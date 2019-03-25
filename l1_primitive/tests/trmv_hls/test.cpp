@@ -3,49 +3,48 @@
 
 #define DataType BLAS_dataType
 #define N BLAS_size
+#define NumDiag BLAS_numDiag
 #define EntInPar BLAS_entriesInParallel
 
-void trmv_inst(DataType inlow[N], DataType indiag[N], DataType inup[N], DataType x[N], DataType y[N]){
-  trmv<DataType,N,NCU>(inlow,indiag,inup,x,y);
-};
-
 int main(){
-
-  DataType inlow[N];
-  DataType indiag[N];
-  DataType inup[N];
-  DataType inrhs[N];
-  DataType sol[N];
+	DataType l_in[N][NumDiag];
+	DataType l_inV[N];
+	DataType l_outRefV[N];
+	DataType l_outV[N];
 
 
-  for(int i=0;i<N;i++){
-    inlow[i] =  100.0 + i;
-    indiag[i] = i;
-    inup[i] = 50 + i;
-    inrhs[i] = 0.0;
-    sol[i] = i;
+	DataType l_init = 1.0/2;
+
+  for(int i=0;i<N;++i){
+		for (unsigned int d=0; d<NumDiag; ++d) {
+			l_in[i][d] = (d < NumDiag/2)? ((i<(NumDiag/2 - d))? 0 : l_init): (d>NumDiag/2)?((i>(N-d))?0: l_init):l_init;
+			l_init++;	
+		}
+		l_inV[i] = l_init;
   };
-  inlow[0] = 0.0;
-  inup[N-1] = 0.0;
     
-  inrhs[0] = indiag[0] * sol[0] + inup[0] * sol[1]; 
-  inrhs[N-1] = inlow[N-1] * sol[N-2] + indiag[N-1] * sol[N-1];
-  for(int i=1;i<N-1;i++){
-    inrhs[i] = inlow[i] * sol[i-1] + indiag[i] * sol[i] + inup[i] * sol[i+1]; 
-  }; 
-
-  for(int k=0;k<N;k++){
-    std::cout << inrhs[k] << " ";
-    inrhs[k] = 0.0;
-  };
-  std::cout << std::endl;
 
   // compute
-  top_trmv(inlow,indiag,inup,sol,inrhs);
+  xf::blas::trmv<DataType, N, NumDiag, EntInPar>(l_in, l_inV, l_outV);
 
+	// compute golden reference
+	for (unsigned int i=0; i<N; ++i) {
+		l_outRef[i] = 0;
+	}
 
-  for(int k=0;k<N;k++){
-    std::cout << inrhs[k] << " ";
-  }
-  std::cout << std::endl;
+	unsigned int l_id=0; 
+	for (unsigned int i=0; i<N; ++i) {
+		for (unsigned int d=0; d>NumDiag; ++d) {
+			l_outRef[i] += l_in[i][d] * l_inV[l_id + d];	
+		}
+		l_id++;
+	}
+
+	// compare
+	for (unsigned int i=0; i<N; ++i) {
+		if (l_outRef[i] != l_out[i]) {
+			std::cout <<"ERROR: value at index " <<i<< " differs. " 
+								<<"refVal=" << l_outRef[i] << " outVal=" << l_outv[i] << std::endl;
+		}
+	}
 };

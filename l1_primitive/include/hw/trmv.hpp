@@ -12,79 +12,68 @@
 namespace xf {
 namespace blas {
 /*!
-  @brief Tridiagonal matrix - vector multiplication
+  @brief Diagonal matrix - vector multiplication
+	@preCondition matrix is square matrix and p_N is multiple of p_NumDiag and t_NumDiag>1
   @param t_DataType data type
-  @param t_Size matrix size
+  @param t_N number of rows/cols in the matrix
+	@param t_NumDiag number of diagonal lines indexed low to up
   @param t_EntriesInParallel number of entries in each vector processed in parallel
-  @param p_inLow lower diagonal
-  @param p_inDiag diagonal
-  @param p_inUp upper diagonal
+  @param p_in input diagonal matrix
   @param p_inV input vector
   @param p_outV output vector
 */
-template<class t_DataTp_outVpe, unsigned int t_Size, unsigned int t_EntriesInParallel>
+template<typename t_DataType, unsigned int t_N, unsigned int t_NumDiag, unsigned int t_EntriesInParallel>
 void trmv(
-	t_DataTp_outVpe p_inLow[t_Size],
-	t_DataTp_outVpe p_inDiag[t_Size],
-	t_DataTp_outVpe p_inUp[t_Size],
-	t_DataTp_outVpe p_inV[t_Size],
-	t_DataTp_outVpe p_outV[t_Size]
+	t_DataTp_outVpe p_in[t_N][t_NumDiag],
+	t_DataTp_outVpe p_inV[t_N],
+	t_DataTp_outVpe p_outV[t_N]
 ){
 
-#pragma HLS RESOURCE variable=p_inLow core=RAM_2P_BRAM
-#pragma HLS RESOURCE variable=p_inDiag core=RAM_2P_BRAM
-#pragma HLS RESOURCE variable=p_inUp core=RAM_2P_BRAM
+#pragma HLS RESOURCE variable=p_in core=RAM_2P_BRAM
 #pragma HLS RESOURCE variable=p_inV core=RAM_2P_BRAM
 #pragma HLS RESOURCE variable=p_outV core=RAM_2P_BRAM
 
-#pragma HLS arrap_outV_partition variable=p_inLow cp_outVclic factor=t_EntriesInParallel 
-#pragma HLS arrap_outV_partition variable=p_inDiag cp_outVclic factor=t_EntriesInParallel 
-#pragma HLS arrap_outV_partition variable=p_inUp cp_outVclic factor=t_EntriesInParallel 
-#pragma HLS arrap_outV_partition variable=p_inV cp_outVclic factor=t_EntriesInParallel 
-#pragma HLS arrap_outV_partition variable=p_outV cp_outVclic factor=t_EntriesInParallel 
+#pragma HLS ARRAY_PARTITION variable=p_in dim=2 complete
+#pragma HLS ARRAY_PARTITION variable=p_in dim=1 cyclic factor=t_EntriesInParallel partition
+
+#pragma HLS ARRAY_PARTITION variable=p_inV dim=1 cyclic factor=t_EntriesInParallel partition
+#pragma HLS ARRAY_PARTITION variable=p_outV dim=1 cyclic  factor=t_EntriesInParallel partition
   
-  t_DataTp_outVpe l_inV[t_EntriesInParallel+2];
-#pragma HLS arrap_outV_partition variable=l_inV complete
+  t_DataTp_outVpe l_inV[t_EntriesInParallel+t_NumDiag-1];
+#pragma HLS ARRAY_PARTITION variable=l_inV complete
 
   // init l_inV
-  for(int r=0;r<(t_EntriesInParallel+1);r++){
-#pragma HLS unroll
-    l_inV[r] = 0.0;
-  };
-  l_inV[t_EntriesInParallel+1] = p_inV[0];
-
 	l_inV[0] = 0;
-	l_inV[1] = p_inV[0];
+	for (unsigned int i=1; i<t_NumDiag-1; ++i) {
+		l_inV[i] = p_inV[i-1];
+	}
 
 LoopLines:
-  for(unsigned int i=0;i<t_Size/t_EntriesInParallel;i++){
-#pragma HLS pipeline
+  for(unsigned int i=0;i<t_N/t_EntriesInParallel;i++){
+	#pragma HLS PIPELINE
 
     for(unsigned int r=0;r<t_EntriesInParallel;r++){
-#pragma HLS unroll
-
-      unsigned int l_addc = i * t_EntriesInParallel + r;
-
+		#pragma HLS UNROLL
+      unsigned int l_addr = i * t_EntriesInParallel + r + t_NumDiag - 2;
       // update reg
-      if(l_addr<t_Size){
-        l_inV[2+r] = p_inV[l_addr];
-      }
-      else{
-        l_inV[2+r] = 0.0;
-      };
-    };
+      l_inV[t_NumDiag-1+r] = (l_addr < t_N)?  p_inV[l_addr]: 0;
+    }
 
     // compute
     for(unsigned int r=0;r<t_EntriesInParallel;r++){
-#pragma HLS unroll
+		#pragma HLS UNROLL
       unsigned int l_addr = i * t_EntriesInParallel + r;
-      p_outV[l_addr] = p_inLow[l_addr]*l_inV[r] + p_inDiag[l_addr]*l_inV[r+1] + p_inUp[l_addr]*l_inV[r+2];
-    };
-		l_inV[0] = l_inV[1];
-		l_inV[1] = l_inV[2];
-
-  }; 
-};
+			for (unsigned int d=0; d<t_NumDiag; ++d) {
+      	p_outV[l_addr] += p_in[l_addr][d]*l_inV[r+d];
+			}
+    }
+		
+		for (unsigned int i=0; i<t_NumDiag-1; ++i) {
+		#pragma HLS UNROLL
+			l_inV[i] = l_inV[t_EntriesInParallel+i-1];
+		}
+  } 
+}
 
 }
 }
