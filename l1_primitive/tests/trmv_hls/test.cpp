@@ -1,4 +1,5 @@
 #include <iostream>
+#include "util.h"
 #include "trmv.hpp"
 
 #define DataType BLAS_dataType
