@@ -6,6 +6,7 @@
 #include <string>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/algorithm/string.hpp>
 
 /*!
   @brief read Diagonal matrix from .csv file
@@ -18,7 +19,7 @@
   @param p_out output diagonal matrix
 */
 template<typename t_DataType, unsigned int t_N, unsigned int t_NumDiag>
-int readDiag(std::string p_fileName, unsigned int p_n, t_DataType p_outi[t_N][t_NumDiag])
+int readDiag(std::string p_fileName, unsigned int p_n, t_DataType p_out[t_N][t_NumDiag])
 {
   std::ifstream l_file(p_fileName);
 
@@ -35,7 +36,7 @@ int readDiag(std::string p_fileName, unsigned int p_n, t_DataType p_outi[t_N][t_
       boost::split(l_v, l_line, [](char c){return c == ',';});
       if(l_v.size() == t_NumDiag) {
 				for (unsigned int d=0; d<t_NumDiag; ++d) {
-        	p_out[i][d] = (t_DataType)std::stod(v[d]);
+        	p_out[i][d] = (t_DataType)std::stod(l_v[d]);
 				}
         i++;
       }
@@ -64,17 +65,18 @@ int readDiag(std::string p_fileName, unsigned int p_n, t_DataType p_outi[t_N][t_
 	@param p_outV output dense vector 
 */
 template<typename t_DataType, unsigned int t_N, unsigned int t_NumDiag>
-void diagMult(t_DataType p_in[t_N][t_NumDiag], unsigned int p_n, t_DataType p_inV[t_N], t_DataType p_outV[t_N])
+void diagMult(t_DataType p_in[t_N][t_NumDiag], t_DataType p_inV[t_N], unsigned int p_n, t_DataType p_outV[t_N])
 {
 	for (unsigned int i=0; i<p_n; ++i) {
 		p_outV[i] = 0;
 	}
 	for (unsigned int d=0; d<t_NumDiag; ++d) {
-  	p_outV[0] += p_in[0][d] * vIn[d];
+  	p_outV[0] += p_in[0][d] * p_inV[d];
 	}
   for (int i=1; i<p_n; ++i) {
 		for (unsigned int d=0; d<t_NumDiag; ++d) {
-    	p_outV +=;
+			t_DataType l_vec = ((i-1+d) < p_n)? p_inV[i-1+d]: 0;
+    	p_outV[i] += p_in[i][d] * l_vec;
 		}
   }
 }
