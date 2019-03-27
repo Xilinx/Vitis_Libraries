@@ -14,6 +14,7 @@ namespace blas {
 /*!
   @brief Diagonal matrix - vector multiplication
 	@preCondition matrix is square matrix and p_N is multiple of p_NumDiag and t_NumDiag>1
+	@preCondition t_NumDiag > 1 && t_NumDiag == odd_number && t_EntriesInParallel > t_NumDiag/2
   @param t_DataType data type
   @param t_N maximum number of entries alogn diagonal line
 	@param t_NumDiag number of diagonal lines indexed low to up, 3: tridiagonal; 5: pentadiagonal; 7:heptadiagonal
@@ -45,9 +46,12 @@ void dimv(
 #pragma HLS ARRAY_PARTITION variable=l_inV complete
 
   // init l_inV
-	l_inV[0] = 0;
-	for (unsigned int i=1; i<t_NumDiag-1; ++i) {
-		l_inV[i] = p_inV[i-1];
+  for (unsigned int i=0; i<t_NumDiag/2; ++i) {
+	#pragma HLS UNROLL
+		l_inV[i] = 0;
+	}
+	for (unsigned int i=t_NumDiag/2; i<t_NumDiag-1; ++i) {
+		l_inV[i] = p_inV[i-(t_NumDiag/2)];
 	}
 
 	unsigned int l_nBlocks = p_n / t_EntriesInParallel;
@@ -56,7 +60,7 @@ LoopLines:
 	#pragma HLS PIPELINE
     for(unsigned int r=0;r<t_EntriesInParallel;r++){
 		#pragma HLS UNROLL
-      unsigned int l_addr = i * t_EntriesInParallel + r + t_NumDiag - 2;
+      unsigned int l_addr = i * t_EntriesInParallel + r + t_NumDiag/2;
       // update reg
       l_inV[t_NumDiag-1+r] = (l_addr < p_n)?  p_inV[l_addr]: 0;
     }

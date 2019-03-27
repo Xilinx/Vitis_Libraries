@@ -70,12 +70,14 @@ void diagMult(t_DataType p_in[t_N][t_NumDiag], t_DataType p_inV[t_N], unsigned i
 	for (unsigned int i=0; i<p_n; ++i) {
 		p_outV[i] = 0;
 	}
-	for (unsigned int d=0; d<t_NumDiag; ++d) {
-  	p_outV[0] += p_in[0][d] * p_inV[d];
+	for (unsigned int i=0; i<t_NumDiag/2; ++i ) {
+		for (unsigned int d=0; d<(t_NumDiag/2+i+1); ++d) {
+			p_outV[i] += p_in[i][d+(t_NumDiag/2-i)] * p_inV[d];
+		}
 	}
-  for (int i=1; i<p_n; ++i) {
+  for (int i=t_NumDiag/2; i<p_n; ++i) {
 		for (unsigned int d=0; d<t_NumDiag; ++d) {
-			t_DataType l_vec = ((i-1+d) < p_n)? p_inV[i-1+d]: 0;
+			t_DataType l_vec = ((i-t_NumDiag/2+d) < p_n)? p_inV[i-t_NumDiag/2+d]: 0;
     	p_outV[i] += p_in[i][d] * l_vec;
 		}
   }
