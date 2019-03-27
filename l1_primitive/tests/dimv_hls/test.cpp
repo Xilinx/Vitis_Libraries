@@ -1,6 +1,6 @@
 #include <iostream>
 #include "util.h"
-#include "trmv_top.h"
+#include "dimv_top.h"
 
 #define DataType BLAS_dataType
 #define N BLAS_size
@@ -39,7 +39,7 @@ int main(int argc, char** argv){
 		return EXIT_FAILURE;
 	}
   // compute
-  trmv_top(l_in, l_inV, l_n, l_outV);
+  dimv_top(l_in, l_inV, l_n, l_outV);
 
 	// compute golden reference
 	diagMult<DataType, N, NumDiag>(l_in, l_inV, l_n, l_outVref);

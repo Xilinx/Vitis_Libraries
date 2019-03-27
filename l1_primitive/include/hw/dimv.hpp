@@ -16,7 +16,7 @@ namespace blas {
 	@preCondition matrix is square matrix and p_N is multiple of p_NumDiag and t_NumDiag>1
   @param t_DataType data type
   @param t_N maximum number of entries alogn diagonal line
-	@param t_NumDiag number of diagonal lines indexed low to up
+	@param t_NumDiag number of diagonal lines indexed low to up, 3: tridiagonal; 5: pentadiagonal; 7:heptadiagonal
   @param t_EntriesInParallel number of entries in each vector processed in parallel
   @param p_in input diagonal matrix
   @param p_inV input vector
@@ -24,7 +24,7 @@ namespace blas {
   @param p_outV output vector
 */
 template<typename t_DataType, unsigned int t_N, unsigned int t_NumDiag, unsigned int t_EntriesInParallel>
-void trmv(
+void dimv(
 	t_DataType p_in[t_N][t_NumDiag],
 	t_DataType p_inV[t_N],
 	unsigned int p_n,

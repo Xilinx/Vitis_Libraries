@@ -1,13 +1,13 @@
 ####################
 # A example to build and debug vivado_hls project
-#   vivado_hls -f trmv_hls/build/run.tcl "runCsim 1 runRTLsynth 0 runRTLsim 0 part vu9p dataType double size 8192 numDiag 3 entriesInParallel 4"
+# vivado_hls -f dimv_hls/build/run.tcl "runCsim 1 runRTLsynth 0 runRTLsim 0 part vu9p dataType double size 8192 numDiag 3 entriesInParallel 4 runArgs 'absolute_path_to_diagonal_matrix_file/diag_3.csv 8192'"
 # navigate to csim/build and run
 # gdb --args ./csime.exe path_to_diagonal_matrix_file/A1.csv 8192
 ####################
 set pwd [pwd]
 set pid [pid]
 
-#set runArgs "$pwd/trmv_hls/data/diag_3.csv 8192"
+#set runArgs "$pwd/dimv_hls/data/diag_3.csv 8192"
 
 set SDX_PATH $::env(XILINX_SDX)
 set VIVADO_PATH $::env(XILINX_VIVADO)
@@ -26,7 +26,7 @@ array set opt {
 	runCsim			1
 	runRTLsynth 	0
 	runRTLsim 		0
-	runArgs "$pwd/trmv_hls/data/diag_3.csv 8192"
+	runArgs "$pwd/dimv_hls/data/diag_3.csv 8192"
 }
 
 foreach arg $::argv {
@@ -54,9 +54,9 @@ set CFLAGS_H "$CFLAGS_K -I$pwd -I$BOOST_INCLUDE"
 
 set proj_dir [format prj_hls_%s  $opt(part) ]
 open_project $proj_dir -reset
-set_top trmv_top 
-add_files $pwd/trmv_hls/trmv_top.cpp -cflags "$CFLAGS_K"
-add_files -tb $pwd/trmv_hls/test.cpp -cflags "$CFLAGS_H"
+set_top dimv_top 
+add_files $pwd/dimv_hls/dimv_top.cpp -cflags "$CFLAGS_K"
+add_files -tb $pwd/dimv_hls/test.cpp -cflags "$CFLAGS_H"
 open_solution sol -reset
 config_compile -ignore_long_run_time
 
