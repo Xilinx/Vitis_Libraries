@@ -55,6 +55,14 @@ void dimv(
 	}
 
 	unsigned int l_nBlocks = p_n / t_EntriesInParallel;
+	//initialized p_outV
+	for (unsigned int i=0; i<l_nBlocks; ++i) {
+	#pragma HLS PIPELINE
+		for (unsigned int d=0; d<t_EntriesInParallel; ++d) {
+		#pragma HLS UNROLL
+			p_outV[i*t_EntriesInParallel+d]=0;
+		}
+	}
 LoopLines:
   for(unsigned int i=0;i<l_nBlocks;++i){
 	#pragma HLS PIPELINE
