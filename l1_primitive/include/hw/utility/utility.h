@@ -41,6 +41,8 @@
 #include "ap_int.h"
 #include "ap_shift_reg.h"
 
+namespace xf {
+namespace blas {
 // Helper macros for renaming kernel
 #define PASTER(x,y) x ## y
 #define EVALUATOR(x,y)  PASTER(x,y)
@@ -327,5 +329,6 @@ class WideConv {
       return(l_dst);
     }
 };
-
+}
+}
 #endif

@@ -38,10 +38,10 @@
 
 #include "assert.h"
 #include "hls_stream.h"
-#include "utility.h"
+#include "hw/utility/utility.h"
 
 namespace xf {
-	namespace blas {
+namespace blas {
 template <
 	typename t_DataType
 >
