@@ -42,6 +42,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
+namespace linear_algebra {
 namespace blas {
 // Helper macros for renaming kernel
 #define PASTER(x,y) x ## y
@@ -70,9 +71,9 @@ class WideType {
     T *getValAddr() {return(&m_Val[0]);}
     WideType() {}
     WideType(T p_initScalar) {
-				#pragma HLS inline self
+        #pragma HLS inline self
         for(int i = 0; i < t_Width; ++i) {
-				#pragma HLS UNROLL
+        #pragma HLS UNROLL
           getVal(i) = p_initScalar;
         }
       }
@@ -329,6 +330,7 @@ class WideConv {
       return(l_dst);
     }
 };
+}
 }
 }
 #endif

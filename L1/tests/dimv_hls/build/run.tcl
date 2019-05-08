@@ -18,35 +18,35 @@ set BOOST_INCLUDE "$VIVADO_PATH/tps/boost_1_64_0"
 set BOOST_LIB "$VIVADO_PATH/lib/lnx64.o"
 
 array set opt {
-	part 		vu9p
-	dataType int	
-	size	8192
-	numDiag 3
-	entriesInParallel 4
-	runCsim			1
-	runRTLsynth 	0
-	runRTLsim 		0
-	runArgs "$pwd/dimv_hls/data/diag_3.csv 8192"
+  part    vu9p
+  dataType int  
+  size  8192
+  numDiag 3
+  entriesInParallel 4
+  runCsim     1
+  runRTLsynth   0
+  runRTLsim     0
+  runArgs "$pwd/dimv_hls/data/diag_3.csv 8192"
 }
 
 foreach arg $::argv {
-	puts $arg
-	foreach o [lsort [array names opt]] {
+  puts $arg
+  foreach o [lsort [array names opt]] {
     if {[regexp "$o +(\\w+)" $arg unused opt($o)]} {
       puts "  Setting CONFIG  $o  [set opt($o)]"
     } elseif {[regexp "$o +\'(.*)\'" $arg unused opt($o)]} {
       puts "  Setting CONFIG  $o  [set opt($o)]"
-		}
+    }
   }
 }
 
 puts "Final CONFIG"
 set OPT_FLAGS "-std=c++11 "
 foreach o [lsort [array names opt]] {
-	if { [string match "run*" $o] == 0 } {
-  	puts "  Using CONFIG  $o  [set opt($o)]"
-  	append OPT_FLAGS [format {-D BLAS_%s=%s } $o $opt($o)]
-	}
+  if { [string match "run*" $o] == 0 } {
+    puts "  Using CONFIG  $o  [set opt($o)]"
+    append OPT_FLAGS [format {-D BLAS_%s=%s } $o $opt($o)]
+  }
 }
 
 set CFLAGS_K "-I$pwd/../include/hw -g -O0 $OPT_FLAGS"

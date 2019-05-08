@@ -10,11 +10,11 @@
 
 /*!
   @brief read Diagonal matrix from .csv file
-	@preCondition number of matrix lines, t_NumDiag, along the diagonal direction must be odd and > 1 
+  @preCondition number of matrix lines, t_NumDiag, along the diagonal direction must be odd and > 1 
   @param t_DataType data type
-	@param t_N maximum number of entries in each diagonal line
-	@param t_NumDiag number of diagonal lines indexed low to up
-	@param p_fileName .csv file containing diagonal matrix data
+  @param t_N maximum number of entries in each diagonal line
+  @param t_NumDiag number of diagonal lines indexed low to up
+  @param p_fileName .csv file containing diagonal matrix data
   @param p_n number of entries in each diagonal line
   @param p_out output diagonal matrix
 */
@@ -35,9 +35,9 @@ int readDiag(std::string p_fileName, unsigned int p_n, t_DataType p_out[t_N][t_N
       getline(l_file, l_line);
       boost::split(l_v, l_line, [](char c){return c == ',';});
       if(l_v.size() == t_NumDiag) {
-				for (unsigned int d=0; d<t_NumDiag; ++d) {
-        	p_out[i][d] = (t_DataType)std::stod(l_v[d]);
-				}
+        for (unsigned int d=0; d<t_NumDiag; ++d) {
+          p_out[i][d] = (t_DataType)std::stod(l_v[d]);
+        }
         i++;
       }
       if (i > p_n) {
@@ -55,31 +55,31 @@ int readDiag(std::string p_fileName, unsigned int p_n, t_DataType p_out[t_N][t_N
 
 /*!
   @brief calculate golden reference for diagonal matrix vector multiplication 
-	@preCondition number of matrix lines, t_NumDiag, along the diagonal direction must be odd and > 1 
+  @preCondition number of matrix lines, t_NumDiag, along the diagonal direction must be odd and > 1 
   @param t_DataType data type
-	@param t_N maximum number of entries in each diagonal line
-	@param t_NumDiag number of diagonal lines indexed low to up
+  @param t_N maximum number of entries in each diagonal line
+  @param t_NumDiag number of diagonal lines indexed low to up
   @param p_in input diagonal matrix
   @param p_n number of entries in each diagonal line
-	@param p_inV input dense vector pointer
-	@param p_outV output dense vector 
+  @param p_inV input dense vector pointer
+  @param p_outV output dense vector 
 */
 template<typename t_DataType, unsigned int t_N, unsigned int t_NumDiag>
 void diagMult(t_DataType p_in[t_N][t_NumDiag], t_DataType p_inV[t_N], unsigned int p_n, t_DataType p_outV[t_N])
 {
-	for (unsigned int i=0; i<p_n; ++i) {
-		p_outV[i] = 0;
-	}
-	for (unsigned int i=0; i<t_NumDiag/2; ++i ) {
-		for (unsigned int d=0; d<(t_NumDiag/2+i+1); ++d) {
-			p_outV[i] += p_in[i][d+(t_NumDiag/2-i)] * p_inV[d];
-		}
-	}
+  for (unsigned int i=0; i<p_n; ++i) {
+    p_outV[i] = 0;
+  }
+  for (unsigned int i=0; i<t_NumDiag/2; ++i ) {
+    for (unsigned int d=0; d<(t_NumDiag/2+i+1); ++d) {
+      p_outV[i] += p_in[i][d+(t_NumDiag/2-i)] * p_inV[d];
+    }
+  }
   for (int i=t_NumDiag/2; i<p_n; ++i) {
-		for (unsigned int d=0; d<t_NumDiag; ++d) {
-			t_DataType l_vec = ((i-t_NumDiag/2+d) < p_n)? p_inV[i-t_NumDiag/2+d]: 0;
-    	p_outV[i] += p_in[i][d] * l_vec;
-		}
+    for (unsigned int d=0; d<t_NumDiag; ++d) {
+      t_DataType l_vec = ((i-t_NumDiag/2+d) < p_n)? p_inV[i-t_NumDiag/2+d]: 0;
+      p_outV[i] += p_in[i][d] * l_vec;
+    }
   }
 }
 #endif
