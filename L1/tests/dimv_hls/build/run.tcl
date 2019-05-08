@@ -49,7 +49,7 @@ foreach o [lsort [array names opt]] {
   }
 }
 
-set CFLAGS_K "-I$pwd/../include/hw -g -O0 $OPT_FLAGS"
+set CFLAGS_K "-I$pwd/../include/hw -I$pwd/../include/hw/xf_blas -g -O0 $OPT_FLAGS"
 set CFLAGS_H "$CFLAGS_K -I$pwd -I$BOOST_INCLUDE"
 
 set proj_dir [format prj_hls_%s  $opt(part) ]

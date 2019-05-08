@@ -1,7 +1,7 @@
 #ifndef TRMV_TOP_H
 #define TRMV_TOP_H
 
-#include "dimv.hpp"
+#include "dimv.h"
 
 void dimv_top(
   BLAS_dataType p_in[BLAS_size][BLAS_numDiag], 
