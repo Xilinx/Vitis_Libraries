@@ -41,6 +41,7 @@
 #include "hw/utility/utility.h"
 
 namespace xf {
+namespace linear_algebra {
 namespace blas {
 template <
   typename t_DataType
@@ -722,7 +723,7 @@ class Spmv
     
   
 };
-
+}
 }
 }
 
