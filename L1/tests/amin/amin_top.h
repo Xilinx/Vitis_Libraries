@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "dimv_top.h"
+#ifndef AMIN_TOP_H
+#define AMIN_TOP_H
 
-void dimv_top(
-  BLAS_dataType p_in[BLAS_size][BLAS_numDiag], 
-  BLAS_dataType p_inV[BLAS_size],
+#include "amin.h"
+
+void amin_top(
   unsigned int p_n,
-  BLAS_dataType p_outV[BLAS_size]
-) {
-  
-  xf::linear_algebra::blas::dimv<BLAS_dataType, BLAS_size, BLAS_numDiag, BLAS_entriesInParallel>(
-    p_in,
-    p_inV,
-    p_n,
-    p_outV
-  );
-}
+  hls::stream<ap_uint<BLAS_dataWidth * BLAS_parEntries> > &p_x,
+  BLAS_indexType &p_reault 
+);
+
+void UUT_Top(
+  BLAS_dataType p_in[BLAS_size],
+  unsigned int p_n,
+  BLAS_indexType &p_result
+);
+
+#endif

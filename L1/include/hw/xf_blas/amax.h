@@ -30,7 +30,7 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "xf_blas/utility.h"
+#include "utility/utility.h"
 
 namespace xf {
 namespace linear_algebra {
