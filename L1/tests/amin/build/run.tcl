@@ -1,6 +1,6 @@
 ####################
 # A example to build and debug vivado_hls project
-# vivado_hls -f amin/build/run.tcl "runCsim 1 runRTLsynth 0 runRTLsim 0 part vu9p dataType double indexType int size 8192 3 parEntries 4 runArgs 'absolute_path_to_vector_file/vec_0.csv 8192'"
+# vivado_hls -f amin/build/run.tcl "runCsim 1 runRTLsynth 0 runRTLsim 0 part vu9p dataType double dataWdith 64 indexType int size 8192 3 parEntries 4 runArgs 'absolute_path_to_vector_file/vec_0.csv 8192'"
 # navigate to csim/build and run
 # gdb --args ./csime.exe path_to_diagonal_matrix_file/A1.csv 8192
 ####################
