@@ -125,10 +125,34 @@ void diagMult(t_DataType p_in[t_N][t_NumDiag], t_DataType p_inV[t_N], unsigned i
   @param t_IndexType type of indices
   @param p_in input vector
   @param p_n number of entries in the input vector
-  @param p_res index for the entry that has maximum magnitude
+  @param p_res index for the entry that has minimum magnitude
 */
 template<typename t_DataType, unsigned int t_N, typename t_IndexType>
 void aminRef(t_DataType p_in[t_N], unsigned int p_n, t_IndexType &p_res)
+{
+  unsigned int l_index = 0;
+  t_DataType l_minMagVal = (p_in[0] < 0)? -p_in[0]: p_in[0]; ;
+
+  for (unsigned int i=0; i<p_n; ++i) {
+    t_DataType l_val = (p_in[i] < 0)? -p_in[i]: p_in[i];
+    if (l_minMagVal > l_val) {
+      l_minMagVal = l_val;
+      l_index = i;
+    }
+  }
+  p_res = l_index;
+}
+/*!
+  @brief calculate golden reference for amax
+  @param t_DataType data type
+  @param t_N maximum number of entries in the input vector
+  @param t_IndexType type of indices
+  @param p_in input vector
+  @param p_n number of entries in the input vector
+  @param p_res index for the entry that has maximum magnitude
+*/
+template<typename t_DataType, unsigned int t_N, typename t_IndexType>
+void amaxRef(t_DataType p_in[t_N], unsigned int p_n, t_IndexType &p_res)
 {
   unsigned int l_index = 0;
   t_DataType l_maxMagVal = 0;
