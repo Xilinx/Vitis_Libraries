@@ -23,10 +23,9 @@ void amin_top(
 ) {
   xf::linear_algebra::blas::amin <
     BLAS_dataType,
+    BLAS_dataWidth,
     BLAS_parEntries,
-    BLAS_indexType,
-    BLAS_dataWidth
-  > (
+    BLAS_indexType> (
     p_n, p_x, p_result
   );
 }
