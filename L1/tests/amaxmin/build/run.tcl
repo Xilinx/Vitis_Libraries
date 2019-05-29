@@ -7,8 +7,6 @@
 set pwd [pwd]
 set pid [pid]
 
-#set runArgs "$pwd/amin/data/diag_3.csv 8192"
-
 set SDX_PATH $::env(XILINX_SDX)
 set VIVADO_PATH $::env(XILINX_VIVADO)
 
@@ -27,7 +25,7 @@ array set opt {
   runCsim     1
   runRTLsynth   0
   runRTLsim     0
-  runArgs "$pwd/amin/data/diag_3.csv 8192"
+  runArgs "$pwd/amaxmin/data/diag_3.csv 8192"
 }
 
 foreach arg $::argv {
@@ -56,8 +54,8 @@ set CFLAGS_H "$CFLAGS_K -I$pwd -I$BOOST_INCLUDE"
 set proj_dir [format prj_hls_%s  $opt(part) ]
 open_project $proj_dir -reset
 set_top UUT_Top 
-add_files $pwd/amin/amin_top.cpp -cflags "$CFLAGS_K"
-add_files -tb $pwd/amin/test.cpp -cflags "$CFLAGS_H"
+add_files $pwd/amaxmin/amin_top.cpp -cflags "$CFLAGS_K"
+add_files -tb $pwd/amaxmin/test.cpp -cflags "$CFLAGS_H"
 open_solution sol -reset
 config_compile -ignore_long_run_time
 

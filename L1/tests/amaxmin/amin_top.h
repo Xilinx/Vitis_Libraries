@@ -16,7 +16,7 @@
 #ifndef AMIN_TOP_H
 #define AMIN_TOP_H
 
-#include "amin.h"
+#include "amaxmin.h"
 
 void amin_top(
   unsigned int p_n,

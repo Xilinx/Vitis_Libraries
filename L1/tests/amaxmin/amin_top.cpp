@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "amin.h"
+#include "amin_top.h"
 using namespace xf::linear_algebra::blas;
 void amin_top(
   unsigned int p_n,
