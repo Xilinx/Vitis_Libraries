@@ -35,6 +35,7 @@ void readVec2Stream(
   unsigned int p_n,
   hls::stream<ap_uint<BLAS_dataWidth * BLAS_parEntries> > &p_out
 ) {
+#pragma HLS ARRAY_PARTITION variable=p_in cyclic factor=2 dim=1
   #ifndef __SYNTHESIS__
     assert ((p_n % BLAS_parEntries) == 0);
   #endif
