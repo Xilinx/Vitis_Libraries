@@ -4,30 +4,31 @@ import shlex, subprocess
 import os
 
 def main(b_csim, b_synth, b_cosim, b_max, p_vectorSize, p_parEntries):
-	a=np.random.rand(p_vectorSize) - 0.5
+  a=(np.random.rand(p_vectorSize) - 0.5) * 1000
 
-	vectorPath = r"./amaxmin/data/vector_%d.csv"%p_vectorSize
-	tclPath = r"./amaxmin/build/run.tcl"
-	np.savetxt(vectorPath, a , fmt='%.8f', delimiter=',')
-	a=np.abs(a)
-	if b_max:
-		result = np.argmax(a)
-	else:
-		result = np.argmin(a)
+  vectorPath = r"./amaxmin/data/vector_%d.csv"%p_vectorSize
+  tclPath = r"./amaxmin/build/run.tcl"
+  np.savetxt(vectorPath, a , fmt='%.8f', delimiter=',')
+  a=np.abs(a)
+  if b_max:
+    result = np.argmax(a)
+  else:
+    result = np.argmin(a)
 
-	commandLine ='''vivado_hls -f %s "runCsim %d runRTLsynth %d \
+  commandLine ='''vivado_hls -f %s "runCsim %d runRTLsynth %d \
 runRTLsim %d part vu9p dataType double dataWidth 64 indexType int size %d \
 entriesInParallel %d runArgs \
 '%s %d %d'"'''%(tclPath, b_csim, b_synth, b_cosim, p_vectorSize, p_parEntries,
-			os.path.abspath(vectorPath), p_vectorSize, result)
-	args = shlex.split(commandLine)
-	subprocess.call(args)
+		   os.path.abspath(vectorPath), p_vectorSize, result)
+  args = shlex.split(commandLine)
+  subprocess.call(args)
+  
 
 if __name__== "__main__":
-	parser = argparse.ArgumentParser(description='Generate random vectors and \
-			run test.')
-	parser.add_argument('size', type=int, metavar='N', help='size of the \
-			vector')
-	parser.add_argument('-p', type=int, help='Number of parallel entries')
-	args = parser.parse_args()
-	main(1, 1,1 ,False, args.size, args.p)
+  parser = argparse.ArgumentParser(description='Generate random vectors and \
+      run test.')
+  parser.add_argument('size', type=int, metavar='N', help='size of the \
+      vector')
+  parser.add_argument('-p', type=int, help='Number of parallel entries')
+  args = parser.parse_args()
+  main(1, 1,1 ,False, args.size, args.p)
