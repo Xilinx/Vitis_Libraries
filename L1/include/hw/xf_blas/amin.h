@@ -99,11 +99,11 @@ template<typename t_DataType,
 	unsigned int t_DataWidth,
 	unsigned int t_ParEntries, 
 	typename t_IndexType>
-		void preProcess(unsigned int l_numElem,
-				hls::stream<t_DataType>& l_valueStream,
-				hls::stream<t_IndexType>& l_indexStream,
+		void preProcess(unsigned int p_numElement,
+				hls::stream<t_DataType>& p_valueStream,
+				hls::stream<t_IndexType>& p_indexStream,
 				hls::stream<ap_uint<(t_DataWidth * t_ParEntries)> >& p_x) {
-			for (t_IndexType i = 0; i < l_numElem; i++) {
+			for (t_IndexType i = 0; i < p_numElement; i++) {
 #pragma HLS PIPELINE
 				ap_uint<t_DataWidth * t_ParEntries> l_elem = p_x.read();
 				t_DataType l_x[t_ParEntries];
@@ -116,31 +116,31 @@ template<typename t_DataType,
 				t_DataType l_value;
 				BinaryCmp<t_DataType, t_DataWidth, t_ParEntries, t_IndexType, false>::cmp(
 						l_x, l_value, l_pos);
-				l_valueStream.write(l_value);
-				l_indexStream.write((i * t_ParEntries) + l_pos);
+				p_valueStream.write(l_value);
+				p_indexStream.write((i * t_ParEntries) + l_pos);
 			}
 		}
 
 template<typename t_DataType, 
 	unsigned int t_DataWidth,
-	unsigned int t_ParEntries, 
+	unsigned int t_II, 
 	typename t_IndexType>
-		void postProcess(unsigned int l_numElem,
-				hls::stream<t_DataType>& l_valueStream,
-				hls::stream<t_IndexType>& l_indexStream,
+		void postProcess(unsigned int p_numElement,
+				hls::stream<t_DataType>& p_valueStream,
+				hls::stream<t_IndexType>& p_indexStream,
 				t_IndexType &p_result) {
 #ifndef __SYNTHESIS__
-			assert(l_numElem % t_ParEntries == 0);
+			assert(p_numElement % t_II == 0);
 #endif
 			t_DataType l_min;
 			t_IndexType l_minIndex = 0;
-			for (t_IndexType i = 0; i < l_numElem / t_ParEntries; i++) {
+			for (t_IndexType i = 0; i < p_numElement / t_II; i++) {
 #pragma HLS PIPELINE
-				t_DataType l_v[t_ParEntries];
-				t_IndexType l_i[t_ParEntries];
-				for (t_IndexType j = 0; j < t_ParEntries; j++) {
-					l_v[j] = l_valueStream.read();
-					l_i[j] = l_indexStream.read();
+				t_DataType l_v[t_II];
+				t_IndexType l_i[t_II];
+				for (t_IndexType j = 0; j < t_II; j++) {
+					l_v[j] = p_valueStream.read();
+					l_i[j] = p_indexStream.read();
 				}
 				if (i == 0) {
 					l_min = l_v[0];
@@ -148,7 +148,7 @@ template<typename t_DataType,
 				}
 				t_IndexType l_pos;
 				t_DataType l_value;
-				BinaryCmp<t_DataType, t_DataWidth, t_ParEntries, t_IndexType, false>::cmp(
+				BinaryCmp<t_DataType, t_DataWidth, t_II, t_IndexType, false>::cmp(
 						l_v, l_value, l_pos);
 				if (l_value < l_min) {
 					l_min = l_value;
