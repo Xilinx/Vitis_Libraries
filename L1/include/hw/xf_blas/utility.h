@@ -66,7 +66,7 @@ inline void cmpBigger(t_DataType p_in1, t_DataType p_in2, t_DataType &p_out) {
 template <typename t_DataType, unsigned int t_Width>
 inline void wideCmpBigger(t_DataType p_in[t_Width], t_DataType &p_out) {
   #pragma HLS ARRAY_PARTITION variable=p_in dim=1 complete
-  const t_LogWidth = mlog2(t_Width);
+  const int t_LogWidth = mylog2(t_Width);
   t_DataType l_inner[t_LogWidth][t_Width];
   #pragma HLS ARRAY_PARTITION variable=l_inner dim=1 complete
   #pragma HLS ARRAY_PARTITION variable=l_inner dim=2 complete
@@ -101,12 +101,12 @@ inline void cmpBiggerIndex(
 template <typename t_DataType, typename t_IndexType, unsigned int t_Width>
 inline void wideCmpBiggerIndex(
   t_DataType p_inData[t_Width],
-  t_IndexType p_inIndex[t_Width];
+  t_IndexType p_inIndex[t_Width],
   t_DataType &p_outData,
   t_IndexType &p_outIndex) {
   #pragma HLS ARRAY_PARTITION variable=p_inData dim=1 complete
   #pragma HLS ARRAY_PARTITION variable=p_inIndex dim=1 complete
-  const t_LogWidth = mlog2(t_Width);
+  const int t_LogWidth = mylog2(t_Width);
   t_DataType l_innerData[t_LogWidth][t_Width];
   #pragma HLS ARRAY_PARTITION variable=l_innerData dim=1 complete
   #pragma HLS ARRAY_PARTITION variable=l_innerData dim=2 complete
