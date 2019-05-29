@@ -45,7 +45,8 @@ void readVec2Stream(
     ap_uint<BLAS_dataWidth * BLAS_parEntries> l_val;
     for (unsigned int j=0; j<BLAS_parEntries; ++j) {
       ap_uint<BLAS_dataWidth> l_valUnit = l_bitConv.toBits(p_in[i*BLAS_parEntries + j]);
-      l_val = (l_val <<  BLAS_dataWidth) + l_valUnit;
+//      l_val = (l_val <<  BLAS_dataWidth) + l_valUnit;
+				l_val.range((j+1)*BLAS_dataWidth-1, j*BLAS_dataWidth) = l_valUnit;
     }
     p_out.write(l_val);
   }
