@@ -28,6 +28,6 @@ if __name__== "__main__":
 			run test.')
 	parser.add_argument('size', type=int, metavar='N', help='size of the \
 			vector')
-	parser.add_argument('-p', type=int, help='parallel entries')
+	parser.add_argument('-p', type=int, help='Number of parallel entries')
 	args = parser.parse_args()
 	main(1, 1,1 ,False, args.size, args.p)
