@@ -41,6 +41,30 @@ namespace blas {
 
 
 namespace {
+  template<bool t_Max, 
+    typename t_DataType,
+    typename t_IndexType>
+      void Compare(t_DataType p_v0, t_IndexType p_i0, t_DataType p_v1, t_IndexType p_i1,
+	  t_DataType &p_v, t_IndexType &p_i){
+	if(t_Max){
+	  if(p_v1 > p_v0) {
+	    p_v = p_v1;
+	    p_i = p_i1;
+	  } else {
+	    p_v = p_v0;
+	    p_i = p_i0;
+	  }
+	} 
+	else {
+	  if(p_v1 < p_v0) {
+	    p_v = p_v1;
+	    p_i = p_i1;
+	  } else {
+	    p_v = p_v0;
+	    p_i = p_i0;
+	  }
+	}
+      }
   template<typename t_DataType, 
     unsigned int t_DataWidth, 
     unsigned int t_Entries, 
@@ -54,16 +78,7 @@ namespace {
 	    t_IndexType l_msbIndex, l_lsbIndex;
 	    BinaryCmp<t_DataType, t_DataWidth,  l_halfEntries, t_IndexType, t_Max>::cmp(p_x, l_lsbValue, l_lsbIndex);
 	    BinaryCmp<t_DataType, t_DataWidth, l_halfEntries, t_IndexType, t_Max>::cmp(p_x + l_halfEntries, l_msbValue, l_msbIndex);
-	    if(l_msbValue == l_lsbValue){
-	      p_value = l_lsbValue;
-	      p_index = l_lsbIndex;
-	    } else if((l_msbValue > l_lsbValue) == t_Max){
-	      p_value = l_msbValue;
-	      p_index = l_halfEntries + l_msbIndex;
-	    } else {
-	      p_value = l_lsbValue;
-	      p_index = l_lsbIndex;
-	    }
+	    Compare<t_Max, t_DataType, t_IndexType>(l_lsbValue, l_lsbIndex, l_msbValue, l_msbIndex+l_halfEntries,p_value, p_index);
 	  }
       };
   template<typename t_DataType, 
@@ -122,8 +137,8 @@ namespace {
 	  hls::stream<t_IndexType>& p_indexStream,
 	  t_IndexType &p_result) {
 	const unsigned int l_numEntries = 1 << t_LogNumEntries;
-	t_DataType l_min;
-	t_IndexType l_minIndex = 0;
+	t_DataType l_maxmin;
+	t_IndexType l_index = 0;
 	const unsigned int l_numIter = p_numElement >> t_LogNumEntries;
 	for (t_IndexType i = 0; i < l_numIter; i++) {
 #pragma HLS PIPELINE
@@ -135,17 +150,14 @@ namespace {
 	    l_i[j] = p_indexStream.read();
 	  }
 	  if (i == 0) {
-	    l_min = l_v[0];
-	    l_minIndex = l_i[0];
+	    l_maxmin = l_v[0];
+	    l_index = l_i[0];
 	  }
 	  t_IndexType l_pos;
 	  t_DataType l_value;
 	  BinaryCmp<t_DataType, t_DataWidth, l_numEntries, t_IndexType, t_Max>::cmp(
 	      l_v, l_value, l_pos);
-	  if (l_value < l_min) {
-	    l_min = l_value;
-	    l_minIndex = l_i[l_pos];
-	  }
+	  Compare<t_Max>(l_maxmin, l_index, l_value, l_i[l_pos], l_maxmin, l_index);
 	}
 	const unsigned int l_numRem = p_numElement - (l_numIter << t_LogNumEntries);
 	for (t_IndexType i = 0; i < l_numRem; i++) {
@@ -154,12 +166,9 @@ namespace {
 	  t_IndexType l_i;
 	  l_v = p_valueStream.read();
 	  l_i = p_indexStream.read();
-	  if (l_v < l_min) {
-	    l_min = l_v;
-	    l_minIndex = l_i;
-	  }
+	  Compare<t_Max>(l_maxmin, l_index, l_v, l_i, l_maxmin, l_index);
 	}
-	p_result = l_minIndex;
+	p_result = l_index;
       }
 
   template<typename t_DataType, 
