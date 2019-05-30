@@ -15,15 +15,15 @@
  */
 #include <iostream>
 #include "util.h"
-#include "amin_top.h"
+#include "amaxmin_top.h"
 
 int main(int argc, char** argv){
-  if (argc < 3) {
-    std::cout << "ERROR: passed %d arguments instead of %d, exiting" << argc << 3 << std::endl;
+  if (argc < 4) {
+    std::cout << "ERROR: passed %d arguments instead of %d, exiting" << argc << 4 << std::endl;
     std::cout << " Usage:" << std::endl;
-    std::cout << "    test.exe input_vector_file number_of_entries_in_the_vector" << std::endl;
+    std::cout << "    test.exe input_vector_file number_of_entries_in_the_vector golden_value" << std::endl;
     std::cout << " Example Usage:" << std::endl;
-    std::cout << "    test.exe ./data/vec0.csv 1024" << std::endl;
+    std::cout << "    test.exe ./data/vec0.csv 1024 102" << std::endl;
     return EXIT_FAILURE;
   }
   std::string l_fileName(argv[1]);
@@ -37,11 +37,11 @@ int main(int argc, char** argv){
     return EXIT_FAILURE;
   }
  
-  BLAS_indexType l_indexOut, l_indexRef;
+  BLAS_indexType l_indexOut, l_indexRef = atoi(argv[3]);
   //compute
   UUT_Top(l_vec, l_n, l_indexOut);
   //compute golden reference
-  aminRef<BLAS_dataType, BLAS_size, BLAS_indexType>(l_vec, l_n, l_indexRef);
+  //aminRef<BLAS_dataType, BLAS_size, BLAS_indexType>(l_vec, l_n, l_indexRef);
 
   //compare
   if (l_indexOut != l_indexRef) {

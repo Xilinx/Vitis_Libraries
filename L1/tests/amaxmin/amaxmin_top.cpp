@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include "amin_top.h"
+#include "amaxmin_top.h"
 using namespace xf::linear_algebra::blas;
-void amin_top(
+void amaxmin_top(
   unsigned int p_n,
   hls::stream<ap_uint<BLAS_dataWidth * BLAS_parEntries> > &p_x,
   BLAS_indexType &p_result 
 ) {
-  xf::linear_algebra::blas::amin <
+  BLAS_op <
     BLAS_dataType,
     BLAS_dataWidth,
     mylog2(BLAS_parEntries),
@@ -47,7 +47,7 @@ void readVec2Stream(
     for (unsigned int j=0; j<BLAS_parEntries; ++j) {
       ap_uint<BLAS_dataWidth> l_valUnit = l_bitConv.toBits(p_in[i*BLAS_parEntries + j]);
 //      l_val = (l_val <<  BLAS_dataWidth) + l_valUnit;
-				l_val.range((j+1)*BLAS_dataWidth-1, j*BLAS_dataWidth) = l_valUnit;
+      l_val.range((j+1)*BLAS_dataWidth-1, j*BLAS_dataWidth) = l_valUnit;
     }
     p_out.write(l_val);
   }
@@ -65,7 +65,7 @@ void UUT_Top(
     p_n,
     l_str
   );
-  amin_top(
+  amaxmin_top(
     p_n,
     l_str,
     p_result 

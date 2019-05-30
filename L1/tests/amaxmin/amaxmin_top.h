@@ -18,7 +18,7 @@
 
 #include "amaxmin.h"
 
-void amin_top(
+void amaxmin_top(
   unsigned int p_n,
   hls::stream<ap_uint<BLAS_dataWidth * BLAS_parEntries> > &p_x,
   BLAS_indexType &p_reault 
