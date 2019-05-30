@@ -3,7 +3,7 @@ import argparse
 import shlex, subprocess
 import os
 
-def main(b_csim, b_synth, b_cosim, b_max, p_vectorSize, p_parEntries):
+def main(b_csim, b_synth, b_cosim, p_vectorSize, p_parEntries):
   a=(np.random.rand(p_vectorSize) - 0.5) * 1e5
 
   vectorPath = r"./amaxmin/data/vector_%d.csv"%p_vectorSize
@@ -36,4 +36,4 @@ if __name__== "__main__":
       vector')
   parser.add_argument('-p', type=int, help='Number of parallel entries')
   args = parser.parse_args()
-  main(1, 1, 1 ,False, args.size, args.p)
+  main(1, 1, 1 , args.size, args.p)

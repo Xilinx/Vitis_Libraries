@@ -15,14 +15,14 @@
  */
 
 /**
- * @file amin.h
- * @brief BLAS Level 1 amin template function implementation.
+ * @file amaxmin.h
+ * @brief BLAS Level 1 amax and amin template function implementation.
  *
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_AMIN_H
-#define XF_BLAS_AMIN_H
+#ifndef XF_BLAS_AMAXMIN_H
+#define XF_BLAS_AMAXMIN_H
 
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
@@ -38,7 +38,6 @@
 namespace xf {
 namespace linear_algebra {
 namespace blas {
-
 
 namespace {
   template<bool t_Max, 
