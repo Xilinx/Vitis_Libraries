@@ -164,7 +164,7 @@ xfblasStatus_t xfblasGetMatrix(void *A, unsigned int PE = 0) {
     if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
         return XFBLAS_STATUS_NOT_INITIALIZED;       
     }
-    xfblasStatus_t l_status = BLASHostHandle<void*>::instance().m_handlePtr[PE]->getMat(A, true, true);
+    xfblasStatus_t l_status = BLASHostHandle<void*>::instance().m_handlePtr[PE]->getMat(A, true);
     BLASHostHandle<void*>::instance().m_handlePtr[PE]->clearInstrBuf();
     return l_status;
 }
