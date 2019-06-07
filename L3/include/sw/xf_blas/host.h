@@ -149,6 +149,7 @@ class XHost {
             m_fpga = shared_ptr<XFpga>(new XFpga(p_xclbin, p_kernelName, &l_err));
             if (l_err != CL_SUCCESS){
                 *p_status = XFBLAS_STATUS_NOT_INITIALIZED;
+                return;
             }
             void *l_alignedMem = nullptr;
             int l_memAllocStatus = posix_memalign(&l_alignedMem, PAGE_SIZE, INSTR_BUF_SIZE);
@@ -164,6 +165,7 @@ class XHost {
                                               sizeof(unsigned long long), &this->m_ddrDeviceBaseAddr);
             if (l_err != CL_SUCCESS){
                 *p_status = XFBLAS_STATUS_NOT_INITIALIZED;
+                return;
             }
         }
         
@@ -210,22 +212,17 @@ class XHost {
             m_instrOffset += p_args->sizeInBytes();
         }
         
-        xfblasStatus_t getMat(const T & p_handle, bool p_queryFPGA = false, bool p_syncGet = true) {
+        xfblasStatus_t getMat(const T & p_handle, bool p_syncGet = true) {
             auto &l_hostPtr = m_hostMat;
+            auto &l_devPtr = m_devHandle;
             if (l_hostPtr.find(p_handle) != l_hostPtr.end()) {
-                if (p_queryFPGA)
-                    getFromFPGA(p_handle, p_syncGet);
+                m_fpga->copyFromFpga(l_devPtr[p_handle], p_syncGet);
             } else {
                 return XFBLAS_STATUS_ALLOC_FAILED;
             }
             return XFBLAS_STATUS_SUCCESS;
         }
       
-        void getFromFPGA(const T & p_handle, bool p_syncGet) {
-            auto &l_devPtr = m_devHandle;
-            assert(l_devPtr.find(p_handle) != l_devPtr.end());
-            m_fpga->copyFromFpga(l_devPtr[p_handle], p_syncGet);
-        }
                 
         void clearInstrBuf() {
             memset(this->m_progBuf, 0, PAGE_SIZE);
