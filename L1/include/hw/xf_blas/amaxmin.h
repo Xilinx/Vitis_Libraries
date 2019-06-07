@@ -33,7 +33,6 @@
 #include "hls_stream.h"
 #include "xf_blas/utility.h"
 
-#define abs(x) (x > 0? x : -x)
 
 namespace xf {
 namespace linear_algebra {
@@ -65,7 +64,6 @@ namespace {
 	}
       }
   template<typename t_DataType, 
-    unsigned int t_DataWidth, 
     unsigned int t_Entries, 
     typename t_IndexType,
     bool t_Max> 
@@ -75,28 +73,21 @@ namespace {
 	    const unsigned int l_halfEntries = t_Entries >> 1;
 	    t_DataType l_msbValue, l_lsbValue;
 	    t_IndexType l_msbIndex, l_lsbIndex;
-	    BinaryCmp<t_DataType, t_DataWidth,  l_halfEntries, t_IndexType, t_Max>::cmp(p_x, l_lsbValue, l_lsbIndex);
-	    BinaryCmp<t_DataType, t_DataWidth, l_halfEntries, t_IndexType, t_Max>::cmp(p_x + l_halfEntries, l_msbValue, l_msbIndex);
+	    BinaryCmp<t_DataType, l_halfEntries, t_IndexType, t_Max>::cmp(p_x, l_lsbValue, l_lsbIndex);
+	    BinaryCmp<t_DataType, l_halfEntries, t_IndexType, t_Max>::cmp(p_x + l_halfEntries, l_msbValue, l_msbIndex);
 	    Compare<t_Max, t_DataType, t_IndexType>(l_lsbValue, l_lsbIndex, l_msbValue, l_msbIndex+l_halfEntries,p_value, p_index);
 	  }
       };
   template<typename t_DataType, 
-    unsigned int t_DataWidth, 
     typename t_IndexType,
     bool t_Max> 
-      class BinaryCmp<t_DataType, t_DataWidth, 1, t_IndexType, t_Max>{
+      class BinaryCmp<t_DataType, 1, t_IndexType, t_Max>{
 	public:
 	  static const void cmp(t_DataType p_x[1], t_DataType &p_value, t_IndexType &p_index){
 	    p_index = 0;
 	    p_value = p_x[p_index];
 	  }
       };
-
-  template<typename t_DataType, typename t_IndexType>
-    struct EntryPair{
-      t_DataType s_Value;
-      t_IndexType s_Index;
-    };
 
   template<typename t_DataType, 
     unsigned int t_DataWidth,
@@ -115,11 +106,11 @@ namespace {
 	  for (t_IndexType k = 0; k < l_ParEntries; k++) {
 	    ap_uint<t_DataWidth> l_tmp = l_elem.range((k + 1) * t_DataWidth - 1,
 		k * t_DataWidth);
-	    l_x[k] = abs(*(t_DataType* )&l_tmp);
+	    l_x[k] = fabs(*(t_DataType* )&l_tmp);
 	  }
 	  t_IndexType l_pos;
 	  t_DataType l_value;
-	  BinaryCmp<t_DataType, t_DataWidth, l_ParEntries, t_IndexType, t_Max>::cmp(
+	  BinaryCmp<t_DataType, l_ParEntries, t_IndexType, t_Max>::cmp(
 	      l_x, l_value, l_pos);
 	  p_valueStream.write(l_value);
 	  p_indexStream.write((i << t_LogParEntries) + l_pos);
@@ -127,7 +118,6 @@ namespace {
       }
 
   template<typename t_DataType, 
-    unsigned int t_DataWidth,
     unsigned int t_LogNumEntries, 
     typename t_IndexType,
     bool t_Max>
@@ -140,7 +130,7 @@ namespace {
 	t_IndexType l_index = 0;
 	const unsigned int l_numIter = p_numElement >> t_LogNumEntries;
 	for (t_IndexType i = 0; i < l_numIter; i++) {
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=l_numEntries
 	  t_DataType l_v[l_numEntries];
 #pragma HLS ARRAY_PARTITION variable = l_v complete dim=1
 	  t_IndexType l_i[l_numEntries];
@@ -154,13 +144,14 @@ namespace {
 	  }
 	  t_IndexType l_pos;
 	  t_DataType l_value;
-	  BinaryCmp<t_DataType, t_DataWidth, l_numEntries, t_IndexType, t_Max>::cmp(
+	  BinaryCmp<t_DataType, l_numEntries, t_IndexType, t_Max>::cmp(
 	      l_v, l_value, l_pos);
 	  Compare<t_Max>(l_maxmin, l_index, l_value, l_i[l_pos], l_maxmin, l_index);
 	}
 	const unsigned int l_numRem = p_numElement - (l_numIter << t_LogNumEntries);
 	for (t_IndexType i = 0; i < l_numRem; i++) {
 #pragma HLS PIPELINE
+#pragma HLS loop_tripcount max=l_numEntries
 	  t_DataType l_v;
 	  t_IndexType l_i;
 	  l_v = p_valueStream.read();
@@ -188,7 +179,7 @@ namespace {
 #pragma HLS stream variable=l_indexStream depth=2
 
 	preProcess<t_DataType, t_DataWidth, t_LogParEntries, t_IndexType, t_Max>(p_n, l_valueStream,l_indexStream, p_x);
-	postProcess<t_DataType, t_DataWidth, 1, t_IndexType, t_Max>(p_n, l_valueStream, l_indexStream, p_result);
+	postProcess<t_DataType, 1, t_IndexType, t_Max>(p_n, l_valueStream, l_indexStream, p_result);
 
       }
 
