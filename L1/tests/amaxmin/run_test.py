@@ -8,7 +8,7 @@ import json
 def main(testPath, profile):
   a=(np.random.rand(profile['vectorSize']) - 0.5) * profile['vectorSize']
   vectorPath = os.path.join(testPath, profile['dataPath'], r"vector_%d.csv"%profile['vectorSize'])
-  if profile['op'] == 'double' or profile['op'] == 'float': 
+  if profile['dataType'] == 'double' or profile['dataType'] == 'float': 
     np.savetxt(vectorPath, a , fmt='%.8f', delimiter=',')
   else:
     a = a.astype(int) 

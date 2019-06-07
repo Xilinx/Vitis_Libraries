@@ -47,6 +47,7 @@ int main(int argc, char** argv){
   if (l_indexOut != l_indexRef) {
     std::cout << "ERROR: output index != golden reference" << std::endl;
     std::cout << "outVal = " << l_indexOut << " refVal = " << l_indexRef << std::endl; 
+    return -1;
   }
   return 0;
 };
