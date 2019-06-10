@@ -58,34 +58,34 @@ namespace blas {
     unsigned int t_LogParEntries, 
     typename t_IndexType=unsigned int>
       void axpy(
-	  unsigned int p_n,
-	  const t_DataType p_alpha,
-	  hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_x,
-	  hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_y,
-	  hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_r
-	  ) {
+          unsigned int p_n,
+          const t_DataType p_alpha,
+          hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_x,
+          hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_y,
+          hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_r
+          ) {
 #ifndef __SYNTHESIS__
-	assert(p_n % ( 1 << t_LogParEntries) == 0);
+        assert(p_n % ( 1 << t_LogParEntries) == 0);
 #endif
-	const unsigned int l_numElem = p_n >> t_LogParEntries;
-	const unsigned int l_ParEntries = 1 << t_LogParEntries;
-	for(t_IndexType i=0;i<l_numElem;i++){
+        const unsigned int l_numElem = p_n >> t_LogParEntries;
+        const unsigned int l_ParEntries = 1 << t_LogParEntries;
+        for(t_IndexType i=0;i<l_numElem;i++){
 #pragma HLS PIPELINE
-	  ap_uint<(t_DataWidth << t_LogParEntries)> l_x = p_x.read();
-	  ap_uint<(t_DataWidth << t_LogParEntries)> l_y = p_y.read();
-	  ap_uint<(t_DataWidth << t_LogParEntries)> l_r = 0;
-	  for(t_IndexType j=0;j<l_ParEntries;j++){
+          ap_uint<(t_DataWidth << t_LogParEntries)> l_x = p_x.read();
+          ap_uint<(t_DataWidth << t_LogParEntries)> l_y = p_y.read();
+          ap_uint<(t_DataWidth << t_LogParEntries)> l_r = 0;
+          for(t_IndexType j=0;j<l_ParEntries;j++){
 #pragma HLS UNROLL
-	    ap_uint<t_DataWidt> l_partX = l_x.range((j+1)*t_DataWidth -1, j*t_DataWidth);
-	    t_DataType l_realX = *(t_DataType*)&l_partX;
-	    ap_uint<t_DataWidt> l_partY = l_y.range((j+1)*t_DataWidth -1, j*t_DataWidth);
-	    t_DataType l_realY = *(t_DataType*)&l_partY;
-	    t_DataType l_result = p_alpha * l_realX + l_realY;
-	    ap_uint<t_DataWidt> l_partR = *(ap_uint<t_DataWidth>*)&l_result;
-	    l_r.range((j+1)*t_DataWidth -1, j*t_DataWidth) = l_partR;
-	  }
-	  p_r.write(l_r);
-	}
+            ap_uint<t_DataWidt> l_partX = l_x.range((j+1)*t_DataWidth -1, j*t_DataWidth);
+            t_DataType l_realX = *(t_DataType*)&l_partX;
+            ap_uint<t_DataWidt> l_partY = l_y.range((j+1)*t_DataWidth -1, j*t_DataWidth);
+            t_DataType l_realY = *(t_DataType*)&l_partY;
+            t_DataType l_result = p_alpha * l_realX + l_realY;
+            ap_uint<t_DataWidt> l_partR = *(ap_uint<t_DataWidth>*)&l_result;
+            l_r.range((j+1)*t_DataWidth -1, j*t_DataWidth) = l_partR;
+          }
+          p_r.write(l_r);
+        }
       }
 
 } //end namespace blas
