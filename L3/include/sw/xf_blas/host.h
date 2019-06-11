@@ -245,6 +245,8 @@ class XHost {
 
 template<typename T>
 class BLASHost : public XHost<T> {
+    private:
+        bool execControl = true;
     public:
         BLASHost() = delete;
         virtual ~BLASHost() {}
@@ -257,8 +259,11 @@ class BLASHost : public XHost<T> {
         BLASHost(const string & p_xclbin, const string & p_kernelName, xfblasStatus_t* p_status) : XHost<T> ( p_xclbin, p_kernelName, p_status) {}
         
         xfblasStatus_t execute (bool p_syncExec = false) {
-            this->m_fpga->copyToFpga(this->m_clInstrBuf, false);
-            this->m_fpga->execKernel(this->m_clInstrBuf, p_syncExec);
+            if (execControl){
+              this->m_fpga->copyToFpga(this->m_clInstrBuf, false);
+              this->m_fpga->execKernel(this->m_clInstrBuf, p_syncExec);
+              execControl = false;
+            }
             return XFBLAS_STATUS_SUCCESS;
         }
 };

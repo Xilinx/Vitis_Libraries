@@ -142,7 +142,6 @@ xfblasStatus_t xfblasSgemm(xfblasOperation_t transa, xfblasOperation_t transb, i
         if (transa == XFBLAS_OP_N && transb == XFBLAS_OP_N && alpha == 1 && beta == 1){
             GEMMHost<void*>* l_gemmPtr = static_cast<GEMMHost<void*> *> (BLASHostHandle<void*>::instance().m_handlePtr[PE].get());
             xfblasStatus_t l_status = l_gemmPtr->addGEMMOp(A, B, C, C, m, k, n, lda, ldb, ldc, ldc, 1, 0);
-            l_status = l_gemmPtr -> execute();
             return l_status;
         } else {
             return XFBLAS_STATUS_NOT_SUPPORTED;
@@ -164,8 +163,8 @@ xfblasStatus_t xfblasGetMatrix(void *A, unsigned int PE = 0) {
     if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
         return XFBLAS_STATUS_NOT_INITIALIZED;       
     }
-    xfblasStatus_t l_status = BLASHostHandle<void*>::instance().m_handlePtr[PE]->getMat(A, true);
-    BLASHostHandle<void*>::instance().m_handlePtr[PE]->clearInstrBuf();
+    xfblasStatus_t l_status = BLASHostHandle<void*>::instance().m_handlePtr[PE] -> execute();
+    l_status = BLASHostHandle<void*>::instance().m_handlePtr[PE]->getMat(A, true);
     return l_status;
 }
 /**
@@ -189,10 +188,11 @@ xfblasStatus_t xfblasFree(void *A, unsigned int PE = 0) {
  * @retval xfblasStatus_t 0 if the shut down succeeded
  * @retval xfblasStatus_t 1 if the library was not initialized
  */
-xfblasStatus_t xfblasDestory(){
+xfblasStatus_t xfblasDestory(unsigned int PE = 0){
     if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
         return XFBLAS_STATUS_NOT_INITIALIZED;       
     }  
+    BLASHostHandle<void*>::instance().m_handlePtr[PE]->clearInstrBuf();
     BLASHostHandle<void*>::instance().m_handlePtr.clear();
     ConfigDict::instance().m_dict.clear();
     return XFBLAS_STATUS_SUCCESS;
