@@ -30,6 +30,30 @@
 
 using namespace std;
 
+bool compareGemm(short* a, short* b, short* c){
+  short * goldenC;
+  goldenC = (short*) malloc(m * n * sizeof (short));
+  bool l_check = true;
+  for(int row = 0; row < m; row++){ 
+      for(int col = 0; col < n; col++){ 
+          short l_val = 0;
+          for (int i = 0; i < k; i ++) {
+            l_val += a[IDX2R(row,i,k)] * b[IDX2R(i,col,n)];
+          }
+          goldenC[IDX2R(row,col,n)] = l_val;
+      } 
+  }
+  for(int row = 0; row < m; row++){ 
+    for(int col = 0; col < n; col++){
+      if (goldenC[IDX2R(row,col,n)]!=c[IDX2R(row,col,n)]){
+        l_check = false;
+      }
+    }
+  }
+  return l_check;
+}
+
+
 int main(int argc, char **argv) {
   unsigned int l_argIdx = 1;
   string l_xclbinFile(argv[l_argIdx++]);
@@ -41,21 +65,21 @@ int main(int argc, char **argv) {
   c = ( short *) malloc (m*n* sizeof ( short )); 
 
   for( i = 0; i<  m; i ++){ 
-      for( j = 0; j < k; j ++){ 
-          a[ IDX2R (i,j,k )]=( short ) 1; 
-      } 
+    for( j = 0; j < k; j ++){ 
+      a[ IDX2R (i,j,k )]=( short ) 1; 
+    } 
   } 
 
   for( i = 0; i<  k; i ++){ 
-      for( j = 0; j < n; j ++){ 
-          b[ IDX2R (i,j,k )]=( short ) 1; 
-      } 
+    for( j = 0; j < n; j ++){ 
+      b[ IDX2R (i,j,n )]=( short ) 1; 
+    } 
   } 
 
-    for( i = 0; i<  m; i ++){ 
-      for( j = 0; j < n; j ++){ 
-          c[ IDX2R (i,j,k )]= 0; 
-      } 
+  for( i = 0; i<  m; i ++){ 
+    for( j = 0; j < n; j ++){ 
+      c[ IDX2R (i,j,n )]= 0; 
+    } 
   } 
 
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
@@ -107,10 +131,16 @@ int main(int argc, char **argv) {
   }
   
   for ( i = 0; i < 10; i ++){
-        for ( j = 0; j < 10; j ++){
-            cout<< (c[ IDX2R (i,j, k )])<<" ";
-        }
-        cout<<"\n";
+    for ( j = 0; j < 10; j ++){
+      cout<< (c[ IDX2R (i,j, k )])<<" ";
+    }
+    cout<<"\n";
+  }
+  
+  if (compareGemm(a, b, c)){
+    cout<<"Test passed!\n";
+  }else{
+    cout<<"Test failed!\n";
   }
   
   xfblasFree(a);
