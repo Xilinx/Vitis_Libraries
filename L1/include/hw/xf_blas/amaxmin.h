@@ -29,7 +29,6 @@
 #endif
 
 #include "ap_int.h"
-#include "hls_math.h"
 #include "hls_stream.h"
 #include "xf_blas/utility.h"
 
@@ -106,7 +105,7 @@ namespace {
           for (t_IndexType k = 0; k < l_ParEntries; k++) {
             ap_uint<t_DataWidth> l_tmp = l_elem.range((k + 1) * t_DataWidth - 1,
                 k * t_DataWidth);
-            l_x[k] = fabs(*(t_DataType* )&l_tmp);
+            l_x[k] = abs(*(t_DataType* )&l_tmp);
           }
           t_IndexType l_pos;
           t_DataType l_value;

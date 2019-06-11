@@ -30,7 +30,6 @@
 #endif
 
 #include "ap_int.h"
-#include "hls_math.h"
 #include "hls_stream.h"
 #include "xf_blas/utility.h"
 
@@ -39,14 +38,6 @@ namespace linear_algebra {
 namespace blas {
 
   namespace{
-    template<typename t_DataType>
-      const t_DataType abs(const t_DataType p_x){
-        const t_DataType l_zero = 0;
-        if(p_x < l_zero)
-          return -p_x;
-        else
-          return p_x;
-      }
     template<typename t_DataType, 
       unsigned int t_Entries, 
       typename t_IndexType> 
@@ -85,7 +76,7 @@ namespace blas {
 #pragma HLS UNROLL
               ap_uint<t_DataWidth> l_part = l_x.range((j+1)*t_DataWidth-1, j* t_DataWidth);
               t_DataType l_data = *(t_DataType*)(&l_part);
-              l_input[j]=fabs(l_data);
+              l_input[j]=abs(l_data);
             }
             t_DataType l_sum;
             l_sum = BinarySum<t_DataType, l_ParEntries, t_IndexType>::sum(l_input);

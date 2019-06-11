@@ -40,6 +40,7 @@
 #include <ostream>
 #include <iomanip>
 #include <iostream>
+#include "hls_math.h"
 #include "ap_int.h"
 #include "ap_shift_reg.h"
 
@@ -58,6 +59,15 @@ constexpr size_t mylog2(size_t n) {
   return ( (n<2) ? 0 : 1+mylog2(n/2));
 }
 
+#ifdef __SYNTHESIS__
+float abs(float x){
+  return fabsf(x);
+}
+double abs(double x){
+  return fabs(x);
+}
+
+#endif
 template <typename t_DataType>
 inline void cmpBigger(t_DataType p_in1, t_DataType p_in2, t_DataType &p_out) {
   p_out = (p_in1 > p_in2)? p_in1: p_in2;
