@@ -2,8 +2,18 @@ import numpy as np
 import argparse
 import shlex, subprocess
 import os, sys
-from dataProc import loadProfile
 import json
+
+def loadProfile(filePath):
+  with open(filePath, 'r') as fh:
+    profile = json.loads(fh.read())
+    return profile
+
+
+def writeProfile(profile, filePath):
+  with open(filePath, 'w') as fh:
+    fh.write(json.dumps(profile, indent=2))
+ 
 
 def main(testPath, profile):
   a=(np.random.rand(profile['vectorSize']) - 0.5) * profile['vectorSize']
@@ -19,7 +29,7 @@ def main(testPath, profile):
   elif profile['op'] == 'amin':
     result = np.argmin(a)
   else:
-    print('Operation is not supported')
+    print('ERROR: Operation is not supported')
     sys.exit
 
   commandLine ='''vivado_hls -f %s "runCsim %d runRTLsynth %d \
@@ -31,7 +41,11 @@ entriesInParallel %d runArgs \
     profile['dataWidth'], profile['vectorSize'], profile['parEntries'],
     os.path.abspath(vectorPath), profile['vectorSize'], result)
   args = shlex.split(commandLine)
-  subprocess.call(args)
+  exitCode = subprocess.call(args)
+  if exitCode == 0:
+    print("Test Passed.")
+  else:
+    print("Test failed, please check log file for more details.")
   
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')

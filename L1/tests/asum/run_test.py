@@ -2,7 +2,6 @@ import numpy as np
 import argparse
 import shlex, subprocess
 import os, sys
-from dataProc import loadProfile
 import json
 
 def main(testPath, profile):
@@ -25,6 +24,11 @@ entriesInParallel %d runArgs \
     os.path.abspath(vectorPath), profile['vectorSize'], result)
   args = shlex.split(commandLine)
   subprocess.call(args)
+  exitCode = subprocess.call(args)
+  if exitCode == 0:
+    print("Test Passed.")
+  else:
+    print("Test failed, please check log file for more details.")
   
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
