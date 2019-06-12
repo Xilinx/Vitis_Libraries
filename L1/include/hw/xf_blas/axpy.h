@@ -76,12 +76,12 @@ namespace blas {
           ap_uint<(t_DataWidth << t_LogParEntries)> l_r = 0;
           for(t_IndexType j=0;j<l_ParEntries;j++){
 #pragma HLS UNROLL
-            ap_uint<t_DataWidt> l_partX = l_x.range((j+1)*t_DataWidth -1, j*t_DataWidth);
+            ap_uint<t_DataWidth> l_partX = l_x.range((j+1)*t_DataWidth -1, j*t_DataWidth);
             t_DataType l_realX = *(t_DataType*)&l_partX;
-            ap_uint<t_DataWidt> l_partY = l_y.range((j+1)*t_DataWidth -1, j*t_DataWidth);
+            ap_uint<t_DataWidth> l_partY = l_y.range((j+1)*t_DataWidth -1, j*t_DataWidth);
             t_DataType l_realY = *(t_DataType*)&l_partY;
             t_DataType l_result = p_alpha * l_realX + l_realY;
-            ap_uint<t_DataWidt> l_partR = *(ap_uint<t_DataWidth>*)&l_result;
+            ap_uint<t_DataWidth> l_partR = *(ap_uint<t_DataWidth>*)&l_result;
             l_r.range((j+1)*t_DataWidth -1, j*t_DataWidth) = l_partR;
           }
           p_r.write(l_r);
