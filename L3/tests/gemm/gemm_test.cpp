@@ -16,7 +16,7 @@
 
 
 /*
- * usage: ./gemm_test.cpp PATH_TO_XCLBIN/gemx.xclbin PATH_TO_XCLBIN/config_info.dat
+ * usage: ./gemm_test.exe PATH_TO_XCLBIN/gemx.xclbin PATH_TO_XCLBIN/config_info.dat
  * 
  */
 
@@ -64,15 +64,16 @@ int main(int argc, char **argv) {
   b = ( short *) malloc (k*n* sizeof ( short )); 
   c = ( short *) malloc (m*n* sizeof ( short )); 
 
+  int ind = 11;
   for( i = 0; i<  m; i ++){ 
     for( j = 0; j < k; j ++){ 
-      a[ IDX2R (i,j,k )]=( short ) 1; 
+      a[ IDX2R (i,j,k )]=( short ) ind++; 
     } 
   } 
-
+  ind = 11;
   for( i = 0; i<  k; i ++){ 
     for( j = 0; j < n; j ++){ 
-      b[ IDX2R (i,j,n )]=( short ) 1; 
+      b[ IDX2R (i,j,n )]=( short ) ind++; 
     } 
   } 
 
