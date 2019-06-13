@@ -44,7 +44,7 @@ class BLASHostHandle {
 
 class ConfigDict {
     public:
-        unordered_map<string,string> m_dict={{"not_initialized","1"}};
+        unordered_map<string,string> m_dict={};
         static ConfigDict& instance() {
             static ConfigDict theInstance;
             return theInstance;
