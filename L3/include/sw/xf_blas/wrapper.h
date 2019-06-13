@@ -32,7 +32,7 @@ namespace blas {
  * @retval xfblasStatus_t 2 if the xclbin doesn't contain the engine
  * @retval xfblasStatus_t 4 if the engine is not supported for now
  */
-xfblasStatus_t xfblasCreate(char * xclbin, string configFile, xfblasEngine_t engineName, unsigned int nPE = 1) {
+xfblasStatus_t xfblasCreate(const char * xclbin, string configFile, xfblasEngine_t engineName, unsigned int nPE = 1) {
   xfblasStatus_t l_status = buildConfigDict(configFile, engineName, &ConfigDict::instance().m_dict); 
   if (l_status != XFBLAS_STATUS_SUCCESS){
     return l_status;
