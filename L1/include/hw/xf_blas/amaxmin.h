@@ -89,23 +89,23 @@ namespace {
       };
 
   template<typename t_DataType, 
-    unsigned int t_DataWidth,
     unsigned int t_LogParEntries, 
+    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType,
     bool t_Max>
       void preProcess(unsigned int p_numElement,
           hls::stream<t_DataType>& p_valueStream,
           hls::stream<t_IndexType>& p_indexStream,
-          hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> >& p_x) {
+          hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x){
         const unsigned int l_ParEntries = 1 << t_LogParEntries;
         for (t_IndexType i = 0; i < p_numElement; i++) {
-#pragma HLS PIPELINE
-          ap_uint<(t_DataWidth << t_LogParEntries)> l_elem = p_x.read();
+          #pragma HLS PIPELINE
+          WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> l_elem = p_x.read();
           t_DataType l_x[l_ParEntries];
           for (t_IndexType k = 0; k < l_ParEntries; k++) {
-            ap_uint<t_DataWidth> l_tmp = l_elem.range((k + 1) * t_DataWidth - 1,
-                k * t_DataWidth);
-            l_x[k] = abs(*(t_DataType* )&l_tmp);
+            #pragma HLS UNROLL
+            t_DataType l_value = l_elem[k];
+            l_x[k] = abs(l_value);
           }
           t_IndexType l_pos;
           t_DataType l_value;
@@ -129,9 +129,9 @@ namespace {
         t_IndexType l_index = 0;
         const unsigned int l_numIter = p_numElement >> t_LogNumEntries;
         for (t_IndexType i = 0; i < l_numIter; i++) {
-#pragma HLS PIPELINE II=l_numEntries
+          #pragma HLS PIPELINE II=l_numEntries
           t_DataType l_v[l_numEntries];
-#pragma HLS ARRAY_PARTITION variable = l_v complete dim=1
+          #pragma HLS ARRAY_PARTITION variable = l_v complete dim=1
           t_IndexType l_i[l_numEntries];
           for (t_IndexType j = 0; j < l_numEntries; j++) {
             l_v[j] = p_valueStream.read();
@@ -149,8 +149,8 @@ namespace {
         }
         const unsigned int l_numRem = p_numElement - (l_numIter << t_LogNumEntries);
         for (t_IndexType i = 0; i < l_numRem; i++) {
-#pragma HLS PIPELINE
-#pragma HLS loop_tripcount max=l_numEntries
+          #pragma HLS PIPELINE
+          #pragma HLS loop_tripcount max=l_numEntries
           t_DataType l_v;
           t_IndexType l_i;
           l_v = p_valueStream.read();
@@ -161,23 +161,23 @@ namespace {
       }
 
   template<typename t_DataType, 
-    unsigned int t_DataWidth, 
     unsigned int t_LogParEntries, 
+    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType,
     bool t_Max>
       void aMaxMinHelper (
           unsigned int p_n, // number of element in the stream
-          hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_x,
+          hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
           t_IndexType &p_result
           ) {
 
-#pragma HLS DATAFLOW
+        #pragma HLS DATAFLOW
         hls::stream<t_DataType> l_valueStream;
-#pragma HLS stream variable=l_valueStream depth=2
+        #pragma HLS stream variable=l_valueStream depth=2
         hls::stream<t_IndexType> l_indexStream;
-#pragma HLS stream variable=l_indexStream depth=2
+        #pragma HLS stream variable=l_indexStream depth=2
 
-        preProcess<t_DataType, t_DataWidth, t_LogParEntries, t_IndexType, t_Max>(p_n, l_valueStream,l_indexStream, p_x);
+        preProcess<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, t_Max>(p_n, l_valueStream,l_indexStream, p_x);
         postProcess<t_DataType, 1, t_IndexType, t_Max>(p_n, l_valueStream, l_indexStream, p_result);
 
       }
@@ -199,19 +199,19 @@ namespace {
  */
 
 template<typename t_DataType, 
-  unsigned int t_DataWidth, 
   unsigned int t_LogParEntries, 
+  unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
   typename t_IndexType>
   void amax(
       unsigned int p_n,
-      hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_x,
+      hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
       t_IndexType &p_result
       ) {
-#ifndef __SYNTHESIS__
+    #ifndef __SYNTHESIS__
     assert(p_n % ( 1 << t_LogParEntries) == 0);
-#endif
+    #endif
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    aMaxMinHelper<t_DataType, t_DataWidth, t_LogParEntries, t_IndexType, true>(l_numElem, p_x, p_result);
+    aMaxMinHelper<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, true>(l_numElem, p_x, p_result);
   }
 
 /**
@@ -228,19 +228,19 @@ template<typename t_DataType,
  */
 
 template<typename t_DataType, 
-  unsigned int t_DataWidth, 
   unsigned int t_LogParEntries, 
+  unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
   typename t_IndexType>
   void amin(
       unsigned int p_n,
-      hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_x,
+      hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
       t_IndexType &p_result
       ) {
-#ifndef __SYNTHESIS__
+    #ifndef __SYNTHESIS__
     assert(p_n % ( 1 << t_LogParEntries) == 0);
-#endif
+    #endif
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    aMaxMinHelper<t_DataType, t_DataWidth, t_LogParEntries, t_IndexType, false>(l_numElem, p_x, p_result);
+    aMaxMinHelper<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, false>(l_numElem, p_x, p_result);
   }
 
 

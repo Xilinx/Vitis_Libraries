@@ -4,6 +4,16 @@ import shlex, subprocess
 import os, sys
 import json
 
+def loadProfile(filePath):
+    with open(filePath, 'r') as fh:
+        profile = json.loads(fh.read())
+    return profile
+         
+
+def writeProfile(profile, filePath):
+   with open(filePath, 'w') as fh:
+       fh.write(json.dumps(profile, indent=2))
+                   
 def main(testPath, profile):
   a=(np.random.rand(profile['vectorSize']) - 0.5) 
   vectorPath = os.path.join(testPath, profile['dataPath'], r"vector_%d.csv"%profile['vectorSize'])
@@ -23,7 +33,6 @@ entriesInParallel %d runArgs \
     profile['dataWidth'], profile['vectorSize'], profile['parEntries'],
     os.path.abspath(vectorPath), profile['vectorSize'], result)
   args = shlex.split(commandLine)
-  subprocess.call(args)
   exitCode = subprocess.call(args)
   if exitCode == 0:
     print("Test Passed.")

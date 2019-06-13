@@ -17,6 +17,10 @@
 #define AMIN_TOP_H
 
 #include "amaxmin.h"
+#ifndef BLAS_dataWidth
+#define BLAS_dataWidth (sizeof(BLAS_dataType) * 8)
+#endif
+
 
 void amaxmin_top(
   unsigned int p_n,

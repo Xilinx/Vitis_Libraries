@@ -18,13 +18,13 @@
 using namespace xf::linear_algebra::blas;
 void asum_top(
   unsigned int p_n,
-  hls::stream<ap_uint<BLAS_dataWidth * BLAS_parEntries> > &p_x,
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth > > &p_x,
   BLAS_dataType &p_result 
 ) {
   BLAS_op <
     BLAS_dataType,
-    BLAS_dataWidth,
     mylog2(BLAS_parEntries),
+    BLAS_dataWidth,
     BLAS_indexType> (
     p_n, p_x, p_result
   );
@@ -33,7 +33,7 @@ void asum_top(
 void readVec2Stream(
   BLAS_dataType p_in[BLAS_size],
   unsigned int p_n,
-  hls::stream<ap_uint<BLAS_dataWidth * BLAS_parEntries> > &p_out
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth > > &p_out
 ) {
 #pragma HLS ARRAY_PARTITION variable=p_in cyclic factor=2 dim=1
   #ifndef __SYNTHESIS__
@@ -43,11 +43,9 @@ void readVec2Stream(
   for (unsigned int i=0; i<l_parBlocks; ++i) {
   #pragma HLS PIPELINE
     BitConv<BLAS_dataType> l_bitConv;
-    ap_uint<BLAS_dataWidth * BLAS_parEntries> l_val;
+    WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth > l_val;
     for (unsigned int j=0; j<BLAS_parEntries; ++j) {
-      ap_uint<BLAS_dataWidth> l_valUnit = l_bitConv.toBits(p_in[i*BLAS_parEntries + j]);
-//      l_val = (l_val <<  BLAS_dataWidth) + l_valUnit;
-      l_val.range((j+1)*BLAS_dataWidth-1, j*BLAS_dataWidth) = l_valUnit;
+      l_val[j] = p_in[i*BLAS_parEntries + j];
     }
     p_out.write(l_val);
   }
@@ -58,7 +56,7 @@ void UUT_Top(
   unsigned int p_n,
   BLAS_dataType &p_result
 ){
-  hls::stream<ap_uint<BLAS_dataWidth * BLAS_parEntries> > l_str;
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth> > l_str;
   #pragma HLS DATAFLOW
   readVec2Stream(
     p_in,
