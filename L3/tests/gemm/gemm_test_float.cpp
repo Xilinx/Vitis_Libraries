@@ -18,6 +18,9 @@
 /*
  * usage: ./gemm_test.exe PATH_TO_XCLBIN/gemx.xclbin PATH_TO_XCLBIN/config_info.dat
  * 
+ * compareGemm will compare the golden reference result with the FPGA result, 
+ * if either the absolute difference or the relative difference is within the tolerance, 
+ * the FPGA result will be considered as correct.
  */
 
 #include <string>
@@ -32,7 +35,7 @@
 
 using namespace std;
 
-bool compareGemm(float* a, float* b, float* c, float p_TolRel=1e-3){
+bool compareGemm(float* a, float* b, float* c, float p_TolRel=1e-3, float p_TolAbs=1e-5){
   float * goldenC;
   goldenC = (float*) malloc(m * n * sizeof (float));
   bool l_check = true;
@@ -47,8 +50,15 @@ bool compareGemm(float* a, float* b, float* c, float p_TolRel=1e-3){
   }
   for(int row = 0; row < m; row++){ 
     for(int col = 0; col < n; col++){
-      float l_diffAbs = abs(goldenC[IDX2R(row,col,n)] - c[IDX2R(row,col,n)]);
-      if (l_diffAbs > p_TolRel){
+      float l_ref = goldenC[IDX2R(row,col,n)];
+      float l_result = c[IDX2R(row,col,n)];
+      float l_diffAbs = abs(l_ref-l_result);
+      float l_diffRel = l_diffAbs;
+      if (goldenC[IDX2R(row,col,n)] != 0 ){
+        l_diffRel /= abs(l_ref);
+      }
+      bool check = (l_diffRel <= p_TolRel) || (l_diffAbs <= p_TolAbs);
+      if (!check){
         cout<<"golden result "<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,n)]<<"\n";
         l_check = false;
       }
@@ -70,15 +80,13 @@ int main(int argc, char **argv) {
   float ind = 1;
   for( i = 0; i<  m; i ++){ 
     for( j = 0; j < k; j ++){ 
-      a[ IDX2R (i,j,k )]=( float ) ind;
-      ind = ind + 0.3;
+      a[ IDX2R (i,j,k )]=( float ) ind++;
     } 
-    ind = 1;
   } 
   
   for( i = 0; i<  k; i ++){ 
     for( j = 0; j < n; j ++){ 
-      b[ IDX2R (i,j,n )]=( float ) 1;
+      b[ IDX2R (i,j,n )]=( float ) ind++;
     } 
   } 
 
