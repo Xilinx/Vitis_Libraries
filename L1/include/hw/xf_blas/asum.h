@@ -75,7 +75,7 @@ namespace blas {
             for(t_IndexType j=0; j<l_ParEntries;j++){
               #pragma HLS UNROLL
               t_DataType l_data = l_x[j];
-              l_input[j]=abs(l_data);
+              l_input[j]=hls::abs(l_data);
             }
             t_DataType l_sum;
             l_sum = BinarySum<t_DataType, l_ParEntries, t_IndexType>::sum(l_input);
@@ -128,6 +128,22 @@ namespace blas {
           }
           p_sum = l_finalSum;
         }
+    template<typename t_DataType>
+      class AdderDelay{
+        public:
+          static const unsigned int m_logDelays = 0;
+      };
+    template<>
+      class AdderDelay<double>{
+        public:
+          static const unsigned int m_logDelays = 3;
+      };
+
+    template<>
+      class AdderDelay<float>{
+        public:
+          static const unsigned int m_logDelays = 2;
+      };
   }
 
   /**
@@ -155,7 +171,7 @@ namespace blas {
         #ifndef __SYNTHESIS__
         assert(p_n % ( 1 << t_LogParEntries) == 0);
         #endif
-        const unsigned int l_LogDelays = 3;
+        const unsigned int l_LogDelays = AdderDelay<t_DataType>::m_logDelays;
         #pragma HLS DATAFLOW
         hls::stream<t_DataType> l_data, l_pad;
         #pragma HLS stream variable=l_data depth=2

@@ -105,7 +105,7 @@ namespace {
           for (t_IndexType k = 0; k < l_ParEntries; k++) {
             #pragma HLS UNROLL
             t_DataType l_value = l_elem[k];
-            l_x[k] = abs(l_value);
+            l_x[k] = hls::abs(l_value);
           }
           t_IndexType l_pos;
           t_DataType l_value;
