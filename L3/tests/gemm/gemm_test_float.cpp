@@ -18,9 +18,14 @@
 /*
  * usage: ./gemm_test.exe PATH_TO_XCLBIN/gemx.xclbin PATH_TO_XCLBIN/config_info.dat
  * 
+ * compareGemm will compare the golden reference result with the FPGA result, 
+ * if either the absolute difference or the relative difference is within the tolerance, 
+ * the FPGA result will be considered as correct.
  */
 
 #include <string>
+#include <cmath>
+#include <iomanip>
 #include "xf_blas.h"
 
 # define IDX2R(i,j,ld) (((i)*( ld ))+(j))
@@ -30,13 +35,13 @@
 
 using namespace std;
 
-bool compareGemm(short* a, short* b, short* c){
-  short * goldenC;
-  goldenC = (short*) malloc(m * n * sizeof (short));
+bool compareGemm(float* a, float* b, float* c, float p_TolRel=1e-3, float p_TolAbs=1e-5){
+  float * goldenC;
+  goldenC = (float*) malloc(m * n * sizeof (float));
   bool l_check = true;
   for(int row = 0; row < m; row++){ 
       for(int col = 0; col < n; col++){ 
-          short l_val = 0;
+          float l_val = 0;
           for (int i = 0; i < k; i ++) {
             l_val += a[IDX2R(row,i,k)] * b[IDX2R(i,col,n)];
           }
@@ -45,8 +50,16 @@ bool compareGemm(short* a, short* b, short* c){
   }
   for(int row = 0; row < m; row++){ 
     for(int col = 0; col < n; col++){
-      if (goldenC[IDX2R(row,col,n)]!=c[IDX2R(row,col,n)]){
-        cout<<"golden result "<<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<<c[IDX2R(row,col,n)]<<"\n";
+      float l_ref = goldenC[IDX2R(row,col,n)];
+      float l_result = c[IDX2R(row,col,n)];
+      float l_diffAbs = abs(l_ref-l_result);
+      float l_diffRel = l_diffAbs;
+      if (goldenC[IDX2R(row,col,n)] != 0 ){
+        l_diffRel /= abs(l_ref);
+      }
+      bool check = (l_diffRel <= p_TolRel) || (l_diffAbs <= p_TolAbs);
+      if (!check){
+        cout<<"golden result "<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,n)]<<"\n";
         l_check = false;
       }
     }
@@ -59,21 +72,21 @@ int main(int argc, char **argv) {
   string l_xclbinFile(argv[l_argIdx++]);
   string l_configFile(argv[l_argIdx++]);
   int i, j; // i-row index ,j- column index
-  short * a, * b, * c;
-  a = ( short *) malloc (m*k* sizeof ( short )); // host memory for a
-  b = ( short *) malloc (k*n* sizeof ( short )); 
-  c = ( short *) malloc (m*n* sizeof ( short )); 
+  float * a, * b, * c;
+  a = ( float *) malloc (m*k* sizeof ( float )); // host memory for a
+  b = ( float *) malloc (k*n* sizeof ( float )); 
+  c = ( float *) malloc (m*n* sizeof ( float )); 
 
-  int ind = 1;
+  float ind = 1;
   for( i = 0; i<  m; i ++){ 
     for( j = 0; j < k; j ++){ 
-      a[ IDX2R (i,j,k )]=( short ) ind++; 
+      a[ IDX2R (i,j,k )]=( float ) ind++;
     } 
   } 
-  ind = 1;
+  
   for( i = 0; i<  k; i ++){ 
     for( j = 0; j < n; j ++){ 
-      b[ IDX2R (i,j,n )]=( short ) ind++; 
+      b[ IDX2R (i,j,n )]=( float ) ind++;
     } 
   } 
 
@@ -133,7 +146,7 @@ int main(int argc, char **argv) {
   
   for ( i = 0; i < 10; i ++){
     for ( j = 0; j < 10; j ++){
-      cout<< (c[ IDX2R (i,j, k )])<<" ";
+      cout<< setprecision(10) <<(c[ IDX2R (i,j, k )])<<" ";
     }
     cout<<"\n";
   }

@@ -33,8 +33,15 @@ XCL2_SRC = $(SW_API_DIR)/xf_blas/xcl2/xcl2.cpp
 
 all: clean gemm_test.exe
 
+short: gemm_test.exe
+
+float: gemm_test_float.exe
+
 clean: 
 	rm -rf *.exe
 
 gemm_test.exe: gemm_test.cpp $(XCL2_SRC)
-	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) $(HOST_LIB) -o $@ $^
+	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -o $@ $^ $(HOST_LIB)
+
+gemm_test_float.exe: gemm_test_float.cpp $(XCL2_SRC)
+	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -o $@ $^ $(HOST_LIB)
