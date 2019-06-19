@@ -39,25 +39,6 @@ namespace blas {
 
   namespace{
     template<typename t_DataType, 
-      unsigned int t_Entries, 
-      typename t_IndexType = unsigned int> 
-        class BinarySum{
-          public:
-            static const t_DataType sum(t_DataType p_x[t_Entries]){
-              const unsigned int l_halfEntries = t_Entries >> 1;
-              return BinarySum<t_DataType, l_halfEntries, t_IndexType>::sum(p_x) +
-                BinarySum<t_DataType, l_halfEntries, t_IndexType>::sum(p_x + l_halfEntries);
-            }
-        };
-    template<typename t_DataType, 
-      typename t_IndexType> 
-        class BinarySum<t_DataType, 1, t_IndexType>{
-          public:
-            static const t_DataType sum(t_DataType p_x[1]){
-              return p_x[0];
-            }
-        };
-    template<typename t_DataType, 
       unsigned int t_LogParEntries, 
       unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
       typename t_IndexType = unsigned int>
@@ -68,7 +49,7 @@ namespace blas {
             ) {
           const unsigned int l_ParEntries = 1 << t_LogParEntries;
           for(t_IndexType i=0;i<p_numElems;i++){
-          #pragma HLS PIPELINE
+            #pragma HLS PIPELINE
             WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> l_x = p_x.read();
             t_DataType l_input[l_ParEntries];
             #pragma HLS ARRAY_PARTITION variable=l_input complete dim=1
@@ -96,11 +77,11 @@ namespace blas {
           hls::stream<t_DataType> l_inner;
           #pragma HLS stream variable=l_inner depth=2
           for(t_IndexType i=0;i<p_numElems;i++){
-          #pragma HLS PIPELINE
+            #pragma HLS PIPELINE
             p_pad.write(p_data.read());
           }
           for(t_IndexType i=0;i<l_numExtra;i++){
-          #pragma HLS PIPELINE
+            #pragma HLS PIPELINE
             p_pad.write(0);
           }
         }
@@ -117,33 +98,17 @@ namespace blas {
           const unsigned int l_numIter = (p_numElems + l_Delays -1) >> t_LogDelays;
           t_DataType l_finalSum = 0;
           for(t_IndexType i=0;i<l_numIter;i++){
-          #pragma HLS PIPELINE II=l_Delays
+            #pragma HLS PIPELINE II=l_Delays
             t_DataType l_input[l_Delays];
             #pragma HLS ARRAY_PARTITION variable=l_input complete dim=1
             for(t_IndexType j=0; j<l_Delays;j++){
-            #pragma HLS UNROLL
+              #pragma HLS UNROLL
               l_input[j]=p_pad.read();
             }
             l_finalSum += BinarySum<t_DataType, l_Delays, t_IndexType>::sum(l_input);
           }
           p_sum = l_finalSum;
         }
-    template<typename t_DataType>
-      class AdderDelay{
-        public:
-          static const unsigned int m_logDelays = 0;
-      };
-    template<>
-      class AdderDelay<double>{
-        public:
-          static const unsigned int m_logDelays = 3;
-      };
-
-    template<>
-      class AdderDelay<float>{
-        public:
-          static const unsigned int m_logDelays = 2;
-      };
   }
 
   /**
@@ -154,7 +119,7 @@ namespace blas {
    * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
    * @tparam t_IndexType the datatype of the index 
    *
-   * @param p_n the number of stided entries entries in the input vector p_x, p_n % l_ParEntries == 0
+   * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
    * @param p_x the input stream of packed vector entries
    * @param p_sum the sum, which is 0 if p_n <= 0
    */

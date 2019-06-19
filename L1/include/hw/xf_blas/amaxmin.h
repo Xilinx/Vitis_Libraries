@@ -222,7 +222,7 @@ template<typename t_DataType,
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
  * @tparam t_IndexType the datatype of the index 
  *
- * @param p_n the number of stided entries entries in the input vector p_x, p_n % l_ParEntries == 0
+ * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
  * @param p_x the input stream of packed vector entries
  * @param p_result the resulting index, which is 0 if p_n <= 0
  */
