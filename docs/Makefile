@@ -41,15 +41,15 @@ install: .stamp/sphinx
 	mkdir -p .stamp
 	touch .stamp/doxygen
 
-DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
-
+#DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 .stamp/doxyrest: .stamp/doxygen
+	mkdir -p $(HTML_DEST_DIR)
+	mkdir -p _build
+	mkdir -p _static
 	rm -rf rst
 	mkdir rst
 	doxyrest xml/index.xml -o rst/index.rst \
-		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	doxyrest xml/gqe__join_8h.xml -o rst/gqe_join.rst \
-		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+		-F ./src/doxyrest_frame/cfamily -F ./src/doxyrest_frame/common  -f index.rst.in -Dg_verbatimToCodeBlock
 	touch .stamp/doxyrest
 
 .stamp/sphinx: .stamp/doxyrest Makefile.sphinx
@@ -75,4 +75,4 @@ cleanhtml:
 	rm -rf .stamp/sphinx _build/html _build/doctrees
 
 cleanall:
-	rm -rf .stamp xml rst _build/html _build/doctrees
+	rm -rf .stamp xml rst _build _static $(HTML_DEST_DIR) 
