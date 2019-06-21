@@ -2,7 +2,7 @@
 
 XF BLAS Library is an SDx library for accelerating linear algebra functions.
 
-[Comprehensive documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/gemx/guide/pyguide.html)
+[Comprehensive documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_blas)
 
 Copyright 2019 Xilinx, Inc.
 
