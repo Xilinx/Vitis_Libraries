@@ -32,6 +32,7 @@ namespace blas {
 
   template<
     typename t_DataType,
+    typename t_ResDataType,
     typename t_HandleType,
     unsigned int t_MemWidthBytes,
     unsigned int t_InstrSizeBytes=8,
@@ -44,9 +45,9 @@ namespace blas {
   >
   class GenBin {
     public:
-      typedef ParamB1<t_DataType> ParamB1Type;
+      typedef ParamB1<t_DataType, t_ResDataType> ParamB1Type;
     public:
-      static const size_t ParamB1Bytes = 36 + 2*sizeof(t_DataType);
+      static const size_t ParamB1Bytes = 36 + sizeof(t_DataType) + sizeof(t_ResDataType);
     public:
       GenBin() {}
       xfblasStatus_t addB1Instr(
@@ -57,7 +58,7 @@ namespace blas {
         void* p_y,
         void* p_xRes,
         void* p_yRes,
-        t_DataType p_res
+        t_ResDataType p_res
       ) {
         uint32_t l_opCode32;
         xfblasStatus_t l_status = m_opFinder.getOpCode(p_opName, l_opCode32);
@@ -258,7 +259,7 @@ namespace blas {
         t_DataType* &p_y,
         t_DataType* &p_xRes,
         t_DataType* &p_yRes,
-        t_DataType &p_resScalar
+        t_ResDataType &p_resScalar
       ) {
         uint8_t* l_baseAddr = m_program.getBaseInstrAddr();
         uint8_t* l_paramAddr = l_baseAddr + p_instr.m_paramOff;

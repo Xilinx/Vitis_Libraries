@@ -26,6 +26,7 @@ BLAS_statsPageIdx		= 2
 BLAS_dataPageIdx		= 3
 BLAS_maxNumInstrs		= 64
 BLAS_dataType				= int
+BLAS_resDataType		= int
 BLAS_memWidthBytes	= 64
 
 DFLAGS = -D BLAS_argInstrWidth=$(BLAS_argInstrWidth) \
@@ -37,6 +38,7 @@ DFLAGS = -D BLAS_argInstrWidth=$(BLAS_argInstrWidth) \
 				 -D BLAS_dataPageIdx=$(BLAS_dataPageIdx) \
 				 -D BLAS_maxNumInstrs=$(BLAS_maxNumInstrs) \
 				 -D BLAS_dataType=$(BLAS_dataType) \
+				 -D BLAS_resDataType=$(BLAS_resDataType) \
 				 -D BLAS_memWidthBytes=$(BLAS_memWidthBytes)
 
 GCC_VERSION=6.2.0

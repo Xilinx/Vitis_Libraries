@@ -38,7 +38,7 @@ namespace linear_algebra {
 namespace blas {
 
   //all offsets are defined as byte offsets
-  template<typename t_DataType> 
+  template<typename t_DataType, typename t_ResDataType> 
   struct ParamB1 {
     uint32_t m_n;
     t_DataType m_alpha;
@@ -46,7 +46,7 @@ namespace blas {
     uint64_t m_yOff;
     uint64_t m_xResOff;
     uint64_t m_yResOff;
-    t_DataType m_resScalar;
+    t_ResDataType m_resScalar;
   };
 
   struct Instr {

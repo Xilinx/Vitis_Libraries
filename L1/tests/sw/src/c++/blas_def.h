@@ -36,6 +36,7 @@ namespace blas {
 
 typedef GenBin<
   BLAS_dataType,
+  BLAS_resDataType,
   void*, 
   BLAS_memWidthBytes,
   BLAS_instrSizeBytes,
