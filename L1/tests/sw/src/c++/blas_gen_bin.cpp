@@ -131,9 +131,55 @@ int main(int argc, char** argv)
     xfblasStatus_t l_status = l_gen.write2BinFile(l_binFile);
     assert(l_status == XFBLAS_STATUS_SUCCESS);
   } else if (l_read) {
-    xfblasStatus_t l_status = l_gen.readFromBinFile(l_binFile);
+    /*xfblasStatus_t l_status = l_gen.readFromBinFile(l_binFile);
     assert(l_status == XFBLAS_STATUS_SUCCESS);
-    l_gen.printProgram();
+    l_gen.printProgram();*/
+    vector<Instr> l_instrs;
+    uint32_t l_n;
+    BLAS_dataType l_alpha;
+    BLAS_dataType l_resGolden;
+    BLAS_dataType *l_x, *l_y, *l_xRes, *l_yRes;
+    BLAS_dataType l_xVal=0;
+    BLAS_dataType l_yVal=0;
+    BLAS_dataType l_xResVal=0;
+    BLAS_dataType l_yResVal=0;
+    l_x = &l_xVal;
+    l_y = &l_yVal;
+    l_xRes = &l_xResVal;
+    l_yRes = &l_yResVal;
+
+    xfblasStatus_t l_status = l_gen.readInstrs(l_binFile, l_instrs);
+    for (unsigned int i=0; i<l_instrs.size(); ++i) {
+      Instr l_curInstr=l_instrs[i];
+      if (l_curInstr.m_opClass == B1_OP_CLASS) {
+        l_gen.decodeB1Instr(l_curInstr, l_n, l_alpha, l_x, l_y, l_xRes, l_yRes, l_resGolden);
+        cout <<"  n=" << l_n << "  alpha=" << l_alpha << "  resScalar=" << l_resGolden << endl;
+        if (l_x != nullptr) {
+          cout << "  x:" << endl;
+          for (unsigned int i=0; i<l_n; ++i) {
+            cout << l_x[i] << endl;
+          }
+        }
+        if (l_y != nullptr) {
+          cout << "  y:" << endl;
+          for (unsigned int i=0; i<l_n; ++i) {
+            cout << l_y[i];
+          }
+        }
+        if (l_xRes != nullptr) {
+          cout << "  xRes:" << endl;
+          for (unsigned int i=0; i<l_n; ++i) {
+            cout << l_xRes[i];
+          }
+        }
+        if (l_yRes != nullptr) {
+          cout << "  yRes:" << endl;
+          for (unsigned int i=0; i<l_n; ++i) {
+            cout << l_yRes[i];
+          }
+        }
+      }
+    }
   } else {
     assert(0); // Unknown user command
   }

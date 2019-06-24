@@ -250,6 +250,49 @@ namespace blas {
         }
         return (l_status);
       }
+      void decodeB1Instr(
+        const Instr &p_instr,
+        uint32_t &p_n, 
+        t_DataType &p_alpha, 
+        t_DataType* &p_x,
+        t_DataType* &p_y,
+        t_DataType* &p_xRes,
+        t_DataType* &p_yRes,
+        t_DataType &p_resScalar
+      ) {
+        uint8_t* l_baseAddr = m_program.getBaseInstrAddr();
+        uint8_t* l_paramAddr = l_baseAddr + p_instr.m_paramOff;
+        ParamB1Type l_param;
+        memcpy((uint8_t*)&l_param, l_paramAddr, ParamB1Bytes);
+        p_n = l_param.m_n;
+        p_alpha = l_param.m_alpha;
+        p_resScalar = l_param.m_resScalar;
+        p_x = (l_param.m_xOff!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_xOff): nullptr;
+        p_y = (l_param.m_yOff!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_yOff): nullptr;
+        p_xRes = (l_param.m_xResOff!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_xResOff): nullptr;
+        p_yRes = (l_param.m_yResOff!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_yResOff): nullptr; 
+      }
+      
+      xfblasStatus_t readInstrs(
+        string p_fileName,
+        vector<Instr> &p_instrs
+      ) {
+        xfblasStatus_t l_status = readFromBinFile(p_fileName);
+        assert(l_status == XFBLAS_STATUS_SUCCESS);
+          
+        uint8_t* l_baseInstrAddr = m_program.getBaseInstrAddr();
+        uint8_t* l_addr = l_baseInstrAddr;
+        Instr l_instr;
+        memcpy((uint8_t*) &l_instr, l_addr, t_InstrSizeBytes);
+        while (l_instr.m_opCode != NULL_OP) {
+          p_instrs.push_back(l_instr);
+          l_addr += t_InstrSizeBytes;
+          memcpy((uint8_t*) &l_instr, l_addr, t_InstrSizeBytes);
+        }
+        l_status = XFBLAS_STATUS_SUCCESS;
+        return(l_status);
+      }
+
       void printB1Param(ParamB1Type &p_param, uint8_t* p_baseAddr){
         cout <<"  n=" << p_param.m_n << "  alpha=" << p_param.m_alpha << "  resScalar=" << p_param.m_resScalar << endl;
         uint32_t l_n = p_param.m_n;
@@ -290,13 +333,13 @@ namespace blas {
         uint8_t* l_addr = l_baseInstrAddr;
         Instr l_instr;
         memcpy((uint8_t*) &l_instr, l_addr, t_InstrSizeBytes);
-        while (l_instr.m_opCode != 0) {
+        while (l_instr.m_opCode != NULL_OP) {
           uint8_t* l_paramAddr = l_baseInstrAddr + l_instr.m_paramOff;
           string l_opName;
           xfblasStatus_t l_status = m_opFinder.getOpName(l_instr.m_opCode, l_opName);
           assert(l_status == XFBLAS_STATUS_SUCCESS);
           cout << "Operation: " << l_opName << endl;
-          if (l_instr.m_opClass == 0) { //BLAS L1 function parameters
+          if (l_instr.m_opClass == B1_OP_CLASS) { //BLAS L1 function parameters
             ParamB1Type l_param;
             uint8_t* l_paramAddr = l_baseInstrAddr + l_instr.m_paramOff;
             memcpy((uint8_t*)&l_param, l_paramAddr, ParamB1Bytes);

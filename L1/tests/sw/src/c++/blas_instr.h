@@ -30,6 +30,8 @@
 using namespace std;
 
 #define B1_MaxOpCode 14
+#define NULL_OP 0
+#define B1_OP_CLASS 0
 
 namespace xf {
 namespace linear_algebra {

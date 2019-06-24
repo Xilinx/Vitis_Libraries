@@ -41,8 +41,8 @@ DFLAGS = -D BLAS_argInstrWidth=$(BLAS_argInstrWidth) \
 
 GCC_VERSION=6.2.0
 GCC_PATH=${XILINX_VIVADO}/tps/lnx64
-CC = /bin/g++
-#CC = ${GCC_PATH}/gcc-${GCC_VERSION}/bin/g++
+#CC = /bin/g++
+CC = ${GCC_PATH}/gcc-${GCC_VERSION}/bin/g++
 
 BOOST_INCLUDE=$(XILINX_VIVADO)/tps/boost_1_64_0
 BOOST_LIB=$(XILINX_VIVADO)/lib/lnx64.o
@@ -61,7 +61,7 @@ CFLAGS = -g -O0 -std=c++11 \
 				 $(INCLUDE_CFLAGS)
 
 LFLAGS = $(HOST_LIB_LFLAGS) \
-				 -Wl --rpath=$(BOOST_LIB)
+				 -Wl,--rpath=$(BOOST_LIB)
 
 OUT_DIR = out_test
 GEN_BIN_EXE = $(OUT_DIR)/blas_gen_bin.exe
@@ -69,7 +69,7 @@ GEN_BIN_SO = $(OUT_DIR)/blas_gen_wrapper.so
 
 .PHONY: all
 
-$(GEN_BIN_SO) : ./src/c++/blas_gen_wrapper.cpp
+$(GEN_BIN_SO) : ./src/c++/blas_gen_wrapper.cpp |  $(OUT_DIR)
 	@echo "***** Link testcase generator executable *****"
 	@echo "INFO: LIB IS" ${LIB_LFLAGS}
 	@echo "*************************************************"
