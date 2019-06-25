@@ -25,8 +25,13 @@ BLAS_paramPageIdx		= 1
 BLAS_statsPageIdx		= 2
 BLAS_dataPageIdx		= 3
 BLAS_maxNumInstrs		= 64
+
+ifndef BLAS_dataType
 BLAS_dataType				= int
+endif
+ifndef BLAS_resDataType
 BLAS_resDataType		= int
+endif
 BLAS_memWidthBytes	= 64
 
 DFLAGS = -D BLAS_argInstrWidth=$(BLAS_argInstrWidth) \
