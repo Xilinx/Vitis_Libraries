@@ -26,7 +26,7 @@ extern "C" {
       void* p_y,
       void* p_xRes,
       void* p_yRes,
-      BLAS_dataType p_res
+      BLAS_resDataType p_res
       ) {
     return  genBin -> addB1Instr(p_opName, p_n, p_alpha, p_x, p_y, p_xRes, p_yRes, p_res);
   }
@@ -38,5 +38,8 @@ extern "C" {
   }
   void printProgram(GenBinType* genBin) {
     genBin -> printProgram();
+  }
+  void clearProgram(GenBinType* genBin) {
+    genBin -> clearProgram();
   }
 }
