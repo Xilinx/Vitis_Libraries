@@ -1,0 +1,26 @@
+{
+  "tclPath": "./run.tcl",
+  "dataPath": "./data/",
+  "b_csim": true,
+  "b_synth": true,
+  "b_cosim": true,
+  "dataTypes": [
+    ["int", 32],
+    ["uint", 16]
+  ],
+  "retTypes": [
+    ["int", 32],
+    ["uint", 16]
+  ],
+  "op": "asum",
+  "parEntries": 4,
+  "vectorSizes": [
+    8,
+    12
+  ],
+  "valueRange": [
+    -1024,
+    1024
+  ],
+  "numSimulation": 2
+}
