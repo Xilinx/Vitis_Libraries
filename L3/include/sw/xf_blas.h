@@ -24,9 +24,9 @@
 
 #include "xf_blas/handle.h"
 #include "xf_blas/gemm_host.h"
-#include "utility/utility.h"
 
 #include "xf_blas/wrapper.h"
+
 
 using namespace xf::linear_algebra::blas;
 

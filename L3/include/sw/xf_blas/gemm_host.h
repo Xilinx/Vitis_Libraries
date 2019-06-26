@@ -33,7 +33,7 @@ public:
       unsigned int p_cOffset, unsigned int p_xOffset, unsigned int p_m, unsigned int p_k,
       unsigned int p_n, unsigned int p_lda, unsigned int p_ldb,
       unsigned int p_ldc, unsigned int p_ldx, int p_postScale, int p_postShift) :
-        m_GemmArgs( { int(OpGemm),  p_aOffset, p_bOffset, p_cOffset, p_xOffset, p_m, p_k,
+      m_GemmArgs( { int(OpGemm),  p_aOffset, p_bOffset, p_cOffset, p_xOffset, p_m, p_k,
     p_n, p_lda, p_ldb, p_ldc, p_ldx, 0, 0, 0, 0 }) {
     m_GemmArgs.m_postScaleVal = (p_postScale << 8) | (p_postShift & 0x000000ff);
   }
@@ -54,53 +54,52 @@ protected:
 };
 
 class GEMMHost : public BLASHost {
-public:
-  GEMMHost() = delete;
-  virtual ~GEMMHost() {}
-  GEMMHost(const GEMMHost &) = delete;
-  GEMMHost(const string & p_xclbin, const string & p_kernelName, xfblasStatus_t* p_status) : BLASHost ( p_xclbin, p_kernelName, p_status) {}
+  public:
+    GEMMHost() = delete;
+    virtual ~GEMMHost() {}
+    GEMMHost(const GEMMHost &) = delete;
+    GEMMHost(const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int nPE) : BLASHost ( p_xclbin, p_logFile, p_status, nPE) {}
+    
   
-  
-  virtual xfblasStatus_t addGEMMOp(void* p_a, void* p_b, void* p_c, void* p_bias, unsigned int p_m, unsigned int p_k, unsigned int p_n, unsigned int p_lda, unsigned int p_ldb, unsigned int p_ldc, unsigned int p_ldx, int p_postScale, int p_postShift) {
-    if (this->m_hostMat.find(p_a) == this->m_hostMat.end()
-        || this->m_hostMat.find(p_b) == this->m_hostMat.end()
-        || this->m_hostMat.find(p_c) == this->m_hostMat.end()
-        || this->m_hostMat.find(p_bias) == this->m_hostMat.end()) {
-      return XFBLAS_STATUS_ALLOC_FAILED;
+    virtual xfblasStatus_t addGEMMOp(void* p_a, void* p_b, void* p_c, void* p_bias, unsigned int p_m, unsigned int p_k, unsigned int p_n, unsigned int p_lda, unsigned int p_ldb, unsigned int p_ldc, unsigned int p_ldx, int p_postScale, int p_postShift, unsigned int PE) {
+      if (this->m_bufHandle.find(p_a) == this->m_bufHandle.end()
+            || this->m_bufHandle.find(p_b) == this->m_bufHandle.end()
+            || this->m_bufHandle.find(p_c) == this->m_bufHandle.end()
+            || this->m_bufHandle.find(p_bias) == this->m_bufHandle.end()) {
+          return XFBLAS_STATUS_ALLOC_FAILED;
+      }
+      unsigned int handle_A, handle_B, handle_C, handle_bias;
+      auto &l_devPtr = this->m_bufHandle;
+      handle_A=l_devPtr[p_a];
+      handle_B=l_devPtr[p_b];
+      handle_C=l_devPtr[p_c];
+      handle_bias=l_devPtr[p_bias];
+      xclBOProperties p;
+      uint64_t address_A = !xclGetBOProperties(this->m_fpga->m_handle, handle_A, &p) ? p.paddr : -1;
+      uint64_t address_B = !xclGetBOProperties(this->m_fpga->m_handle, handle_B, &p) ? p.paddr : -1;
+      uint64_t address_C = !xclGetBOProperties(this->m_fpga->m_handle, handle_C, &p) ? p.paddr : -1;
+      uint64_t address_bias = !xclGetBOProperties(this->m_fpga->m_handle, handle_bias, &p) ? p.paddr : -1;
+      unsigned long long l_aOff, l_bOff, l_cOff, l_xOff;
+      l_aOff = (unsigned long long) address_A;
+      l_bOff = (unsigned long long) address_B;
+      l_cOff = (unsigned long long) address_C;
+      l_xOff = (unsigned long long) address_bias;
+
+      l_aOff -= this->m_ddrDeviceBaseAddr[PE];
+      l_bOff -= this->m_ddrDeviceBaseAddr[PE];
+      l_cOff -= this->m_ddrDeviceBaseAddr[PE];
+      l_xOff -= this->m_ddrDeviceBaseAddr[PE];
+      
+      l_aOff /= this->PAGE_SIZE;
+      l_bOff /= this->PAGE_SIZE;
+      l_cOff /= this->PAGE_SIZE;
+      l_xOff /= this->PAGE_SIZE;
+
+      GemmArgs l_gargs(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_k, p_n, p_lda, p_ldb, p_ldc, p_ldx, p_postScale, p_postShift);
+      this->addInstr ( &l_gargs);
+      
+      return XFBLAS_STATUS_SUCCESS;
     }
-    unsigned long long l_aOff = 0, l_bOff = 0, l_cOff = 0, l_xOff = 0;
-
-    cl_int l_err = xclGetMemObjDeviceAddress(this->m_devHandle[p_a].get(),XHost::m_fpga->m_Device.get(),sizeof(unsigned long long), &l_aOff);
-    l_err = xclGetMemObjDeviceAddress(this->m_devHandle[p_b].get(),XHost::m_fpga->m_Device.get(),sizeof(unsigned long long), &l_bOff);
-    l_err = xclGetMemObjDeviceAddress(this->m_devHandle[p_c].get(),XHost::m_fpga->m_Device.get(),sizeof(unsigned long long), &l_cOff);
-    l_err = xclGetMemObjDeviceAddress(this->m_devHandle[p_bias].get(),XHost::m_fpga->m_Device.get(),sizeof(unsigned long long), &l_xOff);
-
-    if (l_err != CL_SUCCESS){
-      return XFBLAS_STATUS_NOT_INITIALIZED;
-    }
-
-    if (l_aOff <= this->m_ddrDeviceBaseAddr || l_bOff <= this->m_ddrDeviceBaseAddr || l_cOff <= this->m_ddrDeviceBaseAddr || l_xOff <= this->m_ddrDeviceBaseAddr) {
-      return XFBLAS_STATUS_ALLOC_FAILED;  
-    }
-
-    l_aOff -= this->m_ddrDeviceBaseAddr;
-    l_bOff -= this->m_ddrDeviceBaseAddr;
-    l_cOff -= this->m_ddrDeviceBaseAddr;
-    l_xOff -= this->m_ddrDeviceBaseAddr;
-
-    if (l_aOff % this->PAGE_SIZE != 0 || l_bOff % this->PAGE_SIZE != 0 || l_cOff % this->PAGE_SIZE != 0 || l_xOff % this->PAGE_SIZE != 0) {
-      return XFBLAS_STATUS_ALLOC_FAILED; 
-    }
-
-    l_aOff /= this->PAGE_SIZE;
-    l_bOff /= this->PAGE_SIZE;
-    l_cOff /= this->PAGE_SIZE;
-    l_xOff /= this->PAGE_SIZE;
-
-    GemmArgs l_gargs(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_k, p_n, p_lda, p_ldb, p_ldc, p_ldx, p_postScale, p_postShift);
-    this->addInstr ( &l_gargs);
-    return XFBLAS_STATUS_SUCCESS;
-  }
   
   
 };
