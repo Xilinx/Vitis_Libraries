@@ -22,42 +22,27 @@
 #ifndef BLAS_INSTR_H
 #define BLAS_INSTR_H
 
+#include <iostream>
+#include <iomanip>
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include "L3/include/sw/utility/utility.h"
-#include "blas_instr.h"
 
 using namespace std;
 
 #define B1_MaxOpCode 14
 #define NULL_OP 0
 #define B1_OP_CLASS 0
+#define OUTPUT_WIDTH 7 
+#define ENTRIES_PER_LINE 16
 
 namespace xf {
 namespace linear_algebra {
 namespace blas {
-
-  //all offsets are defined as byte offsets
-  template<typename t_DataType, typename t_ResDataType> 
-  struct ParamB1 {
-    uint32_t m_n;
-    t_DataType m_alpha;
-    uint64_t m_xOff;
-    uint64_t m_yOff;
-    uint64_t m_xResOff;
-    uint64_t m_yResOff;
-    t_ResDataType m_resScalar;
-  };
-
-  struct Instr {
-    uint16_t m_opClass;
-    uint16_t m_opCode;
-    int32_t m_paramOff;
-  };
-
-  class FindOpCodeB1 {
+  class FindOpCode {
     public:
-      FindOpCodeB1() {
+      FindOpCode() {
         m_opMap = {
           {"null_op", 0},
           {"amax", 1},
@@ -94,6 +79,102 @@ namespace blas {
     private:
       unordered_map<string, uint32_t> m_opMap;
   };
+
+  //all offsets are defined as byte offsets
+  template<typename t_DataType, typename t_ResDataType> 
+  class ParamB1 {
+    public:
+      ParamB1(){}
+    public:
+      void getData(
+        uint64_t p_addr, 
+        uint32_t p_n, 
+        vector<t_DataType> &p_data
+      ){
+        p_data.clear();
+        if (p_addr == 0) {
+          return;
+        }
+        size_t l_dataBytes = p_n * sizeof(t_DataType);
+        p_data.resize(m_n);
+        memcpy((char*)&(p_data[0]), reinterpret_cast<char*>(p_addr), l_dataBytes);
+        return;
+      }
+      void printData(ostream &os, const vector<t_DataType> &p_data, uint32_t p_n) {
+        for (unsigned int i=0; i<p_n; ++i){
+          if ((i % ENTRIES_PER_LINE) == 0) {
+            os << "\n";
+          }
+          os << setw(OUTPUT_WIDTH) << p_data[i];
+        } 
+        os << "\n";
+      }
+      void print(ostream &os) {
+        os << "n=" << m_n
+           << " alpha="
+           << setw(OUTPUT_WIDTH) << m_alpha
+           << " resGolden="
+           << setw(OUTPUT_WIDTH) << m_resScalar << "\n";
+
+        vector<t_DataType> l_data;
+        getData(m_xAddr, m_n, l_data);
+        if (l_data.size() != 0) {
+          os << "x:" << "\n";
+          printData(os, l_data, m_n);
+        }   
+        getData(m_yAddr, m_n, l_data);
+        if (l_data.size() != 0) {
+          os << "y:" << "\n";
+          printData(os, l_data, m_n);
+        }   
+        getData(m_xResAddr, m_n, l_data);
+        if (l_data.size() != 0) {
+          os << "xRes:" << "\n";
+          printData(os, l_data, m_n);
+        }   
+        getData(m_yResAddr, m_n, l_data);
+        if (l_data.size() != 0) {
+          os << "yRes:" << "\n";
+          printData(os, l_data, m_n);
+        }   
+      }
+    public:
+      uint32_t m_n;
+      t_DataType m_alpha;
+      uint64_t m_xAddr;
+      uint64_t m_yAddr;
+      uint64_t m_xResAddr;
+      uint64_t m_yResAddr;
+      t_ResDataType m_resScalar;
+  };
+
+  template<typename T1, typename T2>
+  ostream& operator<<(ostream &os, ParamB1<T1, T2> &p_val) {
+    p_val.print(os);
+    return (os);
+  }
+
+  class Instr {
+    public:
+      Instr() {}
+    public:
+      void print(ostream &os) {
+        FindOpCode l_opFinder;
+        string l_opName;
+        xfblasStatus_t l_status = l_opFinder.getOpName(m_opCode, l_opName);
+        assert(l_status == XFBLAS_STATUS_SUCCESS);
+        os << "Operation: " << l_opName << "\n";
+      }
+    public:
+      uint16_t m_opClass;
+      uint16_t m_opCode;
+      int32_t m_paramOff;
+  };
+
+  ostream& operator<<(ostream &os, Instr &p_instr) {
+    p_instr.print(os);
+    return(os);
+  }
 
 } //end namespace blas
 } //end namespace linear_algebra

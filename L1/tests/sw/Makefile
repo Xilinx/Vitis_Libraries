@@ -80,14 +80,14 @@ $(GEN_BIN_SO) : ./src/c++/blas_gen_wrapper.cpp |  $(OUT_DIR)
 	@echo "***** Link testcase generator executable *****"
 	@echo "INFO: LIB IS" ${LIB_LFLAGS}
 	@echo "*************************************************"
-	$(CC) $(CFLAGS) $(DFLAGS) -shared -fPIC -fdata-sections -ffunction-sections -Wl,--gc-sections $^ -o $@
+	$(CC) $(CFLAGS) $(DFLAGS) -shared -fPIC -fpermissive -fdata-sections -ffunction-sections -Wl,--gc-sections $^ -o $@
 
 $(GEN_BIN_EXE) : ./src/c++/* | $(OUT_DIR)
 	@echo "***** Compile testcase generator executable *****"
 	@echo "INFO: INCLUDE IS " ${INCLUDE_CFLAGS}
 	@echo "INFO: LIB IS" ${LIB_LFLAGS}
 	@echo "*************************************************"
-	$(CC) $(CFLAGS) $(LFLAGS) $(DFLAGS) -fdata-sections -ffunction-sections -Wl,--gc-sections src/c++/blas_gen_bin.cpp -o $@
+	$(CC) $(CFLAGS) $(LFLAGS) $(DFLAGS) -fpermissive -fdata-sections -ffunction-sections -Wl,--gc-sections src/c++/blas_gen_bin.cpp -o $@
 
 clean :
 	$(RM) -r ${OUT_DIR} 

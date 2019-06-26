@@ -40,14 +40,13 @@ namespace blas {
     unsigned int t_MaxNumInstrs=64,
     unsigned int t_InstrPageIdx=0,
     unsigned int t_ParamPageIdx=1,
-    unsigned int t_StatsPageIdx=2,
-    unsigned int t_DataPageIdx=3
+    unsigned int t_StatsPageIdx=2
   >
   class GenBin {
     public:
-      typedef ParamB1<t_DataType, t_ResDataType> ParamB1Type;
+      typedef typename Program<t_HandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB1Type ParamB1Type;
     public:
-      static const size_t ParamB1Bytes = 36 + sizeof(t_DataType) + sizeof(t_ResDataType);
+      static const size_t ParamB1Bytes = Program<t_HandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB1Bytes;
     public:
       GenBin() {}
       xfblasStatus_t addB1Instr(
@@ -61,7 +60,8 @@ namespace blas {
         t_ResDataType p_res
       ) {
         uint32_t l_opCode32;
-        xfblasStatus_t l_status = m_opFinder.getOpCode(p_opName, l_opCode32);
+        FindOpCode l_opFinder;
+        xfblasStatus_t l_status = l_opFinder.getOpCode(p_opName, l_opCode32);
         uint16_t l_opClass, l_opCode; 
         if ((l_status == XFBLAS_STATUS_SUCCESS) && (l_opCode32 < B1_MaxOpCode)) { //BLAS L1 operations
           l_opClass = 0;
@@ -76,10 +76,10 @@ namespace blas {
           l_param.m_n = p_n;
           l_param.m_alpha = p_alpha;
           l_param.m_resScalar = p_res;
-          l_param.m_xOff = 0;
-          l_param.m_yOff = 0;
-          l_param.m_xResOff = 0;
-          l_param.m_yResOff = 0;
+          l_param.m_xAddr = 0;
+          l_param.m_yAddr = 0;
+          l_param.m_xResAddr = 0;
+          l_param.m_yResAddr = 0;
 
           unsigned long long l_dataBufSize;
           if (p_x != nullptr) {
@@ -87,14 +87,14 @@ namespace blas {
             if (l_status != XFBLAS_STATUS_SUCCESS) {
               return (l_status);
             }
-            l_param.m_xOff = reinterpret_cast<uint64_t>(m_program.getDatMem(p_x, l_dataBufSize));
+            l_param.m_xAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_x, l_dataBufSize));
           }
           if (p_y != nullptr) {
             l_status = m_program.regDatMem(p_y, p_y, p_n*sizeof(t_DataType));
             if (l_status != XFBLAS_STATUS_SUCCESS) {
               return (l_status);
             }
-            l_param.m_yOff = reinterpret_cast<uint64_t>(m_program.getDatMem(p_y, l_dataBufSize));
+            l_param.m_yAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_y, l_dataBufSize));
           }
 
           if (p_xRes != nullptr) {
@@ -102,26 +102,20 @@ namespace blas {
             if (l_status != XFBLAS_STATUS_SUCCESS) {
               return (l_status);
             }
-            l_param.m_xResOff = reinterpret_cast<uint64_t>(m_program.getDatMem(p_xRes, l_dataBufSize));
+            l_param.m_xResAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_xRes, l_dataBufSize));
           }
           if (p_yRes != nullptr) {
             l_status = m_program.regDatMem(p_yRes, p_yRes, p_n*sizeof(t_DataType));
             if (l_status != XFBLAS_STATUS_SUCCESS) {
               return (l_status);
             }
-            l_param.m_yResOff = reinterpret_cast<uint64_t>(m_program.getDatMem(p_yRes, l_dataBufSize));
+            l_param.m_yResAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_yRes, l_dataBufSize));
           }
 
-          uint8_t* l_instrAddr;
-          uint8_t* l_paramAddr;
-          m_program.getCurrInstrAddr(ParamB1Bytes, l_instrAddr, l_paramAddr);
           uint8_t* l_instrVal = reinterpret_cast<uint8_t*> (&l_instr);
           uint8_t* l_paramVal = reinterpret_cast<uint8_t*> (&l_param);
         
-          //store the instruction and its parameters into memory
-          memcpy(l_instrAddr, l_instrVal, t_InstrSizeBytes);  
-          memcpy(l_paramAddr, l_paramVal, ParamB1Bytes);
-
+          m_program.addInstr(l_instrVal, l_paramVal, ParamB1Bytes);
           return(XFBLAS_STATUS_SUCCESS);
         }
         else {
@@ -130,125 +124,12 @@ namespace blas {
       }
 
       xfblasStatus_t write2BinFile(string p_fileName){
-        xfblasStatus_t l_status=XFBLAS_STATUS_SUCCESS;
-        ofstream l_of(p_fileName.c_str(), ios::binary);
-        if (l_of.is_open()) {
-          //write instructions to file
-          uint8_t* l_baseInstrAddr = m_program.getBaseInstrAddr();
-          l_of.write(reinterpret_cast<char*>(l_baseInstrAddr), t_DataPageIdx*t_PageSizeBytes);
-          //write data and fix x,y,xRes and yRes offset in the parameters
-          unsigned int l_numInstrs = m_program.getNumInstrs();
-          uint8_t *l_addr = l_baseInstrAddr;
-          long l_ofPos = l_of.tellp();
-          for (unsigned int i=0; i<l_numInstrs; ++i) {
-            Instr l_instr;
-            memcpy((uint8_t*) &l_instr, l_addr, t_InstrSizeBytes);
-            uint8_t *l_paramAddr = l_baseInstrAddr + l_instr.m_paramOff;
-            ParamB1Type l_param;
-            memcpy((uint8_t*) &l_param, l_paramAddr, ParamB1Bytes);
-            uint32_t l_n = l_param.m_n;
-            size_t l_vecBytes = l_n * sizeof(t_DataType);
-            uint8_t l_zeroConst = 0;
-            unsigned int l_paddingBytes = (t_PageSizeBytes - (l_vecBytes%t_PageSizeBytes)) % t_PageSizeBytes;
-            //write x vector
-            if (l_param.m_xOff != 0) {
-              uint8_t* l_xAddr = reinterpret_cast<uint8_t*>(l_param.m_xOff);
-              l_param.m_xOff = l_ofPos;
-              l_of.write((char*)l_xAddr, l_vecBytes);
-              for (unsigned int b=0; b<l_paddingBytes; ++b) {
-                l_of.write((char*)&l_zeroConst, 1);
-              }
-              l_ofPos = l_of.tellp();
-            }
-            //write y vector
-            if (l_param.m_yOff != 0) {
-              uint8_t* l_yAddr = reinterpret_cast<uint8_t*>(l_param.m_yOff);
-              l_param.m_yOff = l_ofPos;
-              l_of.write((char*)l_yAddr, l_vecBytes);
-              for (unsigned int b=0; b<l_paddingBytes; ++b) {
-                l_of.write((char*)&l_zeroConst, 1);
-              }
-              l_ofPos = l_of.tellp();
-            }
-            //write xRes vector 
-            if (l_param.m_xResOff != 0) {
-              uint8_t* l_xResAddr = reinterpret_cast<uint8_t*>(l_param.m_xResOff);
-              l_param.m_xResOff = l_ofPos;
-              l_of.write((char*)l_xResAddr, l_vecBytes);
-              for (unsigned int b=0; b<l_paddingBytes; ++b) {
-                l_of.write((char*)&l_zeroConst, 1);
-              }
-              l_ofPos = l_of.tellp();
-            }
-            //write yRes vector
-            if (l_param.m_yResOff != 0) {
-              uint8_t* l_yResAddr = reinterpret_cast<uint8_t*>(l_param.m_yResOff);
-              l_param.m_yResOff = l_ofPos;
-              l_of.write((char*)l_yResAddr, l_vecBytes);
-              for (unsigned int b=0; b<l_paddingBytes; ++b) {
-                l_of.write((char*)&l_zeroConst, 1);
-              }
-              l_ofPos = l_of.tellp();
-            }
-            size_t l_paramOff = l_instr.m_paramOff + 4 + sizeof(t_DataType);
-            if (l_param.m_xOff !=0) {
-              l_of.seekp(l_paramOff);
-              l_of.write((char*) &(l_param.m_xOff), 8);
-            }
-            l_paramOff += 8;
-            if (l_param.m_yOff !=0) {
-              l_of.seekp(l_paramOff);
-              l_of.write((char*) &(l_param.m_yOff), 8);
-            }
-            l_paramOff += 8;
-            if (l_param.m_xResOff !=0) {
-              l_of.seekp(l_paramOff);
-              l_of.write((char*) &(l_param.m_xResOff), 8);
-            }
-            l_paramOff += 8;
-            if (l_param.m_yResOff !=0) {
-              l_of.seekp(l_paramOff);
-              l_of.write((char*) &(l_param.m_yResOff), 8);
-            }
-            l_of.seekp(l_ofPos);
-            l_addr += t_InstrSizeBytes;
-          }
-
-          l_of.close();
-        }
-        else {
-          l_status = XFBLAS_STATUS_INVALID_FILE;
-        }
+        xfblasStatus_t l_status=m_program.write2BinFile(p_fileName);
         return (l_status);
-      }
-      void clearProgram() {
-        m_program.clear();
       }
 
       xfblasStatus_t readFromBinFile(string p_fileName) {
-        xfblasStatus_t l_status=XFBLAS_STATUS_INVALID_FILE;
-        ifstream l_if(p_fileName.c_str(), ios::binary);
-        if (l_if.is_open()) {
-          size_t l_fileBytes = getFileSize(p_fileName);
-          cout << "INFO: loading " << p_fileName << " of size " << l_fileBytes <<endl;
-          size_t l_fileSizeInPages = l_fileBytes / t_PageSizeBytes;
-          assert(l_fileBytes % t_PageSizeBytes == 0);
-          m_program.clear();
-          m_program.allocPages(l_fileSizeInPages);
-          l_if.read((char*) (m_program.getBaseInstrAddr()), l_fileBytes);
-          if (l_if) { 
-            cout << "INFO: loaded " << l_fileBytes << " bytes from " << p_fileName << endl;
-            l_status = XFBLAS_STATUS_SUCCESS;
-          }
-          else {
-            m_program.clear();
-            cout << "ERROR: loaded only " << l_if.gcount() << " bytes from " << p_fileName << endl;
-          }
-          l_if.close();
-        }
-        else {
-          cout << "ERROR: failed to open file " << p_fileName << endl;
-        }
+        xfblasStatus_t l_status=m_program.readFromBinFile(p_fileName);
         return (l_status);
       }
       void decodeB1Instr(
@@ -261,114 +142,33 @@ namespace blas {
         t_DataType* &p_yRes,
         t_ResDataType &p_resScalar
       ) {
-        uint8_t* l_baseAddr = m_program.getBaseInstrAddr();
-        uint8_t* l_paramAddr = l_baseAddr + p_instr.m_paramOff;
-        ParamB1Type l_param;
-        memcpy((uint8_t*)&l_param, l_paramAddr, ParamB1Bytes);
-        p_n = l_param.m_n;
-        p_alpha = l_param.m_alpha;
-        p_resScalar = l_param.m_resScalar;
-        p_x = (l_param.m_xOff!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_xOff): nullptr;
-        p_y = (l_param.m_yOff!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_yOff): nullptr;
-        p_xRes = (l_param.m_xResOff!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_xResOff): nullptr;
-        p_yRes = (l_param.m_yResOff!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_yResOff): nullptr; 
+        m_program.decodeB1Instr(p_instr, p_n, p_alpha, p_x, p_y, p_xRes, p_yRes, p_resScalar);
       }
       
       xfblasStatus_t readInstrs(
         string p_fileName,
         vector<Instr> &p_instrs
       ) {
-        xfblasStatus_t l_status = readFromBinFile(p_fileName);
-        assert(l_status == XFBLAS_STATUS_SUCCESS);
-          
-        uint8_t* l_baseInstrAddr = m_program.getBaseInstrAddr();
-        uint8_t* l_addr = l_baseInstrAddr;
-        Instr l_instr;
-        memcpy((uint8_t*) &l_instr, l_addr, t_InstrSizeBytes);
-        while (l_instr.m_opCode != NULL_OP) {
-          p_instrs.push_back(l_instr);
-          l_addr += t_InstrSizeBytes;
-          memcpy((uint8_t*) &l_instr, l_addr, t_InstrSizeBytes);
-        }
-        l_status = XFBLAS_STATUS_SUCCESS;
+        xfblasStatus_t l_status = m_program.readInstrsFromBinFile(p_fileName, p_instrs);
         return(l_status);
       }
 
-      void printB1Param(ParamB1Type &p_param, uint8_t* p_baseAddr){
-        cout <<"  n=" << p_param.m_n << "  alpha=" << p_param.m_alpha << "  resScalar=" << p_param.m_resScalar << endl;
-        uint32_t l_n = p_param.m_n;
-        size_t l_dataBytes = l_n * sizeof(t_DataType);
-        vector<t_DataType> l_data;
-        l_data.resize(l_n);
-        if (p_param.m_xOff !=0) {
-          cout << "  x:" << endl;
-          memcpy((uint8_t*)&(l_data[0]), reinterpret_cast<uint8_t*>(p_baseAddr+p_param.m_xOff), l_dataBytes);
-          for (unsigned int i=0; i<l_n; ++i) {
-            cout << l_data[i] << endl;
-          }
-        }
-        if (p_param.m_yOff !=0) {
-          cout << "  y:" << endl;
-          memcpy((uint8_t*)&(l_data[0]), reinterpret_cast<uint8_t*>(p_baseAddr+p_param.m_yOff), l_dataBytes);
-          for (unsigned int i=0; i<l_n; ++i) {
-            cout << l_data[i] << endl;
-          }
-        }
-        if (p_param.m_xResOff !=0) {
-          cout << "  xRes:" << endl;
-          memcpy((uint8_t*)&(l_data[0]), reinterpret_cast<uint8_t*>(p_baseAddr+p_param.m_xResOff), l_dataBytes);
-          for (unsigned int i=0; i<l_n; ++i) {
-            cout << l_data[i] << endl;
-          }
-        }
-        if (p_param.m_yResOff !=0) {
-          cout << "  yRes:" << endl;
-          memcpy((uint8_t*)&(l_data[0]), reinterpret_cast<uint8_t*>(p_baseAddr+p_param.m_yResOff), l_dataBytes);
-          for (unsigned int i=0; i<l_n; ++i) {
-            cout << l_data[i] << endl;
-          }
-        }
-      }
       void printProgram() {
-        uint8_t* l_baseInstrAddr = m_program.getBaseInstrAddr();
-        uint8_t* l_addr = l_baseInstrAddr;
-        Instr l_instr;
-        memcpy((uint8_t*) &l_instr, l_addr, t_InstrSizeBytes);
-        while (l_instr.m_opCode != NULL_OP) {
-          uint8_t* l_paramAddr = l_baseInstrAddr + l_instr.m_paramOff;
-          string l_opName;
-          xfblasStatus_t l_status = m_opFinder.getOpName(l_instr.m_opCode, l_opName);
-          assert(l_status == XFBLAS_STATUS_SUCCESS);
-          cout << "Operation: " << l_opName << endl;
-          if (l_instr.m_opClass == B1_OP_CLASS) { //BLAS L1 function parameters
-            ParamB1Type l_param;
-            uint8_t* l_paramAddr = l_baseInstrAddr + l_instr.m_paramOff;
-            memcpy((uint8_t*)&l_param, l_paramAddr, ParamB1Bytes);
-            printB1Param(l_param, l_baseInstrAddr);
-          }
-          l_addr += t_InstrSizeBytes; 
-          memcpy((uint8_t*) &l_instr, l_addr, t_InstrSizeBytes);
-        }
+        cout << m_program;
       }
     private:
       Program<
         t_HandleType,
+        t_DataType,
+        t_ResDataType,
         t_MemWidthBytes,
         t_InstrSizeBytes,
         t_PageSizeBytes,
         t_MaxNumInstrs,
         t_InstrPageIdx,
         t_ParamPageIdx,
-        t_StatsPageIdx,
-        t_DataPageIdx
+        t_StatsPageIdx
       > m_program;
-
-      FindOpCodeB1 m_opFinder;
-    private:
-      ifstream::pos_type getFileSize(string p_fileName) {
-        ifstream in(p_fileName.c_str(), ifstream::ate | ifstream::binary);
-        return in.tellg();
-      }
   };
     
 } //end namespace blas

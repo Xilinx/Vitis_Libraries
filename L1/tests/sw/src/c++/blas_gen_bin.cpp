@@ -78,14 +78,12 @@ int main(int argc, char** argv)
     while (l_argIdx < argc) {
       string l_opName(argv[l_argIdx++]);
       uint32_t l_n = stoi(argv[l_argIdx++]);
-      double l_alphaDouble = stod(argv[l_argIdx++]);
-      BLAS_dataType l_alpha = (BLAS_dataType)l_alphaDouble;
+      BLAS_dataType l_alpha = static_cast<BLAS_dataType>(atof(argv[l_argIdx++]));
       string l_handleX(argv[l_argIdx++]);
       string l_handleY(argv[l_argIdx++]);
       string l_handleXres(argv[l_argIdx++]);
       string l_handleYres(argv[l_argIdx++]);
-      double l_resDouble = stod(argv[l_argIdx++]);
-      BLAS_dataType l_resScalar = (BLAS_dataType) l_resDouble;
+      BLAS_resDataType l_resScalar = static_cast<BLAS_resDataType>(atof(argv[l_argIdx++]));
       uint8_t* l_xPtr=nullptr;
       uint8_t* l_yPtr=nullptr;
       uint8_t* l_xResPtr=nullptr;
@@ -98,7 +96,7 @@ int main(int argc, char** argv)
       if (l_handleX != "NULL") {
         l_x.resize(l_xIdx+l_n);
         for (unsigned int d=0; d<l_n; ++d) {
-          l_x[l_xIdx+d] = (BLAS_dataType)d;
+          l_x[l_xIdx+d] = (BLAS_dataType)d/10;
         }
         l_xPtr = reinterpret_cast<uint8_t*>(&(l_x[l_xIdx]));
       }
@@ -131,13 +129,13 @@ int main(int argc, char** argv)
     xfblasStatus_t l_status = l_gen.write2BinFile(l_binFile);
     assert(l_status == XFBLAS_STATUS_SUCCESS);
   } else if (l_read) {
-    /*xfblasStatus_t l_status = l_gen.readFromBinFile(l_binFile);
+    xfblasStatus_t l_status = l_gen.readFromBinFile(l_binFile);
     assert(l_status == XFBLAS_STATUS_SUCCESS);
-    l_gen.printProgram();*/
-    vector<Instr> l_instrs;
+    l_gen.printProgram();
+    /*vector<Instr> l_instrs;
     uint32_t l_n;
     BLAS_dataType l_alpha;
-    BLAS_dataType l_resGolden;
+    BLAS_resDataType l_resGolden;
     BLAS_dataType *l_x, *l_y, *l_xRes, *l_yRes;
     BLAS_dataType l_xVal=0;
     BLAS_dataType l_yVal=0;
@@ -180,7 +178,7 @@ int main(int argc, char** argv)
         }
       }
     }
-  } else {
+  */} else {
     assert(0); // Unknown user command
   }
   

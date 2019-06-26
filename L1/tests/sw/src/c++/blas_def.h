@@ -44,8 +44,7 @@ typedef GenBin<
   BLAS_maxNumInstrs,
   BLAS_instrPageIdx,
   BLAS_paramPageIdx,
-  BLAS_statsPageIdx,
-  BLAS_dataPageIdx
+  BLAS_statsPageIdx
 > GenBinType;
 
 } //end namespace blas

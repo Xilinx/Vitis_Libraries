@@ -36,7 +36,8 @@ typedef enum {
     XFBLAS_STATUS_NOT_PADDED,       //5
     XFBLAS_STATUS_MEM_ALLOCATED,    //6
     XFBLAS_STATUS_INVALID_OP,       //7
-    XFBLAS_STATUS_INVALID_FILE      //8
+    XFBLAS_STATUS_INVALID_FILE,     //8
+    XFBLAS_STATUS_INVALID_PROGRAM   //9
 } xfblasStatus_t;
   
 
