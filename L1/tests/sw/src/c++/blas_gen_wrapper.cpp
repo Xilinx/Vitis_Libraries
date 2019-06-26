@@ -54,7 +54,4 @@ extern "C" {
   void printProgram(GenBinType* genBin) {
     genBin -> printProgram();
   }
-  void clearProgram(GenBinType* genBin) {
-    genBin -> clearProgram();
-  }
 }

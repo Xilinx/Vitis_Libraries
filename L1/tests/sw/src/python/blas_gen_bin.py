@@ -64,11 +64,6 @@ class BLAS_GEN:
     func.argtypes=[ct.c_void_p]
     func(self.obj)
 
-  def clearProgram(self):
-    func=self.lib.clearProgram 
-    func.argtypes=[ct.c_void_p]
-    func(self.obj)
-
   def __del__(self):
     func=self.lib.genBinDel
     func.argtypes=[ct.c_void_p]

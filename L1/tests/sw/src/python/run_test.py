@@ -21,6 +21,7 @@ from blas_gen_bin import BLAS_GEN
 from hls import HLS
 from makefile import Makefile
 import pdb
+from operation import BLAS_L1
 
 class RunTest:
   def __init__(self):
@@ -73,39 +74,8 @@ class RunTest:
     if not os.path.exists(self.datapath):
       os.mkdir(self.datapath)
 
-  def dataGen(self, size, dataType):
-    a = np.random.rand(size) * (self.maxValue -self.minValue) + self.minValue
-    a = a.astype(dataType)
-    return a
-
-
-  def compute(self, op, alpha, x, y):
-    xr = None
-    yr = None
-    result = -1
-    if op =='amax':
-      result = np.argmax(np.abs(x))
-    elif op=='amin':
-      result = np.argmin(np.abs(x))
-    elif op=='asum':
-      result = np.sum(np.abs(x))
-    elif op=='axpy':
-      yr = alpha * x + y
-    elif op=='copy':
-      result = x
-    elif op=='dot':
-      result = np.dot(x, y)
-    elif op=='scal':
-      xr = alpha * x
-    elif op=='swap':
-      xr, yr = y, x
-    else:
-      print("ERROR: Operation '%s' is not supported."%op)
-      sys.exit
-    return xr, yr, result
-
   def runTest(self, libpath, makefile):
-    make = Makefile(makefile)
+    make = Makefile(makefile, libpath)
     dtLen =  len(self.dtList)
     for index in range(dtLen):
       dt = self.dtList[index][0]
@@ -117,25 +87,24 @@ class RunTest:
 
       c_type=self.typeDict[dtype]
       r_type=self.typeDict[rtype]
-      if  make.make(libpath, c_type, r_type)!= 0:
+      if  make.make(c_type, r_type)!= 0:
         print("ERROR: make shared library failure.")
         sys.exit
       lib = C.cdll.LoadLibrary(libpath)
       for j in range(self.numSim): 
+        #pdb.set_trace()
         vectorSize = np.random.randint(self.minSize, self.maxSize)
-        xdata = self.dataGen(vectorSize, dtype)
-        ydata = self.dataGen(vectorSize, dtype)
-        alpha = self.dataGen(1, dtype)
-        xr, yr, r = self.compute(self.op, alpha, xdata, ydata)
+        op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
+        alpha, xdata, ydata, xr, yr, r = op.compute()
         binFile =os.path.join(self.datapath,
-          'TestBin_v%d_d%s%s_r%s%d.bin'%(vectorSize,dt,dw, rt,rw))
+          'TestBin_v%d_d%s%s_r%s%d.bin'%(vectorSize,dt,dw,rt,rw))
         blas_gen=BLAS_GEN(lib)
-        blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr, r)
+        blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
+            r.astype(rtype))
         blas_gen.write2BinFile(binFile)
         print("write file sucessfully.")
         blas_read=BLAS_GEN(lib)
         blas_read.readFromBinFile(binFile)
-        #pdb.set_trace()
         blas_read.printProgram()
 
   #     opArgs=r'''op %s dataType %s dataWidth %d indexType int size %d \
