@@ -68,9 +68,26 @@ bool compareGemm(float* a, float* b, float* c, float p_TolRel=1e-3, float p_TolA
 }
 
 int main(int argc, char **argv) {
+  
+  if (argc < 3){
+    cerr << " usage: \n"
+         << " gemx_test_float.exe gemx.xclbin config_info.dat log.txt\n"
+         << " gemx_test_float.exe gemx.xclbin config_info.dat\n";
+    return EXIT_FAILURE; 
+  }
   unsigned int l_argIdx = 1;
   string l_xclbinFile(argv[l_argIdx++]);
   string l_configFile(argv[l_argIdx++]);
+  string l_logFile;
+  
+  if (argc == 3){
+    ofstream logFile("log.txt");
+    logFile.close();
+    l_logFile = "log.txt";
+  } else {
+    l_logFile = argv[l_argIdx++];
+  }
+  
   int i, j; // i-row index ,j- column index
   float * a, * b, * c;
   a = ( float *) malloc (m*k* sizeof ( float )); // host memory for a
@@ -97,34 +114,34 @@ int main(int argc, char **argv) {
   } 
 
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
-  xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, XFBLAS_ENGINE_GEMM);
+  xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Create Handle failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
-  status = xfblasMalloc(m,k,sizeof(*a),a,k);
+  status = xfblasMallocRestricted(m,k,sizeof(*a),a,k);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
   
-  status = xfblasMalloc(k,n,sizeof(*b),b,n);
+  status = xfblasMallocRestricted(k,n,sizeof(*b),b,n);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix B failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
-  status = xfblasMalloc(m,n,sizeof(*c),c,n);
+  status = xfblasMallocRestricted(m,n,sizeof(*c),c,n);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix C failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
   
-  status = xfblasSetMatrix(a);
-  status = xfblasSetMatrix(b);
-  status = xfblasSetMatrix(c);
+  status = xfblasSetMatrixRestricted(a);
+  status = xfblasSetMatrixRestricted(b);
+  status = xfblasSetMatrixRestricted(c);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Set Matrix failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
@@ -137,7 +154,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGetMatrix(c);
+  status = xfblasGetMatrixRestricted(c);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 

@@ -23,9 +23,7 @@ SW_API_DIR = ../../include/sw
 CXX = g++
 HOST_CXXFLAGS = -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-unused-parameter -Wno-unused-variable
 HOST_INCLUDE = -I$(XILINX_XRT)/include -I$(SW_API_DIR)
-HOST_LIB = -L$(XILINX_XRT)/lib -lz -lxilinxopencl -lstdc++ -lrt -pthread
-
-XCL2_SRC = $(SW_API_DIR)/xf_blas/xcl2/xcl2.cpp
+HOST_LIB = -L$(XILINX_XRT)/lib -Wl,-rpath-link,$XILINX_XRT/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
 
 ######################################################
 
@@ -37,11 +35,16 @@ short: gemm_test.exe
 
 float: gemm_test_float.exe
 
+common: gemm_common_test.exe
+
 clean: 
 	rm -rf *.exe
 
-gemm_test.exe: gemm_test.cpp $(XCL2_SRC)
+gemm_test.exe: gemm_test.cpp
 	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -o $@ $^ $(HOST_LIB)
 
-gemm_test_float.exe: gemm_test_float.cpp $(XCL2_SRC)
+gemm_test_float.exe: gemm_test_float.cpp
+	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -o $@ $^ $(HOST_LIB)
+	
+gemm_common_test.exe: gemm_common_test.cpp
 	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -o $@ $^ $(HOST_LIB)
