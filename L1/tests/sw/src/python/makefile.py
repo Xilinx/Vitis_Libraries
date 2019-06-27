@@ -22,9 +22,10 @@ class Makefile:
     self.makefile = makefile
     self.target = target
 
-  def make(self, dtype, rtype):
+  def make(self, dtype, rtype, rebuild = True):
 
-    os.remove(self.target)
+    if os.path.exists(self.target) and rebuild:
+      os.remove(self.target)
     os.environ['BLAS_dataType']= "'%s'"%dtype
     os.environ['BLAS_resDataType']="'%s'"%rtype
 
