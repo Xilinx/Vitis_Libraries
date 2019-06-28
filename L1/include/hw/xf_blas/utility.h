@@ -49,20 +49,20 @@ constexpr size_t mylog2(size_t n) {
 
 template<typename t_DataType, 
   unsigned int t_Entries, 
-  typename t_IndexType = unsigned int> 
+  typename t_SumType = t_DataType>
   class BinarySum{
     public:
-      static const t_DataType sum(t_DataType p_x[t_Entries]){
+      static const t_SumType sum(t_DataType p_x[t_Entries]){
         const unsigned int l_halfEntries = t_Entries >> 1;
-        return BinarySum<t_DataType, l_halfEntries, t_IndexType>::sum(p_x) +
-          BinarySum<t_DataType, l_halfEntries, t_IndexType>::sum(p_x + l_halfEntries);
+        return BinarySum<t_DataType, l_halfEntries, t_SumType>::sum(p_x) +
+          BinarySum<t_DataType, l_halfEntries, t_SumType>::sum(p_x + l_halfEntries);
       }
   };
 template<typename t_DataType, 
-  typename t_IndexType> 
-  class BinarySum<t_DataType, 1, t_IndexType>{
+  typename t_SumType> 
+  class BinarySum<t_DataType, 1, t_SumType>{
     public:
-      static const t_DataType sum(t_DataType p_x[1]){
+      static const t_SumType sum(t_DataType p_x[1]){
         return p_x[0];
       }
   };

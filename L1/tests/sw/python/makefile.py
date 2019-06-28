@@ -18,9 +18,10 @@ import numpy as np
 import pdb
 
 class Makefile:
-  def __init__(self, makefile, target):
+  def __init__(self, makefile, libpath):
     self.makefile = makefile
-    self.target = target
+    self.libpath = libpath
+    self.target = r'out_test/blas_gen_wrapper.so'
 
   def make(self, dtype, rtype, rebuild = True):
 
@@ -31,5 +32,9 @@ class Makefile:
 
     commandLine =r'make -f %s %s'%(self.makefile, self.target)
     args = shlex.split(commandLine)
-    exitCode = subprocess.call(args)
-    return exitCode
+    subprocess.call(args)
+    if os.path.exists(self.target):
+      os.rename(self.target, self.libpath)
+      return True
+    else:
+      return False

@@ -23,6 +23,12 @@ from makefile import Makefile
 import pdb
 from operation import BLAS_L1
 
+def Format(x):
+  f_dic = {0:'th', 1:'st', 2:'nd',3:'rd'}
+  k = x % 10
+  if k>=4:
+    k=0
+  return "%d%s"%(x, f_dic[k])
 class RunTest:
   def __init__(self):
     self.profile = None 
@@ -56,7 +62,7 @@ class RunTest:
     self.rtList = self.profile['retTypes']
 
 
-    self.parEntries = self.profile['parEntries']
+    self.logParEntries = self.profile['logParEntries']
     
     self.minValue = self.profile['valueRange'][0]
     self.maxValue = self.profile['valueRange'][1]
@@ -66,16 +72,17 @@ class RunTest:
     self.minSize = self.profile['vectorSizes'][0]
     self.maxSize = self.profile['vectorSizes'][1]
 
-    self.parallel = self.profile['parEntries']
-
-    self.hls = HLS(self.profile['tclPath'], self.profile['b_csim'],
+    self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
         self.profile['b_synth'], self.profile['b_cosim'])
-    self.datapath = self.profile['dataPath']
+    self.libpath = r'out_test/libs'
+    if not os.path.exists(self.libpath):
+      os.makedirs(self.libpath)
+    self.datapath = r'out_test/data' 
     if not os.path.exists(self.datapath):
-      os.mkdir(self.datapath)
+      os.makedirs(self.datapath)
+    self.vs=list()
 
-  def runTest(self, libpath, makefile):
-    make = Makefile(makefile, libpath)
+  def runTest(self,makefile):
     dtLen =  len(self.dtList)
     for index in range(dtLen):
       dt = self.dtList[index][0]
@@ -87,13 +94,22 @@ class RunTest:
 
       c_type=self.typeDict[dtype]
       r_type=self.typeDict[rtype]
-      if  make.make(c_type, r_type)!= 0:
-        print("ERROR: make shared library failure.")
-        sys.exit
+      libpath =os.path.join(self.libpath,
+          'blas_gen_d%s%s_r%s%d.so'%(dt,dw,rt,rw))
+      if not os.path.exists(libpath):
+        make = Makefile(makefile, libpath)
+        if not make.make(c_type, r_type):
+          print("ERROR: make shared library failure.")
+          sys.exit
       lib = C.cdll.LoadLibrary(libpath)
+      print("Start to test operation %s under DataType %s and return DataType %s"%(self.op, c_type, r_type))
       for j in range(self.numSim): 
-        #pdb.set_trace()
-        vectorSize = np.random.randint(self.minSize, self.maxSize)
+        while(True):
+          vectorSize = (np.random.randint(self.minSize, self.maxSize)>> self.logParEntries)<< self.logParEntries
+          if not vectorSize in self.vs:
+            self.vs.append(vectorSize)
+            break
+
         op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
         alpha, xdata, ydata, xr, yr, r = op.compute()
         binFile =os.path.join(self.datapath,
@@ -102,25 +118,36 @@ class RunTest:
         blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
             r.astype(rtype))
         blas_gen.write2BinFile(binFile)
-        print("write file sucessfully.")
-        blas_read=BLAS_GEN(lib)
-        blas_read.readFromBinFile(binFile)
-        blas_read.printProgram()
+        print("Data file %s has been generated sucessfully."%binFile)
+        #blas_read=BLAS_GEN(lib)
+        #blas_read.readFromBinFile(binFile)
+        #blas_read.printProgram()
+        #blas_gen.printProgram()
+        
+        runArgs=os.path.abspath(binFile)
+        logfile=os.path.join(self.datapath, r'logfile_v%d_d%s%s_r%s%d.log'%(vectorSize,dt,dw,rt,rw))
 
-  #     opArgs=r'''op %s dataType %s dataWidth %d indexType int size %d \
-  #entriesInParallel %d'''%(op, dt, dtWidth, vectorSize, self.parallel)
-  #      runArgs=os.path.abspath(binFile)
-  #      result = self.hls.execution(opArgs, runArgs)
-                  
+        print("Starting %s test."%Format(j+1))
+        self.hls.generateTCL(self.op, c_type, dw, r_type, self.logParEntries)
+        self.hls.execution(runArgs, logfile)
+        result = self.hls.checkLog(logfile)
 
-def main(lib, profile):
+        if result:
+          print("%s test passed."%Format(j+1))
+        else:
+          print("Operation %s failed the test with input %s, please check log file %s"%(self.op, 
+                binFile, os.path.abspath(logfile)))
+          return
+    print("All tests are passed.")
+
+def main(profile, makefile):
   runTest = RunTest()
   runTest.parseProfile(profile)
-  runTest.runTest(lib, 'Makefile')
+  runTest.runTest(makefile)
   
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('p', type=str, metavar='Profile', help='path to the profile file')
   args = parser.parse_args()
-  libpath=r'out_test/blas_gen_wrapper.so'
-  main(libpath, args.p)
+  makefile=r'./Makefile'
+  main(args.p, makefile)

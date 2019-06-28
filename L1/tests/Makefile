@@ -27,7 +27,7 @@ BLAS_dataPageIdx		= 3
 BLAS_maxNumInstrs		= 64
 
 ifndef BLAS_dataType
-BLAS_dataType				= float
+BLAS_dataType				= int
 endif
 ifndef BLAS_resDataType
 BLAS_resDataType		= int
