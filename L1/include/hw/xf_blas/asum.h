@@ -59,7 +59,7 @@ namespace blas {
               l_input[j]=hls::abs(l_data);
             }
             t_DataType l_sum;
-            l_sum = BinarySum<t_DataType, l_ParEntries, t_IndexType>::sum(l_input);
+            l_sum = BinarySum<t_DataType, l_ParEntries>::sum(l_input);
             p_data.write(l_sum);
           }
         }
@@ -105,7 +105,7 @@ namespace blas {
               #pragma HLS UNROLL
               l_input[j]=p_pad.read();
             }
-            l_finalSum += BinarySum<t_DataType, l_Delays, t_IndexType>::sum(l_input);
+            l_finalSum += BinarySum<t_DataType, l_Delays>::sum(l_input);
           }
           p_sum = l_finalSum;
         }
