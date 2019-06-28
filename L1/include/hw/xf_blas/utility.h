@@ -29,6 +29,7 @@
 #include <iomanip>
 #include <iostream>
 #include "hls_math.h"
+#include "hls_stream.h"
 #include "ap_int.h"
 #include "ap_shift_reg.h"
 
@@ -357,6 +358,57 @@ class WideConv {
         return(l_dst);
       }
 };
+
+template<
+  typename t_DataType,
+  unsigned int t_DataWidth,
+  unsigned int t_ParEntries>
+void readVec2Stream(
+  t_DataType *p_in,
+  unsigned int p_n,
+  hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth > > &p_out
+) {
+//#pragma HLS DATA_PACK variable=p_out
+  #ifndef __SYNTHESIS__
+    assert ((p_n % t_ParEntries) == 0);
+  #endif
+  unsigned int l_parBlocks = p_n / t_ParEntries;
+  for (unsigned int i=0; i<l_parBlocks; ++i) {
+  #pragma HLS PIPELINE
+    BitConv<t_DataType> l_bitConv;
+    WideType<t_DataType, t_ParEntries, t_DataWidth > l_val;
+    for (unsigned int j=0; j<t_ParEntries; ++j) {
+      l_val[j] = p_in[i*t_ParEntries + j];
+    }
+    p_out.write(l_val);
+  }
+} //end readVec2Stream
+
+template<
+  typename t_DataType,
+  unsigned int t_DataWidth,
+  unsigned int t_ParEntries>
+void writeStream2Vec(
+  hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth > > &p_in,
+  unsigned int p_n,
+  t_DataType *p_out
+) {
+//#pragma HLS DATA_PACK variable=p_in
+  #ifndef __SYNTHESIS__
+    assert ((p_n % t_ParEntries) == 0);
+  #endif
+  unsigned int l_parBlocks = p_n / t_ParEntries;
+  for (unsigned int i=0; i<l_parBlocks; ++i) {
+  #pragma HLS PIPELINE
+    BitConv<t_DataType> l_bitConv;
+    WideType<t_DataType, t_ParEntries, t_DataWidth > l_val;
+    l_val = p_in.read();
+    for (unsigned int j=0; j<t_ParEntries; ++j) {
+      p_out[i*t_ParEntries + j]=l_val[j];
+    }
+  }
+} //end writeStream2Vec
+
 }
 }
 }

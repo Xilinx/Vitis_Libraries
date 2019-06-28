@@ -1,8 +1,8 @@
 ####################
 # A example to build and debug vivado_hls project
-# vivado_hls -f asum/build/run.tcl "runCsim 1 runRTLsynth 0 runRTLsim 0 part vu9p dataType double dataWdith 64 indexType int size 8192 3 parEntries 4 runArgs 'absolute_path_to_vector_file/vec_0.csv 8192'"
+# vivado_hls -f ./build/run-hls.tcl "runCsim 1 runRTLsynth 0 runRTLsim 0 part vu9p dataType double dataWdith 64 resDataType int size 8192 3 logParEntries 4 opName amax runArgs '../out_test/data/app.bin'"
 # navigate to csim/build and run
-# gdb --args ./csime.exe path_to_diagonal_matrix_file/A1.csv 8192
+# gdb --args ./csime.exe path_to_app_bin/app.bin 8192
 ####################
 set pwd [pwd]
 set pid [pid]
@@ -16,17 +16,23 @@ set BOOST_INCLUDE "$VIVADO_PATH/tps/boost_1_64_0"
 set BOOST_LIB "$VIVADO_PATH/lib/lnx64.o"
 
 array set opt {
-  op	  asum
   part    vu9p
-  dataType int 
-  indexType int 
-  size  8192
+  dataType int
+  resDataType int
   dataWidth 32
-  parEntries 4
+  logParEntries 4
+  pageSizeBytes 4096
+  memWidthBytes 64
+  instrSizeBytes 8
+  maxNumInstrs 16
+  instrPageIdx 0
+  paramPageIdx 1
+  statsPageIdx 2
+  opName "amax"
   runCsim     1
   runRTLsynth   0
   runRTLsim     0
-  runArgs "$pwd/asum/data/diag_3.csv 8192"
+  runArgs "$pwd/../out_test/data/app.bin"
 }
 
 foreach arg $::argv {
@@ -49,14 +55,14 @@ foreach o [lsort [array names opt]] {
   }
 }
 
-set CFLAGS_K "-I$pwd/../include/hw -I$pwd/../include/hw/xf_blas -g -O0 $OPT_FLAGS"
-set CFLAGS_H "$CFLAGS_K -I$pwd -I$BOOST_INCLUDE"
+set CFLAGS_K "-I$pwd/../include/hw -I$pwd/../include/hw/xf_blas  -g -O0 $OPT_FLAGS"
+set CFLAGS_H "$CFLAGS_K -I$pwd -I$pwd/sw/include -I$pwd/../.. -I$pwd/hw -I$BOOST_INCLUDE"
 
 set proj_dir [format prj_hls_%s  $opt(part) ]
 open_project $proj_dir -reset
-set_top UUT_Top 
-add_files $pwd/asum/asum_top.cpp -cflags "$CFLAGS_K"
-add_files -tb $pwd/asum/test.cpp -cflags "$CFLAGS_H"
+set_top uut_top 
+add_files $pwd/hw/$opt(opName)/uut_top.cpp -cflags "$CFLAGS_K"
+add_files -tb $pwd/sw/src/test.cpp -cflags "$CFLAGS_H"
 open_solution sol -reset
 config_compile -ignore_long_run_time
 
