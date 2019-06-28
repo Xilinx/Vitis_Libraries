@@ -1,11 +1,11 @@
 {
   "b_csim": true,
-  "b_synth": true,
-  "b_cosim": true,
+  "b_synth": false,
+  "b_cosim": false,
   "dataTypes": [
     ["float", 32],
-    ["uint", 16],
-    ["float", 64]
+    ["uint", 32],
+    ["int", 32]
   ],
   "retTypes": [
     ["int", 32],
@@ -15,8 +15,8 @@
   "op": "amax",
   "logParEntries": 2,
   "vectorSizes": [
-    8,
-    12
+    4,
+    128
   ],
   "valueRange": [
     -1024,
