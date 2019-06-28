@@ -56,7 +56,7 @@ class RunTest:
     self.rtList = self.profile['retTypes']
 
 
-    self.parEntries = self.profile['parEntries']
+    self.logParEntries = self.profile['logParEntries']
     
     self.minValue = self.profile['valueRange'][0]
     self.maxValue = self.profile['valueRange'][1]
@@ -66,11 +66,9 @@ class RunTest:
     self.minSize = self.profile['vectorSizes'][0]
     self.maxSize = self.profile['vectorSizes'][1]
 
-    self.parallel = self.profile['parEntries']
-
-    self.hls = HLS(self.profile['tclPath'], self.profile['b_csim'],
+    self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
         self.profile['b_synth'], self.profile['b_cosim'])
-    self.datapath = self.profile['dataPath']
+    self.datapath = r'out_test/data' #self.profile['dataPath']
     if not os.path.exists(self.datapath):
       os.mkdir(self.datapath)
 
@@ -93,7 +91,7 @@ class RunTest:
       lib = C.cdll.LoadLibrary(libpath)
       for j in range(self.numSim): 
         #pdb.set_trace()
-        vectorSize = np.random.randint(self.minSize, self.maxSize)
+        vectorSize = (np.random.randint(self.minSize, self.maxSize)>> self.logParEntries)<< self.logParEntries
         op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
         alpha, xdata, ydata, xr, yr, r = op.compute()
         binFile =os.path.join(self.datapath,
@@ -106,11 +104,13 @@ class RunTest:
         blas_read=BLAS_GEN(lib)
         blas_read.readFromBinFile(binFile)
         blas_read.printProgram()
+        
+        opArgs=r'op %s dataType %s dataWidth %d resDataType %s logParEntries %d'%(self.op, c_type, dw, r_type, self.logParEntries)
+        runArgs=os.path.abspath(binFile)
+        result = self.hls.execution(opArgs, runArgs)
 
-  #     opArgs=r'''op %s dataType %s dataWidth %d indexType int size %d \
-  #entriesInParallel %d'''%(op, dt, dtWidth, vectorSize, self.parallel)
-  #      runArgs=os.path.abspath(binFile)
-  #      result = self.hls.execution(opArgs, runArgs)
+  def generateTCL(self):
+    pass
                   
 
 def main(lib, profile):

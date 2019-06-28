@@ -1,6 +1,4 @@
 {
-  "tclPath": "./run.tcl",
-  "dataPath": "./data/",
   "b_csim": true,
   "b_synth": true,
   "b_cosim": true,
@@ -15,7 +13,7 @@
     ["int", 32]
   ],
   "op": "amax",
-  "parEntries": 4,
+  "logParEntries": 2,
   "vectorSizes": [
     8,
     12
