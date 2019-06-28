@@ -15,6 +15,12 @@ set GCC_PATH "$VIVADO_PATH/tps/lnx64"
 set BOOST_INCLUDE "$VIVADO_PATH/tps/boost_1_64_0"
 set BOOST_LIB "$VIVADO_PATH/lib/lnx64.o"
 
+set PARAM_FILE "./out_test/parameters.tcl"
+
+if { [file exists $PARAM_FILE] == 1} {
+  source $PARAM_FILE
+}
+
 array set opt {
   part    vu9p
   dataType int

@@ -22,14 +22,30 @@ class HLS:
     self.csim = b_csim
     self.syn = b_syn 
     self.cosim = b_cosim 
+    self.opArgs=str()
 
-  def execution(self, opArgs, runArgs):
+  def execution(self, runArgs, logFile):
     commandLine ='''vivado_hls -f %s "runCsim %d runRTLsynth %d \
 runRTLsim %d part vu9p %s runArgs '%s'"'''%(self.tcl, self.csim, self.syn,
-  self.cosim, opArgs, runArgs)
+  self.cosim, self.opArgs, runArgs)
     #pdb.set_trace()
     #print(commandLine)
     args = shlex.split(commandLine)
-    exitCode = subprocess.call(args)
-    return exitCode
+    hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (stdoutdata, stderrdata) = hls.communicate()
+    print(stderrdata)
+    with open(logFile, 'w') as f:
+      f.write(stdoutdata)
+  def checkLog(self, logFile):
+    with open(logFile, 'r') as f:
+      content = f.read()
+    errIndex = content.find("ERROR")
+    failIndex = content.find("FAIL")
+    if errIndex == -1 and failIndex == -1: 
+      return True
+    else:
+      return False
+
+  def generateTCL(self, op, c_type, dw, r_type, logParEntries):
+    self.opArgs=r'op %s dataType %s dataWidth %d resDataType %s logParEntries %d'%(op, c_type, dw, r_type, logParEntries)
 

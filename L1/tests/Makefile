@@ -27,7 +27,7 @@ BLAS_dataPageIdx		= 3
 BLAS_maxNumInstrs		= 64
 
 ifndef BLAS_dataType
-BLAS_dataType				= float
+BLAS_dataType				= int
 endif
 ifndef BLAS_resDataType
 BLAS_resDataType		= int
@@ -87,7 +87,7 @@ $(GEN_BIN_EXE) : ./sw/src/* | $(OUT_DIR)
 	@echo "INFO: INCLUDE IS " ${INCLUDE_CFLAGS}
 	@echo "INFO: LIB IS" ${LIB_LFLAGS}
 	@echo "*************************************************"
-	$(CC) $(CFLAGS) $(LFLAGS) $(DFLAGS) -fpermissive -fdata-sections -ffunction-sections -Wl,--gc-sections src/blas_gen_bin.cpp -o $@
+	$(CC) $(CFLAGS) $(LFLAGS) $(DFLAGS) -fpermissive -fdata-sections -ffunction-sections -Wl,--gc-sections ./sw/src/blas_gen_bin.cpp -o $@
 
 clean :
 	$(RM) -r ${OUT_DIR} 
