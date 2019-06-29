@@ -3,8 +3,8 @@
   "b_synth": false,
   "b_cosim": false,
   "dataTypes": [
-    ["float", 32],
-    ["uint", 32],
+    ["float", 64],
+    ["uint", 16],
     ["int", 32]
   ],
   "retTypes": [
@@ -22,5 +22,5 @@
     -1024,
     1024
   ],
-  "numSimulation": 1
+  "numSimulation": 2
 }

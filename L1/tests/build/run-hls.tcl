@@ -15,42 +15,9 @@ set GCC_PATH "$VIVADO_PATH/tps/lnx64"
 set BOOST_INCLUDE "$VIVADO_PATH/tps/boost_1_64_0"
 set BOOST_LIB "$VIVADO_PATH/lib/lnx64.o"
 
-set PARAM_FILE "./out_test/parameters.tcl"
-
-if { [file exists $PARAM_FILE] == 1} {
-  source $PARAM_FILE
-}
-
-array set opt {
-  part    vu9p
-  dataType int
-  resDataType int
-  dataWidth 32
-  logParEntries 4
-  pageSizeBytes 4096
-  memWidthBytes 64
-  instrSizeBytes 8
-  maxNumInstrs 16
-  instrPageIdx 0
-  paramPageIdx 1
-  statsPageIdx 2
-  opName "amax"
-  runCsim     1
-  runRTLsynth   0
-  runRTLsim     0
-  runArgs "$pwd/../out_test/data/app.bin"
-}
-
-foreach arg $::argv {
-  puts $arg
-  foreach o [lsort [array names opt]] {
-    if {[regexp "$o +(\\w+)" $arg unused opt($o)]} {
-      puts "  Setting CONFIG  $o  [set opt($o)]"
-    } elseif {[regexp "$o +\'(.*)\'" $arg unused opt($o)]} {
-      puts "  Setting CONFIG  $o  [set opt($o)]"
-    }
-  }
-}
+set PARAM_FILE [lindex $argv 2]
+puts $PARAM_FILE
+source $PARAM_FILE
 
 puts "Final CONFIG"
 set OPT_FLAGS "-std=c++11 "

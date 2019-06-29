@@ -24,10 +24,8 @@ class HLS:
     self.cosim = b_cosim 
     self.opArgs=str()
 
-  def execution(self, runArgs, logFile):
-    commandLine ='''vivado_hls -f %s "runCsim %d runRTLsynth %d \
-runRTLsim %d part vu9p %s runArgs '%s'"'''%(self.tcl, self.csim, self.syn,
-  self.cosim, self.opArgs, runArgs)
+  def execution(self, logFile):
+    commandLine ='vivado_hls -f %s "%s"'%(self.tcl, self.params)
     #pdb.set_trace()
     #print(commandLine)
     args = shlex.split(commandLine)
@@ -46,6 +44,36 @@ runRTLsim %d part vu9p %s runArgs '%s'"'''%(self.tcl, self.csim, self.syn,
     else:
       return False
 
-  def generateTCL(self, op, c_type, dw, r_type, logParEntries):
+  def generateTCL(self, op, c_type, dw, r_type, logParEntries, binFile, fileparams):
+    self.params = fileparams
+    with open(self.params, 'w') as f:
+       f.write('array set opt {\n ')   
+       f.write('   part    vu9p\n ')
+       f.write('   dataType %s\n '%c_type)
+       f.write('   resDataType %s\n '%r_type)
+       f.write('   dataWidth %d\n '%dw)
+       f.write('   logParEntries %d\n '%logParEntries)
+       f.write('   pageSizeBytes 4096\n ')
+       f.write('   memWidthBytes 64\n ')
+       f.write('   instrSizeBytes 8\n ')
+       f.write('   maxNumInstrs 16\n ')
+       f.write('   instrPageIdx 0\n ')
+       f.write('   paramPageIdx 1\n ')
+       f.write('   statsPageIdx 2\n ')
+       f.write('   opName "%s"\n '%op)
+       if self.csim:
+         f.write('   runCsim     1\n ')
+       else:
+         f.write('   runCsim     0\n ')
+       if self.syn:
+        f.write('   runRTLsynth   1\n ')
+       else:
+        f.write('   runRTLsynth   0\n ')
+       if self.cosim:
+         f.write('   runRTLsim     1\n ')
+       else:
+         f.write('   runRTLsim     0\n ')
+       f.write('   runArgs "%s"\n '%binFile)
+       f.write(' }\n ')
     self.opArgs=r'op %s dataType %s dataWidth %d resDataType %s logParEntries %d'%(op, c_type, dw, r_type, logParEntries)
 

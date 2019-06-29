@@ -74,12 +74,15 @@ class RunTest:
 
     self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
         self.profile['b_synth'], self.profile['b_cosim'])
-    self.libpath = r'out_test/libs'
-    if not os.path.exists(self.libpath):
-      os.makedirs(self.libpath)
-    self.datapath = r'out_test/data' 
-    if not os.path.exists(self.datapath):
-      os.makedirs(self.datapath)
+
+    self.testPath = r'out_test/%s'%self.op
+
+    self.libPath = os.path.join(self.testPath, 'libs')
+    if not os.path.exists(self.libPath):
+      os.makedirs(self.libPath)
+    self.dataPath = os.path.join(self.testPath, 'data')
+    if not os.path.exists(self.dataPath):
+      os.makedirs(self.dataPath)
     self.vs=list()
 
   def runTest(self,makefile):
@@ -94,14 +97,16 @@ class RunTest:
 
       c_type=self.typeDict[dtype]
       r_type=self.typeDict[rtype]
-      libpath =os.path.join(self.libpath,
+      tclPath =os.path.join(self.testPath,
+          'parameters_d%s%s_r%s%d.tcl'%(dt,dw,rt,rw))
+      libPath =os.path.join(self.libPath,
           'blas_gen_d%s%s_r%s%d.so'%(dt,dw,rt,rw))
-      if not os.path.exists(libpath):
-        make = Makefile(makefile, libpath)
+      if not os.path.exists(libPath):
+        make = Makefile(makefile, libPath)
         if not make.make(c_type, r_type):
           print("ERROR: make shared library failure.")
           sys.exit
-      lib = C.cdll.LoadLibrary(libpath)
+      lib = C.cdll.LoadLibrary(libPath)
       print("Start to test operation %s under DataType %s and return DataType %s"%(self.op, c_type, r_type))
       for j in range(self.numSim): 
         while(True):
@@ -112,7 +117,7 @@ class RunTest:
 
         op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
         alpha, xdata, ydata, xr, yr, r = op.compute()
-        binFile =os.path.join(self.datapath,
+        binFile =os.path.join(self.dataPath,
           'TestBin_v%d_d%s%s_r%s%d.bin'%(vectorSize,dt,dw,rt,rw))
         blas_gen=BLAS_GEN(lib)
         blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
@@ -124,12 +129,12 @@ class RunTest:
         #blas_read.printProgram()
         #blas_gen.printProgram()
         
-        runArgs=os.path.abspath(binFile)
-        logfile=os.path.join(self.datapath, r'logfile_v%d_d%s%s_r%s%d.log'%(vectorSize,dt,dw,rt,rw))
+        logfile=os.path.join(self.dataPath, r'logfile_v%d_d%s%s_r%s%d.log'%(vectorSize,dt,dw,rt,rw))
 
         print("Starting %s test."%Format(j+1))
-        self.hls.generateTCL(self.op, c_type, dw, r_type, self.logParEntries)
-        self.hls.execution(runArgs, logfile)
+        self.hls.generateTCL(self.op, c_type, dw, r_type, self.logParEntries, os.path.abspath(binFile),
+            os.path.abspath(tclPath))
+        self.hls.execution(logfile)
         result = self.hls.checkLog(logfile)
 
         if result:
