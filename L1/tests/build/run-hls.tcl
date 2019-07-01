@@ -16,7 +16,6 @@ set BOOST_INCLUDE "$VIVADO_PATH/tps/boost_1_64_0"
 set BOOST_LIB "$VIVADO_PATH/lib/lnx64.o"
 
 set PARAM_FILE [lindex $argv 2]
-puts $PARAM_FILE
 source $PARAM_FILE
 
 puts "Final CONFIG"
@@ -28,8 +27,8 @@ foreach o [lsort [array names opt]] {
   }
 }
 
-set CFLAGS_K "-I$pwd/../include/hw -I$pwd/../include/hw/xf_blas  -g -O0 $OPT_FLAGS"
-set CFLAGS_H "$CFLAGS_K -I$pwd -I$pwd/sw/include -I$pwd/../.. -I$pwd/hw -I$BOOST_INCLUDE"
+set CFLAGS_K "-I$pwd/../include/hw -I$pwd/hw -I$pwd/../include/hw/xf_blas  -g -O0 $OPT_FLAGS"
+set CFLAGS_H "$CFLAGS_K -I$pwd -I$pwd/../include/hw -I$pwd/../include/hw/xf_blas -I$pwd/hw -I$pwd/sw/include -I$pwd/../.. -I$pwd/hw -I$BOOST_INCLUDE"
 
 set proj_dir [format prj_hls_%s  $opt(part) ]
 open_project $proj_dir -reset
@@ -38,6 +37,9 @@ add_files $pwd/hw/$opt(opName)/uut_top.cpp -cflags "$CFLAGS_K"
 add_files -tb $pwd/sw/src/test.cpp -cflags "$CFLAGS_H"
 open_solution sol -reset
 config_compile -ignore_long_run_time
+
+set DIRECTIVE_FILE [lindex $argv 3]
+source $DIRECTIVE_FILE
 
 if {$opt(part) == "vu9p"} {
   set_part {xcvu9p-fsgd2104-2-i} -tool vivado

@@ -12,6 +12,7 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
 
+from __future__ import print_function
 import shlex, subprocess
 import pdb
 
@@ -22,30 +23,34 @@ class HLS:
     self.csim = b_csim
     self.syn = b_syn 
     self.cosim = b_cosim 
-    self.opArgs=str()
 
   def execution(self, logFile):
-    commandLine ='vivado_hls -f %s "%s"'%(self.tcl, self.params)
-    #pdb.set_trace()
+    commandLine ='vivado_hls -f %s "%s" "%s"'%(self.tcl, self.params, self.directive)
     #print(commandLine)
+    #pdb.set_trace()
     args = shlex.split(commandLine)
     hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (stdoutdata, stderrdata) = hls.communicate()
-    print(stderrdata)
+#    (stdoutdata, stderrdata) = hls.communicate()
     with open(logFile, 'w') as f:
-      f.write(stdoutdata)
+      while True:
+        line = hls.stdout.readline()
+        if not line:
+          break
+        print(line, end='')
+        f.write(line)
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
-    errIndex = content.find("ERROR")
-    failIndex = content.find("FAIL")
+    errIndex = content.lower().find("error")
+    failIndex = content.lower().find("fail")
     if errIndex == -1 and failIndex == -1: 
       return True
     else:
       return False
 
-  def generateTCL(self, op, c_type, dw, r_type, logParEntries, binFile, fileparams):
+  def generateTCL(self, op, c_type, dw, r_type, logParEntries, vs, binFile, fileparams, directive):
     self.params = fileparams
+    self.directive = directive
     with open(self.params, 'w') as f:
        f.write('array set opt {\n ')   
        f.write('   part    vu9p\n ')
@@ -75,5 +80,9 @@ class HLS:
          f.write('   runRTLsim     0\n ')
        f.write('   runArgs "%s"\n '%binFile)
        f.write(' }\n ')
-    self.opArgs=r'op %s dataType %s dataWidth %d resDataType %s logParEntries %d'%(op, c_type, dw, r_type, logParEntries)
+    with open(self.directive, 'w') as f:
+       f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_x\n'%(vs>>logParEntries))
+       f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_y\n'%(vs>>logParEntries))
+       f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_xRes\n'%(vs>>logParEntries))
+       f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_yRes\n'%(vs>>logParEntries))
 

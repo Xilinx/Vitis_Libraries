@@ -1,7 +1,7 @@
 {
   "b_csim": true,
-  "b_synth": false,
-  "b_cosim": false,
+  "b_synth": true,
+  "b_cosim": true,
   "dataTypes": [
     ["float", 64],
     ["uint", 16],
@@ -15,8 +15,8 @@
   "op": "amax",
   "logParEntries": 2,
   "vectorSizes": [
-    4,
-    128
+    1024,
+    8192
   ],
   "valueRange": [
     -1024,

@@ -97,10 +97,11 @@ class RunTest:
 
       c_type=self.typeDict[dtype]
       r_type=self.typeDict[rtype]
-      tclPath =os.path.join(self.testPath,
-          'parameters_d%s%s_r%s%d.tcl'%(dt,dw,rt,rw))
-      libPath =os.path.join(self.libPath,
-          'blas_gen_d%s%s_r%s%d.so'%(dt,dw,rt,rw))
+
+      typeStr = 'd%s%s_r%s%d'%(dt,dw,rt,rw)
+
+      libPath =os.path.join(self.libPath,'blas_gen_%s.so'%typeStr)
+
       if not os.path.exists(libPath):
         make = Makefile(makefile, libPath)
         if not make.make(c_type, r_type):
@@ -117,23 +118,27 @@ class RunTest:
 
         op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
         alpha, xdata, ydata, xr, yr, r = op.compute()
-        binFile =os.path.join(self.dataPath,
-          'TestBin_v%d_d%s%s_r%s%d.bin'%(vectorSize,dt,dw,rt,rw))
+        binFile =os.path.join(self.dataPath,'TestBin_v%d_%s.bin'%(vectorSize,typeStr))
         blas_gen=BLAS_GEN(lib)
         blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
             r.astype(rtype))
         blas_gen.write2BinFile(binFile)
         print("Data file %s has been generated sucessfully."%binFile)
-        #blas_read=BLAS_GEN(lib)
-        #blas_read.readFromBinFile(binFile)
-        #blas_read.printProgram()
-        #blas_gen.printProgram()
         
-        logfile=os.path.join(self.dataPath, r'logfile_v%d_d%s%s_r%s%d.log'%(vectorSize,dt,dw,rt,rw))
+        logfile=os.path.join(self.dataPath, 
+            r'logfile_v%d_%s.log'%(vectorSize,typeStr))
+        
+        paramTclPath =os.path.join(self.testPath, 
+           r'parameters_v%d_%s.tcl'%(vectorSize,typeStr))
 
-        print("Starting %s test."%Format(j+1))
-        self.hls.generateTCL(self.op, c_type, dw, r_type, self.logParEntries, os.path.abspath(binFile),
-            os.path.abspath(tclPath))
+        directivePath = os.path.join(self.dataPath, 
+            r'directive_v%d_par%d.log'%(vectorSize,self.logParEntries))
+
+        print("Starting %s test.\nParameters in file %s.\nLog file %s."%(Format(j+1), paramTclPath, logfile))
+
+        self.hls.generateTCL(self.op, c_type, dw, r_type, self.logParEntries, 
+            vectorSize, os.path.abspath(binFile), os.path.abspath(paramTclPath),
+            os.path.abspath(directivePath))
         self.hls.execution(logfile)
         result = self.hls.checkLog(logfile)
 
