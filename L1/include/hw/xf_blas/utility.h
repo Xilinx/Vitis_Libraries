@@ -363,6 +363,49 @@ template<
   typename t_DataType,
   unsigned int t_DataWidth,
   unsigned int t_ParEntries>
+void mem2stream(
+  WideType<t_DataType, t_ParEntries, t_DataWidth > *p_in,
+  unsigned int p_n,
+  hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth > > &p_out
+) {
+//#pragma HLS DATA_PACK variable=p_out
+  #ifndef __SYNTHESIS__
+    assert ((p_n % t_ParEntries) == 0);
+  #endif
+  unsigned int l_parBlocks = p_n / t_ParEntries;
+  for (unsigned int i=0; i<l_parBlocks; ++i) {
+  #pragma HLS PIPELINE
+    WideType<t_DataType, t_ParEntries, t_DataWidth > l_val = p_in[i];
+    p_out.write(l_val);
+  }
+} //end mem2stream
+
+template<
+  typename t_DataType,
+  unsigned int t_DataWidth,
+  unsigned int t_ParEntries>
+void stream2mem(
+  hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth > > &p_in,
+  unsigned int p_n,
+  WideType<t_DataType, t_ParEntries, t_DataWidth > *p_out
+) {
+//#pragma HLS DATA_PACK variable=p_in
+  #ifndef __SYNTHESIS__
+    assert ((p_n % t_ParEntries) == 0);
+  #endif
+  unsigned int l_parBlocks = p_n / t_ParEntries;
+  for (unsigned int i=0; i<l_parBlocks; ++i) {
+  #pragma HLS PIPELINE
+    WideType<t_DataType, t_ParEntries, t_DataWidth > l_val;
+    l_val = p_in.read();
+    p_out[i] = l_val;
+  }
+} //end stream2mem
+
+template<
+  typename t_DataType,
+  unsigned int t_DataWidth,
+  unsigned int t_ParEntries>
 void readVec2Stream(
   t_DataType *p_in,
   unsigned int p_n,
