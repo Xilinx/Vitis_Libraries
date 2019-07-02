@@ -1,7 +1,7 @@
 {
   "b_csim": true,
   "b_synth": true,
-  "b_cosim": true,
+  "b_cosim": false,
   "dataTypes": [
     ["float", 64],
     ["uint", 16],

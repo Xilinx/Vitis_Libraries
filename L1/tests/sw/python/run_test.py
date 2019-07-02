@@ -71,9 +71,6 @@ class RunTest:
 
     self.vectorSizes = self.profile['vectorSizes']
 
-    self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
-        self.profile['b_synth'], self.profile['b_cosim'])
-
     self.testPath = r'out_test/%s'%self.op
 
     self.libPath = os.path.join(self.testPath, 'libs')
@@ -82,7 +79,14 @@ class RunTest:
     self.dataPath = os.path.join(self.testPath, 'data')
     if not os.path.exists(self.dataPath):
       os.makedirs(self.dataPath)
-    self.vs=list()
+
+    self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
+        self.profile['b_synth'], self.profile['b_cosim'])
+
+    directivePath = os.path.join(self.testPath, 
+        r'directive_par%d.tcl'%(self.logParEntries))
+    self.hls.generateDirective(self.logParEntries, directivePath)
+
 
   def runTest(self,makefile):
     dtLen =  len(self.dtList)
@@ -111,10 +115,8 @@ class RunTest:
       for vectorSize in self.vectorSizes:
         paramTclPath =os.path.join(self.testPath, 
            r'parameters_v%d_%s.tcl'%(vectorSize,typeStr))
-        directivePath = os.path.join(self.testPath, 
-            r'directive_par%d.tcl'%(self.logParEntries))
-        self.hls.generateTCL(self.op, c_type, dw, r_type, self.logParEntries, 
-            vectorSize, paramTclPath, directivePath)
+        self.hls.generateParam(self.op, c_type, dw, r_type, self.logParEntries, 
+            vectorSize, paramTclPath)
         for j in range(self.numSim): 
           op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
           alpha, xdata, ydata, xr, yr, r = op.compute()
@@ -130,7 +132,7 @@ class RunTest:
           
           print("Starting %s test.\nParameters in file %s.\nLog file %s."%(Format(j+1), paramTclPath, logfile))
 
-          self.hls.execution(binFile, logfile, True)
+          self.hls.execution(binFile, logfile)
           result = self.hls.checkLog(logfile)
 
           if result:

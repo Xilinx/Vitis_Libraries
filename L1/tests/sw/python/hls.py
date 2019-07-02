@@ -51,7 +51,7 @@ class HLS:
       else:
         return False
     elif self.syn:
-      passIndex = content.find("Finished generating all TRL models")
+      passIndex = content.find("Finished generating all RTL models")
       if passIndex >=0:
         return True
       else:
@@ -64,10 +64,12 @@ class HLS:
         return False
     else:
       return False
+  def cosimPerf(self, logFile):
+    if self.cosim:
+      pass
 
-  def generateTCL(self, op, c_type, dw, r_type, logParEntries, vs, fileparams, directive):
+  def generateParam(self, op, c_type, dw, r_type, logParEntries, vs, fileparams):
     self.params = fileparams
-    self.directive = directive
     with open(self.params, 'w') as f:
        f.write('array set opt {\n ')   
        f.write('   part    vu9p\n ')
@@ -97,6 +99,8 @@ class HLS:
        else:
          f.write('   runRTLsim     0\n ')
        f.write(' }\n ')
+  def generateDirective(self, logParEntries, directivePath):
+    self.directive = directivePath
     with open(self.directive, 'w') as f:
        #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_x\n'%(vs))
        #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_y\n'%(vs))
