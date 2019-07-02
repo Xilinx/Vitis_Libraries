@@ -118,7 +118,7 @@ class RunTest:
         for j in range(self.numSim): 
           op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
           alpha, xdata, ydata, xr, yr, r = op.compute()
-          binFile =os.path.join(self.dataPath,'TestBin_v%d_%s_s%s.bin'%(vectorSize,typeStr, Format(j+1)))
+          binFile =os.path.join(self.dataPath,'TestBin_v%d_%s_%s.bin'%(vectorSize,typeStr, Format(j+1)))
           blas_gen=BLAS_GEN(lib)
           blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
               r.astype(rtype))
@@ -126,7 +126,7 @@ class RunTest:
           print("Data file %s has been generated sucessfully."%binFile)
           
           logfile=os.path.join(self.dataPath, 
-              r'logfile_v%d_%s_s%s.log'%(vectorSize,typeStr,Format(j+1)))
+              r'logfile_v%d_%s_%s.log'%(vectorSize,typeStr,Format(j+1)))
           
           print("Starting %s test.\nParameters in file %s.\nLog file %s."%(Format(j+1), paramTclPath, logfile))
 
