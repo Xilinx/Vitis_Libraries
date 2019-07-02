@@ -27,16 +27,12 @@ using namespace xf::linear_algebra::blas;
 int uut_top(
   uint32_t p_n,
   BLAS_dataType p_alpha,
-  BLAS_dataType *p_x,
-  BLAS_dataType *p_y,
-  BLAS_dataType *p_xRes,
-  BLAS_dataType *p_yRes,
+  BLAS_dataType p_x[BLAS_vectorSize],
+  BLAS_dataType p_y[BLAS_vectorSize],
+  BLAS_dataType p_xRes[BLAS_vectorSize],
+  BLAS_dataType p_yRes[BLAS_vectorSize],
   BLAS_resDataType p_goldRes
 ) {
-  #pragma HLS INTERFACE m_axi port=p_x depth=16
-  #pragma HLS INTERFACE m_axi port=p_y depth=16
-  #pragma HLS INTERFACE m_axi port=p_xRes depth=16
-  #pragma HLS INTERFACE m_axi port=p_yRes depth=16
   BLAS_resDataType l_res;
 
   hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth> > l_str;

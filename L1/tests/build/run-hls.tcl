@@ -16,6 +16,8 @@ set BOOST_INCLUDE "$VIVADO_PATH/tps/boost_1_64_0"
 set BOOST_LIB "$VIVADO_PATH/lib/lnx64.o"
 
 set PARAM_FILE [lindex $argv 2]
+set DIRECTIVE_FILE [lindex $argv 3]
+set RUNARGS [lindex $argv 4]
 source $PARAM_FILE
 
 puts "Final CONFIG"
@@ -38,7 +40,6 @@ add_files -tb $pwd/sw/src/test.cpp -cflags "$CFLAGS_H"
 open_solution sol -reset
 config_compile -ignore_long_run_time
 
-set DIRECTIVE_FILE [lindex $argv 3]
 source $DIRECTIVE_FILE
 
 if {$opt(part) == "vu9p"} {
@@ -52,7 +53,7 @@ create_clock -period 3.333333 -name default
 
 if {$opt(runCsim)} {
   puts "***** C SIMULATION *****"
-  csim_design -ldflags "-L$BOOST_LIB -lboost_iostreams -lz -lrt -L$GCC_PATH/$GCC_VERSION/lib64 -lstdc++ -Wl,--rpath=$BOOST_LIB" -argv "$opt(runArgs)"
+  csim_design -ldflags "-L$BOOST_LIB -lboost_iostreams -lz -lrt -L$GCC_PATH/$GCC_VERSION/lib64 -lstdc++ -Wl,--rpath=$BOOST_LIB" -argv "$RUNARGS"
 }
 
 if {$opt(runRTLsynth)} {
@@ -60,7 +61,7 @@ if {$opt(runRTLsynth)} {
   csynth_design
   if {$opt(runRTLsim)} {
     puts "***** C/RTL SIMULATION *****"
-    cosim_design -trace_level all -ldflags "-L$BOOST_LIB -lboost_program_options -lrt" -argv "$opt(runArgs)"
+    cosim_design -trace_level all -ldflags "-L$BOOST_LIB -lboost_program_options -lrt" -argv "$RUNARGS"
   }
 }
 

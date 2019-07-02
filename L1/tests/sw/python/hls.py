@@ -15,6 +15,7 @@
 from __future__ import print_function
 import shlex, subprocess
 import pdb
+import os
 
 class HLS:
   def __init__(self, tclPath, b_csim, b_syn, b_cosim):
@@ -24,9 +25,10 @@ class HLS:
     self.syn = b_syn 
     self.cosim = b_cosim 
 
-  def execution(self, logFile):
-    commandLine ='vivado_hls -f %s "%s" "%s"'%(self.tcl, self.params, self.directive)
-    #print(commandLine)
+  def execution(self, binFile, logFile, b_print = False):
+    commandLine ='vivado_hls -f %s %s %s %s'%(self.tcl, self.params, 
+        self.directive, os.path.abspath(binFile))
+ #   print(commandLine)
     #pdb.set_trace()
     args = shlex.split(commandLine)
     hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -36,19 +38,34 @@ class HLS:
         line = hls.stdout.readline()
         if not line:
           break
-        print(line, end='')
+        if b_print:
+          print(line, end='')
         f.write(line)
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
-    errIndex = content.lower().find("error")
-    failIndex = content.lower().find("fail")
-    if errIndex == -1 and failIndex == -1: 
-      return True
+    if self.cosim:
+      passIndex = content.find(r"C/RTL co-simulation finished: PASS")
+      if passIndex >=0:
+        return True
+      else:
+        return False
+    elif self.syn:
+      passIndex = content.find("Finished generating all TRL models")
+      if passIndex >=0:
+        return True
+      else:
+        return False
+    elif self.csim:
+      passIndex = content.find("CSIM done with 0 errors")
+      if passIndex >=0:
+        return True
+      else:
+        return False
     else:
       return False
 
-  def generateTCL(self, op, c_type, dw, r_type, logParEntries, vs, binFile, fileparams, directive):
+  def generateTCL(self, op, c_type, dw, r_type, logParEntries, vs, fileparams, directive):
     self.params = fileparams
     self.directive = directive
     with open(self.params, 'w') as f:
@@ -58,6 +75,7 @@ class HLS:
        f.write('   resDataType %s\n '%r_type)
        f.write('   dataWidth %d\n '%dw)
        f.write('   logParEntries %d\n '%logParEntries)
+       f.write('   vectorSize %d\n '%vs)
        f.write('   pageSizeBytes 4096\n ')
        f.write('   memWidthBytes 64\n ')
        f.write('   instrSizeBytes 8\n ')
@@ -78,11 +96,14 @@ class HLS:
          f.write('   runRTLsim     1\n ')
        else:
          f.write('   runRTLsim     0\n ')
-       f.write('   runArgs "%s"\n '%binFile)
        f.write(' }\n ')
     with open(self.directive, 'w') as f:
-       f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_x\n'%(vs>>logParEntries))
-       f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_y\n'%(vs>>logParEntries))
-       f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_xRes\n'%(vs>>logParEntries))
-       f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_yRes\n'%(vs>>logParEntries))
+       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_x\n'%(vs))
+       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_y\n'%(vs))
+       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_xRes\n'%(vs))
+       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_yRes\n'%(vs))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_x\n'%(1<<logParEntries))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_y\n'%(1<<logParEntries))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_xRes\n'%(1<<logParEntries))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_yRes\n'%(1<<logParEntries))
 

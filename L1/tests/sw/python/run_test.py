@@ -69,8 +69,7 @@ class RunTest:
 
     self.numSim = self.profile['numSimulation']
 
-    self.minSize = self.profile['vectorSizes'][0]
-    self.maxSize = self.profile['vectorSizes'][1]
+    self.vectorSizes = self.profile['vectorSizes']
 
     self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
         self.profile['b_synth'], self.profile['b_cosim'])
@@ -109,45 +108,37 @@ class RunTest:
           sys.exit
       lib = C.cdll.LoadLibrary(libPath)
       print("Start to test operation %s under DataType %s and return DataType %s"%(self.op, c_type, r_type))
-      for j in range(self.numSim): 
-        while(True):
-          vectorSize = (np.random.randint(self.minSize, self.maxSize)>> self.logParEntries)<< self.logParEntries
-          if not vectorSize in self.vs:
-            self.vs.append(vectorSize)
-            break
-
-        op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
-        alpha, xdata, ydata, xr, yr, r = op.compute()
-        binFile =os.path.join(self.dataPath,'TestBin_v%d_%s.bin'%(vectorSize,typeStr))
-        blas_gen=BLAS_GEN(lib)
-        blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
-            r.astype(rtype))
-        blas_gen.write2BinFile(binFile)
-        print("Data file %s has been generated sucessfully."%binFile)
-        
-        logfile=os.path.join(self.dataPath, 
-            r'logfile_v%d_%s.log'%(vectorSize,typeStr))
-        
+      for vectorSize in self.vectorSizes:
         paramTclPath =os.path.join(self.testPath, 
            r'parameters_v%d_%s.tcl'%(vectorSize,typeStr))
-
-        directivePath = os.path.join(self.dataPath, 
-            r'directive_v%d_par%d.log'%(vectorSize,self.logParEntries))
-
-        print("Starting %s test.\nParameters in file %s.\nLog file %s."%(Format(j+1), paramTclPath, logfile))
-
+        directivePath = os.path.join(self.testPath, 
+            r'directive_par%d.tcl'%(self.logParEntries))
         self.hls.generateTCL(self.op, c_type, dw, r_type, self.logParEntries, 
-            vectorSize, os.path.abspath(binFile), os.path.abspath(paramTclPath),
-            os.path.abspath(directivePath))
-        self.hls.execution(logfile)
-        result = self.hls.checkLog(logfile)
+            vectorSize, paramTclPath, directivePath)
+        for j in range(self.numSim): 
+          op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
+          alpha, xdata, ydata, xr, yr, r = op.compute()
+          binFile =os.path.join(self.dataPath,'TestBin_v%d_%s_s%s.bin'%(vectorSize,typeStr, Format(j+1)))
+          blas_gen=BLAS_GEN(lib)
+          blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
+              r.astype(rtype))
+          blas_gen.write2BinFile(binFile)
+          print("Data file %s has been generated sucessfully."%binFile)
+          
+          logfile=os.path.join(self.dataPath, 
+              r'logfile_v%d_%s_s%s.log'%(vectorSize,typeStr,Format(j+1)))
+          
+          print("Starting %s test.\nParameters in file %s.\nLog file %s."%(Format(j+1), paramTclPath, logfile))
 
-        if result:
-          print("%s test passed."%Format(j+1))
-        else:
-          print("Operation %s failed the test with input %s, please check log file %s"%(self.op, 
-                binFile, os.path.abspath(logfile)))
-          return
+          self.hls.execution(binFile, logfile, True)
+          result = self.hls.checkLog(logfile)
+
+          if result:
+            print("%s test passed."%Format(j+1))
+          else:
+            print("Operation %s failed the test with input %s, please check log file %s"%(self.op, 
+                  binFile, os.path.abspath(logfile)))
+            return
     print("All tests are passed.")
 
 def main(profile, makefile):

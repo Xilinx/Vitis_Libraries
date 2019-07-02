@@ -16,6 +16,7 @@
   "logParEntries": 2,
   "vectorSizes": [
     1024,
+    4096,
     8192
   ],
   "valueRange": [

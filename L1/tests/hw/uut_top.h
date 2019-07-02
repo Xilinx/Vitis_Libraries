@@ -19,10 +19,10 @@
 int uut_top(
   uint32_t p_n,
   BLAS_dataType p_alpha,
-  BLAS_dataType *p_x,
-  BLAS_dataType *p_y,
-  BLAS_dataType *p_xRes,
-  BLAS_dataType *p_yRes,
+  BLAS_dataType p_x[BLAS_vectorSize],
+  BLAS_dataType p_y[BLAS_vectorSize],
+  BLAS_dataType p_xRes[BLAS_vectorSize],
+  BLAS_dataType p_yRes[BLAS_vectorSize],
   BLAS_resDataType p_goldRes
 );
 #endif
