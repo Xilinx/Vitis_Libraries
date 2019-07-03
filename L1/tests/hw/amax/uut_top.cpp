@@ -39,11 +39,13 @@ int uut_top(
   #pragma HLS DATAFLOW
   readVec2Stream<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(p_x, p_n, l_str);
   amax<BLAS_dataType,BLAS_logParEntries,BLAS_dataWidth,BLAS_resDataType>(p_n, l_str, l_res);
-  if (l_res == p_goldRes) {
-    return(0);
+  bool l_exactMatch=false;
+  bool l_pass = isClose<BLAS_dataType>(1e-3, 3e-6, p_goldRes, l_res, l_exactMatch);
+  if (l_pass){
+    return 0;
   }
   else {
-    return(-1);
+    return -1;
   }
 }
  
