@@ -13,25 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef AMIN_TOP_H
-#define AMIN_TOP_H
+#ifndef UUT_TOP_H
+#define UUT_TOP_H
 
-#include "amaxmin.h"
-#ifndef BLAS_dataWidth
-#define BLAS_dataWidth (sizeof(BLAS_dataType) * 8)
-#endif
-
-
-void amaxmin_top(
-  unsigned int p_n,
-  hls::stream<ap_uint<BLAS_dataWidth * BLAS_parEntries> > &p_x,
-  BLAS_indexType &p_reault 
+void uut_top(
+  uint32_t p_n,
+  BLAS_dataType p_alpha,
+  BLAS_dataType p_x[BLAS_vectorSize],
+  BLAS_dataType p_y[BLAS_vectorSize],
+  BLAS_dataType p_xRes[BLAS_vectorSize],
+  BLAS_dataType p_yRes[BLAS_vectorSize],
+  BLAS_resDataType &p_goldRes
 );
-
-void UUT_Top(
-  BLAS_dataType p_in[BLAS_size],
-  unsigned int p_n,
-  BLAS_indexType &p_result
-);
-
 #endif

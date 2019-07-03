@@ -51,7 +51,7 @@ namespace blas {
                 #pragma HLS UNROLL
                 l_dot[k] =l_A[k] * l_x[k];
               }
-              p_r.write(BinarySum<t_DataType, 1 << t_LogParEntries, t_IndexType>::sum(l_dot));
+              p_r.write(BinarySum<t_DataType, 1 << t_LogParEntries>::sum(l_dot));
             }
         }
     template<typename t_DataType, 
@@ -101,7 +101,7 @@ namespace blas {
                 #pragma HLS UNROLL
                 l_input[j]=p_pad.read();
               }
-              l_finalSum += BinarySum<t_DataType, l_Delays, t_IndexType>::sum(l_input);
+              l_finalSum += BinarySum<t_DataType, l_Delays>::sum(l_input);
             }
             p_sum.write(l_finalSum);
           }

@@ -12,21 +12,29 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
 
+import os, sys
 import shlex, subprocess
+import numpy as np
+import pdb
 
-class HLS:
-  def __init__(self, tclPath, b_csim, b_syn, b_cosim):
+class Makefile:
+  def __init__(self, makefile, libpath):
+    self.makefile = makefile
+    self.libpath = libpath
+    self.target = r'out_test/blas_gen_wrapper.so'
 
-    self.tcl = tclPath
-    self.csim = b_csim
-    self.syn = b_syn 
-    self.cosim = b_cosim 
+  def make(self, dtype, rtype, rebuild = True):
 
-  def execution(self, opArgs, runArgs):
-    commandLine ='''vivado_hls -f %s "runCsim %d runRTLsynth %d \
-runRTLsim %d part vu9p %s runArgs '%s'"'''%(self.tcl, self.csim, self.syn,
-  self.cosim, opArgs, runArgs)
+    if os.path.exists(self.target) and rebuild:
+      os.remove(self.target)
+    os.environ['BLAS_dataType']= "'%s'"%dtype
+    os.environ['BLAS_resDataType']="'%s'"%rtype
+
+    commandLine =r'make -f %s %s'%(self.makefile, self.target)
     args = shlex.split(commandLine)
-    exitCode = subprocess.call(args)
-    return exitCode
-
+    subprocess.call(args)
+    if os.path.exists(self.target):
+      os.rename(self.target, self.libpath)
+      return True
+    else:
+      return False

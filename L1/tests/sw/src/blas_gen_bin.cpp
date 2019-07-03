@@ -52,10 +52,11 @@ int main(int argc, char** argv)
   string l_mode(argv[1]);
   bool l_write = l_mode == "-write";
   bool l_read = l_mode == "-read";
+  bool l_print = l_mode == "-print";
   
   string l_binFile;
   
-  if (l_read || l_write) {
+  if (l_read || l_write || l_print) {
     l_binFile = argv[2];
 
     printf("XFBLAS:  %s %s %s\n",
@@ -128,11 +129,14 @@ int main(int argc, char** argv)
     }
     xfblasStatus_t l_status = l_gen.write2BinFile(l_binFile);
     assert(l_status == XFBLAS_STATUS_SUCCESS);
-  } else if (l_read) {
+  }
+  else if (l_print) {
     xfblasStatus_t l_status = l_gen.readFromBinFile(l_binFile);
     assert(l_status == XFBLAS_STATUS_SUCCESS);
     l_gen.printProgram();
-    /*vector<Instr> l_instrs;
+  } 
+  else if (l_read) {
+    vector<Instr> l_instrs;
     uint32_t l_n;
     BLAS_dataType l_alpha;
     BLAS_resDataType l_resGolden;
@@ -178,7 +182,7 @@ int main(int argc, char** argv)
         }
       }
     }
-  */} else {
+  } else {
     assert(0); // Unknown user command
   }
   

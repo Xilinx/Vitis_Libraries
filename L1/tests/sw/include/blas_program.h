@@ -77,7 +77,7 @@ namespace blas {
       typedef ParamB1<t_DataType, t_ResDataType> ParamB1Type; 
     public:
       static const unsigned int ParamStartOff = t_ParamPageIdx * t_PageSizeBytes;
-      static const size_t ParamB1Bytes = 36 + sizeof(t_DataType) + sizeof(t_ResDataType);
+      static const size_t ParamB1Bytes = sizeof(ParamB1Type);
     public:
       Program() : 
         m_numInstrs(0), 
@@ -184,6 +184,7 @@ namespace blas {
         return l_resPtr;
       } 
       xfblasStatus_t getInstrs(vector<Instr> &p_instrs) {
+        reset();
         xfblasStatus_t l_status = XFBLAS_STATUS_INVALID_PROGRAM;
         uint8_t* l_baseInstrAddr = getBaseInstrAddr();
         uint8_t* l_addr = l_baseInstrAddr;
@@ -311,6 +312,25 @@ namespace blas {
           }
           l_if.close();
         }
+        vector<Instr> l_instrs;
+        l_status = getInstrs(l_instrs);
+        assert(l_status == XFBLAS_STATUS_SUCCESS);
+        uint8_t* l_baseInstrAddr=getBaseInstrAddr();
+        for (unsigned int i=0; i<l_instrs.size(); ++i) {
+          if (l_instrs[i].m_opClass == B1_OP_CLASS) {
+            ParamB1Type l_param;
+            memcpy((uint8_t*)&l_param, l_baseInstrAddr+m_currParamOff, ParamB1Bytes);
+            l_param.m_xAddr = (l_param.m_xAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_xAddr):0;
+            l_param.m_yAddr = (l_param.m_yAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_yAddr):0;
+            l_param.m_xResAddr = (l_param.m_xResAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_xResAddr):0;
+            l_param.m_yResAddr = (l_param.m_yResAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_yResAddr):0;
+            memcpy(l_baseInstrAddr+m_currParamOff, (uint8_t*)&l_param, ParamB1Bytes); 
+            m_currParamOff += ParamB1Bytes;
+            while (m_currParamOff % t_MemWidthBytes != 0) {
+              m_currParamOff++;
+            }
+          }
+        }
         return (l_status);
       }
       
@@ -341,10 +361,10 @@ namespace blas {
         p_n = l_param.m_n;
         p_alpha = l_param.m_alpha;
         p_resScalar = l_param.m_resScalar;
-        p_x = (l_param.m_xAddr!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_xAddr): nullptr;
-        p_y = (l_param.m_yAddr!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_yAddr): nullptr;
-        p_xRes = (l_param.m_xResAddr!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_xResAddr): nullptr;
-        p_yRes = (l_param.m_yResAddr!=0)? reinterpret_cast<t_DataType*>(l_baseAddr+l_param.m_yResAddr): nullptr; 
+        p_x = reinterpret_cast<t_DataType*>(l_param.m_xAddr);
+        p_y = reinterpret_cast<t_DataType*>(l_param.m_yAddr);
+        p_xRes = reinterpret_cast<t_DataType*>(l_param.m_xResAddr);
+        p_yRes = reinterpret_cast<t_DataType*>(l_param.m_yResAddr); 
       }
 
     void print(ostream &os) {
@@ -357,11 +377,6 @@ namespace blas {
         os << l_instrs[i];
         if (l_instrs[i].m_opClass == B1_OP_CLASS) {
           ParamB1Type l_param = getB1Param();
-          l_param.m_xAddr = (l_param.m_xAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_xAddr):0;
-          l_param.m_yAddr = (l_param.m_yAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_yAddr):0;
-          l_param.m_xResAddr = (l_param.m_xResAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_xResAddr):0;
-          l_param.m_yResAddr = (l_param.m_yResAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_yResAddr):0;
-              
           os << l_param;
         }
       }

@@ -70,26 +70,15 @@ class BLAS_GEN:
     func(self.obj)
 
 def main(lib, path):
-  if path == None:
-    path = './'
-  blas_gen=BLAS_GEN(lib)
   blas_read=BLAS_GEN(lib)
-  filename = r'app.bin'
-  filepath = os.path.join(path, filename)
-  size = 16
-  x = np.ctypeslib.as_ctypes((np.linspace(1, size, size, dtype=np.int32)))
-  ptr_x  = ct.pointer(x)
-  blas_gen.addB1Instr('amin', size, 0, ptr_x, None, None, None, 1)
-  blas_gen.write2BinFile(filepath)
-  print("write file sucessfully.")
-  blas_read.readFromBinFile(filepath)
+  blas_read.readFromBinFile(path)
   blas_read.printProgram()
 
 if __name__=="__main__":
   parser = argparse.ArgumentParser(description='Run HLS test.')
   parser.add_argument('so', type=str, metavar='sharedLibrary', help='path to the shared library file')
-  parser.add_argument('-p', type=str, metavar='outputPath', help='path to generate bin files')
+  parser.add_argument('bin', type=str, metavar='binfile', help='path to generate bin files')
   args = parser.parse_args()
   lib = ct.cdll.LoadLibrary(args.so)
-  main(lib, args.p)
+  main(lib, args.bin)
 

@@ -1,28 +1,27 @@
 {
-  "tclPath": "./run.tcl",
-  "dataPath": "./data/",
   "b_csim": true,
   "b_synth": true,
   "b_cosim": true,
   "dataTypes": [
-    ["float", 32],
+    ["float", 64],
     ["uint", 16],
-    ["float", 64]
-  ],
-  "retTypes": [
-    ["int", 32],
-    ["int", 32],
     ["int", 32]
   ],
-  "op": "amax",
-  "parEntries": 4,
+  "retTypes": [
+    ["float", 64],
+    ["uint", 16],
+    ["int", 32]
+  ],
+  "op": "asum",
+  "logParEntries": 2,
   "vectorSizes": [
-    8,
-    12
+    1024,
+    4096,
+    8192
   ],
   "valueRange": [
     -1024,
     1024
   ],
-  "numSimulation": 1
+  "numSimulation": 2
 }
