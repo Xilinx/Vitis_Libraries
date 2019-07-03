@@ -452,21 +452,6 @@ void writeStream2Vec(
   }
 } //end writeStream2Vec
 
-//provide same functionality as numpy.isclose
-template <typename T>
-bool isClose(
-  float p_tolRel, 
-  float p_tolAbs, 
-  T p_vRef, 
-  T p_v,
-  bool &p_exactMatch
-  ) {
-  float l_diffAbs = abs(p_v - p_vRef);
-  p_exactMatch = (p_vRef == p_v);
-  bool l_status = (l_diffAbs <= (p_tolAbs + p_tolRel*l_diffAbs));
-  return(l_status);
-}
-
 }
 }
 }

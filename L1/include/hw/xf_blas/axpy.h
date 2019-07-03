@@ -48,41 +48,37 @@ namespace blas {
    * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
    * @tparam t_IndexType the datatype of the index 
    *
-   * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+   * @param p_n the number of entries in the input vector p_x, p_n % t_ParEntries == 0
    * @param p_x the input stream of packed entries of vector X
    * @param p_y the input stream of packed entries of vector Y
    * @param p_r the output stream of packed entries of result vector Y
    */
   template<typename t_DataType, 
-    unsigned int t_DataWidth, 
-    unsigned int t_LogParEntries, 
+    unsigned int t_ParEntries, 
+    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType=unsigned int>
       void axpy(
           unsigned int p_n,
           const t_DataType p_alpha,
-          hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_x,
-          hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_y,
-          hls::stream<ap_uint<(t_DataWidth << t_LogParEntries)> > & p_r
+          hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_x,
+          hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_y,
+          hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_r
           ) {
 #ifndef __SYNTHESIS__
-        assert(p_n % ( 1 << t_LogParEntries) == 0);
+        assert(p_n % t_ParEntries == 0);
 #endif
-        const unsigned int l_numElem = p_n >> t_LogParEntries;
-        const unsigned int l_ParEntries = 1 << t_LogParEntries;
+        const unsigned int l_numElem = p_n / t_ParEntries;
         for(t_IndexType i=0;i<l_numElem;i++){
 #pragma HLS PIPELINE
-          ap_uint<(t_DataWidth << t_LogParEntries)> l_x = p_x.read();
-          ap_uint<(t_DataWidth << t_LogParEntries)> l_y = p_y.read();
-          ap_uint<(t_DataWidth << t_LogParEntries)> l_r = 0;
-          for(t_IndexType j=0;j<l_ParEntries;j++){
+          WideType<t_DataType, t_ParEntries, t_DataWidth> l_x = p_x.read();
+          WideType<t_DataType, t_ParEntries, t_DataWidth> l_y = p_y.read();
+          WideType<t_DataType, t_ParEntries, t_DataWidth> l_r;
+          for(t_IndexType j=0;j<t_ParEntries;j++){
 #pragma HLS UNROLL
-            ap_uint<t_DataWidth> l_partX = l_x.range((j+1)*t_DataWidth -1, j*t_DataWidth);
-            t_DataType l_realX = *(t_DataType*)&l_partX;
-            ap_uint<t_DataWidth> l_partY = l_y.range((j+1)*t_DataWidth -1, j*t_DataWidth);
-            t_DataType l_realY = *(t_DataType*)&l_partY;
+            t_DataType l_realX = l_x[j];
+            t_DataType l_realY = l_y[j];
             t_DataType l_result = p_alpha * l_realX + l_realY;
-            ap_uint<t_DataWidth> l_partR = *(ap_uint<t_DataWidth>*)&l_result;
-            l_r.range((j+1)*t_DataWidth -1, j*t_DataWidth) = l_partR;
+            l_r[j] = l_result;
           }
           p_r.write(l_r);
         }
