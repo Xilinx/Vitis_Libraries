@@ -121,25 +121,26 @@ class RunTest:
         logfile=os.path.join(self.dataPath, 
             r'logfile_v%d_%s.log'%(vectorSize,typeStr))
         
-
         binFile =os.path.join(self.dataPath,'TestBin_v%d_%s.bin'%(vectorSize,typeStr))
         blas_gen=BLAS_GEN(lib)
         op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
 
+        dataList = list()
         for j in range(self.numSim): 
-          alpha, xdata, ydata, xr, yr, r = op.compute()
+          dataList.append(op.compute())
+          alpha, xdata, ydata, xr, yr,r = dataList[-1]
           blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
               r.astype(rtype))
 
         blas_gen.write2BinFile(binFile)
         print("Data file %s has been generated sucessfully."%binFile)
-        print("Test vector size %d. Parameters in file %s.\nLog file %s."%(vectorSize, paramTclPath, logfile))
-        self.hls.execution(binFile, logfile)
+        print("Test vector size %d. Parameters in file %s.\nLog file %s\n"%(vectorSize, paramTclPath, logfile))
+        self.hls.execution(binFile, logfile, True)
         result = self.hls.checkLog(logfile)
         if result:
           print("Test passed.")
         else:
-          print("%s failed the test with input %s, please check log file %s"%(self.op, 
+          print("Test failed.\n %s with input %s\nplease check log file %s"%(self.op, 
                 binFile, os.path.abspath(logfile)))
           return
     print("All tests are passed.")
