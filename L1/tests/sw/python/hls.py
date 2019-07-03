@@ -28,12 +28,13 @@ class HLS:
   def execution(self, binFile, logFile, b_print = False):
     commandLine ='vivado_hls -f %s %s %s %s'%(self.tcl, self.params, 
         self.directive, os.path.abspath(binFile))
- #   print(commandLine)
+    print(commandLine)
     #pdb.set_trace()
     args = shlex.split(commandLine)
     hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 #    (stdoutdata, stderrdata) = hls.communicate()
     with open(logFile, 'w') as f:
+      f.write(commandLine)
       while True:
         line = hls.stdout.readline()
         if not line:
