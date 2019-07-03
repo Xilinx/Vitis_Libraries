@@ -42,14 +42,14 @@ class RunTest:
 
     self.hls = None
     self.typeDict ={
-      np.int8: 'char',
-      np.int16: 'short',
-      np.int32: 'int',
-      np.int64: 'long long int',
-      np.uint8: 'unsigned char',
-      np.uint16: 'unsigned short',
-      np.uint32: 'unsigned int',
-      np.uint64: 'unsigned long long int',
+      np.int8: 'int8_t',
+      np.int16: 'int16_t',
+      np.int32: 'int32_t',
+      np.int64: 'int64_t',
+      np.uint8: 'uint8_t',
+      np.uint16: 'uint16_t',
+      np.uint32: 'uint32_t',
+      np.uint64: 'uint64_t',
       np.float32: 'float',
       np.float64: 'double'
     }
@@ -117,30 +117,31 @@ class RunTest:
            r'parameters_v%d_%s.tcl'%(vectorSize,typeStr))
         self.hls.generateParam(self.op, c_type, dw, r_type, self.logParEntries, 
             vectorSize, paramTclPath)
+
+        logfile=os.path.join(self.dataPath, 
+            r'logfile_v%d_%s.log'%(vectorSize,typeStr))
+        
+
+        binFile =os.path.join(self.dataPath,'TestBin_v%d_%s.bin'%(vectorSize,typeStr))
+        blas_gen=BLAS_GEN(lib)
+        op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
+
         for j in range(self.numSim): 
-          op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
           alpha, xdata, ydata, xr, yr, r = op.compute()
-          binFile =os.path.join(self.dataPath,'TestBin_v%d_%s_%s.bin'%(vectorSize,typeStr, Format(j+1)))
-          blas_gen=BLAS_GEN(lib)
           blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
               r.astype(rtype))
-          blas_gen.write2BinFile(binFile)
-          print("Data file %s has been generated sucessfully."%binFile)
-          
-          logfile=os.path.join(self.dataPath, 
-              r'logfile_v%d_%s_%s.log'%(vectorSize,typeStr,Format(j+1)))
-          
-          print("Starting %s test.\nParameters in file %s.\nLog file %s."%(Format(j+1), paramTclPath, logfile))
 
-          self.hls.execution(binFile, logfile)
-          result = self.hls.checkLog(logfile)
-
-          if result:
-            print("%s test passed."%Format(j+1))
-          else:
-            print("Operation %s failed the test with input %s, please check log file %s"%(self.op, 
-                  binFile, os.path.abspath(logfile)))
-            return
+        blas_gen.write2BinFile(binFile)
+        print("Data file %s has been generated sucessfully."%binFile)
+        print("Test vector size %d. Parameters in file %s.\nLog file %s."%(vectorSize, paramTclPath, logfile))
+        self.hls.execution(binFile, logfile)
+        result = self.hls.checkLog(logfile)
+        if result:
+          print("Test passed.")
+        else:
+          print("%s failed the test with input %s, please check log file %s"%(self.op, 
+                binFile, os.path.abspath(logfile)))
+          return
     print("All tests are passed.")
 
 def main(profile, makefile):
