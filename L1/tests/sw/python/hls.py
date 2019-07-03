@@ -58,7 +58,7 @@ class HLS:
       else:
         return False
     elif self.csim:
-      passIndex = content.find("CSIM done with 0 errors")
+      passIndex = content.find("CSim done with 0 errors")
       if passIndex >=0:
         return True
       else:
