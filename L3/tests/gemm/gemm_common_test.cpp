@@ -68,6 +68,15 @@ int main(int argc, char **argv) {
     l_logFile = argv[l_argIdx++];
   }
   
+  
+  int l_kernelID = 0;
+  
+  if (argc == 5){
+    cout<<"read custom kernel ID\n";
+    l_kernelID = stoi(argv[l_argIdx++]); 
+  }
+  
+  
   int i, j; // i-row index ,j- column index
 
   short * a, * b, * c;
@@ -101,7 +110,7 @@ int main(int argc, char **argv) {
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
   xfblasStatus_t status = XFBLAS_STATUS_SUCCESS;
   
-  status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM);
+  status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM, l_kernelID);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Create Handle failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   

@@ -58,10 +58,10 @@ class GEMMHost : public BLASHost {
     GEMMHost() = delete;
     virtual ~GEMMHost() {}
     GEMMHost(const GEMMHost &) = delete;
-    GEMMHost(const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int nPE) : BLASHost ( p_xclbin, p_logFile, p_status, nPE) {}
+    GEMMHost(const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int PE) : BLASHost ( p_xclbin, p_logFile, p_status, PE) {}
     
   
-    virtual xfblasStatus_t addGEMMOp(void* p_a, void* p_b, void* p_c, void* p_bias, unsigned int p_m, unsigned int p_k, unsigned int p_n, unsigned int p_lda, unsigned int p_ldb, unsigned int p_ldc, unsigned int p_ldx, int p_postScale, int p_postShift, unsigned int PE) {
+    virtual xfblasStatus_t addGEMMOp(void* p_a, void* p_b, void* p_c, void* p_bias, unsigned int p_m, unsigned int p_k, unsigned int p_n, unsigned int p_lda, unsigned int p_ldb, unsigned int p_ldc, unsigned int p_ldx, int p_postScale, int p_postShift) {
       if (this->m_bufHandle.find(p_a) == this->m_bufHandle.end()
             || this->m_bufHandle.find(p_b) == this->m_bufHandle.end()
             || this->m_bufHandle.find(p_c) == this->m_bufHandle.end()
@@ -74,21 +74,23 @@ class GEMMHost : public BLASHost {
       handle_B=l_devPtr[p_b];
       handle_C=l_devPtr[p_c];
       handle_bias=l_devPtr[p_bias];
+      
       xclBOProperties p;
       uint64_t address_A = !xclGetBOProperties(this->m_fpga->m_handle, handle_A, &p) ? p.paddr : -1;
       uint64_t address_B = !xclGetBOProperties(this->m_fpga->m_handle, handle_B, &p) ? p.paddr : -1;
       uint64_t address_C = !xclGetBOProperties(this->m_fpga->m_handle, handle_C, &p) ? p.paddr : -1;
       uint64_t address_bias = !xclGetBOProperties(this->m_fpga->m_handle, handle_bias, &p) ? p.paddr : -1;
+      
       unsigned long long l_aOff, l_bOff, l_cOff, l_xOff;
       l_aOff = (unsigned long long) address_A;
       l_bOff = (unsigned long long) address_B;
       l_cOff = (unsigned long long) address_C;
       l_xOff = (unsigned long long) address_bias;
 
-      l_aOff -= this->m_ddrDeviceBaseAddr[PE];
-      l_bOff -= this->m_ddrDeviceBaseAddr[PE];
-      l_cOff -= this->m_ddrDeviceBaseAddr[PE];
-      l_xOff -= this->m_ddrDeviceBaseAddr[PE];
+      l_aOff -= this->m_fpga->m_baseAddress[this->m_fpga->m_cuIndex];
+      l_bOff -= this->m_fpga->m_baseAddress[this->m_fpga->m_cuIndex];
+      l_cOff -= this->m_fpga->m_baseAddress[this->m_fpga->m_cuIndex];
+      l_xOff -= this->m_fpga->m_baseAddress[this->m_fpga->m_cuIndex];
       
       l_aOff /= this->PAGE_SIZE;
       l_bOff /= this->PAGE_SIZE;

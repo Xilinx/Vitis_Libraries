@@ -60,13 +60,14 @@ int main(int argc, char **argv) {
   
   if (argc < 3){
     cerr << " usage: \n"
+         << " gemx_test.exe gemx.xclbin config_info.dat log.txt 0\n"
          << " gemx_test.exe gemx.xclbin config_info.dat log.txt\n"
          << " gemx_test.exe gemx.xclbin config_info.dat\n";
     return EXIT_FAILURE; 
   }
   unsigned int l_argIdx = 1;
   string l_xclbinFile(argv[l_argIdx++]);
-  string l_configFile(argv[l_argIdx++]);
+  string l_configFile(argv[l_argIdx++]);  
   string l_logFile;
   
   if (argc == 3){
@@ -75,6 +76,13 @@ int main(int argc, char **argv) {
     l_logFile = "log.txt";
   } else {
     l_logFile = argv[l_argIdx++];
+  }
+  
+  int l_kernelID = 0;
+  
+  if (argc == 5){
+    cout<<"read custom kernel ID\n";
+    l_kernelID = stoi(argv[l_argIdx++]); 
   }
   
   int i, j; // i-row index ,j- column index
@@ -86,13 +94,13 @@ int main(int argc, char **argv) {
   int ind = 1;
   for( i = 0; i<  m; i ++){ 
     for( j = 0; j < k; j ++){ 
-      a[ IDX2R (i,j,k )]=( short ) ind++; 
+      a[ IDX2R (i,j,k )]= ind++; 
     } 
   } 
   ind = 1;
   for( i = 0; i<  k; i ++){ 
     for( j = 0; j < n; j ++){ 
-      b[ IDX2R (i,j,n )]=( short ) ind++; 
+      b[ IDX2R (i,j,n )]= ind++; 
     } 
   } 
 
@@ -103,15 +111,17 @@ int main(int argc, char **argv) {
   } 
 
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
-  xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM);
+  xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM, l_kernelID);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Create Handle failed with error code: "<< status << "\n"; 
+    xfblasDestory();
     return EXIT_FAILURE;   
   }
   status = xfblasMallocRestricted(m,k,sizeof(*a),a,k);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
+    xfblasDestory();
     return EXIT_FAILURE;   
   }
   
@@ -119,12 +129,14 @@ int main(int argc, char **argv) {
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix B failed with error code: "<< status << "\n"; 
+    xfblasDestory();
     return EXIT_FAILURE;   
   }
   status = xfblasMallocRestricted(m,n,sizeof(*c),c,n);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix C failed with error code: "<< status << "\n"; 
+    xfblasDestory();
     return EXIT_FAILURE;   
   }
   
@@ -133,6 +145,7 @@ int main(int argc, char **argv) {
   status = xfblasSetMatrixRestricted(c);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Set Matrix failed with error code: "<< status << "\n"; 
+    xfblasDestory();
     return EXIT_FAILURE;   
   }
   
@@ -140,6 +153,7 @@ int main(int argc, char **argv) {
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
+    xfblasDestory();
     return EXIT_FAILURE;   
   }
   
@@ -147,6 +161,7 @@ int main(int argc, char **argv) {
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 
+    xfblasDestory();
     return EXIT_FAILURE;   
   }
   
