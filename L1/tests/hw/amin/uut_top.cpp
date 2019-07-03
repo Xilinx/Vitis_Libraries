@@ -18,7 +18,7 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "asum.h"
+#include "amaxmin.h"
 #include "xf_blas/utility.h"
 
 using namespace xf::linear_algebra::blas;
@@ -38,7 +38,7 @@ int uut_top(
   hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth> > l_str;
   #pragma HLS DATAFLOW
   readVec2Stream<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(p_x, p_n, l_str);
-  asum<BLAS_dataType,BLAS_logParEntries,BLAS_dataWidth>(p_n, l_str, l_res);
+  amin<BLAS_dataType,BLAS_logParEntries,BLAS_dataWidth,BLAS_resDataType>(p_n, l_str, l_res);
   bool l_exactMatch=false;
   bool l_pass = isClose<BLAS_dataType>(1e-3, 3e-6, p_goldRes, l_res, l_exactMatch);
   if (l_pass){

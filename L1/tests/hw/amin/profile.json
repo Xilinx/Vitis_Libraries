@@ -12,7 +12,7 @@
     ["int", 32],
     ["int", 32]
   ],
-  "op": "amax",
+  "op": "amin",
   "logParEntries": 2,
   "vectorSizes": [
     1024,
