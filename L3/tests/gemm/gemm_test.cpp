@@ -94,13 +94,13 @@ int main(int argc, char **argv) {
   int ind = 1;
   for( i = 0; i<  m; i ++){ 
     for( j = 0; j < k; j ++){ 
-      a[ IDX2R (i,j,k )]= ind++; 
+      a[ IDX2R (i,j,k )]= (short) ind++; 
     } 
   } 
   ind = 1;
   for( i = 0; i<  k; i ++){ 
     for( j = 0; j < n; j ++){ 
-      b[ IDX2R (i,j,n )]= ind++; 
+      b[ IDX2R (i,j,n )]= (short) ind++; 
     } 
   } 
 
