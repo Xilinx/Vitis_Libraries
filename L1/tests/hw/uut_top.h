@@ -16,13 +16,13 @@
 #ifndef UUT_TOP_H
 #define UUT_TOP_H
 
-int uut_top(
+void uut_top(
   uint32_t p_n,
   BLAS_dataType p_alpha,
   BLAS_dataType p_x[BLAS_vectorSize],
   BLAS_dataType p_y[BLAS_vectorSize],
   BLAS_dataType p_xRes[BLAS_vectorSize],
   BLAS_dataType p_yRes[BLAS_vectorSize],
-  BLAS_resDataType p_goldRes
+  BLAS_resDataType &p_goldRes
 );
 #endif
