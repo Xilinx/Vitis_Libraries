@@ -99,6 +99,7 @@ class dot(BLAS_L1):
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
     x = dataGen(self.dtype, self.dsize, self.maxV, self.minV)
+    y = dataGen(self.dtype, self.dsize, self.maxV, self.minV)
     r=np.dot(x, y)
     return alpha, x, y, xr, yr, r
 
