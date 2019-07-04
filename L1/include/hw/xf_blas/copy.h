@@ -38,7 +38,7 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
   /**
-   * @brief copy function taht compute Y = X
+   * @brief copy function that compute Y = X
    *
    * @tparam t_DataType the data type of the vector entries
    * @tparam t_DataWidth the number of bits used to represent the datatype

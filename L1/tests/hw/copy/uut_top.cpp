@@ -41,7 +41,7 @@ void uut_top(
   #pragma HLS DATAFLOW
   readVec2Stream<BLAS_dataType,BLAS_dataWidth, BLAS_parEntries>(p_x, p_n, l_strX);
   copy<BLAS_dataType, BLAS_dataWidth, BLAS_parEntries>(p_n, l_strX, l_strR);
-  writeStream2Vec<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(l_strR, p_n, p_yRes);
+  writeStream2Vec<BLAS_dataType,BLAS_dataWidth, BLAS_parEntries>(l_strR, p_n, p_yRes);
 }
 
 #endif
