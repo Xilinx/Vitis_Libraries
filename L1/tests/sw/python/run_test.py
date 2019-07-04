@@ -134,10 +134,17 @@ class RunTest:
         for j in range(self.numSim): 
           dataList.append(op.compute())
           alpha, xdata, ydata, xr, yr,r = dataList[-1]
-          blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr,
-              r.astype(rtype))
+          res = blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr, r.astype(rtype))
+          if not res == 'XFBLAS_STATUS_SUCCESS':
+            print("ERROR: Add instruction failed.")
+            print("Test failed due to the previous errors.")
+            return
 
-        blas_gen.write2BinFile(binFile)
+        res = blas_gen.write2BinFile(binFile)
+        if not res == 'XFBLAS_STATUS_SUCCESS':
+          print("ERROR: Write data file %s failed."%binFile)
+          print("Test failed due to the previous errors.")
+          return
         print("Data file %s has been generated sucessfully."%binFile)
         print("Test vector size %d. Parameters in file %s.\nLog file %s\n"%(vectorSize, paramTclPath, logfile))
         self.hls.execution(binFile, logfile, True)
@@ -150,14 +157,29 @@ class RunTest:
           return
     print("All tests are passed.")
 
-def main(profile, makefile):
-  runTest = RunTest()
-  runTest.parseProfile(profile)
-  runTest.runTest(makefile)
+def main(profileList, makefile): 
+  for profile in profileList:
+    if not os.path.exists(profile):
+      print("File %s is not exists."%profile)
+      continue
+    runTest = RunTest()
+    runTest.parseProfile(profile)
+    runTest.runTest(makefile)
   
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
-  parser.add_argument('p', type=str, metavar='Profile', help='path to the profile file')
+  parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
+  group = parser.add_mutually_exclusive_group(required=True)
+  group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of pathes to the profile files')
+  group.add_argument('--operator', nargs='*',metavar='opName', help='list of operator names')
   args = parser.parse_args()
-  makefile=r'./Makefile'
-  main(args.p, makefile)
+  
+  profile = list()
+  if args.profile:
+    profile = args.profile
+  elif args.operator:
+    for op in args.operator:
+      profile.append('./hw/%s/profile.json'%op)
+  else:
+    parser.print_help()
+  main(set(profile), args.makefile)
