@@ -97,11 +97,14 @@ namespace blas {
       hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_y,
       t_DataType &p_res
       ) {
+    #pragma HLS DATA_PACK variable=p_x
+    #pragma HLS DATA_PACK variable=p_y
     #ifndef __SYNTHESIS__
     assert(p_n % ( 1 << t_LogParEntries) == 0);
     #endif
     #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > l_mulStr;
+    #pragma HLS DATA_PACK variable=l_mulStr
     mul<t_DataType, 1<<t_LogParEntries, t_DataWidth, t_IndexType>(p_n,p_x,p_y,l_mulStr);
     sum<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType>(p_n, l_mulStr, p_res);    
   }
