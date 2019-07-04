@@ -19,6 +19,7 @@ import argparse
 import os
 
 class BLAS_GEN:
+
   def __init__(self, lib):
     c_types = [ct.c_byte, ct.c_short, ct.c_int, ct.c_long, ct.c_longlong,
       ct.c_ubyte, ct.c_ushort, ct.c_uint, ct.c_ulong,
@@ -27,6 +28,17 @@ class BLAS_GEN:
     self.lib.genBinNew.restype=ct.c_void_p
     self.obj = lib.genBinNew()
     self.typeDict = {np.dtype(ctype): ctype for ctype in c_types}
+    self.status =['XFBLAS_STATUS_SUCCESS',          ##0
+                  'XFBLAS_STATUS_NOT_INITIALIZED',  ##1
+                  'XFBLAS_STATUS_INVALID_VALUE',    ##2
+                  'XFBLAS_STATUS_ALLOC_FAILED',     ##3
+                  'XFBLAS_STATUS_NOT_SUPPORTED',    ##4
+                  'XFBLAS_STATUS_NOT_PADDED',       ##5
+                  'XFBLAS_STATUS_MEM_ALLOCATED',    ##6
+                  'XFBLAS_STATUS_INVALID_OP',       ##7
+                  'XFBLAS_STATUS_INVALID_FILE',     ##8
+                  'XFBLAS_STATUS_INVALID_PROGRAM']  ##9
+  
 
   def _getType(self, x):
     return self.typeDict[x.dtype]
@@ -45,19 +57,22 @@ class BLAS_GEN:
     func.argtypes=[ct.c_void_p, ct.c_char_p, ct.c_int, 
       self._getType(p_alpha),  ct.c_void_p,ct.c_void_p,ct.c_void_p,
       ct.c_void_p, self._getType(p_res)]
-    return func(self.obj, p_opName.encode('utf-8'), p_n, p_alpha,
+    status = func(self.obj, p_opName.encode('utf-8'), p_n, p_alpha,
         self._getPointer(p_x), self._getPointer(p_y), self._getPointer(p_xRes),
             self._getPointer(p_yRes), p_res)
+    return self.status[status]
 
   def write2BinFile(self, p_fileName):
     func=self.lib.write2BinFile
     func.argtypes=[ct.c_void_p, ct.c_char_p]
-    return func(self.obj, p_fileName.encode('utf-8'))
+    status = func(self.obj, p_fileName.encode('utf-8'))
+    return self.status[status]
 
   def readFromBinFile(self, p_fileName):
     func=self.lib.readFromBinFile
     func.argtypes=[ct.c_void_p, ct.c_char_p]
-    return func(self.obj, p_fileName.encode('utf-8'))
+    status = func(self.obj, p_fileName.encode('utf-8'))
+    return self.status[status]
 
   def printProgram(self):
     func=self.lib.printProgram 
