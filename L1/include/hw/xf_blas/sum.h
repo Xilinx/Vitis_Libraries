@@ -21,8 +21,8 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_ASUM_H
-#define XF_BLAS_ASUM_H
+#ifndef XF_BLAS_SUM_H
+#define XF_BLAS_SUM_H
 
 
 #ifndef __cplusplus
@@ -32,7 +32,6 @@
 #include "ap_int.h"
 #include "hls_stream.h"
 #include "xf_blas/utility.h"
-#include "xf_abs.h"
 
 namespace xf {
 namespace linear_algebra {
