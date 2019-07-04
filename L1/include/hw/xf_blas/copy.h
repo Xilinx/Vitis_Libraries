@@ -57,8 +57,8 @@ namespace blas {
   >
   void copy (
     unsigned int p_n,
-    hls::stream<ap_uint<(t_DataWidth * t_ParEntries)> > &p_x,
-    hls::stream<ap_uint<(t_DataWidth * t_ParEntries)> > &p_y
+    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_x,
+    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_y
   ) {
     #ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
@@ -66,7 +66,7 @@ namespace blas {
     const unsigned int l_parEntries = p_n / t_ParEntries;
     for (t_IndexType i=0; i<l_parEntries; ++i) {
     #pragma HLS PIPELINE
-      ap_uint<(t_DataWidth*t_ParEntries)> l_x;
+      WideType<t_DataType, t_ParEntries, t_DataWidth> l_x;
       l_x = p_x.read();
       p_y.write(l_x);
     }
