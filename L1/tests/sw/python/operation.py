@@ -103,6 +103,15 @@ class dot(BLAS_L1):
     r=np.dot(x, y)
     return alpha, x, y, xr, yr, r
 
+class nrm2(BLAS_L1):
+  def __init__(self, dtype, dsize, maxV, minV):
+    BLAS_L1.__init__(self, 'nrm2', dtype, dsize, maxV, minV)
+  def compute(self): 
+    alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
+    x = dataGen(self.dtype, self.dsize, self.maxV, self.minV)
+    r = np.linalg.norm(x)
+    return alpha, x, y, xr, yr, r
+
 class swap(BLAS_L1):
   def __init__(self, dtype, dsize, maxV, minV):
     BLAS_L1.__init__(self, 'swap', dtype, dsize, maxV, minV)

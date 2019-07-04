@@ -51,8 +51,9 @@ namespace blas {
           {"axpy", 4},
           {"copy", 5},
           {"dot", 6},
-          {"scal", 7},
-          {"swap", 8}
+          {"nrm2", 7},
+          {"scal", 8},
+          {"swap", 9}
         };
       }
       xfblasStatus_t getOpCode(const string &p_opName, uint32_t &p_opCode) {

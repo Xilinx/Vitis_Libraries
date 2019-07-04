@@ -1,0 +1,23 @@
+{
+  "b_csim": true,
+  "b_synth": true,
+  "b_cosim": true,
+  "dataTypes": [
+    ["float", 64]
+  ],
+  "retTypes": [
+    ["float", 64]
+  ],
+  "op": "nrm2",
+  "logParEntries": 2,
+  "vectorSizes": [
+    1024,
+    4096,
+    8192
+  ],
+  "valueRange": [
+    -1024,
+    1024
+  ],
+  "numSimulation": 2
+}
