@@ -127,6 +127,7 @@ namespace blas {
           hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
           t_DataType &p_sum
           ) {
+        #pragma HLS data_pack variable=p_x
         #ifndef __SYNTHESIS__
         assert(p_n % ( 1 << t_LogParEntries) == 0);
         #endif
@@ -135,6 +136,8 @@ namespace blas {
         hls::stream<t_DataType> l_data, l_pad;
         #pragma HLS stream variable=l_data depth=2
         #pragma HLS stream variable=l_pad depth=2
+        #pragma HLS data_pack variable=l_data
+        #pragma HLS data_pack variable=l_pad
         unsigned int l_numElem = p_n >> t_LogParEntries;
         preProcess<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType>(l_numElem, p_x, l_data);
         padding<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad);
