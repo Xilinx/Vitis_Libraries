@@ -69,7 +69,7 @@ class HLS:
     if self.cosim:
       pass
 
-  def generateParam(self, op, c_type, dw, r_type, logParEntries, vs, fileparams):
+  def generateParam(self, op, c_type, dw, r_type, logParEntries, parEntries, vs, fileparams):
     self.params = fileparams
     with open(self.params, 'w') as f:
        f.write('array set opt {\n ')   
@@ -78,6 +78,7 @@ class HLS:
        f.write('   resDataType %s\n '%r_type)
        f.write('   dataWidth %d\n '%dw)
        f.write('   logParEntries %d\n '%logParEntries)
+       f.write('   parEntries %d\n '%parEntries)
        f.write('   vectorSize %d\n '%vs)
        f.write('   pageSizeBytes 4096\n ')
        f.write('   memWidthBytes 64\n ')
@@ -100,15 +101,15 @@ class HLS:
        else:
          f.write('   runRTLsim     0\n ')
        f.write(' }\n ')
-  def generateDirective(self, logParEntries, directivePath):
+  def generateDirective(self, parEntries, directivePath):
     self.directive = directivePath
     with open(self.directive, 'w') as f:
        #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_x\n'%(vs))
        #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_y\n'%(vs))
        #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_xRes\n'%(vs))
        #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_yRes\n'%(vs))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_x\n'%(1<<logParEntries))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_y\n'%(1<<logParEntries))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_xRes\n'%(1<<logParEntries))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_yRes\n'%(1<<logParEntries))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_x\n'%(parEntries))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_y\n'%(parEntries))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_xRes\n'%(parEntries))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_yRes\n'%(parEntries))
 
