@@ -164,10 +164,10 @@ namespace blas {
         else if (m_datMemSize[p_memHandle] != p_bufBytes){
           m_datMem[p_memHandle] = p_memPtr;
           m_datMemSize[p_memHandle] = p_bufBytes;
-          l_resStats = XFBLAS_STATUS_SUCCESS;
+          l_resStats = XFBLAS_STATUS_MEM_ALLOCATED;
         }
         else {
-          l_resStats = XFBLAS_STATUS_MEM_ALLOCATED;
+          l_resStats = XFBLAS_STATUS_SUCCESS;
         }
         return (l_resStats);
       }
