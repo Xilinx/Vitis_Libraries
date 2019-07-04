@@ -67,6 +67,7 @@ template<typename t_DataType,
     unsigned int l_numElem = p_n >> t_LogParEntries;
     hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > l_abs;
     #pragma HLS stream variable=l_abs depth=2
+    #pragma HLS DATAFLOW
 
     abs<t_DataType, 1<<t_LogParEntries, t_DataWidth, t_IndexType>(p_n, p_x, l_abs);
     min<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType>(p_n, l_abs, p_result);
