@@ -37,6 +37,7 @@ void uut_top(
   BLAS_resDataType l_res;
 
   hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth> > l_str;
+  #pragma HLS data_pack variable=l_str
   #pragma HLS DATAFLOW
   readVec2Stream<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(p_x, p_n, l_str);
   asum<BLAS_dataType,BLAS_logParEntries,BLAS_dataWidth>(p_n, l_str, l_res);

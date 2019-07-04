@@ -64,6 +64,8 @@ namespace blas {
           hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_x,
           hls::stream<WideType<t_AbsDataType, t_ParEntries, t_AbsDataWidth> > & p_abs
           ) {
+        #pragma HLS data_pack variable=p_x
+        #pragma HLS data_pack variable=p_abs
         #ifndef __SYNTHESIS__
         assert(p_n % t_ParEntries == 0);
         #endif

@@ -63,6 +63,7 @@ template<typename t_DataType,
       hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
       t_IndexType &p_result
       ) {
+    #pragma HLS data_pack variable=p_x
     #ifndef __SYNTHESIS__
     assert(p_n % ( 1 << t_LogParEntries) == 0);
     #endif
