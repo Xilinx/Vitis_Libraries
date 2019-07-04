@@ -31,7 +31,7 @@ void uut_top(
   BLAS_dataType p_y[BLAS_vectorSize],
   BLAS_dataType p_xRes[BLAS_vectorSize],
   BLAS_dataType p_yRes[BLAS_vectorSize],
-  BLAS_resDataType p_goldRes
+  BLAS_resDataType &p_goldRes
 ) {
   BLAS_resDataType l_res;
 
