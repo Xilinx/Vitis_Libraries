@@ -15,14 +15,14 @@
  */
 
 /**
- * @file amaxmin.h
- * @brief BLAS Level 1 amax and amin template function implementation.
+ * @file maxmin.h
+ * @brief BLAS Level 1 max and min template function implementation.
  *
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_AMAXMIN_H
-#define XF_BLAS_AMAXMIN_H
+#ifndef XF_BLAS_MAXMIN_H
+#define XF_BLAS_MAXMIN_H
 
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
@@ -101,16 +101,10 @@ namespace {
         for (t_IndexType i = 0; i < p_numElement; i++) {
           #pragma HLS PIPELINE
           WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> l_elem = p_x.read();
-          t_DataType l_x[l_ParEntries];
-          for (t_IndexType k = 0; k < l_ParEntries; k++) {
-            #pragma HLS UNROLL
-            t_DataType l_value = l_elem[k];
-            l_x[k] = hls::abs(l_value);
-          }
           t_IndexType l_pos;
           t_DataType l_value;
           BinaryCmp<t_DataType, l_ParEntries, t_IndexType, t_Max>::cmp(
-              l_x, l_value, l_pos);
+              l_elem.getValAddr(), l_value, l_pos);
           p_valueStream.write(l_value);
           p_indexStream.write((i << t_LogParEntries) + l_pos);
         }
@@ -165,7 +159,7 @@ namespace {
     unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType,
     bool t_Max>
-      void aMaxMinHelper (
+      void MaxMinHelper (
           unsigned int p_n, // number of element in the stream
           hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
           t_IndexType &p_result
@@ -186,7 +180,7 @@ namespace {
 
 
 /**
- * @brief amax function that returns the position of the vector element that has the maximum magnitude.
+ * @brief max function that returns the position of the vector element that has the maximum magnitude.
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
@@ -202,7 +196,7 @@ template<typename t_DataType,
   unsigned int t_LogParEntries, 
   unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
   typename t_IndexType>
-  void amax(
+  void max(
       unsigned int p_n,
       hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
       t_IndexType &p_result
@@ -211,11 +205,11 @@ template<typename t_DataType,
     assert(p_n % ( 1 << t_LogParEntries) == 0);
     #endif
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    aMaxMinHelper<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, true>(l_numElem, p_x, p_result);
+    MaxMinHelper<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, true>(l_numElem, p_x, p_result);
   }
 
 /**
- * @brief amin function that returns the position of the vector element that has the minimum magnitude.
+ * @brief min function that returns the position of the vector element that has the minimum magnitude.
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
@@ -231,7 +225,7 @@ template<typename t_DataType,
   unsigned int t_LogParEntries, 
   unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
   typename t_IndexType>
-  void amin(
+  void min(
       unsigned int p_n,
       hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
       t_IndexType &p_result
@@ -240,7 +234,7 @@ template<typename t_DataType,
     assert(p_n % ( 1 << t_LogParEntries) == 0);
     #endif
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    aMaxMinHelper<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, false>(l_numElem, p_x, p_result);
+    MaxMinHelper<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, false>(l_numElem, p_x, p_result);
   }
 
 
