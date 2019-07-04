@@ -15,14 +15,14 @@
  */
 
 /**
- * @file copy.h
+ * @file scal.h
  * @brief BLAS Level 1 copy template function implementation.
  *
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_COPY_H
-#define XF_BLAS_COPY_H
+#ifndef XF_BLAS_SCAL_H
+#define XF_BLAS_SCAL_H
 
 
 #ifndef __cplusplus
@@ -38,16 +38,16 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
   /**
-   * @brief copy function that compute Y = X
+   * @brief scal function that compute X = alpha * X
    *
    * @tparam t_DataType the data type of the vector entries
    * @tparam t_DataWidth the number of bits used to represent the datatype
    * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
    * @tparam t_IndexType the datatype of the index
    *
-   * @param p_n the number of entries in vector X and Y
+   * @param p_n the number of entries in vector X, p_n % t_ParEntries == 0
    * @param p_x the packed input vector stream
-   * @param p_y the packed output vector stream 
+   * @param p_res the packed output vector stream 
    */
   template<
     typename t_DataType,
@@ -55,13 +55,14 @@ namespace blas {
     unsigned int t_ParEntries,
     typename t_IndexType=unsigned int
   >
-  void copy (
+  void scal (
     unsigned int p_n,
+    t_DataType p_alpha,
     hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_x,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_y
+    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_res
   ) {
     #pragma HLS DATA_PACK variable=p_x
-    #pragma HLS DATA_PACK variable=p_y
+    #pragma HLS DATA_PACK variable=p_res
     
     #ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
@@ -69,9 +70,15 @@ namespace blas {
     const unsigned int l_parEntries = p_n / t_ParEntries;
     for (t_IndexType i=0; i<l_parEntries; ++i) {
     #pragma HLS PIPELINE
-      WideType<t_DataType, t_ParEntries, t_DataWidth> l_x;
-      l_x = p_x.read();
-      p_y.write(l_x);
+      WideType<t_DataType, t_ParEntries, t_DataWidth> l_valX;
+      WideType<t_DataType, t_ParEntries, t_DataWidth> l_valY;
+      #pragma HLS ARRAY_PARTITION variable=l_valX complete dim=1
+      #pragma HLS ARRAY_PARTITION variable=l_valY complete dim=1
+      l_valX = p_x.read();
+      for (unsigned int j=0; j<t_ParEntries; ++j) {
+        l_valY[j] = p_alpha * l_valX[j];
+      }
+      p_res.write(l_valY);
     }
   } 
 } //end namespace blas
