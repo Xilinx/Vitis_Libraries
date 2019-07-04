@@ -15,7 +15,7 @@
  */
 
 /**
- * @file xf_abs.h
+ * @file abs.h
  * @brief BLAS Level 1 abs template function implementation.
  *
  * This file is part of XF BLAS Library.
@@ -41,7 +41,7 @@ namespace linear_algebra {
 namespace blas {
 
   /**
-   * @brief xf_abs function that returns the magnitude of each vector element.
+   * @brief abs function that returns the magnitude of each vector element.
    *
    * @tparam t_DataType the data type of the vector entries
    * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
@@ -59,7 +59,7 @@ namespace blas {
     typename t_IndexType=unsigned int,
     typename t_AbsDataType = t_DataType,
     unsigned int t_AbsDataWidth = sizeof(t_AbsDataType) << 3>
-      void xf_abs(
+      void abs(
           unsigned int p_n,
           hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_x,
           hls::stream<WideType<t_AbsDataType, t_ParEntries, t_AbsDataWidth> > & p_abs
