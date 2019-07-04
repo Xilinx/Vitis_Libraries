@@ -18,13 +18,13 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "amaxmin.h"
+#include "amin.h"
 #include "xf_blas/utility.h"
 
 using namespace xf::linear_algebra::blas;
 
 
-int uut_top(
+void uut_top(
   uint32_t p_n,
   BLAS_dataType p_alpha,
   BLAS_dataType p_x[BLAS_vectorSize],
@@ -39,14 +39,7 @@ int uut_top(
   #pragma HLS DATAFLOW
   readVec2Stream<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(p_x, p_n, l_str);
   amin<BLAS_dataType,BLAS_logParEntries,BLAS_dataWidth,BLAS_resDataType>(p_n, l_str, l_res);
-  bool l_exactMatch=false;
-  bool l_pass = isClose<BLAS_dataType>(1e-3, 3e-6, p_goldRes, l_res, l_exactMatch);
-  if (l_pass){
-    return 0;
-  }
-  else {
-    return -1;
-  }
+  p_goldRes = l_res;
 }
  
 #endif
