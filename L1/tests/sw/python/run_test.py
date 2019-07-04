@@ -36,9 +36,10 @@ class RunTest:
     self.dtList =  None
     self.vectorSize = None  
     self.dtWidth = None  
-    self.parEntries = None
+    self.parEntries = 1
+    self.logParEntries = 0
     self.valueRange = None
-    self.numSim = None
+    self.numSim = 1
 
     self.hls = None
     self.typeDict ={
@@ -62,7 +63,11 @@ class RunTest:
     self.rtList = self.profile['retTypes']
 
 
-    self.logParEntries = self.profile['logParEntries']
+    if 'logParEntries' in self.profile:
+      self.logParEntries = self.profile['logParEntries']
+      self.parEntries = 1 << self.logParEntries
+    if 'parEntries' in self.profile:
+      self.parEntries == self.profile['parEntries']
     
     self.minValue = self.profile['valueRange'][0]
     self.maxValue = self.profile['valueRange'][1]
@@ -85,7 +90,7 @@ class RunTest:
 
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.logParEntries))
-    self.hls.generateDirective(self.logParEntries, directivePath)
+    self.hls.generateDirective(self.parEntries, directivePath)
 
 
   def runTest(self,makefile):
@@ -116,7 +121,7 @@ class RunTest:
         paramTclPath =os.path.join(self.testPath, 
            r'parameters_v%d_%s.tcl'%(vectorSize,typeStr))
         self.hls.generateParam(self.op, c_type, dw, r_type, self.logParEntries, 
-            vectorSize, paramTclPath)
+            self.parEntries, vectorSize, paramTclPath)
 
         logfile=os.path.join(self.dataPath, 
             r'logfile_v%d_%s.log'%(vectorSize,typeStr))
