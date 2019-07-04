@@ -411,7 +411,6 @@ void readVec2Stream(
   unsigned int p_n,
   hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth > > &p_out
 ) {
-//#pragma HLS DATA_PACK variable=p_out
   #ifndef __SYNTHESIS__
     assert ((p_n % t_ParEntries) == 0);
   #endif
