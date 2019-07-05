@@ -39,6 +39,7 @@ class HLS:
         line = hls.stdout.readline()
         if not line:
           break
+        line = line.decode('utf-8')
         if b_print:
           print(line, end='')
         f.write(line)
