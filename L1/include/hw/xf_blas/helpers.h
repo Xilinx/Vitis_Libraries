@@ -29,12 +29,13 @@
 #include "helpers/utils/utils.h"
 
 
+/*        DATA MOVER            */
+#include "helpers/dataMover/dataMover.h"
+
+
 /*        HELPER FUNCTIONS             */
 #include "helpers/funcs/maxmin.h"
 #include "helpers/funcs/abs.h"
 #include "helpers/funcs/sum.h"
-
-/*        DATA MOVER            */
-#include "helpers/dataMover/dataMover.h"
 
 #endif

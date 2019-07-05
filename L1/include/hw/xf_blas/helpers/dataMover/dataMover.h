@@ -21,18 +21,12 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_DATA_MOVER_H
-#define XF_BLAS_DATA_MOVER_H
+#ifndef XF_BLAS_DATAMOVER_H
+#define XF_BLAS_DATAMOVER_H
 
-#include <stdint.h>
-#include <ostream>
-#include <iomanip>
-#include <iostream>
-#include "hls_math.h"
 #include "hls_stream.h"
 #include "ap_int.h"
 #include "ap_shift_reg.h"
-#include "xf_blas/helpers.h"
 
 namespace xf {
 namespace linear_algebra {

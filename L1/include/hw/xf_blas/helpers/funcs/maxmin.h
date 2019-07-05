@@ -28,10 +28,8 @@
 #error "BLAS Library only works with C++."
 #endif
 
-#include "ap_int.h"
+#include "hls_math.h"
 #include "hls_stream.h"
-#include "xf_blas/helpers.h"
-
 
 namespace xf {
 namespace linear_algebra {
@@ -143,7 +141,7 @@ namespace {
         }
         const unsigned int l_numRem = p_numElement - (l_numIter << t_LogNumEntries);
         for (t_IndexType i = 0; i < l_numRem; i++) {
-          #pragma HLS PIPELINE
+//          #pragma HLS PIPELINE
           #pragma HLS loop_tripcount max=l_numEntries
           t_DataType l_v;
           t_IndexType l_i;

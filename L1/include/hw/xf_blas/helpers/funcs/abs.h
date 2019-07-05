@@ -24,17 +24,12 @@
 #ifndef XF_BLAS_ABS_H
 #define XF_BLAS_ABS_H
 
-
-
-
-
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
 #endif
 
-#include "ap_int.h"
+#include "hls_math.h"
 #include "hls_stream.h"
-#include "xf_blas/helpers.h"
 
 namespace xf {
 namespace linear_algebra {

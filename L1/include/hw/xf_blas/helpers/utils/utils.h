@@ -24,16 +24,6 @@
 #ifndef XF_BLAS_UTILS_H
 #define XF_BLAS_UTILS_H
 
-#include <stdint.h>
-#include <ostream>
-#include <iomanip>
-#include <iostream>
-#include "hls_math.h"
-#include "hls_stream.h"
-#include "ap_int.h"
-#include "ap_shift_reg.h"
-#include "types.h"
-
 namespace xf {
 namespace linear_algebra {
 namespace blas {

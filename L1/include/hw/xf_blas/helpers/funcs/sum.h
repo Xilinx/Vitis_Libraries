@@ -29,9 +29,8 @@
 #error "BLAS Library only works with C++."
 #endif
 
-#include "ap_int.h"
+#include "hls_math.h"
 #include "hls_stream.h"
-#include "xf_blas/helpers.h"
 
 namespace xf {
 namespace linear_algebra {
