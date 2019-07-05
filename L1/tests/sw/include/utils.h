@@ -34,7 +34,7 @@ bool isClose(
   ) {
   float l_diffAbs = abs(p_v - p_vRef);
   p_exactMatch = (p_vRef == p_v);
-  bool l_status = (l_diffAbs <= (p_tolAbs + p_tolRel*l_diffAbs));
+  bool l_status = (l_diffAbs <= (p_tolAbs + p_tolRel*abs(p_vRef)));
   return(l_status);
 }
 template<typename T>
@@ -45,7 +45,7 @@ bool compare(T x, T ref){
 template<>
 bool compare<double>(double x, double ref){
   bool l_exactMatch;
-  return isClose<double>(1e-2, 3e-4, x, ref, l_exactMatch);
+  return isClose<float>(1e-3, 3e-6, x, ref, l_exactMatch);
 }
 template<>
 bool compare<float>(float x, float ref){

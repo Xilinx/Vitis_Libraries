@@ -31,9 +31,7 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "xf_blas/utility.h"
-#include "abs.h"
-#include "sum.h"
+#include "xf_blas/helpers.h"
 
 namespace xf {
 namespace linear_algebra {

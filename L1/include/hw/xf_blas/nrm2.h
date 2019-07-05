@@ -32,8 +32,7 @@
 #include "ap_int.h"
 #include "hls_math.h"
 #include "hls_stream.h"
-#include "sum.h"
-#include "xf_blas/utility.h"
+#include "xf_blas/helpers.h"
 
 
 namespace xf {

@@ -19,7 +19,7 @@
 #include "ap_int.h"
 #include "hls_stream.h"
 #include "scal.h"
-#include "xf_blas/utility.h"
+#include "xf_blas/helpers.h"
 
 using namespace xf::linear_algebra::blas;
 
