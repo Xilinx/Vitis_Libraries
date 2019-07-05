@@ -18,62 +18,10 @@
 #include <vector>
 #include <cmath>
 #include "blas_def.h"
+#include "utils.h"
 #include "uut_top.h"
 
 using namespace xf::linear_algebra::blas;
-#include <exception>
-
-//provide same functionality as numpy.isclose
-template <typename T>
-bool isClose(
-  float p_tolRel, 
-  float p_tolAbs, 
-  T p_vRef, 
-  T p_v,
-  bool &p_exactMatch
-  ) {
-  float l_diffAbs = abs(p_v - p_vRef);
-  p_exactMatch = (p_vRef == p_v);
-  bool l_status = (l_diffAbs <= (p_tolAbs + p_tolRel*l_diffAbs));
-  return(l_status);
-}
-template<typename T>
-bool compare(T x, T ref){
-  return x == ref;
-}
-
-template<>
-bool compare<double>(double x, double ref){
-  bool l_exactMatch;
-  return isClose<double>(1e-3, 3e-6, x, ref, l_exactMatch);
-}
-template<>
-bool compare<float>(float x, float ref){
-  bool l_exactMatch;
-  return isClose<float>(1e-3, 3e-6, x, ref, l_exactMatch);
-}
-
-
-template<typename T>
-bool compare(unsigned int n, T *x, T *ref){
-  bool l_ret = true;
-  try{
-    if(ref == nullptr){
-      if(x == nullptr)
-        return true;
-      for(int i=0;i<n;i++)
-        l_ret = l_ret && compare(x[i], (T)0);
-    } else {
-      for(int i=0;i<n;i++)
-        l_ret = l_ret && compare(x[i], ref[i]);
-    }
-  } catch (exception &e){
-    std::cout << "Exception happend: " <<e.what() << std::endl;
-    return false;
-  }
-  return l_ret;
-}
-
 int main(int argc, char** argv){
   if (argc < 2) {
     std::cout << "ERROR: passed %d arguments instead of %d, exiting" << argc << 2 << std::endl;
