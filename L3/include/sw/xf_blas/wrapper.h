@@ -222,7 +222,7 @@ xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float *A, int l
 }  
 
 /**
- * @brief This function copies a matrix in host memory to FPGA device memory. xfblasMalloc() need to be called prior to this function.
+ * @brief This function copies a matrix in host memory to FPGA device memory. xfblasMallocRestricted() need to be called prior to this function.
  * @param A pointer to the matrix array in the host memory
  * @retval xfblasStatus_t 0 if the operation completed successfully
  * @retval xfblasStatus_t 1 if the library was not initialized
