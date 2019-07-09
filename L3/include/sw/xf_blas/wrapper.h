@@ -33,7 +33,7 @@ namespace blas {
  * @retval xfblasStatus_t 2 if the xclbin doesn't contain the engine
  * @retval xfblasStatus_t 4 if the engine is not supported for now
  */
-xfblasStatus_t xfblasCreate(const char * xclbin, string configFile, const char * logFile, xfblasEngine_t engineName, unsigned int PE = 0) {
+xfblasStatus_t xfblasCreate(const char* xclbin, string configFile, const char* logFile, xfblasEngine_t engineName, unsigned int PE = 0) {
   xfblasStatus_t l_status = buildConfigDict(configFile, engineName, &ConfigDict::instance().m_dict);  
   if (l_status != XFBLAS_STATUS_SUCCESS){
     return l_status;
@@ -61,7 +61,7 @@ xfblasStatus_t xfblasCreate(const char * xclbin, string configFile, const char *
  * @retval xfblasStatus_t 3 if there is memory already allocated to the same matrix
  * @retval xfblasStatus_t 4 if the engine is not supported for now
  */
-xfblasStatus_t xfblasMalloc(short ** devPtr, int rows, int lda, int elemSize){
+xfblasStatus_t xfblasMalloc(short** devPtr, int rows, int lda, int elemSize){
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -92,7 +92,7 @@ xfblasStatus_t xfblasMalloc(short ** devPtr, int rows, int lda, int elemSize){
   }
 } 
 
-xfblasStatus_t xfblasMalloc(float ** devPtr, int rows, int lda, int elemSize){
+xfblasStatus_t xfblasMalloc(float** devPtr, int rows, int lda, int elemSize){
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -137,7 +137,7 @@ xfblasStatus_t xfblasMalloc(float ** devPtr, int rows, int lda, int elemSize){
  * @retval xfblasStatus_t 4 if the engine is not supported for now
  * @retval xfblasStatus_t 5 if rows, cols or lda is not padded correctly
  */
-xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void * A, int lda){
+xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void* A, int lda){
     if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
       return XFBLAS_STATUS_NOT_INITIALIZED;       
     }
@@ -177,7 +177,7 @@ xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void * A
  * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
  * @retval xfblasStatus_t 4 if the engine is not supported for now
  */
-xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, short *A, int lda, short * d_A){
+xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, short* A, int lda, short* d_A){
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -199,7 +199,7 @@ xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, short *A, int l
   }
 }  
 
-xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float *A, int lda, float * d_A){
+xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float* A, int lda, float* d_A){
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -228,7 +228,7 @@ xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float *A, int l
  * @retval xfblasStatus_t 1 if the library was not initialized
  * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
  */
-xfblasStatus_t xfblasSetMatrixRestricted(void * A){
+xfblasStatus_t xfblasSetMatrixRestricted(void* A){
     if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
       return XFBLAS_STATUS_NOT_INITIALIZED;       
     }
@@ -243,7 +243,7 @@ xfblasStatus_t xfblasSetMatrixRestricted(void * A){
  * @retval xfblasStatus_t 1 if the library was not initialized
  * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
  */
-xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short * d_a, short * a, int lda) {
+xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_a, short* a, int lda) {
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -266,7 +266,7 @@ xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short * d_a, sh
   }
 }
 
-xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float * d_a, float * a, int lda) {
+xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float* d_a, float* a, int lda) {
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -296,7 +296,7 @@ xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float * d_a, fl
  * @retval xfblasStatus_t 1 if the library was not initialized
  * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
  */
-xfblasStatus_t xfblasGetMatrixRestricted(void *A) {
+xfblasStatus_t xfblasGetMatrixRestricted(void* A) {
     if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
       return XFBLAS_STATUS_NOT_INITIALIZED;       
     }
@@ -312,7 +312,7 @@ xfblasStatus_t xfblasGetMatrixRestricted(void *A) {
  * @retval xfblasStatus_t 1 if the library was not initialized
  * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
  */
-xfblasStatus_t xfblasFree(void *A) {
+xfblasStatus_t xfblasFree(void* A) {
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -357,7 +357,7 @@ xfblasStatus_t xfblasDestory(){
  * @retval xfblasStatus_t 3 if not all the matrices have FPGA devie memory allocated
  * @retval xfblasStatus_t 4 if the engine is not supported for now
  */
-xfblasStatus_t xfblasSgemm(xfblasOperation_t transa, xfblasOperation_t transb, int m, int n, int k, int alpha, void * A, int lda, void * B, int ldb, int beta, void * C, int ldc){
+xfblasStatus_t xfblasGemm(xfblasOperation_t transa, xfblasOperation_t transb, int m, int n, int k, int alpha, void * A, int lda, void * B, int ldb, int beta, void * C, int ldc){
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }

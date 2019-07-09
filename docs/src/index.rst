@@ -38,3 +38,9 @@ for reference.
 
    overview.rst
    release.rst
+ 
+.. toctree::
+   :caption: User Guide
+   :maxdepth: 1
+
+   user_guide/L3.rst
