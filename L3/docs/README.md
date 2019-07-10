@@ -1,1 +1,0 @@
-This directory contains documents and user guides.

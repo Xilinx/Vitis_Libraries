@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;   
   }
   
-  status = xfblasSgemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n);
+  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
