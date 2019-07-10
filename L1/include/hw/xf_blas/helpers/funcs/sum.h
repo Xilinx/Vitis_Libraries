@@ -39,17 +39,16 @@ namespace blas {
   namespace{
     template<typename t_DataType, 
       unsigned int t_LogParEntries, 
-      unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
       typename t_IndexType = unsigned int>
         void preProcess(
             unsigned int p_numElems,
-            hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+            hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
             hls::stream<t_DataType> & p_data
             ) {
           const unsigned int l_ParEntries = 1 << t_LogParEntries;
           for(t_IndexType i=0;i<p_numElems;i++){
             #pragma HLS PIPELINE
-            WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> l_x = p_x.read();
+            WideType<t_DataType, 1<<t_LogParEntries> l_x = p_x.read();
             #pragma HLS ARRAY_PARTITION variable=l_x complete dim=1
             t_DataType l_sum;
             l_sum = BinarySum<t_DataType, l_ParEntries>::sum(l_x.getValAddr());
@@ -108,7 +107,6 @@ namespace blas {
    * @brief sum function that returns the sum of all the vector elements.
    *
    * @tparam t_DataType the data type of the vector entries
-   * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
    * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
    * @tparam t_IndexType the datatype of the index 
    *
@@ -119,11 +117,10 @@ namespace blas {
 
   template<typename t_DataType, 
     unsigned int t_LogParEntries, 
-    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType=unsigned int>
       void sum(
           unsigned int p_n,
-          hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+          hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
           t_DataType &p_sum
           ) {
         #pragma HLS data_pack variable=p_x
@@ -138,7 +135,7 @@ namespace blas {
         #pragma HLS data_pack variable=l_data
         #pragma HLS data_pack variable=l_pad
         unsigned int l_numElem = p_n >> t_LogParEntries;
-        preProcess<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType>(l_numElem, p_x, l_data);
+        preProcess<t_DataType, t_LogParEntries, t_IndexType>(l_numElem, p_x, l_data);
         padding<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad);
         postProcess<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_pad, p_sum);
       }

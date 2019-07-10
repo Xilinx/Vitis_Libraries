@@ -41,7 +41,6 @@ namespace blas {
    * @brief copy function that compute Y = X
    *
    * @tparam t_DataType the data type of the vector entries
-   * @tparam t_DataWidth the number of bits used to represent the datatype
    * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
    * @tparam t_IndexType the datatype of the index
    *
@@ -51,14 +50,13 @@ namespace blas {
    */
   template<
     typename t_DataType,
-    unsigned int t_DataWidth,
     unsigned int t_ParEntries,
     typename t_IndexType=unsigned int
   >
   void copy (
     unsigned int p_n,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_x,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_y
+    hls::stream<WideType<t_DataType, t_ParEntries> > &p_x,
+    hls::stream<WideType<t_DataType, t_ParEntries> > &p_y
   ) {
     #pragma HLS DATA_PACK variable=p_x
     #pragma HLS DATA_PACK variable=p_y
@@ -69,7 +67,7 @@ namespace blas {
     const unsigned int l_parEntries = p_n / t_ParEntries;
     for (t_IndexType i=0; i<l_parEntries; ++i) {
     #pragma HLS PIPELINE
-      WideType<t_DataType, t_ParEntries, t_DataWidth> l_x;
+      WideType<t_DataType, t_ParEntries> l_x;
       l_x = p_x.read();
       p_y.write(l_x);
     }

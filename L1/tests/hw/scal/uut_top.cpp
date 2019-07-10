@@ -34,12 +34,12 @@ void uut_top(
   BLAS_resDataType &p_goldRes
   ) {
 
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth> > l_strX;
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth> > l_strR;
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strX;
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strR;
   #pragma HLS DATAFLOW
-  readVec2Stream<BLAS_dataType,BLAS_dataWidth, BLAS_parEntries>(p_x, p_n, l_strX);
-  scal<BLAS_dataType, BLAS_dataWidth, BLAS_parEntries>(p_n, p_alpha, l_strX, l_strR);
-  writeStream2Vec<BLAS_dataType,BLAS_dataWidth, BLAS_parEntries>(l_strR, p_n, p_xRes);
+  readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_x, p_n, l_strX);
+  scal<BLAS_dataType, BLAS_parEntries>(p_n, p_alpha, l_strX, l_strR);
+  writeStream2Vec<BLAS_dataType, BLAS_parEntries>(l_strR, p_n, p_xRes);
 }
 
 #endif

@@ -41,7 +41,6 @@ namespace blas {
  * @brief amin function that returns the position of the vector element that has the minimum magnitude.
  *
  * @tparam t_DataType the data type of the vector entries
- * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
  * @tparam t_IndexType the datatype of the index 
  *
@@ -52,11 +51,10 @@ namespace blas {
 
 template<typename t_DataType, 
   unsigned int t_LogParEntries, 
-  unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
   typename t_IndexType>
   void amin(
       unsigned int p_n,
-      hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+      hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
       t_IndexType &p_result
       ) {
     #pragma HLS data_pack variable=p_x
@@ -64,12 +62,12 @@ template<typename t_DataType,
     assert(p_n % ( 1 << t_LogParEntries) == 0);
     #endif
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > l_abs;
+    hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > l_abs;
     #pragma HLS stream variable=l_abs depth=2
     #pragma HLS DATAFLOW
 
-    abs<t_DataType, 1<<t_LogParEntries, t_DataWidth, t_IndexType>(p_n, p_x, l_abs);
-    min<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType>(p_n, l_abs, p_result);
+    abs<t_DataType, 1<<t_LogParEntries, t_IndexType>(p_n, p_x, l_abs);
+    min<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_abs, p_result);
   }
 
 

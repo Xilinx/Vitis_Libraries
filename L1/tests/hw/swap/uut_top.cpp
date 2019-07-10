@@ -34,20 +34,20 @@ void uut_top(
   BLAS_resDataType &p_goldRes
   ) {
 
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth> > l_strX;
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth> > l_strResX;
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth> > l_strY;
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries, BLAS_dataWidth> > l_strResY;
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strX;
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strResX;
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strY;
+  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strResY;
   #pragma HLS DATA_PACK variable=l_strX
   #pragma HLS DATA_PACK variable=l_strY
   #pragma HLS DATA_PACK variable=l_strResX
   #pragma HLS DATA_PACK variable=l_strResY
   #pragma HLS DATAFLOW
-  readVec2Stream<BLAS_dataType,BLAS_dataWidth, BLAS_parEntries>(p_x, p_n, l_strX);
-  readVec2Stream<BLAS_dataType,BLAS_dataWidth, BLAS_parEntries>(p_y, p_n, l_strY);
-  swap<BLAS_dataType, BLAS_dataWidth, BLAS_parEntries>(p_n, l_strX, l_strY, l_strResX, l_strResY);
-  writeStream2Vec<BLAS_dataType,BLAS_dataWidth, BLAS_parEntries>(l_strResX, p_n, p_xRes);
-  writeStream2Vec<BLAS_dataType,BLAS_dataWidth, BLAS_parEntries>(l_strResY, p_n, p_yRes);
+  readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_x, p_n, l_strX);
+  readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_y, p_n, l_strY);
+  swap<BLAS_dataType, BLAS_parEntries>(p_n, l_strX, l_strY, l_strResX, l_strResY);
+  writeStream2Vec<BLAS_dataType, BLAS_parEntries>(l_strResX, p_n, p_xRes);
+  writeStream2Vec<BLAS_dataType, BLAS_parEntries>(l_strResY, p_n, p_yRes);
 
 }
 

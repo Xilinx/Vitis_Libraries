@@ -41,14 +41,13 @@ namespace blas {
   namespace {
     template<typename t_DataType, 
       unsigned int t_ParEntries, 
-      unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
       typename t_IndexType=unsigned int
     >
     void mul(
         unsigned int p_n,
-        hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_x,
-        hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_y,
-        hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_res
+        hls::stream<WideType<t_DataType, t_ParEntries> > & p_x,
+        hls::stream<WideType<t_DataType, t_ParEntries> > & p_y,
+        hls::stream<WideType<t_DataType, t_ParEntries> > & p_res
     ){
       #ifndef __SYNTHESIS__
         assert(p_n % t_ParEntries == 0);
@@ -56,9 +55,9 @@ namespace blas {
       t_IndexType l_numParEntries = p_n / t_ParEntries;
       for (t_IndexType i=0; i<l_numParEntries; ++i) {
       #pragma HLS PIPELINE
-        WideType<t_DataType, t_ParEntries, t_DataWidth> l_valX;
-        WideType<t_DataType, t_ParEntries, t_DataWidth> l_valY;
-        WideType<t_DataType, t_ParEntries, t_DataWidth> l_valRes;
+        WideType<t_DataType, t_ParEntries> l_valX;
+        WideType<t_DataType, t_ParEntries> l_valY;
+        WideType<t_DataType, t_ParEntries> l_valRes;
         #pragma HLS ARRAY_PARTITION variable=l_valX complete dim=1
         #pragma HLS ARRAY_PARTITION variable=l_valY complete dim=1
         #pragma HLS ARRAY_PARTITION variable=l_valRes complete dim=1
@@ -76,7 +75,6 @@ namespace blas {
    * @brief dot function that returns the dot product of vector x and y.
    *
    * @tparam t_DataType the data type of the vector entries
-   * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
    * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
    * @tparam t_IndexType the datatype of the index 
    *
@@ -87,13 +85,12 @@ namespace blas {
 
   template<typename t_DataType, 
     unsigned int t_LogParEntries, 
-    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType=unsigned int
   >
   void dot(
       unsigned int p_n,
-      hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
-      hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_y,
+      hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
+      hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_y,
       t_DataType &p_res
       ) {
     #pragma HLS DATA_PACK variable=p_x
@@ -102,10 +99,10 @@ namespace blas {
     assert(p_n % ( 1 << t_LogParEntries) == 0);
     #endif
     #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > l_mulStr;
+    hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > l_mulStr;
     #pragma HLS DATA_PACK variable=l_mulStr
-    mul<t_DataType, 1<<t_LogParEntries, t_DataWidth, t_IndexType>(p_n,p_x,p_y,l_mulStr);
-    sum<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType>(p_n, l_mulStr, p_res);    
+    mul<t_DataType, 1<<t_LogParEntries, t_IndexType>(p_n,p_x,p_y,l_mulStr);
+    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_mulStr, p_res);    
   }
 
 

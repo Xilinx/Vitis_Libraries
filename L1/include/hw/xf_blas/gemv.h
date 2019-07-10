@@ -32,19 +32,18 @@ namespace blas {
   namespace{
     template<typename t_DataType, 
       unsigned int t_LogParEntries, 
-      unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
       typename t_IndexType = unsigned int>
         void preProcess(
             unsigned int p_rows,
             unsigned int p_numIter,
-            hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+            hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
             hls::stream<t_DataType> & p_data
             ) {
           for(t_IndexType i=0; i<p_n; i++)
             for(t_IndexType j=0;j<l_numIter;j++){
               #pragma HLS PIPELINE 
-              WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> l_A = p_M.read();
-              WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> = p_x.read();
+              WideType<t_DataType, 1<<t_LogParEntries> l_A = p_M.read();
+              WideType<t_DataType, 1<<t_LogParEntries> = p_x.read();
               t_DataType l_dot[1 << t_LogParEntries];
               #pragma HLS ARRAY_PARTITION variable=l_dot complete dim=1
               for(t_IndexType k=0;k<t_ParEntries;k++){
@@ -112,7 +111,6 @@ namespace blas {
    * matrix and a vector y = M * x
    *
    * @tparam t_DataType the data type of the vector entries
-   * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
    * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
    * @tparam t_IndexType the datatype of the index 
    *
@@ -124,12 +122,11 @@ namespace blas {
    */
   template<typename t_DataType, 
     unsigned int t_LogParEntries,
-    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType=unsigned int>
       void gemv(const unsigned int p_m,
           const unsigned int p_n,
-          hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_M,
-          hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+          hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_M,
+          hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
           hls::stream<t_DataType> &p_y
           ){
         #ifndef __SYNTHESIS__
@@ -141,7 +138,7 @@ namespace blas {
         #pragma HLS stream variable=l_pad depth=2
         const unsigned int l_LogDelays = AdderDelay<t_DataType>::m_logDelays;
         #pragma HLS DATAFLOW
-        preProcess<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType>(p_m, l_numIter, p_M, p_x, l_data);
+        preProcess<t_DataType, t_LogParEntries, t_IndexType>(p_m, l_numIter, p_M, p_x, l_data);
         padding<t_DataType, l_LogDelays, t_IndexType>(p_m, l_numIter, l_data, l_pad);
         postProcess<t_DataType, l_LogDelays, t_IndexType>(p_m, l_numIter, l_pad, p_y);
       }

@@ -41,7 +41,6 @@ namespace blas {
    * @brief asum function that returns the sum of the magnitude of vector elements.
    *
    * @tparam t_DataType the data type of the vector entries
-   * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
    * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
    * @tparam t_IndexType the datatype of the index 
    *
@@ -52,11 +51,10 @@ namespace blas {
 
   template<typename t_DataType, 
     unsigned int t_LogParEntries, 
-    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType=unsigned int>
       void asum(
           unsigned int p_n,
-          hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+          hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
           t_DataType &p_sum
           ) {
         #ifndef __SYNTHESIS__
@@ -64,12 +62,12 @@ namespace blas {
         #endif
         #pragma HLS DATAFLOW
 
-        hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > l_abs;
+        hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > l_abs;
         #pragma HLS data_pack variable=l_abs
         #pragma HLS stream variable=l_abs depth=2
 
-        abs<t_DataType, 1<<t_LogParEntries, t_DataWidth, t_IndexType>(p_n, p_x, l_abs);
-        sum<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType>(p_n, l_abs, p_sum);
+        abs<t_DataType, 1<<t_LogParEntries, t_IndexType>(p_n, p_x, l_abs);
+        sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_abs, p_sum);
       }
 
 

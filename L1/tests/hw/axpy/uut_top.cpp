@@ -34,14 +34,14 @@ void uut_top(
   BLAS_resDataType &p_goldRes
   ) {
 
-  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth> > l_strX;
-  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth> > l_strY;
-  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth> > l_strR;
+  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries> > l_strX;
+  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries> > l_strY;
+  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries> > l_strR;
   #pragma HLS DATAFLOW
-  readVec2Stream<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(p_x, p_n, l_strX);
-  readVec2Stream<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(p_y, p_n, l_strY);
-  axpy<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth>(p_n, p_alpha, l_strX, l_strY, l_strR);
-  writeStream2Vec<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(l_strR, p_n, p_yRes);
+  readVec2Stream<BLAS_dataType, 1<<BLAS_logParEntries>(p_x, p_n, l_strX);
+  readVec2Stream<BLAS_dataType, 1<<BLAS_logParEntries>(p_y, p_n, l_strY);
+  axpy<BLAS_dataType, 1<<BLAS_logParEntries>(p_n, p_alpha, l_strX, l_strY, l_strR);
+  writeStream2Vec<BLAS_dataType, 1<<BLAS_logParEntries>(l_strR, p_n, p_yRes);
 }
 
 #endif

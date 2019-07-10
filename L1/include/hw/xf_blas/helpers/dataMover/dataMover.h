@@ -61,12 +61,11 @@ void stream2mem(
 
 template<
   typename t_DataType,
-  unsigned int t_DataWidth,
   unsigned int t_ParEntries>
 void readVec2Stream(
   t_DataType *p_in,
   unsigned int p_n,
-  hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth > > &p_out
+  hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
 ) {
   #ifndef __SYNTHESIS__
     assert ((p_n % t_ParEntries) == 0);
@@ -75,7 +74,7 @@ void readVec2Stream(
   for (unsigned int i=0; i<l_parBlocks; ++i) {
   #pragma HLS PIPELINE
     BitConv<t_DataType> l_bitConv;
-    WideType<t_DataType, t_ParEntries, t_DataWidth > l_val;
+    WideType<t_DataType, t_ParEntries > l_val;
     for (unsigned int j=0; j<t_ParEntries; ++j) {
       l_val[j] = p_in[i*t_ParEntries + j];
     }
@@ -85,10 +84,9 @@ void readVec2Stream(
 
 template<
   typename t_DataType,
-  unsigned int t_DataWidth,
   unsigned int t_ParEntries>
 void writeStream2Vec(
-  hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth > > &p_in,
+  hls::stream<WideType<t_DataType, t_ParEntries > > &p_in,
   unsigned int p_n,
   t_DataType *p_out
 ) {
@@ -100,7 +98,7 @@ void writeStream2Vec(
   for (unsigned int i=0; i<l_parBlocks; ++i) {
   #pragma HLS PIPELINE
     BitConv<t_DataType> l_bitConv;
-    WideType<t_DataType, t_ParEntries, t_DataWidth > l_val;
+    WideType<t_DataType, t_ParEntries > l_val;
     l_val = p_in.read();
     for (unsigned int j=0; j<t_ParEntries; ++j) {
       p_out[i*t_ParEntries + j]=l_val[j];

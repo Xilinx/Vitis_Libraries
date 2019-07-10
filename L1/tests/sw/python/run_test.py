@@ -86,15 +86,17 @@ class RunTest:
       os.makedirs(self.dataPath)
 
     self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
-        self.profile['b_synth'], self.profile['b_cosim'])
+       self.profile['b_synth'], self.profile['b_cosim'])
+     #   False, False)
 
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.logParEntries))
     self.hls.generateDirective(self.parEntries, directivePath)
 
 
-  def runTest(self,makefile):
+  def runTest(self,makefile, maxN):
     dtLen =  len(self.dtList)
+    numSimulation = 0
     for index in range(dtLen):
       dt = self.dtList[index][0]
       dw = self.dtList[index][1]
@@ -118,6 +120,9 @@ class RunTest:
       lib = C.cdll.LoadLibrary(libPath)
       print("Start to test operation %s under DataType %s and return DataType %s"%(self.op, c_type, r_type))
       for vectorSize in self.vectorSizes:
+        if numSimulation == maxN:
+          break
+        numSimulation = numSimulation + 1
         paramTclPath =os.path.join(self.testPath, 
            r'parameters_v%d_%s.tcl'%(vectorSize,typeStr))
         self.hls.generateParam(self.op, c_type, dw, r_type, self.logParEntries, 
@@ -157,18 +162,19 @@ class RunTest:
           return
     print("All tests are passed.")
 
-def main(profileList, makefile): 
+def main(profileList, makefile, maxN): 
   for profile in profileList:
     if not os.path.exists(profile):
       print("File %s is not exists."%profile)
       continue
     runTest = RunTest()
     runTest.parseProfile(profile)
-    runTest.runTest(makefile)
+    runTest.runTest(makefile, maxN)
   
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
+  parser.add_argument('--max', metavar='numSim', type=int, help='maximum number of simulations for each profile/operator')
   group = parser.add_mutually_exclusive_group(required=True)
   group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of pathes to the profile files')
   group.add_argument('--operator', nargs='*',metavar='opName', help='list of operator names')
@@ -182,4 +188,4 @@ if __name__== "__main__":
       profile.append('./hw/%s/profile.json'%op)
   else:
     parser.print_help()
-  main(set(profile), args.makefile)
+  main(set(profile), args.makefile, args.max)

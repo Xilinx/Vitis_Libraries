@@ -88,17 +88,16 @@ namespace {
 
   template<typename t_DataType, 
     unsigned int t_LogParEntries, 
-    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType,
     bool t_Max>
       void preProcess(unsigned int p_numElement,
           hls::stream<t_DataType>& p_valueStream,
           hls::stream<t_IndexType>& p_indexStream,
-          hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x){
+          hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x){
         const unsigned int l_ParEntries = 1 << t_LogParEntries;
         for (t_IndexType i = 0; i < p_numElement; i++) {
           #pragma HLS PIPELINE
-          WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> l_elem = p_x.read();
+          WideType<t_DataType, 1<<t_LogParEntries> l_elem = p_x.read();
           t_IndexType l_pos;
           t_DataType l_value;
           BinaryCmp<t_DataType, l_ParEntries, t_IndexType, t_Max>::cmp(
@@ -154,12 +153,11 @@ namespace {
 
   template<typename t_DataType, 
     unsigned int t_LogParEntries, 
-    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType,
     bool t_Max>
       void MaxMinHelper (
           unsigned int p_n, // number of element in the stream
-          hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+          hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
           t_IndexType &p_result
           ) {
 
@@ -172,7 +170,7 @@ namespace {
         #pragma HLS data_pack variable=l_indexStream
         #pragma HLS stream variable=l_indexStream depth=2
 
-        preProcess<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, t_Max>(p_n, l_valueStream,l_indexStream, p_x);
+        preProcess<t_DataType, t_LogParEntries, t_IndexType, t_Max>(p_n, l_valueStream,l_indexStream, p_x);
         postProcess<t_DataType, 1, t_IndexType, t_Max>(p_n, l_valueStream, l_indexStream, p_result);
 
       }
@@ -184,7 +182,6 @@ namespace {
  * @brief max function that returns the position of the vector element that has the maximum magnitude.
  *
  * @tparam t_DataType the data type of the vector entries
- * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
  * @tparam t_IndexType the datatype of the index 
  *
@@ -195,11 +192,10 @@ namespace {
 
 template<typename t_DataType, 
   unsigned int t_LogParEntries, 
-  unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
   typename t_IndexType>
   void max(
       unsigned int p_n,
-      hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+      hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
       t_IndexType &p_result
       ) {
     #pragma HLS data_pack variable=p_x
@@ -207,14 +203,13 @@ template<typename t_DataType,
     assert(p_n % ( 1 << t_LogParEntries) == 0);
     #endif
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    MaxMinHelper<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, true>(l_numElem, p_x, p_result);
+    MaxMinHelper<t_DataType, t_LogParEntries, t_IndexType, true>(l_numElem, p_x, p_result);
   }
 
 /**
  * @brief min function that returns the position of the vector element that has the minimum magnitude.
  *
  * @tparam t_DataType the data type of the vector entries
- * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
  * @tparam t_IndexType the datatype of the index 
  *
@@ -225,11 +220,10 @@ template<typename t_DataType,
 
 template<typename t_DataType, 
   unsigned int t_LogParEntries, 
-  unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
   typename t_IndexType>
   void min(
       unsigned int p_n,
-      hls::stream<WideType<t_DataType, 1<<t_LogParEntries, t_DataWidth> > & p_x,
+      hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
       t_IndexType &p_result
       ) {
     #pragma HLS data_pack variable=p_x
@@ -237,7 +231,7 @@ template<typename t_DataType,
     assert(p_n % ( 1 << t_LogParEntries) == 0);
     #endif
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    MaxMinHelper<t_DataType, t_LogParEntries, t_DataWidth, t_IndexType, false>(l_numElem, p_x, p_result);
+    MaxMinHelper<t_DataType, t_LogParEntries, t_IndexType, false>(l_numElem, p_x, p_result);
   }
 
 

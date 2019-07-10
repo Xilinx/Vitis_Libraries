@@ -41,7 +41,6 @@ namespace blas {
    * @brief scal function that compute X = alpha * X
    *
    * @tparam t_DataType the data type of the vector entries
-   * @tparam t_DataWidth the number of bits used to represent the datatype
    * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
    * @tparam t_IndexType the datatype of the index
    *
@@ -51,15 +50,14 @@ namespace blas {
    */
   template<
     typename t_DataType,
-    unsigned int t_DataWidth,
     unsigned int t_ParEntries,
     typename t_IndexType=unsigned int
   >
   void scal (
     unsigned int p_n,
     t_DataType p_alpha,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_x,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_res
+    hls::stream<WideType<t_DataType, t_ParEntries> > &p_x,
+    hls::stream<WideType<t_DataType, t_ParEntries> > &p_res
   ) {
     #pragma HLS DATA_PACK variable=p_x
     #pragma HLS DATA_PACK variable=p_res
@@ -70,8 +68,8 @@ namespace blas {
     const unsigned int l_parEntries = p_n / t_ParEntries;
     for (t_IndexType i=0; i<l_parEntries; ++i) {
     #pragma HLS PIPELINE
-      WideType<t_DataType, t_ParEntries, t_DataWidth> l_valX;
-      WideType<t_DataType, t_ParEntries, t_DataWidth> l_valY;
+      WideType<t_DataType, t_ParEntries> l_valX;
+      WideType<t_DataType, t_ParEntries> l_valY;
       #pragma HLS ARRAY_PARTITION variable=l_valX complete dim=1
       #pragma HLS ARRAY_PARTITION variable=l_valY complete dim=1
       l_valX = p_x.read();

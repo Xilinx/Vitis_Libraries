@@ -44,7 +44,6 @@ namespace blas {
    * @brief axpy function that compute Y = alpha*X + Y.
    *
    * @tparam t_DataType the data type of the vector entries
-   * @tparam t_DataWidth the datawidth of the datatype t_DataType of the input vector 
    * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
    * @tparam t_IndexType the datatype of the index 
    *
@@ -55,14 +54,13 @@ namespace blas {
    */
   template<typename t_DataType, 
     unsigned int t_ParEntries, 
-    unsigned int t_DataWidth = sizeof(t_DataType) << 3, 
     typename t_IndexType=unsigned int>
       void axpy(
           unsigned int p_n,
           const t_DataType p_alpha,
-          hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_x,
-          hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_y,
-          hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > & p_r
+          hls::stream<WideType<t_DataType, t_ParEntries> > & p_x,
+          hls::stream<WideType<t_DataType, t_ParEntries> > & p_y,
+          hls::stream<WideType<t_DataType, t_ParEntries> > & p_r
           ) {
         #pragma HLS data_pack variable=p_x
         #pragma HLS data_pack variable=p_y
@@ -73,9 +71,9 @@ namespace blas {
         const unsigned int l_numElem = p_n / t_ParEntries;
         for(t_IndexType i=0;i<l_numElem;i++){
 #pragma HLS PIPELINE
-          WideType<t_DataType, t_ParEntries, t_DataWidth> l_x = p_x.read();
-          WideType<t_DataType, t_ParEntries, t_DataWidth> l_y = p_y.read();
-          WideType<t_DataType, t_ParEntries, t_DataWidth> l_r;
+          WideType<t_DataType, t_ParEntries> l_x = p_x.read();
+          WideType<t_DataType, t_ParEntries> l_y = p_y.read();
+          WideType<t_DataType, t_ParEntries> l_r;
           for(t_IndexType j=0;j<t_ParEntries;j++){
 #pragma HLS UNROLL
             t_DataType l_realX = l_x[j];

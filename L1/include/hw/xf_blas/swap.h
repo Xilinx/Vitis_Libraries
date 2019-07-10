@@ -41,7 +41,6 @@ namespace blas {
    * @brief swap function taht swap vector x and y 
    *
    * @tparam t_DataType the data type of the vector entries
-   * @tparam t_DataWidth the number of bits used to represent the datatype
    * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
    * @tparam t_IndexType the datatype of the index
    *
@@ -53,16 +52,15 @@ namespace blas {
    */
   template<
     typename t_DataType,
-    unsigned int t_DataWidth,
     unsigned int t_ParEntries,
     typename t_IndexType=unsigned int
   >
   void swap (
     unsigned int p_n,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_x,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_y,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_xRes,
-    hls::stream<WideType<t_DataType, t_ParEntries, t_DataWidth> > &p_yRes
+    hls::stream<WideType<t_DataType, t_ParEntries> > &p_x,
+    hls::stream<WideType<t_DataType, t_ParEntries> > &p_y,
+    hls::stream<WideType<t_DataType, t_ParEntries> > &p_xRes,
+    hls::stream<WideType<t_DataType, t_ParEntries> > &p_yRes
   ) {
     #pragma HLS DATA_PACK variable=p_x
     #pragma HLS DATA_PACK variable=p_y
@@ -74,8 +72,8 @@ namespace blas {
     const unsigned int l_parEntries = p_n / t_ParEntries;
     for (t_IndexType i=0; i<l_parEntries; ++i) {
     #pragma HLS PIPELINE
-      WideType<t_DataType, t_ParEntries, t_DataWidth> l_valX;
-      WideType<t_DataType, t_ParEntries, t_DataWidth> l_valY;
+      WideType<t_DataType, t_ParEntries> l_valX;
+      WideType<t_DataType, t_ParEntries> l_valY;
       l_valX = p_x.read();
       l_valY = p_y.read();
       p_xRes.write(l_valY);

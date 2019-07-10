@@ -36,14 +36,14 @@ void uut_top(
 ) {
   BLAS_resDataType l_res;
 
-  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth> > l_strX;
-  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries, BLAS_dataWidth> > l_strY;
+  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries> > l_strX;
+  hls::stream<WideType<BLAS_dataType, 1<<BLAS_logParEntries> > l_strY;
   #pragma HLS DATAFLOW
   #pragma HLS DATA_PACK variable=l_strX
   #pragma HLS DATA_PACK variable=l_strY
-  readVec2Stream<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(p_x, p_n, l_strX);
-  readVec2Stream<BLAS_dataType,BLAS_dataWidth, 1<<BLAS_logParEntries>(p_y, p_n, l_strY);
-  dot<BLAS_dataType,BLAS_logParEntries,BLAS_dataWidth>(p_n, l_strX, l_strY, l_res);
+  readVec2Stream<BLAS_dataType, 1<<BLAS_logParEntries>(p_x, p_n, l_strX);
+  readVec2Stream<BLAS_dataType, 1<<BLAS_logParEntries>(p_y, p_n, l_strY);
+  dot<BLAS_dataType,BLAS_logParEntries>(p_n, l_strX, l_strY, l_res);
   p_goldRes = l_res;
 }
  
