@@ -74,10 +74,12 @@ namespace blas {
     public:
       typedef Page<uint8_t, t_PageSizeBytes> PageType;
       typedef vector<PageType> PageVectorType;
-      typedef ParamB1<t_DataType, t_ResDataType> ParamB1Type; 
+      typedef ParamB1<t_DataType, t_ResDataType> ParamB1Type;
+      typedef ParamB2<t_DataType> ParamB2Type; 
     public:
       static const unsigned int ParamStartOff = t_ParamPageIdx * t_PageSizeBytes;
       static const size_t ParamB1Bytes = sizeof(ParamB1Type);
+      static const size_t ParamB2Bytes = sizeof(ParamB2Type);
     public:
       Program() : 
         m_numInstrs(0), 
@@ -213,6 +215,17 @@ namespace blas {
         return (l_param);
       }
 
+      ParamB2Type getB2Param() {
+        ParamB2Type l_param;
+        uint8_t* l_baseInstrAddr = getBaseInstrAddr();
+        memcpy((uint8_t*)&l_param, l_baseInstrAddr+m_currParamOff, ParamB2Bytes);
+        m_currParamOff += ParamB2Bytes;
+        while (m_currParamOff % t_MemWidthBytes != 0) {
+          m_currParamOff++;
+        }
+        return (l_param);
+      }
+
       void writePaddingBytes(size_t p_bytes, ofstream &p_of) {
         uint8_t l_zeroConst=0;
         for (unsigned int b=0; b<p_bytes; ++b) {
@@ -225,12 +238,14 @@ namespace blas {
         uint64_t &p_addr, 
         ifstream::pos_type &p_ofPos,
         ofstream &p_of) {
-          p_of.seekp(p_ofPos);
-          char* l_addr = reinterpret_cast<char*>(p_addr);
-          p_addr = (uint64_t)p_ofPos;
-          p_of.write(l_addr, p_dataBytes);
-          writePaddingBytes(p_paddingBytes, p_of);
-          p_ofPos += (p_dataBytes+p_paddingBytes);
+          if (p_addr != 0) {
+            p_of.seekp(p_ofPos);
+            char* l_addr = reinterpret_cast<char*>(p_addr);
+            p_addr = (uint64_t)p_ofPos;
+            p_of.write(l_addr, p_dataBytes);
+            writePaddingBytes(p_paddingBytes, p_of);
+            p_ofPos += (p_dataBytes+p_paddingBytes);
+          }
       }
       void writeB1Param(
         ofstream &p_of,
@@ -240,29 +255,50 @@ namespace blas {
         
         uint32_t l_n = p_param.m_n;
         size_t l_dataBytes = l_n*sizeof(t_DataType);
-        size_t l_paddingBytes = t_PageSizeBytes - (l_dataBytes%t_PageSizeBytes);
-        uint8_t l_zeroConst=0;
+        size_t l_paddingBytes = ((l_dataBytes%t_PageSizeBytes) !=0)? (t_PageSizeBytes - (l_dataBytes%t_PageSizeBytes)):0;
 
         ifstream::pos_type l_ofPos = p_ofDataPos;
-        if (p_param.m_xAddr != 0) {
-          writeData(l_dataBytes, l_paddingBytes, p_param.m_xAddr, l_ofPos, p_of);
-        }
-        if (p_param.m_yAddr != 0) {
-          writeData(l_dataBytes, l_paddingBytes, p_param.m_yAddr, l_ofPos, p_of);
-        }
-        if (p_param.m_xResAddr != 0) {
-          writeData(l_dataBytes, l_paddingBytes, p_param.m_xResAddr, l_ofPos, p_of);
-        }
-        if (p_param.m_yResAddr != 0) {
-          writeData(l_dataBytes, l_paddingBytes, p_param.m_yResAddr, l_ofPos, p_of);
-        }
+        writeData(l_dataBytes, l_paddingBytes, p_param.m_xAddr, l_ofPos, p_of);
+        writeData(l_dataBytes, l_paddingBytes, p_param.m_yAddr, l_ofPos, p_of);
+        writeData(l_dataBytes, l_paddingBytes, p_param.m_xResAddr, l_ofPos, p_of);
+        writeData(l_dataBytes, l_paddingBytes, p_param.m_yResAddr, l_ofPos, p_of);
         p_ofDataPos = l_ofPos;
 
         p_of.seekp(p_ofParamPos);
         p_of.write((char*)&p_param, ParamB1Bytes);
-        l_paddingBytes = t_MemWidthBytes - (ParamB1Bytes % t_MemWidthBytes);
+        l_paddingBytes = ((ParamB1Bytes % t_MemWidthBytes)!=0)? (t_MemWidthBytes - (ParamB1Bytes % t_MemWidthBytes)):0;
         writePaddingBytes(l_paddingBytes, p_of);
         p_ofParamPos += (ParamB1Bytes + l_paddingBytes);
+      }
+
+      void writeB2Param(
+        ofstream &p_of,
+        ParamB2Type &p_param,
+        ifstream::pos_type &p_ofParamPos,
+        ifstream::pos_type &p_ofDataPos) {
+       
+        uint32_t l_m = p_param.m_m; 
+        uint32_t l_n = p_param.m_n;
+        uint32_t l_kl = p_param.m_kl;
+        uint32_t l_ku = p_param.m_ku;
+        size_t l_vecDataBytes = l_n*sizeof(t_DataType);
+        size_t l_vecPaddingBytes = ((l_vecDataBytes%t_PageSizeBytes) != 0)?(t_PageSizeBytes - (l_vecDataBytes%t_PageSizeBytes)): 0;
+        size_t l_matDataBytes = l_m*l_n*sizeof(t_DataType);
+        size_t l_matPaddingBytes = ((l_matDataBytes%t_PageSizeBytes) != 0)? (t_PageSizeBytes - (l_matDataBytes%t_PageSizeBytes)): 0;
+
+        ifstream::pos_type l_ofPos = p_ofDataPos;
+        writeData(l_matDataBytes, l_matPaddingBytes, p_param.m_aAddr, l_ofPos, p_of);
+        writeData(l_vecDataBytes, l_vecPaddingBytes, p_param.m_xAddr, l_ofPos, p_of);
+        writeData(l_vecDataBytes, l_vecPaddingBytes, p_param.m_yAddr, l_ofPos, p_of);
+        writeData(l_matDataBytes, l_matPaddingBytes, p_param.m_aResAddr, l_ofPos, p_of);
+        writeData(l_vecDataBytes, l_vecPaddingBytes, p_param.m_yResAddr, l_ofPos, p_of);
+        p_ofDataPos = l_ofPos;
+
+        p_of.seekp(p_ofParamPos);
+        p_of.write((char*)&p_param, ParamB2Bytes);
+        size_t l_paddingBytes = ((ParamB2Bytes % t_MemWidthBytes) != 0)? (t_MemWidthBytes - (ParamB2Bytes % t_MemWidthBytes)): 0;
+        writePaddingBytes(l_paddingBytes, p_of);
+        p_ofParamPos += (ParamB2Bytes + l_paddingBytes);
       }
 
       xfblasStatus_t write2BinFile(const string &p_fileName) {
@@ -281,6 +317,10 @@ namespace blas {
             if (l_instrs[i].m_opClass == B1_OP_CLASS) {
               ParamB1Type l_param = getB1Param();
               writeB1Param(l_of, l_param, l_ofParamPos, l_ofDataPos);
+            }
+            else if (l_instrs[i].m_opClass == B2_OP_CLASS) {
+              ParamB2Type l_param = getB2Param();
+              writeB2Param(l_of, l_param, l_ofParamPos, l_ofDataPos);
             }
           }
           l_of.close();
@@ -326,9 +366,20 @@ namespace blas {
             l_param.m_yResAddr = (l_param.m_yResAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_yResAddr):0;
             memcpy(l_baseInstrAddr+m_currParamOff, (uint8_t*)&l_param, ParamB1Bytes); 
             m_currParamOff += ParamB1Bytes;
-            while (m_currParamOff % t_MemWidthBytes != 0) {
-              m_currParamOff++;
-            }
+          }
+          else if (l_instrs[i].m_opClass == B2_OP_CLASS) {
+            ParamB2Type l_param;
+            memcpy((uint8_t*)&l_param, l_baseInstrAddr+m_currParamOff, ParamB2Bytes);
+            l_param.m_aAddr = (l_param.m_aAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_aAddr):0;
+            l_param.m_xAddr = (l_param.m_xAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_xAddr):0;
+            l_param.m_yAddr = (l_param.m_yAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_yAddr):0;
+            l_param.m_aResAddr = (l_param.m_aResAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_aResAddr):0;
+            l_param.m_yResAddr = (l_param.m_yResAddr != 0)? reinterpret_cast<uint64_t> (l_baseInstrAddr+l_param.m_yResAddr):0;
+            memcpy(l_baseInstrAddr+m_currParamOff, (uint8_t*)&l_param, ParamB2Bytes); 
+            m_currParamOff += ParamB2Bytes;
+          }
+          while (m_currParamOff % t_MemWidthBytes != 0) {
+            m_currParamOff++;
           }
         }
         return (l_status);
@@ -367,6 +418,36 @@ namespace blas {
         p_yRes = reinterpret_cast<t_DataType*>(l_param.m_yResAddr); 
       }
 
+      void decodeB2Instr(
+        const Instr &p_instr,
+        uint32_t &p_m,
+        uint32_t &p_n,
+        uint32_t &p_kl,
+        uint32_t &p_ku, 
+        t_DataType &p_alpha,
+        t_DataType &p_beta,
+        t_DataType* &p_a,
+        t_DataType* &p_x,
+        t_DataType* &p_y,
+        t_DataType* &p_aRes,
+        t_DataType* &p_yRes
+      ) {
+        uint8_t* l_baseAddr = getBaseInstrAddr();
+        uint8_t* l_paramAddr = l_baseAddr + p_instr.m_paramOff;
+        ParamB2Type l_param;
+        memcpy((uint8_t*)&l_param, l_paramAddr, ParamB2Bytes);
+        p_m = l_param.m_m;
+        p_n = l_param.m_n;
+        p_kl = l_param.m_kl;
+        p_ku = l_param.m_ku;
+        p_alpha = l_param.m_alpha;
+        p_beta = l_param.m_beta;
+        p_a = reinterpret_cast<t_DataType*>(l_param.m_aAddr);
+        p_x = reinterpret_cast<t_DataType*>(l_param.m_xAddr);
+        p_y = reinterpret_cast<t_DataType*>(l_param.m_yAddr);
+        p_aRes = reinterpret_cast<t_DataType*>(l_param.m_aResAddr); 
+        p_yRes = reinterpret_cast<t_DataType*>(l_param.m_yResAddr); 
+      }
     void print(ostream &os) {
       reset();
       vector<Instr> l_instrs;
@@ -377,6 +458,10 @@ namespace blas {
         os << l_instrs[i];
         if (l_instrs[i].m_opClass == B1_OP_CLASS) {
           ParamB1Type l_param = getB1Param();
+          os << l_param;
+        }
+        else if (l_instrs[i].m_opClass == B2_OP_CLASS) {
+          ParamB2Type l_param = getB2Param();
           os << l_param;
         }
       }

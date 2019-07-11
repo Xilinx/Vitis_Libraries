@@ -35,6 +35,71 @@ void to_upper(string &p_str) {
   });
 }
 
+void initVec(
+  const string &p_handle,
+  size_t p_n,
+  vector<BLAS_dataType> &p_vec,
+  uint8_t* &p_vecPtr) {
+    if (p_handle != "NULL") {
+      p_vec.resize(p_n);
+      for (unsigned int i=0; i<p_n; ++i) {
+        p_vec[i] = (BLAS_dataType)i/10;
+      }
+      p_vecPtr = reinterpret_cast<uint8_t*>(&(p_vec[0]));
+    }
+}
+
+void initMat(
+  const string &p_handle,
+  size_t p_m,
+  size_t p_n,
+  vector<BLAS_dataType> &p_mat,
+  uint8_t* &p_matPtr) {
+    if (p_handle != "NULL") {
+      size_t l_size = p_m * p_n;
+      p_mat.resize(l_size);
+      for (unsigned int i=0; i<l_size; ++i) {
+        p_mat[i] = (BLAS_dataType)i/10;
+      }
+      p_matPtr = reinterpret_cast<uint8_t*>(&(p_mat[0]));
+    }
+}
+
+void outputVec(
+  string p_str,
+  uint32_t p_n,
+  BLAS_dataType *p_data 
+){
+  if (p_data != nullptr) {
+    cout << "  " << p_str << endl;
+    for (unsigned int i=0; i<p_n; ++i) {
+      if ((i % ENTRIES_PER_LINE) == 0) {
+        cout << endl;
+      }
+      cout << setw(OUTPUT_WIDTH) << p_data[i] << "  ";
+    }
+  }
+}
+
+void outputMat(
+  string p_str,
+  uint32_t p_m,
+  uint32_t p_n,
+  BLAS_dataType *p_data 
+){
+  if (p_data != nullptr) {
+    cout << "  " << p_str << endl;
+    for (unsigned int i=0; i<p_m; ++i) {
+      for (unsigned int j=0; j<p_n; ++j) {
+        if ((j % ENTRIES_PER_LINE) == 0) {
+          cout << endl;
+        }
+        cout << setw(OUTPUT_WIDTH) << p_data[i*p_n+j] << "  ";
+      }
+    }
+  }
+}
+
 int main(int argc, char** argv)
 {
   if (argc < 3 ){
@@ -70,62 +135,85 @@ int main(int argc, char** argv)
   
   ////////////////////////  TEST PROGRAM STARTS HERE  ////////////////////////
   GenBinType l_gen;
+  FindOpCode l_findOp;
   if (l_write) {
     unsigned int l_argIdx = 3;
     unsigned int l_instrCount = 0;
     
-    vector<BLAS_dataType> l_x, l_y, l_xRes, l_yRes;
-    unsigned int l_xIdx=0, l_yIdx=0, l_xResIdx=0, l_yResIdx=0;
+    vector<vector<BLAS_dataType>> l_a, l_x, l_y, l_aRes, l_xRes, l_yRes;
+    l_a.resize(BLAS_maxNumInstrs); 
+    l_x.resize(BLAS_maxNumInstrs); 
+    l_y.resize(BLAS_maxNumInstrs); 
+    l_aRes.resize(BLAS_maxNumInstrs); 
+    l_xRes.resize(BLAS_maxNumInstrs); 
+    l_yRes.resize(BLAS_maxNumInstrs); 
+    unsigned int l_idx=0; 
     while (l_argIdx < argc) {
       string l_opName(argv[l_argIdx++]);
-      uint32_t l_n = stoi(argv[l_argIdx++]);
-      BLAS_dataType l_alpha = static_cast<BLAS_dataType>(atof(argv[l_argIdx++]));
-      string l_handleX(argv[l_argIdx++]);
-      string l_handleY(argv[l_argIdx++]);
-      string l_handleXres(argv[l_argIdx++]);
-      string l_handleYres(argv[l_argIdx++]);
-      BLAS_resDataType l_resScalar = static_cast<BLAS_resDataType>(atof(argv[l_argIdx++]));
-      uint8_t* l_xPtr=nullptr;
-      uint8_t* l_yPtr=nullptr;
-      uint8_t* l_xResPtr=nullptr;
-      uint8_t* l_yResPtr=nullptr;
-      to_upper(l_handleX);
-      to_upper(l_handleY);
-      to_upper(l_handleXres);
-      to_upper(l_handleYres);
-      
-      if (l_handleX != "NULL") {
-        l_x.resize(l_xIdx+l_n);
-        for (unsigned int d=0; d<l_n; ++d) {
-          l_x[l_xIdx+d] = (BLAS_dataType)d/10;
-        }
-        l_xPtr = reinterpret_cast<uint8_t*>(&(l_x[l_xIdx]));
+      uint32_t l_opCode;
+      xfblasStatus_t l_status = l_findOp.getOpCode(l_opName, l_opCode);
+      if (l_status != XFBLAS_STATUS_SUCCESS) {
+        return -1;
       }
-      if (l_handleY != "NULL") {
-        l_y.resize(l_yIdx+l_n);
-        for (unsigned int d=0; d<l_n; ++d) {
-          l_y[l_yIdx+d] = (BLAS_dataType)d;
-        }
-        l_yPtr = reinterpret_cast<uint8_t*>(&(l_y[l_yIdx]));
+      if (l_opCode <= B1_MaxOpCode) {
+        uint32_t l_n = stoi(argv[l_argIdx++]);
+        BLAS_dataType l_alpha = static_cast<BLAS_dataType>(atof(argv[l_argIdx++]));
+        string l_handleX(argv[l_argIdx++]);
+        string l_handleY(argv[l_argIdx++]);
+        string l_handleXres(argv[l_argIdx++]);
+        string l_handleYres(argv[l_argIdx++]);
+        BLAS_resDataType l_resScalar = static_cast<BLAS_resDataType>(atof(argv[l_argIdx++]));
+        uint8_t* l_xPtr=nullptr;
+        uint8_t* l_yPtr=nullptr;
+        uint8_t* l_xResPtr=nullptr;
+        uint8_t* l_yResPtr=nullptr;
+        to_upper(l_handleX);
+        to_upper(l_handleY);
+        to_upper(l_handleXres);
+        to_upper(l_handleYres);
+        
+        initVec(l_handleX, l_n, l_x[l_idx], l_xPtr);
+        initVec(l_handleY, l_n, l_y[l_idx], l_yPtr);
+        initVec(l_handleXres, l_n, l_xRes[l_idx], l_xResPtr);
+        initVec(l_handleYres, l_n, l_yRes[l_idx], l_yResPtr);
+        xfblasStatus_t l_status= l_gen.addB1Instr(
+                          l_opName, l_n, l_alpha, 
+                          l_xPtr, l_yPtr, l_xResPtr, l_yResPtr, l_resScalar);
+        assert(l_status == XFBLAS_STATUS_SUCCESS);
       }
-      if (l_handleXres != "NULL") {
-        l_xRes.resize(l_xResIdx+l_n);
-        for (unsigned int d=0; d<l_n; ++d) {
-          l_xRes[l_xResIdx+d] = (BLAS_dataType)d;
-        }
-        l_xResPtr = reinterpret_cast<uint8_t*>(&(l_xResPtr[l_xResIdx]));
+      else if (l_opCode <= B2_MaxOpCode) {
+        uint32_t l_m = stoi(argv[l_argIdx++]);
+        uint32_t l_n = stoi(argv[l_argIdx++]);
+        uint32_t l_kl = stoi(argv[l_argIdx++]);
+        uint32_t l_ku = stoi(argv[l_argIdx++]);
+        BLAS_dataType l_alpha = static_cast<BLAS_dataType>(atof(argv[l_argIdx++]));
+        BLAS_dataType l_beta = static_cast<BLAS_dataType>(atof(argv[l_argIdx++]));
+        string l_handleA(argv[l_argIdx++]);
+        string l_handleX(argv[l_argIdx++]);
+        string l_handleY(argv[l_argIdx++]);
+        string l_handleAres(argv[l_argIdx++]);
+        string l_handleYres(argv[l_argIdx++]);
+        to_upper(l_handleA);
+        to_upper(l_handleX);
+        to_upper(l_handleY);
+        to_upper(l_handleAres);
+        to_upper(l_handleYres);
+        uint8_t* l_aPtr=nullptr;
+        uint8_t* l_xPtr=nullptr;
+        uint8_t* l_yPtr=nullptr;
+        uint8_t* l_aResPtr=nullptr;
+        uint8_t* l_yResPtr=nullptr;
+        initMat(l_handleA, l_m, l_n, l_a[l_idx], l_aPtr);
+        initVec(l_handleX, l_n, l_x[l_idx], l_xPtr);
+        initVec(l_handleY, l_n, l_y[l_idx], l_yPtr);
+        initMat(l_handleAres, l_m, l_n, l_aRes[l_idx], l_aResPtr);
+        initVec(l_handleYres, l_n, l_yRes[l_idx], l_yResPtr);
+        xfblasStatus_t l_status= l_gen.addB2Instr(
+                          l_opName, l_m, l_n, l_kl, l_ku, l_alpha, l_beta,
+                          l_aPtr, l_xPtr, l_yPtr, l_aResPtr, l_yResPtr);
+        assert(l_status == XFBLAS_STATUS_SUCCESS);
       }
-      if (l_handleYres != "NULL") {
-        l_yRes.resize(l_yResIdx+l_n);
-        for (unsigned int d=0; d<l_n; ++d) {
-          l_yRes[l_yResIdx+d] = (BLAS_dataType)d;
-        }
-        l_yResPtr = reinterpret_cast<uint8_t*>(&(l_yRes[l_yResIdx]));
-      }
-      xfblasStatus_t l_status= l_gen.addB1Instr(
-                        l_opName, l_n, l_alpha, 
-                        l_xPtr, l_yPtr, l_xResPtr, l_yResPtr, l_resScalar);
-      assert(l_status == XFBLAS_STATUS_SUCCESS);
+      l_idx++;
     }
     xfblasStatus_t l_status = l_gen.write2BinFile(l_binFile);
     assert(l_status == XFBLAS_STATUS_SUCCESS);
@@ -137,16 +225,20 @@ int main(int argc, char** argv)
   } 
   else if (l_read) {
     vector<Instr> l_instrs;
-    uint32_t l_n;
-    BLAS_dataType l_alpha;
+    uint32_t l_m, l_n, l_kl, l_ku;
+    BLAS_dataType l_alpha, l_beta;
     BLAS_resDataType l_resGolden;
-    BLAS_dataType *l_x, *l_y, *l_xRes, *l_yRes;
+    BLAS_dataType *l_a, *l_x, *l_y, *l_aRes, *l_xRes, *l_yRes;
+    BLAS_dataType l_aVal = 0;
     BLAS_dataType l_xVal=0;
     BLAS_dataType l_yVal=0;
+    BLAS_dataType l_aResVal=0;
     BLAS_dataType l_xResVal=0;
     BLAS_dataType l_yResVal=0;
+    l_a = &l_aVal;
     l_x = &l_xVal;
     l_y = &l_yVal;
+    l_aRes = &l_aResVal;
     l_xRes = &l_xResVal;
     l_yRes = &l_yResVal;
 
@@ -156,30 +248,24 @@ int main(int argc, char** argv)
       if (l_curInstr.m_opClass == B1_OP_CLASS) {
         l_gen.decodeB1Instr(l_curInstr, l_n, l_alpha, l_x, l_y, l_xRes, l_yRes, l_resGolden);
         cout <<"  n=" << l_n << "  alpha=" << l_alpha << "  resScalar=" << l_resGolden << endl;
-        if (l_x != nullptr) {
-          cout << "  x:" << endl;
-          for (unsigned int i=0; i<l_n; ++i) {
-            cout << l_x[i] << endl;
-          }
-        }
-        if (l_y != nullptr) {
-          cout << "  y:" << endl;
-          for (unsigned int i=0; i<l_n; ++i) {
-            cout << l_y[i];
-          }
-        }
-        if (l_xRes != nullptr) {
-          cout << "  xRes:" << endl;
-          for (unsigned int i=0; i<l_n; ++i) {
-            cout << l_xRes[i];
-          }
-        }
-        if (l_yRes != nullptr) {
-          cout << "  yRes:" << endl;
-          for (unsigned int i=0; i<l_n; ++i) {
-            cout << l_yRes[i];
-          }
-        }
+        outputVec("x:", l_n, l_x);
+        outputVec("y:", l_n, l_y);
+        outputVec("xRes:", l_n, l_xRes);
+        outputVec("yRes:", l_n, l_yRes);
+      }
+      else if (l_curInstr.m_opClass == B2_OP_CLASS) {
+        l_gen.decodeB2Instr(l_curInstr, l_m, l_n, l_kl, l_ku, l_alpha, l_beta, l_a, l_x, l_y, l_aRes, l_yRes);
+        cout << "m=" << l_m 
+             << "  n=" << l_n 
+             << " kl=" << l_kl 
+             << " ku=" << l_ku 
+             << "  alpha=" << l_alpha 
+             << "  beta=" << l_beta << endl;
+        outputMat("A:", l_m, l_n, l_a);
+        outputVec("x:", l_n, l_x);
+        outputVec("y:", l_n, l_y);
+        outputMat("ARes", l_m, l_n, l_aRes);
+        outputVec("yRes:", l_n, l_yRes);
       }
     }
   } else {

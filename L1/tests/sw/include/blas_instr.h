@@ -31,15 +31,103 @@
 
 using namespace std;
 
-#define B1_MaxOpCode 14
+#define B1_MaxOpCode 13
+#define B2_MaxOpCode 26
+#define B3_MaxOpCode 51
 #define NULL_OP 0
 #define B1_OP_CLASS 0
+#define B2_OP_CLASS 1
+#define B3_OP_CLASS 2
 #define OUTPUT_WIDTH 7 
 #define ENTRIES_PER_LINE 16
 
 namespace xf {
 namespace linear_algebra {
 namespace blas {
+  namespace {
+    template<typename t_DataType>
+    void printVec(ostream &os, const vector<t_DataType> &p_data, uint32_t p_n) {
+      for (unsigned int i=0; i<p_n; ++i){
+        if ((i % ENTRIES_PER_LINE) == 0) {
+          os << "\n";
+        }
+        os << setw(OUTPUT_WIDTH) << p_data[i] << "  ";
+      } 
+      os << "\n";
+    }
+    template<typename t_DataType>
+    void printMat(ostream &os, const vector<t_DataType> &p_data, uint32_t p_m, uint32_t p_n) {
+      for (unsigned int i=0; i<p_m; ++i) {
+        for (unsigned int j=0; j<p_n; ++j){
+          if ((j % ENTRIES_PER_LINE) == 0) {
+            os << "\n";
+          }
+          os << setw(OUTPUT_WIDTH) << p_data[i*p_n+j] << "  ";
+        } 
+        os << "\n" << "\n";
+      }
+    }
+    template<typename t_DataType>
+    void getVecData(
+      uint64_t p_addr, 
+      uint32_t p_n, 
+      vector<t_DataType> &p_data
+    ){
+      p_data.clear();
+      if (p_addr == 0) {
+        return;
+      }
+      size_t l_dataBytes = p_n * sizeof(t_DataType);
+      p_data.resize(p_n);
+      memcpy((char*)&(p_data[0]), reinterpret_cast<char*>(p_addr), l_dataBytes);
+      return;
+    }
+    template<typename t_DataType>
+    void getMatrixData(
+      uint64_t p_addr,
+      uint32_t p_m,
+      uint32_t p_n, 
+      vector<t_DataType> &p_data
+    ){
+      p_data.clear();
+      if (p_addr == 0) {
+        return;
+      }
+      size_t l_dataBytes = p_m * p_n * sizeof(t_DataType);
+      p_data.resize(p_m * p_n);
+      memcpy((char*)&(p_data[0]), reinterpret_cast<char*>(p_addr), l_dataBytes);
+      return;
+    }
+    template<typename t_DataType>
+    void showVec(
+      ostream &os,
+      uint32_t p_n,
+      uint64_t p_addr,
+      string p_str
+    ) {
+      vector<t_DataType> l_data;
+      getVecData<t_DataType>(p_addr, p_n, l_data);
+      if (l_data.size() != 0) {
+        os << p_str << "\n";
+        printVec<t_DataType>(os, l_data, p_n);
+      }
+    }
+    template<typename t_DataType>
+    void showMatrix(
+      ostream &os,
+      uint32_t p_m,
+      uint32_t p_n,
+      uint64_t p_addr,
+      string p_str
+    ) {
+      vector<t_DataType> l_data;
+      getMatrixData(p_addr, p_m, p_n, l_data);
+      if (l_data.size() != 0) {
+        os << p_str << "\n";
+        printMat<t_DataType>(os, l_data, p_m, p_n);
+      }
+    }
+  }
   class FindOpCode {
     public:
       FindOpCode() {
@@ -52,8 +140,50 @@ namespace blas {
           {"copy", 5},
           {"dot", 6},
           {"nrm2", 7},
-          {"scal", 8},
-          {"swap", 9}
+          {"rot", 8},
+          {"rotg", 9},
+          {"rotm", 10},
+          {"rotmg", 11},
+          {"scal", 12},
+          {"swap", 13},
+          {"gbmv", 14},
+          {"gemv", 15},
+          {"ger", 16},
+          {"sbmv", 17},
+          {"spmv", 18},
+          {"spr", 19},
+          {"spr2", 20},
+          {"symv", 21},
+          {"syr", 22},
+          {"syr2", 23},
+          {"tbmv", 24},
+          {"tbsv", 25},
+          {"tpmv", 26},
+          {"tpsv", 27},
+          {"trmv", 28},
+          {"trsv", 29},
+          {"hemv", 30},
+          {"hbmv", 31},
+          {"hpmv", 32},
+          {"her", 33},
+          {"her2", 34},
+          {"hpr", 35},
+          {"hpr2", 36},
+          {"gemm", 37},
+          {"gemm3m", 38},
+          {"gemmBatched", 39},
+          {"gemmStridedBatched", 40},
+          {"symm", 41},
+          {"syrj", 42},
+          {"syr2k", 43},
+          {"syrkx", 44},
+          {"trmm", 45},
+          {"trsm", 46},
+          {"trsmBatched", 47},
+          {"hemm", 48},
+          {"herk", 49},
+          {"her2k", 50},
+          {"herkx", 51}
         };
       }
       xfblasStatus_t getOpCode(const string &p_opName, uint32_t &p_opCode) {
@@ -87,29 +217,6 @@ namespace blas {
     public:
       ParamB1(){}
     public:
-      void getData(
-        uint64_t p_addr, 
-        uint32_t p_n, 
-        vector<t_DataType> &p_data
-      ){
-        p_data.clear();
-        if (p_addr == 0) {
-          return;
-        }
-        size_t l_dataBytes = p_n * sizeof(t_DataType);
-        p_data.resize(m_n);
-        memcpy((char*)&(p_data[0]), reinterpret_cast<char*>(p_addr), l_dataBytes);
-        return;
-      }
-      void printData(ostream &os, const vector<t_DataType> &p_data, uint32_t p_n) {
-        for (unsigned int i=0; i<p_n; ++i){
-          if ((i % ENTRIES_PER_LINE) == 0) {
-            os << "\n";
-          }
-          os << setw(OUTPUT_WIDTH) << p_data[i];
-        } 
-        os << "\n";
-      }
       void print(ostream &os) {
         os << "n=" << m_n
            << " alpha="
@@ -117,27 +224,10 @@ namespace blas {
            << " resGolden="
            << setw(OUTPUT_WIDTH) << m_resScalar << "\n";
 
-        vector<t_DataType> l_data;
-        getData(m_xAddr, m_n, l_data);
-        if (l_data.size() != 0) {
-          os << "x:" << "\n";
-          printData(os, l_data, m_n);
-        }   
-        getData(m_yAddr, m_n, l_data);
-        if (l_data.size() != 0) {
-          os << "y:" << "\n";
-          printData(os, l_data, m_n);
-        }   
-        getData(m_xResAddr, m_n, l_data);
-        if (l_data.size() != 0) {
-          os << "xRes:" << "\n";
-          printData(os, l_data, m_n);
-        }   
-        getData(m_yResAddr, m_n, l_data);
-        if (l_data.size() != 0) {
-          os << "yRes:" << "\n";
-          printData(os, l_data, m_n);
-        }   
+        showVec<t_DataType>(os, m_n, m_xAddr, "x:"); 
+        showVec<t_DataType>(os, m_n, m_yAddr, "y:"); 
+        showVec<t_DataType>(os, m_n, m_xResAddr, "xRes:"); 
+        showVec<t_DataType>(os, m_n, m_yResAddr, "xRes:"); 
       }
     public:
       uint32_t m_n;
@@ -155,6 +245,57 @@ namespace blas {
     return (os);
   }
 
+  template<typename t_DataType> 
+  class ParamB2 {
+    public:
+      ParamB2(){}
+    public:
+      void getVecData(
+        uint64_t p_addr, 
+        uint32_t p_n, 
+        vector<t_DataType> &p_data
+      ){
+        p_data.clear();
+        if (p_addr == 0) {
+          return;
+        }
+        size_t l_dataBytes = p_n * sizeof(t_DataType);
+        p_data.resize(p_n);
+        memcpy((char*)&(p_data[0]), reinterpret_cast<char*>(p_addr), l_dataBytes);
+        return;
+      }
+      void print(ostream &os) {
+        os << "m=" << m_m << " n=" << m_n << " kl=" << m_kl << " ku=" << m_ku
+           << " alpha="
+           << setw(OUTPUT_WIDTH) << m_alpha
+           << " beta="
+           << setw(OUTPUT_WIDTH) << m_beta << "\n";
+
+        showMatrix<t_DataType>(os, m_m, m_n, m_aAddr, "A:");
+        showVec<t_DataType>(os, m_n, m_xAddr, "x:");
+        showVec<t_DataType>(os, m_n, m_yAddr, "y:");
+        showMatrix<t_DataType>(os, m_m, m_n, m_aResAddr, "ARes:");
+        showVec<t_DataType>(os, m_n, m_yResAddr, "yRes:");
+      }
+    public:
+      uint32_t m_m;
+      uint32_t m_n;
+      uint32_t m_kl;
+      uint32_t m_ku;
+      t_DataType m_alpha;
+      t_DataType m_beta;
+      uint64_t m_aAddr;
+      uint64_t m_xAddr;
+      uint64_t m_yAddr;
+      uint64_t m_aResAddr;
+      uint64_t m_yResAddr;
+  };
+
+  template<typename T1>
+  ostream& operator<<(ostream &os, ParamB2<T1> &p_val) {
+    p_val.print(os);
+    return (os);
+  }
   class Instr {
     public:
       Instr() {}
