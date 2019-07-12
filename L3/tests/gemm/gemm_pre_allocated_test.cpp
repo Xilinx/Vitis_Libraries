@@ -1,0 +1,164 @@
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <string>
+#include <cmath>
+#include <iomanip>
+#include "xf_blas.h"
+
+# define IDX2R(i,j,ld) (((i)*( ld ))+(j))
+# define m 5 // a - mxk matrix
+# define n 5 // b - kxn matrix
+# define k 5 // c - mxn matrix
+
+using namespace std;
+
+XFBLAS_dataType* getGoldenMat(XFBLAS_dataType* a, XFBLAS_dataType* b, XFBLAS_dataType* c, int padded_lda, int padded_ldb, int padded_ldc){
+  XFBLAS_dataType * goldenC;
+  goldenC = (XFBLAS_dataType*) malloc(m * n * sizeof (XFBLAS_dataType));
+  for(int row = 0; row < m; row++){ 
+      for(int col = 0; col < n; col++){ 
+          XFBLAS_dataType l_val = 0;
+          for (int i = 0; i < k; i ++) {
+            l_val += a[IDX2R(row,i,padded_lda)] * b[IDX2R(i,col,padded_ldb)];
+          }
+          goldenC[IDX2R(row,col,n)] = l_val + c[IDX2R(row,col,padded_ldc)];
+      } 
+  }
+  return goldenC;
+}
+
+bool compareGemm(XFBLAS_dataType* c, XFBLAS_dataType* goldenC, int padded_ldc, float p_TolRel=1e-3, float p_TolAbs=1e-5){
+  bool l_check = true;
+  for(int row = 0; row < m; row++){ 
+    for(int col = 0; col < n; col++){
+      XFBLAS_dataType l_ref = goldenC[IDX2R(row,col,n)];
+      XFBLAS_dataType l_result = c[IDX2R(row,col,padded_ldc)];
+      XFBLAS_dataType l_diffAbs = abs(l_ref-l_result);
+      XFBLAS_dataType l_diffRel = l_diffAbs;
+      if (goldenC[IDX2R(row,col,n)] != 0 ){
+        l_diffRel /= abs(l_ref);
+      }
+      bool check = (l_diffRel <= p_TolRel) || (l_diffAbs <= p_TolAbs);
+      if (!check){
+        cout<<"golden result "<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,padded_ldc)]<<"\n";
+        l_check = false;
+      }
+    }
+  }
+  return l_check;
+}
+
+int main(int argc, char **argv) {
+  unsigned int l_argIdx = 1;
+  string l_xclbinFile(argv[l_argIdx++]);
+  string l_configFile(argv[l_argIdx++]);
+  string l_logFile(argv[l_argIdx++]);
+  
+  int i, j; // i-row index ,j- column index
+
+  XFBLAS_dataType * a, * b, * c;
+  
+  int padded_lda, padded_ldb, padded_ldc;
+  
+  xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
+  xfblasStatus_t status = XFBLAS_STATUS_SUCCESS;
+  
+  status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM);
+  if (status != XFBLAS_STATUS_SUCCESS) {
+    cout<<"Create Handle failed with error code: "<< status << "\n"; 
+    return EXIT_FAILURE;   
+  }
+  
+  status = xfblasMallocManaged(&a, &padded_lda, m,k,sizeof(*a));
+  
+  if (status != XFBLAS_STATUS_SUCCESS) {
+    cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
+    return EXIT_FAILURE;   
+  }
+  status = xfblasMallocManaged(&b, &padded_ldb, k,n,sizeof(*b));
+  
+  if (status != XFBLAS_STATUS_SUCCESS) {
+    cout<<"Malloc memory for matrix B failed with error code: "<< status << "\n"; 
+    return EXIT_FAILURE;   
+  }
+  
+  status = xfblasMallocManaged(&c, &padded_ldc, m,n,sizeof(*c));
+  
+  if (status != XFBLAS_STATUS_SUCCESS) {
+    cout<<"Malloc memory for matrix C failed with error code: "<< status << "\n"; 
+    return EXIT_FAILURE;   
+  }
+  
+  int ind = 1;
+
+  for( i = 0; i<  m; i ++){ 
+      for( j = 0; j < k; j ++){ 
+          a[ IDX2R (i,j,padded_lda)]=( XFBLAS_dataType ) ind++; 
+      } 
+  } 
+  
+  for( i = 0; i<  k; i ++){ 
+      for( j = 0; j < n; j ++){ 
+          b[ IDX2R (i,j,padded_ldb )]=( XFBLAS_dataType ) ind++; 
+      } 
+  } 
+
+  for( i = 0; i<  m; i ++){ 
+      for( j = 0; j < n; j ++){ 
+          c[ IDX2R (i,j,padded_ldc )]= 1; 
+      } 
+  } 
+  
+  for ( i = 0; i < m; i ++){
+        for ( j = 0; j < n; j ++){
+            cout<< (c[ IDX2R (i,j,padded_ldc)])<<" ";
+        }
+        cout<<"\n";
+  }
+  
+  XFBLAS_dataType* goldenC = getGoldenMat(a, b, c, padded_lda, padded_ldb, padded_ldc);
+  
+  
+  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n);
+  
+  status = xfblasDeviceSynchronize();
+  
+  if (status != XFBLAS_STATUS_SUCCESS) {
+    cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
+    return EXIT_FAILURE;   
+  }
+  
+  for ( i = 0; i < m; i ++){
+        for ( j = 0; j < n; j ++){
+            cout<< (c[ IDX2R (i,j, padded_ldc)])<<" ";
+        }
+        cout<<"\n";
+  }
+  
+  
+  if (compareGemm(c, goldenC, padded_ldc)){
+    cout<<"Test passed!\n";
+  }else{
+    cout<<"Test failed!\n";
+  }
+  
+  xfblasFree(a);
+  xfblasFree(b);
+  xfblasFree(c);
+  xfblasDestory();
+  
+}

@@ -20,9 +20,9 @@
  * 
  */
 
-#include <iostream>
-#include <fstream>
 #include <string>
+#include <cmath>
+#include <iomanip>
 #include "xf_blas.h"
 
 # define IDX2R(i,j,ld) (((i)*( ld ))+(j))
@@ -32,23 +32,35 @@
 
 using namespace std;
 
-bool compareGemm(short* a, short* b, short* c){
-  short * goldenC;
-  goldenC = (short*) malloc(m * n * sizeof (short));
-  bool l_check = true;
+XFBLAS_dataType* getGoldenMat(XFBLAS_dataType* a, XFBLAS_dataType* b, XFBLAS_dataType* c){
+  XFBLAS_dataType * goldenC;
+  goldenC = (XFBLAS_dataType*) malloc(m * n * sizeof (XFBLAS_dataType));
   for(int row = 0; row < m; row++){ 
       for(int col = 0; col < n; col++){ 
-          short l_val = 0;
+          XFBLAS_dataType l_val = 0;
           for (int i = 0; i < k; i ++) {
             l_val += a[IDX2R(row,i,k)] * b[IDX2R(i,col,n)];
           }
-          goldenC[IDX2R(row,col,n)] = l_val;
+          goldenC[IDX2R(row,col,n)] = l_val + c[IDX2R(row,col,n)];
       } 
   }
+  return goldenC;
+}
+
+bool compareGemm(XFBLAS_dataType* c, XFBLAS_dataType* goldenC, float p_TolRel=1e-3, float p_TolAbs=1e-5){
+  bool l_check = true;
   for(int row = 0; row < m; row++){ 
     for(int col = 0; col < n; col++){
-      if (goldenC[IDX2R(row,col,n)]!=c[IDX2R(row,col,n)]){
-        cout<<"golden result "<<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<<c[IDX2R(row,col,n)]<<"\n";
+      XFBLAS_dataType l_ref = goldenC[IDX2R(row,col,n)];
+      XFBLAS_dataType l_result = c[IDX2R(row,col,n)];
+      XFBLAS_dataType l_diffAbs = abs(l_ref-l_result);
+      XFBLAS_dataType l_diffRel = l_diffAbs;
+      if (goldenC[IDX2R(row,col,n)] != 0 ){
+        l_diffRel /= abs(l_ref);
+      }
+      bool check = (l_diffRel <= p_TolRel) || (l_diffAbs <= p_TolAbs);
+      if (!check){
+        cout<<"golden result"<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,n)]<<"\n";
         l_check = false;
       }
     }
@@ -86,21 +98,21 @@ int main(int argc, char **argv) {
   }
   
   int i, j; // i-row index ,j- column index
-  short * a, * b, * c;
-  a = ( short *) malloc (m*k* sizeof ( short )); // host memory for a
-  b = ( short *) malloc (k*n* sizeof ( short )); 
-  c = ( short *) malloc (m*n* sizeof ( short )); 
+  XFBLAS_dataType * a, * b, * c;
+  a = ( XFBLAS_dataType *) malloc (m*k* sizeof ( XFBLAS_dataType )); // host memory for a
+  b = ( XFBLAS_dataType *) malloc (k*n* sizeof ( XFBLAS_dataType )); 
+  c = ( XFBLAS_dataType *) malloc (m*n* sizeof ( XFBLAS_dataType )); 
 
   int ind = 1;
   for( i = 0; i<  m; i ++){ 
     for( j = 0; j < k; j ++){ 
-      a[ IDX2R (i,j,k )]= (short) ind++; 
+      a[ IDX2R (i,j,k )]= (XFBLAS_dataType) ind++; 
     } 
   } 
   ind = 1;
   for( i = 0; i<  k; i ++){ 
     for( j = 0; j < n; j ++){ 
-      b[ IDX2R (i,j,n )]= (short) ind++; 
+      b[ IDX2R (i,j,n )]= (XFBLAS_dataType) ind++; 
     } 
   } 
 
@@ -109,6 +121,8 @@ int main(int argc, char **argv) {
       c[ IDX2R (i,j,n )]= 0; 
     } 
   } 
+  
+  XFBLAS_dataType* goldenC = getGoldenMat(a,b,c);
 
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
   xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM, l_kernelID);
@@ -172,12 +186,11 @@ int main(int argc, char **argv) {
     cout<<"\n";
   }
   
-  if (compareGemm(a, b, c)){
+  if (compareGemm(c,goldenC)){
     cout<<"Test passed!\n";
   }else{
     cout<<"Test failed!\n";
   }
-  
   
   xfblasFree(a);
   xfblasFree(b);

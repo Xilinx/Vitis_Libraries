@@ -233,7 +233,7 @@ class XHost {
         return XFBLAS_STATUS_SUCCESS;
       }
     }
-    
+
     template<typename t_dataType> 
     xfblasStatus_t setMatToFPGA(void* p_hostHandle, int p_rows, int p_lda, int p_paddedLda, t_dataType & p_hostPtr, t_dataType & p_devPtr){
       auto &l_devPtr = m_bufHandle;
@@ -288,6 +288,25 @@ class XHost {
         }  
       } else {
         return XFBLAS_STATUS_ALLOC_FAILED;
+      }
+      return XFBLAS_STATUS_SUCCESS;
+    }
+    
+    xfblasStatus_t deviceSync(){
+      for (auto& l_devPtr: m_bufHandle){
+        if(!m_fpga->copyToFpga(l_devPtr.second, m_hostMatSz[l_devPtr.first])){
+          return XFBLAS_STATUS_ALLOC_FAILED;
+        }
+      }
+      return XFBLAS_STATUS_SUCCESS;
+    }
+    
+    
+    xfblasStatus_t getMatManaged() {
+      for (auto& l_devPtr: m_bufHandle){
+        if(!m_fpga->copyFromFpga(l_devPtr.second, m_hostMatSz[l_devPtr.first])){
+          return XFBLAS_STATUS_ALLOC_FAILED;
+        }
       }
       return XFBLAS_STATUS_SUCCESS;
     }
