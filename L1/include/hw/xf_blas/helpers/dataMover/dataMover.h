@@ -106,7 +106,55 @@ void writeStream2Vec(
   }
 } //end writeStream2Vec
 
+template<
+  typename t_DataType,
+  unsigned int t_ParEntries>
+void gem2Stream(
+  unsigned int p_m,
+  unsigned int p_n,
+  t_DataType *p_in,
+  hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
+) {
+  #ifndef __SYNTHESIS__
+    assert ((p_n % t_ParEntries) == 0);
+  #endif
+  unsigned int l_parBlocks = p_m * p_n / t_ParEntries;
+  for (unsigned int i=0; i<l_parBlocks; ++i) {
+  #pragma HLS PIPELINE
+    BitConv<t_DataType> l_bitConv;
+    WideType<t_DataType, t_ParEntries > l_val;
+    for (unsigned int j=0; j<t_ParEntries; ++j) {
+      l_val[j] = p_in[i*t_ParEntries + j];
+    }
+    p_out.write(l_val);
+  }
+} //end gem2Stream
 
+template<
+  typename t_DataType,
+  unsigned int t_ParEntries>
+void vec2GemStream(
+  unsigned int p_m,
+  unsigned int p_n,
+  t_DataType *p_in,
+  hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
+) {
+  #ifndef __SYNTHESIS__
+    assert ((p_n % t_ParEntries) == 0);
+  #endif
+  unsigned int l_parBlocks = p_n / t_ParEntries;
+  for (unsigned int l=0; l<p_m; ++l) {
+    for (unsigned int i=0; i<l_parBlocks; ++i) {
+    #pragma HLS PIPELINE
+      BitConv<t_DataType> l_bitConv;
+      WideType<t_DataType, t_ParEntries > l_val;
+      for (unsigned int j=0; j<t_ParEntries; ++j) {
+        l_val[j] = p_in[i*t_ParEntries + j];
+      }
+      p_out.write(l_val);
+    }
+  }
+} //end readVec2Stream
 }
 }
 }
