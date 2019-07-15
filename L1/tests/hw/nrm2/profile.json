@@ -10,7 +10,7 @@
   ],
   "op": "nrm2",
   "logParEntries": 2,
-  "vectorSizes": [
+  "sizeList": [
     1024,
     4096,
     8192
