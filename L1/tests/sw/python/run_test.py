@@ -94,8 +94,8 @@ class RunTest:
       os.makedirs(self.dataPath)
 
     self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
-     #  self.profile['b_synth'], self.profile['b_cosim'])
-        False, False)
+       self.profile['b_synth'], self.profile['b_cosim'])
+      #  False, False)
 
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.logParEntries))
@@ -132,7 +132,7 @@ class RunTest:
     blas_gen.write2BinFile(binFile)
     print("Data file %s has been generated sucessfully."%binFile)
     print("Testing %s. Parameters in file %s.\nLog file %s\n"%(self.op.sizeStr, paramTclPath, logfile))
-    self.hls.execution(binFile, logfile)
+    self.hls.execution(binFile, logfile, True)
     self.hls.checkLog(logfile)
 
   def runTest(self):

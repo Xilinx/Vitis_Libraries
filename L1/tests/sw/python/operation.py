@@ -90,8 +90,9 @@ class BLAS_L1(OP):
         runTest.run()
 
   def paramTCL(self, f):
-   f.write('   opName "%s"\n '%self.name)
-   f.write('   vectorSize %d\n '%self.vectorDim)
+    f.write('   L1 true\n ')
+    f.write('   opName "%s"\n '%self.name)
+    f.write('   vectorSize %d\n '%self.vectorDim)
 
 class amin(BLAS_L1):
   def __init__(self, blas_l1: BLAS_L1):
@@ -194,6 +195,7 @@ class BLAS_L2(OP):
       return op
     except:
       raise OP_ERROR("%s is not defined."%opName)
+
   def __init__(self, name, maxV, minV):
     self.name=name
     self.maxV = maxV
@@ -232,9 +234,10 @@ class BLAS_L2(OP):
     self.sizeStr = "m%d-n%d"%(self.m,self.n)
 
   def paramTCL(self, f):
-   f.write('   opName "%s"\n '%self.name)
-   f.write('   matrixSize %d\n '%self.m * self.n)
-   f.write('   vectorSize %d\n '%self.n)
+    f.write('   L2 true\n ')
+    f.write('   opName "%s"\n '%self.name)
+    f.write('   matrixSize %d\n '%(self.m * self.n))
+    f.write('   vectorSize %d\n '%self.n)
 
   def test(self, runTest):
     vecDimList = runTest.profile['matrixDims']
