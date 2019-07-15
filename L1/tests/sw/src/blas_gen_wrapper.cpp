@@ -46,7 +46,7 @@ extern "C" {
     return  genBin -> addB1Instr(p_opName, p_n, p_alpha, p_x, p_y, p_xRes, p_yRes, p_res);
   }
   xfblasStatus_t addB2Instr(GenBinType* genBin,
-      string p_opName,
+      const char * p_opName,
       uint32_t p_m,
       uint32_t p_n,
       uint32_t p_kl,

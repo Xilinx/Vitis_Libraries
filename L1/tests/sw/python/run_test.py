@@ -17,11 +17,11 @@ import ctypes as C
 import argparse
 import os, sys
 import json
-from blas_gen_bin import BLAS_GEN
-from hls import HLS
-from makefile import Makefile
 import pdb
-from operation import BLAS_L1
+from blas_gen_bin import BLAS_GEN, BLAS_ERROR
+from hls import HLS, HLS_ERROR, Parameters
+from makefile import Makefile
+from operation import OP, BLAS_L1, BLAS_L2, OP_ERROR
 
 def Format(x):
   f_dic = {0:'th', 1:'st', 2:'nd',3:'rd'}
@@ -29,17 +29,15 @@ def Format(x):
   if k>=4:
     k=0
   return "%d%s"%(x, f_dic[k])
+
 class RunTest:
-  def __init__(self):
+  def __init__(self, makefile):
     self.profile = None 
-    self.opList = None 
-    self.dtList =  None
-    self.vectorSize = None  
-    self.dtWidth = None  
     self.parEntries = 1
     self.logParEntries = 0
     self.valueRange = None
     self.numSim = 1
+    self.makefile = makefile
 
     self.hls = None
     self.typeDict ={
@@ -58,123 +56,111 @@ class RunTest:
   def parseProfile(self, filePath):
     with open(filePath, 'r') as fh:
       self.profile = json.loads(fh.read())
-    self.op = self.profile['op']
-    self.dtList = self.profile['dataTypes']
-    self.rtList = self.profile['retTypes']
 
+    self.opName = self.profile['op']
+    self.opClass = OP.parse(self.opName)
 
-    if 'logParEntries' in self.profile:
-      self.logParEntries = self.profile['logParEntries']
-      self.parEntries = 1 << self.logParEntries
-    if 'parEntries' in self.profile:
-      self.parEntries == self.profile['parEntries']
-    
     self.minValue = self.profile['valueRange'][0]
     self.maxValue = self.profile['valueRange'][1]
 
+    self.op = eval(self.opClass).parse(self.opName, self.maxValue, self.minValue)
+
+    if 'logParEntries' in self.profile:
+      self.logParEntries = self.profile['logParEntries']
+    else:
+      self.logParEntries == -1
+
+    if self.logParEntries == -1:
+      self.parEntries == self.profile['parEntries']
+    else:
+      self.parEntries = 1 << self.logParEntries
+
+    if 'dataTypes' in self.profile:
+      self.dataTypes = [eval('np.%s'%dt) for dt in self.profile['dataTypes']]
+
+    if 'retTypes' in self.profile:
+      self.retTypes = [eval('np.%s'%dt) for dt in self.profile['retTypes']]
+    
     self.numSim = self.profile['numSimulation']
 
-    self.vectorSizes = self.profile['vectorSizes']
-
-    self.testPath = r'out_test/%s'%self.op
+    self.testPath = r'out_test/%s'%self.op.name
 
     self.libPath = os.path.join(self.testPath, 'libs')
     if not os.path.exists(self.libPath):
       os.makedirs(self.libPath)
+
     self.dataPath = os.path.join(self.testPath, 'data')
     if not os.path.exists(self.dataPath):
       os.makedirs(self.dataPath)
 
     self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
-       self.profile['b_synth'], self.profile['b_cosim'])
-     #   False, False)
+     #  self.profile['b_synth'], self.profile['b_cosim'])
+        False, False)
 
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.logParEntries))
-    self.hls.generateDirective(self.parEntries, directivePath)
+    self.params = Parameters(self.op, self.logParEntries, self.parEntries)
+    self.hls.generateDirective(self.params, directivePath)
 
+  def run(self):
+    c_type = self.typeDict[self.op.dataType]
+    self.params.setDtype(c_type)
+    r_type = c_type
+    typeStr = 'd%s'%c_type
+    if self.opClass == 'BLAS_L1':
+      r_type = self.typeDict[self.op.rtype]
+      typeStr = 'd%s_r%s'%(c_type, r_type)
+    self.params.setRtype(r_type)
 
-  def runTest(self,makefile, maxN):
-    dtLen =  len(self.dtList)
-    numSimulation = 0
-    for index in range(dtLen):
-      dt = self.dtList[index][0]
-      dw = self.dtList[index][1]
-      dtype = eval(r'np.%s%d'%(dt, dw))
-      rt = self.rtList[index][0]
-      rw = self.rtList[index][1]
-      rtype = eval(r'np.%s%d'%(rt, rw))
+    libPath =os.path.join(self.libPath,'blas_gen_%s.so'%typeStr)
 
-      c_type=self.typeDict[dtype]
-      r_type=self.typeDict[rtype]
+    if not os.path.exists(libPath):
+      make = Makefile(self.makefile, libPath)
+      if not make.make(c_type, r_type):
+        raise Exception("ERROR: make shared library failure.")
 
-      typeStr = 'd%s%s_r%s%d'%(dt,dw,rt,rw)
+    self.lib = C.cdll.LoadLibrary(libPath)
+    
+    paramTclPath =os.path.join(self.dataPath, r'parameters_%s_%s.tcl'%(self.op.sizeStr,typeStr))
+    logfile=os.path.join(self.dataPath, r'logfile_%s_%s.log'%(self.op.sizeStr,typeStr))
+    binFile =os.path.join(self.dataPath,'TestBin_%s_%s.bin'%(self.op.sizeStr,typeStr))
 
-      libPath =os.path.join(self.libPath,'blas_gen_%s.so'%typeStr)
+    self.hls.generateParam(self.params, paramTclPath)
+    dataList = [self.op.compute() for j in range(self.numSim)]
+    blas_gen=BLAS_GEN(self.lib)
+    self.op.addInstr(blas_gen, dataList)
+    blas_gen.write2BinFile(binFile)
+    print("Data file %s has been generated sucessfully."%binFile)
+    print("Testing %s. Parameters in file %s.\nLog file %s\n"%(self.op.sizeStr, paramTclPath, logfile))
+    self.hls.execution(binFile, logfile)
+    self.hls.checkLog(logfile)
 
-      if not os.path.exists(libPath):
-        make = Makefile(makefile, libPath)
-        if not make.make(c_type, r_type):
-          print("ERROR: make shared library failure.")
-          sys.exit
-      lib = C.cdll.LoadLibrary(libPath)
-      print("Start to test operation %s under DataType %s and return DataType %s"%(self.op, c_type, r_type))
-      for vectorSize in self.vectorSizes:
-        if numSimulation == maxN:
-          break
-        numSimulation = numSimulation + 1
-        paramTclPath =os.path.join(self.testPath, 
-           r'parameters_v%d_%s.tcl'%(vectorSize,typeStr))
-        self.hls.generateParam(self.op, c_type, dw, r_type, self.logParEntries, 
-            self.parEntries, vectorSize, paramTclPath)
+  def runTest(self):
+    self.op.test(self)
 
-        logfile=os.path.join(self.dataPath, 
-            r'logfile_v%d_%s.log'%(vectorSize,typeStr))
-        
-        binFile =os.path.join(self.dataPath,'TestBin_v%d_%s.bin'%(vectorSize,typeStr))
-        blas_gen=BLAS_GEN(lib)
-        op = BLAS_L1.parse(self.op,dtype, vectorSize, self.maxValue, self.minValue) 
-
-        dataList = list()
-        for j in range(self.numSim): 
-          dataList.append(op.compute())
-          alpha, xdata, ydata, xr, yr,r = dataList[-1]
-          res = blas_gen.addB1Instr(self.op, vectorSize, alpha, xdata, ydata, xr, yr, r.astype(rtype))
-          if not res == 'XFBLAS_STATUS_SUCCESS':
-            print("ERROR: Add instruction failed.")
-            print("Test failed due to the previous errors.")
-            return
-
-        res = blas_gen.write2BinFile(binFile)
-        if not res == 'XFBLAS_STATUS_SUCCESS':
-          print("ERROR: Write data file %s failed."%binFile)
-          print("Test failed due to the previous errors.")
-          return
-        print("Data file %s has been generated sucessfully."%binFile)
-        print("Test vector size %d. Parameters in file %s.\nLog file %s\n"%(vectorSize, paramTclPath, logfile))
-        self.hls.execution(binFile, logfile, True)
-        result = self.hls.checkLog(logfile)
-        if result:
-          print("Test passed.")
-        else:
-          print("Test failed.\n %s with input %s\nplease check log file %s"%(self.op, 
-                binFile, os.path.abspath(logfile)))
-          return
+def main(profileList, makefile): 
+  try:
+    for profile in profileList:
+      if not os.path.exists(profile):
+        print("File %s is not exists."%profile)
+        continue
+      runTest = RunTest(makefile)
+      runTest.parseProfile(profile)
+      runTest.runTest() 
+      print("All tests for %s are passed."%runTest.op.name)
     print("All tests are passed.")
-
-def main(profileList, makefile, maxN): 
-  for profile in profileList:
-    if not os.path.exists(profile):
-      print("File %s is not exists."%profile)
-      continue
-    runTest = RunTest()
-    runTest.parseProfile(profile)
-    runTest.runTest(makefile, maxN)
+  except OP_ERROR as err:
+    print("OPERATOR ERROR: %s"%(err.message))
+    print("Test failed due to previous errors.")
+  except BLAS_ERROR as err:
+    print("BLAS ERROR: %s with status code is %s"%(err.message, err.status))
+    print("Test failed due to previous errors.")
+  except HLS_ERROR as err:
+    print("HLS ERROR: %s\nPlease check log file %s"%(err.message, os.path.abspath(err.logFile)))
   
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
-  parser.add_argument('--max', metavar='numSim', type=int, help='maximum number of simulations for each profile/operator')
   group = parser.add_mutually_exclusive_group(required=True)
   group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of pathes to the profile files')
   group.add_argument('--operator', nargs='*',metavar='opName', help='list of operator names')
@@ -188,4 +174,4 @@ if __name__== "__main__":
       profile.append('./hw/%s/profile.json'%op)
   else:
     parser.print_help()
-  main(set(profile), args.makefile, args.max)
+  main(set(profile), args.makefile)

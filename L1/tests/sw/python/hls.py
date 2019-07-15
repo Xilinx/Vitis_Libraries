@@ -17,6 +17,21 @@ import shlex, subprocess
 import pdb
 import os
 
+class HLS_ERROR(Exception):
+  def __init__(self, message, logFile):
+    self.message = message
+    self.logFile = logFile
+
+class Parameters:
+  def __init__(self, op, logParEntries, parEntries):
+    self.op = op
+    self.logParEntries = logParEntries
+    self.parEntries=parEntries
+  def setRtype(self, rtype):
+    self.rtype = rtype
+  def setDtype(self, dtype):
+    self.dtype = dtype
+
 class HLS:
   def __init__(self, tclPath, b_csim, b_syn, b_cosim):
 
@@ -33,7 +48,7 @@ class HLS:
     args = shlex.split(commandLine)
     hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 #    (stdoutdata, stderrdata) = hls.communicate()
-    with open(logFile, 'w') as f:
+    with open(logFile, 'w', buffering=1) as f:
       f.write(commandLine)
       while True:
         line = hls.stdout.readline()
@@ -46,49 +61,42 @@ class HLS:
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
+    passIndex = content.find("ERROR")
+    if passIndex >= 0:
+      raise HLS_ERROR("HLS execution met errors.", logFile)
     if self.cosim:
       passIndex = content.find(r"C/RTL co-simulation finished: PASS")
-      if passIndex >=0:
-        return True
-      else:
-        return False
+      if passIndex < 0:
+        raise HLS_ERROR("C/RTL co-simulation FAILED.", logFile)
     elif self.syn:
       passIndex = content.find("Finished generating all RTL models")
-      if passIndex >=0:
-        return True
-      else:
-        return False
+      if passIndex < 0:
+        raise HLS_ERROR("SYNTHESIS FAILED.", logFile)
     elif self.csim:
       passIndex = content.find("CSim done with 0 errors")
-      if passIndex >=0:
-        return True
-      else:
-        return False
+      if passIndex < 0:
+        raise HLS_ERROR("Csim FAILED.", logFile)
     else:
-      return False
+      raise HLS_ERROR("PROFILE ERROR.", logFile)
+
   def cosimPerf(self, logFile):
     if self.cosim:
       pass
 
-  def generateParam(self, op, c_type, dw, r_type, logParEntries, parEntries, vs, fileparams):
+  def generateParam(self, m, fileparams):
     self.params = fileparams
     with open(self.params, 'w') as f:
        f.write('array set opt {\n ')   
-       f.write('   part    vu9p\n ')
-       f.write('   dataType %s\n '%c_type)
-       f.write('   resDataType %s\n '%r_type)
-       f.write('   dataWidth %d\n '%dw)
-       f.write('   logParEntries %d\n '%logParEntries)
-       f.write('   parEntries %d\n '%parEntries)
-       f.write('   vectorSize %d\n '%vs)
-       f.write('   pageSizeBytes 4096\n ')
-       f.write('   memWidthBytes 64\n ')
-       f.write('   instrSizeBytes 8\n ')
-       f.write('   maxNumInstrs 16\n ')
-       f.write('   instrPageIdx 0\n ')
-       f.write('   paramPageIdx 1\n ')
-       f.write('   statsPageIdx 2\n ')
-       f.write('   opName "%s"\n '%op)
+      ###########  TEST PARAMETERS  ##############
+       f.write('   dataType %s\n '%m.dtype)
+       f.write('   resDataType %s\n '%m.rtype)
+       f.write('   logParEntries %d\n '%m.logParEntries)
+       f.write('   parEntries %d\n '%m.parEntries)
+      ###########  OP PARAMETERS  ##############
+
+       m.op.paramTCL(f)
+
+      ###########  HLS PARAMETERS  ##############
        if self.csim:
          f.write('   runCsim     1\n ')
        else:
@@ -101,16 +109,20 @@ class HLS:
          f.write('   runRTLsim     1\n ')
        else:
          f.write('   runRTLsim     0\n ')
+      ###########  FIXED PARAMETERS  ##############
+       f.write('   part    vu9p\n ')
+       f.write('   pageSizeBytes 4096\n ')
+       f.write('   memWidthBytes 64\n ')
+       f.write('   instrSizeBytes 8\n ')
+       f.write('   maxNumInstrs 16\n ')
+       f.write('   instrPageIdx 0\n ')
+       f.write('   paramPageIdx 1\n ')
+       f.write('   statsPageIdx 2\n ')
        f.write(' }\n ')
-  def generateDirective(self, parEntries, directivePath):
+
+  def generateDirective(self, m:Parameters, directivePath):
     self.directive = directivePath
     with open(self.directive, 'w') as f:
-       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_x\n'%(vs))
-       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_y\n'%(vs))
-       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_xRes\n'%(vs))
-       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" p_yRes\n'%(vs))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_x\n'%(parEntries))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_y\n'%(parEntries))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_xRes\n'%(parEntries))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" p_yRes\n'%(parEntries))
-
+      for inface in m.op.interfaceList:
+       #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" %s\n'%(vs, inface))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" %s\n'%(m.parEntries, inface))
