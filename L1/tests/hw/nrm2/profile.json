@@ -3,14 +3,14 @@
   "b_synth": true,
   "b_cosim": true,
   "dataTypes": [
-    ["float", 64]
+    "float64"
   ],
   "retTypes": [
-    ["float", 64]
+    "float64"
   ],
   "op": "nrm2",
   "logParEntries": 2,
-  "sizeList": [
+  "vectorDims": [
     1024,
     4096,
     8192
