@@ -15,6 +15,7 @@
  */
 #ifndef UUT_TOP_H
 #define UUT_TOP_H
+#if BLAS_L1
 
 void uut_top(
   uint32_t p_n,
@@ -25,4 +26,21 @@ void uut_top(
   BLAS_dataType p_yRes[BLAS_vectorSize],
   BLAS_resDataType &p_goldRes
 );
+#endif
+
+#if  BLAS_L2
+void uut_top(
+  uint32_t p_m,
+  uint32_t p_n,
+  uint32_t p_kl,
+  uint32_t p_ku,
+  BLAS_dataType p_alpha,
+  BLAS_dataType p_beta,
+  BLAS_dataType p_a[BLAS_matrixSize],
+  BLAS_dataType p_x[BLAS_vectorSize],
+  BLAS_dataType p_y[BLAS_matrixSize/BLAS_vectorSize],
+  BLAS_dataType p_aRes[BLAS_matrixSize],
+  BLAS_dataType p_yRes[BLAS_matrixSize/BLAS_vectorSize]
+  );
+#endif
 #endif
