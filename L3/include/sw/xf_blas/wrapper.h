@@ -163,6 +163,89 @@ xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void* A,
     }
 } 
 
+
+/** 
+ * @brief This function allocates memory on the FPGA device, rewrites the leading dimension size after padding. 
+ * @param devPtr pointer to mapped memory
+ * @param paddedLda leading dimension of the matrix after padding 
+ * @param rows number of rows in the matrix
+ * @param lda leading dimension of the matrix that indicates the total number of cols in the matrix
+ * @param elemSize number of bytes required to store each element in the matrix
+ * @retval xfblasStatus_t 0 if the allocation completed successfully
+ * @retval xfblasStatus_t 1 if the library was not initialized
+ * @retval xfblasStatus_t 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+ * @retval xfblasStatus_t 3 if there is memory already allocated to the same matrix
+ * @retval xfblasStatus_t 4 if the engine is not supported for now
+ */
+xfblasStatus_t xfblasMallocManaged(short** devPtr, int* paddedLda, int rows, int lda, int elemSize){
+  if (ConfigDict::instance().m_dict.empty()){
+    return XFBLAS_STATUS_NOT_INITIALIZED;    
+  }
+  if (rows <= 0 || lda <=0 || elemSize <=0){
+    return XFBLAS_STATUS_INVALID_VALUE;
+  }
+  
+  if(ConfigDict::instance().m_dict["GEMX_dataType"] != "short"){
+    return XFBLAS_STATUS_INVALID_VALUE;
+  }
+  
+  if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1"){
+    int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+    xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
+    if (rows % l_minSize != 0 || lda % l_minSize != 0){
+      int l_paddedRows = getPaddedSize(rows, l_minSize); 
+      int l_paddedLda = getPaddedSize(lda, l_minSize);
+      unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
+      *paddedLda = getPaddedSize(lda, l_minSize);
+      l_status = BLASHostHandle::instance().m_handlePtr->allocMat<short*>(devPtr, l_bufSize);
+    } else {
+      unsigned long long l_bufSize =  rows * lda * elemSize;
+      *paddedLda = lda;
+      l_status = BLASHostHandle::instance().m_handlePtr->allocMat<short*>(devPtr, l_bufSize);
+    }
+    return l_status;
+   
+  } else {
+    return XFBLAS_STATUS_NOT_SUPPORTED;
+  }
+  
+}
+
+xfblasStatus_t xfblasMallocManaged(float** devPtr, int* paddedLda, int rows, int lda, int elemSize){
+  if (ConfigDict::instance().m_dict.empty()){
+    return XFBLAS_STATUS_NOT_INITIALIZED;    
+  }
+  if (rows <= 0 || lda <=0 || elemSize <=0){
+    return XFBLAS_STATUS_INVALID_VALUE;
+  }
+  
+  if(ConfigDict::instance().m_dict["GEMX_dataType"] != "float"){
+    return XFBLAS_STATUS_INVALID_VALUE;
+  }
+  
+  if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1"){
+    int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+    xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
+    if (rows % l_minSize != 0 || lda % l_minSize != 0){
+      int l_paddedRows = getPaddedSize(rows, l_minSize); 
+      int l_paddedLda = getPaddedSize(lda, l_minSize);
+      unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
+      *paddedLda = getPaddedSize(lda, l_minSize);
+      l_status = BLASHostHandle::instance().m_handlePtr->allocMat<float*>(devPtr, l_bufSize);
+    } else {
+      unsigned long long l_bufSize =  rows * lda * elemSize;
+      *paddedLda = lda;
+      l_status = BLASHostHandle::instance().m_handlePtr->allocMat<float*>(devPtr, l_bufSize);
+    }
+    return l_status;
+   
+  } else {
+    return XFBLAS_STATUS_NOT_SUPPORTED;
+  }
+  
+}
+
+
 /**
  * @brief This function copies a matrix in host memory to FPGA device memory. xfblasMalloc() need to be called prior to this function.
  * @param rows number of rows in the matrix
@@ -229,12 +312,31 @@ xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float* A, int l
  * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
  */
 xfblasStatus_t xfblasSetMatrixRestricted(void* A){
-    if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
-      return XFBLAS_STATUS_NOT_INITIALIZED;       
-    }
-    xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr->setMatToFPGARestricted(A);
-    return l_status;
+  if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
+    return XFBLAS_STATUS_NOT_INITIALIZED;       
+  }
+  xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr->setMatToFPGARestricted(A);
+  return l_status;
 }  
+
+/**
+ * @brief This function will synchronize all the device memory to host memory
+ * @retval xfblasStatus_t 0 if the operation completed successfully
+ * @retval xfblasStatus_t 1 if the library was not initialized
+ * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for some of the matrices in the host memory
+ */
+xfblasStatus_t xfblasDeviceSynchronize(){
+  if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()){
+    return XFBLAS_STATUS_NOT_INITIALIZED;       
+  }
+  xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr -> deviceSync();
+  if (l_status != XFBLAS_STATUS_SUCCESS) {
+    return l_status;
+  }
+  l_status = BLASHostHandle::instance().m_handlePtr -> execute();
+  l_status = BLASHostHandle::instance().m_handlePtr -> getMatManaged();
+  return l_status;
+}
 
 /**
  * @brief This function copies a matrix in FPGA device memory to host memory
@@ -377,7 +479,7 @@ xfblasStatus_t xfblasGemm(xfblasOperation_t transa, xfblasOperation_t transb, in
       } else {
         l_status = l_gemmPtr->addGEMMOp(A, B, C, C, m, k, n, lda, ldb, ldc, ldc, 1, 0);
       }
-        return l_status;   
+      return l_status;   
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }

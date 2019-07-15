@@ -25,6 +25,8 @@ HOST_CXXFLAGS = -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-
 HOST_INCLUDE = -I$(XILINX_XRT)/include -I$(SW_API_DIR)
 HOST_LIB = -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
 
+XFBLAS_dataType = short
+
 ######################################################
 
 .PHONY: all
@@ -37,14 +39,19 @@ float: gemm_test_float.exe
 
 common: gemm_common_test.exe
 
+pre_allocated: gemm_pre_allocated_test.exe
+
 clean: 
 	rm -rf *.exe
 
 gemm_test.exe: gemm_test.cpp
-	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -o $@ $^ $(HOST_LIB)
+	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=short -o $@ $^ $(HOST_LIB)
 
-gemm_test_float.exe: gemm_test_float.cpp
-	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -o $@ $^ $(HOST_LIB)
+gemm_test_float.exe: gemm_test.cpp
+	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=float -o $@ $^ $(HOST_LIB)
 	
 gemm_common_test.exe: gemm_common_test.cpp
-	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -o $@ $^ $(HOST_LIB)
+	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
+
+gemm_pre_allocated_test.exe: gemm_pre_allocated_test.cpp
+	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
