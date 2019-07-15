@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UUT_TOP_H
-#define UUT_TOP_H
-
 #include "ap_int.h"
 #include "hls_stream.h"
 #include "gemv.h"
@@ -37,18 +34,20 @@ void uut_top(
   BLAS_dataType p_aRes[BLAS_matrixSize],
   BLAS_dataType p_yRes[BLAS_vectorSize]
   ) {
-
+#pragma HLS DATAFLOW
   hls::stream<WideType<BLAS_dataType, 1 << BLAS_logParEntries> > l_strA;
   #pragma HLS data_pack variable=l_strA
   hls::stream<WideType<BLAS_dataType, 1 << BLAS_logParEntries> > l_strX;
   #pragma HLS data_pack variable=l_strX
-  hls::stream<WideType<BLAS_dataType, 1 << BLAS_logParEntries> > l_strY;
+  hls::stream<WideType<BLAS_dataType, 1> > l_strY;
   #pragma HLS data_pack variable=l_strY
+  hls::stream<WideType<BLAS_dataType, 1> > l_strYR;
+  #pragma HLS data_pack variable=l_strYR
   #pragma HLS DATAFLOW
   gem2Stream<BLAS_dataType, BLAS_parEntries>(p_m, p_n, p_a, l_strA);
   vec2GemStream<BLAS_dataType, BLAS_parEntries>(p_m, p_n, p_x, l_strX);
-  gemv<BLAS_dataType, BLAS_logParEntries>(p_m, p_n, l_strA, l_strX, l_strY);
-  writeStream2Vec<BLAS_dataType, BLAS_parEntries>(l_strY, p_n, p_yRes);
+  readVec2Stream<BLAS_dataType, 1>(p_y, p_m, l_strY);
+  gemv<BLAS_dataType, BLAS_logParEntries>(p_m, p_n, p_alpha, l_strA, l_strX, p_beta, l_strY, l_strYR);
+  writeStream2Vec<BLAS_dataType, 1>(l_strYR, p_m, p_yRes);
 }
 
-#endif

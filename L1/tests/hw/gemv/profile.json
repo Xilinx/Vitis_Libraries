@@ -1,0 +1,18 @@
+{
+  "b_csim": true,
+  "b_synth": true,
+  "b_cosim": true,
+  "dataTypes": [
+    "float64"
+  ],
+  "op": "gemv",
+  "logParEntries": 2,
+  "matrixDims": [
+    [32,64]
+  ],
+  "valueRange": [
+    -4,
+    4
+  ],
+  "numSimulation": 2 
+}
