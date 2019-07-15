@@ -37,5 +37,6 @@
 #include "helpers/funcs/maxmin.h"
 #include "helpers/funcs/abs.h"
 #include "helpers/funcs/sum.h"
+#include "helpers/funcs/mul.h"
 
 #endif
