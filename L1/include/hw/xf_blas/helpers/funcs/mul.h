@@ -44,13 +44,13 @@ namespace blas {
           hls::stream<WideType<t_DataType, t_ParEntries> > & p_x,
           hls::stream<WideType<t_DataType, t_ParEntries> > & p_y,
           hls::stream<WideType<t_DataType, t_ParEntries> > & p_res,
-          unsigned int p_repeat = 1
+          unsigned int p_mulIters = 1
           ){
         #ifndef __SYNTHESIS__
         assert(p_n % t_ParEntries == 0);
         #endif
         t_IndexType l_numParEntries = p_n / t_ParEntries;
-        for(int r = 0; r< p_repeat; r++)
+        for(int r = 0; r< p_mulIters; r++)
         for (t_IndexType i=0; i<l_numParEntries; ++i) {
           #pragma HLS PIPELINE
           WideType<t_DataType, t_ParEntries> l_valX;

@@ -44,11 +44,11 @@ namespace blas {
             unsigned int p_numElems,
             hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
             hls::stream<t_DataType> & p_data,
-            unsigned int p_repeat = 1
+            unsigned int p_mulIters = 1
 
             ) {
           const unsigned int l_ParEntries = 1 << t_LogParEntries;
-          for(unsigned int r=0; r<p_repeat; r++)
+          for(unsigned int r=0; r<p_mulIters; r++)
             for(t_IndexType i=0;i<p_numElems;i++){
               #pragma HLS PIPELINE
               WideType<t_DataType, 1<<t_LogParEntries> l_x = p_x.read();
@@ -65,13 +65,13 @@ namespace blas {
             unsigned int p_numElems,
             hls::stream<t_DataType> & p_data,
             hls::stream<t_DataType> & p_pad,
-            unsigned int p_repeat = 1
+            unsigned int p_mulIters = 1
 
             ) {
           const unsigned int l_Delays = 1 << t_LogDelays;
           const unsigned int l_numIter = (p_numElems + l_Delays -1) >> t_LogDelays;
           const unsigned int l_numExtra = (l_numIter << t_LogDelays) - p_numElems;
-          for(unsigned int r=0; r<p_repeat; r++){
+          for(unsigned int r=0; r<p_mulIters; r++){
             /*
           for(t_IndexType i=0;i<p_numElems;i++){
             #pragma HLS PIPELINE
@@ -97,12 +97,12 @@ namespace blas {
             unsigned int p_numElems,
             hls::stream<t_DataType> & p_pad,
             hls::stream<WideType<t_DataType, 1> > & p_sum,
-            unsigned int p_repeat = 1
+            unsigned int p_mulIters = 1
 
             ) {
           const unsigned int l_Delays = 1 << t_LogDelays;
           const unsigned int l_numIter = (p_numElems + l_Delays -1) >> t_LogDelays;
-          for(unsigned int r=0; r<p_repeat; r++){
+          for(unsigned int r=0; r<p_mulIters; r++){
             t_DataType l_finalSum = 0;
             for(t_IndexType i=0;i<l_numIter;i++){
               #pragma HLS PIPELINE II=l_Delays
@@ -129,7 +129,7 @@ namespace blas {
    *
    * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
    * @param p_x the input stream of packed vector entries
-   * @param p_repeat number of repeat 
+   * @param p_mulIters number of repeat 
    * @param p_sum the sum, which is 0 if p_n <= 0
    */
 
@@ -140,7 +140,7 @@ namespace blas {
           unsigned int p_n,
           hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
           hls::stream<WideType<t_DataType, 1> > &p_sum,
-          unsigned int p_repeat
+          unsigned int p_mulIters
           ) {
         #pragma HLS data_pack variable=p_x
         #ifndef __SYNTHESIS__
@@ -154,9 +154,9 @@ namespace blas {
         #pragma HLS data_pack variable=l_data
         #pragma HLS data_pack variable=l_pad
         unsigned int l_numElem = p_n >> t_LogParEntries;
-        preProcess<t_DataType, t_LogParEntries, t_IndexType>(l_numElem, p_x, l_data, p_repeat);
-        padding<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad, p_repeat);
-        postProcess<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_pad, p_sum, p_repeat);
+        preProcess<t_DataType, t_LogParEntries, t_IndexType>(l_numElem, p_x, l_data, p_mulIters);
+        padding<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad, p_mulIters);
+        postProcess<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_pad, p_sum, p_mulIters);
       }
 
   /**
