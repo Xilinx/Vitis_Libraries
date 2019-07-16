@@ -18,6 +18,12 @@ import numpy as np
 import argparse
 import os
 
+
+class BLAS_ERROR(Exception):
+  def __init__(self, status, message):
+    self.status = status
+    self.message = message
+
 class BLAS_GEN:
 
   def __init__(self, lib):
@@ -60,19 +66,34 @@ class BLAS_GEN:
     status = func(self.obj, p_opName.encode('utf-8'), p_n, p_alpha,
         self._getPointer(p_x), self._getPointer(p_y), self._getPointer(p_xRes),
             self._getPointer(p_yRes), p_res)
-    return self.status[status]
+    if status > 0: 
+      raise BLAS_ERROR(self.status[status], "Add BLAS_L1 instruction failed.")
+
+  def addB2Instr(self, p_opName, p_m, p_n, p_kl, p_ku, 
+      p_alpha, p_beta, p_a, p_x, p_y, p_aRes, p_yRes):
+    func=self.lib.addB2Instr
+    func.argtypes=[ct.c_void_p, ct.c_char_p, ct.c_int, ct.c_int, ct.c_int, ct.c_int,
+      self._getType(p_alpha), self._getType(p_beta),  
+      ct.c_void_p, ct.c_void_p, ct.c_void_p, ct.c_void_p, ct.c_void_p]
+    status = func(self.obj, p_opName.encode('utf-8'), p_m, p_n, p_kl, p_ku,
+        p_alpha, p_beta, self._getPointer(p_a), self._getPointer(p_x), self._getPointer(p_y), 
+        self._getPointer(p_aRes),  self._getPointer(p_yRes))
+    if status > 0: 
+      raise BLAS_ERROR(self.status[status], "Add BLAS_L2 instruction failed.")
 
   def write2BinFile(self, p_fileName):
     func=self.lib.write2BinFile
     func.argtypes=[ct.c_void_p, ct.c_char_p]
     status = func(self.obj, p_fileName.encode('utf-8'))
-    return self.status[status]
+    if status > 0: 
+      raise BLAS_ERROR(self.status[status], "Write file %s failed."%p_fileName)
 
   def readFromBinFile(self, p_fileName):
     func=self.lib.readFromBinFile
     func.argtypes=[ct.c_void_p, ct.c_char_p]
     status = func(self.obj, p_fileName.encode('utf-8'))
-    return self.status[status]
+    if status > 0: 
+      raise BLAS_ERROR(self.status[status], "Read file %s failed."%p_fileName)
 
   def printProgram(self):
     func=self.lib.printProgram 

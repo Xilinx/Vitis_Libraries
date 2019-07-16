@@ -38,39 +38,6 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-  namespace {
-    template<typename t_DataType, 
-      unsigned int t_ParEntries, 
-      typename t_IndexType=unsigned int
-    >
-    void mul(
-        unsigned int p_n,
-        hls::stream<WideType<t_DataType, t_ParEntries> > & p_x,
-        hls::stream<WideType<t_DataType, t_ParEntries> > & p_y,
-        hls::stream<WideType<t_DataType, t_ParEntries> > & p_res
-    ){
-      #ifndef __SYNTHESIS__
-        assert(p_n % t_ParEntries == 0);
-      #endif
-      t_IndexType l_numParEntries = p_n / t_ParEntries;
-      for (t_IndexType i=0; i<l_numParEntries; ++i) {
-      #pragma HLS PIPELINE
-        WideType<t_DataType, t_ParEntries> l_valX;
-        WideType<t_DataType, t_ParEntries> l_valY;
-        WideType<t_DataType, t_ParEntries> l_valRes;
-        #pragma HLS ARRAY_PARTITION variable=l_valX complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=l_valY complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=l_valRes complete dim=1
-        l_valX = p_x.read();
-        l_valY = p_y.read();
-        for (unsigned int j=0; j<t_ParEntries; ++j) {
-          l_valRes[j] = l_valX[j] * l_valY[j];
-        }
-        p_res.write(l_valRes);
-      }
-    }
-  }
-
   /**
    * @brief dot function that returns the dot product of vector x and y.
    *

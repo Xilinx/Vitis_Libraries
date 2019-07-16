@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UUT_TOP_H
-#define UUT_TOP_H
-#if BLAS_L1
+#include "ap_int.h"
+#include "hls_stream.h"
+#include "gemv.h"
+#include "xf_blas/helpers.h"
 
-void uut_top(
-  uint32_t p_n,
-  BLAS_dataType p_alpha,
-  BLAS_dataType p_x[BLAS_vectorSize],
-  BLAS_dataType p_y[BLAS_vectorSize],
-  BLAS_dataType p_xRes[BLAS_vectorSize],
-  BLAS_dataType p_yRes[BLAS_vectorSize],
-  BLAS_resDataType &p_goldRes
-);
-#endif
+using namespace xf::linear_algebra::blas;
 
-#if  BLAS_L2
+
 void uut_top(
   uint32_t p_m,
   uint32_t p_n,
@@ -41,6 +33,21 @@ void uut_top(
   BLAS_dataType p_y[BLAS_matrixSize/BLAS_vectorSize],
   BLAS_dataType p_aRes[BLAS_matrixSize],
   BLAS_dataType p_yRes[BLAS_matrixSize/BLAS_vectorSize]
-  );
-#endif
-#endif
+  ) {
+#pragma HLS DATAFLOW
+  hls::stream<WideType<BLAS_dataType, 1 << BLAS_logParEntries> > l_strA;
+  #pragma HLS data_pack variable=l_strA
+  hls::stream<WideType<BLAS_dataType, 1 << BLAS_logParEntries> > l_strX;
+  #pragma HLS data_pack variable=l_strX
+  hls::stream<WideType<BLAS_dataType, 1> > l_strY;
+  #pragma HLS data_pack variable=l_strY
+  hls::stream<WideType<BLAS_dataType, 1> > l_strYR;
+  #pragma HLS data_pack variable=l_strYR
+  #pragma HLS DATAFLOW
+  gem2Stream<BLAS_dataType, BLAS_parEntries>(p_m, p_n, p_a, l_strA);
+  vec2GemStream<BLAS_dataType, BLAS_parEntries>(p_m, p_n, p_x, l_strX);
+  readVec2Stream<BLAS_dataType, 1>(p_y, p_m, l_strY);
+  gemv<BLAS_dataType, BLAS_logParEntries>(p_m, p_n, p_alpha, l_strA, l_strX, p_beta, l_strY, l_strYR);
+  writeStream2Vec<BLAS_dataType, 1>(l_strYR, p_m, p_yRes);
+}
+

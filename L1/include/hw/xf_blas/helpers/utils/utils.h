@@ -59,18 +59,21 @@ template<typename t_DataType>
 class AdderDelay{
   public:
     static const unsigned int m_logDelays = 0;
+    static const unsigned int m_Delays = 1 << m_logDelays;
 };
 
 template<>
 class AdderDelay<double>{
   public:
     static const unsigned int m_logDelays = 3;
+    static const unsigned int m_Delays = 1 << m_logDelays;
 };
 
 template<>
 class AdderDelay<float>{
   public:
     static const unsigned int m_logDelays = 2;
+    static const unsigned int m_Delays = 1 << m_logDelays;
 };
 
 }

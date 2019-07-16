@@ -273,9 +273,9 @@ namespace blas {
 
         showMatrix<t_DataType>(os, m_m, m_n, m_aAddr, "A:");
         showVec<t_DataType>(os, m_n, m_xAddr, "x:");
-        showVec<t_DataType>(os, m_n, m_yAddr, "y:");
+        showVec<t_DataType>(os, m_m, m_yAddr, "y:");
         showMatrix<t_DataType>(os, m_m, m_n, m_aResAddr, "ARes:");
-        showVec<t_DataType>(os, m_n, m_yResAddr, "yRes:");
+        showVec<t_DataType>(os, m_m, m_yResAddr, "yRes:");
       }
     public:
       uint32_t m_m;

@@ -179,7 +179,7 @@ namespace blas {
             l_param.m_xAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_x, l_dataBufSize));
           }
           if (p_y != nullptr) {
-            l_status = m_program.regDatMem(p_y, p_y, p_n*sizeof(t_DataType));
+            l_status = m_program.regDatMem(p_y, p_y, p_m*sizeof(t_DataType));
             if (l_status != XFBLAS_STATUS_SUCCESS) {
               return (l_status);
             }
@@ -194,7 +194,7 @@ namespace blas {
             l_param.m_aResAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_aRes, l_dataBufSize));
           }
           if (p_yRes != nullptr) {
-            l_status = m_program.regDatMem(p_yRes, p_yRes, p_n*sizeof(t_DataType));
+            l_status = m_program.regDatMem(p_yRes, p_yRes, p_m*sizeof(t_DataType));
             if (l_status != XFBLAS_STATUS_SUCCESS) {
               return (l_status);
             }

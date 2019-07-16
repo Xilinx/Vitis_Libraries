@@ -281,17 +281,19 @@ namespace blas {
         uint32_t l_n = p_param.m_n;
         uint32_t l_kl = p_param.m_kl;
         uint32_t l_ku = p_param.m_ku;
-        size_t l_vecDataBytes = l_n*sizeof(t_DataType);
-        size_t l_vecPaddingBytes = ((l_vecDataBytes%t_PageSizeBytes) != 0)?(t_PageSizeBytes - (l_vecDataBytes%t_PageSizeBytes)): 0;
+        size_t l_vecXDataBytes = l_n*sizeof(t_DataType);
+        size_t l_vecXPaddingBytes = ((l_vecXDataBytes%t_PageSizeBytes) != 0)?(t_PageSizeBytes - (l_vecXDataBytes%t_PageSizeBytes)): 0;
+        size_t l_vecYDataBytes = l_m*sizeof(t_DataType);
+        size_t l_vecYPaddingBytes = ((l_vecYDataBytes%t_PageSizeBytes) != 0)?(t_PageSizeBytes - (l_vecYDataBytes%t_PageSizeBytes)): 0;
         size_t l_matDataBytes = l_m*l_n*sizeof(t_DataType);
         size_t l_matPaddingBytes = ((l_matDataBytes%t_PageSizeBytes) != 0)? (t_PageSizeBytes - (l_matDataBytes%t_PageSizeBytes)): 0;
 
         ifstream::pos_type l_ofPos = p_ofDataPos;
         writeData(l_matDataBytes, l_matPaddingBytes, p_param.m_aAddr, l_ofPos, p_of);
-        writeData(l_vecDataBytes, l_vecPaddingBytes, p_param.m_xAddr, l_ofPos, p_of);
-        writeData(l_vecDataBytes, l_vecPaddingBytes, p_param.m_yAddr, l_ofPos, p_of);
+        writeData(l_vecXDataBytes, l_vecXPaddingBytes, p_param.m_xAddr, l_ofPos, p_of);
+        writeData(l_vecYDataBytes, l_vecYPaddingBytes, p_param.m_yAddr, l_ofPos, p_of);
         writeData(l_matDataBytes, l_matPaddingBytes, p_param.m_aResAddr, l_ofPos, p_of);
-        writeData(l_vecDataBytes, l_vecPaddingBytes, p_param.m_yResAddr, l_ofPos, p_of);
+        writeData(l_vecYDataBytes, l_vecYPaddingBytes, p_param.m_yResAddr, l_ofPos, p_of);
         p_ofDataPos = l_ofPos;
 
         p_of.seekp(p_ofParamPos);

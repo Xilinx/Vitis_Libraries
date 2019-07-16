@@ -33,19 +33,20 @@ int main(int argc, char** argv){
   }
   std::string l_binFile(argv[1]);
   GenBinType l_gen; 
-  uint32_t l_n;
-  BLAS_dataType l_alpha;
-  BLAS_resDataType l_resGolden=0, l_res=0;
-  BLAS_dataType *l_x = nullptr, *l_y= nullptr;
-  BLAS_dataType *l_xRes= nullptr, *l_yRes= nullptr;
-  BLAS_dataType *l_xResRef= nullptr, *l_yResRef= nullptr;
 
   vector<Instr> l_instrs;
   bool l_return = true;
   xfblasStatus_t l_status = l_gen.readInstrs(l_binFile, l_instrs);
   for (unsigned int i=0; i<l_instrs.size(); ++i) {
     Instr l_curInstr=l_instrs[i];
+    #if BLAS_L1
     if (l_curInstr.m_opClass == B1_OP_CLASS) {
+      uint32_t l_n;
+      BLAS_dataType l_alpha;
+      BLAS_resDataType l_resGolden=0, l_res=0;
+      BLAS_dataType *l_x = nullptr, *l_y= nullptr;
+      BLAS_dataType *l_xRes= nullptr, *l_yRes= nullptr;
+      BLAS_dataType *l_xResRef= nullptr, *l_yResRef= nullptr;
       l_gen.decodeB1Instr(l_curInstr, l_n, l_alpha, l_x, l_y, l_xResRef, l_yResRef, l_resGolden);
       l_xRes = new BLAS_dataType[l_n];
       l_yRes = new BLAS_dataType[l_n];
@@ -62,6 +63,32 @@ int main(int argc, char** argv){
       if(!l_return)
         break;
     }
+    #endif
+    #if BLAS_L2
+    if (l_curInstr.m_opClass == B2_OP_CLASS) {
+      uint32_t l_m, l_n, l_ku, l_kl;
+      BLAS_dataType l_alpha, l_beta;
+      BLAS_dataType *l_a = nullptr, *l_x = nullptr, *l_y= nullptr;
+      BLAS_dataType *l_aRes= nullptr, *l_yRes= nullptr;
+      BLAS_dataType *l_aResRef= nullptr, *l_yResRef= nullptr;
+      l_gen.decodeB2Instr(l_curInstr, l_m, l_n, l_kl, l_ku, l_alpha, l_beta, 
+          l_a, l_x, l_y, l_aResRef, l_yResRef);
+      l_aRes = new BLAS_dataType[l_m * l_n];
+      l_yRes = new BLAS_dataType[l_m];
+      for(int p=0;p<l_m;p++){
+        for(int l=0;l<l_n;l++)
+          l_aRes[p*l_n + l] = 0;
+        l_yRes[p] = 0;
+      }
+      uut_top(l_m, l_n, l_kl, l_ku, l_alpha, l_beta, l_a, l_x, l_y, l_aRes, l_yRes);
+      l_return = l_return && compare(l_n*l_m, l_aRes, l_aResRef);
+      l_return = l_return && compare(l_m, l_yRes, l_yResRef);
+      delete []l_aRes;
+      delete []l_yRes;
+      if(!l_return)
+        break;
+    }
+    #endif
   }
   //compute
   if(l_return)
