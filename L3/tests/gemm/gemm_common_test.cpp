@@ -84,11 +84,11 @@ int main(int argc, char **argv) {
   }
   
   
-  int l_kernelID = 0;
+  int l_numKernel = 1;
   
   if (argc == 5){
-    cout<<"read custom kernel ID\n";
-    l_kernelID = stoi(argv[l_argIdx++]); 
+    cout<<"read custom number of kernels\n";
+    l_numKernel = stoi(argv[l_argIdx++]); 
   }
   
   
@@ -127,48 +127,48 @@ int main(int argc, char **argv) {
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
   xfblasStatus_t status = XFBLAS_STATUS_SUCCESS;
   
-  status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM, l_kernelID);
+  status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM, l_numKernel);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Create Handle failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
   
-  status = xfblasMalloc(&d_a, m,k,sizeof(*a));
+  status = xfblasMalloc(&d_a, m,k,sizeof(*a), l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
-  status = xfblasMalloc(&d_b, k,n,sizeof(*b));
+  status = xfblasMalloc(&d_b, k,n,sizeof(*b), l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix B failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
   
-  status = xfblasMalloc(&d_c, m,n,sizeof(*c));
+  status = xfblasMalloc(&d_c, m,n,sizeof(*c), l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix C failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
   
-  status = xfblasSetMatrix(m,k,sizeof(*a),a,k,d_a);
-  status = xfblasSetMatrix(k,n,sizeof(*b),b,n,d_b);
-  status = xfblasSetMatrix(m,n,sizeof(*c),c,n,d_c);
+  status = xfblasSetMatrix(m,k,sizeof(*a),a,k,d_a, l_numKernel-1);
+  status = xfblasSetMatrix(k,n,sizeof(*b),b,n,d_b, l_numKernel-1);
+  status = xfblasSetMatrix(m,n,sizeof(*c),c,n,d_c, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Set Matrix failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, d_a, k, d_b, n, 1, d_c, n);
+  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, d_a, k, d_b, n, 1, d_c, n, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
-  status = xfblasGetMatrix(m,n,sizeof(*c),d_c,c,m);
+  status = xfblasGetMatrix(m,n,sizeof(*c),d_c,c,m, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 
@@ -188,10 +188,10 @@ int main(int argc, char **argv) {
     cout<<"Test failed!\n";
   }
   
-  xfblasFree(d_a);
-  xfblasFree(d_b);
-  xfblasFree(d_c);
-  xfblasDestory();
+  xfblasFree(d_a, l_numKernel-1);
+  xfblasFree(d_b, l_numKernel-1);
+  xfblasFree(d_c, l_numKernel-1);
+  xfblasDestory(l_numKernel);
   free(a);
   free(b);
   free(c);

@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
   
   if (argc < 3){
     cerr << " usage: \n"
-         << " gemx_test.exe gemx.xclbin config_info.dat log.txt 0\n"
+         << " gemx_test.exe gemx.xclbin config_info.dat log.txt 1\n"
          << " gemx_test.exe gemx.xclbin config_info.dat log.txt\n"
          << " gemx_test.exe gemx.xclbin config_info.dat\n";
     return EXIT_FAILURE; 
@@ -90,14 +90,22 @@ int main(int argc, char **argv) {
     l_logFile = argv[l_argIdx++];
   }
   
-  int l_kernelID = 0;
+  int l_numKernel = 0;
   
   if (argc == 5){
-    cout<<"read custom kernel ID\n";
-    l_kernelID = stoi(argv[l_argIdx++]); 
+    cout<<"read custom number of kernels\n";
+    l_numKernel = stoi(argv[l_argIdx++]); 
   }
   
-  int i, j; // i-row index ,j- column index
+  xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
+  xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM, l_numKernel);
+  if (status != XFBLAS_STATUS_SUCCESS) {
+    cout<<"Create Handle failed with error code: "<< status << "\n"; 
+    xfblasDestory();
+    return EXIT_FAILURE;   
+  }
+    
+  int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
   XFBLAS_dataType * a, * b, * c;
   a = ( XFBLAS_dataType *) malloc (m*k* sizeof ( XFBLAS_dataType )); // host memory for a
   b = ( XFBLAS_dataType *) malloc (k*n* sizeof ( XFBLAS_dataType )); 
@@ -123,30 +131,22 @@ int main(int argc, char **argv) {
   } 
   
   XFBLAS_dataType* goldenC = getGoldenMat(a,b,c);
-
-  xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
-  xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM, l_kernelID);
-  if (status != XFBLAS_STATUS_SUCCESS) {
-    cout<<"Create Handle failed with error code: "<< status << "\n"; 
-    xfblasDestory();
-    return EXIT_FAILURE;   
-  }
-  status = xfblasMallocRestricted(m,k,sizeof(*a),a,k);
   
+  status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, l_numKernel-1);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
     xfblasDestory();
     return EXIT_FAILURE;   
   }
   
-  status = xfblasMallocRestricted(k,n,sizeof(*b),b,n);
+  status = xfblasMallocRestricted(k,n,sizeof(*b),b,n, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix B failed with error code: "<< status << "\n"; 
     xfblasDestory();
     return EXIT_FAILURE;   
   }
-  status = xfblasMallocRestricted(m,n,sizeof(*c),c,n);
+  status = xfblasMallocRestricted(m,n,sizeof(*c),c,n, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix C failed with error code: "<< status << "\n"; 
@@ -154,16 +154,16 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;   
   }
   
-  status = xfblasSetMatrixRestricted(a);
-  status = xfblasSetMatrixRestricted(b);
-  status = xfblasSetMatrixRestricted(c);
+  status = xfblasSetMatrixRestricted(a, l_numKernel-1);
+  status = xfblasSetMatrixRestricted(b, l_numKernel-1);
+  status = xfblasSetMatrixRestricted(c, l_numKernel-1);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Set Matrix failed with error code: "<< status << "\n"; 
     xfblasDestory();
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n);
+  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGetMatrixRestricted(c);
+  status = xfblasGetMatrixRestricted(c, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 
@@ -192,13 +192,14 @@ int main(int argc, char **argv) {
     cout<<"Test failed!\n";
   }
   
-  xfblasFree(a);
-  xfblasFree(b);
-  xfblasFree(c);
-  xfblasDestory();
+  xfblasFree(a, l_numKernel-1);
+  xfblasFree(b, l_numKernel-1);
+  xfblasFree(c, l_numKernel-1);
   free(a);
   free(b);
   free(c);
   
+  xfblasDestory(l_numKernel);
+
   return EXIT_SUCCESS;
 }
