@@ -28,7 +28,7 @@ class OP_ERROR(Exception):
 class OP:
   opDict = {
     'BLAS_L1': ('amax', 'amin', 'asum', 'axpy', 'swap', 'scal', 'dot', 'nrm2'),
-    'BLAS_L2': ('gemv', 'gbmv')
+    'BLAS_L2': ('gemv', 'gbmv', 'sbmv', 'symv')
   }
   @staticmethod
   def parse(opName):
@@ -269,10 +269,22 @@ class gbmv(BLAS_L2):
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    a = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
+    a = np.zeros((self.ku+self.kl+1, self.m), dtype=self.dataType)
+    matrix = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
+    v = np.diag(matrix)
+    a[self.ku][:] = v
+    band_mat = np.diag(v)
+    for i in range(self.ku, 0, -1):
+      v = np.diag(matrix, i)
+      a[self.ku - i][self.m-len(v):] = v
+      band_mat = band_mat + np.diag(v, i)
+    for i in range(-self.kl, 0):
+      v = np.diag(matrix, i)
+      a[self.ku-i][0:len(v)] = v
+      band_mat = band_mat + np.diag(v, i)
     x = dataGen(self.dataType, self.n, self.maxV, self.minV)
     y = dataGen(self.dataType, self.m, self.maxV, self.minV)
-    yr = alpha * np.matmul(a, x) + beta * y
+    yr = alpha * np.matmul(band_mat, x) + beta * y
     return alpha, beta, a, x, y, ar, yr
 
   def test(self, runTest):
@@ -288,11 +300,70 @@ class gbmv(BLAS_L2):
           self.setSize(matrixDim)
           runTest.run()
 
+class symv(BLAS_L2):
+  def __init__(self, blas_l2: BLAS_L2):
+    self.copyConstructor(blas_l2)
+
+  def setSize(self, m):
+    self.matrixDim =(m ,m) 
+    self.m = m
+    self.sizeStr = "m%d"%(self.m)
+
+  def compute(self):
+    alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
+    a = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
+    a = a + np.transpose(a)
+    x = dataGen(self.dataType, self.m, self.maxV, self.minV)
+    y = dataGen(self.dataType, self.m, self.maxV, self.minV)
+    yr = alpha * np.matmul(a, x) + beta * y
+    return alpha, beta, a, x, y, ar, yr
+
+class sbmv(BLAS_L2):
+  def __init__(self, blas_l2: BLAS_L2):
+    self.copyConstructor(blas_l2)
+
+  def setK(self, k):
+    self.k = k
+
+  def setSize(self, m):
+    self.matrixDim =(m ,m) 
+    self.m = m
+    self.sizeStr = "m%d"%(self.m)
+
+  def compute(self):
+    alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
+    a = np.zeros((self.k*2+1, self.m), dtype=self.dataType)
+    v = dataGen(self.dataType, self.m, self.maxV, self.minV)
+    a[self.k][:] = v
+    band_mat = np.diag(v)
+    for i in range(1, self.k+1):
+      v = dataGen(self.dataType, self.m - i, self.maxV, self.minV)
+      a[self.k + i][:len(v)] = v
+      a[self.k - i][self.m-len(v):] = v
+      band_mat = band_mat + np.diag(v, i)
+      band_mat = band_mat + np.diag(v, -i)
+    x = dataGen(self.dataType, self.m, self.maxV, self.minV)
+    y = dataGen(self.dataType, self.m, self.maxV, self.minV)
+    yr = alpha * np.matmul(band_mat, x) + beta * y
+    return alpha, beta, a, x, y, ar, yr
+
+  def test(self, runTest):
+    matrixDimList = runTest.profile['matrixDims']
+    dataTypeList = runTest.dataTypes
+    kulList = runTest.profile['kulList']
+    for dataType in dataTypeList:
+      self.setDtype(dataType)
+      for k in kList:
+        self.setK(k)
+        self.sizeStr = "m%d-k%d"%(self.m,self.k)
+        for matrixDim in matrixDimList:
+          self.setSize(matrixDim)
+          runTest.run()
+
 
 def main():
 
-  #pdb.set_trace()
-  opName = 'amin'
+  opName = 'sbmv'
   className = None
   for cls, ops in OP.opDict.items():
     if opName in ops:
@@ -300,10 +371,11 @@ def main():
       break
 
   if className:
-    op  = eval(className).parse(opName, np.uint8, np.uint8, 128, -1024,   1024)
-    alpha, x, y, xr, yr, r = op.compute()
-    print(x)
-    print(r)
+    op  = eval(className).parse(opName, -24,   24)
+    op.setDtype(np.int32)
+    op.setSize(6)
+    op.setK(2)
+    alpha, beta, a, x, y, ar, yr = op.compute()
 
 if __name__=='__main__':
   main()
