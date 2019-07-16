@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_SPMV_H
-#define XF_BLAS_SPMV_H
+#ifndef XF_BLAS_GEMV_H
+#define XF_BLAS_GEMV_H
 
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
