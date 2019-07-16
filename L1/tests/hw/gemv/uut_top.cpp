@@ -30,9 +30,9 @@ void uut_top(
   BLAS_dataType p_beta,
   BLAS_dataType p_a[BLAS_matrixSize],
   BLAS_dataType p_x[BLAS_vectorSize],
-  BLAS_dataType p_y[BLAS_vectorSize],
+  BLAS_dataType p_y[BLAS_matrixSize/BLAS_vectorSize],
   BLAS_dataType p_aRes[BLAS_matrixSize],
-  BLAS_dataType p_yRes[BLAS_vectorSize]
+  BLAS_dataType p_yRes[BLAS_matrixSize/BLAS_vectorSize]
   ) {
 #pragma HLS DATAFLOW
   hls::stream<WideType<BLAS_dataType, 1 << BLAS_logParEntries> > l_strA;
