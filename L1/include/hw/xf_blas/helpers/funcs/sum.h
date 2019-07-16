@@ -71,9 +71,8 @@ namespace blas {
           const unsigned int l_Delays = 1 << t_LogDelays;
           const unsigned int l_numIter = (p_numElems + l_Delays -1) >> t_LogDelays;
           const unsigned int l_numExtra = (l_numIter << t_LogDelays) - p_numElems;
-          hls::stream<t_DataType> l_inner;
-          #pragma HLS stream variable=l_inner depth=2
           for(unsigned int r=0; r<p_repeat; r++){
+            /*
           for(t_IndexType i=0;i<p_numElems;i++){
             #pragma HLS PIPELINE
             p_pad.write(p_data.read());
@@ -82,6 +81,12 @@ namespace blas {
             #pragma HLS PIPELINE
             p_pad.write(0);
           }
+          */
+            for(t_IndexType i=0;i<(l_numIter << t_LogDelays);i++){
+              #pragma HLS PIPELINE
+              t_DataType l_v = i<p_numElems? p_data.read() : 0;
+                p_pad.write(l_v);
+            }
           }
         }
 
@@ -108,8 +113,9 @@ namespace blas {
                 l_input.shift(p_pad.read());
               }
               l_finalSum += BinarySum<t_DataType, l_Delays>::sum(l_input.getValAddr());
+              if(i == l_numIter - 1)
+                p_sum.write(l_finalSum);
             }
-            p_sum.write(l_finalSum);
           }
         }
   }
