@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_SBMV_H
-#define XF_BLAS_SBMV_H
+#ifndef XF_BLAS_GBMV_H
+#define XF_BLAS_GBMV_H
 
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
@@ -43,26 +43,27 @@ namespace blas {
    */
   template<typename t_DataType, 
     unsigned int t_ParEntries,
-    typename t_MacType = t_DataType,
-    typename t_IndexType=unsigned int>
-      void gbmv(const unsigned int p_row,
+    unsigned int t_ParBlocks,
+    typename t_IndexType=unsigned int,
+    typename t_MacType = t_DataType>
+      void gbmv(const unsigned int p_m,
           const unsigned int p_kl,
           const unsigned int p_ku,
           hls::stream<WideType<t_DataType, t_ParEntries> > & p_A,
           hls::stream<WideType<t_DataType, t_ParEntries> > & p_x,
           hls::stream<WideType<t_MacType, t_ParEntries> > &p_y
           ){
-        static const unsigned int l_delays = AdderDelay<t_DataType>::m_Delays + 4; // 4 for the latency of BRAM read and write
 
-        static const unsigned int l_blocks =l_delays * t_ParEntries; 
+        static const unsigned int l_numRows = t_ParBlocks * t_ParEntries; 
         #ifndef __SYNTHESIS__
-        assert(p_row % l_blocks == 0);
+        assert(p_m % l_numRows == 0);
         #endif
 
-        const unsigned int l_numIter = p_row/l_blocks;
+        const unsigned int l_numIter = p_m/l_numRows;
 
-        WideType<t_MacType, t_ParEntries> l_y[l_delays];
-        for(t_IndexType l=0; l <l_delays; l++){
+        WideType<t_MacType, t_ParEntries> l_y[t_ParBlocks];
+
+        for(t_IndexType l=0; l <t_ParBlocks; l++){
           #pragma HLS PIPELINE
           for(t_IndexType k=0;k<t_ParEntries;k++){
             #pragma HLS UNROLL
@@ -72,7 +73,7 @@ namespace blas {
 
         for(t_IndexType i=0; i< l_numIter;i++){
           for(t_IndexType j=0;j<p_kl + 1 + p_ku;j++){
-            for(t_IndexType l=0; l <l_delays; l++){
+            for(t_IndexType l=0; l <t_ParBlocks; l++){
               #pragma HLS PIPELINE 
               WideType<t_DataType, t_ParEntries> l_A = p_A.read();
               WideType<t_DataType, t_ParEntries> l_x = p_x.read();
@@ -82,7 +83,7 @@ namespace blas {
               }
             }
           }
-          for(t_IndexType l=0; l <l_delays; l++){
+          for(t_IndexType l=0; l <t_ParBlocks; l++){
             #pragma HLS PIPELINE
             p_y.write(l_y[l]);
             for(t_IndexType k=0;k<t_ParEntries;k++){
@@ -92,7 +93,6 @@ namespace blas {
           }
         }
       }
-
 
 } //end namespace blas
 } //end namspace linear_algebra
