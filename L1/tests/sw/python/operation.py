@@ -291,13 +291,12 @@ class gbmv(BLAS_L2):
 
   def bandMatrix(self):
     matrix = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
-    a = np.zeros((self.kl+self.ku+1, self.m), dtype=self.dataType)
+    minD = self.m if self.m < self.n else self.n
+    a = np.zeros((self.kl+self.ku+1, minD), dtype=self.dataType)
     for i in range(-self.kl, self.ku+1):
       v = np.diag(matrix, i)
-      if i > 0:
-        a[self.ku - i][self.m-len(v):] = v
-      else:
-        a[self.ku - i][:len(v)] = v
+      startIndex = 0 if i < 0 else i
+      a[self.ku - i][startIndex:startIndex+len(v)] = v
     for i in range(self.m):
       for j in range(self.n):
         if i - j > self.kl or i - j < -self.ku:
