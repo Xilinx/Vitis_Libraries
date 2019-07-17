@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef GEMXKERNEL_HW_HPP
+#define GEMXKERNEL_HW_HPP
+
 // control
 // 0x00 : Control signals
 //        bit 0  - ap_start (Read/Write/COH)
@@ -53,3 +56,5 @@
 #define XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_BITS_P_DDRRD_M_VAL_DATA 64
 #define XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA 0x1c
 #define XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_BITS_P_DDRWR_M_VAL_DATA 64
+
+#endif

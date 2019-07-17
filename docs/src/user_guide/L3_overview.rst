@@ -34,7 +34,7 @@ XFBLAS library uses row-major storage. The array index of a matrix element could
   
 1.2 Memory Allocation
 ----------------------
-XFBLAS level 3 library supports three different versions of APIs to support memory allocation in device. Users could choose from different versions to better support their application based on the cases.
+XFBLAS level 3 library supports three different versions of APIs to support memory allocation in device. Users could choose from different versions to better support their application based on the cases. Examples for using three different versions could be found in :doc:`BLAS Level 3 example<L3_example>`.
 
 +--------------------------------+-------------------------------------+------------------------------+
 | Already have host memory input | Host memory matrix sizes are padded | Version to choose            |
@@ -44,8 +44,18 @@ XFBLAS level 3 library supports three different versions of APIs to support memo
 | Yes                            | No                                  | Default memory version       |
 +--------------------------------+-------------------------------------+------------------------------+
 | No                             | Does not apply                      | Pre-allocated memory version |
-+--------------------------------+-------------------------------------+------------------------------+
++--------------------------------+-------------------------------------+------------------------------+ 
 
+- Restricted memory version
+  To use restricted memory version, user's input matrix sizes must be multiplier of certain configuration values that are used to build the FPGA bitstreams. Also, host memory is encouaged to be 4k aligned when using restricted memory version. Compared to the default memory version, even though there are requirement on the matrix sizes, restricted memory version could save extra memory copy in host side. 
+
+- Default memory version
+  This version has no limitations on user host memory, and it is easy to use. API functions will do the padding internally so this will lead to extra memory copy in host side. The result output matrix will also be the same sizes.
+  
+- Pre-allocated memory version
+  To use this version, users need to call API functions to allocate the device memory first, then fill in host memory that is mapped to device memory with values. There is no extra memory copy and the programming is easier compared to the other two versions. However, when filling in the matrices, users need to use the padded sizes, also the result output matrix's sizes are padded instead of the original ones. Please see examples for more usage information. 
+  
+  
 1.3 Supported Datatypes
 ------------------------
 - short
@@ -62,9 +72,9 @@ This section describes how to use the XFBLAS library API level.
 ~~~~~~~~~~~~~~~~~~~
 XFBLAS API function calls return the error status of datatype `xfblasStatus_t <2.2.2 xfblasStatus_t_>`_.
 
-2.1.2 XFBLAS context
-~~~~~~~~~~~~~~~~~~~~
-.. NOTE:: TODO
+2.1.2 XFBLAS initialization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To initialize the library, xfblasCreate() function must be called. This function will open the device, download the FPGA image to the device  and create context on the selected compute unit. For a multi-kernels xclbin, contexts will be opened on the corresponding compute units. Please refer to :doc:`gemm example<L3_example_gemm>` for detail usage.
 
 2.2 Datatypes Reference
 -----------------------
@@ -129,7 +139,7 @@ The xfblasOperation_t type indicates which operation needs to be performed with 
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasCreate(const char* xclbin, string configFile, const char* logFile, xfblasEngine_t engineName, unsigned int PE = 0)
+    xfblasStatus_t xfblasCreate(const char* xclbin, string configFile, const char* logFile, xfblasEngine_t engineName, unsigned int kernelNumber = 1)
 
 This function initializes the XFBLAS library and creates a handle for the specific engine. It must be called prior to any other XFBLAS library calls.
 
@@ -140,28 +150,19 @@ This function initializes the XFBLAS library and creates a handle for the specif
 
     *
         - xclbin
-
         - file path to FPGA bitstream
-
     *
         - configFile
-
         - file path to config_info.dat file
-
     *
         - logFile
-
         - file path to log file
-
     *
         - engineName
-
         - XFBLAS engine to run
-
     *
-        - PE
-
-        - index of kernel that is being used, default is 0
+        - kernelNumber
+        - number of kernels that is being used, default is 1
 
 .. rubric:: Return:
 
@@ -170,369 +171,24 @@ This function initializes the XFBLAS library and creates a handle for the specif
     
     *
         - xfblasStatus_t
-
         - 0 if the initialization succeeded
-
     *
         - xfblasStatus_t
-
         - 1 if the opencl runtime initialization failed
-
     *
         - xfblasStatus_t
-
         - 2 if the xclbin doesn't contain the engine
-
     *
         - xfblasStatus_t
-
         - 4 if the engine is not supported for now
 
-2.3.2 xfblasMalloc
-~~~~~~~~~~~~~~~~~~~
-        
-.. ref-code-block:: cpp
-    :class: title-code-block
-
-    xfblasStatus_t xfblasMalloc(short** devPtr, int rows, int lda, int elemSize)
-    xfblasStatus_t xfblasMalloc(float ** devPtr, int rows, int lda, int elemSize)
-
-This function allocates memory on the FPGA device.
-
-.. rubric:: Parameters:
-
-.. list-table::
-    :widths: 20 80
-
-    *
-        - devPtr
-
-        - pointer to mapped memory
-
-    *
-        - rows
-
-        - number of rows in the matrix
-
-    *
-        - lda
-
-        - leading dimension of the matrix that indicates the total number of cols in the matrix
-
-    *
-        - elemSize
-
-        - number of bytes required to store each element in the matrix
-
-.. rubric:: Return:
-
-.. list-table::
-    :widths: 20 80
-    
-    *
-        - xfblasStatus_t
-
-        - 0 if the allocation completed successfully
-
-    *
-        - xfblasStatus_t
-
-        - 1 if the library was not initialized
-
-    *
-        - xfblasStatus_t
-
-        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
-
-    *
-        - xfblasStatus_t
-
-        - 3 if there is memory already allocated to the same matrix
-
-    *
-        - xfblasStatus_t
-
-        - 4 if the engine is not supported for now
-
-2.3.3 xfblasMallocRestricted
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. ref-code-block:: cpp
-    :class: title-code-block
-
-    xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void* A, int lda)
-
-This function allocates memory for host row-major format matrix on the FPGA device.
-
-.. rubric:: Parameters:
-
-.. list-table::
-    :widths: 20 80
-
-    *
-        - rows
-
-        - number of rows in the matrix
-
-    *
-        - cols
-
-        - number of cols in the matrix that is being used
-
-    *
-        - elemSize
-
-        - number of bytes required to store each element in the matrix
-
-    *
-        - A
-
-        - pointer to the matrix array in the host memory
-
-    *
-        - lda
-
-        - leading dimension of the matrix that indicates the total number of cols in the matrix
-
-.. rubric:: Return:
-
-.. list-table::
-    :widths: 20 80
-    
-    *
-        - xfblasStatus_t
-
-        - 0 if the allocation completed successfully
-
-    *
-        - xfblasStatus_t
-
-        - 1 if the library was not initialized
-
-    *
-        - xfblasStatus_t
-
-        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
-
-    *
-        - xfblasStatus_t
-
-        - 3 if there is memory already allocated to the same matrix
-
-    *
-        - xfblasStatus_t
-
-        - 4 if the engine is not supported for now
-
-    *
-        - xfblasStatus_t
-
-        - 5 if rows, cols or lda is not padded correctly
-
-2.3.4 xfblasSetMatrix
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. ref-code-block:: cpp
-    :class: title-code-block
-
-    xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, short* A, int lda, short* d_A)
-    xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float* A, int lda, float* d_A)
-
-This function copies a matrix in host memory to FPGA device memory. `xfblasMalloc() <2.3.2 xfblasMalloc_>`_ need to be called prior to this function.
-
-.. rubric:: Parameters:
-
-.. list-table::
-    :widths: 20 80
-
-    *
-        - rows
-
-        - number of rows in the matrix
-
-    *
-        - cols
-
-        - number of cols in the matrix that is being used
-
-    *
-        - elemSize
-
-        - number of bytes required to store each element in the matrix
-
-    *
-        - A
-
-        - pointer to the matrix array in the host memory
-
-    *
-        - lda
-
-        - leading dimension of the matrix that indicates the total number of cols in the matrix
-
-    *
-        - d_A
-
-        - pointer to mapped memory
-
-.. rubric:: Return:
-
-.. list-table::
-    :widths: 20 80
-    
-    *
-        - xfblasStatus_t
-
-        - 0 if the operation completed successfully
-
-    *
-        - xfblasStatus_t
-
-        - 1 if the library was not initialized
-
-    *
-        - xfblasStatus_t
-
-        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
-
-    *
-        - xfblasStatus_t
-
-        - 3 if there is no FPGA device memory allocated for the matrix
-
-    *
-        - xfblasStatus_t
-
-        - 4 if the engine is not supported for now
-
-2.3.5 xfblasSetMatrixRestricted
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. ref-code-block:: cpp
-    :class: title-code-block
-
-    xfblasStatus_t xfblasSetMatrixRestricted(void* A)
-
-This function copies a matrix in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.3 xfblasMallocRestricted_>`_ need to be called prior to this function.
-
-.. rubric:: Parameters:
-
-.. list-table::
-    :widths: 20 80
-
-    *
-        - A
-
-        - pointer to the matrix array in the host memory
-
-.. rubric:: Return:
-
-.. list-table::
-    :widths: 20 80
-    
-    *
-        - xfblasStatus_t
-
-        - 0 if the operation completed successfully
-
-    *
-        - xfblasStatus_t
-
-        - 1 if the library was not initialized
-
-    *
-        - xfblasStatus_t
-
-        - 3 if there is no FPGA device memory allocated for the matrix
-
-2.3.6 xfblasGetMatrix
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. ref-code-block:: cpp
-    :class: title-code-block
-
-    xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_a, short* a, int lda)
-    xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float* d_a, float* a, int lda) 
-
-This function copies a matrix in FPGA device memory to host memory.
-
-.. rubric:: Parameters:
-
-.. list-table::
-    :widths: 20 80
-
-    *
-        - A
-
-        - pointer to matrix A in the host memory
-
-.. rubric:: Return:
-
-.. list-table::
-    :widths: 20 80
-    
-    *
-        - xfblasStatus_t
-
-        - 0 if the operation completed successfully
-
-    *
-        - xfblasStatus_t
-
-        - 1 if the library was not initialized
-
-    *
-        - xfblasStatus_t
-
-        - 3 if there is no FPGA device memory allocated for the matrix
-
-2.3.7 xfblasGetMatrixRestricted
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. ref-code-block:: cpp
-    :class: title-code-block
-
-    xfblasStatus_t xfblasGetMatrixRestricted(void* A)
-
-This function copies a matrix in FPGA device memory to host memory.
-
-.. rubric:: Parameters:
-
-.. list-table::
-    :widths: 20 80
-
-    *
-        - A
-
-        - pointer to matrix A in the host memory
-
-.. rubric:: Return:
-
-.. list-table::
-    :widths: 20 80
-    
-    *
-        - xfblasStatus_t
-
-        - 0 if the operation completed successfully
-
-    *
-        - xfblasStatus_t
-
-        - 1 if the library was not initialized
-
-    *
-        - xfblasStatus_t
-
-        - 3 if there is no FPGA device memory allocated for the matrix
-
-2.3.8 xfblasFree
+2.3.2 xfblasFree
 ~~~~~~~~~~~~~~~~~
 
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasFree(void* A)
+    xfblasStatus_t xfblasFree(void* A, unsigned int kernelIndex = 0)
 
 This function frees memory in FPGA device.
 
@@ -543,8 +199,10 @@ This function frees memory in FPGA device.
 
     *
         - A
-
         - pointer to matrix A in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
 
 .. rubric:: Return:
 
@@ -553,20 +211,15 @@ This function frees memory in FPGA device.
     
     *
         - xfblasStatus_t
-
         - 0 if the operation completed successfully
-
     *
         - xfblasStatus_t
-
         - 1 if the library was not initialized
-
     *
         - xfblasStatus_t
-
         - 3 if there is no FPGA device memory allocated for the matrix
 
-2.3.9 xfblasDestory
+2.3.3 xfblasDestory
 ~~~~~~~~~~~~~~~~~~~~
 
 .. ref-code-block:: cpp
@@ -576,6 +229,15 @@ This function frees memory in FPGA device.
 
 This function releases handle used by the XFBLAS library.
 
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - kernelNumber
+        - number of kernels that is being used, default is 1
+
 .. rubric:: Return:
 
 .. list-table::
@@ -583,13 +245,410 @@ This function releases handle used by the XFBLAS library.
 
     *
         - xfblasStatus_t
-
         - 0 if the shut down succeeded
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+        
+2.3.4 xfblasMalloc
+~~~~~~~~~~~~~~~~~~~
+        
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasMalloc(short** devPtr, int rows, int lda, int elemSize, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasMalloc(float** devPtr, int rows, int lda, int elemSize, unsigned int kernelIndex = 0)
+
+This function allocates memory on the FPGA device.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - devPtr
+        - pointer to mapped memory
+    *
+        - rows
+        - number of rows in the matrix
+    *
+        - lda
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+    *
+        - elemSize
+        - number of bytes required to store each element in the matrix
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+    
+    *
+        - xfblasStatus_t
+        - 0 if the allocation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+    *
+        - xfblasStatus_t
+        - 3 if there is memory already allocated to the same matrix
+    *
+        - xfblasStatus_t
+        - 4 if the engine is not supported for now
+
+2.3.5 xfblasSetMatrix
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, short* A, int lda, short* d_A, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float* A, int lda, float* d_A, unsigned int kernelIndex = 0)
+
+This function copies a matrix in host memory to FPGA device memory. `xfblasMalloc() <2.3.4 xfblasMalloc_>`_ need to be called prior to this function.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - rows
+        - number of rows in the matrix
+    *
+        - cols
+        - number of cols in the matrix that is being used
+    *
+        - elemSize
+        - number of bytes required to store each element in the matrix
+    *
+        - A
+        - pointer to the matrix array in the host memory
+    *
+        - lda
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+    *
+        - d_A
+        - pointer to mapped memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+    
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for the matrix
+    *
+        - xfblasStatus_t
+        - 4 if the engine is not supported for now
+
+2.3.6 xfblasGetMatrix
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_A, short* A, int lda, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float* d_A, float* A, int lda, unsigned int kernelIndex = 0) 
+
+This function copies a matrix in FPGA device memory to host memory.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - rows
+        - number of rows in the matrix
+    *
+        - cols
+        - number of cols in the matrix that is being used
+
+    *
+        - elemSize
+        - number of bytes required to store each element in the matrix
+    *
+        - d_A
+        - pointer to mapped memory
+    *
+        - A
+        - pointer to the matrix array in the host memory
+    *
+        - lda
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+    
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for the matrix
+        
+2.3.7 xfblasMallocRestricted
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void* A, int lda, unsigned int kernelIndex = 0)
+
+This function allocates memory for host row-major format matrix on the FPGA device.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - rows
+        - number of rows in the matrix
+    *
+        - cols
+        - number of cols in the matrix that is being used
+    *
+        - elemSize
+        - number of bytes required to store each element in the matrix
+    *
+        - A
+        - pointer to the matrix array in the host memory
+    *
+        - lda
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+        
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+    
+    *
+        - xfblasStatus_t
+        - 0 if the allocation completed successfully
 
     *
         - xfblasStatus_t
-
         - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+
+    *
+        - xfblasStatus_t
+        - 3 if there is memory already allocated to the same matrix
+
+    *
+        - xfblasStatus_t
+        - 4 if the engine is not supported for now
+
+    *
+        - xfblasStatus_t
+        - 5 if rows, cols or lda is not padded correctly
+
+2.3.8 xfblasSetMatrixRestricted
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasSetMatrixRestricted(void* A, unsigned int kernelIndex = 0)
+
+This function copies a matrix in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.7 xfblasMallocRestricted_>`_ need to be called prior to this function.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+        - pointer to the matrix array in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+    
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+
+
+2.3.9 xfblasGetMatrixRestricted
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasGetMatrixRestricted(void* A, unsigned int kernelIndex = 0)
+
+This function copies a matrix in FPGA device memory to host memory.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+        - pointer to matrix A in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+    
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+
+        
+2.3.10 xfblasMallocManaged
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasMallocManaged(short** devPtr, int* paddedLda, int rows, int lda, int elemSize, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasMallocManaged(float** devPtr, int* paddedLda, int rows, int lda, int elemSize, unsigned int kernelIndex = 0)
+
+This function allocates memory on the FPGA device, rewrites the leading dimension size after padding.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - devPtr
+        - pointer to mapped memory
+    *
+        - paddedLda
+        - leading dimension of the matrix after padding
+    *
+        - rows
+        - number of rows in the matrix
+    *
+        - lda
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+    *
+        - elemSize
+        - number of bytes required to store each element in the matrix       
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80        
+
+    *
+        - xfblasStatus_t
+        - 0 if the allocation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+    *
+        - xfblasStatus_t
+        - 3 if there is memory already allocated to the same matrix
+    *
+        - xfblasStatus_t
+        - 4 if the engine is not supported for now
+
+2.3.11 xfblasDeviceSynchronize
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasDeviceSynchronize(unsigned int kernelIndex = 0)
+
+This function will synchronize all the device memory to host memory.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80      
+
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for some of the matrices in the host memory
 
 2.4 XFBLAS Function Reference
 ------------------------------
@@ -600,7 +659,7 @@ This function releases handle used by the XFBLAS library.
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasGemm(xfblasOperation_t transa, xfblasOperation_t transb, int m, int n, int k, int alpha, void* A, int lda, void* B, int ldb, int beta, void* C, int ldc)
+    xfblasStatus_t xfblasGemm(xfblasOperation_t transa, xfblasOperation_t transb, int m, int n, int k, int alpha, void* A, int lda, void* B, int ldb, int beta, void* C, int ldc, unsigned int kernelIndex = 0)
 
 This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + beta*C. See :doc:`gemm example<L3_example_gemm>` for detail usage.
 
@@ -611,69 +670,47 @@ This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + b
 
     *
         - transa
-
         - operation op(A) that is non- or (conj.) transpose
-
     *
         - transb
-
         - operation op(B) that is non- or (conj.) transpose
-
     *
         - m
-
         - number of rows in matrix A, matrix C
-
     *
         - n
-
         - number of cols in matrix B, matrix C
-
     *
         - k
-
         - number of cols in matrix A, number of rows in matrix B
-
     *
         - alpha
-
         - scalar used for multiplication
-
     *
         - A
-
         - pointer to matrix A in the host memory
-
     *
         - lda
-
         - leading dimension of matirx A
-
     *
         - B
-
         - pointer to matrix B in the host memory
-
     *
         - ldb
-
         - leading dimension of matrix B
-
     *
         - beta
-
         - scalar used for multiplication
-
     *
         - C
-
         - pointer to matrix C in the host memory
-
     *
         - ldc
-
         - leading dimension of matrix C
-
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -681,22 +718,15 @@ This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + b
     
     *
         - xfblasStatus_t
-
         - 0 if the operation completed successfully
-
     *
         - xfblasStatus_t
-
         - 1 if the library was not initialized
-
     *
         - xfblasStatus_t
-
         - 3 if not all the matrices have FPGA devie memory allocated
-
     *
         - xfblasStatus_t
-
         - 4 if the engine is not supported for now
 
         

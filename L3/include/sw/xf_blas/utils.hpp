@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_UTILS_H
-#define XF_BLAS_UTILS_H
+#ifndef XF_BLAS_UTILS_HPP
+#define XF_BLAS_UTILS_HPP
 
 #include <fstream>
 #include <string>

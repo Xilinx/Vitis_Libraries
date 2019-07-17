@@ -17,7 +17,7 @@
 #include <string>
 #include <cmath>
 #include <iomanip>
-#include "xf_blas.h"
+#include "xf_blas.hpp"
 
 # define IDX2R(i,j,ld) (((i)*( ld ))+(j))
 # define m 5 // a - mxk matrix

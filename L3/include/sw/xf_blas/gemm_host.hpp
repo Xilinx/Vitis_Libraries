@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_GEMM_HOST_H
-#define XF_BLAS_GEMM_HOST_H
+#ifndef XF_BLAS_GEMM_HOST_HPP
+#define XF_BLAS_GEMM_HOST_HPP
 
 
-#include "host.h"
+#include "host.hpp"
 
 namespace xf {
 namespace linear_algebra {

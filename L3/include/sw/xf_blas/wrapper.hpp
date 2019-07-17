@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_WRAPPER_H
-#define XF_BLAS_WRAPPER_H
+#ifndef XF_BLAS_WRAPPER_HPP
+#define XF_BLAS_WRAPPER_HPP
 
 namespace xf {
 namespace linear_algebra {
@@ -353,13 +353,18 @@ xfblasStatus_t xfblasDeviceSynchronize(unsigned int kernelIndex = 0){
 
 /**
  * @brief This function copies a matrix in FPGA device memory to host memory
- * @param A pointer to matrix A in the host memory
+ * @param rows number of rows in the matrix
+ * @param cols number of cols in the matrix that is being used
+ * @param elemSize number of bytes required to store each element in the matrix
+ * @param d_A pointer to mapped memory
+ * @param A pointer to the matrix array in the host memory
+ * @param lda leading dimension of the matrix that indicates the total number of cols in the matrix
  * @param kernelIndex index of kernel that is being used, default is 0
  * @retval xfblasStatus_t 0 if the operation completed successfully
  * @retval xfblasStatus_t 1 if the library was not initialized
  * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
  */
-xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_a, short* a, int lda, unsigned int kernelIndex = 0) {
+xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_A, short* A, int lda, unsigned int kernelIndex = 0) {
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -375,14 +380,14 @@ xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_a, sho
     int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
     int paddedLda = getPaddedSize(lda, l_minSize);
     xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex] -> execute();
-    l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->getMat<short*>(d_a,rows,lda,paddedLda,a,d_a);
+    l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->getMat<short*>(d_A,rows,lda,paddedLda,A,d_A);
     return l_status;
   } else {
     return XFBLAS_STATUS_NOT_SUPPORTED;
   }
 }
 
-xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float* d_a, float* a, int lda, unsigned int kernelIndex = 0) {
+xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float* d_A, float* A, int lda, unsigned int kernelIndex = 0) {
   if (ConfigDict::instance().m_dict.empty()){
     return XFBLAS_STATUS_NOT_INITIALIZED;    
   }
@@ -398,7 +403,7 @@ xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float* d_a, flo
     int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
     int paddedLda = getPaddedSize(lda, l_minSize);
     xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex] -> execute();
-    l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->getMat<float*>(d_a,rows,lda,paddedLda,a,d_a);
+    l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->getMat<float*>(d_A,rows,lda,paddedLda,A,d_A);
     return l_status;
   } else {
     return XFBLAS_STATUS_NOT_SUPPORTED;

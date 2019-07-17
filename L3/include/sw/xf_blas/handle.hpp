@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_HANDLE_H
-#define XF_BLAS_HANDLE_H
+#ifndef XF_BLAS_HANDLE_HPP
+#define XF_BLAS_HANDLE_HPP
 
 #include <vector>
 #include <memory>
 
 #include <unordered_map>
-#include "host.h"
+#include "host.hpp"
 
 using namespace std;
 

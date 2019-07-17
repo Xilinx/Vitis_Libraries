@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_UTILITY_H
-#define XF_BLAS_UTILITY_H
+#ifndef XF_BLAS_UTILITY_HPP
+#define XF_BLAS_UTILITY_HPP
 
 
 using namespace std;

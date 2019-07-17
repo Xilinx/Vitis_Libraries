@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_HOST_H
-#define XF_BLAS_HOST_H
+#ifndef XF_BLAS_HOST_HPP
+#define XF_BLAS_HOST_HPP
 
 #include <stdio.h>
 #include <string.h>
@@ -28,9 +28,9 @@
 #include "xclhal2.h"
 #include "xclbin.h"
 
-#include "../utility/utility.h"
-#include "utils.h"
-#include "gemxkernel_hw.h"
+#include "../utility/utility.hpp"
+#include "utils.hpp"
+#include "gemxkernel_hw.hpp"
 
 # define IDX2R(i,j,ld) (((i)*( ld ))+(j))
 

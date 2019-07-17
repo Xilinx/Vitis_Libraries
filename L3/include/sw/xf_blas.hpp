@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_H
-#define XF_BLAS_H
+#ifndef XF_BLAS_HPP
+#define XF_BLAS_HPP
 
 /**
- * @file xf_blas.h
+ * @file xf_blas.hpp
  * @brief Top-level header for XF BLAS Libaray level-3.
  */
 
-#include "xf_blas/handle.h"
-#include "xf_blas/gemm_host.h"
+#include "xf_blas/handle.hpp"
+#include "xf_blas/gemm_host.hpp"
 
-#include "xf_blas/wrapper.h"
+#include "xf_blas/wrapper.hpp"
 
 
 using namespace xf::linear_algebra::blas;
