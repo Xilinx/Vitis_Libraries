@@ -22,6 +22,7 @@ def dataGen(dataType, size, maxValue, minValue):
   a = np.reshape(a, size)
   return a
 
+
 class OP_ERROR(Exception):
   def __init__(self, message):
     self.message = message
@@ -248,6 +249,18 @@ class BLAS_L2(OP):
         self.setSize(vecDim)
         runTest.run()
 
+  def testBand(self, runTest):
+    matrixDimList = runTest.profile['matrixDims']
+    dataTypeList = runTest.dataTypes
+    kulList = runTest.profile['kulList']
+    for dataType in dataTypeList:
+      self.setDtype(dataType)
+      for kul in kulList:
+        self.setK(kul)
+        for matrixDim in matrixDimList:
+          self.setSize(matrixDim)
+          runTest.run()
+
 class gemv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
@@ -263,42 +276,37 @@ class gbmv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
 
-  def setKul(self, ku, kl):
-    self.ku = ku
-    self.kl = kl
+  def setK(self, kul):
+    self.ku = kul[0]
+    self.kl = kul[1]
+    self.sizeStr = "m%d-n%d-u%d-l%d"%(self.m,self.n,self.ku,self.kl)
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    a = np.zeros((self.ku+self.kl+1, self.m), dtype=self.dataType)
-    matrix = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
-    v = np.diag(matrix)
-    a[self.ku][:] = v
-    band_mat = np.diag(v)
-    for i in range(self.ku, 0, -1):
-      v = np.diag(matrix, i)
-      a[self.ku - i][self.m-len(v):] = v
-      band_mat = band_mat + np.diag(v, i)
-    for i in range(-self.kl, 0):
-      v = np.diag(matrix, i)
-      a[self.ku-i][0:len(v)] = v
-      band_mat = band_mat + np.diag(v, i)
+    a, matrix = self.bandMatrix()
     x = dataGen(self.dataType, self.n, self.maxV, self.minV)
     y = dataGen(self.dataType, self.m, self.maxV, self.minV)
-    yr = alpha * np.matmul(band_mat, x) + beta * y
+    yr = alpha * np.matmul(matrix, x) + beta * y
     return alpha, beta, a, x, y, ar, yr
 
+  def bandMatrix(self):
+    matrix = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
+    a = np.zeros((self.kl+self.ku+1, self.m), dtype=self.dataType)
+    for i in range(-self.kl, self.ku+1):
+      v = np.diag(matrix, i)
+      if i > 0:
+        a[self.ku - i][self.m-len(v):] = v
+      else:
+        a[self.ku - i][:len(v)] = v
+    for i in range(self.m):
+      for j in range(self.n):
+        if i - j > self.kl or i - j < -self.ku:
+          matrix[i][j] = 0
+    return a, matrix
+
   def test(self, runTest):
-    matrixDimList = runTest.profile['matrixDims']
-    dataTypeList = runTest.dataTypes
-    kulList = runTest.profile['kulList']
-    for dataType in dataTypeList:
-      self.setDtype(dataType)
-      for kul in kulList:
-        self.setKul(kul)
-        self.sizeStr = "m%d-n%d-u%d-l%d"%(self.m,self.n,self.ku,self.kl)
-        for matrixDim in matrixDimList:
-          self.setSize(matrixDim)
-          runTest.run()
+    self.testBand(runTest)
+
 
 class symv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
@@ -307,6 +315,7 @@ class symv(BLAS_L2):
   def setSize(self, m):
     self.matrixDim =(m ,m) 
     self.m = m
+    self.n = m
     self.sizeStr = "m%d"%(self.m)
 
   def compute(self):
@@ -318,17 +327,19 @@ class symv(BLAS_L2):
     yr = alpha * np.matmul(a, x) + beta * y
     return alpha, beta, a, x, y, ar, yr
 
+
 class sbmv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
 
   def setK(self, k):
     self.k = k
+    self.sizeStr = "m%d_k%d"%(self.m, k)
 
   def setSize(self, m):
     self.matrixDim =(m ,m) 
     self.m = m
-    self.sizeStr = "m%d"%(self.m)
+    self.n = m
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
@@ -348,22 +359,11 @@ class sbmv(BLAS_L2):
     return alpha, beta, a, x, y, ar, yr
 
   def test(self, runTest):
-    matrixDimList = runTest.profile['matrixDims']
-    dataTypeList = runTest.dataTypes
-    kulList = runTest.profile['kulList']
-    for dataType in dataTypeList:
-      self.setDtype(dataType)
-      for k in kList:
-        self.setK(k)
-        self.sizeStr = "m%d-k%d"%(self.m,self.k)
-        for matrixDim in matrixDimList:
-          self.setSize(matrixDim)
-          runTest.run()
-
+    self.testBand(runTest)
 
 def main():
 
-  opName = 'sbmv'
+  opName = 'gbmv'
   className = None
   for cls, ops in OP.opDict.items():
     if opName in ops:
@@ -373,8 +373,8 @@ def main():
   if className:
     op  = eval(className).parse(opName, -24,   24)
     op.setDtype(np.int32)
-    op.setSize(6)
-    op.setK(2)
+    op.setSize([6, 4])
+    op.setK([2, 2])
     alpha, beta, a, x, y, ar, yr = op.compute()
 
 if __name__=='__main__':
