@@ -42,16 +42,15 @@ namespace blas {
   
 class XFpga {
   public:
-    unsigned int m_cuIndex;
     xclDeviceHandle m_handle;
     uuid_t m_xclbinId;
     vector<int> m_mem;
     vector<unsigned long long> m_baseAddress;
     unsigned int m_execHandle;
+    bool m_init = false;
 
     XFpga() = delete;
-    XFpga(const char * p_xclbin, const char * p_logFile, int* p_err, unsigned int p_cuIndex) {
-      m_cuIndex = p_cuIndex;
+    XFpga(const char * p_xclbin, const char * p_logFile, int* p_err) {
       if(0 >= xclProbe()) {
         *p_err = 1;
         return;
@@ -65,10 +64,10 @@ class XFpga {
       l_stream.seekg(0, l_stream.end);
       int l_size = l_stream.tellg();
       l_stream.seekg(0, l_stream.beg);
-
+    
       char *l_header = new char[l_size];
       l_stream.read(l_header, l_size);
-
+    
       const xclBin *l_blob = (const xclBin *)l_header;
       if (xclLoadXclBin(m_handle, l_blob)) {
         *p_err = 1;
@@ -76,12 +75,7 @@ class XFpga {
       //cout << "Finished downloading bitstream " << p_xclbin << "\n";
       const axlf* l_top = (const axlf*)l_header;
       auto l_ip = xclbin::get_axlf_section(l_top, IP_LAYOUT);
-      struct ip_layout* l_layout =  (ip_layout*) (l_header + l_ip->m_sectionOffset);
       
-      if(m_cuIndex > (unsigned)l_layout->m_count) {
-        *p_err = 1;
-        return;
-      }
       auto l_topo = xclbin::get_axlf_section(l_top, MEM_TOPOLOGY);
       struct mem_topology* l_topology = (mem_topology*)(l_header + l_topo->m_sectionOffset);
       
@@ -94,18 +88,21 @@ class XFpga {
       }
       
       uuid_copy(m_xclbinId, l_top->m_header.uuid);
-      delete [] l_header;     
-
-      if(xclOpenContext(m_handle, m_xclbinId, m_cuIndex, true)){
-        *p_err = 1;
-        return;
-      }
+      delete [] l_header;  
+        
     }
     
     ~XFpga() {}
+    
+    bool openContext(unsigned int p_cuIndex){
+      if(xclOpenContext(m_handle, m_xclbinId, p_cuIndex, true)){
+        return false;
+      }
+      return true;
+    }
 
-    unsigned int createBuf(void *p_ptr, size_t p_szBytes) {
-      return xclAllocUserPtrBO(m_handle,p_ptr,p_szBytes,m_mem[m_cuIndex]);
+    unsigned int createBuf(void *p_ptr, size_t p_szBytes,unsigned int p_kernelIndex) {
+      return xclAllocUserPtrBO(m_handle,p_ptr,p_szBytes,m_mem[p_kernelIndex]);
     }
     
     bool copyToFpga(unsigned int p_bufHandle, size_t p_szBytes) {
@@ -123,7 +120,7 @@ class XFpga {
       return true;
     }
 
-    bool execKernel() {
+    bool execKernel(unsigned int p_kernelIndex) {
       m_execHandle = xclAllocBO(m_handle,4096+4096, xclBOKind(0), (1<<31));
       void* execData = xclMapBO(m_handle,m_execHandle,true);
       auto ecmd = reinterpret_cast<ert_start_kernel_cmd*>(execData);
@@ -132,12 +129,12 @@ class XFpga {
       ecmd->state = ERT_CMD_STATE_NEW;
       ecmd->opcode = ERT_START_CU;
       ecmd->count = 1 + rsz;
-      ecmd->cu_mask = 0x1 << m_cuIndex;
+      ecmd->cu_mask = 0x1 << p_kernelIndex;
       ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_AP_CTRL] = 0x0; // ap_start
-      ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRRD_M_VAL_DATA/4] = m_baseAddress[m_cuIndex];
-      ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA/4] = m_baseAddress[m_cuIndex];
-      ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRRD_M_VAL_DATA/4+1] = m_baseAddress[m_cuIndex] >> 32;
-      ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA/4+1] = m_baseAddress[m_cuIndex] >> 32;   
+      ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRRD_M_VAL_DATA/4] = m_baseAddress[p_kernelIndex];
+      ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA/4] = m_baseAddress[p_kernelIndex];
+      ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRRD_M_VAL_DATA/4+1] = m_baseAddress[p_kernelIndex] >> 32;
+      ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA/4+1] = m_baseAddress[p_kernelIndex] >> 32;   
       
       if (xclExecBuf(m_handle, m_execHandle)) {  
         return false;
@@ -145,6 +142,19 @@ class XFpga {
       return true;
     }
 };
+
+
+class XFpgaHold {
+  public:
+    shared_ptr<XFpga> m_xFpgaPtr;
+    static XFpgaHold& instance() {
+      static XFpgaHold theInstance;
+      return theInstance;
+    }
+  protected:
+    XFpgaHold() {}
+};
+
 
 class XHost {
   protected:
@@ -154,18 +164,18 @@ class XHost {
     unordered_map<void*, void*  > m_hostMat;
     unordered_map<void*, unsigned int> m_bufHandle;
     unordered_map<void*, unsigned long long > m_hostMatSz;
-    shared_ptr<XFpga> m_fpga;
+    shared_ptr<XFpga> m_fpga = XFpgaHold::instance().m_xFpgaPtr;
     vector<unsigned long long> m_ddrDeviceBaseAddr;
     char* m_progBuf;
     char* m_instrBuf;
     unsigned int m_instrOffset;
     unsigned int m_instrBufHandle;
+    unsigned int m_cuIndex;
   public:
     XHost() = delete;
-    XHost ( const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int PE) {
-      int l_err = 0;
-      m_fpga = shared_ptr<XFpga>(new XFpga(p_xclbin, p_logFile, &l_err, PE));
-      if (l_err != 0){
+    XHost ( const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex) {
+      m_cuIndex = p_kernelIndex;
+      if (!m_fpga->openContext(m_cuIndex)){
         *p_status = XFBLAS_STATUS_NOT_INITIALIZED;
         return;
       }
@@ -178,7 +188,7 @@ class XHost {
       m_progBuf = (char*)l_alignedMem;
       memset(m_instrBuf, 0, INSTR_BUF_SIZE);
       m_instrOffset = 0;
-      m_instrBufHandle = m_fpga->createBuf(m_instrBuf,INSTR_BUF_SIZE+KERN_DBG_BUF_SIZE);
+      m_instrBufHandle = m_fpga->createBuf(m_instrBuf,INSTR_BUF_SIZE+KERN_DBG_BUF_SIZE,m_cuIndex);
     }
     
     bool addMatRestricted(void * p_hostHandle, void * p_matPtr, unsigned long long p_bufSize) {
@@ -213,7 +223,7 @@ class XHost {
       if (l_devPtr.find(p_hostHandle) != l_devPtr.end()) {
         return XFBLAS_STATUS_ALLOC_FAILED; 
       } else {
-        l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle]);
+        l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
         return XFBLAS_STATUS_SUCCESS;
       }
     }
@@ -225,7 +235,7 @@ class XHost {
       if (l_devPtr.find(*p_devPtr) != l_devPtr.end()) {
         return XFBLAS_STATUS_ALLOC_FAILED; 
       } else {
-        unsigned int l_deviceHandle = xclAllocBO(m_fpga->m_handle, p_bufSize, XCL_BO_DEVICE_RAM, m_fpga->m_mem[m_fpga->m_cuIndex]); 
+        unsigned int l_deviceHandle = xclAllocBO(m_fpga->m_handle, p_bufSize, XCL_BO_DEVICE_RAM, m_fpga->m_mem[m_cuIndex]); 
         *p_devPtr = (t_dataType)xclMapBO(m_fpga->m_handle, l_deviceHandle, true);
         memset(*p_devPtr,0,p_bufSize);
         l_hostSzPtr[*p_devPtr] = p_bufSize;
@@ -301,7 +311,6 @@ class XHost {
       return XFBLAS_STATUS_SUCCESS;
     }
     
-    
     xfblasStatus_t getMatManaged() {
       for (auto& l_devPtr: m_bufHandle){
         if(!m_fpga->copyFromFpga(l_devPtr.second, m_hostMatSz[l_devPtr.first])){
@@ -351,7 +360,7 @@ class XHost {
     xfblasStatus_t closeContext(){
       xclFreeBO(m_fpga->m_handle, m_instrBufHandle);
       xclFreeBO(m_fpga->m_handle,m_fpga->m_execHandle);
-      xclCloseContext(m_fpga->m_handle, m_fpga->m_xclbinId, m_fpga->m_cuIndex);
+      xclCloseContext(m_fpga->m_handle, m_fpga->m_xclbinId, this->m_cuIndex);
       return XFBLAS_STATUS_SUCCESS;
     }
 };
@@ -364,7 +373,7 @@ class BLASHost : public XHost {
     virtual ~BLASHost() {}
     BLASHost(const BLASHost &) = delete;
 
-    BLASHost(const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int PE) : XHost ( p_xclbin, p_logFile, p_status, PE) {}
+    BLASHost(const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex) : XHost ( p_xclbin, p_logFile, p_status, p_kernelIndex) {}
     
     xfblasStatus_t execute () {
       xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
@@ -372,7 +381,7 @@ class BLASHost : public XHost {
         if(!this->m_fpga->copyToFpga(this->m_instrBufHandle, this->INSTR_BUF_SIZE+this->KERN_DBG_BUF_SIZE)){
           l_status = XFBLAS_STATUS_ALLOC_FAILED;
         }
-        if(!this->m_fpga->execKernel()){
+        if(!this->m_fpga->execKernel(this->m_cuIndex)){
           l_status = XFBLAS_STATUS_ALLOC_FAILED;
         }
       }

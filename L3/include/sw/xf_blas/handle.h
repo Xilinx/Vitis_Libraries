@@ -31,7 +31,7 @@ namespace blas {
 
 class BLASHostHandle {
   public:
-    shared_ptr<BLASHost> m_handlePtr;
+    vector<shared_ptr<BLASHost>> m_handlePtr;
     static BLASHostHandle& instance() {
       static BLASHostHandle theInstance;
       return theInstance;

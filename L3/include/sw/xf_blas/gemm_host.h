@@ -58,7 +58,7 @@ class GEMMHost : public BLASHost {
     GEMMHost() = delete;
     virtual ~GEMMHost() {}
     GEMMHost(const GEMMHost &) = delete;
-    GEMMHost(const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int PE) : BLASHost ( p_xclbin, p_logFile, p_status, PE) {}
+    GEMMHost(const char * p_xclbin, const char * p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex) : BLASHost ( p_xclbin, p_logFile, p_status, p_kernelIndex) {}
     
   
     virtual xfblasStatus_t addGEMMOp(void* p_a, void* p_b, void* p_c, void* p_bias, unsigned int p_m, unsigned int p_k, unsigned int p_n, unsigned int p_lda, unsigned int p_ldb, unsigned int p_ldc, unsigned int p_ldx, int p_postScale, int p_postShift) {
@@ -87,10 +87,10 @@ class GEMMHost : public BLASHost {
       l_cOff = (unsigned long long) address_C;
       l_xOff = (unsigned long long) address_bias;
 
-      l_aOff -= this->m_fpga->m_baseAddress[this->m_fpga->m_cuIndex];
-      l_bOff -= this->m_fpga->m_baseAddress[this->m_fpga->m_cuIndex];
-      l_cOff -= this->m_fpga->m_baseAddress[this->m_fpga->m_cuIndex];
-      l_xOff -= this->m_fpga->m_baseAddress[this->m_fpga->m_cuIndex];
+      l_aOff -= this->m_fpga->m_baseAddress[this->m_cuIndex];
+      l_bOff -= this->m_fpga->m_baseAddress[this->m_cuIndex];
+      l_cOff -= this->m_fpga->m_baseAddress[this->m_cuIndex];
+      l_xOff -= this->m_fpga->m_baseAddress[this->m_cuIndex];
       
       l_aOff /= this->PAGE_SIZE;
       l_bOff /= this->PAGE_SIZE;
