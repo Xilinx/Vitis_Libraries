@@ -13,8 +13,10 @@
  # limitations under the License.
 
 import numpy as np
+import sys
 import pdb
 
+t_Debug= False
 
 def dataGen(dataType, size, maxValue, minValue):
   a = np.random.random(size) * (maxValue - minValue) + minValue
@@ -280,6 +282,10 @@ class gbmv(BLAS_L2):
     self.ku = kul[0]
     self.kl = kul[1]
     self.sizeStr = "m%d-n%d-u%d-l%d"%(self.m,self.n,self.ku,self.kl)
+    if self.ku < self.n - self.m:
+      print("WARNING: Current matrix configuration has multiple zero columns")
+    if self.m - self.n > self.kl:
+      print("WARNING: Current matrix configuration has multiple zero rows")
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
@@ -287,12 +293,14 @@ class gbmv(BLAS_L2):
     x = dataGen(self.dataType, self.n, self.maxV, self.minV)
     y = dataGen(self.dataType, self.m, self.maxV, self.minV)
     yr = alpha * np.matmul(matrix, x) + beta * y
+    t_Debug and print("Matrix:\n", matrix)
+    t_Debug and print("Storage:\n",a)
     return alpha, beta, a, x, y, ar, yr
 
   def bandMatrix(self):
     matrix = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
-    minD = self.m if self.m < self.n else self.n
-    a = np.zeros((self.kl+self.ku+1, minD), dtype=self.dataType)
+    aDim = self.m +self.ku if self.m < self.n else self.n
+    a = np.zeros((self.kl+self.ku+1, aDim), dtype=self.dataType)
     for i in range(-self.kl, self.ku+1):
       v = np.diag(matrix, i)
       startIndex = 0 if i < 0 else i
@@ -372,11 +380,9 @@ def main():
   if className:
     op  = eval(className).parse(opName, -24,   24)
     op.setDtype(np.int32)
-    op.setSize([6, 4])
-    op.setK([2, 2])
+    op.setSize([int(sys.argv[1]), int(sys.argv[2])])
+    op.setK([int(sys.argv[3]), int(sys.argv[4])])
     alpha, beta, a, x, y, ar, yr = op.compute()
 
 if __name__=='__main__':
   main()
-      
-  
