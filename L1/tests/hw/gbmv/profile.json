@@ -1,0 +1,27 @@
+{
+  "b_csim": true,
+  "b_synth": true,
+  "b_cosim": true,
+  "dataTypes": [
+    "int32",
+    "float64"
+  ],
+  "op": "gbmv",
+  "ParEntries": 4,
+  "matrixDims": [
+    [60, 64],
+    [128, 128],
+    [256, 248]
+  ],
+  "kulList":[
+    [2, 2],
+    [1, 3],
+    [4, 2]
+  ],
+  "valueRange": [
+    -1024,
+    1024
+  ],
+  "numSimulation": 2 
+}
+
