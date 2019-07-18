@@ -31,7 +31,7 @@
 #include <unordered_map>
 #include <vector>
 #include "blas_instr.h"
-#include "L3/include/sw/utility/utility.h"
+#include "L3/include/sw/utility/utility.hpp"
 
 using namespace std;
 

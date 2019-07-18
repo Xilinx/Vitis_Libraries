@@ -31,6 +31,7 @@
 
 /*        DATA MOVER            */
 #include "helpers/dataMover/dataMover.h"
+#include "helpers/dataMover/sbMatMover.hpp"
 
 
 /*        HELPER FUNCTIONS             */
