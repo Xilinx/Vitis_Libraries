@@ -51,6 +51,7 @@ template<typename t_DataType,
   class BinarySum<t_DataType, 1, t_SumType>{
     public:
       static const t_SumType sum(t_DataType p_x[1]){
+        #pragma HLS INLINE
         return p_x[0];
       }
   };
