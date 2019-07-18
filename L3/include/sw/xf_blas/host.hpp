@@ -113,7 +113,10 @@ class XFpga {
     }
 
     bool copyFromFpga(unsigned int p_bufHandle, size_t p_szBytes) {
-      xclExecWait(m_handle,10);
+      bool waitFinish = false;
+      while (waitFinish!= true) {
+        waitFinish = xclExecWait(m_handle,1);
+      }
       if (xclSyncBO(m_handle, p_bufHandle, XCL_BO_SYNC_BO_FROM_DEVICE, p_szBytes, 0)){
         return false;
       }
