@@ -31,111 +31,119 @@
 namespace xf {
 namespace linear_algebra {
 namespace blas {
-  namespace {
-    template<
-      typename t_DataType,
-      unsigned int t_ParEntries
-    >
-    void processSbMatStream(
-      unsigned int p_n,
-      unsigned int p_k,
-      hls::stream<WideType<t_DataType, t_ParEntries > > &p_in,
-      hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
-    ){
-      unsigned int l_parBlocks = p_n / t_ParEntries;
-      for (unsigned int i=p_k; i>0; --i) {
-        uint16_t l_numPaddings = i % t_ParEntries;
-        uint16_t l_numFirstEnt = t_ParEntries - l_numPaddings;
-        uint16_t j=0;
-        uint16_t l_numOut = 0;
-        WideType<t_DataType, t_ParEntries> l_intVal;
-        WideType<t_DataType, t_ParEntries> l_out;
-        
-        do {//skip the paddings
-        #pragma HLS PIPELINE
-          WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-          WideType<t_DataType, t_ParEntries> l_intVal = l_val;
-          j++;
-        } while (i >= (j*t_ParEntries));
+  template<
+    typename t_DataType,
+    unsigned int t_ParEntries
+  >
+  void processUpSbMatStream(
+    unsigned int p_n,
+    unsigned int p_k,
+    hls::stream<WideType<t_DataType, t_ParEntries > > &p_in,
+    hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
+  ){
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int i=p_k; i>0; --i) {
+      uint16_t l_numPaddings = i % t_ParEntries;
+      uint16_t l_numFirstEnt = t_ParEntries - l_numPaddings;
+      uint16_t j=0;
+      uint16_t l_numOut = 0;
+      WideType<t_DataType, t_ParEntries> l_intVal;
+      #pragma HLS ARRAY_PARTITION variable=l_intVal complete dim=1
+      WideType<t_DataType, t_ParEntries> l_out;
+      #pragma HLS ARRAY_PARTITION variable=l_out complete dim=1
+      
+      do {//skip the paddings
+      #pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_val = p_in.read();
+        l_intVal = l_val;
+        j++;
+      } while (i >= (j*t_ParEntries));
 
-        do {//output superdiagonals without paddings
-        #pragma HLS PIPELINE
-          WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-          for (unsigned int b=0; b<t_ParEntries; ++b) {
-            l_out[b] = (b < l_numFirstEnt)? l_intVal[t_ParEntries-b] : l_val[b-l_numFirstEnt];
-          }
-          p_out.write(l_out);
-          l_numOut++;
-          l_intVal = l_val;
-          j++;
-        } while (j<l_parBlocks);
-
-        do {
-          for (unsigned int b=0; b<t_ParEntries; ++b){
-            l_out[b] = (b < l_numFirstEnt)? l_intVal[t_ParEntries-b]: 0;
-          }
-          p_out.write(l_out);
-          l_intVal = 0;
-          l_numOut++;
-        } while (l_numOut < l_parBlocks);
-      }
-      for (unsigned int i=0; i<=p_k; ++i) {
-        for (unsigned int j=0; j<l_parBlocks; ++j) {
-        #pragma HLS PIPELINE
-          for (unsigned int b=0; b<t_ParEntries; ++b) {
-            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-            p_out.write(l_val);
-          }
+      do {//output superdiagonals without paddings
+      #pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_val = p_in.read();
+        #pragma HLS ARRAY_PARTITION variable=l_val complete dim=1
+        for (unsigned int b=0; b<t_ParEntries; ++b) {
+          l_out[b] = (b < l_numFirstEnt)? l_intVal[t_ParEntries-1-b] : l_val[b-l_numFirstEnt];
         }
+        p_out.write(l_out);
+        l_numOut++;
+        l_intVal = l_val;
+        j++;
+      } while (j<l_parBlocks);
+
+      do {
+        for (unsigned int b=0; b<t_ParEntries; ++b){
+          l_out[b] = (b < l_numFirstEnt)? l_intVal[t_ParEntries-1-b]: 0;
+        }
+        p_out.write(l_out);
+        l_intVal = 0;
+        l_numOut++;
+      } while (l_numOut < l_parBlocks);
+    }
+    for (unsigned int i=0; i<=p_k; ++i) {
+      for (unsigned int j=0; j<l_parBlocks; ++j) {
+      #pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_val = p_in.read();
+        p_out.write(l_val);
       }
     }
-
-    template<
-      typename t_DataType,
-      unsigned int t_ParEntries
-    >
-    void readSbMat2Stream(
-      unsigned int p_n,
-      unsigned int p_k,
-      t_DataType *p_a,
-      hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
-    ) {
-      unsigned int l_parBlocks = p_n / t_ParEntries;
-      for (unsigned int i=0; i<= p_k; ++i) {
-        for (unsigned int j=0; j<l_parBlocks; ++j) {
-        #pragma HLS PIPELINE
-          WideType<t_DataType, t_ParEntries> l_val;
-          for (unsigned int b=0; b < t_ParEntries; ++b) {
-            l_val[b] = p_a[i*l_parBlocks+j*t_ParEntries+b];
-          }
-          p_out.write(l_val);
-        }
-      } 
-    } 
-    
-    template<
-      typename t_DataType,
-      unsigned int t_ParEntries
-    >
-    void readVec2SbStream(
-      unsigned int p_n,
-      unsigned int p_k,
-      t_DataType *p_x,
-      hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
-    ) {
-      unsigned int l_parBlocks = p_n / t_ParEntries;
-      for (unsigned int i=0; i<= p_k*2; ++i) {
-        for (unsigned int j=0; j<l_parBlocks; ++j) {
-        #pragma HLS PIPELINE
-          WideType<t_DataType, t_ParEntries> l_val;
-          for (unsigned int b=0; b < t_ParEntries; ++b) {
-            l_val[b] = p_x[j*t_ParEntries+b];
-          }
-          p_out.write(l_val);
-        }
-      } 
-    } 
   }
+
+  template<
+    typename t_DataType,
+    unsigned int t_ParEntries
+  >
+  void readUpSbMat2Stream(
+    unsigned int p_n,
+    unsigned int p_k,
+    t_DataType *p_a,
+    hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
+  ) {
+    unsigned int l_parBlocks = p_n * (p_k+1) / t_ParEntries;
+    unsigned int l_upParBlocks = p_n * p_k / t_ParEntries;
+    for (unsigned int i=0; i<l_parBlocks; ++i) {
+    #pragma HLS PIPELINE
+      WideType<t_DataType, t_ParEntries> l_val;
+      #pragma HLS ARRAY_PARTITION variable=l_val complete dim=1 
+      for (unsigned int b=0; b < t_ParEntries; ++b) {
+        l_val[b] = p_a[i*t_ParEntries+b];
+      }
+      p_out.write(l_val);
+    }
+    for (unsigned int i=0; i<l_upParBlocks; ++i) {
+    #pragma HLS PIPELINE
+      WideType<t_DataType, t_ParEntries> l_val;
+      #pragma HLS ARRAY_PARTITION variable=l_val complete dim=1 
+      for (unsigned int b=0; b < t_ParEntries; ++b) {
+        l_val[b] = p_a[i*t_ParEntries+b];
+      }
+      p_out.write(l_val);
+    }
+  } 
+  
+  template<
+    typename t_DataType,
+    unsigned int t_ParEntries
+  >
+  void readVec2SbStream(
+    unsigned int p_n,
+    unsigned int p_k,
+    t_DataType *p_x,
+    hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
+  ) {
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int i=0; i<= p_k*2; ++i) {
+      for (unsigned int j=0; j<l_parBlocks; ++j) {
+      #pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_val;
+        for (unsigned int b=0; b < t_ParEntries; ++b) {
+          l_val[b] = p_x[j*t_ParEntries+b];
+        }
+        p_out.write(l_val);
+      }
+    } 
+  } 
 
 /**
  * @brief sbmSuper2Stream function that moves symmetric banded matrix with super diagonals from memory to stream
@@ -165,8 +173,8 @@ void sbmSuper2Stream(
   #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries > > l_str;
     #pragma HLS DATA_PACK variable=l_str
-    readSbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_str);
-    processSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_str, p_out); 
+    readUpSbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_str);
+    processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_str, p_out); 
   }//end sbmSuper2Stream
    
 /**
@@ -196,7 +204,7 @@ void vec2SbMatStream(
     hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
     #pragma HLS DATA_PACK variable=l_str
     readVec2SbStream<t_DataType, t_ParEntries>(p_n, p_k, p_x, l_str);
-    processSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_str, p_out); 
+    processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_str, p_out); 
 } //end vec2SbStream
 }
 }
