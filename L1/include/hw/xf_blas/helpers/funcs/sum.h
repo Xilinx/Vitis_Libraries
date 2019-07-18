@@ -180,6 +180,7 @@ namespace blas {
           t_DataType &p_sum
           ) {
         #pragma HLS data_pack variable=p_x
+        #pragma HLS DATAFLOW
         hls::stream<WideType<t_DataType, 1> > p_s;
         sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, p_x, p_s, 1);
         p_sum = p_s.read()[0];
