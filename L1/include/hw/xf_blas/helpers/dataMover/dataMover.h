@@ -32,6 +32,35 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
+template<unsigned int t_NumStreams, 
+  typename t_DataType>
+    void dupStream(unsigned int p_n, 
+        hls::stream<WideType<t_DataType, t_NumStreams> > &p_wideStream,
+        hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams]){
+      for(unsigned int i=0; i < p_n; i++){
+        #pragma HLS PIPELINE
+        WideType<t_DataType, t_NumStreams> p_in = p_wideStream.read();
+        for(unsigned int j=0; j<t_NumStreams; j++){
+          p_stream[j].write(WideType<t_DataType, 1>(p_in[j]));
+        }
+      }
+    }
+
+template<unsigned int t_NumStreams, 
+  typename t_DataType>
+    void mergeStream(unsigned int p_n, 
+        hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams],
+        hls::stream<WideType<t_DataType, t_NumStreams> > &p_wideStream){
+      for(unsigned int i=0; i < p_n; i++){
+        #pragma HLS PIPELINE
+        WideType<t_DataType, t_NumStreams> p_out;
+        for(unsigned int j=0; j<t_NumStreams; j++){
+          p_out[j] = p_stream[j].read().getVal(0);
+        }
+        p_wideStream.write(p_out);
+      }
+    }
+
 template<typename t_DataType>
 void mem2stream(
   unsigned int p_n,
