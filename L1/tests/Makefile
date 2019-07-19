@@ -1,3 +1,4 @@
+#
 # Copyright 2019 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,12 +12,65 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
+# -----------------------------------------------------------------------------
+#                          project common settings
+
+MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+
+GCC_VERSION=6.2.0
+GCC_PATH=${XILINX_VIVADO}/tps/lnx64
+CC = ${GCC_PATH}/gcc-${GCC_VERSION}/bin/g++
+
+SHELL = /bin/bash
+
+.SECONDEXPANSION:
+
+# -----------------------------------------------------------------------------
+# MK_INC_BEGIN help.mk
+
+.PHONY: help
+
+help::
+	@echo ""
+	@echo "Makefile Usage:"
+	@echo ""
+	@echo "  make all TARGET=<exe/so> BLAS_dataType=<int>, BLAS_resDataTyp=<int>"
+	@echo "      Command to generate the design for specified target and device."
+	@echo "      TARGET defaults to exe, which builds blas_gen_bin.exe"
+	@echo "      BLAS_dataType default is int, BLAS_resDataType default is int "
+	@echo ""
+	@echo "  make blas_gen_bin.<exe/so> BLAS_dataType=<int>, BLAS_resDataTyp=<int>"
+	@echo "      Command to generate the specified target."
+	@echo "      BLAS_dataType default is int, BLAS_resDataType default is int "
+	@echo ""
+	@echo "  make clean "
+	@echo "      Command to remove the generated files."
+	@echo ""
+	@echo ""
+
+# MK_INC_END help.mk
+
+
+# MK_INC_BEGIN vivado.mk
 ifndef XILINX_VIVADO
 	$(error Environment variable XILINX_VIVADO is required and should point to Vivado install area)
 endif
-SHELL = /bin/bash
+# MK_INC_END vivado.mk
 
+# Target check
+TARGET ?= exe
+ifeq ($(filter $(TARGET), exe so),)
+$(error TARGET is not exe or so)
+endif
+
+
+# -----------------------------------------------------------------------------
+# BEGIN_XF_MK_USER_SECTION
+# -----------------------------------------------------------------------------
+#
 BLAS_argInstrWidth	= 8
 BLAS_pageSizeBytes	= 4096
 BLAS_instrSizeBytes = 8 
@@ -25,56 +79,48 @@ BLAS_paramPageIdx		= 1
 BLAS_statsPageIdx		= 2
 BLAS_dataPageIdx		= 3
 BLAS_maxNumInstrs		= 64
-
-ifndef BLAS_dataType
-BLAS_dataType				= int
-endif
-ifndef BLAS_resDataType
-BLAS_resDataType		= int
-endif
 BLAS_memWidthBytes	= 64
 
-DFLAGS = -D BLAS_argInstrWidth=$(BLAS_argInstrWidth) \
-				 -D BLAS_pageSizeBytes=$(BLAS_pageSizeBytes) \
-				 -D BLAS_instrSizeBytes=$(BLAS_instrSizeBytes) \
-				 -D BLAS_instrPageIdx=$(BLAS_instrPageIdx) \
-				 -D BLAS_paramPageIdx=$(BLAS_paramPageIdx) \
-				 -D BLAS_statsPageIdx=$(BLAS_statsPageIdx) \
-				 -D BLAS_dataPageIdx=$(BLAS_dataPageIdx) \
-				 -D BLAS_maxNumInstrs=$(BLAS_maxNumInstrs) \
-				 -D BLAS_dataType=$(BLAS_dataType) \
-				 -D BLAS_resDataType=$(BLAS_resDataType) \
-				 -D BLAS_memWidthBytes=$(BLAS_memWidthBytes)
+BLAS_dataType ?= int
+BLAS_resDataType?= int
 
-GCC_VERSION=6.2.0
-GCC_PATH=${XILINX_VIVADO}/tps/lnx64
-#CC = /bin/g++
-CC = ${GCC_PATH}/gcc-${GCC_VERSION}/bin/g++
+DFLAGS = -D BLAS_argInstrWidth=$(BLAS_argInstrWidth) \
+	-D BLAS_pageSizeBytes=$(BLAS_pageSizeBytes) \
+	-D BLAS_instrSizeBytes=$(BLAS_instrSizeBytes) \
+	-D BLAS_instrPageIdx=$(BLAS_instrPageIdx) \
+	-D BLAS_paramPageIdx=$(BLAS_paramPageIdx) \
+	-D BLAS_statsPageIdx=$(BLAS_statsPageIdx) \
+	-D BLAS_dataPageIdx=$(BLAS_dataPageIdx) \
+	-D BLAS_maxNumInstrs=$(BLAS_maxNumInstrs) \
+	-D BLAS_dataType=$(BLAS_dataType) \
+	-D BLAS_resDataType=$(BLAS_resDataType) \
+	-D BLAS_memWidthBytes=$(BLAS_memWidthBytes)
 
 BOOST_INCLUDE=$(XILINX_VIVADO)/tps/boost_1_64_0
 BOOST_LIB=$(XILINX_VIVADO)/lib/lnx64.o
 
 INCLUDE_CFLAGS = -I$(XILINX_VIVADO)/include \
-								 -I$(BOOST_INCLUDE) \
-								 -I./sw/include \
-								 -I../..
+		 -I$(BOOST_INCLUDE) \
+		 -I./sw/include \
+		 -I../..
 
 LIB_LFLAGS = -L$(BOOST_LIB) \
-						 -lboost_iostreams -lz \
-						 -lstdc++ \
-						 -lrt \
-						 -pthread
+	     -lboost_iostreams -lz \
+	     -lstdc++ \
+	     -lrt \
+	     -pthread
 CFLAGS = -g -O0 -std=c++11 \
-				 $(INCLUDE_CFLAGS)
+	 $(INCLUDE_CFLAGS)
 
 LFLAGS = $(HOST_LIB_LFLAGS) \
-				 -Wl,--rpath=$(BOOST_LIB)
+	 -Wl,--rpath=$(BOOST_LIB)
 
 OUT_DIR = out_test
 GEN_BIN_EXE = $(OUT_DIR)/blas_gen_bin.exe
-GEN_BIN_SO = $(OUT_DIR)/blas_gen_wrapper.so
+GEN_BIN_SO = $(OUT_DIR)/blas_gen_bin_d$(BLAS_dataType)_r$(BLAS_resDataType).so
 
 .PHONY: all
+all: $(OUT_DIR)/blas_gen_bin.$(TARGET)
 
 $(GEN_BIN_SO) : ./sw/src/blas_gen_wrapper.cpp |  $(OUT_DIR)
 	@echo "***** Link testcase generator executable *****"

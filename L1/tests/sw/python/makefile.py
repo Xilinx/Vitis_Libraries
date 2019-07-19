@@ -21,16 +21,14 @@ class Makefile:
   def __init__(self, makefile, libpath):
     self.makefile = makefile
     self.libpath = libpath
-    self.target = r'out_test/blas_gen_wrapper.so'
 
-  def make(self, dtype, rtype, rebuild = True):
+  def make(self, dtype='int', rtype='int', rebuild = False):
 
+    self.target = r'out_test/blas_gen_bin_d%s_r%s.so'%(dtype, rtype)
     if os.path.exists(self.target) and rebuild:
       os.remove(self.target)
-    os.environ['BLAS_dataType']= "'%s'"%dtype
-    os.environ['BLAS_resDataType']="'%s'"%rtype
 
-    commandLine =r'make -f %s %s'%(self.makefile, self.target)
+    commandLine =r'make -f %s %s BLAS_dataType=%s BLAS_resDataType=%s'%(self.makefile, self.target, dtype, rtype)
     args = shlex.split(commandLine)
     subprocess.call(args)
     if os.path.exists(self.target):
