@@ -15,7 +15,7 @@
  */
 
 /**
- * @file utils.h
+ * @file utils.hpp
  * @brief common datatypes for L1 modules.
  * 
  * This file is part of XF BLAS Library.

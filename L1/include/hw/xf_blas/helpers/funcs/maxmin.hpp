@@ -15,7 +15,7 @@
  */
 
 /**
- * @file maxmin.h
+ * @file maxmin.hpp
  * @brief BLAS Level 1 max and min template function implementation.
  *
  * This file is part of XF BLAS Library.

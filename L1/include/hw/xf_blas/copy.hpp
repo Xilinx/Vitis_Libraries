@@ -15,7 +15,7 @@
  */
 
 /**
- * @file copy.h
+ * @file copy.hpp
  * @brief BLAS Level 1 copy template function implementation.
  *
  * This file is part of XF BLAS Library.

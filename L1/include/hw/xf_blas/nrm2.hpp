@@ -15,7 +15,7 @@
  */
 
 /**
- * @file nrm2.h
+ * @file nrm2.hpp
  * @brief BLAS Level 1 asum template function implementation.
  *
  * This file is part of XF BLAS Library.

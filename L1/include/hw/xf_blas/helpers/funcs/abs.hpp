@@ -15,7 +15,7 @@
  */
 
 /**
- * @file abs.h
+ * @file abs.hpp
  * @brief BLAS Level 1 abs template function implementation.
  *
  * This file is part of XF BLAS Library.

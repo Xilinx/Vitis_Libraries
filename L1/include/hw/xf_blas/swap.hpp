@@ -15,7 +15,7 @@
  */
 
 /**
- * @file swap.h
+ * @file swap.hpp
  * @brief BLAS Level 1 swap template function implementation.
  *
  * This file is part of XF BLAS Library.

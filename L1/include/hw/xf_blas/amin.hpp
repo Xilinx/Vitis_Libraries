@@ -15,7 +15,7 @@
  */
 
 /**
- * @file amin.h
+ * @file amin.hpp
  * @brief BLAS Level 1 amin template function implementation.
  *
  * This file is part of XF BLAS Library.

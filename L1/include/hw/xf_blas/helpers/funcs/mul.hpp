@@ -15,7 +15,7 @@
  */
 
 /**
- * @file mul.h
+ * @file mul.hpp
  * @brief BLAS Level 1 sum template function implementation.
  *
  * This file is part of XF BLAS Library.

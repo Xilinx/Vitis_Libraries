@@ -15,7 +15,7 @@
  */
 
 /** 
- * @file xf_blas.h
+ * @file xf_blas.hpp
  * @brif Top-level header for XF BLAS Library.
  * 
  */

@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include "blas_def.h"
+#include "blas_def.hpp"
 
 using namespace std;
 using namespace xf::linear_algebra::blas;

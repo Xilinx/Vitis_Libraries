@@ -16,7 +16,7 @@
 
 
 /**
- * @file axpy.h
+ * @file axpy.hpp
  * @brief BLAS Level 1 axpy template function implementation.
  *
  * This file is part of XF BLAS Library.

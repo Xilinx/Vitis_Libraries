@@ -15,7 +15,7 @@
  */
 
 /**
- * @file dot.h
+ * @file dot.hpp
  * @brief BLAS Level 1 asum template function implementation.
  *
  * This file is part of XF BLAS Library.
