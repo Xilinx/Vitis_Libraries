@@ -38,7 +38,7 @@
 
 #include "assert.h"
 #include "hls_stream.h"
-#include "hw/xf_blas/helpers.h"
+#include "hw/xf_blas/helpers.hpp"
 
 namespace xf {
 namespace linear_algebra {
