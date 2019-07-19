@@ -37,6 +37,7 @@
 #include "xf_blas/dot.hpp"
 #include "xf_blas/scal.hpp"
 #include "xf_blas/swap.hpp"
+#include "xf_blas/nrm2.hpp"
 
 
 // BLAS L2 function modules
