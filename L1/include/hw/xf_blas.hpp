@@ -43,6 +43,7 @@
 // BLAS L2 function modules
 
 #include "xf_blas/gemv.hpp"
+#include "xf_blas/gbmv.hpp"
 /* TODO
  *
 #include "xf_blas/sbmv.hpp"
