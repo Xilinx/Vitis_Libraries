@@ -130,10 +130,13 @@ class RunTest:
     blas_gen=BLAS_GEN(self.lib)
     self.op.addInstr(blas_gen, dataList)
     blas_gen.write2BinFile(binFile)
+    print("\n")
+    print("="*64)
     print("Data file %s has been generated sucessfully."%binFile)
-    print("Testing %s. Parameters in file %s.\nLog file %s\n"%(self.op.sizeStr, paramTclPath, logfile))
-    self.hls.execution(binFile, logfile, True)
+    print("Parameters in file %s.\nLog file %s"%(paramTclPath, logfile))
+    self.hls.execution(binFile, logfile)
     self.hls.checkLog(logfile)
+    print("Test of size %s passed."%self.op.sizeStr)
 
   def runTest(self):
     self.op.test(self)

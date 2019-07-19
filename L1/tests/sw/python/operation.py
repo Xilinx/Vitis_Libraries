@@ -30,7 +30,7 @@ class OP_ERROR(Exception):
     self.message = message
 class OP:
   opDict = {
-    'BLAS_L1': ('amax', 'amin', 'asum', 'axpy', 'swap', 'scal', 'dot', 'nrm2'),
+    'BLAS_L1': ('amax', 'amin', 'asum', 'axpy', 'swap', 'scal', 'dot', 'copy', 'nrm2'),
     'BLAS_L2': ('gemv', 'gbmv', 'sbmv', 'symv')
   }
   @staticmethod

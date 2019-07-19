@@ -15,7 +15,7 @@
 from __future__ import print_function
 import shlex, subprocess
 import pdb
-import os
+import os, sys
 
 class HLS_ERROR(Exception):
   def __init__(self, message, logFile):
@@ -44,6 +44,8 @@ class HLS:
     commandLine ='vivado_hls -f %s %s %s %s'%(self.tcl, self.params, 
         self.directive, os.path.abspath(binFile))
     print(commandLine)
+    if not b_print:
+      print("vivado_hls stdout print is hidden.")
     #pdb.set_trace()
     args = shlex.split(commandLine)
     hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -57,7 +59,17 @@ class HLS:
         line = line.decode('utf-8')
         if b_print:
           print(line, end='')
+        else:
+          print('.', end='') 
+          if line.find("CSIM finish") >=0:
+            print('\nCSIM finished.')
+          if line.find(r'C/RTL co-simulation finished') >=0:
+            print('\nCOSIM finished.')
+          if line.find(r'C/RTL SIMULATION') >=0:
+            print("\nSYNTHESIS finished.")
+          sys.stdout.flush()
         f.write(line)
+    print('vivado_hls finished execution.') 
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
