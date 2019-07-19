@@ -20,40 +20,36 @@
  * 
  */
 
-#ifndef XF_BLAS_H
-#define XF_BLAS_H
+#ifndef XF_BLAS_HPP
+#define XF_BLAS_HPP
 
 
 // shared modules
-#include "xf_blas/utility.h"
+#include "xf_blas/helpers.hpp"
 
 // BLAS L1 function modules
 
-#include "xf_blas/amaxmin.h"
-#include "xf_blas/asum.h"
-#include "xf_blas/axpy.h"
+#include "xf_blas/amaxmin.hpp"
+#include "xf_blas/asum.hpp"
+#include "xf_blas/axpy.hpp"
+#include "xf_blas/copy.hpp"
+#include "xf_blas/dot.hpp"
+#include "xf_blas/scal.hpp"
+#include "xf_blas/swap.hpp"
 
-/* TODO
-
-#include "xf_blas/copy.h"
-#include "xf_blas/dot.h"
-#include "xf_blas/scal.h"
-#include "xf_blas/swap.h"
-
-*/
 
 // BLAS L2 function modules
 
+#include "xf_blas/gemv.hpp"
 /* TODO
  *
-#include "xf_blas/gemv.h"
-#include "xf_blas/sbmv.h"
-#include "xf_blas/spmv.h"
-#include "xf_blas/symv.h"
-#include "xf_blas/tpmv.h"
-#include "xf_blas/tbmv.h"
-#include "xf_blas/tbsv.h"
-#include "xf_blas/trmv.h"
+#include "xf_blas/sbmv.hpp"
+#include "xf_blas/spmv.hpp"
+#include "xf_blas/symv.hpp"
+#include "xf_blas/tpmv.hpp"
+#include "xf_blas/tbmv.hpp"
+#include "xf_blas/tbsv.hpp"
+#include "xf_blas/trmv.hpp"
 
 */
 
@@ -61,7 +57,7 @@
 
 /* TODO
  *
-#include "xf_blas/gemm.h"
+#include "xf_blas/gemm.hpp"
  *
 */
 
