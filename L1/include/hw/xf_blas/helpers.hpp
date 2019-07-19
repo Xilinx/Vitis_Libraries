@@ -21,23 +21,23 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_HELPERS_H
-#define XF_BLAS_HELPERS_H
+#ifndef XF_BLAS_HELPERS_HPP
+#define XF_BLAS_HELPERS_HPP
 
 /*        UTILITY FUNCTIONS             */
-#include "helpers/utils/types.h"
-#include "helpers/utils/utils.h"
+#include "helpers/utils/types.hpp"
+#include "helpers/utils/utils.hpp"
 
 
 /*        DATA MOVER            */
-#include "helpers/dataMover/dataMover.h"
+#include "helpers/dataMover/dataMover.hpp"
 #include "helpers/dataMover/sbMatMover.hpp"
 
 
 /*        HELPER FUNCTIONS             */
-#include "helpers/funcs/maxmin.h"
-#include "helpers/funcs/abs.h"
-#include "helpers/funcs/sum.h"
-#include "helpers/funcs/mul.h"
+#include "helpers/funcs/maxmin.hpp"
+#include "helpers/funcs/abs.hpp"
+#include "helpers/funcs/sum.hpp"
+#include "helpers/funcs/mul.hpp"
 
 #endif
