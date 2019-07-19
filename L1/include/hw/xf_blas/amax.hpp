@@ -21,8 +21,8 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_AMAX_H
-#define XF_BLAS_AMAX_H
+#ifndef XF_BLAS_AMAX_HPP
+#define XF_BLAS_AMAX_HPP
 
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
@@ -30,7 +30,7 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "xf_blas/helpers.h"
+#include "xf_blas/helpers.hpp"
 
 
 namespace xf {

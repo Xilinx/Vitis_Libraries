@@ -15,8 +15,7 @@
  */
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "gemv.h"
-#include "xf_blas/helpers.h"
+#include "xf_blas.hpp"
 
 using namespace xf::linear_algebra::blas;
 

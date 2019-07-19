@@ -29,7 +29,8 @@
 
 // BLAS L1 function modules
 
-#include "xf_blas/amaxmin.hpp"
+#include "xf_blas/amax.hpp"
+#include "xf_blas/amin.hpp"
 #include "xf_blas/asum.hpp"
 #include "xf_blas/axpy.hpp"
 #include "xf_blas/copy.hpp"

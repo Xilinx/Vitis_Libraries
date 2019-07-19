@@ -21,8 +21,8 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_DATAMOVER_H
-#define XF_BLAS_DATAMOVER_H
+#ifndef XF_BLAS_DATAMOVER_HPP
+#define XF_BLAS_DATAMOVER_HPP
 
 #include "hls_stream.h"
 #include "ap_int.h"

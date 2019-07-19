@@ -21,8 +21,8 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_SBMATMOVER_HPP
-#define XF_BLAS_SBMATMOVER_HPP
+#ifndef XF_BLAS_SBMATMOVER_HPPPP
+#define XF_BLAS_SBMATMOVER_HPPPP
 
 #include "hls_stream.h"
 #include "ap_int.h"

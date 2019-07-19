@@ -15,14 +15,14 @@
  */
 
 /**
- * @file helpers.h
+ * @file helpers.hpp
  * @brief common datatypes for L1 modules.
  * 
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_HELPERS_HPP
-#define XF_BLAS_HELPERS_HPP
+#ifndef XF_BLAS_HPPELPERS_HPP
+#define XF_BLAS_HPPELPERS_HPP
 
 /*        UTILITY FUNCTIONS             */
 #include "helpers/utils/types.hpp"

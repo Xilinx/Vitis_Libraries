@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _UTILS_H_
-#define _UTILS_H_
+#ifndef _UTILS_HPP_
+#define _UTILS_HPP_
 
 #include <iostream>
 #include <string>

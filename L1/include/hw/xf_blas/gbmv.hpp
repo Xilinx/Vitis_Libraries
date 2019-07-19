@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_GBMV_H
-#define XF_BLAS_GBMV_H
+#ifndef XF_BLAS_GBMV_HPP
+#define XF_BLAS_GBMV_HPP
 
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
@@ -23,7 +23,7 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "xf_blas/helpers.h"
+#include "xf_blas/helpers.hpp"
 
 namespace xf {
 namespace linear_algebra {

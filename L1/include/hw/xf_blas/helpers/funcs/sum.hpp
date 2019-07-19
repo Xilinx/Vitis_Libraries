@@ -21,8 +21,8 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_SUM_H
-#define XF_BLAS_SUM_H
+#ifndef XF_BLAS_SUM_HPP
+#define XF_BLAS_SUM_HPP
 
 
 #ifndef __cplusplus

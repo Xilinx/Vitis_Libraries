@@ -1,5 +1,5 @@
-#ifndef XF_BLAS_L1_TESTS_UTIL_H
-#define XF_BLAS_L1_TESTS_UTIL_H
+#ifndef XF_BLAS_L1_TESTS_UTIL_HPP
+#define XF_BLAS_L1_TESTS_UTIL_HPP
 #include <iostream>
 #include <vector>
 #include <fstream>

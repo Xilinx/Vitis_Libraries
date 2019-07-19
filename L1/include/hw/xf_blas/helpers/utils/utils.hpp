@@ -21,8 +21,8 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_UTILS_H
-#define XF_BLAS_UTILS_H
+#ifndef XF_BLAS_UTILS_HPP
+#define XF_BLAS_UTILS_HPP
 
 namespace xf {
 namespace linear_algebra {

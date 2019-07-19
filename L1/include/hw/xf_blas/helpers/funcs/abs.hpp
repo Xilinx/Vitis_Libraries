@@ -21,8 +21,8 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_ABS_H
-#define XF_BLAS_ABS_H
+#ifndef XF_BLAS_ABS_HPP
+#define XF_BLAS_ABS_HPP
 
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."

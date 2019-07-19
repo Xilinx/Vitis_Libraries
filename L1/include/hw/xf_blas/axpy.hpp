@@ -22,8 +22,8 @@
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_AXPY_H
-#define XF_BLAS_AXPY_H
+#ifndef XF_BLAS_AXPY_HPP
+#define XF_BLAS_AXPY_HPP
 
 
 #ifndef __cplusplus
@@ -33,7 +33,7 @@
 #include "ap_int.h"
 #include "hls_math.h"
 #include "hls_stream.h"
-#include "xf_blas/helpers.h"
+#include "xf_blas/helpers.hpp"
 
 
 namespace xf {

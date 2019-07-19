@@ -19,8 +19,8 @@
  *  $DateTime: 2019/06/13 $
  */
 
-#ifndef BLAS_INSTR_H
-#define BLAS_INSTR_H
+#ifndef BLAS_INSTR_HPP
+#define BLAS_INSTR_HPP
 
 #include <iostream>
 #include <iomanip>

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UUT_TOP_H
-#define UUT_TOP_H
+#ifndef UUT_TOP_HPP
+#define UUT_TOP_HPP
 #if BLAS_L1
 
 void uut_top(

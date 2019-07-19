@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef XF_BLAS_TRMV_H
-#define XF_BLAS_TRMV_H
+#ifndef XF_BLAS_TRMV_HPP
+#define XF_BLAS_TRMV_HPP
 
 namespace xf {
 namespace linear_algebra {

@@ -19,8 +19,8 @@
  *  $DateTime: 2019/06/13$
  */
 
-#ifndef BLAS_PROGRAM_H
-#define BLAS_PROGRAM_H
+#ifndef BLAS_PROGRAM_HPP
+#define BLAS_PROGRAM_HPP
 
 #include <array>
 #include <cassert>
@@ -30,7 +30,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "blas_instr.h"
+#include "blas_instr.hpp"
 #include "L3/include/sw/utility/utility.hpp"
 
 using namespace std;
@@ -59,7 +59,7 @@ namespace blas {
    * @brief program memory, including data and instruction memory 
    */ 
   template <
-    typename t_HandleType,
+    typename t_HPPandleType,
     typename t_DataType,
     typename t_ResDataType,
     unsigned int t_MemWidthBytes,
@@ -153,7 +153,7 @@ namespace blas {
       }
       
       xfblasStatus_t regDatMem(
-        const t_HandleType &p_memHandle, 
+        const t_HPPandleType &p_memHandle, 
         void* p_memPtr, 
         unsigned long long p_bufBytes
       ) {
@@ -175,7 +175,7 @@ namespace blas {
       }
 
       void* getDatMem(
-        const t_HandleType &p_memHandle, 
+        const t_HPPandleType &p_memHandle, 
         unsigned long long &p_bufSize
       ) {
         void* l_resPtr = nullptr;
@@ -473,8 +473,8 @@ namespace blas {
       unsigned int m_numInstrs;
       uint32_t m_currParamOff;
       PageVectorType m_pages;
-      unordered_map<t_HandleType, void*> m_datMem;
-      unordered_map<t_HandleType, unsigned long long> m_datMemSize;
+      unordered_map<t_HPPandleType, void*> m_datMem;
+      unordered_map<t_HPPandleType, unsigned long long> m_datMemSize;
     private:  
       ifstream::pos_type getFileSize(string p_fileName) {
         ifstream in(p_fileName.c_str(), ifstream::ate | ifstream::binary);

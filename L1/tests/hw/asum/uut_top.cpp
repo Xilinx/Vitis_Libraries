@@ -18,9 +18,7 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "asum.h"
-#include "xf_blas/helpers.h"
-#include "uut_top.h"
+#include "xf_blas.hpp"
 
 using namespace xf::linear_algebra::blas;
 

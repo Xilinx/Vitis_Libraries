@@ -17,9 +17,9 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include "blas_def.h"
-#include "utils.h"
-#include "uut_top.h"
+#include "blas_def.hpp"
+#include "utils.hpp"
+#include "uut_top.hpp"
 
 using namespace xf::linear_algebra::blas;
 int main(int argc, char** argv){

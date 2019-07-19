@@ -19,11 +19,11 @@
  *  $DateTime: 2019/06/14$
  */
 
-#ifndef BLAS_GEN_BIN_H
-#define BLAS_GEN_BIN_H
+#ifndef BLAS_GEN_BIN_HPP
+#define BLAS_GEN_BIN_HPP
 
 #include <cstring>
-#include "blas_program.h"
+#include "blas_program.hpp"
 
 using namespace std;
 namespace xf {
@@ -33,7 +33,7 @@ namespace blas {
   template<
     typename t_DataType,
     typename t_ResDataType,
-    typename t_HandleType,
+    typename t_HPPandleType,
     unsigned int t_MemWidthBytes,
     unsigned int t_InstrSizeBytes=8,
     unsigned int t_PageSizeBytes=4096,
@@ -44,11 +44,11 @@ namespace blas {
   >
   class GenBin {
     public:
-      typedef typename Program<t_HandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB1Type ParamB1Type;
-      typedef typename Program<t_HandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB2Type ParamB2Type;
+      typedef typename Program<t_HPPandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB1Type ParamB1Type;
+      typedef typename Program<t_HPPandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB2Type ParamB2Type;
     public:
-      static const size_t ParamB1Bytes = Program<t_HandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB1Bytes;
-      static const size_t ParamB2Bytes = Program<t_HandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB2Bytes;
+      static const size_t ParamB1Bytes = Program<t_HPPandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB1Bytes;
+      static const size_t ParamB2Bytes = Program<t_HPPandleType,t_DataType,t_ResDataType,t_MemWidthBytes,t_InstrSizeBytes,t_PageSizeBytes,t_MaxNumInstrs,t_InstrPageIdx,t_ParamPageIdx,t_StatsPageIdx>::ParamB2Bytes;
     public:
       GenBin() {}
       xfblasStatus_t addB1Instr(
@@ -263,7 +263,7 @@ namespace blas {
       }
     private:
       Program<
-        t_HandleType,
+        t_HPPandleType,
         t_DataType,
         t_ResDataType,
         t_MemWidthBytes,

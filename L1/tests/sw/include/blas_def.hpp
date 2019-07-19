@@ -18,9 +18,9 @@
  *
  *  $DateTime: 2019/06/13 $
  */
-#ifndef BLAS_DEF_H
-#define BLAS_DEF_H
-#include "blas_gen_bin.h"
+#ifndef BLAS_DEF_HPP
+#define BLAS_DEF_HPP
+#include "blas_gen_bin.hpp"
 
 /*#define BLAS_pageSizeBytes 4096
 #define BLAS_instrSizeBytes 8
