@@ -74,7 +74,6 @@ class XFpga {
       }
       //cout << "Finished downloading bitstream " << p_xclbin << "\n";
       const axlf* l_top = (const axlf*)l_header;
-      auto l_ip = xclbin::get_axlf_section(l_top, IP_LAYOUT);
       
       auto l_topo = xclbin::get_axlf_section(l_top, MEM_TOPOLOGY);
       struct mem_topology* l_topology = (mem_topology*)(l_header + l_topo->m_sectionOffset);
@@ -113,10 +112,7 @@ class XFpga {
     }
 
     bool copyFromFpga(unsigned int p_bufHandle, size_t p_szBytes) {
-      bool waitFinish = false;
-      while (waitFinish!= true) {
-        waitFinish = xclExecWait(m_handle,1);
-      }
+      while (xclExecWait(m_handle,1) == 0);
       if (xclSyncBO(m_handle, p_bufHandle, XCL_BO_SYNC_BO_FROM_DEVICE, p_szBytes, 0)){
         return false;
       }
