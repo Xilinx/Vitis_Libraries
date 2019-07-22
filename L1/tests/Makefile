@@ -37,12 +37,12 @@ help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make all TARGET=<exe/so> BLAS_dataType=<int>, BLAS_resDataTyp=<int>"
+	@echo "  make all TARGET=<exe/so> BLAS_dataType=<int>, BLAS_resDataType=<int>"
 	@echo "      Command to generate the design for specified target and device."
 	@echo "      TARGET defaults to exe, which builds blas_gen_bin.exe"
 	@echo "      BLAS_dataType default is int, BLAS_resDataType default is int "
 	@echo ""
-	@echo "  make blas_gen_bin.<exe/so> BLAS_dataType=<int>, BLAS_resDataTyp=<int>"
+	@echo "  make blas_gen_bin.<exe/so> BLAS_dataType=<int>, BLAS_resDataType=<int>"
 	@echo "      Command to generate the specified target."
 	@echo "      BLAS_dataType default is int, BLAS_resDataType default is int "
 	@echo ""
@@ -121,6 +121,9 @@ GEN_BIN_SO = $(OUT_DIR)/blas_gen_bin_d$(BLAS_dataType)_r$(BLAS_resDataType).so
 
 .PHONY: all
 all: $(OUT_DIR)/blas_gen_bin.$(TARGET)
+
+$(OUT_DIR)/blas_gen_bin.so : $(GEN_BIN_SO)
+	@cp $(GEN_BIN_SO) $(OUT_DIR)/blas_gen_bin.so
 
 $(GEN_BIN_SO) : ./sw/src/blas_gen_wrapper.cpp |  $(OUT_DIR)
 	@echo "***** Link testcase generator executable *****"
