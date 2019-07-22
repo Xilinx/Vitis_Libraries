@@ -254,7 +254,21 @@ class Program {
         size_t l_vecYDataBytes = l_m * sizeof(t_DataType);
         size_t l_vecYPaddingBytes =
             ((l_vecYDataBytes % t_PageSizeBytes) != 0) ? (t_PageSizeBytes - (l_vecYDataBytes % t_PageSizeBytes)) : 0;
-        size_t l_matDataBytes = l_m * l_n * sizeof(t_DataType);
+        size_t l_matDataBytes;
+        switch (p_param.m_aStore) {
+        GBM:
+            l_matDataBytes = (l_kl + l_ku + 1) * l_n * sizeof(t_DataType);
+            break;
+        SBM_LO:
+            l_matDataBytes = (l_kl + 1) * l_n * sizeof(t_DataType);
+            break;
+        SBM_UP:
+            l_matDataBytes = (l_ku + 1) * l_n * sizeof(t_DataType);
+            break;
+            default:
+                l_matDataBytes = l_m * l_n * sizeof(t_DataType);
+                break;
+        }
         size_t l_matPaddingBytes =
             ((l_matDataBytes % t_PageSizeBytes) != 0) ? (t_PageSizeBytes - (l_matDataBytes % t_PageSizeBytes)) : 0;
 

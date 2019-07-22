@@ -66,10 +66,27 @@ void outputVec(string p_str, uint32_t p_n, BLAS_dataType* p_data) {
     }
 }
 
-void outputMat(string p_str, uint32_t p_m, uint32_t p_n, BLAS_dataType* p_data) {
+void outputMat(
+    string p_str, uint16_t p_opCode, uint32_t p_m, uint32_t p_n, uint32_t p_kl, uint32_t p_ku, BLAS_dataType* p_data) {
+    uint32_t l_rows = 0;
+    switch (p_opCode) {
+        case SBMV:
+            if (p_ku == 0) {
+                l_rows = p_kl + 1;
+            } else {
+                l_rows = p_ku + 1;
+            }
+            break;
+        case GBMV:
+            l_rows = p_kl + p_ku + 1;
+            break;
+        default:
+            l_rows = p_m;
+    }
+
     if (p_data != nullptr) {
         cout << "  " << p_str << endl;
-        for (unsigned int i = 0; i < p_m; ++i) {
+        for (unsigned int i = 0; i < l_rows; ++i) {
             for (unsigned int j = 0; j < p_n; ++j) {
                 if ((j % ENTRIES_PER_LINE) == 0) {
                     cout << endl;
@@ -229,10 +246,10 @@ int main(int argc, char** argv) {
                 l_gen.decodeB2Instr(l_curInstr, l_m, l_n, l_kl, l_ku, l_alpha, l_beta, l_a, l_x, l_y, l_aRes, l_yRes);
                 cout << "m=" << l_m << "  n=" << l_n << " kl=" << l_kl << " ku=" << l_ku << "  alpha=" << l_alpha
                      << "  beta=" << l_beta << endl;
-                outputMat("A:", l_m, l_n, l_a);
+                outputMat("A:", l_curInstr.m_opCode, l_m, l_n, l_kl, l_ku, l_a);
                 outputVec("x:", l_n, l_x);
                 outputVec("y:", l_m, l_y);
-                outputMat("ARes", l_m, l_n, l_aRes);
+                outputMat("ARes", l_curInstr.m_opCode, l_m, l_n, l_kl, l_ku, l_aRes);
                 outputVec("yRes:", l_m, l_yRes);
             }
         }

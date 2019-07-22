@@ -226,7 +226,10 @@ ostream& operator<<(ostream& os, ParamB1<T1, T2>& p_val) {
 template <typename t_DataType>
 class ParamB2 {
    public:
-    ParamB2() {}
+    typedef enum { GEM, GBM, SBM_LO, SBM_UP } MatStoreType;
+
+   public:
+    ParamB2() { m_aStore = GEM; }
 
    public:
     void getVecData(uint64_t p_addr, uint32_t p_n, vector<t_DataType>& p_data) {
@@ -242,15 +245,31 @@ class ParamB2 {
     void print(ostream& os) {
         os << "m=" << m_m << " n=" << m_n << " kl=" << m_kl << " ku=" << m_ku << " alpha=" << setw(OUTPUT_WIDTH)
            << m_alpha << " beta=" << setw(OUTPUT_WIDTH) << m_beta << "\n";
+        uint32_t l_rows = 0;
+        switch (m_aStore) {
+            case SBM_LO:
+                l_rows = m_kl + 1;
+                break;
+            case SBM_UP:
+                l_rows = m_ku + 1;
+                break;
+            case GBM:
+                l_rows = m_kl + m_ku + 1;
+                break;
+            default:
+                l_rows = m_m;
+                break;
+        }
+        showMatrix<t_DataType>(os, l_rows, m_n, m_aAddr, "A:");
 
-        showMatrix<t_DataType>(os, m_m, m_n, m_aAddr, "A:");
         showVec<t_DataType>(os, m_n, m_xAddr, "x:");
         showVec<t_DataType>(os, m_m, m_yAddr, "y:");
-        showMatrix<t_DataType>(os, m_m, m_n, m_aResAddr, "ARes:");
+        showMatrix<t_DataType>(os, l_rows, m_n, m_aResAddr, "ARes:");
         showVec<t_DataType>(os, m_m, m_yResAddr, "yRes:");
     }
 
    public:
+    MatStoreType m_aStore;
     uint32_t m_m;
     uint32_t m_n;
     uint32_t m_kl;

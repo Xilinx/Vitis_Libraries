@@ -25,6 +25,10 @@
 #include <cstring>
 #include "blas_program.hpp"
 
+// const opcode defintion for printing
+#define SBMV 17
+#define GBMV 14
+
 using namespace std;
 namespace xf {
 namespace linear_algebra {
@@ -62,6 +66,7 @@ class GenBin {
                              t_InstrPageIdx,
                              t_ParamPageIdx,
                              t_StatsPageIdx>::ParamB2Type ParamB2Type;
+    typedef typename ParamB2<t_DataType>::MatStoreType MatStoreType;
 
    public:
     static const size_t ParamB1Bytes = Program<t_HPPandleType,
@@ -168,6 +173,25 @@ class GenBin {
             l_param.m_yAddr = 0;
             l_param.m_aResAddr = 0;
             l_param.m_yResAddr = 0;
+
+            MatStoreType l_store;
+
+            switch (l_opCode) {
+                case SBMV:
+                    if (p_kl == 0) {
+                        l_store = MatStoreType::SBM_UP;
+                    } else {
+                        l_store = MatStoreType::SBM_LO;
+                    }
+                    break;
+                case GBMV:
+                    l_store = MatStoreType::GBM;
+                    break;
+                default:
+                    l_store = MatStoreType::GEM;
+                    break;
+            }
+            l_param.m_aStore = l_store;
 
             l_status = regMem(p_m * p_n * sizeof(t_DataType), p_a, l_param.m_aAddr);
             l_status = regMem(p_n * sizeof(t_DataType), p_x, l_param.m_xAddr);
