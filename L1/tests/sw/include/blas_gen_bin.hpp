@@ -82,42 +82,16 @@ namespace blas {
           l_param.m_xResAddr = 0;
           l_param.m_yResAddr = 0;
 
-          unsigned long long l_dataBufSize;
-          if (p_x != nullptr) {
-            l_status = m_program.regDatMem(p_x, p_x, p_n*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_xAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_x, l_dataBufSize));
-          }
-          if (p_y != nullptr) {
-            l_status = m_program.regDatMem(p_y, p_y, p_n*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_yAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_y, l_dataBufSize));
-          }
-
-          if (p_xRes != nullptr) {
-            l_status = m_program.regDatMem(p_xRes, p_xRes, p_n*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_xResAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_xRes, l_dataBufSize));
-          }
-          if (p_yRes != nullptr) {
-            l_status = m_program.regDatMem(p_yRes, p_yRes, p_n*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_yResAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_yRes, l_dataBufSize));
-          }
+          l_status = regMem(p_n*sizeof(t_DataType), p_x, l_param.m_xAddr);
+          l_status = regMem(p_n*sizeof(t_DataType), p_y, l_param.m_yAddr);
+          l_status = regMem(p_n*sizeof(t_DataType), p_xRes, l_param.m_xResAddr);
+          l_status = regMem(p_n*sizeof(t_DataType), p_yRes, l_param.m_yResAddr);
 
           uint8_t* l_instrVal = reinterpret_cast<uint8_t*> (&l_instr);
           uint8_t* l_paramVal = reinterpret_cast<uint8_t*> (&l_param);
         
           m_program.addInstr(l_instrVal, l_paramVal, ParamB1Bytes);
-          return(XFBLAS_STATUS_SUCCESS);
+          return(l_status);
         }
         else {
           return(XFBLAS_STATUS_INVALID_OP);
@@ -163,49 +137,17 @@ namespace blas {
           l_param.m_aResAddr = 0;
           l_param.m_yResAddr = 0;
 
-          unsigned long long l_dataBufSize;
-          if (p_a != nullptr) {
-            l_status = m_program.regDatMem(p_a, p_a, p_m*p_n*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_aAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_a, l_dataBufSize));
-          }
-          if (p_x != nullptr) {
-            l_status = m_program.regDatMem(p_x, p_x, p_n*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_xAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_x, l_dataBufSize));
-          }
-          if (p_y != nullptr) {
-            l_status = m_program.regDatMem(p_y, p_y, p_m*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_yAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_y, l_dataBufSize));
-          }
-
-          if (p_aRes != nullptr) {
-            l_status = m_program.regDatMem(p_aRes, p_aRes, p_m*p_n*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_aResAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_aRes, l_dataBufSize));
-          }
-          if (p_yRes != nullptr) {
-            l_status = m_program.regDatMem(p_yRes, p_yRes, p_m*sizeof(t_DataType));
-            if (l_status != XFBLAS_STATUS_SUCCESS) {
-              return (l_status);
-            }
-            l_param.m_yResAddr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_yRes, l_dataBufSize));
-          }
+          l_status = regMem(p_m*p_n*sizeof(t_DataType), p_a, l_param.m_aAddr);
+          l_status = regMem(p_n*sizeof(t_DataType), p_x, l_param.m_xAddr);
+          l_status = regMem(p_m*sizeof(t_DataType), p_y, l_param.m_yAddr);
+          l_status = regMem(p_m*p_n*sizeof(t_DataType), p_aRes, l_param.m_aResAddr);
+          l_status = regMem(p_m*sizeof(t_DataType), p_yRes, l_param.m_yResAddr);
 
           uint8_t* l_instrVal = reinterpret_cast<uint8_t*> (&l_instr);
           uint8_t* l_paramVal = reinterpret_cast<uint8_t*> (&l_param);
         
           m_program.addInstr(l_instrVal, l_paramVal, ParamB2Bytes);
-          return(XFBLAS_STATUS_SUCCESS);
+          return(l_status);
         }
         else {
           return(XFBLAS_STATUS_INVALID_OP);
@@ -262,6 +204,19 @@ namespace blas {
         cout << m_program;
       }
     private:
+      xfblasStatus_t regMem(size_t p_bytes, void* p_memPointer, uint64_t &p_addr) {
+        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
+        if (p_memPointer != nullptr) {
+          l_status = m_program.regDatMem(p_memPointer, p_memPointer, p_bytes);
+          if (l_status != XFBLAS_STATUS_SUCCESS) {
+            return (l_status);
+          }
+          unsigned long long l_bufSize;
+          p_addr = reinterpret_cast<uint64_t>(m_program.getDatMem(p_memPointer, l_bufSize));
+        }
+        return(l_status);
+      }
+
       Program<
         t_HPPandleType,
         t_DataType,

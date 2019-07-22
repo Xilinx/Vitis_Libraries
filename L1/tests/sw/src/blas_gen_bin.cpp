@@ -205,9 +205,9 @@ int main(int argc, char** argv)
         uint8_t* l_yResPtr=nullptr;
         initMat(l_handleA, l_m, l_n, l_a[l_idx], l_aPtr);
         initVec(l_handleX, l_n, l_x[l_idx], l_xPtr);
-        initVec(l_handleY, l_n, l_y[l_idx], l_yPtr);
+        initVec(l_handleY, l_m, l_y[l_idx], l_yPtr);
         initMat(l_handleAres, l_m, l_n, l_aRes[l_idx], l_aResPtr);
-        initVec(l_handleYres, l_n, l_yRes[l_idx], l_yResPtr);
+        initVec(l_handleYres, l_m, l_yRes[l_idx], l_yResPtr);
         xfblasStatus_t l_status= l_gen.addB2Instr(
                           l_opName, l_m, l_n, l_kl, l_ku, l_alpha, l_beta,
                           l_aPtr, l_xPtr, l_yPtr, l_aResPtr, l_yResPtr);
@@ -263,9 +263,9 @@ int main(int argc, char** argv)
              << "  beta=" << l_beta << endl;
         outputMat("A:", l_m, l_n, l_a);
         outputVec("x:", l_n, l_x);
-        outputVec("y:", l_n, l_y);
+        outputVec("y:", l_m, l_y);
         outputMat("ARes", l_m, l_n, l_aRes);
-        outputVec("yRes:", l_n, l_yRes);
+        outputVec("yRes:", l_m, l_yRes);
       }
     }
   } else {
