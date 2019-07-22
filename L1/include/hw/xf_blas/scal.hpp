@@ -24,7 +24,6 @@
 #ifndef XF_BLAS_SCAL_HPP
 #define XF_BLAS_SCAL_HPP
 
-
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
 #endif
@@ -37,50 +36,44 @@
 namespace xf {
 namespace linear_algebra {
 namespace blas {
-  /**
-   * @brief scal function that compute X = alpha * X
-   *
-   * @tparam t_DataType the data type of the vector entries
-   * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
-   * @tparam t_IndexType the datatype of the index
-   *
-   * @param p_n the number of entries in vector X, p_n % t_ParEntries == 0
-   * @param p_x the packed input vector stream
-   * @param p_res the packed output vector stream 
-   */
-  template<
-    typename t_DataType,
-    unsigned int t_ParEntries,
-    typename t_IndexType=unsigned int
-  >
-  void scal (
-    unsigned int p_n,
-    t_DataType p_alpha,
-    hls::stream<WideType<t_DataType, t_ParEntries> > &p_x,
-    hls::stream<WideType<t_DataType, t_ParEntries> > &p_res
-  ) {
-    #pragma HLS DATA_PACK variable=p_x
-    #pragma HLS DATA_PACK variable=p_res
-    
-    #ifndef __SYNTHESIS__
+/**
+ * @brief scal function that compute X = alpha * X
+ *
+ * @tparam t_DataType the data type of the vector entries
+ * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
+ * @tparam t_IndexType the datatype of the index
+ *
+ * @param p_n the number of entries in vector X, p_n % t_ParEntries == 0
+ * @param p_x the packed input vector stream
+ * @param p_res the packed output vector stream
+ */
+template <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
+void scal(unsigned int p_n,
+          t_DataType p_alpha,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_res) {
+#pragma HLS DATA_PACK variable = p_x
+#pragma HLS DATA_PACK variable = p_res
+
+#ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
-    #endif
+#endif
     const unsigned int l_parEntries = p_n / t_ParEntries;
-    for (t_IndexType i=0; i<l_parEntries; ++i) {
-    #pragma HLS PIPELINE
-      WideType<t_DataType, t_ParEntries> l_valX;
-      WideType<t_DataType, t_ParEntries> l_valY;
-      #pragma HLS ARRAY_PARTITION variable=l_valX complete dim=1
-      #pragma HLS ARRAY_PARTITION variable=l_valY complete dim=1
-      l_valX = p_x.read();
-      for (unsigned int j=0; j<t_ParEntries; ++j) {
-        l_valY[j] = p_alpha * l_valX[j];
-      }
-      p_res.write(l_valY);
+    for (t_IndexType i = 0; i < l_parEntries; ++i) {
+#pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_valX;
+        WideType<t_DataType, t_ParEntries> l_valY;
+#pragma HLS ARRAY_PARTITION variable = l_valX complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = l_valY complete dim = 1
+        l_valX = p_x.read();
+        for (unsigned int j = 0; j < t_ParEntries; ++j) {
+            l_valY[j] = p_alpha * l_valX[j];
+        }
+        p_res.write(l_valY);
     }
-  } 
-} //end namespace blas
-} //end namspace linear_algebra
-} //end namespace xf
+}
+} // end namespace blas
+} // namespace linear_algebra
+} // end namespace xf
 
 #endif

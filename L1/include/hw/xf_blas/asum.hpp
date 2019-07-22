@@ -24,7 +24,6 @@
 #ifndef XF_BLAS_ASUM_HPP
 #define XF_BLAS_ASUM_HPP
 
-
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
 #endif
@@ -37,42 +36,35 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-  /**
-   * @brief asum function that returns the sum of the magnitude of vector elements.
-   *
-   * @tparam t_DataType the data type of the vector entries
-   * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
-   * @tparam t_IndexType the datatype of the index 
-   *
-   * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
-   * @param p_x the input stream of packed vector entries
-   * @param p_sum the sum, which is 0 if p_n <= 0
-   */
+/**
+ * @brief asum function that returns the sum of the magnitude of vector elements.
+ *
+ * @tparam t_DataType the data type of the vector entries
+ * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
+ * @tparam t_IndexType the datatype of the index
+ *
+ * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+ * @param p_x the input stream of packed vector entries
+ * @param p_sum the sum, which is 0 if p_n <= 0
+ */
 
-  template<typename t_DataType, 
-    unsigned int t_LogParEntries, 
-    typename t_IndexType=unsigned int>
-      void asum(
-          unsigned int p_n,
-          hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
-          t_DataType &p_sum
-          ) {
-        #ifndef __SYNTHESIS__
-        assert(p_n % ( 1 << t_LogParEntries) == 0);
-        #endif
-        #pragma HLS DATAFLOW
+template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+void asum(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_DataType& p_sum) {
+#ifndef __SYNTHESIS__
+    assert(p_n % (1 << t_LogParEntries) == 0);
+#endif
+#pragma HLS DATAFLOW
 
-        hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > l_abs;
-        #pragma HLS data_pack variable=l_abs
-        #pragma HLS stream variable=l_abs depth=2
+    hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_abs;
+#pragma HLS data_pack variable = l_abs
+#pragma HLS stream variable = l_abs depth = 2
 
-        abs<t_DataType, 1<<t_LogParEntries, t_IndexType>(p_n, p_x, l_abs);
-        sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_abs, p_sum);
-      }
+    abs<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_x, l_abs);
+    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_abs, p_sum);
+}
 
-
-} //end namespace blas
-} //end namspace linear_algebra
-} //end namespace xf
+} // end namespace blas
+} // namespace linear_algebra
+} // end namespace xf
 
 #endif

@@ -34,21 +34,20 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-typedef GenBin<
-  BLAS_dataType,
-  BLAS_resDataType,
-  void*, 
-  BLAS_memWidthBytes,
-  BLAS_instrSizeBytes,
-  BLAS_pageSizeBytes,
-  BLAS_maxNumInstrs,
-  BLAS_instrPageIdx,
-  BLAS_paramPageIdx,
-  BLAS_statsPageIdx
-> GenBinType;
+typedef GenBin<BLAS_dataType,
+               BLAS_resDataType,
+               void*,
+               BLAS_memWidthBytes,
+               BLAS_instrSizeBytes,
+               BLAS_pageSizeBytes,
+               BLAS_maxNumInstrs,
+               BLAS_instrPageIdx,
+               BLAS_paramPageIdx,
+               BLAS_statsPageIdx>
+    GenBinType;
 
-} //end namespace blas
-} //end namespace linear_algebra
-} //end namespace xf
+} // end namespace blas
+} // end namespace linear_algebra
+} // end namespace xf
 
 #endif

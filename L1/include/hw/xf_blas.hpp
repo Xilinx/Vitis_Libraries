@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-/** 
+/**
  * @file xf_blas.hpp
  * @brif Top-level header for XF BLAS Library.
- * 
+ *
  */
 
 #ifndef XF_BLAS_HPP
 #define XF_BLAS_HPP
-
 
 // shared modules
 #include "xf_blas/helpers.hpp"
@@ -38,7 +37,6 @@
 #include "xf_blas/scal.hpp"
 #include "xf_blas/swap.hpp"
 #include "xf_blas/nrm2.hpp"
-
 
 // BLAS L2 function modules
 
@@ -63,7 +61,5 @@
 #include "xf_blas/gemm.hpp"
  *
 */
-
-
 
 #endif

@@ -17,7 +17,7 @@
 /**
  * @file utils.hpp
  * @brief common datatypes for L1 modules.
- * 
+ *
  * This file is part of XF BLAS Library.
  */
 
@@ -32,159 +32,128 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-template<unsigned int t_NumStreams, 
-  typename t_DataType>
-    void dupStream(unsigned int p_n, 
-        hls::stream<WideType<t_DataType, t_NumStreams> > &p_wideStream,
-        hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams]){
-      for(unsigned int i=0; i < p_n; i++){
-        #pragma HLS PIPELINE
+template <unsigned int t_NumStreams, typename t_DataType>
+void dupStream(unsigned int p_n,
+               hls::stream<WideType<t_DataType, t_NumStreams> >& p_wideStream,
+               hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams]) {
+    for (unsigned int i = 0; i < p_n; i++) {
+#pragma HLS PIPELINE
         WideType<t_DataType, t_NumStreams> p_in = p_wideStream.read();
-        for(unsigned int j=0; j<t_NumStreams; j++){
-          p_stream[j].write(WideType<t_DataType, 1>(p_in[j]));
+        for (unsigned int j = 0; j < t_NumStreams; j++) {
+            p_stream[j].write(WideType<t_DataType, 1>(p_in[j]));
         }
-      }
     }
+}
 
-template<unsigned int t_NumStreams, 
-  typename t_DataType>
-    void mergeStream(unsigned int p_n, 
-        hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams],
-        hls::stream<WideType<t_DataType, t_NumStreams> > &p_wideStream){
-      for(unsigned int i=0; i < p_n; i++){
-        #pragma HLS PIPELINE
+template <unsigned int t_NumStreams, typename t_DataType>
+void mergeStream(unsigned int p_n,
+                 hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams],
+                 hls::stream<WideType<t_DataType, t_NumStreams> >& p_wideStream) {
+    for (unsigned int i = 0; i < p_n; i++) {
+#pragma HLS PIPELINE
         WideType<t_DataType, t_NumStreams> p_out;
-        for(unsigned int j=0; j<t_NumStreams; j++){
-          p_out[j] = p_stream[j].read().getVal(0);
+        for (unsigned int j = 0; j < t_NumStreams; j++) {
+            p_out[j] = p_stream[j].read().getVal(0);
         }
         p_wideStream.write(p_out);
-      }
     }
+}
 
-template<typename t_DataType>
-void mem2stream(
-  unsigned int p_n,
-  t_DataType *p_in,
-  hls::stream<t_DataType> &p_out
-) {
-  for (unsigned int i=0; i<p_n; ++i) {
-  #pragma HLS PIPELINE
-    t_DataType l_val = p_in[i];
-    p_out.write(l_val);
-  }
-} //end mem2stream
-
-template<typename t_DataType>
-void stream2mem(
-  unsigned int p_n,
-  hls::stream<t_DataType> &p_in,
-  t_DataType *p_out
-) {
-  for (unsigned int i=0; i<p_n; ++i) {
-  #pragma HLS PIPELINE
-    t_DataType l_val = p_in.read();
-    p_out[i] = l_val;
-  }
-} //end stream2mem
-
-
-template<
-  typename t_DataType,
-  unsigned int t_ParEntries>
-void readVec2Stream(
-  t_DataType *p_in,
-  unsigned int p_n,
-  hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
-) {
-  #ifndef __SYNTHESIS__
-    assert ((p_n % t_ParEntries) == 0);
-  #endif
-  unsigned int l_parBlocks = p_n / t_ParEntries;
-  for (unsigned int i=0; i<l_parBlocks; ++i) {
-  #pragma HLS PIPELINE
-    BitConv<t_DataType> l_bitConv;
-    WideType<t_DataType, t_ParEntries > l_val;
-    for (unsigned int j=0; j<t_ParEntries; ++j) {
-      l_val[j] = p_in[i*t_ParEntries + j];
+template <typename t_DataType>
+void mem2stream(unsigned int p_n, t_DataType* p_in, hls::stream<t_DataType>& p_out) {
+    for (unsigned int i = 0; i < p_n; ++i) {
+#pragma HLS PIPELINE
+        t_DataType l_val = p_in[i];
+        p_out.write(l_val);
     }
-    p_out.write(l_val);
-  }
-} //end readVec2Stream
+} // end mem2stream
 
-template<
-  typename t_DataType,
-  unsigned int t_ParEntries>
-void writeStream2Vec(
-  hls::stream<WideType<t_DataType, t_ParEntries > > &p_in,
-  unsigned int p_n,
-  t_DataType *p_out
-) {
+template <typename t_DataType>
+void stream2mem(unsigned int p_n, hls::stream<t_DataType>& p_in, t_DataType* p_out) {
+    for (unsigned int i = 0; i < p_n; ++i) {
+#pragma HLS PIPELINE
+        t_DataType l_val = p_in.read();
+        p_out[i] = l_val;
+    }
+} // end stream2mem
+
+template <typename t_DataType, unsigned int t_ParEntries>
+void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+#ifndef __SYNTHESIS__
+    assert((p_n % t_ParEntries) == 0);
+#endif
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int i = 0; i < l_parBlocks; ++i) {
+#pragma HLS PIPELINE
+        BitConv<t_DataType> l_bitConv;
+        WideType<t_DataType, t_ParEntries> l_val;
+        for (unsigned int j = 0; j < t_ParEntries; ++j) {
+            l_val[j] = p_in[i * t_ParEntries + j];
+        }
+        p_out.write(l_val);
+    }
+} // end readVec2Stream
+
+template <typename t_DataType, unsigned int t_ParEntries>
+void writeStream2Vec(hls::stream<WideType<t_DataType, t_ParEntries> >& p_in, unsigned int p_n, t_DataType* p_out) {
 //#pragma HLS DATA_PACK variable=p_in
-  #ifndef __SYNTHESIS__
-    assert ((p_n % t_ParEntries) == 0);
-  #endif
-  unsigned int l_parBlocks = p_n / t_ParEntries;
-  for (unsigned int i=0; i<l_parBlocks; ++i) {
-  #pragma HLS PIPELINE
-    BitConv<t_DataType> l_bitConv;
-    WideType<t_DataType, t_ParEntries > l_val;
-    l_val = p_in.read();
-    for (unsigned int j=0; j<t_ParEntries; ++j) {
-      p_out[i*t_ParEntries + j]=l_val[j];
+#ifndef __SYNTHESIS__
+    assert((p_n % t_ParEntries) == 0);
+#endif
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int i = 0; i < l_parBlocks; ++i) {
+#pragma HLS PIPELINE
+        BitConv<t_DataType> l_bitConv;
+        WideType<t_DataType, t_ParEntries> l_val;
+        l_val = p_in.read();
+        for (unsigned int j = 0; j < t_ParEntries; ++j) {
+            p_out[i * t_ParEntries + j] = l_val[j];
+        }
     }
-  }
-} //end writeStream2Vec
+} // end writeStream2Vec
 
-template<
-  typename t_DataType,
-  unsigned int t_ParEntries>
-void gem2Stream(
-  unsigned int p_m,
-  unsigned int p_n,
-  t_DataType *p_in,
-  hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
-) {
-  #ifndef __SYNTHESIS__
-    assert ((p_n % t_ParEntries) == 0);
-  #endif
-  unsigned int l_parBlocks = p_m * p_n / t_ParEntries;
-  for (unsigned int i=0; i<l_parBlocks; ++i) {
-  #pragma HLS PIPELINE
-    BitConv<t_DataType> l_bitConv;
-    WideType<t_DataType, t_ParEntries > l_val;
-    for (unsigned int j=0; j<t_ParEntries; ++j) {
-      l_val[j] = p_in[i*t_ParEntries + j];
+template <typename t_DataType, unsigned int t_ParEntries>
+void gem2Stream(unsigned int p_m,
+                unsigned int p_n,
+                t_DataType* p_in,
+                hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+#ifndef __SYNTHESIS__
+    assert((p_n % t_ParEntries) == 0);
+#endif
+    unsigned int l_parBlocks = p_m * p_n / t_ParEntries;
+    for (unsigned int i = 0; i < l_parBlocks; ++i) {
+#pragma HLS PIPELINE
+        BitConv<t_DataType> l_bitConv;
+        WideType<t_DataType, t_ParEntries> l_val;
+        for (unsigned int j = 0; j < t_ParEntries; ++j) {
+            l_val[j] = p_in[i * t_ParEntries + j];
+        }
+        p_out.write(l_val);
     }
-    p_out.write(l_val);
-  }
-} //end gem2Stream
+} // end gem2Stream
 
-template<
-  typename t_DataType,
-  unsigned int t_ParEntries>
-void vec2GemStream(
-  unsigned int p_m,
-  unsigned int p_n,
-  t_DataType *p_in,
-  hls::stream<WideType<t_DataType, t_ParEntries > > &p_out
-) {
-  #ifndef __SYNTHESIS__
-    assert ((p_n % t_ParEntries) == 0);
-  #endif
-  unsigned int l_parBlocks = p_n / t_ParEntries;
-  for (unsigned int l=0; l<p_m; ++l) {
-    for (unsigned int i=0; i<l_parBlocks; ++i) {
-    #pragma HLS PIPELINE
-      BitConv<t_DataType> l_bitConv;
-      WideType<t_DataType, t_ParEntries > l_val;
-      for (unsigned int j=0; j<t_ParEntries; ++j) {
-        l_val[j] = p_in[i*t_ParEntries + j];
-      }
-      p_out.write(l_val);
+template <typename t_DataType, unsigned int t_ParEntries>
+void vec2GemStream(unsigned int p_m,
+                   unsigned int p_n,
+                   t_DataType* p_in,
+                   hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+#ifndef __SYNTHESIS__
+    assert((p_n % t_ParEntries) == 0);
+#endif
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int l = 0; l < p_m; ++l) {
+        for (unsigned int i = 0; i < l_parBlocks; ++i) {
+#pragma HLS PIPELINE
+            BitConv<t_DataType> l_bitConv;
+            WideType<t_DataType, t_ParEntries> l_val;
+            for (unsigned int j = 0; j < t_ParEntries; ++j) {
+                l_val[j] = p_in[i * t_ParEntries + j];
+            }
+            p_out.write(l_val);
+        }
     }
-  }
-} //end readVec2Stream
-}
-}
-}
+} // end readVec2Stream
+} // namespace blas
+} // namespace linear_algebra
+} // namespace xf
 #endif

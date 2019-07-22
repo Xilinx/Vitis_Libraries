@@ -35,47 +35,45 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-  /**
-   * @brief abs function that returns the magnitude of each vector element.
-   *
-   * @tparam t_DataType the data type of the vector entries
-   * @tparam t_ParEntries the number of parallelly processed entries in the input vector 
-   * @tparam t_IndexType the datatype of the index 
-   *
-   * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
-   * @param p_x the input stream of packed vector entries
-   * @param p_abs the output stream of packed vector entries
-   */
+/**
+ * @brief abs function that returns the magnitude of each vector element.
+ *
+ * @tparam t_DataType the data type of the vector entries
+ * @tparam t_ParEntries the number of parallelly processed entries in the input vector
+ * @tparam t_IndexType the datatype of the index
+ *
+ * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+ * @param p_x the input stream of packed vector entries
+ * @param p_abs the output stream of packed vector entries
+ */
 
-  template<typename t_DataType, 
-    unsigned int t_ParEntries, 
-    typename t_IndexType=unsigned int,
-    typename t_AbsDataType = t_DataType,
-    unsigned int t_AbsDataWidth = sizeof(t_AbsDataType) << 3>
-      void abs(
-          unsigned int p_n,
-          hls::stream<WideType<t_DataType, t_ParEntries> > & p_x,
-          hls::stream<WideType<t_AbsDataType, t_ParEntries, t_AbsDataWidth> > & p_abs
-          ) {
-        #pragma HLS data_pack variable=p_x
-        #pragma HLS data_pack variable=p_abs
-        #ifndef __SYNTHESIS__
-        assert(p_n % t_ParEntries == 0);
-        #endif
-        unsigned int l_numElems = p_n / t_ParEntries;
-        for(t_IndexType i=0;i<l_numElems;i++){
-          #pragma HLS PIPELINE
-          WideType<t_DataType, t_ParEntries> l_x = p_x.read();
-          WideType<t_AbsDataType, t_ParEntries> l_abs;
-          for(t_IndexType j=0; j<t_ParEntries;j++){
-            #pragma HLS UNROLL
-            l_abs[j]=hls::abs(l_x[j]);
-          }
-          p_abs.write(l_abs);
+template <typename t_DataType,
+          unsigned int t_ParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_AbsDataType = t_DataType,
+          unsigned int t_AbsDataWidth = sizeof(t_AbsDataType) << 3>
+void abs(unsigned int p_n,
+         hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
+         hls::stream<WideType<t_AbsDataType, t_ParEntries, t_AbsDataWidth> >& p_abs) {
+#pragma HLS data_pack variable = p_x
+#pragma HLS data_pack variable = p_abs
+#ifndef __SYNTHESIS__
+    assert(p_n % t_ParEntries == 0);
+#endif
+    unsigned int l_numElems = p_n / t_ParEntries;
+    for (t_IndexType i = 0; i < l_numElems; i++) {
+#pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_x = p_x.read();
+        WideType<t_AbsDataType, t_ParEntries> l_abs;
+        for (t_IndexType j = 0; j < t_ParEntries; j++) {
+#pragma HLS UNROLL
+            l_abs[j] = hls::abs(l_x[j]);
         }
-      }
+        p_abs.write(l_abs);
+    }
 }
-}
-}
+} // namespace blas
+} // namespace linear_algebra
+} // namespace xf
 
 #endif

@@ -24,7 +24,6 @@
 #ifndef XF_BLAS_DOT_HPP
 #define XF_BLAS_DOT_HPP
 
-
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
 #endif
@@ -33,48 +32,41 @@
 #include "hls_stream.h"
 #include "xf_blas/helpers.hpp"
 
-
 namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-  /**
-   * @brief dot function that returns the dot product of vector x and y.
-   *
-   * @tparam t_DataType the data type of the vector entries
-   * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
-   * @tparam t_IndexType the datatype of the index 
-   *
-   * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
-   * @param p_x the input stream of packed vector entries
-   * @param p_res the dot product of x and y
-   */
+/**
+ * @brief dot function that returns the dot product of vector x and y.
+ *
+ * @tparam t_DataType the data type of the vector entries
+ * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
+ * @tparam t_IndexType the datatype of the index
+ *
+ * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+ * @param p_x the input stream of packed vector entries
+ * @param p_res the dot product of x and y
+ */
 
-  template<typename t_DataType, 
-    unsigned int t_LogParEntries, 
-    typename t_IndexType=unsigned int
-  >
-  void dot(
-      unsigned int p_n,
-      hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
-      hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_y,
-      t_DataType &p_res
-      ) {
-    #pragma HLS DATA_PACK variable=p_x
-    #pragma HLS DATA_PACK variable=p_y
-    #ifndef __SYNTHESIS__
-    assert(p_n % ( 1 << t_LogParEntries) == 0);
-    #endif
-    #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > l_mulStr;
-    #pragma HLS DATA_PACK variable=l_mulStr
-    mul<t_DataType, 1<<t_LogParEntries, t_IndexType>(p_n,p_x,p_y,l_mulStr);
-    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_mulStr, p_res);    
-  }
+template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+void dot(unsigned int p_n,
+         hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
+         hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
+         t_DataType& p_res) {
+#pragma HLS DATA_PACK variable = p_x
+#pragma HLS DATA_PACK variable = p_y
+#ifndef __SYNTHESIS__
+    assert(p_n % (1 << t_LogParEntries) == 0);
+#endif
+#pragma HLS DATAFLOW
+    hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
+#pragma HLS DATA_PACK variable = l_mulStr
+    mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_x, p_y, l_mulStr);
+    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_mulStr, p_res);
+}
 
-
-} //end namespace blas
-} //end namspace linear_algebra
-} //end namespace xf
+} // end namespace blas
+} // namespace linear_algebra
+} // end namespace xf
 
 #endif
