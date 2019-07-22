@@ -17,7 +17,7 @@
 /**
  * @file helpers.hpp
  * @brief common datatypes for L1 modules.
- * 
+ *
  * This file is part of XF BLAS Library.
  */
 
@@ -28,11 +28,9 @@
 #include "helpers/utils/types.hpp"
 #include "helpers/utils/utils.hpp"
 
-
 /*        DATA MOVER            */
 #include "helpers/dataMover/dataMover.hpp"
 #include "helpers/dataMover/sbMatMover.hpp"
-
 
 /*        HELPER FUNCTIONS             */
 #include "helpers/funcs/maxmin.hpp"

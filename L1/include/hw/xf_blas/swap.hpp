@@ -24,7 +24,6 @@
 #ifndef XF_BLAS_SWAP_HPP
 #define XF_BLAS_SWAP_HPP
 
-
 #ifndef __cplusplus
 #error "BLAS Library only works with C++."
 #endif
@@ -37,51 +36,45 @@
 namespace xf {
 namespace linear_algebra {
 namespace blas {
-  /**
-   * @brief swap function taht swap vector x and y 
-   *
-   * @tparam t_DataType the data type of the vector entries
-   * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
-   * @tparam t_IndexType the datatype of the index
-   *
-   * @param p_n the number of entries in vector X and Y, p_n % t_ParEntries == 0
-   * @param p_x the packed input vector stream
-   * @param p_y the packed input vector stream 
-   * @param p_xRes the packed output stream
-   * @param p_yRes the packed output stream
-   */
-  template<
-    typename t_DataType,
-    unsigned int t_ParEntries,
-    typename t_IndexType=unsigned int
-  >
-  void swap (
-    unsigned int p_n,
-    hls::stream<WideType<t_DataType, t_ParEntries> > &p_x,
-    hls::stream<WideType<t_DataType, t_ParEntries> > &p_y,
-    hls::stream<WideType<t_DataType, t_ParEntries> > &p_xRes,
-    hls::stream<WideType<t_DataType, t_ParEntries> > &p_yRes
-  ) {
-    #pragma HLS DATA_PACK variable=p_x
-    #pragma HLS DATA_PACK variable=p_y
-    #pragma HLS DATA_PACK variable=p_xRes
-    #pragma HLS DATA_PACK variable=p_yRes
-    #ifndef __SYNTHESIS__
+/**
+ * @brief swap function taht swap vector x and y
+ *
+ * @tparam t_DataType the data type of the vector entries
+ * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
+ * @tparam t_IndexType the datatype of the index
+ *
+ * @param p_n the number of entries in vector X and Y, p_n % t_ParEntries == 0
+ * @param p_x the packed input vector stream
+ * @param p_y the packed input vector stream
+ * @param p_xRes the packed output stream
+ * @param p_yRes the packed output stream
+ */
+template <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
+void swap(unsigned int p_n,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_y,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_xRes,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_yRes) {
+#pragma HLS DATA_PACK variable = p_x
+#pragma HLS DATA_PACK variable = p_y
+#pragma HLS DATA_PACK variable = p_xRes
+#pragma HLS DATA_PACK variable = p_yRes
+#ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
-    #endif
+#endif
     const unsigned int l_parEntries = p_n / t_ParEntries;
-    for (t_IndexType i=0; i<l_parEntries; ++i) {
-    #pragma HLS PIPELINE
-      WideType<t_DataType, t_ParEntries> l_valX;
-      WideType<t_DataType, t_ParEntries> l_valY;
-      l_valX = p_x.read();
-      l_valY = p_y.read();
-      p_xRes.write(l_valY);
-      p_yRes.write(l_valX);
+    for (t_IndexType i = 0; i < l_parEntries; ++i) {
+#pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_valX;
+        WideType<t_DataType, t_ParEntries> l_valY;
+        l_valX = p_x.read();
+        l_valY = p_y.read();
+        p_xRes.write(l_valY);
+        p_yRes.write(l_valX);
     }
-  } 
-} //end namespace blas
-} //end namspace linear_algebra
-} //end namespace xf
+}
+} // end namespace blas
+} // namespace linear_algebra
+} // end namespace xf
 
 #endif

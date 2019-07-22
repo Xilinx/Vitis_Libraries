@@ -32,7 +32,6 @@
 #include "hls_stream.h"
 #include "xf_blas/helpers.hpp"
 
-
 namespace xf {
 namespace linear_algebra {
 namespace blas {
@@ -41,40 +40,31 @@ namespace blas {
  * @brief amin function that returns the position of the vector element that has the minimum magnitude.
  *
  * @tparam t_DataType the data type of the vector entries
- * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector 
- * @tparam t_IndexType the datatype of the index 
+ * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
+ * @tparam t_IndexType the datatype of the index
  *
  * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
  * @param p_x the input stream of packed vector entries
  * @param p_result the resulting index, which is 0 if p_n <= 0
  */
 
-template<typename t_DataType, 
-  unsigned int t_LogParEntries, 
-  typename t_IndexType>
-  void amin(
-      unsigned int p_n,
-      hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > & p_x,
-      t_IndexType &p_result
-      ) {
-    #pragma HLS data_pack variable=p_x
-    #ifndef __SYNTHESIS__
-    assert(p_n % ( 1 << t_LogParEntries) == 0);
-    #endif
+template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
+void amin(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_IndexType& p_result) {
+#pragma HLS data_pack variable = p_x
+#ifndef __SYNTHESIS__
+    assert(p_n % (1 << t_LogParEntries) == 0);
+#endif
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    hls::stream<WideType<t_DataType, 1<<t_LogParEntries> > l_abs;
-    #pragma HLS stream variable=l_abs depth=2
-    #pragma HLS DATAFLOW
+    hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_abs;
+#pragma HLS stream variable = l_abs depth = 2
+#pragma HLS DATAFLOW
 
-    abs<t_DataType, 1<<t_LogParEntries, t_IndexType>(p_n, p_x, l_abs);
+    abs<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_x, l_abs);
     min<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_abs, p_result);
-  }
+}
 
-
-} //end namespace blas
-} //end namspace linear_algebra
-} //end namespace xf
+} // end namespace blas
+} // namespace linear_algebra
+} // end namespace xf
 
 #endif
-
-

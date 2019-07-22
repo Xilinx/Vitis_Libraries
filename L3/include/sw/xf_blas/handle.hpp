@@ -17,11 +17,11 @@
 #ifndef XF_BLAS_HANDLE_HPP
 #define XF_BLAS_HANDLE_HPP
 
-#include <vector>
 #include <memory>
+#include <vector>
 
-#include <unordered_map>
 #include "host.hpp"
+#include <unordered_map>
 
 using namespace std;
 
@@ -30,31 +30,31 @@ namespace linear_algebra {
 namespace blas {
 
 class BLASHostHandle {
-  public:
-    vector<shared_ptr<BLASHost>> m_handlePtr;
-    static BLASHostHandle& instance() {
-      static BLASHostHandle theInstance;
-      return theInstance;
-    }
-  protected:
-    BLASHostHandle() {}
+public:
+  vector<shared_ptr<BLASHost>> m_handlePtr;
+  static BLASHostHandle &instance() {
+    static BLASHostHandle theInstance;
+    return theInstance;
+  }
+
+protected:
+  BLASHostHandle() {}
 };
 
 class ConfigDict {
-  public:
-    unordered_map<string,string> m_dict={};
-    static ConfigDict& instance() {
-      static ConfigDict theInstance;
-      return theInstance;
-    }
-  protected:
-    ConfigDict(){}
+public:
+  unordered_map<string, string> m_dict = {};
+  static ConfigDict &instance() {
+    static ConfigDict theInstance;
+    return theInstance;
+  }
+
+protected:
+  ConfigDict() {}
 };
 
-}  
-}
-}
-
-
+} // namespace blas
+} // namespace linear_algebra
+} // namespace xf
 
 #endif

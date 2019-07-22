@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,17 +15,10 @@
  */
 #include "dimv_top.h"
 
-void dimv_top(
-  BLAS_dataType p_in[BLAS_size][BLAS_numDiag], 
-  BLAS_dataType p_inV[BLAS_size],
-  unsigned int p_n,
-  BLAS_dataType p_outV[BLAS_size]
-) {
-  
-  xf::linear_algebra::blas::dimv<BLAS_dataType, BLAS_size, BLAS_numDiag, BLAS_entriesInParallel>(
-    p_in,
-    p_inV,
-    p_n,
-    p_outV
-  );
+void dimv_top(BLAS_dataType p_in[BLAS_size][BLAS_numDiag],
+              BLAS_dataType p_inV[BLAS_size],
+              unsigned int p_n,
+              BLAS_dataType p_outV[BLAS_size]) {
+    xf::linear_algebra::blas::dimv<BLAS_dataType, BLAS_size, BLAS_numDiag, BLAS_entriesInParallel>(p_in, p_inV, p_n,
+                                                                                                   p_outV);
 }

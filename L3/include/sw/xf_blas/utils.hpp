@@ -28,76 +28,85 @@ namespace linear_algebra {
 namespace blas {
 
 typedef enum {
-OpControl, OpGemv, OpGemm, OpTransp, OpSpmv, OpUspmv, OpResult, OpFail, OpFcn
+  OpControl,
+  OpGemv,
+  OpGemm,
+  OpTransp,
+  OpSpmv,
+  OpUspmv,
+  OpResult,
+  OpFail,
+  OpFcn
 } OpType;
-  
+
 class BLASArgs {
-  public:
-    virtual ~BLASArgs() {}
-    virtual size_t sizeInBytes() = 0;
-    virtual char* asByteArray() = 0;
+public:
+  virtual ~BLASArgs() {}
+  virtual size_t sizeInBytes() = 0;
+  virtual char *asByteArray() = 0;
 };
-  
-xfblasStatus_t buildConfigDict(string p_configFile, xfblasEngine_t p_engineName, unordered_map<string, string>* p_configDict){
-  unordered_map<string,string> l_configDict;
+
+xfblasStatus_t buildConfigDict(string p_configFile, xfblasEngine_t p_engineName,
+                               unordered_map<string, string> *p_configDict) {
+  unordered_map<string, string> l_configDict;
   ifstream l_configInfo(p_configFile);
   bool l_good = l_configInfo.good();
-  if (!l_good){
+  if (!l_good) {
     return XFBLAS_STATUS_NOT_INITIALIZED;
   }
-  if (l_configInfo.is_open()){
+  if (l_configInfo.is_open()) {
     string line;
     string key;
     string value;
     string equalSign = "=";
-    while (getline(l_configInfo,line)) {
+    while (getline(l_configInfo, line)) {
       int index = line.find(equalSign);
-      if (index == 0) continue;
-      key = line.substr(0,index);
-      value = line.substr(index+1);
-      l_configDict[key]=value;
+      if (index == 0)
+        continue;
+      key = line.substr(0, index);
+      value = line.substr(index + 1);
+      l_configDict[key] = value;
     }
   }
-  
+
   l_configInfo.close();
-  
+
   // Additional limit for different engines
-  if (p_engineName == XFBLAS_ENGINE_GEMM){
-    if (l_configDict.find("GEMX_gemmMBlocks")!=l_configDict.end()){
+  if (p_engineName == XFBLAS_ENGINE_GEMM) {
+    if (l_configDict.find("GEMX_gemmMBlocks") != l_configDict.end()) {
       int l_mBlock = stoi(l_configDict["GEMX_gemmMBlocks"]);
       int l_kBlock = stoi(l_configDict["GEMX_gemmKBlocks"]);
       int l_nBlock = stoi(l_configDict["GEMX_gemmNBlocks"]);
       int l_ddrWidth = stoi(l_configDict["GEMX_ddrWidth"]);
       int l_maxBlock = max(l_mBlock, max(l_kBlock, l_nBlock));
       int l_minSize = l_ddrWidth * l_maxBlock;
-      l_configDict["minSize"] = to_string(l_minSize);  
+      l_configDict["minSize"] = to_string(l_minSize);
     } else {
       return XFBLAS_STATUS_NOT_INITIALIZED;
     }
-  } 
+  }
   *p_configDict = l_configDict;
   return XFBLAS_STATUS_SUCCESS;
 }
 
-int getPaddedSize(int p_size, int p_minSize){
+int getPaddedSize(int p_size, int p_minSize) {
   return p_size + p_minSize - 1 - (p_size - 1) % p_minSize;
 }
 
-int getTypeSize(string p_typeName){
-  if (p_typeName == "float"){
+int getTypeSize(string p_typeName) {
+  if (p_typeName == "float") {
     return sizeof(float);
-  } else if (p_typeName == "short"){
+  } else if (p_typeName == "short") {
     return sizeof(short);
-  } else if (p_typeName == "int"){
+  } else if (p_typeName == "int") {
     return sizeof(int);
   } else {
     return 0;
   }
 }
-  
-}
-}
-}
 
+} // namespace blas
+} // namespace linear_algebra
+} // namespace xf
 
 #endif
