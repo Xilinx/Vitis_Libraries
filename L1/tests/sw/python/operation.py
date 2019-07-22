@@ -277,12 +277,20 @@ class BLAS_L2(OP):
     self.name=name
     self.maxV = maxV
     self.minV = minV
+    self.ku=0
+    self.kl=0
+    self.m=0
+    self.n=0
     self.interfaceList=('p_a', 'p_x', 'p_y', 'p_aRes', 'p_yRes')
 
   def copyConstructor(self, object):
     self.name = object.name
     self.maxV = object.maxV
     self.minV = object.minV
+    self.ku = object.ku
+    self.kl=object.kl
+    self.m=object.m
+    self.n=object.n
     self.interfaceList= object.interfaceList
 
   def compute(self): 
