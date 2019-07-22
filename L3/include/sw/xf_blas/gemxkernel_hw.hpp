@@ -46,7 +46,8 @@
 // 0x20 : Data signal of p_DdrWr_m_Val
 //        bit 31~0 - p_DdrWr_m_Val[63:32] (Read/Write)
 // 0x24 : reserved
-// (SC = Self Clear, COR = Clear on Read, TOW = Toggle on Write, COH = Clear on Handshake)
+// (SC = Self Clear, COR = Clear on Read, TOW = Toggle on Write, COH = Clear on
+// Handshake)
 
 #define XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_AP_CTRL            0x00
 #define XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_GIE                0x04
