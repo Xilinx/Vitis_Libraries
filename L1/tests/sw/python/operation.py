@@ -16,12 +16,83 @@ import numpy as np
 import sys
 import pdb
 
-t_Debug= False
+t_Debug= True
+
+class DataGenerator:
+  def __init__(self, engine = np.random.random):
+    self.engine = engine
+
+  def setRange(self, minValue, maxValue):
+    self.minValue = minValue
+    self.maxValue = maxValue
+
+  def setDataType(self, dtype):
+    self.dataType = dtype
+
+  def data(self, size:tuple):
+    v = self.engine(size) * (self.maxValue - self.minValue) + self.minValue
+    v = v.astype(self.dataType)
+    return v
+
+  def scalar(self, value=None):
+    tup = (1)
+    v = self.data(tup)
+    if value:
+      v[0] = value
+    return v
+
+  def vector(self, size:int):
+    tup = (size)
+    return self.data(tup)
+
+  def matrix(self, size:tuple):
+    assert len(size) == 2
+    return self.data(size)
+
+  def symmetricMatrix(self, size:int):
+    tup = (size, size)
+    mat = self.matrix(tup)
+    mat = (mat + mat.transpose())/2
+    return mat.astype(self.dataType) 
+
+  def symmetricBandedMatrix(self, size:int, k:int):
+    tupS = (size, size)
+    tupK = (k, k)
+    mat = self.bandedMatrix(tupS, tupK)
+    mat = (mat + mat.transpose())/2
+    return mat.astype(self.dataType) 
+
+  def bandedMatrix(self, size:tuple, k:tuple):
+    assert len(size) == 2
+    assert len(k) == 2
+    m, n = size
+    kl, ku = k
+    matrix = self.matrix(size)
+    for i in range(m):
+      for j in range(n):
+        if i - j > kl or i - j < -ku:
+          matrix[i][j] = 0
+    return matrix
+
+  def bandedMatrixStorage(self, matrix, k, colAlign=True):
+    assert len(matrix.shape) == 2
+    m, n = matrix.shape
+    assert len(k) == 2
+    kl, ku = k
+    if colAlign:
+      aDim = m +ku if m < n else n
+      a = np.zeros((kl+ku+1, aDim), dtype=self.dataType)
+      for i in range(-kl, ku+1):
+        v = np.diag(matrix, i)
+        startIndex = 0 if i < 0 else i
+        a[ku - i][startIndex:startIndex+len(v)] = v
+    else:
+      pass
+    return a
 
 def dataGen(dataType, size, maxValue, minValue):
   a = np.random.random(size) * (maxValue - minValue) + minValue
   a = a.astype(dataType)
-  a = np.reshape(a, size)
   return a
 
 
@@ -72,9 +143,12 @@ class BLAS_L1(OP):
     self.sizeStr = "v%d"%size
 
   def compute(self): 
+    self.dataGen = DataGenerator()
+    self.dataGen.setRange(self.minV, self.maxV)
+    self.dataGen.setDataType(self.dataType)
     x = y = xr = yr = None
-    alpha = dataGen(self.dataType, 1, self.maxV, self.minV)
-    r = np.zeros(1)
+    alpha = self.dataGen.scalar()
+    r = self.dataGen.scalar(0)
     return alpha, x, y, xr, yr, r
   def addInstr(self, blas_gen, register):
     for alpha, x, y, xr, yr, r in register:
@@ -103,7 +177,7 @@ class amin(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    x = self.dataGen.vector(self.vectorDim)
     r = np.argmin(np.abs(x))
     return alpha, x, y, xr, yr, r
 
@@ -114,7 +188,7 @@ class amax(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    x = self.dataGen.vector(self.vectorDim)
     r = np.argmax(np.abs(x))
     return alpha, x, y, xr, yr, r
 
@@ -124,7 +198,7 @@ class asum(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    x = self.dataGen.vector(self.vectorDim)
     r = np.sum(np.abs(x))
     return alpha, x, y, xr, yr, r
 
@@ -134,8 +208,8 @@ class axpy(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
-    y = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    x = self.dataGen.vector(self.vectorDim)
+    y = self.dataGen.vector(self.vectorDim)
     yr = alpha * x+ y
     return alpha, x, y, xr, yr, r
 
@@ -145,7 +219,7 @@ class copy(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    yr = x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    yr = x = self.dataGen.vector(self.vectorDim)
     return alpha, x, y, xr, yr, r
 
 class dot(BLAS_L1):
@@ -154,8 +228,8 @@ class dot(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
-    y = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    x = self.dataGen.vector(self.vectorDim)
+    y = self.dataGen.vector(self.vectorDim)
     r=np.dot(x, y)
     return alpha, x, y, xr, yr, r
 
@@ -165,7 +239,7 @@ class nrm2(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    x = self.dataGen.vector(self.vectorDim)
     r = np.linalg.norm(x)
     return alpha, x, y, xr, yr, r
 
@@ -175,8 +249,8 @@ class swap(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    yr = x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
-    xr = y = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    yr = x = self.dataGen.vector(self.vectorDim)
+    xr = y = self.dataGen.vector(self.vectorDim)
     return alpha, x, y, xr, yr, r
 
 class scal(BLAS_L1):
@@ -185,7 +259,7 @@ class scal(BLAS_L1):
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
-    x = dataGen(self.dataType, self.vectorDim, self.maxV, self.minV)
+    x = self.dataGen.vector(self.vectorDim)
     xr = alpha * x
     return alpha, x, y, xr, yr, r
 
@@ -203,26 +277,21 @@ class BLAS_L2(OP):
     self.name=name
     self.maxV = maxV
     self.minV = minV
-    self.ku=0
-    self.kl=0
-    self.m=0
-    self.n=0
     self.interfaceList=('p_a', 'p_x', 'p_y', 'p_aRes', 'p_yRes')
 
   def copyConstructor(self, object):
     self.name = object.name
     self.maxV = object.maxV
     self.minV = object.minV
-    self.ku = object.ku
-    self.kl=object.kl
-    self.m=object.m
-    self.n=object.n
     self.interfaceList= object.interfaceList
 
   def compute(self): 
+    self.dataGen = DataGenerator()
+    self.dataGen.setRange(self.minV, self.maxV)
+    self.dataGen.setDataType(self.dataType)
     a = x = y = ar = yr = None
-    alpha = beta = dataGen(self.dataType, 1, self.minV, self.maxV)
-    beta = beta = dataGen(self.dataType, 1, self.minV, self.maxV)
+    alpha = self.dataGen.scalar()
+    beta = self.dataGen.scalar()
     return alpha, beta, a, x, y, ar, yr
 
   def addInstr(self, blas_gen, register):
@@ -268,17 +337,18 @@ class gemv(BLAS_L2):
     self.copyConstructor(blas_l2)
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    a = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
-    x = dataGen(self.dataType, self.n, self.maxV, self.minV)
-    y = dataGen(self.dataType, self.m, self.maxV, self.minV)
-    yr = alpha * np.matmul(a, x) + beta * y
-    return alpha, beta, a, x, y, ar, yr
+    matrix = self.dataGen.matrix(self.matrixDim)
+    x = self.dataGen.vector(self.n)
+    y = self.dataGen.vector(self.m)
+    yr = alpha * np.matmul(matrix, x) + beta * y
+    return alpha, beta, matrix, x, y, ar, yr
 
 class gbmv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
 
   def setK(self, kul):
+    self.k=tuple(kul)
     self.ku = kul[0]
     self.kl = kul[1]
     self.sizeStr = "m%d-n%d-u%d-l%d"%(self.m,self.n,self.ku,self.kl)
@@ -290,8 +360,10 @@ class gbmv(BLAS_L2):
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     a, matrix = self.bandMatrix()
-    x = dataGen(self.dataType, self.n, self.maxV, self.minV)
-    y = dataGen(self.dataType, self.m, self.maxV, self.minV)
+    matrix = self.dataGen.bandedMatrix(self.matrixDim, self.k)
+    a = self.dataGen.bandedMatrixStorage(matrix, self.k)
+    x = self.dataGen.vector(self.n)
+    y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(matrix, x) + beta * y
     t_Debug and print("Matrix:\n", matrix)
     t_Debug and print("Storage:\n",a)
@@ -327,13 +399,12 @@ class symv(BLAS_L2):
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    a = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
-    a = a + np.transpose(a)
-    x = dataGen(self.dataType, self.m, self.maxV, self.minV)
-    y = dataGen(self.dataType, self.m, self.maxV, self.minV)
-    yr = alpha * np.matmul(a, x) + beta * y
-    return alpha, beta, a, x, y, ar, yr
-
+    matrix = self.dataGen.matrix(self.matrixDim)
+    matrix = matrix + np.transpose(matrix)
+    x = self.dataGen.vector(self.n)
+    y = self.dataGen.vector(self.m)
+    yr = alpha * np.matmul(matrix, x) + beta * y
+    return alpha, beta, matrix, x, y, ar, yr
 
 class sbmv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
@@ -360,8 +431,8 @@ class sbmv(BLAS_L2):
       a[self.k - i][self.m-len(v):] = v
       band_mat = band_mat + np.diag(v, i)
       band_mat = band_mat + np.diag(v, -i)
-    x = dataGen(self.dataType, self.m, self.maxV, self.minV)
-    y = dataGen(self.dataType, self.m, self.maxV, self.minV)
+    x = self.dataGen.vector(self.n)
+    y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(band_mat, x) + beta * y
     return alpha, beta, a, x, y, ar, yr
 
