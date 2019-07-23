@@ -16,6 +16,7 @@
 #include "ap_int.h"
 #include "hls_stream.h"
 #include "xf_blas.hpp"
+#include "uut_top.hpp"
 
 using namespace xf::linear_algebra::blas;
 
@@ -27,19 +28,22 @@ void uut_top(uint32_t p_m,
              BLAS_dataType p_beta,
              BLAS_dataType p_a[BLAS_matrixSize],
              BLAS_dataType p_x[BLAS_vectorSize],
-             BLAS_dataType p_y[BLAS_matrixSize / BLAS_vectorSize],
+             BLAS_dataType p_y[BLAS_vectorSize],
              BLAS_dataType p_aRes[BLAS_matrixSize],
-             BLAS_dataType p_yRes[BLAS_matrixSize / BLAS_vectorSize]) {
+             BLAS_dataType p_yRes[BLAS_vectorSize]) {
 #pragma HLS DATAFLOW
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strA;
 #pragma HLS data_pack variable = l_strA
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strX;
 #pragma HLS data_pack variable = l_strX
+    hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strY;
+#pragma HLS data_pack variable = l_strY
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strYR;
 #pragma HLS data_pack variable = l_strYR
 #pragma HLS DATAFLOW
     sbmSuper2Stream<BLAS_dataType, BLAS_parEntries>(p_n, p_ku, p_a, l_strA);
     vec2GbMatStream<BLAS_dataType, BLAS_parEntries>(p_n, p_ku, p_ku, p_x, l_strX);
-    gbmv<BLAS_dataType, BLAS_parEntries, BLAS_parBlocks>(p_m, p_ku, p_ku, l_strA, l_strX, l_strYR);
+    readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_y, p_m, l_strY);
+    gbmv<BLAS_dataType, BLAS_parEntries, 1024>(p_m, p_ku, p_ku, p_alpha, l_strA, l_strX, p_beta,l_strY, l_strYR);
     writeStream2Vec<BLAS_dataType, BLAS_parEntries>(l_strYR, p_m, p_yRes);
 }
