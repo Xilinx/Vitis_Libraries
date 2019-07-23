@@ -31,6 +31,8 @@ class Parameters:
     self.rtype = rtype
   def setDtype(self, dtype):
     self.dtype = dtype
+  def setPath(self, path):
+    self.path = path
 
 class HLS:
   def __init__(self, tclPath, b_csim, b_syn, b_cosim):
@@ -99,6 +101,7 @@ class HLS:
     self.params = fileparams
     with open(self.params, 'w') as f:
        f.write('array set opt {\n ')   
+       f.write('   path %s\n '%m.path)
       ###########  TEST PARAMETERS  ##############
        f.write('   dataType %s\n '%m.dtype)
        f.write('   resDataType %s\n '%m.rtype)

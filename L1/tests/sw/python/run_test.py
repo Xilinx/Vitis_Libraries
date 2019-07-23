@@ -18,6 +18,7 @@ import argparse
 import os, sys
 import json
 import pdb
+import traceback
 from blas_gen_bin import BLAS_GEN, BLAS_ERROR
 from hls import HLS, HLS_ERROR, Parameters
 from makefile import Makefile
@@ -138,18 +139,19 @@ class RunTest:
     self.hls.checkLog(logfile)
     print("Test of size %s passed."%self.op.sizeStr)
 
-  def runTest(self):
+  def runTest(self, path):
+    self.params.setPath(path)
     self.op.test(self)
 
 def main(profileList, makefile): 
   try:
     for profile in profileList:
       if not os.path.exists(profile):
-        print("File %s is not exists."%profile)
+        print("File %s is not exists, skip this test."%profile)
         continue
       runTest = RunTest(makefile)
       runTest.parseProfile(profile)
-      runTest.runTest() 
+      runTest.runTest(os.path.dirname(profile)) 
       print("All tests for %s are passed."%runTest.op.name)
     print("All tests are passed.")
   except OP_ERROR as err:

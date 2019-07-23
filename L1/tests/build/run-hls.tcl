@@ -35,7 +35,7 @@ set CFLAGS_H "$CFLAGS_K -I$pwd -I$pwd/../include/hw -I$pwd/../include/hw/xf_blas
 set proj_dir [format prj_hls_%s  $opt(part) ]
 open_project $proj_dir -reset
 set_top uut_top 
-add_files $pwd/hw/$opt(opName)/uut_top.cpp -cflags "$CFLAGS_K"
+add_files $opt(path)/uut_top.cpp -cflags "$CFLAGS_K"
 add_files -tb $pwd/sw/src/test.cpp -cflags "$CFLAGS_H"
 open_solution sol -reset
 config_compile -ignore_long_run_time
