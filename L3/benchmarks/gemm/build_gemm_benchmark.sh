@@ -14,25 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 if [ "$1" == "-h" ]; then
-  echo "Usage: `basename $0` path_to_xclbin path_to_config_info"
+  echo "Usage: `basename $0` path_to_config_info"
   exit 0
 elif [ "$1" == "" ]; then
-  echo "Usage: `basename $0` path_to_xclbin path_to_config_info"
+  echo "Usage: `basename $0` path_to_config_info"
   exit 0
 else
-  n=256
-  logs=()
-  while [  $n -le 8192 ]; do
-    date
-    echo "#############  $n ################"
-    nice ./gemm_perf_test.exe $1 $2 $n $n $n | tee log-$n.txt
-    logs="$logs log-$n.txt"
-    n=`expr $n \* 2`
-  done
-  
-  egrep -h ^DATA_CSV $logs | grep Freq | head -1 > perf_gemm_api_cpp.csv
-  egrep -h ^DATA_CSV $logs | grep -v Freq >> perf_gemm_api_cpp.csv
+  dataType=$(grep GEMX_dataType $1 | sed 's/^GEMX_dataType=//')
+  echo ================================================
+  echo Now build benchmark with $dataType type
+  echo ================================================
+  make XFBLAS_dataType=${dataType}
 fi
 
 
