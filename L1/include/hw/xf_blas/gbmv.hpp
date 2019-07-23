@@ -43,7 +43,7 @@ namespace blas {
  */
 template <typename t_DataType,
           unsigned int t_ParEntries,
-          unsigned int t_ParBlocks,
+          unsigned int t_MaxRows,
           typename t_IndexType = unsigned int,
           typename t_MacType = t_DataType>
 void gbmv(const unsigned int p_m,
@@ -52,16 +52,17 @@ void gbmv(const unsigned int p_m,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_A,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
           hls::stream<WideType<t_MacType, t_ParEntries> >& p_y) {
-    static const unsigned int l_numRows = t_ParBlocks * t_ParEntries;
+#pragma HLS data_pack variable = p_A
+#pragma HLS data_pack variable = p_x
+#pragma HLS data_pack variable = p_y
 #ifndef __SYNTHESIS__
-    assert(p_m % l_numRows == 0);
+    assert(p_m <= t_MaxRows);
 #endif
 
-    const unsigned int l_numIter = p_m / l_numRows;
+    const unsigned int l_MaxIter = t_MaxRows/t_ParEntries;
+    WideType<t_MacType, t_ParEntries> l_y[l_MaxIter];
 
-    WideType<t_MacType, t_ParEntries> l_y[t_ParBlocks];
-
-    for (t_IndexType l = 0; l < t_ParBlocks; l++) {
+    for (t_IndexType l = 0; l < t_MaxRows; l++) {
 #pragma HLS PIPELINE
         for (t_IndexType k = 0; k < t_ParEntries; k++) {
 #pragma HLS UNROLL
@@ -69,27 +70,61 @@ void gbmv(const unsigned int p_m,
         }
     }
 
-    for (t_IndexType i = 0; i < l_numIter; i++) {
-        for (t_IndexType j = 0; j < p_kl + 1 + p_ku; j++) {
-            for (t_IndexType l = 0; l < t_ParBlocks; l++) {
+    for (t_IndexType j = 0; j < p_kl + 1 + p_ku; j++) {
+        for (t_IndexType l = 0; l < l_MaxIter; l++) {
 #pragma HLS PIPELINE
-                WideType<t_DataType, t_ParEntries> l_A = p_A.read();
-                WideType<t_DataType, t_ParEntries> l_x = p_x.read();
-                for (t_IndexType k = 0; k < t_ParEntries; k++) {
-#pragma HLS UNROLL
-                    l_y[l][k] += l_A[k] * l_x[k];
-                }
-            }
-        }
-        for (t_IndexType l = 0; l < t_ParBlocks; l++) {
-#pragma HLS PIPELINE
-            p_y.write(l_y[l]);
+            if (l >= p_m / t_ParEntries) break;
+            WideType<t_DataType, t_ParEntries> l_A = p_A.read();
+            WideType<t_DataType, t_ParEntries> l_x = p_x.read();
             for (t_IndexType k = 0; k < t_ParEntries; k++) {
 #pragma HLS UNROLL
-                l_y[l][k] = 0;
+                l_y[l][k] += l_A[k] * l_x[k];
             }
+            if (j == p_kl + p_ku) p_y.write(l_y[l]);
         }
     }
+}
+
+/**
+ * @brief gbmv function performs general banded matrix-vector multiplication
+ * matrix and a vector y = alpha * M * x + beta * y
+ *
+ * @tparam t_DataType the data type of the vector entries
+ * @tparam t_ParEntries the number of parallelly processed entries in the input vector
+ * @tparam t_MaxRows the maximum size of buffers for output vector
+ * @tparam t_IndexType the datatype of the index
+ * @tparam t_MacType the datatype of the output stream
+ *
+ * @param p_m the number of rows of input matrix p_M
+ * @param p_alpha, scalar alpha
+ * @param p_M the input stream of packed Matrix entries
+ * @param p_x the input stream of packed vector entries
+ * @param p_beta, scalar beta
+ * @param p_y the output vector
+ */
+template <typename t_DataType,
+          unsigned int t_ParEntries,
+          unsigned int t_MaxRows,
+          typename t_IndexType = unsigned int,
+          typename t_MacType = t_DataType>
+void gbmv(const unsigned int p_m,
+          const unsigned int p_kl,
+          const unsigned int p_ku,
+          const t_DataType p_alpha,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_M,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
+          const t_DataType p_beta,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_y,
+          hls::stream<WideType<t_DataType, t_ParEntries> >& p_yr) {
+#pragma HLS data_pack variable = p_M
+#pragma HLS data_pack variable = p_x
+#pragma HLS data_pack variable = p_y
+#pragma HLS data_pack variable = p_yr
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_x, l_y;
+#pragma HLS DATAFLOW
+    gbmv<t_DataType, t_ParEntries, t_MaxRows, t_IndexType, t_MacType>(p_m, p_kl, p_ku, p_M, p_x, l_x);
+    scal<t_DataType, t_ParEntries, t_IndexType>(p_m, p_beta, p_y, l_y);
+    axpy<t_DataType, t_ParEntries, t_IndexType>(p_m, p_alpha, l_x, l_y, p_yr);
 }
 
 } // end namespace blas
