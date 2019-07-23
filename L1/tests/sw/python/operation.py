@@ -16,7 +16,7 @@ import numpy as np
 import sys
 import pdb
 
-t_Debug= True
+t_Debug= False
 
 class DataGenerator:
   def __init__(self, engine = np.random.random):
@@ -46,7 +46,8 @@ class DataGenerator:
     return self.data(tup)
 
   def matrix(self, size:tuple):
-    assert len(size) == 2
+    if not len(size) == 2:
+      raise OP_ERROR("Matrix size error.")
     return self.data(size)
 
   def symmetricMatrix(self, size:int):
@@ -55,16 +56,16 @@ class DataGenerator:
     mat = (mat + mat.transpose())/2
     return mat.astype(self.dataType) 
 
-  def symmetricBandedMatrix(self, size:int, k:int):
-    tupS = (size, size)
-    tupK = (k, k)
-    mat = self.bandedMatrix(tupS, tupK)
+  def symmetricBandedMatrix(self, size, k):
+    mat = self.bandedMatrix(size, k)
     mat = (mat + mat.transpose())/2
     return mat.astype(self.dataType) 
 
   def bandedMatrix(self, size:tuple, k:tuple):
-    assert len(size) == 2
-    assert len(k) == 2
+    if not len(size) == 2:
+      raise OP_ERROR("Matrix size error.")
+    if not len(k) == 2:
+      raise OP_ERROR("Band dimention error.")
     m, n = size
     kl, ku = k
     matrix = self.matrix(size)
@@ -74,18 +75,24 @@ class DataGenerator:
           matrix[i][j] = 0
     return matrix
 
-  def bandedMatrixStorage(self, matrix, k, colAlign=True):
-    assert len(matrix.shape) == 2
+  def bandedMatrixStorage(self, matrix, k, sup=True, sub=True, colAlign=True):
+    if sup == False and sub == False:
+      raise OP_ERROR("Banded matrix storage setting error.")
+    if not len(matrix.shape) == 2:
+      raise OP_ERROR("Matrix dimention error.")
     m, n = matrix.shape
-    assert len(k) == 2
+    if not len(k) == 2:
+      raise OP_ERROR("Band dimention error.")
     kl, ku = k
     if colAlign:
       aDim = m +ku if m < n else n
-      a = np.zeros((kl+ku+1, aDim), dtype=self.dataType)
-      for i in range(-kl, ku+1):
-        v = np.diag(matrix, i)
+      supIndex = (ku if sup else 0)
+      subIndex = (-kl if sub else 0)
+      a = np.zeros((supIndex - subIndex + 1, aDim), dtype=self.dataType)
+      for i in range(subIndex, supIndex+1):
+        v= np.diag(matrix, i)
         startIndex = 0 if i < 0 else i
-        a[ku - i][startIndex:startIndex+len(v)] = v
+        a[supIndex - i][startIndex:startIndex+len(v)] = v
     else:
       pass
     return a
@@ -102,7 +109,7 @@ class OP_ERROR(Exception):
 class OP:
   opDict = {
     'BLAS_L1': ('amax', 'amin', 'asum', 'axpy', 'swap', 'scal', 'dot', 'copy', 'nrm2'),
-    'BLAS_L2': ('gemv', 'gbmv', 'sbmv', 'symv')
+    'BLAS_L2': ('gemv', 'gbmv', 'sbmv', 'symv', 'sbmvUp')
   }
   @staticmethod
   def parse(opName):
@@ -367,7 +374,6 @@ class gbmv(BLAS_L2):
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    a, matrix = self.bandMatrix()
     matrix = self.dataGen.bandedMatrix(self.matrixDim, self.k)
     a = self.dataGen.bandedMatrixStorage(matrix, self.k)
     x = self.dataGen.vector(self.n)
@@ -376,20 +382,6 @@ class gbmv(BLAS_L2):
     t_Debug and print("Matrix:\n", matrix)
     t_Debug and print("Storage:\n",a)
     return alpha, beta, a, x, y, ar, yr
-
-  def bandMatrix(self):
-    matrix = dataGen(self.dataType, self.matrixDim, self.maxV, self.minV)
-    aDim = self.m +self.ku if self.m < self.n else self.n
-    a = np.zeros((self.kl+self.ku+1, aDim), dtype=self.dataType)
-    for i in range(-self.kl, self.ku+1):
-      v = np.diag(matrix, i)
-      startIndex = 0 if i < 0 else i
-      a[self.ku - i][startIndex:startIndex+len(v)] = v
-    for i in range(self.m):
-      for j in range(self.n):
-        if i - j > self.kl or i - j < -self.ku:
-          matrix[i][j] = 0
-    return a, matrix
 
   def test(self, runTest):
     self.testBand(runTest)
@@ -417,39 +409,55 @@ class symv(BLAS_L2):
 class sbmv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
+    self.sup = True
+    self.sub = True
 
-  def setK(self, k):
-    self.k = k
+  def setK(self, k:int):
+    self.kl = k
+    self.ku = k
+    self.k = (k, k)
     self.sizeStr = "m%d_k%d"%(self.m, k)
 
-  def setSize(self, m):
+  def setSize(self, m:int):
     self.matrixDim =(m ,m) 
     self.m = m
     self.n = m
 
+  def setStorage(self, s=(True, True)):
+    self.sup = s[0]
+    self.sub = s[1]
+    if not self.sup:
+      self.ku = 0
+    if not self.sub:
+      self.kl = 0
+
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    a = np.zeros((self.k*2+1, self.m), dtype=self.dataType)
-    v = dataGen(self.dataType, self.m, self.maxV, self.minV)
-    a[self.k][:] = v
-    band_mat = np.diag(v)
-    for i in range(1, self.k+1):
-      v = dataGen(self.dataType, self.m - i, self.maxV, self.minV)
-      a[self.k + i][:len(v)] = v
-      a[self.k - i][self.m-len(v):] = v
-      band_mat = band_mat + np.diag(v, i)
-      band_mat = band_mat + np.diag(v, -i)
+    matrix = self.dataGen.symmetricBandedMatrix(self.matrixDim, self.k)
+    a = self.dataGen.bandedMatrixStorage(matrix, self.k, sup=self.sup, sub=self.sub)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(band_mat, x) + beta * y
+    yr = alpha * np.matmul(matrix, x) + beta * y
+    t_Debug and print("Matrix:\n", matrix)
+    t_Debug and print("Storage:\n",a)
     return alpha, beta, a, x, y, ar, yr
 
   def test(self, runTest):
-    self.testBand(runTest)
+    matrixDimList = runTest.profile['matrixDims']
+    dataTypeList = runTest.dataTypes
+    kulList = runTest.profile['kList']
+    for dataType in dataTypeList:
+      self.setDtype(dataType)
+      for kul in kulList:
+        self.setK(kul)
+        for matrixDim in matrixDimList:
+          self.setSize(matrixDim)
+          self.setStorage(runTest.profile['storage'])
+          runTest.run()
 
 def main():
 
-  opName = 'gbmv'
+  opName = 'sbmv'
   className = None
   for cls, ops in OP.opDict.items():
     if opName in ops:
@@ -457,10 +465,11 @@ def main():
       break
 
   if className:
-    op  = eval(className).parse(opName, -24,   24)
+    op  = eval(className).parse(opName, -64,   64)
     op.setDtype(np.int32)
-    op.setSize([int(sys.argv[1]), int(sys.argv[2])])
-    op.setK([int(sys.argv[3]), int(sys.argv[4])])
+    op.setSize(int(sys.argv[1]))
+    op.setK(int(sys.argv[2]))
+    op.setStorage(False)
     alpha, beta, a, x, y, ar, yr = op.compute()
 
 if __name__=='__main__':
