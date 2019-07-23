@@ -39,7 +39,7 @@ void processUpSbMatStream(unsigned int p_n,
     unsigned int l_parBlocks = p_n / t_ParEntries;
     for (int i = p_k; i > 0; --i) {
         uint16_t l_numPaddings = i % t_ParEntries;
-        uint16_t l_numFirstEnt = t_ParEntries - l_numPaddings;
+        uint16_t l_entBegin = t_ParEntries - l_numPaddings;
         uint16_t j = 0;
         uint16_t l_numOut = 0;
         WideType<t_DataType, t_ParEntries> l_intVal;
@@ -47,34 +47,34 @@ void processUpSbMatStream(unsigned int p_n,
         WideType<t_DataType, t_ParEntries> l_out;
 #pragma HLS ARRAY_PARTITION variable = l_out complete dim = 1
 
-        do { // skip the paddings
+        while (i >= (j * t_ParEntries)) { // skip the paddings
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
             l_intVal = l_val;
             j++;
-        } while (i >= (j * t_ParEntries));
+        }
 
-        do { // output superdiagonals without paddings
+        while (j < l_parBlocks) { // output superdiagonals without paddings
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
 #pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_numFirstEnt) ? l_intVal[t_ParEntries - 1 - b] : l_val[b - l_numFirstEnt];
+                l_out[b] = (b < l_entBegin) ? l_intVal[l_numPaddings + b] : l_val[b - l_entBegin];
             }
             p_out.write(l_out);
             l_numOut++;
             l_intVal = l_val;
             j++;
-        } while (j < l_parBlocks);
+        }
 
-        do {
+        while (l_numOut < l_parBlocks) {
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_numFirstEnt) ? l_intVal[t_ParEntries - 1 - b] : 0;
+                l_out[b] = (b < l_entBegin) ? l_intVal[l_numPaddings + b] : 0;
             }
             p_out.write(l_out);
             l_intVal = 0;
             l_numOut++;
-        } while (l_numOut < l_parBlocks);
+        }
     }
     for (unsigned int i = 0; i <= p_k; ++i) {
         for (unsigned int j = 0; j < l_parBlocks; ++j) {
@@ -107,7 +107,7 @@ void readUpSbMat2Stream(unsigned int p_n,
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_val[b] = p_a[(i * p_n + j) * t_ParEntries + b];
+                l_val[b] = p_a[(i * l_nParBlocks + j) * t_ParEntries + b];
             }
             p_out.write(l_val);
         }
@@ -120,14 +120,16 @@ void readVec2GbStream(unsigned int p_n,
                       unsigned int p_kl,
                       t_DataType* p_x,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
-    unsigned int l_parBlocks = p_n * (p_ku + p_kl + 1) / t_ParEntries;
-    for (unsigned int j = 0; j < l_parBlocks; ++j) {
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int i = 0; i < (p_ku + p_kl + 1); ++i) {
+        for (unsigned int j = 0; j < l_parBlocks; ++j) {
 #pragma HLS PIPELINE
-        WideType<t_DataType, t_ParEntries> l_val;
-        for (unsigned int b = 0; b < t_ParEntries; ++b) {
-            l_val[b] = p_x[j * t_ParEntries + b];
+            WideType<t_DataType, t_ParEntries> l_val;
+            for (unsigned int b = 0; b < t_ParEntries; ++b) {
+                l_val[b] = p_x[j * t_ParEntries + b];
+            }
+            p_out.write(l_val);
         }
-        p_out.write(l_val);
     }
 }
 
@@ -147,31 +149,39 @@ void processLoSbMatStream(unsigned int p_n,
     }
     for (int i = 1; i <= p_k; ++i) {
         uint16_t l_numPaddings = i % t_ParEntries;
-        uint16_t j = 0;
+        uint16_t l_entBegin = t_ParEntries - l_numPaddings;
+        uint16_t j = 1;
         uint16_t l_numOut = 0;
         WideType<t_DataType, t_ParEntries> l_intVal(0);
 #pragma HLS ARRAY_PARTITION variable = l_intVal complete dim = 1
         WideType<t_DataType, t_ParEntries> l_out;
 #pragma HLS ARRAY_PARTITION variable = l_out complete dim = 1
 
-        do { // pad zeros
+        while (i >= (j * t_ParEntries)) { // pad zeros
 #pragma HLS PIPELINE
             l_out = l_intVal;
             p_out.write(l_out);
+            l_numOut++;
             j++;
-        } while (i >= (j * t_ParEntries));
+        }
 
-        do {
+        while (l_numOut < l_parBlocks) {
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
 #pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_numPaddings) ? l_intVal[b] : l_val[b - l_numPaddings];
+                l_out[b] = (b < l_numPaddings) ? l_intVal[l_entBegin + b] : l_val[b - l_numPaddings];
             }
             p_out.write(l_out);
             l_numOut++;
             l_intVal = l_val;
-        } while (l_numOut < l_parBlocks);
+        }
+        // read out redundant data in a row
+        while (j > 1) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
+            j--;
+        }
     }
 }
 
@@ -182,13 +192,13 @@ void readLoSbMat2Stream(unsigned int p_n,
                         hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     unsigned int l_parBlocks = p_n * (p_k + 1) / t_ParEntries;
     unsigned int l_nParBlocks = p_n / t_ParEntries;
-    for (int i = 1; i <= p_k; ++i) {
+    for (int i = p_k; i > 0; --i) {
         for (unsigned int j = 0; j < l_nParBlocks; ++j) {
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_val[b] = p_a[(i * p_n + j) * t_ParEntries + b];
+                l_val[b] = p_a[(i * l_nParBlocks + j) * t_ParEntries + b];
             }
             p_out.write(l_val);
         }
@@ -213,7 +223,7 @@ void processGbMatStream(unsigned int p_n,
     unsigned int l_parBlocks = p_n / t_ParEntries;
     for (int i = p_ku; i > 0; --i) {
         uint16_t l_numPaddings = i % t_ParEntries;
-        uint16_t l_numFirstEnt = t_ParEntries - l_numPaddings;
+        uint16_t l_entBegin = t_ParEntries - l_numPaddings;
         uint16_t j = 0;
         uint16_t l_numOut = 0;
         WideType<t_DataType, t_ParEntries> l_intVal;
@@ -221,34 +231,35 @@ void processGbMatStream(unsigned int p_n,
         WideType<t_DataType, t_ParEntries> l_out;
 #pragma HLS ARRAY_PARTITION variable = l_out complete dim = 1
 
-        do { // skip the paddings
+        while (i >= (j * t_ParEntries)) { // skip the entries due to the paddings
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
             l_intVal = l_val;
             j++;
-        } while (i >= (j * t_ParEntries));
+        }
 
-        do { // output superdiagonals without paddings
+        while (j < l_parBlocks) { // output superdiagonals without paddings
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
 #pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_numFirstEnt) ? l_intVal[t_ParEntries - 1 - b] : l_val[b - l_numFirstEnt];
+                l_out[b] = (b < l_entBegin) ? l_intVal[l_numPaddings + b] : l_val[b - l_entBegin];
             }
             p_out.write(l_out);
             l_numOut++;
             l_intVal = l_val;
             j++;
-        } while (j < l_parBlocks);
+        }
 
-        do {
+        while (l_numOut < l_parBlocks) {
+#pragma HLS PIPELINE
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_numFirstEnt) ? l_intVal[t_ParEntries - 1 - b] : 0;
+                l_out[b] = (b < l_entBegin) ? l_intVal[l_numPaddings + b] : 0;
             }
             p_out.write(l_out);
             l_intVal = 0;
             l_numOut++;
-        } while (l_numOut < l_parBlocks);
+        }
     }
     for (unsigned int j = 0; j < l_parBlocks; ++j) {
 #pragma HLS PIPELINE
@@ -257,31 +268,38 @@ void processGbMatStream(unsigned int p_n,
     }
     for (int i = 1; i <= p_kl; ++i) {
         uint16_t l_numPaddings = i % t_ParEntries;
-        uint16_t j = 0;
+        uint16_t l_entBegin = t_ParEntries - l_numPaddings;
+        uint16_t j = 1;
         uint16_t l_numOut = 0;
         WideType<t_DataType, t_ParEntries> l_intVal(0);
 #pragma HLS ARRAY_PARTITION variable = l_intVal complete dim = 1
         WideType<t_DataType, t_ParEntries> l_out;
 #pragma HLS ARRAY_PARTITION variable = l_out complete dim = 1
 
-        do { // pad zeros
+        while (i >= (j * t_ParEntries)) { // pad zeros
 #pragma HLS PIPELINE
             l_out = l_intVal;
             p_out.write(l_out);
+            l_numOut++;
             j++;
-        } while (i >= (j * t_ParEntries));
-
-        do {
+        }
+        while (l_numOut < l_parBlocks) {
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
 #pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_numPaddings) ? l_intVal[b] : l_val[b - l_numPaddings];
+                l_out[b] = (b < l_numPaddings) ? l_intVal[l_entBegin + b] : l_val[b - l_numPaddings];
             }
             p_out.write(l_out);
             l_numOut++;
             l_intVal = l_val;
-        } while (l_numOut < l_parBlocks);
+        }
+        // read out redundant data in a row
+        while (j > 1) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
+            j--;
+        }
     }
 }
 
@@ -410,7 +428,7 @@ void vec2GbMatStream(unsigned int p_n,
 #pragma HLS DATA_PACK variable = l_str
     readVec2GbStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, p_x, l_str);
     processGbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, l_str, p_out);
-} // end vec2UpSbStream
+} // end vec2GbStream
 } // namespace blas
 } // namespace linear_algebra
 } // namespace xf
