@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     l_logFile = argv[l_argIdx++];
   }
   
-  int l_numKernel = 0;
+  int l_numKernel = 1;
   
   if (argc == 5){
     cout<<"read custom number of kernels\n";
@@ -107,10 +107,11 @@ int main(int argc, char **argv) {
     
   int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
   XFBLAS_dataType * a, * b, * c;
-  a = ( XFBLAS_dataType *) malloc (m*k* sizeof ( XFBLAS_dataType )); // host memory for a
-  b = ( XFBLAS_dataType *) malloc (k*n* sizeof ( XFBLAS_dataType )); 
-  c = ( XFBLAS_dataType *) malloc (m*n* sizeof ( XFBLAS_dataType )); 
-
+  
+  posix_memalign((void** )&a, 4096, m*k* sizeof ( XFBLAS_dataType ));
+  posix_memalign((void** )&b, 4096, k*n* sizeof ( XFBLAS_dataType ));
+  posix_memalign((void** )&c, 4096, m*n* sizeof ( XFBLAS_dataType ));
+  
   int ind = 1;
   for( i = 0; i<  m; i ++){ 
     for( j = 0; j < k; j ++){ 

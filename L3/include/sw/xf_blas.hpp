@@ -22,9 +22,6 @@
  * @brief Top-level header for XF BLAS Libaray level-3.
  */
 
-#include "xf_blas/gemm_host.hpp"
-#include "xf_blas/handle.hpp"
-
 #include "xf_blas/wrapper.hpp"
 
 using namespace xf::linear_algebra::blas;
