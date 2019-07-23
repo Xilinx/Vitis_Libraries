@@ -119,10 +119,10 @@ void gemv(const unsigned int p_m,
  * @param p_m the number of rows of input matrix p_M
  * @param p_n the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n %
  * l_ParEntries == 0
- * @param p_alpha
+ * @param p_alpha, scalar alpha
  * @param p_M the input stream of packed Matrix entries
  * @param p_x the input stream of packed vector entries
- * @param p_beta
+ * @param p_beta, scalar beta
  * @param p_y the output vector
  */
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
@@ -142,9 +142,6 @@ void gemv(const unsigned int p_m,
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
     const unsigned int l_numIter = p_n >> t_LogParEntries;
-    hls::stream<WideType<t_DataType, 1> > l_data, l_pad;
-#pragma HLS stream variable = l_data depth = 2
-#pragma HLS stream variable = l_pad depth = 2
     hls::stream<WideType<t_DataType, 1> > l_x, l_y;
 #pragma HLS DATAFLOW
     gemv<t_DataType, t_LogParEntries, t_IndexType>(p_m, p_n, p_M, p_x, l_x);
