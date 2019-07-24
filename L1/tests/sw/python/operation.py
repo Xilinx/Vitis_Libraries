@@ -18,6 +18,28 @@ import pdb
 
 t_Debug= False
 
+
+class OP_ERROR(Exception):
+  def __init__(self, message):
+    self.message = message
+class OP:
+  opDict = {
+    'BLAS_L1': ('amax', 'amin', 'asum', 'axpy', 'swap', 'scal', 'dot', 'copy', 'nrm2'),
+    'BLAS_L2': ('gemv', 'gbmv', 'sbmv', 'symv') #, 'spmv', 'tbmv', 'tbsv', 'tpmv', 'trmv'
+  }
+  @staticmethod
+  def parse(opName):
+    for cls, ops in OP.opDict.items():
+      if opName in ops:
+        return cls
+    raise OP_ERROR("opName %s is not supported."%opName)
+
+  def __init__(self):
+    pass
+
+  def setDtype(self, dataType):
+    self.dataType = dataType
+
 class DataGenerator:
   def __init__(self, engine = np.random.random):
     self.engine = engine
@@ -61,6 +83,13 @@ class DataGenerator:
     mat = (mat + mat.transpose())/2
     return mat.astype(self.dataType) 
 
+  def triangularMatrix(self, size:int, upper=True):
+    mat = self.matrix((size, size))
+    if upper:
+      return np.triu(mat)
+    else:
+      return np.tril(mat)
+    
   def bandedMatrix(self, size:tuple, k:tuple):
     if not len(size) == 2:
       raise OP_ERROR("Matrix size error.")
@@ -97,32 +126,30 @@ class DataGenerator:
       pass
     return a
 
+  def symmetricMatrixStorage(self, matrix, upper=True, colMajor=False):
+    if colMajor:
+      pass
+    else:
+      if upper:
+        return np.reshape(np.triu(matrix), -1)
+      else:
+        return np.reshape(np.tril(matrix), -1)
+
+  def packedStorage(self, matrix, upper=True):
+    m, n = matrix.shape
+    assert m==n
+    a = list()
+    for i in range(m):
+      left = i if upper else 0
+      right = m if upper else i+1
+      for j in range(left, right):
+        a.append(matrix[i][j])
+    return np.asarray(a, dtype=matrix.dtype)
+
 def dataGen(dataType, size, maxValue, minValue):
   a = np.random.random(size) * (maxValue - minValue) + minValue
   a = a.astype(dataType)
   return a
-
-
-class OP_ERROR(Exception):
-  def __init__(self, message):
-    self.message = message
-class OP:
-  opDict = {
-    'BLAS_L1': ('amax', 'amin', 'asum', 'axpy', 'swap', 'scal', 'dot', 'copy', 'nrm2'),
-    'BLAS_L2': ('gemv', 'gbmv', 'sbmv', 'symv', 'sbmvUp')
-  }
-  @staticmethod
-  def parse(opName):
-    for cls, ops in OP.opDict.items():
-      if opName in ops:
-        return cls
-    raise OP_ERROR("opName %s is not supported."%opName)
-
-  def __init__(self):
-    pass
-
-  def setDtype(self, dataType):
-    self.dataType = dataType
 
 
 class BLAS_L1(OP):
@@ -462,21 +489,27 @@ class sbmv(BLAS_L2):
           runTest.run()
 
 def main():
-
-  opName = 'sbmv'
-  className = None
-  for cls, ops in OP.opDict.items():
-    if opName in ops:
-      className = cls
-      break
-
-  if className:
-    op  = eval(className).parse(opName, -64,   64)
-    op.setDtype(np.int32)
-    op.setSize(int(sys.argv[1]))
-    op.setK(int(sys.argv[2]))
-    op.setStorage(False)
-    alpha, beta, a, x, y, ar, yr = op.compute()
+  dg = DataGenerator()
+  dg.setRange(-16, 16)
+  dg.setDataType(np.int8)
+  matrix = dg.triangularMatrix(8, False)
+  a= dg.packedStorage(matrix, False)
+  print(matrix)
+  print(a)
+#  opName = 'sbmv'
+#  className = None
+#  for cls, ops in OP.opDict.items():
+#    if opName in ops:
+#      className = cls
+#      break
+#
+#  if className:
+#    op  = eval(className).parse(opName, -64,   64)
+#    op.setDtype(np.int32)
+#    op.setSize(int(sys.argv[1]))
+#    op.setK(int(sys.argv[2]))
+#    op.setStorage(False)
+#    alpha, beta, a, x, y, ar, yr = op.compute()
 
 if __name__=='__main__':
   main()
