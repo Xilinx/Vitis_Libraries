@@ -426,10 +426,16 @@ class sbmv(BLAS_L2):
   def setStorage(self, s=(True, True)):
     self.sup = s[0]
     self.sub = s[1]
-    if not self.sup:
+    if self.sup and self.sub:
+      self.sizeStr = self.sizeStr + "_full"
+    elif not self.sup:
       self.ku = 0
-    if not self.sub:
+      self.sizeStr = self.sizeStr + "_sub"
+    elif not self.sub:
       self.kl = 0
+      self.sizeStr = self.sizeStr + "_sup"
+    else:
+      raise OP_ERROR("Storage setting error.")
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
