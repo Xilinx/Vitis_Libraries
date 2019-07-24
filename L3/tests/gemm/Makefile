@@ -20,6 +20,8 @@ endif
 
 SW_API_DIR = ../../include/sw
 
+#------------------------------host----------------------------------
+
 CXX = g++
 HOST_CXXFLAGS = -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-unused-parameter -Wno-unused-variable
 HOST_INCLUDE = -I$(XILINX_XRT)/include -I$(SW_API_DIR)
@@ -27,7 +29,7 @@ HOST_LIB = -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
 
 XFBLAS_dataType = short
 
-######################################################
+#------------------------------dummies-------------------------------
 
 .PHONY: all
 
