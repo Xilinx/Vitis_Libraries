@@ -31,6 +31,18 @@
 namespace xf {
 namespace linear_algebra {
 namespace blas {
+
+/**
+ * @brief processUpSbMatStream function that moves the head paddings to the end of each super-diagonal
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_k number of super-diagonals
+ * @param p_in stream of the super-diagonals not including main diagonal of a p_n x p_n symmetric banded matrix
+ * @param p_out output stream of super-diagonals not including main diagonal with 0 paddings in the tails
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void processUpSbMatStream(unsigned int p_n,
                           unsigned int p_k,
@@ -47,14 +59,16 @@ void processUpSbMatStream(unsigned int p_n,
         WideType<t_DataType, t_ParEntries> l_out;
 #pragma HLS ARRAY_PARTITION variable = l_out complete dim = 1
 
-        while (i >= (j * t_ParEntries)) { // skip the paddings
+        // skip the paddings
+        while (i >= (j * t_ParEntries)) {
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
             l_intVal = l_val;
             j++;
         }
 
-        while (j < l_parBlocks) { // output superdiagonals without paddings
+        // output superdiagonals without paddings
+        while (j < l_parBlocks) {
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
 #pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
@@ -67,6 +81,7 @@ void processUpSbMatStream(unsigned int p_n,
             j++;
         }
 
+        // pad zeros in the end of each super-diagonal
         while (l_numOut < l_parBlocks) {
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
                 l_out[b] = (b < l_entBegin) ? l_intVal[l_numPaddings + b] : 0;
@@ -76,78 +91,26 @@ void processUpSbMatStream(unsigned int p_n,
             l_numOut++;
         }
     }
-    for (unsigned int i = 0; i <= p_k; ++i) {
-        for (unsigned int j = 0; j < l_parBlocks; ++j) {
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-            p_out.write(l_val);
-        }
-    }
 }
 
-template <typename t_DataType, unsigned int t_ParEntries>
-void readUpSbMat2Stream(unsigned int p_n,
-                        unsigned int p_k,
-                        t_DataType* p_a,
-                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
-    unsigned int l_parBlocks = p_n * (p_k + 1) / t_ParEntries;
-    unsigned int l_nParBlocks = p_n / t_ParEntries;
-    for (unsigned int i = 0; i < l_parBlocks; ++i) {
-#pragma HLS PIPELINE
-        WideType<t_DataType, t_ParEntries> l_val;
-#pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
-        for (unsigned int b = 0; b < t_ParEntries; ++b) {
-            l_val[b] = p_a[i * t_ParEntries + b];
-        }
-        p_out.write(l_val);
-    }
-    for (int i = p_k - 1; i >= 0; --i) {
-        for (unsigned int j = 0; j < l_nParBlocks; ++j) {
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val;
-#pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
-            for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_val[b] = p_a[(i * l_nParBlocks + j) * t_ParEntries + b];
-            }
-            p_out.write(l_val);
-        }
-    }
-}
-
-template <typename t_DataType, unsigned int t_ParEntries>
-void readVec2GbStream(unsigned int p_n,
-                      unsigned int p_ku,
-                      unsigned int p_kl,
-                      t_DataType* p_x,
-                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
-    unsigned int l_parBlocks = p_n / t_ParEntries;
-    for (unsigned int i = 0; i < (p_ku + p_kl + 1); ++i) {
-        for (unsigned int j = 0; j < l_parBlocks; ++j) {
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val;
-            for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_val[b] = p_x[j * t_ParEntries + b];
-            }
-            p_out.write(l_val);
-        }
-    }
-}
-
+/**
+ * @brief processLoSbMatStream function that moves the tail paddings to the beginning of each super-diagonal
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_k number of sub-diagonals
+ * @param p_in stream of the sub-diagonals including main diagonal of a p_n x p_n symmetric banded matrix
+ * @param p_out output stream of sub-diagonals including main diagonal with 0 paddings at the beginnings
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void processLoSbMatStream(unsigned int p_n,
                           unsigned int p_k,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     unsigned int l_parBlocks = p_n / t_ParEntries;
-    // output superdiagonals and main diagonals
-    for (unsigned int i = 0; i <= p_k; ++i) {
-        for (unsigned int j = 0; j < l_parBlocks; ++j) {
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-            p_out.write(l_val);
-        }
-    }
-    for (int i = 1; i <= p_k; ++i) {
+    for (int i = 0; i <= p_k; ++i) {
         uint16_t l_numPaddings = i % t_ParEntries;
         uint16_t l_entBegin = t_ParEntries - l_numPaddings;
         uint16_t j = 1;
@@ -157,7 +120,8 @@ void processLoSbMatStream(unsigned int p_n,
         WideType<t_DataType, t_ParEntries> l_out;
 #pragma HLS ARRAY_PARTITION variable = l_out complete dim = 1
 
-        while (i >= (j * t_ParEntries)) { // pad zeros
+        // pad zeros
+        while (i >= (j * t_ParEntries)) {
 #pragma HLS PIPELINE
             l_out = l_intVal;
             p_out.write(l_out);
@@ -165,6 +129,7 @@ void processLoSbMatStream(unsigned int p_n,
             j++;
         }
 
+        // output entries along sub-diagonals
         while (l_numOut < l_parBlocks) {
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
@@ -176,7 +141,7 @@ void processLoSbMatStream(unsigned int p_n,
             l_numOut++;
             l_intVal = l_val;
         }
-        // read out redundant data in a row
+        // read out redundant data
         while (j > 1) {
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val = p_in.read();
@@ -185,11 +150,129 @@ void processLoSbMatStream(unsigned int p_n,
     }
 }
 
+/**
+ * @brief forwardSbMatStream function that forwards the diagonal streams
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_k number of diagonals
+ * @param p_in stream of the diagonals of a p_n x p_n symmetric banded matrix
+ * @param p_out the output copy of the input diagonal stream
+ */
+template <typename t_DataType, unsigned int t_ParEntries>
+void forwardSbMatStream(unsigned int p_n,
+                        unsigned int p_k,
+                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
+                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int i = 0; i < p_k; ++i) {
+        for (unsigned int j = 0; j < l_parBlocks; ++j) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
+            p_out.write(l_val);
+        }
+    }
+}
+
+/**
+ * @brief mergeGbMatStream function that merges processed gbMat streams
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_ku number of super-diagonals
+ * @param p_kl number of sub-diagonals
+ * @param p_inUp stream of the processed super-diagonals, not including main diagonal
+ * @param p_inLo stream of the processed sub_diagonals, including main diagonal
+ * @param p_out the output gbMat stream
+ */
+template <typename t_DataType, unsigned int t_ParEntries>
+void mergeGbMatStream(unsigned int p_n,
+                      unsigned int p_ku,
+                      unsigned int p_kl,
+                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_inUp,
+                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_inLo,
+                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int i = 0; i < p_ku; ++i) {
+        for (unsigned int j = 0; j < l_parBlocks; ++j) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_val = p_inUp.read();
+            p_out.write(l_val);
+        }
+    }
+    for (unsigned int i = 0; i <= p_kl; ++i) {
+        for (unsigned int j = 0; j < l_parBlocks; ++j) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_val = p_inLo.read();
+            p_out.write(l_val);
+        }
+    }
+}
+
+/**
+ * @brief readUpSbMat2Stream function that read the sbMat from Memory into the streams
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_k number of super-diagonals
+ * @param p_a memory location of a p_n x p_n symmetric banded matrix with super-diagonals
+ * @param p_outUp the stream of super-diagonals
+ * @param p_outLo the stream of ready sub-diagonals
+ */
+template <typename t_DataType, unsigned int t_ParEntries>
+void readUpSbMat2Stream(unsigned int p_n,
+                        unsigned int p_k,
+                        t_DataType* p_a,
+                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_outUp,
+                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_outLo) {
+    unsigned int l_parBlocks = p_n * p_k / t_ParEntries;
+    unsigned int l_nParBlocks = p_n / t_ParEntries;
+    for (unsigned int i = 0; i < l_parBlocks; ++i) {
+#pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_val;
+#pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
+        for (unsigned int b = 0; b < t_ParEntries; ++b) {
+            l_val[b] = p_a[i * t_ParEntries + b];
+        }
+        p_outUp.write(l_val);
+    }
+    for (int i = p_k; i >= 0; --i) {
+        for (unsigned int j = 0; j < l_nParBlocks; ++j) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_val;
+#pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
+            for (unsigned int b = 0; b < t_ParEntries; ++b) {
+                l_val[b] = p_a[(i * l_nParBlocks + j) * t_ParEntries + b];
+            }
+            p_outLo.write(l_val);
+        }
+    }
+}
+
+/**
+ * @brief readLoSbMat2Stream function that read the sbMat from memory into the streams
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_k number of sub-diagonals
+ * @param p_a memory location of a p_n x p_n symmetric banded matrix with sub-diagonals
+ * @param p_outUp the stream of ready super-diagonals
+ * @param p_outLo the stream of sub-diagonals
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readLoSbMat2Stream(unsigned int p_n,
                         unsigned int p_k,
                         t_DataType* p_a,
-                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_outUp,
+                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_outLo) {
     unsigned int l_parBlocks = p_n * (p_k + 1) / t_ParEntries;
     unsigned int l_nParBlocks = p_n / t_ParEntries;
     for (int i = p_k; i > 0; --i) {
@@ -200,7 +283,7 @@ void readLoSbMat2Stream(unsigned int p_n,
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
                 l_val[b] = p_a[(i * l_nParBlocks + j) * t_ParEntries + b];
             }
-            p_out.write(l_val);
+            p_outUp.write(l_val);
         }
     }
     for (unsigned int i = 0; i < l_parBlocks; ++i) {
@@ -210,114 +293,97 @@ void readLoSbMat2Stream(unsigned int p_n,
         for (unsigned int b = 0; b < t_ParEntries; ++b) {
             l_val[b] = p_a[i * t_ParEntries + b];
         }
-        p_out.write(l_val);
+        p_outLo.write(l_val);
     }
 }
 
+/**
+ * @brief readVec2GbStream function that read the vector from memory into stream
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_ku number of super-diagonals
+ * @param p_kl number of sub-siagonals
+ * @param p_a memory location of vector x
+ * @param p_outUp the vector stream of for super-diagonals
+ * @param p_outLo the vector stream of for sub-diagonals
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
-void processGbMatStream(unsigned int p_n,
-                        unsigned int p_ku,
-                        unsigned int p_kl,
-                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
-                        hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+void readVec2GbStream(unsigned int p_n,
+                      unsigned int p_ku,
+                      unsigned int p_kl,
+                      t_DataType* p_x,
+                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_outUp,
+                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_outLo) {
     unsigned int l_parBlocks = p_n / t_ParEntries;
-    for (int i = p_ku; i > 0; --i) {
-        uint16_t l_numPaddings = i % t_ParEntries;
-        uint16_t l_entBegin = t_ParEntries - l_numPaddings;
-        uint16_t j = 0;
-        uint16_t l_numOut = 0;
-        WideType<t_DataType, t_ParEntries> l_intVal;
-#pragma HLS ARRAY_PARTITION variable = l_intVal complete dim = 1
-        WideType<t_DataType, t_ParEntries> l_out;
-#pragma HLS ARRAY_PARTITION variable = l_out complete dim = 1
-
-        while (i >= (j * t_ParEntries)) { // skip the entries due to the paddings
+    for (unsigned int i = 0; i < p_ku; ++i) {
+        for (unsigned int j = 0; j < l_parBlocks; ++j) {
 #pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-            l_intVal = l_val;
-            j++;
-        }
-
-        while (j < l_parBlocks) { // output superdiagonals without paddings
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-#pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
+            WideType<t_DataType, t_ParEntries> l_val;
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_entBegin) ? l_intVal[l_numPaddings + b] : l_val[b - l_entBegin];
+                l_val[b] = p_x[j * t_ParEntries + b];
             }
-            p_out.write(l_out);
-            l_numOut++;
-            l_intVal = l_val;
-            j++;
-        }
-
-        while (l_numOut < l_parBlocks) {
-#pragma HLS PIPELINE
-            for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_entBegin) ? l_intVal[l_numPaddings + b] : 0;
-            }
-            p_out.write(l_out);
-            l_intVal = 0;
-            l_numOut++;
+            p_outUp.write(l_val);
         }
     }
-    for (unsigned int j = 0; j < l_parBlocks; ++j) {
+    for (unsigned int i = 0; i < p_kl + 1; ++i) {
+        for (unsigned int j = 0; j < l_parBlocks; ++j) {
 #pragma HLS PIPELINE
-        WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-        p_out.write(l_val);
-    }
-    for (int i = 1; i <= p_kl; ++i) {
-        uint16_t l_numPaddings = i % t_ParEntries;
-        uint16_t l_entBegin = t_ParEntries - l_numPaddings;
-        uint16_t j = 1;
-        uint16_t l_numOut = 0;
-        WideType<t_DataType, t_ParEntries> l_intVal(0);
-#pragma HLS ARRAY_PARTITION variable = l_intVal complete dim = 1
-        WideType<t_DataType, t_ParEntries> l_out;
-#pragma HLS ARRAY_PARTITION variable = l_out complete dim = 1
-
-        while (i >= (j * t_ParEntries)) { // pad zeros
-#pragma HLS PIPELINE
-            l_out = l_intVal;
-            p_out.write(l_out);
-            l_numOut++;
-            j++;
-        }
-        while (l_numOut < l_parBlocks) {
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-#pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
+            WideType<t_DataType, t_ParEntries> l_val;
             for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                l_out[b] = (b < l_numPaddings) ? l_intVal[l_entBegin + b] : l_val[b - l_numPaddings];
+                l_val[b] = p_x[j * t_ParEntries + b];
             }
-            p_out.write(l_out);
-            l_numOut++;
-            l_intVal = l_val;
-        }
-        // read out redundant data in a row
-        while (j > 1) {
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val = p_in.read();
-            j--;
+            p_outLo.write(l_val);
         }
     }
 }
 
+/**
+ * @brief readGbMat2Stream function that read the gbMat from memory into the streams
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_ku number of super-diagonals
+ * @param p_kl number of sub-diagonals
+ * @param p_a memory location of a p_n x p_n symmetric banded matrix with sub-diagonals
+ * @param p_outUp the stream of super-diagonals
+ * @param p_outLo the stream of sub-diagonals including main diagonal
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readGbMat2Stream(unsigned int p_n,
                       unsigned int p_ku,
                       unsigned int p_kl,
                       t_DataType* p_a,
-                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
-    unsigned int l_parBlocks = p_n * (p_ku + p_kl + 1) / t_ParEntries;
-    for (unsigned int i = 0; i < l_parBlocks; ++i) {
+                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_outUp,
+                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_outLo) {
+    unsigned int l_parBlocks = p_n / t_ParEntries;
+    for (unsigned int i = 0; i < p_ku; ++i) {
+        for (unsigned int j = 0; j < l_parBlocks; ++j) {
 #pragma HLS PIPELINE
-        WideType<t_DataType, t_ParEntries> l_val;
+            WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
-        for (unsigned int b = 0; b < t_ParEntries; ++b) {
-            l_val[b] = p_a[i * t_ParEntries + b];
+            for (unsigned int b = 0; b < t_ParEntries; ++b) {
+                l_val[b] = p_a[(i * l_parBlocks + j) * t_ParEntries + b];
+            }
+            p_outUp.write(l_val);
         }
-        p_out.write(l_val);
+    }
+    t_DataType* l_a = p_a;
+    l_a = &(p_a[p_ku * l_parBlocks * t_ParEntries]);
+    for (unsigned int i = 0; i <= p_kl; ++i) {
+        for (unsigned int j = 0; j < l_parBlocks; ++j) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_val;
+#pragma HLS ARRAY_PARTITION variable = l_val complete dim = 1
+            for (unsigned int b = 0; b < t_ParEntries; ++b) {
+                l_val[b] = l_a[(i * l_parBlocks + j) * t_ParEntries + b];
+            }
+            p_outLo.write(l_val);
+        }
     }
 }
 /**
@@ -341,10 +407,18 @@ void sbmSuper2Stream(unsigned int p_n,
     assert((p_n % (t_ParEntries * t_ParBlocks)) == 0);
 #endif
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
-#pragma HLS DATA_PACK variable = l_str
-    readUpSbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_str);
-    processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_str, p_out);
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strUp;
+#pragma HLS DATA_PACK variable = l_strUp
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strLo;
+#pragma HLS DATA_PACK variable = l_strLo
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strUpRes;
+#pragma HLS DATA_PACK variable = l_strUpRes
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strLoRes;
+#pragma HLS DATA_PACK variable = l_strLoRes
+    readUpSbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_strUp, l_strLo);
+    processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_strUp, l_strUpRes);
+    forwardSbMatStream<t_DataType, t_ParEntries>(p_n, p_k + 1, l_strLo, l_strLoRes);
+    mergeGbMatStream<t_DataType, t_ParEntries>(p_n, p_k, p_k, l_strUpRes, l_strLoRes, p_out);
 }
 
 /**
@@ -368,10 +442,18 @@ void sbmSub2Stream(unsigned int p_n,
     assert((p_n % (t_ParEntries * t_ParBlocks)) == 0);
 #endif
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
-#pragma HLS DATA_PACK variable = l_str
-    readLoSbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_str);
-    processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_str, p_out);
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strUp;
+#pragma HLS DATA_PACK variable = l_strUp
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strLo;
+#pragma HLS DATA_PACK variable = l_strLo
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strUpRes;
+#pragma HLS DATA_PACK variable = l_strUpRes
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strLoRes;
+#pragma HLS DATA_PACK variable = l_strLoRes
+    readLoSbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_strUp, l_strLo);
+    forwardSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_strUp, l_strUpRes);
+    processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_strLo, l_strLoRes);
+    mergeGbMatStream<t_DataType, t_ParEntries>(p_n, p_k, p_k, l_strUpRes, l_strLoRes, p_out);
 }
 
 /**
@@ -397,10 +479,18 @@ void gbm2Stream(unsigned int p_n,
     assert((p_n % (t_ParEntries * t_ParBlocks)) == 0);
 #endif
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
-#pragma HLS DATA_PACK variable = l_str
-    readGbMat2Stream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, p_a, l_str);
-    processGbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, l_str, p_out);
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strUp;
+#pragma HLS DATA_PACK variable = l_strUp
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strLo;
+#pragma HLS DATA_PACK variable = l_strLo
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strUpRes;
+#pragma HLS DATA_PACK variable = l_strUpRes
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strLoRes;
+#pragma HLS DATA_PACK variable = l_strLoRes
+    readGbMat2Stream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, p_a, l_strUp, l_strLo);
+    processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, l_strUp, l_strUpRes);
+    processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_kl, l_strLo, l_strLoRes);
+    mergeGbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, l_strUpRes, l_strLoRes, p_out);
 }
 
 /**
@@ -410,9 +500,10 @@ void gbm2Stream(unsigned int p_n,
  * @tparam t_ParEntries number of parallelly processed entries in the matrix
  *
  * @param p_n number of rows/cols in a square matrix
- * @param p_k number of superdiagonals
+ * @param p_ku number of superdiagonals
+ * @param p_kl number of subdiagonals
  * @param p_x vector input
- * @param p_out output stream, which matches the outputs of sbMat2Stream
+ * @param p_out output stream, which matches the outputs of gbMat2Stream or sbMat2Stream
  */
 template <typename t_DataType, unsigned int t_ParEntries>
 void vec2GbMatStream(unsigned int p_n,
@@ -424,11 +515,19 @@ void vec2GbMatStream(unsigned int p_n,
     assert((p_n % t_ParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
-#pragma HLS DATA_PACK variable = l_str
-    readVec2GbStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, p_x, l_str);
-    processGbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, l_str, p_out);
-} // end vec2GbStream
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strUp;
+#pragma HLS DATA_PACK variable = l_strUp
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strLo;
+#pragma HLS DATA_PACK variable = l_strLo
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strUpRes;
+#pragma HLS DATA_PACK variable = l_strUpRes
+    hls::stream<WideType<t_DataType, t_ParEntries> > l_strLoRes;
+#pragma HLS DATA_PACK variable = l_strLoRes
+    readVec2GbStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, p_x, l_strUp, l_strLo);
+    processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, l_strUp, l_strUpRes);
+    processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_kl, l_strLo, l_strLoRes);
+    mergeGbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, l_strUpRes, l_strLoRes, p_out);
+} // end vec2GbMatStream
 } // namespace blas
 } // namespace linear_algebra
 } // namespace xf

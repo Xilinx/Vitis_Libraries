@@ -59,7 +59,7 @@ void gbmv(const unsigned int p_m,
     assert(p_m <= t_MaxRows);
 #endif
 
-    const unsigned int l_MaxIter = t_MaxRows/t_ParEntries;
+    const unsigned int l_MaxIter = t_MaxRows / t_ParEntries;
     WideType<t_MacType, t_ParEntries> l_y[l_MaxIter];
 
     for (t_IndexType l = 0; l < t_MaxRows; l++) {
