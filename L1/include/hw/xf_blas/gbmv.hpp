@@ -47,6 +47,7 @@ template <typename t_DataType,
           typename t_IndexType = unsigned int,
           typename t_MacType = t_DataType>
 void gbmv(const unsigned int p_m,
+          const unsigned int p_n,
           const unsigned int p_kl,
           const unsigned int p_ku,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_A,
@@ -57,9 +58,12 @@ void gbmv(const unsigned int p_m,
 #pragma HLS data_pack variable = p_y
 #ifndef __SYNTHESIS__
     assert(p_m <= t_MaxRows);
+    assert(p_m <= p_n + p_kl);
+    assert(p_m % t_ParEntries == 0);
 #endif
 
     const unsigned int l_MaxIter = t_MaxRows / t_ParEntries;
+    const unsigned int l_threshold = p_m / t_ParEntries;
     WideType<t_MacType, t_ParEntries> l_y[l_MaxIter];
 
     for (t_IndexType l = 0; l < t_MaxRows; l++) {
@@ -73,7 +77,7 @@ void gbmv(const unsigned int p_m,
     for (t_IndexType j = 0; j < p_kl + 1 + p_ku; j++) {
         for (t_IndexType l = 0; l < l_MaxIter; l++) {
 #pragma HLS PIPELINE
-            if (l >= p_m / t_ParEntries) break;
+            if (l >= l_threshold) break;
             WideType<t_DataType, t_ParEntries> l_A = p_A.read();
             WideType<t_DataType, t_ParEntries> l_x = p_x.read();
             for (t_IndexType k = 0; k < t_ParEntries; k++) {
@@ -108,6 +112,7 @@ template <typename t_DataType,
           typename t_IndexType = unsigned int,
           typename t_MacType = t_DataType>
 void gbmv(const unsigned int p_m,
+          const unsigned int p_n,
           const unsigned int p_kl,
           const unsigned int p_ku,
           const t_DataType p_alpha,
@@ -122,7 +127,7 @@ void gbmv(const unsigned int p_m,
 #pragma HLS data_pack variable = p_yr
     hls::stream<WideType<t_DataType, t_ParEntries> > l_x, l_y;
 #pragma HLS DATAFLOW
-    gbmv<t_DataType, t_ParEntries, t_MaxRows, t_IndexType, t_MacType>(p_m, p_kl, p_ku, p_M, p_x, l_x);
+    gbmv<t_DataType, t_ParEntries, t_MaxRows, t_IndexType, t_MacType>(p_m, p_n, p_kl, p_ku, p_M, p_x, l_x);
     scal<t_DataType, t_ParEntries, t_IndexType>(p_m, p_beta, p_y, l_y);
     axpy<t_DataType, t_ParEntries, t_IndexType>(p_m, p_alpha, l_x, l_y, p_yr);
 }

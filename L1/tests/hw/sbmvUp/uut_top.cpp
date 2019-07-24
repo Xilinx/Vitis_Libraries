@@ -44,6 +44,6 @@ void uut_top(uint32_t p_m,
     sbmSuper2Stream<BLAS_dataType, BLAS_parEntries>(p_n, p_ku, p_a, l_strA);
     vec2GbMatStream<BLAS_dataType, BLAS_parEntries>(p_n, p_ku, p_ku, p_x, l_strX);
     readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_y, p_m, l_strY);
-    gbmv<BLAS_dataType, BLAS_parEntries, 1024>(p_m, p_ku, p_ku, p_alpha, l_strA, l_strX, p_beta, l_strY, l_strYR);
+    gbmv<BLAS_dataType, BLAS_parEntries, 1024>(p_m, p_n, p_ku, p_ku, p_alpha, l_strA, l_strX, p_beta, l_strY, l_strYR);
     writeStream2Vec<BLAS_dataType, BLAS_parEntries>(l_strYR, p_m, p_yRes);
 }
