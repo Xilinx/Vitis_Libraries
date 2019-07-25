@@ -72,7 +72,7 @@ class RunTest:
       self.logParEntries = -1
 
     if self.logParEntries == -1:
-      self.parEntries == self.profile['parEntries']
+      self.parEntries = self.profile['parEntries']
     else:
       self.parEntries = 1 << self.logParEntries
 
@@ -99,7 +99,7 @@ class RunTest:
       #  False, False)
 
     directivePath = os.path.join(self.testPath, 
-        r'directive_par%d.tcl'%(self.logParEntries))
+        r'directive_par%d.tcl'%(self.parEntries))
     self.params = Parameters(self.op, self.logParEntries, self.parEntries)
     self.hls.generateDirective(self.params, directivePath)
 
