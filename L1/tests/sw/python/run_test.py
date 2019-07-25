@@ -69,7 +69,7 @@ class RunTest:
     if 'logParEntries' in self.profile:
       self.logParEntries = self.profile['logParEntries']
     else:
-      self.logParEntries == -1
+      self.logParEntries = -1
 
     if self.logParEntries == -1:
       self.parEntries == self.profile['parEntries']
