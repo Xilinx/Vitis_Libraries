@@ -126,14 +126,14 @@ class RunTest:
     logfile=os.path.join(self.dataPath, r'logfile_%s_%s.log'%(self.op.sizeStr,typeStr))
     binFile =os.path.join(self.dataPath,'TestBin_%s_%s.bin'%(self.op.sizeStr,typeStr))
 
-    self.hls.generateParam(self.params, paramTclPath)
+    print("\n")
+    print("="*64)
     dataList = [self.op.compute() for j in range(self.numSim)]
     blas_gen=BLAS_GEN(self.lib)
     self.op.addInstr(blas_gen, dataList)
     blas_gen.write2BinFile(binFile)
-    print("\n")
-    print("="*64)
     print("Data file %s has been generated sucessfully."%binFile)
+    self.hls.generateParam(self.params, paramTclPath)
     print("Parameters in file %s.\nLog file %s"%(paramTclPath, logfile))
     self.hls.execution(binFile, logfile)
     self.hls.checkLog(logfile)
@@ -147,8 +147,7 @@ def main(profileList, makefile):
   try:
     for profile in profileList:
       if not os.path.exists(profile):
-        print("File %s is not exists, skip this test."%profile)
-        continue
+        raise Exception("ERROR: File %s is not exists."%profile)
       runTest = RunTest(makefile)
       runTest.parseProfile(profile)
       runTest.runTest(os.path.dirname(profile)) 
