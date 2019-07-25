@@ -66,7 +66,7 @@ void gbmv(const unsigned int p_m,
     const unsigned int l_threshold = p_m / t_ParEntries;
     WideType<t_MacType, t_ParEntries> l_y[l_MaxIter];
 
-    for (t_IndexType l = 0; l < t_MaxRows; l++) {
+    for (t_IndexType l = 0; l < l_MaxIter; l++) {
 #pragma HLS PIPELINE
         for (t_IndexType k = 0; k < t_ParEntries; k++) {
 #pragma HLS UNROLL
