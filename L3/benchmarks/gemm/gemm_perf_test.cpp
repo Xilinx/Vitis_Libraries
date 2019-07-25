@@ -126,15 +126,15 @@ int main(int argc, char **argv) {
   inFile.close();
   
   inFile.open(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin", ifstream::binary);
-  inFile.read( (char*) a, sizeof(XFBLAS_dataType)*k*n );
+  inFile.read( (char*) b, sizeof(XFBLAS_dataType)*k*n );
   inFile.close();
   
   inFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
-  inFile.read( (char*) a, sizeof(XFBLAS_dataType)*m*n );
+  inFile.read( (char*) c, sizeof(XFBLAS_dataType)*m*n );
   inFile.close();
   
   inFile.open(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
-  inFile.read( (char*) a, sizeof(XFBLAS_dataType)*m*n );
+  inFile.read( (char*) goldenC, sizeof(XFBLAS_dataType)*m*n );
   inFile.close();
   
   TimePointType l_tp[4];

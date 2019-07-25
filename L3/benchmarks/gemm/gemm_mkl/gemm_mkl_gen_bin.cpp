@@ -27,18 +27,18 @@ int main(int argc, char **argv) {
   outFile.close();
 
   outFile.open(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin", ofstream::binary);
-  outFile.write( (char*) a, sizeof(XFBLAS_dataType)*k*n );
+  outFile.write( (char*) b, sizeof(XFBLAS_dataType)*k*n );
   outFile.close();
 
   outFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ofstream::binary);
-  outFile.write( (char*) a, sizeof(XFBLAS_dataType)*m*n );
+  outFile.write( (char*) c, sizeof(XFBLAS_dataType)*m*n );
   outFile.close();
   
   // Generating Golden Output
   GEMM_MKL(m, k, n, alpha, beta, a, b, c);
 
   outFile.open(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin", ofstream::binary);
-  outFile.write( (char*) a, sizeof(XFBLAS_dataType)*m*n );
+  outFile.write( (char*) c, sizeof(XFBLAS_dataType)*m*n );
   outFile.close();
 
   free(a);
