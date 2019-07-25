@@ -22,6 +22,7 @@
 
 using namespace std;
 
+// Deprecated (Recommend using gemm_mkl to generate the golden output.)
 XFBLAS_dataType* getGoldenMat(XFBLAS_dataType* a, XFBLAS_dataType* b, XFBLAS_dataType* c, int m, int k, int n){
   XFBLAS_dataType * goldenC;
   goldenC = (XFBLAS_dataType*) malloc(m * n * sizeof (XFBLAS_dataType));

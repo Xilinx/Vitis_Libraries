@@ -1,5 +1,5 @@
 ifndef MKLROOT
-$(warning [WARNING] MKLROOT not defined)
+$(error [ERROR] MKLROOT not defined)
 endif
 
 CXX	= g++

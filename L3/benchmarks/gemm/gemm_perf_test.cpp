@@ -27,6 +27,7 @@
 #include <iostream>
 #include <sstream>
 #include <assert.h>
+#include <fstream>
 
 #include "xf_blas.hpp"
 #include "gemm_helper.hpp"
@@ -110,32 +111,31 @@ int main(int argc, char **argv) {
   }
   
   int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
-  XFBLAS_dataType * a, * b, * c;
+  XFBLAS_dataType * a, * b, * c, * goldenC;
   
   posix_memalign((void** )&a, 4096, m*k* sizeof ( XFBLAS_dataType ));
   posix_memalign((void** )&b, 4096, k*n* sizeof ( XFBLAS_dataType ));
   posix_memalign((void** )&c, 4096, m*n* sizeof ( XFBLAS_dataType ));
+  posix_memalign((void** )&goldenC, 4096, m*n* sizeof ( XFBLAS_dataType ));
   
-  int ind = 1;
-  for( i = 0; i<  m; i ++){ 
-    for( j = 0; j < k; j ++){ 
-      a[ IDX2R (i,j,k )]= (XFBLAS_dataType) ind; 
-    } 
-  } 
-  ind = 1;
-  for( i = 0; i<  k; i ++){ 
-    for( j = 0; j < n; j ++){ 
-      b[ IDX2R (i,j,n )]= (XFBLAS_dataType) ind; 
-    } 
-  } 
+  ifstream inFile;
+  string data_dir("./data/");
 
-  for( i = 0; i<  m; i ++){ 
-    for( j = 0; j < n; j ++){ 
-      c[ IDX2R (i,j,n )]= 0; 
-    } 
-  } 
+  inFile.open(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin", ifstream::binary);
+  inFile.read( (char*) a, sizeof(XFBLAS_dataType)*m*k );
+  inFile.close();
   
-  XFBLAS_dataType* goldenC = getGoldenMat(a,b,c,m,k,n);
+  inFile.open(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin", ifstream::binary);
+  inFile.read( (char*) a, sizeof(XFBLAS_dataType)*k*n );
+  inFile.close();
+  
+  inFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
+  inFile.read( (char*) a, sizeof(XFBLAS_dataType)*m*n );
+  inFile.close();
+  
+  inFile.open(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
+  inFile.read( (char*) a, sizeof(XFBLAS_dataType)*m*n );
+  inFile.close();
   
   TimePointType l_tp[4];
   unsigned int l_tpIdx = 0;
