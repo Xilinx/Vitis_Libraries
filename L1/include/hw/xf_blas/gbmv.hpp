@@ -58,7 +58,7 @@ void gbmv(const unsigned int p_m,
 #pragma HLS data_pack variable = p_y
 #ifndef __SYNTHESIS__
     assert(p_m <= t_MaxRows);
-    assert(p_m <= p_n + p_kl);
+    assert(p_m == p_n);
     assert(p_m % t_ParEntries == 0);
 #endif
 
