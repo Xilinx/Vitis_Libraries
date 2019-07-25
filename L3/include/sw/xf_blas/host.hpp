@@ -111,7 +111,6 @@ class XFpga {
     }
 
     bool copyFromFpga(unsigned int p_bufHandle, size_t p_szBytes) {
-        while (xclExecWait(m_handle, 1) == 0);
         if (xclSyncBO(m_handle, p_bufHandle, XCL_BO_SYNC_BO_FROM_DEVICE, p_szBytes, 0)) {
             return false;
         }
@@ -137,6 +136,9 @@ class XFpga {
         if (xclExecBuf(m_handle, m_execHandle)) {
             return false;
         }
+        
+        while (xclExecWait(m_handle, 1) == 0);
+        
         return true;
     }
 };
@@ -387,6 +389,7 @@ class BLASHost : public XHost {
             if (!this->m_fpga->execKernel(this->m_cuIndex)) {
                 l_status = XFBLAS_STATUS_ALLOC_FAILED;
             }
+            m_execControl = false;
         }
         return l_status;
     }

@@ -56,8 +56,8 @@ The following is an example of how to use XFBLAS API. Users always need to inclu
     
     if (argc < 3){
       cerr << " usage: \n"
-           << " gemx_test.exe gemx.xclbin config_info.dat log.txt\n"
-           << " gemx_test.exe gemx.xclbin config_info.dat\n";
+           << " gemx_example.exe gemx.xclbin config_info.dat log.txt\n"
+           << " gemx_example.exe gemx.xclbin config_info.dat\n";
       return EXIT_FAILURE; 
     }
     unsigned int l_argIdx = 1;
@@ -99,7 +99,7 @@ The following is an example of how to use XFBLAS API. Users always need to inclu
     } 
   
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
-    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM);
+    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName);
     status = xfblasMallocRestricted(m,k,sizeof(*a),a,k);
     status = xfblasMallocRestricted(k,n,sizeof(*b),b,n);
     status = xfblasMallocRestricted(m,n,sizeof(*c),c,n);
@@ -144,11 +144,11 @@ These API functions run on the first kernel by default, but they could support m
     status = xfblasGetMatrixRestricted(c, 1);
   
   
-**4. XFBLAS L3 test**
+**4. XFBLAS L3 example**
 
-Please see `XFBLAS L3 test folder`_ for more test cases. 
+Please see `XFBLAS L3 example folder`_ for more example cases. 
 
-.. _XFBLAS L3 test folder: https://gitenterprise.xilinx.com/FaaSApps/xf_blas/tree/master/L3/tests
+.. _XFBLAS L3 example folder: https://gitenterprise.xilinx.com/FaaSApps/xf_blas/tree/master/L3/examples
 
 .. toctree::
    :maxdepth: 2
