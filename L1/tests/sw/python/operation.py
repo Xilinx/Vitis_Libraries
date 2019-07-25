@@ -360,19 +360,11 @@ class BLAS_L2(OP):
       self.setDtype(dataType)
       for vecDim in vecDimList:
         self.setSize(vecDim)
-        runTest.run()
+        self.specTest(runTest)
 
-  def testBand(self, runTest):
-    matrixDimList = runTest.profile['matrixDims']
-    dataTypeList = runTest.dataTypes
-    kulList = runTest.profile['kulList']
-    for dataType in dataTypeList:
-      self.setDtype(dataType)
-      for kul in kulList:
-        self.setK(kul)
-        for matrixDim in matrixDimList:
-          self.setSize(matrixDim)
-          runTest.run()
+  def specTest(self, runTest):
+    runTest.run()
+
 
 class gemv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
@@ -410,13 +402,16 @@ class gbmv(BLAS_L2):
     t_Debug and print("Storage:\n",a)
     return alpha, beta, a, x, y, ar, yr
 
-  def test(self, runTest):
-    self.testBand(runTest)
-
+  def specTest(self, runTest):
+    kulList = runTest.profile['kulList']
+    for kul in kulList:
+      self.setK(kul)
+      runTest.run()
 
 class symv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
+    self.upper = True
 
   def setSize(self, m):
     self.matrixDim =(m ,m) 
@@ -424,14 +419,21 @@ class symv(BLAS_L2):
     self.n = m
     self.sizeStr = "m%d"%(self.m)
 
+  def setStorage(self, upper = True):
+    self.upper = upper 
+
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    matrix = self.dataGen.matrix(self.matrixDim)
-    matrix = matrix + np.transpose(matrix)
+    matrix = self.dataGen.symmetricMatrix(self.matrixDim)
+    a = symmetricMatrixStorage(matrix, self.upper)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(matrix, x) + beta * y
-    return alpha, beta, matrix, x, y, ar, yr
+    return alpha, beta, a, x, y, ar, yr
+
+  def specTest(self, runTest):
+    self.setStorage(runTest.profile['storage'])
+    runTest.run()
 
 class sbmv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
@@ -475,18 +477,12 @@ class sbmv(BLAS_L2):
     t_Debug and print("Storage:\n",a)
     return alpha, beta, a, x, y, ar, yr
 
-  def test(self, runTest):
-    matrixDimList = runTest.profile['matrixDims']
-    dataTypeList = runTest.dataTypes
+  def specTest(self, runTest):
     kulList = runTest.profile['kList']
-    for dataType in dataTypeList:
-      self.setDtype(dataType)
-      for kul in kulList:
-        self.setK(kul)
-        for matrixDim in matrixDimList:
-          self.setSize(matrixDim)
-          self.setStorage(runTest.profile['storage'])
-          runTest.run()
+    for kul in kulList:
+      self.setK(kul)
+      self.setStorage(runTest.profile['storage'])
+      runTest.run()
 
 def main():
   dg = DataGenerator()
