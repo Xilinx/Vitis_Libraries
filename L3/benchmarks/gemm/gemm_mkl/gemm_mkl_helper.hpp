@@ -32,10 +32,10 @@ XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_init=true){
 /*// OBSOLETE, use posix_memalign.
   mat = (XFBLAS_dataType *)memalign(128, (size_t)p_rows * (size_t)p_cols * sizeof(XFBLAS_dataType));
   if (mat == (XFBLAS_dataType *)NULL) {
-    printf("Out of memory for the matrix\n");
+    printf("[ERROR] failed to create the matrix\n");
     exit(1);
   }*/
-  int rc = posix_memalign( (void**) &mat, 128, (size_t)p_rows * (size_t)p_cols * sizeof(XFBLAS_dataType));
+  int rc = posix_memalign( (void**) &mat, 4096, (size_t)p_rows * (size_t)p_cols * sizeof(XFBLAS_dataType));
   if( rc != 0 ){
 	printf("[ERROR %d] failed to create the matrix\n", rc);
     exit(1);
@@ -44,6 +44,7 @@ XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_init=true){
   return mat;
 }
 
+// TODO, implement random input
 void initMat(XFBLAS_dataType* mat, int p_rows, int p_cols){
   srand(time(NULL));
   for (int j = 0; j < p_rows; j ++)

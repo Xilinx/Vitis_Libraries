@@ -1,5 +1,9 @@
 #include "gemm_mkl_helper.hpp"
 
+#include <fstream>
+#include <string>
+using namespace std;
+
 int main(int argc, char **argv) {
 
   if (argc < 4) {
@@ -10,24 +14,32 @@ int main(int argc, char **argv) {
   int m=atoi(argv[1]), k=atoi(argv[2]), n=atoi(argv[3]);
   XFBLAS_dataType *a, *b, *c, alpha = 1., beta = 1.;
 
+  // Generating Random Input
   a = createMat(m, k);
   b = createMat(k, n);
   c = createMat(m, n);
 
-  // Generating Random Input and Golden Output
+  ofstream outFile;
+  string data_dir("../data/");
+
+  outFile.open(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin", ofstream::binary);
+  outFile.write( (char*) a, sizeof(XFBLAS_dataType)*m*k );
+  outFile.close();
+
+  outFile.open(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin", ofstream::binary);
+  outFile.write( (char*) a, sizeof(XFBLAS_dataType)*k*n );
+  outFile.close();
+
+  outFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ofstream::binary);
+  outFile.write( (char*) a, sizeof(XFBLAS_dataType)*m*n );
+  outFile.close();
+  
+  // Generating Golden Output
   GEMM_MKL(m, k, n, alpha, beta, a, b, c);
 
-  // TODO, generate bin via C++ ofstream 
-  FILE* pFile;
-  pFile = fopen ("../data/matA.bin", "wb");
-  fwrite( a, sizeof(XFBLAS_dataType), m*k, pFile);
-  fclose(pFile);
-  pFile = fopen ("../data/matB.bin", "wb");
-  fwrite( b, sizeof(XFBLAS_dataType), k*n, pFile);
-  fclose(pFile);
-  pFile = fopen ("../data/matC.bin", "wb");
-  fwrite( c, sizeof(XFBLAS_dataType), m*n, pFile);
-  fclose(pFile);
+  outFile.open(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin", ofstream::binary);
+  outFile.write( (char*) a, sizeof(XFBLAS_dataType)*m*n );
+  outFile.close();
 
   free(a);
   free(b);

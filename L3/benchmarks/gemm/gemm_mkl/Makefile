@@ -1,5 +1,5 @@
 ifndef MKLROOT
-$(error MKLROOT not defined)
+$(warning [WARNING] MKLROOT not defined)
 endif
 
 CXX	= g++
@@ -23,4 +23,4 @@ dgemm_mkl_gen: gemm_mkl_gen_bin.cpp
 	$(CXX) $(CFLAGS) -DUSE_DOUBLE_PRECISION -o $@ $^ $(MKL_LIBS) -lpthread -lm
 
 clean:
-	rm -f *.o *~ sgemm_mkl_bench dgemm_mkl_bench sgemm_mkl_gen dgemm_mkl_gen
+	rm -f log-*.txt perf_gemm_mkl_bench.csv *.o *~ sgemm_mkl_bench dgemm_mkl_bench sgemm_mkl_gen dgemm_mkl_gen

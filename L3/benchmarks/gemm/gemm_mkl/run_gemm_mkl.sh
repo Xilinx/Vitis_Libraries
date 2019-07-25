@@ -14,18 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [ "$#" -ne 6 ]; then
-	echo "Usage: $0 <thread#> <m> <k> <n> <data_type> <mode>" >&2
+if [ "$#" -ne 3 ]; then
+	echo "Usage: $0 <thread#> <data_type> <mode>" >&2
 	echo "where <data_type> = float double" >&2
 	echo "<mode> = (g)enerate binary, (b)enchmark, (a)ll" >&2
 	exit 1
 fi
 
-NUM_M=$2
-NUM_K=$3
-NUM_N=$4
-DATA_TYPE=$5
-MODE=$6
+DATA_TYPE=$2
+MODE=$3
 
 NUMA="numactl -i all"
 export OMP_NUM_THREADS=$1
@@ -34,35 +31,70 @@ if [[ ("$MODE" == "g") || ("$MODE" == "a") ]]; then
 	if [ ! -e "../data" ]; then
 		mkdir ../data
 	fi
-	if [[ ("$DATA_TYPE" == "double") ]]; then
-		make dgemm_mkl_gen
-		./dgemm_mkl_gen $NUM_M $NUM_K $NUM_N
-	elif [[ ("$DATA_TYPE" == "float") ]]; then
-		make sgemm_mkl_gen
-		./sgemm_mkl_gen $NUM_M $NUM_K $NUM_N
-	else
-		echo "Error in data_type"
-		exit 1
-	fi
+	n=256
+	while [  $n -le 8192 ]; do
+		echo "############# $n ################"
+		if [[ ("$DATA_TYPE" == "double") ]]; then
+			make dgemm_mkl_gen
+			if [ -e dgemm_mkl_gen ]; then
+				./dgemm_mkl_gen $n $n $n
+			else
+				echo "Error in Generating Binary"
+				exit 1
+			fi
+		elif [[ ("$DATA_TYPE" == "float") ]]; then
+			make sgemm_mkl_gen
+			if [ -e sgemm_mkl_gen ]; then
+				./sgemm_mkl_gen $n $n $n
+			else
+				echo "Error in Generating Binary"
+				exit 1
+			fi
+		else
+			echo "Error in data_type"
+			exit 1
+		fi
+		n=`expr $n \* 2`
+	done
 	echo "====================="
 	echo "Generating binary complete"
-	echo "Binary File is at ../data/"
+	echo "Binary file is at ../data/"
 	echo "====================="
 fi
 
 if [[ ("$MODE" == "b") || ("$MODE" == "a") ]]; then
-	if [[ ("$DATA_TYPE" == "double") ]]; then
-		make dgemm_mkl_bench
-		$NUMA ./dgemm_mkl_bench $NUM_M $NUM_K $NUM_N
-	elif [[ ("$DATA_TYPE" == "float") ]]; then
-		make sgemm_mkl_bench
-		$NUMA ./sgemm_mkl_bench $NUM_M $NUM_K $NUM_N
-	else
-		echo "Error in data_type"
-		exit 1
-	fi
+	n=256
+	logs=()
+	while [  $n -le 8192 ]; do
+		echo "############# $n ################"
+		if [[ ("$DATA_TYPE" == "double") ]]; then
+			make dgemm_mkl_bench
+			if [ -e dgemm_mkl_bench ]; then
+				$NUMA ./dgemm_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
+			else
+				echo "Error in Benchmarking"
+				exit 1
+			fi
+		elif [[ ("$DATA_TYPE" == "float") ]]; then
+			make sgemm_mkl_bench
+			if [ -e sgemm_mkl_bench ]; then
+				$NUMA ./sgemm_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
+			else
+				echo "Error in Benchmarking"
+				exit 1
+			fi
+		else
+			echo "Error in data_type"
+			exit 1
+		fi
+		logs="$logs log-$DATA_TYPE-$n.txt"
+		n=`expr $n \* 2`
+	done
 	echo "====================="
 	echo "Benchmarking complete"
+	egrep -h ^DATA_CSV $logs | grep Type | head -1 > perf_gemm_mkl_bench.csv
+	egrep -h ^DATA_CSV $logs | grep -v Type >> perf_gemm_mkl_bench.csv
+	echo "Parsing CSV complete"
 	echo "====================="
 fi
 
