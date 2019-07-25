@@ -71,7 +71,7 @@ class HLS:
             print("\nSYNTHESIS finished.")
           sys.stdout.flush()
         f.write(line)
-    print('vivado_hls finished execution.') 
+    print('\nvivado_hls finished execution.') 
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
