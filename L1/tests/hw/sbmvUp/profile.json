@@ -7,7 +7,7 @@
     "float64"
   ],
   "op": "sbmv",
-  "ParEntries": 4,
+  "parEntries": 4,
   "matrixDims": [
     8,
     12
