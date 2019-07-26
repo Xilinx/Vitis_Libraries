@@ -182,7 +182,7 @@ class BLAS_L1(OP):
     self.dataGen.setDataType(self.dataType)
     x = y = xr = yr = None
     alpha = self.dataGen.scalar()
-    r = self.dataGen.scalar(0)
+    r = np.zeros(1, dtype=np.int32)
     return alpha, x, y, xr, yr, r
   def addInstr(self, blas_gen, register):
     for alpha, x, y, xr, yr, r in register:
