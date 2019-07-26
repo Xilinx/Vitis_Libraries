@@ -103,17 +103,17 @@ class RunTest:
     self.params = Parameters(self.op, self.logParEntries, self.parEntries)
     self.hls.generateDirective(self.params, directivePath)
 
-  def run(self):
+  def build(self):
     c_type = self.typeDict[self.op.dataType]
     self.params.setDtype(c_type)
     r_type = c_type
-    typeStr = 'd%s'%c_type
+    self.typeStr = 'd%s'%c_type
     if self.opClass == 'BLAS_L1':
       r_type = self.typeDict[self.op.rtype]
-      typeStr = 'd%s_r%s'%(c_type, r_type)
+      self.typeStr = 'd%s_r%s'%(c_type, r_type)
     self.params.setRtype(r_type)
 
-    libPath =os.path.join(self.libPath,'blas_gen_%s.so'%typeStr)
+    libPath =os.path.join(self.libPath,'blas_gen_%s.so'%self.typeStr)
 
     if not os.path.exists(libPath):
       make = Makefile(self.makefile, libPath)
@@ -121,10 +121,11 @@ class RunTest:
         raise Exception("ERROR: make shared library failure.")
 
     self.lib = C.cdll.LoadLibrary(libPath)
-    
-    paramTclPath =os.path.join(self.dataPath, r'parameters_%s_%s.tcl'%(self.op.sizeStr,typeStr))
-    logfile=os.path.join(self.dataPath, r'logfile_%s_%s.log'%(self.op.sizeStr,typeStr))
-    binFile =os.path.join(self.dataPath,'TestBin_%s_%s.bin'%(self.op.sizeStr,typeStr))
+
+  def run(self):
+    paramTclPath =os.path.join(self.dataPath, r'parameters_%s_%s.tcl'%(self.op.sizeStr,self.typeStr))
+    logfile=os.path.join(self.dataPath, r'logfile_%s_%s.log'%(self.op.sizeStr,self.typeStr))
+    binFile =os.path.join(self.dataPath,'TestBin_%s_%s.bin'%(self.op.sizeStr,self.typeStr))
 
     print("\n")
     print("="*64)
@@ -133,6 +134,7 @@ class RunTest:
     self.op.addInstr(blas_gen, dataList)
     blas_gen.write2BinFile(binFile)
     print("Data file %s has been generated sucessfully."%binFile)
+    del dataList
     self.hls.generateParam(self.params, paramTclPath)
     print("Parameters in file %s.\nLog file %s"%(paramTclPath, logfile))
     self.hls.execution(binFile, logfile)
