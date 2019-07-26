@@ -387,9 +387,9 @@ class gbmv(BLAS_L2):
 
   def setK(self, kul):
     self.k=tuple(kul)
-    self.ku = kul[0]
-    self.kl = kul[1]
-    self.sizeStr = "m%d-n%d-u%d-l%d"%(self.m,self.n,self.ku,self.kl)
+    self.kl = kul[0]
+    self.ku = kul[1]
+    self.sizeStr = "m%d-n%d-l%d-u%d"%(self.m,self.n,self.kl,self.ku)
     self.memorySize = (self.kl + self.ku +1) * self.n
     if self.ku < self.n - self.m:
       print("WARNING: Current matrix configuration has multiple zero columns")
