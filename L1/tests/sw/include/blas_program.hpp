@@ -72,6 +72,7 @@ class Program {
     typedef vector<PageType> PageVectorType;
     typedef ParamB1<t_DataType, t_ResDataType> ParamB1Type;
     typedef ParamB2<t_DataType> ParamB2Type;
+    typedef typename ParamB2<t_DataType>::MatStoreType MatStoreType;
 
    public:
     static const unsigned int ParamStartOff = t_ParamPageIdx * t_PageSizeBytes;
@@ -256,15 +257,15 @@ class Program {
             ((l_vecYDataBytes % t_PageSizeBytes) != 0) ? (t_PageSizeBytes - (l_vecYDataBytes % t_PageSizeBytes)) : 0;
         size_t l_matDataBytes;
         switch (p_param.m_aStore) {
-        GBM:
-            l_matDataBytes = (l_kl + l_ku + 1) * l_n * sizeof(t_DataType);
-            break;
-        SBM_LO:
-            l_matDataBytes = (l_kl + 1) * l_n * sizeof(t_DataType);
-            break;
-        SBM_UP:
-            l_matDataBytes = (l_ku + 1) * l_n * sizeof(t_DataType);
-            break;
+            case MatStoreType::GBM:
+                l_matDataBytes = (l_kl + l_ku + 1) * l_n * sizeof(t_DataType);
+                break;
+            case MatStoreType::SBM_LO:
+                l_matDataBytes = (l_kl + 1) * l_n * sizeof(t_DataType);
+                break;
+            case MatStoreType::SBM_UP:
+                l_matDataBytes = (l_ku + 1) * l_n * sizeof(t_DataType);
+                break;
             default:
                 l_matDataBytes = l_m * l_n * sizeof(t_DataType);
                 break;

@@ -30,6 +30,10 @@ void uut_top(uint32_t p_m,
              BLAS_dataType p_y[BLAS_matrixSize / BLAS_vectorSize],
              BLAS_dataType p_aRes[BLAS_matrixSize],
              BLAS_dataType p_yRes[BLAS_matrixSize / BLAS_vectorSize]) {
+#ifndef __SYNTHESIS__
+    assert(p_m == p_n);
+#endif
+
 #pragma HLS DATAFLOW
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strA;
 #pragma HLS data_pack variable = l_strA
@@ -43,6 +47,7 @@ void uut_top(uint32_t p_m,
     gbm2Stream<BLAS_dataType, BLAS_parEntries>(p_n, p_kl, p_ku, p_a, l_strA);
     vec2GbMatStream<BLAS_dataType, BLAS_parEntries>(p_n, p_kl, p_ku, p_x, l_strX);
     readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_y, p_m, l_strY);
-    gbmv<BLAS_dataType, BLAS_parEntries, BLAS_vectorSize>(p_m, p_n, p_kl, p_ku, p_alpha, l_strA, l_strX, p_beta, l_strY, l_strYR);
+    gbmv<BLAS_dataType, BLAS_parEntries, BLAS_vectorSize>(p_m, p_n, p_kl, p_ku, p_alpha, l_strA, l_strX, p_beta, l_strY,
+                                                          l_strYR);
     writeStream2Vec<BLAS_dataType, BLAS_parEntries>(l_strYR, p_m, p_yRes);
 }

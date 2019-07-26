@@ -464,15 +464,15 @@ void sbmSub2Stream(unsigned int p_n,
  * @tparam t_ParBlocks number of t_ParEntries, p_n must be multiple t_ParEntries * t_ParBlocks
  *
  * @param p_n number of rows/cols in a square matrix
- * @param p_ku number of superdiagonals
  * @param p_kl number of subdiagonals
+ * @param p_ku number of superdiagonals
  * @param p_a a p_m x p_n symmetric banded matrix with on-chip column-major storage and corresponding 0 paddings
  * @param p_out output stream, which is row-aligned with 0 paddings along subdiagonals
  */
 template <typename t_DataType, unsigned int t_ParEntries, unsigned int t_ParBlocks = 1>
 void gbm2Stream(unsigned int p_n,
-                unsigned int p_ku,
                 unsigned int p_kl,
+                unsigned int p_ku,
                 t_DataType* p_a,
                 hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
 #ifndef __SYNTHESIS__
