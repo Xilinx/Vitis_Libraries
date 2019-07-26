@@ -507,8 +507,8 @@ void gbm2Stream(unsigned int p_n,
  */
 template <typename t_DataType, unsigned int t_ParEntries>
 void vec2GbMatStream(unsigned int p_n,
-                     unsigned int p_ku,
                      unsigned int p_kl,
+                     unsigned int p_ku,
                      t_DataType* p_x,
                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
 #ifndef __SYNTHESIS__
