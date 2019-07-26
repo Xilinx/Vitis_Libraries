@@ -196,6 +196,7 @@ class BLAS_L1(OP):
     for dataType, retType in zip(dataTypeList, retTypeList):
       self.setDtype(dataType)
       self.setRtype(retType)
+      runTest.build()
       for vecDim in vecDimList:
         self.setSize(vecDim)
         runTest.run()
@@ -346,18 +347,21 @@ class BLAS_L2(OP):
     self.m = mn[0]
     self.n = mn[1]
     self.sizeStr = "m%d-n%d"%(self.m,self.n)
+    self.memorySize = self.m * self.n
 
   def paramTCL(self, f):
     f.write('   L2 true\n ')
     f.write('   opName "%s"\n '%self.name)
     f.write('   matrixSize %d\n '%(self.m * self.n))
     f.write('   vectorSize %d\n '%self.n)
+    f.write('   memorySize %d\n '%self.memorySize)
 
   def test(self, runTest):
     vecDimList = runTest.profile['matrixDims']
     dataTypeList = runTest.dataTypes
     for dataType in dataTypeList:
       self.setDtype(dataType)
+      runTest.build()
       for vecDim in vecDimList:
         self.setSize(vecDim)
         self.specTest(runTest)
@@ -386,6 +390,7 @@ class gbmv(BLAS_L2):
     self.ku = kul[0]
     self.kl = kul[1]
     self.sizeStr = "m%d-n%d-u%d-l%d"%(self.m,self.n,self.ku,self.kl)
+    self.memorySize = (self.kl + self.ku +1) * self.n
     if self.ku < self.n - self.m:
       print("WARNING: Current matrix configuration has multiple zero columns")
     if self.m - self.n > self.kl:
@@ -445,6 +450,7 @@ class sbmv(BLAS_L2):
     self.kl = k
     self.ku = k
     self.k = (k, k)
+    self.memorySize = (self.kl + self.ku +1) * self.n
     self.sizeStr = "m%d_k%d"%(self.m, k)
 
   def setSize(self, m:int):
