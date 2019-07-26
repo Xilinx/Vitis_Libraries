@@ -43,7 +43,7 @@ bool compare<double>(double x, double ref) {
 template <>
 bool compare<float>(float x, float ref) {
     bool l_exactMatch;
-    return isClose<float>(1e-3, 3e-6, x, ref, l_exactMatch);
+    return isClose<float>(2e-3, 3e-6, x, ref, l_exactMatch);
 }
 
 template <typename T>
@@ -54,7 +54,9 @@ bool compare(unsigned int n, T* x, T* ref) {
             if (x == nullptr) return true;
             for (int i = 0; i < n; i++) l_ret = l_ret && compare(x[i], (T)0);
         } else {
-            for (int i = 0; i < n; i++) l_ret = l_ret && compare(x[i], ref[i]);
+            for (int i = 0; i < n; i++) {
+                l_ret = l_ret && compare(x[i], ref[i]);
+            }
         }
     } catch (exception& e) {
         std::cout << "Exception happend: " << e.what() << std::endl;
