@@ -122,20 +122,44 @@ int main(int argc, char **argv) {
   string data_dir("./data/");
 
   inFile.open(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin", ifstream::binary);
-  inFile.read( (char*) a, sizeof(XFBLAS_dataType)*m*k );
-  inFile.close();
+  if( inFile.is_open() ){
+    inFile.read( (char*) a, sizeof(XFBLAS_dataType)*m*k );
+    inFile.close();
+  } 
+  else {
+    cerr << "Error opening "<<(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin")<<endl;
+    exit(1);
+  }
   
   inFile.open(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin", ifstream::binary);
-  inFile.read( (char*) b, sizeof(XFBLAS_dataType)*k*n );
-  inFile.close();
-  
+  if( inFile.is_open() ){
+    inFile.read( (char*) b, sizeof(XFBLAS_dataType)*k*n );
+    inFile.close();
+  }
+  else {
+    cerr << "Error opening "<<(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin")<<endl;
+    exit(1);
+  }
+
   inFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
-  inFile.read( (char*) c, sizeof(XFBLAS_dataType)*m*n );
-  inFile.close();
+  if( inFile.is_open() ){
+    inFile.read( (char*) c, sizeof(XFBLAS_dataType)*m*n );
+    inFile.close();
+  }
+  else {
+    cerr << "Error opening "<<(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin")<<endl;
+    exit(1);
+  }
   
   inFile.open(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
-  inFile.read( (char*) goldenC, sizeof(XFBLAS_dataType)*m*n );
-  inFile.close();
+  if( inFile.is_open() ){
+    inFile.read( (char*) goldenC, sizeof(XFBLAS_dataType)*m*n );
+    inFile.close();
+  }
+  else {
+    cerr << "Error opening "<<(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin")<<endl;
+    exit(1);
+  }
   
   TimePointType l_tp[4];
   unsigned int l_tpIdx = 0;

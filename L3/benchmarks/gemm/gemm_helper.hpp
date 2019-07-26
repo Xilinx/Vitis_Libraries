@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef GEMM_HELPER_HPP
+#define GEMM_HELPER_HPP
+
 #include <cmath>
 #include <iomanip>
 #include <string>
@@ -86,6 +89,4 @@ bool readConfigDict(string p_configFile, unordered_map<string, string>* p_config
     return true;
 }
 
-
-
-
+#endif
