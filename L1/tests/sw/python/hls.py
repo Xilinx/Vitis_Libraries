@@ -65,9 +65,9 @@ class HLS:
           print('.', end='') 
           if line.find("CSIM finish") >=0:
             print('\nCSIM finished.')
-          if line.find(r'C/RTL co-simulation finished') >=0:
+          elif line.find(r'C/RTL co-simulation finished') >=0:
             print('\nCOSIM finished.')
-          if line.find(r'C/RTL SIMULATION') >=0:
+          elif line.find(r'C/RTL SIMULATION') >=0:
             print("\nSYNTHESIS finished.")
           sys.stdout.flush()
         f.write(line)
