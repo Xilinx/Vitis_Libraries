@@ -41,6 +41,6 @@ for reference.
  
 .. toctree::
    :caption: User Guide
-   :maxdepth: 1
+   :maxdepth: 3
 
    user_guide/L3.rst

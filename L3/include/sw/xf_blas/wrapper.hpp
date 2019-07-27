@@ -19,6 +19,7 @@
 
 #include "handle.hpp"
 #include "gemm_host.hpp"
+#include "gemv_host.hpp"
 
 namespace xf {
 namespace linear_algebra {
@@ -60,6 +61,21 @@ xfblasStatus_t xfblasCreate(const char* xclbin,
                 shared_ptr<BLASHost>(new GEMMHost(xclbin, logFile, &l_status, i)));
         }
         return l_status;
+    } else if (engineName == XFBLAS_ENGINE_GEMV) {
+        if (ConfigDict::instance().m_dict["GEMX_runGemv"] != "1") {
+            return XFBLAS_STATUS_INVALID_VALUE;
+        }
+        int l_err = 0;
+        XFpgaHold::instance().m_xFpgaPtr = shared_ptr<XFpga>(new XFpga(xclbin, logFile, &l_err));
+        if (l_err != 0) {
+            return XFBLAS_STATUS_NOT_INITIALIZED;
+        }
+        for (unsigned int i = 0; i < kernelNumber; i++) {
+            BLASHostHandle::instance().m_handlePtr.push_back(
+                shared_ptr<BLASHost>(new GEMVHost(xclbin, logFile, &l_status, i)));
+        }
+        return l_status;      
+    
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -103,7 +119,21 @@ xfblasStatus_t xfblasMalloc(short** devPtr, int rows, int lda, int elemSize, uns
             l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMat<short*>(devPtr, l_bufSize);
         }
         return l_status;
-
+    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        int l_paddedRows, l_paddedLda;
+        if (lda == 1){
+            l_paddedRows = getPaddedSize(rows, l_minSize);
+            l_paddedLda = lda;
+        } else {
+            l_paddedRows = getPaddedSize(rows, l_minSize);
+            l_paddedLda = getPaddedSize(lda, l_minSize);
+        }
+        unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
+        l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMat<short*>(devPtr, l_bufSize);
+        return l_status;
+      
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -134,7 +164,21 @@ xfblasStatus_t xfblasMalloc(float** devPtr, int rows, int lda, int elemSize, uns
             l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMat<float*>(devPtr, l_bufSize);
         }
         return l_status;
-
+        
+    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        int l_paddedRows, l_paddedLda;
+        if (lda == 1){
+            l_paddedRows = getPaddedSize(rows, l_minSize);
+            l_paddedLda = lda;
+        } else {
+            l_paddedRows = getPaddedSize(rows, l_minSize);
+            l_paddedLda = getPaddedSize(lda, l_minSize);
+        }
+        unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
+        l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMat<float*>(devPtr, l_bufSize);
+        return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -177,6 +221,28 @@ xfblasStatus_t xfblasMallocRestricted(
             xfblasStatus_t l_status =
                 BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMatRestricted(A, A, l_bufSize);
             return l_status;
+        }
+        
+     } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        if (lda == 1){
+            if (rows % l_minSize != 0) {
+              return XFBLAS_STATUS_NOT_PADDED;
+            } else {
+              unsigned long long l_bufSize = rows * lda * elemSize;
+              xfblasStatus_t l_status =
+                   BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMatRestricted(A, A, l_bufSize);
+            return l_status;
+          }
+        } else {
+            if (rows % l_minSize != 0 || cols % l_minSize != 0 || lda % l_minSize != 0) {
+              return XFBLAS_STATUS_NOT_PADDED;
+            } else {
+              unsigned long long l_bufSize = rows * lda * elemSize;
+              xfblasStatus_t l_status =
+                   BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMatRestricted(A, A, l_bufSize);
+            return l_status;
+          }
         }
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
@@ -225,7 +291,23 @@ xfblasStatus_t xfblasMallocManaged(
             l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMat<short*>(devPtr, l_bufSize);
         }
         return l_status;
-
+        
+    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        int l_paddedRows, l_paddedLda;
+        if (lda == 1){
+            l_paddedRows = getPaddedSize(rows, l_minSize);
+            l_paddedLda = lda;
+            *paddedLda = lda;
+        } else {
+            l_paddedRows = getPaddedSize(rows, l_minSize);
+            l_paddedLda = getPaddedSize(lda, l_minSize);
+            *paddedLda = l_paddedLda;
+        }
+        unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
+        l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMat<short*>(devPtr, l_bufSize);
+        return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -259,7 +341,22 @@ xfblasStatus_t xfblasMallocManaged(
             l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMat<float*>(devPtr, l_bufSize);
         }
         return l_status;
-
+    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+        xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        int l_paddedRows, l_paddedLda;
+        if (lda == 1){
+            l_paddedRows = getPaddedSize(rows, l_minSize);
+            l_paddedLda = lda;
+            *paddedLda = lda;
+        } else {
+            l_paddedRows = getPaddedSize(rows, l_minSize);
+            l_paddedLda = getPaddedSize(lda, l_minSize);
+            *paddedLda = l_paddedLda;
+        }
+        unsigned long long l_bufSize = l_paddedRows * l_paddedLda * elemSize;
+        l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->allocMat<float*>(devPtr, l_bufSize);
+        return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -300,6 +397,17 @@ xfblasStatus_t xfblasSetMatrix(
         xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->setMatToFPGA<short*>(
             d_A, rows, lda, paddedLda, A, d_A);
         return l_status;
+        
+    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1"){
+        int paddedLda;
+      if (lda==1){
+        paddedLda = 1;
+      } else {
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        paddedLda = getPaddedSize(lda, l_minSize);
+      } 
+        xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->setMatToFPGA<short*>(d_A, rows, lda, paddedLda, A, d_A);
+        return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -323,6 +431,17 @@ xfblasStatus_t xfblasSetMatrix(
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->setMatToFPGA<float*>(
             d_A, rows, lda, paddedLda, A, d_A);
+        return l_status;
+        
+    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1"){
+        int paddedLda;
+      if (lda==1){
+        paddedLda = 1;
+      } else {
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        paddedLda = getPaddedSize(lda, l_minSize);
+      } 
+        xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->setMatToFPGA<float*>(d_A, rows, lda, paddedLda, A, d_A);
         return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
@@ -399,6 +518,18 @@ xfblasStatus_t xfblasGetMatrix(
         l_status =
             BLASHostHandle::instance().m_handlePtr[kernelIndex]->getMat<short*>(d_A, rows, lda, paddedLda, A, d_A);
         return l_status;
+        
+    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+      int paddedLda;
+      if (lda==1){
+        paddedLda = 1;
+      } else {
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        int paddedLda = getPaddedSize(lda, l_minSize);
+      }
+      xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->execute();
+      l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->getMat<short*>(d_A, rows, lda, paddedLda, A, d_A);
+      return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -424,6 +555,18 @@ xfblasStatus_t xfblasGetMatrix(
         l_status =
             BLASHostHandle::instance().m_handlePtr[kernelIndex]->getMat<float*>(d_A, rows, lda, paddedLda, A, d_A);
         return l_status;
+        
+    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+      int paddedLda;
+      if (lda==1){
+        paddedLda = 1;
+      } else {
+        int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+        int paddedLda = getPaddedSize(lda, l_minSize);
+      }
+      xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->execute();
+      l_status = BLASHostHandle::instance().m_handlePtr[kernelIndex]->getMat<float*>(d_A, rows, lda, paddedLda, A, d_A);
+      return l_status;
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -532,10 +675,10 @@ xfblasStatus_t xfblasGemm(xfblasOperation_t transa,
                 int padded_n = getPaddedSize(n, l_minSize);
                 int padded_k = getPaddedSize(k, l_minSize);
                 int paddedLda = getPaddedSize(lda, l_minSize);
-                int padded_ldb = getPaddedSize(ldb, l_minSize);
-                int padded_ldc = getPaddedSize(ldc, l_minSize);
-                l_status = l_gemmPtr->addGEMMOp(A, B, C, C, padded_m, padded_k, padded_n, paddedLda, padded_ldb,
-                                                padded_ldc, padded_ldc, 1, 0);
+                int paddedLdb = getPaddedSize(ldb, l_minSize);
+                int paddedLdc = getPaddedSize(ldc, l_minSize);
+                l_status = l_gemmPtr->addGEMMOp(A, B, C, C, padded_m, padded_k, padded_n, paddedLda, paddedLdb,
+                                                paddedLdc, paddedLdc, 1, 0);
             } else {
                 l_status = l_gemmPtr->addGEMMOp(A, B, C, C, m, k, n, lda, ldb, ldc, ldc, 1, 0);
             }
@@ -547,6 +690,63 @@ xfblasStatus_t xfblasGemm(xfblasOperation_t transa,
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
 }
+
+/**
+ * @brief This function performs the matrix-vector multiplication y = alpha*op(A) x+ beta*y
+ * @param transa operation op(A) that is non- or (conj.) transpose
+ * @param m number of rows in matrix A
+ * @param n number of cols in matrix A
+ * @param alpha scalar used for multiplication
+ * @param A pointer to matrix A in the host memory
+ * @param lda leading dimension of matirx A
+ * @param x pointer to vector x in the host memory
+ * @param incx stride between consecutive elements of x
+ * @param beta scalar used for multiplication
+ * @param y pointer to vector y in the host memory
+ * @param incy stride between consecutive elements of y
+ * @param kernelIndex index of kernel that is being used, default is 0
+ * @retval xfblasStatus_t 0 if the operation completed successfully
+ * @retval xfblasStatus_t 1 if the library was not initialized
+ * @retval xfblasStatus_t 3 if not all the matrices have FPGA devie memory allocated
+ * @retval xfblasStatus_t 4 if the engine is not supported for now
+ */
+xfblasStatus_t xfblasGemv(xfblasOperation_t trans,
+                          int m,
+                          int n,
+                          int alpha,
+                          void* A,
+                          int lda,
+                          void* x,
+                          int incx,
+                          int beta,
+                          void* y,
+                          int incy,
+                          unsigned int kernelIndex = 0) {
+    if (ConfigDict::instance().m_dict.empty()) {
+        return XFBLAS_STATUS_NOT_INITIALIZED;
+    }
+    if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+        if (trans == XFBLAS_OP_N && alpha == 1 && beta == 1 && incx == 1 && incy ==1) {
+            GEMVHost* l_gemvPtr = static_cast<GEMVHost*>(BLASHostHandle::instance().m_handlePtr[kernelIndex].get());
+            xfblasStatus_t l_status;
+            int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+            if (m % l_minSize != 0 || n % l_minSize != 0 ) {
+                int paddedM = getPaddedSize(m, l_minSize);
+                int paddedN = getPaddedSize(n, l_minSize);
+                int paddedLda = getPaddedSize(lda, l_minSize);
+                l_status = l_gemvPtr->addGEMVOp(A, x, y, paddedM, paddedN, paddedLda);
+            } else {
+                l_status = l_gemvPtr->addGEMVOp(A, x, y, m, n, lda);
+            }
+            return l_status;
+        } else {
+            return XFBLAS_STATUS_NOT_SUPPORTED;
+        }
+    } else {
+        return XFBLAS_STATUS_NOT_SUPPORTED;
+    }
+}
+
 
 } // namespace blas
 } // namespace linear_algebra

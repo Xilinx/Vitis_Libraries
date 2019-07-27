@@ -75,6 +75,20 @@ xfblasStatus_t buildConfigDict(string p_configFile,
             return XFBLAS_STATUS_NOT_INITIALIZED;
         }
     }
+    
+    if (p_engineName == XFBLAS_ENGINE_GEMV) {
+        if (l_configDict.find("GEMX_gemvmGroups") != l_configDict.end()) {
+            int l_mBlock = stoi(l_configDict["GEMX_gemvmGroups"]);
+            int l_nBlock = stoi(l_configDict["GEMX_transpBlocks"]);
+            int l_ddrWidth = stoi(l_configDict["GEMX_ddrWidth"]);
+            int l_maxBlock = max(l_mBlock, l_nBlock);
+            int l_minSize = l_ddrWidth * l_maxBlock;
+            l_configDict["minSize"] = to_string(l_minSize);
+        } else {
+            return XFBLAS_STATUS_NOT_INITIALIZED;
+        }
+    }
+    
     *p_configDict = l_configDict;
     return XFBLAS_STATUS_SUCCESS;
 }

@@ -24,44 +24,39 @@
 #include "xf_blas.hpp"
 
 #define IDX2R(i, j, ld) (((i) * (ld)) + (j))
-# define m 128 // a - mxk matrix
-# define n 128 // b - kxn matrix
-# define k 128 // c - mxn matrix
+# define m 256 // a - mxk matrix
+# define n 256 // b - kxn matrix
 
 using namespace std;
 
-XFBLAS_dataType* getGoldenMat(XFBLAS_dataType* a, XFBLAS_dataType* b, XFBLAS_dataType* c){
-  XFBLAS_dataType * goldenC;
-  goldenC = (XFBLAS_dataType*) malloc(m * n * sizeof (XFBLAS_dataType));
+XFBLAS_dataType* getGoldenMat(XFBLAS_dataType* a, XFBLAS_dataType* x, XFBLAS_dataType* y){
+  XFBLAS_dataType * goldenY;
+  goldenY = (XFBLAS_dataType*) malloc(m * 1 * sizeof (XFBLAS_dataType));
   for(int row = 0; row < m; row++){ 
-      for(int col = 0; col < n; col++){ 
           XFBLAS_dataType l_val = 0;
-          for (int i = 0; i < k; i ++) {
-            l_val += a[IDX2R(row,i,k)] * b[IDX2R(i,col,n)];
+          for (int i = 0; i < n; i ++) {
+            l_val += a[IDX2R(row,i,n)] * x[i];
           }
-          goldenC[IDX2R(row,col,n)] = l_val + c[IDX2R(row,col,n)];
-      } 
+          goldenY[row] = l_val + y[row];
   }
-  return goldenC;
+  return goldenY;
 }
 
-bool compareGemm(XFBLAS_dataType* c, XFBLAS_dataType* goldenC, float p_TolRel=1e-3, float p_TolAbs=1e-5){
+bool compareGemv(XFBLAS_dataType* y, XFBLAS_dataType* goldenY, float p_TolRel=1e-3, float p_TolAbs=1e-5){
   bool l_check = true;
   for(int row = 0; row < m; row++){ 
-    for(int col = 0; col < n; col++){
-      XFBLAS_dataType l_ref = goldenC[IDX2R(row,col,n)];
-      XFBLAS_dataType l_result = c[IDX2R(row,col,n)];
+      XFBLAS_dataType l_ref = goldenY[row];
+      XFBLAS_dataType l_result = y[row];
       XFBLAS_dataType l_diffAbs = abs(l_ref-l_result);
       XFBLAS_dataType l_diffRel = l_diffAbs;
-      if (goldenC[IDX2R(row,col,n)] != 0 ){
+      if (goldenY[row] != 0 ){
         l_diffRel /= abs(l_ref);
       }
       bool check = (l_diffRel <= p_TolRel) || (l_diffAbs <= p_TolAbs);
       if (!check){
-        cout<<"golden result "<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,n)]<<"\n";
+        cout<<"golden result "<< setprecision(10) <<goldenY[row]<<" is not equal to fpga result "<< setprecision(10) <<y[row]<<"\n";
         l_check = false;
       }
-    }
   }
   return l_check;
 }
@@ -70,8 +65,8 @@ int main(int argc, char **argv) {
   
   if (argc < 3){
     cerr << " usage: \n"
-         << " gemm_test.exe gemx.xclbin config_info.dat 1\n"
-         << " gemm_test.exe gemx.xclbin config_info.dat\n";
+         << " gemv_test.exe gemx.xclbin config_info.dat 1\n"
+         << " gemv_test.exe gemx.xclbin config_info.dat\n";
     return EXIT_FAILURE; 
   }
   unsigned int l_argIdx = 1;
@@ -88,7 +83,7 @@ int main(int argc, char **argv) {
     l_numKernel = stoi(argv[l_argIdx++]); 
   }
   
-  xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
+  xfblasEngine_t engineName = XFBLAS_ENGINE_GEMV;
   xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Create Handle failed with error code: "<< status << "\n"; 
@@ -97,48 +92,44 @@ int main(int argc, char **argv) {
   }
     
   int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
-  XFBLAS_dataType * a, * b, * c;
+  XFBLAS_dataType * a, * x, * y;
   
-  posix_memalign((void** )&a, 4096, m*k* sizeof ( XFBLAS_dataType ));
-  posix_memalign((void** )&b, 4096, k*n* sizeof ( XFBLAS_dataType ));
-  posix_memalign((void** )&c, 4096, m*n* sizeof ( XFBLAS_dataType ));
+  posix_memalign((void** )&a, 4096, m*n* sizeof ( XFBLAS_dataType ));
+  posix_memalign((void** )&x, 4096, n*1* sizeof ( XFBLAS_dataType ));
+  posix_memalign((void** )&y, 4096, m*1* sizeof ( XFBLAS_dataType ));
   
   int ind = 1;
-  for( i = 0; i<  m; i ++){ 
-    for( j = 0; j < k; j ++){ 
-      a[ IDX2R (i,j,k )]= (XFBLAS_dataType) ind++; 
+  for( i = 0; i<  m; i ++) { 
+    for( j = 0; j < n; j ++){ 
+      a[ IDX2R (i,j,n )]= (XFBLAS_dataType) ind++; 
     } 
   } 
   ind = 1;
-  for( i = 0; i<  k; i ++){ 
-    for( j = 0; j < n; j ++){ 
-      b[ IDX2R (i,j,n )]= (XFBLAS_dataType) ind++; 
-    } 
+  for( i = 0; i<  n; i ++) { 
+      x[ i ]= (XFBLAS_dataType) ind; 
   } 
 
   for( i = 0; i<  m; i ++){ 
-    for( j = 0; j < n; j ++){ 
-      c[ IDX2R (i,j,n )]= 0; 
-    } 
+      y[ i ]= 0; 
   } 
   
-  XFBLAS_dataType* goldenC = getGoldenMat(a,b,c);
+  XFBLAS_dataType* goldenY = getGoldenMat(a,x,y);
   
-  status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, l_numKernel-1);
+  status = xfblasMallocRestricted(m,n,sizeof(*a),a,n, l_numKernel-1);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
     xfblasDestory();
     return EXIT_FAILURE;   
   }
   
-  status = xfblasMallocRestricted(k,n,sizeof(*b),b,n, l_numKernel-1);
+  status = xfblasMallocRestricted(n,1,sizeof(*x),x,1, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix B failed with error code: "<< status << "\n"; 
     xfblasDestory();
     return EXIT_FAILURE;   
   }
-  status = xfblasMallocRestricted(m,n,sizeof(*c),c,n, l_numKernel-1);
+  status = xfblasMallocRestricted(m,1,sizeof(*y),y,1, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix C failed with error code: "<< status << "\n"; 
@@ -147,23 +138,23 @@ int main(int argc, char **argv) {
   }
   
   status = xfblasSetMatrixRestricted(a, l_numKernel-1);
-  status = xfblasSetMatrixRestricted(b, l_numKernel-1);
-  status = xfblasSetMatrixRestricted(c, l_numKernel-1);
+  status = xfblasSetMatrixRestricted(x, l_numKernel-1);
+  status = xfblasSetMatrixRestricted(y, l_numKernel-1);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Set Matrix failed with error code: "<< status << "\n"; 
     xfblasDestory();
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n, l_numKernel-1);
+  status = xfblasGemv(XFBLAS_OP_N, m, n, 1, a, n, x, 1, 1, y, 1, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
-    cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
+    cout<<"Matrix Vector Multiplication failed with error code: "<< status << "\n"; 
     xfblasDestory();
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGetMatrixRestricted(c, l_numKernel-1);
+  status = xfblasGetMatrixRestricted(y, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 
@@ -172,24 +163,22 @@ int main(int argc, char **argv) {
   }
   
   for ( i = 0; i < 10; i ++){
-    for ( j = 0; j < 10; j ++){
-      cout<< (c[ IDX2R (i,j, k )])<<" ";
-    }
+    cout<< (y[ i ])<<" ";
     cout<<"\n";
   }
   
-  if (compareGemm(c,goldenC)){
+  if (compareGemv(y,goldenY)){
     cout<<"Test passed!\n";
   }else{
     cout<<"Test failed!\n";
   }
   
   xfblasFree(a, l_numKernel-1);
-  xfblasFree(b, l_numKernel-1);
-  xfblasFree(c, l_numKernel-1);
+  xfblasFree(x, l_numKernel-1);
+  xfblasFree(y, l_numKernel-1);
   free(a);
-  free(b);
-  free(c);
+  free(x);
+  free(y);
   
   xfblasDestory(l_numKernel);
 

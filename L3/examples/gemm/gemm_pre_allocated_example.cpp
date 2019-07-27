@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#include <string>
-#include <cmath>
-#include <iomanip>
 #include "xf_blas.hpp"
 
 # define IDX2R(i, j, ld) (((i) * (ld)) + (j))
@@ -30,7 +27,7 @@ int main(int argc, char **argv) {
   
   if (argc < 3){
     cerr << " usage: \n"
-         << " gemx_pre_allocated_test.exe gemx.xclbin config_info.dat\n";
+         << " gemm_pre_allocated_test.exe gemx.xclbin config_info.dat\n";
     return EXIT_FAILURE; 
   }
   unsigned int l_argIdx = 1;
