@@ -9,13 +9,13 @@
   "op": "symv",
   "logParEntries": 2,
   "matrixDims": [
-    [60,64],
-    [128, 128],
-    [1024, 256]
+    128,
+    1024,
+    2048
   ],
   "valueRange": [
-    -1024,
-    1024
+    -124,
+    104
   ],
   "numSimulation": 2 
 }
