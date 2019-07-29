@@ -25,10 +25,10 @@ void uut_top(uint32_t p_m,
              uint32_t p_ku,
              BLAS_dataType p_alpha,
              BLAS_dataType p_beta,
-             BLAS_dataType p_a[BLAS_matrixSize],
+             BLAS_dataType p_a[BLAS_memorySize],
              BLAS_dataType p_x[BLAS_vectorSize],
              BLAS_dataType p_y[BLAS_matrixSize / BLAS_vectorSize],
-             BLAS_dataType p_aRes[BLAS_matrixSize],
+             BLAS_dataType p_aRes[BLAS_memorySize],
              BLAS_dataType p_yRes[BLAS_matrixSize / BLAS_vectorSize]) {
 #ifndef __SYNTHESIS__
     assert(p_m == p_n);
