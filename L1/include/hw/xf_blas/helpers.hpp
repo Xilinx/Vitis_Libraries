@@ -33,6 +33,7 @@
 #include "helpers/dataMover/sbMatMover.hpp"
 
 /*        HELPER FUNCTIONS             */
+#include "helpers/funcs/padding.hpp"
 #include "helpers/funcs/maxmin.hpp"
 #include "helpers/funcs/abs.hpp"
 #include "helpers/funcs/sum.hpp"

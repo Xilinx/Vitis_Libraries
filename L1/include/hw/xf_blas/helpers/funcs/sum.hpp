@@ -54,34 +54,6 @@ void preProcess(unsigned int p_numElems,
             p_data.write(l_sum);
         }
 }
-template <typename t_DataType, unsigned int t_LogDelays, typename t_IndexType = unsigned int>
-void padding(unsigned int p_numElems,
-             hls::stream<t_DataType>& p_data,
-             hls::stream<t_DataType>& p_pad,
-             unsigned int p_mulIters = 1
-
-             ) {
-    const unsigned int l_Delays = 1 << t_LogDelays;
-    const unsigned int l_numIter = (p_numElems + l_Delays - 1) >> t_LogDelays;
-    const unsigned int l_numExtra = (l_numIter << t_LogDelays) - p_numElems;
-    for (unsigned int r = 0; r < p_mulIters; r++) {
-        /*
-      for(t_IndexType i=0;i<p_numElems;i++){
-        #pragma HLS PIPELINE
-        p_pad.write(p_data.read());
-      }
-      for(t_IndexType i=0;i<l_numExtra;i++){
-        #pragma HLS PIPELINE
-        p_pad.write(0);
-      }
-      */
-        for (t_IndexType i = 0; i < (l_numIter << t_LogDelays); i++) {
-#pragma HLS PIPELINE
-            t_DataType l_v = i < p_numElems ? p_data.read() : 0;
-            p_pad.write(l_v);
-        }
-    }
-}
 
 template <typename t_DataType, unsigned int t_LogDelays, typename t_IndexType = unsigned int>
 void postProcess(unsigned int p_numElems,
@@ -140,7 +112,7 @@ void sum(unsigned int p_n,
 #pragma HLS data_pack variable = l_pad
     unsigned int l_numElem = p_n >> t_LogParEntries;
     preProcess<t_DataType, t_LogParEntries, t_IndexType>(l_numElem, p_x, l_data, p_mulIters);
-    padding<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad, p_mulIters);
+    padding<t_DataType, 1 << l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad, p_mulIters);
     postProcess<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_pad, p_sum, p_mulIters);
 }
 
