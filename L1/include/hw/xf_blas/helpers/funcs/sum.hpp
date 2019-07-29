@@ -42,7 +42,7 @@ void preProcess(unsigned int p_numElems,
                 hls::stream<t_DataType>& p_data,
                 unsigned int p_mulIters = 1
 
-) {
+                ) {
     const unsigned int l_ParEntries = 1 << t_LogParEntries;
     for (unsigned int r = 0; r < p_mulIters; r++)
         for (t_IndexType i = 0; i < p_numElems; i++) {
@@ -60,7 +60,7 @@ void padding(unsigned int p_numElems,
              hls::stream<t_DataType>& p_pad,
              unsigned int p_mulIters = 1
 
-) {
+             ) {
     const unsigned int l_Delays = 1 << t_LogDelays;
     const unsigned int l_numIter = (p_numElems + l_Delays - 1) >> t_LogDelays;
     const unsigned int l_numExtra = (l_numIter << t_LogDelays) - p_numElems;
@@ -89,7 +89,7 @@ void postProcess(unsigned int p_numElems,
                  hls::stream<WideType<t_DataType, 1> >& p_sum,
                  unsigned int p_mulIters = 1
 
-) {
+                 ) {
     const unsigned int l_Delays = 1 << t_LogDelays;
     const unsigned int l_numIter = (p_numElems + l_Delays - 1) >> t_LogDelays;
     for (unsigned int r = 0; r < p_mulIters; r++) {

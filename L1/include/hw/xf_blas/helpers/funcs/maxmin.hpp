@@ -124,7 +124,7 @@ void postProcess(unsigned int p_numElement,
     }
     const unsigned int l_numRem = p_numElement - (l_numIter << t_LogNumEntries);
     for (t_IndexType i = 0; i < l_numRem; i++) {
-    //          #pragma HLS PIPELINE
+//          #pragma HLS PIPELINE
 #pragma HLS loop_tripcount max = l_numEntries
         t_DataType l_v;
         t_IndexType l_i;
