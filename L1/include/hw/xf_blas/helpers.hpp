@@ -29,8 +29,9 @@
 #include "helpers/utils/utils.hpp"
 
 /*        DATA MOVER            */
-#include "helpers/dataMover/dataMover.hpp"
-#include "helpers/dataMover/sbMatMover.hpp"
+#include "helpers/dataMover/vecMoverB1.hpp"
+#include "helpers/dataMover/matMoverB2.hpp"
+#include "helpers/dataMover/bandedMatMoverB2.hpp"
 
 /*        HELPER FUNCTIONS             */
 #include "helpers/funcs/padding.hpp"

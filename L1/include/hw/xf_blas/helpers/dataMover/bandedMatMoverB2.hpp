@@ -15,14 +15,14 @@
  */
 
 /**
- * @file sbMatMover.hpp
- * @brief data movers for symmetric banded matrix.
+ * @file bandedMatMoverB1.hpp
+ * @brief data movers for banded matrices and corresponding vectors.
  *
  * This file is part of XF BLAS Library.
  */
 
-#ifndef XF_BLAS_SBMATMOVER_HPPPP
-#define XF_BLAS_SBMATMOVER_HPPPP
+#ifndef XF_BLAS_BANDEDMATMOVERB2_HPP
+#define XF_BLAS_BANDEDMATMOVERB2_HPP
 
 #include "hls_stream.h"
 #include "ap_int.h"
