@@ -18,7 +18,7 @@
 #define GEMM_MKL_HELPER_HPP
 
 #include <iostream>
-#include <cblas.h>
+#include <mkl.h>
 #include <chrono>
 
 #ifdef USE_DOUBLE_PRECISION
