@@ -92,7 +92,8 @@ if [[ ("$MODE" == "b") || ("$MODE" == "a") ]]; then
 	done
 	echo "====================="
 	echo "Benchmarking complete"
-	egrep -h ^DATA_CSV $logs | grep Type | head -1 > perf_gemm_mkl_bench.csv
+        cat /proc/cpuinfo | grep "model name" | head -1 | tr ':' ',' > perf_gemm_mkl_bench.csv
+	egrep -h ^DATA_CSV $logs | grep Type | head -1 >> perf_gemm_mkl_bench.csv
 	egrep -h ^DATA_CSV $logs | grep -v Type >> perf_gemm_mkl_bench.csv
 	echo "Parsing CSV complete"
 	echo "====================="
