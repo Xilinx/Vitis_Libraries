@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#include <string>
-#include <cmath>
-#include <iomanip>
 #include "xf_blas.hpp"
 
 # define IDX2R(i, j, ld) (((i) * (ld)) + (j))
@@ -30,8 +27,8 @@ int main(int argc, char **argv) {
   
   if (argc < 3){
     cerr << " usage: \n"
-         << " gemx_common_test.exe gemx.xclbin config_info.dat 1\n"
-         << " gemx_common_test.exe gemx.xclbin config_info.dat\n";
+         << " gemm_common_test.exe gemx.xclbin config_info.dat 1\n"
+         << " gemm_common_test.exe gemx.xclbin config_info.dat\n";
     return EXIT_FAILURE; 
   }
   unsigned int l_argIdx = 1;
@@ -124,7 +121,7 @@ int main(int argc, char **argv) {
     cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
-  status = xfblasGetMatrix(m,n,sizeof(*c),d_c,c,m, l_numKernel-1);
+  status = xfblasGetMatrix(m,n,sizeof(*c),d_c,c,n, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 

@@ -20,8 +20,6 @@
  * 
  */
 
-#include <string>
-#include <cmath>
 #include <iomanip>
 #include "xf_blas.hpp"
 
@@ -72,8 +70,8 @@ int main(int argc, char **argv) {
   
   if (argc < 3){
     cerr << " usage: \n"
-         << " gemx_test.exe gemx.xclbin config_info.dat 1\n"
-         << " gemx_test.exe gemx.xclbin config_info.dat\n";
+         << " gemm_test.exe gemx.xclbin config_info.dat 1\n"
+         << " gemm_test.exe gemx.xclbin config_info.dat\n";
     return EXIT_FAILURE; 
   }
   unsigned int l_argIdx = 1;

@@ -82,6 +82,7 @@ void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_D
 #ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
 #endif
+#pragma HLS DATA_PACK variable = p_out
     unsigned int l_parBlocks = p_n / t_ParEntries;
     for (unsigned int i = 0; i < l_parBlocks; ++i) {
 #pragma HLS PIPELINE
@@ -96,7 +97,7 @@ void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_D
 
 template <typename t_DataType, unsigned int t_ParEntries>
 void writeStream2Vec(hls::stream<WideType<t_DataType, t_ParEntries> >& p_in, unsigned int p_n, t_DataType* p_out) {
-//#pragma HLS DATA_PACK variable=p_in
+#pragma HLS DATA_PACK variable = p_in
 #ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
 #endif
