@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
   }
   int l_argIdx = 0;
   string l_xclbinFile, l_configFile;
-  if (argc > ++l_argIdx) {l_xclbinFile = argv[l_argIdx];cout<<l_xclbinFile<<"\n"; }
+  if (argc > ++l_argIdx) {l_xclbinFile = argv[l_argIdx];}
   if (argc > ++l_argIdx) {l_configFile = argv[l_argIdx];}
   string l_logFile;
 
