@@ -25,14 +25,14 @@ class OP_ERROR(Exception):
 class OP:
   opDict = {
     'BLAS_L1': ('amax', 'amin', 'asum', 'axpy', 'swap', 'scal', 'dot', 'copy', 'nrm2'),
-    'BLAS_L2': ('gemv', 'gbmv', 'sbmv', 'symv') #, 'spmv', 'tbmv', 'tbsv', 'tpmv', 'trmv'
+    'BLAS_L2': ('gemv', 'gbmv', 'sbmv', 'symv', 'spmv', 'tpmv', 'trmv', 'tbmv')
   }
   @staticmethod
   def parse(opName):
     for cls, ops in OP.opDict.items():
       if opName in ops:
         return cls
-    raise OP_ERROR("opName %s is not supported."%opName)
+    raise OP_ERROR("opName %s is not upperported."%opName)
 
   def __init__(self):
     pass
@@ -104,8 +104,8 @@ class DataGenerator:
           matrix[i][j] = 0
     return matrix
 
-  def bandedMatrixStorage(self, matrix, k, sup=True, sub=True, colAlign=True):
-    if sup == False and sub == False:
+  def bandedMatrixStorage(self, matrix, k, upper=True, lower=True, colAlign=True):
+    if upper == False and lower == False:
       raise OP_ERROR("Banded matrix storage setting error.")
     if not len(matrix.shape) == 2:
       raise OP_ERROR("Matrix dimention error.")
@@ -115,13 +115,13 @@ class DataGenerator:
     kl, ku = k
     if colAlign:
       aDim = m +ku if m < n else n
-      supIndex = (ku if sup else 0)
-      subIndex = (-kl if sub else 0)
-      a = np.zeros((supIndex - subIndex + 1, aDim), dtype=self.dataType)
-      for i in range(subIndex, supIndex+1):
+      upperIndex = (ku if upper else 0)
+      lowerIndex = (-kl if lower else 0)
+      a = np.zeros((upperIndex - lowerIndex + 1, aDim), dtype=self.dataType)
+      for i in range(lowerIndex, upperIndex+1):
         v= np.diag(matrix, i)
         startIndex = 0 if i < 0 else i
-        a[supIndex - i][startIndex:startIndex+len(v)] = v
+        a[upperIndex - i][startIndex:startIndex+len(v)] = v
     else:
       pass
     return a
@@ -370,6 +370,7 @@ class BLAS_L2(OP):
     runTest.run()
 
 
+
 class gemv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
@@ -413,6 +414,7 @@ class gbmv(BLAS_L2):
       self.setK(kul)
       runTest.run()
 
+
 class symv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
@@ -422,15 +424,54 @@ class symv(BLAS_L2):
     self.matrixDim =(m ,m) 
     self.m = m
     self.n = m
+    self.memorySize = self.m * self.n
     self.sizeStr = "m%d"%(self.m)
 
   def setStorage(self, upper = True):
     self.upper = upper 
+    if self.upper:
+      self.sizeStr = self.sizeStr + "_upper"
+      self.ku = 1
+    else:
+      self.sizeStr = self.sizeStr + "_lower"
+      self.kl = 1
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    matrix = self.dataGen.symmetricMatrix(self.matrixDim)
-    a = symmetricMatrixStorage(matrix, self.upper)
+    matrix = self.dataGen.symmetricMatrix(self.m)
+    #a = self.dataGen.symmetricMatrixStorage(matrix, self.upper)
+    x = self.dataGen.vector(self.n)
+    y = self.dataGen.vector(self.m)
+    yr = alpha * np.matmul(matrix, x) + beta * y
+    return alpha, beta, matrix, x, y, ar, yr
+
+class trmv(symv):
+  def __init__(self, blas_l2: BLAS_L2):
+    self.copyConstructor(blas_l2)
+    self.upper = True
+
+  def compute(self):
+    alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
+    matrix = self.dataGen.triangularMatrix(self.m, self.upper)
+    x = self.dataGen.vector(self.n)
+    y = self.dataGen.vector(self.m)
+    yr = alpha * np.matmul(matrix, x) + beta * y
+    return alpha, beta, matrix, x, y, ar, yr
+
+  def specTest(self, runTest):
+    self.setStorage(runTest.profile['storage'])
+    runTest.run()
+
+
+class tpmv(symv):
+  def __init__(self, blas_l2: BLAS_L2):
+    self.copyConstructor(blas_l2)
+    self.upper = True
+
+  def compute(self):
+    alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
+    matrix = self.dataGen.triangularMatrix(self.m, self.upper)
+    a = self.dataGen.packedStorage(matrix, self.upper)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(matrix, x) + beta * y
@@ -440,11 +481,31 @@ class symv(BLAS_L2):
     self.setStorage(runTest.profile['storage'])
     runTest.run()
 
+
+class spmv(symv):
+  def __init__(self, blas_l2: BLAS_L2):
+    self.copyConstructor(blas_l2)
+    self.upper = True
+
+  def compute(self):
+    alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
+    matrix = self.dataGen.symmetricMatrix(self.matrixDim)
+    a = self.dataGen.packedStorage(matrix, self.upper)
+    x = self.dataGen.vector(self.n)
+    y = self.dataGen.vector(self.m)
+    yr = alpha * np.matmul(matrix, x) + beta * y
+    return alpha, beta, a, x, y, ar, yr
+
+  def specTest(self, runTest):
+    self.setStorage(runTest.profile['storage'])
+    runTest.run()
+
+
 class sbmv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
-    self.sup = True
-    self.sub = True
+    self.upper = True
+    self.lower = True
 
   def setK(self, k:int):
     self.kl = k
@@ -459,28 +520,26 @@ class sbmv(BLAS_L2):
     self.n = m
 
   def setStorage(self, s=(True, True)):
-    self.sup = s[0]
-    self.sub = s[1]
-    if self.sup and self.sub:
+    self.upper = s[0]
+    self.lower = s[1]
+    if self.upper and self.lower:
       self.sizeStr = self.sizeStr + "_full"
-    elif not self.sup:
+    elif not self.upper:
       self.ku = 0
-      self.sizeStr = self.sizeStr + "_sub"
-    elif not self.sub:
+      self.sizeStr = self.sizeStr + "_lower"
+    elif not self.lower:
       self.kl = 0
-      self.sizeStr = self.sizeStr + "_sup"
+      self.sizeStr = self.sizeStr + "_upper"
     else:
       raise OP_ERROR("Storage setting error.")
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     matrix = self.dataGen.symmetricBandedMatrix(self.matrixDim, self.k)
-    a = self.dataGen.bandedMatrixStorage(matrix, self.k, sup=self.sup, sub=self.sub)
+    a = self.dataGen.bandedMatrixStorage(matrix, self.k, upper=self.upper, lower=self.lower)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(matrix, x) + beta * y
-    t_Debug and print("Matrix:\n", matrix)
-    t_Debug and print("Storage:\n",a)
     return alpha, beta, a, x, y, ar, yr
 
   def specTest(self, runTest):
@@ -489,6 +548,28 @@ class sbmv(BLAS_L2):
       self.setK(kul)
       self.setStorage(runTest.profile['storage'])
       runTest.run()
+
+class tbmv(sbmv):
+  def __init__(self, blas_l2: BLAS_L2):
+    self.copyConstructor(blas_l2)
+
+  def setStorage(self, upper = True):
+    self.upper = upper 
+    if self.upper:
+      self.sizeStr = self.sizeStr + "_upper"
+      self.kl = 0
+    else:
+      self.sizeStr = self.sizeStr + "_lower"
+      self.ku = 0
+
+  def compute(self):
+    alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
+    matrix = self.dataGen.bandedMatrix(self.matrixDim, (self.kl, self.ku), self.upper)
+    a = self.dataGen.bandedMatrixStorage(matrix, self.k)
+    x = self.dataGen.vector(self.n)
+    y = self.dataGen.vector(self.m)
+    yr = alpha * np.matmul(matrix, x) + beta * y
+    return alpha, beta, a, x, y, ar, yr
 
 def main():
   dg = DataGenerator()
