@@ -33,8 +33,8 @@
  *  $Author: Xilinx $
  */
 
-#ifndef SPMV_H
-#define SPMV_H
+#ifndef SPMV_HPP
+#define SPMV_HPP
 
 #include "assert.h"
 #include "hls_stream.h"

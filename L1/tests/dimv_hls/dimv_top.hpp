@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TRMV_TOP_H
-#define TRMV_TOP_H
+#ifndef DIMV_TOP_HPP
+#define DIMV_TOP_HPP
 
 #include "dimv.h"
 
