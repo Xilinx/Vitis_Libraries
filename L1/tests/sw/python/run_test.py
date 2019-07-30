@@ -124,7 +124,10 @@ class RunTest:
 
   def run(self):
     paramTclPath =os.path.join(self.dataPath, r'parameters_%s_%s.tcl'%(self.op.sizeStr,self.typeStr))
-    logfile=os.path.join(self.dataPath, r'logfile_%s_%s.log'%(self.op.sizeStr,self.typeStr))
+    logpath=os.path.join(self.dataPath, r'logs_%s_%s'%(self.op.sizeStr,self.typeStr))
+    if not os.path.exists(logpath):
+      os.makedirs(logpath)
+    logfile=os.path.join(logpath, 'logfile.log')
     binFile =os.path.join(self.dataPath,'TestBin_%s_%s.bin'%(self.op.sizeStr,self.typeStr))
 
     print("\n")
