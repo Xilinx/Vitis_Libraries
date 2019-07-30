@@ -3,6 +3,7 @@
   "b_synth": true,
   "b_cosim": true,
   "dataTypes": [
+    "int32",
     "float32",
     "float64"
   ],
@@ -13,13 +14,10 @@
     4096
   ],
   "kList":[
-    2,
     3,
     4
   ],
-  "storage":[
-    true, false
-  ],
+  "storage": true,
   "valueRange": [
     -100,
     100
