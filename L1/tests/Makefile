@@ -56,7 +56,7 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 ifndef XILINX_VIVADO
-	$(error Environment variable XILINX_VIVADO is required and should point to Vivado install area)
+$(error Environment variable XILINX_VIVADO is required and should point to Vivado install area)
 endif
 # MK_INC_END vivado.mk
 
