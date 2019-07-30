@@ -226,7 +226,7 @@ ostream& operator<<(ostream& os, ParamB1<T1, T2>& p_val) {
 template <typename t_DataType>
 class ParamB2 {
    public:
-    typedef enum { GEM, GBM, SBM_LO, SBM_UP } MatStoreType;
+    typedef enum { GEM, GBM, SBM_LO, SBM_UP, TBM_LO, TBM_UP } MatStoreType;
 
    public:
     ParamB2() { m_aStore = GEM; }
@@ -247,14 +247,20 @@ class ParamB2 {
            << m_alpha << " beta=" << setw(OUTPUT_WIDTH) << m_beta << "\n";
         uint32_t l_rows = 0;
         switch (m_aStore) {
+            case GBM:
+                l_rows = m_kl + m_ku + 1;
+                break;
             case SBM_LO:
                 l_rows = m_kl + 1;
                 break;
             case SBM_UP:
                 l_rows = m_ku + 1;
                 break;
-            case GBM:
-                l_rows = m_kl + m_ku + 1;
+            case TBM_LO:
+                l_rows = m_kl + 1;
+                break;
+            case TBM_UP:
+                l_rows = m_ku + 1;
                 break;
             default:
                 l_rows = m_m;

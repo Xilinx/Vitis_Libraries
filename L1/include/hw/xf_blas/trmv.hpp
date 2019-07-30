@@ -72,7 +72,7 @@ void trmv(const bool mode,
 }
 
 } // end namespace blas
-} // end namspace linear_algebra
+} // namespace linear_algebra
 } // end namespace xf
 
 #endif

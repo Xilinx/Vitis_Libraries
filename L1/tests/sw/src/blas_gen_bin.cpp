@@ -43,9 +43,38 @@ void initVec(const string& p_handle, size_t p_n, vector<BLAS_dataType>& p_vec, u
     }
 }
 
-void initMat(const string& p_handle, size_t p_m, size_t p_n, vector<BLAS_dataType>& p_mat, uint8_t*& p_matPtr) {
+void initMat(const string& p_handle,
+             uint16_t p_opCode,
+             uint32_t p_m,
+             uint32_t p_n,
+             uint32_t p_kl,
+             uint32_t p_ku,
+             vector<BLAS_dataType>& p_mat,
+             uint8_t*& p_matPtr) {
+    uint32_t l_rows = 0;
+    switch (p_opCode) {
+        case GBMV:
+            l_rows = p_kl + p_ku + 1;
+            break;
+        case SBMV:
+            if (p_ku == 0) {
+                l_rows = p_kl + 1;
+            } else {
+                l_rows = p_ku + 1;
+            }
+            break;
+        case TBMV:
+            if (p_ku == 0) {
+                l_rows = p_kl + 1;
+            } else {
+                l_rows = p_ku + 1;
+            }
+            break;
+        default:
+            l_rows = p_m;
+    }
+    size_t l_size = l_rows * p_n;
     if (p_handle != "NULL") {
-        size_t l_size = p_m * p_n;
         p_mat.resize(l_size);
         for (unsigned int i = 0; i < l_size; ++i) {
             p_mat[i] = (BLAS_dataType)i / 10;
@@ -70,6 +99,9 @@ void outputMat(
     string p_str, uint16_t p_opCode, uint32_t p_m, uint32_t p_n, uint32_t p_kl, uint32_t p_ku, BLAS_dataType* p_data) {
     uint32_t l_rows = 0;
     switch (p_opCode) {
+        case GBMV:
+            l_rows = p_kl + p_ku + 1;
+            break;
         case SBMV:
             if (p_ku == 0) {
                 l_rows = p_kl + 1;
@@ -77,8 +109,12 @@ void outputMat(
                 l_rows = p_ku + 1;
             }
             break;
-        case GBMV:
-            l_rows = p_kl + p_ku + 1;
+        case TBMV:
+            if (p_ku == 0) {
+                l_rows = p_kl + 1;
+            } else {
+                l_rows = p_ku + 1;
+            }
             break;
         default:
             l_rows = p_m;
@@ -196,10 +232,10 @@ int main(int argc, char** argv) {
                 uint8_t* l_yPtr = nullptr;
                 uint8_t* l_aResPtr = nullptr;
                 uint8_t* l_yResPtr = nullptr;
-                initMat(l_handleA, l_m, l_n, l_a[l_idx], l_aPtr);
+                initMat(l_handleA, l_opCode, l_m, l_n, l_kl, l_ku, l_a[l_idx], l_aPtr);
                 initVec(l_handleX, l_n, l_x[l_idx], l_xPtr);
                 initVec(l_handleY, l_m, l_y[l_idx], l_yPtr);
-                initMat(l_handleAres, l_m, l_n, l_aRes[l_idx], l_aResPtr);
+                initMat(l_handleAres, l_opCode, l_m, l_n, l_kl, l_ku, l_aRes[l_idx], l_aResPtr);
                 initVec(l_handleYres, l_m, l_yRes[l_idx], l_yResPtr);
                 xfblasStatus_t l_status = l_gen.addB2Instr(l_opName, l_m, l_n, l_kl, l_ku, l_alpha, l_beta, l_aPtr,
                                                            l_xPtr, l_yPtr, l_aResPtr, l_yResPtr);
