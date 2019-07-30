@@ -16,6 +16,8 @@ from __future__ import print_function
 import shlex, subprocess
 import pdb
 import os, sys
+import re
+import shutil
 
 class HLS_ERROR(Exception):
   def __init__(self, message, logFile):
@@ -72,9 +74,26 @@ class HLS:
           sys.stdout.flush()
         f.write(line)
     print('\nvivado_hls finished execution.') 
+
+  def findReport(self, dir):
+    reports = list()
+    if dir is None:
+      return reports
+    files = os.listdir(dir)
+    for f in files:
+      if f.endswith(".rpt"):
+        reports.append(os.path.join(dir, f))
+    return reports
+
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
+    regex = r"Opening and resetting solution '([\w/]+)'"
+    match = re.search(regex, content)
+    reports = list()
+    solDir = None
+    if match:
+      solDir = match.group(1)
     passIndex = content.find("ERROR")
     if passIndex >= 0:
       raise HLS_ERROR("HLS execution met errors.", logFile)
@@ -82,16 +101,20 @@ class HLS:
       passIndex = content.find(r"C/RTL co-simulation finished: PASS")
       if passIndex < 0:
         raise HLS_ERROR("C/RTL co-simulation FAILED.", logFile)
-    elif self.syn:
+      reports = reports + self.findReport(os.path.join(solDir, 'sim/report'))
+    if self.syn:
       passIndex = content.find("Finished generating all RTL models")
       if passIndex < 0:
         raise HLS_ERROR("SYNTHESIS FAILED.", logFile)
-    elif self.csim:
+      reports = reports + self.findReport(os.path.join(solDir, 'syn/report'))
+    if self.csim:
       passIndex = content.find("CSim done with 0 errors")
       if passIndex < 0:
         raise HLS_ERROR("Csim FAILED.", logFile)
-    else:
-      raise HLS_ERROR("PROFILE ERROR.", logFile)
+
+    filedir = os.path.dirname(logFile)
+    for report in reports:
+      shutil.copy2(report, filedir)
 
   def cosimPerf(self, logFile):
     if self.cosim:
