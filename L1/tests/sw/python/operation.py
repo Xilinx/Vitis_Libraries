@@ -40,6 +40,9 @@ class OP:
   def setDtype(self, dataType):
     self.dataType = dataType
 
+  def setRtype(self, rtype):
+    self.rtype = rtype
+
 class DataGenerator:
   def __init__(self, engine = np.random.random):
     self.engine = engine
@@ -170,8 +173,6 @@ class BLAS_L1(OP):
     self.maxV = object.maxV
     self.minV = object.minV
     self.interfaceList= object.interfaceList
-  def setRtype(self, rtype):
-    self.rtype = rtype
   def setSize(self, size):
     self.vectorDim = size
     self.sizeStr = "v%d"%size
@@ -379,7 +380,7 @@ class gemv(BLAS_L2):
     matrix = self.dataGen.matrix(self.matrixDim)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(matrix, x) + beta * y
+    yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     return alpha, beta, matrix, x, y, ar, yr
 
 class gbmv(BLAS_L2):
@@ -403,7 +404,7 @@ class gbmv(BLAS_L2):
     a = self.dataGen.bandedMatrixStorage(matrix, self.k)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(matrix, x) + beta * y
+    yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     t_Debug and print("Matrix:\n", matrix)
     t_Debug and print("Storage:\n",a)
     return alpha, beta, a, x, y, ar, yr
@@ -439,11 +440,15 @@ class symv(BLAS_L2):
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     matrix = self.dataGen.symmetricMatrix(self.m)
-    #a = self.dataGen.symmetricMatrixStorage(matrix, self.upper)
+    a = self.dataGen.symmetricMatrixStorage(matrix, self.upper)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(matrix, x) + beta * y
-    return alpha, beta, matrix, x, y, ar, yr
+    yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
+    return alpha, beta, a, x, y, ar, yr
+
+  def specTest(self, runTest):
+    self.setStorage(runTest.profile['storage'])
+    runTest.run()
 
 class trmv(symv):
   def __init__(self, blas_l2: BLAS_L2):
@@ -455,12 +460,8 @@ class trmv(symv):
     matrix = self.dataGen.triangularMatrix(self.m, self.upper)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(matrix, x) + beta * y
+    yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     return alpha, beta, matrix, x, y, ar, yr
-
-  def specTest(self, runTest):
-    self.setStorage(runTest.profile['storage'])
-    runTest.run()
 
 
 class tpmv(symv):
@@ -474,13 +475,8 @@ class tpmv(symv):
     a = self.dataGen.packedStorage(matrix, self.upper)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(matrix, x) + beta * y
+    yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     return alpha, beta, a, x, y, ar, yr
-
-  def specTest(self, runTest):
-    self.setStorage(runTest.profile['storage'])
-    runTest.run()
-
 
 class spmv(symv):
   def __init__(self, blas_l2: BLAS_L2):
@@ -493,13 +489,8 @@ class spmv(symv):
     a = self.dataGen.packedStorage(matrix, self.upper)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(matrix, x) + beta * y
+    yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     return alpha, beta, a, x, y, ar, yr
-
-  def specTest(self, runTest):
-    self.setStorage(runTest.profile['storage'])
-    runTest.run()
-
 
 class sbmv(BLAS_L2):
   def __init__(self, blas_l2: BLAS_L2):
@@ -539,7 +530,7 @@ class sbmv(BLAS_L2):
     a = self.dataGen.bandedMatrixStorage(matrix, self.k, upper=self.upper, lower=self.lower)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(matrix, x) + beta * y
+    yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     return alpha, beta, a, x, y, ar, yr
 
   def specTest(self, runTest):
@@ -557,18 +548,20 @@ class tbmv(sbmv):
     self.upper = upper 
     if self.upper:
       self.sizeStr = self.sizeStr + "_upper"
+      self.k = (0, self.ku)
       self.kl = 0
     else:
       self.sizeStr = self.sizeStr + "_lower"
+      self.k = (self.kl, 0)
       self.ku = 0
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    matrix = self.dataGen.bandedMatrix(self.matrixDim, (self.kl, self.ku), self.upper)
+    matrix = self.dataGen.bandedMatrix(self.matrixDim, self.k)
     a = self.dataGen.bandedMatrixStorage(matrix, self.k)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
-    yr = alpha * np.matmul(matrix, x) + beta * y
+    yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     return alpha, beta, a, x, y, ar, yr
 
 def main():
