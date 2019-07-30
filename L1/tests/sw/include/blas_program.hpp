@@ -266,6 +266,12 @@ class Program {
             case MatStoreType::SBM_UP:
                 l_matDataBytes = (l_ku + 1) * l_n * sizeof(t_DataType);
                 break;
+            case MatStoreType::TBM_LO:
+                l_matDataBytes = (l_kl + 1) * l_n * sizeof(t_DataType);
+                break;
+            case MatStoreType::TBM_UP:
+                l_matDataBytes = (l_ku + 1) * l_n * sizeof(t_DataType);
+                break;
             default:
                 l_matDataBytes = l_m * l_n * sizeof(t_DataType);
                 break;

@@ -72,7 +72,7 @@ void vec2GemStream(unsigned int p_m,
             p_out.write(l_val);
         }
     }
-} // end vec2GemStream 
+} // end vec2GemStream
 } // namespace blas
 } // namespace linear_algebra
 } // namespace xf
