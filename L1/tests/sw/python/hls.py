@@ -12,7 +12,6 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
 
-from __future__ import print_function
 import shlex, subprocess
 import pdb
 import os, sys
@@ -88,12 +87,6 @@ class HLS:
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
-    regex = r"Opening and resetting solution '([\w/]+)'"
-    match = re.search(regex, content)
-    reports = list()
-    solDir = None
-    if match:
-      solDir = match.group(1)
     passIndex = content.find("ERROR")
     if passIndex >= 0:
       raise HLS_ERROR("HLS execution met errors.", logFile)
@@ -101,24 +94,23 @@ class HLS:
       passIndex = content.find(r"C/RTL co-simulation finished: PASS")
       if passIndex < 0:
         raise HLS_ERROR("C/RTL co-simulation FAILED.", logFile)
-      reports = reports + self.findReport(os.path.join(solDir, 'sim/report'))
     if self.syn:
       passIndex = content.find("Finished generating all RTL models")
       if passIndex < 0:
         raise HLS_ERROR("SYNTHESIS FAILED.", logFile)
-      reports = reports + self.findReport(os.path.join(solDir, 'syn/report'))
     if self.csim:
       passIndex = content.find("CSim done with 0 errors")
       if passIndex < 0:
         raise HLS_ERROR("Csim FAILED.", logFile)
 
-    filedir = os.path.dirname(logFile)
-    for report in reports:
-      shutil.copy2(report, filedir)
-
-  def cosimPerf(self, logFile):
-    if self.cosim:
-      pass
+  def benchmarking(self, logFile):
+    with open(logFile, 'r') as f:
+      content = f.read()
+    regex = r"Opening and resetting solution '([\w/]+)'"
+    match = re.search(regex, content)
+    if match and self.syn:
+      solDir = match.group(1)
+      rpt_syn= self.findReport(os.path.join(solDir, 'syn','report', 'uut_top_csynth.rpt'))
 
   def generateParam(self, m, fileparams):
     self.params = fileparams
