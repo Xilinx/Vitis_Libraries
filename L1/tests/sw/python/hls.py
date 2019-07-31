@@ -118,9 +118,19 @@ class HLS:
     features[r'Theory time [ns]']  = t_time
     features[r'Efficiency'] = '%.3f%%'%(t_time/time)
 
-    regex = r"Opening and resetting solution '([\w/]+)'"
-    match = re.search(regex, content)
-    solDir = match.group(1)
+    regex0 = r"Opening and resetting solution '([\w/]+)'"
+    regex1 = r"Creating and opening solution '([\w/]+)'"
+    match0 = re.search(regex0, content)
+    match1 = re.search(regex1, content)
+    if match0: 
+      solDir = match0.group(1)
+    elif match1:
+      solDir = match1.group(1)
+    elif os.path.exists(os.path.join('.', 'prj_hls_vu9p', 'sol')):
+      solDir = os.path.join('.', 'prj_hls_vu9p', 'sol')
+    else:
+      raise HLS_ERROR("Can't find the solution directory.")
+
     rpt_syn= os.path.join(solDir, 'syn','report', 'uut_top_csynth.rpt')
 
     with open(rpt_syn, 'r') as f:
