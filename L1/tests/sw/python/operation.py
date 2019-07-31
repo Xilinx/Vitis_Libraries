@@ -189,6 +189,15 @@ class BLAS_L1(OP):
     for alpha, x, y, xr, yr, r in register:
       blas_gen.addB1Instr(self.name, self.vectorDim, alpha, x, y, xr, yr, r.astype(self.rtype))
 
+  def features(self):
+    features = dict()
+    features['Op name'] = self.name
+    features['Vector Size'] = self.vectorDim
+    features['No. OPs'] = self.vectorDim
+    return features
+
+  def time(self, parallel, clock):
+    return self.vectorDim * clock / parallel
 
   def test(self, runTest):
     vecDimList = runTest.profile['vectorDims']
@@ -249,6 +258,11 @@ class axpy(BLAS_L1):
     yr = alpha * x+ y
     return alpha, x, y, xr, yr, r
 
+  def features(self):
+    features = BLAS_L1.features(self) 
+    features['No. OPs'] = self.vectorDim * 2
+    return features
+
 class copy(BLAS_L1):
   def __init__(self, blas_l1: BLAS_L1):
     self.copyConstructor(blas_l1)
@@ -261,6 +275,11 @@ class copy(BLAS_L1):
 class dot(BLAS_L1):
   def __init__(self, blas_l1: BLAS_L1):
     self.copyConstructor(blas_l1)
+
+  def features(self):
+    features = BLAS_L1.features(self) 
+    features['No. OPs'] = self.vectorDim * 2
+    return features
 
   def compute(self): 
     alpha, x, y, xr, yr, r = BLAS_L1.compute(self)
@@ -279,6 +298,11 @@ class nrm2(BLAS_L1):
     r = np.linalg.norm(x)
     return alpha, x, y, xr, yr, r
 
+  def features(self):
+    features = BLAS_L1.features(self) 
+    features['No. OPs'] = self.vectorDim * 2
+    return features
+
 class swap(BLAS_L1):
   def __init__(self, blas_l1: BLAS_L1):
     self.copyConstructor(blas_l1)
@@ -288,6 +312,11 @@ class swap(BLAS_L1):
     yr = x = self.dataGen.vector(self.vectorDim)
     xr = y = self.dataGen.vector(self.vectorDim)
     return alpha, x, y, xr, yr, r
+
+  def features(self):
+    features = BLAS_L1.features(self) 
+    features['No. OPs'] = self.vectorDim * 3
+    return features
 
 class scal(BLAS_L1):
   def __init__(self, blas_l1: BLAS_L1):
@@ -328,6 +357,17 @@ class BLAS_L2(OP):
     self.m=object.m
     self.n=object.n
     self.interfaceList= object.interfaceList
+
+  def features(self):
+    features = dict()
+    features['Op name'] = self.name
+    features['Matrix Size m'] = self.m
+    features['Matrix Size n'] = self.n
+    features['No. OPs'] = 2 * self.m * self.n + self.m * 3
+    return features
+
+  def time(self, parallel, clock):
+    return self.m * self.n * clock / parallel
 
   def compute(self): 
     self.dataGen = DataGenerator()
@@ -398,6 +438,15 @@ class gbmv(BLAS_L2):
     if self.m - self.n > self.kl:
       print("WARNING: Current matrix configuration has multiple zero rows")
 
+  def features(self):
+    features = BLAS_L2.features(self)
+    features['kl'] = self.kl
+    features['ku'] = self.ku
+    features['No. OPs'] = 2 * self.m * (self.ku + self.kl + 1) + self.m * 3
+
+  def time(self, parallel, clock):
+    return self.m * (self.ku + self.kl + 1) * clock / parallel
+
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     matrix = self.dataGen.bandedMatrix(self.matrixDim, self.k)
@@ -446,6 +495,17 @@ class symv(BLAS_L2):
     yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     return alpha, beta, a, x, y, ar, yr
 
+  def features(self):
+    features = dict()
+    features['Op name'] = self.name
+    features['DataType'] = self.dataType
+    features['Matrix Size m'] = self.m
+    features['No. OPs'] = 2 * self.m * self.m + self.m * 3
+    return features
+
+  def time(self, parallel, clock):
+    return self.m * self.m * clock / parallel
+
   def specTest(self, runTest):
     self.setStorage(runTest.profile['storage'])
     runTest.run()
@@ -463,8 +523,14 @@ class trmv(symv):
     yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
     return alpha, beta, matrix, x, y, ar, yr
 
+  def features(self):
+    features = symv.features(self)
+    features['No. OPs'] = self.m * (self.m + 1) + self.m * 3
 
-class tpmv(symv):
+  def time(self, parallel, clock):
+    return self.m * (1 + self.m) / 2 * clock / parallel
+
+class tpmv(trmv):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
     self.upper = True
@@ -504,6 +570,16 @@ class sbmv(BLAS_L2):
     self.k = (k, k)
     self.memorySize = (self.kl + self.ku +1) * self.n
     self.sizeStr = "m%d_k%d"%(self.m, k)
+
+  def features(self):
+    features = symv.features(self)
+    k = self.ku if self.ku != 0 else self.kl
+    features['k'] = k
+    features['No. OPs'] = 2 * self.m * (k * 2 + 1) + self.m * 3
+
+  def time(self, parallel, clock):
+    k = self.ku if self.ku != 0 else self.kl
+    return self.m * (k* 2 + 1) / parallel * clock
 
   def setSize(self, m:int):
     self.matrixDim =(m ,m) 
@@ -554,6 +630,13 @@ class tbmv(sbmv):
       self.sizeStr = self.sizeStr + "_lower"
       self.k = (self.kl, 0)
       self.ku = 0
+
+  def features(self):
+    features = sbmv.features(self)
+    features['No. OPs'] = 2 * self.m * (self.kl + self.ku + 1) + self.m * 3
+
+  def time(self, parallel, clock):
+    return self.m * (self.kl + self.ku + 1) / parallel * clock
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
