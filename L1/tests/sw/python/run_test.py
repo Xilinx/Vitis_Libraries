@@ -16,6 +16,7 @@ import numpy as np
 import ctypes as C
 import argparse
 import os, sys
+import shutil
 import json
 import pdb
 import traceback
@@ -37,7 +38,8 @@ class RunTest:
     self.parEntries = 1
     self.logParEntries = 0
     self.valueRange = None
-    self.numSim = 1
+    self.numToSim = 1
+    self.numSim = 0
     self.makefile = makefile
 
     self.hls = None
@@ -82,9 +84,12 @@ class RunTest:
     if 'retTypes' in self.profile:
       self.retTypes = [eval('np.%s'%dt) for dt in self.profile['retTypes']]
     
-    self.numSim = self.profile['numSimulation']
+    self.numToSim = self.profile['numSimulation']
 
     self.testPath = r'out_test/%s'%self.op.name
+    if os.path.exists(self.testPath):
+      shutil.rmtree(self.testPath)
+    self.reports = list()
 
     self.libPath = os.path.join(self.testPath, 'libs')
     if not os.path.exists(self.libPath):
@@ -100,18 +105,18 @@ class RunTest:
 
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.parEntries))
-    self.params = Parameters(self.op, self.logParEntries, self.parEntries)
-    self.hls.generateDirective(self.params, directivePath)
+    self.hls.setParam(Parameters(self.op, self.logParEntries, self.parEntries))
+    self.hls.generateDirective(directivePath)
 
   def build(self):
     c_type = self.typeDict[self.op.dataType]
-    self.params.setDtype(c_type)
+    self.hls.params.setDtype(c_type)
     r_type = c_type
     self.typeStr = 'd%s'%c_type
     if self.opClass == 'BLAS_L1':
       r_type = self.typeDict[self.op.rtype]
       self.typeStr = 'd%s_r%s'%(c_type, r_type)
-    self.params.setRtype(r_type)
+    self.hls.params.setRtype(r_type)
 
     libPath =os.path.join(self.libPath,'blas_gen_%s.so'%self.typeStr)
 
@@ -132,47 +137,104 @@ class RunTest:
 
     print("\n")
     print("="*64)
-    dataList = [self.op.compute() for j in range(self.numSim)]
+    dataList = [self.op.compute() for j in range(self.numToSim)]
     blas_gen=BLAS_GEN(self.lib)
     self.op.addInstr(blas_gen, dataList)
     blas_gen.write2BinFile(binFile)
     print("Data file %s has been generated sucessfully."%binFile)
     del dataList
-    self.hls.generateParam(self.params, paramTclPath)
+    self.hls.generateParam(paramTclPath)
     print("Parameters in file %s.\nLog file %s"%(paramTclPath, logfile))
     self.hls.execution(binFile, logfile)
     self.hls.checkLog(logfile)
+    self.numSim += self.numToSim
+    self.hls.benchmarking(logfile, self.op, self.reports)
     print("Test of size %s passed."%self.op.sizeStr)
 
   def runTest(self, path):
-    self.params.setPath(path)
+    self.hls.params.setPath(path)
     self.op.test(self)
 
+  def writeReport(self):
+    reportPath = os.path.join(self.testPath, 'report.rpt')
+    if len(self.reports) == 0:
+      raise OP_ERROR("Benchmark fails for op %s."%self.op.name)
+    features = self.reports[0]
+    keys = features.keys()
+    lens = [len(key)+4 for key in keys]
+
+    sepStr = '+' + '+'.join(['-' * l for l in lens]) + '+\n'
+
+    with open(reportPath, 'w+') as f:
+      f.write(sepStr)
+      ########### START OF KEYS ################
+      strList=['|']
+      for s, l in zip(keys, lens):
+        strList.append(('{:<%d}|'%l).format(s))
+      strList.append('\n')
+      f.write(''.join(strList))
+      f.write(sepStr)
+      ########### END OF KEYS ################
+
+      while self.reports:
+        features = self.reports.pop(0)
+        strList=['|']
+        for key, l in zip(keys, lens):
+          strList.append(('{:<%d}|'%l).format(features[key]))
+        strList.append('\n')
+        f.write(''.join(strList))
+        f.write(sepStr)
+    return reportPath
+
 def main(profileList, makefile): 
+  numOps = len(profileList)
+  passOps = dict()
+  print(r"There are in total %d operator[s] under test."%numOps)
   try:
-    for profile in profileList:
+    while profileList:
+      profile = profileList.pop()
       if not os.path.exists(profile):
         raise Exception("ERROR: File %s is not exists."%profile)
       runTest = RunTest(makefile)
       runTest.parseProfile(profile)
       runTest.runTest(os.path.dirname(profile)) 
-      print("All tests for %s are passed."%runTest.op.name)
-    print("All tests are passed.")
+      print("All %d tests for %s are passed."%(runTest.numSim, runTest.op.name))
+      passOps[runTest.op.name] = (runTest.numSim * runTest.hls.csim, runTest.numSim * runTest.hls.cosim)
+      if runTest.hls.cosim:
+        rpt = runTest.writeReport()
+        print("Benchmark info for op %s is written in %s."%(runTest.op.name, rpt))
   except OP_ERROR as err:
     print("OPERATOR ERROR: %s"%(err.message))
-    print("Test failed due to previous errors.")
   except BLAS_ERROR as err:
     print("BLAS ERROR: %s with status code is %s"%(err.message, err.status))
-    print("Test failed due to previous errors.")
   except HLS_ERROR as err:
     print("HLS ERROR: %s\nPlease check log file %s"%(err.message, os.path.abspath(err.logFile)))
+  finally:
+    passed = len(passOps)
+    print("%d / %d operation[s] passed tests." %(passed, numOps))
+    if passed != 0:
+      sepStr = '+'.join(['', '-'*10, '-'*10, '-'*10, '\n'])
+      print(sepStr)
+      keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
+          '{:<10}'.format('No.cosim'),'{:<10}'.format('Status'), '\n'])
+      print(keys)
+      print(sepStr)
+      for opName in passOps.keys(): 
+        csim, cosim = passOps[opName]
+        value = '|'.join(['', '{:<10}'.format(opName), '{:<10}'.format(csim),
+          '{:<10}'.format(cosim),'{:<10}'.format('Passed'), '\n'])
+        print(value)
+        print(sepStr)
+    remain = numOps - passed
+    if remain != 0:
+      print("%d operation[s] is/are not tested due to the previous errors." %remain)
   
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
   group = parser.add_mutually_exclusive_group(required=True)
-  group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of pathes to the profile files')
-  group.add_argument('--operator', nargs='*',metavar='opName', help='list of operator names')
+  group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of path to profile files')
+  group.add_argument('--operator', nargs='*',metavar='opName', help='list of test dirs in ./hw')
   args = parser.parse_args()
   
   profile = list()
