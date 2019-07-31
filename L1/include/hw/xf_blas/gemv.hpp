@@ -37,6 +37,7 @@ namespace blas {
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
+ * @tparam t_NumStream the number of parallel streams feed to gemv
  * @tparam t_IndexType the datatype of the index
  *
  * @param p_m the number of rows of input matrix p_M
