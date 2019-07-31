@@ -443,6 +443,7 @@ class gbmv(BLAS_L2):
     features['kl'] = self.kl
     features['ku'] = self.ku
     features['No. OPs'] = 2 * self.m * (self.ku + self.kl + 1) + self.m * 3
+    return features
 
   def time(self, parallel, clock):
     return self.m * (self.ku + self.kl + 1) * clock / parallel
@@ -526,6 +527,7 @@ class trmv(symv):
   def features(self):
     features = symv.features(self)
     features['No. OPs'] = self.m * (self.m + 1) + self.m * 3
+    return features
 
   def time(self, parallel, clock):
     return self.m * (1 + self.m) / 2 * clock / parallel
@@ -576,6 +578,7 @@ class sbmv(BLAS_L2):
     k = self.ku if self.ku != 0 else self.kl
     features['k'] = k
     features['No. OPs'] = 2 * self.m * (k * 2 + 1) + self.m * 3
+    return features
 
   def time(self, parallel, clock):
     k = self.ku if self.ku != 0 else self.kl
@@ -634,6 +637,7 @@ class tbmv(sbmv):
   def features(self):
     features = sbmv.features(self)
     features['No. OPs'] = 2 * self.m * (self.kl + self.ku + 1) + self.m * 3
+    return features
 
   def time(self, parallel, clock):
     return self.m * (self.kl + self.ku + 1) / parallel * clock
