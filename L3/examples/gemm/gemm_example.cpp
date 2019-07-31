@@ -21,6 +21,7 @@
  */
 
 #include <iomanip>
+#include <cmath>
 #include "xf_blas.hpp"
 
 #define IDX2R(i, j, ld) (((i) * (ld)) + (j))
