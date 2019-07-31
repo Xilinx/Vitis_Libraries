@@ -44,7 +44,7 @@ class HLS:
     self.cosim = b_cosim 
 
   def execution(self, binFile, logFile, b_print = False):
-    commandLine ='vivado_hls -f %s %s %s %s'%(self.tcl, self.params, 
+    commandLine ='vivado_hls -f %s %s %s %s'%(self.tcl, self.paramFile, 
         self.directive, os.path.abspath(binFile))
     print(commandLine)
     if not b_print:
@@ -74,16 +74,6 @@ class HLS:
         f.write(line)
     print('\nvivado_hls finished execution.') 
 
-  def findReport(self, dir):
-    reports = list()
-    if dir is None:
-      return reports
-    files = os.listdir(dir)
-    for f in files:
-      if f.endswith(".rpt"):
-        reports.append(os.path.join(dir, f))
-    return reports
-
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
@@ -103,18 +93,57 @@ class HLS:
       if passIndex < 0:
         raise HLS_ERROR("Csim FAILED.", logFile)
 
-  def benchmarking(self, logFile):
+  def benchmarking(self, logFile, op, reportList):
+    if not self.csim:
+      return
+
+    features = op.features()
+    features['DataType'] = self.params.dtype
+
+    dirname = os.path.dirname(logFile)
     with open(logFile, 'r') as f:
       content = f.read()
+      
+    regex = r'RTL Simulation : \d / \d \[n/a\] @ "(\d+)"'
+    matches = re.findall(regex, content)
+    timeList = [int(mat) for mat in matches]
+    time = (timeList[-1] - timeList[0]) / (len(timeList) - 1) / 1e3
+    features['Average time [ns]'] =  time
+
+    regex = r"(\d+\.?\d*)ns"
+    match = re.search(regex, content)
+    clock  = float(match.group(1))
+    features[r'clock [ns]'] = clock
+    t_time = op.time(self.params.parEntries, clock)
+    features[r'Theory time [ns]']  = t_time
+    features[r'Efficiency'] = '%.3f%%'%(t_time/time)
+
     regex = r"Opening and resetting solution '([\w/]+)'"
     match = re.search(regex, content)
-    if match and self.syn:
-      solDir = match.group(1)
-      rpt_syn= self.findReport(os.path.join(solDir, 'syn','report', 'uut_top_csynth.rpt'))
+    solDir = match.group(1)
+    rpt_syn= os.path.join(solDir, 'syn','report', 'uut_top_csynth.rpt')
 
-  def generateParam(self, m, fileparams):
-    self.params = fileparams
-    with open(self.params, 'w') as f:
+    with open(rpt_syn, 'r') as f:
+      rpt = f.read()
+
+    regex = r'\|Total\s*\|\s*(\d+)\|\s*(\d+)\|\s*(\d+)\|\s*(\d+)\|\s*(\d+)\|' 
+    match = re.search(regex, rpt)
+    features['BRAM_18K'] = match.group(1)
+    features['DSP48E'] = match.group(2)
+    features['FF'] = match.group(3)
+    features['LUT'] = match.group(4)
+    features['URAM'] = match.group(5)
+
+    reportList.append(features)
+
+
+  def setParam(self, m):
+    self.params = m
+
+  def generateParam(self, fileparams):
+    m = self.params
+    self.paramFile = fileparams
+    with open(self.paramFile, 'w') as f:
        f.write('array set opt {\n ')   
        f.write('   path %s\n '%m.path)
       ###########  TEST PARAMETERS  ##############
@@ -150,9 +179,9 @@ class HLS:
        f.write('   statsPageIdx 2\n ')
        f.write(' }\n ')
 
-  def generateDirective(self, m:Parameters, directivePath):
+  def generateDirective(self, directivePath):
     self.directive = directivePath
     with open(self.directive, 'w') as f:
-      for inface in m.op.interfaceList:
+      for inface in self.params.op.interfaceList:
        #f.write('set_directive_interface -mode m_axi -depth %d "uut_top" %s\n'%(vs, inface))
-       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" %s\n'%(m.parEntries, inface))
+       f.write('set_directive_array_partition -type cyclic -factor %d -dim 1 "uut_top" %s\n'%(self.params.parEntries, inface))
