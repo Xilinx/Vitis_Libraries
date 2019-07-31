@@ -161,7 +161,7 @@ class RunTest:
       raise OP_ERROR("Benchmark fails for op %s."%self.op.name)
     features = self.reports[0]
     keys = features.keys()
-    lens = [len(key)+4 for key in keys]
+    lens = [len(key)+2 for key in keys]
 
     sepStr = '+' + '+'.join(['-' * l for l in lens]) + '+\n'
 
