@@ -197,12 +197,13 @@ def main(profileList, makefile):
         raise Exception("ERROR: File %s is not exists."%profile)
       runTest = RunTest(makefile)
       runTest.parseProfile(profile)
+      print("Starting to test %s."%(runTest.op.name))
       runTest.runTest(os.path.dirname(profile)) 
       print("All %d tests for %s are passed."%(runTest.numSim, runTest.op.name))
       passOps[runTest.op.name] = (runTest.numSim * runTest.hls.csim, runTest.numSim * runTest.hls.cosim)
       if runTest.hls.cosim:
         rpt = runTest.writeReport()
-        print("Benchmark info for op %s is written in %s."%(runTest.op.name, rpt))
+        print("Benchmark info for op %s is written in %s"%(runTest.op.name, rpt))
   except OP_ERROR as err:
     print("OPERATOR ERROR: %s"%(err.message))
   except BLAS_ERROR as err:
