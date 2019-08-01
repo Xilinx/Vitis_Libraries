@@ -186,16 +186,44 @@ class RunTest:
         f.write(sepStr)
     return reportPath
 
+def makeTable(passDict, failDict, handle = print):
+
+  passed = len(passDict)
+  remain = len(failDict)
+  numOps = passed + remain
+  handle("%d / %d operation[s] passed the tests." %(passed, numOps))
+  if remain != 0:
+    handle("%d operation[s] failed the tests." %remain)
+  sepStr = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '\n'])
+  handle(sepStr)
+  keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
+      '{:<10}'.format('No.cosim'),'{:<10}'.format('Status'), '\n'])
+  handle(keys)
+  handle(sepStr)
+  for opName in passDict.keys(): 
+    csim, cosim = passDict[opName]
+    value = '|'.join(['', '{:<10}'.format(opName), '{:<10}'.format(csim),
+      '{:<10}'.format(cosim),'{:<10}'.format('Passed'), '\n'])
+    handle(value)
+    handle(sepStr)
+  for opName in failDict.keys(): 
+    csim, cosim = failDict[opName]
+    value = '|'.join(['', '{:<10}'.format(opName), '{:<10}'.format(csim),
+      '{:<10}'.format(cosim),'{:<10}'.format('Failed'), '\n'])
+    handle(value)
+    handle(sepStr)
+
 def main(profileList, makefile): 
   numOps = len(profileList)
   passOps = dict()
+  failOps = dict()
   print(r"There are in total %d operator[s] under test."%numOps)
-  try:
-    while profileList:
-      profile = profileList.pop()
+  while profileList:
+    profile = profileList.pop()
+    runTest = RunTest(makefile)
+    try:
       if not os.path.exists(profile):
         raise Exception("ERROR: File %s is not exists."%profile)
-      runTest = RunTest(makefile)
       runTest.parseProfile(profile)
       print("Starting to test %s."%(runTest.op.name))
       runTest.runTest(os.path.dirname(profile)) 
@@ -204,32 +232,18 @@ def main(profileList, makefile):
       if runTest.hls.cosim:
         rpt = runTest.writeReport()
         print("Benchmark info for op %s is written in %s"%(runTest.op.name, rpt))
-  except OP_ERROR as err:
-    print("OPERATOR ERROR: %s"%(err.message))
-  except BLAS_ERROR as err:
-    print("BLAS ERROR: %s with status code is %s"%(err.message, err.status))
-  except HLS_ERROR as err:
-    print("HLS ERROR: %s\nPlease check log file %s"%(err.message, os.path.abspath(err.logFile)))
-  finally:
-    passed = len(passOps)
-    print("%d / %d operation[s] passed tests." %(passed, numOps))
-    if passed != 0:
-      sepStr = '+'.join(['', '-'*10, '-'*10, '-'*10, '\n'])
-      print(sepStr)
-      keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
-          '{:<10}'.format('No.cosim'),'{:<10}'.format('Status'), '\n'])
-      print(keys)
-      print(sepStr)
-      for opName in passOps.keys(): 
-        csim, cosim = passOps[opName]
-        value = '|'.join(['', '{:<10}'.format(opName), '{:<10}'.format(csim),
-          '{:<10}'.format(cosim),'{:<10}'.format('Passed'), '\n'])
-        print(value)
-        print(sepStr)
-    remain = numOps - passed
-    if remain != 0:
-      print("%d operation[s] is/are not tested due to the previous errors." %remain)
-  
+
+    except OP_ERROR as err:
+      print("OPERATOR ERROR: %s"%(err.message))
+    except BLAS_ERROR as err:
+      print("BLAS ERROR: %s with status code is %s"%(err.message, err.status))
+    except HLS_ERROR as err:
+      print("HLS ERROR: %s\nPlease check log file %s"%(err.message, os.path.abspath(err.logFile)))
+    finally:
+      if not runTest.op.name in passOps:
+        failOps[runTest.op.name]= (runTest.numSim * runTest.hls.csim, runTest.numSim * runTest.hls.cosim) 
+  makeTable(passOps, failOps) 
+
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
