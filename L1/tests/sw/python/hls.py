@@ -108,15 +108,16 @@ class HLS:
     matches = re.findall(regex, content)
     timeList = [int(mat) for mat in matches]
     time = (timeList[-1] - timeList[0]) / (len(timeList) - 1) / 1e3
-    features['Average time [ns]'] =  time
+    features['Average T[ns]'] =  time
 
     regex = r"(\d+\.?\d*)ns"
     match = re.search(regex, content)
     clock  = float(match.group(1))
-    features[r'clock [ns]'] = clock
+    features[r'clock[ns]'] = clock
     t_time = op.time(self.params.parEntries, clock)
-    features[r'Theory time [ns]']  = t_time
-    features[r'Efficiency'] = '%.3f%%'%(t_time/time)
+    features[r'Estimated T[ns]']  = '%.1f'%(t_time)
+    features[r'Efficiency'] = '%.1f%%'%(t_time/time * 100)
+    features[r'Perf. [GOPS]'] = '%.3f'%(float(features['No. OPs']) / time)
 
     regex0 = r"Opening and resetting solution '([\w/]+)'"
     regex1 = r"Creating and opening solution '([\w/]+)'"
