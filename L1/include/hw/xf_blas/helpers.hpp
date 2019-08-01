@@ -32,6 +32,7 @@
 #include "helpers/dataMover/vecMoverB1.hpp"
 #include "helpers/dataMover/matMoverB2.hpp"
 #include "helpers/dataMover/bandedMatMoverB2.hpp"
+#include "helpers/dataMover/transpMatB2.hpp"
 
 /*        HELPER FUNCTIONS             */
 #include "helpers/funcs/padding.hpp"
