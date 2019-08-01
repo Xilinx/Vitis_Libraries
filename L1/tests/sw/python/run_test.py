@@ -19,7 +19,6 @@ import os, sys
 import shutil
 import json
 import pdb
-import traceback
 from blas_gen_bin import BLAS_GEN, BLAS_ERROR
 from hls import HLS, HLS_ERROR, Parameters
 from makefile import Makefile
@@ -239,6 +238,9 @@ def main(profileList, makefile):
       print("BLAS ERROR: %s with status code is %s"%(err.message, err.status))
     except HLS_ERROR as err:
       print("HLS ERROR: %s\nPlease check log file %s"%(err.message, os.path.abspath(err.logFile)))
+    except Exception as err:
+      type, value, traceback = sys.exc_info()
+      print(traceback)
     finally:
       if not runTest.op.name in passOps:
         failOps[runTest.op.name]= (runTest.numSim * runTest.hls.csim, runTest.numSim * runTest.hls.cosim) 
