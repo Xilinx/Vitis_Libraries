@@ -106,7 +106,7 @@ The following is an example of how to use XFBLAS API. Users always need to inclu
     status = xfblasSetMatrixRestricted(a);
     status = xfblasSetMatrixRestricted(b);
     status = xfblasSetMatrixRestricted(c);
-    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n);
+    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a, k, b, n, 1, c, n);
     status = xfblasGetMatrixRestricted(c);
     
     for ( i = 0; i < 128; i ++){
