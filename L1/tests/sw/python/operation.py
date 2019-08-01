@@ -192,8 +192,8 @@ class BLAS_L1(OP):
   def features(self):
     features = dict()
     features['Op name'] = self.name
-    features['Vector Size'] = self.vectorDim
-    features['No. OPs'] = self.vectorDim
+    features['Vec. Size'] = self.vectorDim
+    features['No.OPs'] = self.vectorDim
     return features
 
   def time(self, parallel, clock):
@@ -260,7 +260,7 @@ class axpy(BLAS_L1):
 
   def features(self):
     features = BLAS_L1.features(self) 
-    features['No. OPs'] = self.vectorDim * 2
+    features['No.OPs'] = self.vectorDim * 2
     return features
 
 class copy(BLAS_L1):
@@ -278,7 +278,7 @@ class dot(BLAS_L1):
 
   def features(self):
     features = BLAS_L1.features(self) 
-    features['No. OPs'] = self.vectorDim * 2
+    features['No.OPs'] = self.vectorDim * 2
     return features
 
   def compute(self): 
@@ -300,7 +300,7 @@ class nrm2(BLAS_L1):
 
   def features(self):
     features = BLAS_L1.features(self) 
-    features['No. OPs'] = self.vectorDim * 2
+    features['No.OPs'] = self.vectorDim * 2
     return features
 
 class swap(BLAS_L1):
@@ -315,7 +315,7 @@ class swap(BLAS_L1):
 
   def features(self):
     features = BLAS_L1.features(self) 
-    features['No. OPs'] = self.vectorDim * 3
+    features['No.OPs'] = self.vectorDim * 3
     return features
 
 class scal(BLAS_L1):
@@ -361,9 +361,9 @@ class BLAS_L2(OP):
   def features(self):
     features = dict()
     features['Op name'] = self.name
-    features['Matrix Size m'] = self.m
-    features['Matrix Size n'] = self.n
-    features['No. OPs'] = 2 * self.m * self.n + self.m * 3
+    features['Mat. Size m'] = self.m
+    features['Mat. Size n'] = self.n
+    features['No.OPs'] = 2 * self.m * self.n + self.m * 3
     return features
 
   def time(self, parallel, clock):
@@ -442,7 +442,7 @@ class gbmv(BLAS_L2):
     features = BLAS_L2.features(self)
     features['kl'] = self.kl
     features['ku'] = self.ku
-    features['No. OPs'] = 2 * self.m * (self.ku + self.kl + 1) + self.m * 3
+    features['No.OPs'] = 2 * self.m * (self.ku + self.kl + 1) + self.m * 3
     return features
 
   def time(self, parallel, clock):
@@ -499,9 +499,8 @@ class symv(BLAS_L2):
   def features(self):
     features = dict()
     features['Op name'] = self.name
-    features['DataType'] = self.dataType
-    features['Matrix Size m'] = self.m
-    features['No. OPs'] = 2 * self.m * self.m + self.m * 3
+    features['Mat. Size m'] = self.m
+    features['No.OPs'] = 2 * self.m * self.m + self.m * 3
     return features
 
   def time(self, parallel, clock):
@@ -526,7 +525,7 @@ class trmv(symv):
 
   def features(self):
     features = symv.features(self)
-    features['No. OPs'] = self.m * (self.m + 1) + self.m * 3
+    features['No.OPs'] = self.m * (self.m + 1) + self.m * 3
     return features
 
   def time(self, parallel, clock):
@@ -577,7 +576,7 @@ class sbmv(BLAS_L2):
     features = symv.features(self)
     k = self.ku if self.ku != 0 else self.kl
     features['k'] = k
-    features['No. OPs'] = 2 * self.m * (k * 2 + 1) + self.m * 3
+    features['No.OPs'] = 2 * self.m * (k * 2 + 1) + self.m * 3
     return features
 
   def time(self, parallel, clock):
@@ -636,7 +635,7 @@ class tbmv(sbmv):
 
   def features(self):
     features = sbmv.features(self)
-    features['No. OPs'] = 2 * self.m * (self.kl + self.ku + 1) + self.m * 3
+    features['No.OPs'] = 2 * self.m * (self.kl + self.ku + 1) + self.m * 3
     return features
 
   def time(self, parallel, clock):

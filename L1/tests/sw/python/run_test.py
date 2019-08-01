@@ -19,6 +19,7 @@ import os, sys
 import shutil
 import json
 import pdb
+import time
 import traceback
 from blas_gen_bin import BLAS_GEN, BLAS_ERROR
 from hls import HLS, HLS_ERROR, Parameters
@@ -86,9 +87,7 @@ class RunTest:
     
     self.numToSim = self.profile['numSimulation']
 
-    self.testPath = r'out_test/%s'%self.op.name
-    if os.path.exists(self.testPath):
-      shutil.rmtree(self.testPath)
+    self.testPath = os.path.join('out_test', self.op.name)
     self.reports = list()
 
     self.libPath = os.path.join(self.testPath, 'libs')
@@ -155,7 +154,7 @@ class RunTest:
     self.hls.params.setPath(path)
     self.op.test(self)
 
-  def writeReport(self):
+  def writeReport(self, profile, flag = 'w+'):
     reportPath = os.path.join(self.testPath, 'report.rpt')
     if len(self.reports) == 0:
       raise OP_ERROR("Benchmark fails for op %s."%self.op.name)
@@ -165,7 +164,9 @@ class RunTest:
 
     sepStr = '+' + '+'.join(['-' * l for l in lens]) + '+\n'
 
-    with open(reportPath, 'w+') as f:
+    with open(reportPath, flag) as f:
+      f.write(time.ctime())
+      f.write("Profile path: %s"%profile)
       f.write(sepStr)
       ########### START OF KEYS ################
       strList=['|']
@@ -187,13 +188,15 @@ class RunTest:
     return reportPath
 
 def makeTable(passDict, failDict, handle = print):
-
+  handle('='*25 + 'REPORT' + '='*25 + '\n')
+  handle(time.ctime())
+  handle('\n')
   passed = len(passDict)
   remain = len(failDict)
   numOps = passed + remain
-  handle("%d / %d operation[s] passed the tests." %(passed, numOps))
+  handle("%d / %d operation[s] passed the tests.\n" %(passed, numOps))
   if remain != 0:
-    handle("%d operation[s] failed the tests." %remain)
+    handle("%d operation[s] failed the tests.\n" %remain)
   sepStr = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '\n'])
   handle(sepStr)
   keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
@@ -214,13 +217,12 @@ def makeTable(passDict, failDict, handle = print):
     handle(sepStr)
 
 def main(profileList, makefile): 
-  numOps = len(profileList)
   passOps = dict()
   failOps = dict()
-  print(r"There are in total %d operator[s] under test."%numOps)
   while profileList:
     profile = profileList.pop()
     runTest = RunTest(makefile)
+    passed = False
     try:
       if not os.path.exists(profile):
         raise Exception("ERROR: File %s is not exists."%profile)
@@ -228,9 +230,19 @@ def main(profileList, makefile):
       print("Starting to test %s."%(runTest.op.name))
       runTest.runTest(os.path.dirname(profile)) 
       print("All %d tests for %s are passed."%(runTest.numSim, runTest.op.name))
-      passOps[runTest.op.name] = (runTest.numSim * runTest.hls.csim, runTest.numSim * runTest.hls.cosim)
+      passed = True
+      csim = 0
+      cosim = 0
+      flag = 'w+'
+      if runTest.op.name in passOps:
+        csim, cosim = passOps[runTest.op.name] 
+        flag = 'a+'
+      csim = csim + runTest.numSim * runTest.hls.csim
+      cosim = csim + runTest.numSim * runTest.hls.cosim
+      passOps[runTest.op.name] = (csim, cosim)
+
       if runTest.hls.cosim:
-        rpt = runTest.writeReport()
+        rpt = runTest.writeReport(profile, flag)
         print("Benchmark info for op %s is written in %s"%(runTest.op.name, rpt))
 
     except OP_ERROR as err:
@@ -239,10 +251,21 @@ def main(profileList, makefile):
       print("BLAS ERROR: %s with status code is %s"%(err.message, err.status))
     except HLS_ERROR as err:
       print("HLS ERROR: %s\nPlease check log file %s"%(err.message, os.path.abspath(err.logFile)))
+    except Exception as err:
+      type, value, tb = sys.exc_info()
+      traceback.print_exception(type, value, tb)
     finally:
-      if not runTest.op.name in passOps:
-        failOps[runTest.op.name]= (runTest.numSim * runTest.hls.csim, runTest.numSim * runTest.hls.cosim) 
+      if not passed:
+        csim = 0
+        cosim = 0
+        if runTest.op.name in failOps:
+          csim, cosim = failOps[runTest.op.name] 
+        csim = csim + runTest.numSim * runTest.hls.csim
+        cosim = cosim + runTest.numSim * runTest.hls.cosim
+        failOps[runTest.op.name] = (csim, cosim)
   makeTable(passOps, failOps) 
+  with open("statistics.rpt", 'a+') as f:
+    makeTable(passOps, failOps, f.write) 
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')

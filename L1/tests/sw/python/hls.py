@@ -94,7 +94,7 @@ class HLS:
         raise HLS_ERROR("Csim FAILED.", logFile)
 
   def benchmarking(self, logFile, op, reportList):
-    if not self.csim:
+    if not self.cosim:
       return
 
     features = op.features()
@@ -108,16 +108,17 @@ class HLS:
     matches = re.findall(regex, content)
     timeList = [int(mat) for mat in matches]
     time = (timeList[-1] - timeList[0]) / (len(timeList) - 1) / 1e3
-    features['Average T[ns]'] =  time
+    features['RTL T[ns]'] =  '%.1f'%time
 
     regex = r"(\d+\.?\d*)ns"
     match = re.search(regex, content)
     clock  = float(match.group(1))
     features[r'clock[ns]'] = clock
     t_time = op.time(self.params.parEntries, clock)
-    features[r'Estimated T[ns]']  = '%.1f'%(t_time)
-    features[r'Efficiency'] = '%.1f%%'%(t_time/time * 100)
-    features[r'Perf. [GOPS]'] = '%.3f'%(float(features['No. OPs']) / time)
+    features[r'P.Entries'] = self.params.parEntries
+    features[r'Est. T[ns]']  = '%.1f'%(t_time)
+    features[r'Eff.'] = '%.1f%%'%(t_time/time * 100)
+    features[r'Perf. [GOPS]'] = '%.3f'%(float(features['No.OPs']) / time)
 
     regex0 = r"Opening and resetting solution '([\w/]+)'"
     regex1 = r"Creating and opening solution '([\w/]+)'"
@@ -137,13 +138,15 @@ class HLS:
     with open(rpt_syn, 'r') as f:
       rpt = f.read()
 
-    regex = r'\|Total\s*\|\s*(\d+)\|\s*(\d+)\|\s*(\d+)\|\s*(\d+)\|\s*(\d+)\|' 
+    regex = r'\|Total\s*' + r'\|\s*(\d+)' * 5 
     match = re.search(regex, rpt)
-    features['BRAM_18K'] = match.group(1)
-    features['DSP48E'] = match.group(2)
-    features['FF'] = match.group(3)
-    features['LUT'] = match.group(4)
-    features['URAM'] = match.group(5)
+    regex = r'\|Available SLR\s*'  + r'\|\s*(\d+)' * 5
+    match_slr = re.search(regex, rpt)
+    features['BRAM_18K  '] = '%s(%.2f%%)'%(match.group(1), 100 * int(match.group(1))/int(match_slr.group(1)))
+    features['DSP48E    '] = '%s(%.2f%%)'%(match.group(2), 100 * int(match.group(2))/int(match_slr.group(2)))
+    features['FF        '] = '%s(%.2f%%)'%(match.group(3), 100 * int(match.group(3))/int(match_slr.group(3)))
+    features['LUT       '] = '%s(%.2f%%)'%(match.group(4), 100 * int(match.group(4))/int(match_slr.group(4)))
+    features['URAM      '] = '%s(%.2f%%)'%(match.group(5), 100 * int(match.group(5))/int(match_slr.group(5)))
 
     reportList.append(features)
 
