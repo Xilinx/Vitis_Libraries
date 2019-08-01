@@ -94,7 +94,7 @@ class HLS:
         raise HLS_ERROR("Csim FAILED.", logFile)
 
   def benchmarking(self, logFile, op, reportList):
-    if not self.csim:
+    if not self.cosim:
       return
 
     features = op.features()
