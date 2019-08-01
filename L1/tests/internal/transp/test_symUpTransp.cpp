@@ -23,39 +23,40 @@
 
 using namespace xf::linear_algebra::blas;
 
-void uut_transpSymUpMat(unsigned int p_blocks,
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > &p_in,
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > &p_out) {
-  #pragma HLS DATA_PACK variable=p_in
-  #pragma HLS DATA_PACK variable=p_out
+void uut_transpMat(unsigned int p_blocks,
+                   hls::stream<WideType<BLAS_dataType, BLAS_parEntries> >& p_in,
+                   hls::stream<WideType<BLAS_dataType, BLAS_parEntries> >& p_out) {
+#pragma HLS DATA_PACK variable = p_in
+#pragma HLS DATA_PACK variable = p_out
 
-  transpSymUpMat<BLAS_dataType, BLAS_parEntries>(p_blocks, p_in, p_out);  
+    // transpSymUpMatBlocks<BLAS_dataType, BLAS_parEntries>(p_blocks, p_in, p_out);
+    transpMatBlocks<BLAS_dataType, BLAS_parEntries>(p_blocks, p_in, p_out);
 }
 
-int main(){
-  unsigned int l_blocks=4;
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_in;
-  hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_out;
+int main() {
+    unsigned int l_blocks = 4;
+    hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_in;
+    hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_out;
 
-  for (unsigned int b=0; b<l_blocks; ++b) {
-    WideType<BLAS_dataType, BLAS_parEntries> l_val;
-    for (unsigned int i=0; i<BLAS_parEntries; ++i) {
-      for (unsigned int j=0; j<BLAS_parEntries; ++j) {
-        l_val[j] = b*BLAS_parEntries*BLAS_parEntries+i*BLAS_parEntries+j;
-      }
-      l_in.write(l_val);
+    for (unsigned int b = 0; b < l_blocks; ++b) {
+        WideType<BLAS_dataType, BLAS_parEntries> l_val;
+        for (unsigned int i = 0; i < BLAS_parEntries; ++i) {
+            for (unsigned int j = 0; j < BLAS_parEntries; ++j) {
+                l_val[j] = b * BLAS_parEntries * BLAS_parEntries + i * BLAS_parEntries + j;
+            }
+            l_in.write(l_val);
+        }
     }
-  }
 
-  uut_transpSymUpMat(l_blocks, l_in, l_out);
+    uut_transpMat(l_blocks, l_in, l_out);
 
-  for (unsigned int b=0; b<l_blocks; ++b) {
-    for (unsigned int i=0; i<BLAS_parEntries; ++i) {
-      WideType<BLAS_dataType, BLAS_parEntries> l_val;
-      l_val = l_out.read();
-      std::cout << l_val << std::endl;
+    for (unsigned int b = 0; b < l_blocks; ++b) {
+        for (unsigned int i = 0; i < BLAS_parEntries; ++i) {
+            WideType<BLAS_dataType, BLAS_parEntries> l_val;
+            l_val = l_out.read();
+            std::cout << l_val << std::endl;
+        }
+        std::cout << std::endl;
     }
-    std::cout << std::endl;
-  }
-  return 0;
+    return 0;
 }

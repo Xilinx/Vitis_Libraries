@@ -34,7 +34,7 @@ set CFLAGS_H "$CFLAGS_K -I$pwd -I$pwd/../include/hw -I$pwd/../include/hw/xf_blas
 
 set proj_dir [format prj_hls_%s  $opt(part) ]
 open_project $proj_dir -reset
-set_top uut_transpSymUpMat 
+set_top uut_transpMat 
 add_files $pwd/internal/transp/test_symUpTransp.cpp -cflags "$CFLAGS_K"
 add_files -tb $pwd/internal/transp/test_symUpTransp.cpp -cflags "$CFLAGS_H"
 open_solution sol -reset
