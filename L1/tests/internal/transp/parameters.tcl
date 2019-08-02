@@ -1,5 +1,5 @@
 array set opt {
-    dataType  float 
+    dataType  uint32_t 
     resDataType int32_t
     logParEntries 2
     parEntries 4
