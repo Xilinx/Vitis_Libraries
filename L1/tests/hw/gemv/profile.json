@@ -3,19 +3,20 @@
   "b_synth": true,
   "b_cosim": true,
   "dataTypes": [
+    "uint16",
     "int32",
     "float64"
   ],
   "op": "gemv",
   "logParEntries": 2,
   "matrixDims": [
-    [60,64],
-    [128, 128],
-    [1024, 256]
+    [128, 4096],
+    [1024, 512],
+    [2048, 2048]
   ],
   "valueRange": [
-    -1024,
-    1024
+    -124,
+    124
   ],
-  "numSimulation": 2 
+  "numSimulation": 4 
 }
