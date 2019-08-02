@@ -87,6 +87,7 @@ void preProcess(unsigned int p_numElement,
     for (t_IndexType i = 0; i < p_numElement; i++) {
 #pragma HLS PIPELINE
         WideType<t_DataType, 1 << t_LogParEntries> l_elem = p_x.read();
+#pragma HLS ARRAY_PARTITION variable=l_elem complete dim=1
         t_IndexType l_pos;
         t_DataType l_value;
         BinaryCmp<t_DataType, l_ParEntries, t_IndexType, t_Max>::cmp(l_elem.getValAddr(), l_value, l_pos);
