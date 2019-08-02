@@ -30,7 +30,8 @@ void uut_transpMat(unsigned int p_blocks,
 #pragma HLS DATA_PACK variable = p_out
 
     // transpSymUpMatBlocks<BLAS_dataType, BLAS_parEntries>(p_blocks, p_in, p_out);
-    transpMatBlocks<BLAS_dataType, BLAS_parEntries>(p_blocks, p_in, p_out);
+    // transpMatBlocks<BLAS_dataType, BLAS_parEntries>(p_blocks, p_in, p_out);
+    transpSymLoMatBlocks<BLAS_dataType, BLAS_parEntries>(p_blocks, p_in, p_out);
 }
 
 int main() {
