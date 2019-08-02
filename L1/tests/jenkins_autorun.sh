@@ -6,6 +6,8 @@ if [ -d $TEST_DIR ]; then
   rm $TEST_DIR -rf
 fi
 
+source set_env.sh
+
 PYTHON=python3
 PYTEST=./sw/python/run_test.py
 
