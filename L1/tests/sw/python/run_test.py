@@ -187,34 +187,35 @@ class RunTest:
         f.write(sepStr)
     return reportPath
 
-def makeTable(passDict, failDict, handle = print):
-  handle('='*25 + 'REPORT' + '='*25 + '\n')
-  handle(time.ctime())
-  handle('\n')
+def makeTable(passDict, failDict, print_fn = print):
+  print_fn('='*25 + 'REPORT' + '='*25 + '\n')
+  print_fn(time.ctime())
+  print_fn('\n')
   passed = len(passDict)
   remain = len(failDict)
   numOps = passed + remain
-  handle("%d / %d operation[s] passed the tests.\n" %(passed, numOps))
+  print_fn("%d / %d operation[s] passed the tests.\n" %(passed, numOps))
   if remain != 0:
-    handle("%d / %d operation[s] passed the tests.\n" %(remain, numOps))
+    print_fn("%d / %d operation[s] failed the tests.\n" %(remain, numOps))
   sepStr = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '\n'])
-  handle(sepStr)
+  print_fn(sepStr)
   keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
       '{:<10}'.format('No.cosim'),'{:<10}'.format('Status'), '\n'])
-  handle(keys)
-  handle(sepStr)
+  print_fn(keys)
+  print_fn(sepStr)
   for opName in passDict.keys(): 
     csim, cosim = passDict[opName]
     value = '|'.join(['', '{:<10}'.format(opName), '{:<10}'.format(csim),
       '{:<10}'.format(cosim),'{:<10}'.format('Passed'), '\n'])
-    handle(value)
-    handle(sepStr)
+    print_fn(value)
+    print_fn(sepStr)
   for opName in failDict.keys(): 
     csim, cosim = failDict[opName]
     value = '|'.join(['', '{:<10}'.format(opName), '{:<10}'.format(csim),
       '{:<10}'.format(cosim),'{:<10}'.format('Failed'), '\n'])
-    handle(value)
-    handle(sepStr)
+    print_fn(value)
+    print_fn(sepStr)
+  return remain
 
 def main(profileList, makefile): 
   print(r"There are in total %d testing profile[s]."%len(profileList))
@@ -264,9 +265,11 @@ def main(profileList, makefile):
         csim = csim + runTest.numSim * runTest.hls.csim
         cosim = cosim + runTest.numSim * runTest.hls.cosim
         failOps[runTest.op.name] = (csim, cosim)
-  makeTable(passOps, failOps) 
   with open("statistics.rpt", 'a+') as f:
     makeTable(passOps, failOps, f.write) 
+
+  r = makeTable(passOps, failOps) 
+  sys.exit(r)
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
