@@ -154,7 +154,7 @@ class RunTest:
     self.hls.params.setPath(path)
     self.op.test(self)
 
-  def writeReport(self, profile, flag = 'w+'):
+  def writeReport(self, profile, flag = 'a+'):
     reportPath = os.path.join(self.testPath, 'report.rpt')
     if len(self.reports) == 0:
       raise OP_ERROR("Benchmark fails for op %s."%self.op.name)
@@ -165,8 +165,8 @@ class RunTest:
     sepStr = '+' + '+'.join(['-' * l for l in lens]) + '+\n'
 
     with open(reportPath, flag) as f:
-      f.write(time.ctime())
-      f.write("Profile path: %s"%profile)
+      f.write(time.ctime() + '\n')
+      f.write("Profile path: %s\n"%profile)
       f.write(sepStr)
       ########### START OF KEYS ################
       strList=['|']
@@ -196,7 +196,7 @@ def makeTable(passDict, failDict, handle = print):
   numOps = passed + remain
   handle("%d / %d operation[s] passed the tests.\n" %(passed, numOps))
   if remain != 0:
-    handle("%d operation[s] failed the tests.\n" %remain)
+    handle("%d / %d operation[s] passed the tests.\n" %(remain, numOps))
   sepStr = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '\n'])
   handle(sepStr)
   keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
@@ -238,7 +238,7 @@ def main(profileList, makefile):
         csim, cosim = passOps[runTest.op.name] 
         flag = 'a+'
       csim = csim + runTest.numSim * runTest.hls.csim
-      cosim = csim + runTest.numSim * runTest.hls.cosim
+      cosim = cosim + runTest.numSim * runTest.hls.cosim
       passOps[runTest.op.name] = (csim, cosim)
 
       if runTest.hls.cosim:
