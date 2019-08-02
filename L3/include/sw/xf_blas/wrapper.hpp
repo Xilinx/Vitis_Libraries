@@ -677,10 +677,10 @@ xfblasStatus_t xfblasGemm(xfblasOperation_t transa,
                 int paddedLda = getPaddedSize(lda, l_minSize);
                 int paddedLdb = getPaddedSize(ldb, l_minSize);
                 int paddedLdc = getPaddedSize(ldc, l_minSize);
-                l_status = l_gemmPtr->addGEMMOp(A, B, C, C, padded_m, padded_k, padded_n, paddedLda, paddedLdb,
+                l_status = l_gemmPtr->addGEMMOp(A, B, C, C, padded_m, padded_n, padded_k, paddedLda, paddedLdb,
                                                 paddedLdc, paddedLdc, 1, 0);
             } else {
-                l_status = l_gemmPtr->addGEMMOp(A, B, C, C, m, k, n, lda, ldb, ldc, ldc, 1, 0);
+                l_status = l_gemmPtr->addGEMMOp(A, B, C, C, m, n, k, lda, ldb, ldc, ldc, 1, 0);
             }
             return l_status;
         } else {

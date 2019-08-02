@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
         cout<<"\n";
   }
     
-  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n);
+  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a, k, b, n, 1, c, n);
   
   status = xfblasDeviceSynchronize();
   

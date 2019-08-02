@@ -126,7 +126,7 @@ L3 API GEMM example
       return EXIT_FAILURE;   
     }
     
-    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, d_a, k, d_b, n, 1, d_c, n, l_numKernel-1);
+    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, d_a, k, d_b, n, 1, d_c, n, l_numKernel-1);
     
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
@@ -265,7 +265,7 @@ L3 API GEMM example
       return EXIT_FAILURE;   
     }
     
-    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n, l_numKernel-1);
+    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a, k, b, n, 1, c, n, l_numKernel-1);
     
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
@@ -395,7 +395,7 @@ L3 API GEMM example
           cout<<"\n";
     }
       
-    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n);
+    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a, k, b, n, 1, c, n);
     
     status = xfblasDeviceSynchronize();
     
