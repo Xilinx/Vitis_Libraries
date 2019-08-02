@@ -217,6 +217,7 @@ def makeTable(passDict, failDict, handle = print):
     handle(sepStr)
 
 def main(profileList, makefile): 
+  print(r"There are in total %d testing profile[s]."%len(profileList))
   passOps = dict()
   failOps = dict()
   while profileList:

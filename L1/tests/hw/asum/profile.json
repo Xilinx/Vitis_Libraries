@@ -4,11 +4,13 @@
   "b_cosim": true,
   "dataTypes": [
     "float64",
+    "float32",
     "uint16",
     "int32"
   ],
   "retTypes": [
     "float64",
+    "float32",
     "uint16",
     "int32"
   ],
@@ -23,5 +25,5 @@
     -1024,
     1024
   ],
-  "numSimulation": 2
+  "numSimulation": 4
 }
