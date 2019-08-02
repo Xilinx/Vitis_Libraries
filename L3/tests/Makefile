@@ -18,7 +18,7 @@ ifndef XILINX_XRT
     $(error XILINX_XRT not defined)
 endif
 
-SW_API_DIR = ../../include/sw
+SW_API_DIR = ../include/sw
 
 #------------------------------host----------------------------------
 
@@ -27,19 +27,30 @@ HOST_CXXFLAGS = -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-
 HOST_INCLUDE = -I$(XILINX_XRT)/include -I$(SW_API_DIR)
 HOST_LIB = -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
 
+OUT_DIR = out_test
+
+#default settings
+
 XFBLAS_dataType = short
+OPERATOR_NAME = gemm
+
+TEST_EXE = $(OUT_DIR)/$(OPERATOR_NAME)/test_$(XFBLAS_dataType).exe
 
 #------------------------------dummies-------------------------------
 
 .PHONY: all
 
-all: clean gemm_test.exe
+all: $(TEST_EXE)
 
 clean: 
-	rm -rf *.exe
+	$(RM) -r ${OUT_DIR} 
 
-gemm_test.exe: gemm_test.cpp
+$(TEST_EXE) : ./xf_blas/$(OPERATOR_NAME)/test.cpp |  $(OPERATOR_NAME)
 	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
 
-
+$(OPERATOR_NAME) : $(OUT_DIR)
+	mkdir -p $(OUT_DIR)/$(OPERATOR_NAME)
 	
+$(OUT_DIR) :
+	@echo "************* Creating DIR $@ *************"
+	mkdir -p $@
