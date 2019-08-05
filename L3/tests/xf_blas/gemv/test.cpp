@@ -138,8 +138,8 @@ int main(int argc, char **argv) {
   }
   
   status = xfblasSetMatrixRestricted(a, l_numKernel-1);
-  status = xfblasSetMatrixRestricted(x, l_numKernel-1);
-  status = xfblasSetMatrixRestricted(y, l_numKernel-1);
+  status = xfblasSetVectorRestricted(x, l_numKernel-1);
+  status = xfblasSetVectorRestricted(y, l_numKernel-1);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Set Matrix failed with error code: "<< status << "\n"; 
     xfblasDestory();
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGetMatrixRestricted(y, l_numKernel-1);
+  status = xfblasGetVectorRestricted(y, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 
