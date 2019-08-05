@@ -266,10 +266,8 @@ def main(profileList, makefile):
         cosim = cosim + runTest.numSim * runTest.hls.cosim
         failOps[runTest.op.name] = (csim, cosim)
   with open("statistics.rpt", 'a+') as f:
-    makeTable(passOps, failOps, f.write) 
-
-  r = makeTable(passOps, failOps) 
-  sys.exit(r)
+    r = makeTable(passOps, failOps, f.write) 
+    sys.exit(r)
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
