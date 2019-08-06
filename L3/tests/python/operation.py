@@ -81,8 +81,8 @@ class gemv():
     
     self.y_out = self.compute();
     
-    # transa, m, n, alpha, lda, incx, beta, incy
-    self.param = np.asarray([0, 0, m, n, self.alpha, n, 1, self.beta, 1], dtype=np.int32)    
+    # transa, m, n, alpha, lda, incx, beta, incy, kernelIndex
+    self.param = np.asarray([0, m, n, self.alpha, n, 1, self.beta, 1, 0], dtype=np.int32)    
     
     out_dir = "out_test/gemv/data/"+cppDataType+"/"
     if not os.path.exists(out_dir):

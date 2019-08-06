@@ -103,8 +103,8 @@ int main(int argc, char **argv) {
   }
   
   status = xfblasSetMatrix(m,n,sizeof(*a),a,n,d_a, l_numKernel-1);
-  status = xfblasSetMatrix(n,1,sizeof(*x),x,1,d_x, l_numKernel-1);
-  status = xfblasSetMatrix(m,1,sizeof(*y),y,1,d_y, l_numKernel-1);
+  status = xfblasSetVector(n,sizeof(*x),x,1,d_x, l_numKernel-1);
+  status = xfblasSetVector(m,sizeof(*y),y,1,d_y, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Set Matrix failed with error code: "<< status << "\n"; 
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
     cout<<"Matrix Vector Multiplication failed with error code: "<< status << "\n"; 
     return EXIT_FAILURE;   
   }
-  status = xfblasGetMatrix(m,1,sizeof(*y),d_y,y,1, l_numKernel-1);
+  status = xfblasGetVector(m,sizeof(*y),d_y,y,1,l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 

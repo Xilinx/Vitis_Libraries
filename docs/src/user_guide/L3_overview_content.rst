@@ -302,7 +302,113 @@ This function allocates memory on the FPGA device.
         - xfblasStatus_t
         - 4 if the engine is not supported for now
 
-2.3.5 xfblasSetMatrix
+2.3.5 xfblasSetVector
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasSetVector(int n, int elemSize, short* x, int incx, short* d_x, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasSetVector(int n, int elemSize, float* x, int incx, float* d_x, unsigned int kernelIndex = 0)
+
+This function copies a vector in host memory to FPGA device memory. `xfblasMalloc() <2.3.4 xfblasMalloc_>`_ need to be called prior to this function.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - n
+        - number of elements in vector
+    *
+        - elemSize
+        - number of bytes required to store each element in the vector
+    *
+        - x
+        - pointer to the vector in the host memory
+    *
+        - incx
+        - the storage spacing between consecutive elements of vector x
+    *
+        - d_x
+        - pointer to mapped memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 2 if parameters rows, cols, elemSize, lda <= 0 or cols > lda or data types are not matched
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for the vector
+    *
+        - xfblasStatus_t
+        - 4 if the engine is not supported for now
+
+2.3.6 xfblasGetVector
+^^^^^^^^^^^^^^^^^^^^^^
+        
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasGetVector(int n, int elemSize, short* d_x, short* x, int incx, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasGetVector(int n, int elemSize, float* d_x, float* x, int incx, unsigned int kernelIndex = 0)
+
+This function copies a vector in FPGA device memory to host memory.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - n
+        - number of elements in vector
+    *
+        - elemSize
+        - number of bytes required to store each element in the vector
+    *
+        - d_x
+        - pointer to mapped memory
+    *
+        - x
+        - pointer to the vector in the host memory
+    *
+        - incx
+        - the storage spacing between consecutive elements of vector x
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for the vector
+
+2.3.7 xfblasSetMatrix
 ^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -361,7 +467,7 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
         - xfblasStatus_t
         - 4 if the engine is not supported for now
 
-2.3.6 xfblasGetMatrix
+2.3.8 xfblasGetMatrix
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -415,7 +521,7 @@ This function copies a matrix in FPGA device memory to host memory.
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for the matrix
         
-2.3.7 xfblasMallocRestricted
+2.3.9 xfblasMallocRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -479,7 +585,82 @@ This function allocates memory for host row-major format matrix on the FPGA devi
         - xfblasStatus_t
         - 5 if rows, cols or lda is not padded correctly
 
-2.3.8 xfblasSetMatrixRestricted
+2.3.10 xfblasSetVectorRestricted
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasSetVectorRestricted(void* x, unsigned int kernelIndex = 0)
+
+This function copies a vector in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.9 xfblasMallocRestricted_>`_ need to be called prior to this function.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+        - pointer to the vector in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+    
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for the vector
+  
+2.3.11 xfblasGetVectorRestricted
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    xfblasStatus_t xfblasGetVectorRestricted(void* x, unsigned int kernelIndex = 0)
+
+This function copies a matrix in FPGA device memory to host memory.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+        - pointer to vetcor x in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - xfblasStatus_t
+        - 0 if the operation completed successfully
+    *
+        - xfblasStatus_t
+        - 1 if the library was not initialized
+    *
+        - xfblasStatus_t
+        - 3 if there is no FPGA device memory allocated for the matrix
+
+
+2.3.12 xfblasSetMatrixRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -487,7 +668,7 @@ This function allocates memory for host row-major format matrix on the FPGA devi
 
     xfblasStatus_t xfblasSetMatrixRestricted(void* A, unsigned int kernelIndex = 0)
 
-This function copies a matrix in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.7 xfblasMallocRestricted_>`_ need to be called prior to this function.
+This function copies a matrix in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.9 xfblasMallocRestricted_>`_ need to be called prior to this function.
 
 .. rubric:: Parameters:
 
@@ -518,7 +699,7 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
 
 
 
-2.3.9 xfblasGetMatrixRestricted
+2.3.13 xfblasGetMatrixRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -557,7 +738,7 @@ This function copies a matrix in FPGA device memory to host memory.
 
 
         
-2.3.10 xfblasMallocManaged
+2.3.14 xfblasMallocManaged
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -613,7 +794,7 @@ This function allocates memory on the FPGA device, rewrites the leading dimensio
         - xfblasStatus_t
         - 4 if the engine is not supported for now
 
-2.3.11 xfblasDeviceSynchronize
+2.3.15 xfblasDeviceSynchronize
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp

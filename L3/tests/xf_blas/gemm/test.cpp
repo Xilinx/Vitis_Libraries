@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-
-/*
- * usage: ./gemm_test.exe PATH_TO_XCLBIN/gemx.xclbin PATH_TO_XCLBIN/config_info.dat
- * 
- */
-
-#include <cmath>
 #include "xf_blas.hpp"
 #include "../helper_test.hpp"
 
@@ -82,7 +75,7 @@ int main(int argc, char **argv) {
   
   for ( i = 0; i < 5; i ++){
     for ( j = 0; j < 5; j ++){
-      cout<< (a[ IDX2R (i,j, ldc )])<<" ";
+      cout<< (a[ IDX2R (i,j, lda )])<<" ";
     }
     cout<<"\n";
   }
