@@ -37,11 +37,6 @@ help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make all TARGET=<exe/so> BLAS_dataType=<int>, BLAS_resDataType=<int>"
-	@echo "      Command to generate the design for specified target and device."
-	@echo "      TARGET defaults to exe, which builds blas_gen_bin.exe"
-	@echo "      BLAS_dataType default is int, BLAS_resDataType default is int "
-	@echo ""
 	@echo "  make blas_gen_bin.<exe/so> BLAS_dataType=<int>, BLAS_resDataType=<int>"
 	@echo "      Command to generate the specified target."
 	@echo "      BLAS_dataType default is int, BLAS_resDataType default is int "
@@ -59,13 +54,6 @@ ifndef XILINX_VIVADO
 $(error Environment variable XILINX_VIVADO is required and should point to Vivado install area)
 endif
 # MK_INC_END vivado.mk
-
-# Target check
-TARGET ?= exe
-ifeq ($(filter $(TARGET), exe so),)
-$(error TARGET is not exe or so)
-endif
-
 
 # -----------------------------------------------------------------------------
 # BEGIN_XF_MK_USER_SECTION
@@ -118,9 +106,6 @@ LFLAGS = $(HOST_LIB_LFLAGS) \
 OUT_DIR = out_test
 GEN_BIN_EXE = $(OUT_DIR)/blas_gen_bin.exe
 GEN_BIN_SO = $(OUT_DIR)/blas_gen_bin_d$(BLAS_dataType)_r$(BLAS_resDataType).so
-
-.PHONY: all
-all: $(OUT_DIR)/blas_gen_bin.$(TARGET)
 
 $(OUT_DIR)/blas_gen_bin.so : $(GEN_BIN_SO)
 	@cp $(GEN_BIN_SO) $(OUT_DIR)/blas_gen_bin.so
