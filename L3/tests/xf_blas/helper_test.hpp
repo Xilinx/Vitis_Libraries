@@ -19,6 +19,7 @@
 
 #include <string>
 #include <iomanip>
+#include <cmath>
 
 using namespace std;
 
@@ -57,8 +58,25 @@ bool compareMat(t_dataType* c, t_dataType* goldenC, int m, int k, int n, float p
 }
 
 
-
-
+template <typename t_dataType>
+bool compareVector(t_dataType* y, t_dataType* goldenY, int m, float p_TolRel=1e-3, float p_TolAbs=1e-5){
+  bool l_check = true;
+  for(int row = 0; row < m; row++){ 
+      t_dataType l_ref = goldenY[row];
+      t_dataType l_result = y[row];
+      t_dataType l_diffAbs = abs(l_ref-l_result);
+      t_dataType l_diffRel = l_diffAbs;
+      if (goldenY[row] != 0 ){
+        l_diffRel /= abs(l_ref);
+      }
+      bool check = (l_diffRel <= p_TolRel) || (l_diffAbs <= p_TolAbs);
+      if (!check){
+        cout<<"golden result "<< setprecision(10) <<goldenY[row]<<" is not equal to fpga result "<< setprecision(10) <<y[row]<<"\n";
+        l_check = false;
+      }
+  }
+  return l_check;
+}
 
 
 #endif
