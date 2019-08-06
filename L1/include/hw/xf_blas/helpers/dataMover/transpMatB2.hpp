@@ -165,6 +165,29 @@ void transpMatBlocks(unsigned int p_blocks,
     }
 }
 
+/**
+ * @brief fwdMatBlocks function forwards matrix blocks
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries the number of parallely processed entries in the matrix
+ *
+ * @param p_blocks number of matrix blocks
+ * @param p_in input stream of matrix blocks
+ * @param p_out output stream of matrix blocks
+ */
+template <typename t_DataType, unsigned int t_ParEntries>
+void fwdMatBlocks(unsigned int p_blocks,
+                  hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
+                  hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+    for (unsigned int l_block = 0; l_block < p_blocks; ++l_block) {
+        for (unsigned int i = 0; i < t_ParEntries; ++i) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_val;
+            l_val = p_in.read();
+            p_out.write(l_val);
+        }
+    }
+}
 } // namespace blas
 } // namespace linear_algebra
 } // namespace xf
