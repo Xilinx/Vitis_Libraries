@@ -103,11 +103,17 @@ int main(int argc, char **argv) {
   int k = 256;
   int n = 256;
   
-  if (argc > 3){
-    cout<<"read custom sizes of matrix\n";
+  if (argc >= 6){
     m = stoi(argv[l_argIdx++]);
     k = stoi(argv[l_argIdx++]);
     n = stoi(argv[l_argIdx++]);
+    cout<<"Read custom sizes of matrix: ("<<m<<", "<<k<<", "<<n<<")\n";
+  }
+
+  string data_dir("./data/");
+  if (argc >= 7){
+    data_dir = (string) argv[l_argIdx++];
+    cout<<"Read custom data directory: "<<data_dir<<endl;
   }
   
   int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
@@ -119,7 +125,6 @@ int main(int argc, char **argv) {
   posix_memalign((void** )&goldenC, 4096, m*n* sizeof ( XFBLAS_dataType ));
   
   ifstream inFile;
-  string data_dir("./data/");
 
   inFile.open(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin", ifstream::binary);
   if( inFile.is_open() ){

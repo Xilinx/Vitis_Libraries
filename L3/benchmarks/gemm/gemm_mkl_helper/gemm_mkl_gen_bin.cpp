@@ -20,10 +20,11 @@
 #include <string>
 using namespace std;
 
+
 int main(int argc, char **argv) {
 
-  if (argc < 4) {
-    printf("Usage: gemm_mkl m k n\n");
+  if (argc < 5) {
+    printf("Usage: gemm_mkl m k n dir\n");
     return EXIT_FAILURE;
   }
 
@@ -36,7 +37,7 @@ int main(int argc, char **argv) {
   c = createMat(m, n);
 
   ofstream outFile;
-  string data_dir("../data/");
+  string data_dir(argv[4]);
 
   outFile.open(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin", ofstream::binary);
   outFile.write( (char*) a, sizeof(XFBLAS_dataType)*m*k );

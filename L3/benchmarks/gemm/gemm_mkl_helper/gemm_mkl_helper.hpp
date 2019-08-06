@@ -24,20 +24,20 @@
 #ifdef USE_DOUBLE_PRECISION
 	#define DISPLAY_GEMM_FUNC "DGEMM_MKL"
 	#define XFBLAS_dataType	double
-	#define GEMM_MKL(m, k, n, alpha, beta, a, b, c)	\
-		cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, a, m, b, k, beta, c, m);
+	#define GEMM_MKL(m, n, k, alpha, beta, a, b, c)	\
+		cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, a, k, b, n, beta, c, n);
 		
 #elif USE_SINGLE_PRECISION
 	#define DISPLAY_GEMM_FUNC "SGEMM_MKL"
 	#define XFBLAS_dataType float
-	#define GEMM_MKL(m, k, n, alpha, beta, a, b, c) \
-		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, a, m, b, k, beta, c, m);
+	#define GEMM_MKL(m, n, k, alpha, beta, a, b, c) \
+		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, a, k, b, n, beta, c, n);
 		
 #else
 	#define DISPLAY_GEMM_FUNC "SGEMM_MKL"
 	#define XFBLAS_dataType float
-	#define GEMM_MKL(m, k, n, alpha, beta, a, b, c) \
-		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, a, m, b, k, beta, c, m);
+	#define GEMM_MKL(m, n, k, alpha, beta, a, b, c) \
+		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, a, k, b, n, beta, c, n);
 		
 #endif
 
