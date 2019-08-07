@@ -188,6 +188,49 @@ void fwdMatBlocks(unsigned int p_blocks,
         }
     }
 }
+
+/**
+ * @brief transpMemWordBlocks memWord wise transposer
+ *
+ * @tparam t_DataType data type of the matrix entries
+ * @tparam t_MemWidth number of entries in one memory word
+ * @tparam t_Rows number of rows in the block
+ * @tparam t_Cols number of cols in the block
+ *
+ * @param p_blocks number of blocks
+ * @param p_in input stream of memory words
+ * @param p_out ouput transposed stream of memory words
+ */
+template <typename t_DataType, unsigned int t_MemWidth, unsigned int t_Rows, unsigned int t_Cols>
+void transpMemWordBlocks(unsigned int p_blocks,
+                         hls::stream<WideType<t_DataType, t_MemWidth> >& p_in,
+                         hls::stream<WideType<t_DataType, t_MemWidth> >& p_out) {
+#ifndef __SYNTHESIS__
+    assert(t_Cols % t_MemWidth == 0);
+#endif
+
+    static const unsigned int t_ColWords = t_Cols / t_MemWidth;
+    static const unsigned int t_Size = t_ColWords * t_Rows;
+
+    WideType<t_DataType, t_MemWidth> l_buf[t_Size];
+#pragma HLS DATA_PACK variable = l_buf
+    for (unsigned int b = 0; b < p_blocks; ++b) {
+#pragma HLS DATAFLOW
+        for (unsigned int i = 0; i < t_Rows; ++i) {
+            for (unsigned int j = 0; j < t_ColWords; ++j) {
+#pragma HLS PIPELINE
+                WideType<t_DataType, t_MemWidth> l_val = p_in.read();
+                l_buf[j * t_Rows + i] = l_val;
+            }
+        }
+        for (unsigned int i = 0; i < t_Size; ++i) {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_MemWidth> l_val = l_buf[i];
+            p_out.write(l_val);
+        }
+    }
+}
+
 } // namespace blas
 } // namespace linear_algebra
 } // namespace xf
