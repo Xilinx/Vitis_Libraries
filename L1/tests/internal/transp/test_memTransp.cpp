@@ -28,11 +28,13 @@ void uut_transpMat(unsigned int p_blocks,
                    hls::stream<WideType<BLAS_dataType, BLAS_memWidth> >& p_out) {
 #pragma HLS DATA_PACK variable = p_in
 #pragma HLS DATA_PACK variable = p_out
-    transpMemWordBlocks<BLAS_dataType, BLAS_memWidth, BLAS_rows, BLAS_cols>(p_blocks, p_in, p_out);
+    // transpMemWordBlocks<BLAS_dataType, BLAS_memWidth, BLAS_rows, BLAS_cols>(p_blocks, p_in, p_out);
+    transpMemBlocks<BLAS_dataType, BLAS_memWidth, BLAS_rows, BLAS_cols>(p_blocks, p_in, p_out);
 }
 
 int main() {
     unsigned int l_colWords = BLAS_cols / BLAS_memWidth;
+    unsigned int l_size = BLAS_rows * BLAS_cols / BLAS_memWidth;
     hls::stream<WideType<BLAS_dataType, BLAS_memWidth> > l_in;
     hls::stream<WideType<BLAS_dataType, BLAS_memWidth> > l_out;
 
@@ -52,14 +54,12 @@ int main() {
     uut_transpMat(l_blocks, l_in, l_out);
 
     for (unsigned int b = 0; b < l_blocks; ++b) {
-        for (unsigned int i = 0; i < l_colWords; ++i) {
-            for (unsigned int j = 0; j < BLAS_rows; ++j) {
-                WideType<BLAS_dataType, BLAS_memWidth> l_val;
-                l_val = l_out.read();
-                std::cout << l_val << std::endl;
-            }
-            std::cout << std::endl;
+        for (unsigned int i = 0; i < l_size; ++i) {
+            WideType<BLAS_dataType, BLAS_memWidth> l_val;
+            l_val = l_out.read();
+            std::cout << l_val << std::endl;
         }
+        std::cout << std::endl;
     }
     return 0;
 }
