@@ -54,7 +54,7 @@ bool compareGemm(XFBLAS_dataType* c, XFBLAS_dataType* goldenC, int m, int n, flo
       }
       bool check = (l_diffRel <= p_TolRel) || (l_diffAbs <= p_TolAbs);
       if (!check){
-        cout<<"#"<<row<<" golden result"<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,n)]<<"\n";
+        cout<<"#("<<row<<", "<<col<<") golden result"<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,n)]<<"\n";
         l_check = false;
       }
     }
