@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   // Generating Random Input
   a = createMat(m, n);
   x = createMat(n, 1);
-  y = createMat(m, 1);
+  y = createMat(m, 1, true);
 
   ofstream outFile;
   string data_dir(argv[3]);

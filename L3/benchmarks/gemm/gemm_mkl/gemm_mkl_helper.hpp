@@ -43,10 +43,10 @@
 
 typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePointType;
 
-XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_init);
-void initMat(XFBLAS_dataType* mat, int p_rows, int p_cols);
+XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_zero);
+void initMat(XFBLAS_dataType* mat, int p_rows, int p_cols, bool is_zero);
 
-XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_init=true){
+XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_zero=false){
   XFBLAS_dataType* mat; 
 /*// OBSOLETE, use posix_memalign.
   mat = (XFBLAS_dataType *)memalign(128, (size_t)p_rows * (size_t)p_cols * sizeof(XFBLAS_dataType));
@@ -59,15 +59,15 @@ XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_init=true){
 	printf("[ERROR %d] failed to create the matrix\n", rc);
     exit(1);
   }
-  if( is_init ) initMat(mat, p_rows, p_cols);
+  initMat(mat, p_rows, p_cols, is_zero);
   return mat;
 }
 
 // TODO, implement random input
-void initMat(XFBLAS_dataType* mat, int p_rows, int p_cols){
+void initMat(XFBLAS_dataType* mat, int p_rows, int p_cols, bool is_zero){
   srand(time(NULL));
   for (int j = 0; j < p_rows; j ++)
     for (int i = 0; i < p_cols; i ++)
-	  mat[i + (size_t)j * (size_t)p_cols] = (i==j)? 1 : 0;
+	  mat[i + (size_t)j * (size_t)p_cols] = (!is_zero&(i==j))? 1 : 0;
 }
 #endif
