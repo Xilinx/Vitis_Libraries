@@ -67,7 +67,7 @@ if [[ ("$MODE" == "g") || ("$MODE" == "a") ]]; then
 		n=`expr $n \* 2`
 	done
 	echo "====================="
-	echo "Generating binary complete"
+	echo "Generating binary file (Golden data) complete"
 	echo "Binary file is at ../data/$DATA_TYPE/"
 	echo "====================="
 fi
@@ -110,7 +110,7 @@ if [[ ("$MODE" == "b") || ("$MODE" == "a") ]]; then
 		n=`expr $n \* 2`
 	done
 	echo "====================="
-	echo "Benchmarking complete"
+	echo "GEMV MKL Benchmarking complete"
         cat /proc/cpuinfo | grep "model name" | head -1 | tr ':' ',' > perf_gemv_mkl_bench.csv
 	egrep -h ^DATA_CSV $logs | grep Type | head -1 >> perf_gemv_mkl_bench.csv
 	egrep -h ^DATA_CSV $logs | grep -v Type >> perf_gemv_mkl_bench.csv
