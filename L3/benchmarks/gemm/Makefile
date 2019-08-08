@@ -33,12 +33,12 @@ XFBLAS_dataType = short
 
 .PHONY: all
 
-all: clean gemm_perf_test.exe
+all: clean gemm_bench.exe
 
 clean: 
-	rm -rf *.exe
+	rm -rf *.exe *.txt
 
-gemm_perf_test.exe: gemm_perf_test.cpp
+gemm_bench.exe: gemm_bench.cpp
 	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
 
 
