@@ -218,13 +218,13 @@ void transpMemWordBlocks(unsigned int p_blocks,
 #pragma HLS DATAFLOW
         for (unsigned int i = 0; i < t_Rows; ++i) {
             for (unsigned int j = 0; j < t_ColWords; ++j) {
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE REWIND
                 WideType<t_DataType, t_MemWidth> l_val = p_in.read();
                 l_buf[j * t_Rows + i] = l_val;
             }
         }
         for (unsigned int i = 0; i < t_Size; ++i) {
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE REWIND
             WideType<t_DataType, t_MemWidth> l_val = l_buf[i];
             p_out.write(l_val);
         }
@@ -261,7 +261,7 @@ void transpMemBlocks(unsigned int p_blocks,
 #pragma HLS DATAFLOW
         for (unsigned int i = 0; i < t_Rows; ++i) {
             for (unsigned int j = 0; j < t_ColWords; ++j) {
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE REWIND
                 WideType<t_DataType, t_MemWidth> l_val = p_in.read();
 #pragma HLS ARRAY_PARTITION variable = l_val complete
                 for (unsigned int k = 0; k < t_MemWidth; ++k) {
@@ -271,7 +271,7 @@ void transpMemBlocks(unsigned int p_blocks,
         }
         for (unsigned int i = 0; i < t_Cols; ++i) {
             for (unsigned int j = 0; j < t_RowWords; ++j) {
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE REWIND
                 WideType<t_DataType, t_MemWidth> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
                 WideType<t_DataType, t_MemWidth> l_out;
