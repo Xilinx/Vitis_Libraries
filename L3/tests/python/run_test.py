@@ -30,7 +30,7 @@ class RunTest:
   def  __init__(self):
     self.profile = None
     
-  def parseProfile(self, filePath):
+  def parseProfile(self, filePath, shell):
     with open(filePath, 'r') as fh:
       self.profile = json.loads(fh.read())
     self.opName = self.profile['op']
@@ -39,7 +39,7 @@ class RunTest:
     self.minValue = self.profile['valueRange'][0]
     self.maxValue = self.profile['valueRange'][1]
     self.dimList = self.profile['matrixDims']
-    self.shell = self.profile["shell"]
+    self.shell = shell
     
   def build(self): 
     for dataType in self.cppDataTypes:
@@ -74,13 +74,13 @@ class RunTest:
         i = i + 1
       logFile.close()
         
-def main(profileList):
+def main(profileList, shell):
   commandLine = 'make clean'
   args = shlex.split(commandLine)
   subprocess.call(args)
   for profile in profileList:
     runTest = RunTest()
-    runTest.parseProfile(profile)
+    runTest.parseProfile(profile,shell)
     runTest.build()
     runTest.genBin()
     runTest.run()
@@ -94,6 +94,7 @@ if __name__== "__main__":
   group = parser.add_mutually_exclusive_group(required=True)
   group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of pathes to the profile files')
   group.add_argument('--operator', nargs='*',metavar='opName', help='list of operator names')
+  group.add_argument('--shell',default='xilinx_vcu1525_dynamic_5_1', help='choice of xclbin')
   args = parser.parse_args()
   
   profile = list()
@@ -105,4 +106,4 @@ if __name__== "__main__":
   else:
     parser.print_help()
     
-  main(set(profile))
+  main(set(profile), args.shell)

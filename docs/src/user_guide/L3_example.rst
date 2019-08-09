@@ -154,3 +154,4 @@ Please see `XFBLAS L3 example folder`_ for more example cases.
    :maxdepth: 2
    
    L3_example_gemm.rst
+   L3_example_gemv.rst
