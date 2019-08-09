@@ -28,7 +28,9 @@
 // const opcode defintion for printing
 #define GBMV 14
 #define SBMV 17
+#define SPMV 18
 #define TBMV 24
+#define TPMV 26
 
 using namespace std;
 namespace xf {
@@ -39,6 +41,7 @@ template <typename t_DataType,
           typename t_ResDataType,
           typename t_HPPandleType,
           unsigned int t_MemWidthBytes,
+          unsigned int t_ParEntries,
           unsigned int t_InstrSizeBytes = 8,
           unsigned int t_PageSizeBytes = 4096,
           unsigned int t_MaxNumInstrs = 64,
@@ -51,6 +54,7 @@ class GenBin {
                              t_DataType,
                              t_ResDataType,
                              t_MemWidthBytes,
+                             t_ParEntries,
                              t_InstrSizeBytes,
                              t_PageSizeBytes,
                              t_MaxNumInstrs,
@@ -61,19 +65,21 @@ class GenBin {
                              t_DataType,
                              t_ResDataType,
                              t_MemWidthBytes,
+                             t_ParEntries,
                              t_InstrSizeBytes,
                              t_PageSizeBytes,
                              t_MaxNumInstrs,
                              t_InstrPageIdx,
                              t_ParamPageIdx,
                              t_StatsPageIdx>::ParamB2Type ParamB2Type;
-    typedef typename ParamB2<t_DataType>::MatStoreType MatStoreType;
+    typedef typename ParamB2<t_DataType, t_ParEntries>::MatStoreType MatStoreType;
 
    public:
     static const size_t ParamB1Bytes = Program<t_HPPandleType,
                                                t_DataType,
                                                t_ResDataType,
                                                t_MemWidthBytes,
+                                               t_ParEntries,
                                                t_InstrSizeBytes,
                                                t_PageSizeBytes,
                                                t_MaxNumInstrs,
@@ -84,6 +90,7 @@ class GenBin {
                                                t_DataType,
                                                t_ResDataType,
                                                t_MemWidthBytes,
+                                               t_ParEntries,
                                                t_InstrSizeBytes,
                                                t_PageSizeBytes,
                                                t_MaxNumInstrs,
@@ -92,7 +99,7 @@ class GenBin {
                                                t_StatsPageIdx>::ParamB2Bytes;
 
    public:
-    GenBin() {}
+    GenBin() { assert((t_MemWidthBytes / sizeof(t_DataType)) % t_ParEntries == 0); }
     xfblasStatus_t addB1Instr(string p_opName,
                               uint32_t p_n,
                               t_DataType p_alpha,
@@ -177,6 +184,7 @@ class GenBin {
 
             MatStoreType l_store;
             uint32_t l_rows = 0;
+            uint32_t l_entries = 0;
             switch (l_opCode) {
                 case SBMV:
                     if (p_kl == 0) {
@@ -187,6 +195,17 @@ class GenBin {
                         l_rows = p_kl + 1;
                     }
                     break;
+                case SPMV:
+                    assert(p_m == p_n);
+                    if (p_kl == 0) {
+                        l_store = MatStoreType::PM_UP;
+                        assert(p_ku == p_n);
+                    } else {
+                        l_store = MatStoreType::PM_LO;
+                        assert(p_kl == p_n);
+                    }
+                    l_entries = ((p_n / t_ParEntries) + 1) * (p_n / t_ParEntries) * t_ParEntries * t_ParEntries / 2;
+                    break;
                 case TBMV:
                     if (p_kl == 0) {
                         l_store = MatStoreType::TBM_UP;
@@ -195,6 +214,17 @@ class GenBin {
                         l_store = MatStoreType::TBM_LO;
                         l_rows = p_kl + 1;
                     }
+                    break;
+                case TPMV:
+                    assert(p_m == p_n);
+                    if (p_kl == 0) {
+                        l_store = MatStoreType::PM_UP;
+                        assert(p_ku == p_n);
+                    } else {
+                        l_store = MatStoreType::PM_LO;
+                        assert(p_kl == p_n);
+                    }
+                    l_entries = ((p_n / t_ParEntries) + 1) * (p_n / t_ParEntries) * t_ParEntries * t_ParEntries / 2;
                     break;
                 case GBMV:
                     l_store = MatStoreType::GBM;
@@ -206,10 +236,15 @@ class GenBin {
             }
             l_param.m_aStore = l_store;
 
-            l_status = regMem(l_rows * p_n * sizeof(t_DataType), p_a, l_param.m_aAddr);
+            if ((l_store == MatStoreType::PM_UP) || (l_store == MatStoreType::PM_LO)) {
+                l_status = regMem(l_entries * sizeof(t_DataType), p_a, l_param.m_aAddr);
+                l_status = regMem(l_entries * sizeof(t_DataType), p_aRes, l_param.m_aResAddr);
+            } else {
+                l_status = regMem(l_rows * p_n * sizeof(t_DataType), p_a, l_param.m_aAddr);
+                l_status = regMem(l_rows * p_n * sizeof(t_DataType), p_aRes, l_param.m_aResAddr);
+            }
             l_status = regMem(p_n * sizeof(t_DataType), p_x, l_param.m_xAddr);
             l_status = regMem(p_m * sizeof(t_DataType), p_y, l_param.m_yAddr);
-            l_status = regMem(l_rows * p_n * sizeof(t_DataType), p_aRes, l_param.m_aResAddr);
             l_status = regMem(p_m * sizeof(t_DataType), p_yRes, l_param.m_yResAddr);
 
             uint8_t* l_instrVal = reinterpret_cast<uint8_t*>(&l_instr);
@@ -281,6 +316,7 @@ class GenBin {
             t_DataType,
             t_ResDataType,
             t_MemWidthBytes,
+            t_ParEntries,
             t_InstrSizeBytes,
             t_PageSizeBytes,
             t_MaxNumInstrs,

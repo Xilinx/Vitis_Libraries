@@ -68,6 +68,39 @@ void printMat(ostream& os, const vector<t_DataType>& p_data, uint32_t p_m, uint3
            << "\n";
     }
 }
+
+template <typename t_DataType, unsigned int t_ParEntries>
+void printPackedMatLo(ostream& os, const vector<t_DataType>& p_data, uint32_t p_n) {
+    unsigned int l_blocks = p_n / t_ParEntries;
+    unsigned int l_off = 0;
+    for (unsigned int b = 0; b < l_blocks; ++b) {
+        for (unsigned int i = 0; i < t_ParEntries; ++i) {
+            for (unsigned int j = 0; j < (b + 1) * t_ParEntries; ++j) {
+                os << setw(OUTPUT_WIDTH) << p_data[l_off + j] << "  ";
+            }
+            l_off += (b + 1) * t_ParEntries;
+            os << "\n";
+        }
+        os << "\n";
+    }
+}
+
+template <typename t_DataType, unsigned int t_ParEntries>
+void printPackedMatUp(ostream& os, const vector<t_DataType>& p_data, uint32_t p_n) {
+    unsigned int l_blocks = p_n / t_ParEntries;
+    unsigned int l_off = 0;
+    for (unsigned int b = l_blocks; b > 0; --b) {
+        for (unsigned int i = 0; i < t_ParEntries; ++i) {
+            for (unsigned int j = 0; j < b * t_ParEntries; ++j) {
+                os << setw(OUTPUT_WIDTH) << p_data[l_off + j] << "  ";
+            }
+            l_off += b * t_ParEntries;
+            os << "\n";
+        }
+        os << "\n";
+    }
+}
+
 template <typename t_DataType>
 void getVecData(uint64_t p_addr, uint32_t p_n, vector<t_DataType>& p_data) {
     p_data.clear();
@@ -80,13 +113,13 @@ void getVecData(uint64_t p_addr, uint32_t p_n, vector<t_DataType>& p_data) {
     return;
 }
 template <typename t_DataType>
-void getMatrixData(uint64_t p_addr, uint32_t p_m, uint32_t p_n, vector<t_DataType>& p_data) {
+void getMatrixData(uint64_t p_addr, uint32_t p_entries, vector<t_DataType>& p_data) {
     p_data.clear();
     if (p_addr == 0) {
         return;
     }
-    size_t l_dataBytes = p_m * p_n * sizeof(t_DataType);
-    p_data.resize(p_m * p_n);
+    size_t l_dataBytes = p_entries * sizeof(t_DataType);
+    p_data.resize(p_entries);
     memcpy((char*)&(p_data[0]), reinterpret_cast<char*>(p_addr), l_dataBytes);
     return;
 }
@@ -102,12 +135,39 @@ void showVec(ostream& os, uint32_t p_n, uint64_t p_addr, string p_str) {
 template <typename t_DataType>
 void showMatrix(ostream& os, uint32_t p_m, uint32_t p_n, uint64_t p_addr, string p_str) {
     vector<t_DataType> l_data;
-    getMatrixData(p_addr, p_m, p_n, l_data);
+    getMatrixData(p_addr, p_m * p_n, l_data);
     if (l_data.size() != 0) {
         os << p_str << "\n";
         printMat<t_DataType>(os, l_data, p_m, p_n);
     }
 }
+
+template <typename t_DataType, unsigned int t_ParEntries>
+void showPackedMatrixLo(ostream& os, uint32_t p_m, uint32_t p_n, uint64_t p_addr, string p_str) {
+    vector<t_DataType> l_data;
+    assert(p_m == p_n);
+    uint32_t l_blocks = p_n / t_ParEntries;
+    uint32_t l_numEntries = (l_blocks + 1) * l_blocks * t_ParEntries * t_ParEntries / 2;
+    getMatrixData(p_addr, l_numEntries, l_data);
+    if (l_data.size() != 0) {
+        os << p_str << "\n";
+        printPackedMatLo<t_DataType, t_ParEntries>(os, l_data, p_n);
+    }
+}
+
+template <typename t_DataType, unsigned int t_ParEntries>
+void showPackedMatrixUp(ostream& os, uint32_t p_m, uint32_t p_n, uint64_t p_addr, string p_str) {
+    vector<t_DataType> l_data;
+    assert(p_m == p_n);
+    uint32_t l_blocks = p_n / t_ParEntries;
+    uint32_t l_numEntries = (l_blocks + 1) * l_blocks * t_ParEntries * t_ParEntries / 2;
+    getMatrixData(p_addr, l_numEntries, l_data);
+    if (l_data.size() != 0) {
+        os << p_str << "\n";
+        printPackedMatUp<t_DataType, t_ParEntries>(os, l_data, p_n);
+    }
+}
+
 } // namespace
 class FindOpCode {
    public:
@@ -223,10 +283,10 @@ ostream& operator<<(ostream& os, ParamB1<T1, T2>& p_val) {
     return (os);
 }
 
-template <typename t_DataType>
+template <typename t_DataType, unsigned int t_ParEntries>
 class ParamB2 {
    public:
-    typedef enum { GEM, GBM, SBM_LO, SBM_UP, TBM_LO, TBM_UP } MatStoreType;
+    typedef enum { GEM, GBM, PM_LO, PM_UP, SBM_LO, SBM_UP, TBM_LO, TBM_UP } MatStoreType;
 
    public:
     ParamB2() { m_aStore = GEM; }
@@ -266,7 +326,13 @@ class ParamB2 {
                 l_rows = m_m;
                 break;
         }
-        showMatrix<t_DataType>(os, l_rows, m_n, m_aAddr, "A:");
+        if (m_aStore == PM_LO) {
+            showPackedMatrixLo<t_DataType, t_ParEntries>(os, l_rows, m_n, m_aAddr, "A:");
+        } else if (m_aStore == PM_UP) {
+            showPackedMatrixUp<t_DataType, t_ParEntries>(os, l_rows, m_n, m_aAddr, "A:");
+        } else {
+            showMatrix<t_DataType>(os, l_rows, m_n, m_aAddr, "A:");
+        }
 
         showVec<t_DataType>(os, m_n, m_xAddr, "x:");
         showVec<t_DataType>(os, m_m, m_yAddr, "y:");
@@ -289,8 +355,8 @@ class ParamB2 {
     uint64_t m_yResAddr;
 };
 
-template <typename T1>
-ostream& operator<<(ostream& os, ParamB2<T1>& p_val) {
+template <typename T1, unsigned int T2>
+ostream& operator<<(ostream& os, ParamB2<T1, T2>& p_val) {
     p_val.print(os);
     return (os);
 }
