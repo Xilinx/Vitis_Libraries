@@ -11,5 +11,6 @@
   "valueRange": [
     -1024,
     1024
-  ]
+  ],
+  "shell": "xilinx_vcu1525_dynamic_5_1"
 }

@@ -72,15 +72,7 @@ int main(int argc, char **argv) {
   readMatBin((char*) b, iterIndex, k, n, l_dataDir, "matB_in", sizeof(XFBLAS_dataType));
   readMatBin((char*) c, iterIndex, m, n, l_dataDir, "matC_in", sizeof(XFBLAS_dataType));
   readMatBin((char*) goldenC, iterIndex, m, n, l_dataDir, "matC_out", sizeof(XFBLAS_dataType));
-  
-  for ( i = 0; i < 5; i ++){
-    for ( j = 0; j < 5; j ++){
-      cout<< (a[ IDX2R (i,j, lda )])<<" ";
-    }
-    cout<<"\n";
-  }
-  
-#ifdef TEST_HW_RUN
+
   XFBLAS_dataType * d_a, * d_b, * d_c;
   
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
@@ -123,7 +115,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a, k, b, n, 1, c, n, l_numKernel-1);
+  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, d_a, k, d_b, n, 1, d_c, n, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
@@ -139,14 +131,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;   
   }
   
-  for ( i = 0; i < 10; i ++){
-    for ( j = 0; j < 10; j ++){
-      cout<< (c[ IDX2R (i,j, k )])<<" ";
-    }
-    cout<<"\n";
-  }
-  
-  if (compareMat<XFBLAS_dataType>(c,goldenC,m,k,n)){
+  if (compareMat<XFBLAS_dataType>(c,goldenC,m,n)){
     cout<<"Test passed!\n";
   }else{
     cout<<"Test failed!\n";
@@ -160,8 +145,6 @@ int main(int argc, char **argv) {
   free(c);
   
   xfblasDestory(l_numKernel);
-  
-#endif
 
   return EXIT_SUCCESS;
 }

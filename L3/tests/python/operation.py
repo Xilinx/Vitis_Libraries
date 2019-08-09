@@ -28,10 +28,12 @@ def write2Bin(data_array, file_name):
   with open(file_name, "wb") as f:
     data_array.tofile(f)
   
+def write2Txt(data_array, file_name):
+  np.savetxt(file_name,data_array)
+
 class gemm():
   def __init__(self):
-    print("GEMM Initialized")
-
+    print("***** Generating golden reference for GEMM ******")
     
   def genBin(self, cnt, dataType, cppDataType, size, maxValue, minValue):
     if not len(size) == 3:
@@ -64,7 +66,7 @@ class gemm():
 
 class gemv():
   def __init__(self):
-    print("GEMV Initialized")
+    print("***** Generating golden reference for GEMV ******")
 
   def genBin(self, cnt, dataType, cppDataType, size, maxValue, minValue):
     if not len(size) == 2:
@@ -95,11 +97,3 @@ class gemv():
     
   def compute(self):
     return self.alpha * np.matmul(self.a_in, self.x_in) + self.beta * self.y_in; 
-
-'''    
-my_gemm_size = [3, 3, 4];   
-gemm().genBin(1, np.float32, my_gemm_size, 10.0, 0.0);    
-
-my_gemv_size = [3, 4];
-gemv().genBin(1, np.float32, my_gemv_size, 10.0, 0.0);    
-'''

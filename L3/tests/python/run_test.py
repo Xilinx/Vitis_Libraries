@@ -18,7 +18,7 @@ import ctypes as C
 import argparse
 import json
 import shlex, subprocess
-from operation import gemm, gemv
+from operation import *
 
 typeDict ={
       np.int16: 'short',
@@ -39,6 +39,7 @@ class RunTest:
     self.minValue = self.profile['valueRange'][0]
     self.maxValue = self.profile['valueRange'][1]
     self.dimList = self.profile['matrixDims']
+    self.shell = self.profile["shell"]
     
   def build(self): 
     for dataType in self.cppDataTypes:
@@ -61,11 +62,17 @@ class RunTest:
   def run(self):
     for dataType in self.cppDataTypes:
       i = 0
+      logFile = open(r'out_test/%s/log_%s.txt'%(self.opName,dataType),"w") 
       for dim in self.dimList:
-        commandLine = r'out_test/%s/test_%s.exe gemx.xclbin config_info.dat %d out_test/%s/data/%s/'%(self.opName, dataType, i, self.opName,dataType)
+        commandLine = r'out_test/%s/test_%s.exe ../overlay/%s/%s_%s_1kernel/gemx.xclbin ../overlay/%s/%s_%s_1kernel/config_info.dat %d out_test/%s/data/%s/'%(self.opName, dataType, self.shell, self.opName, dataType, self.shell, self.opName, dataType, i, self.opName,dataType)
+        print("**************** Running Command ****************")
+        print(commandLine)
         args = shlex.split(commandLine)
-        subprocess.call(args)
+        result = subprocess.check_output(args)
+        print(result)
+        logFile.write(result)
         i = i + 1
+      logFile.close()
         
 def main(profileList):
   commandLine = 'make clean'
@@ -77,6 +84,9 @@ def main(profileList):
     runTest.build()
     runTest.genBin()
     runTest.run()
+  print("******************* TEST DONE *******************")
+  print("See compare report in out_test/OPERATOR_NAME/log_DATATYPE.txt")
+  print("See runtime report in out_test/xrt_report.txt")
 
 
 if __name__== "__main__":
