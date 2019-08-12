@@ -32,7 +32,7 @@
 using namespace std;
 
 #define B1_MaxOpCode 13
-#define B2_MaxOpCode 26
+#define B2_MaxOpCode 36
 #define B3_MaxOpCode 51
 #define NULL_OP 0
 #define B1_OP_CLASS 0
