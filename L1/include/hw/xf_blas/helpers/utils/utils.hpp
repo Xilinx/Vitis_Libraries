@@ -73,7 +73,7 @@ class AdderDelay<float> {
     static const unsigned int m_logDelays = 2;
     static const unsigned int m_Delays = 1 << m_logDelays;
 };
-}
+} // namespace blas
 } // namespace linear_algebra
 } // namespace xf
 #endif
