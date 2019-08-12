@@ -193,7 +193,7 @@ void readSpmUp2Stream(unsigned int p_n,
     t_DataType* l_aAddr = p_a;
     for (unsigned int i = 0; i < l_blocks; ++i) {
         for (unsigned int j = 0; j < l_blocks; ++j) {
-            t_DataType* l_aAddrRowJ = p_a + (j * p_n - (j * (j - 1)) / 2) * t_ParEntries * t_ParEntries;
+            t_DataType* l_aAddrRowJ = p_a + (j * l_blocks - (j * (j - 1)) / 2) * t_ParEntries * t_ParEntries;
             t_DataType* l_aBlockAddr =
                 (i > j) ? (l_aAddrRowJ + (i - j) * t_ParEntries) : (l_aAddr + (j - i) * t_ParEntries);
             unsigned int l_blockId = (i > j) ? j : i;
@@ -214,7 +214,7 @@ void readSpmUp2Stream(unsigned int p_n,
                 l_aBlockAddr += p_n - l_blockId * t_ParEntries;
             }
         }
-        l_aAddr += (p_n - i) * t_ParEntries;
+        l_aAddr += (l_blocks - i) * t_ParEntries * t_ParEntries;
     }
 }
 
