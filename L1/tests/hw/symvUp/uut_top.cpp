@@ -39,14 +39,14 @@ void uut_top(uint32_t p_m,
 #pragma HLS data_pack variable = l_strA
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strX;
 #pragma HLS data_pack variable = l_strX
-    hls::stream<WideType<BLAS_dataType, 1> > l_strY;
+    hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strY;
 #pragma HLS data_pack variable = l_strY
-    hls::stream<WideType<BLAS_dataType, 1> > l_strYR;
+    hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strYR;
 #pragma HLS data_pack variable = l_strYR
 #pragma HLS DATAFLOW
     symUp2Stream<BLAS_dataType, BLAS_parEntries>(p_n, p_a, l_strA);
     vec2SymStream<BLAS_dataType, BLAS_parEntries>(p_n, p_x, l_strX);
-    readVec2Stream<BLAS_dataType, 1>(p_y, p_m, l_strY);
-    gemv<BLAS_dataType, BLAS_logParEntries>(p_m, p_n, p_alpha, l_strA, l_strX, p_beta, l_strY, l_strYR);
-    writeStream2Vec<BLAS_dataType, 1>(l_strYR, p_m, p_yRes);
+    readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_y, p_m, l_strY);
+    symv<BLAS_dataType, BLAS_logParEntries>(p_m, p_alpha, l_strA, l_strX, p_beta, l_strY, l_strYR);
+    writeStream2Vec<BLAS_dataType, BLAS_parEntries>(l_strYR, p_m, p_yRes);
 }
