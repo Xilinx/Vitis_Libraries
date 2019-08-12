@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
   
   if (argc < 3){
     cerr << " usage: \n"
-         << " gemm_bench.exe gemx.xclbin config_info.dat m k n\n"
+         << " gemm_bench.exe gemx.xclbin config_info.dat m k n data_dir iteration\n"
          << " gemm_bench.exe gemx.xclbin config_info.dat\n";
     return EXIT_FAILURE; 
   }
@@ -113,6 +113,12 @@ int main(int argc, char **argv) {
   string data_dir("./data/float/");
   if (argc >= 7){
     data_dir = (string) argv[l_argIdx++];
+    cout<<"Read custom data directory: "<<data_dir<<endl;
+  }
+  
+  int iteration = 2;
+  if (argc >= 8){
+    iteration = stoi(argv[l_argIdx++]);
     cout<<"Read custom data directory: "<<data_dir<<endl;
   }
   
@@ -166,32 +172,59 @@ int main(int argc, char **argv) {
     exit(1);
   }
   
-  TimePointType l_tp[4];
-  unsigned int l_tpIdx = 0;
-  l_tp[l_tpIdx] = chrono::high_resolution_clock::now(); 
+  TimePointType l_tp_start_time;
+  TimePointType l_tp_create_time;
+  l_tp_start_time = chrono::high_resolution_clock::now(); 
   
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
   xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
   
-  showTimeData("xfblasCreate", l_tp[l_tpIdx], l_tp[l_tpIdx+1]); l_tpIdx++;
+  showTimeData("xfblasCreate", l_tp_start_time, l_tp_create_time); 
   
-  status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, l_numKernel-1);
-  status = xfblasMallocRestricted(k,n,sizeof(*b),b,n, l_numKernel-1);
-  status = xfblasMallocRestricted(m,m,sizeof(*c),c,n, l_numKernel-1);
+  xfblasDestory(l_numKernel);
   
-  status = xfblasSetMatrixRestricted(a, l_numKernel-1);
-  status = xfblasSetMatrixRestricted(b, l_numKernel-1);
-  status = xfblasSetMatrixRestricted(c, l_numKernel-1);
+  TimePointType l_tp_loop[3];
+  chrono::duration<double> l_timeApiSum;
   
-  showTimeData("copyToFpga", l_tp[l_tpIdx], l_tp[l_tpIdx+1]); l_tpIdx++;
+  for(int i = 0; i< iteration;  i++){
+    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
+    unsigned int l_tpIdx = 0;
+    l_tp_loop[l_tpIdx] = chrono::high_resolution_clock::now();
+    status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, l_numKernel-1);
+    status = xfblasMallocRestricted(k,n,sizeof(*b),b,n, l_numKernel-1);
+    status = xfblasMallocRestricted(m,m,sizeof(*c),c,n, l_numKernel-1);
+    
+    status = xfblasSetMatrixRestricted(a, l_numKernel-1);
+    status = xfblasSetMatrixRestricted(b, l_numKernel-1);
+    status = xfblasSetMatrixRestricted(c, l_numKernel-1);
+    
+    showTimeData("copyToFpga", l_tp_loop[l_tpIdx], l_tp_loop[l_tpIdx+1]); l_tpIdx++;
+    
+    
+    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a, k, b, n, 1, c, n, l_numKernel-1);
+    status = xfblasGetMatrixRestricted(c, l_numKernel-1);
+    
   
+    
+    showTimeData("copyFromFpga", l_tp_loop[l_tpIdx], l_tp_loop[l_tpIdx+1]); l_tpIdx++;
+    
+    xfblasFree(a, l_numKernel-1);
+    xfblasFree(b, l_numKernel-1);
+    xfblasFree(c, l_numKernel-1);
+    xfblasDestory(l_numKernel);
+    chrono::duration<double> l_timeApiLoop = l_tp_loop[l_tpIdx] - l_tp_loop[0];
+    l_timeApiSum= l_timeApiSum + l_timeApiLoop;
+    
+    if (i != iteration-1){
+      inFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
+      if( inFile.is_open() ){
+        inFile.read( (char*) c, sizeof(XFBLAS_dataType)*m*n );
+        inFile.close();
+      }
+    }
+  }
   
-  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a, k, b, n, 1, c, n, l_numKernel-1);
-  status = xfblasGetMatrixRestricted(c, l_numKernel-1);
-  
-  showTimeData("copyFromFpga", l_tp[l_tpIdx], l_tp[l_tpIdx+1]); l_tpIdx++;
-  
-  chrono::duration<double> l_timeApi = l_tp[l_tpIdx] - l_tp[1];
+  chrono::duration<double> l_timeApi = l_timeApiSum / iteration;
   double l_timeMs = l_timeApi.count() * 1e3;
   
   
@@ -229,14 +262,11 @@ int main(int argc, char **argv) {
     cout<<"Test failed!\n";
   }
   
-  xfblasFree(a, l_numKernel-1);
-  xfblasFree(b, l_numKernel-1);
-  xfblasFree(c, l_numKernel-1);
   free(a);
   free(b);
   free(c);
     
-  xfblasDestory(l_numKernel);
+  //xfblasDestory(l_numKernel);
 
   return EXIT_SUCCESS;
 }

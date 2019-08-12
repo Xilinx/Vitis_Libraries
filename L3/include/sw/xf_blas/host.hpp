@@ -393,6 +393,10 @@ class BLASHost : public XHost {
         }
         return l_status;
     }
+    
+    void enableRun(){
+      m_execControl = true;
+    }
 };
 
 } // namespace blas

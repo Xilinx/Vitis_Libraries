@@ -101,6 +101,7 @@ class GEMVHost : public BLASHost {
 
         GemvArgs l_gargs(l_aOff, l_bOff, l_cOff, p_m, p_n, p_lda);
         this->addInstr(&l_gargs);
+        this->enableRun();
 
         return XFBLAS_STATUS_SUCCESS;
     }
