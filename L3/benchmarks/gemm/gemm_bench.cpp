@@ -192,7 +192,7 @@ int main(int argc, char **argv) {
     l_tp_loop[l_tpIdx] = chrono::high_resolution_clock::now();
     status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, l_numKernel-1);
     status = xfblasMallocRestricted(k,n,sizeof(*b),b,n, l_numKernel-1);
-    status = xfblasMallocRestricted(m,m,sizeof(*c),c,n, l_numKernel-1);
+    status = xfblasMallocRestricted(m,n,sizeof(*c),c,n, l_numKernel-1);
     
     status = xfblasSetMatrixRestricted(a, l_numKernel-1);
     status = xfblasSetMatrixRestricted(b, l_numKernel-1);

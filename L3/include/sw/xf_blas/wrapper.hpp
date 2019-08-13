@@ -723,7 +723,7 @@ xfblasStatus_t xfblasDestory(unsigned int kernelNumber = 1) {
     xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
     for (unsigned int i = 0; i < kernelNumber; i++) {
         BLASHostHandle::instance().m_handlePtr[i]->clearInstrBuf();
-        l_status = BLASHostHandle::instance().m_handlePtr[i]->closeContext();
+        l_status = BLASHostHandle::instance().m_handlePtr[i]->closeContext(i);
     }
 
     XFpgaHold::instance().m_xFpgaPtr = nullptr;
