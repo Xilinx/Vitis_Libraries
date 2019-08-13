@@ -86,6 +86,7 @@ class GEMMHost : public BLASHost {
         }
         unsigned int handle_A, handle_B, handle_C, handle_bias;
         auto& l_devPtr = this->m_bufHandle;
+        
         handle_A = l_devPtr[p_a];
         handle_B = l_devPtr[p_b];
         handle_C = l_devPtr[p_c];
@@ -116,6 +117,7 @@ class GEMMHost : public BLASHost {
         GemmArgs l_gargs(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_k, p_n, p_lda, p_ldb, p_ldc, p_ldx, p_postScale,
                          p_postShift);
         this->addInstr(&l_gargs);
+        this->enableRun();
 
         return XFBLAS_STATUS_SUCCESS;
     }
