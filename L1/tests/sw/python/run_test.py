@@ -34,14 +34,14 @@ def Format(x):
   return "%d%s"%(x, f_dic[k])
 
 class RunTest:
-  def __init__(self, makefile):
+  def __init__(self, args):
     self.profile = None 
     self.parEntries = 1
     self.logParEntries = 0
     self.valueRange = None
     self.numToSim = 1
     self.numSim = 0
-    self.makefile = makefile
+    self.makefile = args.makefile
 
     self.hls = None
     self.typeDict ={
@@ -98,9 +98,13 @@ class RunTest:
     if not os.path.exists(self.dataPath):
       os.makedirs(self.dataPath)
 
-    self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
+    if args.csim:
+      self.hls = HLS(r'build/run-hls.tcl',True, False, False) 
+    elif args.cosim:
+      self.hls = HLS(r'build/run-hls.tcl', False, True, True) 
+    else:
+      self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
        self.profile['b_synth'], self.profile['b_cosim'])
-      #  False, False)
 
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.parEntries))
@@ -128,10 +132,7 @@ class RunTest:
 
   def run(self):
     paramTclPath =os.path.join(self.dataPath, r'parameters_%s_%s.tcl'%(self.op.sizeStr,self.typeStr))
-    logpath=os.path.join(self.dataPath, r'logs_%s_%s'%(self.op.sizeStr,self.typeStr))
-    if not os.path.exists(logpath):
-      os.makedirs(logpath)
-    logfile=os.path.join(logpath, 'logfile.log')
+    logfile=os.path.join(self.dataPath, r'logfile_%s_%s.log'%(self.op.sizeStr,self.typeStr))
     binFile =os.path.join(self.dataPath,'TestBin_%s_%s.bin'%(self.op.sizeStr,self.typeStr))
 
     print("\n")
@@ -217,13 +218,13 @@ def makeTable(passDict, failDict, print_fn = print):
     print_fn(sepStr)
   return remain
 
-def main(profileList, makefile): 
+def main(profileList, args): 
   print(r"There are in total %d testing profile[s]."%len(profileList))
   passOps = dict()
   failOps = dict()
   while profileList:
     profile = profileList.pop()
-    runTest = RunTest(makefile)
+    runTest = RunTest(args)
     passed = False
     try:
       if not os.path.exists(profile):
@@ -275,6 +276,10 @@ if __name__== "__main__":
   group = parser.add_mutually_exclusive_group(required=True)
   group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of path to profile files')
   group.add_argument('--operator', nargs='*',metavar='opName', help='list of test dirs in ./hw')
+  
+  simGroup = parser.add_mutually_exclusive_group()
+  simGroup.add_argument('--csim', action='store_true', default=False, help='csim only')
+  simGroup.add_argument('--cosim', action='store_true', default=False, help='synthesis and cosim only')
   args = parser.parse_args()
   
   profile = list()
@@ -285,4 +290,4 @@ if __name__== "__main__":
       profile.append('./hw/%s/profile.json'%op)
   else:
     parser.print_help()
-  main(set(profile), args.makefile)
+  main(set(profile), args)
