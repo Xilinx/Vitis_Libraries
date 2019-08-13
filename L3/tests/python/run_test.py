@@ -94,7 +94,7 @@ if __name__== "__main__":
   group = parser.add_mutually_exclusive_group(required=True)
   group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of pathes to the profile files')
   group.add_argument('--operator', nargs='*',metavar='opName', help='list of operator names')
-  group.add_argument('--shell',default='xilinx_vcu1525_dynamic_5_1', help='choice of xclbin')
+  group.add_argument('--shell',default='vcu1525_dynamic_5_1', help='choice of xclbin')
   args = parser.parse_args()
   
   profile = list()
