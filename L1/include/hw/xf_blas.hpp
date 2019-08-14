@@ -43,6 +43,7 @@
 #include "xf_blas/gemv.hpp"
 #include "xf_blas/gbmv.hpp"
 #include "xf_blas/symv.hpp"
+#include "xf_blas/trmv.hpp"
 /* TODO
  *
 #include "xf_blas/sbmv.hpp"
@@ -50,7 +51,6 @@
 #include "xf_blas/tpmv.hpp"
 #include "xf_blas/tbmv.hpp"
 #include "xf_blas/tbsv.hpp"
-#include "xf_blas/trmv.hpp"
 
 */
 
