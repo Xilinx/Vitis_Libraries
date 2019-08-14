@@ -3,28 +3,22 @@
   "b_synth": true,
   "b_cosim": true,
   "dataTypes": [
-    "float32",
+    "int32",
     "float64"
   ],
   "op": "tpmv",
-  "parEntries": 4,
+  "logParEntries": 3,
   "matrixDims": [
     1024,
     4096
   ],
-  "kList":[
-    2,
-    3,
-    4
-  ],
-  "storage":[
-    true, false
-  ],
+  "storage": true,
   "valueRange": [
     -100,
     100
   ],
-  "numSimulation": 2 
+  "numSimulation": 4
 }
+
 
 
