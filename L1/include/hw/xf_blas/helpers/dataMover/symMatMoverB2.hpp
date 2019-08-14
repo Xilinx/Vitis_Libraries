@@ -86,15 +86,9 @@ void mergeSymUpMat(unsigned int p_n,
     for (unsigned int i = 0; i < l_blocks; ++i) {
         for (unsigned int j = 0; j < l_blocks; ++j) {
             for (unsigned int br = 0; br < t_ParEntries; ++br) {
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE REWIND
                 WideType<t_DataType, t_ParEntries> l_val;
-                if (i == j) {
-                    l_val = p_inSymUpTransp.read();
-                } else if (i > j) {
-                    l_val = p_inTransp.read();
-                } else {
-                    l_val = p_inForward.read();
-                }
+                l_val = (i == j) ? p_inSymUpTransp.read() : (i < j) ? p_inForward.read() : p_inTransp.read();
                 p_out.write(l_val);
             }
         }
@@ -417,6 +411,7 @@ void vec2SymStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_Dat
     for (unsigned int i = 0; i < l_blocks; ++i) {
         for (unsigned int j = 0; j < l_blocks; ++j) {
             for (unsigned int br = 0; br < t_ParEntries; ++br) {
+#pragma HLS PIPELINE
                 WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
                 for (unsigned int bl = 0; bl < t_ParEntries; ++bl) {
