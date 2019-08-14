@@ -47,32 +47,27 @@ void transpSymUpMatBlocks(unsigned int p_blocks,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     t_DataType l_buf[t_ParEntries][t_ParEntries];
-#pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 0
     for (unsigned int l_block = 0; l_block < p_blocks; ++l_block) {
-#pragma HLS PIPELINE II = t_ParEntries
         // shuffle and store
         for (unsigned int i = 0; i < t_ParEntries; ++i) {
+#pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
             l_val = p_in.read();
             for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_buf[i][j] = l_val[(t_ParEntries - i + j) % t_ParEntries];
+                l_buf[i][j] = l_val[j];
             }
         }
 
         for (unsigned int i = 0; i < t_ParEntries; ++i) {
+#pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
-            WideType<t_DataType, t_ParEntries> l_out;
-#pragma HLS ARRAY_PARTITION variable = l_out complete
             for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_val[j] = ((t_ParEntries - i + j) % t_ParEntries < i) ? l_buf[(t_ParEntries - i + j) % t_ParEntries][j]
-                                                                       : l_buf[i][j];
+                l_val[j] = (i > j) ? l_buf[j][i] : l_buf[i][j];
             }
-            for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_out[j] = l_val[(i + j) % t_ParEntries];
-            }
-            p_out.write(l_out);
+            p_out.write(l_val);
         }
     }
 }
@@ -92,32 +87,27 @@ void transpSymLoMatBlocks(unsigned int p_blocks,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     t_DataType l_buf[t_ParEntries][t_ParEntries];
-#pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 0
     for (unsigned int l_block = 0; l_block < p_blocks; ++l_block) {
-#pragma HLS PIPELINE II = t_ParEntries
         // shuffle and store
         for (unsigned int i = 0; i < t_ParEntries; ++i) {
+#pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
             l_val = p_in.read();
             for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_buf[i][j] = l_val[(t_ParEntries - i + j) % t_ParEntries];
+                l_buf[i][j] = l_val[j];
             }
         }
 
         for (unsigned int i = 0; i < t_ParEntries; ++i) {
+#pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
-            WideType<t_DataType, t_ParEntries> l_out;
-#pragma HLS ARRAY_PARTITION variable = l_out complete
             for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_val[j] = ((t_ParEntries - i + j) % t_ParEntries > i) ? l_buf[(t_ParEntries - i + j) % t_ParEntries][j]
-                                                                       : l_buf[i][j];
+                l_val[j] = (i < j) ? l_buf[j][i] : l_buf[i][j];
             }
-            for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_out[j] = l_val[(i + j) % t_ParEntries];
-            }
-            p_out.write(l_out);
+            p_out.write(l_val);
         }
     }
 }
@@ -136,31 +126,27 @@ void transpMatBlocks(unsigned int p_blocks,
                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     t_DataType l_buf[t_ParEntries][t_ParEntries];
-#pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 0
     for (unsigned int l_block = 0; l_block < p_blocks; ++l_block) {
-#pragma HLS PIPELINE II = t_ParEntries
         // shuffle and store
         for (unsigned int i = 0; i < t_ParEntries; ++i) {
+#pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
             l_val = p_in.read();
             for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_buf[i][j] = l_val[(i + j) % t_ParEntries];
+                l_buf[i][j] = l_val[j];
             }
         }
 
         for (unsigned int i = 0; i < t_ParEntries; ++i) {
+#pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
-            WideType<t_DataType, t_ParEntries> l_out;
-#pragma HLS ARRAY_PARTITION variable = l_out complete
             for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_val[j] = l_buf[(t_ParEntries - j + i) % t_ParEntries][j];
+                l_val[j] = l_buf[j][i];
             }
-            for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_out[j] = l_val[(t_ParEntries - j + i) % t_ParEntries];
-            }
-            p_out.write(l_out);
+            p_out.write(l_val);
         }
     }
 }
