@@ -59,6 +59,7 @@ void trmv(const bool uplo,
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
 #pragma HLS DATA_PACK variable = l_mulStr
+#pragma HLS STREAM variable = l_mulStr depth = 2
     const unsigned int l_parEntries = 1 << t_LogParEntries;
     const unsigned int l_blocks = p_n >> t_LogParEntries;
     if (uplo) {
