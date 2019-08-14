@@ -56,24 +56,16 @@ void trmv(const bool uplo,
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_M,
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
           hls::stream<WideType<t_MacType, 1> >& p_y) {
-#pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
 #pragma HLS DATA_PACK variable = l_mulStr
-#pragma HLS STREAM variable = l_mulStr depth = 2
+    //#pragma HLS STREAM variable = l_mulStr depth = 2
     const unsigned int l_parEntries = 1 << t_LogParEntries;
     const unsigned int l_blocks = p_n >> t_LogParEntries;
-    if (uplo) {
-        for (t_IndexType i = 0; i < l_blocks; i++) {
-            const unsigned int l_n = (l_blocks - i) << t_LogParEntries;
-            mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(l_n, p_M, p_x, l_mulStr, l_parEntries);
-            sum<t_DataType, t_LogParEntries, t_IndexType>(l_n, l_mulStr, p_y, l_parEntries);
-        }
-    } else {
-        for (t_IndexType i = l_blocks; i > 0; i--) {
-            const unsigned int l_n = (l_blocks + 1 - i) << t_LogParEntries;
-            mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(l_n, p_M, p_x, l_mulStr, l_parEntries);
-            sum<t_DataType, t_LogParEntries, t_IndexType>(l_n, l_mulStr, p_y, l_parEntries);
-        }
+    for (t_IndexType i = 0; i < l_blocks; i++) {
+#pragma HLS DATAFLOW
+        const unsigned int l_n = (uplo ? l_blocks - i : i + 1) << t_LogParEntries;
+        mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(l_n, p_M, p_x, l_mulStr, l_parEntries);
+        sum<t_DataType, t_LogParEntries, t_IndexType>(l_n, l_mulStr, p_y, l_parEntries);
     }
 }
 
