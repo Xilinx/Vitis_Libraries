@@ -12,9 +12,7 @@
     1024,
     4096
   ],
-  "storage":[
-    false, true
-  ],
+  "storage": false, 
   "valueRange": [
     -128,
     128
