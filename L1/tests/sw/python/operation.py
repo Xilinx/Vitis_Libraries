@@ -488,10 +488,10 @@ class symv(BLAS_L2):
     self.upper = upper 
     if self.upper:
       self.sizeStr = self.sizeStr + "_upper"
-      self.ku = 1
+      self.ku = self.m
     else:
       self.sizeStr = self.sizeStr + "_lower"
-      self.kl = 1
+      self.kl = self.m
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
@@ -555,7 +555,7 @@ class tpmv(trmv):
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     matrix = self.dataGen.triangularMatrix(self.m, self.upper)
-    a = self.dataGen.packedStorage(matrix, self.upper, self.PE)
+    a = self.dataGen.packedStorage(matrix, self.PE, self.upper)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
@@ -568,8 +568,8 @@ class spmv(symv):
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
-    matrix = self.dataGen.symmetricMatrix(self.matrixDim)
-    a = self.dataGen.packedStorage(matrix, self.upper, self.PE)
+    matrix = self.dataGen.symmetricMatrix(self.m)
+    a = self.dataGen.packedStorage(matrix, self.PE, self.upper)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
