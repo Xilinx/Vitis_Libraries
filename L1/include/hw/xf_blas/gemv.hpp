@@ -110,7 +110,7 @@ void gemv(const unsigned int p_m,
 }
 
 /**
- * @brief gemv function that returns the result vector of the mutiplication of a
+ * @gemv function that returns the result vector of the mutiplication of a
  * matrix and a vector y = alpha * M * x + beta * y
  *
  * @tparam t_DataType the data type of the vector entries
