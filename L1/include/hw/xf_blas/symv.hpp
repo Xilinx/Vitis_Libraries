@@ -65,6 +65,7 @@ void symv(const unsigned int p_n,
             for (t_IndexType k = 0; k < l_parEntries; k++) {
 #pragma HLS PIPELINE
                 t_DataType l_dot[1 << t_LogParEntries];
+#pragma HLS ARRAY_PARTITION variable = l_dot complete dim = 1
                 WideType<t_DataType, 1 << t_LogParEntries> l_M = p_M.read();
                 WideType<t_DataType, 1 << t_LogParEntries> l_x = p_x.read();
                 for (t_IndexType l = 0; l < l_parEntries; l++) {
