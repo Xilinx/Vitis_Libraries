@@ -190,7 +190,7 @@ class RunTest:
     return reportPath
 
 def makeTable(passDict, failDict, print_fn = print):
-  print_fn('='*45 + 'REPORT' + '='*45 + '\n')
+  print_fn('='*40 + '\tREPORT\t' + '='*40 + '\n')
   print_fn(time.ctime())
   print_fn('\n')
   passed = len(passDict)
