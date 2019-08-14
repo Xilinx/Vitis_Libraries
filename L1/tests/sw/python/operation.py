@@ -138,15 +138,20 @@ class DataGenerator:
       else:
         return np.reshape(np.tril(matrix), -1)
 
-  def packedStorage(self, matrix, upper=True):
+  def packedStorage(self, matrix, factor = 1, upper=True):
     m, n = matrix.shape
     assert m==n
     a = list()
     for i in range(m):
       left = i if upper else 0
       right = m if upper else i+1
+      r = (right - left) % factor
+      if not r == 0 and upper:
+        a += [0] * (factor - r)
       for j in range(left, right):
         a.append(matrix[i][j])
+      if not r == 0 and not upper:
+        a += [0] * (factor - r)
     return np.asarray(a, dtype=matrix.dtype)
 
 def dataGen(dataType, size, maxValue, minValue):
@@ -400,6 +405,7 @@ class BLAS_L2(OP):
   def test(self, runTest):
     vecDimList = runTest.profile['matrixDims']
     dataTypeList = runTest.dataTypes
+    self.PE = runTest.parEntries
     for dataType in dataTypeList:
       self.setDtype(dataType)
       runTest.build()
@@ -515,6 +521,16 @@ class trmv(symv):
     self.copyConstructor(blas_l2)
     self.upper = True
 
+  def features(self):
+    features = dict()
+    features['Op name'] = self.name
+    features['Mat. Size m'] = self.m
+    features['No.OPs'] = self.m * self.m + self.m * 3
+    return features
+
+  def time(self, parallel, clock):
+    return self.m * (self.m + 1)//2  * clock / parallel
+
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     matrix = self.dataGen.triangularMatrix(self.m, self.upper)
@@ -539,7 +555,7 @@ class tpmv(trmv):
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     matrix = self.dataGen.triangularMatrix(self.m, self.upper)
-    a = self.dataGen.packedStorage(matrix, self.upper)
+    a = self.dataGen.packedStorage(matrix, self.upper, self.PE)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
@@ -553,7 +569,7 @@ class spmv(symv):
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     matrix = self.dataGen.symmetricMatrix(self.matrixDim)
-    a = self.dataGen.packedStorage(matrix, self.upper)
+    a = self.dataGen.packedStorage(matrix, self.upper, self.PE)
     x = self.dataGen.vector(self.n)
     y = self.dataGen.vector(self.m)
     yr = alpha * np.matmul(matrix, x, dtype=self.dataGen.dataType) + beta * y
@@ -654,8 +670,8 @@ def main():
   dg = DataGenerator()
   dg.setRange(-16, 16)
   dg.setDataType(np.int8)
-  matrix = dg.triangularMatrix(8, False)
-  a= dg.packedStorage(matrix, False)
+  matrix = dg.triangularMatrix(8, 0)
+  a= dg.packedStorage(matrix, 4, 0)
   print(matrix)
   print(a)
 #  opName = 'sbmv'
