@@ -3,7 +3,7 @@
   "b_synth": true,
   "b_cosim": true,
   "dataTypes": [
-    "float32",
+    "int32",
     "float64"
   ],
   "op": "spmv",
