@@ -190,13 +190,16 @@ class RunTest:
     return reportPath
 
 def makeTable(passDict, failDict, print_fn = print):
-  print_fn('='*40 + '\tREPORT\t' + '='*40 + '\n')
-  print_fn(time.ctime())
-  print_fn('\n')
   passed = len(passDict)
   remain = len(failDict)
   numOps = passed + remain
-  print_fn("%d / %d operation[s] passed the tests.\n" %(passed, numOps))
+  if numOps == 0:
+    return
+  print_fn('='*40 + '   REPORT   ' + '='*40 + '\n')
+  print_fn(time.ctime())
+  print_fn('\n')
+  if passed != 0:
+    print_fn("%d / %d operation[s] passed the tests.\n" %(passed, numOps))
   if remain != 0:
     print_fn("%d / %d operation[s] failed the tests.\n" %(remain, numOps))
   delimiter = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '-'*30, '\n'])
@@ -230,6 +233,7 @@ def main(profileList, args):
     passed = False
     try:
       if not os.path.exists(profile):
+        passed = True
         raise Exception("ERROR: File %s is not exists."%profile)
       runTest.parseProfile(profile)
       print("Starting to test %s."%(runTest.op.name))
