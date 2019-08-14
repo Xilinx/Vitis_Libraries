@@ -58,6 +58,7 @@ class RunTest:
     }
 
   def parseProfile(self, filePath):
+    self.profilePath = filePath
     with open(filePath, 'r') as fh:
       self.profile = json.loads(fh.read())
 
@@ -163,19 +164,19 @@ class RunTest:
     keys = features.keys()
     lens = [len(key)+2 for key in keys]
 
-    sepStr = '+' + '+'.join(['-' * l for l in lens]) + '+\n'
+    delimiter = '+' + '+'.join(['-' * l for l in lens]) + '+\n'
 
     with open(reportPath, flag) as f:
       f.write(time.ctime() + '\n')
       f.write("Profile path: %s\n"%profile)
-      f.write(sepStr)
+      f.write(delimiter)
       ########### START OF KEYS ################
       strList=['|']
       for s, l in zip(keys, lens):
         strList.append(('{:<%d}|'%l).format(s))
       strList.append('\n')
       f.write(''.join(strList))
-      f.write(sepStr)
+      f.write(delimiter)
       ########### END OF KEYS ################
 
       while self.reports:
@@ -185,11 +186,11 @@ class RunTest:
           strList.append(('{:<%d}|'%l).format(features[key]))
         strList.append('\n')
         f.write(''.join(strList))
-        f.write(sepStr)
+        f.write(delimiter)
     return reportPath
 
 def makeTable(passDict, failDict, print_fn = print):
-  print_fn('='*25 + 'REPORT' + '='*25 + '\n')
+  print_fn('='*45 + 'REPORT' + '='*45 + '\n')
   print_fn(time.ctime())
   print_fn('\n')
   passed = len(passDict)
@@ -198,24 +199,25 @@ def makeTable(passDict, failDict, print_fn = print):
   print_fn("%d / %d operation[s] passed the tests.\n" %(passed, numOps))
   if remain != 0:
     print_fn("%d / %d operation[s] failed the tests.\n" %(remain, numOps))
-  sepStr = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '\n'])
-  print_fn(sepStr)
+  delimiter = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '-'*30, '\n'])
+  print_fn(delimiter)
   keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
-      '{:<10}'.format('No.cosim'),'{:<10}'.format('Status'), '\n'])
+      '{:<10}'.format('No.cosim'),'{:<10}'.format('Status'),
+      '{:<30}'.format('Profile'), '\n'])
   print_fn(keys)
-  print_fn(sepStr)
-  for opName in passDict.keys(): 
-    csim, cosim = passDict[opName]
-    value = '|'.join(['', '{:<10}'.format(opName), '{:<10}'.format(csim),
-      '{:<10}'.format(cosim),'{:<10}'.format('Passed'), '\n'])
+  print_fn(delimiter)
+  for rt in passDict.keys(): 
+    csim, cosim = passDict[rt]
+    value = '|'.join(['', '{:<10}'.format(rt.op.name), '{:<10}'.format(csim),
+      '{:<10}'.format(cosim),'{:<10}'.format('Passed'),'{:<30}'.format(rt.profilePath), '\n'])
     print_fn(value)
-    print_fn(sepStr)
-  for opName in failDict.keys(): 
-    csim, cosim = failDict[opName]
-    value = '|'.join(['', '{:<10}'.format(opName), '{:<10}'.format(csim),
-      '{:<10}'.format(cosim),'{:<10}'.format('Failed'), '\n'])
+    print_fn(delimiter)
+  for rt in failDict.keys(): 
+    csim, cosim = failDict[rt]
+    value = '|'.join(['', '{:<10}'.format(rt.op.name), '{:<10}'.format(csim),
+      '{:<10}'.format(cosim),'{:<10}'.format('Failed'), '{:<30}'.format(rt.profilePath),'\n'])
     print_fn(value)
-    print_fn(sepStr)
+    print_fn(delimiter)
   return remain
 
 def main(profileList, args): 
@@ -234,18 +236,12 @@ def main(profileList, args):
       runTest.runTest(os.path.dirname(profile)) 
       print("All %d tests for %s are passed."%(runTest.numSim, runTest.op.name))
       passed = True
-      csim = 0
-      cosim = 0
-      flag = 'w+'
-      if runTest.op.name in passOps:
-        csim, cosim = passOps[runTest.op.name] 
-        flag = 'a+'
-      csim = csim + runTest.numSim * runTest.hls.csim
-      cosim = cosim + runTest.numSim * runTest.hls.cosim
-      passOps[runTest.op.name] = (csim, cosim)
+      csim = runTest.numSim * runTest.hls.csim
+      cosim = runTest.numSim * runTest.hls.cosim
+      passOps[runTest] = (csim, cosim)
 
       if runTest.hls.cosim:
-        rpt = runTest.writeReport(profile, flag)
+        rpt = runTest.writeReport(profile)
         print("Benchmark info for op %s is written in %s"%(runTest.op.name, rpt))
 
     except OP_ERROR as err:
@@ -259,13 +255,9 @@ def main(profileList, args):
       traceback.print_exception(type, value, tb)
     finally:
       if not passed:
-        csim = 0
-        cosim = 0
-        if runTest.op.name in failOps:
-          csim, cosim = failOps[runTest.op.name] 
-        csim = csim + runTest.numSim * runTest.hls.csim
-        cosim = cosim + runTest.numSim * runTest.hls.cosim
-        failOps[runTest.op.name] = (csim, cosim)
+        csim = runTest.numSim * runTest.hls.csim
+        cosim = runTest.numSim * runTest.hls.cosim
+        failOps[runTest] = (csim, cosim)
   with open("statistics.rpt", 'a+') as f:
     r = makeTable(passOps, failOps, f.write) 
     sys.exit(r)
@@ -273,21 +265,18 @@ def main(profileList, args):
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
-  group = parser.add_mutually_exclusive_group(required=True)
-  group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of path to profile files')
-  group.add_argument('--operator', nargs='*',metavar='opName', help='list of test dirs in ./hw')
+  profileGroup = parser.add_mutually_exclusive_group(required=True)
+  profileGroup.add_argument('--profile', nargs='*', metavar='profile.json', help='list of path to profile files')
+  profileGroup.add_argument('--operator', nargs='*',metavar='opName', help='list of test dirs in ./hw')
   
   simGroup = parser.add_mutually_exclusive_group()
   simGroup.add_argument('--csim', action='store_true', default=False, help='csim only')
   simGroup.add_argument('--cosim', action='store_true', default=False, help='synthesis and cosim only')
   args = parser.parse_args()
   
-  profile = list()
   if args.profile:
     profile = args.profile
-  elif args.operator:
-    for op in args.operator:
-      profile.append('./hw/%s/profile.json'%op)
-  else:
-    parser.print_help()
+  else: 
+    profile = ['./hw/%s/profile.json'%op for op in args.operator]
+
   main(set(profile), args)
