@@ -33,7 +33,7 @@ namespace blas {
 
 /**
  * @brief symv function that returns the result vector of the mutiplication of a
- * matrix and a vector y = M * x
+ * symmetric matrix and a vector y = M * x
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
@@ -79,7 +79,7 @@ void symv(const unsigned int p_n,
 
 /**
  * @brief symv function that returns the result vector of the mutiplication of a
- * matrix and a vector y = alpha * M * x + beta * y
+ * symmetric matrix and a vector y = alpha * M * x + beta * y
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
