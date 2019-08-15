@@ -54,12 +54,12 @@ class HLS:
         self.directive, 
         binFile)
     if not b_print:
-      print("vivado_hls stdout print is hidden.")
+      print("OP %s: vivado_hls stdout print is hidden."%self.params.op.name)
     args = shlex.split(commandLine)
     hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=workDir)
     with open(logFile, 'w', buffering=1) as f:
       f.write(commandLine)
-      f.write("Working directory is %s"%workDir)
+      f.write("OP %s: Working directory is %s"%(self.params.op.name, workDir))
       while True:
         line = hls.stdout.readline()
         if not line:
@@ -70,14 +70,14 @@ class HLS:
         else:
           print('.', end='') 
           if line.find("CSIM finish") >=0:
-            print('\nCSIM finished.')
+            print('\nOP %s: CSIM finished.'%self.params.op.name)
           elif line.find(r'C/RTL co-simulation finished') >=0:
-            print('\nCOSIM finished.')
+            print('\nOP %s: COSIM finished.'%self.params.op.name)
           elif line.find(r'C/RTL SIMULATION') >=0:
-            print("\nSYNTHESIS finished.")
+            print("\nOP %s: SYNTHESIS finished."%self.params.op.name)
           sys.stdout.flush()
         f.write(line)
-    print('\nvivado_hls finished execution.') 
+    print('\nOP %s: vivado_hls finished execution.'%self.params.op.name) 
 
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:

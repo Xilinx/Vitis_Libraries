@@ -147,15 +147,16 @@ class RunTest:
     blas_gen=BLAS_GEN(self.lib)
     self.op.addInstr(blas_gen, dataList)
     blas_gen.write2BinFile(binFile)
-    print("Data file %s has been generated sucessfully."%binFile)
+    print("OP %s: Data file %s has been generated sucessfully."%(self.op.name, binFile))
     del dataList
     self.hls.generateParam(paramTclPath)
-    print("Parameters in file %s.\nLog file %s"%(paramTclPath, logfile))
+    print("OP %s: Parameters in file %s."%(self.op.name, paramTclPath))
+    print("OP %s: Log file %s"%(self.op.name,  logfile))
     self.hls.execution(binFile, logfile, self.testPath)
     self.hls.checkLog(logfile)
     self.numSim += self.numToSim
     self.hls.benchmarking(logfile, self.op, self.reports)
-    print("Test of size %s passed."%self.op.sizeStr)
+    print("OP %s: Test of size %s passed."%(self.op.name, self.op.sizeStr))
 
   def run(self, makelock):
     self.makelock = makelock
@@ -166,7 +167,7 @@ class RunTest:
   def writeReport(self, profile, flag = 'a+'):
     reportPath = os.path.join(self.testPath, 'report.rpt')
     if len(self.reports) == 0:
-      raise OP_ERROR("Benchmark fails for op %s."%self.op.name)
+      raise OP_ERROR("OP %s: Benchmark fails for op %s."%(self.op.name, self.op.name))
     features = self.reports[0]
     keys = features.keys()
     lens = [len(key)+2 for key in keys]
@@ -196,19 +197,19 @@ class RunTest:
         f.write(delimiter)
     return reportPath
 
-def makeTable(passDict, failDict, print_fn = print):
-  passed = len(passDict)
-  remain = len(failDict)
-  numOps = passed + remain
+def makeTable(passDict, failDict, skipList, numFailsList, print_fn = print):
+  numPasses = len(passDict)
+  numFails = len(failDict)
+  numOps = numPasses + numFails
   if numOps == 0:
     return
   print_fn('='*40 + '   REPORT   ' + '='*40 + '\n')
   print_fn(time.ctime())
   print_fn('\n')
-  if passed != 0:
-    print_fn("%d / %d operation[s] passed the tests.\n" %(passed, numOps))
-  if remain != 0:
-    print_fn("%d / %d operation[s] failed the tests.\n" %(remain, numOps))
+  if numPasses != 0:
+    print_fn("%d / %d operation[s] numPasses the tests.\n" %(numPasses, numOps))
+  if numFails != 0:
+    print_fn("%d / %d operation[s] failed the tests.\n" %(numFails, numOps))
   delimiter = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '-'*30, '\n'])
   print_fn(delimiter)
   keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
@@ -228,7 +229,17 @@ def makeTable(passDict, failDict, print_fn = print):
       '{:<10}'.format(cosim),'{:<10}'.format('Failed'), '{:<30}'.format(rt.profilePath),'\n'])
     print_fn(value)
     print_fn(delimiter)
-  return remain
+  for skip in skipList:
+    value = '|'.join(['', '{:<10}'.format('Unknown'), '{:<10}'.format(0),
+      '{:<10}'.format(0),'{:<10}'.format('Skipped'), '{:<30}'.format(skip),'\n'])
+    print_fn(value)
+    print_fn(delimiter)
+  for rem in numFailsList:
+    value = '|'.join(['', '{:<10}'.format('Unknown'), '{:<10}'.format(0),
+      '{:<10}'.format(0),'{:<10}'.format('Untested'), '{:<30}'.format(rem),'\n'])
+    print_fn(value)
+    print_fn(delimiter)
+  return numFails
 
 
 def process(runTest, passOps, failOps, dictLock, makeLock):
@@ -268,7 +279,7 @@ def main(profileList, args):
   print(r"There are in total %d testing profile[s]."%len(profileList))
   passOps = dict()
   failOps = dict()
-  skipNum = 0
+  skipList = list()
   argList = list()
   dictLock = threading.Lock()
   makeLock = threading.Lock()
@@ -276,15 +287,17 @@ def main(profileList, args):
     profile = profileList.pop()
     if not os.path.exists(profile):
       print("File %s is not exists."%profile)
-      skipNum += 1
+      skipList.append(profile)
       continue
     runTest = RunTest(profile, args)
     argList.append(runTest)
-  with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
-    for arg in argList:
-      executor.submit(process, arg, passOps, failOps, dictLock, makeLock)
-  with open("statistics.rpt", 'a+') as f:
-    r = makeTable(passOps, failOps, f.write) 
+  try:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
+      for arg in argList:
+        executor.submit(process, arg, passOps, failOps, dictLock, makeLock)
+  finally:
+    with open("statistics.rpt", 'a+') as f:
+      r = makeTable(passOps, failOps, skipList, profileList, f.write) 
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
