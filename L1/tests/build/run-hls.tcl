@@ -7,7 +7,6 @@
 set pwd [pwd]
 set pid [pid]
 
-set SDX_PATH $::env(XILINX_SDX)
 set VIVADO_PATH $::env(XILINX_VIVADO)
 
 set GCC_VERSION 6.2.0

@@ -22,7 +22,7 @@ linear algebra subroutines (BLAS). Three types of implementations are provided
 in this library, namely L1 primitives, L2 kernels and L3 software APIs. Those 
 implementations are organized in their corresponding directories L1, L2 and L3.
 The L1 primitives' implementations can be leveraged by FPGA hardware developers.
-The L2 kernels' implementations provide usage examples for SDx host code developers.
+The L2 kernels' implementations provide usage examples for Vitis host code developers.
 The L3 software APIs' implementations provide C, C++ and Python function interfaces
 to allow pure software developers  to offload BLAS operatins to pre-built FPGA images, 
 also called overlays. 

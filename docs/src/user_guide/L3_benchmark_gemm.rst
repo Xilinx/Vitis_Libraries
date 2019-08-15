@@ -63,13 +63,13 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 1.4 Running on Nimbix Cloud
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Follow the user guide `SDx On Nimbix`_ to login to your Nimbix account
+- Follow the user guide `Vitis On Nimbix`_ to login to your Nimbix account
 - Launch application "Xilinx SDAccel Development & Alveo FPGA 2018.3" and select "Desktop Mode with FPGA"
 - Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U200 FPGA (nx5u_xdma_201830_1)"
 - Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm/gemm_mkl directory
 - Run Intel® MKL GEMM APIs according to the above benchmark procedures.
 
-.. _SDx On Nimbix: https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1240-sdaccel-nimbix-getting-started.pdf
+.. _Vitis On Nimbix: https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1240-sdaccel-nimbix-getting-started.pdf
 
 .. NOTE:: FPGA is not required in Intel® Math Kernel Library but will be used in Xilinx's XFBLAS library.
 
@@ -166,7 +166,7 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 2.2 Running on Nimbix Cloud
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Follow the user guide "SDx On Nimbix" to login to your Nimbix account
+- Follow the user guide "Vitis On Nimbix" to login to your Nimbix account
 - Launch application "Xilinx SDAccel Development & Alveo FPGA 2018.3" and select "Desktop Mode with FPGA"
 - Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U200 FPGA (nx5u_xdma_201830_1)"
 - Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm directory

@@ -1,6 +1,6 @@
 # XF BLAS Library
 
-XF BLAS Library is an SDx library for accelerating linear algebra functions.
+XF BLAS Library is an Vitis library for accelerating linear algebra functions.
 
 [Comprehensive documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_blas)
 
