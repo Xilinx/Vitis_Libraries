@@ -45,7 +45,7 @@ void uut_top(uint32_t p_m,
 #pragma HLS data_pack variable = l_strYR
 #pragma HLS DATAFLOW
     tpmUp2Stream<BLAS_dataType, BLAS_parEntries>(p_n, p_a, l_strA);
-    vec2TrmLoStream<BLAS_dataType, BLAS_parEntries>(p_n, p_x, l_strX);
+    vec2TrmUpStream<BLAS_dataType, BLAS_parEntries>(p_n, p_x, l_strX);
     readVec2Stream<BLAS_dataType, 1>(p_y, p_n, l_strY);
     trmv<BLAS_dataType, BLAS_logParEntries>(true, p_n, p_alpha, l_strA, l_strX, p_beta, l_strY, l_strYR);
     writeStream2Vec<BLAS_dataType, 1>(l_strYR, p_m, p_yRes);
