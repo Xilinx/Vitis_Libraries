@@ -40,14 +40,14 @@ vector<future<xfblasStatus_t>> fuStatus;
  * @param d_A pointer to mapped memory
  * @param kernelIndex index of kernel that is being used, default is 0
  */
-xfblasStatus_t xfblasSetMatrix(
+xfblasStatus_t xfblasSetMatrixAsync(
     int rows, int cols, int elemSize, short* A, int lda, short* d_A, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
   fuStatus.push_back( async(launch::async, xfblasSetMatrix, rows, cols, elemSize, A, lda, d_A, kernelIndex ); 
   
 }
 
-void xfblasSetMatrix(
+void xfblasSetMatrixAsync(
     int rows, int cols, int elemSize, float* A, int lda, float* d_A, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
   fuStatus.push_back( async(launch::async, xfblasSetMatrix, rows, cols, elemSize, A, lda, d_A, kernelIndex ); 
@@ -94,7 +94,7 @@ void xfblasSetMatrixRestrictedAsync(void* A, unsigned int kernelIndex = 0) {
  * @param x pointer to the vector in the host memory
  * @param kernelIndex index of kernel that is being used, default is 0
  */
-void xfblasSetVectorRestricted(void* x, unsigned int kernelIndex = 0) {
+void xfblasSetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
   fuStatus.push_back( async(launch::async, xfblasSetVectorRestricted, x, kernelIndex) );
 }
