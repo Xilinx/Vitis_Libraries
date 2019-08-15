@@ -147,16 +147,16 @@ class RunTest:
     blas_gen=BLAS_GEN(self.lib)
     self.op.addInstr(blas_gen, dataList)
     blas_gen.write2BinFile(binFile)
-    print("OP %s: Data file %s has been generated sucessfully."%(self.op.name, binFile))
+    print("\nOP %s: Data file %s has been generated sucessfully."%(self.op.name, binFile))
     del dataList
     self.hls.generateParam(paramTclPath)
-    print("OP %s: Parameters in file %s."%(self.op.name, paramTclPath))
-    print("OP %s: Log file %s"%(self.op.name,  logfile))
+    print("\nOP %s: Parameters in file %s."%(self.op.name, paramTclPath))
+    print("\nOP %s: Log file %s"%(self.op.name,  logfile))
     self.hls.execution(binFile, logfile, self.testPath)
     self.hls.checkLog(logfile)
     self.numSim += self.numToSim
     self.hls.benchmarking(logfile, self.op, self.reports)
-    print("OP %s: Test of size %s passed."%(self.op.name, self.op.sizeStr))
+    print("\nOP %s: Test of size %s passed."%(self.op.name, self.op.sizeStr))
 
   def run(self, makelock):
     self.makelock = makelock
@@ -167,7 +167,7 @@ class RunTest:
   def writeReport(self, profile, flag = 'a+'):
     reportPath = os.path.join(self.testPath, 'report.rpt')
     if len(self.reports) == 0:
-      raise OP_ERROR("OP %s: Benchmark fails for op %s."%(self.op.name, self.op.name))
+      raise OP_ERROR("\nOP %s: Benchmark fails for op %s."%(self.op.name, self.op.name))
     features = self.reports[0]
     keys = features.keys()
     lens = [len(key)+2 for key in keys]
