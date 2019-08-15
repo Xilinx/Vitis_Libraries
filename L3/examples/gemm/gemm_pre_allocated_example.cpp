@@ -131,6 +131,6 @@ int main(int argc, char **argv) {
   xfblasFree(a);
   xfblasFree(b);
   xfblasFree(c);
-  xfblasDestory();
+  xfblasDestroy();
   
 }

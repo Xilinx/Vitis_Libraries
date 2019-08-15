@@ -218,13 +218,13 @@ This function frees memory in FPGA device.
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for the matrix
 
-2.3.3 xfblasDestory
+2.3.3 xfblasDestroy
 ^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasDestory()
+    xfblasStatus_t xfblasDestroy()
 
 This function releases handle used by the XFBLAS library.
 

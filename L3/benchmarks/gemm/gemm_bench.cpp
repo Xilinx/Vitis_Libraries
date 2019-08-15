@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
   
   showTimeData("xfblasCreate", l_tp_start_time, l_tp_create_time); 
   
-  xfblasDestory(l_numKernel);
+  xfblasDestroy(l_numKernel);
   
   TimePointType l_tp_loop[3];
   chrono::duration<double> l_timeApiSum;
@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
     xfblasFree(a, l_numKernel-1);
     xfblasFree(b, l_numKernel-1);
     xfblasFree(c, l_numKernel-1);
-    xfblasDestory(l_numKernel);
+    xfblasDestroy(l_numKernel);
     chrono::duration<double> l_timeApiLoop = l_tp_loop[l_tpIdx] - l_tp_loop[0];
     l_timeApiSum= l_timeApiSum + l_timeApiLoop;
     
@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
   free(b);
   free(c);
     
-  //xfblasDestory(l_numKernel);
+  //xfblasDestroy(l_numKernel);
 
   return EXIT_SUCCESS;
 }

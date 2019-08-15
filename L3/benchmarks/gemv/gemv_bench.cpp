@@ -236,7 +236,7 @@ int main(int argc, char **argv) {
   free(x);
   free(y);
   
-  xfblasDestory(l_numKernel);
+  xfblasDestroy(l_numKernel);
 
   return EXIT_SUCCESS;
 }

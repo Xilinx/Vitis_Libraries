@@ -716,7 +716,7 @@ xfblasStatus_t xfblasFree(void* A, unsigned int kernelIndex = 0) {
  * @retval xfblasStatus_t 0 if the shut down succeeded
  * @retval xfblasStatus_t 1 if the library was not initialized
  */
-xfblasStatus_t xfblasDestory(unsigned int kernelNumber = 1) {
+xfblasStatus_t xfblasDestroy(unsigned int kernelNumber = 1) {
     if (ConfigDict::instance().m_dict.empty()) {
         return XFBLAS_STATUS_NOT_INITIALIZED;
     }

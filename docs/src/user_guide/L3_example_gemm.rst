@@ -155,7 +155,7 @@ L3 API GEMM example
     xfblasFree(d_a, l_numKernel-1);
     xfblasFree(d_b, l_numKernel-1);
     xfblasFree(d_c, l_numKernel-1);
-    xfblasDestory(l_numKernel);
+    xfblasDestroy(l_numKernel);
     free(a);
     free(b);
     free(c);
@@ -204,7 +204,7 @@ L3 API GEMM example
     xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Create Handle failed with error code: "<< status << "\n"; 
-      xfblasDestory();
+      xfblasDestroy();
       return EXIT_FAILURE;   
     }
       
@@ -237,7 +237,7 @@ L3 API GEMM example
     status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, l_numKernel-1);
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
-      xfblasDestory();
+      xfblasDestroy();
       return EXIT_FAILURE;   
     }
     
@@ -245,14 +245,14 @@ L3 API GEMM example
     
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Malloc memory for matrix B failed with error code: "<< status << "\n"; 
-      xfblasDestory();
+      xfblasDestroy();
       return EXIT_FAILURE;   
     }
     status = xfblasMallocRestricted(m,n,sizeof(*c),c,n, l_numKernel-1);
     
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Malloc memory for matrix C failed with error code: "<< status << "\n"; 
-      xfblasDestory();
+      xfblasDestroy();
       return EXIT_FAILURE;   
     }
     
@@ -261,7 +261,7 @@ L3 API GEMM example
     status = xfblasSetMatrixRestricted(c, l_numKernel-1);
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Set Matrix failed with error code: "<< status << "\n"; 
-      xfblasDestory();
+      xfblasDestroy();
       return EXIT_FAILURE;   
     }
     
@@ -269,7 +269,7 @@ L3 API GEMM example
     
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Matrix Multiplication failed with error code: "<< status << "\n"; 
-      xfblasDestory();
+      xfblasDestroy();
       return EXIT_FAILURE;   
     }
     
@@ -277,7 +277,7 @@ L3 API GEMM example
     
     if (status != XFBLAS_STATUS_SUCCESS) {
       cout<<"Get Matirx failed with error code: "<< status << "\n"; 
-      xfblasDestory();
+      xfblasDestroy();
       return EXIT_FAILURE;   
     }
     
@@ -296,7 +296,7 @@ L3 API GEMM example
     free(b);
     free(c);
     
-    xfblasDestory(l_numKernel);
+    xfblasDestroy(l_numKernel);
   
     return EXIT_SUCCESS;
   }
@@ -423,7 +423,7 @@ L3 API GEMM example
     xfblasFree(a);
     xfblasFree(b);
     xfblasFree(c);
-    xfblasDestory();
+    xfblasDestroy();
     
   }
   

@@ -79,14 +79,14 @@ int main(int argc, char **argv) {
   xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Create Handle failed with error code: "<< status << "\n"; 
-    xfblasDestory();
+    xfblasDestroy();
     return EXIT_FAILURE;   
   }
     
   status = xfblasMalloc(&d_a, m,n,sizeof(*a), l_numKernel-1);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
-    xfblasDestory();
+    xfblasDestroy();
     return EXIT_FAILURE;   
   }
   
@@ -94,14 +94,14 @@ int main(int argc, char **argv) {
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix B failed with error code: "<< status << "\n"; 
-    xfblasDestory();
+    xfblasDestroy();
     return EXIT_FAILURE;   
   }
   status = xfblasMalloc(&d_y, m,1,sizeof(*y), l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix C failed with error code: "<< status << "\n"; 
-    xfblasDestory();
+    xfblasDestroy();
     return EXIT_FAILURE;   
   }
   
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
   status = xfblasSetVector(m,sizeof(*y),y,1,d_y, l_numKernel-1);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Set Matrix failed with error code: "<< status << "\n"; 
-    xfblasDestory();
+    xfblasDestroy();
     return EXIT_FAILURE;   
   }
   
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Matrix Vector Multiplication failed with error code: "<< status << "\n"; 
-    xfblasDestory();
+    xfblasDestroy();
     return EXIT_FAILURE;   
   }
   
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
 
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Get Matirx failed with error code: "<< status << "\n"; 
-    xfblasDestory();
+    xfblasDestroy();
     return EXIT_FAILURE;   
   }
 
@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
   free(x);
   free(y);
   
-  xfblasDestory(l_numKernel);
+  xfblasDestroy(l_numKernel);
   
   return EXIT_SUCCESS;
 }
