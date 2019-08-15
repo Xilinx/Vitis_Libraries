@@ -44,8 +44,8 @@ bool compareMat(t_dataType* c, t_dataType* goldenC, int m, int n, float p_TolRel
     for(int col = 0; col < n; col++){
       t_dataType l_ref = goldenC[IDX2R(row,col,n)];
       t_dataType l_result = c[IDX2R(row,col,n)];
-      t_dataType l_diffAbs = abs(l_ref-l_result);
-      t_dataType l_diffRel = l_diffAbs;
+      float l_diffAbs = abs(l_ref-l_result);
+      float l_diffRel = l_diffAbs;
       if (goldenC[IDX2R(row,col,n)] != 0 ){
         l_diffRel /= abs(l_ref);
       }
@@ -70,8 +70,8 @@ bool compareVector(t_dataType* y, t_dataType* goldenY, int m, float p_TolRel=1e-
   for(int row = 0; row < m; row++){ 
       t_dataType l_ref = goldenY[row];
       t_dataType l_result = y[row];
-      t_dataType l_diffAbs = abs(l_ref-l_result);
-      t_dataType l_diffRel = l_diffAbs;
+      float l_diffAbs = abs(l_ref-l_result);
+      float l_diffRel = l_diffAbs;
       if (goldenY[row] != 0 ){
         l_diffRel /= abs(l_ref);
       }

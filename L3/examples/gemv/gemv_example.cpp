@@ -47,8 +47,8 @@ bool compareGemv(XFBLAS_dataType* y, XFBLAS_dataType* goldenY, float p_TolRel=1e
   for(int row = 0; row < m; row++){ 
       XFBLAS_dataType l_ref = goldenY[row];
       XFBLAS_dataType l_result = y[row];
-      XFBLAS_dataType l_diffAbs = abs(l_ref-l_result);
-      XFBLAS_dataType l_diffRel = l_diffAbs;
+      float l_diffAbs = abs(l_ref-l_result);
+      float l_diffRel = l_diffAbs;
       if (goldenY[row] != 0 ){
         l_diffRel /= abs(l_ref);
       }
