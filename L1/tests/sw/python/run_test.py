@@ -12,14 +12,9 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
 
-import numpy as np
-import ctypes as C
 import argparse
 import os, sys
-import shutil
-import json
 import pdb
-import time
 import traceback
 from blas_gen_bin import BLAS_ERROR
 from hls import HLS_ERROR
@@ -34,9 +29,6 @@ def Format(x):
   if k>=4:
     k=0
   return "%d%s"%(x, f_dic[k])
-
-def makeTable(statList, statPath, flag = 'a+'):
-  list2File(statList, statPath, flag)
 
 def process(rt, statList, dictLock = threading.Lock(), makeLock = threading.Lock()):
   passed = False
@@ -102,7 +94,7 @@ def main(profileList, args):
         executor.submit(process, arg, statList)
   finally:
     statPath = os.path.join(os.getcwd(),"statistics.rpt") 
-    makeTable(statList, statPath) 
+    list2File(statList, statPath) 
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')

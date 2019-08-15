@@ -18,7 +18,6 @@ import argparse
 import os, sys
 import json
 import pdb
-import time
 from blas_gen_bin import BLAS_GEN
 from hls import HLS, Parameters
 from makefile import Makefile
