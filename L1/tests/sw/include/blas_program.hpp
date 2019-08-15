@@ -60,6 +60,7 @@ template <typename t_HPPandleType,
           typename t_DataType,
           typename t_ResDataType,
           unsigned int t_MemWidthBytes,
+          unsigned int t_ParEntries,
           unsigned int t_InstrSizeBytes,
           unsigned int t_PageSizeBytes,
           unsigned int t_MaxNumInstrs,
@@ -71,8 +72,8 @@ class Program {
     typedef Page<uint8_t, t_PageSizeBytes> PageType;
     typedef vector<PageType> PageVectorType;
     typedef ParamB1<t_DataType, t_ResDataType> ParamB1Type;
-    typedef ParamB2<t_DataType> ParamB2Type;
-    typedef typename ParamB2<t_DataType>::MatStoreType MatStoreType;
+    typedef ParamB2<t_DataType, t_ParEntries> ParamB2Type;
+    typedef typename ParamB2<t_DataType, t_ParEntries>::MatStoreType MatStoreType;
 
    public:
     static const unsigned int ParamStartOff = t_ParamPageIdx * t_PageSizeBytes;
@@ -259,6 +260,14 @@ class Program {
         switch (p_param.m_aStore) {
             case MatStoreType::GBM:
                 l_matDataBytes = (l_kl + l_ku + 1) * l_n * sizeof(t_DataType);
+                break;
+            case MatStoreType::PM_LO:
+                l_matDataBytes = ((l_n / t_ParEntries) + 1) * (l_n / t_ParEntries) * t_ParEntries * t_ParEntries *
+                                 sizeof(t_DataType) / 2;
+                break;
+            case MatStoreType::PM_UP:
+                l_matDataBytes = ((l_n / t_ParEntries) + 1) * (l_n / t_ParEntries) * t_ParEntries * t_ParEntries *
+                                 sizeof(t_DataType) / 2;
                 break;
             case MatStoreType::SBM_LO:
                 l_matDataBytes = (l_kl + 1) * l_n * sizeof(t_DataType);
@@ -481,8 +490,9 @@ template <typename T1,
           unsigned int T7,
           unsigned int T8,
           unsigned int T9,
-          unsigned int T10>
-ostream& operator<<(ostream& os, Program<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>& p_val) {
+          unsigned int T10,
+          unsigned int T11>
+ostream& operator<<(ostream& os, Program<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>& p_val) {
     p_val.print(os);
     return (os);
 }

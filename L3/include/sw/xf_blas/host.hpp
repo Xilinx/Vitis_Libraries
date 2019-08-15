@@ -46,7 +46,7 @@ class XFpga {
     uuid_t m_xclbinId;
     vector<int> m_mem;
     vector<unsigned long long> m_baseAddress;
-    unsigned int m_execHandle;
+    vector<unsigned int> m_execHandles;
     bool m_init = false;
 
     XFpga() = delete;
@@ -118,7 +118,7 @@ class XFpga {
     }
 
     bool execKernel(unsigned int p_kernelIndex) {
-        m_execHandle = xclAllocBO(m_handle, 4096 + 4096, xclBOKind(0), (1 << 31));
+        unsigned int m_execHandle = xclAllocBO(m_handle, 4096 + 4096, xclBOKind(0), (1 << 31));
         void* execData = xclMapBO(m_handle, m_execHandle, true);
         auto ecmd = reinterpret_cast<ert_start_kernel_cmd*>(execData);
         auto rsz = XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA / 4 + 2; // regmap array size
@@ -138,6 +138,8 @@ class XFpga {
         }
         
         while (xclExecWait(m_handle, 1) == 0);
+        
+        m_execHandles.push_back(m_execHandle);
         
         return true;
     }
@@ -360,9 +362,9 @@ class XHost {
         }
     }
 
-    xfblasStatus_t closeContext() {
+    xfblasStatus_t closeContext(unsigned int p_kernelIndex) {
         xclFreeBO(m_fpga->m_handle, m_instrBufHandle);
-        xclFreeBO(m_fpga->m_handle, m_fpga->m_execHandle);
+        xclFreeBO(m_fpga->m_handle, m_fpga->m_execHandles[p_kernelIndex]);
         xclCloseContext(m_fpga->m_handle, m_fpga->m_xclbinId, this->m_cuIndex);
         return XFBLAS_STATUS_SUCCESS;
     }
@@ -392,6 +394,10 @@ class BLASHost : public XHost {
             m_execControl = false;
         }
         return l_status;
+    }
+    
+    void enableRun(){
+      m_execControl = true;
     }
 };
 

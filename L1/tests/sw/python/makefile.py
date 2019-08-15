@@ -22,17 +22,26 @@ class Makefile:
     self.makefile = makefile
     self.libpath = libpath
 
-  def make(self, dtype='int', rtype='int', rebuild = False):
+  def make(self, envDict, rebuild = False):
 
-    self.target = r'out_test/blas_gen_bin_d%s_r%s.so'%(dtype, rtype)
-    if os.path.exists(self.target) and rebuild:
+    envStr = ' '.join(["%s=%s"%(key, envDict[key]) for key in envDict])
+    nameStr = '_'.join(["%s-%s"%(key, envDict[key]) for key in envDict])
+    self.target = r'out_test/blas_gen_bin.so'
+    self.libName = os.path.join(self.libpath, r'blas_gen_bin_%s.so'%nameStr)
+
+    if os.path.exists(self.libName):
+      if not rebuild:
+        return self.libName
+      else:
+        os.remove(self.libName)
+    if os.path.exists(self.libName):
       os.remove(self.target)
 
-    commandLine =r'make -f %s %s BLAS_dataType=%s BLAS_resDataType=%s'%(self.makefile, self.target, dtype, rtype)
+    commandLine =r'make -f %s %s %s'%(self.makefile, self.target, envStr)
     args = shlex.split(commandLine)
     subprocess.call(args)
     if os.path.exists(self.target):
-      os.rename(self.target, self.libpath)
-      return True
+      os.rename(self.target, self.libName)
+      return self.libName
     else:
-      return False
+      raise Exception("ERROR: make shared library failure.")

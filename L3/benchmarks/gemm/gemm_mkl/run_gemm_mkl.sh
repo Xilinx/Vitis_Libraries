@@ -27,27 +27,51 @@ MODE=$3
 NUMA="numactl -i all"
 export OMP_NUM_THREADS=$1
 
+
+if [[ ("$MODE" != "g") && ("$MODE" != "b") && ("$MODE" != "a") ]]; then
+	echo "Error in mode"
+	exit 1
+fi
+
 if [[ ("$MODE" == "g") || ("$MODE" == "a") ]]; then
-	if [ ! -e "../data" ]; then
-		mkdir ../data
+	# Build
+	if [[ ("$DATA_TYPE" == "double") ]]; then
+		make dgemm_mkl_gen
+	elif [[ ("$DATA_TYPE" == "float") ]]; then
+		 make sgemm_mkl_gen
+	elif [[ ("$DATA_TYPE" == "short") ]]; then
+		make sgemm_mkl_gen_short
+	else
+		echo "Error in data_type"
+		exit 1
 	fi
+	
+	if [ ! -e "../data/$DATA_TYPE" ]; then
+		mkdir -p ../data/$DATA_TYPE
+	fi
+	# Run
 	n=256
 	while [  $n -le 8192 ]; do
 		echo "############# $n ################"
 		if [[ ("$DATA_TYPE" == "double") ]]; then
-			make dgemm_mkl_gen
 			if [ -e dgemm_mkl_gen ]; then
-				./dgemm_mkl_gen $n $n $n
+				./dgemm_mkl_gen $n $n $n ../data/$DATA_TYPE/
 			else
-				echo "Error in Generating Binary"
+				echo "Error in Generating Binary: ./dgemm_mkl_gen not found"
 				exit 1
 			fi
 		elif [[ ("$DATA_TYPE" == "float") ]]; then
-			make sgemm_mkl_gen
 			if [ -e sgemm_mkl_gen ]; then
-				./sgemm_mkl_gen $n $n $n
+				./sgemm_mkl_gen $n $n $n ../data/$DATA_TYPE/
 			else
-				echo "Error in Generating Binary"
+				echo "Error in Generating Binary: ./sgemm_mkl_gen not found"
+				exit 1
+			fi
+		elif [[ ("$DATA_TYPE" == "short") ]]; then
+			if [ -e sgemm_mkl_gen_short ]; then
+				./sgemm_mkl_gen_short $n $n $n ../data/$DATA_TYPE/
+			else
+				echo "Error in Generating Binary: ./short_gemm_mkl_gen not found"
 				exit 1
 			fi
 		else
@@ -57,41 +81,53 @@ if [[ ("$MODE" == "g") || ("$MODE" == "a") ]]; then
 		n=`expr $n \* 2`
 	done
 	echo "====================="
-	echo "Generating binary complete"
-	echo "Binary file is at ../data/"
+	echo "Generating binary file (Golden data) complete"
+	echo "Binary file is at ../data/$DATA_TYPE/"
 	echo "====================="
 fi
 
 if [[ ("$MODE" == "b") || ("$MODE" == "a") ]]; then
+	# Build
+	if [[ ("$DATA_TYPE" == "double") ]]; then
+		make dgemm_mkl_bench
+	elif [[ ("$DATA_TYPE" == "float") ]]; then
+		 make sgemm_mkl_bench
+	elif [[ ("$DATA_TYPE" == "short") ]]; then
+		echo "Benchmarking Error: datatype (short) is not supported in MKL"
+		exit 1
+	else
+		echo "Benchmarking Error in data_type"
+		exit 1
+	fi
+
+	# Run
 	n=256
 	logs=()
 	while [  $n -le 8192 ]; do
 		echo "############# $n ################"
 		if [[ ("$DATA_TYPE" == "double") ]]; then
-			make dgemm_mkl_bench
 			if [ -e dgemm_mkl_bench ]; then
 				$NUMA ./dgemm_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
 			else
-				echo "Error in Benchmarking"
+				echo "Error in Benchmarking: ./dgemm_mkl_bench not found"
 				exit 1
 			fi
 		elif [[ ("$DATA_TYPE" == "float") ]]; then
-			make sgemm_mkl_bench
 			if [ -e sgemm_mkl_bench ]; then
 				$NUMA ./sgemm_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
 			else
-				echo "Error in Benchmarking"
+				echo "Error in Benchmarking: ./sgemm_mkl_bench not found"
 				exit 1
 			fi
 		else
-			echo "Error in data_type"
+			echo "Benchmarking Error in data_type"
 			exit 1
 		fi
 		logs="$logs log-$DATA_TYPE-$n.txt"
 		n=`expr $n \* 2`
 	done
 	echo "====================="
-	echo "Benchmarking complete"
+	echo "GEMM MKL Benchmarking complete"
         cat /proc/cpuinfo | grep "model name" | head -1 | tr ':' ',' > perf_gemm_mkl_bench.csv
 	egrep -h ^DATA_CSV $logs | grep Type | head -1 >> perf_gemm_mkl_bench.csv
 	egrep -h ^DATA_CSV $logs | grep -v Type >> perf_gemm_mkl_bench.csv

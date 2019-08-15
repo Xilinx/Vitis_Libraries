@@ -1,16 +1,16 @@
- # Copyright 2019 Xilinx, Inc.
- #
- # Licensed under the Apache License, Version 2.0 (the "License");
- # you may not use this file except in compliance with the License.
- # You may obtain a copy of the License at
- #
- #     http://www.apache.org/licenses/LICENSE-2.0
- #
- # Unless required by applicable law or agreed to in writing, software
- # distributed under the License is distributed on an "AS IS" BASIS,
- # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- # See the License for the specific language governing permissions and
- # limitations under the License.
+# Copyright 2019 Xilinx, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import numpy as np
 import os
@@ -28,43 +28,21 @@ def write2Bin(data_array, file_name):
   with open(file_name, "wb") as f:
     data_array.tofile(f)
   
-class gemm():
+def write2Txt(data_array, file_name):
+  np.savetxt(file_name,data_array)
+
+class BLAS_L2():
+  def writeBins(self,m,n,cnt):
+    write2Bin(self.a_in, self.out_dir+"matA_in"+str(cnt)+"_"+str(m)+"_"+str(n)+".bin");    
+    write2Bin(self.x_in, self.out_dir+"vecX_in"+str(cnt)+"_"+str(n)+"_1.bin");
+    write2Bin(self.y_in, self.out_dir+"vecY_in"+str(cnt)+"_"+str(m)+"_1.bin");
+    write2Bin(self.y_out, self.out_dir+"vecY_out"+str(cnt)+"_"+str(m)+"_1.bin");
+    write2Bin(self.param, self.out_dir+"param_in"+str(cnt)+".bin");
+    
+
+class gemv(BLAS_L2):
   def __init__(self):
-    print("GEMM Initialized")
-
-    
-  def genBin(self, cnt, dataType, cppDataType, size, maxValue, minValue):
-    if not len(size) == 3:
-        raise OP_ERROR("[ERROR] GEMM wrong matrix size: "+str(size))
-
-    [m, n, k] = size;
-    self.a_in = dataGen(dataType, [m, k], maxValue, minValue);
-    self.b_in = dataGen(dataType, [k, n], maxValue, minValue);
-    self.c_in = dataGen(dataType, [m, n], maxValue, minValue);
-    
-    self.alpha = 1
-    self.beta = 1
-    
-    self.c_out = self.compute();
-    
-    # transa, transb, m, n, k, alpha, lda, ldb, beta, ldc, kernelIndex
-    self.param = np.asarray([0, 0, m, n, k, self.alpha, k, n, self.beta, n, 0], dtype=np.int32)
-    
-    out_dir = "out_test/gemm/data/"+cppDataType+"/"
-    if not os.path.exists(out_dir):
-      os.makedirs(out_dir)
-    write2Bin(self.a_in, out_dir+"matA_in"+str(cnt)+"_"+str(m)+"_"+str(k)+".bin");    
-    write2Bin(self.b_in, out_dir+"matB_in"+str(cnt)+"_"+str(k)+"_"+str(n)+".bin");
-    write2Bin(self.c_in, out_dir+"matC_in"+str(cnt)+"_"+str(m)+"_"+str(n)+".bin");
-    write2Bin(self.c_out, out_dir+"matC_out"+str(cnt)+"_"+str(m)+"_"+str(n)+".bin");
-    write2Bin(self.param, out_dir+"param_in"+str(cnt)+".bin");
-    
-  def compute(self):
-    return self.alpha * np.matmul(self.a_in, self.b_in) + self.beta * self.c_in; 
-
-class gemv():
-  def __init__(self):
-    print("GEMV Initialized")
+    print("***** Generating golden reference for GEMV ******")
 
   def genBin(self, cnt, dataType, cppDataType, size, maxValue, minValue):
     if not len(size) == 2:
@@ -84,22 +62,48 @@ class gemv():
     # transa, m, n, alpha, lda, incx, beta, incy, kernelIndex
     self.param = np.asarray([0, m, n, self.alpha, n, 1, self.beta, 1, 0], dtype=np.int32)    
     
-    out_dir = "out_test/gemv/data/"+cppDataType+"/"
-    if not os.path.exists(out_dir):
-      os.makedirs(out_dir)
-    write2Bin(self.a_in, out_dir+"matA_in"+str(cnt)+"_"+str(m)+"_"+str(n)+".bin");    
-    write2Bin(self.x_in, out_dir+"vecX_in"+str(cnt)+"_"+str(n)+"_1.bin");
-    write2Bin(self.y_in, out_dir+"vecY_in"+str(cnt)+"_"+str(m)+"_1.bin");
-    write2Bin(self.y_out, out_dir+"vecY_out"+str(cnt)+"_"+str(m)+"_1.bin");
-    write2Bin(self.param, out_dir+"param_in"+str(cnt)+".bin");
+    self.out_dir = "out_test/gemv/data/"+cppDataType+"/"
+    if not os.path.exists(self.out_dir):
+      os.makedirs(self.out_dir)
+    self.writeBins(m,n,cnt)
     
   def compute(self):
     return self.alpha * np.matmul(self.a_in, self.x_in) + self.beta * self.y_in; 
 
-'''    
-my_gemm_size = [3, 3, 4];   
-gemm().genBin(1, np.float32, my_gemm_size, 10.0, 0.0);    
+class BLAS_L3():
+  def writeBins(self,m,n,k,cnt):
+    write2Bin(self.a_in, self.out_dir+"matA_in"+str(cnt)+"_"+str(m)+"_"+str(k)+".bin")  
+    write2Bin(self.b_in, self.out_dir+"matB_in"+str(cnt)+"_"+str(k)+"_"+str(n)+".bin")
+    write2Bin(self.c_in, self.out_dir+"matC_in"+str(cnt)+"_"+str(m)+"_"+str(n)+".bin")
+    write2Bin(self.c_out, self.out_dir+"matC_out"+str(cnt)+"_"+str(m)+"_"+str(n)+".bin")
+    write2Bin(self.param, self.out_dir+"param_in"+str(cnt)+".bin")
+    
+class gemm(BLAS_L3):
+  def __init__(self):
+    print("***** Generating golden reference for GEMM ******")
+    
+  def genBin(self, cnt, dataType, cppDataType, size, maxValue, minValue):
+    if not len(size) == 3:
+        raise OP_ERROR("[ERROR] GEMM wrong matrix size: "+str(size))
 
-my_gemv_size = [3, 4];
-gemv().genBin(1, np.float32, my_gemv_size, 10.0, 0.0);    
-'''
+    [m, n, k] = size;
+    self.a_in = dataGen(dataType, [m, k], maxValue, minValue);
+    self.b_in = dataGen(dataType, [k, n], maxValue, minValue);
+    self.c_in = dataGen(dataType, [m, n], maxValue, minValue);
+    
+    self.alpha = 1
+    self.beta = 1
+    
+    self.c_out = self.compute();
+    
+    # transa, transb, m, n, k, alpha, lda, ldb, beta, ldc, kernelIndex
+    self.param = np.asarray([0, 0, m, n, k, self.alpha, k, n, self.beta, n, 0], dtype=np.int32)
+    
+    self.out_dir = "out_test/gemm/data/"+cppDataType+"/"
+    if not os.path.exists(self.out_dir):
+      os.makedirs(self.out_dir)
+    self.writeBins(m,n,k,cnt)
+
+  def compute(self):
+    return self.alpha * np.matmul(self.a_in, self.b_in) + self.beta * self.c_in; 
+

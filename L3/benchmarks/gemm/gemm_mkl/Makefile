@@ -24,7 +24,7 @@ MKL_LIBS = -L$(MKLROOT)/lib/intel64 -Wl,--start-group -lmkl_intel_lp64 -lmkl_gnu
 
 all : sgemm
 
-sgemm  : sgemm_mkl_bench sgemm_mkl_gen
+sgemm  : sgemm_mkl_bench sgemm_mkl_gen sgemm_mkl_gen_short
 
 sgemm_mkl_bench  : gemm_mkl_bench.cpp
 	$(CXX) $(CFLAGS) -DUSE_FLOAT_PRECISION -o $@ $^ $(MKL_LIBS) -lpthread -lm
@@ -38,5 +38,8 @@ sgemm_mkl_gen: gemm_mkl_gen_bin.cpp
 dgemm_mkl_gen: gemm_mkl_gen_bin.cpp
 	$(CXX) $(CFLAGS) -DUSE_DOUBLE_PRECISION -o $@ $^ $(MKL_LIBS) -lpthread -lm
 
+sgemm_mkl_gen_short: gemm_mkl_gen_bin.cpp
+	$(CXX) $(CFLAGS) -DUSE_SHORT -o $@ $^ $(MKL_LIBS) -lpthread -lm
+
 clean:
-	rm -f log-*.txt perf_gemm_mkl_bench.csv *.o *~ sgemm_mkl_bench dgemm_mkl_bench sgemm_mkl_gen dgemm_mkl_gen
+	rm -f log-*.txt perf_gemm_mkl_bench.csv *.o *~ sgemm_mkl_bench dgemm_mkl_bench sgemm_mkl_gen dgemm_mkl_gen sgemm_mkl_gen_short

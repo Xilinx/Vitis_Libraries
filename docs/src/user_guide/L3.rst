@@ -25,3 +25,4 @@ L3 API User Guide
    L3_overview.rst
    L3_example.rst
    L3_benchmark.rst
+   L3_test.rst

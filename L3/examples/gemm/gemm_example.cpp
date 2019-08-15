@@ -52,8 +52,8 @@ bool compareGemm(XFBLAS_dataType* c, XFBLAS_dataType* goldenC, float p_TolRel=1e
     for(int col = 0; col < n; col++){
       XFBLAS_dataType l_ref = goldenC[IDX2R(row,col,n)];
       XFBLAS_dataType l_result = c[IDX2R(row,col,n)];
-      XFBLAS_dataType l_diffAbs = abs(l_ref-l_result);
-      XFBLAS_dataType l_diffRel = l_diffAbs;
+      float l_diffAbs = abs(l_ref-l_result);
+      float l_diffRel = l_diffAbs;
       if (goldenC[IDX2R(row,col,n)] != 0 ){
         l_diffRel /= abs(l_ref);
       }

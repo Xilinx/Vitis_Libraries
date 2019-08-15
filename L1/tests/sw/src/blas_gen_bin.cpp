@@ -51,29 +51,34 @@ void initMat(const string& p_handle,
              uint32_t p_ku,
              vector<BLAS_dataType>& p_mat,
              uint8_t*& p_matPtr) {
-    uint32_t l_rows = 0;
+    size_t l_size = 0;
     switch (p_opCode) {
         case GBMV:
-            l_rows = p_kl + p_ku + 1;
+            l_size = (p_kl + p_ku + 1) * p_n;
+            break;
+        case SPMV:
+            l_size = ((p_n / BLAS_parEntries) + 1) * (p_n / BLAS_parEntries) * BLAS_parEntries * BLAS_parEntries / 2;
+            break;
+        case TPMV:
+            l_size = ((p_n / BLAS_parEntries) + 1) * (p_n / BLAS_parEntries) * BLAS_parEntries * BLAS_parEntries / 2;
             break;
         case SBMV:
             if (p_ku == 0) {
-                l_rows = p_kl + 1;
+                l_size = (p_kl + 1) * p_n;
             } else {
-                l_rows = p_ku + 1;
+                l_size = (p_ku + 1) * p_n;
             }
             break;
         case TBMV:
             if (p_ku == 0) {
-                l_rows = p_kl + 1;
+                l_size = (p_kl + 1) * p_n;
             } else {
-                l_rows = p_ku + 1;
+                l_size = (p_ku + 1) * p_n;
             }
             break;
         default:
-            l_rows = p_m;
+            l_size = p_m * p_n;
     }
-    size_t l_size = l_rows * p_n;
     if (p_handle != "NULL") {
         p_mat.resize(l_size);
         for (unsigned int i = 0; i < l_size; ++i) {
@@ -122,12 +127,45 @@ void outputMat(
 
     if (p_data != nullptr) {
         cout << "  " << p_str << endl;
-        for (unsigned int i = 0; i < l_rows; ++i) {
-            for (unsigned int j = 0; j < p_n; ++j) {
-                if ((j % ENTRIES_PER_LINE) == 0) {
-                    cout << endl;
+        if ((p_opCode == SPMV) || (p_opCode == TPMV)) {
+            if (p_ku == 0) {
+                assert(p_kl == p_n);
+                unsigned int l_blocks = p_n / BLAS_parEntries;
+                unsigned int l_off = 0;
+                for (unsigned int b = 0; b < l_blocks; ++b) {
+                    for (unsigned int i = 0; i < BLAS_parEntries; ++i) {
+                        for (unsigned int j = 0; j < (b + 1) * BLAS_parEntries; ++j) {
+                            cout << setw(OUTPUT_WIDTH) << p_data[l_off + j] << "  ";
+                        }
+                        l_off += (b + 1) * BLAS_parEntries;
+                        cout << "\n";
+                    }
+                    cout << "\n";
                 }
-                cout << setw(OUTPUT_WIDTH) << p_data[i * p_n + j] << "  ";
+            } else {
+                assert(p_kl == 0);
+                assert(p_ku == p_n);
+                unsigned int l_blocks = p_n / BLAS_parEntries;
+                unsigned int l_off = 0;
+                for (unsigned int b = l_blocks; b > 0; --b) {
+                    for (unsigned int i = 0; i < BLAS_parEntries; ++i) {
+                        for (unsigned int j = 0; j < b * BLAS_parEntries; ++j) {
+                            cout << setw(OUTPUT_WIDTH) << p_data[l_off + j] << "  ";
+                        }
+                        l_off += b * BLAS_parEntries;
+                        cout << "\n";
+                    }
+                    cout << "\n";
+                }
+            }
+        } else {
+            for (unsigned int i = 0; i < l_rows; ++i) {
+                for (unsigned int j = 0; j < p_n; ++j) {
+                    if ((j % ENTRIES_PER_LINE) == 0) {
+                        cout << endl;
+                    }
+                    cout << setw(OUTPUT_WIDTH) << p_data[i * p_n + j] << "  ";
+                }
             }
         }
     }

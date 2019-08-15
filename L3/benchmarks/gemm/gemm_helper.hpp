@@ -41,20 +41,20 @@ XFBLAS_dataType* getGoldenMat(XFBLAS_dataType* a, XFBLAS_dataType* b, XFBLAS_dat
   return goldenC;
 }
 
-bool compareGemm(XFBLAS_dataType* c, XFBLAS_dataType* goldenC, int m, int k, int n, float p_TolRel=1e-3, float p_TolAbs=1e-5){
+bool compareGemm(XFBLAS_dataType* c, XFBLAS_dataType* goldenC, int m, int n, float p_TolRel=1e-3, float p_TolAbs=1e-5){
   bool l_check = true;
   for(int row = 0; row < m; row++){ 
     for(int col = 0; col < n; col++){
       XFBLAS_dataType l_ref = goldenC[IDX2R(row,col,n)];
       XFBLAS_dataType l_result = c[IDX2R(row,col,n)];
-      XFBLAS_dataType l_diffAbs = abs(l_ref-l_result);
-      XFBLAS_dataType l_diffRel = l_diffAbs;
+      float l_diffAbs = abs(l_ref-l_result);
+      float l_diffRel = l_diffAbs;
       if (goldenC[IDX2R(row,col,n)] != 0 ){
         l_diffRel /= abs(l_ref);
       }
       bool check = (l_diffRel <= p_TolRel) || (l_diffAbs <= p_TolAbs);
       if (!check){
-        cout<<"golden result"<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,n)]<<"\n";
+        cout<<"#("<<row<<", "<<col<<") golden result"<< setprecision(10) <<goldenC[IDX2R(row,col,n)]<<" is not equal to fpga result "<< setprecision(10) <<c[IDX2R(row,col,n)]<<"\n";
         l_check = false;
       }
     }

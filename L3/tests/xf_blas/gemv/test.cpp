@@ -42,7 +42,6 @@ int main(int argc, char **argv) {
   int i, j;
   XFBLAS_dataType * a, * x, * y, *goldenY;
   
-  
   ifstream l_instrFile;
   l_instrFile.open(l_dataDir+"param_in"+to_string(iterIndex)+".bin");
   int * l_instr;
@@ -74,14 +73,6 @@ int main(int argc, char **argv) {
   readMatBin((char*) y, iterIndex, m, 1, l_dataDir, "vecY_in", sizeof(XFBLAS_dataType));
   readMatBin((char*) goldenY, iterIndex, m, 1, l_dataDir, "vecY_out", sizeof(XFBLAS_dataType));
     
-  for ( i = 0; i < 5; i ++){
-    for ( j = 0; j < 5; j ++){
-      cout<< (a[ IDX2R (i,j, lda )])<<" ";
-    }
-    cout<<"\n";
-  }
-  
-#ifdef TEST_HW_RUN
   XFBLAS_dataType * d_a, * d_x, * d_y;
   
   xfblasEngine_t engineName = XFBLAS_ENGINE_GEMV;
@@ -123,7 +114,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;   
   }
   
-  status = xfblasGemv(XFBLAS_OP_N, m, n, 1, a, n, x, 1, 1, y, 1, l_numKernel-1);
+  status = xfblasGemv(XFBLAS_OP_N, m, n, 1, d_a, n, d_x, 1, 1, d_y, 1, l_numKernel-1);
   
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Matrix Vector Multiplication failed with error code: "<< status << "\n"; 
@@ -138,12 +129,7 @@ int main(int argc, char **argv) {
     xfblasDestory();
     return EXIT_FAILURE;   
   }
-  
-  for ( i = 0; i < 10; i ++){
-    cout<< (y[ i ])<<" ";
-    cout<<"\n";
-  }
-  
+
   if (compareVector<XFBLAS_dataType>(y,goldenY,m)){
     cout<<"Test passed!\n";
   }else{
@@ -158,7 +144,6 @@ int main(int argc, char **argv) {
   free(y);
   
   xfblasDestory(l_numKernel);
-#endif
   
   return EXIT_SUCCESS;
 }

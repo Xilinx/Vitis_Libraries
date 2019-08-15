@@ -15,9 +15,10 @@ source set_env.sh
 
 PYTHON=python3
 PYTEST=./sw/python/run_test.py
+$PAR=8
 
-$PYTHON $PYTEST --operator amax amin asum axpy dot copy nrm2 scal swap 
-$PYTHON $PYTEST --operator gemv gbmv sbmvUp sbmvLo tbmvUp tbmvLo
+$PYTHON $PYTEST --operator amax amin asum axpy dot copy nrm2 scal swap --parallel $PAR
+$PYTHON $PYTEST --operator gemv gbmv sbmvUp sbmvLo tbmvUp tbmvLo --parallel $PAR
 
 if [ -f $STAT ]; then
   cat $STAT

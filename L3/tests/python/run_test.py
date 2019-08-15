@@ -18,7 +18,7 @@ import ctypes as C
 import argparse
 import json
 import shlex, subprocess
-from operation import gemm, gemv
+from operation import *
 
 typeDict ={
       np.int16: 'short',
@@ -30,7 +30,7 @@ class RunTest:
   def  __init__(self):
     self.profile = None
     
-  def parseProfile(self, filePath):
+  def parseProfile(self, filePath, shell):
     with open(filePath, 'r') as fh:
       self.profile = json.loads(fh.read())
     self.opName = self.profile['op']
@@ -39,6 +39,7 @@ class RunTest:
     self.minValue = self.profile['valueRange'][0]
     self.maxValue = self.profile['valueRange'][1]
     self.dimList = self.profile['matrixDims']
+    self.shell = shell
     
   def build(self): 
     for dataType in self.cppDataTypes:
@@ -61,22 +62,31 @@ class RunTest:
   def run(self):
     for dataType in self.cppDataTypes:
       i = 0
+      logFile = open(r'out_test/%s/log_%s.txt'%(self.opName,dataType),"w") 
       for dim in self.dimList:
-        commandLine = r'out_test/%s/test_%s.exe gemx.xclbin config_info.dat %d out_test/%s/data/%s/'%(self.opName, dataType, i, self.opName,dataType)
+        commandLine = r'out_test/%s/test_%s.exe ../overlay/%s/%s_%s_1kernel/gemx.xclbin ../overlay/%s/%s_%s_1kernel/config_info.dat %d out_test/%s/data/%s/'%(self.opName, dataType, self.shell, self.opName, dataType, self.shell, self.opName, dataType, i, self.opName,dataType)
+        print("**************** Running Command ****************")
+        print(commandLine)
         args = shlex.split(commandLine)
-        subprocess.call(args)
+        result = subprocess.check_output(args).decode("utf-8")
+        print(result)
+        logFile.write(result)
         i = i + 1
+      logFile.close()
         
-def main(profileList):
+def main(profileList, shell):
   commandLine = 'make clean'
   args = shlex.split(commandLine)
   subprocess.call(args)
   for profile in profileList:
     runTest = RunTest()
-    runTest.parseProfile(profile)
+    runTest.parseProfile(profile,shell)
     runTest.build()
     runTest.genBin()
     runTest.run()
+  print("******************* TEST DONE *******************")
+  print("See compare report in out_test/OPERATOR_NAME/log_DATATYPE.txt")
+  print("See runtime report in out_test/xrt_report.txt")
 
 
 if __name__== "__main__":
@@ -84,6 +94,7 @@ if __name__== "__main__":
   group = parser.add_mutually_exclusive_group(required=True)
   group.add_argument('--profile', nargs='*', metavar='profile.json', help='list of pathes to the profile files')
   group.add_argument('--operator', nargs='*',metavar='opName', help='list of operator names')
+  parser.add_argument('--shell',default='vcu1525_dynamic_5_1', help='choice of xclbin')
   args = parser.parse_args()
   
   profile = list()
@@ -95,4 +106,4 @@ if __name__== "__main__":
   else:
     parser.print_help()
     
-  main(set(profile))
+  main(set(profile), args.shell)

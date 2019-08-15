@@ -28,6 +28,8 @@ class Parameters:
     self.op = op
     self.logParEntries = logParEntries
     self.parEntries=parEntries
+    self.rtype = 'uint32_t'
+    self.dtype = 'uint32_t'
   def setRtype(self, rtype):
     self.rtype = rtype
   def setDtype(self, dtype):
@@ -43,18 +45,21 @@ class HLS:
     self.syn = b_syn 
     self.cosim = b_cosim 
 
-  def execution(self, binFile, logFile, b_print = False):
-    commandLine ='vivado_hls -f %s %s %s %s'%(self.tcl, self.paramFile, 
-        self.directive, os.path.abspath(binFile))
-    print(commandLine)
+  def execution(self, binFile, logFile, workDir='.', b_print = False):
+    testDir = os.getcwd()
+    commandLine ='vivado_hls -f %s %s %s %s %s'%(
+        os.path.abspath(self.tcl), 
+        os.path.abspath(testDir),
+        self.paramFile, 
+        self.directive, 
+        binFile)
     if not b_print:
-      print("vivado_hls stdout print is hidden.")
-    #pdb.set_trace()
+      print("\nOP %s: vivado_hls stdout print is hidden."%self.params.op.name)
     args = shlex.split(commandLine)
-    hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#    (stdoutdata, stderrdata) = hls.communicate()
+    hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=workDir)
     with open(logFile, 'w', buffering=1) as f:
       f.write(commandLine)
+      f.write("\nOP %s: Working directory is %s"%(self.params.op.name, workDir))
       while True:
         line = hls.stdout.readline()
         if not line:
@@ -65,14 +70,14 @@ class HLS:
         else:
           print('.', end='') 
           if line.find("CSIM finish") >=0:
-            print('\nCSIM finished.')
+            print('\nOP %s: CSIM finished.'%self.params.op.name)
           elif line.find(r'C/RTL co-simulation finished') >=0:
-            print('\nCOSIM finished.')
+            print('\nOP %s: COSIM finished.'%self.params.op.name)
           elif line.find(r'C/RTL SIMULATION') >=0:
-            print("\nSYNTHESIS finished.")
+            print("\nOP %s: SYNTHESIS finished."%self.params.op.name)
           sys.stdout.flush()
         f.write(line)
-    print('\nvivado_hls finished execution.') 
+    print('\nOP %s: vivado_hls finished execution.'%self.params.op.name) 
 
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
