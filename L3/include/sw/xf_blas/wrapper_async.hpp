@@ -40,19 +40,17 @@ vector<future<xfblasStatus_t>> fuStatus;
  * @param d_A pointer to mapped memory
  * @param kernelIndex index of kernel that is being used, default is 0
  */
-xfblasStatus_t xfblasSetMatrixAsync(
+void xfblasSetMatrixAsync(
     int rows, int cols, int elemSize, short* A, int lda, short* d_A, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
-  fuStatus.push_back( async(launch::async, xfblasSetMatrix, rows, cols, elemSize, A, lda, d_A, kernelIndex ); 
-  
+  fuStatus.push_back( async(launch::async, [&] { return xfblasSetMatrix( rows, cols, elemSize, A, lda, d_A, kernelIndex); } ) );
 }
 
 void xfblasSetMatrixAsync(
     int rows, int cols, int elemSize, float* A, int lda, float* d_A, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
-  fuStatus.push_back( async(launch::async, xfblasSetMatrix, rows, cols, elemSize, A, lda, d_A, kernelIndex ); 
+  fuStatus.push_back( async(launch::async, [&] { return xfblasSetMatrix( rows, cols, elemSize, A, lda, d_A, kernelIndex); } ) );
 }
-
 
 /**
  * @brief This asynchronous function copies a vector in host memory to FPGA device memory. xfblasMalloc() need to be called prior to
@@ -67,14 +65,13 @@ void xfblasSetMatrixAsync(
 void xfblasSetVectorAsync(
     int n, int elemSize, short* x, int incx, short* d_x, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
-  fuStatus.push_back( async(launch::async, xfblasSetVector, n, elemSize, x, incx, d_x, kernelIndex );
+  fuStatus.push_back( async(launch::async, [&] { return xfblasSetVector( n, elemSize, x, incx, d_x, kernelIndex); } ) );
 }
 
 void xfblasSetVectorAsync(
     int n, int elemSize, float* x, int incx, float* d_x, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
-  fuStatus.push_back( async(launch::async, xfblasSetVector, n, elemSize, x, incx, d_x, kernelIndex );
-  
+  fuStatus.push_back( async(launch::async, [&] { return xfblasSetVector( n, elemSize, x, incx, d_x, kernelIndex); } ) );
 }
 
 /**
@@ -112,13 +109,13 @@ void xfblasSetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0) {
 void xfblasGetMatrixAsync(
     int rows, int cols, int elemSize, short* d_A, short* A, int lda, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
-  fuStatus.push_back( async(launch::async, xfblasGetMatrix, rows, cols, elemSize, d_A, A, lda, kernelIndex ); 
+  fuStatus.push_back( async(launch::async, [&] { return xfblasGetMatrix( rows, cols, elemSize, d_A, A, lda, kernelIndex); } ) ); 
 }
 
 void xfblasGetMatrixAsync(
     int rows, int cols, int elemSize, float* d_A, float* A, int lda, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
-  fuStatus.push_back( async(launch::async, xfblasGetMatrix, rows, cols, elemSize, d_A, A, lda, kernelIndex ); 
+  fuStatus.push_back( async(launch::async, [&] { return xfblasGetMatrix( rows, cols, elemSize, d_A, A, lda, kernelIndex); } ) ); 
 }
 
 /**
@@ -133,13 +130,13 @@ void xfblasGetMatrixAsync(
 void xfblasGetVectorAsync(
     int n, int elemSize, short* d_x, short* x, int incx, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
-  fuStatus.push_back( async(launch::async, xfblasGetVector, n, elemSize, d_x, x, incx, kernelIndex );
+  fuStatus.push_back( async(launch::async, [&] { return xfblasGetVector( n, elemSize, d_x, x, incx, kernelIndex); } ) );
 }
 
 void xfblasGetVectorAsync(
     int n, int elemSize, float* d_x, float* x, int incx, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
-  fuStatus.push_back( async(launch::async, xfblasGetVector, n, elemSize, d_x, x, incx, kernelIndex );
+  fuStatus.push_back( async(launch::async, [&] { return xfblasGetVector( n, elemSize, d_x, x, incx, kernelIndex); } ) );
 }
 
 /**
@@ -164,7 +161,6 @@ void xfblasGetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0) {
   concurrentKernels.push_back( kernelIndex );
   fuStatus.push_back( async(launch::async, xfblasGetVectorRestricted, x, kernelIndex) );
 }
-
 
 void xfblasKernelSynchronize(){
   for(auto &fu : fuStatus) { fu.wait(); }
