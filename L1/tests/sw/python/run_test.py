@@ -297,7 +297,7 @@ def main(profileList, args):
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
-  parser.add_argument('--parallel', type=int, default=4, help='number of parallel processes')
+  parser.add_argument('--parallel', type=int, default=1, help='number of parallel processes')
   profileGroup = parser.add_mutually_exclusive_group(required=True)
   profileGroup.add_argument('--profile', nargs='*', metavar='profile.json', help='list of path to profile files')
   profileGroup.add_argument('--operator', nargs='*',metavar='opName', help='list of test dirs in ./hw')
