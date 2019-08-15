@@ -107,10 +107,7 @@ LFLAGS = $(HOST_LIB_LFLAGS) \
 
 OUT_DIR = out_test
 GEN_BIN_EXE = $(OUT_DIR)/blas_gen_bin.exe
-GEN_BIN_SO = $(OUT_DIR)/blas_gen_bin_d$(BLAS_dataType)_r$(BLAS_resDataType).so
-
-$(OUT_DIR)/blas_gen_bin.so : $(GEN_BIN_SO)
-	@cp $(GEN_BIN_SO) $(OUT_DIR)/blas_gen_bin.so
+GEN_BIN_SO = $(OUT_DIR)/blas_gen_bin.so
 
 $(GEN_BIN_SO) : ./sw/src/blas_gen_wrapper.cpp |  $(OUT_DIR)
 	@echo "***** Link testcase generator executable *****"

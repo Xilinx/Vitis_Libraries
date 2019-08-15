@@ -98,13 +98,14 @@ class RunTest:
     self.dataPath = os.path.join(self.testPath, 'data')
     if not os.path.exists(self.dataPath):
       os.makedirs(self.dataPath)
+    hlsTCL = os.path.join('.', 'build', r'run-hls.tcl')
 
     if args.csim:
-      self.hls = HLS(r'build/run-hls.tcl',True, False, False) 
+      self.hls = HLS(hlsTCL,True, False, False) 
     elif args.cosim:
-      self.hls = HLS(r'build/run-hls.tcl', False, True, True) 
+      self.hls = HLS(hlsTCL, False, True, True) 
     else:
-      self.hls = HLS(r'build/run-hls.tcl', self.profile['b_csim'],
+      self.hls = HLS(hlsTCL, self.profile['b_csim'],
        self.profile['b_synth'], self.profile['b_cosim'])
 
     directivePath = os.path.join(self.testPath, 
@@ -113,22 +114,23 @@ class RunTest:
     self.hls.generateDirective(directivePath)
 
   def build(self):
+    envD = dict()
+    parEntriesList = ['spmv', 'tpmv']
     c_type = self.typeDict[self.op.dataType]
     self.hls.params.setDtype(c_type)
-    r_type = c_type
+    envD["BLAS_dataType"] = c_type
     self.typeStr = 'd%s'%c_type
     if self.opClass == 'BLAS_L1':
       r_type = self.typeDict[self.op.rtype]
       self.typeStr = 'd%s_r%s'%(c_type, r_type)
-    self.hls.params.setRtype(r_type)
+      envD["BLAS_resDataType"] =r_type
+      self.hls.params.setRtype(r_type)
 
-    libPath =os.path.join(self.libPath,'blas_gen_%s.so'%self.typeStr)
+    if self.op.name in parEntriesList:
+      envD["BLAS_parEntries"] = "%d"%self.parEntries
 
-    if not os.path.exists(libPath):
-      make = Makefile(self.makefile, libPath)
-      if not make.make(c_type, r_type):
-        raise Exception("ERROR: make shared library failure.")
-
+    make = Makefile(self.makefile, self.libPath)
+    libPath = make.make(envD)
     self.lib = C.cdll.LoadLibrary(libPath)
 
   def run(self):

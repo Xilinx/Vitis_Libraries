@@ -28,6 +28,8 @@ class Parameters:
     self.op = op
     self.logParEntries = logParEntries
     self.parEntries=parEntries
+    self.rtype = 'uint32_t'
+    self.dtype = 'uint32_t'
   def setRtype(self, rtype):
     self.rtype = rtype
   def setDtype(self, dtype):
@@ -43,15 +45,18 @@ class HLS:
     self.syn = b_syn 
     self.cosim = b_cosim 
 
-  def execution(self, binFile, logFile, b_print = False):
-    commandLine ='vivado_hls -f %s %s %s %s'%(self.tcl, self.paramFile, 
-        self.directive, os.path.abspath(binFile))
+  def execution(self, binFile, logFile, workDir='.', b_print = False):
+    commandLine ='vivado_hls -f %s %s %s %s'%(
+        os.path.abspath(self.tcl), 
+        os.path.abspath(self.paramFile), 
+        os.path.abspath(self.directive), 
+        os.path.abspath(binFile))
     print(commandLine)
     if not b_print:
       print("vivado_hls stdout print is hidden.")
     #pdb.set_trace()
     args = shlex.split(commandLine)
-    hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=workDir)
 #    (stdoutdata, stderrdata) = hls.communicate()
     with open(logFile, 'w', buffering=1) as f:
       f.write(commandLine)
