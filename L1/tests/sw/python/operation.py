@@ -552,6 +552,13 @@ class tpmv(trmv):
     self.copyConstructor(blas_l2)
     self.upper = True
 
+  def setSize(self, m):
+    self.matrixDim =(m ,m) 
+    self.m = m
+    self.n = m
+    self.memorySize = (m + 1)* m // 2 + (self.PE - 1) *  m // 2
+    self.sizeStr = "m%d"%(self.m)
+
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
     matrix = self.dataGen.triangularMatrix(self.m, self.upper)
@@ -565,6 +572,13 @@ class spmv(symv):
   def __init__(self, blas_l2: BLAS_L2):
     self.copyConstructor(blas_l2)
     self.upper = True
+
+  def setSize(self, m):
+    self.matrixDim =(m ,m) 
+    self.m = m
+    self.n = m
+    self.memorySize = (m + 1)* m // 2 + (self.PE - 1) *  m // 2
+    self.sizeStr = "m%d"%(self.m)
 
   def compute(self):
     alpha, beta, a, x, y, ar, yr = BLAS_L2.compute(self)
