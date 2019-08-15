@@ -46,20 +46,20 @@ class HLS:
     self.cosim = b_cosim 
 
   def execution(self, binFile, logFile, workDir='.', b_print = False):
-    commandLine ='vivado_hls -f %s %s %s %s'%(
+    testDir = os.getcwd()
+    commandLine ='vivado_hls -f %s %s %s %s %s'%(
         os.path.abspath(self.tcl), 
-        os.path.abspath(self.paramFile), 
-        os.path.abspath(self.directive), 
-        os.path.abspath(binFile))
-    print(commandLine)
+        os.path.abspath(testDir),
+        self.paramFile, 
+        self.directive, 
+        binFile)
     if not b_print:
       print("vivado_hls stdout print is hidden.")
-    #pdb.set_trace()
     args = shlex.split(commandLine)
     hls = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=workDir)
-#    (stdoutdata, stderrdata) = hls.communicate()
     with open(logFile, 'w', buffering=1) as f:
       f.write(commandLine)
+      f.write("Working directory is %s"%workDir)
       while True:
         line = hls.stdout.readline()
         if not line:

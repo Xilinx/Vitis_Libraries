@@ -148,7 +148,7 @@ class RunTest:
     del dataList
     self.hls.generateParam(paramTclPath)
     print("Parameters in file %s.\nLog file %s"%(paramTclPath, logfile))
-    self.hls.execution(binFile, logfile)
+    self.hls.execution(binFile, logfile, self.testPath)
     self.hls.checkLog(logfile)
     self.numSim += self.numToSim
     self.hls.benchmarking(logfile, self.op, self.reports)
