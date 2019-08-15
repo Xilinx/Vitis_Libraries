@@ -23,6 +23,7 @@ from blas_gen_bin import BLAS_GEN
 from hls import HLS, Parameters
 from makefile import Makefile
 from operation import OP, BLAS_L1, BLAS_L2, OP_ERROR
+from table import list2File
 import threading
 
 class RunTest:
@@ -156,7 +157,7 @@ class RunTest:
     self.hls.benchmarking(logfile, self.op, self.reports)
     print("\nOP %s: Test of size %s passed."%(self.op.name, self.op.sizeStr))
 
-  def run(self, makelock):
+  def run(self, makelock = threading.Lock()):
     self.makelock = makelock
     path = os.path.dirname(self.profilePath)
     self.hls.params.setPath(path)
@@ -166,31 +167,5 @@ class RunTest:
     reportPath = os.path.join(self.testPath, 'report.rpt')
     if len(self.reports) == 0:
       raise OP_ERROR("\nOP %s: Benchmark fails for op %s."%(self.op.name, self.op.name))
-    features = self.reports[0]
-    keys = features.keys()
-    lens = [len(key)+2 for key in keys]
-
-    delimiter = '+' + '+'.join(['-' * l for l in lens]) + '+\n'
-
-    with open(reportPath, flag) as f:
-      f.write(time.ctime() + '\n')
-      f.write("Profile path: %s\n"%profile)
-      f.write(delimiter)
-      ########### START OF KEYS ################
-      strList=['|']
-      for s, l in zip(keys, lens):
-        strList.append(('{:<%d}|'%l).format(s))
-      strList.append('\n')
-      f.write(''.join(strList))
-      f.write(delimiter)
-      ########### END OF KEYS ################
-
-      while self.reports:
-        features = self.reports.pop(0)
-        strList=['|']
-        for key, l in zip(keys, lens):
-          strList.append(('{:<%d}|'%l).format(features[key]))
-        strList.append('\n')
-        f.write(''.join(strList))
-        f.write(delimiter)
+    list2File(self.reports, reportPath)
     return reportPath

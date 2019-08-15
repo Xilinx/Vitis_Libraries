@@ -26,6 +26,7 @@ from hls import HLS_ERROR
 import threading
 import concurrent.futures
 from runTest import RunTest
+from table import list2File
 
 def Format(x):
   f_dic = {0:'th', 1:'st', 2:'nd',3:'rd'}
@@ -34,59 +35,26 @@ def Format(x):
     k=0
   return "%d%s"%(x, f_dic[k])
 
-def makeTable(passDict, failDict, skipList, print_fn = print):
-  numPasses = len(passDict)
-  numFails = len(failDict)
-  numOps = numPasses + numFails
-  if numOps == 0:
-    return
-  print_fn('='*40 + '   REPORT   ' + '='*40 + '\n')
-  print_fn(time.ctime())
-  print_fn('\n')
-  if numPasses != 0:
-    print_fn("%d / %d operation[s] numPasses the tests.\n" %(numPasses, numOps))
-  if numFails != 0:
-    print_fn("%d / %d operation[s] failed the tests.\n" %(numFails, numOps))
-  delimiter = '+'.join(['', '-'*10, '-'*10, '-'*10, '-'*10, '-'*30, '\n'])
-  print_fn(delimiter)
-  keys = '|'.join(['', '{:<10}'.format('op Name'), '{:<10}'.format('No.csim'),
-      '{:<10}'.format('No.cosim'),'{:<10}'.format('Status'),
-      '{:<30}'.format('Profile'), '\n'])
-  print_fn(keys)
-  print_fn(delimiter)
-  for rt in passDict.keys(): 
-    csim, cosim = passDict[rt]
-    value = '|'.join(['', '{:<10}'.format(rt.op.name), '{:<10}'.format(csim),
-      '{:<10}'.format(cosim),'{:<10}'.format('Passed'),'{:<30}'.format(rt.profilePath), '\n'])
-    print_fn(value)
-    print_fn(delimiter)
-  for rt in failDict.keys(): 
-    csim, cosim = failDict[rt]
-    value = '|'.join(['', '{:<10}'.format(rt.op.name), '{:<10}'.format(csim),
-      '{:<10}'.format(cosim),'{:<10}'.format('Failed'), '{:<30}'.format(rt.profilePath),'\n'])
-    print_fn(value)
-    print_fn(delimiter)
-  for skip in skipList:
-    value = '|'.join(['', '{:<10}'.format('Unknown'), '{:<10}'.format(0),
-      '{:<10}'.format(0),'{:<10}'.format('Skipped'), '{:<30}'.format(skip),'\n'])
-    print_fn(value)
-    print_fn(delimiter)
-  return numFails
+def makeTable(statList, statPath, flag = 'a+'):
+  list2File(statList, statPath, flag)
 
-
-def process(rt, passOps, failOps, dictLock, makeLock):
+def process(rt, statList, dictLock = threading.Lock(), makeLock = threading.Lock()):
   passed = False
   try:
     rt.parseProfile()
     with rt.opLock:
       print("Starting to test %s."%(rt.op.name))
-      rt.run(makeLock) 
+      rt.run() 
       print("All %d tests for %s are passed."%(rt.numSim, rt.op.name))
       passed = True
       csim = rt.numSim * rt.hls.csim
       cosim = rt.numSim * rt.hls.cosim
       with dictLock:
-        passOps[rt] = (csim, cosim)
+        statList.append({'Op Name':rt.op.name, 
+            'No.csim':csim, 
+            'No.cosim':cosim, 
+            'Status':'Passed', 
+            'Profile': rt.profilePath})
 
       if rt.hls.cosim:
         rpt = rt.writeReport(profile)
@@ -106,31 +74,35 @@ def process(rt, passOps, failOps, dictLock, makeLock):
       csim = rt.numSim * rt.hls.csim
       cosim = rt.numSim * rt.hls.cosim
       with dictLock:
-        failOps[rt] = (csim, cosim)
+        statList.append({'Op Name':rt.op.name, 
+            'No.csim':csim, 
+            'No.cosim':cosim, 
+            'Status':'Failed', 
+            'Profile': rt.profilePath})
 
 def main(profileList, args): 
   print(r"There are in total %d testing profile[s]."%len(profileList))
-  opLocks = dict()
-  passOps = dict()
-  failOps = dict()
-  skipList = list()
+  statList = list()
   argList = list()
   dictLock = threading.Lock()
-  makeLock = threading.Lock()
   for profile in profileList:
     if not os.path.exists(profile):
       print("File %s is not exists."%profile)
-      skipList.append(profile)
+      statList.append({'Op Name': 'Unknown', 
+          'No.csim': 0, 
+          'No.cosim': 0, 
+          'Status':'Skipped', 
+          'Profile': rt.profilePath})
       continue
     rt = RunTest(profile, args)
     argList.append(rt)
   try:
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
       for arg in argList:
-        executor.submit(process, arg, passOps, failOps, dictLock, makeLock)
+        executor.submit(process, arg, statList)
   finally:
-    with open("statistics.rpt", 'a+') as f:
-      r = makeTable(passOps, failOps, skipList, f.write) 
+    statPath = os.path.join(os.getcwd(),"statistics.rpt") 
+    makeTable(statList, statPath) 
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
