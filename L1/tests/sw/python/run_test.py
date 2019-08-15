@@ -36,7 +36,8 @@ def Format(x):
   return "%d%s"%(x, f_dic[k])
 
 class RunTest:
-  def __init__(self, profile, args):
+  def __init__(self, profile, args, opLocks):
+    self.opLocks = opLocks
     self.profilePath = profile
     self.profile = None 
     self.parEntries = 1
@@ -90,16 +91,21 @@ class RunTest:
     
     self.numToSim = self.profile['numSimulation']
 
+    if not self.opName in self.opLocks:
+      self.opLocks[self.opName] = threading.Lock()
+    self.opLock = self.opLocks[self.opName] 
     self.testPath = os.path.join('out_test', self.op.name)
     self.reports = list()
 
     self.libPath = os.path.join(self.testPath, 'libs')
-    if not os.path.exists(self.libPath):
-      os.makedirs(self.libPath)
+    with self.opLock:
+      if not os.path.exists(self.libPath):
+        os.makedirs(self.libPath)
 
     self.dataPath = os.path.join(self.testPath, 'data')
-    if not os.path.exists(self.dataPath):
-      os.makedirs(self.dataPath)
+    with self.opLock:
+      if not os.path.exists(self.dataPath):
+        os.makedirs(self.dataPath)
     hlsTCL = os.path.join('.', 'build', r'run-hls.tcl')
 
     if args.csim:
@@ -113,7 +119,8 @@ class RunTest:
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.parEntries))
     self.hls.setParam(Parameters(self.op, self.logParEntries, self.parEntries))
-    self.hls.generateDirective(directivePath)
+    with self.opLock:
+      self.hls.generateDirective(directivePath)
 
   def build(self):
     envD = dict()
@@ -241,18 +248,19 @@ def process(runTest, passOps, failOps, dictLock, makeLock):
   passed = False
   try:
     runTest.parseProfile()
-    print("Starting to test %s."%(runTest.op.name))
-    runTest.run(makeLock) 
-    print("All %d tests for %s are passed."%(runTest.numSim, runTest.op.name))
-    passed = True
-    csim = runTest.numSim * runTest.hls.csim
-    cosim = runTest.numSim * runTest.hls.cosim
-    with dictLock:
-      passOps[runTest] = (csim, cosim)
+    with runTest.opLock:
+      print("Starting to test %s."%(runTest.op.name))
+      runTest.run(makeLock) 
+      print("All %d tests for %s are passed."%(runTest.numSim, runTest.op.name))
+      passed = True
+      csim = runTest.numSim * runTest.hls.csim
+      cosim = runTest.numSim * runTest.hls.cosim
+      with dictLock:
+        passOps[runTest] = (csim, cosim)
 
-    if runTest.hls.cosim:
-      rpt = runTest.writeReport(profile)
-      print("Benchmark info for op %s is written in %s"%(runTest.op.name, rpt))
+      if runTest.hls.cosim:
+        rpt = runTest.writeReport(profile)
+        print("Benchmark info for op %s is written in %s"%(runTest.op.name, rpt))
 
   except OP_ERROR as err:
     print("OPERATOR ERROR: %s"%(err.message))
@@ -272,6 +280,7 @@ def process(runTest, passOps, failOps, dictLock, makeLock):
 
 def main(profileList, args): 
   print(r"There are in total %d testing profile[s]."%len(profileList))
+  opLocks = dict()
   passOps = dict()
   failOps = dict()
   skipList = list()
@@ -284,7 +293,7 @@ def main(profileList, args):
       print("File %s is not exists."%profile)
       skipList.append(profile)
       continue
-    runTest = RunTest(profile, args)
+    runTest = RunTest(profile, args, opLocks)
     argList.append(runTest)
   try:
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
