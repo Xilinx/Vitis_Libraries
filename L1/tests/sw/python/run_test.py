@@ -197,7 +197,7 @@ class RunTest:
         f.write(delimiter)
     return reportPath
 
-def makeTable(passDict, failDict, skipList, numFailsList, print_fn = print):
+def makeTable(passDict, failDict, skipList, print_fn = print):
   numPasses = len(passDict)
   numFails = len(failDict)
   numOps = numPasses + numFails
@@ -232,11 +232,6 @@ def makeTable(passDict, failDict, skipList, numFailsList, print_fn = print):
   for skip in skipList:
     value = '|'.join(['', '{:<10}'.format('Unknown'), '{:<10}'.format(0),
       '{:<10}'.format(0),'{:<10}'.format('Skipped'), '{:<30}'.format(skip),'\n'])
-    print_fn(value)
-    print_fn(delimiter)
-  for rem in numFailsList:
-    value = '|'.join(['', '{:<10}'.format('Unknown'), '{:<10}'.format(0),
-      '{:<10}'.format(0),'{:<10}'.format('Untested'), '{:<30}'.format(rem),'\n'])
     print_fn(value)
     print_fn(delimiter)
   return numFails
@@ -297,7 +292,7 @@ def main(profileList, args):
         executor.submit(process, arg, passOps, failOps, dictLock, makeLock)
   finally:
     with open("statistics.rpt", 'a+') as f:
-      r = makeTable(passOps, failOps, skipList, profileList, f.write) 
+      r = makeTable(passOps, failOps, skipList, f.write) 
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
