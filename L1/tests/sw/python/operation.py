@@ -214,7 +214,7 @@ class BLAS_L1(OP):
       runTest.build()
       for vecDim in vecDimList:
         self.setSize(vecDim)
-        runTest.run()
+        runTest.runTest()
 
   def paramTCL(self, f):
     f.write('   L1 true\n ')
@@ -414,7 +414,7 @@ class BLAS_L2(OP):
         self.specTest(runTest)
 
   def specTest(self, runTest):
-    runTest.run()
+    runTest.runTest()
 
 
 
@@ -469,7 +469,7 @@ class gbmv(BLAS_L2):
     kulList = runTest.profile['kulList']
     for kul in kulList:
       self.setK(kul)
-      runTest.run()
+      runTest.runTest()
 
 
 class symv(BLAS_L2):
@@ -514,7 +514,7 @@ class symv(BLAS_L2):
 
   def specTest(self, runTest):
     self.setStorage(runTest.profile['storage'])
-    runTest.run()
+    runTest.runTest()
 
 class trmv(symv):
   def __init__(self, blas_l2: BLAS_L2):
@@ -632,7 +632,7 @@ class sbmv(BLAS_L2):
     for kul in kulList:
       self.setK(kul)
       self.setStorage(runTest.profile['storage'])
-      runTest.run()
+      runTest.runTest()
 
 class tbmv(sbmv):
   def __init__(self, blas_l2: BLAS_L2):

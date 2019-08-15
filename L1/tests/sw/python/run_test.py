@@ -25,6 +25,8 @@ from blas_gen_bin import BLAS_GEN, BLAS_ERROR
 from hls import HLS, HLS_ERROR, Parameters
 from makefile import Makefile
 from operation import OP, BLAS_L1, BLAS_L2, OP_ERROR
+import threading
+import concurrent.futures
 
 def Format(x):
   f_dic = {0:'th', 1:'st', 2:'nd',3:'rd'}
@@ -34,7 +36,8 @@ def Format(x):
   return "%d%s"%(x, f_dic[k])
 
 class RunTest:
-  def __init__(self, args):
+  def __init__(self, profile, args):
+    self.profilePath = profile
     self.profile = None 
     self.parEntries = 1
     self.logParEntries = 0
@@ -57,9 +60,8 @@ class RunTest:
       np.float64: 'double'
     }
 
-  def parseProfile(self, filePath):
-    self.profilePath = filePath
-    with open(filePath, 'r') as fh:
+  def parseProfile(self):
+    with open(self.profilePath, 'r') as fh:
       self.profile = json.loads(fh.read())
 
     self.opName = self.profile['op']
@@ -129,11 +131,12 @@ class RunTest:
     if self.op.name in parEntriesList:
       envD["BLAS_parEntries"] = "%d"%self.parEntries
 
-    make = Makefile(self.makefile, self.libPath)
-    libPath = make.make(envD)
+    with self.makelock:
+      make = Makefile(self.makefile, self.libPath)
+      libPath = make.make(envD)
     self.lib = C.cdll.LoadLibrary(libPath)
 
-  def run(self):
+  def runTest(self):
     paramTclPath =os.path.join(self.dataPath, r'parameters_%s_%s.tcl'%(self.op.sizeStr,self.typeStr))
     logfile=os.path.join(self.dataPath, r'logfile_%s_%s.log'%(self.op.sizeStr,self.typeStr))
     binFile =os.path.join(self.dataPath,'TestBin_%s_%s.bin'%(self.op.sizeStr,self.typeStr))
@@ -154,7 +157,9 @@ class RunTest:
     self.hls.benchmarking(logfile, self.op, self.reports)
     print("Test of size %s passed."%self.op.sizeStr)
 
-  def runTest(self, path):
+  def run(self, makelock):
+    self.makelock = makelock
+    path = os.path.dirname(self.profilePath)
     self.hls.params.setPath(path)
     self.op.test(self)
 
@@ -225,52 +230,66 @@ def makeTable(passDict, failDict, print_fn = print):
     print_fn(delimiter)
   return remain
 
+
+def process(runTest, passOps, failOps, dictLock, makeLock):
+  passed = False
+  try:
+    runTest.parseProfile()
+    print("Starting to test %s."%(runTest.op.name))
+    runTest.run(makeLock) 
+    print("All %d tests for %s are passed."%(runTest.numSim, runTest.op.name))
+    passed = True
+    csim = runTest.numSim * runTest.hls.csim
+    cosim = runTest.numSim * runTest.hls.cosim
+    with dictLock:
+      passOps[runTest] = (csim, cosim)
+
+    if runTest.hls.cosim:
+      rpt = runTest.writeReport(profile)
+      print("Benchmark info for op %s is written in %s"%(runTest.op.name, rpt))
+
+  except OP_ERROR as err:
+    print("OPERATOR ERROR: %s"%(err.message))
+  except BLAS_ERROR as err:
+    print("BLAS ERROR: %s with status code is %s"%(err.message, err.status))
+  except HLS_ERROR as err:
+    print("HLS ERROR: %s\nPlease check log file %s"%(err.message, os.path.abspath(err.logFile)))
+  except Exception as err:
+    type, value, tb = sys.exc_info()
+    traceback.print_exception(type, value, tb)
+  finally:
+    if not passed:
+      csim = runTest.numSim * runTest.hls.csim
+      cosim = runTest.numSim * runTest.hls.cosim
+      with dictLock:
+        failOps[runTest] = (csim, cosim)
+
 def main(profileList, args): 
   print(r"There are in total %d testing profile[s]."%len(profileList))
   passOps = dict()
   failOps = dict()
+  skipNum = 0
+  argList = list()
+  dictLock = threading.Lock()
+  makeLock = threading.Lock()
   while profileList:
     profile = profileList.pop()
-    runTest = RunTest(args)
-    passed = False
-    try:
-      if not os.path.exists(profile):
-        passed = True
-        raise Exception("ERROR: File %s is not exists."%profile)
-      runTest.parseProfile(profile)
-      print("Starting to test %s."%(runTest.op.name))
-      runTest.runTest(os.path.dirname(profile)) 
-      print("All %d tests for %s are passed."%(runTest.numSim, runTest.op.name))
-      passed = True
-      csim = runTest.numSim * runTest.hls.csim
-      cosim = runTest.numSim * runTest.hls.cosim
-      passOps[runTest] = (csim, cosim)
-
-      if runTest.hls.cosim:
-        rpt = runTest.writeReport(profile)
-        print("Benchmark info for op %s is written in %s"%(runTest.op.name, rpt))
-
-    except OP_ERROR as err:
-      print("OPERATOR ERROR: %s"%(err.message))
-    except BLAS_ERROR as err:
-      print("BLAS ERROR: %s with status code is %s"%(err.message, err.status))
-    except HLS_ERROR as err:
-      print("HLS ERROR: %s\nPlease check log file %s"%(err.message, os.path.abspath(err.logFile)))
-    except Exception as err:
-      type, value, tb = sys.exc_info()
-      traceback.print_exception(type, value, tb)
-    finally:
-      if not passed:
-        csim = runTest.numSim * runTest.hls.csim
-        cosim = runTest.numSim * runTest.hls.cosim
-        failOps[runTest] = (csim, cosim)
+    if not os.path.exists(profile):
+      print("File %s is not exists."%profile)
+      skipNum += 1
+      continue
+    runTest = RunTest(profile, args)
+    argList.append(runTest)
+  with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
+    for arg in argList:
+      executor.submit(process, arg, passOps, failOps, dictLock, makeLock)
   with open("statistics.rpt", 'a+') as f:
     r = makeTable(passOps, failOps, f.write) 
-    sys.exit(r)
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
+  parser.add_argument('--parallel', type=int, default=4, help='number of parallel processes')
   profileGroup = parser.add_mutually_exclusive_group(required=True)
   profileGroup.add_argument('--profile', nargs='*', metavar='profile.json', help='list of path to profile files')
   profileGroup.add_argument('--operator', nargs='*',metavar='opName', help='list of test dirs in ./hw')
