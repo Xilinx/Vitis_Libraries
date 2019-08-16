@@ -46,7 +46,7 @@
 #include "xf_blas/trmv.hpp"
 /* TODO
  *
-*/
+ */
 
 // BLAS L3 function modules
 
