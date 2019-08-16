@@ -28,12 +28,19 @@ NUMA="numactl -i all"
 export OMP_NUM_THREADS=$1
 #export KMP_AFFINITY=granularity=fine,compact,1,0
 
+if [[ ("$MODE" != "g") && ("$MODE" != "b") && ("$MODE" != "a") ]]; then
+	echo "Error in mode"
+	exit 1
+fi
+
 if [[ ("$MODE" == "g") || ("$MODE" == "a") ]]; then
 	# Build
 	if [[ ("$DATA_TYPE" == "double") ]]; then
 		make dgemv_mkl_gen
 	elif [[ ("$DATA_TYPE" == "float") ]]; then
 		 make sgemv_mkl_gen
+	elif [[ ("$DATA_TYPE" == "short") ]]; then
+		make sgemv_mkl_gen_short
 	else
 		echo "Error in data_type"
 		exit 1
@@ -50,14 +57,21 @@ if [[ ("$MODE" == "g") || ("$MODE" == "a") ]]; then
 			if [ -e dgemv_mkl_gen ]; then
 				./dgemv_mkl_gen $n $n ../data/$DATA_TYPE/
 			else
-				echo "Error in Generating Binary"
+				echo "Error in Generating Binary: ./dgemv_mkl_gen not found"
 				exit 1
 			fi
 		elif [[ ("$DATA_TYPE" == "float") ]]; then
 			if [ -e sgemv_mkl_gen ]; then
 				./sgemv_mkl_gen $n $n ../data/$DATA_TYPE/
 			else
-				echo "Error in Generating Binary"
+				echo "Error in Generating Binary: ./sgemv_mkl_gen not found"
+				exit 1
+			fi
+		elif [[ ("$DATA_TYPE" == "short") ]]; then
+			if [ -e sgemv_mkl_gen_short ]; then
+				./sgemv_mkl_gen_short $n $n ../data/$DATA_TYPE/
+			else
+				echo "Error in Generating Binary: ./short_gemv_mkl_gen not found"
 				exit 1
 			fi
 		else
@@ -78,8 +92,11 @@ if [[ ("$MODE" == "b") || ("$MODE" == "a") ]]; then
 		make dgemv_mkl_bench
 	elif [[ ("$DATA_TYPE" == "float") ]]; then
 		 make sgemv_mkl_bench
+	elif [[ ("$DATA_TYPE" == "short") ]]; then
+		echo "Benchmarking Error: datatype (short) is not supported in MKL"
+		exit 1
 	else
-		echo "Error in data_type"
+		echo "Benchmarking Error in data_type"
 		exit 1
 	fi
 
@@ -92,18 +109,18 @@ if [[ ("$MODE" == "b") || ("$MODE" == "a") ]]; then
 			if [ -e dgemv_mkl_bench ]; then
 				$NUMA ./dgemv_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
 			else
-				echo "Error in Benchmarking"
+				echo "Error in Benchmarking: ./dgemv_mkl_bench not found"
 				exit 1
 			fi
 		elif [[ ("$DATA_TYPE" == "float") ]]; then
 			if [ -e sgemv_mkl_bench ]; then
 				$NUMA ./sgemv_mkl_bench $n $n $n | tee log-$DATA_TYPE-$n.txt
 			else
-				echo "Error in Benchmarking"
+				echo "Error in Benchmarking: ./sgemv_mkl_bench not found"
 				exit 1
 			fi
 		else
-			echo "Error in data_type"
+			echo "Benchmarking Error in data_type"
 			exit 1
 		fi
 		logs="$logs log-$DATA_TYPE-$n.txt"

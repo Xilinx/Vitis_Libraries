@@ -205,7 +205,7 @@ int main(int argc, char **argv) {
 
   float l_freq = getBoardFreqMHz(l_xclbinFile);
   int GEMX_ddrWidth = stoi(l_configDict["GEMX_ddrWidth"]);
-  unsigned long int l_Ops = 2ull * m * n + m * n * 3;
+  unsigned long int l_Ops = 2ull * m * n + m;
   unsigned long int l_Parallel_Ops = 2ull * m * n;
 
   double l_perfApiInTops = l_Ops / (l_timeMs * 1e-3) / 1e12;

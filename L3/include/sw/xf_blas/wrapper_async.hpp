@@ -167,7 +167,7 @@ void xfblasKernelSynchronize(){
 }
 
 void xfblasKernelSynchronize( unsigned int kernelIndex ){
-  for( int i=0; i<concurrentKernels.size(); i++ ){ if(concurrentKernels[i]==kernelIndex) fuStatus[i].wait(); }
+  for( unsigned int i=0; i<concurrentKernels.size(); i++ ){ if(concurrentKernels[i]==kernelIndex) fuStatus[i].wait(); }
 }
 
 
