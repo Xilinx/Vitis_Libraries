@@ -18,7 +18,8 @@ PYTEST=./sw/python/run_test.py
 PAR=8
 
 $PYTHON $PYTEST --operator amax amin asum axpy copy dot nrm2 scal swap --parallel $PAR
-#$PYTHON $PYTEST --operator gemv gbmv sbmvLo sbmvUp symvLo symvUp tbmvLo tbmvUp tbmvLo tbmvUp tpmvLo tpmvUp trmvLo trmvUp --csim --parallel $PAR
+$PYTHON $PYTEST --operator gemv gbmv sbmvLo sbmvUp tbmvLo tbmvUp --parallel $PAR
+$PYTHON $PYTEST --operator symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp trmvLo trmvUp --parallel $PAR --csim
 
 if [ -f $STAT ]; then
   cat $STAT
