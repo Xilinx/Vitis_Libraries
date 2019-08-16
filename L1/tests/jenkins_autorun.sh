@@ -20,6 +20,7 @@ PAR=8
 $PYTHON $PYTEST --operator amax amin asum axpy copy dot nrm2 scal swap --parallel $PAR
 $PYTHON $PYTEST --operator gemv gbmv sbmvLo sbmvUp tbmvLo tbmvUp --parallel $PAR
 $PYTHON $PYTEST --operator symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp trmvLo trmvUp --parallel $PAR --csim
+$PYTHON $PYTEST --operator  trmvLo trmvUp --parallel $PAR --cosim
 
 if [ -f $STAT ]; then
   cat $STAT
