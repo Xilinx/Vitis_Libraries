@@ -47,11 +47,10 @@ void trmUp2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_Data
     for (unsigned int i = 0; i < p_n; ++i) {
         for (unsigned int j = i / t_ParEntries; j < l_blocks; ++j) {
 #pragma HLS PIPELINE
-            t_DataType* l_aAddr = p_a + i * p_n + j * t_ParEntries;
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
             for (unsigned int k = 0; k < t_ParEntries; ++k) {
-                l_val[k] = l_aAddr[k];
+                l_val[k] = p_a[(i*l_blocks+j)*t_ParEntries+k];
             }
             p_out.write(l_val);
         }
@@ -70,14 +69,14 @@ void trmUp2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_Data
  */
 template <typename t_DataType, unsigned int t_ParEntries>
 void trmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
+    uint16_t l_blocks = p_n / t_ParEntries;
     for (unsigned int i = 0; i < p_n; ++i) {
         for (unsigned int j = 0; j <= i / t_ParEntries; ++j) {
 #pragma HLS PIPELINE
-            t_DataType* l_aAddr = p_a + i * p_n + j * t_ParEntries;
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
             for (unsigned int k = 0; k < t_ParEntries; ++k) {
-                l_val[k] = l_aAddr[k];
+                l_val[k] = p_a[(i*l_blocks+j)*t_ParEntries+k];
             }
             p_out.write(l_val);
         }
