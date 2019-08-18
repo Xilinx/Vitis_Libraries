@@ -98,7 +98,6 @@ int main(int argc, char **argv) {
   logFile.close();
   l_logFile = "xrt_report.txt";
   
-  int l_numKernel = 1;
   int m = 256;
   int k = 256;
   int n = 256;
@@ -116,60 +115,80 @@ int main(int argc, char **argv) {
     cout<<"Read custom data directory: "<<data_dir<<endl;
   }
   
-  int iteration = 2;
+  int l_numKernel = 1;
   if (argc >= 8){
+    l_numKernel = stoi(argv[l_argIdx++]);
+    cout<<"Read custom kernel number: "<<l_numKernel<<endl;
+#ifdef XFBLAS_LAUNCH_ASYNC
+    cout<<"[INFO] Enabling Asynchronous Concurrent Kernels: "<<l_numKernel<<endl;
+#else
+	cout<<"[INFO] Disabling Asynchronicity"<<endl;
+#endif
+  }
+  
+  int iteration = 2;
+  if (argc >= 9){
     iteration = stoi(argv[l_argIdx++]);
-    cout<<"Read custom data directory: "<<data_dir<<endl;
+    cout<<"Read custom iteration: "<<iteration<<endl;
   }
   
   int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
-  XFBLAS_dataType * a, * b, * c, * goldenC;
+  XFBLAS_dataType ** a, ** b, ** c, ** goldenC;
   
-  posix_memalign((void** )&a, 4096, m*k* sizeof ( XFBLAS_dataType ));
-  posix_memalign((void** )&b, 4096, k*n* sizeof ( XFBLAS_dataType ));
-  posix_memalign((void** )&c, 4096, m*n* sizeof ( XFBLAS_dataType ));
-  posix_memalign((void** )&goldenC, 4096, m*n* sizeof ( XFBLAS_dataType ));
+  a = (XFBLAS_dataType ** ) malloc(l_numKernel*sizeof( XFBLAS_dataType*));
+  b = (XFBLAS_dataType ** ) malloc(l_numKernel*sizeof( XFBLAS_dataType*));
+  c = (XFBLAS_dataType ** ) malloc(l_numKernel*sizeof( XFBLAS_dataType*));
+  goldenC = (XFBLAS_dataType ** ) malloc(l_numKernel*sizeof( XFBLAS_dataType*));
+  
+  for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+	posix_memalign((void** )&a[kernelIndex], 4096, m*k* sizeof ( XFBLAS_dataType ));
+	posix_memalign((void** )&b[kernelIndex], 4096, k*n* sizeof ( XFBLAS_dataType ));
+	posix_memalign((void** )&c[kernelIndex], 4096, m*n* sizeof ( XFBLAS_dataType ));
+	posix_memalign((void** )&goldenC[kernelIndex], 4096, m*n* sizeof ( XFBLAS_dataType ));
+  }
   
   ifstream inFile;
 
-  inFile.open(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin", ifstream::binary);
-  if( inFile.is_open() ){
-    inFile.read( (char*) a, sizeof(XFBLAS_dataType)*m*k );
-    inFile.close();
-  } 
-  else {
-    cerr << "Error opening "<<(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin")<<endl;
-    exit(1);
-  }
-  
-  inFile.open(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin", ifstream::binary);
-  if( inFile.is_open() ){
-    inFile.read( (char*) b, sizeof(XFBLAS_dataType)*k*n );
-    inFile.close();
-  }
-  else {
-    cerr << "Error opening "<<(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin")<<endl;
-    exit(1);
-  }
-
-  inFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
-  if( inFile.is_open() ){
-    inFile.read( (char*) c, sizeof(XFBLAS_dataType)*m*n );
-    inFile.close();
-  }
-  else {
-    cerr << "Error opening "<<(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin")<<endl;
-    exit(1);
-  }
-  
-  inFile.open(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
-  if( inFile.is_open() ){
-    inFile.read( (char*) goldenC, sizeof(XFBLAS_dataType)*m*n );
-    inFile.close();
-  }
-  else {
-    cerr << "Error opening "<<(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin")<<endl;
-    exit(1);
+  for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+	inFile.open(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin", ifstream::binary);
+	if( inFile.is_open() ){
+	  inFile.read( (char*) a[kernelIndex], sizeof(XFBLAS_dataType)*m*k );
+	  inFile.close();
+	} 
+	else {
+	  cerr << "Error opening "<<(data_dir+"matA_in_"+to_string(m)+"_"+to_string(k)+".bin")<<endl;
+	  exit(1);
+	}
+	
+	inFile.open(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin", ifstream::binary);
+	if( inFile.is_open() ){
+	  inFile.read( (char*) b[kernelIndex], sizeof(XFBLAS_dataType)*k*n );
+	  inFile.close();
+	}
+	else {
+	  cerr << "Error opening "<<(data_dir+"matB_in_"+to_string(k)+"_"+to_string(n)+".bin")<<endl;
+	  exit(1);
+	}
+	
+	inFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
+	if( inFile.is_open() ){
+	  inFile.read( (char*) c[kernelIndex], sizeof(XFBLAS_dataType)*m*n );
+	  inFile.close();
+	}
+	else {
+	  cerr << "Error opening "<<(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin")<<endl;
+	  exit(1);
+	}
+	
+	inFile.open(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
+	if( inFile.is_open() ){
+		inFile.read( (char*) goldenC[kernelIndex], sizeof(XFBLAS_dataType)*m*n );
+		inFile.close();
+	}
+	else {
+	  cerr << "Error opening "<<(data_dir+"matC_out_"+to_string(m)+"_"+to_string(n)+".bin")<<endl;
+	  exit(1);
+	}
   }
   
   TimePointType l_tp_start_time;
@@ -190,37 +209,59 @@ int main(int argc, char **argv) {
     xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
     unsigned int l_tpIdx = 0;
     l_tp_loop[l_tpIdx] = chrono::high_resolution_clock::now();
-    status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, l_numKernel-1);
-    status = xfblasMallocRestricted(k,n,sizeof(*b),b,n, l_numKernel-1);
-    status = xfblasMallocRestricted(m,n,sizeof(*c),c,n, l_numKernel-1);
+	for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+      status = xfblasMallocRestricted(m,k,sizeof(*a[kernelIndex]),a[kernelIndex],k, kernelIndex);
+      status = xfblasMallocRestricted(k,n,sizeof(*b[kernelIndex]),b[kernelIndex],n, kernelIndex);
+      status = xfblasMallocRestricted(m,n,sizeof(*c[kernelIndex]),c[kernelIndex],n, kernelIndex);
+#ifdef XFBLAS_LAUNCH_ASYNC
+	  xfblasSetMatrixRestrictedAsync(a[kernelIndex], kernelIndex);
+	  xfblasSetMatrixRestrictedAsync(b[kernelIndex], kernelIndex);
+	  xfblasSetMatrixRestrictedAsync(c[kernelIndex], kernelIndex);
+#else      
+      status = xfblasSetMatrixRestricted(a[kernelIndex], kernelIndex);
+      status = xfblasSetMatrixRestricted(b[kernelIndex], kernelIndex);
+      status = xfblasSetMatrixRestricted(c[kernelIndex], kernelIndex);
+#endif
+    }
+#ifdef XFBLAS_LAUNCH_ASYNC
+    xfblasKernelSynchronize();
+#endif
+    showTimeData("copyToFpga", l_tp_loop[l_tpIdx], l_tp_loop[l_tpIdx+1]); l_tpIdx++;  
     
-    status = xfblasSetMatrixRestricted(a, l_numKernel-1);
-    status = xfblasSetMatrixRestricted(b, l_numKernel-1);
-    status = xfblasSetMatrixRestricted(c, l_numKernel-1);
-    
-    showTimeData("copyToFpga", l_tp_loop[l_tpIdx], l_tp_loop[l_tpIdx+1]); l_tpIdx++;
-    
-    
-    status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a, k, b, n, 1, c, n, l_numKernel-1);
-    status = xfblasGetMatrixRestricted(c, l_numKernel-1);
-    
-  
+	for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+	  status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, n, k, 1, a[kernelIndex], k, b[kernelIndex], n, 1, c[kernelIndex], n, kernelIndex);
+	}
+
+	for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+#ifdef XFBLAS_LAUNCH_ASYNC
+	  xfblasGetMatrixRestrictedAsync(c[kernelIndex], kernelIndex);
+#else
+	  status = xfblasGetMatrixRestricted(c[kernelIndex], kernelIndex);
+#endif
+	}
+#ifdef XFBLAS_LAUNCH_ASYNC
+    xfblasKernelSynchronize();
+#endif     
     
     showTimeData("copyFromFpga", l_tp_loop[l_tpIdx], l_tp_loop[l_tpIdx+1]); l_tpIdx++;
     
-    xfblasFree(a, l_numKernel-1);
-    xfblasFree(b, l_numKernel-1);
-    xfblasFree(c, l_numKernel-1);
+	for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+      xfblasFree(a[kernelIndex], kernelIndex);
+      xfblasFree(b[kernelIndex], kernelIndex);
+      xfblasFree(c[kernelIndex], kernelIndex);
+	}
     xfblasDestroy(l_numKernel);
     chrono::duration<double> l_timeApiLoop = l_tp_loop[l_tpIdx] - l_tp_loop[0];
     l_timeApiSum= l_timeApiSum + l_timeApiLoop;
     
     if (i != iteration-1){
-      inFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
-      if( inFile.is_open() ){
-        inFile.read( (char*) c, sizeof(XFBLAS_dataType)*m*n );
-        inFile.close();
-      }
+	  for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+        inFile.open(data_dir+"matC_in_"+to_string(m)+"_"+to_string(n)+".bin", ifstream::binary);
+        if( inFile.is_open() ){
+          inFile.read( (char*) c[kernelIndex], sizeof(XFBLAS_dataType)*m*n );
+          inFile.close();
+        }
+	  }
     }
   }
   
@@ -236,7 +277,7 @@ int main(int argc, char **argv) {
   
   float l_freq = getBoardFreqMHz(l_xclbinFile);
   int GEMX_ddrWidth = stoi(l_configDict["GEMX_ddrWidth"]); 
-  unsigned long int l_Ops = 2ull * m * k * n + m * n * 3;
+  unsigned long int l_Ops = l_numKernel*( 2ull * m * k * n + m * n * 3 );
   unsigned long int l_Parallel_Ops = 2ull * m * k * n;
   
   double l_perfApiInTops = l_Ops / (l_timeMs * 1e-3) / 1e12;
@@ -249,23 +290,29 @@ int main(int argc, char **argv) {
   cout << "DATA_CSV:,"<<l_freq<<","<<m<<","<<k<<","<<n<<","
        << l_timeMs <<","<<l_effApiPct<<","<<l_perfApiInTops<<"\n";
   
-  for ( i = 0; i < 10; i ++){
-    for ( j = 0; j < 10; j ++){
-      cout<< (c[ IDX2R (i,j, k )])<<" ";
+  for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+	cout<<">> Kernel #"<<kernelIndex<<" << ";
+    if (compareGemm(c[kernelIndex],goldenC[kernelIndex],m,n)){
+      cout<<"Test passed!\n";
+    }else{
+      cout<<"Test failed!\n";
     }
-    cout<<"\n";
+    for ( i = 0; i < 10; i ++){
+      for ( j = 0; j < 10; j ++){
+        cout<< (c[kernelIndex][ IDX2R (i,j, k )])<<" ";
+      }
+      cout<<"\n";
+    }
   }
-  
-  if (compareGemm(c,goldenC,m,n)){
-    cout<<"Test passed!\n";
-  }else{
-    cout<<"Test failed!\n";
+  for( int kernelIndex=0; kernelIndex<l_numKernel; kernelIndex++ ){
+    free(a[kernelIndex]);
+    free(b[kernelIndex]);
+    free(c[kernelIndex]);
   }
-  
   free(a);
   free(b);
   free(c);
-    
+  
   //xfblasDestroy(l_numKernel);
 
   return EXIT_SUCCESS;
