@@ -42,5 +42,6 @@
 #include "helpers/funcs/abs.hpp"
 #include "helpers/funcs/sum.hpp"
 #include "helpers/funcs/mul.hpp"
+#include "helpers/funcs/dotHelper.hpp"
 
 #endif

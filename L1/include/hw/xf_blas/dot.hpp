@@ -16,7 +16,7 @@
 
 /**
  * @file dot.hpp
- * @brief BLAS Level 1 asum template function implementation.
+ * @brief BLAS Level 1 dot template function implementation.
  *
  * This file is part of XF BLAS Library.
  */
@@ -58,11 +58,12 @@ void dot(unsigned int p_n,
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
+
+    hls::stream<WideType<t_DataType, 1> > l_dot;
+#pragma HLS DATA_PACK variable = l_dot
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
-#pragma HLS DATA_PACK variable = l_mulStr
-    mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_x, p_y, l_mulStr);
-    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_mulStr, p_res);
+    DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, 1, p_x, p_y, l_dot);
+    p_res = l_dot.read()[0];
 }
 
 } // end namespace blas
