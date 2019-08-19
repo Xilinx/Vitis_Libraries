@@ -164,8 +164,11 @@ void xfblasGetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0) {
 
 void xfblasKernelSynchronize(){
   for(auto &fu : fuStatus) { fu.wait(); }
+  fuStatus.clear();
+  concurrentKernels.clear();
 }
 
+// TODO, potential bugs, probably not needed
 void xfblasKernelSynchronize( unsigned int kernelIndex ){
   for( unsigned int i=0; i<concurrentKernels.size(); i++ ){ if(concurrentKernels[i]==kernelIndex) fuStatus[i].wait(); }
 }
