@@ -92,13 +92,9 @@ void dot_dsp(unsigned int p_n,
 #pragma HLS ARRAY_PARTITION variable = l_x complete dim = 1
             WideType<t_DataType, l_parEntries> l_y = p_y.read();
 #pragma HLS ARRAY_PARTITION variable = l_y complete dim = 1
-            t_DataType l_dot[l_parEntries];
-#pragma HLS ARRAY_PARTITION variable = l_dot complete dim = 1
             for (t_IndexType j = 0; j < l_parEntries; ++j) {
-                l_dot[j] = l_x[j] * l_y[j];
+                l_res +=  l_x[j] * l_y[j];
             }
-            l_res += BinarySum<t_DataType, l_parEntries>::sum(l_dot);
-
             if (i == l_numIter - 1) p_res.write(l_res);
         }
     }
