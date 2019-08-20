@@ -48,10 +48,6 @@ def process(rt, statList, dictLock = threading.Lock(), makeLock = threading.Lock
             'Status':'Passed', 
             'Profile': rt.profilePath})
 
-      if rt.hls.cosim:
-        rpt = rt.writeReport(profile)
-        print("Benchmark info for op %s is written in %s"%(rt.op.name, rpt))
-
   except OP_ERROR as err:
     print("OPERATOR ERROR: %s"%(err.message))
   except BLAS_ERROR as err:
@@ -62,6 +58,11 @@ def process(rt, statList, dictLock = threading.Lock(), makeLock = threading.Lock
     type, value, tb = sys.exc_info()
     traceback.print_exception(type, value, tb)
   finally:
+
+    if rt.hls.cosim and rt.numSim > 0:
+      rpt = rt.writeReport(profile)
+      print("Benchmark info for op %s is written in %s"%(rt.op.name, rpt))
+
     if not passed:
       csim = rt.numSim * rt.hls.csim
       cosim = rt.numSim * rt.hls.cosim
