@@ -31,7 +31,7 @@ XFBLAS_dataType ?= short
 numKernels ?= 1
 
 ifneq (${numKernels}, 1)
-  $(info [INFO] Asynchronous Concurrent Execution is Enabled.)
+  $(info [INFO] Asynchronous Concurrent Execution Is Enabled.)
   HOST_CXXFLAGS += -DXFBLAS_LAUNCH_ASYNC
 endif
 
