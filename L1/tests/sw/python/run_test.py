@@ -94,12 +94,16 @@ def main(profileList, args):
       for arg in argList:
         executor.submit(process, arg, statList)
   finally:
-    statPath = os.path.join(os.getcwd(),"statistics.rpt") 
+    if args.id is None:
+      statPath = os.path.join(os.getcwd(),"statistics.rpt") 
+    else:
+      statPath = os.path.join(os.getcwd(),"statistics_%d.rpt"%args.id) 
     list2File(statList, statPath) 
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
+  parser.add_argument('--id', type=int, help='command line id')
   parser.add_argument('--parallel', type=int, default=1, help='number of parallel processes')
   profileGroup = parser.add_mutually_exclusive_group(required=True)
   profileGroup.add_argument('--profile', nargs='*', metavar='profile.json', help='list of path to profile files')
