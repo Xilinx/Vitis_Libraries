@@ -94,10 +94,10 @@ def main(profileList, args):
       for arg in argList:
         executor.submit(process, arg, statList)
   finally:
-    if args.id:
-      statPath = os.path.join(os.getcwd(),"statistics_%d.rpt"%args.id) 
-    else:
+    if args.id is None:
       statPath = os.path.join(os.getcwd(),"statistics.rpt") 
+    else:
+      statPath = os.path.join(os.getcwd(),"statistics_%d.rpt"%args.id) 
     list2File(statList, statPath) 
 
 if __name__== "__main__":
