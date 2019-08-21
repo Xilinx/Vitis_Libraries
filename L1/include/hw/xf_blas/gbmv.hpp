@@ -65,6 +65,15 @@ void gbmv(const unsigned int p_m,
     const unsigned int l_MaxIter = t_MaxRows / t_ParEntries;
     const unsigned int l_threshold = p_m / t_ParEntries;
     WideType<t_MacType, t_ParEntries> l_y[l_MaxIter];
+    /*
+    for (t_IndexType l = 0; l < l_MaxIter; l++) {
+#pragma HLS PIPELINE
+        for (t_IndexType k = 0; k < t_ParEntries; k++) {
+#pragma HLS UNROLL
+            l_y[l][k] = 0;
+        }
+    }
+    */
 
     for (t_IndexType j = 0; j < p_kl + 1 + p_ku; j++) {
         for (t_IndexType l = 0; l < l_MaxIter; l++) {
@@ -74,10 +83,8 @@ void gbmv(const unsigned int p_m,
             WideType<t_DataType, t_ParEntries> l_x = p_x.read();
             for (t_IndexType k = 0; k < t_ParEntries; k++) {
 #pragma HLS UNROLL
-                if (j == 0)
-                    l_y[l][k] = l_A[k] * l_x[k];
-                else
-                    l_y[l][k] += l_A[k] * l_x[k];
+                if (0 == j) l_y[l][k] = 0;
+                l_y[l][k] += l_A[k] * l_x[k];
             }
             if (j == p_kl + p_ku) p_y.write(l_y[l]);
         }
