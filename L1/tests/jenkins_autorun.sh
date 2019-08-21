@@ -17,14 +17,9 @@ PYTHON=python3
 PYTEST=./sw/python/run_test.py
 PYCHECK=./sw/python/check_process.py
 PAR=8
-#SUBMIT="bsub -cwd `pwd` -q medium -R \"select[(os== lin && type == X86_64 && (osdistro == rhel||osdistro == centos) && (osver == ws6 || osver== ws7))] rusage[mem=16000]\" "
 
-$PYTHON $PYTEST --operator amax amin asum axpy --parallel $PAR --id 0  --csim &
-$PYTHON $PYTEST --operator copy dot nrm2 scal swap --parallel $PAR  --id 1 --csim &
-$PYTHON $PYTEST --operator gemv trmvLo trmvUp --parallel $PAR  --id 2 --csim &
-$PYTHON $PYTEST --operator gbmv sbmvLo sbmvUp tbmvLo tbmvUp --parallel $PAR  --id 3 --csim &
-$PYTHON $PYTEST --operator symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp --parallel $PAR --csim  --id 4&
-$PYTHON $PYCHECK --basename "statistics" --ext "rpt" --number 5
+$PYTHON $PYTEST --operator amax amin asum axpy copy dot nrm2 scal swap gbmv sbmvLo sbmvUp tbmvLo tbmvUp gemv trmvLo trmvUp --parallel $PAR
+$PYTHON $PYTEST --operator symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp --parallel $PAR --csim  4
 
 if [ -f $STAT ]; then
   cat $STAT
