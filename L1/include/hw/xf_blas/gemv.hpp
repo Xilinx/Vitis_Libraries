@@ -69,7 +69,7 @@ void gemv(const unsigned int p_m,
 #pragma HLS UNROLL
         DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, p_m, p_M, p_x, l_y);
     }
-    mergeStream<t_NumStreams>(l_y, p_y);
+    combineStream<t_NumStreams>(l_y, p_y);
 }
 
 /**
