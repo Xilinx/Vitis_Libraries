@@ -33,9 +33,22 @@ namespace linear_algebra {
 namespace blas {
 
 template <unsigned int t_NumStreams, typename t_DataType>
-void dupStream(unsigned int p_n,
-               hls::stream<WideType<t_DataType, t_NumStreams> >& p_wideStream,
-               hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams]) {
+void duplicateStream(unsigned int p_n,
+                     hls::stream<t_DataType>& p_inputStream,
+                     hls::stream<t_DataType> p_streams[t_NumStreams]) {
+    for (unsigned int i = 0; i < p_n; i++) {
+#pragma HLS PIPELINE
+        t_DataType p_in = p_inputStream.read();
+        for (unsigned int j = 0; j < t_NumStreams; j++) {
+            p_streams[j].write(p_in);
+        }
+    }
+}
+
+template <unsigned int t_NumStreams, typename t_DataType>
+void splitStream(unsigned int p_n,
+                 hls::stream<WideType<t_DataType, t_NumStreams> >& p_wideStream,
+                 hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams]) {
     for (unsigned int i = 0; i < p_n; i++) {
 #pragma HLS PIPELINE
         WideType<t_DataType, t_NumStreams> p_in = p_wideStream.read();
@@ -46,9 +59,9 @@ void dupStream(unsigned int p_n,
 }
 
 template <unsigned int t_NumStreams, typename t_DataType>
-void mergeStream(unsigned int p_n,
-                 hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams],
-                 hls::stream<WideType<t_DataType, t_NumStreams> >& p_wideStream) {
+void combineStream(unsigned int p_n,
+                   hls::stream<WideType<t_DataType, 1> > p_stream[t_NumStreams],
+                   hls::stream<WideType<t_DataType, t_NumStreams> >& p_wideStream) {
     for (unsigned int i = 0; i < p_n; i++) {
 #pragma HLS PIPELINE
         WideType<t_DataType, t_NumStreams> p_out;
