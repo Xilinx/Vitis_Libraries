@@ -11,12 +11,12 @@
   "logParEntries": 2,
   "matrixDims": [
     [128, 4096],
-    [1024, 512],
-    [2048, 2048]
+    [1024, 1024],
+    [2048, 512]
   ],
   "valueRange": [
     -124,
     124
   ],
-  "numSimulation": 4 
+  "numSimulation": 2 
 }
