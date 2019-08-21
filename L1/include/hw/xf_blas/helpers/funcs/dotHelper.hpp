@@ -49,12 +49,15 @@ namespace blas {
  * @param p_res the dot product of x and y
  */
 namespace {
-template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+template <typename t_DataType,
+          unsigned int t_LogParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_MacDataType = t_DataType>
 void dot_tree(unsigned int p_n,
               const unsigned int p_iter,
               hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
               hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
-              hls::stream<WideType<t_DataType, 1> >& p_res) {
+              hls::stream<WideType<t_MacDataType, 1> >& p_res) {
 #pragma HLS DATA_PACK variable = p_x
 #pragma HLS DATA_PACK variable = p_y
 #pragma HLS DATA_PACK variable = p_res
@@ -64,16 +67,19 @@ void dot_tree(unsigned int p_n,
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
 #pragma HLS DATA_PACK variable = l_mulStr
-    mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_x, p_y, l_mulStr, p_iter);
-    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_mulStr, p_res, p_iter);
+    mul<t_DataType, 1 << t_LogParEntries, t_IndexType, t_MacDataType>(p_n, p_x, p_y, l_mulStr, p_iter);
+    sum<t_DataType, t_LogParEntries, t_IndexType, t_MacDataType>(p_n, l_mulStr, p_res, p_iter);
 }
 
-template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+template <typename t_DataType,
+          unsigned int t_LogParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_MacDataType = t_DataType>
 void dot_dsp(unsigned int p_n,
              const unsigned int p_iter,
              hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
              hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
-             hls::stream<WideType<t_DataType, 1> >& p_res) {
+             hls::stream<WideType<t_MacDataType, 1> >& p_res) {
 #pragma HLS DATA_PACK variable = p_x
 #pragma HLS DATA_PACK variable = p_y
 #pragma HLS DATA_PACK variable = p_res
@@ -81,7 +87,7 @@ void dot_dsp(unsigned int p_n,
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 
-    t_DataType l_res = 0;
+    t_MacDataType l_res = 0;
     const unsigned int l_numIter = p_n >> t_LogParEntries;
     const unsigned int l_parEntries = 1 << t_LogParEntries;
     for (t_IndexType l = 0; l < p_iter; ++l) {
@@ -101,14 +107,17 @@ void dot_dsp(unsigned int p_n,
 }
 } // namespace
 
-template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+template <typename t_DataType,
+          unsigned int t_LogParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_MacDataType = t_DataType>
 class DotHelper {
    public:
     static void dot(unsigned int p_n,
                     const unsigned int p_iter,
                     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
                     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
-                    hls::stream<WideType<t_DataType, 1> >& p_res) {
+                    hls::stream<WideType<t_MacDataType, 1> >& p_res) {
 #pragma HLS DATA_PACK variable = p_x
 #pragma HLS DATA_PACK variable = p_y
 #pragma HLS DATA_PACK variable = p_res
@@ -116,11 +125,11 @@ class DotHelper {
         assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
-        dot_dsp<t_DataType, t_LogParEntries, t_IndexType>(p_n, p_iter, p_x, p_y, p_res);
+        dot_dsp<t_DataType, t_LogParEntries, t_IndexType, t_MacDataType>(p_n, p_iter, p_x, p_y, p_res);
     }
 };
 template <unsigned int t_LogParEntries, typename t_IndexType>
-class DotHelper<float, t_LogParEntries, t_IndexType> {
+class DotHelper<float, t_LogParEntries, t_IndexType, float> {
    public:
     static void dot(const unsigned int p_n,
                     const unsigned int p_iter,
@@ -138,7 +147,7 @@ class DotHelper<float, t_LogParEntries, t_IndexType> {
     }
 };
 template <unsigned int t_LogParEntries, typename t_IndexType>
-class DotHelper<double, t_LogParEntries, t_IndexType> {
+class DotHelper<double, t_LogParEntries, t_IndexType, double> {
    public:
     static void dot(const unsigned int p_n,
                     const unsigned int p_iter,
