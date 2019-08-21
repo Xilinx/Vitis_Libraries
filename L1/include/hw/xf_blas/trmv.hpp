@@ -66,8 +66,7 @@ void trmv(const bool uplo,
     for (t_IndexType i = 0; i < l_blocks; i++) {
 #pragma HLS DATAFLOW
         const unsigned int l_n = (uplo ? l_blocks - i : i + 1) << t_LogParEntries;
-        mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(l_n, p_M, p_x, l_mulStr, l_parEntries);
-        sum<t_DataType, t_LogParEntries, t_IndexType>(l_n, l_mulStr, p_y, l_parEntries);
+        DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(l_n, l_parEntries, p_M, p_x, p_y);
     }
 }
 

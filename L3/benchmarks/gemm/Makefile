@@ -28,6 +28,7 @@ HOST_INCLUDE = -I$(XILINX_XRT)/include -I$(SW_API_DIR)
 HOST_LIB = -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
 
 XFBLAS_dataType = short
+HOST_CXXFLAGS += -DXFBLAS_LAUNCH_ASYNC
 
 #------------------------------dummies-------------------------------
 

@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
   xfblasFree(d_a, l_numKernel-1);
   xfblasFree(d_x, l_numKernel-1);
   xfblasFree(d_y, l_numKernel-1);
-  xfblasDestory(l_numKernel);
+  xfblasDestroy(l_numKernel);
   free(a);
   free(x);
   free(y);

@@ -22,12 +22,13 @@ elif [ "$1" == "" ]; then
   exit 0
 else
   dataType=$(grep GEMX_dataType $2 | sed 's/^GEMX_dataType=//')
+  numKernels=$(grep GEMX_numKernels $2 | sed 's/^GEMX_numKernels=//')
   n=256
   logs=()
   while [  $n -le 8192 ]; do
     date
     echo "#############  $n ################"
-    nice ./gemm_bench.exe $1 $2 $n $n $n ./data/$dataType/ | tee log-$n.txt
+    nice ./gemm_bench.exe $1 $2 $n $n $n ./data/$dataType/ $numKernels 1 | tee log-$n.txt
     logs="$logs log-$n.txt"
     n=`expr $n \* 2`
   done

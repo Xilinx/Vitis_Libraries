@@ -120,7 +120,7 @@ The following is an example of how to use XFBLAS API. Users always need to inclu
     xfblasFree(a);
     xfblasFree(b);
     xfblasFree(c);
-    xfblasDestory();
+    xfblasDestroy();
     free(a);
     free(b);
     free(c);

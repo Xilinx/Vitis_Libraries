@@ -63,16 +63,13 @@ void gemv(const unsigned int p_m,
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr[t_NumStreams];
-#pragma HLS DATA_PACK variable = l_mulStr
     hls::stream<WideType<t_DataType, 1> > l_y[t_NumStreams];
 #pragma HLS DATA_PACK variable = l_y
     for (int i = 0; i < t_NumStreams; i++) {
 #pragma HLS UNROLL
-        mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_M, p_x, l_mulStr, p_m);
-        sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_mulStr, l_y, p_m);
+        DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, p_m, p_M, p_x, l_y);
     }
-    mergeStream<t_NumStreams>(l_y, p_y);
+    combineStream<t_NumStreams>(l_y, p_y);
 }
 
 /**
@@ -103,10 +100,7 @@ void gemv(const unsigned int p_m,
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
-#pragma HLS DATA_PACK variable = l_mulStr
-    mul<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_M, p_x, l_mulStr, p_m);
-    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_mulStr, p_y, p_m);
+    DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, p_m, p_M, p_x, p_y);
 }
 
 /**

@@ -364,7 +364,9 @@ class XHost {
 
     xfblasStatus_t closeContext(unsigned int p_kernelIndex) {
         xclFreeBO(m_fpga->m_handle, m_instrBufHandle);
-        xclFreeBO(m_fpga->m_handle, m_fpga->m_execHandles[p_kernelIndex]);
+        if ( p_kernelIndex < (unsigned int) m_fpga->m_execHandles.size()) {
+          xclFreeBO(m_fpga->m_handle, m_fpga->m_execHandles[p_kernelIndex]);
+        }
         xclCloseContext(m_fpga->m_handle, m_fpga->m_xclbinId, this->m_cuIndex);
         return XFBLAS_STATUS_SUCCESS;
     }
