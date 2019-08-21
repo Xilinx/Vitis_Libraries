@@ -24,7 +24,7 @@ $SUBMIT $PYTHON $PYTEST --operator copy dot nrm2 scal swap --parallel $PAR  --id
 $SUBMIT $PYTHON $PYTEST --operator gemv trmvLo trmvUp --parallel $PAR  --id 2 --csim &
 $SUBMIT $PYTHON $PYTEST --operator gbmv sbmvLo sbmvUp tbmvLo tbmvUp --parallel $PAR  --id 3 --csim &
 $SUBMIT $PYTHON $PYTEST --operator symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp --parallel $PAR --csim  --id 4&
-$PYTHON $PYCHECK --name "statistics" --ext "rpt" --number 5
+$PYTHON $PYCHECK --basename "statistics" --ext "rpt" --number 5
 
 if [ -f $STAT ]; then
   cat $STAT
