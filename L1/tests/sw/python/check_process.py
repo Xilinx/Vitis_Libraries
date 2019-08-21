@@ -1,4 +1,5 @@
 import time
+import functools
 import argparse
 import os
 
@@ -6,8 +7,11 @@ def poll(fileList, t):
   while True:
     fileFound = [os.path.exists(f) for f in fileList]
     func = lambda x, y : x and y
-    if reduce(func, fileFound):
+    allFound = functools.reduce(func, fileFound)
+    if allFound:
+      print("Poll finished.")
       break
+    print("Poll sleep for %ds."%t)
     time.sleep(t)
 
 def merge(fileList, filename):
