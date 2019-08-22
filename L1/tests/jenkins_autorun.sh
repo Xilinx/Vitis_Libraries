@@ -22,7 +22,7 @@ SUBMIT="bsub -cwd `pwd` -q medium -R \"select[(os== lin && type == X86_64 && (os
 
 eval "$SUBMIT $PYTHON $PYTEST --operator amax amin asum axpy copy dot nrm2 scal swap --parallel $PAR --id 0 &"
 eval "$SUBMIT $PYTHON $PYTEST --operator gbmv sbmvLo sbmvUp tbmvLo tbmvUp gemv trmvLo trmvUp --parallel $PAR --id 1&"
-eval "$PYTHON $PYTEST --operator symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp --parallel $PAR --csim --id 2 &"
+eval "$SUBMIT $PYTHON $PYTEST --operator symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp --parallel $PAR --csim --id 2 &"
 $PYTHON $PYCHECK --number 3
 
 if [ -f $STAT ]; then
