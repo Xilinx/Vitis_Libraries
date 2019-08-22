@@ -104,10 +104,10 @@ CFLAGS = -g -O0 -std=c++11 \
 
 LFLAGS = $(HOST_LIB_LFLAGS) \
 	 -Wl,--rpath=$(BOOST_LIB)
-
 OUT_DIR = out_test
+MK_DIR?=$(OUT_DIR)
 GEN_BIN_EXE = $(OUT_DIR)/blas_gen_bin.exe
-GEN_BIN_SO = $(OUT_DIR)/blas_gen_bin.so
+GEN_BIN_SO = $(MK_DIR)/blas_gen_bin.so
 
 $(GEN_BIN_SO) : ./sw/src/blas_gen_wrapper.cpp |  $(OUT_DIR)
 	@echo "***** Link testcase generator executable *****"
