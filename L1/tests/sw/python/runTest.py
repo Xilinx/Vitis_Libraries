@@ -24,6 +24,7 @@ from makefile import Makefile
 from operation import OP, BLAS_L1, BLAS_L2, OP_ERROR
 from table import list2File
 import threading
+import time
 
 class RunTest:
   def __init__(self, profile, args, opLocks = dict() ):
@@ -166,5 +167,5 @@ class RunTest:
     reportPath = os.path.join(self.testPath, 'report.rpt')
     if len(self.reports) == 0:
       raise OP_ERROR("\nOP %s: Benchmark fails for op %s."%(self.op.name, self.op.name))
-    list2File(self.reports, reportPath)
+    list2File(self.reports, reportPath, addInfo = "Profile path is %s.\n"%self.profilePath)
     return reportPath
