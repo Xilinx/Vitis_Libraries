@@ -131,7 +131,7 @@ class RunTest:
 
     with self.makelock:
       make = Makefile(self.makefile, self.libPath)
-      libPath = make.make(envD)
+      libPath = make.make(envD, self.testPath)
     self.lib = C.cdll.LoadLibrary(libPath)
 
   def runTest(self):
