@@ -61,7 +61,7 @@ void gemv(const unsigned int p_m,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1> > l_y[t_NumStreams];
-#pragma HLS data_pack variable=l_y
+#pragma HLS data_pack variable = l_y
     for (int i = 0; i < t_NumStreams; i++) {
 #pragma HLS UNROLL
         DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, p_m, p_M, p_x, l_y);
@@ -128,8 +128,8 @@ void gemv(const unsigned int p_m,
 #endif
     const unsigned int l_numIter = p_n >> t_LogParEntries;
     hls::stream<WideType<t_DataType, 1> > l_x, l_y;
-#pragma HLS data_pack variable=l_x
-#pragma HLS data_pack variable=l_y
+#pragma HLS data_pack variable = l_x
+#pragma HLS data_pack variable = l_y
 #pragma HLS DATAFLOW
     gemv<t_DataType, t_LogParEntries, t_IndexType>(p_m, p_n, p_M, p_x, l_x);
     scal<t_DataType, 1, t_IndexType>(p_m, p_beta, p_y, l_y);
