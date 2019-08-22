@@ -143,7 +143,6 @@ template <typename t_DataType,
 void MaxMinHelper(unsigned int p_n, // number of element in the stream
                   hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
                   t_IndexType& p_result) {
-#pragma HLS data_pack variable = p_x
 #pragma HLS DATAFLOW
     hls::stream<t_DataType> l_valueStream;
 #pragma HLS data_pack variable = l_valueStream
@@ -172,7 +171,6 @@ void MaxMinHelper(unsigned int p_n, // number of element in the stream
 
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
 void max(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_IndexType& p_result) {
-#pragma HLS data_pack variable = p_x
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
@@ -194,7 +192,6 @@ void max(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries
 
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
 void min(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_IndexType& p_result) {
-#pragma HLS data_pack variable = p_x
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif

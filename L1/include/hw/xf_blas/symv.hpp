@@ -104,6 +104,8 @@ void symv(const unsigned int p_n,
 #endif
     const unsigned int l_numIter = p_n >> t_LogParEntries;
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_x, l_y;
+#pragma HLS data_pack variable = l_x
+#pragma HLS data_pack variable = l_y
 #pragma HLS DATAFLOW
     symv<t_DataType, t_LogParEntries, t_IndexType>(p_n, p_M, p_x, l_x);
     scal<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_beta, p_y, l_y);

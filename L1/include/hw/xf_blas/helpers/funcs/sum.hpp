@@ -105,7 +105,6 @@ void sum(unsigned int p_n,
          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
          hls::stream<WideType<t_SumDataType, 1> >& p_sum,
          unsigned int p_mulIters) {
-#pragma HLS data_pack variable = p_x
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
@@ -139,11 +138,11 @@ template <typename t_DataType,
           typename t_IndexType = unsigned int,
           typename t_SumDataType = t_DataType>
 void sum(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_DataType& p_sum) {
-#pragma HLS data_pack variable = p_x
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, 1> > p_s;
-    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, p_x, p_s, 1);
-    p_sum = p_s.read()[0];
+    hls::stream<WideType<t_DataType, 1> > l_s;
+#pragma HLS data_pack variable = l_s
+    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, p_x, l_s, 1);
+    p_sum = l_s.read()[0];
 }
 
 } // end namespace blas

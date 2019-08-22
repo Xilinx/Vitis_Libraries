@@ -63,6 +63,7 @@ void dot_tree(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
+#pragma HLS data_pack variable=l_mulStr
     mul<t_DataType, 1 << t_LogParEntries, t_IndexType, t_MacDataType>(p_n, p_x, p_y, l_mulStr, p_iter);
     sum<t_DataType, t_LogParEntries, t_IndexType, t_MacDataType>(p_n, l_mulStr, p_res, p_iter);
 }
