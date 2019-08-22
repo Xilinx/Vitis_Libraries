@@ -33,7 +33,7 @@ void uut_top(uint32_t p_n,
     BLAS_resDataType l_res;
 
     hls::stream<WideType<BLAS_dataType, 1 << BLAS_logParEntries> > l_strX;
-#pragma HLS DATA_PACK variable = l_strX
+#pragma HLS data_pack variable = l_strX
 #pragma HLS DATAFLOW
     readVec2Stream<BLAS_dataType, 1 << BLAS_logParEntries>(p_x, p_n, l_strX);
     nrm2<BLAS_dataType, BLAS_logParEntries>(p_n, l_strX, l_res);
