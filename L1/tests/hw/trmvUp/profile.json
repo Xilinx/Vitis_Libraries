@@ -9,7 +9,7 @@
   "op": "trmv",
   "logParEntries": 3,
   "matrixDims": [
-    64
+    1024
   ],
   "storage":  true,
   "valueRange": [
