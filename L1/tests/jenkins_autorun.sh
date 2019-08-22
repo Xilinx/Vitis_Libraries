@@ -5,6 +5,7 @@ STAT=./statistics.rpt
 
 if [ -d $TEST_DIR ]; then
   rm $TEST_DIR -rf
+  mkdir $TEST_DIR
 fi
 
 if [ -f $STAT ]; then
