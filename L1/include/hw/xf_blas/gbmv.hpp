@@ -29,18 +29,6 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-/**
- * @brief gbmv function performs general banded matrix-vector multiplication
- *
- * @tparam t_DataType the data type of the vector entries
- * @tparam t_ParEntries the number of parallelly processed entries in the input vector
- * @tparam t_MacType the datawidth of the datatype t_DataType of the input vector
- * @tparam t_IndexType the datatype of the index
- *
- * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
- * @param p_x the input stream of packed vector entries
- * @param p_sum the sum, which is 0 if p_n <= 0
- */
 template <typename t_DataType,
           unsigned int t_ParEntries,
           unsigned int t_MaxRows,

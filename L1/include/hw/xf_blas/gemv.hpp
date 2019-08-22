@@ -31,30 +31,14 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-/**
- * @brief gemv function that returns the result vector of the mutiplication of a
- * matrix and a vector y = M * x
- *
- * @tparam t_DataType the data type of the vector entries
- * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
- * @tparam t_NumStream the number of parallel streams feed to gemv
- * @tparam t_IndexType the datatype of the index
- *
- * @param p_m the number of rows of input matrix p_M
- * @param p_n the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n %
- * l_ParEntries == 0
- * @param p_M the input stream of packed Matrix entries
- * @param p_x the input stream entries of the vector
- * @param p_y the output stream of packed vector
- */
 template <typename t_DataType,
           unsigned int t_LogParEntries,
-          unsigned int t_NumStreams = 1 << t_LogParEntries,
+          unsigned int t_NumStreams = (1 << t_LogParEntries),
           typename t_IndexType = unsigned int>
 void gemv(const unsigned int p_m,
           const unsigned int p_n,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > p_M[t_NumStreams],
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > p_x[t_NumStreams],
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> > p_M[t_NumStreams],
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> > p_x[t_NumStreams],
           hls::stream<WideType<t_DataType, t_NumStreams> >& p_y) {
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
@@ -69,26 +53,11 @@ void gemv(const unsigned int p_m,
     combineStream<t_NumStreams>(l_y, p_y);
 }
 
-/**
- * @brief gemv function that returns the result vector of the mutiplication of a
- * matrix and a vector y = M * x
- *
- * @tparam t_DataType the data type of the vector entries
- * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
- * @tparam t_IndexType the datatype of the index
- *
- * @param p_m the number of rows of input matrix p_M
- * @param p_n the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n %
- * l_ParEntries == 0
- * @param p_M the input stream of packed Matrix entries
- * @param p_x the input stream of packed vector entries
- * @param p_y the output vector
- */
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 void gemv(const unsigned int p_m,
           const unsigned int p_n,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_M,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_M,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_x,
           hls::stream<WideType<t_DataType, 1> >& p_y) {
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
@@ -98,8 +67,8 @@ void gemv(const unsigned int p_m,
 }
 
 /**
- * @gemv function that returns the result vector of the mutiplication of a
- * matrix and a vector y = alpha * M * x + beta * y
+ * @brief gemv function that returns the result vector of the mutiplication of a matrix and a vector y = alpha * M * x +
+ * beta * y
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
@@ -108,18 +77,18 @@ void gemv(const unsigned int p_m,
  * @param p_m the number of rows of input matrix p_M
  * @param p_n the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n %
  * l_ParEntries == 0
- * @param p_alpha, scalar alpha
+ * @param p_alpha scalar alpha
  * @param p_M the input stream of packed Matrix entries
  * @param p_x the input stream of packed vector entries
- * @param p_beta, scalar beta
+ * @param p_beta scalar beta
  * @param p_y the output vector
  */
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 void gemv(const unsigned int p_m,
           const unsigned int p_n,
           const t_DataType p_alpha,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_M,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_M,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_x,
           const t_DataType p_beta,
           hls::stream<WideType<t_DataType, 1> >& p_y,
           hls::stream<WideType<t_DataType, 1> >& p_yr) {

@@ -49,7 +49,7 @@ namespace blas {
  */
 
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
-void amin(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_IndexType& p_result) {
+void amin(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_x, t_IndexType& p_result) {
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif

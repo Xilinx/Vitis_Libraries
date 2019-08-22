@@ -85,7 +85,7 @@ void nrm2Square(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogPar
  */
 
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-void nrm2(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_DataType& p_res) {
+void nrm2(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_x, t_DataType& p_res) {
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
