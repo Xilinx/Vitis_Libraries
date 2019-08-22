@@ -55,9 +55,6 @@ void axpy(unsigned int p_n,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_y,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_r) {
-#pragma HLS data_pack variable = p_x
-#pragma HLS data_pack variable = p_y
-#pragma HLS data_pack variable = p_r
 #ifndef __SYNTHESIS__
     assert(p_n % t_ParEntries == 0);
 #endif

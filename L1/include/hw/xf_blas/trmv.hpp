@@ -56,11 +56,7 @@ void trmv(const bool uplo,
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_M,
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
           hls::stream<WideType<t_MacType, 1> >& p_y) {
-#pragma HLS DATA_PACK variable = p_M
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
-#pragma HLS DATA_PACK variable = l_mulStr
     const unsigned int l_parEntries = 1 << t_LogParEntries;
     const unsigned int l_blocks = p_n >> t_LogParEntries;
     for (t_IndexType i = 0; i < l_blocks; i++) {
@@ -95,10 +91,6 @@ void trmv(const bool uplo,
           const t_DataType p_beta,
           hls::stream<WideType<t_DataType, 1> >& p_y,
           hls::stream<WideType<t_DataType, 1> >& p_yr) {
-#pragma HLS data_pack variable = p_M
-#pragma HLS data_pack variable = p_x
-#pragma HLS data_pack variable = p_y
-#pragma HLS data_pack variable = p_yr
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif

@@ -33,10 +33,6 @@ void uut_top(uint32_t p_n,
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strResX;
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strY;
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strResY;
-#pragma HLS DATA_PACK variable = l_strX
-#pragma HLS DATA_PACK variable = l_strY
-#pragma HLS DATA_PACK variable = l_strResX
-#pragma HLS DATA_PACK variable = l_strResY
 #pragma HLS DATAFLOW
     readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_x, p_n, l_strX);
     readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_y, p_n, l_strY);

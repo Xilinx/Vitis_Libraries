@@ -62,13 +62,11 @@ void square(unsigned int p_n,
 }
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 void nrm2Square(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_DataType& p_res) {
-#pragma HLS DATA_PACK variable = p_x
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
-#pragma HLS DATA_PACK variable = l_mulStr
     square<t_DataType, 1 << t_LogParEntries, t_IndexType>(p_n, p_x, l_mulStr);
     sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, l_mulStr, p_res);
 }
@@ -88,7 +86,6 @@ void nrm2Square(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogPar
 
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 void nrm2(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_DataType& p_res) {
-#pragma HLS DATA_PACK variable = p_x
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif

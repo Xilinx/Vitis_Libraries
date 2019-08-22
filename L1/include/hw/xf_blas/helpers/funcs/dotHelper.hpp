@@ -58,15 +58,11 @@ void dot_tree(unsigned int p_n,
               hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
               hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
               hls::stream<WideType<t_MacDataType, 1> >& p_res) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
-#pragma HLS DATA_PACK variable = p_res
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_mulStr;
-#pragma HLS DATA_PACK variable = l_mulStr
     mul<t_DataType, 1 << t_LogParEntries, t_IndexType, t_MacDataType>(p_n, p_x, p_y, l_mulStr, p_iter);
     sum<t_DataType, t_LogParEntries, t_IndexType, t_MacDataType>(p_n, l_mulStr, p_res, p_iter);
 }
@@ -80,9 +76,6 @@ void dot_dsp(unsigned int p_n,
              hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
              hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
              hls::stream<WideType<t_MacDataType, 1> >& p_res) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
-#pragma HLS DATA_PACK variable = p_res
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
@@ -118,9 +111,6 @@ class DotHelper {
                     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
                     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
                     hls::stream<WideType<t_MacDataType, 1> >& p_res) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
-#pragma HLS DATA_PACK variable = p_res
 #ifndef __SYNTHESIS__
         assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
@@ -136,9 +126,6 @@ class DotHelper<float, t_LogParEntries, t_IndexType, float> {
                     hls::stream<WideType<float, 1 << t_LogParEntries> >& p_x,
                     hls::stream<WideType<float, 1 << t_LogParEntries> >& p_y,
                     hls::stream<WideType<float, 1> >& p_res) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
-#pragma HLS DATA_PACK variable = p_res
 #ifndef __SYNTHESIS__
         assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
@@ -154,9 +141,6 @@ class DotHelper<double, t_LogParEntries, t_IndexType, double> {
                     hls::stream<WideType<double, 1 << t_LogParEntries> >& p_x,
                     hls::stream<WideType<double, 1 << t_LogParEntries> >& p_y,
                     hls::stream<WideType<double, 1> >& p_res) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
-#pragma HLS DATA_PACK variable = p_res
 #ifndef __SYNTHESIS__
         assert(p_n % (1 << t_LogParEntries) == 0);
 #endif

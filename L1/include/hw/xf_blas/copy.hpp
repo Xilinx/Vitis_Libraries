@@ -51,9 +51,6 @@ template <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType =
 void copy(unsigned int p_n,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_y) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
-
 #ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
 #endif
