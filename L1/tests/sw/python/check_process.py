@@ -1,7 +1,7 @@
 import time
 import functools
 import argparse
-import os
+import os, sys
 
 def poll(fileList, t, progress = 30):
   while True:
@@ -15,8 +15,9 @@ def poll(fileList, t, progress = 30):
     perT = t / progress
     print('[=', end="")
     for i in range(progress):
-      time.sleep(perT)
       print('\b=%d'%(i%10), end="")
+      sys.stdout.flush()
+      time.sleep(perT)
     print(']')
 
 
