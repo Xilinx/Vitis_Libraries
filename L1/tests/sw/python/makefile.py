@@ -22,11 +22,11 @@ class Makefile:
     self.makefile = makefile
     self.libpath = libpath
 
-  def make(self, envDict, rebuild = False):
+  def make(self, envDict, makePath='out_test', rebuild = False):
 
     envStr = ' '.join(["%s=%s"%(key, envDict[key]) for key in envDict])
     nameStr = '_'.join(["%s-%s"%(key, envDict[key]) for key in envDict])
-    self.target = r'out_test/blas_gen_bin.so'
+    self.target = os.path.join(makePath, 'blas_gen_bin.so')
     self.libName = os.path.join(self.libpath, r'blas_gen_bin_%s.so'%nameStr)
 
     if os.path.exists(self.libName):
@@ -37,7 +37,7 @@ class Makefile:
     if os.path.exists(self.libName):
       os.remove(self.target)
 
-    commandLine =r'make -f %s %s %s'%(self.makefile, self.target, envStr)
+    commandLine =r'make -f %s %s %s MK_DIR=%s'%(self.makefile, self.target, envStr, makePath)
     args = shlex.split(commandLine)
     subprocess.call(args)
     if os.path.exists(self.target):
