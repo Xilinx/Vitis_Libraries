@@ -31,22 +31,6 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-/**
- * @brief trmv function that returns the result vector of the mutiplication of a
- * triangular matrix and a vector y = M * x
- *
- * @tparam t_DataType the data type of the vector entries
- * @tparam t_ParEntries the number of parallelly processed entries in the input
- * vector
- * @tparam t_MacType the datawidth of the datatype t_DataType of the input
- * vector
- * @tparam t_IndexType the datatype of the index
- *
- * @param p_n the number of entries in the input vector p_x
- * @param p_x the input stream of packed vector entries
- * @param p_sum the sum, which is 0 if p_n <= 0
- */
-
 template <typename t_DataType,
           unsigned int t_LogParEntries,
           typename t_IndexType = unsigned int,
@@ -87,8 +71,8 @@ template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexTyp
 void trmv(const bool uplo,
           const unsigned int p_n,
           const t_DataType p_alpha,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_M,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_M,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_x,
           const t_DataType p_beta,
           hls::stream<WideType<t_DataType, 1> >& p_y,
           hls::stream<WideType<t_DataType, 1> >& p_yr) {

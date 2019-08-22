@@ -31,21 +31,6 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-/**
- * @brief symv function that returns the result vector of the mutiplication of a
- * symmetric matrix and a vector y = M * x
- *
- * @tparam t_DataType the data type of the vector entries
- * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
- * @tparam t_NumStream the number of parallel streams feed to symv
- * @tparam t_IndexType the datatype of the index
- *
- * @param p_n the size of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries
- * == 0
- * @param p_M the input stream of packed Matrix entries
- * @param p_x the input stream entries of the vector
- * @param p_y the output stream of packed vector
- */
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 void symv(const unsigned int p_n,
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_M,
@@ -94,11 +79,11 @@ void symv(const unsigned int p_n,
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 void symv(const unsigned int p_n,
           const t_DataType p_alpha,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_M,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_M,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_x,
           const t_DataType p_beta,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
-          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_yr) {
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_y,
+          hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_yr) {
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
