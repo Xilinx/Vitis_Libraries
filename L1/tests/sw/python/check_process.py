@@ -13,9 +13,9 @@ def poll(fileList, t, progress = 30):
       break
     print("Poll sleep for %ds."%t)
     perT = t / progress
-    print('[=', end="")
+    print('[', end="")
     for i in range(progress):
-      print('\b=%d'%(i%10), end="")
+      print('=', end="")
       sys.stdout.flush()
       time.sleep(perT)
     print(']')
