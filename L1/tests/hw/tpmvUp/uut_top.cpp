@@ -36,9 +36,13 @@ void uut_top(uint32_t p_m,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strA;
+#pragma HLS data_pack variable = l_strA
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strX;
+#pragma HLS data_pack variable = l_strX
     hls::stream<WideType<BLAS_dataType, 1> > l_strY;
+#pragma HLS data_pack variable = l_strY
     hls::stream<WideType<BLAS_dataType, 1> > l_strYR;
+#pragma HLS data_pack variable = l_strYR
 #pragma HLS DATAFLOW
     tpmUp2Stream<BLAS_dataType, BLAS_parEntries>(p_n, p_a, l_strA);
     vec2TrmUpStream<BLAS_dataType, BLAS_parEntries>(p_n, p_x, l_strX);
