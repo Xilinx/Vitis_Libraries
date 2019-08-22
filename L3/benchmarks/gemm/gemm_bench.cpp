@@ -120,9 +120,9 @@ int main(int argc, char **argv) {
     l_numKernel = stoi(argv[l_argIdx++]);
     cout<<"Read custom kernel number: "<<l_numKernel<<endl;
 #ifdef XFBLAS_LAUNCH_ASYNC
-    cout<<"[INFO] Enabling Asynchronous Concurrent Kernels: "<<l_numKernel<<endl;
+    cout<<"[INFO] Enabled Asynchronous Concurrent Kernels: "<<l_numKernel<<endl;
 #else
-	cout<<"[INFO] Disabling Asynchronicity"<<endl;
+	cout<<"[INFO] Asynchronous Concurrent Execution Is Disabled."<<endl;
 #endif
   }
   

@@ -64,12 +64,12 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Follow the user guide `SDx On Nimbix`_ to login to your Nimbix account
-- Launch application "Xilinx SDAccel Development & Alveo FPGA 2018.3" and select "Desktop Mode with FPGA"
-- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U200 FPGA (nx5u_xdma_201830_1)"
-- Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm/gemm_mkl directory
+- Launch application "Xilinx SDAccel Development & Alveo FPGA 2019.1" and select "Desktop Mode with FPGA"
+- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U200 FPGA (nx5u_xdma_201830_2)"
+- Copy the L3/benchmarks/gemm/gemm_mkl directory to the Nimbix machine
 - Run Intel® MKL GEMM APIs according to the above benchmark procedures.
 
-.. _SDx On Nimbix: https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1240-sdaccel-nimbix-getting-started.pdf
+.. _SDx On Nimbix: https://www.nimbix.net/alveo/
 
 .. NOTE:: FPGA is not required in Intel® Math Kernel Library but will be used in Xilinx's XFBLAS library.
 
@@ -152,6 +152,14 @@ You can use the run-script to benchmark our Xilinx's XFBLAS library for the GEMM
 2.1 Benchmarking Procedures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Build the host application based on the cfg file and Makefile, including data type, kernel number and asynchrony.
+
+.. code-block:: bash
+ 
+  ./build_gemm_benchmark.sh path_to_config_info
+  
+.. NOTE:: When it comes to multiple kernels, asynchronous concurrent execution is, by default, enabled. You can disable it by commenting out HOST_CXXFLAGS += -DXFBLAS_LAUNCH_ASYNC in Makefile.
+
 The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will explore the GEMM's matrix size from 256 to 8192.
 
 .. code-block:: bash
@@ -166,14 +174,16 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 2.2 Running on Nimbix Cloud
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Follow the user guide "SDx On Nimbix" to login to your Nimbix account
-- Launch application "Xilinx SDAccel Development & Alveo FPGA 2018.3" and select "Desktop Mode with FPGA"
-- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U200 FPGA (nx5u_xdma_201830_1)"
-- Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm directory
+- Follow the user guide `SDx On Nimbix`_ to login to your Nimbix account
+- Launch application "Xilinx SDAccel Development & Alveo FPGA 2019.1" and select "Desktop Mode with FPGA"
+- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U200 FPGA (nx5u_xdma_201830_2)"
+- Copy the L3 directory to the Nimbix machine and navigate to the L3/benchmarks/gemm directory
 - Run Xilinx's XFBLAS APIs according to the above benchmark procedures.
 
-2.3 Performance Result on Nimbix Cloud
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _SDx On Nimbix: https://www.nimbix.net/alveo/
+
+2.3 Performance Result on Nimbix Cloud (float32)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. rubric:: Configuration:
 
@@ -182,18 +192,21 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 	
 	*
 		- fpga_model
-		- Xilinx Alveo U200 FPGA (nx5u_xdma_201830_1)
+		- Xilinx Alveo U200 FPGA (nx5u_xdma_201830_2)
+	*
+		- kernel#
+		- 1
 	*
 		- Frequency
 		- 250 Mhz
 	*
 		- data_type
-		- float
+		- float32
 		
 .. rubric:: Performance Result:
 
 +-------------+--------------+------------+-------------+
-| Matrix Size | EffApiPct    | TimeApiMS  | PerfApiTops |
+| Matrix Size | EffApiPct (%)| TimeApiMS  | PerfApiTops |
 +=============+==============+============+=============+
 | 256         | -            |     -      |      -      |
 +-------------+--------------+------------+-------------+
@@ -209,3 +222,86 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 +-------------+--------------+------------+-------------+
 | 16384       | -            |     -      |      -      |
 +-------------+--------------+------------+-------------+
+
+2.4 Performance Result on Nimbix Cloud (int16, asynchronous)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Configuration:
+
+.. list-table::
+	:widths: 20 80
+	
+	*
+		- fpga_model
+		- Xilinx Alveo U200 FPGA (nx5u_xdma_201830_2)
+	*
+		- kernel#
+		- 2
+	*
+		- Frequency
+		- 240 Mhz
+	*
+		- data_type
+		- int16
+		
+.. rubric:: Performance Result:
+
++-------------+--------------+------------+-------------+
+| Matrix Size | EffApiPct (%)| TimeApiMS  | PerfApiTops |
++=============+==============+============+=============+
+| 256         | 5.383        |  1.268     |      0.053  |
++-------------+--------------+------------+-------------+
+| 512         | 21.094       |  2.589     |      0.208  |
++-------------+--------------+------------+-------------+
+| 1024        | 39.554       |  11.046    |      0.389  |
++-------------+--------------+------------+-------------+
+| 2048        | 62.193       |  56.200    |      0.612  |
++-------------+--------------+------------+-------------+
+| 4096        | 73.463       |  380.626   |      0.722  |
++-------------+--------------+------------+-------------+
+| 8192        | 76.867       |  2910.186  |      0.756  |
++-------------+--------------+------------+-------------+
+| 16384       | 77.626       |  23053.77  |      0.763  |
++-------------+--------------+------------+-------------+
+
+2.5 Performance Result on xbxcloud5 (int16, asynchronous)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Configuration:
+
+.. list-table::
+	:widths: 20 80
+	
+	*
+		- fpga_model
+		- Xilinx Alveo VCU1525 FPGA
+	*
+		- kernel#
+		- 2
+	*
+		- Frequency
+		- 240 Mhz
+	*
+		- data_type
+		- int16
+		
+.. rubric:: Performance Result:
+
++-------------+--------------+------------+-------------+
+| Matrix Size | EffApiPct (%)| TimeApiMS  | PerfApiTops |
++=============+==============+============+=============+
+| 256         | 6.544        |  1.043     |      0.065  |
++-------------+--------------+------------+-------------+
+| 512         | 30.082       |  1.816     |      0.297  |
++-------------+--------------+------------+-------------+
+| 1024        | 60.016       |  7.280     |      0.591  |
++-------------+--------------+------------+-------------+
+| 2048        | 79.433       |  44.003    |      0.781  |
++-------------+--------------+------------+-------------+
+| 4096        | 89.734       |  311.611   |      0.882  |
++-------------+--------------+------------+-------------+
+| 8192        | 95.224       |  2349.166  |      0.936  |
++-------------+--------------+------------+-------------+
+| 16384       | 97.416       |  18370.401 |      0.958  |
++-------------+--------------+------------+-------------+
+
