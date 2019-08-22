@@ -15,7 +15,7 @@
 
 import time
 
-def list2File(listOfDict:list, filePath, flag = 'a+', TabSize = 2, Time = True):
+def list2File(listOfDict:list, filePath, addInfo = None, flag = 'a+', TabSize = 2, Time = True):
   if len(listOfDict) == 0:
     return
   features = listOfDict[0]
@@ -30,6 +30,8 @@ def list2File(listOfDict:list, filePath, flag = 'a+', TabSize = 2, Time = True):
     f.write('=' * rowLen + '\n')
     if Time:
       f.write(time.ctime() + '\n')
+    if addInfo is not None:
+      f.write(addInfo)
 
     f.write(delimiter)
     ########### START OF KEYS ################
