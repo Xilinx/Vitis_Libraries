@@ -36,10 +36,13 @@ namespace linear_algebra {
 namespace blas {
 
 namespace {
-template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+template <typename t_DataType,
+          unsigned int t_LogParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_SumDataType = t_DataType>
 void preProcess(unsigned int p_numElems,
                 hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
-                hls::stream<t_DataType>& p_data,
+                hls::stream<t_SumDataType>& p_data,
                 unsigned int p_mulIters = 1
 
 ) {
@@ -49,8 +52,8 @@ void preProcess(unsigned int p_numElems,
 #pragma HLS PIPELINE
             WideType<t_DataType, 1 << t_LogParEntries> l_x = p_x.read();
 #pragma HLS ARRAY_PARTITION variable = l_x complete dim = 1
-            t_DataType l_sum;
-            l_sum = BinarySum<t_DataType, l_ParEntries>::sum(l_x.getValAddr());
+            t_SumDataType l_sum;
+            l_sum = BinarySum<t_DataType, l_ParEntries, t_SumDataType>::sum(l_x.getValAddr());
             p_data.write(l_sum);
         }
 }
@@ -94,26 +97,28 @@ void postProcess(unsigned int p_numElems,
  * @param p_sum the sum, which is 0 if p_n <= 0
  */
 
-template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+template <typename t_DataType,
+          unsigned int t_LogParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_SumDataType = t_DataType>
 void sum(unsigned int p_n,
          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
-         hls::stream<WideType<t_DataType, 1> >& p_sum,
+         hls::stream<WideType<t_SumDataType, 1> >& p_sum,
          unsigned int p_mulIters) {
-#pragma HLS data_pack variable = p_x
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
     const unsigned int l_LogDelays = AdderDelay<t_DataType>::m_logDelays;
 #pragma HLS DATAFLOW
-    hls::stream<t_DataType> l_data, l_pad;
+    hls::stream<t_SumDataType> l_data, l_pad;
 #pragma HLS stream variable = l_data depth = 2
 #pragma HLS stream variable = l_pad depth = 2
 #pragma HLS data_pack variable = l_data
 #pragma HLS data_pack variable = l_pad
     unsigned int l_numElem = p_n >> t_LogParEntries;
-    preProcess<t_DataType, t_LogParEntries, t_IndexType>(l_numElem, p_x, l_data, p_mulIters);
-    padding<t_DataType, 1 << l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad, p_mulIters);
-    postProcess<t_DataType, l_LogDelays, t_IndexType>(l_numElem, l_pad, p_sum, p_mulIters);
+    preProcess<t_DataType, t_LogParEntries, t_IndexType, t_SumDataType>(l_numElem, p_x, l_data, p_mulIters);
+    padding<t_SumDataType, 1 << l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad, p_mulIters);
+    postProcess<t_SumDataType, l_LogDelays, t_IndexType>(l_numElem, l_pad, p_sum, p_mulIters);
 }
 
 /**
@@ -128,13 +133,16 @@ void sum(unsigned int p_n,
  * @param p_sum the sum, which is 0 if p_n <= 0
  */
 
-template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+template <typename t_DataType,
+          unsigned int t_LogParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_SumDataType = t_DataType>
 void sum(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x, t_DataType& p_sum) {
-#pragma HLS data_pack variable = p_x
 #pragma HLS DATAFLOW
-    hls::stream<WideType<t_DataType, 1> > p_s;
-    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, p_x, p_s, 1);
-    p_sum = p_s.read()[0];
+    hls::stream<WideType<t_DataType, 1> > l_s;
+#pragma HLS data_pack variable = l_s
+    sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, p_x, l_s, 1);
+    p_sum = l_s.read()[0];
 }
 
 } // end namespace blas

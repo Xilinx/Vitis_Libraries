@@ -53,14 +53,11 @@ void dot(unsigned int p_n,
          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
          hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
          t_DataType& p_res) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 
     hls::stream<WideType<t_DataType, 1> > l_dot;
-#pragma HLS DATA_PACK variable = l_dot
 #pragma HLS DATAFLOW
     DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, 1, p_x, p_y, l_dot);
     p_res = l_dot.read()[0];

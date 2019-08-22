@@ -55,10 +55,6 @@ void swap(unsigned int p_n,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_y,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_xRes,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_yRes) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_y
-#pragma HLS DATA_PACK variable = p_xRes
-#pragma HLS DATA_PACK variable = p_yRes
 #ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
 #endif

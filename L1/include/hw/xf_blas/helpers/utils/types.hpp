@@ -63,12 +63,10 @@ class WideType {
     }
     T shift(T p_ValIn) {
 #pragma HLS inline self
-#pragma HLS data_pack variable = p_ValIn
         T l_valOut = m_Val[t_Width - 1];
     WIDE_TYPE_SHIFT:
         for (int i = t_Width - 1; i > 0; --i) {
             T l_val = m_Val[i - 1];
-#pragma HLS data_pack variable = l_val
             m_Val[i] = l_val;
         }
         m_Val[0] = p_ValIn;
@@ -80,7 +78,6 @@ class WideType {
     WIDE_TYPE_SHIFT:
         for (int i = t_Width - 1; i > 0; --i) {
             T l_val = m_Val[i - 1];
-#pragma HLS data_pack variable = l_val
             m_Val[i] = l_val;
         }
         return (l_valOut);
@@ -91,14 +88,12 @@ class WideType {
     WIDE_TYPE_SHIFT:
         for (int i = 0; i < t_Width - 1; ++i) {
             T l_val = m_Val[i + 1];
-#pragma HLS data_pack variable = l_val
             m_Val[i] = l_val;
         }
         return (l_valOut);
     }
     static const WideType zero() {
         WideType l_zero;
-#pragma HLS data_pack variable = l_zero
         for (int i = 0; i < t_Width; ++i) {
             l_zero[i] = 0;
         }

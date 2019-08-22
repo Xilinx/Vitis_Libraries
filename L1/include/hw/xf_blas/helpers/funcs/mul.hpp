@@ -34,11 +34,14 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-template <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
+template <typename t_DataType,
+          unsigned int t_ParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_MulDataType = t_DataType>
 void mul(unsigned int p_n,
          hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
          hls::stream<WideType<t_DataType, t_ParEntries> >& p_y,
-         hls::stream<WideType<t_DataType, t_ParEntries> >& p_res,
+         hls::stream<WideType<t_MulDataType, t_ParEntries> >& p_res,
          unsigned int p_mulIters = 1) {
 #ifndef __SYNTHESIS__
     assert(p_n % t_ParEntries == 0);
@@ -49,7 +52,7 @@ void mul(unsigned int p_n,
 #pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_valX;
             WideType<t_DataType, t_ParEntries> l_valY;
-            WideType<t_DataType, t_ParEntries> l_valRes;
+            WideType<t_MulDataType, t_ParEntries> l_valRes;
 #pragma HLS ARRAY_PARTITION variable = l_valX complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = l_valY complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = l_valRes complete dim = 1

@@ -52,9 +52,6 @@ void scal(unsigned int p_n,
           t_DataType p_alpha,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_x,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_res) {
-#pragma HLS DATA_PACK variable = p_x
-#pragma HLS DATA_PACK variable = p_res
-
 #ifndef __SYNTHESIS__
     assert((p_n % t_ParEntries) == 0);
 #endif

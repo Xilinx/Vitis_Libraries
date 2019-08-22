@@ -56,15 +56,12 @@ void gemv(const unsigned int p_m,
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > p_M[t_NumStreams],
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > p_x[t_NumStreams],
           hls::stream<WideType<t_DataType, t_NumStreams> >& p_y) {
-#pragma HLS data_pack variable = p_M
-#pragma HLS data_pack variable = p_x
-#pragma HLS data_pack variable = p_y
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, 1> > l_y[t_NumStreams];
-#pragma HLS DATA_PACK variable = l_y
+#pragma HLS data_pack variable=l_y
     for (int i = 0; i < t_NumStreams; i++) {
 #pragma HLS UNROLL
         DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, p_m, p_M, p_x, l_y);
@@ -93,9 +90,6 @@ void gemv(const unsigned int p_m,
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_M,
           hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
           hls::stream<WideType<t_DataType, 1> >& p_y) {
-#pragma HLS data_pack variable = p_M
-#pragma HLS data_pack variable = p_x
-#pragma HLS data_pack variable = p_y
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
@@ -129,15 +123,13 @@ void gemv(const unsigned int p_m,
           const t_DataType p_beta,
           hls::stream<WideType<t_DataType, 1> >& p_y,
           hls::stream<WideType<t_DataType, 1> >& p_yr) {
-#pragma HLS data_pack variable = p_M
-#pragma HLS data_pack variable = p_x
-#pragma HLS data_pack variable = p_y
-#pragma HLS data_pack variable = p_yr
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
     const unsigned int l_numIter = p_n >> t_LogParEntries;
     hls::stream<WideType<t_DataType, 1> > l_x, l_y;
+#pragma HLS data_pack variable=l_x
+#pragma HLS data_pack variable=l_y
 #pragma HLS DATAFLOW
     gemv<t_DataType, t_LogParEntries, t_IndexType>(p_m, p_n, p_M, p_x, l_x);
     scal<t_DataType, 1, t_IndexType>(p_m, p_beta, p_y, l_y);

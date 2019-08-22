@@ -43,7 +43,6 @@ void uut_top(uint32_t p_m,
 #pragma HLS data_pack variable = l_strYR
     hls::stream<WideType<BLAS_dataType, BLAS_parEntries> > l_strY;
 #pragma HLS data_pack variable = l_strY
-#pragma HLS DATAFLOW
     gbm2Stream<BLAS_dataType, BLAS_parEntries>(p_n, p_kl, p_ku, p_a, l_strA);
     vec2GbMatStream<BLAS_dataType, BLAS_parEntries>(p_n, p_kl, p_ku, p_x, l_strX);
     readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_y, p_m, l_strY);
