@@ -3,7 +3,7 @@ import functools
 import argparse
 import os
 
-def poll(fileList, t):
+def poll(fileList, t, progress = 30):
   while True:
     fileFound = [os.path.exists(f) for f in fileList]
     func = lambda x, y : x and y
@@ -12,7 +12,13 @@ def poll(fileList, t):
       print("Poll finished.")
       break
     print("Poll sleep for %ds."%t)
-    time.sleep(t)
+    perT = t / progress
+    print('[=', end="")
+    for i in range(progress):
+      time.sleep(perT)
+      print('\b=%d'%(i%10), end="")
+    print(']')
+
 
 def merge(fileList, filename):
   with open(filename, 'w+') as f:
@@ -30,7 +36,7 @@ if __name__== "__main__":
   parser.add_argument('--basename', type=str, default='statistics', help='filename to check')
   parser.add_argument('--number', type=int, required=True, help='number of files')
   parser.add_argument('--ext', type=str, default='rpt', help='file extension')
-  parser.add_argument('--time', type=int, default=600, help='number of seconds to poll')
+  parser.add_argument('--time', type=int, default=60, help='number of seconds to poll')
   args = parser.parse_args()
   
   main(args)
