@@ -19,7 +19,7 @@ PYTHON=python3
 PYTEST=./sw/python/run_test.py
 PYCHECK=./sw/python/check_process.py
 
-PAR=4
+PAR=8
 id=0
 
 SUBMIT="bsub -cwd `pwd` -q medium -R \"select[(os== lin && type == X86_64 && (osdistro == rhel || osdistro == centos) && (osver== ws7))] rusage[mem=16000]\""
