@@ -28,8 +28,7 @@ OPLIST=("amax amin asum axpy copy dot nrm2 scal swap" \
     "gemv gbmv sbmvLo sbmvUp tbmvLo tbmvUp trmvLo trmvUp" \
     "symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp --csim")
 
-for val in "{OPLIST[@]}"; do
-  echo "$SUBMIT $PYTHON $PYTEST --operator $val --parallel $PAR --id $id"
+for val in "${OPLIST[@]}"; do
   eval "$SUBMIT $PYTHON $PYTEST --operator $val --parallel $PAR --id $id"
   ((id++))
 done

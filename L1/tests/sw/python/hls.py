@@ -147,11 +147,11 @@ class HLS:
     match = re.search(regex, rpt)
     regex = r'\|Available SLR\s*'  + r'\|\s*(\d+)' * 5
     match_slr = re.search(regex, rpt)
-    features['BRAM_18K  '] = '%s(%.2f%%)'%(match.group(1), 100 * int(match.group(1))/int(match_slr.group(1)))
-    features['DSP48E    '] = '%s(%.2f%%)'%(match.group(2), 100 * int(match.group(2))/int(match_slr.group(2)))
-    features['FF        '] = '%s(%.2f%%)'%(match.group(3), 100 * int(match.group(3))/int(match_slr.group(3)))
-    features['LUT       '] = '%s(%.2f%%)'%(match.group(4), 100 * int(match.group(4))/int(match_slr.group(4)))
-    features['URAM      '] = '%s(%.2f%%)'%(match.group(5), 100 * int(match.group(5))/int(match_slr.group(5)))
+    features['BRAM_18K'] = '%s(%.2f%%)'%(match.group(1), 100 * int(match.group(1))/int(match_slr.group(1)))
+    features['DSP48E  '] = '%s(%.2f%%)'%(match.group(2), 100 * int(match.group(2))/int(match_slr.group(2)))
+    features['FF      '] = '%s(%.2f%%)'%(match.group(3), 100 * int(match.group(3))/int(match_slr.group(3)))
+    features['LUT     '] = '%s(%.2f%%)'%(match.group(4), 100 * int(match.group(4))/int(match_slr.group(4)))
+    features['URAM    '] = '%s(%.2f%%)'%(match.group(5), 100 * int(match.group(5))/int(match_slr.group(5)))
 
     reportList.append(features)
 
