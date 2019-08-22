@@ -408,9 +408,13 @@ void sbmSuper2Stream(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strUp;
+#pragma HLS DATA_PACK variable = l_strUp
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strLo;
+#pragma HLS DATA_PACK variable = l_strLo
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strUpRes;
+#pragma HLS DATA_PACK variable = l_strUpRes
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strLoRes;
+#pragma HLS DATA_PACK variable = l_strLoRes
     readUpSbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_strUp, l_strLo);
     processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_strUp, l_strUpRes);
     forwardSbMatStream<t_DataType, t_ParEntries>(p_n, p_k + 1, l_strLo, l_strLoRes);
@@ -439,9 +443,13 @@ void sbmSub2Stream(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strUp;
+#pragma HLS DATA_PACK variable = l_strUp
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strLo;
+#pragma HLS DATA_PACK variable = l_strLo
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strUpRes;
+#pragma HLS DATA_PACK variable = l_strUpRes
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strLoRes;
+#pragma HLS DATA_PACK variable = l_strLoRes
     readLoSbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_strUp, l_strLo);
     forwardSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_strUp, l_strUpRes);
     processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_strLo, l_strLoRes);
@@ -472,9 +480,13 @@ void gbm2Stream(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strUp;
+#pragma HLS DATA_PACK variable = l_strUp
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strLo;
+#pragma HLS DATA_PACK variable = l_strLo
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strUpRes;
+#pragma HLS DATA_PACK variable = l_strUpRes
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strLoRes;
+#pragma HLS DATA_PACK variable = l_strLoRes
     readGbMat2Stream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, p_a, l_strUp, l_strLo);
     processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, l_strUp, l_strUpRes);
     processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_kl, l_strLo, l_strLoRes);
@@ -504,9 +516,13 @@ void vec2GbMatStream(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strUp;
+#pragma HLS DATA_PACK variable = l_strUp
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strLo;
+#pragma HLS DATA_PACK variable = l_strLo
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strUpRes;
+#pragma HLS DATA_PACK variable = l_strUpRes
     hls::stream<WideType<t_DataType, t_ParEntries> > l_strLoRes;
+#pragma HLS DATA_PACK variable = l_strLoRes
     readVec2GbStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, p_x, l_strUp, l_strLo);
     processUpSbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, l_strUp, l_strUpRes);
     processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_kl, l_strLo, l_strLoRes);
@@ -592,6 +608,7 @@ void tbmSuper2Stream(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
+#pragma HLS DATA_PACK variable = l_str
     readTbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_str);
     processUpSbMatStream<t_DataType, t_ParEntries, -1>(p_n, p_k, l_str, p_out);
 }
@@ -618,6 +635,7 @@ void tbmSub2Stream(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
+#pragma HLS DATA_PACK variable = l_str
     readTbMat2Stream<t_DataType, t_ParEntries>(p_n, p_k, p_a, l_str);
     processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_str, p_out);
 }
@@ -643,6 +661,7 @@ void vec2TbUpMatStream(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
+#pragma HLS DATA_PACK variable = l_str
     readVec2TbStream<t_DataType, t_ParEntries>(p_n, p_k, p_x, l_str);
     processUpSbMatStream<t_DataType, t_ParEntries, -1>(p_n, p_k, l_str, p_out);
 } // end vec2TbUpMatStream
@@ -668,6 +687,7 @@ void vec2TbLoMatStream(unsigned int p_n,
 #endif
 #pragma HLS DATAFLOW
     hls::stream<WideType<t_DataType, t_ParEntries> > l_str;
+#pragma HLS DATA_PACK variable = l_str
     readVec2TbStream<t_DataType, t_ParEntries>(p_n, p_k, p_x, l_str);
     processLoSbMatStream<t_DataType, t_ParEntries>(p_n, p_k, l_str, p_out);
 } // end vec2TbLoMatStream
