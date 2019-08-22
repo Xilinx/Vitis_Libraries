@@ -19,6 +19,7 @@ import argparse
 import json
 import shlex, subprocess
 from operation import *
+from time import sleep
 
 typeDict ={
       np.int16: 'short',
@@ -82,7 +83,9 @@ def main(profileList, shell):
     runTest = RunTest()
     runTest.parseProfile(profile,shell)
     runTest.build()
+    sleep(0.1)
     runTest.genBin()
+    sleep(0.1)
     runTest.run()
   print("******************* TEST DONE *******************")
   print("See compare report in out_test/OPERATOR_NAME/log_DATATYPE.txt")
