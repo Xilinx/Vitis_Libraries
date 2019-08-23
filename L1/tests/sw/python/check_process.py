@@ -3,22 +3,32 @@ import functools
 import argparse
 import os, sys
 
-def poll(fileList, t, progress = 30):
+def Format(x):
+  f_dic = {0:'th', 1:'st', 2:'nd',3:'rd'}
+  k = x % 10
+  if k>=4:
+    k=0
+  return "%d%s"%(x, f_dic[k])
+
+
+def poll(fileList, t, progress = 80):
+  id = 0
   while True:
     fileFound = [os.path.exists(f) for f in fileList]
     func = lambda x, y : x and y
     allFound = functools.reduce(func, fileFound)
     if allFound:
-      print("Poll finished.")
+      print("Polling finished.")
       break
-    print("Poll sleep for %ds."%t)
+    id+=1
+    print("Sleeping for %ds."%(t))
     perT = t / progress
-    sys.stdout.write('[')
+    sys.stdout.write('%s: [='%Format(id))
     for i in range(progress):
-      sys.stdout.write('=')
+      sys.stdout.write('\b=%d'%(i%10))
       sys.stdout.flush()
       time.sleep(perT)
-    sys.stdout.write(']')
+    sys.stdout.write('\b]\n')
 
 
 def merge(fileList, filename):
