@@ -599,7 +599,7 @@ class sbmv(BLAS_L2):
     self.kl = k
     self.ku = k
     self.k = (k, k)
-    self.memorySize = (self.kl + self.ku +1) * self.n
+    self.memorySize = (k + 1) * self.n
     self.sizeStr = "m%d_k%d"%(self.m, k)
 
   def features(self):
