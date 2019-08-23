@@ -23,13 +23,6 @@ import concurrent.futures
 from runTest import RunTest
 from table import list2File
 
-def Format(x):
-  f_dic = {0:'th', 1:'st', 2:'nd',3:'rd'}
-  k = x % 10
-  if k>=4:
-    k=0
-  return "%d%s"%(x, f_dic[k])
-
 def process(rt, statList, dictLock = threading.Lock(), makeLock = threading.Lock()):
   passed = False
   try:
