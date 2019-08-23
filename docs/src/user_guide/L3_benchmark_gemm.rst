@@ -223,7 +223,48 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 | 16384       | 98.057       | 141292.933 |      0.062  |
 +-------------+--------------+------------+-------------+
 
-2.4 Performance Result on Nimbix Cloud (int16, asynchronous)
+2.4 Performance Result on Nimbix Cloud (float32, asynchronous)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Configuration:
+
+.. list-table::
+	:widths: 20 80
+	
+	*
+		- fpga_model
+		- Xilinx Alveo U200 FPGA (nx5u_xdma_201830_2)
+	*
+		- kernel#
+		- 2
+	*
+		- Frequency
+		- 114 Mhz
+	*
+		- data_type
+		- float32
+		
+.. rubric:: Performance Result:
+
++-------------+--------------+------------+-------------+
+| Matrix Size | EffApiPct (%)| TimeApiMS  | PerfApiTops |
++=============+==============+============+=============+
+| 256         | 28.778       |  1.998     |      0.034  |
++-------------+--------------+------------+-------------+
+| 512         | 61.213       |  7.513     |      0.072  |
++-------------+--------------+------------+-------------+
+| 1024        | 81.209       |  45.306    |      0.095  |
++-------------+--------------+------------+-------------+
+| 2048        | 88.514       |  332.532   |      0.103  |
++-------------+--------------+------------+-------------+
+| 4096        | 93.797       |  2510.409  |      0.110  |
++-------------+--------------+------------+-------------+
+| 8192        | 95.073       |  19813.749 |      0.111  |
++-------------+--------------+------------+-------------+
+| 16384       | 95.801       | 157306.027 |      0.112  |
++-------------+--------------+------------+-------------+
+
+2.5 Performance Result on Nimbix Cloud (int16, asynchronous)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. rubric:: Configuration:
@@ -264,7 +305,7 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 | 16384       | 77.626       |  23053.77  |      0.763  |
 +-------------+--------------+------------+-------------+
 
-2.5 Performance Result on xbxcloud5 (int16, asynchronous)
+2.6 Performance Result on xbxcloud5 (int16, asynchronous)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. rubric:: Configuration:
