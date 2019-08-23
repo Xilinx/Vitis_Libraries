@@ -4,11 +4,10 @@
   "b_cosim": true,
   "dataTypes": [
     "int32",
-    "float32",
     "float64"
   ],
   "op": "tbmv",
-  "parEntries": 4,
+  "parEntries": 6,
   "matrixDims": [
     1024,
     4096
