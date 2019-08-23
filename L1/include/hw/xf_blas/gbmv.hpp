@@ -29,18 +29,6 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-/**
- * @brief gbmv function performs general banded matrix-vector multiplication
- *
- * @tparam t_DataType the data type of the vector entries
- * @tparam t_ParEntries the number of parallelly processed entries in the input vector
- * @tparam t_MacType the datawidth of the datatype t_DataType of the input vector
- * @tparam t_IndexType the datatype of the index
- *
- * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
- * @param p_x the input stream of packed vector entries
- * @param p_sum the sum, which is 0 if p_n <= 0
- */
 template <typename t_DataType,
           unsigned int t_ParEntries,
           unsigned int t_MaxRows,
@@ -112,8 +100,8 @@ void gbmv(const unsigned int p_m,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_y,
           hls::stream<WideType<t_DataType, t_ParEntries> >& p_yr) {
     hls::stream<WideType<t_DataType, t_ParEntries> > l_x, l_y;
-#pragma hls data_pack variable = l_x
-#pragma hls data_pack variable = l_y
+#pragma HLS data_pack variable = l_x
+#pragma HLS data_pack variable = l_y
 #pragma HLS DATAFLOW
     gbmv<t_DataType, t_ParEntries, t_MaxRows, t_IndexType, t_MacType>(p_m, p_n, p_kl, p_ku, p_M, p_x, l_x);
     scal<t_DataType, t_ParEntries, t_IndexType>(p_m, p_beta, p_y, l_y);

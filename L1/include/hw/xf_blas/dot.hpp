@@ -50,8 +50,8 @@ namespace blas {
 
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 void dot(unsigned int p_n,
-         hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_x,
-         hls::stream<WideType<t_DataType, 1 << t_LogParEntries> >& p_y,
+         hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_x,
+         hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_y,
          t_DataType& p_res) {
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
