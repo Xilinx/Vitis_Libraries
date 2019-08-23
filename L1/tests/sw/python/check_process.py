@@ -13,12 +13,12 @@ def poll(fileList, t, progress = 30):
       break
     print("Poll sleep for %ds."%t)
     perT = t / progress
-    print('[', end="")
+    sys.stdout.write('[')
     for i in range(progress):
-      print('=', end="")
+      sys.stdout.write('=')
       sys.stdout.flush()
       time.sleep(perT)
-    print(']')
+    sys.stdout.write(']')
 
 
 def merge(fileList, filename):
