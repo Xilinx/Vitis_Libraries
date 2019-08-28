@@ -128,7 +128,6 @@ int main(int argc, char **argv) {
   status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, l_numKernel-1);
   if (status != XFBLAS_STATUS_SUCCESS) {
     cout<<"Malloc memory for matrix A failed with error code: "<< status << "\n"; 
-    xfblasDestroy();
     return EXIT_FAILURE;   
   }
   
