@@ -69,7 +69,7 @@ This section describes how to use the XFBLAS library API level.
 
 2.1.1 Error status
 ^^^^^^^^^^^^^^^^^^^
-XFBLAS API function calls return the error status of datatype `xfblasStatus_t <2.2.2 xfblasStatus_t_>`_.
+XFBLAS API function calls return the error status of datatype `xfblasStatus_t <2.2.1 xfblasStatus_t_>`_.
 
 2.1.2 XFBLAS initialization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -78,11 +78,7 @@ To initialize the library, xfblasCreate() function must be called. This function
 2.2 Datatypes Reference
 -----------------------
 
-2.2.1 xfblasHandle_t
-^^^^^^^^^^^^^^^^^^^^^^
-.. NOTE:: TODO
-
-2.2.2 xfblasStatus_t
+2.2.1 xfblasStatus_t
 ^^^^^^^^^^^^^^^^^^^^^^
 The type is used for function status returns. All XFBLAS level 3 library functions return status which has the following values.
 
@@ -102,7 +98,7 @@ The type is used for function status returns. All XFBLAS level 3 library functio
 | XFBLAS_STATUS_NOT_PADDED      | For restricted mode, matrix sizes are not padded correctly.                                                       | 5      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
 
-2.2.3 xfblasEngine_t
+2.2.2 xfblasEngine_t
 ^^^^^^^^^^^^^^^^^^^^^
 The xfblasEngine_t type indicates which engine needs to be performed when initializes the XFBLAS library. xfblasEngine_t type should be matched with the FPGA bitstream.
 
@@ -115,7 +111,7 @@ The xfblasEngine_t type indicates which engine needs to be performed when initia
 +--------------------+-----------------------------+
 
 
-2.2.4 xfblasOperation_t
+2.2.3 xfblasOperation_t
 ^^^^^^^^^^^^^^^^^^^^^^^^
 The xfblasOperation_t type indicates which operation needs to be performed with the matrix.
 
@@ -138,7 +134,7 @@ The xfblasOperation_t type indicates which operation needs to be performed with 
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasCreate(const char* xclbin, string configFile, const char* logFile, xfblasEngine_t engineName, unsigned int kernelNumber = 1)
+    xfblasStatus_t xfblasCreate(const char* xclbin, string configFile, const char* logFile, xfblasEngine_t engineName, unsigned int kernelNumber = 1, unsigned int deviceIndex = 0)
 
 This function initializes the XFBLAS library and creates a handle for the specific engine. It must be called prior to any other XFBLAS library calls.
 
@@ -162,6 +158,9 @@ This function initializes the XFBLAS library and creates a handle for the specif
     *
         - kernelNumber
         - number of kernels that is being used, default is 1
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
 
 .. rubric:: Return:
 
@@ -187,7 +186,7 @@ This function initializes the XFBLAS library and creates a handle for the specif
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasFree(void* A, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasFree(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function frees memory in FPGA device.
 
@@ -202,6 +201,10 @@ This function frees memory in FPGA device.
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+
 
 .. rubric:: Return:
 
@@ -217,14 +220,14 @@ This function frees memory in FPGA device.
     *
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for the matrix
-
+        
 2.3.3 xfblasDestroy
 ^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasDestroy()
+    xfblasStatus_t xfblasDestroy(unsigned int kernelNumber = 1, unsigned int deviceIndex = 0)
 
 This function releases handle used by the XFBLAS library.
 
@@ -236,7 +239,10 @@ This function releases handle used by the XFBLAS library.
     *
         - kernelNumber
         - number of kernels that is being used, default is 1
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -255,8 +261,8 @@ This function releases handle used by the XFBLAS library.
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasMalloc(short** devPtr, int rows, int lda, int elemSize, unsigned int kernelIndex = 0)
-    xfblasStatus_t xfblasMalloc(float** devPtr, int rows, int lda, int elemSize, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasMalloc(short** devPtr, int rows, int lda, int elemSize, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    xfblasStatus_t xfblasMalloc(float** devPtr, int rows, int lda, int elemSize, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function allocates memory on the FPGA device.
 
@@ -280,7 +286,10 @@ This function allocates memory on the FPGA device.
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -308,8 +317,8 @@ This function allocates memory on the FPGA device.
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasSetVector(int n, int elemSize, short* x, int incx, short* d_x, unsigned int kernelIndex = 0)
-    xfblasStatus_t xfblasSetVector(int n, int elemSize, float* x, int incx, float* d_x, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasSetVector(int n, int elemSize, short* x, int incx, short* d_x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    xfblasStatus_t xfblasSetVector(int n, int elemSize, float* x, int incx, float* d_x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function copies a vector in host memory to FPGA device memory. `xfblasMalloc() <2.3.4 xfblasMalloc_>`_ need to be called prior to this function.
 
@@ -336,7 +345,10 @@ This function copies a vector in host memory to FPGA device memory. `xfblasMallo
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -364,8 +376,8 @@ This function copies a vector in host memory to FPGA device memory. `xfblasMallo
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasGetVector(int n, int elemSize, short* d_x, short* x, int incx, unsigned int kernelIndex = 0)
-    xfblasStatus_t xfblasGetVector(int n, int elemSize, float* d_x, float* x, int incx, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasGetVector(int n, int elemSize, short* d_x, short* x, int incx, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    xfblasStatus_t xfblasGetVector(int n, int elemSize, float* d_x, float* x, int incx, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function copies a vector in FPGA device memory to host memory.
 
@@ -392,6 +404,9 @@ This function copies a vector in FPGA device memory to host memory.
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
         
 .. rubric:: Return:
 
@@ -414,8 +429,8 @@ This function copies a vector in FPGA device memory to host memory.
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, short* A, int lda, short* d_A, unsigned int kernelIndex = 0)
-    xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float* A, int lda, float* d_A, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, short* A, int lda, short* d_A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, float* A, int lda, float* d_A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function copies a matrix in host memory to FPGA device memory. `xfblasMalloc() <2.3.4 xfblasMalloc_>`_ need to be called prior to this function.
 
@@ -445,7 +460,10 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -473,8 +491,8 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_A, short* A, int lda, unsigned int kernelIndex = 0)
-    xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float* d_A, float* A, int lda, unsigned int kernelIndex = 0) 
+    xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_A, short* A, int lda, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, float* d_A, float* A, int lda, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) 
 
 This function copies a matrix in FPGA device memory to host memory.
 
@@ -505,7 +523,10 @@ This function copies a matrix in FPGA device memory to host memory.
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -527,7 +548,7 @@ This function copies a matrix in FPGA device memory to host memory.
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void* A, int lda, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void* A, int lda, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function allocates memory for host row-major format matrix on the FPGA device.
 
@@ -555,7 +576,10 @@ This function allocates memory for host row-major format matrix on the FPGA devi
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -591,7 +615,7 @@ This function allocates memory for host row-major format matrix on the FPGA devi
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasSetVectorRestricted(void* x, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasSetVectorRestricted(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function copies a vector in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.9 xfblasMallocRestricted_>`_ need to be called prior to this function.
 
@@ -606,7 +630,10 @@ This function copies a vector in host memory to FPGA device memory. `xfblasMallo
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -628,7 +655,7 @@ This function copies a vector in host memory to FPGA device memory. `xfblasMallo
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasGetVectorRestricted(void* x, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasGetVectorRestricted(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function copies a matrix in FPGA device memory to host memory.
 
@@ -643,7 +670,10 @@ This function copies a matrix in FPGA device memory to host memory.
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -666,7 +696,7 @@ This function copies a matrix in FPGA device memory to host memory.
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasSetMatrixRestricted(void* A, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasSetMatrixRestricted(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function copies a matrix in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.9 xfblasMallocRestricted_>`_ need to be called prior to this function.
 
@@ -681,7 +711,10 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -697,15 +730,13 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for the matrix
 
-
-
 2.3.13 xfblasGetMatrixRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasGetMatrixRestricted(void* A, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasGetMatrixRestricted(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function copies a matrix in FPGA device memory to host memory.
 
@@ -720,7 +751,10 @@ This function copies a matrix in FPGA device memory to host memory.
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -737,15 +771,14 @@ This function copies a matrix in FPGA device memory to host memory.
         - 3 if there is no FPGA device memory allocated for the matrix
 
 
-        
 2.3.14 xfblasMallocManaged
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasMallocManaged(short** devPtr, int* paddedLda, int rows, int lda, int elemSize, unsigned int kernelIndex = 0)
-    xfblasStatus_t xfblasMallocManaged(float** devPtr, int* paddedLda, int rows, int lda, int elemSize, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasMallocManaged(short** devPtr, int* paddedLda, int rows, int lda, int elemSize, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    xfblasStatus_t xfblasMallocManaged(float** devPtr, int* paddedLda, int rows, int lda, int elemSize, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function allocates memory on the FPGA device, rewrites the leading dimension size after padding.
 
@@ -772,7 +805,10 @@ This function allocates memory on the FPGA device, rewrites the leading dimensio
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -800,7 +836,7 @@ This function allocates memory on the FPGA device, rewrites the leading dimensio
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasDeviceSynchronize(unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasDeviceSynchronize(unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function will synchronize all the device memory to host memory.
 
@@ -812,7 +848,10 @@ This function will synchronize all the device memory to host memory.
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
-
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
@@ -821,11 +860,9 @@ This function will synchronize all the device memory to host memory.
     *
         - xfblasStatus_t
         - 0 if the operation completed successfully
-
     *
         - xfblasStatus_t
         - 1 if the library was not initialized
-
     *
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for some of the matrices in the host memory
@@ -839,7 +876,7 @@ This function will synchronize all the device memory to host memory.
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasGemm(xfblasOperation_t transa, xfblasOperation_t transb, int m, int n, int k, int alpha, void* A, int lda, void* B, int ldb, int beta, void* C, int ldc, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasGemm(xfblasOperation_t transa, xfblasOperation_t transb, int m, int n, int k, int alpha, void* A, int lda, void* B, int ldb, int beta, void* C, int ldc, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + beta*C. See :doc:`gemm example<L3_example_gemm>` for detail usage.
 
@@ -890,6 +927,9 @@ This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + b
     *
         - kernelIndex
         - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
         
 .. rubric:: Return:
 
@@ -915,7 +955,7 @@ This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + b
 .. ref-code-block:: cpp
     :class: title-code-block
 
-    xfblasStatus_t xfblasGemv(xfblasOperation_t trans, int m, int n, int alpha, void* A, int lda, void* x, int incx, int beta, void* y, int incy, unsigned int kernelIndex = 0)
+    xfblasStatus_t xfblasGemv(xfblasOperation_t trans, int m, int n, int alpha, void* A, int lda, void* x, int incx, int beta, void* y, int incy, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
 This function performs the matrix-vector multiplication y = alpha*op(A) x+ beta*y.
 
@@ -959,15 +999,18 @@ This function performs the matrix-vector multiplication y = alpha*op(A) x+ beta*
     *
         - incy
         - stride between consecutive elements of y
-
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
 .. rubric:: Return:
 
 .. list-table::
     :widths: 20 80
     
-    *
-        - kernelIndex
-        - index of kernel that is being used, default is 0
     *
         - xfblasStatus_t
         - 0 if the operation completed successfully
