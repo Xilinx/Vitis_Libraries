@@ -29,7 +29,6 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-
 class BLASHostHandle {
    public:
     unordered_map<unsigned int, vector<shared_ptr<BLASHost> > > m_handlePtr;

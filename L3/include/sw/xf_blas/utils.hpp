@@ -75,7 +75,7 @@ xfblasStatus_t buildConfigDict(string p_configFile,
             return XFBLAS_STATUS_NOT_INITIALIZED;
         }
     }
-    
+
     if (p_engineName == XFBLAS_ENGINE_GEMV) {
         if (l_configDict.find("GEMX_gemvmGroups") != l_configDict.end()) {
             int l_mBlock = stoi(l_configDict["GEMX_gemvmGroups"]);
@@ -88,7 +88,7 @@ xfblasStatus_t buildConfigDict(string p_configFile,
             return XFBLAS_STATUS_NOT_INITIALIZED;
         }
     }
-    
+
     *p_configDict = l_configDict;
     return XFBLAS_STATUS_SUCCESS;
 }
