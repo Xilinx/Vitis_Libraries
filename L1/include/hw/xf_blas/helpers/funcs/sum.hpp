@@ -45,7 +45,7 @@ void preProcess(unsigned int p_numElems,
                 hls::stream<t_SumDataType>& p_data,
                 unsigned int p_mulIters = 1
 
-) {
+                ) {
     const unsigned int l_ParEntries = 1 << t_LogParEntries;
     for (unsigned int r = 0; r < p_mulIters; r++)
         for (t_IndexType i = 0; i < p_numElems; i++) {
@@ -64,7 +64,7 @@ void postProcess(unsigned int p_numElems,
                  hls::stream<WideType<t_DataType, 1> >& p_sum,
                  unsigned int p_mulIters = 1
 
-) {
+                 ) {
     const unsigned int l_Delays = 1 << t_LogDelays;
     const unsigned int l_numIter = (p_numElems + l_Delays - 1) >> t_LogDelays;
     for (unsigned int r = 0; r < p_mulIters; r++) {

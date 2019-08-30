@@ -50,8 +50,8 @@ class XFpga {
     bool m_init = false;
 
     XFpga() = delete;
-    XFpga(const char* p_xclbin, const char* p_logFile, int* p_err) {
-        if (0 >= xclProbe()) {
+    XFpga(const char* p_xclbin, const char* p_logFile, int* p_err, unsigned int deviceIndex = 0) {
+        if (deviceIndex >= xclProbe()) {
             *p_err = 1;
             return;
         }
@@ -147,7 +147,7 @@ class XFpga {
 
 class XFpgaHold {
    public:
-    shared_ptr<XFpga> m_xFpgaPtr;
+    unordered_map<unsigned int, shared_ptr<XFpga>> m_xFpgaPtr;
     static XFpgaHold& instance() {
         static XFpgaHold theInstance;
         return theInstance;
@@ -165,7 +165,8 @@ class XHost {
     unordered_map<void*, void*> m_hostMat;
     unordered_map<void*, unsigned int> m_bufHandle;
     unordered_map<void*, unsigned long long> m_hostMatSz;
-    shared_ptr<XFpga> m_fpga = XFpgaHold::instance().m_xFpgaPtr;
+    //shared_ptr<XFpga> m_fpga = XFpgaHold::instance().m_xFpgaPtr;
+    shared_ptr<XFpga> m_fpga;
     vector<unsigned long long> m_ddrDeviceBaseAddr;
     char* m_progBuf;
     char* m_instrBuf;
@@ -175,7 +176,8 @@ class XHost {
 
    public:
     XHost() = delete;
-    XHost(const char* p_xclbin, const char* p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex) {
+    XHost(const char* p_xclbin, const char* p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex) {
+        m_fpga =  XFpgaHold::instance().m_xFpgaPtr[p_deviceIndex];
         m_cuIndex = p_kernelIndex;
         if (!m_fpga->openContext(m_cuIndex)) {
             *p_status = XFBLAS_STATUS_NOT_INITIALIZED;
@@ -381,8 +383,8 @@ class BLASHost : public XHost {
     virtual ~BLASHost() {}
     BLASHost(const BLASHost&) = delete;
 
-    BLASHost(const char* p_xclbin, const char* p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex)
-        : XHost(p_xclbin, p_logFile, p_status, p_kernelIndex) {}
+    BLASHost(const char* p_xclbin, const char* p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex)
+        : XHost(p_xclbin, p_logFile, p_status, p_kernelIndex,p_deviceIndex) {}
 
     xfblasStatus_t execute() {
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
