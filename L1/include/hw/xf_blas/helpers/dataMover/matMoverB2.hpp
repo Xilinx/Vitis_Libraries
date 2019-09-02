@@ -32,6 +32,17 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
+/**
+ * @brief gem2Stream function that moves row-major matrix from memory to stream
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_m number of rows in a matrix
+ * @param p_n number of cols in a matrix
+ * @param p_in a p_m x p_n matrix with on-chip row-major storage
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void gem2Stream(unsigned int p_m,
                 unsigned int p_n,
@@ -52,6 +63,17 @@ void gem2Stream(unsigned int p_m,
     }
 } // end gem2Stream
 
+/**
+ * @brief vec2GemStream function that moves vector from memory to stream that matches the gem2Stream outputs
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_m number of rows in a matrix
+ * @param p_n number of cols in a matrix
+ * @param p_in vector input
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void vec2GemStream(unsigned int p_m,
                    unsigned int p_n,

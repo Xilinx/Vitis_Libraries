@@ -90,6 +90,16 @@ void stream2mem(unsigned int p_n, hls::stream<t_DataType>& p_in, t_DataType* p_o
     }
 } // end stream2mem
 
+/**
+ * @brief readVec2Stream function that moves vector from memory to stream
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of entries in a vectpr
+ * @param p_in vector input
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
 #ifndef __SYNTHESIS__
@@ -107,6 +117,16 @@ void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_D
     }
 } // end readVec2Stream
 
+/**
+ * @brief writeStream2Vec function that moves vector from stream to vector
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of entries in a vectpr
+ * @param p_in vector stream input
+ * @param p_out vector output memory
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void writeStream2Vec(hls::stream<WideType<t_DataType, t_ParEntries> >& p_in, unsigned int p_n, t_DataType* p_out) {
 #ifndef __SYNTHESIS__
