@@ -48,7 +48,7 @@ void showTimeData(string p_Task, TimePointType& t1, TimePointType& t2, double* p
 }
 
 float getBoardFreqMHz(string xclbin) {
-    string l_freqCmd = "xclbinutil --info --input " + xclbin;;
+    string l_freqCmd = "xclbinutil --info --input " + xclbin;
     float l_freq = -1;
     char l_lineBuf[256];
     shared_ptr<FILE> l_pipe(popen(l_freqCmd.c_str(), "r"), pclose);
