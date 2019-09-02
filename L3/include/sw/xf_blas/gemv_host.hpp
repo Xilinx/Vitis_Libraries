@@ -51,28 +51,27 @@ class GEMVHost : public BLASHost {
     GEMVHost() = delete;
     virtual ~GEMVHost() {}
     GEMVHost(const GEMVHost&) = delete;
-    GEMVHost(const char* p_xclbin, const char* p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex)
-        : BLASHost(p_xclbin, p_logFile, p_status, p_kernelIndex,p_deviceIndex) {}
+    GEMVHost(const char* p_xclbin,
+             const char* p_logFile,
+             xfblasStatus_t* p_status,
+             unsigned int p_kernelIndex,
+             unsigned int p_deviceIndex)
+        : BLASHost(p_xclbin, p_logFile, p_status, p_kernelIndex, p_deviceIndex) {}
 
-    virtual xfblasStatus_t addGEMVOp(void* p_a,
-                                     void* p_b,
-                                     void* p_c,
-                                     unsigned int p_m,
-                                     unsigned int p_n,
-                                     unsigned int p_lda) {
-      
-              if (this->m_bufHandle.find(p_a) == this->m_bufHandle.end()){
-            cout<<"a\n";
+    virtual xfblasStatus_t addGEMVOp(
+        void* p_a, void* p_b, void* p_c, unsigned int p_m, unsigned int p_n, unsigned int p_lda) {
+        if (this->m_bufHandle.find(p_a) == this->m_bufHandle.end()) {
+            cout << "a\n";
         }
-                if (this->m_bufHandle.find(p_b) == this->m_bufHandle.end()){
-            cout<<"b\n";
+        if (this->m_bufHandle.find(p_b) == this->m_bufHandle.end()) {
+            cout << "b\n";
         }
-                if (this->m_bufHandle.find(p_c) == this->m_bufHandle.end() ){
-            cout<<"c\n";
+        if (this->m_bufHandle.find(p_c) == this->m_bufHandle.end()) {
+            cout << "c\n";
         }
         if (this->m_bufHandle.find(p_a) == this->m_bufHandle.end() ||
             this->m_bufHandle.find(p_b) == this->m_bufHandle.end() ||
-            this->m_bufHandle.find(p_c) == this->m_bufHandle.end() ){
+            this->m_bufHandle.find(p_c) == this->m_bufHandle.end()) {
             return XFBLAS_STATUS_ALLOC_FAILED;
         }
         unsigned int handle_A, handle_B, handle_C;

@@ -130,24 +130,27 @@ class XFpga {
         ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_AP_CTRL] = 0x0; // ap_start
         ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRRD_M_VAL_DATA / 4] = m_baseAddress[p_kernelIndex];
         ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA / 4] = m_baseAddress[p_kernelIndex];
-        ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRRD_M_VAL_DATA / 4 + 1] = m_baseAddress[p_kernelIndex] >> 32;
-        ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA / 4 + 1] = m_baseAddress[p_kernelIndex] >> 32;
+        ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRRD_M_VAL_DATA / 4 + 1] =
+            m_baseAddress[p_kernelIndex] >> 32;
+        ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA / 4 + 1] =
+            m_baseAddress[p_kernelIndex] >> 32;
 
         if (xclExecBuf(m_handle, m_execHandle)) {
             return false;
         }
-        
-        while (xclExecWait(m_handle, 1) == 0);
-        
+
+        while (xclExecWait(m_handle, 1) == 0)
+            ;
+
         m_execHandles.push_back(m_execHandle);
-        
+
         return true;
     }
 };
 
 class XFpgaHold {
    public:
-    unordered_map<unsigned int, shared_ptr<XFpga>> m_xFpgaPtr;
+    unordered_map<unsigned int, shared_ptr<XFpga> > m_xFpgaPtr;
     static XFpgaHold& instance() {
         static XFpgaHold theInstance;
         return theInstance;
@@ -165,7 +168,7 @@ class XHost {
     unordered_map<void*, void*> m_hostMat;
     unordered_map<void*, unsigned int> m_bufHandle;
     unordered_map<void*, unsigned long long> m_hostMatSz;
-    //shared_ptr<XFpga> m_fpga = XFpgaHold::instance().m_xFpgaPtr;
+    // shared_ptr<XFpga> m_fpga = XFpgaHold::instance().m_xFpgaPtr;
     shared_ptr<XFpga> m_fpga;
     vector<unsigned long long> m_ddrDeviceBaseAddr;
     char* m_progBuf;
@@ -176,8 +179,12 @@ class XHost {
 
    public:
     XHost() = delete;
-    XHost(const char* p_xclbin, const char* p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex) {
-        m_fpga =  XFpgaHold::instance().m_xFpgaPtr[p_deviceIndex];
+    XHost(const char* p_xclbin,
+          const char* p_logFile,
+          xfblasStatus_t* p_status,
+          unsigned int p_kernelIndex,
+          unsigned int p_deviceIndex) {
+        m_fpga = XFpgaHold::instance().m_xFpgaPtr[p_deviceIndex];
         m_cuIndex = p_kernelIndex;
         if (!m_fpga->openContext(m_cuIndex)) {
             *p_status = XFBLAS_STATUS_NOT_INITIALIZED;
@@ -366,8 +373,8 @@ class XHost {
 
     xfblasStatus_t closeContext(unsigned int p_kernelIndex) {
         xclFreeBO(m_fpga->m_handle, m_instrBufHandle);
-        if ( p_kernelIndex < (unsigned int) m_fpga->m_execHandles.size()) {
-          xclFreeBO(m_fpga->m_handle, m_fpga->m_execHandles[p_kernelIndex]);
+        if (p_kernelIndex < (unsigned int)m_fpga->m_execHandles.size()) {
+            xclFreeBO(m_fpga->m_handle, m_fpga->m_execHandles[p_kernelIndex]);
         }
         xclCloseContext(m_fpga->m_handle, m_fpga->m_xclbinId, this->m_cuIndex);
         return XFBLAS_STATUS_SUCCESS;
@@ -383,8 +390,12 @@ class BLASHost : public XHost {
     virtual ~BLASHost() {}
     BLASHost(const BLASHost&) = delete;
 
-    BLASHost(const char* p_xclbin, const char* p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex)
-        : XHost(p_xclbin, p_logFile, p_status, p_kernelIndex,p_deviceIndex) {}
+    BLASHost(const char* p_xclbin,
+             const char* p_logFile,
+             xfblasStatus_t* p_status,
+             unsigned int p_kernelIndex,
+             unsigned int p_deviceIndex)
+        : XHost(p_xclbin, p_logFile, p_status, p_kernelIndex, p_deviceIndex) {}
 
     xfblasStatus_t execute() {
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
@@ -399,10 +410,8 @@ class BLASHost : public XHost {
         }
         return l_status;
     }
-    
-    void enableRun(){
-      m_execControl = true;
-    }
+
+    void enableRun() { m_execControl = true; }
 };
 
 } // namespace blas
