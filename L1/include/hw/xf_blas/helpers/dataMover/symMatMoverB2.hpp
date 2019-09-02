@@ -359,7 +359,8 @@ void spmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_Data
 }
 
 /**
- * @brief vec2SymStream function that moves vector from memory to stream that matches the symatrix matrix data mover outputs
+ * @brief vec2SymStream function that moves vector from memory to stream that matches the symatrix matrix data mover
+ * outputs
  *
  * @tparam t_DataType the data type of the matrix entries
  * @tparam t_ParEntries number of parallelly processed entries in the matrix

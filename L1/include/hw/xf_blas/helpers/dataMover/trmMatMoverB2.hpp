@@ -157,7 +157,8 @@ void tpmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_Data
 }
 
 /**
- * @brief vec2TrmUpStream function that moves vector from memory to stream that matches the trmUp2Stream/tpmUp2Stream outputs
+ * @brief vec2TrmUpStream function that moves vector from memory to stream that matches the trmUp2Stream/tpmUp2Stream
+ * outputs
  *
  * @tparam t_DataType the data type of the matrix entries
  * @tparam t_ParEntries number of parallelly processed entries in the matrix
@@ -190,7 +191,8 @@ void vec2TrmUpStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_D
 }
 
 /**
- * @brief vec2TrmLoStream function that moves vector from memory to stream that matches the trmLo2Stream/tpmLo2Stream outputs
+ * @brief vec2TrmLoStream function that moves vector from memory to stream that matches the trmLo2Stream/tpmLo2Stream
+ * outputs
  *
  * @tparam t_DataType the data type of the matrix entries
  * @tparam t_ParEntries number of parallelly processed entries in the matrix
