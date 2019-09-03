@@ -31,6 +31,7 @@ Please follow the instructions described in :doc:`Python environment setup guide
 Please navigate to directory L1/tests, and change the setting of environment variable **TA_PATH** to point to the installation path of your Vitis 2019.2, and run following command to set up Vivado_hls environment.
 
 .. code-block:: bash
+
    source ./set_env.sh
 
 3. Test L1 primitives
@@ -38,17 +39,20 @@ Please navigate to directory L1/tests, and change the setting of environment var
 The L1 primitives can be tested individually or as a group. To launch the testing process, please navigate to the directory **L1/tests**, and enter the following command.
 
 .. code-block:: bash
+
    $ python ./run_test.py --operator amax amin asum axpy copy dot nrm2 scal swap gemv gbmv sbmvLo sbmvUp tbmvLo tbmvUp trmvLo trmvUp symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp
 
 The above command will test and verify all L1 primitvies' implementation in both csim and cosim modes. Hence, it can take a very long time. The following commands show examples for quickly testing some primitives in pure csim or cosim mode.
 
 .. code-block:: bash
+
    $ python ./run_test.py --operator amax amin --csim
    $ python ./run_test.py --operator copy dot --cosim
 
 By default, the testing process only runs in a single thread mode. To speed up the process, users can run the testing with multiple thread via **--parallel** option. For example,
 
 .. code-block:: bash
+
    $ python ./run_test --operator gemv gbmv --parallel 4
 
 4. Test configuration
@@ -56,6 +60,7 @@ By default, the testing process only runs in a single thread mode. To speed up t
 For each primitive, a test configuration file **profile.json** has been provided to specify the test inputs range, the size of the input vector or matrix, the template parameter value used for instantiating the primitive and the simulation mode (csim or cosim) used for testing. Users can find the profile.json file under directory **L1/include/hw/primitive_name**. For example, the profile.json file under **L1/include/hw** contains the following code.
 
 .. code-block:: bash
+
    {
     "b_csim": true,
     "b_synth": true,
