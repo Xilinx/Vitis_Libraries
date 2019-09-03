@@ -39,7 +39,7 @@ Please run following command under directory xf_blas/.
   $ conda install --file requirements.txt
 
 
-**3. Deactivate gemx environment after testing**
+**3. Deactivate xf_blas environment after testing**
 
 Note: Please don't take this step if you intend to run L1 primtives' testing process. 
 You only take it after you've finished all testing.
