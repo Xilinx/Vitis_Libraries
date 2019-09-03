@@ -23,4 +23,7 @@ L1 Primitives User Guide
    :maxdepth: 2
 
    L1_overview.rst
+   L1_compute_api.rst
+   L1_data_mover.rst
+   L1_test.rst
 

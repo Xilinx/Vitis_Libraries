@@ -43,4 +43,5 @@ for reference.
    :caption: User Guide
    :maxdepth: 3
 
+   user_guide/L1.rst
    user_guide/L3.rst
