@@ -32,16 +32,6 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-/**
- * @brief transpSymUpMat function that mirros the super-diagonals in a matrix block to sub-diagonals
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_blocks number of t_ParEntries x t_ParEntries matrix blocks
- * @param p_in input stream of matrix blocks
- * @param p_out output stream of symmetric matrix blocks
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void transpSymUpMatBlocks(unsigned int p_blocks,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
@@ -72,16 +62,6 @@ void transpSymUpMatBlocks(unsigned int p_blocks,
     }
 }
 
-/**
- * @brief transpSymLoMat function that mirros the sub-diagonals in a matrix block to super-diagonals
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_blocks number of t_ParEntries x t_ParEntries matrix blocks
- * @param p_in input stream of matrix blocks
- * @param p_out output stream of symmetric matrix blocks
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void transpSymLoMatBlocks(unsigned int p_blocks,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
@@ -111,16 +91,7 @@ void transpSymLoMatBlocks(unsigned int p_blocks,
         }
     }
 }
-/**
- * @brief transpMat function transposes matrix blocks
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries the number of parallely processed entries in the matrix
- *
- * @param p_blocks number of matrix blocks
- * @param p_in input stream of matrix blocks
- * @param p_out output stream of matrix blocks
- */
+
 template <typename t_DataType, unsigned int t_ParEntries>
 void transpMatBlocks(unsigned int p_blocks,
                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
@@ -151,16 +122,6 @@ void transpMatBlocks(unsigned int p_blocks,
     }
 }
 
-/**
- * @brief fwdMatBlocks function forwards matrix blocks
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries the number of parallely processed entries in the matrix
- *
- * @param p_blocks number of matrix blocks
- * @param p_in input stream of matrix blocks
- * @param p_out output stream of matrix blocks
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void fwdMatBlocks(unsigned int p_blocks,
                   hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
@@ -175,18 +136,6 @@ void fwdMatBlocks(unsigned int p_blocks,
     }
 }
 
-/**
- * @brief transpMemWordBlocks memWord wise transposer
- *
- * @tparam t_DataType data type of the matrix entries
- * @tparam t_MemWidth number of entries in one memory word
- * @tparam t_Rows number of rows in the block
- * @tparam t_Cols number of cols in the block
- *
- * @param p_blocks number of blocks
- * @param p_in input stream of memory words
- * @param p_out ouput transposed stream of memory words
- */
 template <typename t_DataType, unsigned int t_MemWidth, unsigned int t_Rows, unsigned int t_Cols>
 void transpMemWordBlocks(unsigned int p_blocks,
                          hls::stream<WideType<t_DataType, t_MemWidth> >& p_in,
@@ -217,18 +166,6 @@ void transpMemWordBlocks(unsigned int p_blocks,
     }
 }
 
-/**
- * @brief transpMemBlocks read data from device memory and transpose the memory blcok
- *
- * @tparam t_DataType data type of the matrix entries
- * @tparam t_MemWidth number of entries in one memory word
- * @tparam t_Rows number of rows in the block
- * @tparam t_Cols number of cols in the block
- *
- * @param p_blocks number of blocks
- * @param p_in input stream of memory words
- * @param p_out ouput transposed stream of memory words
- */
 template <typename t_DataType, unsigned int t_MemWidth, unsigned int t_Rows, unsigned int t_Cols>
 void transpMemBlocks(unsigned int p_blocks,
                      hls::stream<WideType<t_DataType, t_MemWidth> >& p_in,
