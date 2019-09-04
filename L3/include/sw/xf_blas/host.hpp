@@ -55,7 +55,7 @@ class XFpga {
             *p_err = 1;
             return;
         }
-        m_handle = xclOpen(0, p_logFile, XCL_INFO);
+        m_handle = xclOpen(deviceIndex, p_logFile, XCL_INFO);
         if (xclLockDevice(m_handle)) {
             *p_err = 1;
             return;
