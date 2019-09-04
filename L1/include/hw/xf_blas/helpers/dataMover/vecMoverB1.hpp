@@ -72,20 +72,20 @@ void combineStream(unsigned int p_n,
     }
 }
 
-template <typename t_DataType>
-void mem2stream(unsigned int p_n, t_DataType* p_in, hls::stream<t_DataType>& p_out) {
+template <typename t_DataType, typename t_DesDataType = t_DataType>
+void mem2stream(unsigned int p_n, t_DataType* p_in, hls::stream<t_DesDataType>& p_out) {
     for (unsigned int i = 0; i < p_n; ++i) {
 #pragma HLS PIPELINE
-        t_DataType l_val = p_in[i];
+        t_DesDataType l_val = p_in[i];
         p_out.write(l_val);
     }
 } // end mem2stream
 
-template <typename t_DataType>
-void stream2mem(unsigned int p_n, hls::stream<t_DataType>& p_in, t_DataType* p_out) {
+template <typename t_DataType, typename t_DesDataType = t_DataType>
+void stream2mem(unsigned int p_n, hls::stream<t_DataType>& p_in, t_DesDataType* p_out) {
     for (unsigned int i = 0; i < p_n; ++i) {
 #pragma HLS PIPELINE
-        t_DataType l_val = p_in.read();
+        t_DesDataType l_val = p_in.read();
         p_out[i] = l_val;
     }
 } // end stream2mem
