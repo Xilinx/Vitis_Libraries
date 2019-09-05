@@ -193,9 +193,6 @@ void xfblasGetMatrixRestrictedAsync(void* A, unsigned int kernelIndex = 0, unsig
  * @param x pointer to vetcor x in the host memory
  * @param kernelIndex index of kernel that is being used, default is 0
  * @param deviceIndex index of device that is being used, default is 0
- * @retval xfblasStatus_t 0 if the operation completed successfully
- * @retval xfblasStatus_t 1 if the library was not initialized
- * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
  */
 void xfblasGetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) {
     concurrentKernels.push_back(kernelIndex);
