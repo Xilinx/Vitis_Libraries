@@ -189,7 +189,7 @@ void xfblasGetMatrixRestrictedAsync(void* A, unsigned int kernelIndex = 0, unsig
 }
 
 /**
- * @brief This function copies a matrix in FPGA device memory to host memory
+ * @brief This asynchronous function copies a matrix in FPGA device memory to host memory
  * @param x pointer to vetcor x in the host memory
  * @param kernelIndex index of kernel that is being used, default is 0
  * @param deviceIndex index of device that is being used, default is 0
