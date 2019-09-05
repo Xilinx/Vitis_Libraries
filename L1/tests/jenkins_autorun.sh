@@ -27,7 +27,7 @@ SUBMIT="bsub -cwd `pwd` -q medium -R \"select[(os== lin && type == X86_64 && (os
 OPLIST=("amax amin asum axpy copy dot nrm2 scal swap" \
     "gemv gbmv" \
     "sbmvLo sbmvUp tbmvLo tbmvUp trmvLo trmvUp" \
-    "symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp --csim")
+    "symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp --override --csim")
 
 for val in "${OPLIST[@]}"; do
   eval "$SUBMIT $PYTHON $PYTEST --operator $val --parallel $PAR --id $id"

@@ -100,13 +100,15 @@ class RunTest:
         os.makedirs(self.dataPath)
     hlsTCL = os.path.join('.', 'build', r'run-hls.tcl')
 
-    if self.args.csim:
-      self.hls = HLS(hlsTCL,True, False, False) 
-    elif self.args.cosim:
-      self.hls = HLS(hlsTCL, False, True, True) 
+    if self.args.override:
+      if self.args.benchmark:
+        self.args.cosim = True
+      if self.args.cosim:
+        self.args.csynth = True
+      self.hls = HLS(hlsTCL, self.args.csim, self.args.csynth, self.args.cosim, self.args.benchmark)
     else:
       self.hls = HLS(hlsTCL, self.profile['b_csim'],
-       self.profile['b_synth'], self.profile['b_cosim'])
+        self.profile['b_synth'], self.profile['b_cosim'], self.profile['b_cosim'])
 
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.parEntries))

@@ -14,22 +14,11 @@
 # limitations under the License.
 #
 
-# -----------------------------------------------------------------------------
-#                          project common settings
-
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/tests/*}')
 
-GCC_VERSION=6.2.0
-GCC_PATH=${XILINX_VIVADO}/tps/lnx64
-CC = ${GCC_PATH}/gcc-${GCC_VERSION}/bin/g++
-
-SHELL = /bin/bash
-
-.SECONDEXPANSION:
-
-# -----------------------------------------------------------------------------
-# MK_INC_BEGIN help.mk
+# MK_INC_BEGIN hls_common.mk
 
 .PHONY: help
 
@@ -37,94 +26,204 @@ help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make blas_gen_bin.<exe/so> BLAS_dataType=<int>, BLAS_resDataType=<int>"
-	@echo "      Command to generate the specified target."
-	@echo "      BLAS_dataType default is int, BLAS_resDataType default is int "
+	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 BENCHMAR=1 OP=dot"
+	@echo "      Command to run the selected tasks for specified device."
+	@echo ""
+	@echo "      Valid tasks are CSIM, CSYNTH, COSIM, BENCHMARK"
+	@echo ""
+	@echo "      OP is the operator to be tested."
+	@echo ""
+	@echo "      For example, \`make run OP=dot BENCHMARK=1\`"
 	@echo ""
 	@echo "  make clean "
 	@echo "      Command to remove the generated files."
 	@echo ""
-	@echo ""
 
-# MK_INC_END help.mk
-
+# MK_INC_END hls_common.mk
 
 # MK_INC_BEGIN vivado.mk
-ifndef XILINX_VIVADO
-$(error Environment variable XILINX_VIVADO is required and should point to Vivado install area)
+
+TOOL_VERSION ?= 2019.1
+
+ifeq (,$(XILINX_VIVADO))
+XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
 endif
+export XILINX_VIVADO
+
+.PHONY: check_vivado
+check_vivado:
+ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
+	@echo "Cannot locate Vivado installation. Please set XILINX_VIVADO variable." && false
+endif
+
+export PATH := $(XILINX_VIVADO)/bin:$(PATH)
+
 # MK_INC_END vivado.mk
 
-# -----------------------------------------------------------------------------
-# BEGIN_XF_MK_USER_SECTION
-# -----------------------------------------------------------------------------
-#
-BLAS_argInstrWidth	= 8
-BLAS_pageSizeBytes	= 4096
-BLAS_instrSizeBytes = 8 
-BLAS_instrPageIdx 	= 0
-BLAS_paramPageIdx		= 1
-BLAS_statsPageIdx		= 2
-BLAS_dataPageIdx		= 3
-BLAS_maxNumInstrs		= 64
-BLAS_memWidthBytes	= 64
-BLAS_parEntries		  = 4
+DEVICE ?= u200
+# MK_INC_BEGIN vitis_set_part.mk
 
-BLAS_dataType ?= int
-BLAS_resDataType?= int
+.PHONY: check_part
 
-DFLAGS = -D BLAS_argInstrWidth=$(BLAS_argInstrWidth) \
-	-D BLAS_pageSizeBytes=$(BLAS_pageSizeBytes) \
-	-D BLAS_instrSizeBytes=$(BLAS_instrSizeBytes) \
-	-D BLAS_instrPageIdx=$(BLAS_instrPageIdx) \
-	-D BLAS_paramPageIdx=$(BLAS_paramPageIdx) \
-	-D BLAS_statsPageIdx=$(BLAS_statsPageIdx) \
-	-D BLAS_dataPageIdx=$(BLAS_dataPageIdx) \
-	-D BLAS_maxNumInstrs=$(BLAS_maxNumInstrs) \
-	-D BLAS_dataType=$(BLAS_dataType) \
-	-D BLAS_resDataType=$(BLAS_resDataType) \
-	-D BLAS_memWidthBytes=$(BLAS_memWidthBytes)\
-	-D BLAS_parEntries=$(BLAS_parEntries)
+ifeq (,$(XPART))
+# MK_INC_BEGIN vitis.mk
 
-BOOST_INCLUDE=$(XILINX_VIVADO)/tps/boost_1_64_0
-BOOST_LIB=$(XILINX_VIVADO)/lib/lnx64.o
+TOOL_VERSION ?= 2019.2
 
-INCLUDE_CFLAGS = -I$(XILINX_VIVADO)/include \
-		 -I$(BOOST_INCLUDE) \
-		 -I./sw/include \
-		 -I../..
+ifeq (,$(XILINX_VITIS))
+XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
+endif
+export XILINX_VITIS
+.PHONY: check_vpp
+check_vpp:
+ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
+	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
+endif
 
-LIB_LFLAGS = -L$(BOOST_LIB) \
-	     -lboost_iostreams -lz \
-	     -lstdc++ \
-	     -lrt \
-	     -pthread
-CFLAGS = -g -O0 -std=c++11 \
-	 $(INCLUDE_CFLAGS)
+ifeq (,$(XILINX_XRT))
+XILINX_XRT = /opt/xilinx/xrt
+endif
+export XILINX_XRT
+.PHONY: check_xrt
+check_xrt:
+ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
+	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
+endif
 
-LFLAGS = $(HOST_LIB_LFLAGS) \
-	 -Wl,--rpath=$(BOOST_LIB)
-OUT_DIR = out_test
-MK_DIR?=$(OUT_DIR)
-GEN_BIN_EXE = $(OUT_DIR)/blas_gen_bin.exe
-GEN_BIN_SO = $(MK_DIR)/blas_gen_bin.so
+export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
 
-$(GEN_BIN_SO) : ./sw/src/blas_gen_wrapper.cpp |  $(OUT_DIR)
-	@echo "***** Link testcase generator executable *****"
-	@echo "INFO: LIB IS" ${LIB_LFLAGS}
-	@echo "*************************************************"
-	$(CC) $(CFLAGS) $(DFLAGS) -shared -fPIC -fpermissive -fdata-sections -ffunction-sections -Wl,--gc-sections $^ -o $@
+ifeq (,$(LD_LIBRARY_PATH))
+LD_LIBRARY_PATH := $(XILINX_XRT)/lib
+else
+LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
+endif
+ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
+export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
+endif
 
-$(GEN_BIN_EXE) : ./sw/src/* | $(OUT_DIR)
-	@echo "***** Compile testcase generator executable *****"
-	@echo "INFO: INCLUDE IS " ${INCLUDE_CFLAGS}
-	@echo "INFO: LIB IS" ${LIB_LFLAGS}
-	@echo "*************************************************"
-	$(CC) $(CFLAGS) $(LFLAGS) $(DFLAGS) -fpermissive -fdata-sections -ffunction-sections -Wl,--gc-sections ./sw/src/blas_gen_bin.cpp -o $@
+# Target check
+TARGET ?= sw_emu
+ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
+$(error TARGET is not sw_emu, hw_emu or hw)
+endif
 
-clean :
-	$(RM) -r ${OUT_DIR} 
+# MK_INC_END vitis.mk
+# MK_INC_BEGIN vitis_set_platform.mk
 
-$(OUT_DIR) :
-	@echo "************* Creating DIR $@ *************"
-	mkdir $@
+ifneq (,$(wildcard $(DEVICE)))
+# Use DEVICE as a file path
+XPLATFORM := $(DEVICE)
+else
+# Use DEVICE as a file name pattern
+DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
+# Match the name
+ifneq (,$(PLATFORM_REPO_PATHS))
+XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+endif
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+endif
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+endif
+endif
+
+define MSG_PLATFORM
+No platform matched pattern '$(DEVICE)'.
+Avaialble platforms are: $(XPLATFORMS)
+To add more platform directories, set the PLATFORM_REPO_PATHS variable.
+endef
+export MSG_PLATFORM
+
+define MSG_DEVICE
+More than one platform matched: $(XPLATFORM)
+Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
+endef
+export MSG_DEVICE
+
+.PHONY: check_platform
+check_platform:
+ifeq (,$(XPLATFORM))
+	@echo "$${MSG_PLATFORM}" && false
+endif
+ifneq (,$(word 2,$(XPLATFORM)))
+	@echo "$${MSG_DEVICE}" && false
+endif
+
+XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
+
+# MK_INC_END vitis_set_platform.mk
+ifeq (1, $(words $(XPLATFORM)))
+# Query the part name of device
+ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
+override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.board.part" --platform $(firstword $(XPLATFORM)))
+endif
+endif
+check_part: | check_platform
+ifeq (,$(XPART))
+	@echo "XPART is not set and cannot be inferred. Please run \`make help\` for usage info." && false
+endif
+else # XPART
+check_part:
+	@echo "XPART is directly set to $(XPART)"
+endif # XPART
+
+# MK_INC_END vitis_set_part.mk
+
+# MK_INC_BEGIN hls_test_rules.mk
+
+
+.PHONY: run setup runhls clean
+
+OP ?= dot
+BENCHMARK ?= 1
+
+PFLAGS = --override --operator $(OP)
+
+# at least RTL synthesis before check QoR
+ifeq (1,$(QOR_CHECK))
+ifeq (0,$(VIVADO_IMPL))
+override VIVADO_SYN := 1
+endif
+endif
+
+# need synthesis before cosim or vivado
+ifeq (1,$(VIVADO_IMPL))
+override CSYNTH := 1
+endif
+
+ifeq (1,$(VIVADO_SYN))
+override CSYNTH := 1
+endif
+
+ifeq (1,$(BENCHMARK))
+PFLAGS += --benchmark
+endif
+
+ifeq (1,$(COSIM))
+PFLAGS += --cosim
+endif
+
+ifeq (1,$(CSYNTH))
+PFLAGS += --csynth
+endif
+
+
+run: setup runhls
+
+#setup: | check_part
+
+PYTHON ?= python3
+runhls: setup | check_vivado
+	$(PYTHON) run_test.py $(PFLAGS)
+
+clean:
+	rm -rf out_test/
+
+.PHONY: check
+check: run
+
+# MK_INC_END hls_test_rules.mk
