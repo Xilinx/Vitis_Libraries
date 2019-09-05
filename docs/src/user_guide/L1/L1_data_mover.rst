@@ -15,6 +15,10 @@
 
 .. _user_guide_data_mover_l1:
 
+***********************
+L1 Data mover
+***********************
+
 The L1 data mover modules are used to move matrix and vector data between their on-chip storage and the input/output streams of the computation modules. These data movers are intended to be used in conjunction with computation modules to form the HLS implementations for BLAS level 1 and 2 functions. Users can find this usage in uut_top.cpp files of the BLAS function name folders under directory L1/tests.
 
 1. Matrix storage format

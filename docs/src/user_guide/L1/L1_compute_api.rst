@@ -17,7 +17,7 @@
 
 
 **********************************************
-Primitive APIs in ``xf::linear_algebra::blas``
+L1 Compute APIs
 **********************************************
 
 .. toctree::

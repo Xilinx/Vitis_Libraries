@@ -38,30 +38,35 @@ void readSymUp2Stream(unsigned int p_n,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outSymUpTransp,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outTransp,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outForward) {
-    uint16_t l_blocks = p_n / t_ParEntries;
-    t_DataType* l_aAddr = p_a;
-    for (unsigned int i = 0; i < l_blocks; ++i) {
-        for (unsigned int j = 0; j < l_blocks; ++j) {
-            t_DataType* l_aBlockAddr =
-                (i > j) ? (p_a + j * p_n * t_ParEntries + i * t_ParEntries) : (l_aAddr + j * t_ParEntries);
-            for (unsigned int br = 0; br < t_ParEntries; ++br) {
-#pragma HLS PIPELINE
-                WideType<t_DataType, t_ParEntries> l_val;
+    unsigned int l_blocks = p_n / t_ParEntries;
+    unsigned int l_blocksMinusOne = l_blocks - 1;
+    unsigned int i = 0; // block row index
+    unsigned int j = 0; // block col index
+    while (i < l_blocks) {
+#pragma HLS PIPELINE II = t_ParEntries REWIND
+        // read one block
+        for (int br = 0; br < t_ParEntries; ++br) {
+            WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
-                for (unsigned int bl = 0; bl < t_ParEntries; ++bl) {
-                    l_val[bl] = l_aBlockAddr[bl];
-                }
-                if (i == j) {
-                    p_outSymUpTransp.write(l_val);
-                } else if (i > j) {
-                    p_outTransp.write(l_val);
-                } else {
-                    p_outForward.write(l_val);
-                }
-                l_aBlockAddr += p_n;
+            for (int bl = 0; bl < t_ParEntries; ++bl) {
+#pragma HLS UNROLL
+                l_val[bl] = (i > j) ? (p_a[(j * p_n + br * l_blocks + i) * t_ParEntries + bl])
+                                    : p_a[(i * p_n + br * l_blocks + j) * t_ParEntries + bl];
+            }
+            if (i == j) {
+                p_outSymUpTransp.write(l_val);
+            } else if (i > j) {
+                p_outTransp.write(l_val);
+            } else {
+                p_outForward.write(l_val);
             }
         }
-        l_aAddr += p_n * t_ParEntries;
+        if (j == l_blocksMinusOne) {
+            i++;
+            j = 0;
+        } else {
+            j++;
+        }
     }
 }
 
@@ -91,29 +96,34 @@ void readSymLo2Stream(unsigned int p_n,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outTransp,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outForward) {
     uint16_t l_blocks = p_n / t_ParEntries;
-    t_DataType* l_aAddr = p_a;
-    for (unsigned int i = 0; i < l_blocks; ++i) {
-        for (unsigned int j = 0; j < l_blocks; ++j) {
-            t_DataType* l_aBlockAddr =
-                (i < j) ? (p_a + j * p_n * t_ParEntries + i * t_ParEntries) : (l_aAddr + j * t_ParEntries);
-            for (unsigned int br = 0; br < t_ParEntries; ++br) {
-#pragma HLS PIPELINE
-                WideType<t_DataType, t_ParEntries> l_val;
+    unsigned int l_blocksMinusOne = l_blocks - 1;
+    unsigned int i = 0; // block row index
+    unsigned int j = 0; // block col index
+    while (i < l_blocks) {
+#pragma HLS PIPELINE II = t_ParEntries REWIND
+        // read one block
+        for (int br = 0; br < t_ParEntries; ++br) {
+            WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
-                for (unsigned int bl = 0; bl < t_ParEntries; ++bl) {
-                    l_val[bl] = l_aBlockAddr[bl];
-                }
-                if (i == j) {
-                    p_outSymUpTransp.write(l_val);
-                } else if (i < j) {
-                    p_outTransp.write(l_val);
-                } else {
-                    p_outForward.write(l_val);
-                }
-                l_aBlockAddr += p_n;
+            for (int bl = 0; bl < t_ParEntries; ++bl) {
+#pragma HLS UNROLL
+                l_val[bl] = (i < j) ? (p_a[(j * p_n + br * l_blocks + i) * t_ParEntries + bl])
+                                    : p_a[(i * p_n + br * l_blocks + j) * t_ParEntries + bl];
+            }
+            if (i == j) {
+                p_outSymUpTransp.write(l_val);
+            } else if (i < j) {
+                p_outTransp.write(l_val);
+            } else {
+                p_outForward.write(l_val);
             }
         }
-        l_aAddr += p_n * t_ParEntries;
+        if (j == l_blocksMinusOne) {
+            i++;
+            j = 0;
+        } else {
+            j++;
+        }
     }
 }
 
