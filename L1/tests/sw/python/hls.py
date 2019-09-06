@@ -38,7 +38,7 @@ class Parameters:
     self.path = path
 
 class HLS:
-  def __init__(self, tclPath, b_csim, b_syn, b_cosim):
+  def __init__(self, tclPath, b_csim, b_syn, b_cosim, b_benchmark):
 
     self.tcl = tclPath
     self.csim = b_csim

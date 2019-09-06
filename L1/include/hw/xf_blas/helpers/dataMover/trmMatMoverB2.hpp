@@ -156,6 +156,17 @@ void tpmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_Data
     }
 }
 
+/**
+ * @brief vec2TrmUpStream function that moves vector from memory to stream that matches the trmUp2Stream/tpmUp2Stream
+ * outputs
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_x vector input
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void vec2TrmUpStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     unsigned int l_blocks = p_n / t_ParEntries;
@@ -179,6 +190,17 @@ void vec2TrmUpStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_D
     }
 }
 
+/**
+ * @brief vec2TrmLoStream function that moves vector from memory to stream that matches the trmLo2Stream/tpmLo2Stream
+ * outputs
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_x vector input
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void vec2TrmLoStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     unsigned int i = 0;

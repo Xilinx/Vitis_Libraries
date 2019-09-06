@@ -31,48 +31,42 @@
 namespace xf {
 namespace linear_algebra {
 namespace blas {
-/**
- * @brief readSymUp2Stream function that read the super-symmetric matrix from memory to stream
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries the number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a symmetric matrix
- * @param p_a memory location of a p_n x p_n symmetric matrix
- * @param p_outSymTransp the stream of matrix entries to transpSymMatBlocks
- * @param p_outTransp the stream of matrix entries to transpMatBlocks
- * @param p_out the streams of matrix entries to be directly forwarded
- */
+
 template <typename t_DataType, unsigned int t_ParEntries>
 void readSymUp2Stream(unsigned int p_n,
                       t_DataType* p_a,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outSymUpTransp,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outTransp,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outForward) {
-    uint16_t l_blocks = p_n / t_ParEntries;
-    t_DataType* l_aAddr = p_a;
-    for (unsigned int i = 0; i < l_blocks; ++i) {
-        for (unsigned int j = 0; j < l_blocks; ++j) {
-            t_DataType* l_aBlockAddr =
-                (i > j) ? (p_a + j * p_n * t_ParEntries + i * t_ParEntries) : (l_aAddr + j * t_ParEntries);
-            for (unsigned int br = 0; br < t_ParEntries; ++br) {
-#pragma HLS PIPELINE
-                WideType<t_DataType, t_ParEntries> l_val;
+    unsigned int l_blocks = p_n / t_ParEntries;
+    unsigned int l_blocksMinusOne = l_blocks - 1;
+    unsigned int i = 0; // block row index
+    unsigned int j = 0; // block col index
+    while (i < l_blocks) {
+#pragma HLS PIPELINE II = t_ParEntries REWIND
+        // read one block
+        for (int br = 0; br < t_ParEntries; ++br) {
+            WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
-                for (unsigned int bl = 0; bl < t_ParEntries; ++bl) {
-                    l_val[bl] = l_aBlockAddr[bl];
-                }
-                if (i == j) {
-                    p_outSymUpTransp.write(l_val);
-                } else if (i > j) {
-                    p_outTransp.write(l_val);
-                } else {
-                    p_outForward.write(l_val);
-                }
-                l_aBlockAddr += p_n;
+            for (int bl = 0; bl < t_ParEntries; ++bl) {
+#pragma HLS UNROLL
+                l_val[bl] = (i > j) ? (p_a[(j * p_n + br * l_blocks + i) * t_ParEntries + bl])
+                                    : p_a[(i * p_n + br * l_blocks + j) * t_ParEntries + bl];
+            }
+            if (i == j) {
+                p_outSymUpTransp.write(l_val);
+            } else if (i > j) {
+                p_outTransp.write(l_val);
+            } else {
+                p_outForward.write(l_val);
             }
         }
-        l_aAddr += p_n * t_ParEntries;
+        if (j == l_blocksMinusOne) {
+            i++;
+            j = 0;
+        } else {
+            j++;
+        }
     }
 }
 
@@ -95,18 +89,6 @@ void mergeSymUpMat(unsigned int p_n,
     }
 }
 
-/**
- * @brief readSymLo2Stream function that read the sub-symmetric matrix with from memory to stream
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries the number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a symmetric matrix
- * @param p_a memory location of a p_n x p_n symmetric matrix
- * @param p_outSymTransp the stream of matrix entries to transpSymMatBlocks
- * @param p_outTransp the stream of matrix entries to transpMatBlocks
- * @param p_out the streams of matrix entries to be directly forwarded
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readSymLo2Stream(unsigned int p_n,
                       t_DataType* p_a,
@@ -114,29 +96,34 @@ void readSymLo2Stream(unsigned int p_n,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outTransp,
                       hls::stream<WideType<t_DataType, t_ParEntries> >& p_outForward) {
     uint16_t l_blocks = p_n / t_ParEntries;
-    t_DataType* l_aAddr = p_a;
-    for (unsigned int i = 0; i < l_blocks; ++i) {
-        for (unsigned int j = 0; j < l_blocks; ++j) {
-            t_DataType* l_aBlockAddr =
-                (i < j) ? (p_a + j * p_n * t_ParEntries + i * t_ParEntries) : (l_aAddr + j * t_ParEntries);
-            for (unsigned int br = 0; br < t_ParEntries; ++br) {
-#pragma HLS PIPELINE
-                WideType<t_DataType, t_ParEntries> l_val;
+    unsigned int l_blocksMinusOne = l_blocks - 1;
+    unsigned int i = 0; // block row index
+    unsigned int j = 0; // block col index
+    while (i < l_blocks) {
+#pragma HLS PIPELINE II = t_ParEntries REWIND
+        // read one block
+        for (int br = 0; br < t_ParEntries; ++br) {
+            WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
-                for (unsigned int bl = 0; bl < t_ParEntries; ++bl) {
-                    l_val[bl] = l_aBlockAddr[bl];
-                }
-                if (i == j) {
-                    p_outSymUpTransp.write(l_val);
-                } else if (i < j) {
-                    p_outTransp.write(l_val);
-                } else {
-                    p_outForward.write(l_val);
-                }
-                l_aBlockAddr += p_n;
+            for (int bl = 0; bl < t_ParEntries; ++bl) {
+#pragma HLS UNROLL
+                l_val[bl] = (i < j) ? (p_a[(j * p_n + br * l_blocks + i) * t_ParEntries + bl])
+                                    : p_a[(i * p_n + br * l_blocks + j) * t_ParEntries + bl];
+            }
+            if (i == j) {
+                p_outSymUpTransp.write(l_val);
+            } else if (i < j) {
+                p_outTransp.write(l_val);
+            } else {
+                p_outForward.write(l_val);
             }
         }
-        l_aAddr += p_n * t_ParEntries;
+        if (j == l_blocksMinusOne) {
+            i++;
+            j = 0;
+        } else {
+            j++;
+        }
     }
 }
 
@@ -165,18 +152,6 @@ void mergeSymLoMat(unsigned int p_n,
     }
 }
 
-/**
- * @brief readSpmUp2Stream function that read the packed super-symmetric matrix from memory to stream
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries the number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a symmetric matrix
- * @param p_a memory location of a p_n x p_n symmetric matrix
- * @param p_outSymTransp the stream of matrix entries to transpSymMatBlocks
- * @param p_outTransp the stream of matrix entries to transpMatBlocks
- * @param p_out the streams of matrix entries to be directly forwarded
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readSpmUp2Stream(unsigned int p_n,
                       t_DataType* p_a,
@@ -212,18 +187,6 @@ void readSpmUp2Stream(unsigned int p_n,
     }
 }
 
-/**
- * @brief readSpmLo2Stream function that read the packed sub-symmetric matrix with from memory to stream
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries the number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a symmetric matrix
- * @param p_a memory location of a p_n x p_n symmetric matrix
- * @param p_outSymTransp the stream of matrix entries to transpSymMatBlocks
- * @param p_outTransp the stream of matrix entries to transpMatBlocks
- * @param p_out the streams of matrix entries to be directly forwarded
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readSpmLo2Stream(unsigned int p_n,
                       t_DataType* p_a,
@@ -405,6 +368,17 @@ void spmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_Data
     mergeSymLoMat<t_DataType, t_ParEntries>(p_n, l_symTranspRes, l_transpRes, l_forwardRes, p_out);
 }
 
+/**
+ * @brief vec2SymStream function that moves vector from memory to stream that matches the symatrix matrix data mover
+ * outputs
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_x vector input
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void vec2SymStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     unsigned int l_blocks = p_n / t_ParEntries;

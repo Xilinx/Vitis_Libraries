@@ -541,8 +541,200 @@ This function copies a matrix in FPGA device memory to host memory.
     *
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for the matrix
+
+2.3.9 xfblasSetVectorAsync
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasSetVectorAsync(int n, int elemSize, short* x, int incx, short* d_x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    void xfblasSetVectorAsync(int n, int elemSize, float* x, int incx, float* d_x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+
+This function has the same functionality as `xfblasSetVector() <2.3.5 xfblasSetVector_>`_, with the data transfered asynchronously (with respect to the host).
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - n
+        - number of elements in vector
+    *
+        - elemSize
+        - number of bytes required to store each element in the vector
+    *
+        - x
+        - pointer to the vector in the host memory
+    *
+        - incx
+        - the storage spacing between consecutive elements of vector x
+    *
+        - d_x
+        - pointer to mapped memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
         
-2.3.9 xfblasMallocRestricted
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+
+    *
+        - none
+
+2.3.10 xfblasGetVectorAsync
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasGetVectorAsync(int n, int elemSize, short* d_x, short* x, int incx, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    void xfblasGetVectorAsync(int n, int elemSize, float* d_x, float* x, int incx, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+
+This function has the same functionality as `xfblasGetVector() <2.3.6 xfblasGetVector_>`_, with the data transfered asynchronously (with respect to the host).
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - n
+        - number of elements in vector
+    *
+        - elemSize
+        - number of bytes required to store each element in the vector
+    *
+        - d_x
+        - pointer to mapped memory
+    *
+        - x
+        - pointer to the vector in the host memory
+    *
+        - incx
+        - the storage spacing between consecutive elements of vector x
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+
+    *
+        - none
+
+2.3.11 xfblasSetMatrixAsync
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasSetMatrixAsync(int rows, int cols, int elemSize, short* A, int lda, short* d_A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    void xfblasSetMatrixAsync(int rows, int cols, int elemSize, float* A, int lda, float* d_A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+
+This function has the same functionality as `xfblasSetMatrix() <2.3.7 xfblasSetMatrix>`_, with the data transfered asynchronously (with respect to the host).
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - rows
+        - number of rows in the matrix
+    *
+        - cols
+        - number of cols in the matrix that is being used
+    *
+        - elemSize
+        - number of bytes required to store each element in the matrix
+    *
+        - A
+        - pointer to the matrix array in the host memory
+    *
+        - lda
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+    *
+        - d_A
+        - pointer to mapped memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+    
+    *
+        - none
+
+2.3.12 xfblasGetMatrixAsync
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasGetMatrixAsync(int rows, int cols, int elemSize, short* d_A, short* A, int lda, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+    void xfblasGetMatrixAsync(int rows, int cols, int elemSize, float* d_A, float* A, int lda, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) 
+
+This function has the same functionality as `xfblasGetMatrix() <2.3.8 xfblasGetMatrix>`_, with the data transfered asynchronously (with respect to the host).
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - rows
+        - number of rows in the matrix
+    *
+        - cols
+        - number of cols in the matrix that is being used
+
+    *
+        - elemSize
+        - number of bytes required to store each element in the matrix
+    *
+        - d_A
+        - pointer to mapped memory
+    *
+        - A
+        - pointer to the matrix array in the host memory
+    *
+        - lda
+        - leading dimension of the matrix that indicates the total number of cols in the matrix
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+    
+    *
+        - none
+        
+        
+2.3.13 xfblasMallocRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -609,7 +801,7 @@ This function allocates memory for host row-major format matrix on the FPGA devi
         - xfblasStatus_t
         - 5 if rows, cols or lda is not padded correctly
 
-2.3.10 xfblasSetVectorRestricted
+2.3.14 xfblasSetVectorRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -617,7 +809,7 @@ This function allocates memory for host row-major format matrix on the FPGA devi
 
     xfblasStatus_t xfblasSetVectorRestricted(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
-This function copies a vector in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.9 xfblasMallocRestricted_>`_ need to be called prior to this function.
+This function copies a vector in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.13 xfblasMallocRestricted_>`_ need to be called prior to this function.
 
 .. rubric:: Parameters:
 
@@ -649,7 +841,7 @@ This function copies a vector in host memory to FPGA device memory. `xfblasMallo
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for the vector
   
-2.3.11 xfblasGetVectorRestricted
+2.3.15 xfblasGetVectorRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -690,7 +882,7 @@ This function copies a matrix in FPGA device memory to host memory.
         - 3 if there is no FPGA device memory allocated for the matrix
 
 
-2.3.12 xfblasSetMatrixRestricted
+2.3.16 xfblasSetMatrixRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -698,7 +890,7 @@ This function copies a matrix in FPGA device memory to host memory.
 
     xfblasStatus_t xfblasSetMatrixRestricted(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
 
-This function copies a matrix in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.9 xfblasMallocRestricted_>`_ need to be called prior to this function.
+This function copies a matrix in host memory to FPGA device memory. `xfblasMallocRestricted() <2.3.13 xfblasMallocRestricted_>`_ need to be called prior to this function.
 
 .. rubric:: Parameters:
 
@@ -730,7 +922,7 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for the matrix
 
-2.3.13 xfblasGetMatrixRestricted
+2.3.17 xfblasGetMatrixRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -770,8 +962,141 @@ This function copies a matrix in FPGA device memory to host memory.
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for the matrix
 
+2.3.18 xfblasSetVectorRestrictedAsync
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.3.14 xfblasMallocManaged
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasSetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+
+This function has the same functionality as `xfblasSetVectorRestricted() <2.3.14 xfblasSetVectorRestricted>`_, with the data transfered asynchronously (with respect to the host).
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+        - pointer to the vector in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+    
+    *
+        - none
+		
+2.3.19 xfblasGetVectorRestrictedAsync
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasGetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+
+This function has the same functionality as `xfblasGetVectorRestricted() <2.3.15 xfblasGetVectorRestricted>`_, with the data transfered asynchronously (with respect to the host).
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - x
+        - pointer to vetcor x in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+
+    *
+        - none
+
+
+2.3.20 xfblasSetMatrixRestrictedAsync
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasSetMatrixRestrictedAsync(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+
+This function has the same functionality as `xfblasSetMatrixRestricted() <2.3.16 xfblasSetMatrixRestricted>`_, with the data transfered asynchronously (with respect to the host).
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+        - pointer to the matrix array in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+    
+    *
+        - none
+
+2.3.21 xfblasGetMatrixRestrictedAsync
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasGetMatrixRestrictedAsync(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
+
+This function has the same functionality as `xfblasGetMatrixRestricted() <2.3.17 xfblasGetMatrixRestricted>`_, with the data transfered asynchronously (with respect to the host).
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 20 80
+
+    *
+        - A
+        - pointer to matrix A in the host memory
+    *
+        - kernelIndex
+        - index of kernel that is being used, default is 0
+    *
+        - deviceIndex
+        - index of device that is being used, default is 0
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+    
+    *
+        - none
+
+
+2.3.22 xfblasMallocManaged
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
@@ -830,7 +1155,35 @@ This function allocates memory on the FPGA device, rewrites the leading dimensio
         - xfblasStatus_t
         - 4 if the engine is not supported for now
 
-2.3.15 xfblasDeviceSynchronize
+
+2.3.23 xfblasKernelSynchronize
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+    :class: title-code-block
+
+    void xfblasKernelSynchronize()
+
+This function will wait until all pending commands in all kernels have completed.
+
+.. rubric:: Parameters:
+
+.. list-table::
+    :widths: 100
+
+    *
+        - none
+        
+.. rubric:: Return:
+
+.. list-table::
+    :widths: 100
+
+    *
+        - none
+
+
+2.3.24 xfblasDeviceSynchronize
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
