@@ -112,7 +112,7 @@ class RunTest:
 
     directivePath = os.path.join(self.testPath, 
         r'directive_par%d.tcl'%(self.parEntries))
-    self.hls.setParam(Parameters(self.op, self.logParEntries, self.parEntries))
+    self.hls.setParam(Parameters(self.op, self.logParEntries, self.parEntries, self.args.xpart))
     with self.opLock:
       self.hls.generateDirective(directivePath)
 
