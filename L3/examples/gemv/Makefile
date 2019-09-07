@@ -51,11 +51,11 @@ short: gemv_example.exe
 float: gemv_example_float.exe
 
 gemv_example.exe: gemv_example.cpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=short -o $@ $^ $(HOST_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=short -o $@ $^ $(LDFLAGS)
 
 gemv_example_float.exe: gemv_example.cpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=float -o $@ $^ $(HOST_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=float -o $@ $^ $(LDFLAGS)
 	
 gemv_common_example.exe: gemv_common_example.cpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(LDFLAGS)
 
