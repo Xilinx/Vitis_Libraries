@@ -19,7 +19,7 @@
 
 #include <cmath>
 #include <iomanip>
-#include "string"
+#include <string>
 
 #define IDX2R(i, j, ld) (((i) * (ld)) + (j))
 
@@ -57,33 +57,6 @@ bool compareGemv(XFBLAS_dataType* y, XFBLAS_dataType* goldenY, int m, float p_To
         }
     }
     return l_check;
-}
-
-bool readConfigDict(string p_configFile, unordered_map<string, string>* p_configDict) {
-    unordered_map<string, string> l_configDict;
-    ifstream l_configInfo(p_configFile);
-    bool l_good = l_configInfo.good();
-    if (!l_good) {
-        return false;
-    }
-    if (l_configInfo.is_open()) {
-        string line;
-        string key;
-        string value;
-        string equalSign = "=";
-        while (getline(l_configInfo, line)) {
-            int index = line.find(equalSign);
-            if (index == 0) continue;
-            key = line.substr(0, index);
-            value = line.substr(index + 1);
-            l_configDict[key] = value;
-        }
-    }
-
-    l_configInfo.close();
-
-    *p_configDict = l_configDict;
-    return true;
 }
 
 #endif
