@@ -29,54 +29,10 @@
 #include <fstream>
 
 #include "xf_blas.hpp"
+#include "../bench_helper.hpp"
 #include "gemv_helper.hpp"
 
-#define IDX2R(i, j, ld) (((i) * (ld)) + (j))
-
-typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePointType;
-
 using namespace std;
-
-void showTimeData(string p_Task, TimePointType& t1, TimePointType& t2, double* p_TimeMsOut = 0) {
-    t2 = chrono::high_resolution_clock::now();
-    chrono::duration<double> l_durationSec = t2 - t1;
-    double l_timeMs = l_durationSec.count() * 1e3;
-    if (p_TimeMsOut) {
-        *p_TimeMsOut = l_timeMs;
-    }
-    cout << p_Task << "  " << fixed << setprecision(6) << l_timeMs << " msec\n";
-}
-
-float getBoardFreqMHz(string xclbin) {
-    string l_freqCmd = "xclbinutil --info --input " + xclbin;
-    float l_freq = -1;
-    char l_lineBuf[256];
-    shared_ptr<FILE> l_pipe(popen(l_freqCmd.c_str(), "r"), pclose);
-    // if (!l_pipe) throw std::runtime_error("ERROR: popen(" + l_freqCmd + ") failed");
-    if (!l_pipe) cout << ("ERROR: popen(" + l_freqCmd + ") failed");
-    bool l_nextLine_isFreq = false;
-    while (l_pipe && fgets(l_lineBuf, 256, l_pipe.get())) {
-        std::string l_line(l_lineBuf);
-        // std::cout << "DEBUG: read line " << l_line << std::endl;
-        if (l_nextLine_isFreq) {
-            std::string l_prefix, l_val, l_mhz;
-            std::stringstream l_ss(l_line);
-            l_ss >> l_prefix >> l_val >> l_mhz;
-            l_freq = std::stof(l_val);
-            assert(l_mhz == "MHz");
-            break;
-        } else if (l_line.find("Type:      DATA") != std::string::npos) {
-            l_nextLine_isFreq = true;
-        }
-    }
-    if (l_freq == -1) {
-        // if xbutil does not work, user could put the XOCC achieved kernel frequcy here
-        l_freq = 250;
-        std::cout << "INFO: Failed to get board frequency by xclbinutil. This is normal for cpu and hw emulation, "
-                     "using 250 MHz for reporting.\n";
-    }
-    return (l_freq);
-}
 
 int main(int argc, char** argv) {
     if (argc < 3) {

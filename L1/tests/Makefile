@@ -26,14 +26,14 @@ help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 BENCHMAR=1 OP=dot"
+	@echo "  make OP=dot XPART=<FPGA part name> run CSIM=1 CSYNTH=1 COSIM=1 BENCHMAR=1"
 	@echo "      Command to run the selected tasks for specified device."
 	@echo ""
 	@echo "      Valid tasks are CSIM, CSYNTH, COSIM, BENCHMARK"
 	@echo ""
-	@echo "      OP is the operator to be tested."
+	@echo "      OP is the operator to be tested, mandatory."
 	@echo ""
-	@echo "      For example, \`make run OP=dot BENCHMARK=1\`"
+	@echo "      For example, \`make run XPART='xcu200-fsgd2104-2-e' OP=dot BENCHMARK=1\`"
 	@echo ""
 	@echo "  make clean "
 	@echo "      Command to remove the generated files."
@@ -60,128 +60,27 @@ export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 
 # MK_INC_END vivado.mk
 
-DEVICE ?= u200
 # MK_INC_BEGIN vitis_set_part.mk
 
 .PHONY: check_part
 
-ifeq (,$(XPART))
-# MK_INC_BEGIN vitis.mk
-
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VITIS))
-XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
-endif
-export XILINX_VITIS
-.PHONY: check_vpp
-check_vpp:
-ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
-	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
-endif
-
-ifeq (,$(XILINX_XRT))
-XILINX_XRT = /opt/xilinx/xrt
-endif
-export XILINX_XRT
-.PHONY: check_xrt
-check_xrt:
-ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
-	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
-endif
-
-export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
-
-ifeq (,$(LD_LIBRARY_PATH))
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib
-else
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
-endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-# Target check
-TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
-endif
-
-# MK_INC_END vitis.mk
-# MK_INC_BEGIN vitis_set_platform.mk
-
-ifneq (,$(wildcard $(DEVICE)))
-# Use DEVICE as a file path
-XPLATFORM := $(DEVICE)
-else
-# Use DEVICE as a file name pattern
-DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
-ifneq (,$(PLATFORM_REPO_PATHS))
-XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-endif
-
-define MSG_PLATFORM
-No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
-endef
-export MSG_PLATFORM
-
-define MSG_DEVICE
-More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
-endef
-export MSG_DEVICE
-
-.PHONY: check_platform
-check_platform:
-ifeq (,$(XPLATFORM))
-	@echo "$${MSG_PLATFORM}" && false
-endif
-ifneq (,$(word 2,$(XPLATFORM)))
-	@echo "$${MSG_DEVICE}" && false
-endif
-
-XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
-
-# MK_INC_END vitis_set_platform.mk
-ifeq (1, $(words $(XPLATFORM)))
-# Query the part name of device
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
-override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.board.part" --platform $(firstword $(XPLATFORM)))
-endif
-endif
-check_part: | check_platform
-ifeq (,$(XPART))
-	@echo "XPART is not set and cannot be inferred. Please run \`make help\` for usage info." && false
-endif
-else # XPART
+XPART ?= 'xcu200-fsgd2104-2-e'
 check_part:
 	@echo "XPART is directly set to $(XPART)"
-endif # XPART
 
 # MK_INC_END vitis_set_part.mk
 
 # MK_INC_BEGIN hls_test_rules.mk
 
-
 .PHONY: run setup runhls clean
 
-OP ?= dot
+ifeq (,$(OP))
+	@echo "OP is not set and cannot be inferred. Please run \`make help\` for usage info." && false
+endif
+
 BENCHMARK ?= 1
 
-PFLAGS = --override --operator $(OP)
+PFLAGS = --override --operator $(OP) --xpart $(XPART)
 
 # at least RTL synthesis before check QoR
 ifeq (1,$(QOR_CHECK))
@@ -211,10 +110,9 @@ ifeq (1,$(CSYNTH))
 PFLAGS += --csynth
 endif
 
-
 run: setup runhls
 
-#setup: | check_part
+setup: | check_part
 
 PYTHON ?= python3
 runhls: setup | check_vivado

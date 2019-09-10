@@ -53,6 +53,6 @@ ifneq (${XFBLAS_numKernels}, 1)
 endif
 
 gemm_bench.exe: gemm_bench.cpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(LDFLAGS)
 
 

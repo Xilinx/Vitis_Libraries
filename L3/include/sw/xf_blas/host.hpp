@@ -29,7 +29,7 @@
 #include "xclbin.h"
 
 #include "../utility/utility.hpp"
-#include "utils.hpp"
+#include "helper.hpp"
 #include "gemxkernel_hw.hpp"
 
 #define IDX2R(i, j, ld) (((i) * (ld)) + (j))

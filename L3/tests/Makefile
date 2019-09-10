@@ -45,7 +45,7 @@ TEST_EXE = $(OUT_DIR)/$(OPERATOR_NAME)/test_$(XFBLAS_dataType).exe
 all: ${TEST_EXE}
 
 $(TEST_EXE) : ./xf_blas/$(OPERATOR_NAME)/test.cpp |  $(OPERATOR_NAME)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(LDFLAGS)
 
 $(OPERATOR_NAME) : $(OUT_DIR)
 	mkdir -p $(OUT_DIR)/$(OPERATOR_NAME)
