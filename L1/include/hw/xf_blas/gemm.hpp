@@ -35,10 +35,10 @@ template <typename t_DataType, unsigned int t_M, unsigned int t_N = t_M, typenam
 class SystolicArray {
    public:
     static void process_dsp(unsigned int p_k,
-                            unsigned int p_multi,
                             hls::stream<WideType<t_DataType, t_M> >& p_As,
                             hls::stream<WideType<t_DataType, t_N> >& p_Bs,
-                            hls::stream<WideType<t_MacDataType, t_N> >& p_sum) {
+                            hls::stream<WideType<t_MacDataType, t_N> >& p_sum,
+                            unsigned int p_multi = 1) {
 #ifndef __SYNTHESIS__
         assert(p_k >= t_M + t_N);
 #endif
@@ -52,7 +52,6 @@ class SystolicArray {
 #pragma HLS ARRAY_PARTITION variable = l_C dim = 0 complete
         WideType<t_MacDataType, t_N> l_Co[t_M];
 #pragma HLS ARRAY_PARTITION variable = l_Co dim = 0 complete
-
 
         for (int k = 0, l = 0; l < p_multi * p_k + t_M + t_N; l++, k++) {
 #pragma HLS PIPELINE
@@ -87,6 +86,7 @@ class SystolicArray {
         }
     }
 };
+
 template <typename t_DataType,
           unsigned int t_M,
           unsigned int t_N = t_M,
@@ -95,9 +95,10 @@ template <typename t_DataType,
 void gemm(const unsigned int p_k,
           hls::stream<WideType<t_DataType, t_M> >& p_A,
           hls::stream<WideType<t_DataType, t_N> >& p_B,
-          hls::stream<WideType<t_MacDataType, t_N> >& p_C) {
+          hls::stream<WideType<t_MacDataType, t_N> >& p_C,
+          const unsigned int p_r = 1) {
 #pragma HLS DATAFLOW
-    SystolicArray<t_DataType, t_M, t_N, t_MacDataType>::process_dsp(p_k, 1, p_A, p_B, p_C);
+    SystolicArray<t_DataType, t_M, t_N, t_MacDataType>::process_dsp(p_k, p_A, p_B, p_C, p_r);
 }
 
 } // end namespace blas

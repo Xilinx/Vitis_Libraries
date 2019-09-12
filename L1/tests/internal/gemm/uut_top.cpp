@@ -22,12 +22,13 @@ using namespace xf::linear_algebra::blas;
 void uut_top(uint32_t p_m,
              uint32_t p_n,
              uint32_t p_k,
-             BLAS_dataType p_a[BLAS_m * BLAS_k],
-             BLAS_dataType p_b[BLAS_n * BLAS_k],
-             BLAS_dataType p_c[BLAS_m * BLAS_n]) {
-#pragma HLS ARRAY_PARTITION variable=p_a cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=p_b cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=p_c cyclic factor=16 dim=1
+             uint32_t p_r,
+             BLAS_dataType p_a[BLAS_r * BLAS_m * BLAS_k],
+             BLAS_dataType p_b[BLAS_r * BLAS_n * BLAS_k],
+             BLAS_dataType p_c[BLAS_r * BLAS_m * BLAS_n]) {
+#pragma HLS ARRAY_PARTITION variable = p_a cyclic factor = 16 dim = 1
+#pragma HLS ARRAY_PARTITION variable = p_b cyclic factor = 16 dim = 1
+#pragma HLS ARRAY_PARTITION variable = p_c cyclic factor = 16 dim = 1
 #pragma HLS DATAFLOW
 
     hls::stream<WideType<BLAS_dataType, BLAS_m> > l_strA;
@@ -38,9 +39,8 @@ void uut_top(uint32_t p_m,
 #pragma HLS data_pack variable = l_strC
 
 #pragma HLS DATAFLOW
-    gem2Stream<BLAS_dataType, BLAS_m>(p_k, p_m, p_a, l_strA);
-    gem2Stream<BLAS_dataType, BLAS_n>(p_k, p_n, p_b, l_strB);
-    gemm<BLAS_dataType, BLAS_m, BLAS_n>(p_k, l_strA, l_strB, l_strC);
-    writeStream2Vec<BLAS_dataType, BLAS_n>(l_strC, p_n * p_m, p_c);
+    gem2Stream<BLAS_dataType, BLAS_m>(p_k * p_r, p_m, p_a, l_strA);
+    gem2Stream<BLAS_dataType, BLAS_n>(p_k * p_r, p_n, p_b, l_strB);
+    gemm<BLAS_dataType, BLAS_m, BLAS_n>(p_k, l_strA, l_strB, l_strC, p_r);
+    writeStream2Vec<BLAS_dataType, BLAS_n>(l_strC, p_n * p_m * p_r, p_c);
 }
-
