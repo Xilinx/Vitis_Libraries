@@ -31,7 +31,7 @@ namespace xf {
 namespace linear_algebra {
 namespace blas {
 
-template <typename t_DataType, unsigned int t_M, unsigned int t_N, typename t_MacDataType = t_DataType>
+template <typename t_DataType, unsigned int t_M, unsigned int t_N = t_M, typename t_MacDataType = t_DataType>
 class SystolicArray {
    public:
     static void process_dsp(unsigned int p_k,
@@ -39,48 +39,57 @@ class SystolicArray {
                             hls::stream<WideType<t_DataType, t_M> >& p_As,
                             hls::stream<WideType<t_DataType, t_N> >& p_Bs,
                             hls::stream<WideType<t_MacDataType, t_N> >& p_sum) {
+#ifndef __SYNTHESIS__
+        assert(p_k >= t_M + t_N);
+#endif
+
         WideType<t_DataType, t_M + t_N> l_winA[t_M];
 #pragma HLS ARRAY_PARTITION variable = l_winA dim = 0 complete
         WideType<t_DataType, t_M + t_N> l_winB[t_N];
 #pragma HLS ARRAY_PARTITION variable = l_winB dim = 0 complete
-        for (int i = 0; i < t_M + t_N; i++) {
-#pragma HLS PIPELINE
-            for (int j = 0; j < t_M; j++) l_winA[j].shift(0);
-            for (int j = 0; j < t_N; j++) l_winB[j].shift(0);
-        }
 
         WideType<t_MacDataType, t_N> l_C[t_M];
 #pragma HLS ARRAY_PARTITION variable = l_C dim = 0 complete
-        for (int i = 0; i < t_M; i++) l_C[i] = 0;
+        WideType<t_MacDataType, t_N> l_Co[t_M];
+#pragma HLS ARRAY_PARTITION variable = l_Co dim = 0 complete
 
-        for (int l = 0; l < p_multi; l++) {
-            for (int k = 0; k < p_k + t_M + t_N; k++) {
+
+        for (int k = 0, l = 0; l < p_multi * p_k + t_M + t_N; l++, k++) {
 #pragma HLS PIPELINE
-                WideType<t_DataType, t_M> l_A = 0;
-                WideType<t_DataType, t_N> l_B = 0;
-                if (k < p_k) {
-                    l_A = p_As.read();
-                    l_B = p_Bs.read();
-                }
-                for (int j = 0; j < t_M; j++) l_winA[j].shift(l_A[j]);
-                for (int j = 0; j < t_N; j++) l_winB[j].shift(l_B[j]);
-                for (int m = 0; m < t_M; m++) {
-                    for (int n = 0; n < t_N; n++) {
-                        l_C[m][n] += l_winA[m][m + n] * l_winB[n][m + n];
-                    }
-                }
+            if (k == p_k) {
+                k = 0;
             }
-            for (int i = 0; i < t_M; i++) {
-#pragma HLS PIPELINE
-                p_sum.write(l_C[i]);
-                l_C[i] = 0;
+
+            if (l > p_k && k >= t_N && k < t_M + t_N) {
+                p_sum.write(l_Co[k - t_N]);
+            }
+
+            WideType<t_DataType, t_M> l_A = 0;
+            WideType<t_DataType, t_N> l_B = 0;
+
+            if (l < p_multi * p_k) {
+                l_A = p_As.read();
+                l_B = p_Bs.read();
+            }
+
+            for (int j = 0; j < t_M; j++) l_winA[j].shift(l_A[j]);
+            for (int j = 0; j < t_N; j++) l_winB[j].shift(l_B[j]);
+            for (int m = 0; m < t_M; m++) {
+                for (int n = 0; n < t_N; n++) {
+                    int l_id = m + n;
+                    if (l_id == k) {
+                        l_Co[m][n] = l_C[m][n];
+                        l_C[m][n] = 0;
+                    }
+                    l_C[m][n] += l_winA[m][l_id] * l_winB[n][l_id];
+                }
             }
         }
     }
 };
-template <unsigned int t_M,
-          unsigned int t_N,
-          typename t_DataType,
+template <typename t_DataType,
+          unsigned int t_M,
+          unsigned int t_N = t_M,
           typename t_IndexType = unsigned int,
           typename t_MacDataType = t_DataType>
 void gemm(const unsigned int p_k,
