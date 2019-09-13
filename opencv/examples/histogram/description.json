@@ -1,0 +1,21 @@
+{
+    "example" : "histogram - File I/O",
+    "overview" : "histogram",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "calcHist",
+            "location" : "<LIBRARY>/include/imgproc/xf_histogram.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

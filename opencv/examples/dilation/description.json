@@ -1,0 +1,21 @@
+{
+    "example" : "dilation - File I/O",
+    "overview" : "dilation",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "dilate",
+            "location" : "<LIBRARY>/include/imgproc/xf_dilation.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "example" : "paintmask - File I/O",
+    "overview" : "paintmask",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "paintmask",
+            "location" : "<LIBRARY>/include/imgproc/xf_paintmask.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

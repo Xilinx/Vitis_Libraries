@@ -1,0 +1,21 @@
+{
+    "example" : "erosion - File I/O",
+    "overview" : "erosion",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "erode",
+            "location" : "<LIBRARY>/include/imgproc/xf_erosion.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

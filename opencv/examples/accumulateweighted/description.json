@@ -1,0 +1,21 @@
+{
+    "example" : "accumulateweighted - File I/O",
+    "overview" : "accumulateweighted",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "accumulateWeighted",
+            "location" : "<LIBRARY>/include/imgproc/xf_accumulate_weighted.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

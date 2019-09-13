@@ -1,0 +1,21 @@
+{
+    "example" : "warptransform - File I/O",
+    "overview" : "warptransform",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "warpTransform",
+            "location" : "<LIBRARY>/include/imgproc/xf_warp_transform.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

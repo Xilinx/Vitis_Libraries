@@ -1,0 +1,21 @@
+{
+    "example" : "remap - File I/O",
+    "overview" : "remap",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "remap",
+            "location" : "<LIBRARY>/include/imgproc/xf_remap.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "example" : "crop - File I/O",
+    "overview" : "crop",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "crop",
+            "location" : "<LIBRARY>/include/imgproc/xf_crop.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

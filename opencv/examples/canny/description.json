@@ -1,0 +1,26 @@
+{
+    "example" : "canny - File I/O",
+    "overview" : "canny",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "Canny",
+            "location" : "<LIBRARY>/include/imgproc/xf_canny.hpp",
+            "clkid" : "2"
+        },
+		{
+            "name" : "EdgeTracing",
+            "location" : "<LIBRARY>/include/imgproc/xf_edge_tracing.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

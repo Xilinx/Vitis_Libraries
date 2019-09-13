@@ -1,0 +1,21 @@
+{
+    "example" : "hog - File I/O",
+    "overview" : "hog",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "HOGDescriptor",
+            "location" : "<LIBRARY>/include/imgproc/xf_hog_descriptor.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

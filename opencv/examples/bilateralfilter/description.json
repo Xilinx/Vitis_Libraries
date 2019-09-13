@@ -1,0 +1,21 @@
+{
+    "example" : "bilateralfilter - File I/O",
+    "overview" : "bilateralfilter",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "bilateralFilter",
+            "location" : "<LIBRARY>/include/imgproc/xf_bilateral_filter.hpp",
+            "clkid" : "2"
+        }
+    ]
+}
