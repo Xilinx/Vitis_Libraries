@@ -1,0 +1,17 @@
+bin*
+obj*
+xo*
+xclbin*
+_x_*
+.Xil
+*.csv
+*.log
+*.swp
+*.swo
+*.vim
+*.prj
+t*.exe
+a.out
+xrt_*.csv
+profile*
+vivado.jou
