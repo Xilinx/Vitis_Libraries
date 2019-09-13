@@ -1,0 +1,8 @@
+*.swp
+*.swo
+*.wdb
+*.wcfg
+*.protoinst
+sample_*.ini
+jks.*
+TestResults
