@@ -1,0 +1,59 @@
+.. 
+   Copyright 2019 Xilinx, Inc.
+  
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+*************************************************
+Internal Design of Inflation CapFloor Engine
+*************************************************
+
+
+Overview
+========
+A inflation option can be a cap/floor. the inflation Cap/Floor is a call/put on the inflation rates. 
+
+Implemention
+============
+the YoYInflationBlackCapFloorEngine is year-on-year inflation cap/floor engine based on black formula. The structure of the engine is shown as the figure below:
+
+.. _my-figure1:
+.. figure:: /images/inflationEngine.png
+    :alt: Figure 1 architecture on FPGA
+    :width: 80%
+    :align: center
+
+As we can see from the figure, the engine mainly incudes 4 functions.
+
+1. function discountFactor: the discount factor is calculated at the corresponding time point.
+2. function totalVariance: the total variance of volatility is calculated at the corresponding time point.
+3. function yoyRateImpl: the year-on-year forward rate is is calculated at the corresponding time point.
+4. function blackFormula: the black formula calculates the value of the option based on the results of the above three functions.
+
+Finally, adding the values of each time point is the final pricing value.
+
+Profiling
+=========
+
+The hardware resources are listed in the following table (vivado 19.1 report).
+
+.. table:: Table 1 Hardware resources
+    :align: center
+
+    +------------------------------------+----------+----------+----------+----------+---------+-----------------+
+    |  Engine                            |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | clock period(ns)|
+    +------------------------------------+----------+----------+----------+----------+---------+-----------------+
+    |  YoYInflationBlackCapFloorEngine   |    0     |    0     |    170   |   33129  |  31999  |       3.210     |
+    +------------------------------------+----------+----------+----------+----------+---------+-----------------+
+
+
