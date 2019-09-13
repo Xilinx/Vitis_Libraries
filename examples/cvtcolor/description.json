@@ -1,0 +1,21 @@
+{
+    "example" : "cvtcolor - File I/O",
+    "overview" : "cvtcolor",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "bgr2gray",
+            "location" : "<LIBRARY>/include/imgproc/xf_cvt_color.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "example" : "addweighted - File I/O",
+    "overview" : "addweighted",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "addWeighted",
+            "location" : "<LIBRARY>/include/imgproc/xf_add_weighted.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

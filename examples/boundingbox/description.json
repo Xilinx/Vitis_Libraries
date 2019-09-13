@@ -1,0 +1,21 @@
+{
+    "example" : "boundingbox - File I/O",
+    "overview" : "boundingbox",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "boundingbox",
+            "location" : "<LIBRARY>/include/imgproc/xf_boundingbox.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

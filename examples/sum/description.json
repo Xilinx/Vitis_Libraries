@@ -1,0 +1,21 @@
+{
+    "example" : "sum - File I/O",
+    "overview" : "sum",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "sum",
+            "location" : "<LIBRARY>/include/imgproc/xf_sum.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

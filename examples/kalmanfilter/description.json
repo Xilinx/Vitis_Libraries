@@ -1,0 +1,21 @@
+{
+    "example" : "KalmanFilter - File I/O",
+    "overview" : "KalmanFilter",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "KalmanFilter",
+            "location" : "<LIBRARY>/include/video/xf_kalmanfilter.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "example" : "meanstddev - File I/O",
+    "overview" : "meanstddev",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "meanStdDev",
+            "location" : "<LIBRARY>/include/core/xf_mean_stddev.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

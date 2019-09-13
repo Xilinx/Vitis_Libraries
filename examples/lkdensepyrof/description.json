@@ -1,0 +1,26 @@
+{
+    "example" : "lkdensepyrof - File I/O",
+    "overview" : "lkdensepyrof",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "PyrDown",
+            "location" : "<LIBRARY>/include/video/xf_pyr_dense_optical_flow_wrapper.hpp",
+            "clkid" : "2"
+        },
+		{
+            "name" : "DensePyrOpticalFlow",
+            "location" : "<LIBRARY>/include/video/xf_pyr_dense_optical_flow_wrapper.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

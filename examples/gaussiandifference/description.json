@@ -1,0 +1,36 @@
+{
+    "example" : "gaussiandifference - File I/O",
+    "overview" : "gaussiandifference",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+       {
+            "name" : "GaussianBlur",
+            "location" : "<LIBRARY>/include/imgproc/xf_gaussian_filter.hpp",
+            "clkid" : "2"
+        },
+		{
+            "name" : "duplicateMat",
+            "location" : "<LIBRARY>/include/imgproc/xf_duplicateimage.hpp",
+            "clkid" : "2"
+        },
+		{
+            "name" : "delayMat",
+            "location" : "<LIBRARY>/include/imgproc/xf_delay.hpp",
+            "clkid" : "2"
+        },
+		{
+            "name" : "subtract",
+            "location" : "<LIBRARY>/include/core/xf_arithm.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

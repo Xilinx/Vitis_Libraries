@@ -1,0 +1,21 @@
+{
+    "example" : "boxfilter - File I/O",
+    "overview" : "boxfilter",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "boxFilter",
+            "location" : "<LIBRARY>/include/imgproc/xf_box_filter.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "example" : "sgbm - File I/O",
+    "overview" : "sgbm",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "SemiGlobalBM",
+            "location" : "<LIBRARY>/include/imgproc/xf_sgbm.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

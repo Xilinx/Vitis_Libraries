@@ -1,0 +1,21 @@
+{
+    "example" : "reduce - File I/O",
+    "overview" : "reduce",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "reduce",
+            "location" : "<LIBRARY>/include/imgproc/xf_reduce.hpp",
+            "clkid" : "2"
+        }
+    ]
+}

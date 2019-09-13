@@ -1,0 +1,21 @@
+{
+    "example" : "convertScaleAbs - File I/O",
+    "overview" : "convertScaleAbs",
+    "board" : [
+        "zcu102",
+        "zcu104"
+    ],
+    "os" : [
+        "Linux"
+    ],
+    "system" : {
+        "dmclkid" : "2"
+    },
+    "accelerators" : [
+        {
+            "name" : "convertScaleAbs",
+            "location" : "<LIBRARY>/include/imgproc/xf_convertScaleAbs.hpp",
+            "clkid" : "2"
+        }
+    ]
+}
