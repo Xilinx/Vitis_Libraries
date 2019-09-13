@@ -1,0 +1,8 @@
+*.back
+*.swp
+*.bu
+*prj*
+*proj*
+*.log
+*~
+dummy_*
