@@ -25,7 +25,7 @@
 #define XF_BLAS_UTILS_HPP
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 // Helper macros for renaming kernel
 #define PASTER(x, y) x##y
@@ -74,6 +74,6 @@ class AdderDelay<float> {
     static const unsigned int m_Delays = 1 << m_logDelays;
 };
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

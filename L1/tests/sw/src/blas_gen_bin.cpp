@@ -27,7 +27,7 @@
 #include "blas_def.hpp"
 
 using namespace std;
-using namespace xf::linear_algebra::blas;
+using namespace xf::blas;
 
 void to_upper(string& p_str) {
     for_each(p_str.begin(), p_str.end(), [](char& c) { c = toupper(c); });

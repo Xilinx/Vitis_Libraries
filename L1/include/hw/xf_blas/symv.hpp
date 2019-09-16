@@ -28,7 +28,7 @@
 #include "axpy.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
@@ -98,7 +98,7 @@ void symv(const unsigned int p_n,
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

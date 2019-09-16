@@ -34,7 +34,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename T, unsigned int t_Width, unsigned int t_DataWidth = sizeof(T) * 8>
@@ -284,6 +284,6 @@ class WideConv {
 };
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif
