@@ -21,14 +21,22 @@
 
 extern "C" {
 
-void kernel_getrf_0(double* A) {
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = A latency = 64 num_read_outstanding = \
-    16 num_write_outstanding = 16 max_read_burst_length = 64 max_write_burst_length = 64 depth = 16 * 16
+void kernel_getrf_0(double* A, int* P) {
+// clang-format off
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = A latency = 64 \
+  num_read_outstanding = 16 num_write_outstanding = 16 \
+  max_read_burst_length = 64 max_write_burst_length = 64 depth=16*16
 
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = P latency = 64 \
+  num_read_outstanding = 16 num_write_outstanding = 16 \
+  max_read_burst_length = 64 max_write_burst_length = 64 depth=16
+
+// clang-format on
 #pragma HLS INTERFACE s_axilite port = A bundle = control
+#pragma HLS INTERFACE s_axilite port = P bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     int info;
-    xf::solver::getrf<double, NRC, NRC, NCU>(NRC, NRC, A, NRC, info);
+    xf::solver::getrf<double, NRC, NCU>(NRC, A, NRC, P, info);
 };
 };

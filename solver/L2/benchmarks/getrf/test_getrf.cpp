@@ -124,24 +124,30 @@ int main(int argc, const char* argv[]) {
 
     // Initialization of host buffers
 
-    const int MAXN = 16, LDA = 16;
+    const int MAXN = 16;
     int inout_size = MAXN * MAXN;
     double* dataA = aligned_alloc<double>(inout_size);
+    double* dataP = aligned_alloc<double>(MAXN);
 
     // Generate general matrix dataAN x dataAN
     matGen<double>(dataAN, dataAN, seed, dataA);
 
     // DDR Settings
-    std::vector<cl_mem_ext_ptr_t> mext_io(1);
+    std::vector<cl_mem_ext_ptr_t> mext_io(2);
     mext_io[0].flags = XCL_MEM_DDR_BANK0;
     mext_io[0].obj = dataA;
     mext_io[0].param = 0;
+    mext_io[1].flags = XCL_MEM_DDR_BANK0;
+    mext_io[1].obj = dataP;
+    mext_io[1].param = 0;
 
     // Create device buffer and map dev buf to host buf
-    std::vector<cl::Buffer> buffer(1);
+    std::vector<cl::Buffer> buffer(2);
 
     buffer[0] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                            sizeof(double) * inout_size, &mext_io[0]);
+    buffer[1] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                           sizeof(double) * MAXN, &mext_io[1]);
 
     // Data transfer from host buffer to device buffer
     std::vector<std::vector<cl::Event> > kernel_evt(2);
@@ -150,6 +156,7 @@ int main(int argc, const char* argv[]) {
 
     std::vector<cl::Memory> ob_io;
     ob_io.push_back(buffer[0]);
+    ob_io.push_back(buffer[1]);
 
     q.enqueueMigrateMemObjects(ob_io, 0, nullptr, &kernel_evt[0][0]); // 0 : migrate from host to dev
     q.finish();
@@ -157,6 +164,7 @@ int main(int argc, const char* argv[]) {
 
     // Setup kernel
     kernel_getrf.setArg(0, buffer[0]);
+    kernel_getrf.setArg(1, buffer[1]);
     q.finish();
     std::cout << "INFO: Finish kernel setup" << std::endl;
 

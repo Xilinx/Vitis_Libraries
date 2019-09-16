@@ -124,7 +124,7 @@ int main(int argc, const char* argv[]) {
 
     // Initialization of host buffers
 
-    const int MAXN = 16, LDA = 16;
+    const int MAXN = 16;
     int inout_size = MAXN * MAXN;
     double* dataA = aligned_alloc<double>(inout_size);
 

@@ -113,36 +113,34 @@ LoopSweeps:
    The maximum matrix size supported in FPGA is templated by NRMAX and NCMAX.
  *
  * @tparam T data type (support float and double)
- * @tparam NRMAX maximum number of rows for input matrix
- * @tparam NCMAX maximum number of columns for input matrix
+ * @tparam NRMAX maximum number of rows/cols for input matrix
  * @tparam NCU number of computation unit
- * @param[in] m real row number of input matrix
- * @param[in] n real column number of input matrix
+ * @param[in] n real row/col number of input matrix
  * @param[in,out] A input matrix
  * @param[in] lda leading dimention of input matrix A
  * @param[out] info return value, if info=0, the LU factorization is successful
  */
-template <class T, int NRMAX, int NCMAX, int NCU>
-void getrf_nopivot(int m, int n, T* A, int lda, int& info) {
-    const int NRCU = int((NRMAX + NCU - 1) / NCU);
+template <class T, int NMAX, int NCU>
+void getrf_nopivot(int n, T* A, int lda, int& info) {
+    const int NRCU = int((NMAX + NCU - 1) / NCU);
 
-    T matA[NCU][NRCU][NCMAX];
+    T matA[NCU][NRCU][NMAX];
 #pragma HLS array_partition variable = matA dim = 1 complete
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
 // #pragma HLS resource variable=matA core=RAM_2P_BRAM
 
 LoopRead:
-    for (int r = 0; r < m; r++) {
+    for (int r = 0; r < n; r++) {
         for (int c = 0; c < n; c++) {
 #pragma HLS pipeline
             matA[r % NCU][r / NCU][c] = A[lda * r + c];
         };
     };
 
-    internal::getrf_nopivot_core<T, NRCU, NCMAX, NCU>(m, n, matA, lda);
+    internal::getrf_nopivot_core<T, NRCU, NMAX, NCU>(n, n, matA, lda);
 
 LoopWrite:
-    for (int r = 0; r < m; r++) {
+    for (int r = 0; r < n; r++) {
         for (int c = 0; c < n; c++) {
 #pragma HLS pipeline
             A[r * lda + c] = matA[r % NCU][r / NCU][c];

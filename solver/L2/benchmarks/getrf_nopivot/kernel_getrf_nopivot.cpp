@@ -22,13 +22,15 @@
 extern "C" {
 
 void kernel_getrf_nopivot_0(double* A) {
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = A latency = 64 num_read_outstanding = \
-    16 num_write_outstanding = 16 max_read_burst_length = 64 max_write_burst_length = 64 depth = 16 * 16
+// clang-format off
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = A latency = 64 num_read_outstanding = 16 \
+    num_write_outstanding = 16 max_read_burst_length = 64 max_write_burst_length = 64 depth = 16*16
 
+// clang-format on
 #pragma HLS INTERFACE s_axilite port = A bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     int info;
-    xf::solver::getrf_nopivot<double, NRC, NRC, NCU>(NRC, NRC, A, NRC, info);
+    xf::solver::getrf_nopivot<double, NRC, NCU>(NRC, A, NRC, info);
 };
 };

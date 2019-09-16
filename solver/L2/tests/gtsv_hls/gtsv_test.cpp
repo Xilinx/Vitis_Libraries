@@ -63,6 +63,10 @@ int main() {
         matDiagUp2[i] = -1.0;
         rhs2[i] = 0.0;
     };
+    matDiagLow1[0] = 0.0;
+    matDiagLow2[0] = 0.0;
+    matDiagUp1[NRC - 1] = 0.0;
+    matDiagUp2[NRC - 1] = 0.0;
     rhs1[0] = 1.0;
     rhs1[NRC - 1] = 1.0;
     rhs2[0] = 1.0;
@@ -70,30 +74,15 @@ int main() {
 
     top_gtsv(NRC, matDiagLow1, matDiag1, matDiagUp1, rhs1);
 
-    for (int i = 0; i < NRC; i++) {
-        std::cout << rhs1[i] << std::endl;
-    }
+    // for (int i = 0; i < NRC; i++) {
+    //     std::cout << rhs1[i] << std::endl;
+    // }
 
     int info = 0;
     for (int i = 0; i < NRC; i++) {
-        if (i == 0) {
-            double r = matDiag1[i] * rhs1[i] + matDiagUp1[i] * rhs1[i + 1];
-            if (r != rhs2[i]) {
-                info = 1;
-                break;
-            }
-        } else if (i == (NRC - 1)) {
-            double r = matDiagLow1[i - 1] * rhs1[i - 1] + matDiag1[i] * rhs1[i];
-            if (r != rhs2[i]) {
-                info = 1;
-                break;
-            }
-        } else {
-            double r = matDiagLow1[i - 1] * rhs1[i - 1] + matDiag1[i] * rhs1[i] + matDiagUp1[i] * rhs1[i + 1];
-            if (r != rhs2[i]) {
-                info = 1;
-                break;
-            }
+        double err = std::abs(rhs1[i] - 1.0);
+        if (err > 1e-10) {
+            info = 1;
         }
     }
 

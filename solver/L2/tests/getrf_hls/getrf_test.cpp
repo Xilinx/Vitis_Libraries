@@ -16,9 +16,6 @@
 
 #include "xf_solver_L2.hpp"
 
-#define NRC 16
-#define NCU 1
-
 #ifndef __SYNTHESIS__
 #include "matrixUtility.hpp"
 #include <fstream>
@@ -28,75 +25,168 @@
 #include <string.h>
 #endif
 
-void top_getrf(double* A) {
+#define N 16
+#define NCU 1
+#define DT double
+
+void top_getrf(DT* A, int* P, int matrixSize) {
 // clang-format off
-#pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = A latency = 64 num_read_outstanding = \
-    16 num_write_outstanding = 16 max_read_burst_length = 64 max_write_burst_length = 64 depth = 16*16
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = A latency = 64 \
+  num_read_outstanding = 16 num_write_outstanding = 16 \
+  max_read_burst_length = 64 max_write_burst_length = 64 depth=16*16
+
+#pragma HLS INTERFACE m_axi offset = slave bundle = gmem0 port = P latency = 64 \
+  num_read_outstanding = 16 num_write_outstanding = 16 \
+  max_read_burst_length = 64 max_write_burst_length = 64 depth=16
 
 // clang-format on
 #pragma HLS INTERFACE s_axilite port = A bundle = control
+#pragma HLS INTERFACE s_axilite port = P bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     int info;
-    xf::solver::getrf<double, NRC, NRC, NCU>(NRC, NRC, A, NRC, info);
+    xf::solver::getrf<DT, N, NCU>(matrixSize, A, matrixSize, P, info);
 };
 
 #ifndef __SYNTHESIS__
 
-int main() {
-    double A[NRC * NRC];
+int main(int argc, char* argv[]) {
+    bool run_csim = true;
+    if (argc >= 2) {
+        run_csim = std::stoi(argv[1]);
+        if (run_csim) std::cout << "run csim for funcion verify\n";
+    }
+    // Vectors for input matrix row count and column count
+    // First add special cases
+    std::vector<int> NR = {4, 0, 1, 2, 3, 5, 7, 36, 56, 512, 513};
 
-    double** L = new double*[NRC];
-    double** U = new double*[NRC];
-    for (int i = 0; i < NRC; i++) {
-        L[i] = new double[NRC];
-        U[i] = new double[NRC];
+    // Then add sizes 1x1, 2x2, ...
+    for (int i = 1; i <= N; ++i) {
+        NR.push_back(i);
     }
 
-    unsigned int seedL = 2;
-    unsigned int seedU = 3;
-    triLowerMatGen<double>(NRC, seedL, L);
-    triLowerMatGen<double>(NRC, seedU, U);
+    bool allValid = true;
 
-    for (int i = 0; i < NRC; i++) {
-        L[i][i] = 1.0;
+    int runNm;
+    if (run_csim) {
+        runNm = NR.size();
+    } else {
+        runNm = 1;
     }
 
-    for (int i = 0; i < NRC; i++) {
-        for (int j = 0; j < NRC; j++) {
-            A[i * NRC + j] = 0.0;
-            for (int k = 0; k < NRC; k++) {
-                A[i * NRC + j] += L[i][k] * U[j][k];
+    DT* A = new DT[N * N];
+    DT* A1 = new DT[N * N];
+
+    DT** L = new DT*[N];
+    DT** U = new DT*[N];
+    for (int i = 0; i < N; i++) {
+        L[i] = new DT[N];
+        U[i] = new DT[N];
+    }
+    int* P = new int[N];
+
+    // generate matrix and test
+    for (int idx = 0; idx != runNm; ++idx) {
+        int kRows = NR[idx];
+
+        // Skip some big matricies to shorten test duration
+        if (kRows > 30) {
+            continue;
+        }
+
+        std::cout << "Matrix Size : " << kRows << "x" << kRows << "...\n";
+
+        // Handle invalid settings and input sizes
+        if (N <= 0) {
+            continue;
+        }
+        if (kRows <= 0 || kRows > N) {
+            continue;
+        }
+
+        // L, U
+        unsigned int seedL = 2;
+        unsigned int seedU = 3;
+        triLowerMatGen<DT>(kRows, seedL, L);
+        triLowerMatGen<DT>(kRows, seedU, U);
+
+        for (int i = 0; i < kRows; i++) {
+            L[i][i] = 1.0;
+        }
+
+        // A = L * U
+        for (int i = 0; i < kRows; i++) {
+            for (int j = 0; j < kRows; j++) {
+                A[i * kRows + j] = 0.0;
+                for (int k = 0; k < kRows; k++) {
+                    A[i * kRows + j] += L[i][k] * U[j][k];
+                }
+                A1[i * kRows + j] = A[i * kRows + j];
             }
         }
-    }
 
-    // top
-    top_getrf(A);
+        // top: LU decomposition
+        top_getrf(A, P, kRows);
 
-    int info = 0;
-    for (int i = 0; i < NRC; i++) {
-        for (int j = 0; j < NRC; j++) {
-            if (i > j) {
-                if (A[i * NRC + j] != L[i][j]) {
-                    info = 1;
+        // compute error
+        DT errsum = 0.0;
+        for (int i = 0; i < kRows; i++) {
+            for (int j = 0; j < kRows; j++) {
+                double z = 0.0;
+                for (int k = 0; k < kRows; k++) {
+                    double x, y;
+                    if (k < i)
+                        x = A[i * kRows + k];
+                    else if (k == i)
+                        x = 1.0;
+                    else
+                        x = 0.0;
+
+                    if (k <= j)
+                        y = A[k * kRows + j];
+                    else
+                        y = 0.0;
+
+                    z += x * y;
                 }
-            } else {
-                if (A[i * NRC + j] != U[j][i]) {
-                    info = 1;
-                }
-            };
+                DT err = z - A1[P[i] * kRows + j];
+                errsum += err * err;
+            }
         }
-    }
 
-    for (int i = 0; i < NRC; i++) {
+        int info = 0;
+        if (errsum > 1e-10) {
+            std::cout << errsum << std::endl;
+            info = 1;
+            allValid = false;
+        }
+
+        if (info == 1) {
+            std::cout << "Input matrix : " << kRows << "x" << kRows << " FAIL\n";
+        }
+    };
+
+    for (int i = 0; i < N; i++) {
         delete[] L[i];
         delete[] U[i];
     }
+    delete[] A;
+    delete[] A1;
     delete[] L;
     delete[] U;
+    delete[] P;
 
-    return info;
+    std::cout << "-------------- " << std::endl;
+    if ((!allValid)) {
+        std::cout << "result false" << std::endl;
+        std::cout << "-------------- " << std::endl;
+        return -1;
+    } else {
+        std::cout << "result correct" << std::endl;
+        std::cout << "-------------- " << std::endl;
+        return 0;
+    }
+    std::cout << "-------------- " << std::endl;
 };
 
 #endif
