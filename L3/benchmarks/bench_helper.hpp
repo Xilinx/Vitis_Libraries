@@ -97,4 +97,4 @@ bool readConfigDict(string p_configFile, unordered_map<string, string>* p_config
     return true;
 }
 
-#endif 
+#endif
