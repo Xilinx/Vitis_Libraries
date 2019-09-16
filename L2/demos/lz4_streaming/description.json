@@ -1,0 +1,92 @@
+{
+    "runtime": ["OpenCL"],
+    "example" : "LZ4",
+    "overview" : [
+        "Xilinx implementation of LZ4 application is aimed at achieving high throughput for both compression and decompression."
+    ],
+    "os": [
+        "Linux"
+    ],
+    "include_paths": [
+            "GIT_REPO/common/libs/xcl2/",
+            "GIT_REPO/common/libs/cmdparser/",
+            "GIT_REPO/common/libs/logger/",
+            "GIT_REPO/common/thirdParty/xxhash/"
+    ], 
+    "host_srcs": [
+        "./src/host.cpp",
+        "./src/xil_lz4_streaming.cpp",
+        "GIT_REPO/common/libs/xcl2/xcl2.cpp",
+        "GIT_REPO/common/libs/cmdparser/cmdlineparser.cpp",
+        "GIT_REPO/common/libs/logger/logger.cpp",
+        "GIT_REPO/common/thirdParty/xxhash/xxhash.c"
+    ],
+    "host_hdrs": [
+        "./src/xil_lz4_streaming.hpp",
+        "./src/xil_lz4_config.h",
+        "GIT_REPO/common/libs/xcl2/xcl2.hpp",
+        "GIT_REPO/common/libs/cmdparser/cmdlineparser.h",
+        "GIT_REPO/common/libs/logger/logger.h",
+        "GIT_REPO/common/thirdParty/xxhash/xxhash.h"
+    ],
+    "host_exe": "xil_lz4_streaming",
+    "config_make" : "config.mk",
+    "cmd_args": "./xil_lz4_streaming -cx BUILD/compress.xclbin -dx BUILD/decompress.xclbin -l ../cantrbry.list",
+    "containers": [
+        {
+            "name": "compress",
+            "clflags": "--xp param:compiler.enableAutoPipelining=false -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)", 
+            "ldclflags": "--xp vivado_param:project.writeIntermediateCheckpoints=1",
+            "accelerators": [
+                {
+                    "kernel_name": "xil_lz4_cu1",
+                    "srcs": "../../src/hw/xil_lz4_compress_stream_kernel.cpp",
+                    "include_path": [
+                        "GIT_REPO/L1/include/hw/",
+                        "./src/"
+                    ],
+                    "clflags": "-DC_COMPUTE_UNIT=1"
+                },
+                {
+                    "kernel_name": "xil_lz4_cu2",
+                    "srcs": "../../src/hw/xil_lz4_compress_stream_kernel.cpp",
+                    "include_path": [
+                        "GIT_REPO/L1/include/hw/",
+                        "./src/"
+                    ],
+                    "clflags": "-DC_COMPUTE_UNIT=2"
+                }
+            ]
+        }, 
+        {
+            "name": "decompress",
+            "ldclflags": "--xp vivado_param:project.writeIntermediateCheckpoints=1",
+            "accelerators": [
+                {
+                    "kernel_name": "xil_lz4_dec_cu1", 
+                    "srcs": "../../src/hw/xil_lz4_decompress_stream_kernel.cpp",
+                    "include_path": [
+                        "GIT_REPO/L1/include/hw/",
+                        "./src/"
+                    ],
+                    "clflags": "-DD_COMPUTE_UNIT=1"
+                },
+                {
+                    "kernel_name": "xil_lz4_dec_cu2", 
+                    "srcs": "../../src/hw/xil_lz4_decompress_stream_kernel.cpp",
+                    "include_path": [
+                        "GIT_REPO/L1/include/hw/",
+                        "./src/"
+                    ],
+                    "clflags": "-DD_COMPUTE_UNIT=2"
+                }
+             ]
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ] 
+}
