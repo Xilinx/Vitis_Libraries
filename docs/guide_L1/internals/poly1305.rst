@@ -1,0 +1,56 @@
+.. 
+   Copyright 2019 Xilinx, Inc.
+  
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+******************
+Poly1305 Algorithm
+******************
+
+.. toctree::
+   :maxdepth: 1
+
+Overview
+========
+
+The Poly1305 is a cryptographic message authentication code (MAC) created by Daniel J. Bernstein. It can be used to verify the data integrity and the authenticity of a message (from viki).
+
+The Poly1305 algorithm is defined in `RFC 8439`_.
+
+.. _`RFC 8439`: https://tools.ietf.org/html/rfc8439
+
+Implementation on FPGA
+======================
+
+As shown in the above summary of reference 2.5.1, we can know the implementation process of the Poly1305 algorithm. In order to improve the timing and reduce the latency for HLS implementation, we optimize the multiplication and module operations in the algorithm. The optimization idea is:
+
+* In order to improve the timing for multiplication operation, the multiplier and the multiplicand are separated into 27-bit and 18-bit arrays, and the result is multiplied to obtain the final result.
+
+* For module operation :math:`X=mod(A,P)`, where :math:`P=2^{130}-5`, we can do special processing to reduce the latency. Please see the code for details.
+
+Performance
+===========
+
+The hardware resource utilizations are listed in :numref:`tab1SHA1` below:
+
+.. _tab1SHA1:
+
+.. table:: Hardware resources for the Poly1305 (Vivado 2019.1) 
+    :align: center
+
+    +----------+----------+----------+----------+-----------+-----------+-----------------+
+    |   BRAM   |    DSP   |    FF    |    LUT   |    CLB    |    SRL    | clock period(ns)|
+    +----------+----------+----------+----------+-----------+-----------+-----------------+
+    |     0    |     65   |   5776   |   2409   |   727     |    92     |      2.920      |
+    +----------+----------+----------+----------+-----------+-----------+-----------------+
+
