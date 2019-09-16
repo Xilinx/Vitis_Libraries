@@ -1,0 +1,85 @@
+..
+   Copyright 2019 Xilinx, Inc.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+****************************************
+Internal Design of Closed Form Merton 76
+****************************************
+
+Overview
+========
+
+The Merton 76 model (or Merton Jump Diffusion model) models the dynamics of a financial market; it adds a random jump aspect to the Black-Scholes model.
+
+
+Design Structure
+================
+
+There are two layers to the kernel; the engine itself and the IO wrapper.
+
+The Engine (M76Engine.hpp)
+===========================
+
+The engine performs a single Merton 76 Closed Form solution for a European Call Option in two parts. The first part calculates a series of Black Scholes solutions weighted by the random jump variable (Poisson Distribution). The second part sums these results to form the overall call price. The engine is split into two parts in order to minimise the latency (maximise throughput) of the overall design. The engine is pipelined in order to maximise throughput when dealing with multiple call price calculations. The combination of nested loops and the inner loop being a summing loop makes pipelining difficult. So the summing loop is taken out of the engine loop in order to mitigate this. 
+
+The m76 engine makes use of the Black Scholes Closed Form kernel. The Greeks are calculated by the Black Scholes kerenl but are ignored by the m76 kernel.
+
+The engine by default sums 100 iterations of weighted Black Scholes. This can be changed with the #define MAX_N in m76_engine_defn.hpp
+
+
+IO Wrapper (m76_kernel.cpp)
+===========================
+
+The wrapper takes as input an array of parameter data and iterates through the array calling the Engine for each entry. The results are returned as an array. This is done in order to make efficient use of DMA to and from the FPGA; one batch data transaction being much faster than multiple single transactions. The data is first read from global memory into local memory, then processed and finally the output data copied from local memory back to global memory. This is done because the extra time required by the copies is more than compensated for by the speedup of the Engine accessing local memory.
+
+The wrapper will process up to 2048 calculations in one batch. This number can be increased at the expense of memory in the FPGA but will give performance advantages when processing large amounts of data due to the kernel's pipelining.
+
+In order to speed up kernel execution for a large number of calculations, the input array and the sum array have been partitioned by a factor of 8. The engine inner loop has been unrolled which creates 8 engines working in parallel. The array partitioning is needed to let multiple read accesses from the engines to happen in the same clock cycle. The partition factor of 8 is a balance between efficiency and the amount of resource required in the FPGA.
+
+
+Resource Utilization
+====================
+
+The floating point kernel Area Information:
+
+:FF:         136311 (17% of SLR on u200 board)  
+:LUT:        132573 (33% of SLR on u200 board)   
+:DSP:        718 (31% of SLR on u200 board)
+:BRAM:       548 (38% of SLR on u200 board)
+:URAM:       0
+
+
+Throughput
+==========
+
+The theoretical throughput depends on different factors. A floating point kernel will be faster than a double kernel. A larger MAX_N will provide more accurate results but will decrease throughput. The kernel has been pipelined in order to increase the throughput when a large number of inputs is to be processed.
+
+Throughput is composed of three processes; transferring data to the FPGA, running the computations and transferring the results back from the FPGA. The demo contains options to measure timings as described in the README.md file.
+
+As an example, processing a batch of 2048 call calculations with a floating point kernel with MAX_N = 100 breaks down as follows:
+
+Time to transfer data = 0.207ms
+
+Time for 2048 calculations = 0.969ms (equates to ~0.47us per calculation)
+
+Time to transfer results = 0.078ms
+
+
+
+
+
+
+.. toctree::
+   :maxdepth: 1
