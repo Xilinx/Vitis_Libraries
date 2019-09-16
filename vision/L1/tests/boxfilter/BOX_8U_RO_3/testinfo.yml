@@ -1,0 +1,10 @@
+owner : ckreddy
+level : 6
+memory : 20
+description : Auviz design - xF::BOX_8U_RO_3
+id : 1047
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : xF::BOX_8U_RO_3

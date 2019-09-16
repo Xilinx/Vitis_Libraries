@@ -1,0 +1,11 @@
+owner : ckreddy
+level : 6
+memory : 20
+description : Auviz design - xF::Harris_331_No
+id : 1062
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::Harris_331_No
+    subset_test : 1

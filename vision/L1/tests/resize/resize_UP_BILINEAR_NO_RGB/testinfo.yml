@@ -1,0 +1,10 @@
+owner : maheshm
+level : 6
+memory : 20
+description : Auviz design - xF::resize_UP_BILINEAR_NO_RGBA
+id : 1127
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::resize_UP_BILINEAR_NO_RGBA

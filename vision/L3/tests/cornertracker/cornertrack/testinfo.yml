@@ -1,0 +1,9 @@
+owner : nkpavan
+level : 6
+memory : 20
+description : Auviz design - CornerTracker
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : CornerTracker

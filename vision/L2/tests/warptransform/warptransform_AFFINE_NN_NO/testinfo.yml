@@ -1,0 +1,11 @@
+owner : nkpavan
+level : 6
+memory : 20
+description : Auviz design - warptransform_AFFINE_NN_NO
+id : 1112
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : warptransform_AFFINE_NN_NO
+    subset_test : 1

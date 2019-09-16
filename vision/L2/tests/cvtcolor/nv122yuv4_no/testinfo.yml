@@ -1,0 +1,10 @@
+owner : mounikag
+level : 6
+memory : 20
+description : Auviz design - xF::nv122yuv4_no
+id : 1203
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::nv122yuv4_no

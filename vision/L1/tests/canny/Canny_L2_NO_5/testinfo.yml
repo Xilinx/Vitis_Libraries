@@ -1,0 +1,11 @@
+owner : ckreddy
+level : 6
+memory : 20
+description : Auviz design - xF::Canny_L2_NO_5
+id : 1016
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::Canny_L2_NO_5
+    subset_test : 1

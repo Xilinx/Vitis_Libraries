@@ -1,0 +1,10 @@
+owner : gouthamb
+level : 6
+memory : 20
+description : Auviz design - channel_combine_NO
+id : 1138
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : channel_combine_NO

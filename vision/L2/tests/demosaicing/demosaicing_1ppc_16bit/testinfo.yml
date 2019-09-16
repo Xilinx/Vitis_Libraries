@@ -1,0 +1,10 @@
+owner : varuns
+level : 6
+memory : 20
+description : demosaicing_1ppc_16bit
+id : 1812
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xf::demosaicing_1ppc_16bit

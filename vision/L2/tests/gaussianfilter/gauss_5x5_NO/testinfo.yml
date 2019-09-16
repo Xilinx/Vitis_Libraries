@@ -1,0 +1,10 @@
+owner : gouthamb
+level : 6
+memory : 20
+description : Auviz design - xF::Gaussian_5x5_NO
+id : 1006
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::Gaussian_5x5_NO

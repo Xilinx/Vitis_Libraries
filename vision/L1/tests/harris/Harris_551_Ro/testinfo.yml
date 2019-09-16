@@ -1,0 +1,10 @@
+owner : ckreddy
+level : 6
+memory : 20
+description : Auviz design - xF::Harris_551_Ro
+id : 1088
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : xF::Harris_551_Ro

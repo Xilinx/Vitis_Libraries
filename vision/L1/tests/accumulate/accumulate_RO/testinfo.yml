@@ -1,0 +1,10 @@
+owner : gouthamb
+level : 4
+memory : 20
+description : Auviz design - xF::accumulate_RO
+id : 1027
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : xF::accumulate_RO

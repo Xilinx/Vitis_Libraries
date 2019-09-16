@@ -1,0 +1,10 @@
+owner : gouthamb
+level : 6
+memory : 20
+description : Auviz design - xF::bitwise_or
+id : 1038
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : xF::bitwise_or

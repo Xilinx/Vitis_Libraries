@@ -1,0 +1,10 @@
+owner : ckreddy
+level : 6
+memory : 20
+description : Auviz design - xF::Magnitude_NO_L2
+id : 1023
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::Magnitude_NO_L2
