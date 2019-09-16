@@ -1,0 +1,10 @@
+owner : nkpavan
+level : 6
+memory : 20
+description : Auviz design - pyrup_NO_RGBA
+id : 1108
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : pyrup_NO_RGBA

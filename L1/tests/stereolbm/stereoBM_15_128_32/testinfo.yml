@@ -1,0 +1,10 @@
+owner : akashsun
+level : 6
+memory : 20
+description : Auviz design - stereoBM_config_15_128_32
+id : 1033
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : stereoBM_config_15_128_32

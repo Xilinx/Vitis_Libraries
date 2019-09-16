@@ -1,0 +1,11 @@
+#define WIDTH 128
+#define HEIGHT 2160
+#define __SDSOC 1
+#define RO 0
+#define NO 1
+#define FILTER_SIZE_3 0
+#define FILTER_SIZE_5 1
+#define FILTER_SIZE_7 0
+
+#define GRAY 1
+#define RGB 0

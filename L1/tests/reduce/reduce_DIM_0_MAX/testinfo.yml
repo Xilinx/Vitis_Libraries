@@ -1,0 +1,10 @@
+owner : mounikag
+level : 6
+memory : 20
+description : Auviz design - xF::reduce_dim_0_max
+id : 1131
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::reduce_dim_0_max

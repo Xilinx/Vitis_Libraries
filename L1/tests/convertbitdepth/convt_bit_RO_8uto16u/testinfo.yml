@@ -1,0 +1,10 @@
+owner : gouthamb
+level : 6
+memory : 20
+description : Auviz design - convt_bit_NO_8uto16S
+id : 1146
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : convt_bit_NO_8uto16S

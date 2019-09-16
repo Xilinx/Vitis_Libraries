@@ -1,0 +1,10 @@
+owner : ckreddy
+level : 6
+memory : 20
+description : Auviz design - xF::FAST_RO_NON_NMS
+id : 1118
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : xF::FAST_RO_NON_NMS

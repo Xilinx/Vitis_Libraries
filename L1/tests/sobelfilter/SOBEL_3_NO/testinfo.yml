@@ -1,0 +1,10 @@
+owner : ckreddy
+level : 6
+memory : 20
+description : Auviz design - xF::SOBEL_3_NO
+id : 1169
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::SOBEL_3_NO

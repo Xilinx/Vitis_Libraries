@@ -1,0 +1,11 @@
+owner : gouthamb
+level : 6
+memory : 20
+description : Auviz design - otsu_RO
+id : 1136
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : otsu_RO
+    subset_test : 1

@@ -1,0 +1,12 @@
+owner : maheshm
+level : 6
+memory : 20
+description : kalmanfilter_128state
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : kalmanfilter_128state
+    excl_platforms :
+                   - zcu104
+                   - /proj/fisdata/fisusr/sandboxes/ckohn/2018.3_daily_latest/zcu104_rv_ss/

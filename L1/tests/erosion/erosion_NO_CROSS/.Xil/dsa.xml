@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root VersionMajor="1" VersionMinor="13">
+  <GenAppInfo Name="Vivado" Version="2018.3" CL="2405991" TimeStamp="Fri Dec  7 00:32:23 2018"/>
+  <DSA Vendor="xilinx.com" BoardId="zcu102" Name="zcu102" VersionMajor="1" VersionMinor="0" Description="" FeatureRomTimestamp="0" DcpLogicFunctionStripped="false" DcpEncrypt="false" Unified="true" Fixed="false">
+    <Build UsesPR="false" PlatformState="pre_synth" TopModuleName="zcu102_wrapper"/>
+    <Board Name="xilinx.com:zcu102:3.2" Vendor="xilinx.com" Part="xczu9eg-ffvb1156-2-e" BoardPart="xilinx.com:zcu102:part0:3.2">
+      <Images>
+        <Img Type="HDPI" File="zcu102_board.jpeg"/>
+        <Img Type="MDPI" File=""/>
+        <Img Type="LDPI" File=""/>
+      </Images>
+    </Board>
+    <Devices>
+      <Device Name="fpga0" Type="8" FpgaDevice="zynquplus:xczu9eg:ffvb1156:-2:e">
+        <Core Name="OCL_REGION_0" Type="clc_region" ComputeUnits="60" DRBDName="zcu102.bd"/>
+      </Device>
+    </Devices>
+    <Files>
+      <File Type="EMU_XML" Name="emu/emu.xml"/>
+      <File Type="HPFM" Name="zcu102.hpfm"/>
+      <File Type="REBUILD_TCL" Name="prj/rebuild.tcl"/>
+      <File Type="IP_CACHE_DIR" Name="ipcache"/>
+    </Files>
+  </DSA>
+</Root>

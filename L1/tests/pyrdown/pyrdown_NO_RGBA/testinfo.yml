@@ -1,0 +1,10 @@
+owner : nkpavan
+level : 6
+memory : 20
+description : Auviz design - pyrdown_NO_RGBA
+id : 1107
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : pyrdown_NO_RGBA

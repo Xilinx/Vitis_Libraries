@@ -1,0 +1,9 @@
+owner : maheshm
+level : 6
+memory : 20
+description : Auviz design - xF::resize_DOWN_NN_RO
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : xF::resize_DOWN_NN_RO

@@ -1,0 +1,11 @@
+owner : mounikag
+level : 6
+memory : 20
+description : Auviz design - xF::min_max_loc_16sno
+id : 1189
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::min_max_loc_16sno
+    subset_test : 1

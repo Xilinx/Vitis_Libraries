@@ -1,0 +1,11 @@
+owner : maheshm
+level : 6
+memory : 20
+description : Auviz design - xF::resize_UP_AREA_NO
+id : 1125
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::resize_UP_AREA_NO
+    subset_test : 1

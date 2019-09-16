@@ -1,0 +1,10 @@
+owner : ckreddy
+level : 6
+memory : 20
+description : Auviz design - xF::Threshold_RO_trunc
+id : 1133
+products : [all]
+user:
+    high_clkid : 2
+    low_clkid : 1
+    design : xF::Threshold_RO_trunc

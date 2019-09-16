@@ -1,0 +1,11 @@
+owner : gouthamb
+level : 6
+memory : 20
+description : Auviz design - xF::arithm_NO_8U_RGBA
+disabled : 1
+id : 1038
+products : [all]
+user:
+    high_clkid : 4
+    low_clkid : 2
+    design : xF::arithm_NO_8U_RGBA
