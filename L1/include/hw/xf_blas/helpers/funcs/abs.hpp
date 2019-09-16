@@ -32,7 +32,7 @@
 #include "hls_stream.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -71,7 +71,7 @@ void abs(unsigned int p_n,
     }
 }
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif
