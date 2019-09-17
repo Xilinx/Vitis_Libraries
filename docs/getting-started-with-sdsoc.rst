@@ -1,7 +1,7 @@
 .. _ariaid-title1:
 
 Getting Started with SDSoC
-==========================
+==============================
 
 This chapter provides the information you need to bring up your design
 using the xfOpenCV library functions.
