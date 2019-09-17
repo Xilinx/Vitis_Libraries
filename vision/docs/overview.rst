@@ -20,10 +20,10 @@ xfOpenCV library functions are mostly similar in functionality to their
 OpenCV equivalent. Any deviations, if present, are documented.
 
 Note: For more information on the xfOpenCV library prerequisites, see
-the `Prerequisites <getting-started-with-sdsoc.html#gyt1504034261161>`__. To
+the Prerequisites <getting-started-with-sdsoc.html#gyt1504034261161>__. To
 familiarize yourself with the steps required to use the xfOpenCV library
-functions, see the `Using the xfOpenCV
-Library <getting-started-with-sdsoc.html#xne1504034261508>`__.
+functions, see the Using the `xfOpenCV
+Library <getting-started-with-sdsoc.html>`__.
 
 .. _basic-features:
 
@@ -45,7 +45,7 @@ properties hold true for all the functions.
 
 The xfOpenCV library contains enumerated datatypes which enables you to
 configure ``xf::Mat``. For more details on ``xf::Mat``, see the `xf::Mat
-Image Container Class <api-reference.html#owg1504034262157>`__.
+Image Container Class <api-reference.html>`__.
 
 .. _xfopencv-kernel:
 
@@ -69,7 +69,7 @@ which all the calls to xfOpenCV functions are moved to hardware.
 Functions from xfOpenCV are used to read and write images in the memory.
 The image containers for xfOpenCV library functions are ``xf::Mat``
 objects. For more information, see the `xf::Mat Image Container
-Class <api-reference.html#owg1504034262157>`__.
+Class <api-reference.html>`__.
 
 The reVISION platform supports both live and file input-output (I/O)
 modes. For more details, see the `reVISION Getting Started
@@ -163,22 +163,7 @@ The following table lists the contents of the xfOpenCV library.
 |                                   | shows how to use xfOpenCV library |
 |                                   | in SDAccel™ environment.          |
 +-----------------------------------+-----------------------------------+
-| HLS_Use_Model                     | Contains examples for using       |
-|                                   | xfOpenCV functions in Standalone  |
-|                                   | Vivado HLS in 2 different modes.  |
-+-----------------------------------+-----------------------------------+
-| HLS_Use_Model/Standalone_HLS_Exam | Contains sample code and Tcl      |
-| ple                               | script for synthesizing xfOpenCV  |
-|                                   | functions as is, in standalone    |
-|                                   | Vivado HLS tool.                  |
-+-----------------------------------+-----------------------------------+
-| HLS_Use_Model/Standalone_HLS_AXI_ | Contains sample code and Tcl      |
-| Example                           | script for synthesizing functions |
-|                                   | with AXI interfaces, in           |
-|                                   | standalone Vivado HLS tool.       |
-+-----------------------------------+-----------------------------------+
+
 
 .. include:: getting-started-with-sdsoc.rst
-.. include:: getting-started-with-sdaccel.rst
-.. include:: getting-started-with-hls.rst
 .. include:: design-examples.rst 

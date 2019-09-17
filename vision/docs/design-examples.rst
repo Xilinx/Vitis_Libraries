@@ -12,14 +12,14 @@ the processor and the programmable logic. These examples also illustrate
 different ways to implement complex dataflow paths. The following
 examples are described in this section:
 
--  `Iterative Pyramidal Dense Optical
-   Flow <design-examples.html#jcr1510602888334>`__
--  `Corner Tracking Using Sparse Optical
-   Flow <design-examples.html#ypx1510602888667>`__
--  `Color Detection <design-examples.html#dyn1510602889272>`__
--  `Difference of Gaussian
-   Filter <design-examples.html#fmq1510602889620>`__
--  `Stereo Vision Pipeline <design-examples.html#pmt1510602889961>`__
+-  Iterative Pyramidal Dense Optical
+   Flow <design-examples.html#jcr1510602888334>__
+-  Corner Tracking Using Sparse Optical
+   Flow <design-examples.html#ypx1510602888667>__
+-  Color Detection <design-examples.html#dyn1510602889272>__
+-  Difference of Gaussian
+   Filter <design-examples.html#fmq1510602889620>__
+-  Stereo Vision Pipeline <design-examples.html#pmt1510602889961>__
 
 .. _interative-pyramidal:
 
