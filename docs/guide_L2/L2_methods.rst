@@ -23,7 +23,6 @@ Linear Solver
    LinearSolver/gtsv/gtsv.rst
    LinearSolver/polinearsolver/polinearsolver.rst
    LinearSolver/pomatrixinverse/pomatrixinverse.rst
-   LinearSolver/potri/potri.rst
    LinearSolver/trtrs/trtrs.rst
 
 Matrix decomposition

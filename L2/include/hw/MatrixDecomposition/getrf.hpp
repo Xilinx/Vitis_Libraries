@@ -27,124 +27,122 @@
 #include <iostream>
 
 namespace xf {
-  namespace solver {
+namespace solver {
 
-    namespace internalgetrf {
+namespace internalgetrf {
 
-      // update submatrix
-      template <class T, int NRCU, int NCMAX>
-      void subUpdate(T A[NRCU][NCMAX], T rows[NCMAX], T cols[NCMAX], int rs, int re, int cs, int ce){
+// update submatrix
+template <class T, int NRCU, int NCMAX>
+void subUpdate(T A[NRCU][NCMAX], T rows[NCMAX], T cols[NCMAX], int rs, int re, int cs, int ce) {
+    T a00 = rows[cs];
 
-        T a00 = rows[cs];
+    T Acs[NRCU];
+    // pragma HLS resource variable=Acs core=XPM_MEMORY uram
 
-        T Acs[NRCU]; 
-// pragma HLS resource variable=Acs core=XPM_MEMORY uram
+    int nrows = re - rs + 1;
+    int ncols = ce - cs;
 
-        int nrows = re - rs + 1;
-        int ncols = ce - cs;
-
-      LoopMulSub:
-        for(unsigned int i=0;i<nrows*ncols;i++){
+LoopMulSub:
+    for (unsigned int i = 0; i < nrows * ncols; i++) {
 #pragma HLS pipeline
-#pragma HLS dependence variable=A inter false
-#pragma HLS loop_tripcount min=1 max=NCMAX*NRCU
+#pragma HLS dependence variable = A inter false
+#pragma HLS loop_tripcount min = 1 max = NCMAX * NRCU
 
-          int r = i / ncols + rs;
-          int c = i % ncols + cs + 1;
+        int r = i / ncols + rs;
+        int c = i % ncols + cs + 1;
 
-          A[r][c] = A[r][c] - cols[r] * rows[c];
-        };
+        A[r][c] = A[r][c] - cols[r] * rows[c];
+    };
+}
 
-      }
+// core part of getrf (no pivoting)
+template <class T, int NRCU, int NCMAX, int NCU>
+void getrf_core(int m, int n, T A[NCU][NRCU][NCMAX], int pivot[NCMAX], int lda) {
+LoopSweeps:
+    for (int s = 0; s < (m - 1); s++) {
+        T rows[NCU][NCMAX];
+        T cols[NCU][NCMAX];
+#pragma HLS array_partition variable = rows dim = 1
+#pragma HLS array_partition variable = cols dim = 1
+#pragma HLS resource variable = rows core = RAM_2P_BRAM
+#pragma HLS resource variable = cols core = RAM_2P_BRAM
 
-      // core part of getrf (no pivoting)
-      template <class T, int NRCU, int NCMAX, int NCU>
-      void getrf_core(int m, int n, T A[NCU][NRCU][NCMAX], int pivot[NCMAX], int lda) {
+        int idscu = s % NCU;
+        int idsrow = s / NCU;
 
-      LoopSweeps:
-        for (int s=0;s<(m-1);s++){
+        T pmax = -1.0;
+        int prow = s;
+        int pidcu = 0;
+        int pidrow = 0;
 
-          T rows[NCU][NCMAX];
-          T cols[NCU][NCMAX];
-#pragma HLS array_partition variable=rows dim=1
-#pragma HLS array_partition variable=cols dim=1
-#pragma HLS resource variable=rows core=RAM_2P_BRAM
-#pragma HLS resource variable=cols core=RAM_2P_BRAM
-
-          int idscu = s % NCU;
-          int idsrow = s / NCU;
-
-          T pmax = -1.0;
-          int prow = s; int pidcu = 0; int pidrow = 0;
-
-        LoopPivot:
-          for(int k=s;k<n;k++){
+    LoopPivot:
+        for (int k = s; k < n; k++) {
 #pragma HLS pipeline
-            int idcu = k % NCU; 
+            int idcu = k % NCU;
             int idrow = k / NCU;
             T absa = std::abs(A[idcu][idrow][s]);
-            if (absa > pmax){
-              pmax = absa;
-              pidcu = idcu; 
-              pidrow = idrow;
-              prow = k;
+            if (absa > pmax) {
+                pmax = absa;
+                pidcu = idcu;
+                pidrow = idrow;
+                prow = k;
             };
-          };
+        };
 
-          int ptmp = pivot[s];
-          pivot[s] = pivot[prow];
-          pivot[prow] = ptmp;
+        int ptmp = pivot[s];
+        pivot[s] = pivot[prow];
+        pivot[prow] = ptmp;
 
-        LoopRows:
-          for(int k=0;k<n;k++){
+    LoopRows:
+        for (int k = 0; k < n; k++) {
 #pragma HLS pipeline
-#pragma HLS loop_tripcount min=1 max=NCMAX
+#pragma HLS loop_tripcount min = 1 max = NCMAX
 
-            for(int r=0;r<NCU;r++){
+            for (int r = 0; r < NCU; r++) {
 #pragma HLS unroll
-              rows[r][k] = A[pidcu][pidrow][k];
+                rows[r][k] = A[pidcu][pidrow][k];
             };
             A[pidcu][pidrow][k] = A[idscu][idsrow][k];
             A[idscu][idsrow][k] = rows[0][k];
-          };
+        };
 
-          T a00 = rows[0][s];
+        T a00 = rows[0][s];
 
-        LoopDiv:
-          for (int j=s+1;j<m;j++){
+    LoopDiv:
+        for (int j = s + 1; j < m; j++) {
 #pragma HLS pipeline
-#pragma HLS dependence variable=A inter false
-#pragma HLS loop_tripcount min=1 max=NRCU
+#pragma HLS dependence variable = A inter false
+#pragma HLS loop_tripcount min = 1 max = NRCU
             int i = j % NCU;
             int r = j / NCU;
             A[i][r][s] = A[i][r][s] / a00;
             cols[i][r] = A[i][r][s];
-          };
+        };
 
-        LoopMat:
-          for (int i=0;i<NCU;i++){
+    LoopMat:
+        for (int i = 0; i < NCU; i++) {
 #pragma HLS unroll
-            int rs, re, cs, ce; 
-            rs = (i<=(s%NCU)) ? (s/NCU+1): (s/NCU);
+            int rs, re, cs, ce;
+            rs = (i <= (s % NCU)) ? (s / NCU + 1) : (s / NCU);
             re = NRCU - 1;
             cs = s;
             ce = NCMAX - 1;
-            subUpdate<T,NRCU,NCMAX>(A[i], rows[i], cols[i], rs, re, cs, ce);
-          };
-
-          // if(s==0){
-          //   break;
-          // }
+            subUpdate<T, NRCU, NCMAX>(A[i], rows[i], cols[i], rs, re, cs, ce);
         };
-      };
 
-    }; // end of namespace internalgetrf
+        // if(s==0){
+        //   break;
+        // }
+    };
+};
 
+}; // end of namespace internalgetrf
 
 /**
  * @brief This function computes the LU decomposition (with partial pivoting) of matrix \f$A\f$ \n
           \f{equation*} {P A = L U, }\f}
-          where where \f$P\f$ is a permutation matrix, \f$A\f$ is a dense matrix of size \f$m \times n\f$, \f$L\f$ is a lower triangular matrix with unit
+          where where \f$P\f$ is a permutation matrix, \f$A\f$ is a dense matrix of size \f$m \times n\f$, \f$L\f$ is a
+ lower triangular matrix with unit
  diagonal, and \f$U\f$ is a upper triangular matrix. This function does not implement pivoting.\n
    The maximum matrix size supported in FPGA is templated by NMAX.
  *
@@ -157,47 +155,46 @@ namespace xf {
  * @param[out] pivot indices, row i of matrix A is stored in row[i]
  * @param[out] info return value, if info=0, the LU factorization is successful
  */
-    template<class T, int NMAX, int NCU>
-    void getrf(int n, T* A, int lda, int* ipiv, int& info){
+template <class T, int NMAX, int NCU>
+void getrf(int n, T* A, int lda, int* ipiv, int& info) {
+    const int NRCU = int((NMAX + NCU - 1) / NCU);
 
-      const int NRCU = int((NMAX+NCU-1)/NCU);
-
-      T matA[NCU][NRCU][NMAX];
-#pragma HLS array_partition variable=matA dim=1 complete
-#pragma HLS resource variable=matA core=XPM_MEMORY uram
+    T matA[NCU][NRCU][NMAX];
+#pragma HLS array_partition variable = matA dim = 1 complete
+#pragma HLS resource variable = matA core = XPM_MEMORY uram
 // #pragma HLS resource variable=matA core=RAM_2P_BRAM
 
-    LoopRead:
-      for(int r=0;r<n;r++){
-        for(int c=0;c<n;c++){
+LoopRead:
+    for (int r = 0; r < n; r++) {
+        for (int c = 0; c < n; c++) {
 #pragma HLS pipeline
-          matA[r%NCU][r/NCU][c] = A[lda*r+c];
+            matA[r % NCU][r / NCU][c] = A[lda * r + c];
         };
-      };
+    };
 
-      int pivot[NMAX];
-      for(int r=0;r<n;r++){
+    int pivot[NMAX];
+    for (int r = 0; r < n; r++) {
 #pragma HLS pipeline
         pivot[r] = r;
-      }
+    }
 
-      internalgetrf::getrf_core<T, NRCU, NMAX, NCU>(n, n, matA, pivot, lda);
+    internalgetrf::getrf_core<T, NRCU, NMAX, NCU>(n, n, matA, pivot, lda);
 
-    LoopWrite:
-      for(int r=0;r<n;r++){
-        for(int c=0;c<n;c++){
+LoopWrite:
+    for (int r = 0; r < n; r++) {
+        for (int c = 0; c < n; c++) {
 #pragma HLS pipeline
-          A[r*lda+c] = matA[r%NCU][r/NCU][c];
+            A[r * lda + c] = matA[r % NCU][r / NCU][c];
         };
-      };
+    };
 
-      for(int r=0;r<n;r++){
+    for (int r = 0; r < n; r++) {
 #pragma HLS pipeline
         ipiv[r] = pivot[r];
-      }
-    }; 
+    }
+};
 
-  }; // end of namcespace solver
+}; // end of namcespace solver
 }; // end of namespace xf
 
 #endif
