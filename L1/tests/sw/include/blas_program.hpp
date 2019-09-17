@@ -36,7 +36,7 @@
 using namespace std;
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename t_DataType, unsigned int t_PageSize>
@@ -498,6 +498,6 @@ ostream& operator<<(ostream& os, Program<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10
 }
 
 } // end namespace blas
-} // end namespace linear_algebra
+
 } // end namespace xf
 #endif

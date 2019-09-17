@@ -21,7 +21,7 @@
 #include "xf_blas.hpp"
 #include "uut_top.hpp"
 
-using namespace xf::linear_algebra::blas;
+using namespace xf::blas;
 
 void uut_top(uint32_t p_n,
              BLAS_dataType p_alpha,

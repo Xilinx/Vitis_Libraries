@@ -23,7 +23,7 @@
 #include <future>
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 vector<unsigned int> concurrentKernels;
@@ -215,7 +215,7 @@ void xfblasKernelSynchronize(unsigned int kernelIndex) {
 }
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif
