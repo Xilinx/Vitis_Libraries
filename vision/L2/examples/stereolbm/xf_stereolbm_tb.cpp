@@ -28,71 +28,82 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  ***************************************************************************/
 #include "common/xf_headers.h"
+#include "xf_stereolbm_config.h"
 #include "xcl2.hpp"
 
 using namespace std;
 
+#define _TEXTURE_THRESHOLD_ 20
+#define _UNIQUENESS_RATIO_ 15
+#define _PRE_FILTER_CAP_ 31
+#define _MIN_DISP_ 0
+
 int main(int argc, char** argv) {
     cv::setUseOptimized(false);
 
-    if (argc != 4) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
         return EXIT_FAILURE;
     }
 
     cv::Mat left_img, right_img;
 
-    // Reading in the images:
-    left_img = cv::imread(argv[2], 0);
-    right_img = cv::imread(argv[3], 0);
+    // Reading in the images: Only Grayscale image
+    left_img = cv::imread(argv[1], 0);
+    right_img = cv::imread(argv[2], 0);
 
     if (left_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
         return EXIT_FAILURE;
     }
 
     if (right_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[3] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
         return EXIT_FAILURE;
     }
+
+    int rows = left_img.rows;
+    int cols = left_img.cols;
 
     cv::Mat disp, hls_disp;
 
     // OpenCV reference function:
-    /*cv::StereoBM bm;
-    bm.state->preFilterCap = 31;
+    cv::StereoBM bm;
+    bm.state->preFilterCap = _PRE_FILTER_CAP_;
     bm.state->preFilterType = CV_STEREO_BM_XSOBEL;
     bm.state->SADWindowSize = SAD_WINDOW_SIZE;
-    bm.state->minDisparity = 0;
+    bm.state->minDisparity = _MIN_DISP_;
     bm.state->numberOfDisparities = NO_OF_DISPARITIES;
-    bm.state->textureThreshold = 20;
-    bm.state->uniquenessRatio = 15;
-    bm(left_img, right_img, disp);*/
+    bm.state->textureThreshold = _TEXTURE_THRESHOLD_;
+    bm.state->uniquenessRatio = _UNIQUENESS_RATIO_;
+    bm(left_img, right_img, disp);
 
-    cv::Ptr<cv::StereoBM> stereobm = cv::StereoBM::create(NO_OF_DISPARITIES, SAD_WINDOW_SIZE);
-    stereobm->setPreFilterCap(31);
-    stereobm->setUniquenessRatio(15);
-    stereobm->setTextureThreshold(20);
-    stereobm->compute(left_img, right_img, disp);
-
-    hls_disp.create(disp.rows, disp.cols, disp.depth());
+    // enable this if the above code is obsolete
+    /* cv::Ptr<cv::StereoBM> stereobm = cv::StereoBM::create(NO_OF_DISPARITIES, SAD_WINDOW_SIZE);
+    stereobm-> setPreFilterCap(_PRE_FILTER_CAP_);
+    stereobm-> setUniquenessRatio(_UNIQUENESS_RATIO_);
+    stereobm-> setTextureThreshold(_TEXTURE_THRESHOLD_);
+    stereobm-> compute(left_img,right_img,disp); */
 
     cv::Mat disp8, hls_disp8;
     disp.convertTo(disp8, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
     cv::imwrite("ocv_output.png", disp8);
+    // end of reference
 
-    hls_disp8.create(disp8.rows, disp8.cols, disp8.depth());
+    // Creating host memory for the hw acceleration
+    hls_disp.create(rows, cols, CV_16UC1);
+    hls_disp8.create(rows, cols, CV_8UC1);
 
     // OpenCL section:
     std::vector<unsigned char> bm_state_params(4);
-    bm_state_params[0] = 31;
-    bm_state_params[1] = 15;
-    bm_state_params[2] = 20;
-    bm_state_params[3] = 0;
+    bm_state_params[0] = _PRE_FILTER_CAP_;
+    bm_state_params[1] = _UNIQUENESS_RATIO_;
+    bm_state_params[2] = _TEXTURE_THRESHOLD_;
+    bm_state_params[3] = _MIN_DISP_;
 
-    size_t image_in_size_bytes = left_img.rows * left_img.cols * sizeof(unsigned char);
+    size_t image_in_size_bytes = rows * cols * sizeof(unsigned char);
     size_t vec_in_size_bytes = bm_state_params.size() * sizeof(unsigned char);
-    size_t image_out_size_bytes = hls_disp.rows * hls_disp.cols * sizeof(unsigned short int);
+    size_t image_out_size_bytes = rows * cols * sizeof(unsigned short int);
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -109,10 +120,8 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
-    std::string binaryFile = argv[1];
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_stereolbm");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -130,6 +139,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(1, buffer_inImageR));
     OCL_CHECK(err, err = kernel.setArg(2, buffer_inVecBM));
     OCL_CHECK(err, err = kernel.setArg(3, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(4, rows));
+    OCL_CHECK(err, err = kernel.setArg(5, cols));
 
     // Initialize the buffers:
     cl::Event event;
@@ -173,38 +184,35 @@ int main(int argc, char** argv) {
     hls_disp.convertTo(hls_disp8, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
     cv::imwrite("hls_out.jpg", hls_disp8);
 
-    int cnt = 0, total = 0;
-
-    // Changing the invalid value from negative to zero for validating the difference:
+    ////////  FUNCTIONAL VALIDATION  ////////
+    // changing the invalid value from negative to zero for validating the difference
+    cv::Mat disp_u(rows, cols, CV_16UC1);
     for (int i = 0; i < disp.rows; i++) {
         for (int j = 0; j < disp.cols; j++) {
             if (disp.at<short>(i, j) < 0) {
-                disp.at<short>(i, j) = 0;
-            }
+                disp_u.at<unsigned short>(i, j) = 0;
+            } else
+                disp_u.at<unsigned short>(i, j) = (unsigned short)disp.at<short>(i, j);
         }
     }
 
-    // Error computation, removing off the border, different kind of border computations:
-    for (int i = SAD_WINDOW_SIZE; i < hls_disp8.rows - SAD_WINDOW_SIZE; i++) {
-        for (int j = SAD_WINDOW_SIZE; j < hls_disp8.cols - SAD_WINDOW_SIZE; j++) {
-            total++;
-            int diff = (disp.at<unsigned short>(i, j)) - (hls_disp.at<unsigned short>(i, j));
-            if (diff < 0) diff = -diff;
-            if (diff > 1) {
-                cnt++;
-            }
-        }
-    }
+    cv::Mat diff;
+    diff.create(left_img.rows, left_img.cols, CV_16UC1);
+    cv::absdiff(disp_u, hls_disp, diff);
+    cv::imwrite("diff_img.jpg", diff);
 
-    float percentage = ((float)cnt / (float)total) * 100.0;
-    std::cout << "INFO: Error Percentage = " << percentage << "%" << std::endl;
+    // removing border before diff analysis
+    cv::Mat diff_c;
+    diff_c.create((diff.rows - SAD_WINDOW_SIZE << 1), diff.cols - (SAD_WINDOW_SIZE << 1), CV_16UC1);
+    cv::Rect roi;
+    roi.x = SAD_WINDOW_SIZE;
+    roi.y = SAD_WINDOW_SIZE;
+    roi.width = diff.cols - (SAD_WINDOW_SIZE << 1);
+    roi.height = diff.rows - (SAD_WINDOW_SIZE << 1);
+    diff_c = diff(roi);
 
-    if (percentage > 0.0f) {
-        std::cout << "ERROR: Test Failed" << std::endl;
-        return EXIT_FAILURE;
-    } else {
-        std::cout << "INFO: Test Pass" << std::endl;
-    }
+    float err_per;
+    xf::cv::analyzeDiff(diff_c, 0, err_per);
 
     return 0;
 }

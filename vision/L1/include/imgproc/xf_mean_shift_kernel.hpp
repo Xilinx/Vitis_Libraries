@@ -599,11 +599,13 @@ void xFMeanShiftKernel(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
     uint16_t x1, x2, y1, y2;
     bool track;
 
+#ifndef _SYNTHESIS_
     assert((no_objects <= MAXOBJ) && "number of objects should be less than MAX_OBJECTS");
     assert((NPC == XF_NPPC1) && "NPC must be XF_NPPC1");
     //	assert((WORDWIDTH == XF_32UW) &&
     //			"WORDWIDTH must be XF_32UW");
     assert((COLS % 2 == 0) && "object width must be in multiples of two");
+#endif
 
 loop_objects:
     for (uint8_t i = 0; i < no_objects; i++) {
@@ -611,7 +613,9 @@ loop_objects:
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXOBJ
         // clang-format on
 
+#ifndef _SYNTHESIS_
         assert((obj_wdt[i] % 2 == 0) && "object width must be in multiples of two");
+#endif
 
         a = i;
         x1 = tlx[i];
@@ -620,10 +624,12 @@ loop_objects:
         y2 = obj_hgt[i];
         track = (bool)status[i];
 
+#ifndef _SYNTHESIS_
         assert((x2 < 700) && (y2 < 700) && "object width and height should be less than 700");
         assert((x2 > 20) && (y2 > 20) && "object width and height should be greater than 20");
         assert((x2 <= COLS) && "The object width must be less than the MAX_WIDTH ");
         assert((y2 <= ROWS) && "The object height must be less than the MAX_HEIGHT ");
+#endif
 
         if (track) {
             xFTrackmulKernelFunc<ROWS, (COLS >> XF_BITSHIFT(NPC)), COLS, SRC_T, ROWS_IMG, COLS_IMG, MAXOBJ,

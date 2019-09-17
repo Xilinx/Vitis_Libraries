@@ -30,6 +30,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "common/xf_headers.h"
 #include "xf_mean_shift_config.h"
 
+#define _DISPLAY_TRACKING_ 0
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf(
@@ -151,6 +153,7 @@ int main(int argc, char* argv[]) {
 
         std::cout << std::endl;
 
+#if _DISPLAY_TRACKING_
         // bounding box in the image for the object track representation
         if (track[0]) rectangle(frame, cvPoint(tlx[0], tly[0]), cvPoint(brx[0], bry[0]), cv::Scalar(0, 0, 255), 2);
         if (track[1]) rectangle(frame, cvPoint(tlx[1], tly[1]), cvPoint(brx[1], bry[1]), cv::Scalar(0, 255, 0), 2);
@@ -169,6 +172,7 @@ int main(int argc, char* argv[]) {
         char c = (char)cv::waitKey(20);
         if (c == 27) // ESC button
             break;
+#endif
     }
 
     return 0;

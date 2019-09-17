@@ -2,6 +2,13 @@
 #include "common/xf_headers.h"
 #include "xf_colordetect_config.h"
 
+#include <iostream>
+#include <time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+
 // colordetect
 // Description:
 // Will detect the colors from the thresholds provided
@@ -106,7 +113,15 @@ int main(int argc, char** argv) {
                                        {75, 255, 255},   // Upper boundary for Green
                                        {179, 255, 255}}; // Upper boundary for Red
 
+    struct timespec start_time;
+    struct timespec end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+
     colordetect(in_img, out_img1, nLowThresh, nHighThresh);
+
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    float diff_latency = (end_time.tv_nsec - start_time.tv_nsec) / 1e9 + end_time.tv_sec - start_time.tv_sec;
+    printf("%f\n", (float)(diff_latency * 1000.f));
 
     static xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPIX> imgInput(in_img.rows, in_img.cols);
 

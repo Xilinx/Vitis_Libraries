@@ -30,6 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "common/xf_headers.h"
 #include "xf_demosaicing_ref.hpp"
 #include "xcl2.hpp"
+#include "xf_demosaicing_config.h"
 
 void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
     // FILE *fp = fopen("output.txt","w");
@@ -123,16 +124,16 @@ void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int c
 }
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1>" << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
         return EXIT_FAILURE;
     }
 
     // Reading in input image:
-    cv::Mat img = cv::imread(argv[2], 1);
+    cv::Mat img = cv::imread(argv[1], 1);
 
     if (img.empty()) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -168,6 +169,8 @@ int main(int argc, char** argv) {
         ref_output_image.rows * ref_output_image.cols * ref_output_image.channels() * sizeof(unsigned char);
 #endif
 
+    int height = img.rows;
+    int width = img.cols;
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
 
@@ -183,15 +186,13 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
-    std::string binaryFile = argv[1];
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_demosaicing");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     // Create a kernel:
-    OCL_CHECK(err, cl::Kernel kernel(program, "demosaicing", &err));
+    OCL_CHECK(err, cl::Kernel kernel(program, "demosaicing_accel", &err));
 
     // Allocate the buffers:
     OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
@@ -200,6 +201,8 @@ int main(int argc, char** argv) {
     // Set kernel arguments:
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(2, height));
+    OCL_CHECK(err, err = kernel.setArg(3, width));
 
     // Initialize the buffers:
     cl::Event event;
@@ -236,9 +239,9 @@ int main(int argc, char** argv) {
             cv::Vec3b ref_out = ref_output_image.at<cv::Vec3b>(i, j);
 #endif
 
-            int err_b = ((int)out[0] - (int)ref_out[0]);
+            int err_b = ((int)out[2] - (int)ref_out[0]);
             int err_g = ((int)out[1] - (int)ref_out[1]);
-            int err_r = ((int)out[2] - (int)ref_out[2]);
+            int err_r = ((int)out[0] - (int)ref_out[2]);
             err_r = abs(err_r);
             err_g = abs(err_g);
             err_b = abs(err_b);
@@ -253,7 +256,7 @@ int main(int argc, char** argv) {
             }
         }
     }
-
+    printf("\nTest Passed : HLS Output matches with reference output\n");
     cv::imwrite("output_image_hls.jpg", output_image_hls);
 
     return 0;

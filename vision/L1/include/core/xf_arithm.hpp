@@ -613,14 +613,12 @@ void absdiff(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     // clang-format on
 
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
-    //	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) &&
-    //			"NPC must be XF_NPPC1 or XF_NPPC8 ");
-    //	assert(((SRC_T == XF_8UC1) ) &&
-    //			"TYPE must be XF_8UC1 ");
-    //	assert(((_src1.rows <= ROWS ) && (_src1.cols <= COLS) && (_src2.rows <= ROWS ) && (_src2.cols <= COLS)) && "ROWS
-    // and COLS should be greater than input image");
-
+#ifndef _SYNTHESIS_
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
+    assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS) && (_src2.rows <= ROWS) && (_src2.cols <= COLS)) &&
+           "ROWS and COLS should be greater than input image");
+#endif
     xFAbsDiffKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                     XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src1, _src2, _dst, _src1.rows, image_width);
 }
@@ -631,15 +629,13 @@ void bitwise_and(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS inline off
-    // clang-format on
-
-    //	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) &&
-    //			"NPC must be XF_NPPC1 or XF_NPPC8 ");
-    //	assert(((SRC_T == XF_8UC1) ) &&
-    //			"Image type must be XF_8UC1 ");
-    //	assert(((_src1.rows <= ROWS ) && (_src1.cols <= COLS) && (_src2.rows <= ROWS ) && (_src2.cols <= COLS)) && "ROWS
-    // and COLS should be greater than input image");
-
+// clang-format on
+#ifndef _SYNTHESIS_
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "Image type must be XF_8UC1 or XF_8UC3 ");
+    assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS) && (_src2.rows <= ROWS) && (_src2.cols <= COLS)) &&
+           "ROWS and COLS should be greater than input image");
+#endif
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 
     xFBitwiseANDKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
@@ -653,14 +649,13 @@ void bitwise_or(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
-    //	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) &&
-    //			"NPC must be XF_NPPC1 or XF_NPPC8 ");
-    //	assert(((SRC_T == XF_8UC1) ) &&
-    //			"Image type must be XF_8UC1 ");
-    //	assert(((_src1.rows <= ROWS ) && (_src1.cols <= COLS) && (_src2.rows <= ROWS ) && (_src2.cols <= COLS)) && "ROWS
-    // and COLS should be greater than input image");
-
+// clang-format on
+#ifndef _SYNTHESIS_
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "Image type must be XF_8UC1 or XF_8UC3 ");
+    assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS) && (_src2.rows <= ROWS) && (_src2.cols <= COLS)) &&
+           "ROWS and COLS should be greater than input image");
+#endif
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 
     xFBitwiseORKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
@@ -689,11 +684,12 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void bitwise_xor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst) {
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1)) && "Image type must be XF_8UC1 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "Image type must be XF_8UC1,XF_8UC3 ");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS) && (src2.rows <= ROWS) && (src2.cols <= COLS)) &&
            "ROWS and COLS should be greater than input image");
-
+#endif
     // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -711,8 +707,8 @@ void multiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
               float scale) {
     // clang-format off
     #pragma HLS inline off
-    // clang-format on
-
+// clang-format on
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3) || (SRC_T == XF_16SC3) ||
             (SRC_T == XF_8UC4) || (SRC_T == XF_16UC4)) &&
@@ -722,7 +718,7 @@ void multiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     assert(((scale >= 0) && (scale <= 1)) && "_scale_val must be within the range of 0 to 1");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS) && (src2.rows <= ROWS) && (src2.cols <= COLS)) &&
            "ROWS and COLS should be greater than input image");
-
+#endif
     uint16_t image_width = src1.cols >> XF_BITSHIFT(NPC);
 
     xFMulKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
@@ -810,14 +806,14 @@ void add(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3) || (SRC_T == XF_8UC4)) &&
-           "TYPE must be XF_8UC1 or XF_16SC1");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3)) &&
+           "TYPE must be XF_8UC1,XF_8UC3,XF_16SC1 or XF_16SC3");
     assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                   XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_add, 1>(
         _src1, _src2, 0, _dst, POLICY_TYPE, _src1.rows, image_width);
@@ -832,13 +828,13 @@ void addS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1)) && "TYPE must be XF_8UC1 or XF_16SC1 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3 ");
     assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl;
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         scl.val[i] = _scl[i];
@@ -857,12 +853,13 @@ void SubS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1)) && "TYPE must be XF_8UC1 or XF_16SC1 ");
     assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
+#endif
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl;
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         scl.val[i] = _scl[i];
@@ -881,13 +878,13 @@ void SubRS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1)) && "TYPE must be XF_8UC1 or XF_16SC1 ");
     assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl;
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         scl.val[i] = _scl[i];
@@ -906,7 +903,7 @@ void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3) || (SRC_T == XF_16SC3) ||
             (SRC_T == XF_8UC4) || (SRC_T == XF_16UC4)) &&
@@ -914,7 +911,7 @@ void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                   XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_sub, 1>(
         _src1, _src2, 0, _dst, POLICY_TYPE, _src1.rows, image_width);
@@ -928,10 +925,12 @@ void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1 ");
+    assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1");
+    assert((_src1.rows <= COLS) && "ROWS and COLS should be greater than input image");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
+#endif
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl;
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         scl.val[i] = _scl[i];
@@ -951,12 +950,13 @@ void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
+    assert((_src1.rows <= COLS) && "ROWS and COLS should be greater than input image");
 
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                   XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_max, 1>(_src1, _src2, 0, _dst, 0,
                                                                                        _src1.rows, image_width);
@@ -971,11 +971,11 @@ void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1 ");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl;
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         scl.val[i] = _scl[i];
@@ -995,11 +995,12 @@ void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
+    assert((_src1.rows <= COLS) && "ROWS and COLS should be greater than input image");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                   XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_min, 1>(_src1, _src2, 0, _dst, 0,
                                                                                        _src1.rows, image_width);
@@ -1013,12 +1014,14 @@ void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
 
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
+    assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
 
+#endif
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl;
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         scl.val[i] = _scl[i];
@@ -1038,12 +1041,13 @@ void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
+    assert((_src1.rows <= COLS) && "ROWS and COLS should be greater than input image");
 
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                   XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_compare, 1>(
         _src1, _src2, 0, _dst, CMP_OP, _src1.rows, image_width);
@@ -1058,11 +1062,11 @@ void set(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1  ");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl;
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         scl.val[i] = _scl[i];
@@ -1079,11 +1083,11 @@ void zero(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1, xf::cv::Mat<SRC_T, ROWS, C
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-
+#ifndef _SYNTHESIS_
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-
+#endif
     xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                   XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_zero, 0>(_src1, _src1, 0, _dst, 0,
                                                                                         _src1.rows, image_width);

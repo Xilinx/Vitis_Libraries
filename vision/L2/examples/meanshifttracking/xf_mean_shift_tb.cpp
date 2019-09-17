@@ -33,6 +33,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <CL/cl.h>
 #include "xcl2.hpp"
 
+#define _PROFILE_ 0
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf(
@@ -103,18 +105,27 @@ int main(int argc, char* argv[]) {
     int height = frame.rows;
     int width = frame.cols;
 
+    cl_int err;
+
+    // Get the device:
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-    cl::Context context(device);
 
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    // Context, command queue and device name:
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    std::cout << "INFO: Device found - " << device_name << std::endl;
+
+    // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_mean_shift");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl(program, "mean_shift_accel");
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+
+    // Create a kernel:
+    OCL_CHECK(err, cl::Kernel krnl(program, "mean_shift_accel", &err));
 
     for (int f_no = 1; f_no <= no_of_frames; f_no++) {
         if (f_no > 1) {
@@ -142,38 +153,46 @@ int main(int argc, char* argv[]) {
         uint8_t no_of_iterations = 4;
 
         /////////////////////////////////////// CL ////////////////////////
-
-        cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * 4));
-        cl::Buffer tlxToDevice(context, CL_MEM_READ_ONLY, no_objects * sizeof(unsigned short));
-        cl::Buffer tlyToDevice(context, CL_MEM_READ_ONLY, no_objects * sizeof(unsigned short));
-        cl::Buffer objHeightToDevice(context, CL_MEM_READ_ONLY, no_objects * sizeof(unsigned short));
-        cl::Buffer objWidthToDevice(context, CL_MEM_READ_ONLY, no_objects * sizeof(unsigned short));
-        cl::Buffer dxFromDevice(context, CL_MEM_WRITE_ONLY, no_objects * sizeof(unsigned short));
-        cl::Buffer dyFromDevice(context, CL_MEM_WRITE_ONLY, no_objects * sizeof(unsigned short));
-        cl::Buffer trackFromDevice(context, CL_MEM_READ_WRITE, no_objects * sizeof(unsigned short));
+        OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * 4), NULL, &err));
+        OCL_CHECK(err,
+                  cl::Buffer tlxToDevice(context, CL_MEM_READ_ONLY, no_objects * sizeof(unsigned short), NULL, &err));
+        OCL_CHECK(err,
+                  cl::Buffer tlyToDevice(context, CL_MEM_READ_ONLY, no_objects * sizeof(unsigned short), NULL, &err));
+        OCL_CHECK(err, cl::Buffer objHeightToDevice(context, CL_MEM_READ_ONLY, no_objects * sizeof(unsigned short),
+                                                    NULL, &err));
+        OCL_CHECK(err, cl::Buffer objWidthToDevice(context, CL_MEM_READ_ONLY, no_objects * sizeof(unsigned short), NULL,
+                                                   &err));
+        OCL_CHECK(err,
+                  cl::Buffer dxFromDevice(context, CL_MEM_WRITE_ONLY, no_objects * sizeof(unsigned short), NULL, &err));
+        OCL_CHECK(err,
+                  cl::Buffer dyFromDevice(context, CL_MEM_WRITE_ONLY, no_objects * sizeof(unsigned short), NULL, &err));
+        OCL_CHECK(err, cl::Buffer trackFromDevice(context, CL_MEM_READ_WRITE, no_objects * sizeof(unsigned short), NULL,
+                                                  &err));
 
         // Set the kernel arguments
-        krnl.setArg(0, imageToDevice);
-        krnl.setArg(1, tlxToDevice);
-        krnl.setArg(2, tlyToDevice);
-        krnl.setArg(3, objHeightToDevice);
-        krnl.setArg(4, objWidthToDevice);
-        krnl.setArg(5, dxFromDevice);
-        krnl.setArg(6, dyFromDevice);
-        krnl.setArg(7, trackFromDevice);
-        krnl.setArg(8, frame_status);
-        krnl.setArg(9, no_objects);
-        krnl.setArg(10, no_of_iterations);
-        krnl.setArg(11, height);
-        krnl.setArg(12, width);
+        OCL_CHECK(err, err = krnl.setArg(0, imageToDevice));
+        OCL_CHECK(err, err = krnl.setArg(1, tlxToDevice));
+        OCL_CHECK(err, err = krnl.setArg(2, tlyToDevice));
+        OCL_CHECK(err, err = krnl.setArg(3, objHeightToDevice));
+        OCL_CHECK(err, err = krnl.setArg(4, objWidthToDevice));
+        OCL_CHECK(err, err = krnl.setArg(5, dxFromDevice));
+        OCL_CHECK(err, err = krnl.setArg(6, dyFromDevice));
+        OCL_CHECK(err, err = krnl.setArg(7, trackFromDevice));
+        OCL_CHECK(err, err = krnl.setArg(8, frame_status));
+        OCL_CHECK(err, err = krnl.setArg(9, no_objects));
+        OCL_CHECK(err, err = krnl.setArg(10, no_of_iterations));
+        OCL_CHECK(err, err = krnl.setArg(11, height));
+        OCL_CHECK(err, err = krnl.setArg(12, width));
 
         // initiate write to clBuffer
-        q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * 4), image.data);
-        q.enqueueWriteBuffer(tlxToDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), tlx);
-        q.enqueueWriteBuffer(tlyToDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), tly);
-        q.enqueueWriteBuffer(objHeightToDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), obj_height);
-        q.enqueueWriteBuffer(objWidthToDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), obj_width);
-        q.enqueueWriteBuffer(trackFromDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), track);
+        OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * 4), image.data));
+        OCL_CHECK(err, q.enqueueWriteBuffer(tlxToDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), tlx));
+        OCL_CHECK(err, q.enqueueWriteBuffer(tlyToDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), tly));
+        OCL_CHECK(err,
+                  q.enqueueWriteBuffer(objHeightToDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), obj_height));
+        OCL_CHECK(err,
+                  q.enqueueWriteBuffer(objWidthToDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), obj_width));
+        OCL_CHECK(err, q.enqueueWriteBuffer(trackFromDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), track));
 
         // Profiling Objects
         cl_ulong start = 0;
@@ -182,18 +201,20 @@ int main(int argc, char* argv[]) {
         cl::Event event_sp;
 
         // Launch the kernel
-        q.enqueueTask(krnl, NULL, &event_sp);
+        OCL_CHECK(err, err = q.enqueueTask(krnl, NULL, &event_sp));
 
         // profiling
         clWaitForEvents(1, (const cl_event*)&event_sp);
+#if _PROFILE_
         event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
         event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
         diff_prof = end - start;
         std::cout << (diff_prof / 1000000) << "ms" << std::endl;
+#endif
 
-        q.enqueueReadBuffer(dxFromDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), dx);
-        q.enqueueReadBuffer(dyFromDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), dy);
-        q.enqueueReadBuffer(trackFromDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), track);
+        OCL_CHECK(err, q.enqueueReadBuffer(dxFromDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), dx));
+        OCL_CHECK(err, q.enqueueReadBuffer(dyFromDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), dy));
+        OCL_CHECK(err, q.enqueueReadBuffer(trackFromDevice, CL_TRUE, 0, no_objects * sizeof(unsigned short), track));
         q.finish();
         /////////////////////////////////////// end of CL ////////////////////////
 

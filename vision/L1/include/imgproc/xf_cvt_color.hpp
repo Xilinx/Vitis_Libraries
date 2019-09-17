@@ -2491,7 +2491,8 @@ void rgba2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC4) && " RGBA image Type must be XF_8UC4");
     assert((DST_T == XF_8UC1) && " Y, U, V image Type must be XF_8UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGBA image rows and cols should be less than ROWS, COLS");
@@ -2499,7 +2500,7 @@ void rgba2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_src.cols == _u_image.cols) && (_src.rows == _u_image.rows)) && "RGBA and U plane dimensions mismatch");
     assert(((_src.cols == _v_image.cols) && (_src.rows == _v_image.rows)) && "RGBA and V plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xFRgba2Yuv4<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(
         _src, _y_image, _u_image, _v_image, _src.rows, _src.cols);
 }
@@ -2593,7 +2594,8 @@ void rgb2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((DST_T == XF_8UC1) && " Y, U, V image Type must be XF_8UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
@@ -2603,6 +2605,7 @@ void rgb2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_src.cols == _v_image.cols) && (_src.rows == (_v_image.rows << 2))) &&
            "RGB and V plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
+#endif
 
     xFRgb2Iyuv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), ROWS / 4, ROWS / 4>(
         _src, _y_image, _u_image, _v_image, _src.rows, _src.cols);
@@ -2645,7 +2648,8 @@ void rgba2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC4) && " RGBA image Type must be XF_8UC3");
     assert((DST_T == XF_8UC1) && " Y, U, V image Type must be XF_8UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGBA image rows and cols should be less than ROWS, COLS");
@@ -2655,6 +2659,7 @@ void rgba2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_src.cols == _v_image.cols) && (_src.rows == (_v_image.rows << 2))) &&
            "RGBA and V plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
+#endif
 
     xFRgba2Iyuv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), ROWS / 4, ROWS / 4>(
         _src, _y_image, _u_image, _v_image, _src.rows, _src.cols);
@@ -2696,7 +2701,8 @@ void rgba2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC4) && " RGBA image Type must be XF_8UC3");
     assert((Y_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " VU image Type must be XF_8UC2");
@@ -2711,6 +2717,7 @@ void rgba2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
+#endif
     xFRgba2Nv21<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                 XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y, _uv, _src.rows, _src.cols);
 }
@@ -2843,7 +2850,8 @@ void iyuv2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y, U, V images Type must be XF_8UC1");
     assert(((src_y.rows <= ROWS) && (src_y.cols <= COLS)) && " Y image ROWS and COLS should be less than ROWS, COLS");
     assert(((src_y.cols == (_y_image.cols)) && (src_y.rows == _y_image.rows)) &&
@@ -2854,6 +2862,7 @@ void iyuv2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "input and ouput V dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
 
+#endif
     xFIyuv2Yuv4<SRC_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC)>(src_y, src_u, src_v, _y_image, _u_image, _v_image,
                                                                   src_y.rows, src_y.cols);
 }
@@ -2895,7 +2904,8 @@ void iyuv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y, U, V images Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
     assert(((src_y.rows <= ROWS) && (src_y.cols <= COLS)) && " Y image ROWS and COLS should be less than ROWS, COLS");
@@ -2912,6 +2922,7 @@ void iyuv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
+#endif
     xFIyuv2Nv12<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(UV_T, NPC_UV)>(
         src_y, src_u, src_v, _y_image, _uv_image, src_y.rows, src_y.cols);
 }
@@ -2956,8 +2967,8 @@ void nv122iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
-
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y,U,V image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
     assert(((src_y.rows <= ROWS) && (src_y.cols <= COLS)) && " Y image ROWS and COLS should be less than ROWS, COLS");
@@ -2975,6 +2986,7 @@ void nv122iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
+#endif
     xFNv122Iyuv<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(UV_T, NPC_UV), XF_WORDWIDTH(SRC_T, NPC)>(
         src_y, src_uv, _y_image, _u_image, _v_image, src_y.rows, src_y.cols);
 }
@@ -3010,7 +3022,8 @@ void nv122rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
     assert((DST_T == XF_8UC4) && " RGBA image Type must be XF_8UC4");
@@ -3026,6 +3039,7 @@ void nv122rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
+#endif
     xFNv122Rgba<SRC_T, UV_T, DST_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(UV_T, NPC_UV),
                 XF_WORDWIDTH(DST_T, NPC)>(src_y, src_uv, _dst0, src_y.rows, src_y.cols);
 }
@@ -3112,7 +3126,8 @@ void nv212iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y,U,V image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " VU image Type must be XF_8UC2");
     assert(((src_y.rows <= ROWS) && (src_y.cols <= COLS)) && " Y image ROWS and COLS should be less than ROWS, COLS");
@@ -3131,7 +3146,7 @@ void nv212iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
-
+#endif
     xFNv212Iyuv<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(UV_T, NPC_UV), XF_WORDWIDTH(SRC_T, NPC)>(
         src_y, src_uv, _y_image, _u_image, _v_image, src_y.rows, src_y.cols);
 }
@@ -3169,7 +3184,8 @@ void nv212rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " VU image Type must be XF_8UC2");
     assert((DST_T == XF_8UC4) && " RGBA image Type must be XF_8UC4");
@@ -3184,6 +3200,7 @@ void nv212rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
+#endif
     xFNv212Rgba<SRC_T, UV_T, DST_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(DST_T, NPC), XF_WORDWIDTH(UV_T, NPC_UV),
                 XF_WORDWIDTH(DST_T, NPC)>(src_y, src_uv, _dst0, src_y.rows, src_y.cols);
 }
@@ -3225,7 +3242,8 @@ void nv212yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && "Y plane Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && "UV plane Type must be XF_8UC2");
     assert(((src_y.rows <= ROWS) && (src_y.cols <= COLS)) && " Y image rows and cols should be less than ROWS, COLS");
@@ -3240,7 +3258,7 @@ void nv212yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC, NPC_UV values must be same  ");
     }
-
+#endif
     xFNv212Yuv4<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(UV_T, NPC_UV), XF_WORDWIDTH(SRC_T, NPC)>(
         src_y, src_uv, _y_image, _u_image, _v_image, src_y.rows, src_y.cols);
 }
@@ -3268,7 +3286,8 @@ void uyvy2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
     assert((DST_T == XF_8UC1) && " Y, U, V planes Type must be XF_8UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " UYVY image rows and cols should be less than ROWS, COLS");
@@ -3278,7 +3297,7 @@ void uyvy2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_v_image.cols == _src.cols) && ((_v_image.rows << 2) == _src.rows)) &&
            "U and UYVY planes dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1, 8 pixel parallelism is supported  ");
-
+#endif
     xFUyvy2Iyuv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(
         _src, _y_image, _u_image, _v_image, _src.rows, _src.cols);
 }
@@ -3323,7 +3342,8 @@ void uyvy2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
     assert((Y_T == XF_8UC1) && " Y plane Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
@@ -3342,6 +3362,7 @@ void uyvy2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC, NPC_UV values must be same  ");
     }
+#endif
     xFUyvy2Nv12<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                 XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y_image, _uv_image, _src.rows, _src.cols);
 }
@@ -3367,13 +3388,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void uyvy2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
     assert((DST_T == XF_8UC4) && " RGBA plane Type must be XF_8UC4");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " Y image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGBA and UYVY planes dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xFUyvy2Rgba<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(
         _src, _dst, _src.rows, _src.cols);
 }
@@ -3403,7 +3425,8 @@ void yuyv2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
     assert((DST_T == XF_8UC1) && " Y, U, V planes Type must be XF_8UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " YUYV image rows and cols should be less than ROWS, COLS");
@@ -3411,6 +3434,7 @@ void yuyv2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_u_image.cols == _src.cols) && ((_u_image.rows << 2) == _src.rows)) &&
            "U and UYVY planes dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1, 8 pixel parallelism is supported  ");
+#endif
 
     xFYuyv2Iyuv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(
         _src, _y_image, _u_image, _v_image, _src.rows, _src.cols);
@@ -3448,7 +3472,8 @@ void yuyv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
     assert((Y_T == XF_8UC1) && " Y plane Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
@@ -3464,6 +3489,7 @@ void yuyv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC, NPC_UV values must be same  ");
     }
+#endif
     xFYuyv2Nv12<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                 XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y_image, _uv_image, _src.rows, _src.cols);
 }
@@ -3488,7 +3514,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void yuyv2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
     assert((DST_T == XF_8UC4) && " RGBA plane Type must be XF_8UC4");
 
@@ -3496,7 +3523,7 @@ void yuyv2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROW
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "YUYV and RGBA planes dimensions mismatch");
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xFYuyv2Rgba<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(
         _src, _dst, _src.rows, _src.cols);
 }
@@ -3629,7 +3656,8 @@ void rgb2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((Y_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
@@ -3643,6 +3671,7 @@ void rgb2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
+#endif
     xFRgb2Nv21<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y, _uv, _src.rows, _src.cols);
 }
@@ -3820,7 +3849,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void uyvy2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
     assert((DST_T == XF_8UC3) && " RGB plane Type must be XF_8UC3");
 
@@ -3829,7 +3859,7 @@ void uyvy2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xFUyvy2Rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(_src, _dst, _src.rows,
                                                                                                   _src.cols);
 }
@@ -3911,7 +3941,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void yuyv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
     assert((DST_T == XF_8UC3) && " RGB plane Type must be XF_8UC3");
 
@@ -3919,7 +3950,7 @@ void yuyv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "YUYV and RGB planes dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xFYuyv2Rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(_src, _dst, _src.rows,
                                                                                                   _src.cols);
 }
@@ -4042,7 +4073,8 @@ void iyuv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y,U,V planes Type must be XF_8UC1");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert(((src_y.rows <= ROWS) && (src_y.cols <= COLS)) && " Y image rows and cols should be less than ROWS, COLS");
@@ -4051,7 +4083,7 @@ void iyuv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     assert(((src_y.cols == src_v.cols) && (src_y.rows == (src_v.rows << 2))) && "Y and U planes dimensions mismatch");
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xFIyuv2Rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(
         src_y, src_u, src_v, _dst0, src_y.rows, src_y.cols);
 }
@@ -4175,7 +4207,8 @@ void nv122bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " VU image Type must be XF_8UC2");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -4183,7 +4216,7 @@ void nv122bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     assert(((src_y.cols == _dst0.cols) && (src_y.rows == _dst0.rows)) && "Y and BGR plane dimensions mismatch");
     assert(((src_y.cols == (src_uv.cols << 1)) && (src_y.rows == (src_uv.rows << 1))) &&
            "Y and VU planes dimensions mismatch");
-
+#endif
     if (NPC != XF_NPPC1) {
         assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the VU plane for multipixel parallelism  ");
     } else {
@@ -4313,7 +4346,8 @@ void nv122rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -4321,7 +4355,7 @@ void nv122rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     assert(((src_y.cols == _dst0.cols) && (src_y.rows == _dst0.rows)) && "Y and RGB plane dimensions mismatch");
     assert(((src_y.cols == (src_uv.cols << 1)) && (src_y.rows == (src_uv.rows << 1))) &&
            "Y and UV planes dimensions mismatch");
-
+#endif
     if (NPC != XF_NPPC1) {
         assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
     } else {
@@ -4451,7 +4485,8 @@ void nv212rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " vu image Type must be XF_8UC2");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -4459,7 +4494,7 @@ void nv212rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     assert(((src_y.cols == _dst0.cols) && (src_y.rows == _dst0.rows)) && "Y and RGB plane dimensions mismatch");
     assert(((src_y.cols == (src_uv.cols << 1)) && (src_y.rows == (src_uv.rows << 1))) &&
            "Y and VU planes dimensions mismatch");
-
+#endif
     if (NPC != XF_NPPC1) {
         assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
     } else {
@@ -4591,7 +4626,8 @@ void nv212bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " VU image Type must be XF_8UC2");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -4599,7 +4635,7 @@ void nv212bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     assert(((src_y.cols == _dst0.cols) && (src_y.rows == _dst0.rows)) && "Y and BGR plane dimensions mismatch");
     assert(((src_y.cols == (src_uv.cols << 1)) && (src_y.rows == (src_uv.rows << 1))) &&
            "Y and VU planes dimensions mismatch");
-
+#endif
     if (NPC != XF_NPPC1) {
         assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the VU plane for multipixel parallelism  ");
     } else {
@@ -4659,13 +4695,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((DST_T == XF_8UC1) && " GRAY image Type must be XF_8UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and GRAY plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfrgb2gray<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -4717,13 +4754,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((DST_T == XF_8UC1) && " GRAY image Type must be XF_8UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " BGR image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and GRAY plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfbgr2gray<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -4777,13 +4815,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void gray2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " GRAY image Type must be XF_8UC1");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " GRAY image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and GRAY plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfgray2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -4836,13 +4875,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void gray2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " GRAY image Type must be XF_8UC1");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " GRAY image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and GRAY plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfgray2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -4904,13 +4944,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " XYZ image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and XYZ plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfrgb2xyz<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -4972,13 +5013,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " XYZ image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " BGR image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and XYZ plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfbgr2xyz<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5035,13 +5077,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void xyz2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " XYZ image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " XYZ image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and XYZ plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfxyz2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5098,13 +5141,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void xyz2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " XYZ image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " XYZ image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and XYZ plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfxyz2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5162,13 +5206,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " YCrCb image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and YCrCb plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfrgb2ycrcb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5225,13 +5270,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " YCrCb image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " BGR image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and YCrCb plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfbgr2ycrcb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5287,13 +5333,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void ycrcb2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " YCrCb image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " YCrCb image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and YCrCb plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfycrcb2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5349,13 +5396,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void ycrcb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " YCrCb image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " YCrCb image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and YCrCb plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfycrcb2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5465,13 +5513,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " HLS image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and HLS plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfrgb2hls<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5580,13 +5629,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " HLS image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " BGR image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and HLS plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfbgr2hls<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5676,13 +5726,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void hls2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " HLS image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " HLS image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and HLS plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfhls2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5772,13 +5823,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void hls2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " HLS image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " HLS image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and HLS plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfhls2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5856,13 +5908,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void hsv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " HSV image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " HSV image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and HSV plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfhsv2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -5940,13 +5993,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void hsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " HSV image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " HSV image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and HSV plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
-
+#endif
     xfhsv2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -6038,7 +6092,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((DST_T == XF_16UC1) && "  UYVY image Type must be XF_16UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
@@ -6046,7 +6101,7 @@ void rgb2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xfrgb2uyvy<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -6131,7 +6186,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((DST_T == XF_16UC1) && "  YUYV image Type must be XF_16UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
@@ -6139,7 +6195,7 @@ void rgb2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xfrgb2yuyv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -6198,7 +6254,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
@@ -6206,7 +6263,7 @@ void rgb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xfrgb2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               ((COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -6301,7 +6358,8 @@ void nv122uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_Y == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((SRC_UV == XF_8UC2) && " UV image Type must be XF_8UC2");
     assert((DST_T == XF_16UC1) && " UYVY image Type must be XF_16UC1");
@@ -6313,7 +6371,7 @@ void nv122uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
-
+#endif
     xfnv122uyvy<SRC_Y, SRC_UV, DST_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_Y, NPC), XF_WORDWIDTH(SRC_UV, NPC_UV),
                 XF_WORDWIDTH(DST_T, NPC), (COLS >> (XF_NPIXPERCYCLE(NPC)))>(_y, _uv, _dst, _y.rows, _y.cols);
 }
@@ -6408,7 +6466,8 @@ void nv212uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_Y == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((SRC_UV == XF_8UC2) && " UV image Type must be XF_8UC2");
     assert((DST_T == XF_16UC1) && " UYVY image Type must be XF_16UC1");
@@ -6420,6 +6479,7 @@ void nv212uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
+#endif
     xfnv212uyvy<SRC_Y, SRC_UV, DST_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_Y, NPC), XF_WORDWIDTH(SRC_UV, NPC_UV),
                 XF_WORDWIDTH(DST_T, NPC), (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_y, _uv, _dst, _y.rows, _y.cols);
 }
@@ -6513,7 +6573,8 @@ void nv122yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_Y == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((SRC_UV == XF_8UC2) && " UV image Type must be XF_8UC2");
     assert((DST_T == XF_16UC1) && " YUYV image Type must be XF_16UC1");
@@ -6525,7 +6586,7 @@ void nv122yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
-
+#endif
     xfnv122yuyv<SRC_Y, SRC_UV, DST_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_Y, NPC), XF_WORDWIDTH(SRC_UV, NPC_UV),
                 XF_WORDWIDTH(DST_T, NPC), (COLS >> (XF_NPIXPERCYCLE(NPC)))>(_y, _uv, _dst, _y.rows, _y.cols);
 }
@@ -6619,7 +6680,8 @@ void nv212yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_Y == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((SRC_UV == XF_8UC2) && " VU image Type must be XF_8UC2");
     assert((DST_T == XF_16UC1) && " YUYV image Type must be XF_16UC1");
@@ -6631,6 +6693,7 @@ void nv212yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
+#endif
     xfnv212yuyv<SRC_Y, SRC_UV, DST_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_Y, NPC), XF_WORDWIDTH(SRC_UV, NPC_UV),
                 XF_WORDWIDTH(DST_T, NPC), (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_y, _uv, _dst, _y.rows, _y.cols);
 }
@@ -6725,7 +6788,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((DST_T == XF_16UC1) && "  UYVY image Type must be XF_16UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " BGR image rows and cols should be less than ROWS, COLS");
@@ -6733,7 +6797,7 @@ void bgr2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xfbgr2uyvy<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -6818,7 +6882,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((DST_T == XF_16UC1) && "  YUYV image Type must be XF_16UC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " BGR image rows and cols should be less than ROWS, COLS");
@@ -6826,7 +6891,7 @@ void bgr2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xfbgr2yuyv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -6886,7 +6951,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " BGR image rows and cols should be less than ROWS, COLS");
@@ -6894,7 +6960,7 @@ void bgr2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xfbgr2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
@@ -6992,7 +7058,8 @@ void bgr2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((Y_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
@@ -7006,7 +7073,7 @@ void bgr2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
-
+#endif
     xFbgr2Nv12<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y, _uv, _src.rows, _src.cols);
 } /////////////////////////////////////////////////////////end of
@@ -7095,7 +7162,8 @@ void bgr2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert((Y_T == XF_8UC1) && " Y image Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
@@ -7109,6 +7177,7 @@ void bgr2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
+#endif
     xFbgr2Nv21<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y, _uv, _src.rows, _src.cols);
 }
@@ -7190,7 +7259,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void yuyv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
     assert((DST_T == XF_8UC3) && " BGR plane Type must be XF_8UC3");
 
@@ -7199,7 +7269,7 @@ void yuyv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xFYuyv2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(_src, _dst, _src.rows,
                                                                                                   _src.cols);
 }
@@ -7299,7 +7369,8 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void uyvy2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
     assert((DST_T == XF_8UC3) && " BGR plane Type must be XF_8UC3");
 
@@ -7308,7 +7379,7 @@ void uyvy2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xFUyvy2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC)>(_src, _dst, _src.rows,
                                                                                                   _src.cols);
 }
@@ -7347,7 +7418,8 @@ void yuyv2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
     assert((Y_T == XF_8UC1) && " Y plane Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " VU image Type must be XF_8UC2");
@@ -7365,6 +7437,7 @@ void yuyv2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC, NPC_UV values must be same  ");
     }
+#endif
     xFYuyv2Nv21<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                 XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y_image, _uv_image, _src.rows, _src.cols);
 }
@@ -7405,8 +7478,8 @@ void uyvy2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
-
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
     assert((Y_T == XF_8UC1) && " Y plane Type must be XF_8UC1");
     assert((UV_T == XF_8UC2) && " UV image Type must be XF_8UC2");
@@ -7425,7 +7498,7 @@ void uyvy2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC, NPC_UV values must be same  ");
     }
-
+#endif
     xFUyvy2Nv21<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                 XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y_image, _uv_image, _src.rows, _src.cols);
 }
@@ -7515,7 +7588,8 @@ void nv212nv12(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<SRC_UV, ROWS / 2, COLS / 2, NPC_UV>& out_uv) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_Y == XF_8UC1) && " Y plane Type must be XF_8UC1");
     assert((SRC_UV == XF_8UC2) && " VU image Type must be XF_8UC2");
 
@@ -7528,7 +7602,7 @@ void nv212nv12(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC, NPC_UV values must be same  ");
     }
-
+#endif
     xfnv122nv21<SRC_Y, SRC_UV, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_Y, NPC), XF_WORDWIDTH(SRC_UV, NPC_UV),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_y, _uv, out_y, out_uv, _y.rows, _y.cols);
 }
@@ -7581,14 +7655,15 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void uyvy2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& yuyv) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " UYVY image Type must be XF_16UC1");
     assert((DST_T == XF_16UC1) && " YUYV image Type must be XF_16UC1");
     assert(((yuyv.rows <= ROWS) && (yuyv.cols <= COLS)) && " Y image rows and cols should be less than ROWS, COLS");
     assert(((yuyv.cols == uyvy.cols) && (yuyv.rows == uyvy.rows)) && "YUYV and UYVY plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xfuyvy2yuyv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(uyvy, yuyv, uyvy.rows, uyvy.cols);
 }
@@ -7599,14 +7674,15 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void yuyv2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& yuyv, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& uyvy) {
     // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_16UC1) && " YUYV image Type must be XF_16UC1");
     assert((DST_T == XF_16UC1) && " UYVY image Type must be XF_16UC1");
     assert(((yuyv.rows <= ROWS) && (yuyv.cols <= COLS)) && " Y image rows and cols should be less than ROWS, COLS");
     assert(((yuyv.cols == uyvy.cols) && (yuyv.rows == uyvy.rows)) && "YUYV and UYVY plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
            " 1,2,4,8 pixel parallelism is supported  ");
-
+#endif
     xfuyvy2yuyv<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(yuyv, uyvy, uyvy.rows, uyvy.cols);
 }

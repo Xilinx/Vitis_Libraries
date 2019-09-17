@@ -89,20 +89,29 @@ int main(int argc, char** argv) {
     /*  convert to 16S type  */
     in_gray1.convertTo(in_gray1, CV_16SC1);
     in_gray2.convertTo(in_gray2, CV_16SC1);
-#endif
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_16SC1);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
+#else
     out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
     ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_8UC1);
     diff.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
+#endif
 #else
 #if T_16S
     /*  convert to 16S type  */
     in_gray1.convertTo(in_gray1, CV_16SC3);
     in_gray2.convertTo(in_gray2, CV_16SC3);
-#endif
     out_img.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
     ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_16SC3);
     diff.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
+#else
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_8UC3);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
 #endif
+#endif
+
 #ifdef FUNCT_MULTIPLY
     float scale = 0.05;
 #endif
@@ -117,7 +126,7 @@ int main(int argc, char** argv) {
 #endif
 
 #if SCALAR
-    std::vector<unsigned char> scalar(in_gray1.channels());
+    unsigned char scalar[XF_CHANNELS(TYPE, NPC1)];
 
     for (int i = 0; i < in_gray1.channels(); ++i) {
         scalar[i] = 150;
@@ -192,7 +201,7 @@ int main(int argc, char** argv) {
                                             CL_TRUE,           // blocking call
                                             0,                 // buffer offset in bytes
                                             vec_in_size_bytes, // Size in bytes
-                                            scalar.data(),     // Pointer to the data to copy
+                                            scalar,            // Pointer to the data to copy
                                             nullptr, &event));
 #else
     OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage2,     // buffer on the FPGA
@@ -239,7 +248,7 @@ int main(int argc, char** argv) {
 #endif
 #ifdef FUNCT_COMPARE
                       ,
-                      CV_EXTRA_PARM
+                      CV_EXTRA_ARG
 #endif
     );
 #endif
@@ -255,21 +264,19 @@ int main(int argc, char** argv) {
     cv::CV_FUNCT_NAME(in_gray1, scalar[0], ocv_ref
 #ifdef FUNCT_COMPARE
                       ,
-                      CV_EXTRA_PARM
+                      CV_EXTRA_ARG
 #endif
     );
 #endif
 #endif
 #endif
 
-    printf("cv_referencefinished\n");
     // Write down the OpenCV outputs:
     cv::imwrite("ref_img.jpg", ocv_ref);
 
     /* Results verification */
     // Do the diff and save it:
     cv::absdiff(ocv_ref, out_img, diff);
-    printf("performing abs_diff\n");
     cv::imwrite("diff_img.jpg", diff);
 
     // Find the percentage of pixels above error threshold:

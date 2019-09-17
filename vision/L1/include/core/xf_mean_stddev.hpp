@@ -160,13 +160,14 @@ void meanStdDev(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     // clang-format on
     //#pragma HLS dataflow
 
+#ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1 || SRC_T == XF_8UC3 || SRC_T == XF_8UC4) &&
            "Input image type should be XF_8UC1, XF_8UC3 or XF_8UC4");
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " NPC must be XF_NPPC1, XF_NPPC8");
 
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
-
+#endif
     xFStddevkernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), NPC>(_src, _mean, _stddev, _src.rows, _src.cols);
 }
 } // namespace cv

@@ -38,7 +38,9 @@ void warptransform_accel(
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=transform     offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
-    #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
+    #pragma HLS INTERFACE s_axilite  port=rows                    bundle=control
+    #pragma HLS INTERFACE s_axilite  port=cols                    bundle=control
+    #pragma HLS INTERFACE s_axilite  port=return                    bundle=control
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);

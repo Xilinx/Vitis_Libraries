@@ -107,6 +107,7 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
                     uint16_t _channel) {
+#ifndef __SYNTHESIS__
     assert(((_channel == XF_EXTRACT_CH_0) || (_channel == XF_EXTRACT_CH_1) || (_channel == XF_EXTRACT_CH_2) ||
             (_channel == XF_EXTRACT_CH_3) || (_channel == XF_EXTRACT_CH_R) || (_channel == XF_EXTRACT_CH_G) ||
             (_channel == XF_EXTRACT_CH_B) || (_channel == XF_EXTRACT_CH_A) || (_channel == XF_EXTRACT_CH_Y) ||
@@ -117,7 +118,7 @@ void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     assert((SRC_T == XF_8UC4 || SRC_T == XF_8UC3) && (DST_T == XF_8UC1) &&
            "Source image should be of 4 channels and destination image of 1 channel");
     //	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
-
+#endif
     short width = _src_mat.cols >> XF_BITSHIFT(NPC);
 
     // clang-format off

@@ -34,7 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "hls_stream.h"
 #include "common/xf_common.h"
 #include "common/xf_utility.h"
-#include "imgproc/xf_stereoBM.hpp"
+#include "imgproc/xf_stereolbm.hpp"
 #include "xf_config_params.h"
 
 // Set the input and output pixel depth:
@@ -44,7 +44,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PTR_OUT_WIDTH 16
 
 // Set the optimization type:
-#define NPC1 XF_NPPC1
+#define NPC XF_NPPC1
 
 /* config width and height */
 #define WIDTH 1920

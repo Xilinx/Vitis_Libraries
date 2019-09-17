@@ -32,24 +32,21 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern "C" {
 
-void demosaicing(ap_uint<PTR_IN_WIDTH>* img_in, ap_uint<PTR_OUT_WIDTH>* img_out) {
+void demosaicing_accel(ap_uint<PTR_IN_WIDTH>* img_in, ap_uint<PTR_OUT_WIDTH>* img_out, int height, int width) {
     // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
-    #pragma HLS INTERFACE s_axilite  port=img_in 			          bundle=control
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1
-    #pragma HLS INTERFACE s_axilite  port=img_out 			          bundle=control
-    #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
+    #pragma HLS INTERFACE s_axilite  port=height 	              bundle=control
+    #pragma HLS INTERFACE s_axilite  port=width 	              bundle=control
+    #pragma HLS INTERFACE s_axilite  port=return 	              bundle=control
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(HEIGHT, WIDTH);
-
-    const int cols = WIDTH;
-    const int nppc = NPC1;
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
     // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=cols/nppc
-    #pragma HLS STREAM variable=imgOutput.data depth=cols/nppc
+    #pragma HLS STREAM variable=imgInput.data depth=2
+    #pragma HLS STREAM variable=imgOutput.data depth=2
     // clang-format on
 
     // clang-format off

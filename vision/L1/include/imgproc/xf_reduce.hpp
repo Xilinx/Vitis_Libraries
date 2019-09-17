@@ -176,8 +176,10 @@ void reduce(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     unsigned short width = _src_mat.cols >> XF_BITSHIFT(NPC);
     unsigned short height = _src_mat.rows;
 
+#ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8");
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
+#endif
 
     // clang-format off
     #pragma HLS INLINE OFF

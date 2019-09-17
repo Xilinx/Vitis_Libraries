@@ -76,18 +76,18 @@ int main(int argc, char** argv) {
     //	1ST ROI
     x_loc[0] = 0;
     y_loc[0] = 0;
-    ROI_height[0] = 480;
-    ROI_width[0] = 640;
+    ROI_height[0] = 125;
+    ROI_width[0] = 125;
     //	2nd ROI
     x_loc[1] = 50;
     y_loc[1] = 50;
-    ROI_height[1] = 100;
-    ROI_width[1] = 200;
+    ROI_height[1] = 50;
+    ROI_width[1] = 50;
 
     x_loc[2] = 48;
     y_loc[2] = 48;
-    ROI_height[2] = 300;
-    ROI_width[2] = 301;
+    ROI_height[2] = 20;
+    ROI_width[2] = 20;
 
     for (int i = 0; i < NUM_ROI; i++) {
 #if GRAY
@@ -118,12 +118,12 @@ int main(int argc, char** argv) {
     //	clock_gettime(CLOCK_MONOTONIC, &end_time);
     //	float diff_latency = (end_time.tv_nsec - start_time.tv_nsec)/1e9 + end_time.tv_sec - start_time.tv_sec;
     //	printf("\latency: %f ", diff_latency);
-    * /
-        //////////////////  end opencv reference code//////////
 
-        ////////////////////// HLS TOP function call ////////////////////////////
+    //////////////////  end opencv reference code//////////
 
-        xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> imgInput(in_img.rows, in_img.cols);
+    ////////////////////// HLS TOP function call ////////////////////////////
+
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> imgInput(in_img.rows, in_img.cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> imgOutput[NUM_ROI]; //(ROI_height,ROI_width);
 
     xf::cv::Rect_<unsigned int> roi[NUM_ROI];

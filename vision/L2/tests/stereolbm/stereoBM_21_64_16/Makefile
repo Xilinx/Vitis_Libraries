@@ -196,7 +196,7 @@ KSRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/stereolbm
 XFREQUENCY 		:= 300
 
 XCLBIN_NAME 	:= krnl_stereolbm
-KER_NAME    	:= stereoBM_accel:xf_stereoBM_accel.cpp
+KER_NAME    	:= stereolbm_accel:xf_stereolbm_accel.cpp
 
 VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
@@ -211,9 +211,9 @@ KERNELS     	+= $(KER_NAME)
 
 SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/stereolbm
 
-EXE_NAME  		:= stereoBM
-HOST_ARGS 		= $(SRC_DIR)/data/4k.jpg #$(XCLBIN_FILE)
-SRCS      		:= xf_stereoBM_tb xf_stereoBM_accel
+EXE_NAME  		:= stereolbm
+HOST_ARGS 		= $(SRC_DIR)/data/left.png $(SRC_DIR)/data/right.png
+SRCS      		:= xf_stereolbm_tb
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB

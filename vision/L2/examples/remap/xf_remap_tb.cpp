@@ -126,7 +126,6 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_remap");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);

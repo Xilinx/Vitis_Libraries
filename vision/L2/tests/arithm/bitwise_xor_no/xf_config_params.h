@@ -6,10 +6,12 @@
 #define NO 1 // Normal Operation
 #define RO 0 // Resource Optimized
 
+#define GRAY 1
+
 #define ARRAY 1
 #define SCALAR 0
 // macros for accel
-#define FUNCT_NAME bitwise_xor
+#define FUNCT_NUM 8
 //#define EXTRA_ARG  0.05
 //#define EXTRA_PARM XF_CONVERT_POLICY_SATURATE
 

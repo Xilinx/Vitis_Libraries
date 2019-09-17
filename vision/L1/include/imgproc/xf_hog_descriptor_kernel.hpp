@@ -79,9 +79,9 @@ void xFDHOGKernel(hls::stream<XF_SNAME(WORDWIDTH)> _in_stream[NOC],
     hls::stream<XF_SNAME(MAT_WW)> grad_x_stream, grad_y_stream;
     hls::stream<XF_SNAME(XF_16UW)> phase_stream("phase_stream"), mag_stream("mag_stream");
 
-    // clang-format off
-    #pragma HLS DATAFLOW
-    // clang-format on
+    //clang-format off
+#pragma HLS DATAFLOW
+    //clang-format on
 
     //  gradient computation
     xFHOGgradients<ROWS, COLS, DEPTH, XF_9SP, XF_NPPC1, WORDWIDTH, MAT_WW, NOC, USE_URAM>(
@@ -131,8 +131,10 @@ void xFDHOG(hls::stream<XF_SNAME(WORDWIDTH)> _in_stream[NOC],
     // Updating the _width based on NPC
     _width = _width >> XF_BITSHIFT(NPC);
 
+#ifndef _SYNTHESIS_
     assert(((_height <= ROWS) && (_width <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((NPC == XF_NPPC1) && "The NPC value must be XF_NPPC1");
+#endif
 
     if (NPC == XF_NPPC1) {
         xFDHOGKernel<WIN_HEIGHT, WIN_WIDTH, WIN_STRIDE, CELL_HEIGHT, CELL_WIDTH, NOB, (BLOCK_WIDTH / CELL_WIDTH),

@@ -32,34 +32,82 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xf_arithm_config.h"
 
 int main(int argc, char** argv) {
+#if ARRAY
     if (argc != 3) {
-        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr, "<Executable Name> <input image path1> <input image path2> \n");
-        return -1;
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+        return EXIT_FAILURE;
+    }
+#else
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> " << std::endl;
+        return EXIT_FAILURE;
     }
 
+#endif
     cv::Mat in_img1, in_img2, in_gray1, in_gray2, out_img, ocv_ref, diff;
-    /*  reading in the color image  */
+
+#if GRAY
+    // Reading in the image:
     in_gray1 = cv::imread(argv[1], 0);
-    in_gray2 = cv::imread(argv[2], 0);
+
     if (in_gray1.data == NULL) {
-        fprintf(stderr, "Cannot open image at %s\n", argv[1]);
-        return 0;
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        return EXIT_FAILURE;
     }
+#else
+    in_gray1 = cv::imread(argv[1], 1);
+
+    if (in_gray1.data == NULL) {
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        return EXIT_FAILURE;
+    }
+#endif
+#if ARRAY
+#if GRAY
+    in_gray2 = cv::imread(argv[2], 0);
 
     if (in_gray2.data == NULL) {
-        fprintf(stderr, "Cannot open image at %s\n", argv[2]);
-        return 0;
+        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        return EXIT_FAILURE;
     }
+#else
+    in_gray2 = cv::imread(argv[2], 1);
+
+    if (in_gray2.data == NULL) {
+        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        return EXIT_FAILURE;
+    }
+
+#endif
+#endif
+
+#if GRAY
 #if T_16S
     /*  convert to 16S type  */
     in_gray1.convertTo(in_gray1, CV_16SC1);
     in_gray2.convertTo(in_gray2, CV_16SC1);
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_16SC1);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
+#else
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_8UC1);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
 #endif
-
-    out_img.create(in_gray1.rows, in_gray1.cols, in_gray1.depth());
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, in_gray1.depth());
-    diff.create(in_gray1.rows, in_gray1.cols, in_gray1.depth());
+#else
+#if T_16S
+    /*  convert to 16S type  */
+    in_gray1.convertTo(in_gray1, CV_16SC3);
+    in_gray2.convertTo(in_gray2, CV_16SC3);
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_16SC3);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
+#else
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_8UC3);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
+#endif
+#endif
 
 #if ARRAY
     static xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput1(in_gray1.rows, in_gray1.cols);
@@ -88,10 +136,12 @@ int main(int argc, char** argv) {
     //	ocv_ref=cv::Mat::zeros(in_gray1.rows,in_gray1.cols,in_gray1.type());
 
     arithm_accel(imgInput1, imgInput2, imgOutput);
+    out_img.data = imgOutput.copyFrom();
 
 #endif
 
 #if SCALAR
+    unsigned char val[XF_CHANNELS(TYPE, NPC1)];
 
     for (int i = 0; i < XF_CHANNELS(TYPE, NPC1); i++) {
         val[i] = 150;
@@ -122,14 +172,15 @@ int main(int argc, char** argv) {
 
     arithm_accel(imgInput1, val, imgOutput);
 
+    out_img.data = imgOutput.copyFrom();
 #endif
 
-    xf::cv::imwrite("hls_out.jpg", imgOutput);
-    imwrite("ref_img.jpg", ocv_ref); // save the reference image
+    cv::imwrite("hls_out.jpg", out_img);
+    cv::imwrite("ref_img.jpg", ocv_ref); // save the reference image
 
-    xf::cv::absDiff(ocv_ref, imgOutput, diff); // Compute absolute difference image
-    // cv::absdiff(ocv_ref,out_img,diff);
-    imwrite("diff_img.jpg", diff); // Save the difference image for debugging purpose
+    // xf::cv::absDiff(ocv_ref, imgOutput, diff); // Compute absolute difference image
+    cv::absdiff(ocv_ref, out_img, diff);
+    cv::imwrite("diff_img.jpg", diff); // Save the difference image for debugging purpose
 
     FILE* fp2 = fopen("diff.txt", "w");
     // Find minimum and maximum differences.

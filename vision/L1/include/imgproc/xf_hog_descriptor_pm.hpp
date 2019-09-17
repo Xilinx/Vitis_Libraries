@@ -86,17 +86,17 @@ void xFHOGPhaseMagnitudeKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _gradx_stre
 
 rowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN OFF
-        // clang-format on
+        //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
+#pragma HLS LOOP_FLATTEN OFF
+        //clang-format on
 
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
-            #pragma HLS PIPELINE
-            // clang-format on
+            //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = COLS_TRIP max = COLS_TRIP
+#pragma HLS PIPELINE
+            //clang-format on
 
             grad_x_packed_val = (XF_SNAME(WORDWIDTH_SRC))(_gradx_stream.read());
             grad_y_packed_val = (XF_SNAME(WORDWIDTH_SRC))(_grady_stream.read());
@@ -108,9 +108,9 @@ rowLoop:
 
         procLoop:
             for (k = 0, l = 0; k < proc_loop_src, l < proc_loop_dst; k += step_src, l += step_dst) {
-                // clang-format off
-                #pragma HLS UNROLL
-                // clang-format on
+                //clang-format off
+#pragma HLS UNROLL
+                //clang-format on
 
                 XF_PTNAME(DEPTH_SRC)
                 g_x = grad_x_packed_val.range(k + (step_src - 1), k); // Get bits from certain range of positions.
@@ -175,6 +175,7 @@ void xFHOGPhaseMagnitude(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _grad_x,
                          hls::stream<XF_SNAME(WORDWIDTH_DST)>& _mag_stream,
                          uint16_t height,
                          uint16_t width) {
+#ifndef _SYNTHESIS_
     assert((DEPTH_SRC == XF_9SP) && "DEPTH_SRC must be XF_9SP");
     assert((DEPTH_DST == XF_16UP) && "DEPTH_DST must be of type XF_16UP");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8) || (NPC == XF_NPPC16)) &&
@@ -183,6 +184,7 @@ void xFHOGPhaseMagnitude(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _grad_x,
            "WORDWIDTH_SRC must be XF_9UW, XF_72UW or XF_144UW");
     assert(((WORDWIDTH_DST == XF_16UW) || (WORDWIDTH_DST == XF_128UW) || (WORDWIDTH_DST == XF_256UW)) &&
            "WORDWIDTH_DST must be XF_16UW, XF_128UW or XF_256UW");
+#endif
 
     xFHOGPhaseMagnitudeKernel<ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST,
                               (COLS >> XF_BITSHIFT(NPC))>(_grad_x, _grad_y, _phase_stream, _mag_stream, height, width);

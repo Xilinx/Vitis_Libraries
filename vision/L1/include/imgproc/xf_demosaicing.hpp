@@ -224,6 +224,7 @@ void Core_Process(XF_DTUNAME(SRC_T, NPC) imgblock[5][buf_size], int& b, int& g, 
 
 template <int BFORMAT, int SRC_T, int DST_T, int ROWS, int COLS, int NPC, bool USE_URAM>
 void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_mat, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst_mat) {
+#ifndef __SYNTHESIS__
     assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
             (BFORMAT == XF_BAYER_RG)) &&
            ("Unsupported Bayer pattern. Use anyone among: XF_BAYER_BG;XF_BAYER_GB;XF_BAYER_GR;XF_BAYER_RG"));
@@ -234,7 +235,7 @@ void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_mat, xf::cv::Mat<DST_T
     assert(((DST_T == XF_8UC3) || (DST_T == XF_10UC3) || (DST_T == XF_12UC3) || (DST_T == XF_16UC3) ||
             (DST_T == XF_8UC4) || (DST_T == XF_10UC4) || (DST_T == XF_12UC4) || (DST_T == XF_16UC4)) &&
            "Only 8, 10, 12 and 16 bit, 3 and 4 channel images are supported");
-
+#endif
     const int __BHEIGHT = 5;
     const int __BHEIGHTMINUSONE = __BHEIGHT - 1;
     const int __BWIDTH = NPC + __BHEIGHTMINUSONE + (((NPC - 1) >> 1) << 1);

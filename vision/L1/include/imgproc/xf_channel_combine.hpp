@@ -232,13 +232,14 @@ template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
+#ifndef __SYNTHESIS__
     assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_src2.rows <= ROWS) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC2) &&
            "Source image should be of 1 channel and destination image of 2 channels");
     //	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
-
+#endif
     hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
     hls::stream<XF_TNAME(DST_T, NPC)> _out;
@@ -286,6 +287,7 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src3,
            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
+#ifndef __SYNTHESIS__
     assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_src2.rows <= ROWS) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_src3.rows <= ROWS) && (_src3.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -293,7 +295,7 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC3) &&
            "Source image should be of 1 channel and destination image of 3 channels");
     //	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
-
+#endif
     hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in3;
@@ -344,6 +346,7 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src3,
            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src4,
            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
+#ifndef __SYNTHESIS__
     assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_src2.rows <= ROWS) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_src3.rows <= ROWS) && (_src3.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -352,7 +355,7 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC4) &&
            "Source image should be of 1 channel and destination image of 4 channels");
     //	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
-
+#endif
     hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in3;

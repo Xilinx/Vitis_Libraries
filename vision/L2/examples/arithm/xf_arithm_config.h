@@ -93,20 +93,38 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if T_16S
+#if GRAY
 #define TYPE XF_16SC1
 #if NO
 #define PTR_WIDTH 16
 #else
 #define PTR_WIDTH 128
 #endif
+#else
+#define TYPE XF_16SC3
+#if NO
+#define PTR_WIDTH 64
+#else
+#define PTR_WIDTH 512
+#endif
+#endif
 #endif
 
 #if T_8U
+#if GRAY
 #define TYPE XF_8UC1
 #if NO
 #define PTR_WIDTH 8
 #else
 #define PTR_WIDTH 64
+#endif
+#else
+#define TYPE XF_8UC3
+#if NO
+#define PTR_WIDTH 24
+#else
+#define PTR_WIDTH 256
+#endif
 #endif
 #endif
 

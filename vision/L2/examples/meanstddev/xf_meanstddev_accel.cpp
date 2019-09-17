@@ -32,24 +32,20 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern "C" {
 
-void meanstddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned short* stddev) {
+void meanstddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned short* stddev, int height, int width) {
     // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
-    #pragma HLS INTERFACE s_axilite  port=img_in 			          bundle=control
     #pragma HLS INTERFACE m_axi      port=mean          offset=slave  bundle=gmem1
-    #pragma HLS INTERFACE s_axilite  port=mean 			              bundle=control
     #pragma HLS INTERFACE m_axi      port=stddev        offset=slave  bundle=gmem2
-    #pragma HLS INTERFACE s_axilite  port=stddev 			          bundle=control
-    #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
+    #pragma HLS INTERFACE s_axilite  port=height 		      bundle=control
+    #pragma HLS INTERFACE s_axilite  port=width 		      bundle=control
+    #pragma HLS INTERFACE s_axilite  port=return 		      bundle=control
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput;
-
-    const int cols = WIDTH;
-    const int nppc = NPC1;
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
 
     // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=cols/nppc
+    #pragma HLS STREAM variable=imgInput.data depth=2
     // clang-format on
 
     // clang-format off

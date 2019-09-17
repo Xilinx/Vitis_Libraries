@@ -98,10 +98,11 @@ RowLoop:
 
 template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void sum(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1, double sum[XF_CHANNELS(SRC_T, NPC)]) {
+#ifndef __SYNTHESIS__
     assert(((SRC_T == XF_8UC1)) && "Input TYPE must be XF_8UC1 for 1-channel image");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
-
+#endif
     short width = src1.cols >> XF_BITSHIFT(NPC);
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), double> scl;
 

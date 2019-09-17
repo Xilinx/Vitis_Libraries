@@ -30,38 +30,27 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "xf_channel_extract_config.h"
 
-/*void channel_extract_accel(xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, XF_NPPC1> &imgInput, xf::cv::Mat<XF_8UC1, HEIGHT,
-WIDTH, XF_NPPC1> &imgOutput, unsigned short channel){
-
-                xf::cv::extractChannel<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(imgInput, imgOutput, channel);
-}*/
 extern "C" {
 void channel_extract_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_rgba, ap_uint<OUTPUT_PTR_WIDTH>* img_gray, uint16_t channel, int rows, int cols) {
     // clang-format off
     #pragma HLS INTERFACE m_axi     port=img_rgba  	offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_gray  	offset=slave bundle=gmem2
-    #pragma HLS INTERFACE s_axilite port=img_rgba           bundle=control
-    #pragma HLS INTERFACE s_axilite port=img_gray             bundle=control
     #pragma HLS INTERFACE s_axilite port=rows              	 bundle=control
     #pragma HLS INTERFACE s_axilite port=cols              	 bundle=control
     #pragma HLS INTERFACE s_axilite port=channel              	 bundle=control
     #pragma HLS INTERFACE s_axilite port=return              bundle=control
     // clang-format on
 
-    const int pROWS = HEIGHT;
-    const int pCOLS = WIDTH;
-    const int pNPC1 = XF_NPPC1;
-
     xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, XF_NPPC1> imgInput0;
     // clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=pCOLS/pNPC1
+    #pragma HLS stream variable=imgInput0.data depth=2
     // clang-format on
     imgInput0.rows = rows;
     imgInput0.cols = cols;
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> imgOutput0;
     // clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=pCOLS/pNPC1
+    #pragma HLS stream variable=imgOutput0.data depth=2
     // clang-format on
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;

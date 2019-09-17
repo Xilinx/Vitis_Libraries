@@ -72,10 +72,10 @@ int main(int argc, char** argv) {
 
 #if REPETITIVE_BLOCKS
     int dim_rb = (total_no_of_windows * XF_NODPW) >> 1;
-    int no_of_descs = dim_rb;
+    int no_of_descs_hw = dim_rb;
 #elif NON_REPETITIVE_BLOCKS
     int dim_nrb = (nohb_tb * novb_tb * XF_NOBPB) >> 1;
-    int no_of_descs = dim_nrb;
+    int no_of_descs_hw = dim_nrb;
     int dim_expand = (dim_nrb << 1);
 #endif
     int dim = (total_no_of_windows * XF_NODPW);
@@ -104,19 +104,11 @@ int main(int argc, char** argv) {
     //////////////////	HLS TOP Function Call  ////////////////////////
     static xf::cv::Mat<XF_INPUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPC1> inMat(img.rows, img.cols);
     inMat.copyTo(img.data);
-#if REPETITIVE_BLOCKS
-    static xf::cv::Mat<XF_32UC1, 1, XF_DESC_SIZE, XF_NPPC1> outMat(1, dim_rb);
-#elif NON_REPETITIVE_BLOCKS
-    static xf::cv::Mat<XF_32UC1, 1, XF_DESC_SIZE, XF_NPPC1> outMat(1, dim_nrb);
-#endif
+    static xf::cv::Mat<XF_32UC1, 1, XF_DESC_SIZE, XF_NPPC1> outMat(1, no_of_descs_hw);
 
     hog_descriptor_accel(inMat, outMat);
 
-#if REPETITIVE_BLOCKS
-    ap_uint32_t* output = (ap_uint32_t*)malloc(dim_rb * sizeof(ap_uint32_t));
-#elif NON_REPETITIVE_BLOCKS
-    ap_uint32_t* output = (ap_uint32_t*)malloc(dim_nrb * sizeof(ap_uint32_t));
-#endif
+    ap_uint32_t* output = (ap_uint32_t*)malloc(no_of_descs_hw * sizeof(ap_uint32_t));
 
 #if NON_REPETITIVE_BLOCKS
 

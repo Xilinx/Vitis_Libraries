@@ -33,6 +33,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * The number of pixels to be extracted is determined by the NPC.
  */
 
+namespace xf {
+namespace cv {
+
 template <int NPC, int WORDWIDTH, int PIXELDEPTH>
 void xfPackPixels(
     XF_PTNAME(PIXELDEPTH) * tmp_buf, XF_SNAME(WORDWIDTH) & val, uint16_t pos, int16_t loopIter, uint16_t& shift) {
@@ -577,8 +580,6 @@ void xFDuplicateStream(hls::stream<XF_SNAME(WORDWIDTH)>& in_strm,
     }
 }
 
-namespace xf {
-namespace cv {
 class accel_utils {
    public:
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
