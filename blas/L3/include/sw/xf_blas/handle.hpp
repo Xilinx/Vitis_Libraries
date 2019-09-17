@@ -26,7 +26,7 @@
 using namespace std;
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 class BLASHostHandle {
@@ -54,7 +54,7 @@ class ConfigDict {
 };
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

@@ -24,7 +24,7 @@
 using namespace std;
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 typedef enum { OpControl, OpGemv, OpGemm, OpTransp, OpSpmv, OpUspmv, OpResult, OpFail, OpFcn } OpType;
@@ -110,7 +110,7 @@ int getTypeSize(string p_typeName) {
 }
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

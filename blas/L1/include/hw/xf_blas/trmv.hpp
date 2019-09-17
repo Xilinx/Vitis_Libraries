@@ -28,7 +28,7 @@
 #include "axpy.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename t_DataType,
@@ -90,7 +90,7 @@ void trmv(const bool uplo,
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

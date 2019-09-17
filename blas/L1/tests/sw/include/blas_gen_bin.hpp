@@ -34,7 +34,7 @@
 
 using namespace std;
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename t_DataType,
@@ -328,6 +328,6 @@ class GenBin {
 };
 
 } // end namespace blas
-} // end namespace linear_algebra
+
 } // end namespace xf
 #endif

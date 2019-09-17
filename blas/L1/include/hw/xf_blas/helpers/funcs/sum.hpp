@@ -32,7 +32,7 @@
 #include "hls_stream.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 namespace {
@@ -146,7 +146,7 @@ void sum(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

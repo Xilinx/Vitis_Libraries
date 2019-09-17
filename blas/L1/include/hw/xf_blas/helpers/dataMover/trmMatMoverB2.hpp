@@ -29,7 +29,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 /**
  * @brief trmUp2Stream function that read the super-triangular matrix from memory to stream
@@ -223,6 +223,6 @@ void vec2TrmLoStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_D
 }
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

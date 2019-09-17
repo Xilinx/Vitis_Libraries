@@ -29,7 +29,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -96,6 +96,6 @@ void vec2GemStream(unsigned int p_m,
     }
 } // end vec2GemStream
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

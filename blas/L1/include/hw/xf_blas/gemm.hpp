@@ -28,7 +28,7 @@
 #include "axpy.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename t_DataType, unsigned int t_M, unsigned int t_N = t_M, typename t_MacDataType = t_DataType>
@@ -102,7 +102,7 @@ void gemm(const unsigned int p_k,
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif
