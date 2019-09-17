@@ -17,7 +17,7 @@
 #include "hls_stream.h"
 #include "xf_blas.hpp"
 
-using namespace xf::linear_algebra::blas;
+using namespace xf::blas;
 
 void uut_top(uint32_t p_m,
              uint32_t p_n,

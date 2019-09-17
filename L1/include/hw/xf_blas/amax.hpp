@@ -33,7 +33,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -62,7 +62,7 @@ void amax(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntri
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif
