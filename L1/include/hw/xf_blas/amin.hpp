@@ -53,7 +53,6 @@ void amin(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntri
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
-    unsigned int l_numElem = p_n >> t_LogParEntries;
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_abs;
 #pragma HLS stream variable = l_abs depth = 2
 #pragma HLS DATAFLOW
