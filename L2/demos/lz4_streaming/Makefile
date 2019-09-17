@@ -147,7 +147,7 @@ XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
 
 BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
-SRC_DIR := $(XFLIB_DIR)/L2/demo/
+SRC_DIR := $(XFLIB_DIR)/L2/demos/
 TB_DIR := lz4_streaming/
 
 # ------------------------------------------------------------
