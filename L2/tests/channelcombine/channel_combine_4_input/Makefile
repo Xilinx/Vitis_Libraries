@@ -212,7 +212,7 @@ KERNELS     	+= $(KER_NAME)
 SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/channelcombine
 
 EXE_NAME  		:= channel_conine
-HOST_ARGS 		= $(SRC_DIR)/data/4k_1.jpg $(SRC_DIR)/data/4k_2.jpg
+HOST_ARGS 		= $(SRC_DIR)/data/4k_1.jpg $(SRC_DIR)/data/4k_2.jpg $(SRC_DIR)/data/4k_3.jpg $(SRC_DIR)/data/4k_4.jpg
 SRCS      		:= xf_channel_combine_tb
 
 # Macro definitions

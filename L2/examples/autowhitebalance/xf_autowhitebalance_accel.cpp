@@ -76,7 +76,7 @@ void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_inp1, in_mat1);
 
-    xf::cv::balanceWhite<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_WB_TYPE>(in_mat, in_mat1, out_mat, thresh);
+    xf::cv::balanceWhite<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, WB_TYPE>(in_mat, in_mat1, out_mat, thresh);
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
 }

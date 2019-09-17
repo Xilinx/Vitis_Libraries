@@ -33,5 +33,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void lut_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1>& imgInput,
                xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1>& imgOutput,
                unsigned char* lut_ptr) {
+#pragma HLS INTERFACE m_axi depth = 256 port = lut_ptr offset = direct bundle = in
+
     xf::cv::LUT<TYPE, HEIGHT, WIDTH, NPC1>(imgInput, imgOutput, lut_ptr);
 }

@@ -70,9 +70,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 template <int DEPTH, typename hist_type, int NOB, int BIN_STRIDE_FIX>
 void xFDHOGbilinearNO(XF_PTNAME(DEPTH) p, XF_PTNAME(DEPTH) m, uint16_t* bin_center, hist_type* bin) {
-    // clang-format off
-    #pragma HLS INLINE OFF
-    // clang-format on
+    //clang-format off
+#pragma HLS INLINE OFF
+    //clang-format on
 
     // finding the bin index with respect to the phase
     uint32_t tmp_bin_idx = p * XF_HOG_1_BY_20; // Q9.7xQ0.16 -> Q9.23
@@ -175,22 +175,22 @@ void xFDHOGcomputeHistNO(hls::stream<XF_SNAME(WORDWIDTH)>& _phase_strm,
 
     // NPC copied of the histogram array
     hist_type bin[NOB];
-    // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=bin complete dim=1
-// clang-format on
+    //clang-format off
+#pragma HLS ARRAY_PARTITION variable = bin complete dim = 1
+//clang-format on
 
 // initializing the histogram array with zero
 loop_i_init_zero:
     for (i = 0; i < nohc; i++) {
-        // clang-format off
-        #pragma HLS PIPELINE
-        // clang-format on
+        //clang-format off
+#pragma HLS PIPELINE
+        //clang-format on
 
     loop_j_init_zero:
         for (j = 0; j < NOB; j++) {
-            // clang-format off
-            #pragma HLS unroll
-            // clang-format on
+            //clang-format off
+#pragma HLS unroll
+            //clang-format on
             HA[i][j] = 0;
         }
     }
@@ -199,16 +199,16 @@ cell_height_loop:
     for (i = 0; i < CELL_HEIGHT; i++) {
     no_of_horz_cell_loop:
         for (r = 0; r < nohc; r++) {
-            // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=NOHC max=NOHC
-            #pragma HLS PIPELINE
-            // clang-format on
+            //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = NOHC max = NOHC
+#pragma HLS PIPELINE
+            //clang-format on
 
         init_bin_loop_k:
             for (k = 0; k < NOB; k++) {
-                // clang-format off
-                #pragma HLS unroll
-                // clang-format on
+                //clang-format off
+#pragma HLS unroll
+                //clang-format on
                 bin[k] = 0;
             }
 
@@ -239,9 +239,9 @@ cell_height_loop:
         tmp_ssv_computation:
             for (k = 0; k < NOB; k++) // adder tree inferred
             {
-                // clang-format off
-                #pragma HLS unroll
-                // clang-format on
+                //clang-format off
+#pragma HLS unroll
+                //clang-format on
                 tmp += (HA[r][k] * HA[r][k]);
             }
             ssv[r] = tmp; // Q29.16 format <45> bits
@@ -271,9 +271,9 @@ void xFDHOGbilinearRO(XF_PTNAME(DEPTH) p,
                       uchar_t* index_2,
                       hist_type* part_1,
                       hist_type* part_2) {
-    // clang-format off
-    #pragma HLS INLINE OFF
-    // clang-format on
+    //clang-format off
+#pragma HLS INLINE OFF
+    //clang-format on
 
     // finding the bin index with respect to the phase
     uint32_t tmp_bin_idx = p * (uint16_t)XF_HOG_1_BY_20;
@@ -336,16 +336,16 @@ void xFDHOGbilinearRO(XF_PTNAME(DEPTH) p,
  ***************************************************************************/
 template <int NPC, int NOB, typename hist_type, int NOHC>
 void xFDHOGBinRO(hist_type bin[][NOB], hist_type HA[][NOB], uint16_t j) {
-    // clang-format off
-    #pragma HLS INLINE
-// clang-format on
+    //clang-format off
+#pragma HLS INLINE
+//clang-format on
 
 // add all the 8 copies of the temporary array into single copy
 accumulate_to_bin_0_k:
     for (uchar_t k = 0; k < NOB; k++) {
-        // clang-format off
-        #pragma HLS UNROLL
-        // clang-format on
+        //clang-format off
+#pragma HLS UNROLL
+        //clang-format on
 
     accumulate_to_bin_0_l:
         for (uchar_t l = 1; l < (1 << XF_BITSHIFT(NPC)); l++) {
@@ -356,9 +356,9 @@ accumulate_to_bin_0_k:
 // accumulating the temporary histogram to HA array
 accumulate_HA:
     for (uchar_t k = 0; k < NOB; k++) {
-        // clang-format off
-        #pragma HLS PIPELINE
-        // clang-format on
+        //clang-format off
+#pragma HLS PIPELINE
+        //clang-format on
 
         HA[j][k] += bin[0][k];
     }
@@ -395,9 +395,9 @@ void xFDHOGcomputeHistRO(
 
         // NPC copied of the histogram array
         hist_type bin[XF_NPIXPERCYCLE(NPC)][NOB], part_1, part_2;
-// clang-format off
+//clang-format off
 #pragma HLS ARRAY_PARTITION variable=bin complete dim=0
-// clang-format on
+//clang-format on
 
         uint16_t proc_loop = XF_WORDDEPTH(WORDWIDTH);
         uchar_t step = XF_PIXELDEPTH(DEPTH), npc_idx, index_1, index_2;
@@ -406,16 +406,16 @@ void xFDHOGcomputeHistRO(
         loop_i_init_zero:
         for(uint16_t i = 0; i < NOHC; i++)
         {
-// clang-format off
+//clang-format off
 #pragma HLS pipeline
-// clang-format on
+//clang-format on
 
                 loop_j_init_zero:
                 for(uint16_t j = 0; j < NOB; j++)
                 {
-// clang-format off
+//clang-format off
 #pragma HLS unroll
-// clang-format on
+//clang-format on
                         HA[i][j] = 0;
                 }
         }
@@ -426,10 +426,10 @@ void xFDHOGcomputeHistRO(
                 img_col_loop:
                 for(uint16_t j = 0; j < _phase_strm.cols; j++)
                 {
-// clang-format off
+//clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
 #pragma HLS pipeline
-// clang-format on
+//clang-format on
 
                         // reading data from the stream
                         phase_data = _phase_strm.read();
@@ -439,9 +439,9 @@ void xFDHOGcomputeHistRO(
                         init_bin_loop_k:
                         for(uchar_t k = 0; k < NOB; k++)
                         {
-// clang-format off
+//clang-format off
 #pragma HLS unroll
-// clang-format on
+//clang-format on
                                 init_bin_loop_l:
                                 for(uchar_t l = 0; l < (1<<XF_BITSHIFT(NPC)); l++)
                                 {
@@ -452,9 +452,9 @@ void xFDHOGcomputeHistRO(
                         proc_loop:
                         for(uint16_t k = 0; k < proc_loop; k+=step)
                         {
-// clang-format off
+//clang-format off
 #pragma HLS unroll
-// clang-format on
+//clang-format on
                                 p = phase_data.range(k + (step-1), k);
                                 m = mag_data.range(k + (step-1), k);
 
@@ -472,16 +472,16 @@ void xFDHOGcomputeHistRO(
                         xFDHOGBinRO<NPC,NOB,hist_type,NOHC>(bin,HA,j); // HA array will be of format Q15.8
 
                         ssv_type tmp_ssv[NOB];
-// clang-format off
+//clang-format off
 #pragma HLS ARRAY_PARTITION variable=tmp_ssv complete dim=1
-// clang-format on
+//clang-format on
 
                         // square computation on temporary ssv val
                         for(uchar_t k = 0; k < NOB; k++)
                         {
-// clang-format off
+//clang-format off
 #pragma HLS unroll
-// clang-format on
+//clang-format on
                                 tmp_ssv[k] = (HA[j][k] * HA[j][k]);
                         }
 

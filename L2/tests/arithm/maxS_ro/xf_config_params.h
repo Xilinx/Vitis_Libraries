@@ -6,10 +6,13 @@
 #define NO 0 // Normal Operation
 #define RO 1 // Resource Optimized
 
+#define GRAY 0
+
 #define ARRAY 0
 #define SCALAR 1
+
 // macros for accel
-#define FUNCT_NAME max
+#define FUNCT_NUM 12
 //#define EXTRA_ARG  0.05
 //#define EXTRA_PARM XF_CONVERT_POLICY_SATURATE
 

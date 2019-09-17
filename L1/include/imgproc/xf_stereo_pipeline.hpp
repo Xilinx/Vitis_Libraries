@@ -189,8 +189,10 @@ void xFInitUndistortRectifyMapInverseKernel(CM_T* cameraMatrix,
     MAP_type mx;
     MAP_type my;
 
+#ifndef _SYNTHESIS_
     assert(rows <= ROWS);
     assert(cols <= COLS);
+#endif
 
     int idx = 0;
 loop_height:

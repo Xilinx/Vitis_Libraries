@@ -36,28 +36,27 @@ void channel_combine(ap_uint<PTR_IN_WIDTH>* img_in1,
                      ap_uint<PTR_IN_WIDTH>* img_in2,
                      ap_uint<PTR_IN_WIDTH>* img_in3,
                      ap_uint<PTR_IN_WIDTH>* img_in4,
-                     ap_uint<PTR_OUT_WIDTH>* img_out) {
+                     ap_uint<PTR_OUT_WIDTH>* img_out,
+                     int height,
+                     int width) {
     // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0
-    #pragma HLS INTERFACE s_axilite  port=img_in1			          bundle=control
     #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1
-    #pragma HLS INTERFACE s_axilite  port=img_in2 			          bundle=control
     #pragma HLS INTERFACE m_axi      port=img_in3       offset=slave  bundle=gmem2
-    #pragma HLS INTERFACE s_axilite  port=img_in3 		    	      bundle=control
     #pragma HLS INTERFACE m_axi      port=img_in4       offset=slave  bundle=gmem3
-    #pragma HLS INTERFACE s_axilite  port=img_in4			          bundle=control
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4
-    #pragma HLS INTERFACE s_axilite  port=img_out 			          bundle=control
-    #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
+    #pragma HLS interface s_axilite  port=height	              bundle=control
+    #pragma HLS interface s_axilite  port=width 	              bundle=control
+    #pragma HLS interface s_axilite  port=return	              bundle=control
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1;
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput2;
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput3;
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput4;
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput;
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput2(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput3(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput4(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
-    const int sdepth = WIDTH / NPC1;
+    const int sdepth = 2;
 
     // clang-format off
     #pragma HLS STREAM variable=imgInput1.data depth=sdepth

@@ -29,15 +29,14 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ***************************************************************************/
 
-#include "xf_convertScaleAbs_config.h"
+#include "xf_convertscaleabs_config.h"
 
-void convertScaleAbs_accel(
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> &imgInput1,
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> &imgOutput, float scale,
-    float shift) {
-  xf::cv::convertScaleAbs<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1>(
-      imgInput1, imgOutput, scale, shift);
-  //	int type1=imgInput1.type();
-  //	int depth=imgInput1.depth();
-  //	int channels=imgInput1.channels();
+void convertScaleAbs_accel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
+                           xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1>& imgOutput,
+                           float scale,
+                           float shift) {
+    xf::cv::convertScaleAbs<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, imgOutput, scale, shift);
+    //	int type1=imgInput1.type();
+    //	int depth=imgInput1.depth();
+    //	int channels=imgInput1.channels();
 }

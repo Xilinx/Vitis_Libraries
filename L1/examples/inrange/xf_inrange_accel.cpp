@@ -34,5 +34,7 @@ void inrange_accel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX>& _src,
                    unsigned char* lower_thresh,
                    unsigned char* upper_thresh,
                    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPIX>& _dst) {
+#pragma HLS INTERFACE m_axi depth = 3 port = lower_thresh offset = direct bundle = in
+#pragma HLS INTERFACE m_axi depth = 3 port = upper_thresh offset = direct bundle = in
     xf::cv::inRange<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPIX>(_src, lower_thresh, upper_thresh, _dst);
 }

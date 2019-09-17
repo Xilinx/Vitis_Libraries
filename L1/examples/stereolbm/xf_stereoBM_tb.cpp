@@ -32,6 +32,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+#define _TEXTURE_THRESHOLD_ 20
+#define _UNIQUENESS_RATIO_ 15
+#define _PRE_FILTER_CAP_ 31
+#define _MIN_DISP_ 0
+
 int main(int argc, char** argv) {
     cv::setUseOptimized(false);
 
@@ -49,15 +54,23 @@ int main(int argc, char** argv) {
 
     //////////////////      OCV reference Function ////////////////////////
 
+    // OpenCV reference function: enable this for older Opencv version
     cv::StereoBM bm;
-    bm.state->preFilterCap = 31;
+    bm.state->preFilterCap = _PRE_FILTER_CAP_;
     bm.state->preFilterType = CV_STEREO_BM_XSOBEL;
     bm.state->SADWindowSize = SAD_WINDOW_SIZE;
-    bm.state->minDisparity = 0;
+    bm.state->minDisparity = _MIN_DISP_;
     bm.state->numberOfDisparities = NO_OF_DISPARITIES;
-    bm.state->textureThreshold = 20;
-    bm.state->uniquenessRatio = 15;
+    bm.state->textureThreshold = _TEXTURE_THRESHOLD_;
+    bm.state->uniquenessRatio = _UNIQUENESS_RATIO_;
     bm(left_img, right_img, disp);
+
+    // enable this reference code, based on the version of Opencv
+    /*cv::Ptr<cv::StereoBM> stereobm = cv::StereoBM::create(NO_OF_DISPARITIES, SAD_WINDOW_SIZE);
+    stereobm-> setPreFilterCap(_PRE_FILTER_CAP_);
+    stereobm-> setUniquenessRatio(_UNIQUENESS_RATIO_);
+    stereobm-> setTextureThreshold(_TEXTURE_THRESHOLD_);
+    stereobm-> compute(left_img,right_img,disp);*/
 
     cv::Mat disp8;
     disp.convertTo(disp8, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
@@ -73,17 +86,15 @@ int main(int argc, char** argv) {
     rightMat.copyTo(right_img.data);
 
     xf::cv::xFSBMState<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS> bm_state;
-    bm_state.preFilterCap = 31;
-    bm_state.uniquenessRatio = 15;
-    bm_state.textureThreshold = 20;
-    bm_state.minDisparity = 0;
+    bm_state.preFilterCap = _PRE_FILTER_CAP_;
+    bm_state.uniquenessRatio = _UNIQUENESS_RATIO_;
+    bm_state.textureThreshold = _TEXTURE_THRESHOLD_;
+    bm_state.minDisparity = _MIN_DISP_;
 
     stereolbm_accel(leftMat, rightMat, dispMat, bm_state);
 
     dispMat.convertTo(dispMat_out, XF_CONVERT_16U_TO_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
     xf::cv::imwrite("hls_out.jpg", dispMat_out);
-
-    int cnt = 0, total = 0;
 
     // changing the invalid value from negative to zero for validating the difference
     for (int i = 0; i < disp.rows; i++) {

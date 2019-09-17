@@ -215,7 +215,7 @@ KERNELS     	+= $(KER_NAME1) $(KER_NAME2) $(KER_NAME3) $(KER_NAME4)
 SRC_DIR 		:= $(XF_LIB_DIR)/L3/examples/cornertracker
 
 EXE_NAME  		:= cornertracker
-HOST_ARGS 		= $(SRC_DIR)/data/cornerTrack.mp4 10 20000 5
+HOST_ARGS 		= $(SRC_DIR)/data 4 20000 5
 SRCS      		:= xf_corner_tracker_tb
 
 # Macro definitions

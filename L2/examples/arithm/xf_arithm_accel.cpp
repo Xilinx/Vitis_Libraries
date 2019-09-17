@@ -121,11 +121,11 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
     xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in2, imgInput2);
 
 // Run xfOpenCV kernel:
-#ifdef XF_EXTRA_PARM
-    xf::cv::FUNCT_NAME<XF_EXTRA_PARM, TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, imgInput2, imgOutput
+#ifdef EXTRA_PARM
+    xf::cv::FUNCT_NAME<EXTRA_PARM, TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, imgInput2, imgOutput
 #ifdef FUNCT_MULTIPLY
-                                                                 ,
-                                                                 scale
+                                                              ,
+                                                              scale
 #endif
     );
 #else
@@ -145,10 +145,9 @@ void arithm_accel(
     ap_uint<PTR_WIDTH>* img_in1, unsigned char* scl_in, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
     // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0
-    
-    
-    #pragma HLS INTERFACE s_axilite  port=scl_in 			          bundle=control
-    #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
+    #pragma HLS INTERFACE m_axi      port=scl_in        offset=slave  bundle=gmem1
+    #pragma HLS INTERFACE m_axi      port=img_out      	 offset=slave  bundle=gmem2
+   
     #pragma HLS INTERFACE s_axilite  port=height 			          bundle=control
     #pragma HLS INTERFACE s_axilite  port=width 			          bundle=control
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
@@ -169,19 +168,16 @@ void arithm_accel(
 
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in1, imgInput1);
-
     for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
         scl[i] = scl_in[i];
-        printf("the scalar values are %d\n", scl[i]);
     }
 
-    xf::cv::addS<EXTRA_PARM, TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, scl, imgOutput);
     // Run xfOpenCV kernel:
-    /*   xf::cv::FUNCT_NAME<
-   #ifdef EXTRA_PARM
-           EXTRA_PARM,
-   #endif
-           TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, scl, imgOutput);*/
+    xf::cv::FUNCT_NAME<
+#ifdef EXTRA_PARM
+        EXTRA_PARM,
+#endif
+        TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, scl, imgOutput);
 
     // Convert _dst xf::cv::Mat object to output array:
     xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);

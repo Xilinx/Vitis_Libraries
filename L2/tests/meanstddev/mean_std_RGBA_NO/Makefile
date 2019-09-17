@@ -211,9 +211,9 @@ KERNELS     	+= $(KER_NAME)
 
 SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/meanstddev
 
-EXE_NAME  		:= meansddev
+EXE_NAME  		:= meanstddev
 HOST_ARGS 		= $(SRC_DIR)/data/4k.jpg #$(XCLBIN_FILE)
-SRCS      		:= xf_meansddev_tb xf_meanstddev_accel
+SRCS      		:= xf_meanstddev_tb
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB

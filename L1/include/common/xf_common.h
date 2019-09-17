@@ -34,4 +34,5 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xf_params.h"
 #include "xf_types.h"
 
+using namespace xf::cv;
 #endif

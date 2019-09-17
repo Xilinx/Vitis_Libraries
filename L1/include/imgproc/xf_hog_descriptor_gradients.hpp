@@ -53,9 +53,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template <int DEPTH_SRC, int DEPTH_DST, int NOC>
 XF_PTNAME(DEPTH_DST)
 xFHOGgradientXY(XF_PTNAME(DEPTH_SRC) n1, XF_PTNAME(DEPTH_SRC) n2) {
-    // clang-format off
-    #pragma HLS INLINE
-    // clang-format on
+    //clang-format off
+#pragma HLS INLINE
+    //clang-format on
 
     XF_PTNAME(DEPTH_DST) grad;
 
@@ -74,16 +74,16 @@ void xFHOGgradientCompute(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
                           filter_type src_buf0[][filter_width],
                           filter_type src_buf1[][filter_width],
                           filter_type src_buf2[][filter_width]) {
-    // clang-format off
-    #pragma HLS INLINE OFF
-    // clang-format on
+    //clang-format off
+#pragma HLS INLINE OFF
+    //clang-format on
 
     if (NOC == XF_GRAY) {
     Compute_Grad_Loop_Gray:
         for (uchar_t j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-            // clang-format off
-            #pragma HLS UNROLL
-            // clang-format on
+            //clang-format off
+#pragma HLS UNROLL
+            //clang-format on
 
             // x-gradient computation
             GradientvaluesX[j] =
@@ -96,16 +96,16 @@ void xFHOGgradientCompute(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
     } else {
         // Temporary array to hold the gradient data for each channel separately
         XF_PTNAME(DEPTH_DST) tmp_x[NOC], tmp_y[NOC];
-        // clang-format off
-        #pragma HLS ARRAY_PARTITION variable=tmp_x complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=tmp_y complete dim=1
-        // clang-format on
+        //clang-format off
+#pragma HLS ARRAY_PARTITION variable = tmp_x complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = tmp_y complete dim = 1
+        //clang-format on
 
     Compute_Grad_Loop_rgb:
         for (uchar_t j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-            // clang-format off
-            #pragma HLS UNROLL
-            // clang-format on
+            //clang-format off
+#pragma HLS UNROLL
+            //clang-format on
 
             // x-gradient computation
             tmp_x[NOC - 3] = xFHOGgradientXY<DEPTH_SRC, DEPTH_DST, NOC>(src_buf1[NOC - 3][j], src_buf1[NOC - 3][j + 2]);
@@ -167,23 +167,23 @@ void xFHOGcomputeColGrad(hls::stream<XF_SNAME(WORDWIDTH_SRC)> _src_strm[NOS_SRC]
     uchar_t buf_size = XF_NPIXPERCYCLE(NPC) + 2;
     uint16_t col = 0, i = 0, j = 0;
     ap_uint<3> p;
-    // clang-format off
-    #pragma HLS INLINE off
-// clang-format on
+    //clang-format off
+#pragma HLS INLINE off
+//clang-format on
 // column loop up to the end of the row
 Col_Loop:
     for (col = 0; col < (img_width); col++) {
-        // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-        #pragma HLS PIPELINE
-        // clang-format on
+        //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
+#pragma HLS PIPELINE
+        //clang-format on
 
     // reading the data from the stream
     Plane_Loop3:
         for (p = 0; p < NOS_SRC; p++) {
-            // clang-format off
-            #pragma HLS UNROLL
-            // clang-format on
+            //clang-format off
+#pragma HLS UNROLL
+            //clang-format on
             XF_SNAME(WORDWIDTH_SRC) in_data = 0;
             if (flag) {
                 in_data = _src_strm[p].read();
@@ -203,10 +203,10 @@ Col_Loop:
             j = 1;
         data_pack_loop1:
             for (i = 0; i < (max_loop - step); i = i + step) {
-                // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=PIX_COUNT max=PIX_COUNT
-                #pragma HLS UNROLL
-                // clang-format on
+                //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = PIX_COUNT max = PIX_COUNT
+#pragma HLS UNROLL
+                //clang-format on
                 P0.range(i + (step - 1), i) = GradientValuesX[j];
                 P1.range(i + (step - 1), i) = GradientValuesY[j++];
             }
@@ -219,10 +219,10 @@ Col_Loop:
             j = 1;
         data_pack_loop2:
             for (i = 0; i < (max_loop - step); i = i + step) {
-                // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=PIX_COUNT max=PIX_COUNT
-                #pragma HLS UNROLL
-                // clang-format on
+                //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = PIX_COUNT max = PIX_COUNT
+#pragma HLS UNROLL
+                //clang-format on
                 P0.range(i + (step - 1), i) = GradientValuesX[j];
                 P1.range(i + (step - 1), i) = GradientValuesY[j++];
             }
@@ -231,9 +231,9 @@ Col_Loop:
     // copy the last two pixel data to the next iteration
     Plane_Loop4:
         for (p = 0; p < NOS_SRC; p++) {
-            // clang-format off
-            #pragma HLS UNROLL
-            // clang-format on
+            //clang-format off
+#pragma HLS UNROLL
+            //clang-format on
             src_buf0[p][0] = src_buf0[p][buf_size - 2];
             src_buf0[p][1] = src_buf0[p][buf_size - 1];
 
@@ -274,20 +274,20 @@ void xFHOGgradientsKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)> _src_strm[NOS_SRC
     // output gradient buffers; gradient-x and gradient-y
     XF_PTNAME(DEPTH_DST) GradientValuesX[XF_NPIXPERCYCLE(NPC)];
     XF_PTNAME(DEPTH_DST) GradientValuesY[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=GradientValuesX complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=GradientValuesY complete dim=1
-    // clang-format on
+    //clang-format off
+#pragma HLS ARRAY_PARTITION variable = GradientValuesX complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = GradientValuesY complete dim = 1
+    //clang-format on
 
     // temporary buffer to hold the input data for computation
     XF_PTNAME(DEPTH_SRC)
     src_buf0[NOS_SRC][XF_NPIXPERCYCLE(NPC) + 2], src_buf1[NOS_SRC][XF_NPIXPERCYCLE(NPC) + 2],
         src_buf2[NOS_SRC][XF_NPIXPERCYCLE(NPC) + 2];
-    // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=src_buf0 complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=0
-    // clang-format on
+    //clang-format off
+#pragma HLS ARRAY_PARTITION variable = src_buf0 complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = src_buf1 complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = src_buf2 complete dim = 0
+    //clang-format on
 
     // used to temporarily hold the output data before pushing into the stream
     XF_SNAME(WORDWIDTH_DST) P0, P1;
@@ -296,16 +296,16 @@ void xFHOGgradientsKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)> _src_strm[NOS_SRC
     XF_SNAME(WORDWIDTH_SRC) buf[NOS_SRC][3][(COLS >> XF_BITSHIFT(NPC))];
 
     if (USE_URAM) {
-        // clang-format off
-        #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
-        #pragma HLS ARRAY_RESHAPE variable=buf cyclic factor=3 dim=2
-        // clang-format on
+        //clang-format off
+#pragma HLS ARRAY_PARTITION variable = buf complete dim = 1
+#pragma HLS RESOURCE variable = buf core = RAM_S2P_URAM
+#pragma HLS ARRAY_RESHAPE variable = buf cyclic factor = 3 dim = 2
+        //clang-format on
     } else {
-        // clang-format off
-        #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=buf complete dim=2
-        // clang-format on
+        //clang-format off
+#pragma HLS ARRAY_PARTITION variable = buf complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = buf complete dim = 2
+        //clang-format on
     }
 
     row_ind = 1;
@@ -313,10 +313,10 @@ void xFHOGgradientsKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)> _src_strm[NOS_SRC
 // reading the complete first line to the input buffer
 Clear_Row_Read_Buf_Loop:
     for (col = 0; col < (_width); col++) {
-        // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-        #pragma HLS PIPELINE
-        // clang-format on
+        //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
+#pragma HLS PIPELINE
+        //clang-format on
 
     Plane_Loop1:
         for (p = 0; p < NOS_SRC; p++) {
@@ -329,9 +329,9 @@ Clear_Row_Read_Buf_Loop:
 // process loop up to the end of the image
 Row_Loop:
     for (row = 1; row < (_height); row++) {
-        // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+        //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
+        //clang-format on
 
         // updating the row index for the circular buffer organization
         if (row_ind == 2) {
@@ -351,9 +351,9 @@ Row_Loop:
     // padding the left border with zero
     Plane_Loop2:
         for (p = 0; p < NOS_SRC; p++) {
-            // clang-format off
-            #pragma HLS UNROLL
-            // clang-format on
+            //clang-format off
+#pragma HLS UNROLL
+            //clang-format on
             src_buf0[p][0] = src_buf0[p][1] = 0;
             src_buf1[p][0] = src_buf1[p][1] = 0;
             src_buf2[p][0] = src_buf2[p][1] = 0;
@@ -371,9 +371,9 @@ Row_Loop:
         // copy the last two pixel data to the next iteration
         Plane_Loop4:
             for (p = 0; p < NOS_SRC; p++) {
-                // clang-format off
-                #pragma HLS UNROLL
-                // clang-format on
+                //clang-format off
+#pragma HLS UNROLL
+                //clang-format on
                 src_buf0[p][2] = 0;
                 src_buf1[p][2] = 0;
                 src_buf2[p][2] = 0;
@@ -413,9 +413,9 @@ Row_Loop:
 
 Plane_Loop6:
     for (p = 0; p < NOS_SRC; p++) {
-        // clang-format off
-        #pragma HLS UNROLL
-        // clang-format on
+        //clang-format off
+#pragma HLS UNROLL
+        //clang-format on
 
         src_buf0[p][0] = src_buf0[p][1] = 0;
         src_buf1[p][0] = src_buf1[p][1] = 0;
@@ -424,16 +424,16 @@ Plane_Loop6:
 
 Clear_Row_Loop1:
     for (col = 0; col < (_width); col++) {
-        // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-        #pragma HLS PIPELINE
-        // clang-format on
+        //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
+#pragma HLS PIPELINE
+        //clang-format on
 
     Plane_Loop7:
         for (p = 0; p < NOS_SRC; p++) {
-            // clang-format off
-            #pragma HLS UNROLL
-            // clang-format on
+            //clang-format off
+#pragma HLS UNROLL
+            //clang-format on
             buf[p][bottom][col] = 0;
         }
     }
@@ -445,9 +445,9 @@ Clear_Row_Loop1:
 
 Plane_Loop5:
     for (p = 0; p < NOS_SRC; p++) {
-        // clang-format off
-        #pragma HLS UNROLL
-        // clang-format on
+        //clang-format off
+#pragma HLS UNROLL
+        //clang-format on
         src_buf0[p][2] = 0;
         src_buf1[p][2] = 0;
         src_buf2[p][2] = 0;
@@ -482,6 +482,7 @@ void xFHOGgradients(hls::stream<XF_SNAME(WORDWIDTH_SRC)> _src[NOS_SRC],
                     int _border_type,
                     uint16_t _height,
                     uint16_t _width) {
+#ifndef _SYNTHESIS_
     assert(((DEPTH_SRC == XF_8UP)) && " Input image must be of type XF_8UP");
 
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8");
@@ -495,6 +496,7 @@ void xFHOGgradients(hls::stream<XF_SNAME(WORDWIDTH_SRC)> _src[NOS_SRC],
     assert((_border_type == XF_BORDER_CONSTANT) && "Border type must be XF_BORDER_CONSTANT ");
 
     assert(((NOS_SRC == XF_GRAY) || (NOS_SRC == XF_RGB)) && "input_image_type must be either XF_GRAY or XF_RGB");
+#endif
 
     xFHOGgradientsKernel<ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, NOS_SRC,
                          (COLS >> XF_BITSHIFT(NPC)), (XF_NPIXPERCYCLE(NPC)), USE_URAM>(_src, _gradx, _grady, _height,

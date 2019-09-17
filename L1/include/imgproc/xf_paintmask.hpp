@@ -125,10 +125,11 @@ void paintmask(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         color.val[i] = _color[i];
     }
+#ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && "Type must be XF_8UC1");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8");
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
-
+#endif
     // clang-format off
     #pragma HLS INLINE OFF
     // clang-format on

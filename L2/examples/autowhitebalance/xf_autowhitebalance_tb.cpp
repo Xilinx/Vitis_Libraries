@@ -289,7 +289,7 @@ int main(int argc, char** argv) {
 
     imwrite("ocv_simple.png", ocv_ref);
 
-    if (XF_WB_TYPE == 0) {
+    if (WB_TYPE == 0) {
         // Compute absolute difference image
         cv::absdiff(ocv_ref_gw, out_gray, diff);
     } else {
@@ -300,7 +300,7 @@ int main(int argc, char** argv) {
     imwrite("error.png", diff); // Save the difference image for debugging purpose
 
     float err_per;
-    xf::analyzeDiff(diff, 1, err_per);
+    xf::cv::analyzeDiff(diff, 1, err_per);
 
     return 0;
 }

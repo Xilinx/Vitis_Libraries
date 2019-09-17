@@ -36,7 +36,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "common/xf_utility.h"
 #include "imgproc/xf_stereo_pipeline.hpp"
 #include "imgproc/xf_remap.hpp"
-#include "imgproc/xf_stereoBM.hpp"
+#include "imgproc/xf_stereolbm.hpp"
 #include "xf_config_params.h"
 
 /* config width and height */

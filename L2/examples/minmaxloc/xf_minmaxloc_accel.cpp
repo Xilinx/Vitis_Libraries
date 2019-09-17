@@ -32,27 +32,24 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern "C" {
 
-void minmaxloc_accel(ap_uint<PTR_WIDTH>* img_in, int32_t* min_max_value, uint16_t* min_max_loc_xy) {
+void minmaxloc_accel(
+    ap_uint<PTR_WIDTH>* img_in, int32_t* min_max_value, uint16_t* min_max_loc_xy, int height, int width) {
     // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in          offset=slave  bundle=gmem0
-    #pragma HLS INTERFACE s_axilite  port=img_in 			            bundle=control
     #pragma HLS INTERFACE m_axi      port=min_max_value   offset=slave  bundle=gmem1
-    #pragma HLS INTERFACE s_axilite  port=min_max_value 			    bundle=control
     #pragma HLS INTERFACE m_axi      port=min_max_loc_xy  offset=slave  bundle=gmem2
-    #pragma HLS INTERFACE s_axilite  port=min_max_loc_xy 			    bundle=control
-    #pragma HLS INTERFACE s_axilite  port=return 			            bundle=control
+    #pragma HLS INTERFACE s_axilite  port=height 			bundle=control
+    #pragma HLS INTERFACE s_axilite  port=width 			bundle=control
+    #pragma HLS INTERFACE s_axilite  port=return 			bundle=control
     // clang-format on
 
     // Local objects:
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput;
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
     int32_t min_value, max_value;
     uint16_t _min_locx, _min_locy, _max_locx, _max_locy;
 
-    const int cols = WIDTH;
-    const int nppc = NPC1;
-
     // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=cols/nppc
+    #pragma HLS STREAM variable=imgInput.data depth=2
     // clang-format on
 
     // clang-format off

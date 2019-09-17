@@ -75,29 +75,6 @@ int main(int argc, char** argv) {
 
     cv::imwrite("in_hls.jpg", in_gray);
 
-#if 0
-	static xf::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(in_gray.rows,in_gray.cols);
-	static xf::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(out_gray.rows,out_gray.cols);
-
-	imgInput1.copyTo(in_gray.data);
-
-
-	xf::imwrite("in_hls.jpg", imgInput1);
-
-#if __SDSCC__
-perf_counter hw_ctr1;
-hw_ctr1.start();
-#endif
-	gammacorrection_accel(imgInput1,imgOutput,gamma_);
-#if __SDSCC__
-hw_ctr1.stop();
-uint64_t hw_cycles1 = hw_ctr1.avg_cpu_cycles();
-#endif
-
-#else
-
-    /////////////////////////////////////// CL ////////////////////////
-
     int height = in_gray.rows;
     int width = in_gray.cols;
 
@@ -118,14 +95,14 @@ uint64_t hw_cycles1 = hw_ctr1.avg_cpu_cycles();
     cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * 3));
     cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width * 3));
 
-    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * 3), in_gray.data);
-
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);
     krnl.setArg(1, imageFromDevice);
     krnl.setArg(2, gamma_);
     krnl.setArg(3, height);
     krnl.setArg(4, width);
+
+    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * 3), in_gray.data);
 
     // Profiling Objects
     cl_ulong start = 0;
@@ -151,12 +128,6 @@ uint64_t hw_cycles1 = hw_ctr1.avg_cpu_cycles();
     q.finish();
 
     printf("\nafter cl flow\n");
-
-    /////////////////////////////////////// end of CL ////////////////////////
-
-#endif
-
-    // out_gray.data = imgOutput.copyFrom();
 
     cv::imwrite("out_hls.jpg", out_gray);
 

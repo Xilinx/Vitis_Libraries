@@ -88,47 +88,47 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 
     // partitioning across the dim-2 to restrict the BRAM utilization
     if (USE_URAM) {
-        // clang-format off
-        #pragma HLS ARRAY_RESHAPE variable=HA_1 cyclic factor=9 dim=2
-        #pragma HLS ARRAY_RESHAPE variable=HA_2 cyclic factor=9 dim=2
-        #pragma HLS ARRAY_RESHAPE variable=HA_3 cyclic factor=9 dim=2
-        #pragma HLS RESOURCE variable=HA_1 core=RAM_S2P_URAM
-        #pragma HLS RESOURCE variable=HA_2 core=RAM_S2P_URAM
-        #pragma HLS RESOURCE variable=HA_3 core=RAM_S2P_URAM
-        // clang-format on
+        //clang-format off
+#pragma HLS ARRAY_RESHAPE variable = HA_1 cyclic factor = 9 dim = 2
+#pragma HLS ARRAY_RESHAPE variable = HA_2 cyclic factor = 9 dim = 2
+#pragma HLS ARRAY_RESHAPE variable = HA_3 cyclic factor = 9 dim = 2
+#pragma HLS RESOURCE variable = HA_1 core = RAM_S2P_URAM
+#pragma HLS RESOURCE variable = HA_2 core = RAM_S2P_URAM
+#pragma HLS RESOURCE variable = HA_3 core = RAM_S2P_URAM
+        //clang-format on
     } else {
-        // clang-format off
-        #pragma HLS ARRAY_PARTITION variable=HA_1 complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=HA_2 complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=HA_3 complete dim=2
-        // clang-format on
+        //clang-format off
+#pragma HLS ARRAY_PARTITION variable = HA_1 complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = HA_2 complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = HA_3 complete dim = 2
+        //clang-format on
         // specifying the dual-port BRAM
-        // clang-format off
-        #pragma HLS RESOURCE variable=HA_1 core=RAM_S2P_BRAM
-        #pragma HLS RESOURCE variable=HA_2 core=RAM_S2P_BRAM
-        #pragma HLS RESOURCE variable=HA_3 core=RAM_S2P_BRAM
-        // clang-format on
+        //clang-format off
+#pragma HLS RESOURCE variable = HA_1 core = RAM_S2P_BRAM
+#pragma HLS RESOURCE variable = HA_2 core = RAM_S2P_BRAM
+#pragma HLS RESOURCE variable = HA_3 core = RAM_S2P_BRAM
+        //clang-format on
     }
 
     // array to hold the sum of squared values of each cell
     ap_uint<48> ssv_1[NOHC], ssv_2[NOHC], ssv_3[NOHC];
-    // clang-format off
-    #pragma HLS RESOURCE variable=ssv_1 core=RAM_S2P_BRAM
-    #pragma HLS RESOURCE variable=ssv_2 core=RAM_S2P_BRAM
-    #pragma HLS RESOURCE variable=ssv_3 core=RAM_S2P_BRAM
-    // clang-format on
+    //clang-format off
+#pragma HLS RESOURCE variable = ssv_1 core = RAM_S2P_BRAM
+#pragma HLS RESOURCE variable = ssv_2 core = RAM_S2P_BRAM
+#pragma HLS RESOURCE variable = ssv_3 core = RAM_S2P_BRAM
+    //clang-format on
 
     // bin center computation, in the Q9.7 format
     uint16_t bin_center[NOB];
-    // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=bin_center complete dim=0
-    // clang-format on
+    //clang-format off
+#pragma HLS ARRAY_PARTITION variable = bin_center complete dim = 0
+    //clang-format on
 
     uint16_t offset = ((BIN_STRIDE << 7) >> 1), bi = 0;
     for (uchar_t i = 0; i < NOB; i++) {
-        // clang-format off
-        #pragma HLS PIPELINE
-        // clang-format on
+        //clang-format off
+#pragma HLS PIPELINE
+        //clang-format on
 
         bin_center[i] = offset;
         offset += (BIN_STRIDE << 7);
@@ -148,9 +148,9 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 // loop running for vertical block number of times
 verticalBlockLoop:
     for (bi = 0; bi < (novb - 1); bi++) {
-        // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=NOVB-1 max=NOVB-1
-        // clang-format on
+        //clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = NOVB - 1 max = NOVB - 1
+        //clang-format on
         if (idx == 2) {
             xFDHOGcomputeHist<ROWS, COLS, DEPTH_SRC, NPC, WORD_WIDTH_SRC, CELL_HEIGHT, CELL_WIDTH, NOHC,
                               (COLS >> XF_BITSHIFT(NPC)), WIN_STRIDE, BIN_STRIDE, NOB>(_phase_strm, _mag_strm, HA_3,
@@ -223,6 +223,7 @@ void xFDHOGDescriptor(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _phase_strm,
                       hls::stream<XF_SNAME(WORDWIDTH_DST)>& _block_strm,
                       uint16_t _height,
                       uint16_t _width) {
+#ifndef _SYNTHESIS_
     assert((DEPTH_SRC == XF_16UP) && "DEPTH_DST must be XF_16UP");
     assert((DEPTH_DST == XF_16UP) && "DEPTH_DST must be XF_16UP");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8) || (NPC == XF_NPPC16)) &&
@@ -238,12 +239,9 @@ void xFDHOGDescriptor(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _phase_strm,
            "WIN_HEIGHT and WIN_WIDTH must be less than or equal to the image _height and image _width respectively");
     assert((((ROWS - WIN_HEIGHT) % WIN_STRIDE == 0) || ((COLS - WIN_WIDTH) % WIN_STRIDE == 0)) &&
            "The number of windows must not extend the image boundary limit");
-    //	assert(((CELL_HEIGHT == 8)) &&
-    //			"CELL_HEIGHT must be 8");
-    //	assert(((CELL_WIDTH == 8)) &&
-    //			"CELL_WIDTH must be 8");
     assert((NOB == 9) && "NOB must be 9");
     assert(((NOHCPB == 2) && (NOVCPB == 2)) && "number of horizontal and vertical cells per block must be 2");
+#endif
 
     uint16_t novw = (((_height - WIN_HEIGHT) / WIN_STRIDE) + 1);
     uint16_t nohw = (((_width - WIN_WIDTH) / WIN_STRIDE) + 1);

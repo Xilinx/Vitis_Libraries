@@ -49,6 +49,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PTR_WIDTH 64
 #endif
+#define INTYPE unsigned char
 #endif
 #if T_16U
 #define TYPE XF_16UC1
@@ -57,6 +58,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PTR_WIDTH 128
 #endif
+#define INTYPE unsigned short
 #endif
 #if T_16S
 #define TYPE XF_16SC1
@@ -65,6 +67,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PTR_WIDTH 128
 #endif
+#define INTYPE signed short
 #endif
 #if T_32S
 #define TYPE XF_32SC1
@@ -73,6 +76,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PTR_WIDTH 256
 #endif
+#define INTYPE signed int
 #endif
 
 // Resolve optimization type:

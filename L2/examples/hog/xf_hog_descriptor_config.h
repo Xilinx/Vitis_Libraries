@@ -37,9 +37,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "imgproc/xf_hog_descriptor.hpp"
 #include "xf_config_params.h"
 
-#define HEIGHT 2160
-#define WIDTH 3840
-
 /* set the various hog parameters */
 #define XF_WIN_STRIDE 8
 #define XF_BLOCK_HEIGHT 16
@@ -75,7 +72,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PTR_IN_WIDTH 8
 #define XF_INPUT_COLOR XF_GRAY
 #elif RGB_T
-#define IN_TYPE XF_8UC4
+#define IN_TYPE XF_8UC3
 #define PTR_IN_WIDTH 32
 #define XF_INPUT_COLOR XF_RGB
 #endif
@@ -84,7 +81,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OUT_TYPE XF_32UC1
 #define PTR_OUT_WIDTH 32
 
-// Set the optimization type:
-#define NPC1 XF_NPPC1
+// Set the optimization type: // Only XF_NPPC1 is supported currently for HoG
+#define NPC XF_NPPC1
 
 #endif // end of _XF_HOG_CONFIG_H_

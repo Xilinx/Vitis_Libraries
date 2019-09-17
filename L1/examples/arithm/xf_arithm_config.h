@@ -49,11 +49,20 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NPC1 XF_NPPC8
 #endif
 
+#if GRAY
 #if T_8U
 #define TYPE XF_8UC1
 #endif
 #if T_16S
 #define TYPE XF_16SC1
+#endif
+#else
+#if T_8U
+#define TYPE XF_8UC3
+#endif
+#if T_16S
+#define TYPE XF_16SC3
+#endif
 #endif
 
 #if ARRAY

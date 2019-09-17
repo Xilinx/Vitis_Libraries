@@ -67,6 +67,16 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Resolve optimization type:
 #define NPC1 XF_NPPC1
 
+#if (T_16U || T_10U || T_12U)
+#define CV_INTYPE CV_16UC1
+#define CV_OUTTYPE CV_16UC3
+#else
+#define CV_INTYPE CV_8UC1
+#define CV_OUTTYPE CV_8UC3
+#endif
+
+#define ERROR_THRESHOLD 1
+
 // Resolve Bayer pattern:
 #if BAYER_PATTERN == 0
 #define XF_PATTERN XF_BAYER_BG

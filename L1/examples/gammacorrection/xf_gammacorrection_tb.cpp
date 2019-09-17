@@ -28,13 +28,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ***************************************************************************/
 
-#include "xf_headers.h"
+#include "common/xf_headers.h"
 #include "xf_gammacorrection_config.h"
 
-#if 0
-#include <CL/cl.h>
-#include "xcl2.hpp"
-#endif
+//#include <CL/cl.h>
+//#include "xcl2.hpp"
 
 float mean_pixel(cv::Mat img) {
     if (img.channels() > 2) {
@@ -75,84 +73,16 @@ int main(int argc, char** argv) {
 
     float gamma_ = auto_gamma_value(in_gray);
 
-#if 1
-    static xf::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(in_gray.rows, in_gray.cols);
-    static xf::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(out_gray.rows, out_gray.cols);
+    static xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(in_gray.rows, in_gray.cols);
+    static xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(out_gray.rows, out_gray.cols);
 
     imgInput1.copyTo(in_gray.data);
 
-    xf::imwrite("in_hls.jpg", imgInput1);
+    xf::cv::imwrite("in_hls.jpg", imgInput1);
 
-#if __SDSCC__
-    perf_counter hw_ctr1;
-    hw_ctr1.start();
-#endif
     gammacorrection_accel(imgInput1, imgOutput, gamma_);
-#if __SDSCC__
-    hw_ctr1.stop();
-    uint64_t hw_cycles1 = hw_ctr1.avg_cpu_cycles();
-#endif
 
-#else
-
-    /////////////////////////////////////// CL ////////////////////////
-
-    int height = in_gray.rows;
-    int width = in_gray.cols;
-
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
-    cl::Context context(device);
-
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_gammacorrection");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
-    devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl(program, "gammacorrection_accel");
-
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width));
-    cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width));
-
-    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width), (ap_uint<INPUT_PTR_WIDTH>*)in_gray.data);
-
-    // Set the kernel arguments
-    krnl.setArg(0, imageToDevice);
-    krnl.setArg(1, imageFromDevice);
-    krnl.setArg(2, gamma_);
-    krnl.setArg(3, height);
-    krnl.setArg(4, width);
-
-    // Profiling Objects
-    cl_ulong start = 0;
-    cl_ulong end = 0;
-    double diff_prof = 0.0f;
-    cl::Event event_sp;
-
-    // Launch the kernel
-    q.enqueueTask(krnl, NULL, &event_sp);
-    clWaitForEvents(1, (const cl_event*)&event_sp);
-
-    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
-    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
-    diff_prof = end - start;
-    std::cout << (diff_prof / 1000000) << "ms" << std::endl;
-
-    // Copying Device result data to Host memory
-    q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width), (ap_uint<INPUT_PTR_WIDTH>*)out_gray.data);
-
-    q.finish();
-
-    /////////////////////////////////////// end of CL ////////////////////////
-
-#endif
-
-    // out_gray.data = imgOutput.copyFrom();
-
-    xf::imwrite("out_hls.jpg", imgOutput);
+    xf::cv::imwrite("out_hls.jpg", imgOutput);
 
     return 0;
 }

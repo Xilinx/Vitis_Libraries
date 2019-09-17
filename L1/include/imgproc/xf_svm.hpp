@@ -97,9 +97,10 @@ void SVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC>& in_1,
          uint16_t n,
          uchar_t* out_frac,
          ap_int<XF_PIXELDEPTH(DST_T)>* result) {
+#ifndef __SYNTHESIS__
     assert(((SRC1_T == XF_16SC1)) && "Only 16 bit, single channel images are supported");
     assert(((SRC2_T == XF_16SC1)) && "Only 16 bit, single channel images are supported");
-
+#endif
     ap_int<XF_PIXELDEPTH(DST_T)> svm_res = xfSVM<SRC1_T, SRC2_T, DST_T, ROWS1, COLS1, ROWS2, COLS2, NPC, N>(
         in_1, in_2, idx1, idx2, frac1, frac2, n, out_frac);
 

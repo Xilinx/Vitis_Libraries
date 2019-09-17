@@ -195,7 +195,7 @@ data: $(DATA_STAMP)
 KSRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/channelextract
 XFREQUENCY 		:= 300
 
-XCLBIN_NAME 	:= krnl_channel_extract
+XCLBIN_NAME 	:= krnl_channelextract
 KER_NAME    	:= channel_extract_accel:xf_channel_extract_accel.cpp
 
 VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include

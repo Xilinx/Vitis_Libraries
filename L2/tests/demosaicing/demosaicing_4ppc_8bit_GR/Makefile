@@ -213,7 +213,7 @@ SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/demosaicing
 
 EXE_NAME  		:= demosaicing
 HOST_ARGS 		= $(SRC_DIR)/data/4k.jpg #$(XCLBIN_FILE)
-SRCS      		:= xf_demosaicing_tb xf_demosaicing_accel
+SRCS      		:= xf_demosaicing_tb 
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB

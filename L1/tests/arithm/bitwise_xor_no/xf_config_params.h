@@ -6,6 +6,7 @@
 #define NO 1 // Normal Operation
 #define RO 0 // Resource Optimized
 
+#define GRAY 0
 #define ARRAY 1
 #define SCALAR 0
 // macros for accel

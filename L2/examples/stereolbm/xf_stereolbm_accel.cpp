@@ -28,30 +28,30 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ***************************************************************************/
 
-#include "xf_stereoBM_config.h"
+#include "xf_stereolbm_config.h"
 
 extern "C" {
 
 void stereolbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
                      ap_uint<PTR_IN_WIDTH>* img_in_r,
                      unsigned char* bm_state_in,
-                     ap_uint<PTR_OUT_WIDTH>* img_out) {
+                     ap_uint<PTR_OUT_WIDTH>* img_out,
+                     int rows,
+                     int cols) {
     // clang-format off
 	#pragma HLS INTERFACE m_axi      port=img_in_l      offset=slave  bundle=gmem0
-	#pragma HLS INTERFACE s_axilite  port=img_in_l 			          bundle=control
 	#pragma HLS INTERFACE m_axi      port=img_in_r      offset=slave  bundle=gmem1
-	#pragma HLS INTERFACE s_axilite  port=img_in_r 		              bundle=control
 	#pragma HLS INTERFACE m_axi      port=bm_state_in   offset=slave  bundle=gmem2
-	#pragma HLS INTERFACE s_axilite  port=bm_state_in 	              bundle=control
-	#pragma HLS INTERFACE m_axi      port=img_out     	offset=slave  bundle=gmem3
-	#pragma HLS INTERFACE s_axilite  port=img_out 		  	          bundle=control
-	#pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
+	#pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem3
+	#pragma HLS INTERFACE s_axilite  port=rows		bundle=control
+	#pragma HLS INTERFACE s_axilite  port=cols		bundle=control
+	#pragma HLS INTERFACE s_axilite  port=return		bundle=control
     // clang-format on
 
-    xf::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputL;
-    xf::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputR;
-    xf::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput;
-    xf::xFSBMState<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS> bmState;
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> imgInputL(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> imgInputR(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC> imgOutput(rows, cols);
+    xf::cv::xFSBMState<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS> bmState;
 
     // Initialize SBM State:
     bmState.preFilterCap = bm_state_in[0];
@@ -59,12 +59,10 @@ void stereolbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
     bmState.textureThreshold = bm_state_in[2];
     bmState.minDisparity = bm_state_in[3];
 
-    const int cols = WIDTH;
-    const int nppc = NPC1;
     // clang-format off
-	#pragma HLS STREAM variable=imgInputL.data depth=cols/nppc
-	#pragma HLS STREAM variable=imgInputR.data depth=cols/nppc
-	#pragma HLS STREAM variable=imgOutput.data depth=cols/nppc
+	#pragma HLS STREAM variable=imgInputL.data depth=2
+	#pragma HLS STREAM variable=imgInputR.data depth=2
+	#pragma HLS STREAM variable=imgOutput.data depth=2
     // clang-format on
 
     // clang-format off
@@ -72,15 +70,15 @@ void stereolbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
     // clang-format on
 
     // Retrieve xf::Mat objects from img_in data:
-    xf::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in_l, imgInputL);
-    xf::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in_r, imgInputR);
+    xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC>(img_in_l, imgInputL);
+    xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC>(img_in_r, imgInputR);
 
     // Run xfOpenCV kernel:
-    xf::StereoBM<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1,
-                 XF_USE_URAM>(imgInputL, imgInputR, imgOutput, bmState);
+    xf::cv::StereoBM<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC,
+                     XF_USE_URAM>(imgInputL, imgInputR, imgOutput, bmState);
 
     // Convert _dst xf::Mat object to output array:
-    xf::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC>(imgOutput, img_out);
 
     return;
 } // End of kernel

@@ -79,28 +79,28 @@ int main(int argc, char** argv) {
 
     /////////////////////////////////////Feeding ROI/////////////////////////////////////////
 
-    x_loc[0] = 50; // only 3-ROI are feeded, should be modified according to NUM_BOX
-    y_loc[0] = 150;
-    ROI_height[0] = 480;
-    ROI_width[0] = 640;
+    x_loc[0] = 0; // only 3-ROI are feeded, should be modified according to NUM_BOX
+    y_loc[0] = 0;
+    ROI_height[0] = 70;
+    ROI_width[0] = 70;
 
     x_loc[1] = 0;
     y_loc[1] = 0;
-    ROI_height[1] = 100;
-    ROI_width[1] = 200;
+    ROI_height[1] = 50;
+    ROI_width[1] = 50;
 
     x_loc[2] = 50;
     y_loc[2] = 50;
-    ROI_height[2] = 300;
-    ROI_width[2] = 300;
+    ROI_height[2] = 20;
+    ROI_width[2] = 20;
 
-    x_loc[3] = 45;
-    y_loc[3] = 45;
-    ROI_height[3] = 670;
-    ROI_width[3] = 670;
+    x_loc[3] = 1;
+    y_loc[3] = 1;
+    ROI_height[3] = 100;
+    ROI_width[3] = 100;
 
-    x_loc[4] = 67;
-    y_loc[4] = 67;
+    x_loc[4] = 0;
+    y_loc[4] = 0;
     ROI_height[4] = 100;
     ROI_width[4] = 100;
 

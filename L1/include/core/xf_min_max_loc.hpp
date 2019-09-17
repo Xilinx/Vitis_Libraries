@@ -227,9 +227,10 @@ void minMaxLoc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                uint16_t* _minlocy,
                uint16_t* _maxlocx,
                uint16_t* _maxlocy) {
+#ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 or XF_NPPC16");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
-
+#endif
     // clang-format off
     #pragma HLS inline off
     // clang-format on

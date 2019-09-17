@@ -37,18 +37,18 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // main function
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1>" << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
         return EXIT_FAILURE;
     }
 
     cv::Mat img_raw, img;
 
     // Load the test image:
-    img_raw = cv::imread(argv[2], 1); // load as color image through command line argument
+    img_raw = cv::imread(argv[1], 1); // load as color image through command line argument
 
     if (!img_raw.data) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
 #if GRAY_T
     cvtColor(img_raw, img, CV_BGR2GRAY);
 #elif RGB_T
-    cvtColor(img_raw, img, CV_BGR2RGBA);
+    cvtColor(img_raw, img, CV_BGR2RGB);
 #endif
 
     // Creating the input pointers
@@ -82,28 +82,28 @@ int main(int argc, char** argv) {
     int nohb_tb = ((image_width / XF_CELL_WIDTH) - 1);
 
 #if REPETITIVE_BLOCKS
-    int dim_rb = (total_no_of_windows * nobpb_tb) >> 1;
-    int no_of_descs = dim_rb;
+    int dim_rb = (total_no_of_windows * nodpw_tb) >> 1;
+    int no_of_descs_hw = dim_rb;
 #elif NON_REPETITIVE_BLOCKS
     int dim_nrb = (nohb_tb * novb_tb * nobpb_tb) >> 1;
-    int no_of_descs = dim_nrb;
+    int no_of_descs_hw = dim_nrb;
     int dim_expand = (dim_nrb << 1);
 #endif
     int dim = (total_no_of_windows * nodpw_tb);
 
     // Reference HOG implementation:
-    AURHOGDescriptor d(Size(64, 128), Size(16, 16), Size(8, 8), Size(8, 8), 9);
+    AURHOGDescriptor d(Size(XF_WIN_WIDTH, XF_WIN_HEIGHT), Size(XF_BLOCK_WIDTH, XF_BLOCK_HEIGHT),
+                       Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), XF_NO_OF_BINS);
 
     // Creating the input pointers
     vector<float> descriptorsValues;
     vector<Point> locations;
 
 #if GRAY_T
-    d.AURcompute(img, descriptorsValues, Size(8, 8), Size(0, 0), locations);
+    d.AURcompute(img, descriptorsValues, Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), Size(0, 0), locations);
     int _planes = 1;
 #elif RGB_T
-    cvtColor(img_raw, img_raw, CV_BGR2RGB);
-    d.AURcompute(img_raw, descriptorsValues, Size(8, 8), Size(0, 0), locations);
+    d.AURcompute(img, descriptorsValues, Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), Size(0, 0), locations);
     int _planes = 3;
 #endif
 
@@ -112,11 +112,11 @@ int main(int argc, char** argv) {
     // Output of the OCV will be in column major form, for comparison reason we convert that into row major
     cmToRmConv(descriptorsValues, ocv_out_fl.data(), total_no_of_windows);
 
-    std::vector<uint32_t> outMat(1 * no_of_descs);
+    std::vector<uint32_t> outMat(1 * no_of_descs_hw);
 
     // OpenCL section:
     size_t image_in_size_bytes = image_height * image_width * sizeof(unsigned char) * _planes;
-    size_t image_out_size_bytes = 1 * no_of_descs * sizeof(uint32_t);
+    size_t image_out_size_bytes = 1 * no_of_descs_hw * sizeof(uint32_t);
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -133,10 +133,8 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
-    std::string binaryFile = argv[1];
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_hog");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -148,8 +146,13 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
 
     // Set kernel arguments:
+    int rows = img.rows;
+    int cols = img.cols;
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(2, rows));
+    OCL_CHECK(err, err = kernel.setArg(3, cols));
+    OCL_CHECK(err, err = kernel.setArg(4, no_of_descs_hw));
 
     // Initialize the buffers:
     cl::Event event;
@@ -195,15 +198,14 @@ int main(int argc, char** argv) {
 
     int cnt = 0;
     for (int i = 0; i < (dim_rb); i++) {
-        temp = outMat.data[i];
+        temp = outMat[i];
         high = 15;
         low = 0;
-        for (int j = 0; j < 2; j++) {
-            output1[i * 2 + j] = temp.range(high, low);
-            high += 16;
-            low += 16;
-            cnt++;
-        }
+        output1[i * 2] = (uint16_t)(temp & 0x0000FFFF);
+        output1[(i * 2) + 1] = (uint16_t)(temp >> 16);
+        high += 16;
+        low += 16;
+        cnt++;
     }
 #endif
 

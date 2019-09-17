@@ -264,7 +264,7 @@ int main(int argc, char** argv) {
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_corner_tracker");
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_cornertracker");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
@@ -324,7 +324,7 @@ int main(int argc, char** argv) {
         inHarris.copyTo(im0.data);
         // CL
 
-        cl::Kernel krnl(program, "harris_corner");
+        cl::Kernel krnl(program, "cornerTracker");
         cl::Kernel pyr_krnl(program, "pyr_down_accel");
 
         std::vector<cl::Memory> inBufVec1, outBufVec1, inBufVec2, outBufVec2;
@@ -487,7 +487,7 @@ int main(int argc, char** argv) {
                 int next_height = (scale_up_flag == 1) ? pyr_h[l + 1] : pyr_h[l];
                 int next_width = (scale_up_flag == 1) ? pyr_w[l + 1] : pyr_w[l];
                 float scale_in = (next_height - 1) * 1.0 / (curr_height - 1);
-                ap_uint<1> init_flag = ((iterations == 0) && (l == NUM_LEVELS - 1)) ? 1 : 0;
+                int init_flag = ((iterations == 0) && (l == NUM_LEVELS - 1)) ? 1 : 0;
 
                 if ((iterations == 0) && (l != NUM_LEVELS - 1))
                     flow_in.init(pyr_h[l + 1], pyr_w[l + 1], 0);
@@ -502,7 +502,7 @@ int main(int argc, char** argv) {
                 of_krnl.setArg(2, flow_in_buf);
                 of_krnl.setArg(3, flow_buf);
                 of_krnl.setArg(4, l);
-                of_krnl.setArg(5, scale_up_flag);
+                of_krnl.setArg(5, (int)scale_up_flag);
                 of_krnl.setArg(6, scale_in);
                 of_krnl.setArg(7, init_flag);
                 of_krnl.setArg(8, imagepyr1[l].rows);
@@ -523,30 +523,13 @@ int main(int argc, char** argv) {
                 q.enqueueTask(of_krnl, NULL, &event_of_sp);
                 clWaitForEvents(1, (const cl_event*)&event_of_sp);
                 fprintf(stderr, "\n%d level %d calls done\n", l, iterations);
-                // q.enqueueMigrateMemObjects(flow_in_Vec,CL_MIGRATE_MEM_OBJECT_HOST);
-                // q.enqueueMigrateMemObjects(flow_Vec,CL_MIGRATE_MEM_OBJECT_HOST);
 
                 flow_in_buf = flow_buf;
 
-                /*	flow_Vec.push_back(flow_buf);
-                        q.enqueueMigrateMemObjects(flow_Vec,CL_MIGRATE_MEM_OBJECT_HOST);
-
-                        sprintf(name,"flow_op_%d_%d",l,iterations);
-                        FILE *fp_flow_op = fopen(name,"w");
-
-                        for(int ia=0;ia<flow.rows;ia++)
-                                for(int ja=0;ja<flow.cols;ja++)
-                                        fprintf(fp_flow_op,"%u\n",(unsigned int)flow.read(ia*flow.cols+ja));
-
-
-                                fclose(fp_flow_op);*/
-
             } // end iterative coptical flow computation
-            // q.enqueueMigrateMemObjects(flow_in_Vec,CL_MIGRATE_MEM_OBJECT_HOST);
 
         } // end pyramidal iterative optical flow HLS computation
-        // flow_Vec.push_back(flow_buf);
-        // q.enqueueMigrateMemObjects(flow_Vec,CL_MIGRATE_MEM_OBJECT_HOST);
+
         q.finish();
         fprintf(stderr, "\n OF done\n");
 
@@ -556,12 +539,9 @@ int main(int argc, char** argv) {
         std::vector<cl::Memory> list_in_Vec, list_fix_Vec;
         cl::Buffer list_in_buf, list_fix_buf;
 
-        // list_in_buf = cl::Buffer(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,((MAXCORNERS)*sizeof( unsigned
-        // int)),list);
         list_fix_buf = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, ((MAXCORNERS)*8), listfixed);
         // list_in_Vec.push_back(list_in_buf);
         list_fix_Vec.push_back(list_fix_buf);
-        // q.enqueueMigrateMemObjects(list_in_Vec,0/* 0 means from host*/);
         q.enqueueMigrateMemObjects(list_fix_Vec, 0 /* 0 means from host*/);
 
         cu_krnl.setArg(0, list_fix_buf);
@@ -583,11 +563,11 @@ int main(int argc, char** argv) {
         clWaitForEvents(1, (const cl_event*)&cu_event_sp);
 
         q.enqueueMigrateMemObjects(list_fix_Vec, CL_MIGRATE_MEM_OBJECT_HOST);
-        // q.enqueueMigrateMemObjects(list_in_Vec,CL_MIGRATE_MEM_OBJECT_HOST);
+
         q.enqueueMigrateMemObjects(outBufVec1, CL_MIGRATE_MEM_OBJECT_HOST);
 
         q.finish();
-        fprintf(stderr, "\n CU done\n");
+        fprintf(stderr, "\n Corner Update done\n");
 
         if (harris_flag == true) harris_flag = false;
 
@@ -595,27 +575,14 @@ int main(int argc, char** argv) {
 
         /////////////////////////////////////// end of CL ////////////////////////
 
-        // cornerTracker (flow, flow_iter, imagepyr1, imagepyr2, inHarris, outHarris, list, listfixed, pyr_h, pyr_w,
-        // params);
-        /*pyr_down_accel(ap_uint<INPUT_PTR_WIDTH> *inImgPyr1,
-                           ap_uint<OUTPUT_PTR_WIDTH> *outImgPyr1,
-                           ap_uint<INPUT_PTR_WIDTH> *inImgPyr2,
-                           ap_uint<OUTPUT_PTR_WIDTH> *outImgPyr2,
-                           int pyr_h, int pyr_w)*/
-
         cv::Mat outputimage; //(im0.rows, im0.cols, CV_8UC3, im1.data);
         cv::cvtColor(im1, outputimage, cv::COLOR_GRAY2BGR);
         fprintf(stderr, "\n Num of corners = %d", params[0]);
-        sprintf(list_name, "list_test_%d.txt", i);
-        sprintf(list_fix_name, "list_fix_test_%d.txt", i);
-        FILE* fp_list = fopen(list_name, "w");
-        FILE* fp_listfix = fopen(list_fix_name, "w");
         for (int li = 0; li < params[0]; li++) {
             unsigned int point = list[li];
             unsigned short row_num = 0;
             unsigned short col_num = 0;
-            fprintf(fp_list, "val = %d \n", list[li]);
-            fprintf(fp_listfix, "val = %lu \n", listfixed[li]);
+
             if (listfixed[li] >> 42 == 0) {
                 row_num = (point >> 16) & 0x0000FFFF; //.range(31,16);
                 col_num = point & 0x0000FFFF;         //.range(15,0);
@@ -623,8 +590,7 @@ int main(int argc, char** argv) {
                 cv::circle(outputimage, rmappoint, 2, cv::Scalar(0, 0, 255), -1, 8);
             }
         }
-        fclose(fp_list);
-        fclose(fp_listfix);
+
 #if VIDEO_INPUT
         video.write(outputimage);
 #else

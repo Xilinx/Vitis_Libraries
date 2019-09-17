@@ -29,20 +29,20 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
 #include "common/xf_headers.h"
 #include "xcl2.hpp"
-
+#include "xf_min_max_loc_config.h"
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1>" << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
         return EXIT_FAILURE;
     }
 
     cv::Mat in_img, in_gray, in_conv;
 
     // Reading in the image:
-    in_img = cv::imread(argv[2], 0);
+    in_img = cv::imread(argv[1], 0);
 
     if (in_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -70,8 +70,11 @@ int main(int argc, char** argv) {
     uint16_t _min_locx, _min_locy, _max_locx, _max_locy;
     std::vector<uint16_t> min_max_loc_xy(4);
 
+    int height = in_img.rows;
+    int width = in_img.cols;
+
     // OpenCL section:
-    size_t image_in_size_bytes = HEIGHT * WIDTH * sizeof(INTYPE);
+    size_t image_in_size_bytes = height * width * sizeof(INTYPE);
     size_t vec1_out_size_bytes = min_max_value.size() * sizeof(int32_t);
     size_t vec2_out_size_bytes = min_max_loc_xy.size() * sizeof(int32_t);
 
@@ -90,10 +93,8 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
-    std::string binaryFile = argv[1];
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_minmaxloc");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -109,6 +110,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_outVec1));
     OCL_CHECK(err, err = kernel.setArg(2, buffer_outVec2));
+    OCL_CHECK(err, err = kernel.setArg(3, height));
+    OCL_CHECK(err, err = kernel.setArg(4, width));
 
     // Initialize the buffers:
     cl::Event event;

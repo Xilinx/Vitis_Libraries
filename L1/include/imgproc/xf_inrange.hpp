@@ -149,6 +149,7 @@ void inRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     unsigned short width = src.cols >> XF_BITSHIFT(NPC);
     unsigned short height = src.rows;
 
+#ifndef __SYNTHESIS__
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "Type must be XF_8UC1 or XF_8UC3");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8");
 
@@ -157,7 +158,7 @@ void inRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     assert(((upper_thresh[0] >= 0) && (upper_thresh[0] <= 255)) && "lower_thresh must be with the range of 0 to 255");
 
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
-
+#endif
     // clang-format off
   #pragma HLS INLINE OFF
     // clang-format on
