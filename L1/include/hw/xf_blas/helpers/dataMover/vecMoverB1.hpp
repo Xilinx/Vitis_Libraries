@@ -29,7 +29,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <unsigned int t_NumStreams, typename t_DataType>
@@ -145,6 +145,6 @@ void writeStream2Vec(hls::stream<WideType<t_DataType, t_ParEntries> >& p_in, uns
 } // end writeStream2Vec
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

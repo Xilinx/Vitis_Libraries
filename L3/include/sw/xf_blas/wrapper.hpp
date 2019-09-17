@@ -22,7 +22,7 @@
 #include "gemv_host.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -940,7 +940,7 @@ xfblasStatus_t xfblasGemv(xfblasOperation_t trans,
 }
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

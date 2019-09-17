@@ -33,7 +33,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -151,7 +151,7 @@ class DotHelper<double, t_LogParEntries, t_IndexType, double> {
 };
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

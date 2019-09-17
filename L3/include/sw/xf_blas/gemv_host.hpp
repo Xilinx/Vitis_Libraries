@@ -21,7 +21,7 @@
 #include "host.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 class GemvArgs : public BLASArgs {
@@ -107,7 +107,7 @@ class GEMVHost : public BLASHost {
 };
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

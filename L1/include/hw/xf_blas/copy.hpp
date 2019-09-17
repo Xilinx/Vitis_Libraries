@@ -34,7 +34,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 /**
  * @brief copy function that compute Y = X
@@ -63,7 +63,7 @@ void copy(unsigned int p_n,
     }
 }
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif
