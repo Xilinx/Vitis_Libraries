@@ -29,7 +29,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename t_DataType, unsigned int t_ParEntries, int t_LastRowIdx = 0>
@@ -555,6 +555,6 @@ void vec2TbLoMatStream(unsigned int p_n,
 } // end vec2TbLoMatStream
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

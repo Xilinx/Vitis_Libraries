@@ -37,7 +37,7 @@
 using namespace std;
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 class XFpga {
@@ -415,7 +415,7 @@ class BLASHost : public XHost {
 };
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

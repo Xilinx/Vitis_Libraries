@@ -31,7 +31,7 @@
 #define BLAS_maxNumInstr 64
 #define BLAS_dataType int*/
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 typedef GenBin<BLAS_dataType,
@@ -48,7 +48,7 @@ typedef GenBin<BLAS_dataType,
     GenBinType;
 
 } // end namespace blas
-} // end namespace linear_algebra
+
 } // end namespace xf
 
 #endif

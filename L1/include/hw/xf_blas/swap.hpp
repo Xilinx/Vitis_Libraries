@@ -34,7 +34,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 /**
  * @brief swap function taht swap vector x and y
@@ -70,7 +70,7 @@ void swap(unsigned int p_n,
     }
 }
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

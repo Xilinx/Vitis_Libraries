@@ -29,7 +29,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename t_DataType, unsigned int t_ParEntries>
@@ -212,6 +212,6 @@ void transpMemBlocks(unsigned int p_blocks,
     }
 }
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

@@ -32,7 +32,7 @@
 #include "hls_stream.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -65,7 +65,7 @@ void padding(unsigned int p_n,
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif
