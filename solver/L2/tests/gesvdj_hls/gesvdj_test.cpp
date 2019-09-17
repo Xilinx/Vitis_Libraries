@@ -26,7 +26,7 @@
 #define M 512
 #define N M
 
-typedef float DT;
+typedef double DT;
 
 void gesvdj_test(DT* dataA, DT* sigma, DT* dataU, DT* dataV, int matrixSize) {
 // clang-format off
@@ -136,9 +136,18 @@ int main(int argc, char* argv[]) {
             for (int j = 0; j < kRows; j++) {
                 errA += (goldenData[i * kRows + j] - dataA_out[i * kRows + j]) *
                         (goldenData[i * kRows + j] - dataA_out[i * kRows + j]);
+                //           std::cout<<std::setprecision(10)<<dataA_out[i*kRows+j]<<"\t";
             }
+            //         std::cout<<std::endl;;
         }
-        errA = std::sqrt(errA);
+        for (int i = 0; i < kRows; i++) {
+            for (int j = 0; j < kRows; j++) {
+                //       std::cout<<std::setprecision(10)<<goldenData[i*kRows+j]<<"\t";
+            }
+            //     std::cout<<std::endl;;
+        }
+        errA = std::sqrt(errA) / kRows / kRows;
+        std::cout << "errA = " << errA << std::endl;
         DT threshold;
         if (sizeof(DT) == sizeof(double)) {
             threshold = 0.0001;

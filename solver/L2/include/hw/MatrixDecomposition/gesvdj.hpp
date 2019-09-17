@@ -47,64 +47,71 @@ void jacobi_rotation_2x2(T matrix[3], T considerAsZero, T& m_c_left, T& m_s_left
     m00 = matrix[0];
     m01 = matrix[1];
     m11 = matrix[2];
-    T d;
+    if ((m00 == 1) && (m11 == 1) && (m01 == 0)) {
+        m_c_left = 1;
+        m_s_left = 0;
+        m_c_right = 1;
+        m_s_right = 0;
+    } else {
+        T d;
 #pragma HLS RESOURCE variable = d core = DAddSub_nodsp
-    d = m00 - m11; // calculate the off-diagonal value
-    ap_uint<11> exp1;
-    ap_uint<52> sig1;
-    union double_cast_new dc;
+        d = m00 - m11; // calculate the off-diagonal value
+        ap_uint<11> exp1;
+        ap_uint<52> sig1;
+        union double_cast_new dc;
 
-    // calculate deno = 2*m01
-    dc.d = m01;
-    ap_uint<64> data = dc.i;
-    exp1(10, 0) = data(62, 52);
-    exp1 = exp1 + ap_uint<11>(1);
-    data(62, 52) = exp1(10, 0);
-    dc.i = data;
-    T deno = dc.d;
+        // calculate deno = 2*m01
+        dc.d = m01;
+        ap_uint<64> data = dc.i;
+        exp1(10, 0) = data(62, 52);
+        exp1 = exp1 + ap_uint<11>(1);
+        data(62, 52) = exp1(10, 0);
+        dc.i = data;
+        T deno = dc.d;
 
-    // calculate KK = 2*abs(m00 - m11)
-    dc.d = d;
-    data = dc.i;
-    exp1(10, 0) = data(62, 52);
-    exp1 = exp1 + ap_uint<11>(1);
-    data(62, 52) = exp1(10, 0);
-    data[63] = 0;
-    dc.i = data;
-    T KK = dc.d;
+        // calculate KK = 2*abs(m00 - m11)
+        dc.d = d;
+        data = dc.i;
+        exp1(10, 0) = data(62, 52);
+        exp1 = exp1 + ap_uint<11>(1);
+        data(62, 52) = exp1(10, 0);
+        data[63] = 0;
+        dc.i = data;
+        T KK = dc.d;
 
-    T deno2, d2;
+        T deno2, d2;
 #pragma HLS RESOURCE variable = d2 core = DMul_maxdsp
 #pragma HLS RESOURCE variable = deno2 core = DMul_maxdsp
-    d2 = d * d;          // d2 = (m00 - m11)^2
-    deno2 = deno * deno; // deno2 = 4*(m01)^2
-    T m;
+        d2 = d * d;          // d2 = (m00 - m11)^2
+        deno2 = deno * deno; // deno2 = 4*(m01)^2
+        T m;
 #pragma HLS RESOURCE variable = m core = DAddSub_nodsp
-    m = deno2 + d2;         // m = (m00 - m11)^2 + 4*(m01)^2
-    T sqrtM = hls::sqrt(m); // sqrtM = sqrt((m00-m11)^2 + 4*(m01)^2)
+        m = deno2 + d2;         // m = (m00 - m11)^2 + 4*(m01)^2
+        T sqrtM = hls::sqrt(m); // sqrtM = sqrt((m00-m11)^2 + 4*(m01)^2)
 
-    // calculate M2
-    dc.d = m;
-    data = dc.i;
-    exp1(10, 0) = data(62, 52);
-    exp1 = exp1 + ap_uint<11>(1);
-    data(62, 52) = exp1(10, 0);
-    dc.i = data;
-    T M2 = dc.d; // M2 = 2*m
+        // calculate M2
+        dc.d = m;
+        data = dc.i;
+        exp1(10, 0) = data(62, 52);
+        exp1 = exp1 + ap_uint<11>(1);
+        data(62, 52) = exp1(10, 0);
+        dc.i = data;
+        T M2 = dc.d; // M2 = 2*m
 
-    T tmpMul, tmpSum, tmpSub;
+        T tmpMul, tmpSum, tmpSub;
 #pragma HLS RESOURCE variable = tmpMul core = DMul_maxdsp
-    tmpMul = KK * sqrtM; // tmpMul = 2*abs(m00 - m11) * sqrt((m00-m11)^2 + 4*(m01)^2)
+        tmpMul = KK * sqrtM; // tmpMul = 2*abs(m00 - m11) * sqrt((m00-m11)^2 + 4*(m01)^2)
 #pragma HLS RESOURCE variable = tmpSum core = DAddSub_nodsp
-    tmpSum = tmpMul + M2;
-    T tmpDivider = deno2 / tmpSum;
+        tmpSum = tmpMul + M2;
+        T tmpDivider = deno2 / tmpSum;
 #pragma HLS RESOURCE variable = tmpSub core = DAddSub_nodsp
-    tmpSub = 1 - tmpDivider;
-    m_c_right = hls::sqrt(tmpSub);
-    T tmp = hls::sqrt(tmpDivider);
-    m_s_right = (((d > 0) && (deno > 0)) | ((d < 0) && (deno < 0))) ? tmp : -tmp;
-    m_c_left = m_c_right;
-    m_s_left = m_s_right;
+        tmpSub = 1 - tmpDivider;
+        m_c_right = hls::sqrt(tmpSub);
+        T tmp = hls::sqrt(tmpDivider);
+        m_s_right = (((d > 0) && (deno > 0)) | ((d < 0) && (deno < 0))) ? tmp : -tmp;
+        m_c_left = m_c_right;
+        m_s_left = m_s_right;
+    }
 }
 
 template <typename DT>
@@ -268,8 +275,8 @@ void unrollCol(int Dim_inner_extend,
 #pragma HLS dependence variable = dataA16 inter false
                 int p1, q1, p2, q2;
                 T cr, sr, cl, sl;
-                p2 = l << 1; // 2*l
-                q2 = p2 + 1;
+                p2 = (l << 1) * UN; // 2*l
+                q2 = p2 + UN;
                 int tmp = r << 1; // 2*r
                 int tmpG = f * NMAXUN;
                 int tmpSum = tmpG + tmp;
@@ -281,12 +288,12 @@ void unrollCol(int Dim_inner_extend,
                 sl = m_s_right[tmpSumCS]; // g*NMAXUN/2+l
                 T a00, a01, a10, a11;
                 T m00, m01, m10, m11;
-                int tmpP1 = p1 / NMAXUN;
-                int tmpQ1 = q1 / NMAXUN;
-                int num1 = p1 % NMAXUN;
-                int num2 = q1 % NMAXUN;
-                int num3 = p2 % NMAXUN;
-                int num4 = q2 % NMAXUN;
+                int tmpP1 = p1 % UN;
+                int tmpQ1 = q1 % UN;
+                int num1 = p1 / UN;
+                int num2 = q1 / UN;
+                int num3 = p2 / UN;
+                int num4 = q2 / UN;
                 if (tmpP1 == 0) {
                     m00 = dataA1[num1][num3];
                     m01 = dataA1[num1][num4];
@@ -591,8 +598,8 @@ void unrollRow(int Dim_inner_extend,
 #pragma HLS dependence variable = dataA16 inter false
                 int p1, q1, p2, q2;
                 T cr, sr, cl, sl;
-                p1 = r << 1; // 2*r
-                q1 = p1 + 1;
+                p1 = (r << 1) * UN; // 2*r
+                q1 = p1 + UN;
                 int tmp = l << 1; // 2*l
                 int tmpG = g * NMAXUN;
                 int tmpSum = tmpG + tmp;
@@ -604,12 +611,12 @@ void unrollRow(int Dim_inner_extend,
                 sr = m_s_right[tmpSumCS]; // g*NMAXUN/2+l
                 T a00, a01, a10, a11;
                 T m00, m01, m10, m11;
-                int tmpP2 = p2 / NMAXUN;
-                int tmpQ2 = q2 / NMAXUN;
-                int num1 = p1 % NMAXUN;
-                int num2 = q1 % NMAXUN;
-                int num3 = p2 % NMAXUN;
-                int num4 = q2 % NMAXUN;
+                int tmpP2 = p2 % UN;
+                int tmpQ2 = q2 % UN;
+                int num1 = p1 / UN;
+                int num2 = q1 / UN;
+                int num3 = p2 / UN;
+                int num4 = q2 / UN;
                 if (tmpP2 == 0) {
                     m00 = dataA1[num1][num3];
                     m10 = dataA1[num2][num3];
@@ -922,7 +929,12 @@ template <typename T, int m_diagSize, int UN, int NMAXUN>
 void Jacobi_svd(T dataA[UN][UN][NMAXUN][NMAXUN], T dataU_out[UN][UN][NMAXUN][NMAXUN]) {
 #endif
     T considerZero = 2.2250738585072014e-308;
-    T threshold = 8.22045e-17;
+    T threshold; // = 8.22045e-17;
+    if (sizeof(T) == sizeof(double)) {
+        threshold = 8.22045e-17;
+    } else if (sizeof(T) == sizeof(float)) {
+        threshold = 8.22045e-8;
+    }
     bool finished = false;
 #ifndef __SYNTHESIS__
     int counters = 0;
@@ -999,7 +1011,7 @@ While_Loop:
                 std::cout << "p1 = " << p1 << "  q1 = " << q1 << std::endl;
 #endif
 #endif
-                if ((hls::abs(dataA[(p1 / NMAXUN)][q1 / NMAXUN][p1 % NMAXUN][q1 % NMAXUN]) > threshold)) {
+                if ((hls::abs(dataA[(p1 % UN)][q1 % UN][p1 / UN][q1 / UN]) > threshold)) {
                     flag = 1;
                 }
             }
@@ -1019,8 +1031,8 @@ While_Loop:
                         int aa, bb;
                         aa = (tt == 2) ? 1 : 0;
                         bb = (tt == 0) ? 0 : 1;
-                        matrix[tt] = dataA[(Order[i][2 * j + aa] / NMAXUN)][Order[i][2 * j + bb] / NMAXUN]
-                                          [Order[i][2 * j + aa] % NMAXUN][Order[i][2 * j + bb] % NMAXUN];
+                        matrix[tt] = dataA[(Order[i][2 * j + aa] % UN)][Order[i][2 * j + bb] % UN]
+                                          [Order[i][2 * j + aa] / UN][Order[i][2 * j + bb] / UN];
                     }
                     jacobi_rotation_2x2<T, m_diagSize>(matrix, considerZero, m_c_left[j], m_s_left[j], m_c_right[j],
                                                        m_s_right[j]);
@@ -1033,16 +1045,6 @@ While_Loop:
                 }
                 funcDataflow<T, m_diagSize, UN, NMAXUN>(i, Dim_inner_extend, Dim_inner, Order, m_c_right, m_s_right,
                                                         dataA, dataU_out);
-#ifndef __SYNTHESIS__
-#ifdef _SOLVER_DEBUG_
-                for (int m = 0; m < m_diagSize; ++m) {
-                    for (int n = 0; n < m_diagSize; ++n) {
-                        std::cout << dataA[m / NMAXUN][m % NMAXUN][n] << '\t';
-                    }
-                    std::cout << std::endl;
-                }
-#endif
-#endif
             }
         }
     }
@@ -1070,7 +1072,7 @@ Loop_init_I:
     Loop_init_J:
         for (int j = 0; j < diagSize; ++j) {
 #pragma HLS pipeline
-            dataU_out[(r / NMAXUN)][j / NMAXUN][r % NMAXUN][j % NMAXUN] = (r == j) ? 1 : 0;
+            dataU_out[(r % UN)][j % UN][r / UN][j / UN] = (r == j) ? 1 : 0;
         }
     }
     internal::Jacobi_svd<T, diagSize, UN, NMAXUN>(dataA, dataU_out); // core function of Jacbi SVD for symmetric matrix
@@ -1152,11 +1154,11 @@ Loop_init_A:
 #pragma HLS loop_tripcount min = NMAX2 max = NMAX2
 #pragma HLS pipeline
             if ((i < m) && (j < lda)) {
-                dataA_2D[(i / NMAXUN)][j / NMAXUN][i % NMAXUN][j % NMAXUN] = A[i * lda + j];
+                dataA_2D[(i % NCU)][j % NCU][i / NCU][j / NCU] = A[i * lda + j];
             } else if (i == j) {
-                dataA_2D[(i / NMAXUN)][j / NMAXUN][i % NMAXUN][j % NMAXUN] = 1;
+                dataA_2D[(i % NCU)][j % NCU][i / NCU][j / NCU] = 1;
             } else {
-                dataA_2D[(i / NMAXUN)][j / NMAXUN][i % NMAXUN][j % NMAXUN] = 0;
+                dataA_2D[(i % NCU)][j % NCU][i / NCU][j / NCU] = 0;
             }
         }
     }
@@ -1174,13 +1176,13 @@ Loop_postcal:
 // clang-format on
 #pragma HLS pipeline
             if ((j < lda) && (i < lda)) {
-                V[j * ldv + i] = dataU_2D[(j / NMAXUN)][i / NMAXUN][j % NMAXUN][i % NMAXUN];
+                V[j * ldv + i] = dataU_2D[(j % NCU)][i % NCU][j / NCU][i / NCU];
                 ap_uint<1> sign1;
                 union internal::double_cast_new dc;
-                dc.d = dataA_2D[(i / NMAXUN)][i / NMAXUN][i % NMAXUN][i % NMAXUN];
+                dc.d = dataA_2D[(i % NCU)][i % NCU][i / NCU][i / NCU];
                 ap_uint<64> data = dc.i;
                 sign1[0] = data[63];
-                T tmpVal = dataU_2D[(j / NMAXUN)][i / NMAXUN][j % NMAXUN][i % NMAXUN];
+                T tmpVal = dataU_2D[(j % NCU)][i % NCU][j / NCU][i / NCU];
                 U[j * ldu + i] = (sign1[0] == 1) ? (-tmpVal) : (tmpVal);
                 if ((j == i)) {
                     T tmp2 = dc.d;

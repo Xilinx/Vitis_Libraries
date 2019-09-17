@@ -194,7 +194,7 @@ void MulMat(int maxRow1, int maxCol1, int maxCol2, dataType* matLeft, dataType* 
 }
 
 //////// matrix multiplier of matrixLeft[maxRow1][maxCol1] * matrixMiddle[maxCol1][maxCol2] *
-///matrixRight[maxCol2][maxCol3] //////
+/// matrixRight[maxCol2][maxCol3] //////
 template <typename dataType>
 void MulMat(int maxRow1,
             int maxCol1,
