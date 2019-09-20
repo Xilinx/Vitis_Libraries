@@ -89,7 +89,7 @@ For each primitive, a test configuration file **profile.json** has been provided
     "numSimulation": 2
   }
 
-The configuragion file will instruct our testing infrastructure to generate following tests.
+The configuration file will instruct our testing infrastructure to generate the tests.
 
 5. Test outputs
 ==================
