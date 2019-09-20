@@ -26,7 +26,7 @@ else
   echo ================================================
   echo Now build benchmark with $dataType type
   echo ================================================
-  make XFBLAS_dataType=${dataType}
+  make host XFBLAS_dataType=${dataType}
 fi
 
 
