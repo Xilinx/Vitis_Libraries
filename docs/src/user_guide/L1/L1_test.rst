@@ -42,7 +42,7 @@ The L1 primitives can be tested individually or as a group. To launch the testin
 
    $ python ./run_test.py --operator amax amin asum axpy copy dot nrm2 scal swap gemv gbmv sbmvLo sbmvUp tbmvLo tbmvUp trmvLo trmvUp symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp
 
-The above command will test and verify all L1 primitvies' implementation in both csim and cosim modes. Hence, it can take a very long time. The following commands show examples for quickly testing some primitives in pure csim or cosim mode.
+The above command will test and verify all L1 primitives' implementation in both csim and cosim modes. Hence, it can take a very long time. The following commands show examples for quickly testing some primitives in pure csim or cosim mode.
 
 .. code-block:: bash
 
