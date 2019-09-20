@@ -44,7 +44,7 @@ class RunTest:
     
   def build(self): 
     for dataType in self.cppDataTypes:
-      commandLine = r'make OPERATOR_NAME=%s XFBLAS_dataType=%s'%(self.opName,dataType)
+      commandLine = r'make host OPERATOR_NAME=%s XFBLAS_dataType=%s'%(self.opName,dataType)
       args = shlex.split(commandLine)
       subprocess.call(args)
       

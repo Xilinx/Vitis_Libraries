@@ -34,7 +34,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 /**
  * @brief scal function that compute X = alpha * X
@@ -70,7 +70,7 @@ void scal(unsigned int p_n,
     }
 }
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

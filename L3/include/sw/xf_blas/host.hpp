@@ -29,7 +29,7 @@
 #include "xclbin.h"
 
 #include "../utility/utility.hpp"
-#include "utils.hpp"
+#include "helper.hpp"
 #include "gemxkernel_hw.hpp"
 
 #define IDX2R(i, j, ld) (((i) * (ld)) + (j))
@@ -37,7 +37,7 @@
 using namespace std;
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 class XFpga {
@@ -415,7 +415,7 @@ class BLASHost : public XHost {
 };
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

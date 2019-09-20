@@ -24,12 +24,14 @@ class HLS_ERROR(Exception):
     self.logFile = logFile
 
 class Parameters:
-  def __init__(self, op, logParEntries, parEntries):
+  def __init__(self, op, logParEntries, parEntries, xpart):
     self.op = op
     self.logParEntries = logParEntries
     self.parEntries=parEntries
     self.rtype = 'uint32_t'
     self.dtype = 'uint32_t'
+    self.xpart = xpart
+
   def setRtype(self, rtype):
     self.rtype = rtype
   def setDtype(self, dtype):
@@ -44,6 +46,12 @@ class HLS:
     self.csim = b_csim
     self.syn = b_syn 
     self.cosim = b_cosim 
+    self.benchmark = b_benchmark
+
+    self.error = False
+    self.passCsim = False
+    self.passSyn = False
+    self.passCosim = False
 
   def execution(self, binFile, logFile, workDir='.', b_print = False):
     testDir = os.getcwd()
@@ -69,37 +77,44 @@ class HLS:
           print(line, end='')
         else:
           print('.', end='') 
+          sys.stdout.flush()
+
+          ## ERROR checking
+          if line.find("ERROR") >=0:
+            self.error = True
+          if line.find(r"C/RTL co-simulation finished: PASS") >=0:
+            self.passCosim = True
+          if line.find("Finished generating all RTL models") >=0:
+            self.passSyn = True
+          if line.find("CSim done with 0 errors") >=0:
+            self.passCsim = True
+
+          ## process checking
           if line.find("CSIM finish") >=0:
             print('\nOP %s: CSIM finished.'%self.params.op.name)
           elif line.find(r'C/RTL co-simulation finished') >=0:
             print('\nOP %s: COSIM finished.'%self.params.op.name)
           elif line.find(r'C/RTL SIMULATION') >=0:
             print("\nOP %s: SYNTHESIS finished."%self.params.op.name)
-          sys.stdout.flush()
+
         f.write(line)
+
     print('\nOP %s: vivado_hls finished execution.'%self.params.op.name) 
 
   def checkLog(self, logFile):
     with open(logFile, 'r') as f:
       content = f.read()
-    passIndex = content.find("ERROR")
-    if passIndex >= 0:
+    if self.error:
       raise HLS_ERROR("HLS execution met errors.", logFile)
-    if self.cosim:
-      passIndex = content.find(r"C/RTL co-simulation finished: PASS")
-      if passIndex < 0:
-        raise HLS_ERROR("C/RTL co-simulation FAILED.", logFile)
-    if self.syn:
-      passIndex = content.find("Finished generating all RTL models")
-      if passIndex < 0:
-        raise HLS_ERROR("SYNTHESIS FAILED.", logFile)
-    if self.csim:
-      passIndex = content.find("CSim done with 0 errors")
-      if passIndex < 0:
+    elif self.csim and not self.passCsim:
         raise HLS_ERROR("Csim FAILED.", logFile)
+    elif self.syn and not self.passSyn:
+        raise HLS_ERROR("SYNTHESIS FAILED.", logFile)
+    elif self.cosim and not self.passCosim:
+        raise HLS_ERROR("C/RTL co-simulation FAILED.", logFile)
 
   def benchmarking(self, logFile, op, reportList):
-    if not self.cosim:
+    if not self.benchmark:
       return
 
     features = op.features()
@@ -125,8 +140,8 @@ class HLS:
     features[r'Eff.'] = '%.1f%%'%(t_time/time * 100)
     features[r'Perf. [GOPS]'] = '%.3f'%(float(features['No.OPs']) / time)
 
-    regex0 = r"Opening and resetting solution '([\w/]+)'"
-    regex1 = r"Creating and opening solution '([\w/]+)'"
+    regex0 = r"Opening and resetting solution '([\w/-]+)'"
+    regex1 = r"Creating and opening solution '([\w/-]+)'"
     match0 = re.search(regex0, content)
     match1 = re.search(regex1, content)
     if match0: 
@@ -166,6 +181,7 @@ class HLS:
        f.write('array set opt {\n ')   
        f.write('   path %s\n '%m.path)
       ###########  TEST PARAMETERS  ##############
+       f.write('   part    %s\n '%m.xpart)
        f.write('   dataType %s\n '%m.dtype)
        f.write('   resDataType %s\n '%m.rtype)
        f.write('   logParEntries %d\n '%m.logParEntries)
@@ -188,7 +204,6 @@ class HLS:
        else:
          f.write('   runRTLsim     0\n ')
       ###########  FIXED PARAMETERS  ##############
-       f.write('   part    vu9p\n ')
        f.write('   pageSizeBytes 4096\n ')
        f.write('   memWidthBytes 64\n ')
        f.write('   instrSizeBytes 8\n ')

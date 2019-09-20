@@ -13,7 +13,7 @@ if [ -f $STAT ]; then
 fi
 
 source /group/xsjfarm/lsf/conf/profile.lsf
-source set_env.sh
+source set_env_xco.sh
 
 PYTHON=python3
 PYTEST=./sw/python/run_test.py

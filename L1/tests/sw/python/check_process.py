@@ -11,9 +11,9 @@ def Format(x):
   return "%d%s"%(x, f_dic[k])
 
 
-def poll(fileList, t, progress = 80):
+def poll(fileList, t, id_max, progress = 80):
   id = 0
-  while True:
+  while id < id_max:
     fileFound = [os.path.exists(f) for f in fileList]
     func = lambda x, y : x and y
     allFound = functools.reduce(func, fileFound)
@@ -39,7 +39,7 @@ def merge(fileList, filename):
 
 def main(args): 
   fileList = ['%s_%d.%s'%(args.basename, i, args.ext) for i in range(args.number) ]
-  poll(fileList, args.time)
+  poll(fileList, args.time, args.timeout/args.time)
   merge(fileList, '%s.%s'%(args.basename,args.ext))
 
 if __name__== "__main__":
@@ -48,6 +48,7 @@ if __name__== "__main__":
   parser.add_argument('--number', type=int, required=True, help='number of files')
   parser.add_argument('--ext', type=str, default='rpt', help='file extension')
   parser.add_argument('--time', type=int, default=60, help='number of seconds to poll')
+  parser.add_argument('--timeout', type=int, default=10000, help='number of seconds to time out')
   args = parser.parse_args()
   
   main(args)
