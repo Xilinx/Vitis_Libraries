@@ -46,7 +46,7 @@ XFBLAS level 3 library supports three different versions of APIs to support memo
 +--------------------------------+-------------------------------------+------------------------------+ 
 
 - Restricted memory version
-  To use restricted memory version, user's input matrix sizes must be multiplier of certain configuration values that are used to build the FPGA bitstreams. Also, host memory is encouaged to be 4k aligned when using restricted memory version. Compared to the default memory version, even though there are requirement on the matrix sizes, restricted memory version could save extra memory copy in host side. 
+  To use restricted memory version, user's input matrix sizes must be multiplier of certain configuration values that are used to build the FPGA bitstreams. Also, host memory is encouraged to be 4k aligned when using restricted memory version. Compared to the default memory version, even though there are requirements on the matrix sizes, restricted memory version could save extra memory copy in host side. 
 
 - Default memory version
   This version has no limitations on user host memory, and it is easy to use. API functions will do the padding internally so this will lead to extra memory copy in host side. The result output matrix will also be the same sizes.
@@ -89,7 +89,7 @@ The type is used for function status returns. All XFBLAS level 3 library functio
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
 | XFBLAS_STATUS_NOT_INITIALIZED | The XFBLAS library was not initialized. This is usually caused by not calling function xfblasCreate previously.   | 1      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
-| XFBLAS_STATUS_INVALID_VALUE   | An unsupported value or parameter was passed to the function for example an negative matrix size.                 | 2      |
+| XFBLAS_STATUS_INVALID_VALUE   | An unsupported value or parameter was passed to the function. For example, an negative matrix size.                 | 2      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
 | XFBLAS_STATUS_ALLOC_FAILED    | Memory allocation failed inside the XFBLAS library.                                                               | 3      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
@@ -1380,6 +1380,6 @@ This function performs the matrix-vector multiplication y = alpha*op(A) x+ beta*
         
 3. Obtain FPGA bitstream 
 =========================
-FPGA bitstreams (xclbins) will be available to download from Xilinx websites in the future. Currtenly, xclbins could be found in `xf_blas/L3/overlay`_
+FPGA bitstreams (xclbins) will be available to download from Xilinx websites in the future. Currently, xclbins could be found in `xf_blas/L3/overlay`_
 
 .. _xf_blas/L3/overlay: https://gitenterprise.xilinx.com/FaaSApps/xf_blas/tree/master/L3/overlay

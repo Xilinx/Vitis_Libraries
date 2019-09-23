@@ -29,7 +29,7 @@ The following matrix storage formats are supported by L1 data mover modules.
 * packed storage for symmetric and triangular matrices
 * banded storage for banded matrices
 
-For symmetrix, triangular and banded storage, both Up and Lo storage modes are supported. More details about each storage format can be found in `xf_blas/L1/matrix_storage`_.
+For symmetric, triangular and banded storage, both Up and Lo storage modes are supported. More details about each storage format can be found in `xf_blas/L1/matrix_storage`_.
 
 .. _xf_blas/L1/matrix_storage: https://www.netlib.org/blas/blast-forum/chapter2.pdf
 
