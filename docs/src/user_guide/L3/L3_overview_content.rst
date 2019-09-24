@@ -45,13 +45,16 @@ XFBLAS level 3 library supports three different versions of APIs to support memo
 | No                             | Does not apply                      | Pre-allocated memory version |
 +--------------------------------+-------------------------------------+------------------------------+ 
 
-- Restricted memory version
+Restricted memory version
+~~~~~~~~~~~~~~~~~~~~~~~~~~
   To use restricted memory version, user's input matrix sizes must be multiplier of certain configuration values that are used to build the FPGA bitstreams. Also, host memory is encouraged to be 4k aligned when using restricted memory version. Compared to the default memory version, even though there are requirements on the matrix sizes, restricted memory version could save extra memory copy in host side. 
 
-- Default memory version
+Default memory version
+~~~~~~~~~~~~~~~~~~~~~~~
   This version has no limitations on user host memory, and it is easy to use. API functions will do the padding internally so this will lead to extra memory copy in host side. The result output matrix will also be the same sizes.
   
-- Pre-allocated memory version
+Pre-allocated memory version
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   To use this version, users need to call API functions to allocate the device memory first, then fill in host memory that is mapped to device memory with values. There is no extra memory copy and the programming is easier compared to the other two versions. However, when filling in the matrices, users need to use the padded sizes, also the result output matrix's sizes are padded instead of the original ones. Please see examples for more usage information. 
   
   
