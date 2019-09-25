@@ -23,6 +23,45 @@
 
 using namespace xf::fintech;
 
+const char* BSM_KERNEL_NAME = "bsm_kernel";
+
+typedef struct _XCLBINLookupElement {
+    Device::DeviceType deviceType;
+    std::string xclbinName;
+} XCLBINLookupElement;
+
+static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "bsm_kernel.xclbin"},
+                                                    {Device::DeviceType::U200, "bsm_kernel.xclbin"},
+                                                    {Device::DeviceType::U250, "bsm_kernel.xclbin"},
+                                                    {Device::DeviceType::U280, "bsm_kernel.xclbin"}};
+
+static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
+    sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);
+
+const char* CFBlackScholesMerton::getKernelName() {
+    return BSM_KERNEL_NAME;
+}
+
+std::string CFBlackScholesMerton::getXCLBINName(Device* device) {
+    std::string xclbinName = "UNSUPPORTED_DEVICE";
+    Device::DeviceType deviceType;
+    unsigned int i;
+    XCLBINLookupElement* pElement;
+
+    deviceType = device->getDeviceType();
+
+    for (i = 0; i < NUM_XCLBIN_LOOKUP_TABLE_ENTRIES; i++) {
+        pElement = &XCLBIN_LOOKUP_TABLE[i];
+
+        if (pElement->deviceType == deviceType) {
+            xclbinName = pElement->xclbinName;
+            break; // out of loop
+        }
+    }
+
+    return xclbinName;
+}
+
 CFBlackScholesMerton::CFBlackScholesMerton(unsigned int maxNumAssets) : CFBlackScholes(maxNumAssets) {
     allocateBuffers(maxNumAssets);
 }

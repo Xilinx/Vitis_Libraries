@@ -36,7 +36,7 @@ class HestonFDOCLObjects {
     cl::CommandQueue* m_pCommandQueue;
     cl::Kernel* m_pKernel;
 };
-}
-}
+} // namespace fintech
+} // namespace xf
 
 #endif /* _XF_FINTECH_HESTON_OCL_OBJECTS_H_ */

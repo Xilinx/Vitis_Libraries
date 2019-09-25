@@ -30,11 +30,11 @@ In the case of the software and hardware emulations, the Makefile will build and
 
 For example example to run a prebuilt software emulation output (assuming the standard build directories):
 
-    ./bin_xilinx_u250_xdma_201830_1/test.exe -mode fpga -xclbin xclbin_xilinx_u250_xdma_201830_1_sw_emu/kernel_mc.xclbin
+    ./bin_xilinx_u250_xdma_201830_1/test.exe -xclbin xclbin_xilinx_u250_xdma_201830_1_sw_emu/kernel_mc.xclbin
 
 Assuming an Alveo U250 card with the XRT configured, the hardware build is run as follows:
 
-    ./bin_xilinx_u250_xdma_201830_1/test.exe -mode fpga -xclbin xclbin_xilinx_u250_xdma_201830_1_hw/kernel_mc.xclbin
+    ./bin_xilinx_u250_xdma_201830_1/test.exe -xclbin xclbin_xilinx_u250_xdma_201830_1_hw/kernel_mc.xclbin
 
 ## Example Output
 for the testbench, process it via the engine and compare to the expected result, displaying the case difference. For example:
@@ -47,8 +47,9 @@ for the testbench, process it via the engine and compare to the expected result,
     INFO: Importing kernel_mc.xclbin
     Loading: 'kernel_mc.xclbin'
     kernel has been created
-    FPGA execution time of 20 runs: 1066 ms
-    Average execution per run: 53 ms
+    FPGA execution time: 0.273633s
+    option number: 20480
+    opt/sec: 74844.8
     Expected value: 3.833452
     FPGA result:
     			Kernel1 0 - 3.85024			Kernel 1 - 3.8436 			Kernel 2 - 3.85006 			Kernel 3 - 3.85304
@@ -59,13 +60,14 @@ for the testbench, process it via the engine and compare to the expected result,
 ## Timing Performance
 
 The timing performance of the MCEuropeanEngine is shown in the table below, where timesteps is 1, requiredSamples is 16383, and FPGA frequency is 250MHz.
+The execution time is the average of 1000 runs.
 
 | platform                |         Execution time           | 
 |                         |-----------------|----------------|
-| ----------------------- |   cold run      |   warm run     |
-| QuantLib 1.15 on CentOS | 25.9  ms        |   25.9 ms      |
+| ----------------------- | cold run        |   warm run     |
+| QuantLib 1.15 on CentOS | 20.155  ms      |   20.155 ms    |
 | FinTech on U250         | 0.053 ms        |   0.01325ms    |  
-| Accelaration Ratio      | 488X            |   1954X        |
+| Accelaration Ratio      | 380X            |   1521X        |
 
 
 

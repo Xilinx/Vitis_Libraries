@@ -39,7 +39,7 @@ where :math:`U` and :math:`V` are orthogonal (unitary) matrixed and :math:`\Sigm
 Theoretically, the SVD can be characterized by the fact that the singular values are the square roots of eigenvalues of :math:`A^TA`, the columns of :math:`V` are the corresponding eigenvectors, and the columns of U are the eigenvectors of :math:`AA^T`, assuming distinct singular values. The approximation can simplify the general m-by-n matrix SVD problem to a general symmetric matrix SVD problem. 
 Due to the roundoff errors in the formulation of :math:`AA^T` and :math:`A^TA`, the accuracy has a slight influence, but if we don't need too high accuracy, the approximation can largely reduce the complexity of calculation.
 
-There are two dominant categories of SVD algorithms for dense matrix: bidiagonalization methods and Jacobi methods. The classical bidiagonalization method is a long sequential calculation, FPGA has no advantage in that case. In contrast, Jacobi methods apply plane rotations to the entire matrix A. Two-sided Jacobi methods iteratively apply rotations on both sides of matrix A to bring it to diagonal form, while one-sided Hestenes Jacobi methods apply rotations on one side to orthogonalize the columns of matrix A and bring :math:`A^TA` to diagonal form. While Jacobi methods are often slow than bidiagonalization methods, they have better potential in unrolling and pipelining. 
+There are two dominant categories of SVD algorithms for dense matrix: bidiagonalization methods and Jacobi methods. The classical bidiagonalization method is a long sequential calculation, FPGA has no advantage in that case. In contrast, Jacobi methods apply plane rotations to the entire matrix A. Two-sided Jacobi methods iteratively apply rotations on both sides of matrix A to bring it to diagonal form, while one-sided Hestenes Jacobi methods apply rotations on one side to orthogonalize the columns of matrix A and bring :math:`A^TA` to diagonal form. While Jacobi methods are often slower than bidiagonalization methods, they have better potential in unrolling and pipelining. 
 
 Jacobi Methods
 --------------
@@ -95,9 +95,6 @@ SVD workflow:
     :width: 80%
     :align: center
     
-    
-    :ref:`SVD(Singular Value Decomposition) workflow on FPGA`
-
 The input parameters for the 4x4 SVD function is the 4x4 matrix :math:`A`, and the outputs matrix are respectively matrix :math:`U`, :math:`V`, :math:`\Sigma`. As shown in the above figure, the SVD process has 4 main steps:
 
 1. Find the max value of matrix :math:`A`;
@@ -113,7 +110,7 @@ The next step is to decompose the rotation matrix from original matrix :math:`A`
 
 
 .. note::
-    The SVD function used in FinTech is a customized function designated to solve the decomposition for a 4X4 symmetric matrix. It has some tradeoffs between resources and latency. A general SVD solver is under development, it will be updated in the next release.
+    The SVD function is a customized function designated to solve the decomposition for a 4X4 symmetric matrix. It has some tradeoffs between resources and latency. A general SVD solver is under development, it will be updated in the next release.
 
 
 Profiling

@@ -27,6 +27,24 @@
 #include "mcengine_top.hpp"
 
 #define LENGTH(a) (sizeof(a) / sizeof(a[0]))
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
 
 class ArgParser {
    public:
@@ -54,12 +72,9 @@ int main(int argc, const char* argv[]) {
     std::string xclbin_path;
     std::string mode_emu = "hw";
 #ifndef HLS_TEST
-    if (parser.getCmdOption("-mode", mode) && mode == "fpga") {
-        // run_fpga = true;
-        if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-            std::cout << "ERROR:xclbin path is not set!\n";
-            return 1;
-        }
+    if (!parser.getCmdOption("-xclbin", xclbin_path)) {
+        std::cout << "ERROR:xclbin path is not set!\n";
+        return 1;
     }
     if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
         mode_emu = std::getenv("XCL_EMULATION_MODE");
@@ -150,20 +165,27 @@ int main(int argc, const char* argv[]) {
     cl_mem_ext_ptr_t mext_in_0;
     cl_mem_ext_ptr_t mext_in_1[2];
     cl_mem_ext_ptr_t mext_in_2;
-    mext_in_0.flags = XCL_MEM_DDR_BANK0;
     mext_in_0.obj = outputs;
     mext_in_0.param = 0;
 
-    mext_in_1[0].flags = XCL_MEM_DDR_BANK0;
     mext_in_1[0].obj = &resetDates2[0];
     mext_in_1[0].param = 0;
-    mext_in_1[1].flags = XCL_MEM_DDR_BANK0;
     mext_in_1[1].obj = &resetDates2[1024];
     mext_in_1[1].param = 0;
 
-    mext_in_2.flags = XCL_MEM_DDR_BANK0;
     mext_in_2.obj = seed;
     mext_in_2.param = 0;
+#ifndef USE_HBM
+    mext_in_0.flags = XCL_MEM_DDR_BANK0;
+    mext_in_1[0].flags = XCL_MEM_DDR_BANK0;
+    mext_in_1[1].flags = XCL_MEM_DDR_BANK0;
+    mext_in_2.flags = XCL_MEM_DDR_BANK0;
+#else
+    mext_in_0.flags = XCL_BANK0;
+    mext_in_1[0].flags = XCL_BANK0;
+    mext_in_1[1].flags = XCL_BANK0;
+    mext_in_2.flags = XCL_BANK0;
+#endif
 
     // create device buffer and map dev buf to host buf
     cl::Buffer output_buf;

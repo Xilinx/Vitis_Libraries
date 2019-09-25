@@ -143,7 +143,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -244,11 +244,7 @@ XCLBIN_NAME := BinomialTree_$(TARGET)_$(DEVICE_PART)_$(TEST_DT)_pe$(TEST_PE)
 SRC_DIR = $(CUR_DIR)/src
 
 EXE_NAME = binomialtreehost
-ifeq ($(TARGET),cpu)
-    HOST_ARGS += -mode cpu
-else
-    HOST_ARGS = -mode fpga -xclbin $(XCLBIN_FILE)
-endif
+HOST_ARGS = -xclbin $(XCLBIN_FILE)
 
 
 SRCS = binomialtreehost binomialtreecpu

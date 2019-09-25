@@ -28,10 +28,10 @@ typedef struct _XCLBINLookupElement {
     std::string xclbinName;
 } XCLBINLookupElement;
 
-static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "gk_kernel.hw.u50.xclbin"},
-                                                    {Device::DeviceType::U200, "gk_kernel.hw.u200.xclbin"},
-                                                    {Device::DeviceType::U250, "gk_kernel.hw.u250.xclbin"},
-                                                    {Device::DeviceType::U280, "gk_kernel.hw.u280.xclbin"}};
+static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "gk_kernel.xclbin"},
+                                                    {Device::DeviceType::U200, "gk_kernel.xclbin"},
+                                                    {Device::DeviceType::U250, "gk_kernel.xclbin"},
+                                                    {Device::DeviceType::U280, "gk_kernel.xclbin"}};
 
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);

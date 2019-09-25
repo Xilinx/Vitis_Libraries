@@ -17,7 +17,7 @@
 Pricing Engine Overview
 ***********************
 
-FinTech library 1.0 provides 12 pricing engines to calculate price for the following options.
+Vitis Quantitative Finance Library 1.0 provides 12 pricing engines to calculate price for the following options.
 
 * European Option
 * American Option

@@ -2,4 +2,4 @@
 
 The Level 1 APIs are presented as HLS C++ classes and functions.
 
-This level of API is mainly provide for hardware-savvy HLS developers.The API description and design details of these modules can be found in L1 Module User Guide section of the [library documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_fintech/index.html).
+APIs in this level are mainly provided for hardware-savvy HLS developers. The API description and design details of these modules can be found in L1 Module User Guide section of the [library documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_fintech/index.html).

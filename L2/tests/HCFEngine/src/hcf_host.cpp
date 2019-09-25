@@ -42,6 +42,7 @@ static int run_cpu = 0;
 static int gen_csv = 0;
 static int display_results = 0;
 static int check_expected_values = 0;
+static std::string binaryFile = "";
 
 int check_value(TEST_DT act, TEST_DT exp, TEST_DT tolerance, TEST_DT* diff) {
     *diff = my_fabs(act - exp);
@@ -100,8 +101,9 @@ void display_test_parameters(struct xf::fintech::hcfEngineInputDataType<TEST_DT>
 
 int deal_with_cmd_line_args(int argc, char** argv) {
     int opt = 0;
+    int b_set = 0;
     try {
-        while ((opt = getopt(argc, argv, "f:d:w:t:cvhoe")) != -1) {
+        while ((opt = getopt(argc, argv, "f:d:w:t:b:cvhoe")) != -1) {
             switch (opt) {
                 case 'f':
                     file = std::string(optarg);
@@ -114,6 +116,10 @@ int deal_with_cmd_line_args(int argc, char** argv) {
                     break;
                 case 't':
                     tol = atof(optarg);
+                    break;
+                case 'b':
+                    binaryFile = std::string(optarg);
+                    b_set = 1;
                     break;
                 case 'c':
                     run_cpu = 1;
@@ -138,6 +144,10 @@ int deal_with_cmd_line_args(int argc, char** argv) {
     } catch (const std::exception& e) {
         std::cout << "ERROR: Failed to parse command line arg: " << opt << ": " << optarg << ": exc: " << e.what()
                   << std::endl;
+        return 0;
+    }
+    if (!b_set) {
+        std::cout << "ERROR: xclbin path is not set" << std::endl;
         return 0;
     }
 
@@ -165,17 +175,6 @@ class ArgParser {
 
 int main(int argc, char** argv) {
     // cmd parser
-    ArgParser parser(argc, argv);
-    std::string mode;
-    std::string xclbin_path;
-    if (parser.getCmdOption("-mode", mode) && mode == "fpga") {
-        // run_fpga = true;
-        if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-            std::cout << "ERROR:xclbin path is not set!\n";
-            return 1;
-        }
-    }
-    std::cout << "xclbin_path=" << xclbin_path << std::endl;
 
     if (!deal_with_cmd_line_args(argc, argv)) {
         exit(1);
@@ -238,7 +237,7 @@ int main(int argc, char** argv) {
     // import and program the binary
     t_start = std::chrono::high_resolution_clock::now();
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
-    cl::Program::Binaries bins = xcl::import_binary_file(xclbin_path);
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
     cl::Kernel krnl(program, "hcf_kernel");

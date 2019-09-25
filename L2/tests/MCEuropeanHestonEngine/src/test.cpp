@@ -22,6 +22,25 @@
 
 #include <math.h>
 #include "kernel_mceuropeanengine.hpp"
+#define LENGTH(a) (sizeof(a) / sizeof(a[0]))
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -87,7 +106,7 @@ int main(int argc, const char* argv[]) {
     unsigned int maxSamples = 0;
     //
     unsigned int loop_nm = 1; // 1000;
-    DtUsed goleden = 3.83;
+    DtUsed golden = 3.83;
     DtUsed tol = 0.02;
 #ifdef HLS_TEST
     int num_rep = 1;
@@ -112,12 +131,21 @@ int main(int argc, const char* argv[]) {
             requiredSamples = 48128;
         }
     }
+    std::string mode_emu = "hw";
+    if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
+        mode_emu = std::getenv("XCL_EMULATION_MODE");
+    }
+    std::cout << "[INFO]Running in " << mode_emu << " mode" << std::endl;
+    if (mode_emu.compare("hw_emu") == 0) {
+        golden = 3.92513;
+        tol = 1e-5;
+    }
 #endif
 
 #ifdef HLS_TEST
     kernel_mc_0(loop_nm, underlying, riskFreeRate, sigma, v0, theta, kappa, rho, dividendYield, optionType, strike,
                 timeLength, timeSteps, requiredSamples, maxSamples, requiredTolerance, out0_b);
-    print_result(out0_b, goleden, tol, 1);
+    print_result(out0_b, golden, tol, 1);
 #else
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -146,9 +174,15 @@ int main(int argc, const char* argv[]) {
 
     cl_mem_ext_ptr_t mext_out_a[KN];
     cl_mem_ext_ptr_t mext_out_b[KN];
+#ifndef USE_HBM
     mext_out_a[0] = {XCL_MEM_DDR_BANK0, out0_a, 0};
 
     mext_out_b[0] = {XCL_MEM_DDR_BANK0, out0_b, 0};
+#else
+    mext_out_a[0] = {XCL_BANK0, out0_a, 0};
+
+    mext_out_b[0] = {XCL_BANK0, out0_b, 0};
+#endif
     cl::Buffer out_buff_a[KN];
     cl::Buffer out_buff_b[KN];
     for (int i = 0; i < KN; i++) {
@@ -237,12 +271,12 @@ int main(int argc, const char* argv[]) {
               << "Average executiom per run: " << exec_time / num_rep / 1000 << " ms\n";
 
     if (num_rep > 1) {
-        bool passed = print_result(out0_a, goleden, tol, loop_nm);
+        bool passed = print_result(out0_a, golden, tol, loop_nm);
         if (!passed) {
             return -1;
         }
     }
-    bool passed = print_result(out0_b, goleden, tol, loop_nm);
+    bool passed = print_result(out0_b, golden, tol, loop_nm);
     if (!passed) {
         return -1;
     }

@@ -18,10 +18,28 @@
 #ifndef HLS_TEST
 #include "xcl2.hpp"
 #endif
-#define KN 4
 
 #include <math.h>
 #include "kernel_mceuropeanengine.hpp"
+
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -41,9 +59,14 @@ class ArgParser {
     std::vector<std::string> mTokens;
 };
 void print_result(double* out1, double* out2, double* out3, double* out4) {
-    std::cout << "FPGA result:\n"
-              << "            Kernel 0 - " << out1[0] << "            Kernel 1 - " << out2[0]
-              << "            Kernel 2 - " << out3[0] << "            Kernel 3 - " << out4[0] << std::endl;
+    if (KN == 4)
+        std::cout << "FPGA result:\n"
+                  << "            Kernel 0 - " << out1[0] << "            Kernel 1 - " << out2[0]
+                  << "            Kernel 2 - " << out3[0] << "            Kernel 3 - " << out4[0] << std::endl;
+    else if (KN == 2) {
+        std::cout << "FPGA result:\n"
+                  << "            Kernel 0 - " << out1[0] << "            Kernel 1 - " << out2[0] << std::endl;
+    }
 }
 
 int main(int argc, const char* argv[]) {
@@ -78,10 +101,10 @@ int main(int argc, const char* argv[]) {
     bool optionType = 1;
     DtUsed timeLength = 1;
 
-    unsigned int requiredSamples = 16383; // 48128;//0;//1024;//0;
+    unsigned int requiredSamples = 0; // 262144; // 48128;//0;//1024;//0;
     unsigned int maxSamples = 0;
     //
-    unsigned int loop_nm = 1000;
+    unsigned int loop_nm = 1024;
     std::string mode_emu = "hw";
     if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
         mode_emu = std::getenv("XCL_EMULATION_MODE");
@@ -99,18 +122,17 @@ int main(int argc, const char* argv[]) {
             num_rep = 1;
         }
     }
-    if (num_rep > 20) {
-        num_rep = 20;
-        std::cout << "WARNING: limited repeat to " << num_rep << " times\n.";
-    }
-    if (mode_emu == "hw_emu") {
+    if (mode_emu.compare("hw_emu") == 0) {
         loop_nm = 1;
         num_rep = 1;
-    } else if (mode_emu == "sw_emu") {
+        requiredSamples = 1024;
+    } else if (mode_emu.compare("sw_emu") == 0) {
         loop_nm = 1;
         num_rep = 10;
     }
     std::cout << "loop_nm = " << loop_nm << std::endl;
+    std::cout << "num_rep = " << num_rep << std::endl;
+    std::cout << "KN = " << KN << std::endl;
 
 #endif
 
@@ -170,6 +192,7 @@ int main(int argc, const char* argv[]) {
 
     cl_mem_ext_ptr_t mext_out_a[4];
     cl_mem_ext_ptr_t mext_out_b[4];
+#ifndef USE_HBM
     mext_out_a[0] = {XCL_MEM_DDR_BANK0, out0_a, 0};
     mext_out_a[1] = {XCL_MEM_DDR_BANK1, out1_a, 0};
     mext_out_a[2] = {XCL_MEM_DDR_BANK2, out2_a, 0};
@@ -179,8 +202,19 @@ int main(int argc, const char* argv[]) {
     mext_out_b[1] = {XCL_MEM_DDR_BANK1, out1_b, 0};
     mext_out_b[2] = {XCL_MEM_DDR_BANK2, out2_b, 0};
     mext_out_b[3] = {XCL_MEM_DDR_BANK3, out3_b, 0};
-    cl::Buffer out_buff_a[4];
-    cl::Buffer out_buff_b[4];
+#else
+    mext_out_a[0] = {XCL_BANK0, out0_a, 0};
+    mext_out_a[1] = {XCL_BANK1, out1_a, 0};
+    mext_out_a[2] = {XCL_BANK2, out2_a, 0};
+    mext_out_a[3] = {XCL_BANK3, out3_a, 0};
+
+    mext_out_b[0] = {XCL_BANK0, out0_b, 0};
+    mext_out_b[1] = {XCL_BANK1, out1_b, 0};
+    mext_out_b[2] = {XCL_BANK2, out2_b, 0};
+    mext_out_b[3] = {XCL_BANK3, out3_b, 0};
+#endif
+    cl::Buffer out_buff_a[KN];
+    cl::Buffer out_buff_b[KN];
     for (int i = 0; i < KN; i++) {
         out_buff_a[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                    (size_t)(OUTDEP * sizeof(DtUsed)), &mext_out_a[i]);
@@ -312,16 +346,15 @@ int main(int argc, const char* argv[]) {
     kernel3[1].setArg(j++, maxSamples);
 #endif
 
-    std::vector<cl::Memory> out_vec[2]; //{out_buff[0]};
-    for (int i = 0; i < 4; ++i) {
-        if (i < KN) {
-            out_vec[0].push_back(out_buff_a[i]);
-            out_vec[1].push_back(out_buff_b[i]);
-        }
+    std::vector<cl::Memory> out_vec_a; //{out_buff[0]};
+    std::vector<cl::Memory> out_vec_b; //{out_buff[0]};
+    for (int i = 0; i < KN; ++i) {
+        out_vec_a.push_back(out_buff_a[i]);
+        out_vec_b.push_back(out_buff_b[i]);
     }
     q.finish();
     gettimeofday(&st_time, 0);
-    for (int i = 0; i < num_rep; ++i) {
+    for (int i = 0; i < num_rep / KN; ++i) {
         int use_a = i & 1;
         if (use_a) {
             if (i > 1) {
@@ -373,9 +406,9 @@ int main(int argc, const char* argv[]) {
             }
         }
         if (use_a) {
-            q.enqueueMigrateMemObjects(out_vec[0], CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[i], &read_events[i][0]);
+            q.enqueueMigrateMemObjects(out_vec_a, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[i], &read_events[i][0]);
         } else {
-            q.enqueueMigrateMemObjects(out_vec[1], CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[i], &read_events[i][0]);
+            q.enqueueMigrateMemObjects(out_vec_b, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[i], &read_events[i][0]);
         }
     }
 
@@ -383,16 +416,17 @@ int main(int argc, const char* argv[]) {
     q.finish();
     gettimeofday(&end_time, 0);
     int exec_time = tvdiff(&st_time, &end_time);
-    std::cout << "FPGA execution time of " << num_rep << " runs:" << exec_time / 1000 << " ms\n"
-              << "Average executiom per run: " << exec_time / num_rep / 1000 << " ms\n";
-    DtUsed goleden = 3.834522;
-    std::cout << "Expected value: " << goleden << ::std::endl;
+    double time_elapsed = double(exec_time) / 1000 / 1000;
+    std::cout << "FPGA execution time: " << time_elapsed << " s\n"
+              << "options number: " << loop_nm * num_rep << " \n"
+              << "opt/sec: " << double(loop_nm * num_rep) / time_elapsed << std::endl;
+    DtUsed golden = 3.834522;
+    std::cout << "Expected value: " << golden << ::std::endl;
     if (num_rep > 1) {
         print_result(out0_a, out1_a, out2_a, out3_a);
     }
     print_result(out0_b, out1_b, out2_b, out3_b);
 
-    std::cout << "Execution time " << tvdiff(&st_time, &end_time) << std::endl;
 #endif
 
     return 0;

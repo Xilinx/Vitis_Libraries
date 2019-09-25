@@ -17,7 +17,7 @@
 L1 Module User Guide
 **************************************
 
-L1 Module is the low-level primitives which could be used to build kernel to accelerate the specific option pricing.
+L1 Module is the low-level primitives which could be used to build kernel and accelerate the specific option pricing.
 Currently, it includes two evaluation models, Black-Scholes and Heston model, which present the change of stock price with time. It also provides Monte Carlo framework to calculate the price of option. During the evaluation of American Option, it uses Least-Square method and linear solver based on SVD decomposition.
 
 .. toctree::
@@ -34,12 +34,15 @@ Core Utility
    Pentadiag/Pentadiag.rst
    SobolRsg/sobolrsg.rst
    brownian/bb.rst
+   StochasticProcess/stochastic_process1d.rst
+   StochasticProcess/ornsteinuhlenbeck_process.rst
+   fdmmesher/fdmmesher.rst
    
 
 L1 Module APIs
 --------------
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    hw_api.rst
 

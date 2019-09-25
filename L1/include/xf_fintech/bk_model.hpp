@@ -147,7 +147,7 @@ class BKModel {
    public:
     BKModel() {}
     /**
-     * @brief initialization initialize parameter
+     * @brief initialize parameters
      *
      * @param r floating benchmark annual interest rate
      * @param spread spreads on interest rates
@@ -159,7 +159,7 @@ class BKModel {
     }
 
     /**
-     * @brief discount calculate the discount after time dt
+     * @brief calculate the discount after time dt
      *
      * @param t the current timepoint
      * @param dt The difference between the next timepoint and the current timepoint
@@ -175,7 +175,7 @@ class BKModel {
     }
 
     /**
-     * @brief treeShortRate calcutate short-rate of dt at t for TreeEngine
+     * @brief calcutate short-rate of dt at t for TreeEngine
      *
      * @param tree class TrinomialTree
      * @param endCnt end counter of timepoints
@@ -247,9 +247,6 @@ class BKModel {
                     DT price_tmp1 = state_price_disc * probs[0];
                     DT price_tmp2 = state_price_disc * probs[1];
                     DT price_tmp3 = state_price_disc * probs[2];
-#ifndef __SYNTHESIS__
-                    cout << "index=" << index << endl;
-#endif
                     if (flag == 0) {
                         flag = 1;
                     } else if (index == index_d) {
@@ -308,9 +305,6 @@ class BKModel {
                 root = 1;
             else
                 root = rates[i - 1];
-#ifndef __SYNTHESIS__
-            cout << "rates[" << i - 1 << "]=" << root << endl;
-#endif
             DT discountBond = 1 / hls::exp(rate_ * (t + dt));
             DT rate3[3] = {root, xMax, xMin};
             initRate(i, size, values16, tmp_values1, tmp_values2, statePrices, discountBond, x, dx, dt, rate3);

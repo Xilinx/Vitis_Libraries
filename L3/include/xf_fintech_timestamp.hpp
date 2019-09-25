@@ -22,15 +22,26 @@
 namespace xf {
 namespace fintech {
 
+/**
+ * @class Timestamp
+ *
+ * Timestamp class to capture duration
+ */
+
 class Timestamp {
    public:
     Timestamp();
     virtual ~Timestamp();
 
-   public:
+    /**
+     * Capture current timestamp
+     */
     void generateTimestamp(void);
 
-    static double calculateDuration(Timestamp* pStartTime, Timestamp* pStopTime); // result in seconds
+    /**
+     * Calculate a duration is seconds
+     */
+    static double calculateDuration(Timestamp* pStartTime, Timestamp* pStopTime);
 
    private:
     std::chrono::time_point<std::chrono::high_resolution_clock> m_timestamp;

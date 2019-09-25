@@ -20,21 +20,17 @@ Available Models
 The following list of financial models are currently supported in L3:
 
 .. toctree::
-	:maxdepth: 1
+    :maxdepth: 1
 
-	BinomialTree/binomialtree.rst
-	CFBlackScholes/cfblackscholes.rst
-	HCF/hcf.rst
-	M76/m76.rst
-	GarmanKohlhagen/garman_kohlhagen.rst
-	HestonFD/heston_lib.rst
-	MCAmerican/mcamerican.rst
-	MCEuropean/mceuropean.rst
-	MCEuropeanDJE/mceuropeandje.rst
+    BinomialTree/binomialtree.rst
+    CFBlackScholes/cfblackscholes.rst
+    HCF/hcf.rst
+    M76/m76.rst
+    GarmanKohlhagen/garman_kohlhagen.rst
+    Quanto/quanto.rst
+    HestonFD/heston_lib.rst
+    MCAmerican/mcamerican.rst
+    MCEuropean/mceuropean.rst
+    MCEuropeanDJE/mceuropeandje.rst
+    PopMCMC/popmcmc.rst
 
-	
-	
-	
-
-
-   

@@ -1,1 +1,1 @@
-this directory includes APIs for OpenCL kernels.
+This directory includes APIs for OpenCL kernels.

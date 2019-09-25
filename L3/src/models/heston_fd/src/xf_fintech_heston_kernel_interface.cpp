@@ -64,7 +64,7 @@ void kernel_call(std::map<std::pair<int, int>, double>& sparse_map_A,
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl_int err;
-    string xclbin_file = "fd_heston_kernel_u200_m8192_double.xclbin";
+    string xclbin_file = "fd_heston_kernel_u200_hw_m8192_double.xclbin";
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
@@ -74,7 +74,7 @@ void kernel_call(std::map<std::pair<int, int>, double>& sparse_map_A,
 
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_fd_heston(program, "fdKernel_0", &err));
+    OCL_CHECK(err, cl::Kernel krnl_fd_heston(program, "fd_kernel", &err));
 
     kernel_call(&context, &q, &krnl_fd_heston, sparse_map_A, A1_vec, A2_vec, X1_vec, X2_vec, b_vec, u0_vec, M1, M2, N,
                 price_grid);
@@ -232,6 +232,6 @@ void kernel_call(cl::Context* pContext,
     for (i = 0; i < M; ++i) price_grid[i] = price[i];
 }
 
-} // hestonfd
+} // namespace hestonfd
 } // namespace fintech
 } // namespace xf

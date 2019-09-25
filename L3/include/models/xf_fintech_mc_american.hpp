@@ -42,8 +42,19 @@ class MCAmerican : public OCLController {
 
    public:
     /**
-    * Run a single asset until the REQUIRED TOLERANCE is met...
-    */
+     * Run a single asset until the REQUIRED TOLERANCE is met...
+     *
+     * @param optionType either American/European Call or Put
+     * @param stockPrice the stock price
+     * @param strikePrice the strike price
+     * @param riskFreeRate the risk free interest rate
+     * @param dividendYield the dividend yield
+     * @param volatility the volatility
+     * @param timeToMaturity the time to maturity
+     * @param requiredTolerance the tolerance
+     * @param pOptionPrice the returned option price
+     *
+     */
     int run(OptionType optionType,
             double stockPrice,
             double strikePrice,
@@ -55,8 +66,19 @@ class MCAmerican : public OCLController {
             double* pOptionPrice);
 
     /**
-    * Run a single asset for the REQUIRED NUMBER OF SAMPLES...
-    */
+     * Run a single asset for the REQUIRED NUMBER OF SAMPLES...
+     *
+     * @param optionType either American/European Call or Put
+     * @param stockPrice the stock price
+     * @param strikePrice the strike price
+     * @param riskFreeRate the risk free interest rate
+     * @param dividendYield the dividend yield
+     * @param volatility the volatility
+     * @param timeToMaturity the time to maturity
+     * @param requiredSamples the number of samples
+     * @param pOptionPrice the returned option price
+     *
+     */
     int run(OptionType optionType,
             double stockPrice,
             double strikePrice,
@@ -69,10 +91,10 @@ class MCAmerican : public OCLController {
 
    public:
     /**
-    * This method returns the time the execution of the last call to run() took
-    *
-    * @returns Execution time in microseconds
-    */
+     * This method returns the time the execution of the last call to run() took
+     *
+     * @returns Execution time in microseconds
+     */
     long long int getLastRunTime(void);
 
    private:

@@ -13,9 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-**************************************
+********************************************
 Internal Design of MCHullWhiteCapFloorEngine
-**************************************
+********************************************
 
 Overview
 =========
@@ -35,7 +35,7 @@ Where :math:`K` is the strike interest rate and :math:`L` is the actual interest
 Implementation 
 ===============
 
-In Monte Carlo Framework, the path generator is specified with Hull-White model. For path pricer, it fetches the interet sequence from the input stream, calculates the payoff based on above formula and discounts it to time 0 for cap/floor price.
+In Monte Carlo Framework, the path generator is specified with Hull-White model. For path pricer, it fetches the interest sequence from the input stream, calculates the payoff based on above formula and discounts it to time 0 for cap/floor price.
 
 
 

@@ -30,6 +30,16 @@
 namespace xf {
 namespace fintech {
 
+/**
+ * @class FDHeston
+ *
+ * @brief This class implements the Finite Difference Heston Model.
+ *
+ * It is intended that the user will populate the asset data when calling the run() method.
+ * A number of overriden methods have been provided that allow configuration of the number
+ * of steps and return of the Greeks.
+ */
+
 class FDHeston : public OCLController {
    public:
     FDHeston();
@@ -39,38 +49,89 @@ class FDHeston : public OCLController {
     virtual ~FDHeston();
 
    public:
+    /**
+     * Calculate a single option price with default number of steps.
+     *
+     * @param stockPrice the stock price
+     * @param strikePrice the strike price
+     * @param riskFreeRateDomestic the risk free domestic interest rate
+     * @param volatility the volatility
+     * @param timeToMaturity the time to maturity
+     * @param meanReversionRate the mean reversion rate (kappa)
+     * @param volatilityOfVolatility the volatility of volatility (sigma)
+     * @param correlationCoefficient the correlation coefficient (rho)
+     * @param longRunAveragePrice the returned option price (eta)
+     * @param pOptionPrice the returned option price
+     *
+     */
     int run(double stockPrice,
             double strikePrice,
             double riskFreeRateDomestic,
             double volatility,
             double timeToMaturity,
-            double meanReversionRate,      // kappa
-            double volatilityOfVolatility, // sigma
-            double correlationCoefficient, // rho
-            double longRunAveragePrice,    // eta
+            double meanReversionRate,
+            double volatilityOfVolatility,
+            double correlationCoefficient,
+            double longRunAveragePrice,
             double* pOptionPrice);
 
+    /**
+     * Calculate a single option price with a configurable number of steps.
+     *
+     * @param stockPrice the stock price
+     * @param strikePrice the strike price
+     * @param riskFreeRateDomestic the risk free domestic interest rate
+     * @param volatility the volatility
+     * @param timeToMaturity the time to maturity
+     * @param meanReversionRate the mean reversion rate (kappa)
+     * @param volatilityOfVolatility the volatility of volatility (sigma)
+     * @param correlationCoefficient the correlation coefficient (rho)
+     * @param longRunAveragePrice the returned option price (eta)
+     * @param numSteps the number of steps
+     * @param pOptionPrice the returned option price
+     *
+     */
     int run(double stockPrice,
             double strikePrice,
             double riskFreeRateDomestic,
             double volatility,
             double timeToMaturity,
-            double meanReversionRate,      // kappa
-            double volatilityOfVolatility, // sigma
-            double correlationCoefficient, // rho
-            double longRunAveragePrice,    // eta
+            double meanReversionRate,
+            double volatilityOfVolatility,
+            double correlationCoefficient,
+            double longRunAveragePrice,
             int numSteps,
             double* pOptionPrice);
 
+    /**
+     * Calculate a single option price with a default number of steps and return the greeks.
+     *
+     * @param stockPrice the stock price
+     * @param strikePrice the strike price
+     * @param riskFreeRateDomestic the risk free domestic interest rate
+     * @param volatility the volatility
+     * @param timeToMaturity the time to maturity
+     * @param meanReversionRate the mean reversion rate (kappa)
+     * @param volatilityOfVolatility the volatility of volatility (sigma)
+     * @param correlationCoefficient the correlation coefficient (rho)
+     * @param longRunAveragePrice the returned option price (eta)
+     * @param pOptionPrice the returned option price
+     * @param pDelta the returned greek Delta
+     * @param pVega the returned greek Vega
+     * @param pGamma the returned greek Gamma
+     * @param pVolga the returned greek Volga
+     * @param pVanna the returned greek Vanna
+     *
+     */
     int run(double stockPrice,
             double strikePrice,
             double riskFreeRateDomestic,
             double volatility,
             double timeToMaturity,
-            double meanReversionRate,      // kappa
-            double volatilityOfVolatility, // sigma
-            double correlationCoefficient, // rho
-            double longRunAveragePrice,    // eta
+            double meanReversionRate,
+            double volatilityOfVolatility,
+            double correlationCoefficient,
+            double longRunAveragePrice,
             double* pOptionPrice,
             double* pDelta,
             double* pVega,
@@ -78,15 +139,35 @@ class FDHeston : public OCLController {
             double* pVolga,
             double* pVanna);
 
+    /**
+     * Calculate a single option price with a configurable number of steps and return the greeks.
+     *
+     * @param stockPrice the stock price
+     * @param strikePrice the strike price
+     * @param riskFreeRateDomestic the risk free domestic interest rate
+     * @param volatility the volatility
+     * @param timeToMaturity the time to maturity
+     * @param meanReversionRate the mean reversion rate (kappa)
+     * @param volatilityOfVolatility the volatility of volatility (sigma)
+     * @param correlationCoefficient the correlation coefficient (rho)
+     * @param longRunAveragePrice the returned option price (eta)
+     * @param numSteps the number of steps
+     * @param pOptionPrice the returned option price
+     * @param pDelta the returned greek Delta
+     * @param pVega the returned greek Vega
+     * @param pGamma the returned greek Gamma
+     * @param pVolga the returned greek Volga
+     * @param pVanna the returned greek Vanna
+     */
     int run(double stockPrice,
             double strikePrice,
             double riskFreeRateDomestic,
             double volatility,
             double timeToMaturity,
-            double meanReversionRate,      // kappa
-            double volatilityOfVolatility, // sigma
-            double correlationCoefficient, // rho
-            double longRunAveragePrice,    // eta
+            double meanReversionRate,
+            double volatilityOfVolatility,
+            double correlationCoefficient,
+            double longRunAveragePrice,
             int numSteps,
             double* pOptionPrice,
             double* pDelta,
@@ -111,42 +192,34 @@ class FDHeston : public OCLController {
             std::vector<double>& vGrid);
 
    public:
+    /**
+     * This method returns the time the execution of the last call to run() took.
+     */
     long long int getLastRunTime(void); // in microseconds
 
    private:
     // OCLController interface
     int createOCLObjects(Device* device);
     int releaseOCLObjects(void);
-
-   private:
     std::string getXCLBINName(Device* device);
 
-   private:
     cl::Context* m_pContext;
     cl::CommandQueue* m_pCommandQueue;
-
     cl::Program::Binaries m_binaries;
-
     cl::Program* m_pProgram;
-
     cl::Kernel* m_pKernel;
-
-   private:
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runStartTime;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runEndTime;
 
-   private:
     int m_M1;
     int m_M2;
 
-   private:
     static const int DEFAULT_M1 = 128;
     static const int DEFAULT_M2 = 64;
     static const int DEFAULT_N = 200;
 
     static constexpr double DEFAULT_RF = 0; // JIRA: DCA-133
 
-   private:
     // This method takes in the full price grid (default 128x64), then creates a mini-grid (and mini S and V vectors)
     // containing just enough cells to correctly
     // calculate the greeks for a single NPV.

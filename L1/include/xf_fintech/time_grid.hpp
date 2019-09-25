@@ -26,6 +26,10 @@
 #include "hls_math.h"
 #include "ap_int.h"
 
+#ifndef __SYNTHESIS__
+#include <iostream>
+#endif
+
 namespace xf {
 
 namespace fintech {
@@ -69,9 +73,9 @@ class TimeGrid {
         int fixed_reset_cnt_tmp = 0;
         steps[0] = 0;
     loop_timegrid_1:
-        for (i = 0; i < size; i++) {
+        for (i = 0; i < size - 1; i++) {
 #pragma HLS loop_tripcount min = 10 max = 10
-            DT tmp_dt = init_time[i] - init_time[i - 1];
+            DT tmp_dt = init_time[i + 1] - init_time[i];
             int step = hls::round(tmp_dt / dtMax);
             DT dt = tmp_dt / step;
             dtime[steps[i]] = dt;
@@ -79,10 +83,10 @@ class TimeGrid {
             for (j = 1; j < step; j++) {
 #pragma HLS pipeline
 #pragma HLS loop_tripcount min = 5 max = 5
-                time[steps[i] + j] = init_time[i - 1] + dt * j;
+                time[steps[i] + j] = init_time[i] + dt * j;
                 dtime[steps[i] + j] = dt;
             }
-            time[steps[i] + j] = init_time[i];
+            time[steps[i] + j] = init_time[i + 1];
             steps[i + 1] = steps[i] + step;
             endCnt = steps[i + 1];
             if (exerciseCnt[exercise_cnt_tmp] == i) {
@@ -120,9 +124,9 @@ class TimeGrid {
         int fixed_reset_cnt_tmp = 0;
         steps[0] = 0;
     loop_timegrid_1:
-        for (i = 0; i < size; i++) {
+        for (i = 0; i < size - 1; i++) {
 #pragma HLS loop_tripcount min = 10 max = 10
-            DT tmp_dt = init_time[i] - init_time[i - 1];
+            DT tmp_dt = init_time[i + 1] - init_time[i];
             int step = hls::round(tmp_dt / dtMax);
             DT dt = tmp_dt / step;
             dtime[steps[i]] = dt;
@@ -130,10 +134,10 @@ class TimeGrid {
             for (j = 1; j < step; j++) {
 #pragma HLS pipeline
 #pragma HLS loop_tripcount min = 5 max = 5
-                time[steps[i] + j] = init_time[i - 1] + dt * j;
+                time[steps[i] + j] = init_time[i] + dt * j;
                 dtime[steps[i] + j] = dt;
             }
-            time[steps[i] + j] = init_time[i];
+            time[steps[i] + j] = init_time[i + 1];
             steps[i + 1] = steps[i] + step;
             endCnt = steps[i + 1];
             if (fixedResetCnt[fixed_reset_cnt_tmp] == i) {
@@ -164,9 +168,9 @@ class TimeGrid {
         int floating_reset_cnt_tmp = 0;
         steps[0] = 0;
     loop_timegrid_1:
-        for (i = 0; i < size; i++) {
+        for (i = 0; i < size - 1; i++) {
 #pragma HLS loop_tripcount min = 10 max = 10
-            DT tmp_dt = init_time[i] - init_time[i - 1];
+            DT tmp_dt = init_time[i + 1] - init_time[i];
             int step = hls::round(tmp_dt / dtMax);
             DT dt = tmp_dt / step;
             dtime[steps[i]] = dt;
@@ -174,10 +178,10 @@ class TimeGrid {
             for (j = 1; j < step; j++) {
 #pragma HLS pipeline
 #pragma HLS loop_tripcount min = 5 max = 5
-                time[steps[i] + j] = init_time[i - 1] + dt * j;
+                time[steps[i] + j] = init_time[i] + dt * j;
                 dtime[steps[i] + j] = dt;
             }
-            time[steps[i] + j] = init_time[i];
+            time[steps[i] + j] = init_time[i + 1];
             steps[i + 1] = steps[i] + step;
             endCnt = steps[i + 1];
             if (floatingResetCnt[floating_reset_cnt_tmp] == i) {

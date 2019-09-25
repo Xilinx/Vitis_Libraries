@@ -20,9 +20,9 @@ Version 0.5
 -----------
 
 
-FinTech library 0.5 provides engines and primitives for the acceleration of quantitative financial applications on FPGA. It comprises two approaches to pricing:
+Vitis Quantitative Finance Library 0.5 provides engines and primitives for the acceleration of quantitative financial applications on FPGA. It comprises two approaches to pricing:
 
-* a family of 10 Monte-Carlo based engines for 6 equity options (including European and American options) using Black-Scholes and Heston models; all of these pricing engines are based on a provided generic Monte Carlo simulation API, and work in parallel due to their streaming nature; and
+* a family of 10 Monte-Carlo based engines for 6 equity options (including European and American options) using Black-Scholes and Heston models; all of these pricing engines are based on a provided generic Monte Carlo simulation API, and work in parallel due to their streaming interface;
 
 * a finite-difference PDE solver for the Heston model with supporting application code and APIs.
 
@@ -31,3 +31,13 @@ In addition, the library supports low-level functions, such as random number gen
 
 Version 1.0
 -----------
+
+
+FinTech library 1.0 provides engines and primitives for the acceleration of quantitative financial applications on FPGA. It comprises two approaches to pricing:
+
+* A family of Trinomial-Tree based based pricing engines for 4 interest rate derivatives (including swaption, swap, cap/floor and callable bond), using 6 short-term interest rate model (including Hull-White, Two-additive-factor gaussian, Vasicek, Cox-Ingersoll-Ross, Extended Cox-Ingersoll-Ross and BlackKarasinski). All of these pricing engines are based on a provided generic Trinomial-Tree Framework.
+
+* 2 Finite different method based pricing engines for swaption, using Hull-White model and Two-additive-factor gaussian model. 1 Monte-Carlo based pricing engine for cap/floor, using Hull-White model, based on the Monte-Carlo simulation API we provided in release 0.5. 
+
+* 3 close form pricing engine for inflation cap/floor, CPI cap floor and discounting bond.
+

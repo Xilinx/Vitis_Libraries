@@ -33,7 +33,7 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 PCIE Accelerator Card
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Hardware modules and kernels are designed to work with Xilinx Alveo cards. Requirements for specific engines or demonstrations will be documented in the associated subdirectory. Hardware builds for Alveo board targets require package installs as per:
+Hardware modules and kernels are designed to work with Xilinx Alveo cards. Requirements for specific engines or demonstrations will be documented in the associated subdirectory. Hardware builds for Alveo board targets require package installs as:
 * `Alveo U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted>`_
 * `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted>`_
 

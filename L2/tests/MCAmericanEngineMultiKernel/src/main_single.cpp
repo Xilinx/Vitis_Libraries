@@ -118,14 +118,10 @@ int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------MC(American) Engine-----------------\n";
     // cmd parser
     ArgParser parser(argc, argv);
-    std::string mode;
     std::string xclbin_path;
-    if (parser.getCmdOption("-mode", mode) && mode == "fpga") {
-        // run_fpga = true;
-        if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-            std::cout << "ERROR:xclbin path is not set!\n";
-            return 1;
-        }
+    if (!parser.getCmdOption("-xclbin", xclbin_path)) {
+        std::cout << "ERROR:xclbin path is not set!\n";
+        return 1;
     }
     // number of call for kernel
     int loop_nm = 1;

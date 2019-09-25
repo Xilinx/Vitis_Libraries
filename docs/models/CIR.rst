@@ -20,14 +20,15 @@ Cox-Ingersoll-Ross Model
 
 Overview
 =========
-In mathematical finance, the Cox–Ingersoll–Ross model describes the evolution of interest rates. It is a type of "one factor model" (short rate model) as it describes interest rate movements as driven by only one source of market risk. The model can be used in the valuation of interest rate derivatives. It was introduced in 1985 by John C. Cox, Jonathan E. Ingersoll and Stephen A. Ross as an extension of the Vasicek model (from viki).
+In mathematical finance, the Cox-Ingersoll-Ross model describes the evolution of interest rates. It is a type of "one factor model" (short rate model) as it describes interest rate movements as driven by only one source of market risk. The model can be used in the valuation of interest rate derivatives. It was introduced in 1985 by John C. Cox, Jonathan E. Ingersoll and Stephen A. Ross as an extension of the Vasicek model (from Wiki).
 
-As the base of the Extended Cox-Ingersoll-Ross model, the Cox-Ingersoll-Ross model is a outdated model. This section mainly introduces hte implementation process of short-rate and discount, which is applied in Tree Swaption Engine. They are core part for option pricing. 
+As the base of the Extended Cox-Ingersoll-Ross model, the Cox-Ingersoll-Ross model is a outdated model. This section mainly introduces the implementation process of short-rate and discount, which is applied in Tree Swaption Engine. They are core part for option pricing. 
 
 Implementation
 ===================
 As an part of Tree Engine, the class CIRModel implements the single-factor Cox-Ingersoll-Ross model to calculate short-rate and discount by using continuous compounding. Next, the implementation process is introduced.
 
-1. 1) since the short-rate at the current time point is independent of the short-rate at the previous time point, the short-rate is not calcutated independently. 2) According to timepoints and tree related parameters to establish a trinomial tree structure from 0 to N time point by time point.
+1. a) Since the short-rate at the current time point is independent of the short-rate at the previous time point, the short-rate is not calculated independently. 
+   b) According to time-points and tree related parameters to establish a trinomial tree structure from 0 to N time point by time point.
 2. The discount is calculated at time point :math:`t` with the duration :math:`dt` by function discount that based on the short-rate.
 

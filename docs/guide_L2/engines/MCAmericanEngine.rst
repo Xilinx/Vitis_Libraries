@@ -26,7 +26,7 @@ American Option is an option that can be exercised at any time up until its matu
 
 Theory
 ========
-Because the American option can be exercised anytime prior to the stock's expire date, exercise price at each time step is required to be calculated in the process of valuing the optimal exercise. More precisely, the pricing process is as follows:
+Because the American option can be exercised anytime prior to the stock's expire date, exercise price at each time step is required in the process of valuing the optimal exercise. More precisely, the pricing process is as follows:
 
 1. Generate independent stock paths
 2. Start at maturity :math:`T` and calculate the exercise price.
@@ -67,8 +67,6 @@ In the Theory Section, the pricing process is described. However, this process c
         :alt: The McAmericanEngine structure
         :width: 50%
         :align: center
-
-        :ref:`the overview of two processes in American Engine Pricing Option` 
 
 .. hint:: Why two processes are required in MCAmericanEngine and only one process, pricing, is enough for European Option Monte Carlo engine?
 
@@ -124,11 +122,9 @@ Corresponding to the two steps described above, the hardware architecture is sho
         :width: 100%
         :align: center
 
-        :ref:`the structure of American engine calibration process - phase 1: Presamples` 
-
 We denote the process from RNG to generate matrix data :math:`B` and exercise price for each timestep :math:`t` as a Monte-Carlo-Model (MCM) in American Option Calibration Process. Each MCM process 1024 data. With a template parameter UN_PATH, more pieces of MCM can be instanced when hardware resources available. 
 
-To connect multiple MCM data, two merger blocks are created: one for merge price data, one for merge matrix :math:`B`. Meanwhile, to guarantee all calibration path data can be executed in a loop when not enough MCM available, a soft-layer Merger that accumulates all elements of :math:`B` data is employed. Since these intermediate data need to be accumulated multiple times, a BRAM is used to save and load them. 
+To connect multiple MCM data, two merger blocks are created: one for merge price data, one for merge matrix :math:`B`. Meanwhile, to guarantee all calibration path data can be executed in a loop when there is not enough MCM available, a soft-layer Merger that accumulates all elements of :math:`B` data is employed. Since these intermediate data need to be accumulated multiple times, a BRAM is used to save and load them. 
 
 3. Once we get the matrix :math:`B`, the singular matrix :math:`\Sigma` of :math:`B` could be obtained by SVD (Singular Value Decomposition).
 
@@ -150,8 +146,6 @@ Until now, matrix :math:`B` and vector :math:`y` are known, coefficients :math:`
         :width: 60%
         :align: center
 
-        :ref:`the structure of American engine calibration process - phase 2: Calibrate` 
-
 The implementation of step 3 and steps 4 is shown in :numref:`Figure %s <my-figure_calib>`. Because step 2 generates matrix :math:`B` and price data :math:`y` from timesteps :math:`0` to :math:`T`. Step 3 processes these data in the backward direction, from timesteps :math:`T` to :math:`0`. Considering the amount of data, 4096*timesteps*8*sizeof(DT) and 9*timesteps*8*sizeof(DT), it is impossible to store all the data on FPGA. In the implementation, DDR/HBM memory is used to save these data. Correspondingly, DDR data read/write modules are added to the design.
 
 Besides, notice that since SVD is purely computing dependent, which is pretty slow in the design. Therefore, a template parameter UN_STEP is added to speed up the SVD calculation process.
@@ -165,7 +159,7 @@ Pricing Process
 
 MCAmericanEnginePricing
 ```````````````````````````
-The theory of the pricing process is actually already introduced in the Theory Section. Similar to the European option engine, etc other option engines, mcSimulation framework is employed. Compared to the European option engine, the difference is that it needs to calculate the optimal exercise at all time steps. The detailed implementation process of American engine is drawn as Figure :numref:`Figure %s <my-figure_pricing>` shows.
+The theory of the pricing process is actually already introduced in the Theory Section. Similar to the European option engine, mcSimulation framework is employed. Compared to the European option engine, the difference is that it needs to calculate the optimal exercise at all time steps. The detailed implementation process of American engine is drawn as Figure :numref:`Figure %s <my-figure_pricing>` shows.
 
 .. _my-figure_pricing:
 .. figure:: /images/AM/pricing.png
@@ -173,15 +167,13 @@ The theory of the pricing process is actually already introduced in the Theory S
         :width: 100%
         :align: center
 
-        :ref:`the structure of American engine pricing process` 
-
 1. Generate uniform random numbers with Mersenne Twister UNiform MT19937 Random Number Generator (RNG) followed by Inverse Cumulative Normal (ICN) uniform random numbers. Thereafter, generate independent stock paths with the uniform random numbers and Black-Sholes path generator. 
 
 2. Refer to Equation :eq:`expect_calc`, calculate the exercise price at time step :math:`T` by utilizing the calculated coefficients :math:`x`.
 
 3. Calculate the exercise price for previous time steps :math:`t`, and take the max exercise price by comparing the immediate exercise price with the held price value (maximum value for time steps :math:`t+1`). 
 
-4. Continue this process, until time step :math:`t` equals 0, optimal exercise price and the standard deviation is obtained.
+4. Continue the process, until time step :math:`t` equals 0, optimal exercise price and the standard deviation is obtained.
 
 5. Check if the standard deviation is smaller than the required tolerance defined by customers. If not, repeat step 1-4, until the final optimal exercise price is obtained. 
 
@@ -209,8 +201,6 @@ With the three kernels, the kernel level pipeline by shortening the overall exec
         :alt: McAmericanEngine Vitis project architecture on FPGA
         :width: 60%
         :align: center
-
-        :ref:`the architecture of 3-kernel version MCAmericanEngine on FPGA` 
 
 Kernel 1 MCAmericanEngineCalibrate reads price data :math:`y` and matrix data :math:`B` from external memory and outputs coefficients to DDR/HBM. The last kernel MCAmericanEnginePricing reads coefficients data from DDR/HBM and saves the final output optimal exercise price to DDR/HBM.
 

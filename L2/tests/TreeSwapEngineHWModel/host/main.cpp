@@ -25,6 +25,24 @@
 #include "utils.hpp"
 #include "tree_engine_kernel.hpp"
 
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -48,15 +66,13 @@ int main(int argc, const char* argv[]) {
     std::cout << "\n----------------------Tree Swap (HullWhite) Engine-----------------\n";
     // cmd parser
     ArgParser parser(argc, argv);
-    std::string mode;
     std::string xclbin_path;
-    if (parser.getCmdOption("-mode", mode) && mode == "fpga") {
-        // run_fpga = true;
-        if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-            std::cout << "ERROR:xclbin path is not set!\n";
-            return 1;
-        }
+#ifndef HLS_TEST
+    if (!parser.getCmdOption("-xclbin", xclbin_path)) {
+        std::cout << "ERROR:xclbin path is not set!\n";
+        return 1;
     }
+#endif
     // Allocate Memory in Host Memory
     DT* initTime_alloc = aligned_alloc<DT>(LEN);
     int* exerciseCnt_alloc = aligned_alloc<int>(ExerciseLen);
@@ -79,7 +95,8 @@ int main(int argc, const char* argv[]) {
     if (timestep == 1000) golden = -0.0002019878991688788;
 
     double fixedRate = 0.049995924285639641;
-    double initTime[11] = {1,
+    double initTime[12] = {0,
+                           1,
                            1.4958904109589042,
                            2,
                            2.4986301369863013,
@@ -91,7 +108,7 @@ int main(int argc, const char* argv[]) {
                            5.4986301369863018,
                            6.0027397260273974};
 
-    int initSize = 11;
+    int initSize = 12;
     int exerciseCnt[5] = {0, 2, 4, 6, 8};
     int fixedCnt[5] = {0, 2, 4, 6, 8};
     int floatingCnt[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -133,25 +150,27 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[5];
-    mext_o[0].flags = XCL_MEM_DDR_BANK0;
     mext_o[0].obj = output;
     mext_o[0].param = 0;
 
-    mext_o[1].flags = XCL_MEM_DDR_BANK0;
     mext_o[1].obj = initTime_alloc;
     mext_o[1].param = 0;
 
-    mext_o[2].flags = XCL_MEM_DDR_BANK0;
     mext_o[2].obj = exerciseCnt_alloc;
     mext_o[2].param = 0;
 
-    mext_o[3].flags = XCL_MEM_DDR_BANK0;
     mext_o[3].obj = fixedCnt_alloc;
     mext_o[3].param = 0;
 
-    mext_o[4].flags = XCL_MEM_DDR_BANK0;
     mext_o[4].obj = floatingCnt_alloc;
     mext_o[4].param = 0;
+    for (int i = 0; i < 5; ++i) {
+#ifndef USE_HBM
+        mext_o[i].flags = XCL_MEM_DDR_BANK0;
+#else
+        mext_o[i].flags = XCL_BANK0;
+#endif
+    }
 
     // create device buffer and map dev buf to host buf
     cl::Buffer output_buf;

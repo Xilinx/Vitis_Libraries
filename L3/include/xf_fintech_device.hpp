@@ -38,10 +38,9 @@ class Device {
     Device(cl::Device clDevice);
     virtual ~Device();
 
-   public:
     /**
-    * Recognised Xilinx device types.
-    */
+     * Recognised Xilinx device types.
+     */
     typedef enum {
         U50,
         U200,
@@ -52,37 +51,42 @@ class Device {
 
     } DeviceType;
 
-   public:
     /**
-    * Retrieves the enclosed OpenCL device object.
-    * This allows the user to then invoke any standard OpenCL functions that
-    * require a cl::Device object
-    */
+     * Retrieves the enclosed OpenCL device object.
+     * This allows the user to then invoke any standard OpenCL functions that
+     * require a cl::Device object
+     */
     cl::Device getCLDevice(void);
 
     /**
-    * Retrieves the name of this device object.
-    */
+     * Retrieves the name of this device object.
+     */
     std::string getName(void);
 
     /**
-    * Retrieves the device type of this object (or DeviceType::UNKNOWN if is not a
-    * supported device)
-    */
+     * Retrieves the device type of this object (or DeviceType::UNKNOWN if is not a
+     * supported device)
+     */
     DeviceType getDeviceType(void);
 
     /**
-    * Converts a string representation of the device type
-    */
+     * Converts a string representation of the device type
+     */
     std::string getDeviceTypeString(void);
 
+    /**
+     * Claim the device
+     */
     int claim(OCLController* owner);
+
+    /**
+     * Release the device
+     */
     int release(OCLController* owner);
 
    private:
     void setupDeviceType(void);
 
-   private:
     cl::Device m_clDevice;
     std::mutex m_mutex;
 

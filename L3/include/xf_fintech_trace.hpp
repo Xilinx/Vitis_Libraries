@@ -76,25 +76,23 @@ class Trace {
     static char* optionTypeToString(OptionType optionType);
 
     /**
-    * Sets the primary (i.e. console) output stream to be used.  By default this
-    * is std::cout
-    */
+     * Sets the primary (i.e. console) output stream to be used.  By default this
+     * is std::cout
+     */
     static void setConsoleOutputStream(std::ostream& outputStream);
 
     /**
-    * Sets the secondary (i.e. file) output stream stream to be used.  By default
-    * this is not used
-    */
+     * Sets the secondary (i.e. file) output stream stream to be used.  By default
+     * this is not used
+     */
     static void setFileOutputStream(std::ofstream& outputStream);
 
    private:
     Trace();
     virtual ~Trace();
 
-   private:
     static Trace* getInstance(void);
 
-   private:
     int internalPrint(const char* fmt, va_list va_args);
 
     void internalSetEnabled(bool bEnabled);
@@ -102,7 +100,6 @@ class Trace {
 
     static char* getCLErrorString(cl_int cl_error_code);
 
-   private:
     static Trace* m_pInstance;
 
     std::ostream* m_pConsoleOutputStream;

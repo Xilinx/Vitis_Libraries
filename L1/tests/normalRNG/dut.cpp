@@ -36,7 +36,7 @@ extern "C" void dut(const int num,
                     double outputMT19937BoxMuller[SAMPLE_NUM]) {
     xf::fintech::MT19937IcnRng<double> rngMT19937ICN;
     xf::fintech::MT2203IcnRng<double> rngMT2203ICN;
-    xf::fintech::MT19937BoxMullerNomralRng rngMT19937BoxMuller;
+    xf::fintech::MT19937BoxMullerNormalRng rngMT19937BoxMuller;
 
     rngMT19937ICN.seedInitialization(st[0]);
     rngMT2203ICN.statusSetup(st[1], st[2], st[3]);

@@ -53,7 +53,7 @@ class CIRModel {
    public:
     CIRModel() {}
     /**
-     * @brief initialization initialize parameter
+     * @brief initialize parameter
      *
      * @param r floating benchmark annual interest rate
      * @param spread spreads on interest rates
@@ -65,10 +65,10 @@ class CIRModel {
     }
 
     /**
-     * @brief discount calculate the discount after time dt
+     * @brief calculate the discount after time dt
      *
      * @param t the current timepoint
-     * @param dt The difference between the next timepoint and the current timepoint
+     * @param dt the difference between the next timepoint and the current timepoint
      * @param x underlying
      * @param r shortrate
      * @return discount
@@ -80,7 +80,7 @@ class CIRModel {
     }
 
     /**
-     * @brief treeShortRate calcutate short-rate of dt at t for TreeEngine
+     * @brief calcutate short-rate of dt at t for TreeEngine
      *
      * @param tree class TrinomialTree
      * @param endCnt end counter of timepoints
@@ -104,9 +104,6 @@ class CIRModel {
             DT t = time[i];
             DT dt = dtime[i];
             tree.dxUpdate(i, t, dt);
-#ifndef __SYNTHESIS__
-            cout << "i=" << i << ",size=" << tree.size(i) << endl;
-#endif
         }
     }
 };

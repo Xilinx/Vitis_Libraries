@@ -483,7 +483,7 @@ void MCMultiAssetEuropeanHestonEngine(DT underlying[ASSETS],
                                       ap_uint<32> timeSteps = 100,
                                       ap_uint<32> maxSamples = MAX_SAMPLE) {
     typedef MT19937IcnRng<DT> RNG;
-    const static int SN = 1024; // SampNum
+    const static int SN = 512; // SampNum
     const static int VN = 2;
     const static bool SF = false;
     const OptionStyle sty = European;
@@ -524,7 +524,7 @@ void MCMultiAssetEuropeanHestonEngine(DT underlying[ASSETS],
         for (int j = 0; j < ASSETS * 2 + 1; j++) {
             for (int k = 0; k < ASSETS; k++) {
 #pragma HLS PIPELINE II = 1
-                rngSeqInst[i][0].corrand.corrMatrix[j][k] = corrMatrix[j][k];
+                rngSeqInst[i][0].corrand.corrMatrix[j][0][k] = corrMatrix[j][k];
             }
         }
     }

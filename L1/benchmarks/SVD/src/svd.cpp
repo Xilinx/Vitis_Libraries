@@ -22,6 +22,25 @@
 #include "xcl2.hpp"
 #define dataAN 4
 
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
+
 void benchmark_svd_functions(std::string input_path, std::string xclbinName, std::string output_path, double& errA) {
     // variables to measure time
     struct timeval tstart, tend;
@@ -94,10 +113,17 @@ void benchmark_svd_functions(std::string input_path, std::string xclbinName, std
     ///////////////////// DDR Settings //////////////////////
     std::vector<cl_mem_ext_ptr_t> mext_i(1);
     std::vector<cl_mem_ext_ptr_t> mext_o(3);
+#ifdef USE_HBM
+    mext_i[0].flags = XCL_BANK0;
+    mext_o[0].flags = XCL_BANK0;
+    mext_o[1].flags = XCL_BANK0;
+    mext_o[2].flags = XCL_BANK0;
+#else
     mext_i[0].flags = XCL_MEM_DDR_BANK0;
     mext_o[0].flags = XCL_MEM_DDR_BANK0;
     mext_o[1].flags = XCL_MEM_DDR_BANK0;
     mext_o[2].flags = XCL_MEM_DDR_BANK0;
+#endif
     mext_i[0].obj = dataA_svd;
     mext_i[0].param = 0;
     mext_o[0].obj = sigma_kernel;

@@ -44,6 +44,6 @@ void Concatenate(std::vector<double> firstInputArray,
     }
 }
 
-} // hestonfd
+} // namespace hestonfd
 } // namespace fintech
 } // namespace xf

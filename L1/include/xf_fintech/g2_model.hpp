@@ -54,7 +54,7 @@ class G2Model {
    public:
     G2Model() {}
     /**
-     * @brief initialization initialize parameter
+     * @brief initialize parameters
      *
      * @param r floating benchmark annual interest rate
      * @param a initial volatility of stock.
@@ -74,10 +74,10 @@ class G2Model {
     }
 
     /**
-     * @brief discount calculate the discount after time dt
+     * @brief calculate the discount after time dt
      *
      * @param t the current timepoint
-     * @param dt The difference between the next timepoint and the current timepoint
+     * @param dt the difference between the next timepoint and the current timepoint
      * @param x underlying
      * @param r invalid input
      * @return discount
@@ -102,7 +102,7 @@ class G2Model {
     }
 
     /**
-     * @brief treeShortRate calcutate short-rate of dt at t for TreeEngine
+     * @brief calcutate short-rate of dt at t for TreeEngine
      *
      * @param tree class TrinomialTree
      * @param endCnt end counter of timepoints
@@ -127,9 +127,6 @@ class G2Model {
             DT dt = dtime[i];
             tree[0].dxUpdate(i, t, dt);
             tree[1].dxUpdate(i, t, dt);
-#ifndef __SYNTHESIS__
-            cout << "i=" << i << ",size=" << tree[0].size(i) * tree[1].size(i) << endl;
-#endif
         }
     }
 
@@ -168,7 +165,7 @@ class G2Model<DT, void, 0> {
    public:
     G2Model() {}
     /**
-     * @brief initialization initialize parameter
+     * @brief initialize parameter
      *
      * @param r floating benchmark annual interest rate
      * @param a initial volatility of stock.
@@ -192,7 +189,7 @@ class G2Model<DT, void, 0> {
     }
 
     /**
-     * @brief discount calculate the discount after time dt
+     * @brief calculate the discount after time dt
      *
      * @param t the current timepoint
      * @param T the timepoint
@@ -213,7 +210,7 @@ class G2Model<DT, void, 0> {
     }
 
     /**
-     * @brief shortRate calculate the short-rate
+     * @brief calculate the short-rate
      *
      * @param t the current timepoint
      * @param x underlying

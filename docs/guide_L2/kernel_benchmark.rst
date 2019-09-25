@@ -20,7 +20,6 @@ Pricing Engines Demo
 
 
 .. toctree::
-   :maxdepth:2
 
    benchmarks/MCEuropeanEngine.rst
    benchmarks/MCAmericanEngine.rst

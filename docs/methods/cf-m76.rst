@@ -23,15 +23,15 @@ Merton 76 Closed-Form Solution
 Overview
 ========
 
-One of the assumptions in the Black Scholes model is that the stock price moves as geometric Brownian Motion. In reality the stock price will have 'jumps' due to events such as takeover announcements and court actions. Merton's Jump Diffusion Model does this by superimposing a jump component on the Black Scholes Diffusion Component. This Jump Component is composed of lognormal jumps driven by a Poisson process.   
+One of the assumptions in the Black Scholes model is that the stock price moves as geometric Brownian Motion. In reality the stock price will have 'jumps' due to events such as takeover announcements and court actions. Merton's Jump Diffusion Model does this by superimposing a jump component on the Black Scholes Diffusion Component. This Jump Component is composed of log-normal jumps driven by a Poisson process.   
 
-An equation can be drived for the resulting Call Option price:
+An equation can be derived for the resulting Call Option price:
 
 .. math::
    F(S,\tau) = \sum_{n=0}^{\infty} \frac{\mathrm{e}^{-\lambda\tau}(\lambda\tau)^n}{n!} \left[\epsilon_n\lbrace W(SX_n\mathrm{e}^{-\lambda k\tau},\tau ;E,\sigma^2,r)\rbrace\right]
 
 where W is the standard :ref:`Black Scholes <black_scholes>` formula and :math:`X_n` is a complicated random variable which is out of the scope of this explanation. 
-This is very difficult to solve but Merton came up with a specific case where :math:`X_n` has a lognormal distribution.
+This is very difficult to solve but Merton came up with a specific case where :math:`X_n` has a log-normal distribution.
 This simplifies the closed form call price solution to:
 
 .. math::
@@ -59,7 +59,7 @@ E = strike price
 
 :math:`\sigma` = volatility
 
-:math:`\delta^2` = variance of ln(:math:`\gamma`)
+:math:`\delta^2` = variance of `ln` (:math:`\gamma`)
 
 r = interest rate
 
@@ -71,7 +71,7 @@ k = Expected(:math:`\gamma` -1)
 References
 ==========
 
-.. [M76.1] Merton, Robert C. (1976). “Option Pricing when underlying stock returns are discontinuous”, Journal of Financial Economics 3 (1976) 125-144.
+.. [M76.1] Merton, Robert C. (1976). "Option Pricing when underlying stock returns are discontinuous", Journal of Financial Economics 3 (1976) 125-144.
 
-.. [M76.2] Merton, Robert C. (1976). “The Impact on Option Pricing of Specification Error in the Underlying Stock Price Returns”, The Journal of Finance, Vol XXXI, No 2.
+.. [M76.2] Merton, Robert C. (1976). "The Impact on Option Pricing of Specification Error in the Underlying Stock Price Returns", The Journal of Finance, Vol XXXI, No 2.
 

@@ -145,17 +145,31 @@ CORRAND_2 takes 2 independent random numbers in 1 cycle.
 CORRAND_2 produce 2 correlated random number in 1 cycle, in the order of assets.
 */
 
-template <typename DT, int PathNm, int ASSETS>
+template <typename DT, int PathNm, int ASSETS, int CFGNM>
 class CORRAND_2 {
    public:
     bool firstrun;
     ap_uint<1> rounds;
 
-    DT buff_0[ASSETS * 2][PathNm];
-    DT buff_1[ASSETS * 2][PathNm];
-    DT corrMatrix[ASSETS * 2 + 1][ASSETS];
+    DT buff_0[ASSETS * 2][CFGNM][PathNm];
+    DT buff_1[ASSETS * 2][CFGNM][PathNm];
 
-    CORRAND_2() : firstrun(true), rounds(0) {}
+    // configuration from  start
+    DT corrMatrix[ASSETS * 2 + 1][CFGNM][ASSETS];
+
+    CORRAND_2() {
+#pragma HLS array_partition variable = buff_0 dim = 1
+#pragma HLS array_partition variable = buff_1 dim = 1
+//#pragma HLS resource variable=buff_0 core=XPM_MEMORY uram
+//#pragma HLS resource variable=buff_1 core=XPM_MEMORY uram
+#pragma HLS array_partition variable = &corrMatrix dim = 1
+        //#pragma HLS resource variable=corrMatrix core=RAM_1P_LUTRAM
+    }
+
+    void init() {
+        firstrun = true;
+        rounds = 0;
+    }
 
     void setup(DT inputMatrix[ASSETS * 2 + 1][ASSETS]) {
         for (int i = 0; i < ASSETS * 2 + 1; i++) {
@@ -166,264 +180,148 @@ class CORRAND_2 {
         }
     }
 
-    void corrPathCube_s(hls::stream<ap_uint<16> >& timesteps_strm,
-                        hls::stream<ap_uint<16> >& paths_strm,
-                        hls::stream<DT>& inStrm0,
-                        hls::stream<DT>& inStrm1,
-                        hls::stream<DT>& outStrm0,
-                        hls::stream<DT>& outStrm1) {
-#pragma HLS array_partition variable = buff_0 dim = 1
-#pragma HLS array_partition variable = buff_1 dim = 1
-#pragma HLS array_partition variable = corrMatrix dim = 1
-
-        ap_uint<16> timesteps, paths;
-        timesteps = timesteps_strm.read();
-        paths = paths_strm.read();
-
-        if (firstrun) {
-            timesteps += 1;
-        }
-
-    TIME_LOOP:
-        for (int t_itr = 0; t_itr < timesteps; t_itr++) {
-        ASSETS_LOOP:
-            for (int a_itr = 0; a_itr < ASSETS; a_itr++) {
-                int L0 = ASSETS * 2 - a_itr;
-                int L1 = a_itr;
-                int L2 = L0 - 1;
-                int O_A0 = 2 * a_itr;
-                int O_A1 = O_A0 + 1;
-
-                DT matrix_buff[ASSETS * 2 + 1];
-#pragma HLS array_partition variable = matrix_buff dim = 0
-                for (int k = 0; k < ASSETS * 2 + 1; k++) {
-#pragma HLS unroll
-                    matrix_buff[k] = corrMatrix[k][a_itr];
-                }
-
-            PATH_LOOP:
-                for (int p_itr = 0; p_itr < paths; p_itr++) {
-#pragma HLS PIPELINE II = 1
-                    DT z0 = inStrm0.read();
-                    DT z1 = inStrm1.read();
-
-                    DT tmp_buff[ASSETS * 2];
+    inline void _next_body(
+        int t_itr, int a_itr, int p_itr, int c, ap_uint<8>& r_a, ap_uint<16>& r_p, DT z0, DT z1, DT& r_0, DT& r_1) {
+#pragma HLS inline
+        int L0 = ASSETS * 2 - a_itr;
+        int L1 = a_itr;
+        int L2 = L0 - 1;
+        int O_A0 = 2 * a_itr;
+        int O_A1 = O_A0 + 1;
+        DT tmp_buff[ASSETS * 2];
 #pragma HLS array_partition variable = tmp_buff dim = 0
-                    DT tmp_mul[ASSETS * 2 + 1];
+        DT tmp_mul[ASSETS * 2 + 1];
 #pragma HLS array_partition variable = tmp_mul dim = 0
-                    DT tmp_add[ASSETS * 2];
+        DT tmp_add[ASSETS * 2];
 #pragma HLS array_partition variable = tmp_add dim = 0
 
-                    for (int k = 0; k < ASSETS * 2; k++) {
+        DT tmp_buff_dup[ASSETS * 2];
+#pragma HLS array_partition variable = tmp_buff_dup dim = 0
+        for (int k = 0; k < ASSETS * 2; k++) {
 #pragma HLS unroll
-                        if (a_itr == 0) {
-                            tmp_buff[k] = 0;
-                        } else {
-                            if (rounds == 0) {
-                                tmp_buff[k] = buff_0[k][p_itr];
-                            } else {
-                                tmp_buff[k] = buff_1[k][p_itr];
-                            }
-                        }
-                    }
-
-                    for (int k = 0; k < ASSETS * 2 + 1; k++) {
-#pragma HLS unroll
-                        DT tmp_mul_tmp;
-                        if (k < L0) {
-                            tmp_mul_tmp = FPTwoMul(matrix_buff[k], z0);
-                        } else {
-                            tmp_mul_tmp = FPTwoMul(matrix_buff[k], z1);
-                        }
-                        tmp_mul[k] = tmp_mul_tmp;
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        if (k < L1) {
-                            tmp_add[k] = 0;
-                        } else {
-                            tmp_add[k] = tmp_mul[k - L1];
-                        }
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        DT tmp_add_tmp = tmp_add[k];
-                        if (k < L2) {
-                            tmp_add_tmp = FPTwoAdd(tmp_add_tmp, (DT)0.0);
-                        } else {
-                            tmp_add_tmp = FPTwoAdd(tmp_add_tmp, tmp_mul[k + 1]);
-                        }
-                        tmp_add[k] = tmp_add_tmp;
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        DT tmp_buff_tmp = tmp_buff[k];
-                        tmp_buff_tmp = FPTwoAdd(tmp_buff_tmp, tmp_add[k]);
-                        tmp_buff[k] = tmp_buff_tmp;
-                    }
-
-                WRITE_BACK_LOOP:
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        if (rounds == 0) {
-                            buff_0[k][p_itr] = tmp_buff[k];
-                        } else {
-                            buff_1[k][p_itr] = tmp_buff[k];
-                        }
-                    }
-
-                    if (firstrun && t_itr == 0) {
-                        // If this is first run and t = 0, no ouput
-                    } else {
-                        DT r_0, r_1;
-                        if (rounds == 0) {
-                            r_0 = buff_1[O_A0][p_itr];
-                            r_1 = buff_1[O_A1][p_itr];
-                        } else {
-                            r_0 = buff_0[O_A0][p_itr];
-                            r_1 = buff_0[O_A1][p_itr];
-                        }
-                        outStrm0.write(r_0);
-                        outStrm1.write(r_1);
-                    }
-                }
+            if (rounds == 0) {
+                tmp_buff_dup[k] = buff_1[k][c][p_itr];
+                tmp_buff[k] = buff_0[k][c][p_itr];
+                // tmp_buff_dup[k] = buff_1[k][c][r_p];
+            } else {
+                tmp_buff_dup[k] = buff_0[k][c][p_itr];
+                tmp_buff[k] = buff_1[k][c][p_itr];
+                // tmp_buff_dup[k] = buff_0[k][c][r_p];
             }
-            rounds += 1;
         }
-        firstrun = false;
+
+        if (!(firstrun && t_itr == 0)) {
+            r_0 = tmp_buff_dup[O_A0];
+            r_1 = tmp_buff_dup[O_A1];
+
+            // r_0 = tmp_buff_dup[2*r_a];
+            // r_1 = tmp_buff_dup[2*r_a+1];
+            // outStrm[0].write(r_0);
+            // outStrm[1].write(r_1);
+        }
+        // if(c == CFGNM - 1) {
+        //    if(r_a == ASSETS - 1) {
+        //        r_a = 0;
+        //        if(r_p == PathNm - 1) r_p = 0;
+        //        else r_p++;
+        //    } else {
+        //        r_a++;
+        //    }
+        //}
+
+        for (int k = 0; k < ASSETS * 2 + 1; k++) {
+#pragma HLS unroll
+            DT rn_d;
+
+            if (k < L0) {
+                rn_d = z0;
+            } else {
+                rn_d = z1;
+            }
+            tmp_mul[k] = FPTwoMul(corrMatrix[k][c][a_itr], rn_d);
+        }
+
+        for (int k = 0; k < ASSETS * 2; k++) {
+#pragma HLS unroll
+            if (k < L1) {
+                tmp_add[k] = 0;
+            } else {
+                tmp_add[k] = tmp_mul[k - L1];
+            }
+        }
+
+        for (int k = 0; k < ASSETS * 2; k++) {
+#pragma HLS unroll
+            DT tmp_add_tmp = tmp_add[k];
+            DT add_op;
+            if (k < L2) {
+                add_op = 0;
+            } else {
+                add_op = tmp_mul[k + 1];
+            }
+            tmp_add[k] = FPTwoAdd(tmp_add_tmp, add_op);
+        }
+
+        for (int k = 0; k < ASSETS * 2; k++) {
+#pragma HLS unroll
+            DT tmp_buff_tmp = 0; //= FPTwoAdd(tmp_buff[k], tmp_add[k]);
+            if (a_itr == 0) {
+                tmp_buff_tmp = tmp_add[k]; //= FPTwoAdd(tmp_buff[k], tmp_add[k]);
+            } else {
+                tmp_buff_tmp = FPTwoAdd(tmp_buff[k], tmp_add[k]);
+            }
+            if (rounds == 0) {
+                buff_0[k][c][p_itr] = tmp_buff_tmp;
+            } else {
+                buff_1[k][c][p_itr] = tmp_buff_tmp;
+            }
+        }
+        if (c == CFGNM - 1 && a_itr == ASSETS - 1 && p_itr == PathNm - 1) rounds++;
     }
 
-    void corrPathCube(ap_uint<16> timesteps,
-                      ap_uint<16> paths,
+    void corrPathCube(hls::stream<ap_uint<16> >& timestepStrm,
                       hls::stream<DT>& inStrm0,
                       hls::stream<DT>& inStrm1,
                       hls::stream<DT>& outStrm0,
                       hls::stream<DT>& outStrm1) {
-#pragma HLS array_partition variable = buff_0 dim = 1
-#pragma HLS array_partition variable = buff_1 dim = 1
-#pragma HLS array_partition variable = corrMatrix dim = 1
+#pragma HLS dependence variable = buff_0 inter false
+#pragma HLS dependence variable = buff_1 inter false
+
+        ap_uint<16> timesteps;
+        timesteps = timestepStrm.read();
 
         if (firstrun) {
             timesteps += 1;
         }
-
+        ap_uint<8> r_a = 0;
+        ap_uint<16> r_p = 0;
     TIME_LOOP:
         for (int t_itr = 0; t_itr < timesteps; t_itr++) {
+#pragma HLS loop_tripcount min = 10 max = 10
         ASSETS_LOOP:
             for (int a_itr = 0; a_itr < ASSETS; a_itr++) {
-                int L0 = ASSETS * 2 - a_itr;
-                int L1 = a_itr;
-                int L2 = L0 - 1;
-                int O_A0 = 2 * a_itr;
-                int O_A1 = O_A0 + 1;
-
-                DT matrix_buff[ASSETS * 2 + 1];
-#pragma HLS array_partition variable = matrix_buff dim = 0
-                for (int k = 0; k < ASSETS * 2 + 1; k++) {
-#pragma HLS unroll
-                    matrix_buff[k] = corrMatrix[k][a_itr];
-                }
-
+#pragma HLS loop_tripcount min = 5 max = 5
             PATH_LOOP:
-                for (int p_itr = 0; p_itr < paths; p_itr++) {
-#pragma HLS PIPELINE II = 1
+                for (int p_itr = 0; p_itr < PathNm; p_itr++) {
+#pragma HLS loop_tripcount min = 1024 max = 1024
+#pragma HLS pipeline II = 1
+#pragma HLS loop_tripcount min = 2 max = 2
                     DT z0 = inStrm0.read();
                     DT z1 = inStrm1.read();
 
-                    DT tmp_buff[ASSETS * 2];
-#pragma HLS array_partition variable = tmp_buff dim = 0
-                    DT tmp_mul[ASSETS * 2 + 1];
-#pragma HLS array_partition variable = tmp_mul dim = 0
-                    DT tmp_add[ASSETS * 2];
-#pragma HLS array_partition variable = tmp_add dim = 0
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        if (a_itr == 0) {
-                            tmp_buff[k] = 0;
-                        } else {
-                            if (rounds == 0) {
-                                tmp_buff[k] = buff_0[k][p_itr];
-                            } else {
-                                tmp_buff[k] = buff_1[k][p_itr];
-                            }
-                        }
-                    }
-
-                    for (int k = 0; k < ASSETS * 2 + 1; k++) {
-#pragma HLS unroll
-                        DT tmp_mul_tmp;
-                        if (k < L0) {
-                            tmp_mul_tmp = FPTwoMul(matrix_buff[k], z0);
-                        } else {
-                            tmp_mul_tmp = FPTwoMul(matrix_buff[k], z1);
-                        }
-                        tmp_mul[k] = tmp_mul_tmp;
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        if (k < L1) {
-                            tmp_add[k] = 0;
-                        } else {
-                            tmp_add[k] = tmp_mul[k - L1];
-                        }
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        DT tmp_add_tmp = tmp_add[k];
-                        if (k < L2) {
-                            tmp_add_tmp = FPTwoAdd(tmp_add_tmp, (DT)0.0);
-                        } else {
-                            tmp_add_tmp = FPTwoAdd(tmp_add_tmp, tmp_mul[k + 1]);
-                        }
-                        tmp_add[k] = tmp_add_tmp;
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        DT tmp_buff_tmp = tmp_buff[k];
-                        tmp_buff_tmp = FPTwoAdd(tmp_buff_tmp, tmp_add[k]);
-                        tmp_buff[k] = tmp_buff_tmp;
-                    }
-
-                WRITE_BACK_LOOP:
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        if (rounds == 0) {
-                            buff_0[k][p_itr] = tmp_buff[k];
-                        } else {
-                            buff_1[k][p_itr] = tmp_buff[k];
-                        }
-                    }
-
-                    if (firstrun && t_itr == 0) {
-                        // If this is first run and t = 0, no ouput
-                    } else {
-                        DT r_0, r_1;
-                        if (rounds == 0) {
-                            r_0 = buff_1[O_A0][p_itr];
-                            r_1 = buff_1[O_A1][p_itr];
-                        } else {
-                            r_0 = buff_0[O_A0][p_itr];
-                            r_1 = buff_0[O_A1][p_itr];
-                        }
+                    DT r_0, r_1;
+                    _next_body(t_itr, a_itr, p_itr, 0, r_a, r_p, z0, z1, r_0, r_1);
+                    if (!(firstrun && t_itr == 0)) {
                         outStrm0.write(r_0);
                         outStrm1.write(r_1);
                     }
                 }
             }
-            rounds += 1;
         }
         firstrun = false;
     }
 
-    void corrPathCube(ap_uint<16> timesteps,
-                      ap_uint<16> paths,
+    void corrPathCube(hls::stream<ap_uint<16> >& timestepStrm,
                       hls::stream<DT>& inStrm0,
                       hls::stream<DT>& inStrm1,
                       hls::stream<DT>& outStrm0,
@@ -432,114 +330,38 @@ class CORRAND_2 {
                       hls::stream<DT>& outStrm3) {
 #pragma HLS array_partition variable = buff_0 dim = 1
 #pragma HLS array_partition variable = buff_1 dim = 1
-#pragma HLS array_partition variable = corrMatrix dim = 1
+#pragma HLS resource variable = buff_0 core = XPM_MEMORY uram
+#pragma HLS resource variable = buff_1 core = XPM_MEMORY uram
+#pragma HLS array_partition variable = &corrMatrix dim = 1
+#pragma HLS resource variable = corrMatrix core = RAM_1P_LUTRAM
+#pragma HLS dependence variable = buff_0 inter false
+#pragma HLS dependence variable = buff_1 inter false
+
+        ap_uint<16> timesteps;
+        timesteps = timestepStrm.read();
 
         if (firstrun) {
             timesteps += 1;
         }
-
+        ap_uint<8> r_a = 0;
+        ap_uint<16> r_p = 0;
     TIME_LOOP:
         for (int t_itr = 0; t_itr < timesteps; t_itr++) {
+#pragma HLS loop_tripcount min = 10 max = 10
         ASSETS_LOOP:
             for (int a_itr = 0; a_itr < ASSETS; a_itr++) {
-                int L0 = ASSETS * 2 - a_itr;
-                int L1 = a_itr;
-                int L2 = L0 - 1;
-                int O_A0 = 2 * a_itr;
-                int O_A1 = O_A0 + 1;
-
-                DT matrix_buff[ASSETS * 2 + 1];
-#pragma HLS array_partition variable = matrix_buff dim = 0
-                for (int k = 0; k < ASSETS * 2 + 1; k++) {
-#pragma HLS unroll
-                    matrix_buff[k] = corrMatrix[k][a_itr];
-                }
-
+#pragma HLS loop_tripcount min = 5 max = 5
             PATH_LOOP:
-                for (int p_itr = 0; p_itr < paths; p_itr++) {
-#pragma HLS PIPELINE II = 1
+                for (int p_itr = 0; p_itr < PathNm; p_itr++) {
+#pragma HLS loop_tripcount min = 1024 max = 1024
+#pragma HLS pipeline II = 1
+#pragma HLS loop_tripcount min = 2 max = 2
                     DT z0 = inStrm0.read();
                     DT z1 = inStrm1.read();
 
-                    DT tmp_buff[ASSETS * 2];
-#pragma HLS array_partition variable = tmp_buff dim = 0
-                    DT tmp_mul[ASSETS * 2 + 1];
-#pragma HLS array_partition variable = tmp_mul dim = 0
-                    DT tmp_add[ASSETS * 2];
-#pragma HLS array_partition variable = tmp_add dim = 0
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        if (a_itr == 0) {
-                            tmp_buff[k] = 0;
-                        } else {
-                            if (rounds == 0) {
-                                tmp_buff[k] = buff_0[k][p_itr];
-                            } else {
-                                tmp_buff[k] = buff_1[k][p_itr];
-                            }
-                        }
-                    }
-
-                    for (int k = 0; k < ASSETS * 2 + 1; k++) {
-#pragma HLS unroll
-                        DT tmp_mul_tmp;
-                        if (k < L0) {
-                            tmp_mul_tmp = FPTwoMul(matrix_buff[k], z0);
-                        } else {
-                            tmp_mul_tmp = FPTwoMul(matrix_buff[k], z1);
-                        }
-                        tmp_mul[k] = tmp_mul_tmp;
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        if (k < L1) {
-                            tmp_add[k] = 0;
-                        } else {
-                            tmp_add[k] = tmp_mul[k - L1];
-                        }
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        DT tmp_add_tmp = tmp_add[k];
-                        if (k < L2) {
-                            tmp_add_tmp = FPTwoAdd(tmp_add_tmp, (DT)0.0);
-                        } else {
-                            tmp_add_tmp = FPTwoAdd(tmp_add_tmp, tmp_mul[k + 1]);
-                        }
-                        tmp_add[k] = tmp_add_tmp;
-                    }
-
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        DT tmp_buff_tmp = tmp_buff[k];
-                        tmp_buff_tmp = FPTwoAdd(tmp_buff_tmp, tmp_add[k]);
-                        tmp_buff[k] = tmp_buff_tmp;
-                    }
-
-                WRITE_BACK_LOOP:
-                    for (int k = 0; k < ASSETS * 2; k++) {
-#pragma HLS unroll
-                        if (rounds == 0) {
-                            buff_0[k][p_itr] = tmp_buff[k];
-                        } else {
-                            buff_1[k][p_itr] = tmp_buff[k];
-                        }
-                    }
-
-                    if (firstrun && t_itr == 0) {
-                        // If this is first run and t = 0, no ouput
-                    } else {
-                        DT r_0, r_1;
-                        if (rounds == 0) {
-                            r_0 = buff_1[O_A0][p_itr];
-                            r_1 = buff_1[O_A1][p_itr];
-                        } else {
-                            r_0 = buff_0[O_A0][p_itr];
-                            r_1 = buff_0[O_A1][p_itr];
-                        }
+                    DT r_0, r_1;
+                    _next_body(t_itr, a_itr, p_itr, 0, r_a, r_p, z0, z1, r_0, r_1);
+                    if (!(firstrun && t_itr == 0)) {
                         outStrm0.write(r_0);
                         outStrm1.write(r_1);
                         outStrm2.write(-r_0);
@@ -547,7 +369,6 @@ class CORRAND_2 {
                     }
                 }
             }
-            rounds += 1;
         }
         firstrun = false;
     }

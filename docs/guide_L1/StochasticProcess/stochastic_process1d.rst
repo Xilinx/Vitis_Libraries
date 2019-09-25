@@ -20,7 +20,7 @@ StochasticProcess1D
 
 Overview
 =========
-Stochastic processes is drived by using RNGs, for example Monte Carlo, generates random numbers. It starts a point :math:`(t,x)` and a time step :math:`\Delta t` and return a discretization of the process drift and diffusion. StochasticProcess1D is 1-dimensional stochastic process, whose factor of having one direction.  
+`Stochastic processes` is derived by using RNGs. It starts a point :math:`(t,x)` and a time step :math:`\Delta t` and return a discretization of the process drift and diffusion. StochasticProcess1D is 1-dimensional stochastic process, whose factor of having one direction.  
 The StochasticProcess1D describes by
 
 .. math::

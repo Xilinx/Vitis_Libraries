@@ -19,21 +19,21 @@ Internal Design of Barrier Option Pricing Engine
 Overview 
 =========
 
-Use Monte Carlo Simulation method to estimate the payoff of barrier option. Here, we assume the process of asset price applies to Black-Scholes process.
+This engine uses Monte Carlo Simulation method to estimate the payoff of barrier option. Here, we assume the process of asset pricing applies to Black-Scholes process.
 
-Barrier option is kind of option whose payoff depends on whether the option is effective at the maturity time. Only when the option is effective, the holder of the option has the right, but not the obligation, to buy/sell the underlying asset at the strike price. If the option is effective, the payoff of it will be calculated as the European Option.
+Barrier option is a kind of option whose payoff depends on whether the option is effective at the maturity time. Only when the option is effective, the holder of the option has the right, but not the obligation, to buy/sell the underlying asset at the strike price. If the option is effective, the payoff of it will be calculated as the European Option.
 
 There are four barrier option types, including:
 
 * 'UpIn': The option becomes effective when the price of the underlying asset is greater than the barrier value. 
 
-* 'UpOut': The option becomes non-effective when the price of the underlying asset is greater than the barrier value.
+* 'UpOut': The option becomes ineffective when the price of the underlying asset is greater than the barrier value.
 
 * 'DownIn': The option becomes effective when the price of the underlying asset is less than the barrier value.
 
-* 'DownOut': The option becomes non-effective when the price of the underlying asset is less than the barrier value.
+* 'DownOut': The option becomes ineffective when the price of the underlying asset is less than the barrier value.
 
-The rebate is a fixed value which is paid when the option is non-effective.
+The rebate is a fixed value which is paid when the option is ineffective.
 
 .. NOTE::
    In our implementation, barrier option means continuous and single barrier option. That is to say, the barrier event could happen at any time during the lifetime of option. 
@@ -49,7 +49,7 @@ However, the asset price during each discrete time interval maybe go up and down
 After simulating the asset price at each discrete time point, draw the maximum or minimum of the stock price on the interval using the known theoretical distribution of a Brownian Bridge, refer to **''Going to Extremes: Correcting Simulation Bias in Exotic Option Valuation - D.R. Beaglehole, P.H. Dybvig and G. Zhou, Correcting for Simulation Bias in Monte Carlo methods to Value Exotic Opitons in Models Driven by Levy Process - Claudia Ribeiro and Nick Webber.''**
 
 In the following, we will take up-and-out barrier option as an example to elaborate the two kinds of pricing engines.
-Let :math:`T` be the maturity time of option, the barrier level is :math:`B`. The maturity time :math:`T` is discreted by time steps :math:`N`. 
+Let :math:`T` be the maturity time of option, the barrier level is :math:`B`. The maturity time :math:`T` is discretized by time steps :math:`N`. 
 The rebate value is :math:`R`. If a barrier option fails to exercise, the seller may pay a rebate to the buyer of the option. Knock-outs may pay a rebate when they are knocked out, and knock-ins may pay a rebate if they expire without ever knocking in.
 
 
@@ -64,15 +64,13 @@ If the barrier is never hit, the payoff of the option is calculated by value of 
 
 The detailed procedure of Monte Carlo Simulation is as follows:
 
-For :math:`i` = 1 to :math:`M`
+- For :math:`i` = 1 to :math:`M`
 
-For :math:`j` = 1 to :math:`N`
+  - For :math:`j` = 1 to :math:`N`
 
-1. generate a normal random number;
-
-2. simulate the price of asset :math:`S^i_j`;
-
-3. calculate the payoff and discount it to today.
+    - generate a normal random number;
+    - simulate the price of asset :math:`S^i_j`;
+    - calculate the payoff and discount it to today.
 
 if :math:`S^i_j > B`,
 
@@ -115,15 +113,13 @@ is a draw from the distribution of the maximum of :math:`\ln \frac{S(t)}{S(t_j)}
 
 The detailed procedure of Monte Carlo Simulation is as follows:
 
-For :math:`i` = 1 to :math:`M`
+- For :math:`i` = 1 to :math:`M`
 
-For :math:`j` = 1 to :math:`N`
+  - For :math:`j` = 1 to :math:`N`
 
-1. generate a normal random number and uniform random number :math:`u`;
-
-2. simulate the price of asset :math:`S^i_j`;
-
-3. simulate the maximum price of asset :math:`M` during time interval :math:`[t_{j-1}, t_j]`.
+    - generate a normal random number and uniform random number :math:`u`;
+    - simulate the price of asset :math:`S^i_j`;
+    - simulate the maximum price of asset :math:`M` during time interval :math:`[t_{j-1}, t_j]`.
 
 .. math::
    x = \ln \frac {S^i_j}{S^i_{j-1}}
@@ -132,6 +128,6 @@ For :math:`j` = 1 to :math:`N`
 .. math::
    M = S^i_j\exp (y)
 
-The calculation of payoff is similar to MCBarrierEngine's step 3 except that the :math:`S^i_j` is replaced by :math:`M`.
+The calculation of payoff is similar to the step 3 in MCBarrierEngine except that the :math:`S^i_j` is replaced by :math:`M`.
 
 

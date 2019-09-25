@@ -58,17 +58,17 @@ class HestonModel {
     DT A_vec[ASSETS];
 
     /**
-     * @brief initParam
+     * @brief initParam Init model parameters.
      *
-     * @param asset_nm
-     * @param timeLength
-     * @param timeSteps
-     * @param riskFreeRate_input
-     * @param dividendYield
-     * @param kappa
-     * @param theta
-     * @param sigma
-     * @param rho
+     * @param asset_nm Number of asset, should be no  more than ASSETS
+     * @param timeLength Length of time of contract
+     * @param timeSteps Number of timesteps in timeLength
+     * @param riskFreeRate_input  Risk Free rate
+     * @param dividendYield Dividend Yield
+     * @param kappa Kappa of Heston Model
+     * @param theta Theta of Heston Model
+     * @param sigma Sigma of Heston Model
+     * @param rho Rho of Heston Model
      */
     void initParam(int asset_nm,
                    DT timeLength,
@@ -80,17 +80,16 @@ class HestonModel {
                    DT* sigma,
                    DT* rho);
     /**
-     * @brief logEvolve
+     * @brief logEvolve Log Evolve of Heston Model
      *
-     * @param asset_itr
-     * @param s
-     * @param v
-     * @param s_next
-     * @param v_next
-     * @param z0
-     * @param z1
+     * @param asset_itr Which asset to evolve.
+     * @param s Current s(log price).
+     * @param v Current v(volatility).
+     * @param s_next Next s(log price).
+     * @param v_next Next v(volatilty).
+     * @param z0 Random number input for s.
+     * @param z1 Random number input for v.
      */
-
     void logEvolve(int asset_itr, DT s, DT v, DT& s_next, DT& v_next, DT z0, DT z1);
 };
 
@@ -123,17 +122,17 @@ class HestonModel<ASSETS, DT, enums::kDTFullTruncation> {
     DT A_vec[ASSETS];
 
     /**
-     * @brief initParam
+     * @brief initParam Init Model Parameters.
      *
-     * @param asset_nm
-     * @param timeLength
-     * @param timeSteps
-     * @param riskFreeRate_input
-     * @param dividendYield
-     * @param kappa
-     * @param theta
-     * @param sigma
-     * @param rho
+     * @param asset_nm Number of asset, should be no  more than ASSETS
+     * @param timeLength Length of time of contract
+     * @param timeSteps Number of timesteps in timeLength
+     * @param riskFreeRate_input  Risk Free rate
+     * @param dividendYield Dividend Yield
+     * @param kappa Kappa of Heston Model
+     * @param theta Theta of Heston Model
+     * @param sigma Sigma of Heston Model
+     * @param rho Rho of Heston Model
      */
     void initParam(int asset_nm,
                    DT timeLength,
@@ -159,15 +158,15 @@ class HestonModel<ASSETS, DT, enums::kDTFullTruncation> {
     }
 
     /**
-     * @brief logEvolve
+     * @brief logEvolve Log Evolve of Heston Model
      *
-     * @param asset_itr
-     * @param s
-     * @param v
-     * @param s_next
-     * @param v_next
-     * @param z0
-     * @param z1
+     * @param asset_itr Which asset to evolve.
+     * @param s Current s(log price).
+     * @param v Current v(volatility).
+     * @param s_next Next s(log price).
+     * @param v_next Next v(volatilty).
+     * @param z0 Random number input for s.
+     * @param z1 Random number input for v.
      */
     void logEvolve(int asset_itr, DT s, DT v, DT& s_next, DT& v_next, DT z0, DT z1) {
         DT z_mix;
@@ -232,17 +231,17 @@ class HestonModel<ASSETS, DT, enums::kDTPartialTruncation> {
     DT A_vec[ASSETS];
 
     /**
-     * @brief initParam
+     * @brief initParam Init Model Parameters.
      *
-     * @param asset_nm
-     * @param timeLength
-     * @param timeSteps
-     * @param riskFreeRate_input
-     * @param dividendYield
-     * @param kappa
-     * @param theta
-     * @param sigma
-     * @param rho
+     * @param asset_nm Number of asset, should be no  more than ASSETS
+     * @param timeLength Length of time of contract
+     * @param timeSteps Number of timesteps in timeLength
+     * @param riskFreeRate_input  Risk Free rate
+     * @param dividendYield Dividend Yield
+     * @param kappa Kappa of Heston Model
+     * @param theta Theta of Heston Model
+     * @param sigma Sigma of Heston Model
+     * @param rho Rho of Heston Model
      */
     void initParam(int asset_nm,
                    DT timeLength,
@@ -268,15 +267,15 @@ class HestonModel<ASSETS, DT, enums::kDTPartialTruncation> {
     }
 
     /**
-     * @brief logEvolve
+     * @brief logEvolve Log Evolve of Heston Model
      *
-     * @param asset_itr
-     * @param s
-     * @param v
-     * @param s_next
-     * @param v_next
-     * @param z0
-     * @param z1
+     * @param asset_itr Which asset to evolve.
+     * @param s Current s(log price).
+     * @param v Current v(volatility).
+     * @param s_next Next s(log price).
+     * @param v_next Next v(volatilty).
+     * @param z0 Random number input for s.
+     * @param z1 Random number input for v.
      */
     void logEvolve(int asset_itr, DT s, DT v, DT& s_next, DT& v_next, DT z0, DT z1) {
         DT z_mix;
@@ -342,17 +341,17 @@ class HestonModel<ASSETS, DT, enums::kDTReflection> {
     DT A_vec[ASSETS];
 
     /**
-     * @brief initParam
+     * @brief initParam Init Model Parameters.
      *
-     * @param asset_nm
-     * @param timeLength
-     * @param timeSteps
-     * @param riskFreeRate_input
-     * @param dividendYield
-     * @param kappa
-     * @param theta
-     * @param sigma
-     * @param rho
+     * @param asset_nm Number of asset, should be no  more than ASSETS
+     * @param timeLength Length of time of contract
+     * @param timeSteps Number of timesteps in timeLength
+     * @param riskFreeRate_input  Risk Free rate
+     * @param dividendYield Dividend Yield
+     * @param kappa Kappa of Heston Model
+     * @param theta Theta of Heston Model
+     * @param sigma Sigma of Heston Model
+     * @param rho Rho of Heston Model
      */
     void initParam(int asset_nm,
                    DT timeLength,
@@ -378,15 +377,15 @@ class HestonModel<ASSETS, DT, enums::kDTReflection> {
     }
 
     /**
-     * @brief logEvolve
+     * @brief logEvolve Log Evolve of Heston Model
      *
-     * @param asset_itr
-     * @param s
-     * @param v
-     * @param s_next
-     * @param v_next
-     * @param z0
-     * @param z1
+     * @param asset_itr Which asset to evolve.
+     * @param s Current s(log price).
+     * @param v Current v(volatility).
+     * @param s_next Next s(log price).
+     * @param v_next Next v(volatilty).
+     * @param z0 Random number input for s.
+     * @param z1 Random number input for v.
      */
     void logEvolve(int asset_itr, DT s, DT v, DT& s_next, DT& v_next, DT z0, DT z1) {
         DT z_mix;
@@ -449,17 +448,17 @@ class HestonModel<ASSETS, DT, enums::kDTQuadraticExponential> {
     DT A_vec[ASSETS];
 
     /**
-     * @brief initParam
+     * @brief initParam Init Model Parameters.
      *
-     * @param asset_nm
-     * @param timeLength
-     * @param timeSteps
-     * @param riskFreeRate_input
-     * @param dividendYield
-     * @param kappa
-     * @param theta
-     * @param sigma
-     * @param rho
+     * @param asset_nm Number of asset, should be no  more than ASSETS
+     * @param timeLength Length of time of contract
+     * @param timeSteps Number of timesteps in timeLength
+     * @param riskFreeRate_input  Risk Free rate
+     * @param dividendYield Dividend Yield
+     * @param kappa Kappa of Heston Model
+     * @param theta Theta of Heston Model
+     * @param sigma Sigma of Heston Model
+     * @param rho Rho of Heston Model
      */
     void initParam(int asset_nm,
                    DT timeLength,
@@ -502,15 +501,15 @@ class HestonModel<ASSETS, DT, enums::kDTQuadraticExponential> {
     }
 
     /**
-     * @brief logEvolve
+     * @brief logEvolve Log Evolve of Heston Model
      *
-     * @param asset_itr
-     * @param s
-     * @param v
-     * @param s_next
-     * @param v_next
-     * @param z0
-     * @param z1
+     * @param asset_itr Which asset to evolve.
+     * @param s Current s(log price).
+     * @param v Current v(volatility).
+     * @param s_next Next s(log price).
+     * @param v_next Next v(volatilty).
+     * @param z0 Random number input for s.
+     * @param z1 Random number input for v.
      */
     void logEvolve(int asset_itr, DT s, DT v, DT& s_next, DT& v_next, DT z0, DT z1) {
         DT v_old, u1;
@@ -655,17 +654,17 @@ class HestonModel<ASSETS, DT, enums::kDTQuadraticExponentialMartingale> {
     DT A_vec[ASSETS];
 
     /**
-     * @brief initParam
+     * @brief initParam Init Model Parameters.
      *
-     * @param asset_nm
-     * @param timeLength
-     * @param timeSteps
-     * @param riskFreeRate_input
-     * @param dividendYield
-     * @param kappa
-     * @param theta
-     * @param sigma
-     * @param rho
+     * @param asset_nm Number of asset, should be no  more than ASSETS
+     * @param timeLength Length of time of contract
+     * @param timeSteps Number of timesteps in timeLength
+     * @param riskFreeRate_input  Risk Free rate
+     * @param dividendYield Dividend Yield
+     * @param kappa Kappa of Heston Model
+     * @param theta Theta of Heston Model
+     * @param sigma Sigma of Heston Model
+     * @param rho Rho of Heston Model
      */
     void initParam(int asset_nm,
                    DT timeLength,
@@ -708,15 +707,15 @@ class HestonModel<ASSETS, DT, enums::kDTQuadraticExponentialMartingale> {
     }
 
     /**
-     * @brief logEvolve
+     * @brief logEvolve Log Evolve of Heston Model
      *
-     * @param asset_itr
-     * @param s
-     * @param v
-     * @param s_next
-     * @param v_next
-     * @param z0
-     * @param z1
+     * @param asset_itr Which asset to evolve.
+     * @param s Current s(log price).
+     * @param v Current v(volatility).
+     * @param s_next Next s(log price).
+     * @param v_next Next v(volatilty).
+     * @param z0 Random number input for s.
+     * @param z1 Random number input for v.
      */
     void logEvolve(int asset_itr, DT s, DT v, DT& s_next, DT& v_next, DT z0, DT z1) {
         DT v_old, u1;

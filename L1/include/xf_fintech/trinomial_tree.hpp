@@ -35,10 +35,11 @@ namespace fintech {
 #define Sqrt3 1.732050807568877
 
 /**
- * @brief TrinomialTree
+ * @brief TrinomialTree is a lattice based trinomial tree structure
  *
  * @tparam DT date type supported include float and double.
- * @tparam LEN data length
+ * @tparam Process stochastic process.
+ * @tparam LEN maximum length of timestep
  *
  */
 
@@ -62,6 +63,9 @@ class TrinomialTree {
     // Minimum value of j per timepoints
     int j_min[LEN];
 
+    // xf::fintech::OrnsteinUhlenbeckProcess<DT> process
+    Process* process;
+
     // calculate x
     DT calcuX(int j, DT dx, DT x0) {
 #pragma HLS inline
@@ -72,9 +76,13 @@ class TrinomialTree {
     // default constructor
     TrinomialTree() {}
 
-    // xf::fintech::OrnsteinUhlenbeckProcess<DT> process
-    Process* process;
-    // calculate probability per nodes.
+    /**
+     * @brief initialize parameters.
+     *
+     * @param pro stochastic process.
+     * @param endCnt end counter of timepoints
+     * @param x0_ initial underlying
+     */
     void initialization(Process& pro, unsigned endCnt, DT x0_) {
 #pragma HLS pipeline
 #pragma HLS resource variable = dx core = RAM_2P_BRAM
@@ -97,6 +105,13 @@ class TrinomialTree {
         }
     }
 
+    /**
+     * @brief update parameters from array to calculate probability for timepoint=i
+     *
+     * @param i timepoint counter
+     * @param t time for timepoint=i
+     * @param dt the difference time between timepoint=i+1 and timepoint=i
+     */
     void dxUpdateNoCalcu(int i, DT t, DT dt) {
 #pragma HLS inline
         // v2 = process->variance(t,0.0,dt);
@@ -109,7 +124,13 @@ class TrinomialTree {
         j_min_next = j_min[i + 1];
     }
 
-    // get some values to calculate probability for timepoint=i
+    /**
+     * @brief calculate to get parameters to calculate probability for timepoint=i
+     *
+     * @param i timepoint counter
+     * @param t time for timepoint=i
+     * @param dt the difference time between timepoint=i+1 and timepoint=i
+     */
     void dxUpdate(int i, DT t, DT dt) {
 #pragma HLS inline
 #pragma HLS resource variable = arr_v2 core = RAM_1P_BRAM
@@ -143,12 +164,17 @@ class TrinomialTree {
         j_min[i + 1] = k_min;
         j_max[i + 1] = k_max;
         j_min_next = k_min;
-#ifndef __SYNTHESIS__
-        cout << endl << "======== i=" << i << ",j_max=" << j_max_now << ",j_min=" << j_min_now << endl;
-#endif
     }
 
-    // calculate probability for timepoint=i and node=j
+    /**
+     * @brief calculate probability and descendant index for timepoint=i and node=j
+     *
+     * @param j node index
+     * @param t time for timepoint=i
+     * @param dt the difference time between timepoint=i+1 and timepoint=i
+     * @param probs return the calculated probability
+     * @return return the calculated descendant index
+     */
     int calculateProbability(int j, DT t, DT dt, DT* probs) {
 #pragma HLS inline
         DT x = calcuX(j + j_min_now, dx_now, x0);
@@ -168,19 +194,35 @@ class TrinomialTree {
         return k - j_min_next - 1; // descendant index
     }
 
-    // Branch size per timepoints
+    /**
+     * @brief Branch size per timepoints
+     *
+     * @param i timepoint counter
+     * @return the branch size at timepoint is i
+     */
     int size(int i) {
 #pragma HLS inline
         return j_max[i] - j_min[i] + 1;
     }
 
-    // uderlying
+    /**
+     * @brief underlying
+     *
+     * @param index node index for branch
+     * @return underlying
+     */
     DT underlying(int index) {
 #pragma HLS inline
         int j = index + j_min_now;
         return calcuX(j, dx_now, x0);
     }
 
+    /**
+     * @brief get dx
+     *
+     * @param i timepoint counter
+     * @return dx at timepoint is i
+     */
     DT getDx(int i) { return dx[i]; }
 
 }; // class

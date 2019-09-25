@@ -141,7 +141,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -238,7 +238,7 @@ runhls: setup | check_vivado
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf *.prj *_hls.log settings.tcl
+	rm -rf *prj *_hls.log settings.tcl
 
 .PHONY: check
 check: run

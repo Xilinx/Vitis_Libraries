@@ -21,30 +21,31 @@ Internal Design of Asian Option Pricing Engine
 Overview
 ========
 
-Using the Monte Carlo Simulation to estimate the value of Asian Option. Here, we assume the process of asset price applies to Black-Scholes process. 
+This engine uses Monte Carlo Simulation to estimate the value of Asian Option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
 
-Asian Option is kind of exotic option. The payoff is path-dependent and it is dependent on the
+Asian Option is kind of exotic option. The payoff is path dependent and it is dependent on the
 average price of underlying asset over the settled period of time :math:`T`.
 
 The payoff of Asian options is determined by the arithmetic or geometric average underlying price over some pre-set period of time. This is different from the case of usual European Option and American Option, where the payoff of the option depends on the price of the underlying at exercise. One advantage of Asian option is the relative cost of Asian option compared to American options. Because of the averaging feature, Asian options are typically cheaper than American options.    
 
 The average price of underlying asset could be used as strike price or the underlying settlement price at the expiry time.
-When the average price of underlying asset is used as the underlying settlement price at the expiry time, the payoff calculated as follows:
+When the average price of underlying asset is used as the underlying settlement price at the expiry time, the payoff is calculated as follows:
 
    payoff of put option  = :math:`\max(0, K - A(T))`
 
    payoff of call option = :math:`\max(0, A(T) - K)`
 
-When the average price of underlying asset is used as the strike price at the expiry time, the payoff calculated as follows:
+When the average price of underlying asset is used as the strike price at the expiry time, the payoff is calculated as follows:
 
    payoff of put option  = :math:`\max(0, A(T) - S_T)`
 
    payoff of call option = :math:`\max(0, S_T - A(T))`
 
-Where, :math:`T` is the time of maturity. :math:`A(T)` average price of asset during time :math:`T`. 
-:math:`K` is the fixed strike. :math:`S_T` is the price of underlying asset at maturity time.
+Where :math:`T` is the time of maturity, :math:`A(T)` is the average price of asset during time :math:`T`, 
+:math:`K` is the fixed strike, :math:`S_T` is the price of underlying asset at maturity time.
 
-The average could be arithmetic or geometric, which is configurable. The N is the number of discrete steps from 0 to :math:`T`.
+The average could be arithmetic or geometric, which is configurable. :math:`N` is the
+number of discrete steps from 0 to :math:`T`.
 
    Arithmetic average: :math:`A(T) = \frac{\sum_{i=0}^N S_i}{N}`
 
@@ -56,8 +57,6 @@ MCAsianAPEngine
 
 The pricing process of Asian Arithmetic Pricing engine is as follows:
 
-
-
 1. Generate independent stock paths by using Mersenne Twister Uniform MT19937 Random Number Generator (RNG) followed by Inverse Cumulative Normal Uniform Random Numbers.
 2. Start at :math:`t = 0` and calculate the stock price of each path firstly in order to achieve II = 1.
 3. Calculate arithmetic average and geometric average value of each path.
@@ -67,7 +66,7 @@ The pricing process of Asian Arithmetic Pricing engine is as follows:
 .. math::
         Price_{Geometric} = exp{( \frac{1}{M+1} * \sum_{i=0}^{M} (\log{S(i\Delta t)}) )} 
 
-4. Calculate the payoff difference of arithmetic average price and geometric average avarage price.
+4. Calculate the payoff difference of arithmetic average price and geometric average average price.
 
 .. math::
         Payoff_{gap} = \max(0,Strike - Price_{Arithmetic}) - \max(0,Price_{Geometric} - Strike)\> for \> put \> options
@@ -86,9 +85,6 @@ The pricing architecture on FPGA can be shown as the following figure:
     :align: center
     
     
-    :ref:`McAsianAPEngine pricing architecture on FPGA`
-
-
 MCAsianASEngine
 ===============
 
@@ -120,10 +116,6 @@ The pricing architecture on FPGA can be shown as the following figure:
     :align: center
     
     
-    :ref:`McAsianASEngine pricing architecture on FPGA`
-
-    
-
 MCAsianGPEngine
 ================
 
@@ -155,17 +147,14 @@ The pricing architecture on FPGA can be shown as the following figure:
     :align: center
     
     
-    :ref:`McAsianGPEngine pricing architecture on FPGA`
-
-
 .. note::
-    :numref:`Figure.%s <my-figureAP>`,  :numref:`Figure.%s <my-figureAS>`,  :numref:`Figure.%s <my-figureGP>`  show respectively the pricing part of McAsianAPEngine, McAsianASEngine and McAsianGPEngine; the other parts, for example, pathgenerator, mcsimulation and other modules, they are the same as MCEuropeanEngine.
+    :numref:`Figure.%s <my-figureAP>`,  :numref:`Figure.%s <my-figureAS>`,  :numref:`Figure.%s <my-figureGP>`  show the pricing part of McAsianAPEngine, McAsianASEngine and McAsianGPEngine respectively; the other parts, for example, PathGenerator, MCSimulation and other modules, are the same as in MCEuropeanEngine.
 
 
 Profiling
 =========
 
-The hardware resources are listed in :numref:`tab1MCU`. The Arithmetic and Geometric Asian Engines demand almost the same resources.
+The hardware resources are listed in :numref:`tab1MCU`. The Arithmetic and Geometric Asian Engines demand similar amount of resources.
 
 .. _tab1MCU:
 
@@ -183,42 +172,42 @@ The hardware resources are listed in :numref:`tab1MCU`. The Arithmetic and Geome
     +--------------------------+----------+----------+----------+----------+----------+-----------------+
 
 
-:numref:`tab_CPU_vs_FPGA` shows the performance improvement in compare with CPU based Quantlib result (Tolerance = 0.02)
+:numref:`tab_CPU_vs_FPGA` shows the performance improvement in comparison with CPU-based Quantlib result (Tolerance = 0.02)
 
 .. _tab_CPU_vs_FPGA:
 
 .. table:: Comparison between CPU and FPGA
     :align: center
 
-    +----------------------------+-----------------+----------------+-----------------+
-    |          Engines           | McAsianAPEngine | McAsianASEngine| McAsianGPEngine |
-    +----------------------------+-----------------+----------------+-----------------+
-    | SampNum                    |    25951        |    33642       |   46805         |
-    +----------------------------+-----------------+----------------+-----------------+
-    | CPU result                 |    1.98441      |    3.10669     |   3.28924       | 
-    +----------------------------+-----------------+----------------+-----------------+
-    | CPU Execution time(us)     |    224911       |    310856      |   601068        |
-    +----------------------------+-----------------+----------------+-----------------+
-    | FPGA result                |    1.89144      |    3.0866      |   3.26228       | 
-    +----------------------------+-----------------+----------------+-----------------+
-    | FPGA Execution time-HLS(us)|    563.05       |    734.42      |   830.130       |
-    +----------------------------+-----------------+----------------+-----------------+
-    | FPGA SampNum               |    28672        |    34816       |   49152         | 
-    +----------------------------+-----------------+----------------+-----------------+
-    | FPGA E2E Execution time(ms)|    1            |    1           |   1             |
-    +----------------------------+-----------------+----------------+-----------------+
-    | Number of MCM              |    2            |    2           |   4             |
-    +----------------------------+-----------------+----------------+-----------------+
+    +---------------------------------+-----------------+----------------+-----------------+
+    |          Engines                | McAsianAPEngine | McAsianASEngine| McAsianGPEngine |
+    +---------------------------------+-----------------+----------------+-----------------+
+    | SampNum                         |    25951        |    33642       |   46805         |
+    +---------------------------------+-----------------+----------------+-----------------+
+    | CPU result                      |    1.98441      |    3.10669     |   3.28924       | 
+    +---------------------------------+-----------------+----------------+-----------------+
+    | CPU Execution time (us)         |    224911       |    310856      |   601068        |
+    +---------------------------------+-----------------+----------------+-----------------+
+    | FPGA result                     |    1.89144      |    3.0866      |   3.26228       | 
+    +---------------------------------+-----------------+----------------+-----------------+
+    | FPGA Kernel Execution time (us) |    563.05       |    734.42      |   830.130       |
+    +---------------------------------+-----------------+----------------+-----------------+
+    | FPGA SampNum                    |    28672        |    34816       |   49152         | 
+    +---------------------------------+-----------------+----------------+-----------------+
+    | FPGA E2E Execution time (ms)    |    1            |    1           |   1             |
+    +---------------------------------+-----------------+----------------+-----------------+
+    | Number of MCM                   |    2            |    2           |   4             |
+    +---------------------------------+-----------------+----------------+-----------------+
 
 
-:numref:`tab_Max_Performance` shows the max performance of McAsianEngines in one SLR of Xilinx xcu250-figd2104-2L-e (vivado report).
+:numref:`tab_Max_Performance` shows the max performance of McAsianEngines in one SLR of Xilinx xcu250-figd2104-2L-e (Vivado report).
 
 .. _tab_Max_Performance:
 
 .. table:: Hardware resources for max perforamnce
     :align: center
 
-    +--------------------------+----------+----------+----------+----------+----------+------------- +---------------+
+    +--------------------------+----------+----------+----------+----------+----------+--------------+---------------+
     |          Engines         |   BRAM   |    DSP   | Register |    LUT   |  Latency |  Frequency   | Max Unroll Num|
     |                          |          |          |          |          |          |    (MHz)     |               |
     +--------------------------+----------+----------+----------+----------+----------+--------------+---------------+
@@ -230,5 +219,7 @@ The hardware resources are listed in :numref:`tab1MCU`. The Arithmetic and Geome
     +--------------------------+----------+----------+----------+----------+----------+--------------+---------------+
 
 
+
 .. toctree::
    :maxdepth: 1
+

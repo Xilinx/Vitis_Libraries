@@ -17,7 +17,7 @@
 /**
  * @file tree_engine.hpp
  *
- * @brief the file include 4 function that are treeSwaptionEngine, treeSwapEngine, treeCapFloprEngine,
+ * @brief the file include 4 function that are treeSwaptionEngine, treeSwapEngine, treeCapFloorEngine,
  * treeCallableEngine.
  */
 #ifndef _XF_FINTECH_TREE_ENGINE_HPP_
@@ -46,7 +46,7 @@ namespace fintech {
  * @tparam Process stochastic process class
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
- * @tparam LEN maximum length of node of tree, which affects the latency and resources utilization.
+ * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
  * @param process stochastic process that has been initialized
@@ -122,7 +122,7 @@ void treeSwaptionEngine(Model& model,
  * @tparam Process stochastic process class
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
- * @tparam LEN maximum length of node of tree, which affects the latency and resources utilization.
+ * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
  * @param process1 1st dimensional stochastic process that has been initialized
@@ -209,7 +209,7 @@ void treeSwaptionEngine(Model& model,
  * @tparam Process stochastic process
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
- * @tparam LEN maximum length of node of tree, which affects the latency and resources utilization.
+ * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
  * @param process stochastic process that has been initialized
@@ -281,7 +281,7 @@ void treeSwapEngine(Model& model,
  * @tparam Process stochastic process
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
- * @tparam LEN maximum length of node of tree, which affects the latency and resources utilization.
+ * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
  * @param process1 1st dimensional stochastic process that has been initialized
@@ -358,7 +358,7 @@ void treeSwapEngine(Model& model,
  * @tparam Process stochastic process that has been initialized
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
- * @tparam LEN maximum length of node of tree, which affects the latency and resources utilization.
+ * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model
  * @param process stochastic process
@@ -378,7 +378,7 @@ void treeSwapEngine(Model& model,
  * @param NPV is pricing result array of this engine
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
-void treeCapFloprEngine(Model& model,
+void treeCapFloorEngine(Model& model,
                         Process& process,
                         int type,
                         DT fixedRate,
@@ -430,7 +430,7 @@ void treeCapFloprEngine(Model& model,
  * @tparam Process stochastic process
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
- * @tparam LEN maximum length of node of tree, which affects the latency and resources utilization.
+ * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
  * @param process1 1st dimensional stochastic process that has been initialized
@@ -452,7 +452,7 @@ void treeCapFloprEngine(Model& model,
  * @param NPV is pricing result array of this engine
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
-void treeCapFloprEngine(Model& model,
+void treeCapFloorEngine(Model& model,
                         Process& process1,
                         Process& process2,
                         int type,
@@ -506,7 +506,7 @@ void treeCapFloprEngine(Model& model,
  * @tparam Process stochastic process
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
- * @tparam LEN maximum length of node of tree, which affects the latency and resources utilization.
+ * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
  * @param process stochastic process that has been initialized
@@ -578,7 +578,7 @@ void treeCallableEngine(Model& model,
  * @tparam Process stochastic process
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
- * @tparam LEN maximum length of node of tree, which affects the latency and resources utilization.
+ * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
  * @param process1 1st dimensional stochastic process that has been initialized

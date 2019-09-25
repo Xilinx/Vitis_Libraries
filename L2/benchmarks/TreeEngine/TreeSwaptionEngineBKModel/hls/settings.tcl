@@ -1,0 +1,7 @@
+set XPART xcu200-fsgd2104-2-e
+set CSIM 1
+set CSYNTH 0
+set COSIM 0  
+set VIVADO_SYN 0
+set VIVADO_IMPL 0
+set QOR_CHECK 0

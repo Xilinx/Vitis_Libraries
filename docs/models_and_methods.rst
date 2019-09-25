@@ -14,7 +14,7 @@
    limitations under the License.
 
 ************************************
-Pricing models and numerical methods
+Pricing Models and Numerical Methods
 ************************************
 
 Models
@@ -49,4 +49,5 @@ Closed-Form Solution Methods
    methods/cf-ht.rst
    methods/cf-m76.rst
    methods/garman_kohlhagen.rst
+   methods/quanto.rst
    

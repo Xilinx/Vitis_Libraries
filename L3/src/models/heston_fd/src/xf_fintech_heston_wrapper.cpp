@@ -40,10 +40,10 @@ typedef struct _XCLBINLookupElement {
 } XCLBINLookupElement;
 
 static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {
-    {Device::DeviceType::U50, "fd_heston_kernel_u50_m8192_double.xclbin"},
-    {Device::DeviceType::U200, "fd_heston_kernel_u200_m8192_double.xclbin"},
-    {Device::DeviceType::U250, "fd_heston_kernel_u250_m8192_double.xclbin"},
-    {Device::DeviceType::U280, "fd_heston_kernel_u280_m8192_double.xclbin"}};
+    {Device::DeviceType::U50, "fd_heston_kernel_u50_hw_m8192_double.xclbin"},
+    {Device::DeviceType::U200, "fd_heston_kernel_u200_hw_m8192_double.xclbin"},
+    {Device::DeviceType::U250, "fd_heston_kernel_u250_hw_m8192_double.xclbin"},
+    {Device::DeviceType::U280, "fd_heston_kernel_u280_hw_m8192_double.xclbin"}};
 
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);
@@ -139,7 +139,7 @@ int FDHeston::createOCLObjects(Device* device) {
     // Create KERNEL Objects
     /////////////////////////
     if (cl_retval == CL_SUCCESS) {
-        m_pKernel = new cl::Kernel(*m_pProgram, "fdKernel_0", &cl_retval);
+        m_pKernel = new cl::Kernel(*m_pProgram, "fd_kernel", &cl_retval);
     }
 
     return retval;

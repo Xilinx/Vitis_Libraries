@@ -1,1 +1,1 @@
-Some bechmark tests to present the peformance our implementation.
+Some bechmarks to present the peformance of our implementations.

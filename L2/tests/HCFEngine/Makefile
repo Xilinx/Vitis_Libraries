@@ -144,7 +144,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -235,13 +235,7 @@ SRC_DIR = $(CUR_DIR)/src
 
 EXE_NAME = hcf_host
 
-#HOST_ARGS = -mode fpga -xclbin $(XCLBIN_FILE)
-HOST_ARGS = -f $(CUR_DIR)/utils/one.txt -v -c
-ifeq ($(TARGET),cpu)
-    HOST_ARGS = -f $(CUR_DIR)/utils/one.txt -v -c -mode cpu
-else
-    HOST_ARGS = -f $(CUR_DIR)/utils/one.txt -v -c -mode fpga -xclbin $(XCLBIN_FILE)
-endif
+HOST_ARGS = -f $(CUR_DIR)/utils/one.txt -v -c -b $(XCLBIN_FILE)
 
 
 SRCS = hcf_host hcf_cpu hcf_parser

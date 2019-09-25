@@ -29,6 +29,25 @@
 #define TEST_k1
 #define TEST_k2
 #endif
+
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -114,13 +133,11 @@ void writeAsset(int steps, int paths, ap_uint<UN * SZ>* outPrice, std::string& f
     }
     outfile.close();
 }
-
 int main(int argc, const char* argv[]) {
-    std::cout << "\n----------------------MC(American_multikernel) Engine-----------------\n";
+    std::cout << "\n----------------------MC(American) Engine-----------------\n";
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
-
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "ERROR:xclbin path is not set!\n";
         return 1;
@@ -130,7 +147,6 @@ int main(int argc, const char* argv[]) {
         mode = std::getenv("XCL_EMULATION_MODE");
     }
     std::cout << "[INFO]Running in " << mode << " mode" << std::endl;
-
     // AXI depth
     int data_size = depthP;            // 20480;//= depthP = 1024(calibrate
                                        // samples)*10(steps) *2(iter), width: 64*UN
@@ -162,9 +178,10 @@ int main(int argc, const char* argv[]) {
     TEST_DT timeLength = 1;
     TEST_DT requiredTolerance = 0.02;
 
-    unsigned int requiredSamples = 12288;
+    unsigned int requiredSamples = 24576 / KN2;
     int calibSamples = 4096;
     int maxsamples = 0;
+    double golden_output = 3.978;
     std::string num_str;
     if (parser.getCmdOption("-cal", num_str)) {
         try {
@@ -184,10 +201,14 @@ int main(int argc, const char* argv[]) {
         try {
             requiredSamples = std::stoi(num_str);
         } catch (...) {
-            requiredSamples = 12288;
+            requiredSamples = 24576 / KN2;
         }
     }
 
+    if (mode.compare("hw_emu") == 0) {
+        timeSteps = 1;
+        golden_output = 3.84;
+    }
     struct timeval start_time, end_time;
     // platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -221,51 +242,93 @@ int main(int argc, const char* argv[]) {
     kernel_MCAE_k2[0] = cl::Kernel(program, "MCAE_k2");
     kernel_MCAE_k2[1] = cl::Kernel(program, "MCAE_k2");
 
+#if KN2 == 2
     cl::Kernel kernel_MCAE_k3[2];
     kernel_MCAE_k3[0] = cl::Kernel(program, "MCAE_k3");
     kernel_MCAE_k3[1] = cl::Kernel(program, "MCAE_k3");
+#endif
 
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[5];
+#ifndef USE_HBM
     mext_o[0].flags = XCL_MEM_DDR_BANK0;
+#else
+    mext_o[0].flags = XCL_BANK0;
+#endif
     mext_o[0].obj = output_price;
     mext_o[0].param = 0;
 
+#ifndef USE_HBM
     mext_o[1].flags = XCL_MEM_DDR_BANK1;
+#else
+    mext_o[1].flags = XCL_BANK1;
+#endif
     mext_o[1].obj = output_mat;
     mext_o[1].param = 0;
 
+#ifndef USE_HBM
     mext_o[2].flags = XCL_MEM_DDR_BANK2;
+#else
+    mext_o[2].flags = XCL_BANK2;
+#endif
     mext_o[2].obj = coef;
     mext_o[2].param = 0;
 
+#ifndef USE_HBM
     mext_o[3].flags = XCL_MEM_DDR_BANK3;
+#else
+    mext_o[3].flags = XCL_BANK3;
+#endif
     mext_o[3].obj = output;
     mext_o[3].param = 0;
 
+#ifndef USE_HBM
     mext_o[4].flags = XCL_MEM_DDR_BANK3;
+#else
+    mext_o[4].flags = XCL_BANK3;
+#endif
     mext_o[4].obj = output2;
     mext_o[4].param = 0;
 
     cl_mem_ext_ptr_t mext_o_b[5];
+#ifndef USE_HBM
     mext_o_b[0].flags = XCL_MEM_DDR_BANK0;
+#else
+    mext_o_b[0].flags = XCL_BANK0;
+#endif
     mext_o_b[0].obj = output_price_b;
     mext_o_b[0].param = 0;
 
+#ifndef USE_HBM
     mext_o_b[1].flags = XCL_MEM_DDR_BANK1;
+#else
+    mext_o_b[1].flags = XCL_BANK1;
+#endif
     mext_o_b[1].obj = output_mat_b;
     mext_o_b[1].param = 0;
 
+#ifndef USE_HBM
     mext_o_b[2].flags = XCL_MEM_DDR_BANK2;
+#else
+    mext_o_b[2].flags = XCL_BANK2;
+#endif
     mext_o_b[2].obj = coef_b;
     mext_o_b[2].param = 0;
 
+#ifndef USE_HBM
     mext_o_b[3].flags = XCL_MEM_DDR_BANK3;
+#else
+    mext_o_b[3].flags = XCL_BANK3;
+#endif
     mext_o_b[3].obj = output_b;
     mext_o_b[3].param = 0;
 
+#ifndef USE_HBM
     mext_o_b[4].flags = XCL_MEM_DDR_BANK3;
+#else
+    mext_o_b[4].flags = XCL_BANK3;
+#endif
     mext_o_b[4].obj = output2_b;
     mext_o_b[4].param = 0;
     // create device buffer and map dev buf to host buf
@@ -295,11 +358,15 @@ int main(int argc, const char* argv[]) {
 
     std::vector<cl::Memory> ob_out;
     ob_out.push_back(output_buf);
+#if KN2 == 2
     ob_out.push_back(output_buf2);
+#endif
 
     std::vector<cl::Memory> ob_out_b;
     ob_out_b.push_back(output_buf_b);
+#if KN2 == 2
     ob_out_b.push_back(output_buf2_b);
+#endif
 
     kernel_MCAE_k0[0].setArg(0, underlying);
     kernel_MCAE_k0[0].setArg(1, volatility);
@@ -371,6 +438,7 @@ int main(int argc, const char* argv[]) {
     kernel_MCAE_k2[1].setArg(10, requiredSamples);
     kernel_MCAE_k2[1].setArg(11, timeSteps);
 
+#if KN2 == 2
     kernel_MCAE_k3[0].setArg(0, underlying);
     kernel_MCAE_k3[0].setArg(1, volatility);
     kernel_MCAE_k3[0].setArg(2, dividendYield);
@@ -396,6 +464,7 @@ int main(int argc, const char* argv[]) {
     kernel_MCAE_k3[1].setArg(9, requiredTolerance);
     kernel_MCAE_k3[1].setArg(10, requiredSamples);
     kernel_MCAE_k3[1].setArg(11, timeSteps);
+#endif
 
     // number of call for kernel
     int loop_nm = 1;
@@ -406,7 +475,7 @@ int main(int argc, const char* argv[]) {
     for (int i = 0; i < loop_nm; i++) {
         evt0[i].resize(1);
         evt1[i].resize(1);
-        evt2[i].resize(2);
+        evt2[i].resize(KN2);
         evt3[i].resize(1);
     }
 
@@ -425,7 +494,9 @@ int main(int argc, const char* argv[]) {
             }
             q.enqueueTask(kernel_MCAE_k1[0], &evt0[i], &evt1[i][0]);
             q.enqueueTask(kernel_MCAE_k2[0], &evt1[i], &evt2[i][0]);
+#if KN2 == 2
             q.enqueueTask(kernel_MCAE_k3[0], &evt1[i], &evt2[i][1]);
+#endif
             q.enqueueMigrateMemObjects(ob_out, 1, &evt2[i], &evt3[i][0]);
         } else {
             if (i < 2) {
@@ -435,7 +506,9 @@ int main(int argc, const char* argv[]) {
             }
             q.enqueueTask(kernel_MCAE_k1[1], &evt0[i], &evt1[i][0]);
             q.enqueueTask(kernel_MCAE_k2[1], &evt1[i], &evt2[i][0]);
+#if KN2 == 2
             q.enqueueTask(kernel_MCAE_k3[1], &evt1[i], &evt2[i][1]);
+#endif
             q.enqueueMigrateMemObjects(ob_out_b, 1, &evt2[i], &evt3[i][0]);
         }
     }
@@ -448,30 +521,29 @@ int main(int argc, const char* argv[]) {
 
     TEST_DT out = output[0];
     std::cout << "output0 = " << out << std::endl;
-    TEST_DT out2 = output2[0];
+    TEST_DT out2 = (KN2 == 2) ? output2[0] : 0;
     std::cout << "output1 = " << out2 << std::endl;
 
     TEST_DT out_b = output_b[0];
     std::cout << "output0_b = " << out_b << std::endl;
-    TEST_DT out2_b = output2_b[0];
+    TEST_DT out2_b = (KN2 == 2) ? output2_b[0] : 0;
     std::cout << "output1_b = " << out2_b << std::endl;
 
     TEST_DT out_price;
     if (loop_nm == 1) {
-        out_price = (out_b + out2_b) / 2;
+        out_price = (out_b + out2_b) / KN2;
         std::cout << "out_price = " << out_price << std::endl;
     }
     if (loop_nm > 1) {
-        out_price = (out + out2 + out_b + out2_b) / 4;
+        out_price = (out + out2 + out_b + out2_b) / 2 / KN2;
         std::cout << "out_price = " << out_price << std::endl;
     }
     // verify the output price with golden
     // reference value:
     //  - for 224 (UN_PATH=2, UN_STEP=2, UN_PRICING=4),
     // notice that when the employed seed changes, the result also varies.
-    double golden_output = 3.978;
-    double diff = out_price - golden_output;
-    if (diff < 0.2 && diff > -0.2) {
+    double diff = std::fabs(out_price - golden_output);
+    if (diff < 0.02) {
         std::cout << "PASSED!!! the output is confidential!" << std::endl;
     } else {
         std::cout << "FAILURE!!! incorrect ouput value calculated!" << std::endl;

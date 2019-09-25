@@ -18,8 +18,8 @@
 #define _XF_FINTECH_MC_EUROPEAN_KERNEL_CONSTANTS_H_
 
 // MC European
-typedef double KDataType;
+typedef float KDataType;
 #define MCM_NM (8)
-#define OUTDEP (1024)
+#define OUTDEP (1)
 
 #endif //_XF_FINTECH_MC_EUROPEAN_KERNEL_CONSTANTS_H_

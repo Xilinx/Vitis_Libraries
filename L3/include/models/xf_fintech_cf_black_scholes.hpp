@@ -86,10 +86,10 @@ class CFBlackScholes : public OCLController {
 
    public:
     /**
-    * This method returns the time the execution of the last call to run() took
-    *
-    * @returns Execution time in microseconds
-    */
+     * This method returns the time the execution of the last call to run() took
+     *
+     * @returns Execution time in microseconds
+     */
     long long int getLastRunTime(void); // in microseconds
 
    protected:

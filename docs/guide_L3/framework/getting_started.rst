@@ -21,12 +21,9 @@ In order to prepare the framework for use, it is first necessary to build it.
 This step compiles all the relevant files into a single shared library (**libxilinxfintech.so**), that may then be linked against by the users application.
 
 
-
-
-
 Environment Setup
 #################
-A couple of environment setup scripts are provided.  These setup several environment variables that are required by the build process.
+A couple of environment setup scripts are provided. These setup several environment variables that are required by the build process.
 
 CSH:
 
@@ -57,13 +54,6 @@ These scripts set up the following environment variables:
 	* This points to *xf_fintech/ext/xcl2*
 
 The script also modifies **LD_LIBRARY_PATH** to add the location of **libxilinxfintech.so** to it
-
-
-
-
-
-
-
 
 
 Building the library

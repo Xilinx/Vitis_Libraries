@@ -21,11 +21,12 @@ Internal Design of Inflation CapFloor Engine
 
 Overview
 ========
-A inflation option can be a cap/floor. the inflation Cap/Floor is a call/put on the inflation rates. 
+Inflation option can be cap and floor. An inflation cap (floor) is a financial asset that offers protection against inflation being higher (lower) than a given rate of inflation, 
+and can therefore be used by investors to insure against such inflation outcomes.
 
 Implemention
 ============
-the YoYInflationBlackCapFloorEngine is year-on-year inflation cap/floor engine based on black formula. The structure of the engine is shown as the figure below:
+the `YoYInflationBlackCapFloorEngine` is year-on-year inflation cap/floor engine based on black formula. The structure of the engine is shown as the figure below:
 
 .. _my-figure1:
 .. figure:: /images/inflationEngine.png
@@ -45,7 +46,7 @@ Finally, adding the values of each time point is the final pricing value.
 Profiling
 =========
 
-The hardware resources are listed in the following table (vivado 19.1 report).
+The hardware resources are listed in the following table (Vivado 19.1 report).
 
 .. table:: Table 1 Hardware resources
     :align: center

@@ -1,15 +1,15 @@
-# XF FinTech Library
+# Vitis Quantitative Finance Library
 
-The XF FinTech Library is an Vitis Library aimed at providing a comprehensive FPGA acceleration library for quantitative finance.
+The Vitis Quantitative Finance Library is an fundamental library aimed at providing a comprehensive FPGA acceleration library for quantitative finance.
 It is a free/open-source for a variety of real use case, such as modeling, trading, evaluation, risk-management and so on.
 
-The XF FinTech library provides comprehensive tools from the bottom up for quantitative finance. It includes the lowest level modules and functions, the pre-defined middle kernel level, and the third level as pure software APIs working with pre-defined hardware overlays.
+The Vitis Quantitative Finance Library provides comprehensive tools from the bottom up for quantitative finance. It includes the lowest level modules and functions, the pre-defined middle kernel level, and the third level as pure software APIs working with pre-defined hardware overlays.
 
-* At the lowest level (L1), it offers useful statistical functions, numerical methods and linear algebra functions to support practical user to implement advanced modeling, such as RNG, Monte Carlo, SVD decomposition, specialist matrix solvers and so on.
+* At the lowest level (L1), it offers useful statistical functions, numerical methods and linear algebra functions to support practical user to implement advanced modeling, such as RNG, Monte Carlo, SVD, specialist matrix solvers and so on.
 
 * In the middle level (L2), pricing engines kernel are provided to evaluate common finance derivatives, such as equity products, interest-rate products, FX products, and credit products.
 
-* The software API level (L3) wraps the details of offloading acceleration with prebuilt binary (overlay) and allow users to accelerate supported pricing tasks on Alveo cards without hardware development.
+* The software API level (L3) wraps the details of offloading acceleration with pre-built binary (overlay) and allow users to accelerate supported pricing tasks on Alveo cards without hardware development.
 
 Check the [comprehensive HTML documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_fintech/index.html) for more details.
 
@@ -30,13 +30,34 @@ Check the [comprehensive HTML documentation](https://pages.gitenterprise.xilinx.
 | Monte Carlo (discretization quantization)        |                           | L1    |
 | Tridiagonal Solver | Solver for tridiagonal systems of equations using PCR | L1 |
 | Pentadiagonal Solver | Solver for pentadiagonal systems of equations using PCR | L1 |
-| Monte-Carlo Heston         | Monte-Carlo Heston (model only). | L1    |
+| 1-dimentional Stochastic Process | derived by RNGs | L1 |
+| Ornstein Uhlenbeck Process | A simple stochastic process derived by RNGs | L1 |
+| Mesher | Discretization | L1 |
+| Monte-Carlo Heston         | Monte-Carlo Heston (model only). | L2    |
+| Monte-Carlo European Heston | Monte-Carlo simulation of European-style options using Heston model | L2 |
+| Monte-Carlo European Heston Greeks | Measure sensitivity of derivative values | L2 |
 | Monte-Carlo Black-Scholes European | Monte-Carlo simulation of European-style options using the Black-Scholes model | L2 |
+| Monte-Carlo Multi-Asset European Heston | Monte-Carlo simulation of European-style options for multiple underlying asset | L2 |
 | Monte-Carlo Black-Scholes American | Monte-Carlo simulation of American-style options using the Black-Scholes model | L2 |
 | Monte-Carlo Black-Scholes Digital  | Monte-Carlo simulation of digital (all-or-nothing) option using the Black-Scholes model | L2 |
 | Monte-Carlo Black-Scholes Asian    | Monte-Carlo simulation of Asian-style options using the Black-Scholes model | L2 |
 | Monte-Carlo Black-Scholes Barrier  | Monte-Carlo simulation of barrier options using the Black-Scholes model | L2 |
+| Monte-Carlo Cliquet | Monte-Carlo simulation of cliquet option | L2 |
+| Markov Chain of Monte-Carlo | For sampling | L2 |
+| Closed Form Black Scholes Merton | Derivate investment instruments | L2 |
+| Closed Form Heston | Add stochastic volatility | L2 |
+| Closed Form Merton 76 | Add random jump to Black Scholes model | L2 |
+| Garman Kohlhagen | Model for foreign exchange based on Black Scholes Merton | L2 |
+| Quanto | | L2 |
+| Cox-Ross-Rubinstein Binomial Tree | Numerical assumptions in black-Scholes model | L2 |
+| Tree Bermudan Swaption | | L2 |
+| CPI CapFloor | Use linear interpolation | L2 |
+| Inflation CapFloor | Year-on-year inflation cap/floor | L2 |
+| Zero Coupon Bond | | L2 |
+| Monte-Carlo Hull-White | Monte-Carlo simulation of cap/floor using Hull-White model | L2 |
 | Finite-Difference Heston | Solution of the Heston model using an ADI finite-difference solver | L2 |
+| Finite-Difference Hull-White Bermudan Swaption Pricing | Estimate Bermudan Swaption based on FDM | L2 |
+| Finite-Difference G2 Bermudan Swaption Pricing | Estimate Bermudan Swaption based on FDM | L2 |
 | Host API | Unified Host-callable API for the simulation engines | L3 |
 
 ## Requirements
@@ -51,8 +72,8 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### Dependencies
 
-The XF FinTech library also needs the XF RNG and XF BLAS libraries; these should be cloned or unpacked
-at the same directory level as the XF FinTech library.
+The Vitis Quantitative Finance Library also needs the XF RNG and XF BLAS libraries; these should be cloned or unpacked
+at the same directory level as the Vitis Quantitative Finance library.
 
 ### PCIE Accelerator Card
 

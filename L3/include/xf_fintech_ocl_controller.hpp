@@ -24,14 +24,30 @@
 namespace xf {
 namespace fintech {
 
+/**
+ * @class OCLController
+ *
+ * A class handling interaction with OpenCL.
+ */
+
 class OCLController {
    public:
     OCLController();
     virtual ~OCLController() = 0;
 
+    /**
+     * Claim the device
+     */
     int claimDevice(Device* device);
+
+    /**
+     * Release the device
+     */
     int releaseDevice(void);
 
+    /**
+     * Check the device is ready
+     */
     bool deviceIsPrepared(void);
 
    private:
@@ -42,7 +58,6 @@ class OCLController {
     void setCLError(cl_int clError);
     cl_int getCLError(void);
 
-   protected:
     std::mutex m_mutex;
 
     Device* m_pDevice;

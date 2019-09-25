@@ -29,6 +29,7 @@ extern "C" void TREE_k0(int type,
                         int floatingCnt[FloatingLen],
                         int fixedCnt[FixedLen],
                         DT NPV[N]) {
+#ifndef HLS_TEST
 #pragma HLS INTERFACE m_axi port = NPV bundle = gmem0 offset = slave
 #pragma HLS INTERFACE m_axi port = initTime bundle = gmem1 offset = slave
 #pragma HLS INTERFACE m_axi port = exerciseCnt bundle = gmem2 offset = slave
@@ -45,7 +46,7 @@ extern "C" void TREE_k0(int type,
 #pragma HLS INTERFACE s_axilite port = fixedCnt bundle = control
 #pragma HLS INTERFACE s_axilite port = initSize bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
-
+#endif
     DT a = 0.055228873373796609;
     DT sigma = 0.0061062754654949824;
     DT flatRate = 0.04875825;
@@ -71,7 +72,7 @@ extern "C" void TREE_k0(int type,
     Process process;
     process.init(a, sigma, 0.0, 0.0);
 
-    treeCapFloprEngine<DT, Model, Process, DIM, LEN, LEN2>(model, process, type, fixedRate, timestep, initTime,
+    treeCapFloorEngine<DT, Model, Process, DIM, LEN, LEN2>(model, process, type, fixedRate, timestep, initTime,
                                                            initSize, floating_cnt, flatRate, nominal, cfRate, x0,
                                                            spread, NPV);
 

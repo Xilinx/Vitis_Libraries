@@ -144,7 +144,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -193,19 +193,34 @@ debug:
 	@echo "> fd_test_HDRS is $(fd_test_HDRS)"
 # -----------------------------------------------------------------------------
 
-# Kernel setup
-# For hw_emu, set smaller parameters if not already set on command line
-ifeq ($(TARGET),hw_emu)
-	FD_M1                ?= 16
-	FD_M2                ?= 8
-	FD_M_SIZE            ?= 128
-	FD_N                 ?= 2
-	FD_NUM_PCR           ?= 2
-	FD_DATA_TYPE         ?= double
-	FD_DATA_EQ_TYPE      ?= int64_t
-	FD_DATA_WORDS_IN_DDR ?= 8
+ifneq (,$(findstring u50,$(DEVICE)))
+DEVICE_PART := u50
+else ifneq (,$(findstring u200,$(DEVICE)))
+DEVICE_PART := u200
+else ifneq (,$(findstring u250,$(DEVICE)))
+DEVICE_PART := u250
+else ifneq (,$(findstring u280,$(DEVICE)))
+DEVICE_PART := u280
+else
+DEVICE_PART := unknown
 endif
 
+# Sanity check parameters and modify depending on TARGET and/or DEVICE
+ifeq ($(TARGET),hw_emu)
+FD_M1                ?= 16
+FD_M2                ?= 8
+FD_M_SIZE            ?= 128
+FD_N                 ?= 2
+FD_NUM_PCR           ?= 2
+FD_DATA_TYPE         ?= double
+FD_DATA_EQ_TYPE      ?= int64_t
+FD_DATA_WORDS_IN_DDR ?= 8
+endif
+ifneq (,$(findstring u50,$(DEVICE)))
+FD_M1                ?= 64
+FD_M2                ?= 32
+FD_M_SIZE            ?= 2048
+endif
 # Default parameters for those not already set
 FD_M1                ?= 128
 FD_M2                ?= 64
@@ -215,18 +230,17 @@ FD_NUM_PCR           ?= 2
 FD_DATA_TYPE         ?= double
 FD_DATA_EQ_TYPE      ?= int64_t
 FD_DATA_WORDS_IN_DDR ?= 8
-
+FD_M_SIZE := ${FD_M_SIZE}
 # Error check the result
 CHECK_M_SIZE := $(shell echo ${FD_M1}*${FD_M2} | bc)
 ifneq ($(CHECK_M_SIZE), $(FD_M_SIZE))
 $(error FD_M_SIZE must equal FD_M1 * FD_M2)
 endif
 
-
 XFLIB_DIR = $(abspath $(XF_CASE_ROOT)/../../..)
 KSRC_DIR = $(CUR_DIR)/src/kernel
 
-XCLBIN_NAME := ${OUT_DIR}/fd_heston_kernel_${FD_PART}_m${FD_M_SIZE}_${FD_DATA_TYPE}
+XCLBIN_NAME = fd_heston_kernel_${DEVICE_PART}_${TARGET}_m${FD_M_SIZE}_${FD_DATA_TYPE}
 KERNELS = fd_kernel:fd_kernel.cpp
 
 HLS_L1_DIR = $(XF_CASE_ROOT)/../../../L1/include
@@ -243,7 +257,6 @@ VPP_CFLAGS += -D FD_DATA_TYPE=$(FD_DATA_TYPE) \
               -D FD_DATA_EQ_TYPE=$(FD_DATA_EQ_TYPE) \
               -D FD_M_SIZE=$(FD_M_SIZE) \
               -D FD_DATA_WORDS_IN_DDR=$(FD_DATA_WORDS_IN_DDR) \
-              -D FD_PART=$(FD_PART) \
               -D FD_NUM_PCR=$(FD_NUM_PCR)
 
 
@@ -267,7 +280,6 @@ CXXFLAGS += -D FD_DATA_TYPE=$(FD_DATA_TYPE) \
             -D FD_DATA_EQ_TYPE=$(FD_DATA_EQ_TYPE) \
             -D FD_M_SIZE=$(FD_M_SIZE) \
             -D FD_DATA_WORDS_IN_DDR=$(FD_DATA_WORDS_IN_DDR) \
-            -D FD_PART=$(FD_PART) \
             -D FD_NUM_PCR=$(FD_NUM_PCR)
 
 HOST_CCOPT ?= DBG
@@ -277,6 +289,10 @@ endif
 
 ifeq (${HOST_CCOPT},OPT)
     CXXFLAGS += -O3
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+    CXXFLAGS += -DUSE_HBM
 endif
 
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule
@@ -340,11 +356,14 @@ $(foreach k,$(KERNELS),$(eval $(call kernel_hdr_dep,$(k))))
 $(XO_DIR)/%.xo: VPP_CFLAGS += $($(*)_VPP_CFLAGS)
 $(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp
 	@echo -e "----\nCompiling kernel $*..."
+	@echo "  - FD_M_SIZE is $(FD_M_SIZE)"
+	@echo "  - FD_M1 is $(FD_M1)"
+	@echo "  - FD_M2 is $(FD_M2)"
 	mkdir -p $(XO_DIR)
 	$(VPP) -o $@ --kernel $* --compile $(filter %.cpp,$^) \
-		$(VPP_CFLAGS) --xp prop:kernel.$*.kernel_flags=-std=c++0x
+		$(VPP_CFLAGS) --xp prop:kernel.$*.kernel_flags=-std=c++0x --xp param:compiler.fsanitize=address,memory
 
-$(XCLBIN_FILE): $(XO_FILES) | check_vpp
+$(XCLBIN_FILE): $(XO_FILES) | check_vpp check_platform
 	@echo -e "----\nCompiling xclbin..."
 	mkdir -p $(XCLBIN_DIR)
 	$(VPP) -o $@ --link $^ \
@@ -409,6 +428,9 @@ EXE_FILE ?= $(BIN_DIR)/$(EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
 
 $(EXE_FILE): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platform
 	@echo -e "----\nCompiling host $(notdir $@)..."
+	@echo "  - FD_M_SIZE is $(FD_M_SIZE)"
+	@echo "  - FD_M1 is $(FD_M1)"
+	@echo "  - FD_M2 is $(FD_M2)"
 	mkdir -p $(BIN_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 

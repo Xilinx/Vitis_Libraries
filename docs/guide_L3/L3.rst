@@ -20,17 +20,15 @@ L3 Overlay User Guide
 The code within the L3 overlay attempts to provide an easy-to-use abstraction of any OpenCL calls and pre/post-processing that is required to run the financial models by presenting a simple object-orientated framework.
 
 
-
-
 .. toctree::
 	:maxdepth: 1
 
 	framework/getting_started.rst
 	framework/device_enumeration.rst
 	framework/running_a_model.rst
-	|
+	
 	models/models.rst   
-	|
+	
 	framework/framework_classes.rst
 
    

@@ -23,17 +23,17 @@
 
 using namespace xf::fintech;
 
-const char* KERNEL_NAME = "bsm_kernel";
+const char* KERNEL_NAME = "bs_kernel";
 
 typedef struct _XCLBINLookupElement {
     Device::DeviceType deviceType;
     std::string xclbinName;
 } XCLBINLookupElement;
 
-static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "bsm_kernel.hw.u50.xclbin"},
-                                                    {Device::DeviceType::U200, "bsm_kernel.hw.u200.xclbin"},
-                                                    {Device::DeviceType::U250, "bsm_kernel.hw.u250.xclbin"},
-                                                    {Device::DeviceType::U280, "bsm_kernel.hw.u280.xclbin"}};
+static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "bs_kernel.xclbin"},
+                                                    {Device::DeviceType::U200, "bs_kernel.xclbin"},
+                                                    {Device::DeviceType::U250, "bs_kernel.xclbin"},
+                                                    {Device::DeviceType::U280, "bs_kernel.xclbin"}};
 
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);

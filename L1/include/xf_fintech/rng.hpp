@@ -234,9 +234,9 @@ mType CumulativeNormal(mType input) {
 } // namespace internal
 
 /**
- * @brief Box-Muller transform uniform random number to normal random number.
+ * @brief Box-Muller transform from uniform random number to normal random number.
  *
- * @tparam mType data type.
+ * @tparam mType data type
  * @param u1 first uniform random number input. Notice that it should not be zero.
  * @param u2 second uniform random number input
  * @param z1 first normal random number output
@@ -260,7 +260,7 @@ void boxMullerTransform(mType u1, mType u2, mType& z1, mType& z2) {
 }
 
 /**
- * @brief Inverse Cumulative transform random number to normal random number.
+ * @brief Inverse Cumulative transform from random number to normal random number.
  *
  * Reference: Algorithm AS 241, The Percentage Points of the Normal Distribution
  * by  Michael J. Wichura.
@@ -595,7 +595,7 @@ class MT19937 {
 
    public:
     /**
-     * @brief using seed to initialize mt and mt_1
+     * @brief initialize mt and mt_1 using seed
      *
      * @param seed initialization seed
      */
@@ -639,14 +639,14 @@ class MT19937 {
     MT19937() {}
 
     /**
-     * @brief MT19937
+     * @brief Constructor with seed
      *
      * @param seed initialization seed
      */
     MT19937(ap_uint<W> seed) { seedInitialization(seed); }
 
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
      * @param data array to store the initialization data
      */
@@ -669,9 +669,9 @@ class MT19937 {
         addr_head = 0;
     }
     /**
-     * @brief each call of next() generate a uniformed distributed random number
+     * @brief each call of next() generate a uniformly distributed random number
      *
-     * @return a uniformed distributed random number
+     * @return a uniformly distributed random number
      */
     ap_ufixed<W, 0> next() {
 #pragma HLS inline
@@ -739,7 +739,7 @@ class MT19937 {
         return result;
     }
     /**
-     * @brief each call of nextTwo() generate two uniformed distributed random number
+     * @brief each call of nextTwo() generate two uniformly distributed random numbers
      * @param result_l first random number
      * @param result_r second random number
      */
@@ -841,8 +841,8 @@ class MT19937 {
 /**
  * @brief Mersenne Twister to generate uniform random number. Although its
  * period is shorter than MT19937 but also long enough in most cases. It also
- * offers flexcilibily in parrelel computing which may demand indepenency in
- * multiple instance of random number generators.
+ * offers flexibility in parallel computing which may demand indepenency in
+ * multiple instances of random number generators.
  *
  */
 class MT2203 {
@@ -893,6 +893,10 @@ class MT2203 {
     ap_uint<W> C;
 
    public:
+    /**
+     * @brief Initialization using seed
+     * @param seed initialization seed
+     */
     void seedInitialization(ap_uint<W> seed) {
 #pragma HLS inline off
 
@@ -922,25 +926,34 @@ class MT2203 {
     }
 
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
-     * @param A
-     * @param B
-     * @param C
+     * @param A value for configurable parameter A
+     * @param B value for configurable parameter B
+     * @param C value for configurable parameter C
      */
     void statusSetup(ap_uint<W> A, ap_uint<W> B, ap_uint<W> C) {
         this->A = A;
         this->B = B;
         this->C = C;
     }
+
+    /**
+     * @brief Default constructor
+     *
+     */
     MT2203() {}
 
+    /**
+     * @brief Constructor with seed
+     * @param seed initialization seed
+     */
     MT2203(ap_uint<W> seed) { seedInitialization(seed); }
 
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
-     * @param data
+     * @param data initialization data for mt and mt_1
      */
     void statusSetup(ap_uint<W> data[N]) {
         for (ap_uint<A_W> i = 0; i < N; i++) {
@@ -955,9 +968,9 @@ class MT2203 {
         addr_head = 0;
     }
     /**
-     * @brief next
+     * @brief Get next uniformly distributed random number
      *
-     * @return
+     * @return a uniformly distributed random number
      */
     ap_ufixed<W, 0> next() {
 #pragma HLS inline
@@ -1016,65 +1029,76 @@ class MT2203 {
 };
 
 /**
- * @brief Normal distributed random number generator based on InvserCumulative
+ * @brief Normally distributed random number generator based on InvserCumulative
  * function
  *
- * @tparam mType data type supported include float and double.
+ * @tparam mType data type supported including float and double
  */
 template <typename mType>
 class MT19937IcnRng {
    public:
-    MT19937IcnRng() {}
     /**
-     * @brief MT19937IcnRng
+     * @brief Default constructor
      *
-     * @param seed
+     */
+    MT19937IcnRng() {}
+
+    /**
+     * @brief Constructor with seed
+     *
+     * @param seed initialization seed
      */
     MT19937IcnRng(ap_uint<32> seed) {}
+
     /**
-     * @brief using seed to initialize
+     * @brief Initialization using seed
      *
      * @param seed initialization seed
      */
     void seedInitialization(ap_uint<32> seed) {}
+
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
-     * @param data
+     * @param data initialization data for setting up status
      */
     void statusSetup(ap_uint<32> data[624]) {}
+
     /**
-     * @brief next return normal distributed random number
+     * @brief Get next normally distributed random number
      *
-     * @return normal distributed random number
+     * @return a normally distributed random number
      */
     mType next() {}
+
     /**
-     * @brief next return uniform distributed random number
+     * @brief Get next uniformly distributed random number
      *
-     * @param uniformR return uniform distributed random number
+     * @param uniformR return uniformly distributed random number
      */
     void next(mType& uniformR) {}
+
     /**
-     * @brief next return normal distributed random number and its corresponding
-     * uniform distributed random number
+     * @brief Get next normally distributed random number and its corresponding
+     * uniformly distributed random number
      *
-     * @param gaussianR return normal distributed random number.
-     * @param uniformR return uniform distributed random number that
+     * @param gaussianR return normally distributed random number
+     * @param uniformR return uniformly distributed random number that
      * corrresponding to gaussianR
      */
     void next(mType& uniformR, mType& gaussianR) {}
+
     /**
-     * @brief next return next two normal distributed random number
+     * @brief Get next two normally distributed random numbers
      *
-     * @param gaussR return first normal distributed random number.
-     * @param gaussL return second normal distributed random number.
+     * @param gaussR return first normally distributed random number.
+     * @param gaussL return second normally distributed random number.
      */
     void nextTwo(mType& gaussR, mType& gaussL) {}
 };
 
 /**
- * @brief Normal distributed random number generator based on InvserCumulative
+ * @brief Normally distributed random number generator based on InvserCumulative
  * function, output datatype is double.
  */
 template <>
@@ -1087,22 +1111,23 @@ class MT19937IcnRng<double> {
     MT19937IcnRng() {}
 
     /**
-     * @brief using seed to initialize
+     * @brief Initialization using seed
      *
      * @param seed initialization seed
      */
     void seedInitialization(ap_uint<32> seed) { uniformRNG.seedInitialization(seed); }
 
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
-     * @param data
+     * @param data initialization data for setting up status
      */
     void statusSetup(ap_uint<32> data[624]) { uniformRNG.statusSetup(data); }
+
     /**
-     * @brief next return normal distributed random number
+     * @brief Get next normally distributed random number
      *
-     * @return normal distributed random number
+     * @return a normally distributed random number
      */
     double next() {
 #pragma HLS inline
@@ -1111,12 +1136,13 @@ class MT19937IcnRng<double> {
         result = inverseCumulativeNormalAcklam<double>(tmp_uniform);
         return result;
     }
+
     /**
-     * @brief next return normal distributed random number and its corresponding
-     * uniform distributed random number
+     * @brief Get next normally distributed random number and its corresponding
+     * uniformly distributed random number
      *
-     * @param gaussianR return normal distributed random number.
-     * @param uniformR return uniform distributed random number that
+     * @param gaussianR return normally distributed random number.
+     * @param uniformR return uniformly distributed random number that
      * corrresponding to gaussianR
      */
     void next(double& uniformR, double& gaussianR) {
@@ -1127,10 +1153,11 @@ class MT19937IcnRng<double> {
         uniformR = tmp_uniform;
         gaussianR = result;
     }
+
     /**
-     * @brief next return uniform distributed random number
+     * @brief Get next uniformly distributed random number
      *
-     * @param uniformR return uniform distributed random number
+     * @param uniformR return uniformly distributed random number
      */
     void next(double& uniformR) {
 #pragma HLS inline
@@ -1138,10 +1165,10 @@ class MT19937IcnRng<double> {
     }
 
     /**
-     * @brief next return next two normal distributed random number
+     * @brief Get next two normally distributed random number
      *
-     * @param gaussR return first normal distributed random number.
-     * @param gaussL return second normal distributed random number.
+     * @param gaussR return first normally distributed random number.
+     * @param gaussL return second normally distributed random number.
      */
     void nextTwo(double& gaussR, double& gaussL) {
 #pragma HLS inline
@@ -1153,7 +1180,7 @@ class MT19937IcnRng<double> {
 };
 
 /**
- * @brief Normal distributed random number generator based on InvserCumulative
+ * @brief Normally distributed random number generator based on InvserCumulative
  * function, output datatype is float.
  */
 
@@ -1167,22 +1194,23 @@ class MT19937IcnRng<float> {
     MT19937IcnRng() {}
 
     /**
-     * @brief using seed to initialize
+     * @brief Initialization using seed
      *
      * @param seed initialization seed
      */
     void seedInitialization(ap_uint<32> seed) { uniformRNG.seedInitialization(seed); }
 
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
-     * @param data
+     * @param data initialization data for setting up status
      */
     void statusSetup(ap_uint<32> data[624]) { uniformRNG.statusSetup(data); }
+
     /**
-     * @brief next return normal distributed random number
+     * @brief Get next normally distributed random number
      *
-     * @return normal distributed random number
+     * @return a normally distributed random number
      */
     float next() {
 #pragma HLS inline
@@ -1191,12 +1219,13 @@ class MT19937IcnRng<float> {
         result = inverseCumulativeNormalPPND7<float>(tmp_uniform);
         return result;
     }
+
     /**
-     * @brief return normal distributed random number and its corresponding
-     * uniform distributed random number
+     * @brief Get a normally distributed random number and its corresponding
+     * uniformly distributed random number
      *
-     * @param gaussianR return normal distributed random number.
-     * @param uniformR return uniform distributed random number that
+     * @param gaussianR return normally distributed random number.
+     * @param uniformR return uniformly distributed random number that
      * corrresponding to gaussianR
      */
     void next(float& uniformR, float& gaussianR) {
@@ -1207,20 +1236,22 @@ class MT19937IcnRng<float> {
         uniformR = tmp_uniform;
         gaussianR = result;
     }
+
     /**
-     * @brief return uniform distributed random number
+     * @brief Get next uniformly distributed random number
      *
-     * param uniformR return uniform distributed random number
+     * param uniformR return a uniformly distributed random number
      */
     void next(float& uniformR) {
 #pragma HLS inline
         uniformR = uniformRNG.next();
     }
+
     /**
-     * @brief next return next two normal distributed random number
+     * @brief Get next two normally distributed random number
      *
-     * @param gaussR return first normal distributed random number.
-     * @param gaussL return second normal distributed random number.
+     * @param gaussR return first normally distributed random number.
+     * @param gaussL return second normally distributed random number.
      */
     void nextTwo(float& gaussR, float& gaussL) {
 #pragma HLS inline
@@ -1232,11 +1263,11 @@ class MT19937IcnRng<float> {
 };
 
 /**
- * @brief Normal distributed random number generator based on Box-Muller
+ * @brief Normally distributed random number generator based on Box-Muller
  * Transformation, output datatype is float.
  */
 
-class MT19937BoxMullerNomralRng {
+class MT19937BoxMullerNormalRng {
    public:
     MT19937 uniformRNG;
     float u1, u2, utmp;
@@ -1244,11 +1275,11 @@ class MT19937BoxMullerNomralRng {
     ap_uint<1> is_odd;
 
     /**
-     * @brief using seed to initialize
+     * @brief Constructor with seed
      *
      * @param seed initialization seed
      */
-    MT19937BoxMullerNomralRng(ap_uint<32> seed) : uniformRNG(seed) {
+    MT19937BoxMullerNormalRng(ap_uint<32> seed) : uniformRNG(seed) {
         ap_ufixed<33, 0> tmp;
         tmp = uniformRNG.next();
         tmp[0] = 1;
@@ -1260,10 +1291,10 @@ class MT19937BoxMullerNomralRng {
         is_odd = 0;
     }
 
-    MT19937BoxMullerNomralRng() {}
+    MT19937BoxMullerNormalRng() {}
 
     /**
-     * @brief using seed to initialize
+     * @brief Initialization using seed
      *
      * @param seed initialization seed
      */
@@ -1281,14 +1312,15 @@ class MT19937BoxMullerNomralRng {
     }
 
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
-     * @param data
+     * @param data initialization data for setting up status
      */
     void statusSetup(ap_uint<32> data[624]) { uniformRNG.statusSetup(data); }
+
     /**
-     * @brief next
-     * @return normal distributed random number
+     * @brief Get next normally distributed random number
+     * @return a normally distributed random number
      */
     float next() {
 #pragma HLS inline
@@ -1308,63 +1340,73 @@ class MT19937BoxMullerNomralRng {
         return ztmp;
     }
 };
+
 /**
- * @brief MT2203IcnRng
+ * @brief Normally distributed random number generator based on InvserCumulative
+ * function
  *
- *
- * @tparam mType data type supported include float and double.
+ * @tparam mType data type supported including float and double
  */
 template <typename mType>
 class MT2203IcnRng {
    public:
     MT2203IcnRng() {}
+
     /**
-     * @brief MT2203IcnRng
+     * @brief Constructor with seed
      *
-     * @param seed
+     * @param seed initialization seed
      */
     MT2203IcnRng(ap_uint<32> seed) {}
+
     /**
-     * @brief using seed to initialize
+     * @brief Initialization using seed
      *
      * @param seed initialization seed
      */
     void seedInitialization(ap_uint<32> seed) {}
+
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
-     * @param data
+     * @param data initialization data to setup status
      */
     void statusSetup(ap_uint<32> data[624]) {}
+
     /**
-     * @brief statusSetup
+     * @brief Setup status
      *
-     * @param A
-     * @param B
-     * @param C
+     * @param A value for configurable parameter A
+     * @param B value for configurable parameter B
+     * @param C value for configurable parameter C
      */
     void statusSetup(ap_uint<32> A, ap_uint<32> B, ap_uint<32> C) {}
+
     /**
-     * brief next
+     * brief Get next normally distributed random number
      *
-     * @return
+     * @return a normally distributed random number
      *
      */
     mType next() {}
+
     /**
-     * @brief next
+     * @brief Get next uniformly distributed random number
      *
-     * @param uniformR
+     * @param uniformR return a uniformly distributed random bumber
      */
     void next(mType& uniformR) {}
+
     /**
-     * @brief next
+     * @brief Get next normally distributed random number and its corresponding
+     * uniformly distributed random number
      *
-     * @param uniformR
-     * @param gaussianR
+     * @param uniformR return next uniformly distributed random number
+     * @param gaussianR return next normally distributed random number
      */
     void next(mType& uniformR, mType& gaussianR) {}
 };
+
 /**
  * @brief MT2203IcnRng output datatype is double.
  */
@@ -1378,32 +1420,31 @@ class MT2203IcnRng<double> {
     MT2203IcnRng() {}
 
     /**
-     * @brief using seed to initialize
+     * @brief initialization using seed
      *
      * @param seed initialization seed
      */
     void seedInitialization(ap_uint<32> seed) { uniformRNG.seedInitialization(seed); }
 
     /**
-     * @brief statusSetup
+     * @brief setup status
      *
-     * @param data
+     * @param data initialization data for setting up status
      */
     void statusSetup(ap_uint<32> data[624]) { uniformRNG.statusSetup(data); }
     /**
-     * @brief statusSetup
+     * @brief setup status
      *
-     * @param A
-     * @param B
-     * @param C
+     * @param A value for configurable parameter A
+     * @param B value for configurable parameter B
+     * @param C value for configurable parameter C
      */
     void statusSetup(ap_uint<32> A, ap_uint<32> B, ap_uint<32> C) { uniformRNG.statusSetup(A, B, C); }
 
     /**
-     * brief next
+     * brief get next normally distributed random number
      *
-     * @return
-     *
+     * @return a normally distributed random number
      */
     double next() {
 #pragma HLS inline
@@ -1414,10 +1455,11 @@ class MT2203IcnRng<double> {
     }
 
     /**
-     * @brief next
+     * @brief get next normally distributed random number and its corresponding
+     * uniformly distributed random number
      *
-     * @param uniformR
-     * @param gaussianR
+     * @param uniformR return next uniformly distributed random number
+     * @param gaussianR return next normally distributed random number
      */
     void next(double& uniformR, double& gaussianR) {
 #pragma HLS inline
@@ -1427,10 +1469,11 @@ class MT2203IcnRng<double> {
         uniformR = tmp_uniform;
         gaussianR = result;
     }
+
     /**
-     * @brief next
+     * @brief get next uniformly distributed random number
      *
-     * @param uniformR
+     * @param uniformR return a uniformly distributed random bumber
      */
     void next(double& uniformR) {
 #pragma HLS inline
@@ -1451,31 +1494,32 @@ class MT2203IcnRng<float> {
     MT2203IcnRng() {}
 
     /**
-     * @brief using seed to initialize
+     * @brief initialization using seed
      *
      * @param seed initialization seed
      */
     void seedInitialization(ap_uint<32> seed) { uniformRNG.seedInitialization(seed); }
 
     /**
-     * @brief statusSetup
+     * @brief setup status
      *
-     * @param data
+     * @param data data for setting up status
      */
     void statusSetup(ap_uint<32> data[624]) { uniformRNG.statusSetup(data); }
 
     /**
-     * @brief statusSetup
+     * @brief setup status
      *
-     * @param A
-     * @param B
-     * @param C
+     * @param A value for configurable parameter A
+     * @param B value for configurable parameter B
+     * @param C value for configurable parameter C
      */
     void statusSetup(ap_uint<32> A, ap_uint<32> B, ap_uint<32> C) { uniformRNG.statusSetup(A, B, C); }
+
     /**
-     * @brief next
+     * brief get next normally distributed random number
      *
-     * @return
+     * @return a normally distributed random number
      */
     float next() {
 #pragma HLS inline
@@ -1486,10 +1530,11 @@ class MT2203IcnRng<float> {
     }
 
     /**
-     * @brief next
+     * @brief get next normally distributed random number and its corresponding
+     * uniformly distributed random number
      *
-     * @param uniformR
-     * @param gaussianR
+     * @param uniformR return next uniformly distributed random number
+     * @param gaussianR return next normally distributed random number
      */
     void next(float& uniformR, float& gaussianR) {
 #pragma HLS inline
@@ -1499,10 +1544,11 @@ class MT2203IcnRng<float> {
         uniformR = tmp_uniform;
         gaussianR = result;
     }
+
     /**
-     * @brief next
+     * @brief get next uniformly distributed random number
      *
-     * @param uniformR
+     * @param uniformR return a uniformly distributed random bumber
      */
     void next(float& uniformR) {
 #pragma HLS inline
@@ -1511,11 +1557,11 @@ class MT2203IcnRng<float> {
 };
 
 /**
- * @brief Multi variate normal distribution RNG.
+ * @brief Multi-variate normal distribution RNG.
  *
  * @tparam _DT data type, either float or double.
- * @tparam _VariateNum, number of variates.
- * @tparam _BuffDepth, depth of buffer.
+ * @tparam _VariateNum number of variates.
+ * @tparam _BuffDepth depth of buffer.
  */
 template <typename _DT, int _VariatePairNum, int _BuffDepth>
 class MultiVariateNormalRng {
@@ -1697,7 +1743,7 @@ class MultiVariateNormalRng {
      * @brief Initialize underlying RNG, setup lower triangle matrix and
      * pre-calculate
      *
-     * @param seed to initialize underlying RNG
+     * @param seed seed to initialize underlying RNG
      * @param input_ltm input lower triangle matrix
      */
     void init(ap_uint<32> seed, _DT input_ltm[_VariatePairNum * 2 + 1][_VariatePairNum]) {
@@ -1719,8 +1765,8 @@ class MultiVariateNormalRng {
      * @brief Each call returns two random number, in the order of 1st and 2nd,
      * 3rd and 4th .... 2*n-1 th and 2*n th
      *
-     * @param res_0 2*n - 1 th random number generated.
-     * @param res_1 2*n th random number generated.
+     * @param res_0 (2*n - 1)-th random number generated.
+     * @param res_1 2*n-th random number generated.
      */
 
     void next(_DT& res_0, _DT& res_1) {
