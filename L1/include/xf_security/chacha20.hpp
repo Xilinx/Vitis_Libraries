@@ -33,7 +33,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 typedef ap_uint<512> blockTypeChacha;
 
@@ -297,7 +297,7 @@ void chacha20Imp(hls::stream<ap_uint<256> >& keyStrm,
     convert2Byte(packCipherStrm, numPackCipherStrm, ePackCipherStrm, cipherStrm, eCipherStrm);
 }
 
-} // end of namespace details
+} // end of namespace internal
 
 /**
  * @brief chahcha20 is a basic function for stream ciphering
@@ -339,7 +339,7 @@ void chacha20(hls::stream<ap_uint<256> >& keyStrm,
               hls::stream<bool>& ePlainStrm,
               hls::stream<ap_uint<8> >& cipherStrm,
               hls::stream<bool>& eCipherStrm) {
-    details::chacha20Imp(keyStrm, counterNonceStrm, plainStrm, ePlainStrm, cipherStrm, eCipherStrm);
+    internal::chacha20Imp(keyStrm, counterNonceStrm, plainStrm, ePlainStrm, cipherStrm, eCipherStrm);
 }
 
 } // end of namespace security

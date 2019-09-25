@@ -25,3 +25,9 @@ API Functions of ``xf::security``
 
 .. include::  ../rst_L1/namespace_xf_security.rst
    :start-after: FunctionSection
+
+.. include:: ../rst_L1/class_xf_security_aesEnc.rst
+
+.. include:: ../rst_L1/class_xf_security_aesDec.rst
+
+.. include:: ../rst_L1/class_xf_security_rsa.rst

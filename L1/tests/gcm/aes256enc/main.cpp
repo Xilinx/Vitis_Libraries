@@ -59,12 +59,17 @@ struct Test {
     unsigned char* data;
     unsigned char* result;
     unsigned int length;
+    unsigned char* AAD;
+    unsigned int lenAAD;
     unsigned char* tag;
-    Test(const char* d, const char* r, unsigned int len, const char* t) : length(len) {
+    Test(const char* d, const char* r, unsigned int len, const char* aad, unsigned int adlen, const char* t)
+        : length(len), lenAAD(adlen) {
         data = (unsigned char*)malloc(len);
         memcpy(data, d, len);
         result = (unsigned char*)malloc(len);
         memcpy(result, r, len);
+        AAD = (unsigned char*)malloc(adlen);
+        memcpy(AAD, aad, adlen);
         tag = (unsigned char*)malloc(BLK_SIZE);
         memcpy(tag, t, BLK_SIZE);
     }
@@ -114,19 +119,46 @@ int main() {
     int iv_len = 12;
 
     // additional authenticated data
-    const unsigned char aad[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    int aad_len = 0;
+    const unsigned char aad[] =
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz"
+        "abcdefghijklmnopqrstuvwxyz";
 
     vector<Test> tests;
 
     // generate golden
-    for (unsigned int i = 1; i < NUM_TESTS + 1; i++) {
+    for (unsigned int i = 0; i < NUM_TESTS; i++) {
         // ouput length of the result
         int len = 0;
+        // XXX: as the tests with different length of AAD is already covered in GMAC HLS test,
+        // we here only running the tests with different text length
+        int aad_len = 5;
         int ciphertext_len = 0;
-        // input data length must be a multiple of 16
-        unsigned int plaintext_len = (i % 16) * BLK_SIZE + BLK_SIZE;
+        // input data length
+        unsigned int plaintext_len = i % 256;
         // output result buffer
         unsigned char ciphertext[2 * plaintext_len];
         unsigned char tag[BLK_SIZE];
@@ -135,7 +167,6 @@ int main() {
         if (plaintext_len != 0) {
             memcpy(din, plaintext + i, plaintext_len);
         }
-        din[plaintext_len] = 0;
         // call OpenSSL API to get the golden
         EVP_CIPHER_CTX* ctx;
         ctx = EVP_CIPHER_CTX_new();
@@ -149,25 +180,38 @@ int main() {
         ciphertext_len += len;
         EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, BLK_SIZE, tag);
         EVP_CIPHER_CTX_free(ctx);
-        for (unsigned int i = 0; i < plaintext_len / BLK_SIZE; i++) {
-            cout << "EVP_golden[" << dec << i << "] : " << printr((unsigned char*)ciphertext + i * BLK_SIZE, BLK_SIZE)
-                 << endl;
-        }
-        cout << "tag_golden : " << printr((unsigned char*)tag, BLK_SIZE) << endl;
-        tests.push_back(Test((const char*)plaintext + i, (const char*)ciphertext, plaintext_len, (const char*)tag));
+        /*
+unsigned int index = 0;
+for (unsigned int j = 0; j < plaintext_len / BLK_SIZE; j++) {
+    cout << "EVP_golden[" << dec << j << "] : " << printr((unsigned char*)ciphertext + j * BLK_SIZE, BLK_SIZE)
+         << endl;
+    index++;
+}
+if ((plaintext_len % BLK_SIZE) > 0) {
+    cout << "EVP_golden[" << dec << index << "] : "
+         << printr((unsigned char*)ciphertext + plaintext_len / BLK_SIZE * BLK_SIZE, plaintext_len % BLK_SIZE)
+         << endl;
+}
+cout << "tag_golden : " << printr((unsigned char*)tag, BLK_SIZE) << endl;
+        */
+        tests.push_back(Test((const char*)plaintext + i, (const char*)ciphertext, plaintext_len, (const char*)aad,
+                             aad_len, (const char*)tag));
     }
 
     unsigned int nerror = 0;
     unsigned int ncorrect = 0;
 
-    hls::stream<ap_uint<128> > plaintextStrm("plaintextStrm");
-    hls::stream<bool> endPlaintextStrm("endPlaintextStrm");
+    hls::stream<ap_uint<8 * BLK_SIZE> > plaintextStrm("plaintextStrm");
     hls::stream<ap_uint<8 * KEY_SIZE> > cipherkeyStrm("cipherkeyStrm");
     hls::stream<ap_uint<96> > IVStrm("IVStrm");
     hls::stream<ap_uint<128> > AADStrm("AADStrm");
-    hls::stream<ap_uint<128> > ciphertextStrm("ciphertextStrm");
-    hls::stream<bool> endCiphertextStrm("endCiphertextStrm");
-    hls::stream<ap_uint<128> > tagStrm("tagStrm");
+    hls::stream<ap_uint<64> > lenAADStrm("lenAADStrm");
+    hls::stream<ap_uint<64> > lenPldStrm("lenPldStrm");
+    hls::stream<bool> endLenStrm("endLenStrm");
+    hls::stream<ap_uint<8 * BLK_SIZE> > ciphertextStrm("ciphertextStrm");
+    hls::stream<ap_uint<64> > lenCphStrm("lenCphStrm");
+    hls::stream<ap_uint<8 * BLK_SIZE> > tagStrm("tagStrm");
+    hls::stream<bool> endTagStrm("endTagStrm");
 
     for (vector<Test>::const_iterator singletest = tests.begin(); singletest != tests.end(); singletest++) {
         // generate cipherkey
@@ -185,11 +229,27 @@ int main() {
         IVStrm.write(IVReg);
 
         // generate additional authenticated data
-        ap_uint<128> AADReg;
-        for (unsigned int i = 0; i < 16; i++) {
-            AADReg.range(i * 8 + 7, i * 8) = aad[i];
+        ap_uint<8 * BLK_SIZE> AADReg = 0;
+        unsigned int index = 0;
+        for (unsigned int j = 0; j < (*singletest).lenAAD / BLK_SIZE; j++) {
+            for (unsigned int i = 0; i < BLK_SIZE; i++) {
+                AADReg.range(i * 8 + 7, i * 8) = aad[i + index];
+            }
+            index += BLK_SIZE;
+            AADStrm.write(AADReg);
         }
-        AADStrm.write(AADReg);
+        if ((*singletest).lenAAD % BLK_SIZE > 0) {
+            AADReg = 0;
+            for (unsigned int i = 0; i < (*singletest).lenAAD % BLK_SIZE; i++) {
+                AADReg.range(i * 8 + 7, i * 8) = aad[i + index];
+            }
+            AADStrm.write(AADReg);
+        }
+
+        // write length streams
+        lenPldStrm.write((*singletest).length * 8);
+        lenAADStrm.write((*singletest).lenAAD * 8);
+        endLenStrm.write(false);
 
         ap_uint<8 * BLK_SIZE> plaintextReg;
         unsigned int n = 0;
@@ -202,39 +262,57 @@ int main() {
             n++;
             if (n == BLK_SIZE) {
                 plaintextStrm.write(plaintextReg);
-                endPlaintextStrm.write(false);
                 n = 0;
             }
         }
         // deal with the condition that we didn't hit a boundary of the last block
         if (n != 0) {
             plaintextStrm.write(plaintextReg);
-            endPlaintextStrm.write(false);
         }
-        endPlaintextStrm.write(true);
+    }
+    endLenStrm.write(true);
 
-        // call fpga module
-        test(plaintextStrm, endPlaintextStrm, cipherkeyStrm, IVStrm, AADStrm, ciphertextStrm, endCiphertextStrm,
-             tagStrm);
+    cout << "\n" << NUM_TESTS << " inputs ready..." << endl;
 
-        // check result
-        ap_uint<8 * BLK_SIZE> ciphertext;
-        ap_uint<8 * BLK_SIZE> ciphertext_golden;
-        ap_uint<8 * BLK_SIZE> tag;
-        ap_uint<8 * BLK_SIZE> tag_golden;
-        bool end = endCiphertextStrm.read();
+    // call fpga module
+    test(plaintextStrm, cipherkeyStrm, IVStrm, AADStrm, lenAADStrm, lenPldStrm, endLenStrm, ciphertextStrm, lenCphStrm,
+         tagStrm, endTagStrm);
+
+    // check result
+    ap_uint<8 * BLK_SIZE> ciphertext;
+    ap_uint<8 * BLK_SIZE> ciphertext_golden;
+    ap_uint<8 * BLK_SIZE> tag;
+    ap_uint<8 * BLK_SIZE> tag_golden;
+    ap_uint<64> lenCipher;
+    for (std::vector<Test>::const_iterator singletest = tests.begin(); singletest != tests.end(); ++singletest) {
+        bool x = endTagStrm.read();
+        lenCipher = lenCphStrm.read();
+
         bool checked = true;
         int index = 0;
-        while (!end) {
+        for (unsigned int i = 0; i < (*singletest).length / BLK_SIZE; i++) {
             ciphertext = ciphertextStrm.read();
-            for (unsigned int i = 0; i < BLK_SIZE; i++) {
-                ciphertext_golden.range(7 + 8 * i, 8 * i) = (unsigned char)((*singletest).result[i + index]);
+            for (unsigned int j = 0; j < BLK_SIZE; j++) {
+                ciphertext_golden.range(7 + 8 * j, 8 * j) = (unsigned char)((*singletest).result[j + index]);
             }
+            index += BLK_SIZE;
             if (ciphertext_golden != ciphertext) {
                 checked = false;
+                cout << "fpga	: " << hex << ciphertext << endl;
+                cout << "golden : " << hex << ciphertext_golden << endl;
             }
-            end = endCiphertextStrm.read();
-            index += BLK_SIZE;
+        }
+        if ((*singletest).length % 16 > 0) {
+            ciphertext = ciphertextStrm.read();
+            for (unsigned int j = 0; j < (*singletest).length % 16; j++) {
+                ciphertext_golden.range(7 + 8 * j, 8 * j) = (unsigned char)((*singletest).result[j + index]);
+            }
+            if (ciphertext_golden.range((*singletest).length % BLK_SIZE * 8 - 1, 0) !=
+                ciphertext.range((*singletest).length % BLK_SIZE * 8 - 1, 0)) {
+                checked = false;
+                cout << "fpga	: " << hex << ciphertext << endl;
+                cout << "golden : " << hex << ciphertext_golden << endl;
+            }
         }
 
         tag = tagStrm.read();
@@ -243,18 +321,17 @@ int main() {
         }
         if (tag_golden != tag) {
             checked = false;
+            cout << "fpga_tag	: " << hex << tag << endl;
+            cout << "golden_tag : " << hex << tag_golden << endl;
         }
 
         if (!checked) {
             ++nerror;
-            cout << "fpga_ciphertext   : " << hex << ciphertext << endl;
-            cout << "golden_ciphertext : " << hex << ciphertext_golden << endl;
-            cout << "fpga_tag   : " << hex << tag << endl;
-            cout << "golden_tag : " << hex << tag_golden << endl;
         } else {
             ++ncorrect;
         }
     }
+    bool x = endTagStrm.read();
 
     if (nerror) {
         cout << "FAIL: " << dec << nerror << " errors found." << endl;

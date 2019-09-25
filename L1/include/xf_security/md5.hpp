@@ -40,7 +40,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 // @brief Processing block
 struct blockType {
@@ -642,10 +642,10 @@ LOOP_MD5_MAIN:
 
 } // end MD5Digest
 
-} // namespace details
+} // namespace internal
 
 /**
- * @brief Top of MD5.
+ * @brief Top function of MD5.
  *
  * The algorithm reference is : "The MD5 Message-Digest Algorithm".
  *
@@ -668,7 +668,7 @@ static void md5(
 #pragma HLS dataflow
 
     // 512-bit processing block stream
-    hls::stream<details::blockType> blk_strm;
+    hls::stream<internal::blockType> blk_strm;
 #pragma HLS stream variable = blk_strm depth = 2
 
     // number of blocks stream
@@ -680,10 +680,10 @@ static void md5(
 #pragma HLS stream variable = end_nblk_strm depth = 2
 
     // padding and appending message words into blocks
-    details::preProcessing(msg_strm, len_strm, end_len_strm, blk_strm, nblk_strm, end_nblk_strm);
+    internal::preProcessing(msg_strm, len_strm, end_len_strm, blk_strm, nblk_strm, end_nblk_strm);
 
     // digest processing blocks into fingerprint by hash function
-    details::MD5Digest(blk_strm, nblk_strm, end_nblk_strm, digest_strm, end_digest_strm);
+    internal::MD5Digest(blk_strm, nblk_strm, end_nblk_strm, digest_strm, end_digest_strm);
 
 } // end md5
 

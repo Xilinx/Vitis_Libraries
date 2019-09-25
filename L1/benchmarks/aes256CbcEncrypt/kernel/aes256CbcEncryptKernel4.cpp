@@ -223,8 +223,8 @@ static void cipherModeParallel(hls::stream<ap_uint<128> > IVStrm[_channelNumber]
 #pragma HLS unroll
         // XXX cipher mode core is called here
         // the API called should be accordance with the _keyWidth
-        xf::security::details::aesCbcEncrypt<_keyWidth>(textInStrm[m], endTextInStrm[m], cipherkeyStrm[m], IVStrm[m],
-                                                        textOutStrm[m], endTextOutStrm[m]);
+        xf::security::internal::aesCbcEncrypt<_keyWidth>(textInStrm[m], endTextInStrm[m], cipherkeyStrm[m], IVStrm[m],
+                                                         textOutStrm[m], endTextOutStrm[m]);
     }
 } // end cipherModeParallel
 

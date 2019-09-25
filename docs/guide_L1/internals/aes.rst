@@ -13,15 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*****************************
-AES-256 Encryption Algorithms
-*****************************
+**************************
+AES Encryption Algorithms
+**************************
 
 .. toctree::
    :maxdepth: 1
 
-AES-256 is one of AES Algorithms which processes plain data blocks of 128 bits,
-generates cipher data blocks of 128 bits using cipher keys of 256 bits.
+AES-128/192/256 Algorithm process plain data blocks of 128 bits,
+generates cipher data blocks of 128 bits using cipher keys of 128/192/256 bits.
 Basic unit of AES algorithms operation is a two dimensional array of 16 bytes called states.
 Its mapping relation is as illustrated in the figure below.
 
@@ -33,12 +33,12 @@ Its mapping relation is as illustrated in the figure below.
 Original Implementation
 =======================
 
-AES-256 consist of 5 part: KeyExpansion, SubBytes, ShiftRows, MixColumns and AddRoundKey.
+AES-128/192/256 encryption consist of 5 part: KeyExpansion, SubBytes, ShiftRows, MixColumns and AddRoundKey.
 
-KeyExpansion generates 15 round keys from original cipher key and they maps to 2-D array as states do.
+KeyExpansion generates 11/13/15 round keys from original cipher key and they maps to 2-D array as states do.
 
-AES-256 first does XOR add to input plain data blocks with first roundkey.
-Then AES-256 performs 14 round of processing with the last 14 round keys, each at a time.
+AES encryption first does XOR add to input plain data blocks with first roundkey.
+Then AES-128/192/256 encryption performs 10/12/14 round of processing with the left round keys, each at a time.
 Each round sequentially does SubBytes, ShiftRows, MixColumns and AddRoundKey.
 
 .. image:: /images/original_flow.png
@@ -79,8 +79,7 @@ During AddRoundKey, states are XOR with roundkey of this round.
 Optimized Implementation on FPGA
 =================================
 
-Since each round of procee only needs one round key and KeyExpansion is independent of process,
-we put KeyExpansion into each round to save an overhead.
+We seperate key expansion away from encryption. Which means we have to call updateKey() before use new cipher key to encrypt message.
 
 Because SubBytes is independent of each byte's location in states and ShiftRows only shifts in integer of bytes, these two part could exchange their position in processing sequence without changing the result. Thoough no improvement is achieved here, this will benefit later optimizaiton.
 
@@ -98,11 +97,34 @@ The matrix multiplication in MixColumns is actually two parts: multiply bytes in
 
 Based on similar consideration, we also merge such multiplication in KeyExpansion into one time table look up of another new S-Box called "sbox_Rcon". Although sbox_Rcon and sbox_mix_col_1 are bigger than original S-Box, they all could be stored in 1 BRAM on chip. Such merges saves logics without additional resource cost.
 
-Performance(Device: VU9P)
-=================================
 
-==== ===== ====== ====== ===== ====== ===== ====== ========
- II   CLB   LUT     FF    DSP   BRAM   SRL   URAM   CP(ns)
-==== ===== ====== ====== ===== ====== ===== ====== ========
- 1    963   3422   4628    0    138    417    0     2.857
-==== ===== ====== ====== ===== ====== ===== ====== ========
+AES-128 Encryption Performance(Device: U250)
+============================================
+
+==== ====== ====== ====== ===== ====== ===== ====== ========
+ II   CLB     LUT    FF    DSP   BRAM   SRL   URAM   CP(ns)
+==== ====== ====== ====== ===== ====== ===== ====== ========
+ 1    2069   9109   7169    0     2     642    0     2.560
+==== ====== ====== ====== ===== ====== ===== ====== ========
+
+
+AES-192 Encryption Performance(Device: U250)
+============================================
+
+==== ====== ======= ====== ===== ====== ===== ====== ========
+ II   CLB     LUT     FF    DSP   BRAM   SRL   URAM   CP(ns)
+==== ====== ======= ====== ===== ====== ===== ====== ========
+ 1    2725   13321   8917    0     6     898    0     2.976
+==== ====== ======= ====== ===== ====== ===== ====== ========
+
+
+AES-256 Encryption Performance(Device: U250)
+============================================
+
+==== ====== ======= ======= ===== ====== ====== ====== ========
+ II   CLB     LUT     FF     DSP   BRAM   SRL    URAM   CP(ns)
+==== ====== ======= ======= ===== ====== ====== ====== ========
+ 1    3041   15112   10619    0     2     1153    0     2.794
+==== ====== ======= ======= ===== ====== ====== ====== ========
+
+

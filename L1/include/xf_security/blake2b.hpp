@@ -43,7 +43,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 // @brief 1024-bit Processing block
 struct blockType {
@@ -636,10 +636,10 @@ LOOP_BLAKE2B_MAIN:
 
 } // end blake2bDigest
 
-} // namespace details
+} // namespace internal
 
 /**
- * @brief Top of BLAKE2B.
+ * @brief Top function of BLAKE2B.
  *
  * The algorithm reference is : "The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)".
  * The implementation dataflows the sub-modules.
@@ -670,7 +670,7 @@ void blake2b(
 #pragma HLS dataflow
 
     // 1024-bit processing block stream
-    hls::stream<details::blockType> blk_strm("blk_strm");
+    hls::stream<internal::blockType> blk_strm("blk_strm");
 #pragma HLS stream variable = blk_strm depth = 32
 #pragma HLS resource variable = blk_strm core = FIFO_LUTRAM
 
@@ -695,13 +695,13 @@ void blake2b(
 #pragma HLS resource variable = msg_len_out_strm core = FIFO_LUTRAM
 
     // padding key (optional) and message words into blocks
-    details::generateBlock<w>(msg_strm, msg_len_strm, key_strm, key_len_strm, end_len_strm,            // in
-                              blk_strm, nblk_strm, end_nblk_strm, msg_len_out_strm, key_len_out_strm); // out
+    internal::generateBlock<w>(msg_strm, msg_len_strm, key_strm, key_len_strm, end_len_strm,            // in
+                               blk_strm, nblk_strm, end_nblk_strm, msg_len_out_strm, key_len_out_strm); // out
 
     // digest processing blocks into hash value
-    details::blake2bDigest<w>(blk_strm, nblk_strm, end_nblk_strm, key_len_out_strm, msg_len_out_strm,
-                              out_len_strm,                  // in
-                              digest_strm, end_digest_strm); // out
+    internal::blake2bDigest<w>(blk_strm, nblk_strm, end_nblk_strm, key_len_out_strm, msg_len_out_strm,
+                               out_len_strm,                  // in
+                               digest_strm, end_digest_strm); // out
 
 } // end blake2b
 

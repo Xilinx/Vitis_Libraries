@@ -20,11 +20,14 @@
 #include "hls_stream.h"
 
 void test(hls::stream<ap_uint<128> >& ciphertext,
-          hls::stream<bool>& ciphertext_e,
           hls::stream<ap_uint<256> >& cipherkey,
-          hls::stream<ap_uint<96> >& initialization_vector,
-          hls::stream<ap_uint<128> >& AAD_strm,
+          hls::stream<ap_uint<96> >& IV,
+          hls::stream<ap_uint<128> >& AAD,
+          hls::stream<ap_uint<64> >& AAD_length,
+          hls::stream<ap_uint<64> >& ciphertext_length,
+          hls::stream<bool>& end_length,
           hls::stream<ap_uint<128> >& plaintext,
-          hls::stream<bool>& plaintext_e,
-          hls::stream<ap_uint<128> >& tag_strm);
+          hls::stream<ap_uint<64> >& plaintext_length,
+          hls::stream<ap_uint<128> >& tag,
+          hls::stream<bool>& end_tag);
 #endif

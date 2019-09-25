@@ -41,7 +41,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 // @brief Processing block
 struct blockType {
@@ -576,12 +576,12 @@ LOOP_MD4_MAIN:
 
 } // end MD4Digest
 
-} // namespace details
+} // namespace internal
 
 /**
- * @brief Top of MD4.
+ * @brief Top function of MD4.
  *
- * The algorithm reference is : "The MD4 Message-Digest Algorithm".
+ * The algorithm reference is: "The MD4 Message-Digest Algorithm".
  *
  * @param msg_strm The message being hashed.
  * @param len_strm The message length in byte.
@@ -602,7 +602,7 @@ static void md4(
 #pragma HLS dataflow
 
     // 512-bit processing block stream
-    hls::stream<details::blockType> blk_strm;
+    hls::stream<internal::blockType> blk_strm;
 #pragma HLS stream variable = blk_strm depth = 2
 
     // number of blocks stream
@@ -614,10 +614,10 @@ static void md4(
 #pragma HLS stream variable = end_nblk_strm depth = 2
 
     // padding and appending message words into blocks
-    details::preProcessing(msg_strm, len_strm, end_len_strm, blk_strm, nblk_strm, end_nblk_strm);
+    internal::preProcessing(msg_strm, len_strm, end_len_strm, blk_strm, nblk_strm, end_nblk_strm);
 
     // digest processing blocks into fingerprint by hash function
-    details::MD4Digest(blk_strm, nblk_strm, end_nblk_strm, digest_strm, end_digest_strm);
+    internal::MD4Digest(blk_strm, nblk_strm, end_nblk_strm, digest_strm, end_digest_strm);
 
 } // end md4
 

@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+
 source settings.tcl
 
 set PROJ "igcm_aes256_test.prj"
@@ -41,7 +42,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -ldflags "-lcrypto -lssl"
+  cosim_design  -ldflags "-lcrypto -lssl"
 }
 
 if {$VIVADO_SYN == 1} {

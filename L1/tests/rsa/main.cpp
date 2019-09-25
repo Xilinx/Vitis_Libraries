@@ -16,69 +16,53 @@
 
 #include <iostream>
 #include "test.hpp"
-
-using namespace std;
-
-void prt(ap_uint<8>* ptr, int size) {
-    for (int i = 0; i < size; i++) {
-        cout << hex << *(ptr + size);
-    }
-    cout << endl;
-}
+#include <string>
 
 int main() {
-    std::cout << "This is an example test for AES256, mentioned in Appendix C.3, "
-                 "NIST.FIPS.197.pdf"
-              << std::endl;
+    std::cout << std::hex;
 
-    // ap_uint<8> plaintext[16] = {0xf0, 0xf1, 0x52, 0x53, 0xa4, 0x55, 0x66, 0x77,
-    //                            0xf8, 0xf9, 0x5a, 0x5b, 0xac, 0xdd, 0xee, 0xff};
-    ap_uint<8> plaintext[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-                                0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+    ap_uint<2048> modulus = ap_uint<2048>(
+        "0x9d41cd0d38339220ebd110e8c31feb279c5fae3c23090045a0886301588d4c8114fa5cdde708ea77ba0f527e6f6ea8f5634acf517f04"
+        "ca6399e188d5c2d7f03cc90e04dbf7d5d0056ee1b14b8baaf90ef78f5142ddce9ba2eff84c0295f656c29aecaae80ddd5c7127ddc60215"
+        "9458f272316100f726a71362516223f26ddeafa425d3eb2c7f61de7e8586e77d475037563425d931885f03693618bb885ab9b58de74f60"
+        "4a86f28e494dcd819bd8c0bb42f699596969b84f680819e4c9fc0ba687558775f770a302d5b266905defe47bc53c98ce261523b49db624"
+        "1567f4b48c661482ef9c453750c6d420a0b1a3bd4d3d05b060c026ce8efd9bb9456dfe2f5d");
 
-    ap_uint<8> cipherkey[32] = {
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
-    };
+    ap_uint<2048> message = 0;
+    // unsigned char resm[256];
+    unsigned char rawm[256] =
+        "RSA TEST FILE : "
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv"
+        "wxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh"
+        "ijklmnopqrstuvwxyz.";
+    for (int i = 0; i < 256; i++) {
+        message.range(i * 8 + 7, i * 8) = (unsigned int)rawm[255 - i];
+    }
+    message.range(7, 0) = ap_uint<8>("0x0a");
 
-    ap_uint<8> ciphertext[16];
+    ap_uint<2048> exponent = ap_uint<2048>("0x10001");
 
-    ap_uint<128>* p;
-    ap_uint<256>* ck;
-    ap_uint<128> cp;
+    ap_uint<2048> golden = ap_uint<2048>(
+        "0x7E85E87850F80E298487446A567585F7FF39C7DD1E1BAB4303B0000CF581494182D9FB50B27946DD555921727DEA816F41D5750B57BF"
+        "BD130CD4D93BCF81B070AE55B4A8B06D44668E01B1B2FF2B123AE2FB2DB7BE7F4C8158695C4567E9A741F3F8BD7658345185FC78B90F12"
+        "3FF17311534630391A78340D0E8A9C8BC501E28E2EA0AAE5B0941C6D3480389784CBFE3A55B3D05943B657BAD7616423F30808E0312A72"
+        "F89056F66BFE1FFC5F54119A88C6553B41075F0869D228EC6CC3C09738406AAEA6530659C6573B44FDA1CFE20EC9FDEBA7B4B52456B9BB"
+        "D3762929248C11B6006CDAEA05800B902B42FDF8FD5B2F7D3B5F23F2A28E50B05B26E4A778");
 
-    p = (ap_uint<128>*)plaintext;
-    ck = (ap_uint<256>*)cipherkey;
-    // for (int i = 0; i < 16; i++) {
-    // p(i * 8 + 7, i * 8) = plaintext[15 - i](7, 0);
-    // }
-    // for (int i = 0; i < 32; i++) {
-    // ck(i * 8 + 7, i * 8) = cipherkey[31 - i](7, 0);
-    // }
+    // get test result
+    ap_uint<2048> result;
+    rsa_test(message, modulus, exponent, result);
+    //
+    std::cout << "modulus:  " << modulus << std::endl;
+    std::cout << "pub key:  " << exponent << std::endl;
+    std::cout << "message:  " << message << std::endl;
+    std::cout << "golden:   " << golden << std::endl;
+    std::cout << "result:   " << result << std::endl;
 
-    hls::stream<ap_uint<128> > plaintext_strm;
-    hls::stream<bool> i_e_strm;
-    hls::stream<ap_uint<256> > cipherkey_strm;
-    hls::stream<ap_uint<128> > ciphertext_strm;
-    hls::stream<bool> o_e_strm;
-
-    plaintext_strm << *p;
-    i_e_strm << false;
-    i_e_strm << true;
-    cipherkey_strm << *ck;
-
-    test(plaintext_strm, i_e_strm, cipherkey_strm, ciphertext_strm, o_e_strm);
-    while (!o_e_strm.read()) {
-        ciphertext_strm >> cp;
+    if (result != golden) {
+        std::cout << "Not Match !!!" << std::endl;
     }
 
-    for (int i = 0; i < 16; i++) {
-        ciphertext[i](7, 0) = cp(i * 8 + 7, i * 8);
-    }
-
-    cout << "Plaintext:" << hex << *p << endl;
-    cout << "Key:" << hex << *ck << endl;
-    cout << "Ciphertext:" << hex << cp << endl;
-
+    std::cout << std::endl;
     return 0;
 }

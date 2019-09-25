@@ -43,7 +43,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 // @brief 1600-bit Processing block
 struct blockType {
@@ -527,11 +527,11 @@ LOOP_SHAKE_MAIN:
 
 } // end shakeXOF
 
-} // namespace details
+} // namespace internal
 
 /**
  *
- * @brief Top of SHA3-224.
+ * @brief Top function of SHA3-224.
  *
  * The algorithm reference is : "SHA-3 Standard : Permutation-Based Hash and Extendable-Output Functions".
  *
@@ -553,13 +553,13 @@ static void sha3_224(
     hls::stream<bool>& endDigestStrm
 
     ) {
-    details::sha3Digest<28>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
+    internal::sha3Digest<28>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
 
 } // end sha3_224
 
 /**
  *
- * @brief Top of SHA3-256.
+ * @brief Top function of SHA3-256.
  *
  * The algorithm reference is : "SHA-3 Standard : Permutation-Based Hash and Extendable-Output Functions".
  *
@@ -581,13 +581,13 @@ static void sha3_256(
     hls::stream<bool>& endDigestStrm
 
     ) {
-    details::sha3Digest<32>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
+    internal::sha3Digest<32>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
 
 } // end sha3_256
 
 /**
  *
- * @brief Top of SHA3-384.
+ * @brief Top function of SHA3-384.
  *
  * The algorithm reference is : "SHA-3 Standard : Permutation-Based Hash and Extendable-Output Functions".
  *
@@ -609,13 +609,13 @@ static void sha3_384(
     hls::stream<bool>& endDigestStrm
 
     ) {
-    details::sha3Digest<48>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
+    internal::sha3Digest<48>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
 
 } // end sha3_384
 
 /**
  *
- * @brief Top of SHA3-512.
+ * @brief Top function of SHA3-512.
  *
  * The algorithm reference is : "SHA-3 Standard : Permutation-Based Hash and Extendable-Output Functions".
  *
@@ -637,13 +637,13 @@ static void sha3_512(
     hls::stream<bool>& endDigestStrm
 
     ) {
-    details::sha3Digest<64>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
+    internal::sha3Digest<64>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
 
 } // end sha3_512
 
 /**
  *
- * @brief Top of SHAKE-128.
+ * @brief Top function of SHAKE-128.
  *
  * The algorithm reference is : "SHA-3 Standard : Permutation-Based Hash and Extendable-Output Functions".
  *
@@ -665,13 +665,13 @@ static void shake128(
     hls::stream<bool>& endDigestStrm
 
     ) {
-    details::shakeXOF<16>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
+    internal::shakeXOF<16>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
 
 } // end shake128
 
 /**
  *
- * @brief Top of SHAKE-256.
+ * @brief Top function of SHAKE-256.
  *
  * The algorithm reference is : "SHA-3 Standard : Permutation-Based Hash and Extendable-Output Functions".
  *
@@ -693,7 +693,7 @@ static void shake256(
     hls::stream<bool>& endDigestStrm
 
     ) {
-    details::shakeXOF<32>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
+    internal::shakeXOF<32>(msgStrm, msgLenStrm, endMsgLenStrm, digestStrm, endDigestStrm);
 
 } // end shake256
 

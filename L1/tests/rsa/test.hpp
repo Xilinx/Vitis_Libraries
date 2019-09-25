@@ -14,14 +14,5 @@
  * limitations under the License.
  */
 
-#include <ap_int.h>
-#include <hls_stream.h>
-
-void test(hls::stream<ap_uint<128> >& plaintext_strm,
-          hls::stream<bool>& i_e_strm,
-          hls::stream<ap_uint<256> >& cipherkey,
-          hls::stream<ap_uint<128> >& ciphertext_strm,
-          hls::stream<bool>& o_e_strm);
-
 #include "xf_security/asymmetric.hpp"
 void rsa_test(ap_uint<2048> message, ap_uint<2048> N, ap_uint<2048> key, ap_uint<2048>& result);

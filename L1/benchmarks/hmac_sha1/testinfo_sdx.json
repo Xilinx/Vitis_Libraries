@@ -1,5 +1,5 @@
 {
-    "case_name": "jks.L1_gmac", 
+    "case_name": "jks.L1.benchmark_hmacSha1", 
     "disable": 0, 
     "jobs": [
         {
@@ -13,14 +13,10 @@
         }
     ], 
     "machine": {
-        "shell": "u200"
+        "shell": "u250"
     }, 
     "test_type": [
-        "hls_csim", 
-        "hls_csynth", 
-        "hls_cosim", 
-        "hls_vivado_syn", 
-        "hls_vivado_impl"
+        "sdx_sw_emu"
     ], 
     "category": "canary"
 }

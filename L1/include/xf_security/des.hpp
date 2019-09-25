@@ -577,7 +577,7 @@ static void des3Encrypt(ap_uint<64> in, ap_uint<64> key1, ap_uint<64> key2, ap_u
 }
 
 /**
- * @brief desDecrypt is the basic function for decrypt one block with
+ * @brief des3Decrypt is the basic function for decrypt one block with
  * three cipher keys using 3DES
  *
  * @param in input one encrypted text to be decrypted, 64 bits.

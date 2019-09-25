@@ -22,18 +22,26 @@ The profiling in this documentation is based on U250, and the tool version is Vi
 .. toctree::
    :maxdepth: 1
 
+   internals/aes.rst
+   internals/blake2b.rst
+   internals/cbc.rst
+   internals/ccm.rst
+   internals/cfb.rst
+   internals/chacha20.rst
+   internals/ctr.rst
+   internals/des.rst
+   internals/ecb.rst
+   internals/gcm.rst
+   internals/gmac.rst
+   internals/hmac.rst
+   internals/iaes.rst
    internals/md4_5.rst
+   internals/ofb.rst
+   internals/poly1305.rst
+   internals/rc4.rst
+   internals/rsa.rst
    internals/sha1.rst
    internals/sha2.rst
    internals/sha3.rst
-   internals/blake2b.rst
-   internals/aes.rst
-   internals/iaes.rst
-   internals/cbc.rst
-   internals/cfb.rst
-   internals/ctr.rst
-   internals/ecb.rst
-   internals/ofb.rst
    internals/xts.rst
-   internals/gcm.rst
-   internals/ccm.rst
+

@@ -16,8 +16,8 @@
 // number of tasks for a single PCIe block
 #define N_TASK 2
 // number of PUs
-// should be a multiple of 4, and 4 <= CH_NM <= 64
-#define CH_NM 16
+// XXX: should be a multiple of 2
+#define CH_NM 12
 // cipher key size in byte
 #define KEY_SIZE 32
 
@@ -326,61 +326,17 @@ int main(int argc, char* argv[]) {
     // check ping buffer
     for (unsigned int n = 0; n < 4; n++) {
         for (unsigned int j = 0; j < N_TASK; j++) {
-            for (unsigned int i = 0; i < N_ROW; i++) {
-                for (unsigned int k = 0; k < CH_NM; k++) {
-                    if (hb_out_a[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM) != golden[i]) {
+            for (unsigned int k = 0; k < CH_NM; k++) {
+                for (unsigned int i = 0; i < N_ROW; i++) {
+                    if (hb_out_a[n][j * ((N_ROW / 32) * (CH_NM / 2)) + (i / 32) * (CH_NM / 2) + k / 2].range(
+                            (k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8) != golden[i]) {
                         checked = false;
-                        std::cout << "Error found in kernel_1 " << std::dec << k << " channel, " << j << " task, " << i
-                                  << " message" << std::endl;
+                        std::cout << "Error found in kernel_ " << std::dec << n << " " << k << " channel, " << j
+                                  << " task, " << i << " message" << std::endl;
                         std::cout << "golden = " << std::hex << golden[i] << std::endl;
                         std::cout << "fpga   = " << std::hex
-                                  << hb_out_a[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM)
-                                  << std::endl;
-                    }
-
-                    if (hb_out_a[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM) != golden[i]) {
-                        checked = false;
-                        std::cout << "Error found in kernel_2" << std::dec << k << " channel, " << j << " task, " << i
-                                  << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
-                        std::cout << "fpga   = " << std::hex
-                                  << hb_out_a[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM)
-                                  << std::endl;
-                    }
-
-                    if (hb_out_a[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM) != golden[i]) {
-                        checked = false;
-                        std::cout << "Error found in kernel_3" << std::dec << k << " channel, " << j << " task, " << i
-                                  << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
-                        std::cout << "fpga   = " << std::hex
-                                  << hb_out_a[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM)
-                                  << std::endl;
-                    }
-
-                    if (hb_out_a[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM) != golden[i]) {
-                        checked = false;
-                        std::cout << "Error found in kernel_4" << std::dec << k << " channel, " << j << " task, " << i
-                                  << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
-                        std::cout << "fpga   = " << std::hex
-                                  << hb_out_a[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM)
+                                  << hb_out_a[n][j * ((N_ROW / 32) * (CH_NM / 2)) + (i / 32) * (CH_NM / 2) + k / 2]
+                                         .range((k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8)
                                   << std::endl;
                     }
                 }
@@ -391,61 +347,17 @@ int main(int argc, char* argv[]) {
     // check pong buffer
     for (unsigned int n = 0; n < 4; n++) {
         for (unsigned int j = 0; j < N_TASK; j++) {
-            for (unsigned int i = 0; i < N_ROW; i++) {
-                for (unsigned int k = 0; k < CH_NM; k++) {
-                    if (hb_out_b[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM) != golden[i]) {
+            for (unsigned int k = 0; k < CH_NM; k++) {
+                for (unsigned int i = 0; i < N_ROW; i++) {
+                    if (hb_out_b[n][j * ((N_ROW / 32) * (CH_NM / 2)) + (i / 32) * (CH_NM / 2) + k / 2].range(
+                            (k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8) != golden[i]) {
                         checked = false;
-                        std::cout << "Error found in kernel_1 " << std::dec << k << " channel, " << j << " task, " << i
-                                  << " message" << std::endl;
+                        std::cout << "Error found in kernel_ " << std::dec << n << " " << k << " channel, " << j
+                                  << " task, " << i << " message" << std::endl;
                         std::cout << "golden = " << std::hex << golden[i] << std::endl;
                         std::cout << "fpga   = " << std::hex
-                                  << hb_out_b[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM)
-                                  << std::endl;
-                    }
-
-                    if (hb_out_b[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM) != golden[i]) {
-                        checked = false;
-                        std::cout << "Error found in kernel_2" << std::dec << k << " channel, " << j << " task, " << i
-                                  << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
-                        std::cout << "fpga   = " << std::hex
-                                  << hb_out_b[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM)
-                                  << std::endl;
-                    }
-
-                    if (hb_out_b[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM) != golden[i]) {
-                        checked = false;
-                        std::cout << "Error found in kernel_3" << std::dec << k << " channel, " << j << " task, " << i
-                                  << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
-                        std::cout << "fpga   = " << std::hex
-                                  << hb_out_b[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM)
-                                  << std::endl;
-                    }
-
-                    if (hb_out_b[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                            8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM) != golden[i]) {
-                        checked = false;
-                        std::cout << "Error found in kernel_4" << std::dec << k << " channel, " << j << " task, " << i
-                                  << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
-                        std::cout << "fpga   = " << std::hex
-                                  << hb_out_b[n][i / (64 / CH_NM) + j * (N_ROW / (64 / CH_NM))].range(
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM + 7,
-                                         8 * (i % (64 / CH_NM)) + 8 * k * 64 / CH_NM)
+                                  << hb_out_b[n][j * ((N_ROW / 32) * (CH_NM / 2)) + (i / 32) * (CH_NM / 2) + k / 2]
+                                         .range((k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8)
                                   << std::endl;
                     }
                 }

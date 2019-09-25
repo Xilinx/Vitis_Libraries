@@ -16,11 +16,7 @@
         "shell": "u200"
     }, 
     "test_type": [
-        "hls_csim", 
-        "hls_csynth", 
-        "hls_cosim", 
-        "hls_vivado_syn", 
-        "hls_vivado_impl"
+        "hls_csim"
     ], 
     "category": "canary"
 }

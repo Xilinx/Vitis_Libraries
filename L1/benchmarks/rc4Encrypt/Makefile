@@ -144,7 +144,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -229,6 +229,7 @@ HLS_DIR2 = $(XF_CASE_ROOT)/../../../L1/include
 
 VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_CFLAGS += -DHW_EMU_DEBUG  --xp param:hw_em.enableProtocolChecker=true
+#VPP_CFLAGS += -D_XF_SECURITY_RC4_DEBUG_=1
 
 ifeq ($(TARGET),sw_emu)
     VPP_CFLAGS += -D VIVADO_HLS_SIM

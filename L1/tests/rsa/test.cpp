@@ -15,27 +15,8 @@
  */
 
 #include "test.hpp"
-
-#include "xf_security/aes.hpp"
-
-void test(hls::stream<ap_uint<128> >& plaintext_strm,
-          hls::stream<bool>& i_e_strm,
-          hls::stream<ap_uint<256> >& cipherkey_strm,
-          hls::stream<ap_uint<128> >& ciphertext_strm,
-          hls::stream<bool>& o_e_strm) {
-    bool is_end = i_e_strm.read();
-    ap_uint<256> cipherkey = cipherkey_strm.read();
-    xf::security::aesEnc<256> cipher;
-    cipher.updateKey(cipherkey);
-    while (!is_end) {
-#pragma HLS PIPELINE II = 1
-        i_e_strm >> is_end;
-        ap_uint<128> plaintext = plaintext_strm.read();
-        ap_uint<128> ciphertext;
-        cipher.process(plaintext, cipherkey, ciphertext);
-        // xf::security::aes256Encrypt(plaintext, cipherkey, ciphertext);
-        ciphertext_strm.write(ciphertext);
-        o_e_strm << false;
-    }
-    o_e_strm << true;
+void rsa_test(ap_uint<2048> message, ap_uint<2048> N, ap_uint<2048> key, ap_uint<2048>& result) {
+    xf::security::rsa<64, 32> inst;
+    inst.updateKey(N, key);
+    inst.process(message, result);
 }

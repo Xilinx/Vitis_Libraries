@@ -30,6 +30,6 @@ The 1.0 release provides a range of HLS primitives for:
  * Symmetric Block Cipher
  * Symmetric Stream Cipher
  * Cipher Operation Mode
- * Message Anthentication Code(MAC)
+ * Message Authentication code(MAC)
  * Hash Function
  * Asymmetric Cryptography

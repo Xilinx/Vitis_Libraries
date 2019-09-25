@@ -33,7 +33,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 /**
  * @brief Rc_4 is the basic function for stream ciphering
@@ -65,6 +65,7 @@ static void rc4Imp(hls::stream<ap_uint<8> >& keyStrm,
 #endif
     // initial S and read key, 1<=keyLength<=256
     int keyLength = 0;
+LOOP_READ_KEY:
     while (!eKeyStrm.read()) {
 #pragma HLS pipeline II = 1
         keys[keyLength] = keyStrm.read();
@@ -73,6 +74,7 @@ static void rc4Imp(hls::stream<ap_uint<8> >& keyStrm,
 #endif
         ++keyLength;
     }
+LOOP_SET_S:
     for (int i = 0; i < 256; ++i) {
 #pragma HLS unroll
         S[i] = i;
@@ -86,6 +88,7 @@ static void rc4Imp(hls::stream<ap_uint<8> >& keyStrm,
 
     // generate keystream and XOR input data
     ap_uint<8> j8 = 0; //  8-bit width counter to avoid %256
+LOOP_UPDATE_S:
     for (int i = 0, ii = 0; i < 256; ++i) {
 #pragma HLS pipeline II = 1
         // j = (j + S[i] + keys[i % keyLength]) % 256;
@@ -103,6 +106,7 @@ static void rc4Imp(hls::stream<ap_uint<8> >& keyStrm,
     ap_uint<8> i = 0;
     ap_uint<8> j = 0;
     bool last = ePlainStream.read();
+LOOP_EMIT:
     while (!last) {
 #pragma HLS pipeline II = 1
         // next ~10 lines equals to
@@ -132,7 +136,7 @@ static void rc4Imp(hls::stream<ap_uint<8> >& keyStrm,
 #endif
 }
 
-} // end of namespace details
+} // end of namespace internal
 
 /**
  * @brief Rc_4 is the basic function for stream ciphering
@@ -153,7 +157,7 @@ static void rc4(hls::stream<ap_uint<8> >& keyStrm,
                 hls::stream<bool>& ePlainStream,
                 hls::stream<ap_uint<8> >& cipherStream,
                 hls::stream<bool>& eCipherStream) {
-    details::rc4Imp(keyStrm, eKeyStrm, plainStream, ePlainStream, cipherStream, eCipherStream);
+    internal::rc4Imp(keyStrm, eKeyStrm, plainStream, ePlainStream, cipherStream, eCipherStream);
 }
 
 } // end of namespace security

@@ -14,26 +14,27 @@
 # limitations under the License.
 #
 
+
 source settings.tcl
 
-set PROJ "gmac_test.prj"
+set PROJ "gmac_aes128_test.prj"
 set SOLN "solution1"
 set CLKP 3.33
 
 open_project -reset $PROJ
 
-add_files test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-set_top test_gmac
+add_files test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -D_XF_SECURITY_GMAC_DEBUG_=1"
+add_files -tb main.cpp
+set_top test
 
 open_solution -reset $SOLN
 
 set_part $XPART
 create_clock -period $CLKP -name default
-set_clock_uncertainty 1.05
+#set_clock_uncertainty 1.05
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc -ldflags "-lcrypto -lssl"
+  csim_design  -compiler gcc -ldflags "-lcrypto -lssl"
 }
 
 if {$CSYNTH == 1} {
@@ -41,7 +42,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -ldflags "-lcrypto -lssl"
+  cosim_design  -ldflags "-lcrypto -lssl"
 }
 
 if {$VIVADO_SYN == 1} {
