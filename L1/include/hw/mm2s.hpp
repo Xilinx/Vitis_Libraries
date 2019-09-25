@@ -222,6 +222,31 @@ void mm2sNbRoundOff(const ap_uint<DATAWIDTH>* in,
     }
 }
 
+/**
+ * @brief Read data from 512-bit wide axi memory interface and
+ *        write to stream.
+ *
+ * @tparam DATAWIDTH    width of data bus
+ * @tparam BURST_SIZE   burst size of the data transfers
+ *
+ * @param in            pointer to input memory
+ * @param outstream     output stream
+ * @param inputSize     size of the data
+ *
+ */
+template <int DATAWIDTH, int BURST_SIZE>
+void mm2sSimple(const uintMemWidth_t* in, hls::stream<uintMemWidth_t>& outstream, uint32_t inputSize) {
+    const int c_byte_size = 8;
+    const int c_word_size = DATAWIDTH / c_byte_size;
+    const int inSize_gmemwidth = (inputSize - 1) / c_word_size + 1;
+
+mm2s_simple:
+    for (int i = 0; i < inSize_gmemwidth; i++) {
+#pragma HLS PIPELINE II = 1
+        outstream << in[i];
+    }
+}
+
 } // namespace compression
 } // namespace xf
 

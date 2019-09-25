@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+.SECONDEXPANSION:
+
 # ------------------------------------------------------------
 #						Help
 
@@ -114,7 +116,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -147,13 +149,12 @@ XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
 
 BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
-SRC_DIR := $(XFLIB_DIR)/L3/demos/
-TB_DIR := lz4_app/
+SRC_DIR := $(XFLIB_DIR)/L3/demos/lz4_app/src
 
 # ------------------------------------------------------------
 #                      kernel setup
 
-KSRC_DIR = $(XFLIB_DIR)/L2/src/hw
+KSRC_DIR = $(XFLIB_DIR)/L2/src/
 
 VPP = $(XILINX_VITIS)/bin/v++
 
@@ -163,7 +164,7 @@ HLS_SRC_DIR = $(XFLIB_DIR)/L1/include/hw
 # Compilation flags
 VPP_FLAGS = -I$(HLS_SRC_DIR) \
 			 -I$(KSRC_DIR) \
-			 -I$(XFLIB_DIR)/L2/include/hw
+			 -I$(XFLIB_DIR)/L2/include/
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_FLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
 
@@ -225,12 +226,19 @@ $(XCLBIN_FILE_D): $(TEMP_DIR)/xf_decompress.xo
 # ------------------------------------------------------------
 #                       host setup
 
+OBJ_DIR_BASE ?= obj
+BIN_DIR_BASE ?= bin
+
+BIN_DIR_SUFFIX ?= _$(XDEVICE)
+
+OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
+
 CXX := xcpp
-HOST_EXE := xil_lz4_8b
+EXE_NAME := xil_lz4_8b
 #EXE_EXT = exe
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
-CXXFLAGS +=-I$(XFLIB_DIR)/L2/include/hw/
+CXXFLAGS +=-I$(XFLIB_DIR)/L3/include/
 CXXFLAGS +=-I$(XILINX_XRT)/include/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/xcl2/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/cmdparser/
@@ -238,12 +246,13 @@ CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/logger/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
 
 #Host and Common sources
-SRCS += $(SRC_DIR)/$(TB_DIR)/src/host.cpp
-SRCS += $(SRC_DIR)/$(TB_DIR)/src/xil_lz4.cpp
-SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
-SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
-SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
-SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
+SRCS += host.cpp
+EXTRA_OBJS += xil_lz4 xcl2 cmdlineparser logger xxhash
+xil_lz4_SRCS = $(XFLIB_DIR)/L3/src/xil_lz4.cpp
+xcl2_SRCS = $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
+cmdlineparser_SRCS = $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
+logger_SRCS = $(XFLIB_DIR)/common/libs/logger/logger.cpp
+xxhash_SRCS = $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
 CXXFLAGS += -fmessage-length=0
 		-DXDEVICE=$(XDEVICE) \
@@ -252,17 +261,31 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
 LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -std=c++0x -DVERBOSE
 
-EXE_FILE = $(BUILD_DIR)/$(HOST_EXE)
+EXE_FILE = $(BUILD_DIR)/$(EXE_NAME)
 
 
 # ------------------------------------------------------------
 #                       host rules
+OBJ_FILES = $(foreach s,$(SRCS),$(OBJ_DIR)/$(basename $(s)).o)
 
-$(EXE_FILE): $(SRCS) | check_vpp check_xrt check_platform
+$(OBJ_DIR)/%.o: CXXFLAGS += $($(*)_CXXFLAGS)
+
+$(OBJ_FILES): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | check_vpp check_xrt check_platform
+	@echo -e "----\nCompiling object $*..."
+	mkdir -p $(@D) 
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+EXTRA_OBJ_FILES = $(foreach f,$(EXTRA_OBJS),$(OBJ_DIR)/$(f).o)
+
+$(EXTRA_OBJ_FILES): $(OBJ_DIR)/%.o: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp check_xrt check_platform
+	@echo -e "----\nCompiling extra object $@..."
+	mkdir -p $(@D)
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+$(EXE_FILE): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platform
 	@echo -e "----\nCompiling host $(notdir $@)..."
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
 
 # ------------------------------------------------------------
 #                      build rules
@@ -289,8 +312,8 @@ cleanh:
 
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
-	-$(RMDIR) _x_temp* $(CUR_DIR)/reports
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* 
+	-$(RMDIR) _x_temp* $(CUR_DIR)/reports $(CUR_DIR)/obj_*
+	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig* 
 
 clean: cleanh
 
@@ -301,7 +324,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -cx $(XCLBIN_FILE_C) -dx $(XCLBIN_FILE_D) -l $(XFLIB_DIR)/common/test.list
+HOST_ARGS = -cx $(XCLBIN_FILE_C) -dx $(XCLBIN_FILE_D) -v $(XFLIB_DIR)/common/data/sample.txt
 
 
 ifeq ($(TARGET),sw_emu)

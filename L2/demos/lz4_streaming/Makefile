@@ -114,7 +114,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -153,7 +153,7 @@ TB_DIR := lz4_streaming/
 # ------------------------------------------------------------
 #                      kernel setup
 
-KSRC_DIR = $(XFLIB_DIR)/L2/src/hw
+KSRC_DIR = $(XFLIB_DIR)/L2/src/
 
 VPP = $(XILINX_VITIS)/bin/v++
 
@@ -163,7 +163,7 @@ HLS_SRC_DIR = $(XFLIB_DIR)/L1/include/hw
 # Compilation flags
 VPP_FLAGS = -I$(HLS_SRC_DIR) \
 			 -I$(KSRC_DIR) \
-			 -I$(XFLIB_DIR)/L2/include/hw
+			 -I$(XFLIB_DIR)/L2/include/
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_FLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
 
@@ -228,7 +228,7 @@ HOST_EXE := xil_lz4_streaming
 #EXE_EXT = exe
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
-CXXFLAGS +=-I$(XFLIB_DIR)/L2/include/hw/
+CXXFLAGS +=-I$(XFLIB_DIR)/L2/tests/lz4_streaming_tb/src/
 CXXFLAGS +=-I$(XILINX_XRT)/include/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/xcl2/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/cmdparser/

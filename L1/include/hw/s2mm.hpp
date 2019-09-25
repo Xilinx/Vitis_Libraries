@@ -240,6 +240,53 @@ void s2mmNb(ap_uint<DATAWIDTH>* out,
     }
 }
 
+/**
+ * @brief This module reads DATAWIDTH data from stream based on
+ * size stream and writes the data to DDR.
+ *
+ * @tparam STREAM_SIZE_DT Stream size class instance
+ * @tparam BURST_SIZE burst size of the data transfers
+ * @tparam DATAWIDTH width of data bus
+ * @tparam NUM_BLOCKS number of blocks
+ *
+ * @param out output memory address
+ * @param output_idx output index
+ * @param inStream input stream
+ * @param endOfStream stream to indicate end of data stream
+ * @param outSize output data size
+ */
+template <class STREAM_SIZE_DT, int BURST_SIZE, int DATAWIDTH, int NUM_BLOCKS>
+void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
+                   hls::stream<ap_uint<DATAWIDTH> >& inStream,
+                   hls::stream<bool>& endOfStream,
+                   hls::stream<uint32_t>& outSize,
+                   uint32_t* output_size) {
+    uint32_t out_idx = 0;
+s2mm_eos_simple:
+    for (bool eos = endOfStream.read(); eos == false; eos = endOfStream.read())
+#pragma HLS PIPELINE II = 1
+        out[out_idx++] = inStream.read();
+
+    ap_uint<DATAWIDTH> val = inStream.read();
+    output_size[0] = outSize.read();
+}
+
+/**
+ * @brief This module reads DATAWIDTH data from stream based on
+ * size stream and writes the data to DDR. Reading data from
+ * multiple data streams is non-blocking which is done using empty() API.
+ *
+ * @tparam STREAM_SIZE_DT Stream size class instance
+ * @tparam BURST_SIZE burst size of the data transfers
+ * @tparam DATAWIDTH width of data bus
+ * @tparam NUM_BLOCKS number of blocks
+ *
+ * @param out output memory address
+ * @param output_idx output index
+ * @param inStream input stream
+ * @param endOfStream stream to indicate end of data stream
+ * @param outSize output data size
+ */
 template <class STREAM_SIZE_DT, int BURST_SIZE, int DATAWIDTH, int NUM_BLOCKS>
 void s2mmEosNbZlib(ap_uint<DATAWIDTH>* out,
                    const uint32_t output_idx[PARALLEL_BLOCK],

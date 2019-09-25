@@ -15,31 +15,13 @@
  *
  */
 #include "xil_lz4.hpp"
-#include <fstream>
-#include <vector>
 #include "cmdlineparser.h"
 
-void xilCompressTop(std::string& compress_mod,
-                    uint32_t block_size,
-                    std::string& compress_bin,
-                    std::string& single_bin) {
+void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string& single_bin) {
     // Xilinx LZ4 object
-    xfLz4 xlz;
+    xfLz4 xlz(single_bin, 1);
 
-    // LZ4 Compression Binary Name
-    std::string binaryFileName;
-    if (SINGLE_XCLBIN)
-        binaryFileName = single_bin;
-    else
-        binaryFileName = compress_bin;
     xlz.m_bin_flow = 1;
-    // Create xfLz4 object
-    xlz.init(binaryFileName);
-#ifdef VERBOSE
-    std::cout << "\n";
-    std::cout << "KT(MBps)\tLZ4_CR\t\tFile Size(MB)\t\tFile Name" << std::endl;
-    std::cout << "\n";
-#endif
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -71,8 +53,9 @@ void xilCompressTop(std::string& compress_mod,
 
 #ifdef VERBOSE
     std::cout.precision(3);
-    std::cout << "\t\t" << (double)input_size / enbytes << "\t\t" << (double)input_size / 1000000 << "\t\t\t"
-              << lz_compress_in << std::endl;
+    std::cout << std::fixed << std::setprecision(2) << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
+              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << "File Name\t\t:" << lz_compress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_compress_out.c_str() << std::endl;
     std::cout << "Compressed file size: " << enbytes << std::endl;
@@ -81,8 +64,6 @@ void xilCompressTop(std::string& compress_mod,
 #ifdef EVENT_PROFILE
     std::cout << "Total Time (milli sec): " << total_time_ns.count() / 1000000 << std::endl;
 #endif
-
-    xlz.release();
 }
 
 void xilValidate(std::string& file_list, std::string& ext) {
@@ -109,30 +90,17 @@ void xilValidate(std::string& file_list, std::string& ext) {
     }
 }
 
-void xilCompressDecompressList(std::string& file_list,
+void xilCompressDecompressList(xfLz4& xlz,
+                               std::string& file_list,
                                std::string& ext1,
                                std::string& ext2,
                                bool c_flow,
                                bool d_flow,
-                               uint32_t block_size,
-                               std::string& compress_bin,
-                               std::string& decompress_bin,
-                               std::string& single_bin) {
+                               uint32_t block_size) {
     // Compression
-    // LZ4 Compression Binary Name
-    std::string binaryFileName;
-    if (SINGLE_XCLBIN)
-        binaryFileName = single_bin;
-    else
-        binaryFileName = compress_bin;
-
-    // Create xfLz4 object
-    xfLz4 xlz;
-
     if (c_flow == 0) {
         std::cout << "\n";
         xlz.m_bin_flow = 1;
-        xlz.init(binaryFileName);
     }
     std::cout << "\n";
 
@@ -156,13 +124,24 @@ void xilCompressDecompressList(std::string& file_list,
     std::ifstream infilelist(file_list.c_str());
     std::string line;
 
+    if (!(infilelist.good())) {
+        std::cout << "Unable to open the list of files" << std::endl;
+        exit(1);
+    }
+
+    std::getline(infilelist, line);
+    if (!line.length()) {
+        std::cout << "Input list of file is empty" << std::endl;
+        exit(1);
+    }
+
     // Compress list of files
     // This loop does LZ4 compression on list
     // of files.
-    while (std::getline(infilelist, line)) {
+    do {
         std::ifstream inFile(line.c_str(), std::ifstream::binary);
         if (!inFile) {
-            std::cout << "Unable to open file";
+            std::cout << "Unable to open file" << std::endl;
             exit(1);
         }
 
@@ -185,34 +164,30 @@ void xilCompressDecompressList(std::string& file_list,
             std::cout << std::fixed << std::setprecision(3);
             std::cout << (double)input_size / 1000000 << "\t\t\t" << lz_compress_in << std::endl;
         }
-    }
-
-    if (c_flow == 0) {
-        if (!SINGLE_XCLBIN) {
-            xlz.release();
-        }
-    }
+    } while (std::getline(infilelist, line));
 
     // De-Compression
-    // LZ4 Decompression Binary Name
-    std::string binaryFileName_decompress;
-    if (!SINGLE_XCLBIN) binaryFileName_decompress = decompress_bin;
 
     // Xilinx LZ4 object
     if (d_flow == 0) {
         // Create xfLz4 object
         std::cout << "\n";
         xlz.m_bin_flow = 0;
-        if (!SINGLE_XCLBIN) {
-            xlz.init(binaryFileName_decompress);
-        }
-        if (SINGLE_XCLBIN && c_flow == 1) {
-            xlz.init(binaryFileName);
-        }
     }
 
     std::ifstream infilelist_dec(file_list.c_str());
     std::string line_dec;
+
+    if (!(infilelist_dec.good())) {
+        std::cout << "Unable to open the list of files" << std::endl;
+        exit(1);
+    }
+
+    std::getline(infilelist_dec, line_dec);
+    if (!line_dec.length()) {
+        std::cout << "Input list of file is empty" << std::endl;
+        exit(1);
+    }
 
     std::cout << "\n";
     std::cout << "--------------------------------------------------------------" << std::endl;
@@ -235,7 +210,7 @@ void xilCompressDecompressList(std::string& file_list,
     // Decompress list of files
     // This loop does LZ4 decompress on list
     // of files.
-    while (std::getline(infilelist_dec, line_dec)) {
+    do {
         std::string file_line = line_dec;
         file_line = file_line + ext2;
 
@@ -262,20 +237,12 @@ void xilCompressDecompressList(std::string& file_list,
             std::cout << std::fixed << std::setprecision(3);
             std::cout << (double)input_size / 1000000 << "\t\t" << lz_decompress_in << std::endl;
         }
-    } // While loop ends
-
-    if (d_flow == 0) {
-        xlz.release();
-    }
+    } while (std::getline(infilelist_dec, line_dec)); // While loop ends
 }
-void xilBatchVerify(std::string& file_list,
-                      int f,
-                      uint32_t block_size,
-                      std::string& compress_bin,
-                      std::string& decompress_bin,
-                      std::string& single_bin) {
+void xilBatchVerify(std::string& file_list, int f, uint32_t block_size, std::string& single_bin) {
     if (f == 0) { // All flows are tested (Xilinx, Standard)
 
+        xfLz4 xlz(single_bin, 2);
         // Xilinx LZ4 flow
 
         // Flow : Xilinx LZ4 Compress vs Xilinx LZ4 Decompress
@@ -283,8 +250,7 @@ void xilBatchVerify(std::string& file_list,
             // Xilinx LZ4 compression
             std::string ext1 = ".xe2xd.lz4";
             std::string ext2 = ".xe2xd.lz4";
-            xilCompressDecompressList(file_list, ext1, ext2, 0, 0, block_size, compress_bin, decompress_bin,
-                                      single_bin);
+            xilCompressDecompressList(xlz, file_list, ext1, ext2, 0, 0, block_size);
 
             // Validate
             std::cout << "\n";
@@ -305,8 +271,7 @@ void xilBatchVerify(std::string& file_list,
             // Xilinx LZ4 compression
             std::string ext2 = ".xe2sd.lz4";
             std::string ext1 = ".xe2sd.lz4";
-            xilCompressDecompressList(file_list, ext1, ext2, 0, 1, block_size, compress_bin, decompress_bin,
-                                      single_bin);
+            xilCompressDecompressList(xlz, file_list, ext1, ext2, 0, 1, block_size);
 
             std::cout << "\n";
             std::cout << "---------------------------------------------------------------------------------------"
@@ -325,8 +290,7 @@ void xilBatchVerify(std::string& file_list,
             // Standard LZ4 compression
             std::string ext1 = ".se2xd";
             std::string ext2 = ".std.lz4";
-            xilCompressDecompressList(file_list, ext1, ext2, 1, 0, block_size, compress_bin, decompress_bin,
-                                      single_bin);
+            xilCompressDecompressList(xlz, file_list, ext1, ext2, 1, 0, block_size);
 
             // Validate
             std::cout << "\n";
@@ -344,13 +308,13 @@ void xilBatchVerify(std::string& file_list,
     }                  // Flow = 0 ends here
     else if (f == 1) { // Only Xilinx flows are tested
 
+        xfLz4 xlz(single_bin, 2);
         // Flow : Xilinx LZ4 Compress vs Xilinx LZ4 Decompress
         {
             // Xilinx LZ4 compression
             std::string ext1 = ".xe2xd.lz4";
             std::string ext2 = ".xe2xd.lz4";
-            xilCompressDecompressList(file_list, ext1, ext2, 0, 0, block_size, compress_bin, decompress_bin,
-                                      single_bin);
+            xilCompressDecompressList(xlz, file_list, ext1, ext2, 0, 0, block_size);
 
             // Validate
             std::cout << "\n";
@@ -366,13 +330,13 @@ void xilBatchVerify(std::string& file_list,
 
     } // Flow = 1 ends here
     else if (f == 2) {
+        xfLz4 xlz(single_bin, 1);
         // Flow : Xilinx LZ4 Compress vs Standard LZ4 Decompress
         {
             // Xilinx LZ4 compression
             std::string ext1 = ".xe2sd.lz4";
             std::string ext2 = ".xe2sd.lz4";
-            xilCompressDecompressList(file_list, ext1, ext2, 0, 1, block_size, compress_bin, decompress_bin,
-                                      single_bin);
+            xilCompressDecompressList(xlz, file_list, ext1, ext2, 0, 1, block_size);
 
             // Validate
             std::cout << "\n";
@@ -389,13 +353,13 @@ void xilBatchVerify(std::string& file_list,
 
     } // Flow = 2 ends here
     else if (f == 3) {
+        xfLz4 xlz(single_bin, 0);
         { // Start of Flow : Standard LZ4 Compress vs Xilinx LZ4 Decompress
 
             // Standard LZ4 compression
             std::string ext1 = ".se2xd";
             std::string ext2 = ".std.lz4";
-            xilCompressDecompressList(file_list, ext1, ext2, 1, 0, block_size, compress_bin, decompress_bin,
-                                      single_bin);
+            xilCompressDecompressList(xlz, file_list, ext1, ext2, 1, 0, block_size);
 
             // Validate
             std::cout << "\n";
@@ -419,24 +383,11 @@ void xilBatchVerify(std::string& file_list,
     }
 }
 
-void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin, std::string& single_bin) {
+void xilDecompressTop(std::string& decompress_mod, std::string& single_bin) {
     // Create xfLz4 object
-    xfLz4 xlz;
+    xfLz4 xlz(single_bin, 0);
 
-    // LZ4 Decompression Binary Name
-    std::string binaryFileName;
-    if (SINGLE_XCLBIN)
-        binaryFileName = single_bin;
-    else
-        binaryFileName = decompress_bin;
     xlz.m_bin_flow = 0;
-    xlz.init(binaryFileName);
-
-#ifdef VERBOSE
-    std::cout << "\n";
-    std::cout << "KT(MBps)\tFile Size(MB)\t\tFile Name" << std::endl;
-    std::cout << "\n";
-#endif
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -456,18 +407,102 @@ void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin, 
     // Call LZ4 decompression
     xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size);
 #ifdef VERBOSE
-    std::cout << "\t\t" << (double)input_size / 1000000 << "\t\t\t" << lz_decompress_in << std::endl;
+    std::cout << std::fixed << std::setprecision(2) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << "File Name\t\t:" << lz_decompress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_decompress_out.c_str() << std::endl;
 #endif
-    xlz.release();
+}
+
+void xilCompressDecompressTop(std::string& compress_decompress_mod, uint32_t block_size, std::string& single_bin) {
+    // Compression
+
+    // Create xfLz4 object
+    xfLz4 xlz(single_bin, 2);
+
+    xlz.m_bin_flow = 1;
+
+    std::cout << "\n";
+
+    std::cout << "--------------------------------------------------------------" << std::endl;
+    std::cout << "                     Xilinx Compress                          " << std::endl;
+    std::cout << "--------------------------------------------------------------" << std::endl;
+
+    std::cout << "\n";
+
+    std::ifstream inFile(compress_decompress_mod.c_str(), std::ifstream::binary);
+    if (!inFile) {
+        std::cout << "Unable to open file" << std::endl;
+        exit(1);
+    }
+
+    uint64_t input_size = getFileSize(inFile);
+    inFile.close();
+
+    std::string lz_compress_in = compress_decompress_mod;
+    std::string lz_compress_out = compress_decompress_mod;
+    lz_compress_out = lz_compress_out + ".lz4";
+
+    xlz.m_block_size_in_kb = block_size;
+    xlz.m_switch_flow = 0;
+
+    // Call LZ4 compression
+    uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size);
+    std::cout << std::fixed << std::setprecision(2) << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
+              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << "File Name\t\t:" << lz_compress_in << std::endl;
+
+    // De-Compression
+
+    // Xilinx LZ4 object
+    xlz.m_bin_flow = 0;
+
+    std::cout << "\n";
+    std::cout << "--------------------------------------------------------------" << std::endl;
+    std::cout << "                     Xilinx De-Compress                       " << std::endl;
+    std::cout << "--------------------------------------------------------------" << std::endl;
+    std::cout << "\n";
+
+    // Decompress list of files
+    // This loop does LZ4 decompress on list
+    // of files.
+
+    std::string lz_decompress_in = compress_decompress_mod + ".lz4";
+    std::string lz_decompress_out = compress_decompress_mod;
+    lz_decompress_out = lz_decompress_in + ".orig";
+
+    std::ifstream inFile_dec(lz_decompress_in.c_str(), std::ifstream::binary);
+    if (!inFile_dec) {
+        std::cout << "Unable to open file";
+        exit(1);
+    }
+
+    uint64_t input_size1 = getFileSize(inFile_dec);
+    inFile_dec.close();
+
+    // Call LZ4 decompression
+    xlz.m_switch_flow = 0;
+    xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size1);
+
+    std::cout << std::fixed << std::setprecision(2) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << "File Name\t\t:" << lz_decompress_in << std::endl;
+
+    // Validate
+    std::cout << "\n";
+    std::string inputFile = compress_decompress_mod;
+    std::string outputFile = compress_decompress_mod + ".lz4" + ".orig";
+    int ret = validate(inputFile, outputFile);
+    if (ret == 0) {
+        std::cout << (ret ? "FAILED\t" : "PASSED\t") << "\t" << inputFile << std::endl;
+    } else {
+        std::cout << "Validation Failed" << outputFile.c_str() << std::endl;
+    }
 }
 
 int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
-    parser.addSwitch("--compress_xclbin", "-cx", "Compress XCLBIN", "compress");
-    parser.addSwitch("--decompress_xclbin", "-dx", "DeCompress XCLBIN", "decompress");
     parser.addSwitch("--single_xclbin", "-sx", "Single XCLBIN", "compress_decompress");
+    parser.addSwitch("--compress_decompress", "-v", "Compress Decompress", "");
     parser.addSwitch("--compress", "-c", "Compress", "");
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.addSwitch("--decompress", "-d", "Decompress", "");
@@ -475,9 +510,8 @@ int main(int argc, char* argv[]) {
     parser.addSwitch("--flow", "-x", "Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd]", "1");
     parser.parse(argc, argv);
 
-    std::string compress_bin = parser.value("compress_xclbin");
-    std::string decompress_bin = parser.value("decompress_xclbin");
     std::string single_bin = parser.value("single_xclbin");
+    std::string compress_decompress_mod = parser.value("compress_decompress");
     std::string compress_mod = parser.value("compress");
     std::string filelist = parser.value("file_list");
     std::string decompress_mod = parser.value("decompress");
@@ -519,10 +553,13 @@ int main(int argc, char* argv[]) {
         fopt = 1;
 
     // "-c" - Compress Mode
-    if (!compress_mod.empty()) xilCompressTop(compress_mod, bSize, compress_bin, single_bin);
+    if (!compress_mod.empty()) xilCompressTop(compress_mod, bSize, single_bin);
 
     // "-d" Decompress Mode
-    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, decompress_bin, single_bin);
+    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, single_bin);
+
+    // "-d" Decompress Mode
+    if (!compress_decompress_mod.empty()) xilCompressDecompressTop(compress_decompress_mod, bSize, single_bin);
 
     // "-l" List of Files
     if (!filelist.empty()) {
@@ -534,6 +571,6 @@ int main(int argc, char* argv[]) {
             std::cout << "from following source ";
             std::cout << "https://github.com/lz4/lz4.git" << std::endl;
         }
-        xilBatchVerify(filelist, fopt, bSize, compress_bin, decompress_bin, single_bin);
+        xilBatchVerify(filelist, fopt, bSize, single_bin);
     }
 }

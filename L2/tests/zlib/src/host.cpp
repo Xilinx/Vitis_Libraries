@@ -45,11 +45,11 @@ void xilValidate(std::string& file_list, std::string& ext) {
 }
 
 void xilCompressDecompressList(std::string& file_list,
-                                  std::string& ext1,
-                                  std::string& ext2,
-                                  std::string& compress_bin,
-                                  std::string& decompress_bin,
-                                  std::string& single_bin) {
+                               std::string& ext1,
+                               std::string& ext2,
+                               std::string& compress_bin,
+                               std::string& decompress_bin,
+                               std::string& single_bin) {
     // GZIP/Zlib Compression Binary Name
     std::string binaryFileName;
     if (SINGLE_XCLBIN)
@@ -154,9 +154,9 @@ void xilCompressDecompressList(std::string& file_list,
 }
 
 void xilBatchVerify(std::string& file_list,
-                      std::string& compress_bin,
-                      std::string& decompress_bin,
-                      std::string& single_bin) {
+                    std::string& compress_bin,
+                    std::string& decompress_bin,
+                    std::string& single_bin) {
     std::string ext1;
     std::string ext2;
 
