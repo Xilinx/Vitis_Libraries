@@ -16,7 +16,7 @@
 
 /**
  * @file scan_col_2.hpp
- * @brief This file is part of XF Database Library, contains SCAN by column
+ * @brief This file is part of Vitis Database Library, contains SCAN by column
  * functions.
  *
  * Unlike the functions in scan_col.h, these functions obtains the number of

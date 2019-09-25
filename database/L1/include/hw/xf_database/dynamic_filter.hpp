@@ -18,14 +18,14 @@
  * @file dynamic_filter.hpp
  * @brief This file contains run-time-configurable filter primitive.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_DYNAMIC_FILTER_H
 #define XF_DATABASE_DYNAMIC_FILTER_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "ap_int.h"
@@ -499,7 +499,7 @@ namespace xf {
 namespace database {
 
 /**
- * @brief Filter payloads according to conditions set in run-time.
+ * @brief Filter payloads according to conditions set during run-time.
  *
  * This primitive, with its 3 overloads, supports filtering rows using up to four columns as conditions.
  * The payload columns should be grouped together into this primitive, using ``combineCol`` primitive, and its total
@@ -641,11 +641,11 @@ void filter_3_to_4(hls::stream<ap_uint<W> >& v0_strm,
 namespace xf {
 namespace database {
 /**
- * @brief Filter payloads according to conditions set in run-time.
+ * @brief Filter payloads according to conditions set during run-time.
  *
  * This function is a wrapper-around the four-condition-column
  * dynamic_filter, just duplicating the columns to feed all its inputs.
- * Thus the share the same configuration bit pattern.
+ * Thus they share the same configuration bit pattern.
  * All op related to the 4th column should be set to ``FOP_DC``.
  *
  * @tparam W width of all condition column streams, in bits.
@@ -739,11 +739,11 @@ void filter_2_to_4(hls::stream<ap_uint<W> >& v0_strm,
 namespace xf {
 namespace database {
 /**
- * @brief Filter payloads according to conditions set in run-time.
+ * @brief Filter payloads according to conditions set during run-time.
  *
  * This function is a wrapper-around the four-condition-column
  * dynamic_filter, just duplicating the columns to feed all its inputs.
- * Thus the share the same configuration bit pattern.
+ * Thus they share the same configuration bit pattern.
  * All op related to the 3rd and 4th columns should be set to ``FOP_DC``.
  *
  * @tparam W width of all condition column streams, in bits.
@@ -832,11 +832,11 @@ void filter_1_to_4(hls::stream<ap_uint<W> >& v0_strm,
 namespace xf {
 namespace database {
 /**
- * @brief Filter payloads according to conditions set in run-time.
+ * @brief Filter payloads according to conditions set during run-time.
  *
  * This function is a wrapper-around the four-condition-column
  * dynamic_filter, just duplicating the columns to feed all its inputs.
- * Thus the share the same configuration bit pattern.
+ * Thus they share the same configuration bit pattern.
  * All op related to the 2nd to 4th columns should be set to ``FOP_DC``.
  *
  * @tparam W width of all condition column streams, in bits.

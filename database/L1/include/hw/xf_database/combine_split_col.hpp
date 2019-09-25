@@ -18,14 +18,14 @@
  * @file combine_split_col.hpp
  * @brief combine/split unit template function implementation.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_COMBINE_SPLIT_COL_H
 #define XF_DATABASE_COMBINE_SPLIT_COL_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "hls_stream.h"
@@ -44,7 +44,7 @@ namespace database {
  *
  * Columns are passed through streams of certain width in hardware. Normally, each column uses one stream, but for some
  * primitives, the processing semantic abstract the columns into a couple of groups, and trait each group as a whole.
- * To make call to such primitives easier, the combine column primitive fuses data of same row but different columns
+ * To make calling such primitives easier, the combine column primitive fuses data of same row but different columns
  * into one wide column.
  *
  * The counter part of this primitive is ``splitCol``.
@@ -53,8 +53,8 @@ namespace database {
  * @tparam _WCol2 the width of 2nd input stream.
  * @tparam _WColOut the width of output stream.
  *
- * @param din1_strm input data stream.
- * @param din2_strm input data stream.
+ * @param din1_strm 1st input data stream.
+ * @param din2_strm 2nd input data stream.
  * @param in_e_strm end flag stream for input data.
  * @param dout_strm output data stream.
  * @param out_e_strm end flag stream for output data.
@@ -82,7 +82,7 @@ void combineCol(hls::stream<ap_uint<_WCol1> >& din1_strm,
  *
  * Columns are passed through streams of certain width in hardware. Normally, each column uses one stream, but for some
  * primitives, the processing semantic abstract the columns into a couple of groups, and trait each group as a whole.
- * To make call to such primitives easier, the combine column primitive fuses data of same row but different columns
+ * To make calling such primitives easier, the combine column primitive fuses data of same row but different columns
  * into one wide column.
  *
  * The counter part of this primitive is ``splitCol``.
@@ -92,9 +92,9 @@ void combineCol(hls::stream<ap_uint<_WCol1> >& din1_strm,
  * @tparam _WCol3 the width of 3rd input stream.
  * @tparam _WColOut the width of output stream.
  *
- * @param din1_strm input data stream.
- * @param din2_strm input data stream.
- * @param din3_strm input data stream.
+ * @param din1_strm 1st input data stream.
+ * @param din2_strm 2nd input data stream.
+ * @param din3_strm 3rd input data stream.
  * @param in_e_strm end flag stream for input data.
  * @param dout_strm output data stream.
  * @param out_e_strm end flag stream for output data.
@@ -124,7 +124,7 @@ void combineCol(hls::stream<ap_uint<_WCol1> >& din1_strm,
  *
  * Columns are passed through streams of certain width in hardware. Normally, each column uses one stream, but for some
  * primitives, the processing semantic abstract the columns into a couple of groups, and trait each group as a whole.
- * To make call to such primitives easier, the combine column primitive fuses data of same row but different columns
+ * To make calling such primitives easier, the combine column primitive fuses data of same row but different columns
  * into one wide column.
  *
  * The counter part of this primitive is ``splitCol``.
@@ -135,10 +135,10 @@ void combineCol(hls::stream<ap_uint<_WCol1> >& din1_strm,
  * @tparam _WCol4 the width of 4th input stream.
  * @tparam _WColOut the width of output stream.
  *
- * @param din1_strm input data stream.
- * @param din2_strm input data stream.
- * @param din3_strm input data stream.
- * @param din4_strm input data stream.
+ * @param din1_strm 1st input data stream.
+ * @param din2_strm 2nd input data stream.
+ * @param din3_strm 3rd input data stream.
+ * @param din4_strm 4th input data stream.
  * @param in_e_strm end flag stream for input data.
  * @param dout_strm output data stream.
  * @param out_e_strm end flag stream for output data.
@@ -170,7 +170,7 @@ void combineCol(hls::stream<ap_uint<_WCol1> >& din1_strm,
  *
  * Columns are passed through streams of certain width in hardware. Normally, each column uses one stream, but for some
  * primitives, the processing semantic abstract the columns into a couple of groups, and trait each group as a whole.
- * To make call to such primitives easier, the combine column primitive fuses data of same row but different columns
+ * To make calling such primitives easier, the combine column primitive fuses data of same row but different columns
  * into one wide column.
  *
  * The counter part of this primitive is ``splitCol``.
@@ -182,11 +182,11 @@ void combineCol(hls::stream<ap_uint<_WCol1> >& din1_strm,
  * @tparam _WCol5 the width of 5th input stream.
  * @tparam _WColOut the width of output stream.
  *
- * @param din1_strm input data stream.
- * @param din2_strm input data stream.
- * @param din3_strm input data stream.
- * @param din4_strm input data stream.
- * @param din5_strm input data stream.
+ * @param din1_strm 1st input data stream.
+ * @param din2_strm 2nd input data stream.
+ * @param din3_strm 3rd input data stream.
+ * @param din4_strm 4th input data stream.
+ * @param din5_strm 5th input data stream.
  * @param in_e_strm end flag stream for input data.
  * @param dout_strm output data stream.
  * @param out_e_strm end flag stream for output data.
@@ -221,7 +221,7 @@ void combineCol(hls::stream<ap_uint<_WCol1> >& din1_strm,
  *
  * Columns are passed through streams of certain width in hardware. Normally, each column uses one stream, but for some
  * primitives, the processing semantic abstract the columns into a couple of groups, and trait each group as a whole.
- * To make call to such primitives easier, the split column primitive breaks the wide output stream into independent
+ * To make calling such primitives easier, the split column primitive breaks the wide output stream into independent
  * column-specific streams.
  *
  * The counter part of this primitive is ``combineCol``.
@@ -232,8 +232,8 @@ void combineCol(hls::stream<ap_uint<_WCol1> >& din1_strm,
  *
  * @param din_strm input data stream.
  * @param in_e_strm end flag stream for input data.
- * @param dout1_strm output data stream.
- * @param dout2_strm output data stream.
+ * @param dout1_strm 1st output data stream.
+ * @param dout2_strm 2nd output data stream.
  * @param out_e_strm end flag stream for output data.
  */
 template <int _WColIn, int _WCol1, int _WCol2>
@@ -266,7 +266,7 @@ void splitCol(hls::stream<ap_uint<_WColIn> >& din_strm,
  *
  * Columns are passed through streams of certain width in hardware. Normally, each column uses one stream, but for some
  * primitives, the processing semantic abstract the columns into a couple of groups, and trait each group as a whole.
- * To make call to such primitives easier, the split column primitive breaks the wide output stream into independent
+ * To make calling such primitives easier, the split column primitive breaks the wide output stream into independent
  * column-specific streams.
  *
  * The counter part of this primitive is ``combineCol``.
@@ -278,9 +278,9 @@ void splitCol(hls::stream<ap_uint<_WColIn> >& din_strm,
  *
  * @param din_strm input data stream
  * @param in_e_strm end flag stream for input data
- * @param dout1_strm output data stream
- * @param dout2_strm output data stream
- * @param dout3_strm output data stream
+ * @param dout1_strm 1st output data stream
+ * @param dout2_strm 2nd output data stream
+ * @param dout3_strm 3rd output data stream
  * @param out_e_strm end flag stream for output data
  */
 template <int _WColIn, int _WCol1, int _WCol2, int _WCol3>
@@ -318,7 +318,7 @@ void splitCol(hls::stream<ap_uint<_WColIn> >& din_strm,
  *
  * Columns are passed through streams of certain width in hardware. Normally, each column uses one stream, but for some
  * primitives, the processing semantic abstract the columns into a couple of groups, and trait each group as a whole.
- * To make call to such primitives easier, the split column primitive breaks the wide output stream into independent
+ * To make calling such primitives easier, the split column primitive breaks the wide output stream into independent
  * column-specific streams.
  *
  * The counter part of this primitive is ``combineCol``.
@@ -331,10 +331,10 @@ void splitCol(hls::stream<ap_uint<_WColIn> >& din_strm,
  *
  * @param din_strm input data stream
  * @param in_e_strm end flag stream for input data
- * @param dout1_strm output data stream
- * @param dout2_strm output data stream
- * @param dout3_strm output data stream
- * @param dout4_strm output data stream
+ * @param dout1_strm 1st output data stream
+ * @param dout2_strm 2nd output data stream
+ * @param dout3_strm 3rd output data stream
+ * @param dout4_strm 4th output data stream
  * @param out_e_strm end flag stream for output data
  */
 template <int _WColIn, int _WCol1, int _WCol2, int _WCol3, int _WCol4>
@@ -377,7 +377,7 @@ void splitCol(hls::stream<ap_uint<_WColIn> >& din_strm,
  *
  * Columns are passed through streams of certain width in hardware. Normally, each column uses one stream, but for some
  * primitives, the processing semantic abstract the columns into a couple of groups, and trait each group as a whole.
- * To make call to such primitives easier, the split column primitive breaks the wide output stream into independent
+ * To make calling such primitives easier, the split column primitive breaks the wide output stream into independent
  * column-specific streams.
  *
  * The counter part of this primitive is ``combineCol``.
@@ -391,11 +391,11 @@ void splitCol(hls::stream<ap_uint<_WColIn> >& din_strm,
  *
  * @param din_strm input data stream
  * @param in_e_strm end flag stream for input data
- * @param dout1_strm output data stream
- * @param dout2_strm output data stream
- * @param dout3_strm output data stream
- * @param dout4_strm output data stream
- * @param dout5_strm output data stream
+ * @param dout1_strm 1st output data stream
+ * @param dout2_strm 2nd output data stream
+ * @param dout3_strm 3rd output data stream
+ * @param dout4_strm 4th output data stream
+ * @param dout5_strm 5th output data stream
  * @param out_e_strm end flag stream for output data
  */
 template <int _WColIn, int _WCol1, int _WCol2, int _WCol3, int _WCol4, int _WCol5>

@@ -112,7 +112,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -159,43 +159,17 @@ gqeJoin_EXTRA_HDRS = $(XFLIB_DIR)/L2/include/gqe_join.hpp
 # FIXME still many missing
 gqeJoin_VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw \
 		       -I$(XFLIB_DIR)/L2/include \
-		       -I$(XFLIB_DIR)/ext
+		       -I$(XFLIB_DIR)/../utils/L1/include
 
 gqePart_EXTRA_HDRS += $(XFLIB_DIR)/L2/include/gqe_part.hpp
 # FIXME still many missing
 gqePart_VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw \
 		       -I$(XFLIB_DIR)/L2/include \
-		       -I$(XFLIB_DIR)/ext
+		       -I$(XFLIB_DIR)/../utils/L1/include
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
-gqeJoin_VPP_LFLAGS += \
-  --sp gqeJoin_1.buf_A:DDR[0] \
-  --sp gqeJoin_1.buf_B:DDR[0] \
-  --sp gqeJoin_1.buf_C:DDR[0:1] \
-  --sp gqeJoin_1.buf_D:DDR[0] \
-  --sp gqeJoin_1.htb_buf0:HBM[2] \
-  --sp gqeJoin_1.htb_buf1:HBM[3] \
-  --sp gqeJoin_1.htb_buf2:HBM[10] \
-  --sp gqeJoin_1.htb_buf3:HBM[11] \
-  --sp gqeJoin_1.htb_buf4:HBM[18] \
-  --sp gqeJoin_1.htb_buf5:HBM[19] \
-  --sp gqeJoin_1.htb_buf6:HBM[26] \
-  --sp gqeJoin_1.htb_buf7:HBM[27] \
-  --sp gqeJoin_1.stb_buf0:HBM[6] \
-  --sp gqeJoin_1.stb_buf1:HBM[7] \
-  --sp gqeJoin_1.stb_buf2:HBM[14] \
-  --sp gqeJoin_1.stb_buf3:HBM[15] \
-  --sp gqeJoin_1.stb_buf4:HBM[22] \
-  --sp gqeJoin_1.stb_buf5:HBM[23] \
-  --sp gqeJoin_1.stb_buf6:HBM[30] \
-  --sp gqeJoin_1.stb_buf7:HBM[31]
-#  --slr gqeJoin_1:SLR0
-gqePart_VPP_LFLAGS += \
-  --sp gqePart_1.buf_A:DDR[1] \
-  --sp gqePart_1.buf_B:DDR[0] \
-  --sp gqePart_1.buf_D:DDR[0] \
-  --slr gqePart_1:SLR2
+VPP_LFLAGS += --config conn_u280.ini
 CXXFLAGS += -DUSE_HBM
 else
 $(warning Unsupported platform $(XPLATFORM))
@@ -203,12 +177,7 @@ endif
 
 # -----------------------------------------------------------------------------
 
-VPP_LFLAGS += --xp "vivado_prop:run.impl_1.STEPS.OPT_DESIGN.ARGS.DIRECTIVE=Explore" \
-	--xp "vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.IS_ENABLED=true" \
-	--xp "vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore" \
-	--xp "vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore" \
-	--xp "vivado_prop:run.impl_1.{STEPS.ROUTE_DESIGN.ARGS.MORE OPTIONS}={-tns_cleanup}" \
-	--xp "vivado_prop:run.impl_1.STEPS.POST_ROUTE_PHYS_OPT_DESIGN.IS_ENABLED=true"
+VPP_LFLAGS += --config opts.ini 
 
 XFREQUENCY := 200
 
@@ -235,8 +204,16 @@ VPP = v++
 VPP_CFLAGS += -I$(KSRC_DIR)
 VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
 VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 8 \
-  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
+
+MAKE_GEN_INI_FILE ?= $(CUR_DIR)/make_gen_$(XDEVICE).ini
+.PHONY: write_ini
+ifneq (,$(MAKE_GEN_INI))
+write_ini: export MAKE_GEN_INI := $(MAKE_GEN_INI)
+write_ini:
+	@echo "----Generating $(notdir $(MAKE_GEN_INI_FILE)) ..."
+	@echo "$${MAKE_GEN_INI}" > $(MAKE_GEN_INI_FILE)
+VPP_CFLAGS += --config $(MAKE_GEN_INI_FILE)
+endif
 
 KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
 XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)
@@ -260,6 +237,7 @@ endef
 
 $(foreach k,$(KERNELS),$(eval $(call kernel_hdr_dep,$(k))))
 
+
 $(XO_DIR)/%.xo: VPP_CFLAGS += $($(*)_VPP_CFLAGS)
 $(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp
 	@echo -e "----\nCompiling kernel $*..."
@@ -277,9 +255,9 @@ $(XCLBIN_FILE): $(XO_FILES) | check_vpp
 
 .PHONY: xo xclbin
 
-xo: check_vpp check_platform $(XO_FILES)
+xo: write_ini check_vpp check_platform $(XO_FILES)
 
-xclbin: check_vpp check_platform $(XCLBIN_FILE)
+xclbin: write_ini check_vpp check_platform $(XCLBIN_FILE)
 
 # MK_INC_END vitis_kernel_rules.mk
 

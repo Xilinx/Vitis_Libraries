@@ -39,14 +39,25 @@
  * @param buf_B input table B buffer.
  * @param buf_C output table C buffer.
  * @param buf_D configuration buffer.
- * @param buf0 hash-join's temporal buffer for storing small table.
- * @param buf1 hash-join's temporal buffer for storing small table.
- * @param buf2 hash-join's temporal buffer for storing small table.
- * @param buf3 hash-join's temporal buffer for storing small table.
- * @param buf4 hash-join's temporal buffer for storing small table.
- * @param buf5 hash-join's temporal buffer for storing small table.
- * @param buf6 hash-join's temporal buffer for storing small table.
- * @param buf7 hash-join's temporal buffer for storing small table.
+ *
+ * @param htb_buf0 gqeJoin's temporal buffer for storing small table.
+ * @param htb_buf1 gqeJoin's temporal buffer for storing small table.
+ * @param htb_buf2 gqeJoin's temporal buffer for storing small table.
+ * @param htb_buf3 gqeJoin's temporal buffer for storing small table.
+ * @param htb_buf4 gqeJoin's temporal buffer for storing small table.
+ * @param htb_buf5 gqeJoin's temporal buffer for storing small table.
+ * @param htb_buf6 gqeJoin's temporal buffer for storing small table.
+ * @param htb_buf7 gqeJoin's temporal buffer for storing small table.
+ *
+ * @param stb_buf0 gqeJoin's temporal buffer for storing small table.
+ * @param stb_buf1 gqeJoin's temporal buffer for storing small table.
+ * @param stb_buf2 gqeJoin's temporal buffer for storing small table.
+ * @param stb_buf3 gqeJoin's temporal buffer for storing small table.
+ * @param stb_buf4 gqeJoin's temporal buffer for storing small table.
+ * @param stb_buf5 gqeJoin's temporal buffer for storing small table.
+ * @param stb_buf6 gqeJoin's temporal buffer for storing small table.
+ * @param stb_buf7 gqeJoin's temporal buffer for storing small table.
+ *
  */
 extern "C" void gqeJoin(ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_A[],
                         ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_B[],

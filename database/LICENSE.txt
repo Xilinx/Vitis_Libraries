@@ -1,4 +1,4 @@
-Components: XF Database Library
+Components: Vitis Database Library
 
                               Apache License
                         Version 2.0, January 2004

@@ -33,7 +33,7 @@ help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make host xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform>"
+	@echo "  make build TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform>"
 	@echo "      Command to generate the design for specified target and device."
 	@echo ""
 	@echo "      TARGET defaults to sw_emu."
@@ -41,6 +41,8 @@ help::
 	@echo "      DEVICE is case-insensitive and support awk regex."
 	@echo "      For example, \`make xclbin TARGET=hw DEVICE='u200.*qdma'\`"
 	@echo "      It can also be an absolute path to platform file."
+	@echo ""
+	@echo "      Use 'host' or 'xclbin' as make target to build only wanted binary."
 	@echo ""
 	@echo "  make run TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform>"
 	@echo "      Command to run application in emulation."
@@ -141,7 +143,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -206,34 +208,23 @@ filter_kernel_EXTRA_HDRS += $(SRC_DIR)/table_dt.hpp
 filter_kernel_VPP_CFLAGS += -I$(SRC_DIR)
 
 VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw
-VPP_CFLAGS +=--xp "vivado_param:project.writeIntermediateCheckpoints=1"
+VPP_CFLAGS += --config opts.ini
 XCLBIN_NAME := filter_kernel
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
- filter_kernel_VPP_CFLAGS += \
-            --sp filter_kernel_1.buf_filter_cfg:HBM[0] \
-            --sp filter_kernel_1.buf_l_shipdate:HBM[1] \
-            --sp filter_kernel_1.buf_l_discount:HBM[2] \
-            --sp filter_kernel_1.buf_l_quantity:HBM[3] \
-            --sp filter_kernel_1.buf_l_commitdate:HBM[4] \
-            --sp filter_kernel_1.buf_l_extendedprice:HBM[5] \
-            --sp filter_kernel_1.buf_revenue:HBM[6]
+hash_aggr_kernel_VPP_CFLAGS += --config conn_u280.ini
 CXXFLAGS += -DUSE_HBM
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-# U200 and U250
-  filter_kernel_VPP_CFLAGS += \
-            --sp filter_kernel_1.buf_filter_cfg:bank0 \
-            --sp filter_kernel_1.buf_l_shipdate:bank0 \
-            --sp filter_kernel_1.buf_l_discount:bank0 \
-            --sp filter_kernel_1.buf_l_quantity:bank0 \
-            --sp filter_kernel_1.buf_l_commitdate:bank0 \
-            --sp filter_kernel_1.buf_l_extendedprice:bank0 \
-            --sp filter_kernel_1.buf_revenue:bank0
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+# U250
+hash_aggr_kernel_VPP_CFLAGS += --config conn_u250.ini
 CXXFLAGS += -DUSE_DDR
-#LDFLAGS += --xp param:compiler.userPostSysLinkTcl=$(CUR_DIR)/userPostSysLink.tcl
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+# U200
+hash_aggr_kernel_VPP_CFLAGS += --config conn_u200.ini
+CXXFLAGS += -DUSE_DDR
 else
-$(error Unsupported platform $(XPLATFORM))
+$(warning Unsupported platform $(XPLATFORM))
 endif
 
 # -----------------------------------------------------------------------------
@@ -292,8 +283,16 @@ VPP = v++
 VPP_CFLAGS += -I$(KSRC_DIR)
 VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
 VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 8 \
-  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
+
+MAKE_GEN_INI_FILE ?= $(CUR_DIR)/make_gen_$(XDEVICE).ini
+.PHONY: write_ini
+ifneq (,$(MAKE_GEN_INI))
+write_ini: export MAKE_GEN_INI := $(MAKE_GEN_INI)
+write_ini:
+	@echo "----Generating $(notdir $(MAKE_GEN_INI_FILE)) ..."
+	@echo "$${MAKE_GEN_INI}" > $(MAKE_GEN_INI_FILE)
+VPP_CFLAGS += --config $(MAKE_GEN_INI_FILE)
+endif
 
 KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
 XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)
@@ -317,6 +316,7 @@ endef
 
 $(foreach k,$(KERNELS),$(eval $(call kernel_hdr_dep,$(k))))
 
+
 $(XO_DIR)/%.xo: VPP_CFLAGS += $($(*)_VPP_CFLAGS)
 $(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp
 	@echo -e "----\nCompiling kernel $*..."
@@ -334,9 +334,9 @@ $(XCLBIN_FILE): $(XO_FILES) | check_vpp
 
 .PHONY: xo xclbin
 
-xo: check_vpp check_platform $(XO_FILES)
+xo: write_ini check_vpp check_platform $(XO_FILES)
 
-xclbin: check_vpp check_platform $(XCLBIN_FILE)
+xclbin: write_ini check_vpp check_platform $(XCLBIN_FILE)
 
 # MK_INC_END vitis_kernel_rules.mk
 
@@ -423,6 +423,9 @@ endif
 ifneq (,$(BIN_DIR_BASE))
 	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*/emconfig.json
 endif
+ifneq (,$(MAKE_GEN_INI_FILE))
+	rm -rf $(MAKE_GEN_INI_FILE)
+endif
 
 cleanall: clean cleanx
 	rm -rf *.log plist $(DATA_STAMP)
@@ -444,16 +447,7 @@ RUN_ENV += echo "TARGET=hw";
 EMU_CONFIG =
 endif
 
-.PHONY: run run_sw_emu run_hw_emu run_hw check
-
-run_sw_emu:
-	make TARGET=sw_emu run
-
-run_hw_emu:
-	make TARGET=hw_emu run
-
-run_hw:
-	make TARGET=hw run
+.PHONY: run check
 
 run: host xclbin $(EMU_CONFIG) $(DATA_STAMP)
 	$(RUN_ENV) \

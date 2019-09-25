@@ -16,7 +16,7 @@
 
 /**
  * @file types.hpp
- * @brief This file is part of XF Database Library, contains type definitions.
+ * @brief This file is part of Vitis Database Library, contains type definitions.
  */
 
 #ifndef XF_DATABASE_TYPES_H

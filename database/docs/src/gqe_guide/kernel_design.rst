@@ -32,15 +32,15 @@ Join Kernel
 
 The GQE join kernel is a compound of multiple post-bitstream programmable primitives,
 and can execute not only hash-join but also a number of primitives often found as
-prologue or epilogue of join operations. With its all bypass-able data path,
-it can even perform execution step sequence without a join.
+prologue or epilogue of join operations. With its bypass design in data path,
+it can even perform execution without a join.
 
 .. image:: /images/gqe_join_kernel.png
    :alt: GQE Join Kernel
-   :scale: 80%
+   :scale: 60%
    :align: center
 
-The internal of this kernel is illustrate in the figure above. Internal multi-join supports
+The internal of this kernel is illustrated in the figure above. Internal multi-join supports
 three reconfigurable modes, namely inner join, anti-join and semi-join.
 This kernel works with three input buffers, two for data and one for configuration,
 and it emits result to one output buffer, with same data structure as its data input buffers.
@@ -50,17 +50,17 @@ using one's output as successor's input. Basically, a buffer contains an input t
 or an intermediate result table, and each table has a list of data columns,
 placed one after another and aligned to 512b boundaries.
 
-Each column's data structure is essentially a 512bit header, followed by raw data.
+Each column's data structure is essentially a 512-bit header, followed by raw data.
 
 .. NOTE::
-   In current release, all columns are expected to have the same number of elements of same type,
+   In the current release, all columns are expected to have the same number of elements of same type,
    so only the first columns header is used by kernel. This will likely change in future release.
 
 The buffer and column's data structure is shown in the figure below.
 
 .. image:: /images/gqe_2.0_data.png
    :alt: GQE 2.0 Data Buffer Content
-   :scale: 80%
+   :scale: 60%
    :align: center
 
 The configuration buffer basically programs the kernel at runtime. It toggles execution step
@@ -68,7 +68,7 @@ primitives on or off, and defines the filter and/or evaluation expressions.
 The details are documented in the following table:
 
 +---------+---------------+--------------+--------------+--------+----------+----------+---------+---------+
-| 192-512 | 191-184       | 120-183      | 56-119       | 6      | 3-5      | 2        | 1       | 0       |
+| 192-511 | 191-184       | 120-183      | 56-119       | 6      | 3-5      | 2        | 1       | 0       |
 +=========+===============+==============+==============+========+==========+==========+=========+=========+
 | Shuffle | Tab C col sel | Tab B col-id | Tab A col-id | append | join sel | dual key | aggr on | join on |
 +---------+---------------+--------------+--------------+--------+----------+----------+---------+---------+
@@ -104,14 +104,14 @@ The filter config is aligned to lower bits, and each filter's config fully cover
 
 Here the ``join_on`` option toggles whether hash-join is enabled or by-passed in the pipeline.
 
-The ``dual_key`` option instruct the kernel to use
+The ``dual_key`` option instructs the kernel to use
 both first and second column as join key in hash-join, and when it is asserted, the third column
 becomes the first part of the payload input.
 
 The ``join sel`` option indicates the work mode of multi-join, 0 for normal hash join, 1 for semi-join and
 2 for anti-join.
 
-The ``append`` option toggles whether the append mode is enable during writing out consecutive joined table.
+The ``append`` option toggles whether the append mode is enabled during writing out consecutive joined table.
 This option would be usually used when it joins two sub-tables after hash partition.
 
 The eval config is for the :ref:`cid-xf::database::dynamicEval` primitive,
@@ -122,16 +122,16 @@ When ``aggr_on`` is set, aggregation values will write instead of the original r
 
 .. CAUTION::
    To support large sum and count, the output data width of these two fields are doubled.
-   So that the aggregation value for each column is be ``min, max, sum LSB, sum MSB, count LSB, count MSB``.
+   So that the aggregation value for each column is ``min, max, sum LSB, sum MSB, count LSB, count MSB``.
 
 The write option is basically a bit mask for 8 slots in data path.
-Only when the corresponding one-hot bit is asserted, will then column being write to output buffer.
+Only when the corresponding one-hot bit is asserted, the column is written to the output buffer.
 
 .. CAUTION::
    Due to limitation in current ``write_out``, the output buffer must always
    provide 8 column slots, even not all used.
 
-The hardware resource utilizations of join kernel is shown in the table below (work as 182MHz).
+The hardware resource utilization of join kernel is shown in the table below (work as 182MHz).
 
 +----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
 | Primitive      | Quantity |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |
@@ -163,28 +163,28 @@ and supports both grouping and non-grouping aggregate operations.
 
 .. image:: /images/gqe_aggr_kernel.png
    :alt: GQE Aggregate Kernel
-   :scale: 80%
+   :scale: 60%
    :align: center
 
 The internal structure of this kernel is shown in the figure above. It consists of one scan and write,
-two evaluations, one filter, hash group aggregate as well as one aggregate primitive. Raw input table are
+two evaluations, one filter, hash group aggregate as well as one aggregate primitive. Raw input table is
 scanned in or write out by column. Before entering into hash group aggregate module, each element in each
-row will be evaluated and filter. Thus, some new elements can be generated and some rows will be
-left behind. Moreover, two cascaded evaluation modules are added to support more complex expression.
+row will be evaluated and filtered. Thus, some new elements can be generated and some rows will be
+discarded behind. Moreover, two cascaded evaluation modules are added to support more complex expression.
 
-Hash group aggregate is the key module in this kernel, which is a multiple PU implementation and given
+Hash group aggregate is the key module in this kernel, which is a multi-PU implementation and given
 in the following diagram. Each PU requires 2 HBM banks and some URAM memory blocks to buffer distinct
-keys as well as payloads after aggregate operations. And one internal loop are implemented to consume
+keys as well as payloads after aggregate operations. And one internal loop is implemented to consume
 all input rows with each iteration. Furthermore, all PUs are working in parallel to achieve higher
 performance.
 
 .. image:: /images/gqe_aggr_detail.png
    :alt: Detais Diagram of Hash Group Aggregate
-   :scale: 80%
+   :scale: 60%
    :align: center
 
-Also, both input and output table's data structure is same as join kernel. The whole configuration are
-composed of 128 32bit slot. And the detail map of configuration buffer are listed in the table:
+Also, both input and output table's data structure is same as join kernel. The whole configuration is
+composed of 128 32-bit slot. And the detail map of configuration buffer are listed in the table:
 
 +-------------+----------------------+------------------------+
 | Module      |  Module Config Width |      Position          |
@@ -216,7 +216,7 @@ composed of 128 32bit slot. And the detail map of configuration buffer are liste
 | Reserved    |          -           | config[83]~config[127] |
 +-------------+----------------------+------------------------+
 
-The hardware resource utilizations of hash group aggregate is shown in the table below (work as 193MHz).
+The hardware resource utilization of hash group aggregate is shown in the table below (work as 193MHz).
 
 +----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
 | Primitive      | Quantity |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |
@@ -249,11 +249,11 @@ To reduce the size of intermediate data, it is equipped with dynamic filter like
 
 .. image:: /images/gqe_part_kernel.png
    :alt: GQE Part Kernel
-   :scale: 80%
+   :scale: 70%
    :align: center
 
-The internal of this kernel is illustrated in the figure above. It consists of two input buffer and one output buffer.
-Firstly, input table are scanned into multiple columns and then perform filter if related condition is given
+The internal of this kernel is illustrated in the figure above. It consists of two input buffers and one output buffer.
+Firstly, input table is scanned into multiple columns and then perform filter if related condition is given
 in configuration buffer. After that, each row will be dispatched into various buckets based on the hash value of
 primary key. Finally, every full hash bucket will trigger on one burst write into output buffer.
 
@@ -263,13 +263,13 @@ output format with other kernels.
 
 .. image:: /images/gqe_part_detail.png
    :alt: Detais Diagram of Hash Partition
-   :scale: 80%
+   :scale: 70%
    :align: center
 
-For simplicity of use, GQE partition kernel cane resew the scan and filter configuration with GQE join kernel. Also,
+To simplify the design, GQE partition kernel can reuse the scan and filter configuration with GQE join kernel. Also,
 as mentioned above, both input and output table's data structure is same as join kernel.
 
-The hardware resource utilizations of single hash partition is shown in the table below (work as 200MHz).
+The hardware resource utilization of single hash partition is shown in the table below (work as 200MHz).
 
 +----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
 | Primitive      | Quantity |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |

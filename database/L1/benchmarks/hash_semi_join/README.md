@@ -1,8 +1,9 @@
-# Vitis Test on Hash-Semi-Join
+# Hash-Semi-Join
 
 ## Overview
 
-This project demostrate FPGA acceleration of the following query over TPC-H scale factor 1 data.
+This project shows FPGA performance of the following query over TPC-H scale factor 1 data.
+Primitive in use is `hashSemiJoin` from `hash_semi_join.hpp`.
 
 ```
 
@@ -24,14 +25,18 @@ where
 ;
 ```
 
-## Makefile Mostly-Used Targets
-
-  * run\_sw\_emu: software emulation.
-
-  * run\_hw\_emu: hardware emulation.
-
-  * run\_hw: execute on board.
-
 ## Dataset
 
-We used the TPC-H dataset generated with ssb-dbgen tool. Due to unknown license, the source code is not directly included. To download the dbgen tool and create data files, follow README.md in db\_benchmark directory.
+Due to unknown license, the source code of dataset generator is not directly included.
+When the project runs, script in `db_data` folder will automatically grep the dataset generator
+and compile it from source.
+
+## Running the Benchmark
+
+Usage can be queried with `make help`. Basic use is:
+
+```
+make run TARGET=sw_emu DEVICE=/path/to/xpfm
+```
+
+Change `sw_emu` to `hw_emu` or `hw` to run RTL simulation or board test correspondingly.

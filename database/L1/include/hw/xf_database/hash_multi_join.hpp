@@ -19,14 +19,14 @@
  * @brief hash join template function implementation, targeting HBM devices.
  *
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_HASH_MULTI_JOIN_H
 #define XF_DATABASE_HASH_MULTI_JOIN_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "ap_int.h"
@@ -648,7 +648,7 @@ void combine_stream(
     do {
 #pragma HLS pipeline II = 1
         for (int i = 0; i < 2; i++) {
-#pragma hls unroll
+#pragma HLS unroll
             empty_e[i] = !i_e_strm[i].empty() && !last[i];
         }
 
@@ -660,7 +660,7 @@ void combine_stream(
         }
 
         for (int i = 0; i < 2; i++) {
-#pragma hls unroll
+#pragma HLS unroll
             if (rd_e[i]) {
                 j_arr[i] = i_j_strm[i].read();
                 last[i] = i_e_strm[i].read();
@@ -810,7 +810,7 @@ namespace database {
 /**
  * @brief Multi-PU Hash-Multi-Join primitive, using multiple DDR/HBM buffers.
  *
- * This primitive share most of the structure of ``hashJoinV3``.
+ * This primitive shares most of the structure of ``hashJoinV3``.
  * The inner table should be fed once, followed by the outer table once.
  *
  * @tparam HASH_MODE 0 for radix and 1 for Jenkin's Lookup3 hash.
@@ -851,7 +851,7 @@ namespace database {
  * @param pu_end_status_strms constains depth of hash, row number of join result
  *
  * @param j_strm output of joined result
- * @param end flag of joined result
+ * @param j_e_strm end flag of joined result
  */
 template <int HASH_MODE, int KEYW, int PW, int S_PW, int B_PW, int HASHWH, int HASHWL, int ARW, int CH_NM>
 void hashMultiJoin(

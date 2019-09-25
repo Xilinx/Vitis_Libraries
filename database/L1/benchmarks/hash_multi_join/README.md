@@ -1,9 +1,8 @@
-# Vitis Test on Hash-Join-Build-Probe
-
+# Hash-Multi-Join
 
 ## Overview
 
-This bencmark tests the performance of `hash_join_build_probe` from `hash_join.h`
+This benchmark tests the performance of `hashMultiJoin` from `hash_multi_join.hpp`
 with the following query.
 
 ```
@@ -22,20 +21,20 @@ Here `orders1994` is a self-made table, of all `orders` rows with `o_orderdate` 
 
 ## Dataset
 
+
 Due to unknown license, the source code of dataset generator is not directly included.
-When the project runs, script in `db_benchmark` folder will automatically grep the dataset generator and compile it from source.
+When the project runs, script in `db_data` folder will automatically grep the dataset generator
+and compile it from source.
 
-_This project uses 32-bit data for numeric fields._ To benchmark 64-bit performance, edit `host/table_dt.h` and make `TPCH_INT` an `int64_t`.
+_This project uses 32-bit data for numeric fields._
+To benchmark 64-bit performance, edit `host/table_dt.h` and make `TPCH_INT` an `int64_t`.
 
-## Makefile Mostly-Used Targets
+## Running the Benchmark
 
-  * run\_sw\_emu: software emulation.
+Usage can be queried with `make help`. Basic use is:
 
-  * run\_hw\_emu: hardware emulation.
+```
+make run TARGET=sw_emu DEVICE=/path/to/xpfm
+```
 
-  * run\_hw: execute on board.
-
-	* help: show more info.
-
-Before `make` the project, `env.sh` should be setup and sourced.
-
+Change `sw_emu` to `hw_emu` or `hw` to run RTL simulation or board test correspondingly.

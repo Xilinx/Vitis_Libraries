@@ -32,12 +32,11 @@ This makes sorting networks suitable for implementation in hardware or in parall
 
 .. image:: /images/bitonic_sort_architecture.png
    :alt: Bitonic Sort Processing Structure
-   :width: 80%
    :align: center
 
 
 Bitonic sort have giant data throughput and it demands large resource same time. It is well-fitted for the application with high band of data input.
-The table show the resource consumption for a realization of bitonic sort with input bitwidth=32.
+The table shows the resource consumption for an instance of bitonic sort with input bitwidth=32.
 
 
                         +-------------------+----------+-----------+-----------+-----------+
@@ -57,7 +56,6 @@ If the bitonic sort number grow twice, the resource consumption of bitonic sort 
 
 .. image:: /images/bitonic_sort_resource_consumption.png
    :alt: Bitonic Sort Resource Consumption in FPGA
-   :width: 80%
    :align: center
 
 
@@ -67,8 +65,8 @@ If the bitonic sort number grow twice, the resource consumption of bitonic sort 
 
 
 .. CAUTION::
-   The size of bitonic sort number should be set with the consideration of FPGA resource, place and routing.
+   The size of bitonic sort number should be set with the consideration of FPGA resource to pass place and route.
 
 
-This ``bitonicSort`` primitve has one port for key input, one port for payload input, one port for key output, one port for payload output and one bool sign for indicating ascending sort or descending sort.
+This ``bitonicSort`` primitive has one port for key input, one port for payload input, one port for key output, one port for payload output and one boolean sign for indicating ascending sort or descending sort.
 

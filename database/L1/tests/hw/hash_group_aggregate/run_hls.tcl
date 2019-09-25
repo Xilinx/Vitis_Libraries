@@ -22,7 +22,7 @@ set CLKP 4
 
 open_project -reset $PROJ
 
-add_files hash_aggr_kernel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/ext"
+add_files hash_aggr_kernel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../utils/L1/include"
 add_files -tb test_aggr.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top hash_aggr_kernel 
 

@@ -179,12 +179,12 @@ TPCH_INT group_cnt_nz(
     return (TPCH_INT)ref_map.size();
 }
 
-void check_result(ap_uint<1024>* data,
-                  int num,
-                  ap_uint<4> op,
-                  ap_uint<32> key_col,
-                  ap_uint<32> pld_col,
-                  std::unordered_map<TPCH_INT, TPCH_INT>& ref_map) {
+int check_result(ap_uint<1024>* data,
+                 int num,
+                 ap_uint<4> op,
+                 ap_uint<32> key_col,
+                 ap_uint<32> pld_col,
+                 std::unordered_map<TPCH_INT, TPCH_INT>& ref_map) {
     int nerror = 0;
     int ncorrect = 0;
     ap_uint<8 * KEY_SZ * KEY_COL + 3 * 8 * MONEY_SZ * PLD_COL> result;
@@ -219,14 +219,16 @@ void check_result(ap_uint<1024>* data,
             }
         } else {
             std::cout << "ERROR! k:" << key << " does not exist in ref" << std::endl;
+            ++nerror;
         }
     }
 
     if (nerror == 0) {
-        std::cout << "No error found!" << std::endl;
+        std::cout << "PASS! No error found!" << std::endl;
     } else {
-        std::cout << "Found " << nerror << " errors!" << std::endl;
+        std::cout << "FAIL! Found " << nerror << " errors!" << std::endl;
     }
+    return nerror;
 }
 
 void generate_test_dat(TPCH_INT* key, TPCH_INT* pld, size_t n) {
@@ -314,7 +316,7 @@ int main(int argc, const char* argv[]) {
     int agg_result_num = pu_end_status[3];
     int nerror = 0; // result_cnt!=agg_result_num;
 
-    check_result(aggr_result_buf, agg_result_num, op, KEY_COL, PLD_COL, map0);
+    nerror = check_result(aggr_result_buf, agg_result_num, op, KEY_COL, PLD_COL, map0);
 
     std::cout << "ref_result_num=" << result_cnt << std::endl;
     std::cout << "kernel_result_num=" << agg_result_num << std::endl;

@@ -16,7 +16,7 @@
 .. _guide-dynamic_filter:
 
 *********************************
-Internals of Dynamic Filter
+Internals of Dynamic-Filter
 *********************************
 
 .. toctree::
@@ -35,7 +35,6 @@ address consists of bits from these two parts.
 
 .. image:: /images/dynamic_filter.png
    :alt: Dynamic Filter Structure
-   :width: 100%
    :align: center
 
 Limitations
@@ -57,13 +56,12 @@ For generating the raw config bits, see the demo project in
 ``L1/demos/q6_mod/host/filter_test.cpp``.
 
 The layout of the configuration bits is illustrated in the figure below.
-As the figures shows, the immediates are always aligned to 32bit boundaries,
-and comes in *little-endian*. (In the figure, the immediates are 48bit wide,
+As the figures shows, the intermediates are always aligned to 32bit boundaries,
+and comes in *little-endian*. (In the figure, the intermediates are 48bit wide,
 and thus occupies one and a half row.)
 
 .. image:: /images/dynamic_filter_config.png
    :alt: Dynamic Filter Configuration Bits Layout
-   :width: 90%
    :align: center
 
 

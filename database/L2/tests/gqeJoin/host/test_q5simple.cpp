@@ -280,43 +280,43 @@ int main(int argc, const char* argv[]) {
     // Map buffers
     cl::Buffer buf_table_o_a(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                              (size_t)(sizeof(ap_uint<512>) * size_table_o), &mext_table_o);
-    cl::Buffer buf_table_o_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                             (size_t)(sizeof(ap_uint<512>) * size_table_o), &mext_table_o);
+    // cl::Buffer buf_table_o_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+    //                          (size_t)(sizeof(ap_uint<512>) * size_table_o), &mext_table_o);
 
     cl::Buffer buf_table_l_a(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                              (size_t)(sizeof(ap_uint<512>) * size_table_l), &mext_table_l);
-    cl::Buffer buf_table_l_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                             (size_t)(sizeof(ap_uint<512>) * size_table_l), &mext_table_l);
+    // cl::Buffer buf_table_l_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+    //                          (size_t)(sizeof(ap_uint<512>) * size_table_l), &mext_table_l);
 
     cl::Buffer buf_table_out_a(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                (size_t)(sizeof(ap_uint<512>) * table_result_size), &mext_table_out_a);
-    cl::Buffer buf_table_out_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               (size_t)(sizeof(ap_uint<512>) * table_result_size), &mext_table_out_b);
+    // cl::Buffer buf_table_out_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    //                            (size_t)(sizeof(ap_uint<512>) * table_result_size), &mext_table_out_b);
 
     cl::Buffer buf_cfg5s_a(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                            (sizeof(ap_uint<512>) * 9), &mext_cfg5s);
-    cl::Buffer buf_cfg5s_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                           (sizeof(ap_uint<512>) * 9), &mext_cfg5s);
+    // cl::Buffer buf_cfg5s_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+    //                        (sizeof(ap_uint<512>) * 9), &mext_cfg5s);
 
     cl::Buffer buff_a[PU_NM * 2];
-    cl::Buffer buff_b[PU_NM * 2];
+    // cl::Buffer buff_b[PU_NM * 2];
     std::vector<cl::Memory> tb;
     // XXX force to write from hbuf to dbuf, to work-around ECC problem.
     for (int i = 0; i < PU_NM; i++) {
         buff_a[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
-                               (size_t)(KEY_SZ * 2 * HT_BUFF_DEPTH), &memExt[i]);
+                               (size_t)(sizeof(ap_uint<64>) * HT_BUFF_DEPTH), &memExt[i]);
         tb.push_back(buff_a[i]);
-        buff_b[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
-                               (size_t)(KEY_SZ * 2 * HT_BUFF_DEPTH), &memExt[i]);
-        tb.push_back(buff_b[i]);
+        // buff_b[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
+        //                        (size_t)(sizeof(ap_uint<64>) * HT_BUFF_DEPTH), &memExt[i]);
+        // tb.push_back(buff_b[i]);
     }
     for (int i = PU_NM; i < PU_NM * 2; i++) {
         buff_a[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
                                (size_t)(KEY_SZ * 2 * S_BUFF_DEPTH), &memExt[i]);
         tb.push_back(buff_a[i]);
-        buff_b[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
-                               (size_t)(KEY_SZ * 2 * S_BUFF_DEPTH), &memExt[i]);
-        tb.push_back(buff_b[i]);
+        // buff_b[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
+        //                        (size_t)(KEY_SZ * 2 * S_BUFF_DEPTH), &memExt[i]);
+        // tb.push_back(buff_b[i]);
     }
 
     q.enqueueMigrateMemObjects(tb, CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED, nullptr, nullptr);
@@ -339,10 +339,10 @@ int main(int argc, const char* argv[]) {
     ibtable[0].push_back(buf_table_out_a);
     ibtable[0].push_back(buf_cfg5s_a);
 
-    ibtable[1].push_back(buf_table_o_b);
-    ibtable[1].push_back(buf_table_l_b);
-    ibtable[1].push_back(buf_table_out_b);
-    ibtable[1].push_back(buf_cfg5s_b);
+    // ibtable[1].push_back(buf_table_o_b);
+    // ibtable[1].push_back(buf_table_l_b);
+    // ibtable[1].push_back(buf_table_out_b);
+    // ibtable[1].push_back(buf_cfg5s_b);
 
     // set args and enqueue kernel
     int j = 0;
@@ -354,50 +354,56 @@ int main(int argc, const char* argv[]) {
         kernel0table[0].setArg(j++, buff_a[i]);
     }
 
-    j = 0;
-    kernel0table[1].setArg(j++, buf_table_o_b);
-    kernel0table[1].setArg(j++, buf_table_l_b);
-    kernel0table[1].setArg(j++, buf_table_out_b);
-    kernel0table[1].setArg(j++, buf_cfg5s_b);
-    for (int i = 0; i < PU_NM * 2; i++) {
-        kernel0table[1].setArg(j++, buff_b[i]);
-    }
+    // j = 0;
+    // kernel0table[1].setArg(j++, buf_table_o_b);
+    // kernel0table[1].setArg(j++, buf_table_l_b);
+    // kernel0table[1].setArg(j++, buf_table_out_b);
+    // kernel0table[1].setArg(j++, buf_cfg5s_b);
+    // for (int i = 0; i < PU_NM * 2; i++) {
+    //     kernel0table[1].setArg(j++, buff_b[i]);
+    // }
 
     struct timeval tv0;
     int exec_us;
     gettimeofday(&tv0, 0);
+    std::vector<cl::Memory> obtable;
     for (int i = 0; i < num_rep; ++i) {
-        int use_a = i & 1;
+        // int use_a = i & 1;
+
+        q.enqueueMigrateMemObjects(ibtable[0], 0, nullptr, &write_events[i][0]);
+        q.enqueueTask(kernel0table[0], &write_events[i], &kernel_events_l[i][0]);
+        obtable.push_back(buf_table_out_a);
 
         // write data to DDR
-        if (use_a) {
-            if (i > 1) {
-                q.enqueueMigrateMemObjects(ibtable[0], 0, &read_events[i - 2], &write_events[i][0]);
-            } else {
-                q.enqueueMigrateMemObjects(ibtable[0], 0, nullptr, &write_events[i][0]);
-            };
-        } else {
-            if (i > 1) {
-                q.enqueueMigrateMemObjects(ibtable[1], 0, &read_events[i - 2], &write_events[i][0]);
-            } else {
-                q.enqueueMigrateMemObjects(ibtable[1], 0, nullptr, &write_events[i][0]);
-            };
-        }
+        /*
+if (use_a) {
+    if (i > 1) {
+        // q.enqueueMigrateMemObjects(ibtable[0], 0, &read_events[i - 2], &write_events[i][0]);
+    } else {
+        // q.enqueueMigrateMemObjects(ibtable[0], 0, nullptr, &write_events[i][0]);
+    };
+} else {
+    if (i > 1) {
+        // q.enqueueMigrateMemObjects(ibtable[1], 0, &read_events[i - 2], &write_events[i][0]);
+    } else {
+        // q.enqueueMigrateMemObjects(ibtable[1], 0, nullptr, &write_events[i][0]);
+    };
+}
 
-        // enqueue kernel
-        if (use_a) {
-            q.enqueueTask(kernel0table[0], &write_events[i], &kernel_events_l[i][0]);
-        } else {
-            q.enqueueTask(kernel0table[1], &write_events[i], &kernel_events_l[i][0]);
-        }
-
+// enqueue kernel
+if (use_a) {
+    // q.enqueueTask(kernel0table[0], &write_events[i], &kernel_events_l[i][0]);
+} else {
+    // q.enqueueTask(kernel0table[1], &write_events[i], &kernel_events_l[i][0]);
+}
+*/
         // read data from DDR
-        std::vector<cl::Memory> obtable;
-        if (use_a) {
-            obtable.push_back(buf_table_out_a);
-        } else {
-            obtable.push_back(buf_table_out_b);
-        }
+        // std::vector<cl::Memory> obtable;
+        // if (use_a) {
+        // obtable.push_back(buf_table_out_a);
+        //} else {
+        // obtable.push_back(buf_table_out_b);
+        //}
 
         q.enqueueMigrateMemObjects(obtable, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events_l[i], &read_events[i][0]);
     }

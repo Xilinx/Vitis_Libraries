@@ -43,7 +43,7 @@ const int PU = (1 << HASHWH);
 #define TEST_BUF_DEPTH (120000)
 
 /**
- * @breif GQE partition kernel
+ * @brief GQE partition kernel
  *
  * @param k_depth depth of each hash bucket in URAM
  * @param col_index index of input column

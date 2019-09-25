@@ -27,7 +27,7 @@
 #define XF_DATABASE_MERGE_JOIN_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include <hls_stream.h>

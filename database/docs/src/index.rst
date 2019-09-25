@@ -13,16 +13,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-=====================
-XF Database Library
-=====================
+======================
+Vitis Database Library
+======================
 
-XF Database Library is an open-sourced Vitis library written in C++ for
+Vitis Database Library is an open-sourced Vitis library written in C++ for
 accelerating database applications in a variety of use cases.
 It now covers two levels of acceleration: the module level and the pre-defined kernel level,
 and will evolve to offer the third level as pure software APIs working with pre-defined hardware overlays.
 
-* At module level, it provides optimized hardware implementation of most common relational database execution plan steps,
+* At module level, it provides an optimized hardware implementation of most common relational database execution plan steps,
   like hash-join and aggregation.
 * In kernel level, the post-bitstream-programmable kernel can be used to map a sequence of execution plan steps,
   without having to compile FPGA binaries for each query.

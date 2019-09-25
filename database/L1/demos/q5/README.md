@@ -32,24 +32,19 @@ order by
 ;
 ```
 
-## Makefile Targets
+## Running the Benchmark
 
-  * data: prepare the test data.
+Usage can be queried with `make help`. Basic use is:
 
-  * run\_sw\_emu: software emulation.
+```
+make run TARGET=sw_emu DEVICE=/path/to/xpfm
+```
 
-  * run\_hw\_emu: hardware emulation.
+Change `sw_emu` to `hw_emu` or `hw` to run RTL simulation or board test correspondingly.
 
-  * run\_hw: execute on board.
 
 ## Dataset
 
 We used the TPC-H dataset generated with ssb-dbgen tool.
 The makefile will download the tool and create data files when processing the `data` target.
 
-## Building Notes
-
-Some environment variables have to be set before building the project:
-```
-bash $ source env.sh
-```

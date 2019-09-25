@@ -18,14 +18,14 @@
  * @file hash_join_v3.hpp
  * @brief hash join implementation, targeting HBM devices.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_HASH_JOIN_V3_H
 #define XF_DATABASE_HASH_JOIN_V3_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "ap_int.h"
@@ -2238,14 +2238,14 @@ void collect_unit(hls::stream<ap_uint<JW> > i_jrow_strm[PU],
     do {
 #pragma HLS pipeline II = 1
         for (int i = 0; i < PU; i++) {
-#pragma hls unroll
+#pragma HLS unroll
             empty_e[i] = !i_e_strm[i].empty() && !last[i];
         }
 
         rd_e = join_v2::mul_ch_read(empty_e);
 
         for (int i = 0; i < PU; i++) {
-#pragma hls unroll
+#pragma HLS unroll
             if (rd_e[i]) {
                 jrow_arr[i] = i_jrow_strm[i].read();
                 last[i] = i_e_strm[i].read();
@@ -3575,14 +3575,14 @@ void collect_unit(bool& build_probe_flag,
         do {
 #pragma HLS pipeline II = 1
             for (int i = 0; i < PU; i++) {
-#pragma hls unroll
+#pragma HLS unroll
                 empty_e[i] = !i_e_strm[i].empty() && !last[i];
             }
 
             rd_e = join_v2::mul_ch_read(empty_e);
 
             for (int i = 0; i < PU; i++) {
-#pragma hls unroll
+#pragma HLS unroll
                 if (rd_e[i]) {
                     jrow_arr[i] = i_jrow_strm[i].read();
                     last[i] = i_e_strm[i].read();
@@ -3619,7 +3619,7 @@ void collect_unit(bool& build_probe_flag,
 namespace xf {
 namespace database {
 /**
- * @brief Hash-Join v3 primitive, it takes more resourse than ``hashJoinMPU`` and promise a better
+ * @brief Hash-Join v3 primitive, it takes more resourse than ``hashJoinMPU`` and promises a better
  * performance in large size of table
  *
  * The maximum size of small table is 256MBx8(HBM number)=2GB in this design. The total hash entries
@@ -3667,7 +3667,7 @@ namespace database {
  * @param pu_end_status_strms contains hash depth, row number of join result
  *
  * @param j_strm output of joined result
- * @param end flag of joined result
+ * @param j_e_strm end flag of joined result
  */
 template <int HASH_MODE, int KEYW, int PW, int S_PW, int B_PW, int HASHWH, int HASHWL, int ARW, int CH_NM>
 void hashJoinV3(
@@ -4095,9 +4095,9 @@ void hashJoinV3(
 } // hash_join_v3
 
 /**
- * @brief Hash-Build-Probe v3 primitive, it can perform hash build and hash probe separately. It need
+ * @brief Hash-Build-Probe v3 primitive, it can perform hash build and hash probe separately. It needs
  * two call of kernel to perform build and probe seperately. There is a control flag to decide buld or
- * probe. This primitive support multiple build and mutiple probe, for example, you can scadule a workflow
+ * probe. This primitive supports multiple build and mutiple probe, for example, you can scadule a workflow
  * as: build0->build1->probe0->probe1->build2->build3->probe3...
  *
  * The maximum size of small table is 256MBx8=2GB in this design. The total hash entries is equal
@@ -4107,7 +4107,7 @@ void hashJoinV3(
  * This module can accept more than 1 input row per cycle, via multiple input channels. The small
  * table and the big table shares the same input ports, so the width of the payload should be the
  * max of both, while the data should be aligned to the little-end. The small table and big table
- * should be fed only once.
+ * should be fed only ONCE.
  *
  * @tparam HASH_MODE 0 for radix and 1 for Jenkin's Lookup3 hash.
  * @tparam KEYW width of key, in bit.

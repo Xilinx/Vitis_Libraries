@@ -18,7 +18,7 @@
  * @file enums.hpp
  * @brief Header of common enums.
  *
- * This file is part of XF Database Library, and should contain only contain
+ * This file is part of Vitis Database Library, and should contain only contain
  * definitions of enums and constants, so that it can be included in both host
  * and kenrel code without introducing complex dependency.
  */

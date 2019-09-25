@@ -23,7 +23,7 @@ set CLKP 300MHz
 open_project -reset $PROJ
 config_debug
 
-add_files part_dut.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/ext"
+add_files part_dut.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../utils/L1/include"
 add_files -tb part_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -std=c++14"
 set_top part_dut
 

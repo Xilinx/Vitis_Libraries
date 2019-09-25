@@ -112,7 +112,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -159,35 +159,17 @@ gqeAggr_EXTRA_HDRS = $(XFLIB_DIR)/L2/include/gqe_aggr.hpp
 # FIXME still many missing
 gqeAggr_VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw \
 		       -I$(XFLIB_DIR)/L2/include \
-		       -I$(XFLIB_DIR)/ext
+		       -I$(XFLIB_DIR)/../utils/L1/include
 
 gqePart_EXTRA_HDRS += $(XFLIB_DIR)/L2/include/gqe_part.hpp
 # FIXME still many missing
 gqePart_VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw \
 		       -I$(XFLIB_DIR)/L2/include \
-		       -I$(XFLIB_DIR)/ext
+		       -I$(XFLIB_DIR)/../utils/L1/include
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
-gqeAggr_VPP_LFLAGS += \
-  --sp gqeAggr_1.buf_in:DDR[0] \
-  --sp gqeAggr_1.buf_out:DDR[1] \
-  --sp gqeAggr_1.buf_cfg:DDR[0] \
-  --sp gqeAggr_1.buf_result_info:DDR[1] \
-  --sp gqeAggr_1.ping_buf0:HBM[8] \
-  --sp gqeAggr_1.ping_buf1:HBM[12] \
-  --sp gqeAggr_1.ping_buf2:HBM[16] \
-  --sp gqeAggr_1.ping_buf3:HBM[20] \
-  --sp gqeAggr_1.pong_buf0:HBM[10] \
-  --sp gqeAggr_1.pong_buf1:HBM[14] \
-  --sp gqeAggr_1.pong_buf2:HBM[18] \
-  --sp gqeAggr_1.pong_buf3:HBM[22]
-#  --slr gqeAggr_1:SLR2
-gqePart_VPP_LFLAGS += \
-  --sp gqePart_1.buf_A:DDR[1] \
-  --sp gqePart_1.buf_B:DDR[0] \
-  --sp gqePart_1.buf_D:DDR[0] \
-  --slr gqePart_1:SLR2
+VPP_LFLAGS += --config conn_u280.ini
 CXXFLAGS += -DUSE_HBM
 else
 $(warning Unsupported platform $(XPLATFORM))
@@ -195,16 +177,15 @@ endif
 
 # -----------------------------------------------------------------------------
 
-VPP_CFLAGS += --xp "prop:solution.hls_pre_tcl=$(CUR_DIR)/hls_pre.tcl"
+# Use tempalte hook
+define MAKE_GEN_INI
+[advanced]
+prop=solution.hls_pre_tcl=$(CUR_DIR)/hls_pre.tcl
+[vivado]
+prop=run.impl_1.STEPS.ROUTE_DESIGN.TCL.PRE=$(CUR_DIR)/vpreroute.tcl
+endef
 
-VPP_LFLAGS += --xp "vivado_prop:run.impl_1.STEPS.OPT_DESIGN.TCL.POST=$(CUR_DIR)/post_opt.tcl"
-
-VPP_LFLAGS += --xp "vivado_prop:run.impl_1.STEPS.OPT_DESIGN.ARGS.DIRECTIVE=Explore" \
-	--xp "vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.IS_ENABLED=true" \
-	--xp "vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore" \
-	--xp "vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore" \
-	--xp "vivado_prop:run.impl_1.{STEPS.ROUTE_DESIGN.ARGS.MORE OPTIONS}={-tns_cleanup}" \
-	--xp "vivado_prop:run.impl_1.STEPS.POST_ROUTE_PHYS_OPT_DESIGN.IS_ENABLED=true"
+VPP_LFLAGS += --config opts.ini
 
 XFREQUENCY := 200
 
@@ -231,8 +212,16 @@ VPP = v++
 VPP_CFLAGS += -I$(KSRC_DIR)
 VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
 VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 8 \
-  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
+
+MAKE_GEN_INI_FILE ?= $(CUR_DIR)/make_gen_$(XDEVICE).ini
+.PHONY: write_ini
+ifneq (,$(MAKE_GEN_INI))
+write_ini: export MAKE_GEN_INI := $(MAKE_GEN_INI)
+write_ini:
+	@echo "----Generating $(notdir $(MAKE_GEN_INI_FILE)) ..."
+	@echo "$${MAKE_GEN_INI}" > $(MAKE_GEN_INI_FILE)
+VPP_CFLAGS += --config $(MAKE_GEN_INI_FILE)
+endif
 
 KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
 XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)
@@ -256,14 +245,15 @@ endef
 
 $(foreach k,$(KERNELS),$(eval $(call kernel_hdr_dep,$(k))))
 
+
 $(XO_DIR)/%.xo: VPP_CFLAGS += $($(*)_VPP_CFLAGS)
-$(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp
+$(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | mkopts.ini check_vpp
 	@echo -e "----\nCompiling kernel $*..."
 	mkdir -p $(XO_DIR)
 	$(VPP) -o $@ --kernel $* --compile $(filter %.cpp,$^) \
 		$(VPP_CFLAGS)
 
-$(XCLBIN_FILE): $(XO_FILES) | check_vpp
+$(XCLBIN_FILE): $(XO_FILES) | mkopts.ini check_vpp
 	@echo -e "----\nCompiling xclbin..."
 	mkdir -p $(XCLBIN_DIR)
 	$(VPP) -o $@ --link $^ \
@@ -273,9 +263,9 @@ $(XCLBIN_FILE): $(XO_FILES) | check_vpp
 
 .PHONY: xo xclbin
 
-xo: check_vpp check_platform $(XO_FILES)
+xo: write_ini check_vpp check_platform $(XO_FILES)
 
-xclbin: check_vpp check_platform $(XCLBIN_FILE)
+xclbin: write_ini check_vpp check_platform $(XCLBIN_FILE)
 
 # MK_INC_END vitis_kernel_rules.mk
 

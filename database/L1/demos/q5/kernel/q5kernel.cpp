@@ -158,7 +158,7 @@ COL_SPLITTER_P:
         if (nm == 511) {
             nm = 0;
             for (int i = 0; i < OUT_COL_NUM; ++i) {
-#pragma hls unroll
+#pragma HLS unroll
                 o_2e[i].write(false);
                 o_nrow_strm[i].write(512);
             }
@@ -190,13 +190,13 @@ COL_SPLITTER_P:
     }
     if (nm != 0) {
         for (int i = 0; i < OUT_COL_NUM; ++i) {
-#pragma hls unroll
+#pragma HLS unroll
             o_2e[i].write(true);
             o_nrow_strm[i].write(nm);
         }
     } else {
         for (int i = 0; i < OUT_COL_NUM; ++i) {
-#pragma hls unroll
+#pragma HLS unroll
             o_2e[i].write(true);
             o_nrow_strm[i].write(0);
         }

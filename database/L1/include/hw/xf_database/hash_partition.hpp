@@ -15,17 +15,17 @@
  */
 
 /**
- * @file hash_partition.cpp
+ * @file hash_partition.hpp
  * @brief hash partition implementation
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_HASH_PARTITION_H
 #define XF_DATABASE_HASH_PARTITION_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include <ap_int.h>
@@ -465,7 +465,7 @@ BUILD_UNIT_CORE_LOOP:
 
         ap_uint<ARW> waddr = hash_val(bit_num - 1, 0) * depth * 2 + bucket_reg;
         ap_uint<KEYW + PW> wdata = (pld, key);
-        uram_inst.Write(waddr, wdata);
+        uram_inst.write(waddr, wdata);
 
 #ifndef __SYNTHESIS__
         cnt++;
@@ -495,7 +495,7 @@ BUILD_UNIT_CORE_LOOP:
 
         if (ren || (rcnt != 0)) { // write and read simulatously
             ap_uint<ARW> raddr = bk_num(bit_num, 0) * depth + rcnt;
-            ap_uint<KEYW + PW> rdata = uram_inst.Read(raddr);
+            ap_uint<KEYW + PW> rdata = uram_inst.read(raddr);
 #ifndef __SYNTHESIS__
 // if ((pu == 0) && (bk_num[1] == 0))
 // std::cout << "rdata:" << std::dec << rdata(95, 64) << ", addr:" << raddr << std::dec << ",rcnt:" << rcnt
@@ -522,7 +522,7 @@ BUILD_UNIT_CORE_LOOP:
 #pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = uram_inst.blocks inter false
             ap_uint<ARW> raddr = bk_num(bit_num, 0) * depth + i;
-            ap_uint<KEYW + PW> rdata = uram_inst.Read(raddr);
+            ap_uint<KEYW + PW> rdata = uram_inst.read(raddr);
             o_kpld_strm.write(rdata);
         }
         o_nm_strm.write(depth);
@@ -536,7 +536,7 @@ BUILD_UNIT_CORE_LOOP:
 #pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = uram_inst.blocks inter false
             ap_uint<ARW> raddr = bk_num(bit_num, 0) * depth + i;
-            ap_uint<KEYW + PW> rdata = uram_inst.Read(raddr);
+            ap_uint<KEYW + PW> rdata = uram_inst.read(raddr);
             o_kpld_strm.write(rdata);
         }
         o_nm_strm.write(depth);
@@ -568,7 +568,7 @@ BUILD_UNIT_CORE_LOOP:
 #pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = uram_inst.blocks inter false
                 ap_uint<ARW> raddr = 2 * i * depth + offset + j; // need optimize
-                ap_uint<KEYW + PW> rdata = uram_inst.Read(raddr);
+                ap_uint<KEYW + PW> rdata = uram_inst.read(raddr);
                 // if (pu == 0)
                 // std::cout << "data:" << std::hex << rdata << ", address:" << std::dec << raddr << std::endl;
                 o_kpld_strm.write(rdata);
@@ -666,7 +666,7 @@ namespace database {
  * @tparam HASHWL number of hash bits used for partition selection.
  * @tparam ARW width of address for URAM
  * @tparam CH_NM number of input channels, 1,2,4.
- * @tparam CH_NM number of input columns, 1~8.
+ * @tparam COL_NM number of input columns, 1~8.
  *
  * @param mk_on input of double key flag, 0 for off, 1 for on.
  * @param depth input of depth of each hash bucket in URAM.

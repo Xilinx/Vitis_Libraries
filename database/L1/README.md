@@ -1,6 +1,6 @@
 # Level 1: HLS Modules
 
-The Level 1 APIs of XF Database Library is presented as HLS C++ modules.
+The Level 1 APIs of Vitis Database Library is presented as HLS C++ modules.
 
 This level of API is mainly provide for hardware-savvy developers.
 The API description and design details of these modules can be found

@@ -30,7 +30,7 @@ implemented as :ref:`insertSort <cid-xf::database::insertSort>` function.
 Principle
 ~~~~~~~~~
 
-Insert sort is a simple sorting algorithm that builds the final sorted array (or list) one item at a time. It is much less efficient on large lists than more advanced algorithms such as quicksort, heapsort, or merge sort. However, insertion sort provides several advantages:
+Insert sort is a simple sorting algorithm that builds the final sorted array (or list) one item at a time. It is much less efficient on large lists than more advanced algorithms such as quicksort, heapsort, or merge sort. However, insert sort provides several advantages:
 
 1.Simple implementation;
 
@@ -42,11 +42,10 @@ Insert sort is a simple sorting algorithm that builds the final sorted array (or
 
 5.Sort a list as it receives it.
 
-For its FPGA implementation, a dedicated struture is designed as follow:
+For its FPGA implementation, a dedicated structure is designed as follow:
 
 .. image:: /images/insert_sort_architecture.png
    :alt: Insert Sort Processing  Structure
-   :width: 80%
    :align: center
 
 The Insert Sort primitive has an internal shift register array to sort the input stream.
@@ -56,9 +55,9 @@ It takes five steps to finish the sort processing of a stream with limited max s
 
 2.Boardcasting the input value to every shift registers, then comapring size between the internal value of each shift register and the input value. For descending sort, run step3. Otherwise, run step4;
 
-3.For descending sort, we should build a internal ascending array. If the input value is larger than array[i], then right shift array[i]. If the input value is less then array[i] and larger then array[i+1], insert input value to array[i+1];
+3.For descending sort, we should build a internal ascending array. If the input value is larger than array[i], then right shift array[i]. If the input value is less than array[i] and larger than array[i+1], insert input value to array[i+1];
 
-4.For ascending sort, we should build a internal descending array. If the input value is less than array[i], then right shift array[i]. If the input value is larger then array[i] and less then array[i+1], insert input value to array[i+1];
+4.For ascending sort, we should build a internal descending array. If the input value is less than array[i], then right shift array[i]. If the input value is larger than array[i] and less than array[i+1], insert input value to array[i+1];
 
 5.If input stream is not empty, output the last value of the array and then return to step2. Otherwise, right shift the whole register array and output the last array value until the array is empty.
 
@@ -66,7 +65,7 @@ It takes five steps to finish the sort processing of a stream with limited max s
 Synthesis Results
 ~~~~~~~~~~~~~~~~~
 
-For bitwidth=32, the resource consumption for defferent max sort number is listed in the table below:
+For bitwidth=32, the resource consumption for different max sort number is listed in the table below:
 
 +-----------------+----------+-----------+-----------+-----------+-----------+-----------+-----------+
 | Max_sort_number | 8        | 16        | 32        | 64        | 128       | 256       | 512       |
@@ -81,32 +80,28 @@ For bitwidth=32, the resource consumption for defferent max sort number is liste
 
 .. image:: /images/insert_sort_resource.png
    :alt: Insert Sort Resource Consumption
-   :width: 80%
    :align: center
 
 Insert Sort primitive set 1024 as the default maximum sort number.
-In order to achieve arbitary sort number, firstly the input stream will be sorted every 1024 number by Insert Sort primitive, then we use Merge Sort primitive to merge the sorted stream, see reference :ref:`guide-merge_sort`. The picture below show the synthesis result for maximum sort number of 1024.
+In order to achieve arbitrary sort number, firstly the input stream will be sorted every 1024 number by Insert Sort primitive, then we use Merge Sort primitive to merge the sorted stream, see reference :ref:`guide-merge_sort`. The picture below show the synthesis result for maximum sort number of 1024.
 
 .. image:: /images/insert_sort_synthesis_resource.png
    :alt: Insert Sort Synthesis
-   :width: 80%
    :align: center
 
 
 .. image:: /images/insert_sort_loop_synthesis.png
    :alt: Insert Sort Loop
-   :width: 80%
    :align: center
 
 
 Implementation Results
 ~~~~~~~~~~~~~~~~~~~~~~
 
-This is the impemeatation result of Insert Sort primitive with Max_sort_number=1024:
+This is the implementation result of Insert Sort primitive with Max_sort_number=1024:
 
 .. image:: /images/insert_sort_implementation_resource.png
    :alt: Insert Sort Implementation
-   :width: 80%
    :align: center
 
 .. IMPORTANT::
@@ -114,7 +109,7 @@ This is the impemeatation result of Insert Sort primitive with Max_sort_number=1
    For arbitary sort number, Merge Sort primitive is required :ref:`guide-merge_sort`
 
 .. CAUTION::
-   The size of input stream should be larger then the max sort number, otherwise the internal shift register is not fully initialized.
+   The size of input stream should be larger than the max sort number, otherwise the internal shift register is not fully initialized.
 
-This ``insertSort`` primitve has one port for key input, one port for payload input, one port for key output, one port for payload output and one bool sign for indicating ascending sort or descending sort.
+This ``insertSort`` primitive has one port for key input, one port for payload input, one port for key output, one port for payload output and one boolean sign for indicating ascending sort or descending sort.
 

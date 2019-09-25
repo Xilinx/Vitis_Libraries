@@ -18,7 +18,7 @@
  * @file bitonic_sort.hpp
  * @brief bitonic join function.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_BITONIC_SORT_H
@@ -305,9 +305,9 @@ namespace database {
  * @tparam BitonicSortNumber the parallel number
  *
  * @param kin_strm input key stream
- * @param kin_strm_end end flag stream for input data
+ * @param kin_strm_end end flag stream for input key
  * @param kout_strm output key stream
- * @param kout_strm_end end flag stream for output data
+ * @param kout_strm_end end flag stream for output key
  * @param order 1 for ascending or 0 for descending sort
  */
 template <typename Key_Type, int BitonicSortNumber>

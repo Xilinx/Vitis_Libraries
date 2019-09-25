@@ -18,7 +18,7 @@
 Query-Specific Acceleration Demo
 ================================
 
-The following application acceleration demos are shipped withn this library in ``demo_app_accel`` folder.
+The following application acceleration demos are shipped within this library in ``demo_app_accel`` folder.
 
 .. contents:: List of Demos
    :local:
