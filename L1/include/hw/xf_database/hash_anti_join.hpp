@@ -19,14 +19,14 @@
  * @brief hash join template function implementation, targeting HBM devices.
  *
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_HASH_ANTI_JOIN_H
 #define XF_DATABASE_HASH_ANTI_JOIN_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "ap_int.h"
@@ -758,8 +758,8 @@ namespace database {
 /**
  * @brief Multi-PU Hash-Anti-Join primitive, using multiple DDR/HBM buffers.
  *
- * This primitive share most of the structure of ``hashJoinV3``, but performs anti-join instead of inner-join.
- * Both inner and outer table should be send to this primitve once, starting from the inner table.
+ * This primitive shares most of the structure of ``hashJoinV3``, but performs anti-join instead of inner-join.
+ * Both inner and outer table should be send to this primitve once, starting with the inner table.
  *
  * @tparam HASH_MODE 0 for radix and 1 for Jenkin's Lookup3 hash.
  * @tparam KEYW width of key, in bit.
@@ -793,12 +793,12 @@ namespace database {
  * @param stb6_buf HBM/DDR buffer of PU6
  * @param stb7_buf HBM/DDR buffer of PU7
  *
- * @param pu_begin_status_strms, the 1st element is the depth of each hash, the
+ * @param pu_begin_status_strms the 1st element is the depth of each hash, the
  * 2nd element is joined number
  * @param pu_end_status_strms
  *
  * @param j_strm output of joined result
- * @param end flag of joined result
+ * @param j_e_strm end flag of joined result
  */
 
 template <int HASH_MODE, int KEYW, int PW, int S_PW, int B_PW, int HASHWH, int HASHWL, int ARW, int CH_NM>

@@ -18,14 +18,14 @@
  * @file hash_join_v4.hpp
  * @brief hash join implementation, targeting HBM devices.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_HASH_JOIN_V4_H
 #define XF_DATABASE_HASH_JOIN_V4_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "ap_int.h"
@@ -4107,7 +4107,7 @@ namespace database {
  * @brief Hash-Join v4 primitive, using bloom filter to enhance performance of hash join.
  *
  * The build and probe procedure is similar to which in ``hashJoinV3``, and this primitive
- * add a bloom filter to reduce the redundant access to HBM.
+ * adds a bloom filter to reduce the redundant access to HBM.
  *
  * The maximum size of small table is 256MBx8=2GB in this design. The total hash entries
  * is equal to 1<<(HASHWH + HASHWL), and it is limitied to maximum of 1M entries because
@@ -4131,7 +4131,6 @@ namespace database {
  * @tparam BF_W bloom-filter hash width.
  * @tparam EN_BF bloom-filter switch, 0 for off, 1 for on.
  *
- * @param build_probe_flag 0:build 1:probe
  * @param k0_strm_arry input of key columns of both tables.
  * @param p0_strm_arry input of payload columns of both tables.
  * @param e0_strm_arry input of end signal of both tables.
@@ -4589,7 +4588,7 @@ static void hashJoinV4(
 /**
  * @brief Hash-Build-Probe v4 primitive. Compared with ``HashBuildProbeV3``, it enables bloom filter to
  * reduce redundant access to HBM which can further reduce run-time of hash join. Build and probe are
- * separately performed and controlled by a boolean flag. Mutiple build and probe is also provided, and
+ * separately performed and controlled by a boolean flag. Mutiple build and probe are also provided, and
  * it should make sure all rows in build phase can be stored temporarily in HBM to maintain correctness.
  *
  * The maximum size of small table is 256MBx8=2GB in this design. The total hash entries is equal to
@@ -4637,7 +4636,7 @@ static void hashJoinV4(
  * @param pu_end_status_strms returns next build ID, next probe ID, fixed hash depth, joined number of
  * current probe and end addr of stb_buf for each PU
  *
- * @param j_res output of joined rows.
+ * @param j_strm output of joined rows.
  * @param j_e_strm is the end flag of joined result.
  */
 template <int KEYW,

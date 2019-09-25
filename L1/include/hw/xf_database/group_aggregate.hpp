@@ -18,14 +18,14 @@
  * @file group_aggregate.hpp
  * @brief GROUP AGGREGATE template function implementation.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_GROUP_AGGREGATE_H
 #define XF_DATABASE_GROUP_AGGREGATE_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include <ap_int.h>
@@ -507,7 +507,7 @@ namespace database {
  *
  * @tparam op the aggregate operator: AOP_MAX, AOP_MIN, AOP_MEAN, AOP_VARIANCE,
  * AOP_NORML1 or AOP_NORML2
- * @tparam T the input and output stream type
+ * @tparam T the data type of input and output streams
  * @tparam KEY_T the input and output indexing key type
  *
  * @param din_strm input data stream
@@ -546,7 +546,7 @@ void groupAggregate(hls::stream<T>& din_strm,
  * @brief group aggregate function that returns different type as input
  *
  * @tparam op the aggregate operator: AOP_SUM
- * @tparam T the input and output stream type, inferred from argument
+ * @tparam T the input stream type, inferred from argument
  * @tparam T2 the output stream type, inferred from argument
  * @tparam KEY_T the input and output stream type, inferred from argument
  *

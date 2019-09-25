@@ -19,14 +19,14 @@
  * @brief This file contains run-time-configurable expression evaluation
  * primitive.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_DYNAMIC_EVAL_H
 #define XF_DATABASE_DYNAMIC_EVAL_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include <ap_int.h>
@@ -666,7 +666,7 @@ ALU_Processing:
  *
  * The constant numbers are assumed to be no more than 32-bits.
  *
- * For the definition of the configu word, please refer to the "Design Internal" Section of the document and the
+ * For the definition of the config word, please refer to the "Design Internal" Section of the document and the
  * corresponding test in ``L1/tests``.
  *
  * @tparam TStrm1 Type of input Stream1

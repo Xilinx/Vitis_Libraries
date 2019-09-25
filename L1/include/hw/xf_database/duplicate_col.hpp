@@ -32,7 +32,7 @@
 namespace xf {
 namespace database {
 /**
- * @brief Duplicate a column into two.
+ * @brief Duplicate one column into two columns.
  *
  * @tparam W column data width in bits.
  *

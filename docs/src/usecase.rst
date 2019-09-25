@@ -27,7 +27,7 @@ Database acceleration can be achieved in different granularity and flexibility, 
 +--------------------------------+----------------------------------------------------------------------------------------------+
 | Specific query step            | Write a dedicated kernel for some specific execution step [1]_, like hashing.                |
 +--------------------------------+----------------------------------------------------------------------------------------------+
-| General SQL query acceleration | Use or dirive predefined kernels from library to offload matching execution step(s) to FPGA. |
+| General SQL query acceleration | Use or derive predefined kernels from library to offload matching execution step(s) to FPGA. |
 +--------------------------------+----------------------------------------------------------------------------------------------+
 
 Developers targeting the first or second use case may reference the :ref:`module_guide` section,

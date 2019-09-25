@@ -253,12 +253,12 @@ void hash_join_bypass(hls::stream<bool>& jn_on_strm,
         do {
 #pragma HLS pipeline II = 1
             for (int i = 0; i < CH_NM; i++) {
-#pragma hls unroll
+#pragma HLS unroll
                 empty_e[i] = !i_e_strm[i].empty() && !last[i];
             }
             rd_e = xf::database::details::join_v2::mul_ch_read(empty_e);
             for (int i = 0; i < CH_NM; i++) {
-#pragma hls unroll
+#pragma HLS unroll
                 if (rd_e[i]) {
                     for (int c = 0; c < COL; ++c) {
 #pragma HLS unroll

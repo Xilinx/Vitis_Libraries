@@ -15,10 +15,11 @@
 
 .. _tpch:
 
+
+**********************
 TPC-H Queries with GQE
-======================
+**********************
 
-.. toctree::
+GQE acceleration on TPC-H queries is introduced in Section :ref:`gqe_kernel_demo`.
+Current experiment only involes the GQE kernels, and dedicated host C++ code is developed for each query.
 
-.. NOTE::
-   Stay tuned!

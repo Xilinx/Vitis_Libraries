@@ -16,7 +16,7 @@
 
 /**
  * @file utils.hpp
- * @brief This file is part of XF Database Library, contains utilities.
+ * @brief This file is part of Vitis Database Library, contains utilities.
  */
 
 #ifndef XF_DATABASE_UTILS_H

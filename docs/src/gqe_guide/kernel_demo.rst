@@ -26,21 +26,24 @@ The GQE kernel has a demo suite using TPC-H benchmark queries and data.
 It shows performance of the 21 out 22 TPC-H queries, on scale factor 1 and 30.
 
 Two xclbin files containing ``gqeJoin``, ``gqeAggr`` and ``gqePart`` kernels are used
-across all the test queries.
-It proves that a small set of pre-built software-programmable kernels can be used to
-accelerate a wide range of SQL queries.
+across all the tested queries,
+and can accelerate most of the time-significant part of the queries.
 
-As describe in the kernel section, these kernels together can handle most of the
-time-significant part of the queries.
+One xclbin file contains ``gqeJoin`` and ``gqePart``, and it can be used to execute most of the execution steps
+in the queries. The exceptions are queries with non-trivial group-aggregation, for them the second xclbin file
+which provides both ``gqeAggr`` and ``gqePart`` needs to be used.
 
 Performance Data
 ================
 
-The performance of FPGA accelerated query execution is compared against a C++ implementation
-of the query. The result is summarized in the table below.
+The performance of FPGA accelerated query execution is compared against a C++ implementation of the query. 
+The result is summarized in the table below.
 
 For both FPGA and C++, time is measured assuming the data is already loaded into CPU main memory.
-Each of the test has been repeated multiple times, and the table shows the average time.
+Each of the tests has been repeated multiple times, and the table shows the average time.
+
+In the table below, PostgreSQL number is collected with version 9.6 on
+Intel(R) Xeon(R) CPU E5-2690 v4, clocked at 2.60GHz.
 
 Scale Factor 1
 ~~~~~~~~~~~~~~
@@ -161,12 +164,12 @@ Scale Factor 30
 +-------+------------------+------------+---------+---------+---------------+--------+
 
 
-Runnign the Demos
-=================
+Runnig the Demos
+================
 
 The demo code is located in ``L2/demos`` folder.
 A top makefile serves as unified entrance to build all host code.
-Two sub-folders, ``build_aggr_partition`` and ``build_join_partition``, are folder for
-compiling the two xclbins for the demo tests. As the suggested by the folder name,
+Two sub-folders, ``build_aggr_partition`` and ``build_join_partition``, are folders for
+compiling the two xclbins for the demo tests. As suggested by the folder name,
 both xclbin contains ``gqePart`` kernel, but with ``gqeJoin`` or ``gqeAggr`` kernel correspondingly.
 

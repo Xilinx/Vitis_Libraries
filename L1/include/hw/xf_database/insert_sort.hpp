@@ -134,8 +134,8 @@ namespace database {
 /**
  * @brief Insert sort top function.
  *
- * @tparam KEY_TYPE the input and output data type
- * @tparam DATA_TYPE the input and output key type
+ * @tparam KEY_TYPE the input and output key type
+ * @tparam DATA_TYPE the input and output data type
  * @tparam MAX_SORT_NUMBER the max number of the sequence can be sorted
  *
  * @param dinStrm input data stream

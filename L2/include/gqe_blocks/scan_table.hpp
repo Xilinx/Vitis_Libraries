@@ -20,7 +20,7 @@
  * targeting DDR devices.
  *
  *
- * This file is part of XF Database Library
+ * This file is part of Vitis Database Library
  */
 
 #ifndef GQE_SCAN_TABLE_H

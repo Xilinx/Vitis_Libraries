@@ -23,7 +23,7 @@ GQE Overview
    :hidden:
    :maxdepth: 2
 
-As explaned in the :ref:`use_case` section, General Query Engine (GQE) is our
+As explained in the :ref:`use_case` section, General Query Engine (GQE) is our
 solution for general acceleration in database.
 
 The GQE consists of a hardware overlay of post-bitstream programmable

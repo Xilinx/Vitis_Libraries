@@ -7,8 +7,8 @@
             "env": null,
             "files": [],
             "index": 0,
-            "max_memory_MB": 8192,
-            "max_time_min": 180,
+            "max_memory_MB": 32768,
+            "max_time_min": 300,
             "server": "lsf"
         }
     ],

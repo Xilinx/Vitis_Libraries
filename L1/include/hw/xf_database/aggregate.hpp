@@ -16,9 +16,9 @@
 
 /**
  * @file aggregate.hpp
- * @brief AGGREGATE template function implementation.
+ * @brief AGGREGATE template function implementation (including its overloads).
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_AGGREGATE_H
@@ -288,8 +288,8 @@ namespace database {
  * As shown below in the parameters, this function can calculate one of a range of statistics, including
  * minimal, maximal, average(mean), variance, L1 norm, L2 norm. It can also calculate the sum and count.
  *
- * The limitation in this function is that the output data type must match the input data type. In some cases,
- * the sum or count may overflow the output type. This can be safely covered by other aggregation function overloads.
+ * The limitation in this function is that the output data type must match with the input data type. In some cases,
+ * the sum or count may overflow the output type, but it can be safely covered by other aggregation overloads.
  *
  * Note that minimum, maximum, sum, count, number of non-zero, L1 norm as well as L2 norm aggregate functions will
  * all be returned as zero when the input is empty.
@@ -298,7 +298,7 @@ namespace database {
  *
  * @tparam op the aggregate operator: AOP_SUM, AOP_MAX, AOP_MIN, AOP_MEAN,
  *    AOP_VARIANCE, AOP_NORML1 or AOP_NORML2
- * @tparam T the input and output stream type
+ * @tparam T the data type of input and output streams
  *
  * @param in_strm input data stream
  * @param in_e_strm end flag stream for input data
@@ -343,8 +343,8 @@ void aggregate(hls::stream<T>& in_strm,
  * For group-by aggregation, please refer to the ``hashGroupAggregateMPU`` primitive.
  *
  * @tparam op the aggregate operator: AOP_SUM
- * @tparam T the input and output stream type, inferred from argument
- * @tparam T2 the output and output stream type, inferred from argument
+ * @tparam T the data type of input stream, inferred from argument
+ * @tparam T2 the data type of output stream, inferred from argument
  *
  * @param in_strm input data stream
  * @param in_e_strm end flag stream for input data
@@ -373,7 +373,7 @@ void aggregate(hls::stream<T>& in_strm,
  * For group-by aggregation, please refer to the ``hashGroupAggregateMPU`` primitive.
  *
  * @tparam op the aggregate operator: AOP_COUNT or AOP_COUNTNONZEROS
- * @tparam T the input and output stream type, inferred from argument
+ * @tparam T the data type of input stream, inferred from argument
  *
  * @param in_strm input data stream
  * @param in_e_strm end flag stream for input data

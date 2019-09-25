@@ -1,3 +1,3 @@
-# Vitis Tests for Basic Flow in L2 Kernels
+# Vitis Tests for GQE Kernels
 
-**TODO** basic flow test of each kernel, for example, joining two tables of 100 rows, aggregating 100rows into 10 groups.
+This folder contains basic test for each of GQE kernels. They are meant to discover simple regression errors. To understand how these kernels can be used to accelerate real-world SQL queries, please reference the `L2/demos` folder.

@@ -28,16 +28,15 @@ implemented as :ref:`hashJoinMPU <cid-xf::database::hashJoinMPU>` function.
 
 .. image:: /images/hash_join_mpu.png
    :alt: Hash Join MPU Structure
-   :width: 80%
    :align: center
 
-The HASH-JOIN primitive has a clustered design internally to utilize the advantage of high memory bandwidth in Xilinx FPGA.
-Workload is distributed based on MSBs of hash value of join key to Process Units (PU's), so that eachPU can work independently.
-Current design uses 8 PU's, served by 4 input channels though each of which a pair of key and payload can be passed in each cycle.
+The Hash-Join primitive has a clustered design internally to utilize the advantage of high memory bandwidth in Xilinx FPGA.
+Workload is distributed based on MSBs of hash value of join key to Processing Units (PU's), so that each PU can work independently.
+Current design uses 8 PU's, served by 4 input channels through each of which a pair of key and payload can be passed in each cycle.
 
 The number of PU is set to 8, as each PU requires a dedicated bank to avoid conflicts,
 and due to DDR/HBM memory access delay, 4 channels can serve enough data to these PU's.
-Each PU performs HASH-JOIN in 3 phases.
+Each PU performs Hash-Join in 3 phases.
 
 1. build bitmap: with small table as input, the number of keys falls into each hash values are counted.
    The number of counts are stored in bit vector in URAM.
@@ -65,20 +64,20 @@ Each PU performs HASH-JOIN in 3 phases.
 .. CAUTION::
    Currently, this primitive expects unique key in small table.
 
-This ``hashJoinMPU`` primitve has only one port for key input and one port for payload input.
+This ``hashJoinMPU`` primitive has only one port for key input and one port for payload input.
 If your tables are joined by multiple key columns or has multiple columns as payload,
 please use :ref:`combineCol <cid-xf::database::combineCol>` to merge the column streams, and
 use :ref:`splitCol <cid-xf::database::splitCol>` to split the output to columns.
 
-There is two versions of this primitive currently, with different number of slots
+There are two versions of this primitive currently, with different number of slots
 for hash collision and key duplication. The version with more slots per hash entry has less
 total row capacity, as summarized below:
 
-  +--------------+----------------+-------+
-  | row capacity | hash slots     |       |
-  +--------------+----------------+-------+
-  | 2M           | 262144 (2^18)  | 0.25M |
-  +--------------+----------------+-------+
-  | 8M           | 512 (2^9)      | 0.5K  |
-  +--------------+----------------+-------+
+  +--------------+----------------+
+  | row capacity | hash slots     |
+  +--------------+----------------+
+  | 2M           | 262144 (0.25M) |
+  +--------------+----------------+
+  | 8M           | 512 (0.5K)     |
+  +--------------+----------------+
 

@@ -39,10 +39,17 @@
  * @param buf_out output table buffer.
  * @param buf_cfg input configuration buffer.
  * @param buf_result_info output information buffer.
- * @param buf0 hash-join's temporal buffer for storing overflow.
- * @param buf1 hash-join's temporal buffer for storing overflow.
- * @param buf2 hash-join's temporal buffer for storing overflow.
- * @param buf3 hash-join's temporal buffer for storing overflow.
+ *
+ * @param ping_buf0 gqeAggr's temporal buffer for storing overflow.
+ * @param ping_buf1 gqeAggr's temporal buffer for storing overflow.
+ * @param ping_buf2 gqeAggr's temporal buffer for storing overflow.
+ * @param ping_buf3 gqeAggr's temporal buffer for storing overflow.
+ *
+ * @param pong_buf0 gqeAggr's temporal buffer for storing overflow.
+ * @param pong_buf1 gqeAggr's temporal buffer for storing overflow.
+ * @param pong_buf2 gqeAggr's temporal buffer for storing overflow.
+ * @param pong_buf3 gqeAggr's temporal buffer for storing overflow.
+ *
  */
 extern "C" void gqeAggr(ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_in[],
                         ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_out[],

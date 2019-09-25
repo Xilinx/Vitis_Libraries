@@ -16,10 +16,10 @@
 
 /**
  * @file scan_cmp_str_col.hpp
- * @brief This file is part of XF Database Library, contains implentments on
+ * @brief This file is part of Vitis Database Library, contains implentments on
  * scan and filter string column.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_SCAN_CMP_STR_COL_H
@@ -154,12 +154,12 @@ input_stream_loop:
 }
 
 /**
- * @brief      Read multiple columns from global memory and transform into
- *             stream
+ * @brief Read multiple columns from global memory and transform into stream
  *
- * @param      ddr_input  input string array stored in global memory.
- * @param[in]  size       the number of reading global memory
- * @param      stream_o   output string stream in semi-pact format.
+ * @param ddr_input  input string array stored in global memory.
+ * @param size       the number of reading global memory
+ * @param stream_o   output string stream in semi-pact format.
+ * @param e_str_o    output end flag
  */
 void read_ddr(ap_uint<512>* ddr_input,
               hls::stream<int>& size,
@@ -181,7 +181,7 @@ ddr_read:
  *
  * @param      pact_str_stream  input string stream in seim-pact format.
  * @param      e_str_i          end flag stream for input data.
- * @param[in]  num_str          the number of actual strings.
+ * @param      num_str          the number of actual strings.
  * @param      out_str_stream   output string stream in padding-zero format.
  * @param      e_str_o          end flag stream for output data.
  */
@@ -317,11 +317,11 @@ main_loop:
 namespace xf {
 namespace database {
 /**
- * @brief      sacn multiple column of string in global memory, and compare each
+ * @brief      sacn multiple columns of string in global memory, and compare each
  *             of them with constant string
  *
  * @param      ddr_ptr      input string array stored in global memory.
- * @param  size         the number of reading global memory
+ * @param  size         the number of times reading global memory
  * @param  num_str      the number of actual strings
  * @param      cnst_stream  input constant string stream, 512 bits in
  *                          heading-length and padding-zero format,

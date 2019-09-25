@@ -22,14 +22,14 @@
  * (1) less than 2M entries from inner table.
  * (2) max number of key with same hash is less than 256K.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_HASH_SEMI_JOIN_MPU_H
 #define XF_DATABASE_HASH_SEMI_JOIN_MPU_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "ap_int.h"
@@ -136,7 +136,7 @@ namespace database {
  * The outer table and the inner table share the same input ports,
  * so the width of the payload should be the max of both, while the data
  * should be aligned to the little-end.
- * The inner table should be fed TWICE, followed by the outer table once.
+ * The inner table should be fed TWICE, followed by the outer table ONCE.
  *
  * @tparam HashMode 0 for radix and 1 for Jenkin's Lookup3 hash.
  * @tparam WKey width of key, in bit.

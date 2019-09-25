@@ -16,7 +16,7 @@
 
 /**
  * @file scan_col.hpp
- * @brief This file is part of XF Database Library, contains SCAN by column
+ * @brief This file is part of Vitis Database Library, contains SCAN by column
  * functions.
  */
 #ifndef XF_DATABASE_SCAN_COL_H
@@ -90,10 +90,10 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan 1 columns from DDR/HBM buffers.
+ * @brief scan 1 column from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam size0 size of column 0, in byte.
  *
  * @param c0vec_ptr buffer pointer to column 0.
@@ -197,7 +197,7 @@ namespace database {
  * @brief scan 2 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam size0 size of column 0, in byte.
  * @tparam size1 size of column 1, in byte.
  *
@@ -320,7 +320,7 @@ namespace database {
  * @brief scan 3 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam size0 size of column 0, in byte.
  * @tparam size1 size of column 1, in byte.
  * @tparam size2 size of column 2, in byte.
@@ -467,7 +467,7 @@ namespace database {
  * @brief scan 4 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam size0 size of column 0, in byte.
  * @tparam size1 size of column 1, in byte.
  * @tparam size2 size of column 2, in byte.
@@ -634,7 +634,7 @@ namespace database {
  * @brief scan 5 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam size0 size of column 0, in byte.
  * @tparam size1 size of column 1, in byte.
  * @tparam size2 size of column 2, in byte.
@@ -824,7 +824,7 @@ namespace database {
  * @brief scan 6 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam size0 size of column 0, in byte.
  * @tparam size1 size of column 1, in byte.
  * @tparam size2 size of column 2, in byte.
@@ -945,11 +945,11 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan one columns from DDR/HBM buffers, emit multiple rows
+ * @brief scan one column from DDR/HBM buffers, emit multiple rows
  * concurrently.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam ch_num number of concurrent output channels per column.
  * @tparam size0 size of column 0, in byte.
  *
@@ -1034,7 +1034,7 @@ namespace database {
  * concurrently.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam ch_num number of concurrent output channels per column.
  * @tparam size0 size of column 0, in byte.
  * @tparam size1 size of column 1, in byte.
@@ -1131,7 +1131,7 @@ namespace database {
  * concurrently.
  *
  * @tparam burst_len burst read length, must be supported by MC.
- * @tparam vec_len scan this number of items as a vector from AXI port.
+ * @tparam vec_len number of items to be scanned as a vector from AXI port.
  * @tparam ch_num number of concurrent output channels per column.
  * @tparam size0 size of column 0, in byte.
  * @tparam size1 size of column 1, in byte.

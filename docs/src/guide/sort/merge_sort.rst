@@ -32,7 +32,7 @@ implemented as :ref:`mergeSort <cid-xf::database::mergeSort>` function.
 
 The algorithm works in software as follows:
 
-1.Divide the unsorted list into n sublists, each containing 1 element (a list of 1 element is considered sorted).
+1.Divide the unsorted list into N sublists, each containing 1 element (a list of 1 element is considered sorted).
 
 2.Repeatedly merge sublists to produce new sorted sublists until there is only 1 sublist remaining. This will be the sorted list.
 
@@ -40,7 +40,6 @@ For FPGA implementation, a hardware oriented design is realized in the Merge Sor
 
 .. image:: /images/merge_sort_architecture.png
    :alt: Merge Sort Processing Structure
-   :width: 80%
    :align: center
 
 The Merge Sort primitive has an internal comparator to sort two input stream into one output stream.
@@ -61,7 +60,6 @@ Synthesis Results
 
 .. image:: /images/merge_sort_synthesis_resource.png
    :alt: Merge Sort Synthesis
-   :width: 80%
    :align: center
 
 Implementation Results
@@ -69,7 +67,6 @@ Implementation Results
 
 .. image:: /images/merge_sort_implementation_resource.png
    :alt: Merge Sort Implementation
-   :width: 80%
    :align: center
 
 .. IMPORTANT::
@@ -79,5 +76,5 @@ Implementation Results
 .. CAUTION::
    If the two input stream are both empty, the function output will be also empty.
 
-This ``mergeSort`` primitve has two port for key input, two port for payload input, one port for merged key output, one port for merged payload output and one bool sign for indicating ascending sort or descending sort.
+This ``mergeSort`` primitive has two port for key input, two port for payload input, one port for merged key output, one port for merged payload output and one boolean sign for indicating ascending sort or descending sort.
 

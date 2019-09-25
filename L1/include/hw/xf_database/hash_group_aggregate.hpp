@@ -15,17 +15,17 @@
  */
 
 /**
- * @file hash_group_aggregate.h
+ * @file hash_group_aggregate.hpp
  * @brief HASH GROUP AGGREGATE template function implementation.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef _XF_DATABASE_HASH_AGGR_GENERAL_H_
 #define _XF_DATABASE_HASH_AGGR_GENERAL_H_
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "xf_database/utils.hpp"
@@ -260,8 +260,7 @@ void buf_to_stream(
 #pragma HLS RESOURCE variable = e0_strm core = FIFO_SRL
 #pragma HLS STREAM variable = e0_strm depth = 32
 
-    xf::common::utils_hw::axiToStream<_BurstLenR, _WBuffer, ap_uint<_WBuffer> >(in_buf, ostrm, e0_strm, unhandle_cnt,
-                                                                                0);
+    xf::common::utils_hw::axiToStream<_BurstLenR, _WBuffer, ap_uint<_WBuffer> >(in_buf, unhandle_cnt, ostrm, e0_strm);
 
     split_col<_WKey, _KeyNM, _WPay, _PayNM, _WBuffer>(ostrm, e0_strm, kout_strm, pout_strm, eout_strm);
 
@@ -2063,14 +2062,14 @@ void collect_unit(hls::stream<COLUMN_DATA<WKey, KeyNM> > i_key_strm[PU],
     do {
 #pragma HLS pipeline II = 1
         for (int i = 0; i < PU; i++) {
-#pragma hls unroll
+#pragma HLS unroll
             empty_e[i] = !i_e_strm[i].empty() && !last[i];
         }
 
         rd_e = details::join_v2::mul_ch_read(empty_e);
 
         for (int i = 0; i < PU; i++) {
-#pragma hls unroll
+#pragma HLS unroll
 
             if (rd_e[i]) {
                 key_arry[i] = i_key_strm[i].read();
@@ -2356,7 +2355,6 @@ void hash_aggr_top(
     // output of collect pu
     hls::stream<COLUMN_DATA<_WKey, _KeyNM> > collect_key;
 #pragma HLS stream variable = collect_key depth = 512
-#pragma HLS array_partition variable = collect_key complete
 #pragma HLS resource variable = collect_key core = FIFO_BRAM
     hls::stream<COLUMN_DATA<_WPay, _PayNM> > collect_pld[3];
 #pragma HLS stream variable = collect_pld depth = 512
@@ -2554,24 +2552,25 @@ namespace database {
  *
  * With this primitive, the max number of lines of aggregate table is bound by the AXI buffer size.
  *
- * The group aggregation values are updated inside the chip, and when a hash-bucket overflows, the rows are spilled into
- * external buffers. The overflow buffer will be automatically re-scanned, and with each round, a number of distinct
- * groups will be aggregated and emitted. This algorithm ends when the overflow buffer is emptied and all groups are
+ * The group aggregation values are updated inside the chip, and when a hash-bucket overflows, the overflowed rows are
+ * spilled into
+ * external buffers. The overflow buffer will be automatically re-scanned, and within each round, a number of distinct
+ * groups will be aggregated and emitted. This algorithm ends when the overflow buffer is empty and all groups are
  * aggregated.
  *
- * This module can accept multiple input row of key and payload pair per cycle.
- * The max distinct groups aggregated in one pass is ``2 ^ (1 + _WHash)``.
+ * \rst
  *
- * When the width of the input stream is not fully used, data should be aligned to the little-end.
+ * .. ATTENTION::
+ *     1. This module can accept multiple input row of key and payload pair per cycle.
+ *     2. The max distinct groups aggregated in one pass is ``2 ^ (1 + _WHash)``.
+ *     3. When the width of the input stream is not fully used, data should be aligned to the little-end.
+ *     4. It is highly recommended to assign the ping buffer and pong buffer in different HBM banks, input and output in
+ *        different DDR banks for a better performance.
+ *     5. The max number of lines of aggregate table cannot bigger than the max DDR/HBM SIZE used in this design.
+ *     6. When the bit-width of group key is known to be small, say 10-bit, please consider the ``directAggregate``
+ *        primitive, which offers smaller utilization, and requires no external buffer access.
  *
- * It is highly recommended to assign the ping buffer and pong buffer in
- * different HBM banks, input and output in different DDR banks.
- *
- * The max number of lines of aggregate table is no bigger than the max DDR/HBM
- * SIZE used in this design.
- *
- * When the bit-width of group key is known to be small, say 10-bit, please consider the ``directAggregate`` primitive,
- * which offers smaller utilization, and requires no external buffer access.
+ * \endrst
  *
  * @tparam _WKey width of key, in bit.
  * @tparam _KeyNM maximum number of key column, maximum is 8.
@@ -2593,8 +2592,14 @@ namespace database {
  * pld column number(less than 8) and initial aggregate cnt.
  * @param result_info result information at kernel end, contains op, key_column,
  * pld_column and aggregate result cnt
- * @param ping_buf1-4 DDR/HBM ping buffer for unhandled data.
- * @param pong_buf1-4 DDR/HBM pong buffer for unhandled data.
+ * @param ping_buf0 DDR/HBM ping buffer for unhandled data.
+ * @param ping_buf1 DDR/HBM ping buffer for unhandled data.
+ * @param ping_buf2 DDR/HBM ping buffer for unhandled data.
+ * @param ping_buf3 DDR/HBM ping buffer for unhandled data.
+ * @param pong_buf0 DDR/HBM pong buffer for unhandled data.
+ * @param pong_buf1 DDR/HBM pong buffer for unhandled data.
+ * @param pong_buf2 DDR/HBM pong buffer for unhandled data.
+ * @param pong_buf3 DDR/HBM pong buffer for unhandled data.
  * @param aggr_key_out output of key columns.
  * @param aggr_pld_out output of pld columns. [0][*] is the result of min/max/cnt for
  * pld columns, [1][*] is the low-bit value of sum/average, [2][*] is the hight-bit
@@ -2649,7 +2654,9 @@ void hashGroupAggregate(
     ap_uint<32> aggr_num;
     ap_uint<32> round = 0;
     ap_uint<32> unhandle_cnt_r[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+#pragma HLS ARRAY_PARTITION variable = unhandle_cnt_r complete
     ap_uint<32> unhandle_cnt_w[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+#pragma HLS ARRAY_PARTITION variable = unhandle_cnt_w complete
 
     details::hash_group_aggregate::read_config<32>(config, op, key_column, pld_column, aggr_num);
 

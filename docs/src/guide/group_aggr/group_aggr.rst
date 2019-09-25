@@ -13,10 +13,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _guide-group-aggregate:
+.. _guide-group_aggregate:
 
 ********************************************************
-Internals of Group Aggregate (Using Sorted Rows)
+Internals of Group-Aggregate (Using Sorted Rows)
 ********************************************************
 
 .. toctree::
@@ -28,10 +28,9 @@ implemented as :ref:`groupAggregate <cid-xf::database::groupAggregate>` function
 
 .. image:: /images/group_aggr.png
    :alt: Static ALU Block Structure
-   :width: 85%
    :align: center
 
-Group aggregate is similar like the pritimive aggregate, but categorized the input items by group key. For each group key, an normal aggregate is performed. 
+Group aggregate is similar like the primitive aggregate, but categorized the input items by group key. For each group key, an normal aggregate is performed. 
 
 The classification process of the group by is done by Sort. Therefore, this group-aggregate primitive is actually the block that connected after a sort primitive. In other words, the input streams of this primitive is already sorted by group-by key. 
 
@@ -46,7 +45,7 @@ The supported primitives of group-aggregate are:
     - group_aggr_normL1
     - group_aggr_normL2
 
-Corresondingly, the related ops are:
+Correspondingly, the related OPS are:
     - AOP_MAX
     - AOP_MIN
     - AOP_SUM

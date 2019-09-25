@@ -1,17 +1,27 @@
 # Accelerate TPC-H Queries with GQE Kernels
 
-This demo shows TPC-H SQL query acceleration with GQE kernels.
-For each query, scale factor 1 and 30 are supported.
-
-As comparison, each query is also implemented in C++, and time of each execution step can be printed.
-The data is pre-processed into numeric data arrays, for both CPU C++ and FPGA execution.
+This demo shows TPC-H SQL query acceleration with just one or two GQE xclbin files. Two scale factors, 1 and 30, are supported in this demo. For reference, each query is also implemented in single-thread C++ which prints time of each execution step on CPU.
 
 For more details of the kernel and test result, please refer to the HTML document.
 
+## Running the demo
+
+Other than the standard `TARGET` and `DEVICE` variable, the following variables are used to specify the test:
+
+* `MODE`: can be `CPU` or `FPGA`. Select `CPU` to run C++ implementation on host, and `FPGA` to use device.
+* `SF`: can be `1` or `30`. The data will be automatically generated in `db_data` subfolder at first run using selected scale factor.
+* `TB` can be `Q1` to `Q22`, except for `Q19` which is not supported yet.
+
 ```
 # To build the xclbin files for tests
-make run TARGET=<sw_emu|hw_emu|hw> DEVICE=u280-es1_xdma_201830_1
+cd build_aggr_partition
+make xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=u280
+cd ..
+
+cd build_join_partition
+make xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=u280
+cd ..
 
 #To run a specific demo:
-make run TARGET=<sw_emu|hw_emu|hw> DEVICE=u280-es1_xdma_201830_1 TB=<Q1|Q2|...> MODE=<FPGA|CPU>
+make run TARGET=<sw_emu|hw_emu|hw> TB=<Q1|Q2|...> MODE=<FPGA|CPU> SF=<1|30> DEVICE=u280
 ```

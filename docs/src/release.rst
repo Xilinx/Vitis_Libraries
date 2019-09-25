@@ -41,5 +41,5 @@ The 1.0 release provides a range of HLS primitives for mapping the execution
 plan steps in relational database. They cover most of the occurrence in the
 plan generated from TPC-H 22 queries.
 
-These modules work in streaming fashion and allows them to work in parallel
+These modules work in streaming fashion and allow them to work in parallel
 when possible.

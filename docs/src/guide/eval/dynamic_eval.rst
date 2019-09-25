@@ -13,10 +13,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _guide-dynamic-eval:
+.. _guide-dynamic_eval:
 
 ********************************************************
-Internals of Dynamic Evaluation
+Internals of Dynamic-Evaluation
 ********************************************************
 
 .. toctree::
@@ -26,27 +26,28 @@ Internals of Dynamic Evaluation
 This document describes the structure and execution of dynamic evaluation module,
 implemented as :ref:`dynamicEval <cid-xf::database::dynamicEval>` function.
 
-The structure of this 4-stream input primitve is describe as below.
+The structure of ``dynamicEval`` is described as below. The primitive has 4-stream and 4-constant as inputs. 
+The data type of input stream and constant is a template parameter in API, and the maximum width of constant is limited to 64-bit.
 
 .. image:: /images/dynamic_eval_top.png
    :alt: Dynamic Evaluation Top Structure
-   :width: 80%
    :align: center
 
-As shown in the picture, there are two types of cell design.
-
-For cell1-cell4, the two input which are stream and constant respectively:
+The primitive is a tree-shaped structure with evaluation cells in each node. 
+Each evaluation cell provides 4 kinds of computing unit, which are: compare, boolean algebra, multiplex and math compute.
+For comparator and boolean algebra, the results are in boolean type, while multiplex and math compute will generate non-boolean results.
+The internal of dynamic eval will expread two types of results from one cell to the next level of cells.
+There are two types of cell design. For Cell1-Cell4, as the level-1 cells, the two inputs which are stream and constant respectively. 
+For Cell5-Cell7, as the internal cells, which need process both boolean and non-boolean results from previous level. Cell1-Cell4 is shown as:
 
 .. image:: /images/dynamic_eval_l1_cell.png
    :alt: Dynamic Evaluation Cell 1-4 Structure
-   :width: 80%
    :align: center
 
-While Cell 5-Cell 7 have more inputs to select:
+While Cell5-Cell7 has more inputs to select:
 
 .. image:: /images/dynamic_eval_l2_cell.png
    :alt: Dynamic Evaluation Cell 5-7 Structure
-   :width: 80%
    :align: center
 
 The configuration of the primitive is defined as below, and the bits
@@ -82,4 +83,5 @@ are concatenated without padding from top to bottom in LSB to MSB order.
 |          | C4           | 64 bit |
 +----------+--------------+--------+
 
-To automatically generating its configuration, please refer to the software API defined in ``sw_api`` folder.
+To automatically generate its configuration, please refer to the test case in ``L3/tests/sw/dynamic_alu_host/test.cpp``
+To manually generate configuration, please refer to built-in docs in ``L1/include/hw/xf_database/dynamic_eval.hpp``

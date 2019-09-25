@@ -18,14 +18,14 @@
  * @file hash_murmur3.hpp
  * @brief Murmur3 hash function implementation.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_HASH_MURMUR3_H
 #define XF_DATABASE_HASH_MURMUR3_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "hls_stream.h"
@@ -71,12 +71,12 @@ inline void hashmurmur3_strm(hls::stream<ap_uint<W> >& key_strm, hls::stream<ap_
     const int nblocks = W / H;
 
     // keyBlen is the BYTE len of the key.
-    static const ap_uint<H> keyBlen = W / 8;
-    static const uint32_t c1 = 0xcc9e2d51;
-    static const uint32_t c2 = 0x1b873593;
-    static const uint32_t c3 = 0xe6546b64;
-    static const uint32_t c4 = 0x85ebca6b;
-    static const uint32_t c5 = 0xc2b2ae35;
+    const ap_uint<H> keyBlen = W / 8;
+    const uint32_t c1 = 0xcc9e2d51;
+    const uint32_t c2 = 0x1b873593;
+    const uint32_t c3 = 0xe6546b64;
+    const uint32_t c4 = 0x85ebca6b;
+    const uint32_t c5 = 0xc2b2ae35;
     //----------
     // body
 
@@ -118,7 +118,6 @@ LOOP_MURMUR3_MAIN:
 namespace xf {
 namespace database {
 /// @brief murmur3 algorithm.
-/// @details when initial murmur3 module top, need pragram like:
 /// @tparam W the bit width of ap_uint type for input message stream.
 /// @tparam h the bit width of ap_uint type for output hash stream.
 /// @param key_strm the message being hashed.

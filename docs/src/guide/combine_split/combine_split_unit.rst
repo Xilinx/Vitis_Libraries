@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _guide-combine-split-unit:
+.. _guide-combine_split_unit:
 
 ********************************************************
 Internals of Combine-Split-Unit
@@ -28,15 +28,14 @@ implemented as :ref:`combineCol <cid-xf::database::combineCol>` function and :re
 
 .. image:: /images/combine_unit.png
    :alt: Combine Unit Structure
-   :width: 80%
    :align: center
 
 .. image:: /images/split_unit.png
    :alt: Split Unit Structure
-   :width: 55%
    :align: center
 
-The Combine Unit primitive is used to combine two or more streams into one wider stream. And the Split Unit is used to one big stream into several thinner streams. Due to different numbers of input streams of combineUnit / output streams of spiltUnit. Four versions of combine/split unit are provided, including:
+The Combine Unit primitive is used to combine two or more streams into one wider stream. And the Split Unit is used to split one big stream into several thinner streams. 
+Due to different numbers of input streams of combineUnit / output streams of spiltUnit. Four versions of combine/split unit are provided, including:
 
 - 2-stream-input combine unit
 
@@ -47,7 +46,7 @@ The Combine Unit primitive is used to combine two or more streams into one wider
 - 5-stream-input combine unit
 
 - 2-stream-output split unit
-  
+
 - 3-stream-output split unit
 
 - 4-stream-output split unit
@@ -58,7 +57,6 @@ For the combine unit, the input streams are combined from left to right, with th
 
 For the split unit, the output streams are splited from right to left, with the corresponding inputs from stream1 to streamN. (aka. [output streamN, ..., output stream2, output stream1] = input stream). 
 
-  
 .. CAUTION::
     - All input/output streams are ap_uint<> data type.
     - The maximum number of supported streams are 5 for both combine and split unit. When the input/output stream numbers are more than 5, the combination of 2 or more combine/split unit are required.

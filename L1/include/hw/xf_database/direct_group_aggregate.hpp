@@ -18,7 +18,7 @@
  * @file direct_group_aggregate.hpp
  * @brief DIRECT AGGREGATE template function implementation.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_DIRECT_GROUP_AGGREGATE_HPP
@@ -1042,7 +1042,10 @@ namespace database {
  *  - AOP_NORML2
  *
  * The return value is typed the same as the input payload value.
- * **Attention should be paid for overflow in sum or count.**
+ * \rst
+ * .. CAUTION::
+ *     Attention should be paid for overflow in sum or count.
+ * \endrst
  * @tparam op the aggregate operator, as defined in AggregateOp enum.
  * @tparam DATINW  the width of input payload
  * @tparam DATOUTW the width of output aggr-payload
@@ -1098,7 +1101,10 @@ void directGroupAggregate(hls::stream<ap_uint<DATINW> >& vin_strm,
  *  - AOP_NORM1
  *
  * The return value is typed the same as the input payload value.
- * **Attention should be paid for overflow in sum or count.**
+ * \rst
+ * .. CAUTION::
+ *     Attention should be paid for overflow in sum or count.
+ * \endrst
  * @tparam DATINW  the width of input payload
  * @tparam DATOUTW the width of output aggr-payload
  * @tparam DIRECTW the width of input and output key

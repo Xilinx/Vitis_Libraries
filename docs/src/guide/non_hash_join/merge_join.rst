@@ -25,10 +25,12 @@ Internals of Merge-Join and Merge-Left-Join
 
 This document gives the user guide and describes the structure of Merge-Join and Merge-Left-Join, implemented as :ref:`mergeJoin<cid-xf::database::mergeJoin>` function and :ref:`mergeLeftJoin<cid-xf::database::mergeLeftJoin>` function respectively.
 
+----------
 User guide
-        When calling the mergeJoin/mergeLeftJoin function, users need to set the key type and payload type. Only one key stream and one payload stream is given for an input table. If multiple key columns or multiple payload columns are required, please use the :ref:`combineCol <cid-xf::database::combineCol>` to combine columns.
+----------
+        When calling the ``mergeJoin``/``mergeLeftJoin`` function, users need to set the key type and payload type. Only one key stream and one payload stream is given for an input table. If multiple key columns or multiple payload columns are required, please use the :ref:`combineCol <cid-xf::database::combineCol>` to combine columns.
 
-        The user needs to push input tables into the related streams. Users also need to configure the function to merge ascend/descend tables by setting the isascend parameter to true/false.
+        The user needs to push input tables into the related streams. Users also need to configure the function to merge ascend/descend tables by setting the ``isascend`` parameter to true/false.
 
 .. CAUTION:: The left table should not contain duplicated keys.
 ..
@@ -37,12 +39,13 @@ User guide
 
 .. Important:: The mergeLeftJoin function has a isnull_strm output stream to mark if the result right table is null (The current left key does not exist in the right table).
 
+---------
 Structure
+---------
         Use the merge join of ascend tables as an example:
 
 .. image:: /images/merge_join.png
    :alt: Merge Join Structure
-   :width: 100%
    :align: center
 ..
 

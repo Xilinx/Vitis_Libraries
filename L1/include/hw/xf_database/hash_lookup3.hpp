@@ -26,7 +26,7 @@
 #define XF_DATABASE_HASH_LOOKUP3_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "hls_stream.h"
@@ -73,12 +73,12 @@ namespace details {
 /// @param hash_val output hash value.
 template <int W>
 inline void hashlookup3_core(ap_uint<W> key_val, ap_uint<32>& hash_val) {
-    static const int key32blen = W / 32;
-    static const int key96blen = W / 96;
+    const int key32blen = W / 32;
+    const int key96blen = W / 96;
 
     // key8blen is the BYTE len of the key.
-    static const int key8blen = W / 8;
-    static const ap_uint<32> c1 = 0xdeadbeef;
+    const int key8blen = W / 8;
+    const ap_uint<32> c1 = 0xdeadbeef;
     //----------
     // body
 
@@ -213,12 +213,12 @@ LOOP_lookup3_MAIN:
 /// @param hash_val output, hash value.
 template <int W>
 inline void hashlookup3_core(ap_uint<W> key_val, ap_uint<64>& hash_val) {
-    static const int key32blen = W / 32;
-    static const int key96blen = W / 96;
+    const int key32blen = W / 32;
+    const int key96blen = W / 96;
 
     // key8blen is the BYTE len of the key.
-    static const int key8blen = W / 8;
-    static const ap_uint<32> c1 = 0xdeadbeef;
+    const int key8blen = W / 8;
+    const ap_uint<32> c1 = 0xdeadbeef;
     //----------
     // body
 
@@ -357,16 +357,17 @@ LOOP_lookup3_MAIN:
 } // lookup3_64
 
 /// brief Generate 64bit output hash value for the input key.
+/// @tparam W input key width
 /// @param key_val input, key value
-/// @param key_val input, seed value
-/// @param hash_val output, hash value.
+/// @param seed input, seed value
+/// @param hash_val output, hash value
 template <int W>
 inline void hashlookup3_seed_core(ap_uint<W> key_val, ap_uint<32> seed, ap_uint<64>& hash_val) {
-    static const int key32blen = W / 32;
-    static const int key96blen = W / 96;
+    const int key32blen = W / 32;
+    const int key96blen = W / 96;
 
     // key8blen is the BYTE len of the key.
-    static const int key8blen = W / 8;
+    const int key8blen = W / 8;
 
     //----------
     // body
@@ -512,8 +513,8 @@ LOOP_lookup3_MAIN:
 namespace xf {
 namespace database {
 /// @brief lookup3 algorithm, 64-bit hash.
-/// @tparam W the bit width of ap_uint type for input message stream.  W <=96
-/// bit II=1, Others II=(W/96).
+/// II=1 when W<=96, otherwise II=(W/96).
+/// @tparam W the bit width of ap_uint type for input message stream.
 /// @param key_strm the message being hashed.
 /// @param hash_strm the result.
 template <int W>
@@ -535,8 +536,8 @@ void hashLookup3(ap_uint<32> seed, hls::stream<ap_uint<W> >& key_strm, hls::stre
 }
 
 /// @brief lookup3 algorithm, 32-bit hash.
-/// @tparam W the bit width of ap_uint type for input message stream. W <=96 bit
-/// II=1, Others II=(W/96).
+/// II=1 when W<=96, otherwise II=(W/96).
+/// @tparam W the bit width of ap_uint type for input message stream.
 /// @param key_strm the message being hashed.
 /// @param hash_strm the result.
 template <int W>

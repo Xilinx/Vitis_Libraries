@@ -141,7 +141,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -170,7 +170,7 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
 override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.board.part" --platform $(firstword $(XPLATFORM)))
 endif
 endif
-check_part: | check_platform
+check_part: check_platform check_vpp
 ifeq (,$(XPART))
 	@echo "XPART is not set and cannot be inferred. Please run \`make help\` for usage info." && false
 endif

@@ -15,17 +15,17 @@
  */
 
 /**
- * @file bloomfilter.hpp
+ * @file bloom_filter.hpp
  * @brief BLOOMFILTER template function implementation.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_BLOOMFILTER_H
 #define XF_DATABASE_BLOOMFILTER_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "ap_int.h"
@@ -1198,7 +1198,7 @@ void bfGen(hls::stream<ap_uint<STR_IN_W> >& msg_strm,
 /**
  * @brief Generate the bloomfilter in on-chip RAM blocks, and emit the vectors upon finish.
  *
- * This primitive calculates hash of input values, and marks corresponding bits in the on-chip RAM blocks.
+ * This primitive calculates hash values of input, and marks corresponding bits in the on-chip RAM blocks.
  * RAM blocks can be configured to be 18-bit BRAM or 72-bit URAM.
  *
  * The bloom-filter bit vectors are built into internally allocated buffers, and streamed out after the filter has been

@@ -22,14 +22,14 @@
  * (1) less than 8M entries from small table.
  * (2) max number of key with same hash is less than 512.
  *
- * This file is part of XF Database Library.
+ * This file is part of Vitis Database Library.
  */
 
 #ifndef XF_DATABASE_HASH_JOIN_v2_H
 #define XF_DATABASE_HASH_JOIN_v2_H
 
 #ifndef __cplusplus
-#error "XF Database Library only works with C++."
+#error "Vitis Database Library only works with C++."
 #endif
 
 #include "hls_stream.h"
@@ -1484,12 +1484,12 @@ void collect_unit(hls::stream<ap_uint<JW> > i_jrow_strm[PU],
     do {
 #pragma HLS pipeline II = 1
         for (int i = 0; i < PU; i++) {
-#pragma hls unroll
+#pragma HLS unroll
             empty_e[i] = !i_e_strm[i].empty() && !last[i];
         }
         rd_e = mul_ch_read(empty_e);
         for (int i = 0; i < PU; i++) {
-#pragma hls unroll
+#pragma HLS unroll
             if (rd_e[i]) {
                 jrow_arr[i] = i_jrow_strm[i].read();
                 last[i] = i_e_strm[i].read();
