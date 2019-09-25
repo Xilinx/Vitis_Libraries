@@ -18,7 +18,7 @@
 =====================
 L3 API test
 =====================
-XFBLAS level 3 provide an automatic test flow that could be ran by simple one line command:
+XFBLAS level 3 provides an automatic test flow that could be run by simple one line command:
 
 .. code-block:: bash
 

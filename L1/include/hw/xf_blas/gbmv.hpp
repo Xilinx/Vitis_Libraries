@@ -78,10 +78,10 @@ void gbmv(const unsigned int p_m,
  * @tparam t_MacType the datatype of the output stream
  *
  * @param p_m the number of rows of input matrix p_M
- * @param p_alpha, scalar alpha
+ * @param p_alpha scalar alpha
  * @param p_M the input stream of packed Matrix entries
  * @param p_x the input stream of packed vector entries
- * @param p_beta, scalar beta
+ * @param p_beta scalar beta
  * @param p_y the output vector
  */
 template <typename t_DataType,

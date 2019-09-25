@@ -52,7 +52,7 @@ void trmv(const bool uplo,
 }
 
 /**
- * @trmv function that returns the result vector of the mutiplication of a
+ * @brief trmv function that returns the result vector of the multiplication of a
  * triangular matrix and a vector y = alpha * M * x + beta * y
  *
  * @tparam t_DataType the data type of the vector entries
