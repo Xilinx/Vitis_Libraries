@@ -1,31 +1,18 @@
-/***************************************************************************
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-***************************************************************************/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef _XF_HOG_DESCRIPTOR_COMPUTE_HIST_HPP_
 #define _XF_HOG_DESCRIPTOR_COMPUTE_HIST_HPP_
@@ -70,9 +57,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 template <int DEPTH, typename hist_type, int NOB, int BIN_STRIDE_FIX>
 void xFDHOGbilinearNO(XF_PTNAME(DEPTH) p, XF_PTNAME(DEPTH) m, uint16_t* bin_center, hist_type* bin) {
-    //clang-format off
-#pragma HLS INLINE OFF
-    //clang-format on
+    // clang-format off
+    #pragma HLS INLINE OFF
+    // clang-format on
 
     // finding the bin index with respect to the phase
     uint32_t tmp_bin_idx = p * XF_HOG_1_BY_20; // Q9.7xQ0.16 -> Q9.23
@@ -175,22 +162,22 @@ void xFDHOGcomputeHistNO(hls::stream<XF_SNAME(WORDWIDTH)>& _phase_strm,
 
     // NPC copied of the histogram array
     hist_type bin[NOB];
-    //clang-format off
-#pragma HLS ARRAY_PARTITION variable = bin complete dim = 1
-//clang-format on
+    // clang-format off
+    #pragma HLS ARRAY_PARTITION variable=bin complete dim=1
+// clang-format on
 
 // initializing the histogram array with zero
 loop_i_init_zero:
     for (i = 0; i < nohc; i++) {
-        //clang-format off
-#pragma HLS PIPELINE
-        //clang-format on
+        // clang-format off
+        #pragma HLS PIPELINE
+        // clang-format on
 
     loop_j_init_zero:
         for (j = 0; j < NOB; j++) {
-            //clang-format off
-#pragma HLS unroll
-            //clang-format on
+            // clang-format off
+            #pragma HLS unroll
+            // clang-format on
             HA[i][j] = 0;
         }
     }
@@ -199,16 +186,16 @@ cell_height_loop:
     for (i = 0; i < CELL_HEIGHT; i++) {
     no_of_horz_cell_loop:
         for (r = 0; r < nohc; r++) {
-            //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = NOHC max = NOHC
-#pragma HLS PIPELINE
-            //clang-format on
+            // clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=NOHC max=NOHC
+            #pragma HLS PIPELINE
+            // clang-format on
 
         init_bin_loop_k:
             for (k = 0; k < NOB; k++) {
-                //clang-format off
-#pragma HLS unroll
-                //clang-format on
+                // clang-format off
+                #pragma HLS unroll
+                // clang-format on
                 bin[k] = 0;
             }
 
@@ -239,9 +226,9 @@ cell_height_loop:
         tmp_ssv_computation:
             for (k = 0; k < NOB; k++) // adder tree inferred
             {
-                //clang-format off
-#pragma HLS unroll
-                //clang-format on
+                // clang-format off
+                #pragma HLS unroll
+                // clang-format on
                 tmp += (HA[r][k] * HA[r][k]);
             }
             ssv[r] = tmp; // Q29.16 format <45> bits
@@ -271,9 +258,9 @@ void xFDHOGbilinearRO(XF_PTNAME(DEPTH) p,
                       uchar_t* index_2,
                       hist_type* part_1,
                       hist_type* part_2) {
-    //clang-format off
-#pragma HLS INLINE OFF
-    //clang-format on
+    // clang-format off
+    #pragma HLS INLINE OFF
+    // clang-format on
 
     // finding the bin index with respect to the phase
     uint32_t tmp_bin_idx = p * (uint16_t)XF_HOG_1_BY_20;
@@ -336,16 +323,16 @@ void xFDHOGbilinearRO(XF_PTNAME(DEPTH) p,
  ***************************************************************************/
 template <int NPC, int NOB, typename hist_type, int NOHC>
 void xFDHOGBinRO(hist_type bin[][NOB], hist_type HA[][NOB], uint16_t j) {
-    //clang-format off
-#pragma HLS INLINE
-//clang-format on
+    // clang-format off
+    #pragma HLS INLINE
+// clang-format on
 
 // add all the 8 copies of the temporary array into single copy
 accumulate_to_bin_0_k:
     for (uchar_t k = 0; k < NOB; k++) {
-        //clang-format off
-#pragma HLS UNROLL
-        //clang-format on
+        // clang-format off
+        #pragma HLS UNROLL
+        // clang-format on
 
     accumulate_to_bin_0_l:
         for (uchar_t l = 1; l < (1 << XF_BITSHIFT(NPC)); l++) {
@@ -356,9 +343,9 @@ accumulate_to_bin_0_k:
 // accumulating the temporary histogram to HA array
 accumulate_HA:
     for (uchar_t k = 0; k < NOB; k++) {
-        //clang-format off
-#pragma HLS PIPELINE
-        //clang-format on
+        // clang-format off
+        #pragma HLS PIPELINE
+        // clang-format on
 
         HA[j][k] += bin[0][k];
     }
@@ -395,9 +382,9 @@ void xFDHOGcomputeHistRO(
 
         // NPC copied of the histogram array
         hist_type bin[XF_NPIXPERCYCLE(NPC)][NOB], part_1, part_2;
-//clang-format off
+// clang-format off
 #pragma HLS ARRAY_PARTITION variable=bin complete dim=0
-//clang-format on
+// clang-format on
 
         uint16_t proc_loop = XF_WORDDEPTH(WORDWIDTH);
         uchar_t step = XF_PIXELDEPTH(DEPTH), npc_idx, index_1, index_2;
@@ -406,16 +393,16 @@ void xFDHOGcomputeHistRO(
         loop_i_init_zero:
         for(uint16_t i = 0; i < NOHC; i++)
         {
-//clang-format off
+// clang-format off
 #pragma HLS pipeline
-//clang-format on
+// clang-format on
 
                 loop_j_init_zero:
                 for(uint16_t j = 0; j < NOB; j++)
                 {
-//clang-format off
+// clang-format off
 #pragma HLS unroll
-//clang-format on
+// clang-format on
                         HA[i][j] = 0;
                 }
         }
@@ -426,10 +413,10 @@ void xFDHOGcomputeHistRO(
                 img_col_loop:
                 for(uint16_t j = 0; j < _phase_strm.cols; j++)
                 {
-//clang-format off
+// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
 #pragma HLS pipeline
-//clang-format on
+// clang-format on
 
                         // reading data from the stream
                         phase_data = _phase_strm.read();
@@ -439,9 +426,9 @@ void xFDHOGcomputeHistRO(
                         init_bin_loop_k:
                         for(uchar_t k = 0; k < NOB; k++)
                         {
-//clang-format off
+// clang-format off
 #pragma HLS unroll
-//clang-format on
+// clang-format on
                                 init_bin_loop_l:
                                 for(uchar_t l = 0; l < (1<<XF_BITSHIFT(NPC)); l++)
                                 {
@@ -452,9 +439,9 @@ void xFDHOGcomputeHistRO(
                         proc_loop:
                         for(uint16_t k = 0; k < proc_loop; k+=step)
                         {
-//clang-format off
+// clang-format off
 #pragma HLS unroll
-//clang-format on
+// clang-format on
                                 p = phase_data.range(k + (step-1), k);
                                 m = mag_data.range(k + (step-1), k);
 
@@ -472,16 +459,16 @@ void xFDHOGcomputeHistRO(
                         xFDHOGBinRO<NPC,NOB,hist_type,NOHC>(bin,HA,j); // HA array will be of format Q15.8
 
                         ssv_type tmp_ssv[NOB];
-//clang-format off
+// clang-format off
 #pragma HLS ARRAY_PARTITION variable=tmp_ssv complete dim=1
-//clang-format on
+// clang-format on
 
                         // square computation on temporary ssv val
                         for(uchar_t k = 0; k < NOB; k++)
                         {
-//clang-format off
+// clang-format off
 #pragma HLS unroll
-//clang-format on
+// clang-format on
                                 tmp_ssv[k] = (HA[j][k] * HA[j][k]);
                         }
 

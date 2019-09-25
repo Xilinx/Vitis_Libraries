@@ -1,31 +1,18 @@
-/***************************************************************************
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- ***************************************************************************/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef _XF_HOG_DESCRIPTOR_NORM_HPP_
 #define _XF_HOG_DESCRIPTOR_NORM_HPP_
@@ -58,9 +45,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 template <typename ssv_type, typename tmp_nf_sq24_type>
 void xFDHOGnormalizeKernel1(ssv_type ssv_1, ssv_type ssv_2, uint16_t bj, tmp_nf_sq24_type& tmp_nf_sq24) {
-    //clang-format off
-#pragma HLS INLINE OFF
-    //clang-format on
+    // clang-format off
+    #pragma HLS INLINE OFF
+    // clang-format on
 
     // temporary arrays to hold the ssv values of 4 cells
     ap_uint<51> tmp_nf_1, tmp_nf_2;
@@ -98,19 +85,19 @@ void xFDHOGnormalizeKernel2(hist_type HA_1[][NOB],
                             fx_rnf_sq_type& fx_rnf_sq,
                             uint16_t bj,
                             char n) {
-    //clang-format off
-#pragma HLS INLINE OFF
-    //clang-format on
+    // clang-format off
+    #pragma HLS INLINE OFF
+    // clang-format on
 
     // HA_1 nad HA_2 in the Q15.8 format
     uint32_t tmp_clip_1, tmp_clip_2;
 
     // offsets to index the norm_array
     uchar_t offset_1[2], offset_2[2];
-    //clang-format off
-#pragma HLS ARRAY_PARTITION variable = offset_1 complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = offset_2 complete dim = 1
-    //clang-format on
+    // clang-format off
+    #pragma HLS ARRAY_PARTITION variable=offset_1 complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=offset_2 complete dim=1
+    // clang-format on
 
     offset_1[0] = 0;
     offset_1[1] = NOB << 1;
@@ -127,10 +114,10 @@ norm_loop:
     for (j = 0; j < NOHCPB; j++) {
     num_of_bins_loop:
         for (i = 0; i < NOB; i++) {
-            //clang-format off
-#pragma HLS LOOP_FLATTEN
-#pragma HLS PIPELINE
-            //clang-format on
+            // clang-format off
+            #pragma HLS LOOP_FLATTEN
+            #pragma HLS PIPELINE
+            // clang-format on
 
             // normalization I
             // // (Q15.8 x Q(32-n).n) >> n-8 -> Q16.16 format
@@ -185,9 +172,9 @@ template <int NOHC,
 void xFDHOGReNormalizeKernel(norm_block_type* norm_block,
                              fx_rnf_sq_type fx_rnf_sq,
                              hls::stream<XF_SNAME(WORDWIDTH)>& _block_strm) {
-    //clang-format off
-#pragma HLS INLINE OFF
-    //clang-format on
+    // clang-format off
+    #pragma HLS INLINE OFF
+    // clang-format on
 
     char n_rnf;
     uint32_t rnf = xf::cv::Inverse(fx_rnf_sq, 1, &n_rnf); // output in Q(32-n_rnf).n_rnf format
@@ -198,9 +185,9 @@ void xFDHOGReNormalizeKernel(norm_block_type* norm_block,
 
 renorm_loop2:
     for (uchar_t k = 0; k < (NOB * NOHCPB * NOVCPB); k++) {
-        //clang-format off
-#pragma HLS PIPELINE
-        //clang-format on
+        // clang-format off
+        #pragma HLS PIPELINE
+        // clang-format on
 
         ap_uint32_t tmp_block_data = (norm_block[k] * rnf) >> n_rnf; // output in format Q0.16
 
@@ -259,21 +246,21 @@ void xFDHOGNormalize(hist_type HA_1[][NOB],
     ap_uint<26> tmp_nf_sq24_1[1], tmp_nf_sq24_2[1];
     uint32_t nf_1[1], nf_2[1];
     char n_1[1], n_2[1];
-    //clang-format off
-#pragma HLS RESOURCE variable = nf_1 core = RAM_1P_LUTRAM
-#pragma HLS RESOURCE variable = nf_2 core = RAM_1P_LUTRAM
-#pragma HLS RESOURCE variable = tmp_nf_sq24_1 core = RAM_1P_LUTRAM
-#pragma HLS RESOURCE variable = tmp_nf_sq24_2 core = RAM_1P_LUTRAM
-#pragma HLS RESOURCE variable = n_1 core = RAM_1P_LUTRAM
-#pragma HLS RESOURCE variable = n_2 core = RAM_1P_LUTRAM
-    //clang-format on
+    // clang-format off
+    #pragma HLS RESOURCE variable=nf_1 core=RAM_1P_LUTRAM
+    #pragma HLS RESOURCE variable=nf_2 core=RAM_1P_LUTRAM
+    #pragma HLS RESOURCE variable=tmp_nf_sq24_1 core=RAM_1P_LUTRAM
+    #pragma HLS RESOURCE variable=tmp_nf_sq24_2 core=RAM_1P_LUTRAM
+    #pragma HLS RESOURCE variable=n_1 core=RAM_1P_LUTRAM
+    #pragma HLS RESOURCE variable=n_2 core=RAM_1P_LUTRAM
+    // clang-format on
 
     // taking each bin as 16-bit unsigned type
     uint16_t norm_block_1[NODPB], norm_block_2[NODPB];
-    //clang-format off
-#pragma HLS ARRAY_PARTITION variable = norm_block_1 complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = norm_block_2 complete dim = 1
-    //clang-format on
+    // clang-format off
+    #pragma HLS ARRAY_PARTITION variable=norm_block_1 complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=norm_block_2 complete dim=1
+    // clang-format on
 
     // temporary variable for the renormalization (to hold the sum value)
     uint16_t fx_rnf_sq_1[1], fx_rnf_sq_2[1];
@@ -292,9 +279,9 @@ void xFDHOGNormalize(hist_type HA_1[][NOB],
 
 no_of_HB:
     for (bj = 3; bj < nohb; bj++) {
-        //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = NOHB max = NOHB
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NOHB max=NOHB
+        // clang-format on
 
         if (flag) {
             xFDHOGnormalizeKernel1(ssv_1, ssv_2, bj, tmp_nf_sq24_2[0]);

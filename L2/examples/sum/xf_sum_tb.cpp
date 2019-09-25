@@ -1,45 +1,32 @@
-/***************************************************************************
-Copyright (c) 2018, Xilinx, Inc.
-All rights reserved.
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-***************************************************************************/
-#include "common/xf_headers.h"
+#include "common/xf_headers.hpp"
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1>" << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
         return EXIT_FAILURE;
     }
 
     cv::Mat in_gray, in_gray1, out_gray, diff;
 
     // Reading in the image:
-    in_gray = cv::imread(argv[2], 0);
+    in_gray = cv::imread(argv[1], 0);
 
     if (in_gray.data == NULL) {
         std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
@@ -47,7 +34,8 @@ int main(int argc, char** argv) {
     }
 
     int channels = in_gray.channels();
-
+    int height = in_gray.rows;
+    int width = in_gray.cols;
     // OpenCV function
     std::vector<double> ocv_scl(channels);
 
@@ -74,10 +62,8 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
-    std::string binaryFile = argv[1];
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_sum");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -91,6 +77,8 @@ int main(int argc, char** argv) {
     // Set kernel arguments:
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_outVec));
+    OCL_CHECK(err, err = kernel.setArg(2, height));
+    OCL_CHECK(err, err = kernel.setArg(3, width));
 
     // Initialize the buffers:
     cl::Event event;

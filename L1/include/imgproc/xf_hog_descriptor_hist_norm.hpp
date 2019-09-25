@@ -1,31 +1,18 @@
-/***************************************************************************
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- ***************************************************************************/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef _XF_HOG_DESCRIPTOR_HIST_NORM_HPP_
 #define _XF_HOG_DESCRIPTOR_HIST_NORM_HPP_
@@ -88,47 +75,47 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 
     // partitioning across the dim-2 to restrict the BRAM utilization
     if (USE_URAM) {
-        //clang-format off
-#pragma HLS ARRAY_RESHAPE variable = HA_1 cyclic factor = 9 dim = 2
-#pragma HLS ARRAY_RESHAPE variable = HA_2 cyclic factor = 9 dim = 2
-#pragma HLS ARRAY_RESHAPE variable = HA_3 cyclic factor = 9 dim = 2
-#pragma HLS RESOURCE variable = HA_1 core = RAM_S2P_URAM
-#pragma HLS RESOURCE variable = HA_2 core = RAM_S2P_URAM
-#pragma HLS RESOURCE variable = HA_3 core = RAM_S2P_URAM
-        //clang-format on
+        // clang-format off
+        #pragma HLS ARRAY_RESHAPE variable=HA_1 cyclic factor=9 dim=2
+        #pragma HLS ARRAY_RESHAPE variable=HA_2 cyclic factor=9 dim=2
+        #pragma HLS ARRAY_RESHAPE variable=HA_3 cyclic factor=9 dim=2
+        #pragma HLS RESOURCE variable=HA_1 core=RAM_S2P_URAM
+        #pragma HLS RESOURCE variable=HA_2 core=RAM_S2P_URAM
+        #pragma HLS RESOURCE variable=HA_3 core=RAM_S2P_URAM
+        // clang-format on
     } else {
-        //clang-format off
-#pragma HLS ARRAY_PARTITION variable = HA_1 complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = HA_2 complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = HA_3 complete dim = 2
-        //clang-format on
+        // clang-format off
+        #pragma HLS ARRAY_PARTITION variable=HA_1 complete dim=2
+        #pragma HLS ARRAY_PARTITION variable=HA_2 complete dim=2
+        #pragma HLS ARRAY_PARTITION variable=HA_3 complete dim=2
+        // clang-format on
         // specifying the dual-port BRAM
-        //clang-format off
-#pragma HLS RESOURCE variable = HA_1 core = RAM_S2P_BRAM
-#pragma HLS RESOURCE variable = HA_2 core = RAM_S2P_BRAM
-#pragma HLS RESOURCE variable = HA_3 core = RAM_S2P_BRAM
-        //clang-format on
+        // clang-format off
+        #pragma HLS RESOURCE variable=HA_1 core=RAM_S2P_BRAM
+        #pragma HLS RESOURCE variable=HA_2 core=RAM_S2P_BRAM
+        #pragma HLS RESOURCE variable=HA_3 core=RAM_S2P_BRAM
+        // clang-format on
     }
 
     // array to hold the sum of squared values of each cell
     ap_uint<48> ssv_1[NOHC], ssv_2[NOHC], ssv_3[NOHC];
-    //clang-format off
-#pragma HLS RESOURCE variable = ssv_1 core = RAM_S2P_BRAM
-#pragma HLS RESOURCE variable = ssv_2 core = RAM_S2P_BRAM
-#pragma HLS RESOURCE variable = ssv_3 core = RAM_S2P_BRAM
-    //clang-format on
+    // clang-format off
+    #pragma HLS RESOURCE variable=ssv_1 core=RAM_S2P_BRAM
+    #pragma HLS RESOURCE variable=ssv_2 core=RAM_S2P_BRAM
+    #pragma HLS RESOURCE variable=ssv_3 core=RAM_S2P_BRAM
+    // clang-format on
 
     // bin center computation, in the Q9.7 format
     uint16_t bin_center[NOB];
-    //clang-format off
-#pragma HLS ARRAY_PARTITION variable = bin_center complete dim = 0
-    //clang-format on
+    // clang-format off
+    #pragma HLS ARRAY_PARTITION variable=bin_center complete dim=0
+    // clang-format on
 
     uint16_t offset = ((BIN_STRIDE << 7) >> 1), bi = 0;
     for (uchar_t i = 0; i < NOB; i++) {
-        //clang-format off
-#pragma HLS PIPELINE
-        //clang-format on
+        // clang-format off
+        #pragma HLS PIPELINE
+        // clang-format on
 
         bin_center[i] = offset;
         offset += (BIN_STRIDE << 7);
@@ -148,9 +135,9 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 // loop running for vertical block number of times
 verticalBlockLoop:
     for (bi = 0; bi < (novb - 1); bi++) {
-        //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = NOVB - 1 max = NOVB - 1
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NOVB-1 max=NOVB-1
+        // clang-format on
         if (idx == 2) {
             xFDHOGcomputeHist<ROWS, COLS, DEPTH_SRC, NPC, WORD_WIDTH_SRC, CELL_HEIGHT, CELL_WIDTH, NOHC,
                               (COLS >> XF_BITSHIFT(NPC)), WIN_STRIDE, BIN_STRIDE, NOB>(_phase_strm, _mag_strm, HA_3,
@@ -223,7 +210,7 @@ void xFDHOGDescriptor(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _phase_strm,
                       hls::stream<XF_SNAME(WORDWIDTH_DST)>& _block_strm,
                       uint16_t _height,
                       uint16_t _width) {
-#ifndef _SYNTHESIS_
+#ifndef __SYNTHESIS__
     assert((DEPTH_SRC == XF_16UP) && "DEPTH_DST must be XF_16UP");
     assert((DEPTH_DST == XF_16UP) && "DEPTH_DST must be XF_16UP");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8) || (NPC == XF_NPPC16)) &&

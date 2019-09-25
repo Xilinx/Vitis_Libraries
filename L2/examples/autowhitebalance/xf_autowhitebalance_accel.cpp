@@ -1,32 +1,18 @@
-/***************************************************************************
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-***************************************************************************/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "xf_autowhitebalance_config.h"
 
@@ -36,13 +22,21 @@ void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                             ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                             float thresh,
                             int rows,
-                            int cols) {
+                            int cols,
+                            float inputMin,
+                            float inputMax,
+                            float outputMin,
+                            float outputMax) {
     // clang-format off
 #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
 #pragma HLS INTERFACE m_axi     port=img_inp1  offset=slave bundle=gmem2
 #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem3
 
 #pragma HLS INTERFACE s_axilite port=thresh     bundle=control
+#pragma HLS INTERFACE s_axilite port=inputMin     bundle=control
+#pragma HLS INTERFACE s_axilite port=inputMax     bundle=control
+#pragma HLS INTERFACE s_axilite port=outputMin     bundle=control
+#pragma HLS INTERFACE s_axilite port=outputMax     bundle=control
 #pragma HLS INTERFACE s_axilite port=rows     bundle=control
 #pragma HLS INTERFACE s_axilite port=cols     bundle=control
 #pragma HLS INTERFACE s_axilite port=return   bundle=control
@@ -76,7 +70,8 @@ void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_inp1, in_mat1);
 
-    xf::cv::balanceWhite<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, WB_TYPE>(in_mat, in_mat1, out_mat, thresh);
+    xf::cv::balanceWhite<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, WB_TYPE>(in_mat, in_mat1, out_mat, thresh, inputMin,
+                                                                          inputMax, outputMin, outputMax);
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
 }
