@@ -60,9 +60,17 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
+    'sphinx.ext.todo',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.githubpages',
     'doxyrest',
     'cpplexer',
 ]
+###automatically figuring
+numfig = True
+numfig_secnum_depth = (2)
+latex_engine = 'xelatex'
+numfig_format = {'figure': 'Figure %s', 'table': 'Table %s', 'code-block': 'Code %s'}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

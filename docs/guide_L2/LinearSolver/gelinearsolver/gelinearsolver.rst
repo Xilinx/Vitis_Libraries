@@ -15,13 +15,14 @@
    limitations under the License.
 
 *******************************************************
-Lower-Upper Decomposition (GETRF_NOPIVOT)
+General Linear Solver (GELINEARSOLVER)
 *******************************************************
 
-This function computes the LU decomposition (without pivoting) of matrix :math:`A`
+This function solves a system of linear equation with general matrix along with multiple right-hand side vector
 
 .. math::
-    A = L U
+      Ax=B
 
-where :math:`A` is a dense matrix of size :math:`m \times m`, :math:`L` is a lower triangular matrix with unit diagonal, and :math:`U` is a upper triangular matrix. This function does not implement pivoting.
+where :math:`A` is a dense general matrix of size :math:`m \times m`, :math:`x` is a vector need to be computed, and :math:`B` is input vector.
 The maximum matrix size supported in FPGA is templated by NMAX.
+

@@ -16,21 +16,21 @@
 ..
 
 
-Matrix decomposition
+Matrix Decomposition
 ====================
 
 .. include:: ../rst_L2_mat/namespace_xf_solver.rst
-   :start-line: 26
+   :start-after: FunctionSection
 
 Linear Solver
 =============
 
 .. include:: ../rst_L2_linearsolver/namespace_xf_solver.rst
-   :start-line: 26
+   :start-after: FunctionSection
 
-Eigen Value Solver
+Eigenvalue Solver
 ==================
 
 .. include:: ../rst_L2_eigensolver/namespace_xf_solver.rst
-   :start-line: 26
+   :start-after: FunctionSection
 

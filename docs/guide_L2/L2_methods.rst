@@ -14,6 +14,19 @@
    limitations under the License.
 
 
+Matrix Decomposition
+====================
+
+.. toctree::
+   :maxdepth: 1
+
+   MatrixDecomposition/gesvdj/gesvdj.rst
+   MatrixDecomposition/gesvj/gesvj.rst
+   MatrixDecomposition/geqrf/geqrf.rst
+   MatrixDecomposition/getrf/getrf.rst
+   MatrixDecomposition/getrf_nopivot/getrf_nopivot.rst
+   MatrixDecomposition/potrf/potrf.rst
+
 Linear Solver
 =============
 
@@ -23,22 +36,11 @@ Linear Solver
    LinearSolver/gtsv/gtsv.rst
    LinearSolver/polinearsolver/polinearsolver.rst
    LinearSolver/pomatrixinverse/pomatrixinverse.rst
+   LinearSolver/gelinearsolver/gelinearsolver.rst
+   LinearSolver/gematrixinverse/gematrixinverse.rst
    LinearSolver/trtrs/trtrs.rst
 
-Matrix decomposition
-====================
-
-.. toctree::
-   :maxdepth: 2
-
-   MatrixDecomposition/gesvdj/gesvdj.rst
-   MatrixDecomposition/gesvj/gesvj.rst
-   MatrixDecomposition/geqrf/geqrf.rst
-   MatrixDecomposition/getrf/getrf.rst
-   MatrixDecomposition/getrf_nopivot/getrf_nopivot.rst
-   MatrixDecomposition/potrf/potrf.rst
-
-Eigen Value Solver
+Eigenvalue Solver
 ==================
 
 .. toctree::

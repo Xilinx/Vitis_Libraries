@@ -14,9 +14,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*******************************************************
+*********************************************************
 Triangular Solver with multiple right-hand sides (TRTRS)
-*******************************************************
+*********************************************************
 
 This function solves a system of linear equation with triangular coefficient matrix along with multiple right-hand side vector
 

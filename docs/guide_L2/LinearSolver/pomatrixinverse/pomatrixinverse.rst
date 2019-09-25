@@ -15,7 +15,7 @@
    limitations under the License.
 
 *******************************************************
-PO MATRIX Inverse (POMATRIXINVERSE)
+PO Matrix Inverse (POMATRIXINVERSE)
 *******************************************************
 
 This function computes the inverse matrix of :math:`A`

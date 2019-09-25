@@ -22,9 +22,7 @@
 #ifndef _XF_SOLVER_GETRF_
 #define _XF_SOLVER_GETRF_
 
-#include "hls_stream.h"
-
-#include <iostream>
+#include <hls_math.h>
 
 namespace xf {
 namespace solver {
@@ -32,12 +30,11 @@ namespace solver {
 namespace internalgetrf {
 
 // update submatrix
-template <class T, int NRCU, int NCMAX>
+template <typename T, int NRCU, int NCMAX>
 void subUpdate(T A[NRCU][NCMAX], T rows[NCMAX], T cols[NCMAX], int rs, int re, int cs, int ce) {
     T a00 = rows[cs];
 
     T Acs[NRCU];
-    // pragma HLS resource variable=Acs core=XPM_MEMORY uram
 
     int nrows = re - rs + 1;
     int ncols = ce - cs;
@@ -46,7 +43,9 @@ LoopMulSub:
     for (unsigned int i = 0; i < nrows * ncols; i++) {
 #pragma HLS pipeline
 #pragma HLS dependence variable = A inter false
-#pragma HLS loop_tripcount min = 1 max = NCMAX * NRCU
+// clang-format off
+#pragma HLS loop_tripcount min = 1 max = NCMAX*NRCU
+        // clang-format on
 
         int r = i / ncols + rs;
         int c = i % ncols + cs + 1;
@@ -56,7 +55,7 @@ LoopMulSub:
 }
 
 // core part of getrf (no pivoting)
-template <class T, int NRCU, int NCMAX, int NCU>
+template <typename T, int NRCU, int NCMAX, int NCU>
 void getrf_core(int m, int n, T A[NCU][NRCU][NCMAX], int pivot[NCMAX], int lda) {
 LoopSweeps:
     for (int s = 0; s < (m - 1); s++) {
@@ -80,7 +79,7 @@ LoopSweeps:
 #pragma HLS pipeline
             int idcu = k % NCU;
             int idrow = k / NCU;
-            T absa = std::abs(A[idcu][idrow][s]);
+            T absa = hls::abs(A[idcu][idrow][s]);
             if (absa > pmax) {
                 pmax = absa;
                 pidcu = idcu;
@@ -129,10 +128,6 @@ LoopSweeps:
             ce = NCMAX - 1;
             subUpdate<T, NRCU, NCMAX>(A[i], rows[i], cols[i], rs, re, cs, ce);
         };
-
-        // if(s==0){
-        //   break;
-        // }
     };
 };
 
@@ -140,29 +135,29 @@ LoopSweeps:
 
 /**
  * @brief This function computes the LU decomposition (with partial pivoting) of matrix \f$A\f$ \n
-          \f{equation*} {P A = L U, }\f}
-          where where \f$P\f$ is a permutation matrix, \f$A\f$ is a dense matrix of size \f$m \times n\f$, \f$L\f$ is a
- lower triangular matrix with unit
- diagonal, and \f$U\f$ is a upper triangular matrix. This function does not implement pivoting.\n
+          \f{equation*} {P A = L U}\f}
+          where where \f$P\f$ is a permutation matrix, \f$A\f$ is a dense matrix of size \f$n \times n\f$, \f$L\f$ is a
+   lower triangular matrix with unit diagonal, and \f$U\f$ is a upper triangular matrix. This function does not
+ implement
+   pivoting.\n
    The maximum matrix size supported in FPGA is templated by NMAX.
  *
  * @tparam T data type (support float and double)
- * @tparam NMAX maximum number of rows/columns for input matrix
+ * @tparam NMAX maximum number of rows/columns of input matrix
  * @tparam NCU number of computation unit
- * @param[in] n number of rows/cols of input matrix
- * @param[in,out] A input matrix
+ * @param[in] n number of rows/cols of matrix A
+ * @param[in,out] A input matrix, and overwritten by the output upper and lower triangular matrix
  * @param[in] lda leading dimention of input matrix A
  * @param[out] pivot indices, row i of matrix A is stored in row[i]
- * @param[out] info return value, if info=0, the LU factorization is successful
+ * @param[out] info output info (unused)
  */
-template <class T, int NMAX, int NCU>
+template <typename T, int NMAX, int NCU>
 void getrf(int n, T* A, int lda, int* ipiv, int& info) {
     const int NRCU = int((NMAX + NCU - 1) / NCU);
 
     T matA[NCU][NRCU][NMAX];
 #pragma HLS array_partition variable = matA dim = 1 complete
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
-// #pragma HLS resource variable=matA core=RAM_2P_BRAM
 
 LoopRead:
     for (int r = 0; r < n; r++) {

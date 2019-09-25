@@ -13,37 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @file jacobi_svd.h
- * @brief  This files contains implementation of Jascobi SVD decoompostion
- */
+
 #ifndef XF_SOLVER_SYEVJ_H
 #define XF_SOLVER_SYEVJ_H
-#include "ap_fixed.h"
-#include <stdint.h>
-#include <hls_stream.h>
-#include "hls_math.h"
 
 namespace xf {
 namespace solver {
 
 /**
- * @brief Symmetric Matrix Jacobi based Eigen Value Decomposition (SYEVJ) .
-   \f{equation*} {A = U \Sigma {U}^T, }\f}
+ * @brief Symmetric Matrix Jacobi based Eigenvalue Decomposition (SYEVJ) .
+   \f{equation*} {A U = U \Sigma, }\f}
    where \f$A\f$ is a dense symmetric matrix of size \f$m \times m\f$, \f$U\f$
-   is a \f$m \times m\f$ matrix with orthonormal columns, and \f$\Sigma\f$ is diagonal matrix.\n
+   is a \f$m \times m\f$ matrix with orthonormal columns, each column of U is the
+   eigenvector \f$v_{i}\f$, and \f$\Sigma\f$ is diagonal matrix, which contains
+   the eigenvalues \f$\lambda_{i}\f$ of matrix A.\n
    The maximum matrix size supported in FPGA is templated by NMAX.
  *
  * @tparam T data type (support float and double).
- * @tparam NMAX maximum number of input symmetric matrix size
+ * @tparam NMAX maximum number of rows/columns of input matrix
  * @tparam NCU number of computation unit
- * @tparam m symmetric matrix real size.
+ * @tparam m number of rows/cols of matrix A
  * @param A input matrix of size \f$m \times m\f$
- * @param S the decomposed diagonal singular matrix of size \f$m \times m\f$
- * @param U the left U matrix of SVD
- * @param lda the leading dimension of matrix A
- * @param ldu the leading dimension of matrix U
- * @param info the ouput info
+ * @param S decomposed diagonal singular matrix of size \f$m \times m\f$
+ * @param U left U matrix of SVD
+ * @param lda leading dimension of matrix A
+ * @param ldu leading dimension of matrix U
+ * @param info output info (unused)
  */
 #ifndef __SYNTHESIS__
 template <typename T, int NMAX, int NCU>
@@ -56,6 +51,10 @@ void syevj(int m, T A[NMAX * NMAX], int lda, T S[NMAX], T U[NMAX * NMAX], int ld
     const int odd1 = tmpMax % 2;
     const int NMAXUN = (odd1) ? (tmpMax + 1) : tmpMax;
     const int NMAX2 = NMAXUN * NCU;
+    int tmpReal = (lda + NCU - 1) / NCU;
+    int oddReal = tmpReal % 2;
+    int ldaTmp = (oddReal) ? (tmpReal + 1) : tmpReal;
+    int ldaReal = ldaTmp * NCU;
 // matrix initialization
 #ifndef __SYNTHESIS__
     T**** dataA_2D;
@@ -92,20 +91,20 @@ Loop_init_A:
 #pragma HLS loop_tripcount min = NMAX2 max = NMAX2
 #pragma HLS pipeline
             if ((i < m) && (j < lda)) {
-                dataA_2D[(i / NMAXUN)][j / NMAXUN][i % NMAXUN][j % NMAXUN] = A[i * lda + j];
+                dataA_2D[(i % NCU)][j % NCU][i / NCU][j / NCU] = A[i * lda + j];
                 if (i == j) {
                     S[i] = 0;
                 }
             } else if (i == j) {
-                dataA_2D[(i / NMAXUN)][j / NMAXUN][i % NMAXUN][j % NMAXUN] = 1;
+                dataA_2D[(i % NCU)][j % NCU][i / NCU][j / NCU] = 1;
             } else {
-                dataA_2D[(i / NMAXUN)][j / NMAXUN][i % NMAXUN][j % NMAXUN] = 0;
+                dataA_2D[(i % NCU)][j % NCU][i / NCU][j / NCU] = 0;
             }
         }
     }
 
     // Calling for svd core function
-    xf::solver::gesvdj_2D<T, NMAX2, NCU, NMAXUN>(dataA_2D, dataU_2D);
+    xf::solver::gesvdj_2D<T, NMAX2, NCU, NMAXUN>(dataA_2D, dataU_2D, ldaReal);
 
 // Matrix transform from 2D to 1D
 Loop_postcal:
@@ -116,9 +115,9 @@ Loop_postcal:
 // clang-format on
 #pragma HLS pipeline
             if ((j < lda) && (i < lda)) {
-                U[j * ldu + i] = dataU_2D[(j / NMAXUN)][i / NMAXUN][j % NMAXUN][i % NMAXUN];
-                if ((j == i)) {
-                    S[i] = dataA_2D[(i / NMAXUN)][i / NMAXUN][i % NMAXUN][i % NMAXUN];
+                U[j * ldu + i] = dataU_2D[(j % NCU)][i % NCU][j / NCU][i / NCU];
+                if (j == i) {
+                    S[i] = dataA_2D[(i % NCU)][i % NCU][i / NCU][i / NCU];
                 }
             }
         }

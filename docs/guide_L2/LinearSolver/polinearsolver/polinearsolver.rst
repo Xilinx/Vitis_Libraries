@@ -15,7 +15,7 @@
    limitations under the License.
 
 *******************************************************
-PO LINEAR Solver (POLINEARSOLVER)
+PO Linear Solver (POLINEARSOLVER)
 *******************************************************
 
 This function solves a system of linear equation with symmetric positive definite (SPD) matrix along with multiple right-hand side vector

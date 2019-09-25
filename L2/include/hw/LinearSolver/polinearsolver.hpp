@@ -22,10 +22,6 @@
 #ifndef _XF_SOLVER_POLINEAR_HPP_
 #define _XF_SOLVER_POLINEAR_HPP_
 
-#include "ap_fixed.h"
-#include "hls_math.h"
-#include <stdint.h>
-
 namespace xf {
 namespace solver {
 namespace internal_polinear {
@@ -233,24 +229,24 @@ void solver_core(int n, int b, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU
  * The maximum matrix size supported in FPGA is templated by NMAX.
  *
  * @tparam T data type (support float and double)
- * @tparam NMAX maximum number of input symmetric matrix size
+ * @tparam NMAX maximum number of rows/columns of input matrix
  * @tparam NCU number of computation unit
- * @param[in] m number of symmetric matrix's real size
- * @param[in,out] A input matrix of size \f$m \times m\f$
- * @param[in] b number of matrix B column
- * @param[in,out] B input matrix of size b, and output x
+ * @param[in] n number of rows/cols of matrix A
+ * @param[in,out] A input matrix of size \f$n \times n\f$
+ * @param[in] b number of columns of matrix B
+ * @param[in,out] B input matrix of size \f$b \times n\f$, and overwritten by the output matrix x
  * @param[in] lda leading dimention of input matrix A
  * @param[in] ldb leading dimention of input matrix B
- * @param[out] info return value, if info=0, the Triangular Solver is successful
+ * @param[out] info output info (unused)
  */
 
-template <typename T, int N, int NCU>
+template <typename T, int NMAX, int NCU>
 void polinearsolver(int n, T* A, int b, T* B, int lda, int ldb, int& info) {
-    if (N == 1)
+    if (NMAX == 1)
         B[0] = B[0] / A[0];
     else {
-        static T matA[NCU][(N + NCU - 1) / NCU][N];
-        static T matB[NCU][(N + NCU - 1) / NCU];
+        static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
+        static T matB[NCU][(NMAX + NCU - 1) / NCU];
 #pragma HLS array_partition variable = matA dim = 1
 #pragma HLS array_partition variable = matB dim = 1
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
@@ -269,8 +265,8 @@ void polinearsolver(int n, T* A, int b, T* B, int lda, int ldb, int& info) {
                 matB[r % NCU][r / NCU] = B[r * ldb + j];
             }
 
-            T dataX[N];
-            internal_polinear::solver_core<T, N, NCU>(n, j, matA, matB, dataX);
+            T dataX[NMAX];
+            internal_polinear::solver_core<T, NMAX, NCU>(n, j, matA, matB, dataX);
 
             for (int r = 0; r < n; r++) {
 #pragma HLS pipeline

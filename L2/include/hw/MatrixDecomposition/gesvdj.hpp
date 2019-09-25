@@ -19,9 +19,13 @@
  */
 #ifndef XF_SOLVER_SVDJ_H
 #define XF_SOLVER_SVDJ_H
+
 #include "ap_fixed.h"
-#include <stdint.h>
 #include "hls_math.h"
+
+#ifndef __SYNTHESIS__
+#include <iostream>
+#endif
 
 namespace xf {
 namespace solver {
@@ -34,13 +38,8 @@ union double_cast_new {
 // 2x2 Jacobi rotation (core function)
 // the calculation process can be found in "Jack Dongarra, Mark Gates, Azzam Haidar. The Singular Value Decomposition:
 // Anatomy of Optimizing an Algorithm for         Extreme Scale. 2018 SIAM Review, vol.60, No.4, pp.808-865"
-#ifndef __SYNTHESIS__
 template <typename T, int diagSize>
 void jacobi_rotation_2x2(T matrix[3], T considerAsZero, T& m_c_left, T& m_s_left, T& m_c_right, T& m_s_right) {
-#else
-template <typename T, int diagSize>
-void jacobi_rotation_2x2(T matrix[3], T considerAsZero, T& m_c_left, T& m_s_left, T& m_c_right, T& m_s_right) {
-#endif
 #pragma HLS inline off
     T m00, m01, m11;
     // fetch 2X2 matrix from  matrix A
@@ -138,69 +137,47 @@ void GenBlockMat(int dim, int order[maxDim][maxDim]) {
     int dim_1 = dim - 1;
     int dim_1_2 = dim_1 >> 1; //(dim - 1)/ 2
     int dim_2 = dim >> 1;     //(dim)/ 2
+    int dim_3 = maxDim >> 1;  //(dim)/ 2
     for (int i = 0; i < dim; ++i) {
+#pragma HLS loop_tripcount min = 512 max = 512
 #pragma HLS pipeline
         tmpOrder[i] = dim_1 - i;
     }
-    // odd and even ordering / forward sweep
-    if (odd) { // for odd dim number
-    Loop_odd:
-        for (int i = 0; i < dim; ++i) {
-            for (int j = 0; j < dim_1_2; ++j) {
+Loop_even:
+    for (int i = 0; i < dim_1; ++i) {
+#pragma HLS loop_tripcount min = 511 max = 511
+    Loop_precal:
+        for (int j = 0; j < dim_3; ++j) {
+#pragma HLS loop_tripcount min = 256 max = 256
 #pragma HLS pipeline II = 1
-                int counter1 = 2 * j; // for even steps
-                int counter2 = counter1 + 1;
-                ;
-                int tmpCounter1 = counter1;
-                int tmpCounter2 = counter2;
-                if (i % 2 == 1) {
-                    tmpCounter1 = counter2; // for odd steps
-                    tmpCounter2 = counter2 + 1;
-                }
-                int tmp1 = tmpOrder[tmpCounter1];
-                int tmp2 = tmpOrder[tmpCounter2];
-                order[i][counter1] = tmp1;
-                order[i][counter2] = tmp2;
-                tmpOrder[tmpCounter1] = tmp2;
-                tmpOrder[tmpCounter2] = tmp1;
-                if (j == dim_1_2 - 1) {
-                    if (i % 2 == 0) {
-                        order[i][dim_1] = tmpOrder[dim_1];
-                    } else {
-                        order[i][dim_1] = tmpOrder[0];
-                    }
-                }
-            }
-        }
-    } else { // for even dim numer
-    Loop_even:
-        for (int i = 0; i < dim_1; ++i) {
-        Loop_precal:
-            for (int j = 0; j < dim_2; ++j) {
-#pragma HLS pipeline II = 1
-                int counter1 = j << 1; // for even steps
-                int counter2 = counter1 + 1;
-                ;
+            int counter1 = j << 1; // for even steps
+            int counter2 = counter1 + 1;
+            if (j < dim_2) {
                 int tmpCounter1 = counter1;
                 int tmpCounter2 = counter2;
                 int tmp1 = tmpOrder[tmpCounter1];
                 int tmp2 = tmpOrder[tmpCounter2];
                 order[i][counter1] = tmp1;
                 order[i][counter2] = tmp2;
+            } else {
+                order[i][counter1] = maxDim;
+                order[i][counter2] = maxDim;
             }
-            int exchangeNm = ((int)(i / 2)) * 2; // rolling
-            swapTwo<int>(tmpOrder[exchangeNm], tmpOrder[exchangeNm + 1]);
-            int tmp3 = tmpOrder[1];
-        Loop_cal:
-            for (int j = 1; j < dim - 2; j = j + 2) {
-#pragma HLS pipeline II = 1
-                int tmp4 = tmpOrder[j + 2];
-                tmpOrder[j + 2] = tmp3;
-                tmp3 = tmp4;
-            }
-            tmpOrder[1] = tmp3;
         }
+        int exchangeNm = ((int)(i / 2)) * 2; // rolling
+        swapTwo<int>(tmpOrder[exchangeNm], tmpOrder[exchangeNm + 1]);
+        int tmp3 = tmpOrder[1];
+    Loop_cal:
+        for (int j = 1; j < dim - 2; j = j + 2) {
+#pragma HLS loop_tripcount min = 510 max = 510
+#pragma HLS pipeline II = 1
+            int tmp4 = tmpOrder[j + 2];
+            tmpOrder[j + 2] = tmp3;
+            tmp3 = tmp4;
+        }
+        tmpOrder[1] = tmp3;
     }
+//    }
 #ifndef __SYNTHESIS__
     delete[] tmpOrder;
 #endif
@@ -208,7 +185,8 @@ void GenBlockMat(int dim, int order[maxDim][maxDim]) {
 
 #ifndef __SYNTHESIS__
 template <typename T, int m_diagSize, int UN, int NMAXUN>
-void unrollCol(int Dim_inner_extend,
+void unrollCol(int lda,
+               int Dim_inner_extend,
                int* Order,
                T* m_c_right,
                T* m_s_right,
@@ -230,7 +208,8 @@ void unrollCol(int Dim_inner_extend,
                T** dataA16) {
 #else
 template <typename T, int m_diagSize, int UN, int NMAXUN>
-void unrollCol(int Dim_inner_extend,
+void unrollCol(int lda,
+               int Dim_inner_extend,
                int Order[m_diagSize],
                T m_c_right[m_diagSize],
                T m_s_right[m_diagSize],
@@ -282,247 +261,250 @@ void unrollCol(int Dim_inner_extend,
                 int tmpSum = tmpG + tmp;
                 int tmpDivide2 = tmpG >> 1; // f*NMAXUN/2
                 int tmpSumCS = tmpDivide2 + r;
-                p1 = Order[tmpSum];       // row
-                q1 = Order[tmpSum + 1];   // row
-                cl = m_c_right[tmpSumCS]; // g*NMAXUN/2+l
-                sl = m_s_right[tmpSumCS]; // g*NMAXUN/2+l
-                T a00, a01, a10, a11;
-                T m00, m01, m10, m11;
-                int tmpP1 = p1 % UN;
-                int tmpQ1 = q1 % UN;
-                int num1 = p1 / UN;
-                int num2 = q1 / UN;
-                int num3 = p2 / UN;
-                int num4 = q2 / UN;
-                if (tmpP1 == 0) {
-                    m00 = dataA1[num1][num3];
-                    m01 = dataA1[num1][num4];
-                } else if (tmpP1 == 1) {
-                    m00 = dataA2[num1][num3];
-                    m01 = dataA2[num1][num4];
-                } else if (tmpP1 == 2) {
-                    m00 = dataA3[num1][num3];
-                    m01 = dataA3[num1][num4];
-                } else if (tmpP1 == 3) {
-                    m00 = dataA4[num1][num3];
-                    m01 = dataA4[num1][num4];
-                } else if (tmpP1 == 4) {
-                    m00 = dataA5[num1][num3];
-                    m01 = dataA5[num1][num4];
-                } else if (tmpP1 == 5) {
-                    m00 = dataA6[num1][num3];
-                    m01 = dataA6[num1][num4];
-                } else if (tmpP1 == 6) {
-                    m00 = dataA7[num1][num3];
-                    m01 = dataA7[num1][num4];
-                } else if (tmpP1 == 7) {
-                    m00 = dataA8[num1][num3];
-                    m01 = dataA8[num1][num4];
-                } else if (tmpP1 == 8) {
-                    m00 = dataA9[num1][num3];
-                    m01 = dataA9[num1][num4];
-                } else if (tmpP1 == 9) {
-                    m00 = dataA10[num1][num3];
-                    m01 = dataA10[num1][num4];
-                } else if (tmpP1 == 10) {
-                    m00 = dataA11[num1][num3];
-                    m01 = dataA11[num1][num4];
-                } else if (tmpP1 == 11) {
-                    m00 = dataA12[num1][num3];
-                    m01 = dataA12[num1][num4];
-                } else if (tmpP1 == 12) {
-                    m00 = dataA13[num1][num3];
-                    m01 = dataA13[num1][num4];
-                } else if (tmpP1 == 13) {
-                    m00 = dataA14[num1][num3];
-                    m01 = dataA14[num1][num4];
-                } else if (tmpP1 == 14) {
-                    m00 = dataA15[num1][num3];
-                    m01 = dataA15[num1][num4];
-                } else if (tmpP1 == 15) {
-                    m00 = dataA16[num1][num3];
-                    m01 = dataA16[num1][num4];
-                }
-                if (tmpQ1 == 0) {
-                    m10 = dataA1[num2][num3];
-                    m11 = dataA1[num2][num4];
-                } else if (tmpQ1 == 1) {
-                    m10 = dataA2[num2][num3];
-                    m11 = dataA2[num2][num4];
-                } else if (tmpQ1 == 2) {
-                    m10 = dataA3[num2][num3];
-                    m11 = dataA3[num2][num4];
-                } else if (tmpQ1 == 3) {
-                    m10 = dataA4[num2][num3];
-                    m11 = dataA4[num2][num4];
-                } else if (tmpQ1 == 4) {
-                    m10 = dataA5[num2][num3];
-                    m11 = dataA5[num2][num4];
-                } else if (tmpQ1 == 5) {
-                    m10 = dataA6[num2][num3];
-                    m11 = dataA6[num2][num4];
-                } else if (tmpQ1 == 6) {
-                    m10 = dataA7[num2][num3];
-                    m11 = dataA7[num2][num4];
-                } else if (tmpQ1 == 7) {
-                    m10 = dataA8[num2][num3];
-                    m11 = dataA8[num2][num4];
-                } else if (tmpQ1 == 8) {
-                    m10 = dataA9[num2][num3];
-                    m11 = dataA9[num2][num4];
-                } else if (tmpQ1 == 9) {
-                    m10 = dataA10[num2][num3];
-                    m11 = dataA10[num2][num4];
-                } else if (tmpQ1 == 10) {
-                    m10 = dataA11[num2][num3];
-                    m11 = dataA11[num2][num4];
-                } else if (tmpQ1 == 11) {
-                    m10 = dataA12[num2][num3];
-                    m11 = dataA12[num2][num4];
-                } else if (tmpQ1 == 12) {
-                    m10 = dataA13[num2][num3];
-                    m11 = dataA13[num2][num4];
-                } else if (tmpQ1 == 13) {
-                    m10 = dataA14[num2][num3];
-                    m11 = dataA14[num2][num4];
-                } else if (tmpQ1 == 14) {
-                    m10 = dataA15[num2][num3];
-                    m11 = dataA15[num2][num4];
-                } else if (tmpQ1 == 15) {
-                    m10 = dataA16[num2][num3];
-                    m11 = dataA16[num2][num4];
-                }
-            Loop_Inner_Mul3333:
-                for (int ttt = 0; ttt < 4; ++ttt) {
-#pragma HLS pipeline II = 1
-                    T m0, m1;
-                    if (ttt == 0) {
-                        m0 = m00;
-                        m1 = m10;
-                    } else if (ttt == 1) {
-                        m0 = m10;
-                        m1 = -m00;
-                    } else if (ttt == 2) {
-                        m0 = m01;
-                        m1 = m11;
-                    } else if (ttt == 3) {
-                        m0 = m11;
-                        m1 = -m01;
+                p1 = Order[tmpSum];     // row
+                q1 = Order[tmpSum + 1]; // row
+                if ((p1 < lda) && (p2 < lda) && (q1 < lda) && (q2 < lda) && (p1 >= 0) && (p2 >= 0) && (q1 >= 0) &&
+                    (q2 >= 0) && (p1 != q1)) {
+                    cl = m_c_right[tmpSumCS]; // g*NMAXUN/2+l
+                    sl = m_s_right[tmpSumCS]; // g*NMAXUN/2+l
+                    T a00, a01, a10, a11;
+                    T m00, m01, m10, m11;
+                    int tmpP1 = p1 % UN;
+                    int tmpQ1 = q1 % UN;
+                    int num1 = p1 / UN;
+                    int num2 = q1 / UN;
+                    int num3 = p2 / UN;
+                    int num4 = q2 / UN;
+                    if (tmpP1 == 0) {
+                        m00 = dataA1[num1][num3];
+                        m01 = dataA1[num1][num4];
+                    } else if (tmpP1 == 1) {
+                        m00 = dataA2[num1][num3];
+                        m01 = dataA2[num1][num4];
+                    } else if (tmpP1 == 2) {
+                        m00 = dataA3[num1][num3];
+                        m01 = dataA3[num1][num4];
+                    } else if (tmpP1 == 3) {
+                        m00 = dataA4[num1][num3];
+                        m01 = dataA4[num1][num4];
+                    } else if (tmpP1 == 4) {
+                        m00 = dataA5[num1][num3];
+                        m01 = dataA5[num1][num4];
+                    } else if (tmpP1 == 5) {
+                        m00 = dataA6[num1][num3];
+                        m01 = dataA6[num1][num4];
+                    } else if (tmpP1 == 6) {
+                        m00 = dataA7[num1][num3];
+                        m01 = dataA7[num1][num4];
+                    } else if (tmpP1 == 7) {
+                        m00 = dataA8[num1][num3];
+                        m01 = dataA8[num1][num4];
+                    } else if (tmpP1 == 8) {
+                        m00 = dataA9[num1][num3];
+                        m01 = dataA9[num1][num4];
+                    } else if (tmpP1 == 9) {
+                        m00 = dataA10[num1][num3];
+                        m01 = dataA10[num1][num4];
+                    } else if (tmpP1 == 10) {
+                        m00 = dataA11[num1][num3];
+                        m01 = dataA11[num1][num4];
+                    } else if (tmpP1 == 11) {
+                        m00 = dataA12[num1][num3];
+                        m01 = dataA12[num1][num4];
+                    } else if (tmpP1 == 12) {
+                        m00 = dataA13[num1][num3];
+                        m01 = dataA13[num1][num4];
+                    } else if (tmpP1 == 13) {
+                        m00 = dataA14[num1][num3];
+                        m01 = dataA14[num1][num4];
+                    } else if (tmpP1 == 14) {
+                        m00 = dataA15[num1][num3];
+                        m01 = dataA15[num1][num4];
+                    } else if (tmpP1 == 15) {
+                        m00 = dataA16[num1][num3];
+                        m01 = dataA16[num1][num4];
                     }
-                    T tmpMul0, tmpMul1, sum;
+                    if (tmpQ1 == 0) {
+                        m10 = dataA1[num2][num3];
+                        m11 = dataA1[num2][num4];
+                    } else if (tmpQ1 == 1) {
+                        m10 = dataA2[num2][num3];
+                        m11 = dataA2[num2][num4];
+                    } else if (tmpQ1 == 2) {
+                        m10 = dataA3[num2][num3];
+                        m11 = dataA3[num2][num4];
+                    } else if (tmpQ1 == 3) {
+                        m10 = dataA4[num2][num3];
+                        m11 = dataA4[num2][num4];
+                    } else if (tmpQ1 == 4) {
+                        m10 = dataA5[num2][num3];
+                        m11 = dataA5[num2][num4];
+                    } else if (tmpQ1 == 5) {
+                        m10 = dataA6[num2][num3];
+                        m11 = dataA6[num2][num4];
+                    } else if (tmpQ1 == 6) {
+                        m10 = dataA7[num2][num3];
+                        m11 = dataA7[num2][num4];
+                    } else if (tmpQ1 == 7) {
+                        m10 = dataA8[num2][num3];
+                        m11 = dataA8[num2][num4];
+                    } else if (tmpQ1 == 8) {
+                        m10 = dataA9[num2][num3];
+                        m11 = dataA9[num2][num4];
+                    } else if (tmpQ1 == 9) {
+                        m10 = dataA10[num2][num3];
+                        m11 = dataA10[num2][num4];
+                    } else if (tmpQ1 == 10) {
+                        m10 = dataA11[num2][num3];
+                        m11 = dataA11[num2][num4];
+                    } else if (tmpQ1 == 11) {
+                        m10 = dataA12[num2][num3];
+                        m11 = dataA12[num2][num4];
+                    } else if (tmpQ1 == 12) {
+                        m10 = dataA13[num2][num3];
+                        m11 = dataA13[num2][num4];
+                    } else if (tmpQ1 == 13) {
+                        m10 = dataA14[num2][num3];
+                        m11 = dataA14[num2][num4];
+                    } else if (tmpQ1 == 14) {
+                        m10 = dataA15[num2][num3];
+                        m11 = dataA15[num2][num4];
+                    } else if (tmpQ1 == 15) {
+                        m10 = dataA16[num2][num3];
+                        m11 = dataA16[num2][num4];
+                    }
+                Loop_Inner_Mul3333:
+                    for (int ttt = 0; ttt < 4; ++ttt) {
+#pragma HLS pipeline II = 1
+                        T m0, m1;
+                        if (ttt == 0) {
+                            m0 = m00;
+                            m1 = m10;
+                        } else if (ttt == 1) {
+                            m0 = m10;
+                            m1 = -m00;
+                        } else if (ttt == 2) {
+                            m0 = m01;
+                            m1 = m11;
+                        } else if (ttt == 3) {
+                            m0 = m11;
+                            m1 = -m01;
+                        }
+                        T tmpMul0, tmpMul1, sum;
 #pragma HLS RESOURCE variable = tmpMul0 core = DMul_maxdsp
 #pragma HLS RESOURCE variable = tmpMul1 core = DMul_maxdsp
 #pragma HLS RESOURCE variable = sum core = DAddSub_nodsp
-                    tmpMul0 = m0 * cl;
-                    tmpMul1 = m1 * sl;
-                    sum = tmpMul0 + tmpMul1;
-                    if (ttt == 0) {
-                        a00 = sum;
-                    } else if (ttt == 1) {
-                        a10 = sum;
-                    } else if (ttt == 2) {
-                        a01 = sum;
-                    } else if (ttt == 3) {
-                        a11 = sum;
+                        tmpMul0 = m0 * cl;
+                        tmpMul1 = m1 * sl;
+                        sum = tmpMul0 + tmpMul1;
+                        if (ttt == 0) {
+                            a00 = sum;
+                        } else if (ttt == 1) {
+                            a10 = sum;
+                        } else if (ttt == 2) {
+                            a01 = sum;
+                        } else if (ttt == 3) {
+                            a11 = sum;
+                        }
                     }
-                }
-                if (tmpP1 == 0) {
-                    dataA1[num1][num3] = a00;
-                    dataA1[num1][num4] = a01;
-                } else if (tmpP1 == 1) {
-                    dataA2[num1][num3] = a00;
-                    dataA2[num1][num4] = a01;
-                } else if (tmpP1 == 2) {
-                    dataA3[num1][num3] = a00;
-                    dataA3[num1][num4] = a01;
-                } else if (tmpP1 == 3) {
-                    dataA4[num1][num3] = a00;
-                    dataA4[num1][num4] = a01;
-                } else if (tmpP1 == 4) {
-                    dataA5[num1][num3] = a00;
-                    dataA5[num1][num4] = a01;
-                } else if (tmpP1 == 5) {
-                    dataA6[num1][num3] = a00;
-                    dataA6[num1][num4] = a01;
-                } else if (tmpP1 == 6) {
-                    dataA7[num1][num3] = a00;
-                    dataA7[num1][num4] = a01;
-                } else if (tmpP1 == 7) {
-                    dataA8[num1][num3] = a00;
-                    dataA8[num1][num4] = a01;
-                } else if (tmpP1 == 8) {
-                    dataA9[num1][num3] = a00;
-                    dataA9[num1][num4] = a01;
-                } else if (tmpP1 == 9) {
-                    dataA10[num1][num3] = a00;
-                    dataA10[num1][num4] = a01;
-                } else if (tmpP1 == 10) {
-                    dataA11[num1][num3] = a00;
-                    dataA11[num1][num4] = a01;
-                } else if (tmpP1 == 11) {
-                    dataA12[num1][num3] = a00;
-                    dataA12[num1][num4] = a01;
-                } else if (tmpP1 == 12) {
-                    dataA13[num1][num3] = a00;
-                    dataA13[num1][num4] = a01;
-                } else if (tmpP1 == 13) {
-                    dataA14[num1][num3] = a00;
-                    dataA14[num1][num4] = a01;
-                } else if (tmpP1 == 14) {
-                    dataA15[num1][num3] = a00;
-                    dataA15[num1][num4] = a01;
-                } else if (tmpP1 == 15) {
-                    dataA16[num1][num3] = a00;
-                    dataA16[num1][num4] = a01;
-                }
-                if (tmpQ1 == 0) {
-                    dataA1[num2][num3] = a10;
-                    dataA1[num2][num4] = a11;
-                } else if (tmpQ1 == 1) {
-                    dataA2[num2][num3] = a10;
-                    dataA2[num2][num4] = a11;
-                } else if (tmpQ1 == 2) {
-                    dataA3[num2][num3] = a10;
-                    dataA3[num2][num4] = a11;
-                } else if (tmpQ1 == 3) {
-                    dataA4[num2][num3] = a10;
-                    dataA4[num2][num4] = a11;
-                } else if (tmpQ1 == 4) {
-                    dataA5[num2][num3] = a10;
-                    dataA5[num2][num4] = a11;
-                } else if (tmpQ1 == 5) {
-                    dataA6[num2][num3] = a10;
-                    dataA6[num2][num4] = a11;
-                } else if (tmpQ1 == 6) {
-                    dataA7[num2][num3] = a10;
-                    dataA7[num2][num4] = a11;
-                } else if (tmpQ1 == 7) {
-                    dataA8[num2][num3] = a10;
-                    dataA8[num2][num4] = a11;
-                } else if (tmpQ1 == 8) {
-                    dataA9[num2][num3] = a10;
-                    dataA9[num2][num4] = a11;
-                } else if (tmpQ1 == 9) {
-                    dataA10[num2][num3] = a10;
-                    dataA10[num2][num4] = a11;
-                } else if (tmpQ1 == 10) {
-                    dataA11[num2][num3] = a10;
-                    dataA11[num2][num4] = a11;
-                } else if (tmpQ1 == 11) {
-                    dataA12[num2][num3] = a10;
-                    dataA12[num2][num4] = a11;
-                } else if (tmpQ1 == 12) {
-                    dataA13[num2][num3] = a10;
-                    dataA13[num2][num4] = a11;
-                } else if (tmpQ1 == 13) {
-                    dataA14[num2][num3] = a10;
-                    dataA14[num2][num4] = a11;
-                } else if (tmpQ1 == 14) {
-                    dataA15[num2][num3] = a10;
-                    dataA15[num2][num4] = a11;
-                } else if (tmpQ1 == 15) {
-                    dataA16[num2][num3] = a10;
-                    dataA16[num2][num4] = a11;
+                    if (tmpP1 == 0) {
+                        dataA1[num1][num3] = a00;
+                        dataA1[num1][num4] = a01;
+                    } else if (tmpP1 == 1) {
+                        dataA2[num1][num3] = a00;
+                        dataA2[num1][num4] = a01;
+                    } else if (tmpP1 == 2) {
+                        dataA3[num1][num3] = a00;
+                        dataA3[num1][num4] = a01;
+                    } else if (tmpP1 == 3) {
+                        dataA4[num1][num3] = a00;
+                        dataA4[num1][num4] = a01;
+                    } else if (tmpP1 == 4) {
+                        dataA5[num1][num3] = a00;
+                        dataA5[num1][num4] = a01;
+                    } else if (tmpP1 == 5) {
+                        dataA6[num1][num3] = a00;
+                        dataA6[num1][num4] = a01;
+                    } else if (tmpP1 == 6) {
+                        dataA7[num1][num3] = a00;
+                        dataA7[num1][num4] = a01;
+                    } else if (tmpP1 == 7) {
+                        dataA8[num1][num3] = a00;
+                        dataA8[num1][num4] = a01;
+                    } else if (tmpP1 == 8) {
+                        dataA9[num1][num3] = a00;
+                        dataA9[num1][num4] = a01;
+                    } else if (tmpP1 == 9) {
+                        dataA10[num1][num3] = a00;
+                        dataA10[num1][num4] = a01;
+                    } else if (tmpP1 == 10) {
+                        dataA11[num1][num3] = a00;
+                        dataA11[num1][num4] = a01;
+                    } else if (tmpP1 == 11) {
+                        dataA12[num1][num3] = a00;
+                        dataA12[num1][num4] = a01;
+                    } else if (tmpP1 == 12) {
+                        dataA13[num1][num3] = a00;
+                        dataA13[num1][num4] = a01;
+                    } else if (tmpP1 == 13) {
+                        dataA14[num1][num3] = a00;
+                        dataA14[num1][num4] = a01;
+                    } else if (tmpP1 == 14) {
+                        dataA15[num1][num3] = a00;
+                        dataA15[num1][num4] = a01;
+                    } else if (tmpP1 == 15) {
+                        dataA16[num1][num3] = a00;
+                        dataA16[num1][num4] = a01;
+                    }
+                    if (tmpQ1 == 0) {
+                        dataA1[num2][num3] = a10;
+                        dataA1[num2][num4] = a11;
+                    } else if (tmpQ1 == 1) {
+                        dataA2[num2][num3] = a10;
+                        dataA2[num2][num4] = a11;
+                    } else if (tmpQ1 == 2) {
+                        dataA3[num2][num3] = a10;
+                        dataA3[num2][num4] = a11;
+                    } else if (tmpQ1 == 3) {
+                        dataA4[num2][num3] = a10;
+                        dataA4[num2][num4] = a11;
+                    } else if (tmpQ1 == 4) {
+                        dataA5[num2][num3] = a10;
+                        dataA5[num2][num4] = a11;
+                    } else if (tmpQ1 == 5) {
+                        dataA6[num2][num3] = a10;
+                        dataA6[num2][num4] = a11;
+                    } else if (tmpQ1 == 6) {
+                        dataA7[num2][num3] = a10;
+                        dataA7[num2][num4] = a11;
+                    } else if (tmpQ1 == 7) {
+                        dataA8[num2][num3] = a10;
+                        dataA8[num2][num4] = a11;
+                    } else if (tmpQ1 == 8) {
+                        dataA9[num2][num3] = a10;
+                        dataA9[num2][num4] = a11;
+                    } else if (tmpQ1 == 9) {
+                        dataA10[num2][num3] = a10;
+                        dataA10[num2][num4] = a11;
+                    } else if (tmpQ1 == 10) {
+                        dataA11[num2][num3] = a10;
+                        dataA11[num2][num4] = a11;
+                    } else if (tmpQ1 == 11) {
+                        dataA12[num2][num3] = a10;
+                        dataA12[num2][num4] = a11;
+                    } else if (tmpQ1 == 12) {
+                        dataA13[num2][num3] = a10;
+                        dataA13[num2][num4] = a11;
+                    } else if (tmpQ1 == 13) {
+                        dataA14[num2][num3] = a10;
+                        dataA14[num2][num4] = a11;
+                    } else if (tmpQ1 == 14) {
+                        dataA15[num2][num3] = a10;
+                        dataA15[num2][num4] = a11;
+                    } else if (tmpQ1 == 15) {
+                        dataA16[num2][num3] = a10;
+                        dataA16[num2][num4] = a11;
+                    }
                 }
             }
         }
@@ -531,7 +513,8 @@ void unrollCol(int Dim_inner_extend,
 
 #ifndef __SYNTHESIS__
 template <typename T, int m_diagSize, int UN, int NMAXUN>
-void unrollRow(int Dim_inner_extend,
+void unrollRow(int lda,
+               int Dim_inner_extend,
                int* Order,
                T* m_c_right,
                T* m_s_right,
@@ -553,7 +536,8 @@ void unrollRow(int Dim_inner_extend,
                T** dataA16) {
 #else
 template <typename T, int m_diagSize, int UN, int NMAXUN>
-void unrollRow(int Dim_inner_extend,
+void unrollRow(int lda,
+               int Dim_inner_extend,
                int Order[m_diagSize],
                T m_c_right[m_diagSize],
                T m_s_right[m_diagSize],
@@ -605,247 +589,250 @@ void unrollRow(int Dim_inner_extend,
                 int tmpSum = tmpG + tmp;
                 int tmpDivide2 = tmpG >> 1; // g*NMAXUN/2
                 int tmpSumCS = tmpDivide2 + l;
-                p2 = Order[tmpSum];       // row
-                q2 = Order[tmpSum + 1];   // row
-                cr = m_c_right[tmpSumCS]; // g*NMAXUN/2+l
-                sr = m_s_right[tmpSumCS]; // g*NMAXUN/2+l
-                T a00, a01, a10, a11;
-                T m00, m01, m10, m11;
-                int tmpP2 = p2 % UN;
-                int tmpQ2 = q2 % UN;
-                int num1 = p1 / UN;
-                int num2 = q1 / UN;
-                int num3 = p2 / UN;
-                int num4 = q2 / UN;
-                if (tmpP2 == 0) {
-                    m00 = dataA1[num1][num3];
-                    m10 = dataA1[num2][num3];
-                } else if (tmpP2 == 1) {
-                    m00 = dataA2[num1][num3];
-                    m10 = dataA2[num2][num3];
-                } else if (tmpP2 == 2) {
-                    m00 = dataA3[num1][num3];
-                    m10 = dataA3[num2][num3];
-                } else if (tmpP2 == 3) {
-                    m00 = dataA4[num1][num3];
-                    m10 = dataA4[num2][num3];
-                } else if (tmpP2 == 4) {
-                    m00 = dataA5[num1][num3];
-                    m10 = dataA5[num2][num3];
-                } else if (tmpP2 == 5) {
-                    m00 = dataA6[num1][num3];
-                    m10 = dataA6[num2][num3];
-                } else if (tmpP2 == 6) {
-                    m00 = dataA7[num1][num3];
-                    m10 = dataA7[num2][num3];
-                } else if (tmpP2 == 7) {
-                    m00 = dataA8[num1][num3];
-                    m10 = dataA8[num2][num3];
-                } else if (tmpP2 == 8) {
-                    m00 = dataA9[num1][num3];
-                    m10 = dataA9[num2][num3];
-                } else if (tmpP2 == 9) {
-                    m00 = dataA10[num1][num3];
-                    m10 = dataA10[num2][num3];
-                } else if (tmpP2 == 10) {
-                    m00 = dataA11[num1][num3];
-                    m10 = dataA11[num2][num3];
-                } else if (tmpP2 == 11) {
-                    m00 = dataA12[num1][num3];
-                    m10 = dataA12[num2][num3];
-                } else if (tmpP2 == 12) {
-                    m00 = dataA13[num1][num3];
-                    m10 = dataA13[num2][num3];
-                } else if (tmpP2 == 13) {
-                    m00 = dataA14[num1][num3];
-                    m10 = dataA14[num2][num3];
-                } else if (tmpP2 == 14) {
-                    m00 = dataA15[num1][num3];
-                    m10 = dataA15[num2][num3];
-                } else if (tmpP2 == 15) {
-                    m00 = dataA16[num1][num3];
-                    m10 = dataA16[num2][num3];
-                }
-                if (tmpQ2 == 0) {
-                    m01 = dataA1[num1][num4];
-                    m11 = dataA1[num2][num4];
-                } else if (tmpQ2 == 1) {
-                    m01 = dataA2[num1][num4];
-                    m11 = dataA2[num2][num4];
-                } else if (tmpQ2 == 2) {
-                    m01 = dataA3[num1][num4];
-                    m11 = dataA3[num2][num4];
-                } else if (tmpQ2 == 3) {
-                    m01 = dataA4[num1][num4];
-                    m11 = dataA4[num2][num4];
-                } else if (tmpQ2 == 4) {
-                    m01 = dataA5[num1][num4];
-                    m11 = dataA5[num2][num4];
-                } else if (tmpQ2 == 5) {
-                    m01 = dataA6[num1][num4];
-                    m11 = dataA6[num2][num4];
-                } else if (tmpQ2 == 6) {
-                    m01 = dataA7[num1][num4];
-                    m11 = dataA7[num2][num4];
-                } else if (tmpQ2 == 7) {
-                    m01 = dataA8[num1][num4];
-                    m11 = dataA8[num2][num4];
-                } else if (tmpQ2 == 8) {
-                    m01 = dataA9[num1][num4];
-                    m11 = dataA9[num2][num4];
-                } else if (tmpQ2 == 9) {
-                    m01 = dataA10[num1][num4];
-                    m11 = dataA10[num2][num4];
-                } else if (tmpQ2 == 10) {
-                    m01 = dataA11[num1][num4];
-                    m11 = dataA11[num2][num4];
-                } else if (tmpQ2 == 11) {
-                    m01 = dataA12[num1][num4];
-                    m11 = dataA12[num2][num4];
-                } else if (tmpQ2 == 12) {
-                    m01 = dataA13[num1][num4];
-                    m11 = dataA13[num2][num4];
-                } else if (tmpQ2 == 13) {
-                    m01 = dataA14[num1][num4];
-                    m11 = dataA14[num2][num4];
-                } else if (tmpQ2 == 14) {
-                    m01 = dataA15[num1][num4];
-                    m11 = dataA15[num2][num4];
-                } else if (tmpQ2 == 15) {
-                    m01 = dataA16[num1][num4];
-                    m11 = dataA16[num2][num4];
-                }
-            Loop_Inner_Mul1111:
-                for (int ttt = 0; ttt < 4; ++ttt) {
-#pragma HLS pipeline II = 1
-                    T m0, m1;
-                    if (ttt == 0) {
-                        m0 = m00;
-                        m1 = m01;
-                    } else if (ttt == 1) {
-                        m0 = m01;
-                        m1 = -m00;
-                    } else if (ttt == 2) {
-                        m0 = m10;
-                        m1 = m11;
-                    } else if (ttt == 3) {
-                        m0 = m11;
-                        m1 = -m10;
+                p2 = Order[tmpSum];     // row
+                q2 = Order[tmpSum + 1]; // row
+                if ((p1 < lda) && (p2 < lda) && (q1 < lda) && (q2 < lda) && (p1 >= 0) && (p2 >= 0) && (q1 >= 0) &&
+                    (q2 >= 0) && (p2 != q2)) {
+                    cr = m_c_right[tmpSumCS]; // g*NMAXUN/2+l
+                    sr = m_s_right[tmpSumCS]; // g*NMAXUN/2+l
+                    T a00, a01, a10, a11;
+                    T m00, m01, m10, m11;
+                    int tmpP2 = p2 % UN;
+                    int tmpQ2 = q2 % UN;
+                    int num1 = p1 / UN;
+                    int num2 = q1 / UN;
+                    int num3 = p2 / UN;
+                    int num4 = q2 / UN;
+                    if (tmpP2 == 0) {
+                        m00 = dataA1[num1][num3];
+                        m10 = dataA1[num2][num3];
+                    } else if (tmpP2 == 1) {
+                        m00 = dataA2[num1][num3];
+                        m10 = dataA2[num2][num3];
+                    } else if (tmpP2 == 2) {
+                        m00 = dataA3[num1][num3];
+                        m10 = dataA3[num2][num3];
+                    } else if (tmpP2 == 3) {
+                        m00 = dataA4[num1][num3];
+                        m10 = dataA4[num2][num3];
+                    } else if (tmpP2 == 4) {
+                        m00 = dataA5[num1][num3];
+                        m10 = dataA5[num2][num3];
+                    } else if (tmpP2 == 5) {
+                        m00 = dataA6[num1][num3];
+                        m10 = dataA6[num2][num3];
+                    } else if (tmpP2 == 6) {
+                        m00 = dataA7[num1][num3];
+                        m10 = dataA7[num2][num3];
+                    } else if (tmpP2 == 7) {
+                        m00 = dataA8[num1][num3];
+                        m10 = dataA8[num2][num3];
+                    } else if (tmpP2 == 8) {
+                        m00 = dataA9[num1][num3];
+                        m10 = dataA9[num2][num3];
+                    } else if (tmpP2 == 9) {
+                        m00 = dataA10[num1][num3];
+                        m10 = dataA10[num2][num3];
+                    } else if (tmpP2 == 10) {
+                        m00 = dataA11[num1][num3];
+                        m10 = dataA11[num2][num3];
+                    } else if (tmpP2 == 11) {
+                        m00 = dataA12[num1][num3];
+                        m10 = dataA12[num2][num3];
+                    } else if (tmpP2 == 12) {
+                        m00 = dataA13[num1][num3];
+                        m10 = dataA13[num2][num3];
+                    } else if (tmpP2 == 13) {
+                        m00 = dataA14[num1][num3];
+                        m10 = dataA14[num2][num3];
+                    } else if (tmpP2 == 14) {
+                        m00 = dataA15[num1][num3];
+                        m10 = dataA15[num2][num3];
+                    } else if (tmpP2 == 15) {
+                        m00 = dataA16[num1][num3];
+                        m10 = dataA16[num2][num3];
                     }
-                    T tmpMul0, tmpMul1, sum;
+                    if (tmpQ2 == 0) {
+                        m01 = dataA1[num1][num4];
+                        m11 = dataA1[num2][num4];
+                    } else if (tmpQ2 == 1) {
+                        m01 = dataA2[num1][num4];
+                        m11 = dataA2[num2][num4];
+                    } else if (tmpQ2 == 2) {
+                        m01 = dataA3[num1][num4];
+                        m11 = dataA3[num2][num4];
+                    } else if (tmpQ2 == 3) {
+                        m01 = dataA4[num1][num4];
+                        m11 = dataA4[num2][num4];
+                    } else if (tmpQ2 == 4) {
+                        m01 = dataA5[num1][num4];
+                        m11 = dataA5[num2][num4];
+                    } else if (tmpQ2 == 5) {
+                        m01 = dataA6[num1][num4];
+                        m11 = dataA6[num2][num4];
+                    } else if (tmpQ2 == 6) {
+                        m01 = dataA7[num1][num4];
+                        m11 = dataA7[num2][num4];
+                    } else if (tmpQ2 == 7) {
+                        m01 = dataA8[num1][num4];
+                        m11 = dataA8[num2][num4];
+                    } else if (tmpQ2 == 8) {
+                        m01 = dataA9[num1][num4];
+                        m11 = dataA9[num2][num4];
+                    } else if (tmpQ2 == 9) {
+                        m01 = dataA10[num1][num4];
+                        m11 = dataA10[num2][num4];
+                    } else if (tmpQ2 == 10) {
+                        m01 = dataA11[num1][num4];
+                        m11 = dataA11[num2][num4];
+                    } else if (tmpQ2 == 11) {
+                        m01 = dataA12[num1][num4];
+                        m11 = dataA12[num2][num4];
+                    } else if (tmpQ2 == 12) {
+                        m01 = dataA13[num1][num4];
+                        m11 = dataA13[num2][num4];
+                    } else if (tmpQ2 == 13) {
+                        m01 = dataA14[num1][num4];
+                        m11 = dataA14[num2][num4];
+                    } else if (tmpQ2 == 14) {
+                        m01 = dataA15[num1][num4];
+                        m11 = dataA15[num2][num4];
+                    } else if (tmpQ2 == 15) {
+                        m01 = dataA16[num1][num4];
+                        m11 = dataA16[num2][num4];
+                    }
+                Loop_Inner_Mul1111:
+                    for (int ttt = 0; ttt < 4; ++ttt) {
+#pragma HLS pipeline II = 1
+                        T m0, m1;
+                        if (ttt == 0) {
+                            m0 = m00;
+                            m1 = m01;
+                        } else if (ttt == 1) {
+                            m0 = m01;
+                            m1 = -m00;
+                        } else if (ttt == 2) {
+                            m0 = m10;
+                            m1 = m11;
+                        } else if (ttt == 3) {
+                            m0 = m11;
+                            m1 = -m10;
+                        }
+                        T tmpMul0, tmpMul1, sum;
 #pragma HLS RESOURCE variable = tmpMul0 core = DMul_maxdsp
 #pragma HLS RESOURCE variable = tmpMul1 core = DMul_maxdsp
 #pragma HLS RESOURCE variable = sum core = DAddSub_nodsp
-                    tmpMul0 = m0 * cr;
-                    tmpMul1 = m1 * sr;
-                    sum = tmpMul0 + tmpMul1;
-                    if (ttt == 0) {
-                        a00 = sum;
-                    } else if (ttt == 1) {
-                        a01 = sum;
-                    } else if (ttt == 2) {
-                        a10 = sum;
-                    } else if (ttt == 3) {
-                        a11 = sum;
+                        tmpMul0 = m0 * cr;
+                        tmpMul1 = m1 * sr;
+                        sum = tmpMul0 + tmpMul1;
+                        if (ttt == 0) {
+                            a00 = sum;
+                        } else if (ttt == 1) {
+                            a01 = sum;
+                        } else if (ttt == 2) {
+                            a10 = sum;
+                        } else if (ttt == 3) {
+                            a11 = sum;
+                        }
                     }
-                }
-                if (tmpP2 == 0) {
-                    dataA1[num1][num3] = a00;
-                    dataA1[num2][num3] = a10;
-                } else if (tmpP2 == 1) {
-                    dataA2[num1][num3] = a00;
-                    dataA2[num2][num3] = a10;
-                } else if (tmpP2 == 2) {
-                    dataA3[num1][num3] = a00;
-                    dataA3[num2][num3] = a10;
-                } else if (tmpP2 == 3) {
-                    dataA4[num1][num3] = a00;
-                    dataA4[num2][num3] = a10;
-                } else if (tmpP2 == 4) {
-                    dataA5[num1][num3] = a00;
-                    dataA5[num2][num3] = a10;
-                } else if (tmpP2 == 5) {
-                    dataA6[num1][num3] = a00;
-                    dataA6[num2][num3] = a10;
-                } else if (tmpP2 == 6) {
-                    dataA7[num1][num3] = a00;
-                    dataA7[num2][num3] = a10;
-                } else if (tmpP2 == 7) {
-                    dataA8[num1][num3] = a00;
-                    dataA8[num2][num3] = a10;
-                } else if (tmpP2 == 8) {
-                    dataA9[num1][num3] = a00;
-                    dataA9[num2][num3] = a10;
-                } else if (tmpP2 == 9) {
-                    dataA10[num1][num3] = a00;
-                    dataA10[num2][num3] = a10;
-                } else if (tmpP2 == 10) {
-                    dataA11[num1][num3] = a00;
-                    dataA11[num2][num3] = a10;
-                } else if (tmpP2 == 11) {
-                    dataA12[num1][num3] = a00;
-                    dataA12[num2][num3] = a10;
-                } else if (tmpP2 == 12) {
-                    dataA13[num1][num3] = a00;
-                    dataA13[num2][num3] = a10;
-                } else if (tmpP2 == 13) {
-                    dataA14[num1][num3] = a00;
-                    dataA14[num2][num3] = a10;
-                } else if (tmpP2 == 14) {
-                    dataA15[num1][num3] = a00;
-                    dataA15[num2][num3] = a10;
-                } else if (tmpP2 == 15) {
-                    dataA16[num1][num3] = a00;
-                    dataA16[num2][num3] = a10;
-                }
-                if (tmpQ2 == 0) {
-                    dataA1[num1][num4] = a01;
-                    dataA1[num2][num4] = a11;
-                } else if (tmpQ2 == 1) {
-                    dataA2[num1][num4] = a01;
-                    dataA2[num2][num4] = a11;
-                } else if (tmpQ2 == 2) {
-                    dataA3[num1][num4] = a01;
-                    dataA3[num2][num4] = a11;
-                } else if (tmpQ2 == 3) {
-                    dataA4[num1][num4] = a01;
-                    dataA4[num2][num4] = a11;
-                } else if (tmpQ2 == 4) {
-                    dataA5[num1][num4] = a01;
-                    dataA5[num2][num4] = a11;
-                } else if (tmpQ2 == 5) {
-                    dataA6[num1][num4] = a01;
-                    dataA6[num2][num4] = a11;
-                } else if (tmpQ2 == 6) {
-                    dataA7[num1][num4] = a01;
-                    dataA7[num2][num4] = a11;
-                } else if (tmpQ2 == 7) {
-                    dataA8[num1][num4] = a01;
-                    dataA8[num2][num4] = a11;
-                } else if (tmpQ2 == 8) {
-                    dataA9[num1][num4] = a01;
-                    dataA9[num2][num4] = a11;
-                } else if (tmpQ2 == 9) {
-                    dataA10[num1][num4] = a01;
-                    dataA10[num2][num4] = a11;
-                } else if (tmpQ2 == 10) {
-                    dataA11[num1][num4] = a01;
-                    dataA11[num2][num4] = a11;
-                } else if (tmpQ2 == 11) {
-                    dataA12[num1][num4] = a01;
-                    dataA12[num2][num4] = a11;
-                } else if (tmpQ2 == 12) {
-                    dataA13[num1][num4] = a01;
-                    dataA13[num2][num4] = a11;
-                } else if (tmpQ2 == 13) {
-                    dataA14[num1][num4] = a01;
-                    dataA14[num2][num4] = a11;
-                } else if (tmpQ2 == 14) {
-                    dataA15[num1][num4] = a01;
-                    dataA15[num2][num4] = a11;
-                } else if (tmpQ2 == 15) {
-                    dataA16[num1][num4] = a01;
-                    dataA16[num2][num4] = a11;
+                    if (tmpP2 == 0) {
+                        dataA1[num1][num3] = a00;
+                        dataA1[num2][num3] = a10;
+                    } else if (tmpP2 == 1) {
+                        dataA2[num1][num3] = a00;
+                        dataA2[num2][num3] = a10;
+                    } else if (tmpP2 == 2) {
+                        dataA3[num1][num3] = a00;
+                        dataA3[num2][num3] = a10;
+                    } else if (tmpP2 == 3) {
+                        dataA4[num1][num3] = a00;
+                        dataA4[num2][num3] = a10;
+                    } else if (tmpP2 == 4) {
+                        dataA5[num1][num3] = a00;
+                        dataA5[num2][num3] = a10;
+                    } else if (tmpP2 == 5) {
+                        dataA6[num1][num3] = a00;
+                        dataA6[num2][num3] = a10;
+                    } else if (tmpP2 == 6) {
+                        dataA7[num1][num3] = a00;
+                        dataA7[num2][num3] = a10;
+                    } else if (tmpP2 == 7) {
+                        dataA8[num1][num3] = a00;
+                        dataA8[num2][num3] = a10;
+                    } else if (tmpP2 == 8) {
+                        dataA9[num1][num3] = a00;
+                        dataA9[num2][num3] = a10;
+                    } else if (tmpP2 == 9) {
+                        dataA10[num1][num3] = a00;
+                        dataA10[num2][num3] = a10;
+                    } else if (tmpP2 == 10) {
+                        dataA11[num1][num3] = a00;
+                        dataA11[num2][num3] = a10;
+                    } else if (tmpP2 == 11) {
+                        dataA12[num1][num3] = a00;
+                        dataA12[num2][num3] = a10;
+                    } else if (tmpP2 == 12) {
+                        dataA13[num1][num3] = a00;
+                        dataA13[num2][num3] = a10;
+                    } else if (tmpP2 == 13) {
+                        dataA14[num1][num3] = a00;
+                        dataA14[num2][num3] = a10;
+                    } else if (tmpP2 == 14) {
+                        dataA15[num1][num3] = a00;
+                        dataA15[num2][num3] = a10;
+                    } else if (tmpP2 == 15) {
+                        dataA16[num1][num3] = a00;
+                        dataA16[num2][num3] = a10;
+                    }
+                    if (tmpQ2 == 0) {
+                        dataA1[num1][num4] = a01;
+                        dataA1[num2][num4] = a11;
+                    } else if (tmpQ2 == 1) {
+                        dataA2[num1][num4] = a01;
+                        dataA2[num2][num4] = a11;
+                    } else if (tmpQ2 == 2) {
+                        dataA3[num1][num4] = a01;
+                        dataA3[num2][num4] = a11;
+                    } else if (tmpQ2 == 3) {
+                        dataA4[num1][num4] = a01;
+                        dataA4[num2][num4] = a11;
+                    } else if (tmpQ2 == 4) {
+                        dataA5[num1][num4] = a01;
+                        dataA5[num2][num4] = a11;
+                    } else if (tmpQ2 == 5) {
+                        dataA6[num1][num4] = a01;
+                        dataA6[num2][num4] = a11;
+                    } else if (tmpQ2 == 6) {
+                        dataA7[num1][num4] = a01;
+                        dataA7[num2][num4] = a11;
+                    } else if (tmpQ2 == 7) {
+                        dataA8[num1][num4] = a01;
+                        dataA8[num2][num4] = a11;
+                    } else if (tmpQ2 == 8) {
+                        dataA9[num1][num4] = a01;
+                        dataA9[num2][num4] = a11;
+                    } else if (tmpQ2 == 9) {
+                        dataA10[num1][num4] = a01;
+                        dataA10[num2][num4] = a11;
+                    } else if (tmpQ2 == 10) {
+                        dataA11[num1][num4] = a01;
+                        dataA11[num2][num4] = a11;
+                    } else if (tmpQ2 == 11) {
+                        dataA12[num1][num4] = a01;
+                        dataA12[num2][num4] = a11;
+                    } else if (tmpQ2 == 12) {
+                        dataA13[num1][num4] = a01;
+                        dataA13[num2][num4] = a11;
+                    } else if (tmpQ2 == 13) {
+                        dataA14[num1][num4] = a01;
+                        dataA14[num2][num4] = a11;
+                    } else if (tmpQ2 == 14) {
+                        dataA15[num1][num4] = a01;
+                        dataA15[num2][num4] = a11;
+                    } else if (tmpQ2 == 15) {
+                        dataA16[num1][num4] = a01;
+                        dataA16[num2][num4] = a11;
+                    }
                 }
             }
         }
@@ -854,8 +841,15 @@ void unrollRow(int Dim_inner_extend,
 
 #ifndef __SYNTHESIS__
 template <typename T, int m_diagSize, int UN, int NMAXUN>
-void funcDataflow(
-    int i, int Dim_inner_extend, int Dim_inner, int** Order, T* m_c_right, T* m_s_right, T**** dataA, T**** dataU_out) {
+void funcDataflow(int i,
+                  int Dim_inner_extend,
+                  int Dim_inner,
+                  int** Order,
+                  T* m_c_right,
+                  T* m_s_right,
+                  T**** dataA,
+                  T**** dataU_out,
+                  int lda) {
 #else
 template <typename T, int m_diagSize, int UN, int NMAXUN>
 void funcDataflow(int i,
@@ -865,7 +859,8 @@ void funcDataflow(int i,
                   T m_c_right[m_diagSize],
                   T m_s_right[m_diagSize],
                   T dataA[UN][UN][NMAXUN][NMAXUN],
-                  T dataU_out[UN][UN][NMAXUN][NMAXUN]) {
+                  T dataU_out[UN][UN][NMAXUN][NMAXUN],
+                  int lda) {
 #endif
 #pragma HLS inline off
     int Order1[3 * UN][m_diagSize];
@@ -877,6 +872,7 @@ void funcDataflow(int i,
 #pragma HLS array_partition variable = m_c_right1 dim = 1
 #pragma HLS array_partition variable = m_s_right1 dim = 1
     for (int i = 0; i < 16; ++i) {
+#pragma HLS loop_tripcount min = 16 max = 16
         if (i < UN) {
             tmp[i] = i;
         } else {
@@ -884,7 +880,11 @@ void funcDataflow(int i,
         }
     }
     for (int k = 0; k < 3 * UN; ++k) {
+// clang-format off
+#pragma HLS loop_tripcount min = 3*UN max = 3*UN
+        // clang-format on
         for (int j = 0; j < m_diagSize; ++j) {
+#pragma HLS loop_tripcount min = 512 max = 512
 #pragma HLS pipeline
             Order1[k][j] = Order[i][j];
             m_c_right1[k][j] = m_c_right[j];
@@ -892,18 +892,20 @@ void funcDataflow(int i,
         }
     }
     for (int i = 0; i < UN; ++i) {
+#pragma HLS loop_tripcount min = UN max = UN
 #pragma HLS unroll
         unrollRow<T, m_diagSize, UN, NMAXUN>(
-            Dim_inner_extend, Order1[i], m_c_right1[i], m_s_right1[i], dataA[tmp[i]][tmp[0]], dataA[tmp[i]][tmp[1]],
-            dataA[tmp[i]][tmp[2]], dataA[tmp[i]][tmp[3]], dataA[tmp[i]][tmp[4]], dataA[tmp[i]][tmp[5]],
-            dataA[tmp[i]][tmp[6]], dataA[tmp[i]][tmp[7]], dataA[tmp[i]][tmp[8]], dataA[tmp[i]][tmp[9]],
-            dataA[tmp[i]][tmp[10]], dataA[tmp[i]][tmp[11]], dataA[tmp[i]][tmp[12]], dataA[tmp[i]][tmp[13]],
-            dataA[tmp[i]][tmp[14]], dataA[tmp[i]][tmp[15]]);
+            lda, Dim_inner_extend, Order1[i], m_c_right1[i], m_s_right1[i], dataA[tmp[i]][tmp[0]],
+            dataA[tmp[i]][tmp[1]], dataA[tmp[i]][tmp[2]], dataA[tmp[i]][tmp[3]], dataA[tmp[i]][tmp[4]],
+            dataA[tmp[i]][tmp[5]], dataA[tmp[i]][tmp[6]], dataA[tmp[i]][tmp[7]], dataA[tmp[i]][tmp[8]],
+            dataA[tmp[i]][tmp[9]], dataA[tmp[i]][tmp[10]], dataA[tmp[i]][tmp[11]], dataA[tmp[i]][tmp[12]],
+            dataA[tmp[i]][tmp[13]], dataA[tmp[i]][tmp[14]], dataA[tmp[i]][tmp[15]]);
     }
     for (int i = 0; i < UN; ++i) {
+#pragma HLS loop_tripcount min = UN max = UN
 #pragma HLS unroll
         unrollRow<T, m_diagSize, UN, NMAXUN>(
-            Dim_inner_extend, Order1[i + UN], m_c_right1[i + UN], m_s_right1[i + UN], dataU_out[tmp[i]][tmp[0]],
+            lda, Dim_inner_extend, Order1[i + UN], m_c_right1[i + UN], m_s_right1[i + UN], dataU_out[tmp[i]][tmp[0]],
             dataU_out[tmp[i]][tmp[1]], dataU_out[tmp[i]][tmp[2]], dataU_out[tmp[i]][tmp[3]], dataU_out[tmp[i]][tmp[4]],
             dataU_out[tmp[i]][tmp[5]], dataU_out[tmp[i]][tmp[6]], dataU_out[tmp[i]][tmp[7]], dataU_out[tmp[i]][tmp[8]],
             dataU_out[tmp[i]][tmp[9]], dataU_out[tmp[i]][tmp[10]], dataU_out[tmp[i]][tmp[11]],
@@ -911,25 +913,26 @@ void funcDataflow(int i,
             dataU_out[tmp[i]][tmp[15]]);
     }
     for (int i = 0; i < UN; ++i) {
+#pragma HLS loop_tripcount min = UN max = UN
 #pragma HLS unroll
         unrollCol<T, m_diagSize, UN, NMAXUN>(
-            Dim_inner_extend, Order1[i + 2 * UN], m_c_right1[i + 2 * UN], m_s_right1[i + 2 * UN], dataA[tmp[0]][tmp[i]],
-            dataA[tmp[1]][tmp[i]], dataA[tmp[2]][tmp[i]], dataA[tmp[3]][tmp[i]], dataA[tmp[4]][tmp[i]],
-            dataA[tmp[5]][tmp[i]], dataA[tmp[6]][tmp[i]], dataA[tmp[7]][tmp[i]], dataA[tmp[8]][tmp[i]],
-            dataA[tmp[9]][tmp[i]], dataA[tmp[10]][tmp[i]], dataA[tmp[11]][tmp[i]], dataA[tmp[12]][tmp[i]],
-            dataA[tmp[13]][tmp[i]], dataA[tmp[14]][tmp[i]], dataA[tmp[15]][tmp[i]]);
+            lda, Dim_inner_extend, Order1[i + 2 * UN], m_c_right1[i + 2 * UN], m_s_right1[i + 2 * UN],
+            dataA[tmp[0]][tmp[i]], dataA[tmp[1]][tmp[i]], dataA[tmp[2]][tmp[i]], dataA[tmp[3]][tmp[i]],
+            dataA[tmp[4]][tmp[i]], dataA[tmp[5]][tmp[i]], dataA[tmp[6]][tmp[i]], dataA[tmp[7]][tmp[i]],
+            dataA[tmp[8]][tmp[i]], dataA[tmp[9]][tmp[i]], dataA[tmp[10]][tmp[i]], dataA[tmp[11]][tmp[i]],
+            dataA[tmp[12]][tmp[i]], dataA[tmp[13]][tmp[i]], dataA[tmp[14]][tmp[i]], dataA[tmp[15]][tmp[i]]);
     }
 }
 
 #ifndef __SYNTHESIS__
 template <typename T, int m_diagSize, int UN, int NMAXUN>
-void Jacobi_svd(T**** dataA, T**** dataU_out) {
+void Jacobi_svd(T**** dataA, T**** dataU_out, int lda) {
 #else
 template <typename T, int m_diagSize, int UN, int NMAXUN>
-void Jacobi_svd(T dataA[UN][UN][NMAXUN][NMAXUN], T dataU_out[UN][UN][NMAXUN][NMAXUN]) {
+void Jacobi_svd(T dataA[UN][UN][NMAXUN][NMAXUN], T dataU_out[UN][UN][NMAXUN][NMAXUN], int lda) {
 #endif
     T considerZero = 2.2250738585072014e-308;
-    T threshold; // = 8.22045e-17;
+    T threshold;
     if (sizeof(T) == sizeof(double)) {
         threshold = 8.22045e-17;
     } else if (sizeof(T) == sizeof(float)) {
@@ -952,27 +955,24 @@ void Jacobi_svd(T dataA[UN][UN][NMAXUN][NMAXUN], T dataU_out[UN][UN][NMAXUN][NMA
     int Order[m_diagSize][m_diagSize];
 #pragma HLS resource variable = Order core = RAM_T2P_BRAM
 #endif
-    const int odd = m_diagSize % 2;
-    GenBlockMat<m_diagSize, odd>(m_diagSize, Order);
+    int odd = lda % 2;
+    int rank;
+    if (odd) {
+        rank = lda + 1;
+    } else {
+        rank = lda;
+    }
+    GenBlockMat<m_diagSize, 0>(rank, Order);
     int Dim_outer;
     int Dim_inner;
     int Dim_inner_extend;
     int tmp1, tmp2, innerTmp;
     tmp1 = m_diagSize - 1;
     tmp2 = m_diagSize;
-    if (odd == 0) {
-        Dim_outer = tmp1;
-        innerTmp = tmp2;
-    } else {
-        Dim_outer = tmp2;
-        innerTmp = tmp1;
-    }
+    Dim_outer = tmp1;
+    innerTmp = tmp2;
     Dim_inner = innerTmp >> 1;
-    if (odd == 0) {
-        Dim_inner_extend = Dim_inner;
-    } else {
-        Dim_inner_extend = Dim_inner + 1;
-    }
+    Dim_inner_extend = Dim_inner;
 #ifndef __SYNTHESIS__
 #ifdef _SOLVER_DEBUG_
     std::cout << "Dim_inner = " << Dim_inner << std::endl;
@@ -999,20 +999,23 @@ While_Loop:
 #endif
     Loop_innerWhile:
         for (int i = 0; i < Dim_outer; ++i) {
-#pragma HLS loop_tripcount min = 3 max = 3
+#pragma HLS loop_tripcount min = 511 max = 511
             int flag = 0;
             for (int j = 0; j < Dim_inner; ++j) {
+#pragma HLS loop_tripcount min = 256 max = 256
 #pragma HLS pipeline
-                int p1, q1;
-                p1 = Order[i][2 * j];
-                q1 = Order[i][2 * j + 1];
+                if ((i < rank - 1) && (j < rank / 2)) {
+                    int p1, q1;
+                    p1 = Order[i][2 * j];
+                    q1 = Order[i][2 * j + 1];
 #ifndef __SYNTHESIS__
 #ifdef _SOLVER_DEBUG_
-                std::cout << "p1 = " << p1 << "  q1 = " << q1 << std::endl;
+                    std::cout << "p1 = " << p1 << "  q1 = " << q1 << std::endl;
 #endif
 #endif
-                if ((hls::abs(dataA[(p1 % UN)][q1 % UN][p1 / UN][q1 / UN]) > threshold)) {
-                    flag = 1;
+                    if ((hls::abs(dataA[(p1 % UN)][q1 % UN][p1 / UN][q1 / UN]) > threshold)) {
+                        flag = 1;
+                    }
                 }
             }
             T m_c_left[m_diagSize];
@@ -1026,25 +1029,29 @@ While_Loop:
                 T matrix[3];
             Loop_jacobi2x2:
                 for (int j = 0; j < Dim_inner; ++j) {
+#pragma HLS loop_tripcount min = 256 max = 256
 #pragma HLS pipeline II = 2
-                    for (int tt = 0; tt < 3; ++tt) {
-                        int aa, bb;
-                        aa = (tt == 2) ? 1 : 0;
-                        bb = (tt == 0) ? 0 : 1;
-                        matrix[tt] = dataA[(Order[i][2 * j + aa] % UN)][Order[i][2 * j + bb] % UN]
-                                          [Order[i][2 * j + aa] / UN][Order[i][2 * j + bb] / UN];
-                    }
-                    jacobi_rotation_2x2<T, m_diagSize>(matrix, considerZero, m_c_left[j], m_s_left[j], m_c_right[j],
-                                                       m_s_right[j]);
+                    if (j < rank / 2) {
+                        for (int tt = 0; tt < 3; ++tt) {
+#pragma HLS loop_tripcount min = 3 max = 3
+                            int aa, bb;
+                            aa = (tt == 2) ? 1 : 0;
+                            bb = (tt == 0) ? 0 : 1;
+                            matrix[tt] = dataA[(Order[i][2 * j + aa] % UN)][Order[i][2 * j + bb] % UN]
+                                              [Order[i][2 * j + aa] / UN][Order[i][2 * j + bb] / UN];
+                        }
+                        jacobi_rotation_2x2<T, m_diagSize>(matrix, considerZero, m_c_left[j], m_s_left[j], m_c_right[j],
+                                                           m_s_right[j]);
 #ifndef __SYNTHESIS__
 #ifdef _SOLVER_DEBUG_
-                    std::cout << "m_diaSize = " << m_diagSize << std::endl;
-                    std::cout << "m_c_right = " << m_c_right[j] << "  m_s_right = " << m_s_right[j] << std::endl;
+                        std::cout << "m_diaSize = " << m_diagSize << std::endl;
+                        std::cout << "m_c_right = " << m_c_right[j] << "  m_s_right = " << m_s_right[j] << std::endl;
 #endif
 #endif
+                    }
                 }
                 funcDataflow<T, m_diagSize, UN, NMAXUN>(i, Dim_inner_extend, Dim_inner, Order, m_c_right, m_s_right,
-                                                        dataA, dataU_out);
+                                                        dataA, dataU_out, rank);
             }
         }
     }
@@ -1061,21 +1068,24 @@ While_Loop:
 
 #ifndef __SYNTHESIS__
 template <typename T, int diagSize, int UN, int NMAXUN>
-void gesvdj_2D(T**** dataA, T**** dataU_out) {
+void gesvdj_2D(T**** dataA, T**** dataU_out, int lda) {
 #else
 template <typename T, int diagSize, int UN, int NMAXUN>
-void gesvdj_2D(T dataA[UN][UN][NMAXUN][NMAXUN], T dataU_out[UN][UN][NMAXUN][NMAXUN]) {
+void gesvdj_2D(T dataA[UN][UN][NMAXUN][NMAXUN], T dataU_out[UN][UN][NMAXUN][NMAXUN], int lda) {
 #endif
 #pragma HLS inline off
 Loop_init_I:
     for (int r = 0; r < diagSize; ++r) {
+#pragma HLS loop_tripcount min = 512 max = 512
     Loop_init_J:
         for (int j = 0; j < diagSize; ++j) {
+#pragma HLS loop_tripcount min = 512 max = 512
 #pragma HLS pipeline
             dataU_out[(r % UN)][j % UN][r / UN][j / UN] = (r == j) ? 1 : 0;
         }
     }
-    internal::Jacobi_svd<T, diagSize, UN, NMAXUN>(dataA, dataU_out); // core function of Jacbi SVD for symmetric matrix
+    internal::Jacobi_svd<T, diagSize, UN, NMAXUN>(dataA, dataU_out,
+                                                  lda); // core function of Jacbi SVD for symmetric matrix
 }
 
 /**
@@ -1086,17 +1096,17 @@ Loop_init_I:
    The maximum matrix size supported in FPGA is templated by NMAX.
  *
  * @tparam T data type (support float and double).
- * @tparam NMAX maximum number of input symmetric matrix size
+ * @tparam NMAX maximum number of rows/columns of input matrix
  * @tparam NCU number of computation unit
- * @tparam m symmetric matrix real size.
+ * @tparam m number of rows/cols of matrix A
  * @param A input matrix of size \f$m \times m\f$
- * @param S the decomposed diagonal singular matrix of size \f$m \times m\f$
- * @param U the left U matrix of SVD
- * @param V the right V matrix of SVD
- * @param lda the leading dimension of matrix A
- * @param ldu the leading dimension of matrix U
- * @param ldv the leading dimension of matrix V
- * @param info the ouput info
+ * @param S decomposed diagonal singular matrix of size \f$m \times m\f$
+ * @param U left U matrix of SVD
+ * @param V right V matrix of SVD
+ * @param lda leading dimension of matrix A
+ * @param ldu leading dimension of matrix U
+ * @param ldv leading dimension of matrix V
+ * @param info output info (unused)
  */
 #ifndef __SYNTHESIS__
 template <typename T, int NMAX, int NCU>
@@ -1118,6 +1128,10 @@ void gesvdj(int m,
     const int odd1 = tmpMax % 2;
     const int NMAXUN = (odd1) ? (tmpMax + 1) : tmpMax;
     const int NMAX2 = NMAXUN * NCU;
+    int tmpReal = (lda + NCU - 1) / NCU;
+    int oddReal = tmpReal % 2;
+    int ldaTmp = (oddReal) ? (tmpReal + 1) : tmpReal;
+    int ldaReal = ldaTmp * NCU;
 // matrix initialization
 #ifndef __SYNTHESIS__
     T**** dataA_2D;
@@ -1155,6 +1169,7 @@ Loop_init_A:
 #pragma HLS pipeline
             if ((i < m) && (j < lda)) {
                 dataA_2D[(i % NCU)][j % NCU][i / NCU][j / NCU] = A[i * lda + j];
+                S[i * lda + j] = 0;
             } else if (i == j) {
                 dataA_2D[(i % NCU)][j % NCU][i / NCU][j / NCU] = 1;
             } else {
@@ -1163,8 +1178,7 @@ Loop_init_A:
         }
     }
 
-    // Calling for svd core function
-    xf::solver::gesvdj_2D<T, NMAX2, NCU, NMAXUN>(dataA_2D, dataU_2D);
+    xf::solver::gesvdj_2D<T, NMAX2, NCU, NMAXUN>(dataA_2D, dataU_2D, ldaReal);
 
 // Matrix transform from 2D to 1D
 Loop_postcal:
@@ -1176,19 +1190,12 @@ Loop_postcal:
 // clang-format on
 #pragma HLS pipeline
             if ((j < lda) && (i < lda)) {
-                V[j * ldv + i] = dataU_2D[(j % NCU)][i % NCU][j / NCU][i / NCU];
-                ap_uint<1> sign1;
-                union internal::double_cast_new dc;
-                dc.d = dataA_2D[(i % NCU)][i % NCU][i / NCU][i / NCU];
-                ap_uint<64> data = dc.i;
-                sign1[0] = data[63];
                 T tmpVal = dataU_2D[(j % NCU)][i % NCU][j / NCU][i / NCU];
-                U[j * ldu + i] = (sign1[0] == 1) ? (-tmpVal) : (tmpVal);
-                if ((j == i)) {
-                    T tmp2 = dc.d;
-                    S[i * lda + j] = (sign1[0] == 1) ? (-tmp2) : (tmp2);
-                } else {
-                    S[i * lda + j] = 0;
+                T tmpS = dataA_2D[(i % NCU)][i % NCU][i / NCU][i / NCU];
+                V[j * ldv + i] = tmpVal;
+                U[j * ldu + i] = (tmpS < 0) ? (-tmpVal) : (tmpVal);
+                if (j == i) {
+                    S[i * lda + i] = (tmpS < 0) ? (-tmpS) : (tmpS);
                 }
             }
         }
@@ -1215,4 +1222,4 @@ Loop_postcal:
 }
 } // namespace solver
 } // namespace xf
-#endif //#ifndef XF_SOLVER_SVDJ_H
+#endif

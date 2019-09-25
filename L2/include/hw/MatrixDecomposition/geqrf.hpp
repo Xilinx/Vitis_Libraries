@@ -19,7 +19,7 @@
 
 /**
  * @file geqrf.h
- * @brief This file contains QR factorization of dense matrix.
+ * @brief This file contains QR decomposition of dense matrix.
  *
  * This file is part of XF Solver Library.
  */
@@ -70,7 +70,6 @@ void updateColumns(
     int cgStart = baseCol / K;
     int cgEnd = (size - 1) * K + cIdx >= n ? size - 1 : size;
 
-// matrix[i][j] --> matrix[j%K][i][j/K]
 loop_update:
     for (int j = cgStart; j < cgEnd; ++j) {
         DataType dotProduct = 0.0;
@@ -135,7 +134,6 @@ loop_update:
 
 template <typename DataType, int M, int N, int K>
 void update(DataType matrix[K][M][(N + K - 1) / K], int m, int n, DataType v[K][M], DataType& beta, int i) {
-//#pragma HLS dataflow
 loop_columns:
     for (int k = 0; k < K; ++k) {
 #pragma HLS unroll factor = K
@@ -153,7 +151,6 @@ void qrf(int m, int n, DataType matrix[K][M][(N + K - 1) / K], int lda, DataType
         epsilon = 0.00000000000001;
     }
 
-    // matrix[i][j] --> matrix[j%K][i][j/K]
     const int num = m < n ? m : n;
 loop_col:
     for (int i = 0; i < num; ++i) { // i: column index
@@ -180,7 +177,6 @@ loop_col:
         DataType s1[8];
         for (int idx = 0; idx < 8; ++idx) {
 #pragma HLS pipeline
-            //#pragma HLS RESOURCE variable=temp core=DAddSub_nodsp
             int id = idx << 1;
             DataType temp = sum[id] + sum[id + 1];
             s1[idx] = temp;
@@ -249,8 +245,8 @@ loop_col:
 } // namespace internal
 
 /**
- * @brief This function computes QR factorization of matrix \f$A\f$ \n
-   \f{equation*} {A = Q R, }\f}
+ * @brief This function computes QR decomposition of matrix \f$A\f$ \n
+   \f{equation*} {A = Q R}\f}
    where \f$A\f$ is a dense matrix of size \f$m \times n\f$, \f$Q\f$
    is a \f$m \times n\f$ matrix with orthonormal columns, and \f$R\f$ is an
    upper triangular matrix.\n
@@ -258,20 +254,21 @@ loop_col:
  *
  *
  * @tparam T data type (support float and double)
- * @tparam NRMAX maximum number of rows for input matrix
- * @tparam NCMAX maximum number of columns for input matrix
+ * @tparam NRMAX maximum number of rows of input matrix
+ * @tparam NCMAX maximum number of columns of input matrix
  * @tparam NCU number of computation unit
- * @param[in] m real row number of input matrix
- * @param[in] n real column number of input matrix
- * @param[in,out] A input matrix, which contains the triangular R matrix and min(m,n) elementary reflectors in return
- * @param[in] lda leading dimension of input matrix
- * @param[out] tau the scalar factors for elementary reflectors
+ * @param[in] m number of rows of matrix A
+ * @param[in] n number of cols of matrix A
+ * @param[in,out] A input matrix of size \f$m \times lda\f$, and overwritten by the output triangular R matrix and
+ min(m,n) elementary reflectors
+ * @param[in] lda leading dimension of matrix A
+ * @param[out] tau scalar factors for elementary reflectors
  */
 #ifndef __SYNTHESIS__
-template <class T, int NRMAX, int NCMAX, int NCU>
+template <typename T, int NRMAX, int NCMAX, int NCU>
 int geqrf(int m, int n, T* A, int lda, T* tau) {
 #else
-template <class T, int NRMAX, int NCMAX, int NCU>
+template <typename T, int NRMAX, int NCMAX, int NCU>
 int geqrf(int m, int n, T A[NRMAX * NCMAX], int lda, T tau[NCMAX]) {
 #endif
 
@@ -300,7 +297,7 @@ int geqrf(int m, int n, T A[NRMAX * NCMAX], int lda, T tau[NCMAX]) {
     return 0;
 }
 
-template <class T, int NRMAX, int NCMAX, int NCU>
+template <typename T, int NRMAX, int NCMAX, int NCU>
 int geqrf(int m, int n, T A[NRMAX][NCMAX], int lda, T tau[NCMAX]) {
     static T data[NCU][NRMAX][(NCMAX + NCU - 1) / NCU];
 #pragma HLS resource variable = data core = XPM_MEMORY uram
