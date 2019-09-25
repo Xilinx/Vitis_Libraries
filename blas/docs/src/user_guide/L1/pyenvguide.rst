@@ -41,7 +41,7 @@ Please run following command under directory xf_blas/.
 
 **3. Deactivate xf_blas environment after testing**
 
-Note: Please don't take this step if you intend to run L1 primtives' testing process. 
+Note: Please don't take this step if you intend to run L1 primitives' testing process. 
 You only take it after you've finished all testing.
 
 .. code-block:: bash
