@@ -40,7 +40,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 /**
  *
@@ -303,7 +303,7 @@ decryption_ctr_loop:
 
 } // end aesCtrDecrypt
 
-} // namespace details
+} // namespace internal
 
 /**
  *
@@ -331,8 +331,8 @@ static void aes128CtrEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertextStrm,
     hls::stream<bool>& endCiphertextStrm) {
-    details::aesCtrEncrypt<128>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
-                                endCiphertextStrm);
+    internal::aesCtrEncrypt<128>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
+                                 endCiphertextStrm);
 
 } // end aes128CtrEncrypt
 
@@ -362,8 +362,8 @@ static void aes128CtrDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintextStrm,
     hls::stream<bool>& endPlaintextStrm) {
-    details::aesCtrDecrypt<128>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, IVStrm, plaintextStrm,
-                                endPlaintextStrm);
+    internal::aesCtrDecrypt<128>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, IVStrm, plaintextStrm,
+                                 endPlaintextStrm);
 
 } // end aes128CtrDecrypt
 
@@ -393,8 +393,8 @@ static void aes192CtrEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertextStrm,
     hls::stream<bool>& endCiphertextStrm) {
-    details::aesCtrEncrypt<192>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
-                                endCiphertextStrm);
+    internal::aesCtrEncrypt<192>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
+                                 endCiphertextStrm);
 
 } // end aes192CtrEncrypt
 
@@ -424,8 +424,8 @@ static void aes192CtrDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintextStrm,
     hls::stream<bool>& endPlaintextStrm) {
-    details::aesCtrDecrypt<192>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, IVStrm, plaintextStrm,
-                                endPlaintextStrm);
+    internal::aesCtrDecrypt<192>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, IVStrm, plaintextStrm,
+                                 endPlaintextStrm);
 
 } // end aes192CtrDecrypt
 
@@ -455,8 +455,8 @@ static void aes256CtrEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertextStrm,
     hls::stream<bool>& endCiphertextStrm) {
-    details::aesCtrEncrypt<256>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
-                                endCiphertextStrm);
+    internal::aesCtrEncrypt<256>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
+                                 endCiphertextStrm);
 
 } // end aes256CtrEncrypt
 
@@ -486,8 +486,8 @@ static void aes256CtrDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintextStrm,
     hls::stream<bool>& endPlaintextStrm) {
-    details::aesCtrDecrypt<256>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, IVStrm, plaintextStrm,
-                                endPlaintextStrm);
+    internal::aesCtrDecrypt<256>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, IVStrm, plaintextStrm,
+                                 endPlaintextStrm);
 
 } // end aes256CtrDecrypt
 

@@ -41,7 +41,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 /**
  *
@@ -209,7 +209,7 @@ decryption_ecb_loop:
 
 } // end aesEcbDecrypt
 
-} // namespace details
+} // namespace internal
 
 /**
  *
@@ -391,7 +391,7 @@ static void aes128EcbEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertextStrm,
     hls::stream<bool>& endCiphertextStrm) {
-    details::aesEcbEncrypt<128>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, ciphertextStrm, endCiphertextStrm);
+    internal::aesEcbEncrypt<128>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, ciphertextStrm, endCiphertextStrm);
 
 } // end aes128EcbEncrypt
 
@@ -419,7 +419,7 @@ static void aes128EcbDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintextStrm,
     hls::stream<bool>& endPlaintextStrm) {
-    details::aesEcbDecrypt<128>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, plaintextStrm, endPlaintextStrm);
+    internal::aesEcbDecrypt<128>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, plaintextStrm, endPlaintextStrm);
 
 } // end aes128EcbDecrypt
 
@@ -447,7 +447,7 @@ static void aes192EcbEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertextStrm,
     hls::stream<bool>& endCiphertextStrm) {
-    details::aesEcbEncrypt<192>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, ciphertextStrm, endCiphertextStrm);
+    internal::aesEcbEncrypt<192>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, ciphertextStrm, endCiphertextStrm);
 
 } // end aes192EcbEncrypt
 
@@ -475,7 +475,7 @@ static void aes192EcbDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintextStrm,
     hls::stream<bool>& endPlaintextStrm) {
-    details::aesEcbDecrypt<192>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, plaintextStrm, endPlaintextStrm);
+    internal::aesEcbDecrypt<192>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, plaintextStrm, endPlaintextStrm);
 
 } // end aes192EcbDecrypt
 
@@ -503,7 +503,7 @@ static void aes256EcbEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertextStrm,
     hls::stream<bool>& endCiphertextStrm) {
-    details::aesEcbEncrypt<256>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, ciphertextStrm, endCiphertextStrm);
+    internal::aesEcbEncrypt<256>(plaintextStrm, endPlaintextStrm, cipherkeyStrm, ciphertextStrm, endCiphertextStrm);
 
 } // end aes256EcbEncrypt
 
@@ -531,7 +531,7 @@ static void aes256EcbDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintextStrm,
     hls::stream<bool>& endPlaintextStrm) {
-    details::aesEcbDecrypt<256>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, plaintextStrm, endPlaintextStrm);
+    internal::aesEcbDecrypt<256>(ciphertextStrm, endCiphertextStrm, cipherkeyStrm, plaintextStrm, endPlaintextStrm);
 
 } // end aes256EcbDecrypt
 

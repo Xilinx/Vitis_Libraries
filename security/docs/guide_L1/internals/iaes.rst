@@ -13,15 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*****************************
-AES-256 Decryption Algorithms
-*****************************
+**************************
+AES Decryption Algorithms
+**************************
 
 .. toctree::
    :maxdepth: 1
 
-AES-256 decryption is one of AES Algorithms which processes cipher data blocks of 128 bits,
-generates plain data blocks of 128 bits using same cipher keys of 256 bits in data encryption.
+AES-128/192/256 decryption algorithms processes cipher data blocks of 128 bits,
+generates plain data blocks of 128 bits using same cipher keys of 128/192/256 bits in data encryption.
 Basic unit of AES algorithms operation is a two dimensional array of 16 bytes called states.
 Its mapping relation is as illustrated in the figure below.
 
@@ -33,11 +33,11 @@ Its mapping relation is as illustrated in the figure below.
 Original Implementation
 =======================
 
-Similarly, AES-256 decryption consists of 5 part: KeyExpansion, Inverse SubBytes, Inverse ShiftRows, Inverse MixColumns and AddRoundKey.
+Similarly, AES decryption consists of 5 part: KeyExpansion, Inverse SubBytes, Inverse ShiftRows, Inverse MixColumns and AddRoundKey.
 
-KeyExpansion also generates 15 round keys from input cipher key and they maps to 2-D array as states do.
+KeyExpansion also generates 11/13/15 round keys from input cipher key and they maps to 2-D array as states do.
 
-For one input cipher block, AES-256 decryption performs 14 round of processing with the former 14 round keys from behind, each at a time.
+For one input cipher block, AES-128/192/256 decryption performs 10/12/14 round of processing with the former round keys from behind, each at a time.
 Thus, input cipher data blocks will operate XOR with the last roundkey. After that, every round sequentially goes through AddRoundKey, Inverse MixColumns,
 Inverse ShiftRows and Inverse SubBytes. Meanwhile, Inverse MixColumns will be bypassed at the first round.
 
@@ -46,8 +46,8 @@ Inverse ShiftRows and Inverse SubBytes. Meanwhile, Inverse MixColumns will be by
    :width: 100%
    :align: center
 
-Like AES-256 encryption, Inverse SubBytes are transformed into looking up table which is called inverse S-box and is different with that in encryption.
-Details can be found in the chapter of AES-256 encryption.
+Like AES encryption, Inverse SubBytes are transformed into looking up table which is called inverse S-box and is different with that in encryption.
+Details can be found in the chapter of AES encryption.
 
 During Inverse ShiftRows, right circular shift are operated based on each row number in 2-D state array.
 
@@ -64,7 +64,9 @@ In AddRoundKey step, states in each column operate XOR with roundkey of this rou
 Optimized Implementation on FPGA
 =================================
 
-Based on similar consideration in AES-256 encryption implementation, we also can merge inverse SubBytes and Inverse MixColumns into 
+Like in AES encryption, we seperate key expansion away from decryption. We must call updateKey() before use a nwe cipher key to decrypt message.
+
+Based on similar consideration in AES encryption implementation, we also can merge inverse SubBytes and Inverse MixColumns into 
 one look-up table as long as operation flow is re-ordered appropriatly.
 Therefore, we adopt that Inverse MixColumns and AddRoundKey are exchanged each other in one operation round. 
 However, generated key at KeyExpansion stage must be followed by one extra Inverse MixColumns operation for correct decryption. 
@@ -82,11 +84,34 @@ KeyExpansion is seprated from the whole decryption loop.
 In addition, one same SubBytes process should be operated on round keys before they come into Inverse MixColumns step, in order to eliminate unnecessary inverse
 SubBytes operation in the common loop-up table within decryption process. And for the last round in one block decryption, Inverse MixColumns will be skipped.
 
-Performance(Device:VU9P)
-=================================
 
-==== ====== ====== ====== ===== ====== ====== ====== ========
- II   CLB    LUT     FF    DSP   BRAM   SRL    URAM   CP(ns)
-==== ====== ====== ====== ===== ====== ====== ====== ========
- 1    1950   6739   7753    0    532    2112    0     3.049
-==== ====== ====== ====== ===== ====== ====== ====== ========
+AES-128 Decryption Performance(Device:U250)
+===========================================
+
+==== ======= ======= ======= ===== ====== ====== ====== ========
+ II    CLB     LUT     FF     DSP   BRAM   SRL    URAM   CP(ns)
+==== ======= ======= ======= ===== ====== ====== ====== ========
+ 1    5305    27673   11074    0     10    710     0     3.076
+==== ======= ======= ======= ===== ====== ====== ====== ========
+
+
+AES-192 Decryption Performance(Device:U250)
+===========================================
+
+==== ======= ======= ======= ===== ====== ====== ====== ========
+ II    CLB     LUT      FF    DSP   BRAM   SRL    URAM   CP(ns)
+==== ======= ======= ======= ===== ====== ====== ====== ========
+ 1    6409    33433   13296    0     14    898     0     3.032
+==== ======= ======= ======= ===== ====== ====== ====== ========
+
+
+AES-256 Decryption Performance(Device:U250)
+===========================================
+
+==== ======= ======= ======= ===== ====== ====== ====== ========
+ II    CLB     LUT      FF    DSP   BRAM   SRL    URAM   CP(ns)
+==== ======= ======= ======= ===== ====== ====== ====== ========
+ 1    7442    38636   14985    0     10    1153    0     3.016
+==== ======= ======= ======= ===== ====== ====== ====== ========
+
+

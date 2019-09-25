@@ -336,11 +336,27 @@ const ap_uint<8> sboxEnc[256] = {
     0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e, 0xe1, 0xf8, 0x98, 0x11,
     0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf, 0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42,
     0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16};
-
+/**
+ * @brief AES encryption
+ *
+ * @tparam W Bit width of AES key, which is 128, 192 or 256
+ */
 template <int W>
 class aesEnc {
    public:
+    /**
+     * @brief Update key before using it to encrypt
+     *
+     * @param cipherkey Key to be used in encryption.
+     */
     void updateKey(ap_uint<W> cipherkey) {}
+    /**
+     * @brief Encrypt message using AES algorithm
+     *
+     * @param plaintext Message to be encrypted.
+     * @param cipherkey Key to be used in encryption.
+     * @param ciphertext Encryption result.
+     */
     void process(ap_uint<128> plaintext, ap_uint<W> cipherkey, ap_uint<128>& ciphertext) {}
 };
 
@@ -468,10 +484,27 @@ class aesEnc<256> {
     }
 };
 
+/**
+ * @brief AES decryption
+ *
+ * @tparam W Bit width of AES key, which is 128, 192 or 256
+ */
 template <int W>
 class aesDec {
    public:
+    /**
+     * @brief Update key before using it to decrypt.
+     *
+     * @param cipherkey Key to be used in decryption.
+     */
     void updateKey(ap_uint<W> cipherkey) {}
+    /**
+     * @brief Decrypt message using AES algorithm
+     *
+     * @param ciphertext Cipher text to be decrypted.
+     * @param cipherkey Key to be used in decryption.
+     * @param plaintext Decryption result.
+     */
     void process(ap_uint<128> ciphertext, ap_uint<W> cipherkey, ap_uint<128>& plaintext) {}
 };
 

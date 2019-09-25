@@ -41,7 +41,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 // @brief Processing block
 struct blockType {
@@ -828,7 +828,7 @@ LOOP_SHA1_MAIN:
 
 /**
  *
- * @brief Top of SHA-512.
+ * @brief Top function of SHA-512.
  *
  * The algorithm reference is : "Secure Hash Standard", which published by NIST in February 2012.
  * The implementation dataflows the pre-processing part and message digest part.
@@ -901,7 +901,7 @@ void sha512Top(
 
 } // end sha512Top
 
-} // end namespace details
+} // end namespace internal
 
 /**
  *
@@ -929,8 +929,8 @@ void sha384(
     // outputs
     hls::stream<ap_uint<384> >& digest_strm,
     hls::stream<bool>& end_digest_strm) {
-    details::sha512Top<w, 384>(msg_strm, len_strm, end_len_strm, // input streams
-                               digest_strm, end_digest_strm);    // output streams
+    internal::sha512Top<w, 384>(msg_strm, len_strm, end_len_strm, // input streams
+                                digest_strm, end_digest_strm);    // output streams
 
 } // end sha384
 
@@ -960,8 +960,8 @@ void sha512(
     // outputs
     hls::stream<ap_uint<512> >& digest_strm,
     hls::stream<bool>& end_digest_strm) {
-    details::sha512Top<w, 512>(msg_strm, len_strm, end_len_strm, // input streams
-                               digest_strm, end_digest_strm);    // output streams
+    internal::sha512Top<w, 512>(msg_strm, len_strm, end_len_strm, // input streams
+                                digest_strm, end_digest_strm);    // output streams
 
 } // end sha512
 
@@ -992,8 +992,8 @@ void sha512_t(
     // outputs
     hls::stream<ap_uint<t> >& digest_strm,
     hls::stream<bool>& end_digest_strm) {
-    details::sha512Top<w, t>(msg_strm, len_strm, end_len_strm, // input streams
-                             digest_strm, end_digest_strm);    // output streams
+    internal::sha512Top<w, t>(msg_strm, len_strm, end_len_strm, // input streams
+                              digest_strm, end_digest_strm);    // output streams
 
 } // end sha512_t
 

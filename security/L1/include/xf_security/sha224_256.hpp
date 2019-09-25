@@ -49,7 +49,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 /// Processing block
 struct SHA256Block {
@@ -797,7 +797,7 @@ inline void sha256_top(hls::stream<ap_uint<m_width> >& msg_strm,
     sha256Digest(nblk_strm2, end_nblk_strm2, w_strm, //
                  hash_strm, end_hash_strm);
 } // sha256_top
-} // namespace details
+} // namespace internal
 
 /// @brief SHA-224 algorithm with ap_uint stream input and output.
 /// @tparam m_width the input message stream width, currently only 32 allowed.
@@ -807,13 +807,13 @@ inline void sha256_top(hls::stream<ap_uint<m_width> >& msg_strm,
 /// @param hash_strm the result.
 /// @param end_hash_strm the flag for end of hash output.
 template <int m_width>
-void sha224(hls::stream<ap_uint<m_width> >& msg_strm,     // in
-            hls::stream<ap_uint<64> >& len_strm,          // in
-            hls::stream<bool>& end_len_strm,              // in
-            hls::stream<ap_uint<224> >& hash_strm,        // out
-            hls::stream<bool>& end_hash_strm) {           // out
-    details::sha256_top(msg_strm, len_strm, end_len_strm, // in
-                        hash_strm, end_hash_strm);        // out
+void sha224(hls::stream<ap_uint<m_width> >& msg_strm,      // in
+            hls::stream<ap_uint<64> >& len_strm,           // in
+            hls::stream<bool>& end_len_strm,               // in
+            hls::stream<ap_uint<224> >& hash_strm,         // out
+            hls::stream<bool>& end_hash_strm) {            // out
+    internal::sha256_top(msg_strm, len_strm, end_len_strm, // in
+                         hash_strm, end_hash_strm);        // out
 }
 
 /// @brief SHA-256 algorithm with ap_uint stream input and output.
@@ -824,13 +824,13 @@ void sha224(hls::stream<ap_uint<m_width> >& msg_strm,     // in
 /// @param hash_strm the result.
 /// @param end_hash_strm the flag for end of hash output.
 template <int m_width>
-void sha256(hls::stream<ap_uint<m_width> >& msg_strm,     // in
-            hls::stream<ap_uint<64> >& len_strm,          // in
-            hls::stream<bool>& end_len_strm,              // in
-            hls::stream<ap_uint<256> >& hash_strm,        // out
-            hls::stream<bool>& end_hash_strm) {           // out
-    details::sha256_top(msg_strm, len_strm, end_len_strm, // in
-                        hash_strm, end_hash_strm);        // out
+void sha256(hls::stream<ap_uint<m_width> >& msg_strm,      // in
+            hls::stream<ap_uint<64> >& len_strm,           // in
+            hls::stream<bool>& end_len_strm,               // in
+            hls::stream<ap_uint<256> >& hash_strm,         // out
+            hls::stream<bool>& end_hash_strm) {            // out
+    internal::sha256_top(msg_strm, len_strm, end_len_strm, // in
+                         hash_strm, end_hash_strm);        // out
 }
 } // namespace security
 } // namespace xf

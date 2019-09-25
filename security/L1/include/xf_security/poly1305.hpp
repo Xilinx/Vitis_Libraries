@@ -33,7 +33,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 /**
  *
@@ -185,7 +185,7 @@ loop_Len:
     }
 }
 
-} // end of namespace details
+} // end of namespace internal
 
 /**
  *
@@ -206,7 +206,7 @@ void poly1305(
     hls::stream<bool>& endLenStrm,
     // stream out
     hls::stream<ap_uint<128> >& tagStrm) {
-    details::poly1305Imp(keyStrm, payloadStrm, lenPldStrm, endLenStrm, tagStrm);
+    internal::poly1305Imp(keyStrm, payloadStrm, lenPldStrm, endLenStrm, tagStrm);
 }
 
 } // end of namespace security

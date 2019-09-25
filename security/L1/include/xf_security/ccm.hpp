@@ -43,7 +43,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 /**
  *
@@ -236,7 +236,8 @@ void aesCtrEncrypt(
     hls::stream<ap_uint<128> >& S0Strm,
     hls::stream<ap_uint<128> >& cipherStrm,
     hls::stream<ap_uint<64> >& lenCphStrm) {
-#pragma HLS allocation instances = aesEncrypt limit = 1 function
+#pragma HLS allocation instances = updateKey limit = 1 function
+#pragma HLS allocation instances = process limit = 1 function
 
     bool end = endLenPldStrm.read();
     xf::security::aesEnc<_keyWidth> cipher;
@@ -413,7 +414,8 @@ void aesCtrDecrypt(
     hls::stream<ap_uint<128> >& S0Strm,
     hls::stream<ap_uint<128> >& cipherStrm,
     hls::stream<ap_uint<64> >& lenCphStrm) {
-#pragma HLS allocation instances = aesEncrypt limit = 1 function
+#pragma HLS allocation instances = updateKey limit = 1 function
+#pragma HLS allocation instances = process limit = 1 function
 
     bool end = endLenPldStrm.read();
     xf::security::aesEnc<_keyWidth> cipher;
@@ -594,7 +596,8 @@ void CBC_MAC(
     // stream out
     hls::stream<ap_uint<8 * _t> >& tagStrm,
     hls::stream<bool>& endTagStrm) {
-#pragma HLS allocation instances = aesEncrypt limit = 1 function
+#pragma HLS allocation instances = updateKey limit = 1 function
+#pragma HLS allocation instances = process limit = 1 function
 
     bool end = endLenStrm.read();
     xf::security::aesEnc<_keyWidth> cipher;
@@ -1039,7 +1042,7 @@ void aesCcmDecrypt(
 
 } // aesCcmDecrypt
 
-} // namespace details
+} // namespace internal
 
 /**
  *
@@ -1082,8 +1085,8 @@ void aes128CcmEncrypt(
     hls::stream<ap_uint<64> >& lenCphStrm,
     hls::stream<ap_uint<8 * _t> >& tagStrm,
     hls::stream<bool>& endTagStrm) {
-    details::aesCcmEncrypt<_t, _q, 128>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
-                                        endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
+    internal::aesCcmEncrypt<_t, _q, 128>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
+                                         endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
 
 } // end aes128CcmEncrypt
 
@@ -1128,8 +1131,8 @@ void aes128CcmDecrypt(
     hls::stream<ap_uint<64> >& lenCphStrm,
     hls::stream<ap_uint<8 * _t> >& tagStrm,
     hls::stream<bool>& endTagStrm) {
-    details::aesCcmDecrypt<_t, _q, 128>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
-                                        endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
+    internal::aesCcmDecrypt<_t, _q, 128>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
+                                         endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
 
 } // end aes128CcmDecrypt
 
@@ -1174,8 +1177,8 @@ void aes192CcmEncrypt(
     hls::stream<ap_uint<64> >& lenCphStrm,
     hls::stream<ap_uint<8 * _t> >& tagStrm,
     hls::stream<bool>& endTagStrm) {
-    details::aesCcmEncrypt<_t, _q, 192>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
-                                        endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
+    internal::aesCcmEncrypt<_t, _q, 192>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
+                                         endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
 
 } // end aes192CcmEncrypt
 
@@ -1220,8 +1223,8 @@ void aes192CcmDecrypt(
     hls::stream<ap_uint<64> >& lenCphStrm,
     hls::stream<ap_uint<8 * _t> >& tagStrm,
     hls::stream<bool>& endTagStrm) {
-    details::aesCcmDecrypt<_t, _q, 192>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
-                                        endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
+    internal::aesCcmDecrypt<_t, _q, 192>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
+                                         endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
 
 } // end aes192CcmDecrypt
 
@@ -1266,8 +1269,8 @@ void aes256CcmEncrypt(
     hls::stream<ap_uint<64> >& lenCphStrm,
     hls::stream<ap_uint<8 * _t> >& tagStrm,
     hls::stream<bool>& endTagStrm) {
-    details::aesCcmEncrypt<_t, _q, 256>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
-                                        endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
+    internal::aesCcmEncrypt<_t, _q, 256>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
+                                         endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
 
 } // end aes256CcmEncrypt
 
@@ -1312,8 +1315,8 @@ void aes256CcmDecrypt(
     hls::stream<ap_uint<64> >& lenCphStrm,
     hls::stream<ap_uint<8 * _t> >& tagStrm,
     hls::stream<bool>& endTagStrm) {
-    details::aesCcmDecrypt<_t, _q, 256>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
-                                        endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
+    internal::aesCcmDecrypt<_t, _q, 256>(payloadStrm, cipherkeyStrm, nonceStrm, ADStrm, lenADStrm, lenPldStrm,
+                                         endLenStrm, cipherStrm, lenCphStrm, tagStrm, endTagStrm);
 
 } // end aes256CcmDecrypt
 

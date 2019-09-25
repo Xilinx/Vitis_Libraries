@@ -105,16 +105,15 @@ static void splitText(hls::stream<ap_uint<512> >& textBlkStrm,
                       hls::stream<ap_uint<512> >& keyBlkStrm,
                       hls::stream<ap_uint<16> >& keyLenStrm,
                       hls::stream<ap_uint<128> >& msgNumStrm,
+                      hls::stream<ap_uint<128> > msgNumStrm1n[_channelNumber],
+                      hls::stream<ap_uint<128> > msgNumStrm2n[_channelNumber],
                       hls::stream<ap_uint<64> >& taskNumStrm,
-                      hls::stream<ap_uint<8> > textStrm[_channelNumber],
-                      hls::stream<bool> endTextStrm[_channelNumber],
+                      hls::stream<ap_uint<256> > textStrm[_channelNumber],
                       hls::stream<ap_uint<8> > cipherkeyStrm[_channelNumber],
                       hls::stream<bool> endCipherkeyStrm[_channelNumber]) {
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
     std::cout << "Entering splitText..." << std::endl;
 #endif
-
-    const unsigned int blockII = 64 / _channelNumber;
 
     // number of message blocks in byte
     ap_uint<128> msgNum = msgNumStrm.read();
@@ -138,10 +137,12 @@ LOOP_BUFF_KEY:
         }
     }
 
+    ap_uint<128> iEnd = msgNum * _channelNumber / 64;
+
 LOOP_MULTI_TASK:
     for (ap_uint<64> n = 0; n < taskNum; n++) {
     LOOP_SEND_KEY:
-        for (unsigned int ch = 0; ch < _channelNumber; ch++) {
+        for (unsigned char ch = 0; ch < _channelNumber; ch++) {
 #pragma HLS unroll
         LOOP_KEY_BYTE:
             for (ap_uint<16> keyPtr = 0; keyPtr < keyLen; keyPtr++) {
@@ -152,37 +153,42 @@ LOOP_MULTI_TASK:
         }
 
     LOOP_END_KEY:
-        for (unsigned int ch = 0; ch < _channelNumber; ch++) {
+        for (unsigned char ch = 0; ch < _channelNumber; ch++) {
 #pragma HLS unroll
             endCipherkeyStrm[ch].write(true);
+        }
+
+    LOOP_SEND_MSGNUM:
+        for (unsigned char ch = 0; ch < _channelNumber; ch++) {
+#pragma HLS unroll
+            msgNumStrm1n[ch].write(msgNum);
+            msgNumStrm2n[ch].write(msgNum);
         }
 
         unsigned char ch = 0;
 
     LOOP_SPLIT_TEXT:
-        for (ap_uint<128> i = 0; i < msgNum * _channelNumber / 64; i++) {
-#pragma HLS pipeline II = blockII
+        for (ap_uint<128> i = 0; i < iEnd; i++) {
+#pragma HLS pipeline II = 1
             // read a text block
             ap_uint<512> textBlk = textBlkStrm.read();
+            ap_uint<256> v[2];
+#pragma HLS array_partition variable = v complete
+            v[1] = textBlk.range(511, 256);
+            v[0] = textBlk.range(255, 0);
 
         LOOP_SEND_TEXT:
-            for (unsigned int i = 0; i < 64 / _channelNumber; i++) {
-#pragma HLS pipeline II = 1
-            LOOP_TEXT_CH:
-                for (unsigned int ch = 0; ch < _channelNumber; ch++) {
+            for (unsigned char n = 0; n < _channelNumber; n++) {
 #pragma HLS unroll
-                    textStrm[ch].write(
-                        textBlk.range(i * 8 + 7 + 64 / _channelNumber * ch * 8, i * 8 + 64 / _channelNumber * ch * 8));
-                    endTextStrm[ch].write(false);
+                if (n >= ch && n < ch + 2) {
+                    textStrm[n].write(v[n & 0x1]);
                 }
             }
-        }
-
-    // send the end flag for current task
-    LOOP_END_TEXT:
-        for (unsigned int ch = 0; ch < _channelNumber; ++ch) {
-#pragma HLS unroll
-            endTextStrm[ch].write(true);
+            if (ch == _channelNumber - 2) {
+                ch = 0;
+            } else {
+                ch += 2;
+            }
         }
     }
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
@@ -195,11 +201,12 @@ template <unsigned int _channelNumber, unsigned int _burstLength>
 static void scanMultiChannel(ap_uint<512>* ptr,
                              hls::stream<ap_uint<8> > cipherkeyStrm[_channelNumber],
                              hls::stream<bool> endCipherkeyStrm[_channelNumber],
-                             hls::stream<ap_uint<8> > textStrm[_channelNumber],
-                             hls::stream<bool> endTextStrm[_channelNumber],
+                             hls::stream<ap_uint<256> > textStrm[_channelNumber],
                              hls::stream<ap_uint<128> >& msgNumStrm,
                              hls::stream<ap_uint<64> >& taskNumStrm,
-                             hls::stream<ap_uint<64> >& taskNumStrm2) {
+                             hls::stream<ap_uint<64> >& taskNumStrm2,
+                             hls::stream<ap_uint<128> > msgNumStrm1n[_channelNumber],
+                             hls::stream<ap_uint<128> > msgNumStrm2n[_channelNumber]) {
 #pragma HLS dataflow
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
     std::cout << "Entering scanMultiChannel..." << std::endl;
@@ -227,21 +234,111 @@ static void scanMultiChannel(ap_uint<512>* ptr,
     readBlock<_burstLength, _channelNumber>(ptr, textBlkStrm, msgNumStrm, msgNumStrm1, taskNumStrm, taskNumStrm1,
                                             taskNumStrm2, keyBlkStrm, keyLenStrm);
 
-    splitText<_channelNumber>(textBlkStrm, keyBlkStrm, keyLenStrm, msgNumStrm1, taskNumStrm1, textStrm, endTextStrm,
-                              cipherkeyStrm, endCipherkeyStrm);
+    splitText<_channelNumber>(textBlkStrm, keyBlkStrm, keyLenStrm, msgNumStrm1, msgNumStrm1n, msgNumStrm2n,
+                              taskNumStrm1, textStrm, cipherkeyStrm, endCipherkeyStrm);
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
     std::cout << "Exiting scanMultiChannel..." << std::endl;
 #endif
 } // end scanMultiChannel
 
+// @brief downsize the 256-bit stream into 8-bit stream
+static void downSizer(hls::stream<ap_uint<256> >& textStrm,
+                      hls::stream<ap_uint<128> >& msgNumStrm,
+                      hls::stream<ap_uint<8> >& byteStrm,
+                      hls::stream<bool>& endByteStrm) {
+#if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
+    std::cout << "Entering downSizer..." << std::endl;
+#endif
+
+    ap_uint<128> msgNum = msgNumStrm.read();
+LOOP_DOWNSIZE:
+    for (ap_uint<128> i = 0; i < msgNum / 32; i++) {
+        ap_uint<256> text = textStrm.read();
+        for (unsigned char n = 0; n < 32; n++) {
+#pragma HLS pipeline II = 1
+            byteStrm.write(text.range(n * 8 + 7, n * 8));
+            endByteStrm.write(false);
+        }
+    }
+    endByteStrm.write(true);
+#if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
+    std::cout << "Exiting downSizer..." << std::endl;
+#endif
+}
+
+// @brief upsize the 8-bit stream into 256-bit stream
+static void upSizer(hls::stream<ap_uint<8> >& byteStrm,
+                    hls::stream<bool>& endByteStrm,
+                    hls::stream<ap_uint<128> >& msgNumStrm,
+                    hls::stream<ap_uint<256> >& textStrm) {
+#if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
+    std::cout << "Entering upSizer..." << std::endl;
+#endif
+
+    bool e = endByteStrm.read();
+    ap_uint<128> msgNum = msgNumStrm.read();
+LOOP_UPSIZE:
+    for (ap_uint<128> i = 0; i < msgNum / 32; i++) {
+        ap_uint<256> text;
+        for (unsigned char n = 0; n < 32; n++) {
+#pragma HLS pipeline II = 1
+            text.range(n * 8 + 7, n * 8) = byteStrm.read();
+            e = endByteStrm.read();
+        }
+        textStrm.write(text);
+    }
+#if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
+    std::cout << "Exiting upSizer..." << std::endl;
+#endif
+}
+
+// @brief rc4 processing core including rc4, donwsizer, and upsizer
+static void rc4Core(hls::stream<ap_uint<8> >& cipherkeyStrm,
+                    hls::stream<bool>& endCipherkeyStrm,
+                    hls::stream<ap_uint<256> >& textInStrm,
+                    hls::stream<ap_uint<128> >& msgNumStrm1,
+                    hls::stream<ap_uint<128> >& msgNumStrm2,
+                    hls::stream<ap_uint<256> >& textOutStrm) {
+#pragma HLS dataflow
+#if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
+    std::cout << "Entering rc4Core..." << std::endl;
+#endif
+
+    hls::stream<ap_uint<8> > byteInStrm;
+#pragma HLS stream variable = byteInStrm depth = 64
+#pragma HLS resource variable = byteInStrm core = FIFO_LUTRAM
+    hls::stream<bool> endByteInStrm;
+#pragma HLS stream variable = endByteInStrm depth = 64
+#pragma HLS resource variable = endByteInStrm core = FIFO_LUTRAM
+
+    hls::stream<ap_uint<8> > byteOutStrm;
+#pragma HLS stream variable = byteOutStrm depth = 64
+#pragma HLS resource variable = byteOutStrm core = FIFO_LUTRAM
+    hls::stream<bool> endByteOutStrm;
+#pragma HLS stream variable = endByteOutStrm depth = 64
+#pragma HLS resource variable = endByteOutStrm core = FIFO_LUTRAM
+
+    // split the 256-bit text block into byte stream
+    downSizer(textInStrm, msgNumStrm1, byteInStrm, endByteInStrm);
+
+    // perform rc4 algorithm
+    xf::security::rc4(cipherkeyStrm, endCipherkeyStrm, byteInStrm, endByteInStrm, byteOutStrm, endByteOutStrm);
+
+    // combine the byte stream into 256-bit text block
+    upSizer(byteOutStrm, endByteOutStrm, msgNumStrm2, textOutStrm);
+#if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
+    std::cout << "Exiting rc4Core..." << std::endl;
+#endif
+}
+
 // @brief cipher mode in parallel
 template <unsigned int _channelNumber>
 static void cipherModeParallel(hls::stream<ap_uint<8> > cipherkeyStrm[_channelNumber],
                                hls::stream<bool> endCipherkeyStrm[_channelNumber],
-                               hls::stream<ap_uint<8> > textInStrm[_channelNumber],
-                               hls::stream<bool> endTextInStrm[_channelNumber],
-                               hls::stream<ap_uint<8> > textOutStrm[_channelNumber],
-                               hls::stream<bool> endTextOutStrm[_channelNumber]) {
+                               hls::stream<ap_uint<256> > textInStrm[_channelNumber],
+                               hls::stream<ap_uint<128> > msgNumStrm1[_channelNumber],
+                               hls::stream<ap_uint<128> > msgNumStrm2[_channelNumber],
+                               hls::stream<ap_uint<256> > textOutStrm[_channelNumber]) {
 #pragma HLS dataflow
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
     std::cout << "Entering cipherModeParallel..." << std::endl;
@@ -251,8 +348,7 @@ LOOP_UNROLL_CORE:
     for (unsigned int m = 0; m < _channelNumber; m++) {
 #pragma HLS unroll
         // XXX cipher mode core is called here
-        xf::security::rc4(cipherkeyStrm[m], endCipherkeyStrm[m], textInStrm[m], endTextInStrm[m], textOutStrm[m],
-                          endTextOutStrm[m]);
+        rc4Core(cipherkeyStrm[m], endCipherkeyStrm[m], textInStrm[m], msgNumStrm1[m], msgNumStrm2[m], textOutStrm[m]);
     }
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
     std::cout << "Exiting cipherModeParallel..." << std::endl;
@@ -264,10 +360,10 @@ template <unsigned int _channelNumber>
 static void cipherModeProcess(hls::stream<ap_uint<64> >& taskNumStrm,
                               hls::stream<ap_uint<8> > cipherkeyStrm[_channelNumber],
                               hls::stream<bool> endCipherkeyStrm[_channelNumber],
-                              hls::stream<ap_uint<8> > textInStrm[_channelNumber],
-                              hls::stream<bool> endTextInStrm[_channelNumber],
-                              hls::stream<ap_uint<8> > textOutStrm[_channelNumber],
-                              hls::stream<bool> endTextOutStrm[_channelNumber]) {
+                              hls::stream<ap_uint<256> > textInStrm[_channelNumber],
+                              hls::stream<ap_uint<128> > msgNumStrm1[_channelNumber],
+                              hls::stream<ap_uint<128> > msgNumStrm2[_channelNumber],
+                              hls::stream<ap_uint<256> > textOutStrm[_channelNumber]) {
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
     std::cout << "Entering cipherModeProcess..." << std::endl;
 #endif
@@ -277,8 +373,8 @@ static void cipherModeProcess(hls::stream<ap_uint<64> >& taskNumStrm,
 // call paralleled cipher mode taskNum times
 LOOP_MULTI_TASK:
     for (ap_uint<64> i = 0; i < taskNum; i++) {
-        cipherModeParallel<_channelNumber>(cipherkeyStrm, endCipherkeyStrm, textInStrm, endTextInStrm, textOutStrm,
-                                           endTextOutStrm);
+        cipherModeParallel<_channelNumber>(cipherkeyStrm, endCipherkeyStrm, textInStrm, msgNumStrm1, msgNumStrm2,
+                                           textOutStrm);
     }
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
     std::cout << "Exiting cipherModeProcess..." << std::endl;
@@ -289,15 +385,13 @@ LOOP_MULTI_TASK:
 template <unsigned int _burstLength, unsigned int _channelNumber>
 static void mergeResult(hls::stream<ap_uint<128> >& msgNumStrm,
                         hls::stream<ap_uint<64> >& taskNumStrm,
-                        hls::stream<ap_uint<8> > textStrm[_channelNumber],
-                        hls::stream<bool> endTextStrm[_channelNumber],
+                        hls::stream<ap_uint<256> > textStrm[_channelNumber],
                         hls::stream<ap_uint<512> >& outStrm,
                         hls::stream<unsigned int>& burstLenStrm) {
 #if !defined(__SYNTHESIS__) && _XF_SECURITY_RC4_DEBUG_ == 1
     std::cout << "Entering mergeResult..." << std::endl;
 #endif
 
-    const unsigned int blockII = 64 / _channelNumber;
     // burst length for each wirte-out operation
     unsigned int burstLen = 0;
 
@@ -310,20 +404,28 @@ static void mergeResult(hls::stream<ap_uint<128> >& msgNumStrm,
     bool e[_channelNumber];
 LOOP_TASK:
     for (ap_uint<64> n = 0; n < taskNum; n++) {
+        unsigned char ch = 0;
+        ap_uint<128> iEnd = msgNum * _channelNumber / 64;
     LOOP_MERGE:
-        for (ap_uint<128> i = 0; i < msgNum * _channelNumber / 64; i++) {
-#pragma HLS pipeline II = blockII
-            ap_uint<512> axiBlock;
-        LOOP_RECV_TEXT:
-            for (unsigned int i = 0; i < 64 / _channelNumber; i++) {
+        for (ap_uint<128> i = 0; i < iEnd; i++) {
 #pragma HLS pipeline II = 1
-            LOOP_EACH_CH:
-                for (unsigned int ch = 0; ch < _channelNumber; ch++) {
+            ap_uint<256> v[2];
+#pragma HLS array_partition variable = v complete
+
+        LOOP_RECV_TEXT:
+            for (unsigned char n = 0; n < _channelNumber; n++) {
 #pragma HLS unroll
-                    axiBlock.range(i * 8 + 7 + 64 / _channelNumber * ch * 8, i * 8 + 64 / _channelNumber * ch * 8) =
-                        textStrm[ch].read();
-                    e[ch] = endTextStrm[ch].read();
+                if (n >= ch && n < ch + 2) {
+                    v[n & 0x1] = textStrm[n].read();
                 }
+            }
+            ap_uint<512> axiBlock;
+            axiBlock.range(511, 256) = v[1];
+            axiBlock.range(255, 0) = v[0];
+            if (ch == _channelNumber - 2) {
+                ch = 0;
+            } else {
+                ch += 2;
             }
 
             // write-out a AXI block data (4 channels)
@@ -335,12 +437,6 @@ LOOP_TASK:
             } else {
                 burstLen++;
             }
-        }
-
-        // remove the end flag for each task
-        for (unsigned int i = 0; i < _channelNumber; i++) {
-#pragma HLS unroll
-            e[i] = endTextStrm[i].read();
         }
     }
 
@@ -384,7 +480,7 @@ static void writeOut(hls::stream<unsigned int>& burstLenStrm,
 extern "C" void rc4EncryptKernel_4(ap_uint<512> inputData[(1 << 30) + 100], ap_uint<512> outputData[1 << 30]) {
 #pragma HLS dataflow
 
-    const unsigned int _channelNumber = 16;
+    const unsigned int _channelNumber = 12;
     const unsigned int _burstLength = 128;
     const unsigned int bufferDepth = _burstLength * 2;
 
@@ -410,41 +506,40 @@ extern "C" void rc4EncryptKernel_4(ap_uint<512> inputData[(1 << 30) + 100], ap_u
     hls::stream<bool> endCipherkeyStrm[_channelNumber];
 #pragma HLS stream variable = endCipherkeyStrm depth = 512
 #pragma HLS resource variable = endCipherkeyStrm core = FIFO_LUTRAM
-    hls::stream<ap_uint<8> > textInStrm[_channelNumber];
-#pragma HLS stream variable = textInStrm depth = 128
+    hls::stream<ap_uint<256> > textInStrm[_channelNumber];
+#pragma HLS stream variable = textInStrm depth = 2
 #pragma HLS resource variable = textInStrm core = FIFO_LUTRAM
-    hls::stream<bool> endTextInStrm[_channelNumber];
-#pragma HLS stream variable = endTextInStrm depth = 128
-#pragma HLS resource variable = endTextInStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<128> > msgNumStrm;
 #pragma HLS stream variable = msgNumStrm depth = 4
 #pragma HLS resource variable = msgNumStrm core = FIFO_LUTRAM
+    hls::stream<ap_uint<128> > msgNumStrm1n[_channelNumber];
+#pragma HLS stream variable = msgNumStrm1n depth = 4
+#pragma HLS resource variable = msgNumStrm1n core = FIFO_LUTRAM
+    hls::stream<ap_uint<128> > msgNumStrm2n[_channelNumber];
+#pragma HLS stream variable = msgNumStrm2n depth = 4
+#pragma HLS resource variable = msgNumStrm2n core = FIFO_LUTRAM
     hls::stream<ap_uint<64> > taskNumStrm;
 #pragma HLS stream variable = taskNumStrm depth = 4
 #pragma HLS resource variable = taskNumStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<64> > taskNumStrm2;
 #pragma HLS stream variable = taskNumStrm2 depth = 4
 #pragma HLS resource variable = taskNumStrm2 core = FIFO_LUTRAM
-    hls::stream<ap_uint<8> > textOutStrm[_channelNumber];
-#pragma HLS stream variable = textOutStrm depth = 128
+    hls::stream<ap_uint<256> > textOutStrm[_channelNumber];
+#pragma HLS stream variable = textOutStrm depth = 2
 #pragma HLS resource variable = textOutStrm core = FIFO_LUTRAM
-    hls::stream<bool> endTextOutStrm[_channelNumber];
-#pragma HLS stream variable = endTextOutStrm depth = 128
-#pragma HLS resource variable = endTextOutStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<512> > outStrm("outStrm");
 #pragma HLS stream variable = outStrm depth = bufferDepth
 #pragma HLS resource variable = outStrm core = FIFO_BRAM
     hls::stream<unsigned int> burstLenStrm;
 #pragma HLS stream variable = burstLenStrm depth = 4
 
-    scanMultiChannel<_channelNumber, _burstLength>(inputData, cipherkeyStrm, endCipherkeyStrm, textInStrm,
-                                                   endTextInStrm, msgNumStrm, taskNumStrm, taskNumStrm2);
+    scanMultiChannel<_channelNumber, _burstLength>(inputData, cipherkeyStrm, endCipherkeyStrm, textInStrm, msgNumStrm,
+                                                   taskNumStrm, taskNumStrm2, msgNumStrm1n, msgNumStrm2n);
 
-    cipherModeProcess<_channelNumber>(taskNumStrm2, cipherkeyStrm, endCipherkeyStrm, textInStrm, endTextInStrm,
-                                      textOutStrm, endTextOutStrm);
+    cipherModeProcess<_channelNumber>(taskNumStrm2, cipherkeyStrm, endCipherkeyStrm, textInStrm, msgNumStrm1n,
+                                      msgNumStrm2n, textOutStrm);
 
-    mergeResult<_burstLength, _channelNumber>(msgNumStrm, taskNumStrm, textOutStrm, endTextOutStrm, outStrm,
-                                              burstLenStrm);
+    mergeResult<_burstLength, _channelNumber>(msgNumStrm, taskNumStrm, textOutStrm, outStrm, burstLenStrm);
 
     writeOut<_burstLength>(burstLenStrm, outStrm, outputData);
 

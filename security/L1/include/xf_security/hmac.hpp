@@ -36,7 +36,7 @@
 namespace xf {
 namespace security {
 
-namespace detail {
+namespace internal {
 // typedef ap_uint<64> u64;
 
 /**
@@ -629,21 +629,47 @@ void hmacImp(hls::stream<ap_uint<keyW> >& keyStrm,
 #endif
 }
 
-} // end of namespace detail
+} // end of namespace internal
 
 /**
- * @brief compute hmac value according to specific hash function and input data.
+ * @brief Compute HMAC value according to specified hash function and input data.
+ *
+ *  keyW, keyStrm, keyLenStrm, msgW, msgStrm, and msgLenStrm would be used as
+ *  parameters or input for the hash function, so they need to align with the API
+ *  of the hash function.
+ *
+ *  Hash function is wrapped to a template struct which must have a static function named `hash`.
+ *
+ *  Take md5 for example::
+ *
+ *  template <int msgW, int lW, int hshW>
+ *  struct md5_wrapper {
+ *      static void hash(hls::stream<ap_uint<msgW> >& msgStrm,
+ *                       hls::stream<lW>& lenStrm,
+ *                       hls::stream<bool>& eLenStrm,
+ *                       hls::stream<ap_uint<hshW> >& hshStrm,
+ *                       hls::stream<bool>& eHshStrm) {
+ *          xf::security::md5(msgStrm, lenStrm, eLenStrm, hshStrm, eHshStrm);
+ *      }
+ *  };
+ *
+ *  then use hmac like this,
+ *
+ *   xf::security::hmac<32, 32, 64, 128, 64, md5_wrapper>(...);
  *
  * @tparam keyW the width of input stream keyStrm.
  * @tparam msgW the width of input stream msgStrm.
- * @tparam blockSize  the block size(bytes) of the underlying hash function (e.g. 64 bytes for md5 and SHA-1).
+ * @tparam blockSize  the block size (in bytes) of the underlying hash function (e.g. 64 bytes for md5 and SHA-1).
  * @tparam hshW the width of output stream hshStrm.
- * @tparam F hash function, iW is its input stream's  width and oW is output stream's width.
+ * @tparam F a wrapper of hash function which must have a static fucntion named `hash`.
  *
  * @param keyStrm  input key stream.
- * @param keyLenStrm  the length stream of  input key stream.
+ * @param keyLenStrm  the length stream of input key stream. The length is counted in bytes, not in keyW bits.
+ *  That is to say, hmac reads keyLen*8 bits(not keyLen*keyW bits) from keyStrm as a key.
+ *  For example, if a key contains 3 bytes and keyW=32, then keyLen=3.
+ *  The lowest 3 bytes in the data which is read from keyStrm are key and the highest one byte is discarded.
  * @param msgStrm  input meassge stream.
- * @param msgLenStrm  the length stream of  input message stream.
+ * @param msgLenStrm  the length stream of input message stream.
  * @param eLenStrm  the end flag of length stream.
  * @param hshStrm output stream.
  * @param eHshStrm end flag of output stream hshStrm.
@@ -653,12 +679,12 @@ template <int keyW, int msgW, int lW, int hshW, int blockSize, template <int iW,
 void hmac(hls::stream<ap_uint<keyW> >& keyStrm,
           hls::stream<ap_uint<lW> >& keyLenStrm,
           hls::stream<ap_uint<msgW> >& msgStrm,
-          hls::stream<ap_uint<lW> >& lenStrm,
+          hls::stream<ap_uint<lW> >& msgLenStrm,
           hls::stream<bool>& eLenStrm,
           hls::stream<ap_uint<hshW> >& hshStrm,
           hls::stream<bool>& eHshStrm) {
-    detail::hmacImp<keyW, msgW, lW, hshW, blockSize, F>(keyStrm, keyLenStrm, msgStrm, lenStrm, eLenStrm, hshStrm,
-                                                        eHshStrm);
+    internal::hmacImp<keyW, msgW, lW, hshW, blockSize, F>(keyStrm, keyLenStrm, msgStrm, msgLenStrm, eLenStrm, hshStrm,
+                                                          eHshStrm);
 }
 } // end of namespace security
 } // end of namespace xf

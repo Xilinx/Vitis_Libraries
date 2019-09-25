@@ -18,13 +18,16 @@
 #include "xf_security/gcm.hpp"
 
 void test(hls::stream<ap_uint<128> >& ciphertext,
-          hls::stream<bool>& ciphertext_e,
           hls::stream<ap_uint<128> >& cipherkey,
-          hls::stream<ap_uint<96> >& initialization_vector,
-          hls::stream<ap_uint<128> >& AAD_strm,
+          hls::stream<ap_uint<96> >& IV,
+          hls::stream<ap_uint<128> >& AAD,
+          hls::stream<ap_uint<64> >& AAD_length,
+          hls::stream<ap_uint<64> >& ciphertext_length,
+          hls::stream<bool>& end_length,
           hls::stream<ap_uint<128> >& plaintext,
-          hls::stream<bool>& plaintext_e,
-          hls::stream<ap_uint<128> >& tag_strm) {
-    xf::security::aes128GcmDecrypt(ciphertext, ciphertext_e, cipherkey, initialization_vector, AAD_strm, plaintext,
-                                   plaintext_e, tag_strm);
+          hls::stream<ap_uint<64> >& plaintext_length,
+          hls::stream<ap_uint<128> >& tag,
+          hls::stream<bool>& end_tag) {
+    xf::security::aes128GcmDecrypt(ciphertext, cipherkey, IV, AAD, AAD_length, ciphertext_length, end_length, plaintext,
+                                   plaintext_length, tag, end_tag);
 }

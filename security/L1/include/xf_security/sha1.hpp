@@ -41,7 +41,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 // @brief Processing block
 struct blockType {
@@ -596,11 +596,11 @@ LOOP_SHA1_MAIN:
 
 } // end SHA1Digest
 
-} // end namespace details
+} // end namespace internal
 
 /**
  *
- * @brief Top of SHA-1.
+ * @brief Top function of SHA-1.
  *
  * The algorithm reference is : "Secure Hash Standard", which published by NIST in February 2012.
  * The implementation dataflows the pre-processing part and message digest part.
@@ -627,7 +627,7 @@ void sha1(
 #pragma HLS dataflow
 
     // 512-bit processing block stream
-    hls::stream<details::blockType> blk_strm("blk_strm");
+    hls::stream<internal::blockType> blk_strm("blk_strm");
 #pragma HLS stream variable = blk_strm depth = 32
 #pragma HLS resource variable = blk_strm core = FIFO_LUTRAM
 
@@ -659,16 +659,16 @@ void sha1(
 #pragma HLS resource variable = w_strm core = FIFO_LUTRAM
 
     // padding and appending message words into blocks
-    details::preProcessing(msg_strm, len_strm, end_len_strm, blk_strm, nblk_strm, end_nblk_strm);
+    internal::preProcessing(msg_strm, len_strm, end_len_strm, blk_strm, nblk_strm, end_nblk_strm);
 
     // duplicate number of block stream and its end flag stream
-    details::dup_strm<64>(nblk_strm, end_nblk_strm, nblk_strm1, end_nblk_strm1, nblk_strm2, end_nblk_strm2);
+    internal::dup_strm<64>(nblk_strm, end_nblk_strm, nblk_strm1, end_nblk_strm1, nblk_strm2, end_nblk_strm2);
 
     // generate the message schedule in stream
-    details::generateMsgSchedule<w>(blk_strm, nblk_strm1, end_nblk_strm1, w_strm);
+    internal::generateMsgSchedule<w>(blk_strm, nblk_strm1, end_nblk_strm1, w_strm);
 
     // digest precessing blocks into hash value
-    details::SHA1Digest<w>(w_strm, nblk_strm2, end_nblk_strm2, digest_strm, end_digest_strm);
+    internal::SHA1Digest<w>(w_strm, nblk_strm2, end_nblk_strm2, digest_strm, end_digest_strm);
 
 } // end sha1
 

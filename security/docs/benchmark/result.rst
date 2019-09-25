@@ -15,21 +15,9 @@
 
 .. result:
 
-*******************************************************
-Benchmark of AES256 Encryption/Decryption in CBC Mode
-*******************************************************
-
-Overview
-=========
-
-This is a benchmark of aes256CbcEncrypt and aes256CbcDecrypt function using the SDx environment.
-The underlying device is Alveo U250.
-
-
-Highlights
-==========
-
-The performance of aes256CbcEncrypt and aes256CbcDecrypt is shown in the table blow.
+*****************
+Benchmark Result
+*****************
 
 
 ===========================
@@ -37,33 +25,61 @@ aes256CbcDecrypt throughput
 ===========================
 
 To profile performance of aes256CbcDecrypt, we prepare a datapack of 32K messages, each message is 1Kbyte. 
-All these are decrypted in using AES256 algorithm in CBC mode, each message uses a different key.
-We test aes256CbCDecrypt kernel with 10 datapack pipeline, its End to End performance is 590MB/s.
-Kernel utilization is shown in table below. 
+We have 1 kernels, each kernel has 4 PUs.
+Kernel utilization and throughput is shown in table below. 
 
-=========== ================ ================ ============== ======= ========== ============
+=========== ================ ================ ============== ======= ========== =============
  Frequency        LUT               REG            BRAM       URAM       DSP     Throughput
-=========== ================ ================ ============== ======= ========== ============
- 218MHz      245,131(10.6%)   326,430(10.2%)   1,350(56.3%)    0      29(0.2%)    590MB/s
-=========== ================ ================ ============== ======= ========== ============
+=========== ================ ================ ============== ======= ========== =============
+ 286MHz      203,595(11.8%)   312,900(9.1%)    761(28.3.0%)    0      29(0.3%)    4.7GB/s
+=========== ================ ================ ============== ======= ========== =============
+
 
 
 ===========================
 aes256CbcEncrypt throughput
 ===========================
 
-To profile performance of aes256CbcEncrypt, we prepare a datapack of 48K messages, each message is 1Kbyte. 
-All these are encrypted in using AES256 algorithm in CBC mode, each message uses a different key.
-We test aes256CbCDecrypt kernel with 10 datapack pipeline, its End to End performance is 708MB/s.
-Kernel utilization is shown in table below. 
-
+To profile performance of aes256CbcEncrypt, we prepare a datapack of 96K messages, each message is 1Kbyte. 
+We have 4 kernels, each kernel has 12 PUs.
+Kernel utilization and throughput is shown in table below. 
 
 =========== ================ ================ ============== ======= ========== =============
- Frequency        LUT               REG            BRAM       URAM       DSP     Throughtput
+ Frequency        LUT               REG            BRAM       URAM       DSP     Throughput
 =========== ================ ================ ============== ======= ========== =============
- 218MHz      288,096(12.4%)   358,507(11.2%)   1,056(44.0%)    0      44(0.4%)    780MB/s
+ 224MHz     1,059,093(61.3%) 1,010,145(34.9%)  654(24.3%)       0     152(1.3%)    5.5GB/s
 =========== ================ ================ ============== ======= ========== =============
 
 
-.. Notice:: This benchmark is not finished, yet. It will update lately.
+
+==============
+rc4 throughput
+==============
+
+To profile performance of rc4, we prepare a datapack of 24 messages, each message is 2Mbyte.
+We have 4 kernels, each kernel has 12 PUs.
+Kernel utilization and throughput is shown in table below. 
+
+=========== ================ ================ ============== ======= ========== =============
+ Frequency        LUT               REG            BRAM       URAM       DSP     Throughput
+=========== ================ ================ ============== ======= ========== =============
+ 147MHz     1,126,259(73.0%) 1,120,505(34.9%)   640 (44.0%)    0     216(1.8%)    3.0GB/s
+=========== ================ ================ ============== ======= ========== =============
+
+
+
+===================
+hmacSha1 throughput
+===================
+
+To profile performance of hmacSha1, we prepare a datapack of 24 messages, each message is 2Mbyte.
+We have 4 kernels, each kernel has 8 PUs.
+Kernel utilization and throughput is shown in table below. 
+
+=========== ================ ================ ============== ======= ========== =============
+ Frequency        LUT               REG            BRAM       URAM       DSP     Throughput
+=========== ================ ================ ============== ======= ========== =============
+ 281MHz      648,274(37.5%)   1,074,803(31.1%)   726 (27.0%)    0      56(0.5%)    2.1GB/s
+=========== ================ ================ ============== ======= ========== =============
+
 

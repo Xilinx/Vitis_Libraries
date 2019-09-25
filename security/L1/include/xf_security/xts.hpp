@@ -40,7 +40,7 @@
 
 namespace xf {
 namespace security {
-namespace details {
+namespace internal {
 
 /**
  *
@@ -336,7 +336,7 @@ xf:;
 
 } // end aesXtsDecrypt
 
-} // namespace details
+} // namespace internal
 
 /**
  *
@@ -366,8 +366,8 @@ static void aes128XtsEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertextStrm,
     hls::stream<bool>& endCiphertextStrm) {
-    details::aesXtsEncrypt<128>(plaintextStrm, endPlaintextStrm, lenStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
-                                endCiphertextStrm);
+    internal::aesXtsEncrypt<128>(plaintextStrm, endPlaintextStrm, lenStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
+                                 endCiphertextStrm);
 
 } // end aesXts128Encrypt
 
@@ -399,8 +399,8 @@ static void aes128XtsDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintextStrm,
     hls::stream<bool>& endPlaintextStrm) {
-    details::aesXtsDecrypt<128>(ciphertextStrm, endCiphertextStrm, lenStrm, cipherkeyStrm, IVStrm, plaintextStrm,
-                                endPlaintextStrm);
+    internal::aesXtsDecrypt<128>(ciphertextStrm, endCiphertextStrm, lenStrm, cipherkeyStrm, IVStrm, plaintextStrm,
+                                 endPlaintextStrm);
 
 } // end aes128XtsDecrypt
 
@@ -432,8 +432,8 @@ static void aes256XtsEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertextStrm,
     hls::stream<bool>& endCiphertextStrm) {
-    details::aesXtsEncrypt<256>(plaintextStrm, endPlaintextStrm, lenStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
-                                endCiphertextStrm);
+    internal::aesXtsEncrypt<256>(plaintextStrm, endPlaintextStrm, lenStrm, cipherkeyStrm, IVStrm, ciphertextStrm,
+                                 endCiphertextStrm);
 
 } // end aesXts256Encrypt
 
@@ -465,8 +465,8 @@ static void aes256XtsDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintextStrm,
     hls::stream<bool>& endPlaintextStrm) {
-    details::aesXtsDecrypt<256>(ciphertextStrm, endCiphertextStrm, lenStrm, cipherkeyStrm, IVStrm, plaintextStrm,
-                                endPlaintextStrm);
+    internal::aesXtsDecrypt<256>(ciphertextStrm, endCiphertextStrm, lenStrm, cipherkeyStrm, IVStrm, plaintextStrm,
+                                 endPlaintextStrm);
 
 } // end aes256XtsDecrypt
 
