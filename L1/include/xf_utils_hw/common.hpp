@@ -43,7 +43,7 @@ struct PowerOf2 {
 /**
  * @struct GCD common.hpp "xf_utils_hw/common.hpp"
  * @brief Template to calculate Greatest Common Divisor (GCD) of two integers.
- * @tparam _A integer
+ * @tparam _A an integer
  * @tparam _B the other integer
  */
 template <int _A, int _B>
@@ -59,7 +59,7 @@ struct GCD<_A, 0> {
 /**
  * @struct LCM common.hpp "xf_utils_hw/common.hpp"
  * @brief Template to calculate Least Common Multiple(LCM) of two integers.
- * @tparam _A integer
+ * @tparam _A an integer
  * @tparam _B the other integer
  */
 template <int _A, int _B>

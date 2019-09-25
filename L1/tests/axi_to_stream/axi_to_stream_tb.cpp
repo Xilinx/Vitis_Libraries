@@ -33,7 +33,7 @@ void top_axi_to_stream(ap_uint<AXI_WIDTH> rbuf[BUF_DEPTH],
     // clang-format off
     ;
 #pragma HLS INTERFACE m_axi port = rbuf offset = slave bundle = gmem_in1 \
-    latency = 8 num_read_outstanding = 32 max_read_burst_length = 32
+    latency = 125 num_read_outstanding = 32 max_read_burst_length = 32
     // clang-format on
 
     xf::common::utils_hw::axiToStream<BURST_LENTH>(rbuf, num, ostrm, e_ostrm);

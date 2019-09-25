@@ -27,7 +27,7 @@ The :ref:`streamDiscard <cid-xf::common::utils_hw::streamDiscard>` module
 works as a sink of stream(s).
 It basically reads all inputs and discard them.
 Users can use :ref:`streamOneToN <guide-stream_one_to_n>`'s ``TagSelectT``
-algorithm to route data to this module to do dynamic data removal.
+option to route data to this module to do dynamic data removal.
 
 Three variants have been implemented, handling normal stream or synchronized
 streams.

@@ -33,19 +33,19 @@ namespace common {
 namespace utils_hw {
 
 /**
- * @brief combine multiple streams into one, shift selected streams to LSB side.
+ * @brief Combine multiple streams into one, shift selected streams to LSB side.
  *
  * The first selected stream will be copied to LSB. The data within the stream
  * will not change the bit-order.
  *
  * @tparam _WIn input stream width.
- * @tparam _NStrm number of output stream.
+ * @tparam _NStrm number of input streams.
  *
  * @param select_cfg one-hot encoded selection, LSB for istrms[0].
- * @param istrms output data streams.
+ * @param istrms input data streams.
  * @param e_istrm end flag for all input streams.
- * @param ostrm input data stream.
- * @param e_ostrm end flag stream for input data.
+ * @param ostrm output data stream.
+ * @param e_ostrm end flag stream for output data.
  * @param alg algorithm selector for this function.
  */
 template <int _WIn, int _NStrm>
@@ -60,19 +60,19 @@ void streamCombine(hls::stream<ap_uint<_NStrm> >& select_cfg,
                    LSBSideT alg);
 
 /**
- * @brief combine multiple streams into one, shift selected streams to MSB side.
+ * @brief Combine multiple streams into one, shift selected streams to MSB side.
  *
  * The first selected stream will be copied to MSB. The data within the stream
  * will not change the bit-order.
  *
  * @tparam _WIn input stream width.
- * @tparam _NStrm number of output stream.
+ * @tparam _NStrm number of input streams.
  *
  * @param select_cfg one-hot encoded selection, LSB for istrms[0].
- * @param istrms output data streams.
+ * @param istrms input data streams.
  * @param e_istrm end flag for all input streams.
- * @param ostrm input data stream.
- * @param e_ostrm end flag stream for input data.
+ * @param ostrm output data stream.
+ * @param e_ostrm end flag stream for output data.
  * @param alg algorithm selector for this function.
  */
 
@@ -88,7 +88,7 @@ void streamCombine(hls::stream<ap_uint<_NStrm> >& select_cfg,
                    MSBSideT alg);
 
 /**
- * @brief combine multiple streams into a wide one, align to LSB.
+ * @brief Combine multiple streams into a wide one, align to LSB.
  *
  * The first selected stream will be copied to LSB. The data within the stream
  * will not change the bit-order.
@@ -97,7 +97,7 @@ void streamCombine(hls::stream<ap_uint<_NStrm> >& select_cfg,
  *
  * @tparam _WIn input stream width.
  * @tparam _WOut output stream width, should be no less than _WIn * _NStrm.
- * @tparam _NStrm number of output stream.
+ * @tparam _NStrm number of input streams.
  *
  * @param istrms input data streams.
  * @param e_istrm end flag for all input streams.
@@ -115,7 +115,7 @@ void streamCombine(hls::stream<ap_uint<_WIn> > istrms[_NStrm],
                    LSBSideT alg);
 
 /**
- * @brief combine multiple streams into a wide one, align to MSB.
+ * @brief Combine multiple streams into a wide one, align to MSB.
  *
  * The first selected stream will be copied to MSB. The data within the stream
  * will not change the bit-order.
@@ -124,7 +124,7 @@ void streamCombine(hls::stream<ap_uint<_WIn> > istrms[_NStrm],
  *
  * @tparam _WIn input stream width.
  * @tparam _WOut output stream width, should be no less than _WIn * _NStrm.
- * @tparam _NStrm number of output stream.
+ * @tparam _NStrm number of input streams.
  *
  * @param istrms input data streams.
  * @param e_istrm end flag for all input streams.

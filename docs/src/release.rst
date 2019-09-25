@@ -28,5 +28,5 @@ Release Note
 The 1.0 release provides a range of HLS primitives for:
 
  * Work distribution and result collection in different algorithms.
- * Stream manipulation, including combination, duplication, synchronizaton, shuffle, etc.
+ * Stream manipulation, including combination, duplication, synchronization, shuffle, etc.
  * Updating URAM array in higher frequency.

@@ -31,7 +31,7 @@ implemented as :ref:`streamSync <cid-xf::common::utils_hw::streamSync>` function
    :width: 80%
    :align: center
 
-The streamSync synchronizes all streams by sharing a same end-flag stream. Each input data stream has an end-flag stream. After sync, all ouput data streams share one end-flag stream and each output stream is a duplicate of an input stream. That is to say, before output an end-flag, each ouput stream should output a data from corresponding input stream.
+The streamSync synchronizes all streams by sharing a same end-flag stream. Each input data stream has an end-flag stream. After sync, all output streams share one end-flag stream, and each of them is a duplicate of an input stream. That is to say, before output an end-flag, each ouput stream should output a data from corresponding input stream.
 
 .. CAUTION::
   Applicable conditions.

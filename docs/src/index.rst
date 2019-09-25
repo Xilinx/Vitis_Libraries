@@ -35,13 +35,6 @@ along stream-based transfer.
 
    guide/toc.rst
 
-.. toctree::
-   :caption: Benchmark Result
-   :maxdepth: 1
-
-   benchmark/result.rst
-
-
 Index
 -----
 

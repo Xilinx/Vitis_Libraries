@@ -23,7 +23,7 @@ Internals of axiToMultiStream
    :hidden:
    :maxdepth: 2
 
-This document describes the structure and execution of axiToMultiStream,
+This document describes the structure and execution flow of axiToMultiStream,
 implemented as :ref:`axiToMultiStream <cid-xf::common::utils_hw::axiToMultiStream>` function.
 
 .. image:: /images/axi_to_multi_stream.png
@@ -31,9 +31,9 @@ implemented as :ref:`axiToMultiStream <cid-xf::common::utils_hw::axiToMultiStrea
    :width: 80%
    :align: center
 
-The axiToMultiStream primitive non-blocking and Round Robin load multiple categories of data from one AXI master to streams.
+The axiToMultiStream primitive is non-blocking and uses Round Robin to load multiple categories of data from one AXI master into multiple streams.
 For example, in the implementation of one AXI port loading three types of data, the data of each type could be tightly packed.
-Each type of data's length should be in number of char. The three types of data width could be unaligned or aligned,
+Each type of data's length should be multiple of 8 bits. The three types of data width could be unaligned or aligned,
 e.g. three types of data compressed in one binary files. AXI port is assumed to have width as multiple of 8-bit char.
 
 .. CAUTION::
@@ -48,11 +48,8 @@ e.g. three types of data compressed in one binary files. AXI port is assumed to 
 
 This primitive has two modules working simultaneously in side.
 
-1. ``read_to_vec_stream``: read AXI master to three bram buffers.
-   and load the buffers in non-blocking and round robin way to ``_WAxi`` width stream.
+1. ``read_to_vec_stream``: It reads AXI master to three BRAM buffers,
+   and loads the buffers in non-blocking and round robin way to ``_WAxi`` width stream.
 
-2. ``split_vec_to_aligned``: It takes the ``_WAxi`` width stream, aligned to the stream width, then split the _WAxi width data to
-   stream width and output
-
-
+2. ``split_vec_to_aligned``: It takes the ``_WAxi`` width stream, aligns to the stream width, and splits the _WAxi width data to stream width and output the stream.
 

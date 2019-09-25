@@ -20,7 +20,7 @@ Internals of streamNToOne
 *****************************************
 
 The :ref:`streamNToOne <cid-xf::common::utils_hw::streamNToOne>` API
-is designed for collecing data from multiple processor units.
+is designed for collecting data from multiple processor units.
 Three different algorithms have been implemented, ``RoundRobinT``,
 ``LoadBalanceT`` and ``TagSelectT``.
 
@@ -53,12 +53,11 @@ an array of units.
 Vector Output
 ~~~~~~~~~~~~~
 
-
 The design of the primitive includes 3 modules:
 
-1. fetch: attempt to read data from the n input streams.
+1. fetch: attempt to read data from the `n` input streams.
 
-2. vectorize: Inner buffers as wide as the least common multiple of  ``N * Win``
+2. vectorize: Inner buffers as wide as the least common multiple of ``N * Win``
    and ``Wout`` are used to combine the inputs into vectors.
 
 3. emit: read vectorized data and emit to output stream.
@@ -101,7 +100,7 @@ Vector Output
 
 The design of the primitive includes 3 modules:
 
-1. fetch: attempt to read data from the n input streams.
+1. fetch: attempt to read data from the `n` input streams.
 
 2. vectorize: Inner buffers as wide as the least common multiple of  ``N * Win``
    and ``Wout`` are used to combine the inputs into vectors.

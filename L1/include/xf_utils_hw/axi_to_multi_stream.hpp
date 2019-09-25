@@ -184,7 +184,9 @@ template <int _WAxi, int _BurstLen, int _NT>
 void read_to_vec_stream(ap_uint<_WAxi>* rbuf,
                         hls::stream<ap_uint<_WAxi> > vec_strm[_NT],
                         const int len[_NT],
-                        const int offset[_NT]) {
+                        const int offset[_NT],
+                        hls::stream<int> len_copy[_NT],
+                        hls::stream<int> off_copy[_NT]) {
     const int scal_char = _WAxi / 8;
     int len_vec[_NT];                       // length for one type vector, by width of Axi
     int pos_vec[_NT];                       // current position for one type vec, by width of Axi
@@ -213,12 +215,15 @@ INIT0:
     for (int t = 0; t < _NT; t++) {
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = 1
 #pragma HLS PIPELINE II = 1
-        off_ali[t] = (offset[t]) & (scal_char - 1); // scal_char is always 2^N
+        int o = (offset[t]) & (scal_char - 1); // scal_char is always 2^N
+        off_ali[t] = o;
+        off_copy[t].write(o);
     }
 INIT1:
     for (int t = 0; t < _NT; t++) {
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = 1
 #pragma HLS PIPELINE II = 1
+        len_copy[t].write(len[t]);
         len_vec[t] = (len[t] + off_ali[t] + scal_char - 1) / scal_char;
         off_axi[t] = (offset[t] + scal_char - 1) / scal_char - ((off_ali[t]) ? 1 : 0);
         pos_vec[t] = 0;
@@ -250,11 +255,13 @@ ROUND_ROBIN:
 
 template <int _WAxi, typename _TStrm, int scal_vec>
 void split_vec_to_aligned_duplicate(hls::stream<ap_uint<_WAxi> >& vec_strm,
-                                    const int len,
                                     const int scal_char,
-                                    const int offset,
+                                    hls::stream<int>& len_copy,
+                                    hls::stream<int>& off_copy,
                                     hls::stream<_TStrm>& r_strm,
                                     hls::stream<bool>& e_strm) {
+    const int len = len_copy.read();
+    const int offset = off_copy.read();
     const int nread = (len + offset + scal_char - 1) / scal_char;
     // n read times except the first read, n_read+1 = total read times
     int cnt_r = nread - 1;
@@ -359,21 +366,16 @@ void axiToMultiStream(ap_uint<_WAxi>* rbuf,
     const int scal_vec1 = _WAxi / (8 * sizeof(_TStrm1));
     const int scal_vec2 = _WAxi / (8 * sizeof(_TStrm2));
 
-    // Copy parameter to local
-    int off_ali[3];
-#pragma HLS ARRAY_PARTITION variable = off_ali complete
-    for (int t = 0; t < 3; t++) {
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = 1
-#pragma HLS PIPELINE II = 1
-        off_ali[t] = (offset[t]) & (scal_char - 1); // scal_char is always 2^N
-    }
+    // Copy parameter to local, off will be rounded with scal_char
+    hls::stream<int> off_copy[3];
+    hls::stream<int> len_copy[3];
 
-    details::read_to_vec_stream<_WAxi, _BurstLen, 3>(rbuf, vec_strm, len, offset);
-    details::split_vec_to_aligned_duplicate<_WAxi, _TStrm0, scal_vec0>(vec_strm[0], len[0], scal_char, off_ali[0],
+    details::read_to_vec_stream<_WAxi, _BurstLen, 3>(rbuf, vec_strm, len, offset, len_copy, off_copy);
+    details::split_vec_to_aligned_duplicate<_WAxi, _TStrm0, scal_vec0>(vec_strm[0], scal_char, len_copy[0], off_copy[0],
                                                                        ostrm0, e_ostrm0);
-    details::split_vec_to_aligned_duplicate<_WAxi, _TStrm1, scal_vec1>(vec_strm[1], len[1], scal_char, off_ali[1],
+    details::split_vec_to_aligned_duplicate<_WAxi, _TStrm1, scal_vec1>(vec_strm[1], scal_char, len_copy[1], off_copy[1],
                                                                        ostrm1, e_ostrm1);
-    details::split_vec_to_aligned_duplicate<_WAxi, _TStrm2, scal_vec2>(vec_strm[2], len[2], scal_char, off_ali[2],
+    details::split_vec_to_aligned_duplicate<_WAxi, _TStrm2, scal_vec2>(vec_strm[2], scal_char, len_copy[2], off_copy[2],
                                                                        ostrm2, e_ostrm2);
 }
 
