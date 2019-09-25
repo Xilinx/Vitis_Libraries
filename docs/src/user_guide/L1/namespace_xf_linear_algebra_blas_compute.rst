@@ -1,8 +1,8 @@
-.. index:: pair: namespace; xf::linear_algebra::blas
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas:
+.. index:: pair: namespace; xf::blas
+.. _doxid-namespacexf_1_1blas:
 
-namespace xf::linear_algebra::blas
-==================================
+namespace xf::blas
+==================
 
 .. toctree::
 	:hidden:
@@ -15,28 +15,20 @@ Overview
 
 
 
-.. index:: pair: variable; t_LogParEntries
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de:
-.. index:: pair: variable; l_x
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1aa6d3a215d29893c5e08ed5eabc531615:
-.. index:: pair: variable; l_y
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1aae9defdf0f516e81aa3eb5061e592c55:
 
 
 
 
 .. index:: pair: function; gbmv
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1ac1faa34d1380c4be82eb743b015f15d6:
-.. index:: pair: function; gemv< t_DataType, t_LogParEntries, t_IndexType >
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1a64bfd51bd92c789fd505acb623cf4969:
-.. index:: pair: function; scal< t_DataType, 1, t_IndexType >
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1aa293fd8f2b06012eb1ee18ab6dbe5235:
-.. index:: pair: function; axpy< t_DataType, 1, t_IndexType >
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1a1c88906b679045a07a9a1bceef8175b3:
+.. _doxid-namespacexf_1_1blas_1abe4199bfd663b774cba0b9eb27a03e08:
+.. index:: pair: function; gemv
+.. _doxid-namespacexf_1_1blas_1a8757bb7d347fa70520f7dfb0bf5015ea:
+.. index:: pair: function; gemv
+.. _doxid-namespacexf_1_1blas_1a4b8faeb6b0cf62275d81118ee9950585:
 .. index:: pair: function; symv
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1a86a8ed1e692d38fc4ede5c9d78fc60d2:
+.. _doxid-namespacexf_1_1blas_1ab6d6cccceb77ca9d8b8a28fc510d2021:
 .. index:: pair: function; trmv
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1ad541c7b428af8ada9a947a3d1f1b2285:
+.. _doxid-namespacexf_1_1blas_1a97b563c3509866438a45cbde63270435:
 
 
 
@@ -47,68 +39,64 @@ Overview
 	
 	namespace blas {
 
-	// global variables
-
-	 t_LogParEntries;
-	hls::stream<WideType<t_DataType, 1>> l_x;
-	hls::stream<WideType<t_DataType, 1>> l_y;
-
 	// global functions
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
-	void :ref:`amax<doxid-namespacexf_1_1linear__algebra_1_1blas_1abd20b28a989c26e4bd5d528bf67ebea2>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, t_IndexType& p_result);
+	void :ref:`amax<doxid-namespacexf_1_1blas_1ac97d95595ee23916874cd96abaebb5e6>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_IndexType& p_result);
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
-	void :ref:`amin<doxid-namespacexf_1_1linear__algebra_1_1blas_1a401cfc76276132b7c8a58886098402c2>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, t_IndexType& p_result);
+	void :ref:`amin<doxid-namespacexf_1_1blas_1ab41dc9640742e1bd31336510e383c8b6>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_IndexType& p_result);
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void :ref:`asum<doxid-namespacexf_1_1linear__algebra_1_1blas_1af4e5b7396fd154b38ae063f60cc9f0cb>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, t_DataType& p_sum);
+	void :ref:`asum<doxid-namespacexf_1_1blas_1a9352151f4d43f9f20ae9cc1e34630159>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_DataType& p_sum);
 
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
-	void :ref:`axpy<doxid-namespacexf_1_1linear__algebra_1_1blas_1affd2cbe50983ea31c07c03845e3a28c4>`(unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_r);
+	void :ref:`axpy<doxid-namespacexf_1_1blas_1a61a3e6dcf46aaf5ddbf0d1b79dfc5a10>`(unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_r);
 
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
-	void :ref:`copy<doxid-namespacexf_1_1linear__algebra_1_1blas_1abc1e802e40cf7f7e0e8106fb7d6f102e>`(unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y);
-
-	template  <typename t_DataType, unsigned int t_N, unsigned int t_NumDiag, unsigned int t_EntriesInParallel>
-	void :ref:`dimv<doxid-namespacexf_1_1linear__algebra_1_1blas_1abc102f6031b8a65af9b1a2cb6132a74b>`(t_DataType p_in [t_N][t_NumDiag], t_DataType p_inV [t_N], unsigned int p_n, t_DataType p_outV [t_N]);
+	void :ref:`copy<doxid-namespacexf_1_1blas_1ab97952c9808d350040356d44d5902eb1>`(unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y);
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void :ref:`dot<doxid-namespacexf_1_1linear__algebra_1_1blas_1ae529068e5f8a2780987fa6263d609e5a>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_y, t_DataType& p_res);
+	void :ref:`dot<doxid-namespacexf_1_1blas_1a8af71f19450d24aa338a30b225cdcac0>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_y, t_DataType& p_res);
 
 	template  <typename t_DataType, unsigned int t_ParEntries, unsigned int t_MaxRows, typename t_IndexType = unsigned int, typename t_MacType = t_DataType>
 	void gbmv(const unsigned int p_m, const unsigned int p_n, const unsigned int p_kl, const unsigned int p_ku, hls::stream<WideType<t_DataType, t_ParEntries>>& p_A, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_MacType, t_ParEntries>>& p_y);
 
 	template  <typename t_DataType, unsigned int t_ParEntries, unsigned int t_MaxRows, typename t_IndexType = unsigned int, typename t_MacType = t_DataType>
-	void :ref:`gbmv<doxid-namespacexf_1_1linear__algebra_1_1blas_1a31d94a92d733f4cf399f814f9106bb3b>`(const unsigned int p_m, const unsigned int p_n, const unsigned int p_kl, const unsigned int p_ku, const t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_M, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_yr);
+	void :ref:`gbmv<doxid-namespacexf_1_1blas_1a5cec2775b5d537226ba858df112e6587>`(const unsigned int p_m, const unsigned int p_n, const unsigned int p_kl, const unsigned int p_ku, const t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_M, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_yr);
 
-	gemv< t_DataType, t_LogParEntries, t_IndexType >(p_m, p_n, p_M, p_x, :ref:`l_x<doxid-namespacexf_1_1linear__algebra_1_1blas_1aa6d3a215d29893c5e08ed5eabc531615>`);
-	scal< t_DataType, 1, t_IndexType >(p_m, p_beta, p_y, :ref:`l_y<doxid-namespacexf_1_1linear__algebra_1_1blas_1aae9defdf0f516e81aa3eb5061e592c55>`);
-	axpy< t_DataType, 1, t_IndexType >(p_m, p_alpha, :ref:`l_x<doxid-namespacexf_1_1linear__algebra_1_1blas_1aa6d3a215d29893c5e08ed5eabc531615>`, :ref:`l_y<doxid-namespacexf_1_1linear__algebra_1_1blas_1aae9defdf0f516e81aa3eb5061e592c55>`, p_yr);
+	template  <typename t_DataType, unsigned int t_LogParEntries, unsigned int t_NumStreams = (1 << t_LogParEntries), typename t_IndexType = unsigned int>
+	void gemv(const unsigned int p_m, const unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>> p_M [t_NumStreams], hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>> p_x [t_NumStreams], hls::stream<WideType<t_DataType, t_NumStreams>>& p_y);
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void :ref:`nrm2<doxid-namespacexf_1_1linear__algebra_1_1blas_1a048b14da86cf49591f68457007a8a1da>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, t_DataType& p_res);
+	void gemv(const unsigned int p_m, const unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, hls::stream<WideType<t_DataType, 1>>& p_y);
+
+	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+	void :ref:`gemv<doxid-namespacexf_1_1blas_1aa4b14aa75c1be1d8a90d0cafa7f3e279>`(const unsigned int p_m, const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, 1>>& p_y, hls::stream<WideType<t_DataType, 1>>& p_yr);
+
+	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+	void :ref:`nrm2<doxid-namespacexf_1_1blas_1a0b72b37d89ee2c2b5b0e2881aaa35595>`(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_DataType& p_res);
 
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
-	void :ref:`scal<doxid-namespacexf_1_1linear__algebra_1_1blas_1aee44ac6a6a4df8cc69d63e1ea8381f40>`(unsigned int p_n, t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_res);
+	void :ref:`scal<doxid-namespacexf_1_1blas_1a2f58b1501c5999577f4e4b64d4c4f285>`(unsigned int p_n, t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_res);
 
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
-	void :ref:`swap<doxid-namespacexf_1_1linear__algebra_1_1blas_1aa7d231959e217bc6288ee4fd60274445>`(unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_xRes, hls::stream<WideType<t_DataType, t_ParEntries>>& p_yRes);
+	void :ref:`swap<doxid-namespacexf_1_1blas_1af375ccc98b8aa70a9f0af3dbeb44e8f5>`(unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_xRes, hls::stream<WideType<t_DataType, t_ParEntries>>& p_yRes);
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 	void symv(const unsigned int p_n);
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void :ref:`symv<doxid-namespacexf_1_1linear__algebra_1_1blas_1aa0f4cd1d5ddd38ec0bea4431ada7604c>`(const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_M, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_y, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_yr);
+	void :ref:`symv<doxid-namespacexf_1_1blas_1a3185b8d5eb180275476cef08612b82dc>`(const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_y, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_yr);
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int, typename t_MacType = t_DataType>
 	void trmv(const bool uplo, const unsigned int p_n);
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void :ref:`trmv<doxid-namespacexf_1_1linear__algebra_1_1blas_1aa7a9cb6d049a99fe8786a943d3a8ad40>`(const bool uplo, const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_M, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, 1>>& p_y, hls::stream<WideType<t_DataType, 1>>& p_yr);
+	void :ref:`trmv<doxid-namespacexf_1_1blas_1a49d777b37946c19c6f84604af3650a3f>`(const bool uplo, const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, 1>>& p_y, hls::stream<WideType<t_DataType, 1>>& p_yr);
 
 	} // namespace blas
-.. _details-doxid-namespacexf_1_1linear__algebra_1_1blas:
+.. _details-doxid-namespacexf_1_1blas:
 
 Detailed Documentation
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -122,13 +110,13 @@ amax
 #####
 
 .. index:: pair: function; amax
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1abd20b28a989c26e4bd5d528bf67ebea2:
+.. _doxid-namespacexf_1_1blas_1ac97d95595ee23916874cd96abaebb5e6:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
-	void amax(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, t_IndexType& p_result)
+	void amax(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_IndexType& p_result)
 
 amax function that returns the position of the vector element that has the maximum magnitude.
 
@@ -157,7 +145,7 @@ amax function that returns the position of the vector element that has the maxim
 	*
 		- p_n
 
-		- the number of stided entries entries in the input vector p_x, p_n % l_ParEntries == 0
+		- the number of entries in the input vector p_x, p_n % l_ParEntries == 0
 
 	*
 		- p_x
@@ -173,13 +161,13 @@ amin
 #####
 
 .. index:: pair: function; amin
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1a401cfc76276132b7c8a58886098402c2:
+.. _doxid-namespacexf_1_1blas_1ab41dc9640742e1bd31336510e383c8b6:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
-	void amin(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, t_IndexType& p_result)
+	void amin(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_IndexType& p_result)
 
 amin function that returns the position of the vector element that has the minimum magnitude.
 
@@ -224,13 +212,13 @@ asum
 #####
 
 .. index:: pair: function; asum
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1af4e5b7396fd154b38ae063f60cc9f0cb:
+.. _doxid-namespacexf_1_1blas_1a9352151f4d43f9f20ae9cc1e34630159:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void asum(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, t_DataType& p_sum)
+	void asum(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_DataType& p_sum)
 
 asum function that returns the sum of the magnitude of vector elements.
 
@@ -275,7 +263,7 @@ axpy
 #####
 
 .. index:: pair: function; axpy
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1affd2cbe50983ea31c07c03845e3a28c4:
+.. _doxid-namespacexf_1_1blas_1a61a3e6dcf46aaf5ddbf0d1b79dfc5a10:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
@@ -331,7 +319,7 @@ copy
 #####
 
 .. index:: pair: function; copy
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1abc1e802e40cf7f7e0e8106fb7d6f102e:
+.. _doxid-namespacexf_1_1blas_1ab97952c9808d350040356d44d5902eb1:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
@@ -382,13 +370,13 @@ dot
 ####
 
 .. index:: pair: function; dot
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1ae529068e5f8a2780987fa6263d609e5a:
+.. _doxid-namespacexf_1_1blas_1a8af71f19450d24aa338a30b225cdcac0:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void dot(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_y, t_DataType& p_res)
+	void dot(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_y, t_DataType& p_res)
 
 dot function that returns the dot product of vector x and y.
 
@@ -433,7 +421,7 @@ gbmv
 #####
 
 .. index:: pair: function; gbmv
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1a31d94a92d733f4cf399f814f9106bb3b:
+.. _doxid-namespacexf_1_1blas_1a5cec2775b5d537226ba858df112e6587:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
@@ -483,12 +471,7 @@ gbmv function performs general banded matrix-vector multiplication matrix and a 
 	*
 		- p_alpha
 
-		- 
-
-	*
-		- scalar
-
-		- alpha
+		- scalar alpha
 
 	*
 		- p_M
@@ -503,12 +486,7 @@ gbmv function performs general banded matrix-vector multiplication matrix and a 
 	*
 		- p_beta
 
-		- 
-
-	*
-		- scalar
-
-		- beta
+		- scalar beta
 
 	*
 		- p_y
@@ -520,7 +498,7 @@ gemv
 
 
 .. index:: pair: function; gemv
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1a4809493026ae2969f50665f611379657:
+.. _doxid-namespacexf_1_1blas_1aa4b14aa75c1be1d8a90d0cafa7f3e279:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
@@ -528,7 +506,7 @@ gemv
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 	void gemv(const unsigned int p_m, const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, 1>>& p_y, hls::stream<WideType<t_DataType, 1>>& p_yr)
 
-gemv function that returns the result vector of the mutiplication of a matrix and a vector y = alpha * M * x + beta * y
+gemv function that returns the result vector of the multiplication of a matrix and a vector y = alpha * M * x + beta * y
 
 
 
@@ -591,13 +569,13 @@ nrm2
 #####
 
 .. index:: pair: function; nrm2
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1a048b14da86cf49591f68457007a8a1da:
+.. _doxid-namespacexf_1_1blas_1a0b72b37d89ee2c2b5b0e2881aaa35595:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void nrm2(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, t_DataType& p_res)
+	void nrm2(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_DataType& p_res)
 
 nrm2 function that returns the Euclidean norm of the vector x.
 
@@ -642,7 +620,7 @@ scal
 #####
 
 .. index:: pair: function; scal
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1aee44ac6a6a4df8cc69d63e1ea8381f40:
+.. _doxid-namespacexf_1_1blas_1a2f58b1501c5999577f4e4b64d4c4f285:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
@@ -693,7 +671,7 @@ swap
 #####
 
 .. index:: pair: function; swap
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1aa7d231959e217bc6288ee4fd60274445:
+.. _doxid-namespacexf_1_1blas_1af375ccc98b8aa70a9f0af3dbeb44e8f5:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
@@ -701,7 +679,7 @@ swap
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
 	void swap(unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_xRes, hls::stream<WideType<t_DataType, t_ParEntries>>& p_yRes)
 
-swap function taht swap vector x and y
+swap function that swap vector x and y
 
 
 
@@ -754,15 +732,15 @@ symv
 #####
 
 .. index:: pair: function; symv
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1aa0f4cd1d5ddd38ec0bea4431ada7604c:
+.. _doxid-namespacexf_1_1blas_1a3185b8d5eb180275476cef08612b82dc:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void symv(const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_M, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_y, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_yr)
+	void symv(const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_y, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_yr)
 
-symv function that returns the result vector of the mutiplication of a symmetric matrix and a vector y = alpha * M * x + beta * y
+symv function that returns the result vector of the multiplication of a symmetric matrix and a vector y = alpha * M * x + beta * y
 
 
 
@@ -830,15 +808,15 @@ trmv
 #####
 
 .. index:: pair: function; trmv
-.. _doxid-namespacexf_1_1linear__algebra_1_1blas_1aa7a9cb6d049a99fe8786a943d3a8ad40:
+.. _doxid-namespacexf_1_1blas_1a49d777b37946c19c6f84604af3650a3f:
 
 .. ref-code-block:: cpp
 	:class: title-code-block
 
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
-	void trmv(const bool uplo, const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_M, hls::stream<WideType<t_DataType,(1<<:ref:`t_LogParEntries<doxid-namespacexf_1_1linear__algebra_1_1blas_1a8a8b8c839994b5b2887df891844917de>`)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, 1>>& p_y, hls::stream<WideType<t_DataType, 1>>& p_yr)
+	void trmv(const bool uplo, const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, 1>>& p_y, hls::stream<WideType<t_DataType, 1>>& p_yr)
 
-function that returns the result vector of the mutiplication of a triangular matrix and a vector y = alpha * M * x + beta * y
+trmv function that returns the result vector of the multiplication of a triangular matrix and a vector y = alpha * M * x + beta * y
 
 
 

@@ -46,6 +46,7 @@ class HLS:
     self.csim = b_csim
     self.syn = b_syn 
     self.cosim = b_cosim 
+    self.benchmark = b_benchmark
 
     self.error = False
     self.passCsim = False
@@ -113,7 +114,7 @@ class HLS:
         raise HLS_ERROR("C/RTL co-simulation FAILED.", logFile)
 
   def benchmarking(self, logFile, op, reportList):
-    if not self.cosim:
+    if not self.benchmark:
       return
 
     features = op.features()

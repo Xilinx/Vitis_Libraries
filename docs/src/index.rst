@@ -24,7 +24,7 @@ implementations are organized in their corresponding directories L1, L2 and L3.
 The L1 primitives' implementations can be leveraged by FPGA hardware developers.
 The L2 kernels' implementations provide usage examples for Vitis host code developers.
 The L3 software APIs' implementations provide C, C++ and Python function interfaces
-to allow pure software developers  to offload BLAS operatins to pre-built FPGA images, 
+to allow pure software developers  to offload BLAS operations to pre-built FPGA images, 
 also called overlays. 
 
 Since all the kernel code is developed with the permissive Apache 2.0 license,

@@ -42,7 +42,7 @@ The L1 primitives can be tested individually or as a group. To launch the testin
 
    $ python ./run_test.py --operator amax amin asum axpy copy dot nrm2 scal swap gemv gbmv sbmvLo sbmvUp tbmvLo tbmvUp trmvLo trmvUp symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp
 
-The above command will test and verify all L1 primitvies' implementation in both csim and cosim modes. Hence, it can take a very long time. The following commands show examples for quickly testing some primitives in pure csim or cosim mode.
+The above command will test and verify all L1 primitives' implementation in both csim and cosim modes. Hence, it can take a very long time. The following commands show examples for quickly testing some primitives in pure csim or cosim mode.
 
 .. code-block:: bash
 
@@ -89,8 +89,8 @@ For each primitive, a test configuration file **profile.json** has been provided
     "numSimulation": 2
   }
 
-The configuragion file will instruct our testing infrastructure to generate following tests.
+The configuration file will instruct our testing infrastructure to generate the tests.
 
 5. Test outputs
 ==================
-At the end of the testing process, users will find a file called **statistics.rpt** that summarizes the test results, **Passed** or **Failed** for each primitive under test. For each primitive, there is also a file called **report.rpt** in the primitive's folder under directory **out_test/**. This file summarizes the quality of the implementation, namely the resource usage and the efficiency of the implementation. Where efficiency is calculated by equation **theoretical_cycles / measured_cosim_cycles**. The higher the efficiency, the better performance the implementation will provide.
+At the end of the testing process, users will find a file called **statistics.rpt** that summarizes the test results, **Passed** or **Failed** for each primitive under test. For each primitive, there is also a file called **report.rpt** in the primitive's folder under directory **out_test/**. This file summarizes the quality of the implementation, namely the resource usage and the efficiency of the implementation. Where efficiency is calculated by equation **theoretical_cycles / measured_cosim_cycles**. The higher the efficiency, the better the performance the implementation will provide.

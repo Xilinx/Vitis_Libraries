@@ -53,7 +53,7 @@ def process(rt, statList, dictLock = threading.Lock(), makeLock = threading.Lock
     traceback.print_exception(type, value, tb)
   finally:
 
-    if rt.args.benchmark and rt.numSim > 0:
+    if rt.hls.benchmark and rt.numSim > 0:
       rpt = rt.writeReport(profile)
       print("Benchmark info for op %s is written in %s"%(rt.op.name, rpt))
 

@@ -129,7 +129,7 @@ The following is an example of how to use XFBLAS API. Users always need to inclu
   }
 
 
-These API functions run on the first kernel by default, but they could support multi-kernels xclbin. Users will need to put numbers of kernels or index of the kernel in those functions to let the API know. The following code shows that how to initialize XFBLAS library to support a xclbin with 2 kernels and run with the second kernel.
+These API functions run on the first kernel by default, but they could support multi-kernels xclbin. Users will need to put numbers of kernels or index of the kernel in those functions to let the API know. The following code shows how to initialize XFBLAS library to support a xclbin with 2 kernels and run with the second kernel.
 
 .. code-block:: c++
    
