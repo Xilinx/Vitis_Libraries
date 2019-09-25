@@ -17,8 +17,8 @@
 #ifndef _XFCOMPRESSION_ZLIB_STREAM_UTILS_HPP_
 #define _XFCOMPRESSION_ZLIB_STREAM_UTILS_HPP_
 
-#include <string.h>
 #include "common.h"
+#include <string.h>
 
 #define GET_DIFF_IF_BIG(x, y) (x > y) ? (x - y) : 0
 

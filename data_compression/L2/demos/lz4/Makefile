@@ -114,7 +114,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -147,13 +147,13 @@ XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
 
 BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
-SRC_DIR := $(XFLIB_DIR)/L2/demos/
-TB_DIR := lz4/
+SRC_DIR := $(XFLIB_DIR)/L2/demos/lz4/
+TB_DIR := $(XFLIB_DIR)/L2/tests/lz4_tb/
 
 # ------------------------------------------------------------
 #                      kernel setup
 
-KSRC_DIR = $(XFLIB_DIR)/L2/src/hw
+KSRC_DIR = $(XFLIB_DIR)/L2/src/
 
 VPP = $(XILINX_VITIS)/bin/v++
 
@@ -163,7 +163,7 @@ HLS_SRC_DIR = $(XFLIB_DIR)/L1/include/hw
 # Compilation flags
 VPP_FLAGS = -I$(HLS_SRC_DIR) \
 			 -I$(KSRC_DIR) \
-			 -I$(XFLIB_DIR)/L2/include/hw
+			 -I$(XFLIB_DIR)/L2/include/
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_FLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
 
@@ -177,8 +177,7 @@ VPP_LINK_FLAGS = --optimize 2 --jobs 8 \
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				 --report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
 
-XCLBIN_FILE_C = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress.xclbin
-XCLBIN_FILE_D = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/decompress.xclbin
+XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_decompress.xclbin
 
 XO_FILES = $(TEMP_DIR)/xf_compress.xo \
 		   $(TEMP_DIR)/xf_decompress.xo
@@ -209,18 +208,10 @@ $(TEMP_DIR)/xf_decompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 
 
 # xclbin Binary creation
-$(XCLBIN_FILE_C): $(TEMP_DIR)/xf_compress.xo
+$(XCLBIN_FILE): $(TEMP_DIR)/xf_compress.xo $(TEMP_DIR)/xf_decompress.xo
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS)/Compress/ -l \
-	--config $(CUR_DIR)/compress.ini \
+	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l \
 	-o'$@' $(+)
-
-$(XCLBIN_FILE_D): $(TEMP_DIR)/xf_decompress.xo
-	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS)/Decompress/ -l \
-	--config $(CUR_DIR)/decompress.ini \
-	-o'$@' $(+)
-
 
 # ------------------------------------------------------------
 #                       host setup
@@ -230,16 +221,17 @@ HOST_EXE := xil_lz4_8b
 #EXE_EXT = exe
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
-CXXFLAGS +=-I$(XFLIB_DIR)/L2/include/hw/
+CXXFLAGS +=-I$(TB_DIR)/
 CXXFLAGS +=-I$(XILINX_XRT)/include/
+
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/xcl2/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/cmdparser/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/logger/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
 
 #Host and Common sources
-SRCS += $(SRC_DIR)/$(TB_DIR)/src/host.cpp
-SRCS += $(SRC_DIR)/$(TB_DIR)/src/xil_lz4.cpp
+SRCS += $(SRC_DIR)/src/host.cpp
+SRCS += $(TB_DIR)/xil_lz4.cpp
 SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
@@ -273,7 +265,7 @@ all: host xclbin
 
 host: $(EXE_FILE) | check_vpp check_xrt check_platform
 
-xclbin: $(XCLBIN_FILE_C) $(XCLBIN_FILE_D)
+xclbin: $(XCLBIN_FILE)
 
 cleank:
 	rm -f _x_temp*/*.xo
@@ -290,7 +282,7 @@ cleanh:
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
 	-$(RMDIR) _x_temp* $(CUR_DIR)/reports
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* 
+	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig* 
 
 clean: cleanh
 
@@ -301,7 +293,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -cx $(XCLBIN_FILE_C) -dx $(XCLBIN_FILE_D) -l $(XFLIB_DIR)/common/test.list 
+HOST_ARGS = -sx $(XCLBIN_FILE) -v $(XFLIB_DIR)/common/data/sample.txt 
 
 
 ifeq ($(TARGET),sw_emu)

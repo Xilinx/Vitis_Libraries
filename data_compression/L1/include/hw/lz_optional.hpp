@@ -93,9 +93,9 @@ lz_bestMatchFilter_left_over:
 
 /**
  * @brief This module helps in improving the compression ratio.
- * Finds a better match length by performing more character matches 
- * with supported max match, while maintaining an offset window. 
- *  
+ * Finds a better match length by performing more character matches
+ * with supported max match, while maintaining an offset window.
+ *
  * @tparam MAX_MATCH_LEN maximum length allowed for character match
  * @tparam BOOSTER_OFFSET_WINDOW offset window to store/match the character
  *
@@ -107,7 +107,7 @@ lz_bestMatchFilter_left_over:
  * @par Example
  * Following is simple demonstartion of booster input and output.
  *
- * **Input:** even though HAPPY BIRTHDAY can be matched fully but match length 
+ * **Input:** even though HAPPY BIRTHDAY can be matched fully but match length
  * is still 6 due to MATCH_LEN
  *  Input stream each data is 32bit and contains following:
  * - character data  (8bit)     - .....HAPPY BIRTHDAY .......... HAPPY BIRTHDAY

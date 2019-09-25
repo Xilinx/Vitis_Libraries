@@ -10,28 +10,78 @@ Benchmark Results
 Performance
 ```````````
 
-Table below presents the comparison of LZ4 and Snappy throughput on CPU vs best end to end compression throughput achieved with two compute units when executed on Alveo U200.
+Table below presents LZ4 and Snappy compression/decompression **best kernel throughput** achieved with **8 parallel engines** when executed on Alveo U200.
 
-+-----------------------------+---------------------------------+------------------+------------------+
-| Compression Algorithm       | CPU Corei7 9700K CPU @4.9GHz    |   Alveo U200     |  Speed Up        |  
-+=============================+=================================+==================+==================+
-| LZ4 Default (v1.9.0)        |                780 MB/s         |   2.81 GB/s      |    3.60x         |
-+-----------------------------+---------------------------------+------------------+------------------+
-| Snappy 1.1.4                |                565 MB/s         |   2.5 GB/s       |    4.42x         |
-+-----------------------------+---------------------------------+------------------+------------------+
++-----------------------+------------------+-----------------+
+| Data Compression      |   Compression    |  Decompression  |
++=======================+==================+=================+
+| LZ4                   |   1.8 GB/s       |   1.8 GB/s      |
++-----------------------+------------------+-----------------+
+| Snappy                |   1.5 GB/s       |   1.8 GB/s      |
++-----------------------+------------------+-----------------+
 
+Table below presents LZ4 and Snappy compression/decompression **best streaming kernel throughput** achieved with **single engine** when executed on Alveo U200.
+
++-----------------------+------------------+-----------------+
+| Data Compression      |   Compression    |  Decompression  |
++=======================+==================+=================+
+| LZ4                   |   285 MB/s       |   290 MB/s      |
++-----------------------+------------------+-----------------+
+| Snappy                |   260 MB/s       |   290 MB/s      |
++-----------------------+------------------+-----------------+
+
+Compression Ratio
+`````````````````
+
+Table below presents LZ4 and Snappy compression ratio achieved.
+
++-----------------------+-----------------------+
+| Data Compression      |   Compression Ratio   |
++=======================+=======================+
+| LZ4                   |   2.13                |
++-----------------------+-----------------------+
+| Snappy                |   2.15                |
++-----------------------+-----------------------+
 
 Resource Utilization
 ````````````````````
 
-Table below presents resource utilization of Xilinx LZ4 and Snappy compress kernels with 8 engines for two compute units on Alveo U200.
+Table below presents resource utilization of Xilinx LZ4 and Snappy compress/decompress kernels with 8 engines on Alveo U200.
 
-.. note:: The percentage of resources used clearly indicate that we can still have room on Alveo U200 to go for more compute units which can further improve the throughput.
+.. note:: The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
 
-+-----------------------------+-----------------+----------------+---------------+-------------+
-| Compression Algorithm       |       LUT       |     REG        |    BRAM       |  URAM       |
-+=============================+=================+================+===============+=============+
-| LZ4 Default (v1.9.0)        | 103061 [10.34%] | 127686 [6.09%] | 116 [6.59%]   | 96 [10.00%] |  
-+-----------------------------+-----------------+----------------+---------------+-------------+
-| Snappy 1.1.4                | 105829 [10.62%] | 129695 [6.18%] | 292 [16.60%]  | 96 [10.00%] | 
-+-----------------------------+-----------------+----------------+---------------+-------------+
++-------------------+------------+----------+---------+-----------+
+| LZ4               |   LUT      |   REG    |  BRAM   |  URAM     |
++===================+============+==========+=========+===========+
+| Compression       |  51.5K     |  63.8K   |   58    |   48      |  
++-------------------+------------+----------+---------+-----------+
+| Decompression     |  30.6K     |  39.5K   |   146   |   0       |  
++-------------------+------------+----------+---------+-----------+
+
+
++-------------------+------------+----------+---------+-----------+
+| Snappy            |   LUT      |   REG    |  BRAM   |  URAM     |
++===================+============+==========+=========+===========+
+| Compression       |  52.7K     |  64.9K   |  146    |   48      |  
++-------------------+------------+----------+---------+-----------+
+| Decompression     |  30.7K     |  39.5K   |  146    |   0       |  
++-------------------+------------+----------+---------+-----------+
+
+
+Table below presents resource utilization of Xilinx LZ4 and Snappy compress/decompress **streaming kernels** with single engine on Alveo U200.
+
++-------------------+------------+----------+---------+-----------+
+| LZ4 Streaming     |   LUT      |   REG    |  BRAM   |  URAM     |
++===================+============+==========+=========+===========+
+| Compression       |  4.5K      |  3.8K    |   16    |   6       |  
++-------------------+------------+----------+---------+-----------+
+| Decompression     |   809      |  1K      |   16    |   0       |  
++-------------------+------------+----------+---------+-----------+
+
++-------------------+------------+----------+---------+-----------+
+| Snappy Streaming  |   LUT      |   REG    |  BRAM   |  URAM     |
++===================+============+==========+=========+===========+
+| Compression       |  4.5K      |  3.8K    |   16    |   6       |  
++-------------------+------------+----------+---------+-----------+
+| Decompression     |   809      |  1K      |   16    |   0       |  
++-------------------+------------+----------+---------+-----------+
