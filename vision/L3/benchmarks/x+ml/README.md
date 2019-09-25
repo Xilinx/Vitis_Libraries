@@ -34,4 +34,6 @@ export SYSROOT=< path-to-platform-sysroot >
 
 make host xclbin TARGET=hw BOARD=Zynq 
 
+make run TARGET=< hw >
+
 copy the image.ub, xclbins and executable to an SDCARD and run on the board.

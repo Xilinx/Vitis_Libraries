@@ -18,21 +18,21 @@ without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ***************************************************************************/
 
 #ifndef _XF_CONVERT_SCALE_ABS_HPP_
 #define _XF_CONVERT_SCALE_ABS_HPP_
 
-#include "hls_stream.h"
 #include "common/xf_common.h"
+#include "hls_stream.h"
 
 #ifndef XF_IN_STEP
 #define XF_IN_STEP 8
@@ -69,12 +69,16 @@ int convertScaleAbsKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     XF_SNAME(WORDWIDTH_SRC) pxl_pack1, pxl_pack2;
 RowLoop:
     for (i = 0; i < height; i++) {
+// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
 #pragma HLS LOOP_FLATTEN OFF
+        // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
+// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min = TC max = TC
 #pragma HLS pipeline
+            // clang-format on
 
             pxl_pack1 = (XF_SNAME(WORDWIDTH_SRC))(src1.read(i * width + j));
         ProcLoop:
@@ -98,21 +102,18 @@ RowLoop:
     return 0;
 }
 
-#pragma SDS data access_pattern("src1.data" : SEQUENTIAL)
-#pragma SDS data copy("src1.data" [0:"src1.size"])
-#pragma SDS data access_pattern("dst.data" : SEQUENTIAL)
-#pragma SDS data copy("dst.data" [0:"dst.size"])
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void convertScaleAbs(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                      float scale,
                      float shift) {
+#ifndef __SYNTHESIS__
     assert(((SRC_T == XF_8UC1)) && "Input TYPE must be XF_8UC1 for 1-channel ");
 
     assert(((src1.rows == dst.rows) && (src1.cols == dst.cols)) && "Input and output image should be of same size");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
-
+#endif
     short width = src1.cols >> XF_BITSHIFT(NPC);
 
     convertScaleAbsKernel<SRC_T, DST_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),

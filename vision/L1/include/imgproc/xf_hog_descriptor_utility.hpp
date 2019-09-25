@@ -1,31 +1,18 @@
-/***************************************************************************
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-***************************************************************************/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef _XF_HOG_DESCRIPTOR_UTILITY_
 #define _XF_HOG_DESCRIPTOR_UTILITY_
@@ -50,10 +37,10 @@ static char xFIdentifySignBits(ap_uint<24> in_val) {
 
 signBitsLoop:
     for (ap_uint<5> i = 0; i < 24; i++) {
-        //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = 24 max = 24
-#pragma HLS PIPELINE II = 1
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=24 max=24
+        #pragma HLS PIPELINE II=1
+        // clang-format on
 
         if (flag == 0) {
             bool bit_val = in_val.range((23 - counter), (23 - counter));
@@ -136,17 +123,17 @@ void xFHOGReadFromStreamKernel(hls::stream<INPUT_TYPE>& in_stream,
 
 row_loop:
     for (i = 0; i < height; i++) {
-        //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+        // clang-format on
 
     col_loop:
         for (j = 0; j < width; j++) {
-            //clang-format off
-#pragma HLS PIPELINE
-#pragma HLS LOOP_FLATTEN off
-#pragma HLS LOOP_TRIPCOUNT min = COLS max = COLS
-            //clang-format on
+            // clang-format off
+            #pragma HLS PIPELINE
+            #pragma HLS LOOP_FLATTEN off
+            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+            // clang-format on
 
             // reading the data from the stream
             input_data = in_stream.read();
@@ -156,10 +143,10 @@ row_loop:
 
         no_of_channel_loop:
             for (k = 0; k < NOS; k++) {
-                //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = NOS max = NOS
-#pragma HLS UNROLL
-                //clang-format on
+                // clang-format off
+                #pragma HLS LOOP_TRIPCOUNT min=NOS max=NOS
+                #pragma HLS UNROLL
+                // clang-format on
 
                 out_stream[k].write(input_data.range(upper_limit, lower_limit));
                 in_data[k] = input_data.range(upper_limit, lower_limit);
@@ -231,9 +218,9 @@ void xFWriteHOGDescKernelRB(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _block_strm,
     // feature buffer to hold the block data
     XF_SNAME(WORDWIDTH_SRC) feature_buf[NOVBPW][NOHB], block_data_1, block_data_2;
     if (USE_URAM) {
-        //clang-format off
-#pragma HLS RESOURCE variable = feature_buf core = RAM_1P_URAM
-        //clang-format on
+        // clang-format off
+        #pragma HLS RESOURCE variable=feature_buf core=RAM_1P_URAM
+        // clang-format on
     }
 
     // indexes for accessing the feature buffer
@@ -250,16 +237,16 @@ void xFWriteHOGDescKernelRB(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _block_strm,
 // Initial filling of the BRAM (feature buffer)
 loop_vert_blocks_per_win_1:
     for (i = 0; i < NOVBPW; i++) {
-        //clang-format off
-#pragma HLS LOOP_FLATTEN
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_FLATTEN
+        // clang-format on
 
     loop_horiz_blocks_per_win_1:
         for (j = 0; j < nohb; j++) {
-            //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = NOHB max = NOHB
-#pragma HLS pipeline
-            //clang-format on
+            // clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=NOHB max=NOHB
+            #pragma HLS pipeline
+            // clang-format on
 
             block_data_1 = _block_strm.read();
             feature_buf[i][j] = block_data_1;
@@ -269,18 +256,18 @@ loop_vert_blocks_per_win_1:
 // Vertical window loop
 main_vert_win:
     for (i = 0; i < novw; i++) {
-        //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = NOVW max = NOVW
-#pragma HLS LOOP_FLATTEN off
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NOVW max=NOVW
+        #pragma HLS LOOP_FLATTEN off
+        // clang-format on
         ap_uint16_t row_ptr = row_idx;
 
     // Setting the row index for circular buffer organization
     settingIndex_1:
         for (j = 0; j < NOVBPW; j++) {
-            //clang-format off
-#pragma HLS UNROLL
-            //clang-format on
+            // clang-format off
+            #pragma HLS UNROLL
+            // clang-format on
 
             if (row_ptr >= NOVBPW) row_ptr = 0;
 
@@ -290,18 +277,18 @@ main_vert_win:
     // horizontal Window loop
     main_horiz_win:
         for (j = 0; j < nohw; j++) {
-            //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = NOHW max = NOHW
-#pragma HLS LOOP_FLATTEN
-            //clang-format on
+            // clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=NOHW max=NOHW
+            #pragma HLS LOOP_FLATTEN
+            // clang-format on
             // vertical block loop
         main_vert_blocks_per_win_2:
             for (x = 0; x < NOVBPW; x++) {
             main_horiz_blocks_per_win_2:
                 for (y = 0; y < NOHBPW; y++) {
-                    //clang-format off
-#pragma HLS PIPELINE
-                    //clang-format on
+                    // clang-format off
+                    #pragma HLS PIPELINE
+                    // clang-format on
                     block_data_2 = feature_buf[row_idx_buf[x]][j + y];
 
                     offset = 0;
@@ -359,9 +346,9 @@ main_vert_win:
         // filling the newer last block's data
         if (i != (novw - 1)) {
             for (j = 0; j < (NOHBPW - 1); j++) {
-                //clang-format off
-#pragma HLS pipeline
-                //clang-format on
+                // clang-format off
+                #pragma HLS pipeline
+                // clang-format on
                 block_data_1 = _block_strm.read();
                 feature_buf[row_idx_buf[0]][j + nohw] = block_data_1;
             }
@@ -453,10 +440,10 @@ void xFWriteHOGDescKernelNRB(hls::stream<XF_SNAME(WORDWIDTH)>& _block_strm,
 
 write_loop_1:
     for (i = 0; i < (novb * nohb); i++) {
-        //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
-#pragma HLS PIPELINE
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+        #pragma HLS PIPELINE
+        // clang-format on
 
         block_data = _block_strm.read();
         offset = 0;
@@ -533,9 +520,9 @@ void xFWriteHOGDescKernelNRB2( auviz::Mat<ROWS,COLS,DEPTH,NPC,WORDWIDTH>& _block
         write_loop_1:
         for(uint16_t i = 0; i < (NOVB*NOHB); i++)
         {
-//clang-format off
+// clang-format off
 #pragma HLS PIPELINE
-//clang-format on
+// clang-format on
 
                 block_data.range(pack_offset+(pack_step-1),pack_offset) = _block_mat.read();
 
@@ -562,10 +549,10 @@ void xFWriteHOGDescKernelNRB2( auviz::Mat<ROWS,COLS,DEPTH,NPC,WORDWIDTH>& _block
 
         for(uchar_t i = 0; i < (4-counter); i++)
         {
-//clang-format off
+// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=1 max=3
 #pragma HLS PIPELINE
-//clang-format on
+// clang-format on
 
                 block_data.range(pack_offset+(pack_step-1),pack_offset) = 0;
                 pack_offset += pack_step;
@@ -577,9 +564,9 @@ void xFWriteHOGDescKernelNRB2( auviz::Mat<ROWS,COLS,DEPTH,NPC,WORDWIDTH>& _block
         write_loop_3:
         for(uint16_t j = 0; j < NOB; j++)
         {
-//clang-format off
+// clang-format off
 #pragma HLS PIPELINE
-//clang-format on
+// clang-format on
 
                 out_data[0] = block_data.range((offset+(step-1)),offset);
                 memcpy(_out_ptr+mem_offset,out_data,word_size);
@@ -618,17 +605,17 @@ void xFDHOGwriteDescRB2(block_type* block, uint16_t bi, uint16_t bj,
         ap_uint<13> high=31,low=0;
         for(uint16_t m = k; m < k_limit; m++)
         {
-//clang-format off
+// clang-format off
 #pragma HLS LOOP_FLATTEN
 #pragma HLS LOOP_TRIPCOUNT min=15 max=15
-//clang-format on
+// clang-format on
 
                 for(uint16_t n = l; n < l_limit; n++)
                 {
-//clang-format off
+// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=7 max=7
 #pragma HLS pipeline
-//clang-format on
+// clang-format on
 
                         uint16_t p = ((p_tmp-1) - m);
                         uint16_t q = ((q_tmp-1) - n);
@@ -662,17 +649,17 @@ void xFHOGDuplicateKernel(hls::stream<XF_SNAME(WORDWIDTH)>& _src_strm,
     ap_uint<16> i, j;
 Row_Loop:
     for (i = 0; i < height; i++) {
-        //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-#pragma HLS LOOP_FLATTEN OFF
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+        #pragma HLS LOOP_FLATTEN OFF
+        // clang-format on
 
     Col_Loop:
         for (j = 0; j < width; j++) {
-            //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
-#pragma HLS PIPELINE
-            //clang-format on
+            // clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+            #pragma HLS PIPELINE
+            // clang-format on
             XF_SNAME(WORDWIDTH) tmp_src;
             tmp_src = _src_strm.read();
             _dst1_strm.write(tmp_src);
@@ -705,9 +692,9 @@ void xFHOGDuplicate(hls::stream<XF_SNAME(WORDWIDTH)>& _src_strm,
 #define Wg 1
 template <int OBN, int W, int I, ap_q_mode _AP_Q, ap_o_mode _AP_O>
 ap_uint<OBN> xFSqrtHOG(ap_ufixed<W, I, _AP_Q, _AP_O> x) {
-    //clang-format off
-#pragma HLS INLINE OFF
-    //clang-format on
+    // clang-format off
+    #pragma HLS INLINE OFF
+    // clang-format on
 
     assert(I >= 0 && "Number of integer bits for sqrt() must be greater than zero");
     assert(W >= I && "Number of integer bits for sqrt() must be less than or equal to total width");
@@ -726,9 +713,9 @@ ap_uint<OBN> xFSqrtHOG(ap_ufixed<W, I, _AP_Q, _AP_O> x) {
     ap_ufixed<W + Wg + 1, I + 1> result = 0;
     ap_ufixed<W + Wg + 2, I + 2> x2 = x;
     for (uchar_t i = W + Wg - offset; i > (I - 1) / 2; i -= 1) {
-        //clang-format off
-#pragma HLS PIPELINE
-        //clang-format on
+        // clang-format off
+        #pragma HLS PIPELINE
+        // clang-format on
 
         ap_ufixed<W + 2 + Wg, I + 2> t = (result << 1) + factor;
         ap_ufixed<W + Wg, I> thisfactor = 0;

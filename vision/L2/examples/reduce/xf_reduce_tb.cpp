@@ -1,48 +1,36 @@
-/***************************************************************************
-Copyright (c) 2018, Xilinx, Inc.
-All rights reserved.
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- ***************************************************************************/
-#include "common/xf_headers.h"
+#include "common/xf_headers.hpp"
 #include "xcl2.hpp"
+#include "xf_reduce_config.h"
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1>" << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
         return EXIT_FAILURE;
     }
 
     cv::Mat in_img, dst_hls, ocv_ref, in_gray, diff, in_mask;
 
     // Reading in the image:
-    in_img = cv::imread(argv[2], 0);
+    in_img = cv::imread(argv[1], 0);
 
     if (in_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -60,6 +48,9 @@ int main(int argc, char** argv) {
     size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = dst_hls.rows * dst_hls.cols * sizeof(unsigned char);
 
+    int height = in_img.rows;
+    int width = in_img.cols;
+
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
 
@@ -75,11 +66,10 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
-    std::string binaryFile = argv[1];
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_reduce");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
+
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     // Create a kernel:
@@ -93,6 +83,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, dimension));
     OCL_CHECK(err, err = kernel.setArg(2, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(3, height));
+    OCL_CHECK(err, err = kernel.setArg(4, width));
 
     // Initialize the buffers:
     cl::Event event;
@@ -103,9 +95,9 @@ int main(int argc, char** argv) {
                                             image_in_size_bytes, // Size in bytes
                                             in_img.data,         // Pointer to the data to copy
                                             nullptr, &event));
-
     // Execute the kernel:
-    OCL_CHECK(err, err = queue.enqueueTask(kernel));
+    OCL_CHECK(err, err = queue.enqueueTask(kernel, NULL, &event));
+    clWaitForEvents(1, (const cl_event*)&event);
 
     // Copy Result from Device Global Memory to Host Local Memory
     queue.enqueueReadBuffer(buffer_outImage, // This buffers data will be read

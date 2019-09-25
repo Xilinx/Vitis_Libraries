@@ -1,38 +1,24 @@
-/***************************************************************************
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- ***************************************************************************/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef _XF_AWB_HPP_
 #define _XF_AWB_HPP_
 
 #include "hls_stream.h"
-#include "common/xf_common.h"
+#include "common/xf_common.hpp"
 #include "imgproc/xf_duplicateimage.hpp"
 
 #ifndef XF_IN_STEP
@@ -69,234 +55,15 @@ int balanceWhiteKernel_simple(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
                               float thresh,
                               uint16_t height,
-                              uint16_t width) {
-#if 0
-	float inputMin = 0.0f;
-	float inputMax = 255.0f;
-	float outputMin = 0.0f;
-	float outputMax = 255.0f;
-	float p = 2.0f;
-
-	XF_PTNAME(XF_DEPTH(SRC_T,NPC)) in_pix, out_pix;
-	ap_uint<8> r, g, b,b1=0,g1=0,r1=0;
-
-	//******************** Simple white balance ********************
-
-
-	int depth = 2; // depth of histogram tree
-
-	int bins = 16; // number of bins at each histogram level
-
-	int nElements = 256; //int(pow((float)bins, (float)depth));
-
-
-	int hist[3][nElements];
-	int hist1[3][nElements];
-
-
-	int val[3];
-
-	// histogram initialization
-
-	INITIALIZE_HIST:for(int k=0;k<256;k++)
-	{
-#pragma HLS PIPELINE
-#pragma HLS LOOP_TRIPCOUNT min = 256 max = 256
-		INITIALIZE:for(int hi =0 ;hi<3;hi++)
-		{
-#pragma HLS UNROLL
-			hist[hi][k] = 0;
-			hist1[hi][k] = 0;
-		}
-	}
-
-	for (int row = 0; row != (height); row++)// histogram filling
-	{
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = ROWS
-		for (int col = 0; col != (width); col++)// histogram filling
-		{
-#pragma HLS PIPELINE
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = COLS
-#pragma HLS DEPENDENCE variable = hist array intra false
-#pragma HLS DEPENDENCE variable = hist array inter false
-
-			in_pix = src1.read(row*(width)+col);
-
-			for (int j = 0; j < 3; j++)
-			{
-#pragma HLS UNROLL
-				int pos = 0;
-				int currentBin=0;
-				float min_vals= inputMin - 0.5f;
-				float max_vals= inputMax + 0.5f;
-
-
-				float minValue=min_vals;
-				float maxValue=max_vals;
-				float interval = float(maxValue - minValue) / bins;
-
-				val[j] = (in_pix.range((j*8)+7, j*8));
-
-				for (int k = 0; k < 2; ++k)
-				{
-
-#pragma HLS UNROLL
-
-					currentBin = int((val[j] - minValue + 1e-4f) / interval);
-					++hist[j][pos + currentBin];
-
-					pos= (pos + currentBin) * bins;
-
-					minValue = minValue + currentBin * interval;
-					maxValue = minValue + interval;
-
-					interval /= bins;
-				}
-			}
-		}
-	}
-
-	int total = width*height;
-	float min_vals= inputMin - 0.5f;
-	float max_vals= inputMax + 0.5f;
-	float minValue[3]={min_vals,min_vals,min_vals};
-	float maxValue[3]={max_vals,max_vals,max_vals};
-
-	for (int j = 0; j < 3; ++j)
-		// searching for s1 and s2
-	{
-		int p1 = 0;
-		int p2 = bins - 1;
-		int n1 = 0;
-		int n2 = total;
-
-		const float s1 = 2.0f;
-		const float s2 = 2.0f;
-
-		float interval = (max_vals - min_vals) / float(bins);
-
-		for (int k = 0; k < 2; ++k)
-			// searching for s1 and s2
-		{
-
-			int value = hist[j][p1];
-			int value1 = hist[j][p2];
-
-			while (n1 + hist[j][p1] < s1 * total / 100.0f)
-			{
-#pragma HLS PIPELINE
-#pragma HLS LOOP_TRIPCOUNT min = 255 max = 255
-#pragma HLS DEPENDENCE variable = hist array intra false
-
-				n1 += hist[j][p1++];
-				minValue[j] += interval;
-
-			}
-			p1 *= bins;
-
-			while (n2 - hist[j][p2] > (100.0f - s2) * total / 100.0f)
-			{
-#pragma HLS PIPELINE
-#pragma HLS LOOP_TRIPCOUNT min = 255 max = 255
-#pragma HLS DEPENDENCE variable = hist array intra false
-
-				n2 -= hist[j][p2--];
-				maxValue[j] -= interval;
-			}
-			p2 = (p2 + 1) * bins - 1;
-
-			interval /= bins;
-		}
-	}
-
-
-
-
-	//**********************Normalization using minvalue and maxvalue for each channel
-
-	float maxmin_diff[3];
-
-	float newmax = 255.0f;
-	float newmin = 0.0f;
-	maxmin_diff[0]= maxValue[0]-minValue[0];
-	maxmin_diff[1]= maxValue[1]-minValue[1];
-	maxmin_diff[2]= maxValue[2]-minValue[2];
-	unsigned char newdiff = newmax-newmin;
-
-
-	XF_PTNAME(XF_DEPTH(SRC_T,NPC)) in_buf, out_buf;
-
-	float inv_val[3];
-	inv_val[0]= (float)(1/maxmin_diff[0]);
-	inv_val[1]= (float)(1/maxmin_diff[1]);
-	inv_val[2]= (float)(1/maxmin_diff[2]);
-
-	int pval=0, read_index =0,write_index=0;
-	ap_uint<13> row,col;
-
-	Row_Loop1:
-	for( row = 0; row < height; row++)
-	{
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-
-		Col_Loop1:
-		for( col = 0; col < (width>>XF_BITSHIFT(NPC)); col++)
-		{
-#pragma HLS LOOP_TRIPCOUNT min = COLS / NPC max = COLS / NPC
-#pragma HLS pipeline II = 1
-#pragma HLS LOOP_FLATTEN OFF
-
-			in_buf = src2.read(read_index++);
-
-			float value[3]={0,0,0};
-			float divval[3]={0,0,0};
-			float finalmul[3]={0,0,0};
-			ap_int<32> dstval[3]={0,0,0};
-
-
-			for (int j = 0; j < 3; j++){
-
-
-				unsigned char srcval = (in_buf.range((j*8)+7, j*8));
-				/*value[j] = srcval-minValue[j];
-				divval[j] = value[j]/maxmin_diff[j];
-				finalmul[j] = divval[j]*newdiff;
-				dstval[j] = (int)(finalmul[j] + newmin);
-
-				if(dstval[j] > 255)
-				{
-					out_buf.range((j*8)+7, j*8) = 255;//(unsigned char)dstval[j];
-				}else
-				{
-					out_buf.range((j*8)+7, j*8) = (unsigned char)dstval[j];
-				}*/
-				dstval[j] = (newmax - newmin) * (srcval - minValue[j]) / (maxValue[j] - minValue[j]) + newmin;
-
-				if(dstval[j].range(31,31)==1)
-				{
-					dstval[j] = 0;
-				}
-
-				if(dstval[j] > 255)
-				{
-					out_buf.range((j*8)+7, j*8) = 255;//(unsigned char)dstval[j];
-				}else
-				{
-					out_buf.range((j*8)+7, j*8) = (unsigned char)dstval[j];
-				}
-			}
-
-			dst.write(write_index++,out_buf);
-
-
-		}
-	}
-#else
-
-    float inputMin = 0.0f;
-    float inputMax = 255.0f;
-    float outputMin = 0.0f;
-    float outputMax = 255.0f;
+                              uint16_t width,
+                              float inputMin,
+                              float inputMax,
+                              float outputMin,
+                              float outputMax) {
+    // float inputMin = 0.0f;
+    // float inputMax = 255.0f;
+    // float outputMin = 0.0f;
+    // float outputMax = 255.0f;
     float p = 2.0f;
 
     XF_TNAME(SRC_T, NPC) in_pix, in_pix1, out_pix;
@@ -385,7 +152,6 @@ ROW_LOOP:
                 ap_fixed<24, 12> interval = ap_fixed<24, 12>(maxValue - minValue) / bins;
 
                 for (int k = 0; k < 2; ++k) {
-
 #pragma HLS UNROLL
 
                     currentBin = int((val - minValue + (ap_fixed<24, 12>)(1e-4f)) / interval);
@@ -489,81 +255,6 @@ COPY_LOOP:
         }
     }
 
-    //**********************Normalization using minvalue and maxvalue for each channel
-#if 0
-	float maxmin_diff[3];
-
-	float newmax = 255.0f;
-	float newmin = 0.0f;
-	maxmin_diff[0]= maxValue[0]-minValue[0];
-	maxmin_diff[1]= maxValue[1]-minValue[1];
-	maxmin_diff[2]= maxValue[2]-minValue[2];
-	unsigned char newdiff = newmax-newmin;
-
-
-	XF_TNAME(SRC_T,NPC) in_buf_n,out_buf_n;
-
-	float inv_val[3];
-	inv_val[0]= (float)(1/maxmin_diff[0]);
-	inv_val[1]= (float)(1/maxmin_diff[1]);
-	inv_val[2]= (float)(1/maxmin_diff[2]);
-
-	int pval=0, read_index =0,write_index=0;
-	ap_uint<13> row,col;
-
-	Row_Loop1:
-	for( row = 0; row < height; row++)
-	{
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-
-		Col_Loop1:
-		for( col = 0; col < width; col++)
-		{
-#pragma HLS LOOP_TRIPCOUNT min = COLS / NPC max = COLS / NPC
-#pragma HLS pipeline II = 1
-#pragma HLS LOOP_FLATTEN OFF
-
-			in_buf_n = src2.read(read_index++);
-
-			float value[3]={0,0,0};
-			float divval[3]={0,0,0};
-			float finalmul[3]={0,0,0};
-			ap_int<32> dstval[3]={0,0,0};
-
-			for(int p=0; p < XF_NPIXPERCYCLE(NPC)*PLANES;p++)
-			{
-#pragma HLS unroll
-
-				ap_uint<8> val = in_buf_n.range(p*8+7, p*8);
-				//dstval[p%3] = (newmax - newmin) * (val - minValue[p%3]) / (maxValue[p%3] - minValue[p%3]) + newmin;
-
-				value[p%3] = val-minValue[p%3];
-				divval[p%3] = value[p%3]/maxmin_diff[p%3];
-				finalmul[p%3] = divval[p%3]*newdiff;
-				dstval[p%3] = (int)(finalmul[p%3] + newmin);
-
-				if(dstval[p%3].range(31,31)==1)
-				{
-					dstval[p%3] = 0;
-				}
-
-				if(dstval[p%3] > 255)
-				{
-					out_buf_n.range((p*8)+7, p*8) = 255;//(unsigned char)dstval[j];
-				}else
-				{
-					out_buf_n.range((p*8)+7, p*8) = (unsigned char)dstval[p%3];
-				}
-
-
-			}
-
-			dst.write(row*width+col,out_buf_n);
-
-		}
-	}
-
-#else
     ap_fixed<24, 12> maxmin_diff[3];
 
     ap_fixed<24, 12> newmax = 255.0f;
@@ -625,9 +316,6 @@ Row_Loop1:
             dst.write(row * width + col, out_buf_n);
         }
     }
-
-#endif
-#endif
 }
 
 template <int SRC_T,
@@ -647,94 +335,6 @@ int balanceWhiteKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                        float thresh,
                        uint16_t height,
                        uint16_t width) {
-#if 0
-	ap_uint<13> i,j,k,l;
-
-	XF_PTNAME(XF_DEPTH(SRC_T,NPC)) in_pix, out_pix;
-	ap_uint<8> r, g, b,b1=0,g1=0,r1=0;
-
-	XF_SNAME(WORDWIDTH_DST) pxl_pack_out;
-	XF_SNAME(WORDWIDTH_SRC)  pxl_pack1, pxl_pack2;
-
-	int thresh255 = int(thresh*255);
-
-	int minRGB,maxRGB;
-
-	int sumB=0,sumG=0,sumR=0;
-
-	RowLoop:
-	for( i = 0; i < height; i++)
-	{
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-#pragma HLS LOOP_FLATTEN OFF
-		ColLoop:
-		for( j = 0; j < width; j++)
-		{
-#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
-#pragma HLS pipeline
-			in_pix = src1.read(i*src1.cols+j);
-			b = in_pix.range(7, 0);
-			g = in_pix.range(15, 8);
-			r = in_pix.range(23, 16);
-
-			minRGB = MIN(b, MIN(g, r));
-			maxRGB = MAX(b, MAX(g, r));
-
-
-			if ((maxRGB - minRGB) * 255 > thresh255 * maxRGB)
-				continue;
-
-
-			sumB += b;
-			sumG += g;
-			sumR += r;
-		}
-	}
-
-	int max_sum = MAX(sumB,MAX(sumG,sumR));
-
-	float dinB = sumB < 0.1 ? 0.0f: (float)(max_sum/(float)sumB);
-	float dinG = sumG < 0.1 ? 0.0f: (float)(max_sum/(float)sumG);
-	float dinR = sumR < 0.1 ? 0.0f: (float)(max_sum/(float)sumR);
-	float gain_max = MAX(dinB, MAX(dinG, dinR));
-
-
-	if (gain_max > 0)
-	{
-		dinB /= gain_max;
-		dinG /= gain_max;
-		dinR /= gain_max;
-	}
-
-
-	int i_gainB = (dinB * (1 << 8)), i_gainG = (dinG * (1 << 8)),i_gainR = (dinR * (1 << 8));
-
-	for( i = 0; i < height; i++)
-	{
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-#pragma HLS LOOP_FLATTEN OFF
-		ColLoop1:
-		for( j = 0; j < width; j++)
-		{
-#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
-#pragma HLS pipeline
-			in_pix = src2.read(i*src2.cols+j);
-			b = in_pix.range(7, 0);
-			g = in_pix.range(15, 8);
-			r = in_pix.range(23, 16);
-
-			unsigned char b1 = (unsigned char)((b*i_gainB)>>8);
-			unsigned char g1 = (unsigned char)((g*i_gainG)>>8);
-			unsigned char r1 = (unsigned char)((r*i_gainR)>>8);
-
-			out_pix.range(7, 0) = (unsigned char)b1;
-			out_pix.range(15, 8) = (unsigned char)g1;
-			out_pix.range(23, 16) =  (unsigned char)r1;
-
-			dst.write(i*src2.cols+j,out_pix);
-		}
-	}
-#else
     ap_uint<13> i = 0, j = 0;
 
     XF_TNAME(SRC_T, NPC) in_pix, out_pix;
@@ -869,22 +469,21 @@ Row_Loop:
             dst.write(i * width + j, out_pix);
         }
     }
-#endif
 }
-
-#pragma SDS data access_pattern("src1.data" : SEQUENTIAL)
-#pragma SDS data copy("src1.data" [0:"src1.size"])
-#pragma SDS data access_pattern("dst.data" : SEQUENTIAL)
-#pragma SDS data copy("dst.data" [0:"dst.size"])
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, bool WB_TYPE>
 void balanceWhite(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
-                  float thresh) {
+                  float thresh,
+                  float inputMin,
+                  float inputMax,
+                  float outputMin,
+                  float outputMax) {
+#ifndef __SYNTHESIS__
     assert(((src1.rows == dst.rows) && (src1.cols == dst.cols)) && "Input and output image should be of same size");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
+#endif
 
     short width = src1.cols >> XF_BITSHIFT(NPC);
 
@@ -895,7 +494,8 @@ void balanceWhite(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     } else {
         balanceWhiteKernel_simple<SRC_T, DST_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
                                   XF_DEPTH(DST_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-                                  (COLS >> XF_BITSHIFT(NPC))>(src1, src2, dst, thresh, src1.rows, width);
+                                  (COLS >> XF_BITSHIFT(NPC))>(src1, src2, dst, thresh, src1.rows, width, inputMin,
+                                                              inputMax, outputMin, outputMax);
     }
 }
 } // namespace cv

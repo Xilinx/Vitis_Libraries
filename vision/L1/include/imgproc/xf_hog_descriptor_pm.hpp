@@ -1,31 +1,18 @@
-/***************************************************************************
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-***************************************************************************/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef _XF_HOG_DESCRIPTOR_PM_HPP_
 #define _XF_HOG_DESCRIPTOR_PM_HPP_
@@ -86,17 +73,17 @@ void xFHOGPhaseMagnitudeKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _gradx_stre
 
 rowLoop:
     for (i = 0; i < height; i++) {
-        //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-#pragma HLS LOOP_FLATTEN OFF
-        //clang-format on
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+        #pragma HLS LOOP_FLATTEN OFF
+        // clang-format on
 
     colLoop:
         for (j = 0; j < width; j++) {
-            //clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = COLS_TRIP max = COLS_TRIP
-#pragma HLS PIPELINE
-            //clang-format on
+            // clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
+            #pragma HLS PIPELINE
+            // clang-format on
 
             grad_x_packed_val = (XF_SNAME(WORDWIDTH_SRC))(_gradx_stream.read());
             grad_y_packed_val = (XF_SNAME(WORDWIDTH_SRC))(_grady_stream.read());
@@ -108,9 +95,9 @@ rowLoop:
 
         procLoop:
             for (k = 0, l = 0; k < proc_loop_src, l < proc_loop_dst; k += step_src, l += step_dst) {
-                //clang-format off
-#pragma HLS UNROLL
-                //clang-format on
+                // clang-format off
+                #pragma HLS UNROLL
+                // clang-format on
 
                 XF_PTNAME(DEPTH_SRC)
                 g_x = grad_x_packed_val.range(k + (step_src - 1), k); // Get bits from certain range of positions.
@@ -175,7 +162,7 @@ void xFHOGPhaseMagnitude(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _grad_x,
                          hls::stream<XF_SNAME(WORDWIDTH_DST)>& _mag_stream,
                          uint16_t height,
                          uint16_t width) {
-#ifndef _SYNTHESIS_
+#ifndef __SYNTHESIS__
     assert((DEPTH_SRC == XF_9SP) && "DEPTH_SRC must be XF_9SP");
     assert((DEPTH_DST == XF_16UP) && "DEPTH_DST must be of type XF_16UP");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8) || (NPC == XF_NPPC16)) &&

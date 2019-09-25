@@ -212,7 +212,7 @@ KERNELS     	+= $(KER_NAME)
 SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/sum
 
 EXE_NAME  		:= sum
-HOST_ARGS 		= $(SRC_DIR)/data/4k_1.jpg $(SRC_DIR)/data/4k_2.jpg
+HOST_ARGS 		= $(SRC_DIR)/data/4k_1.jpg 
 SRCS      		:= xf_sum_tb
 
 # Macro definitions

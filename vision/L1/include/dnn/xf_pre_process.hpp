@@ -1,39 +1,26 @@
-/***************************************************************************
- Copyright (c) 2016, Xilinx, Inc.
- All rights reserved.
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
- Redistribution and use in source and binary forms, with or without modification,
- are permitted provided that the following conditions are met:
-
- 1. Redistributions of source code must retain the above copyright notice,
- this list of conditions and the following disclaimer.
-
- 2. Redistributions in binary form must reproduce the above copyright notice,
- this list of conditions and the following disclaimer in the documentation
- and/or other materials provided with the distribution.
-
- 3. Neither the name of the copyright holder nor the names of its contributors
- may be used to endorse or promote products derived from this software
- without specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- HOWEVER CXFSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- ***************************************************************************/
 #ifndef _XF_PRE_PROCESS_
 #define _XF_PRE_PROCESS_
 
 #include "hls_stream.h"
 #include "ap_int.h"
 
-//#include "common/xf_common.h"
+//#include "common/xf_common.hpp"
 
 namespace xf {
 namespace cv {
@@ -75,16 +62,21 @@ void xFpreProcessKernel(hls::stream<ap_uint<INPUT_PTR_WIDTH_T> >& srcStrm,
 #endif
 
     for (int k = 0; k < loop_count; k++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = 608 * 608
+// clang-format off
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_TRIPCOUNT min=1 max=608*608
+        // clang-format on
         ap_uint<INPUT_PTR_WIDTH_T> x_pack = srcStrm.read();
         ap_uint<OUTPUT_PTR_WIDTH_T> out_pack;
 
         for (int i = 0; i < NPC_T; i++) {
+// clang-format off
 #pragma HLS UNROLL
+            // clang-format on
             for (int j = 0; j < CPW_T; j++) {
+// clang-format off
 #pragma HLS UNROLL
-
+                // clang-format on
                 X_TYPE x = x_pack.range((j * WX_T) + (WX_T - 1) + (i * CPW_T * WX_T), (j * WX_T) + (i * CPW_T * WX_T));
 
                 ap_fixed<WA_T, FA_T, AP_RND> a = alpha_reg[j];
@@ -159,9 +151,10 @@ template <int INPUT_PTR_WIDTH_T, int T_CHANNELS_T, int CPW_T, int NPC_T, int WX_
 void Arr2Strm(ap_uint<INPUT_PTR_WIDTH_T>* inp, hls::stream<ap_uint<INPUT_PTR_WIDTH_T> >& Strm, int rows, int cols) {
     int loop_count = (rows * cols * WX_T * CPW_T * (T_CHANNELS_T / CPW)) / (INPUT_PTR_WIDTH_T);
     for (int i = 0; i < loop_count; i++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = 608 * 608
-
+// clang-format off
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_TRIPCOUNT min=1 max=608*608
+        // clang-format on
         Strm.write(inp[i]);
     }
 }
@@ -170,9 +163,10 @@ template <int OUTPUT_PTR_WIDTH_T, int T_CHANNELS_T, int CPW_T, int NPC_T, int WX
 void Strm2Arr(hls::stream<ap_uint<OUTPUT_PTR_WIDTH_T> >& Strm, ap_uint<OUTPUT_PTR_WIDTH_T>* out, int rows, int cols) {
     int loop_count = (rows * cols * WX_T * CPW_T * (T_CHANNELS_T / CPW_T)) / (OUTPUT_PTR_WIDTH_T);
     for (int i = 0; i < loop_count; i++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = 608 * 608
-
+// clang-format off
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_TRIPCOUNT min=1 max=608*608
+        // clang-format on
         out[i] = Strm.read();
     }
 }
@@ -190,9 +184,10 @@ void InBitWidthConvert(hls::stream<ap_uint<ptr_width> >& srcStrm,
 
 L1:
     for (int i = 0; i < loop_count; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = 608 * 608
-#pragma HLS PIPELINE II = 1
-
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=1 max=608*608
+#pragma HLS PIPELINE II=1
+        // clang-format on
         if (valid_bits < N_size) {
             if (valid_bits != 0) {
                 out.range(valid_bits - 1, 0) = r.range(ptr_width - 1, ptr_width - valid_bits);
@@ -221,9 +216,10 @@ void OutBitWidthConvert(hls::stream<ap_uint<strm_width> >& srcStrm,
 
 L1:
     for (int i = 0; i < loop_count; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = 608 * 608
-#pragma HLS PIPELINE II = 1
-
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=1 max=608*608
+#pragma HLS PIPELINE II=1
+        // clang-format on
         in = srcStrm.read();
 
         if (bits_to_add <= N_size) {
@@ -286,14 +282,16 @@ void preProcess(hls::stream<ap_uint<INPUT_PTR_WIDTH_T> >& srcStrm,
     ap_fixed<WA_T, FA_T, AP_RND> alpha_reg[T_CHANNELS_T];
     ap_fixed<WB_T, FB_T, AP_RND> beta_reg[T_CHANNELS_T];
     ap_fixed<WY_T, FY_T, AP_RND> gamma_reg[T_CHANNELS_T];
-#pragma HLS ARRAY_PARTITION variable = alpha_reg dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = beta_reg dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = gamma_reg dim = 0 complete
-
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable=alpha_reg dim=0 complete
+#pragma HLS ARRAY_PARTITION variable=beta_reg dim=0 complete
+#pragma HLS ARRAY_PARTITION variable=gamma_reg dim=0 complete
+    // clang-format on
     for (int i = 0; i < 3 * T_CHANNELS_T; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = 12
-#pragma HLS PIPELINE II = 1
-
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=1 max=12
+#pragma HLS PIPELINE II=1
+        // clang-format on
         float temp = params[i];
         if (i < T_CHANNELS_T)
             alpha_reg[i] = temp;
@@ -305,9 +303,9 @@ void preProcess(hls::stream<ap_uint<INPUT_PTR_WIDTH_T> >& srcStrm,
 
     // TODO send this to arry2strm
     int loop_count = (rows * cols) / (NPC_T);
-
+// clang-format off
 #pragma HLS DATAFLOW
-
+    // clang-format on
     // Arr2Strm<INPUT_PTR_WIDTH_T, T_CHANNELS_T, CPW_T, NPC_T, WX_T>(inp, srcStrm, rows, cols);
     InBitWidthConvert<CPW_T, NPC_T, WX_T, INPUT_PTR_WIDTH_T, strm_width_in>(srcStrm, srcStrmIn, loop_count);
     xFpreProcessKernel<strm_width_in, strm_width_out, T_CHANNELS_T, CPW_T, ROWS_T, COLS_T, NPC_T, PACK_MODE_T, WX_T,
@@ -317,5 +315,5 @@ void preProcess(hls::stream<ap_uint<INPUT_PTR_WIDTH_T> >& srcStrm,
     Strm2Arr<OUTPUT_PTR_WIDTH_T, T_CHANNELS_T, CPW_T, NPC_T, WO_T>(dstStrm, out, rows, cols);
 }
 } // namespace cv
+} // namespace xf
 #endif
-}
