@@ -40,8 +40,8 @@ union double_casting {
 // the 2x2 matrix contains 4 elements
 //------beta  gamma-----
 //------gamma alpha-----
-template <typename DT>
-void jacobi_rotation_2x2(DT alpha, DT beta, DT gamma, hls::stream<DT>& s_strm, hls::stream<DT>& c_strm) {
+template <typename T>
+void jacobi_rotation_2x2(T alpha, T beta, T gamma, hls::stream<T>& s_strm, hls::stream<T>& c_strm) {
 //	double zeta = (beta - alpha) / (2.0 * gamma);
 //	double ang_tan = sgn(zeta) / (hls::abs(zeta) + hls::sqrt(1.0 + (zeta*zeta)));//compute tan of angle
 //	double ang_cos = 1.0 / (hls::sqrt (1.0 + (ang_tan*ang_tan)));       //cos
@@ -108,31 +108,30 @@ void jacobi_rotation_2x2(DT alpha, DT beta, DT gamma, hls::stream<DT>& s_strm, h
     double tmpDivider = deno2 / tmpSum;
 #pragma HLS RESOURCE variable = tmpSub core = DAddSub_nodsp
     tmpSub = 1 - tmpDivider;
-    DT c_right = hls::sqrt(tmpSub);
+    T c_right = hls::sqrt(tmpSub);
     double tmp = hls::sqrt(tmpDivider);
-    DT s_right = (((d > 0) && (deno > 0)) | ((d < 0) && (deno < 0))) ? tmp : -tmp;
+    T s_right = (((d > 0) && (deno > 0)) | ((d < 0) && (deno < 0))) ? tmp : -tmp;
 
     s_strm.write(s_right);
     c_strm.write(c_right);
 }
 //! calc the converge of next sweep
-template <typename DT>
-void calc_converge(DT alpha, DT beta, DT gamma, hls::stream<DT>& conv_strm) {
-    DT converge = hls::abs(gamma) / hls::sqrt(alpha * beta); // compute convergence
+template <typename T>
+void calc_converge(T alpha, T beta, T gamma, hls::stream<T>& conv_strm) {
+    T converge = hls::abs(gamma) / hls::sqrt(alpha * beta); // compute convergence
     conv_strm.write(converge);
 }
 
-template <typename DT>
-void svd_and_conv(
-    DT alpha, DT beta, DT gamma, hls::stream<DT>& conv_strm, hls::stream<DT>& s_strm, hls::stream<DT>& c_strm) {
+template <typename T>
+void svd_and_conv(T alpha, T beta, T gamma, hls::stream<T>& conv_strm, hls::stream<T>& s_strm, hls::stream<T>& c_strm) {
 #pragma HLS DATAFLOW
-    jacobi_rotation_2x2<DT>(alpha, beta, gamma, s_strm, c_strm);
+    jacobi_rotation_2x2<T>(alpha, beta, gamma, s_strm, c_strm);
     calc_converge(alpha, beta, gamma, conv_strm);
 }
 
-template <typename DT, int MAXM, int MAXN, int MCU, int ACUM>
+template <typename T, int MAXM, int MAXN, int MCU, int ACUM>
 void update_A(
-    DT A[MCU][ACUM][MAXN], DT A_i[MCU][ACUM], DT A_j[MCU][ACUM], int rows, int cols, int col_i, int col_j, DT s, DT c) {
+    T A[MCU][ACUM][MAXN], T A_i[MCU][ACUM], T A_j[MCU][ACUM], int rows, int cols, int col_i, int col_j, T s, T c) {
 #pragma HLS inline off
 UPDATE_A:
     for (int k = 0; k < ACUM; k++) {
@@ -142,16 +141,16 @@ UPDATE_A:
 #pragma HLS UNROLL
             // tki = A[k][i];
             // tkj = A[k][j];
-            DT tki = A_i[m][k];
-            DT tkj = A_j[m][k];
+            T tki = A_i[m][k];
+            T tkj = A_j[m][k];
             A[m][k][col_i] = c * tki - s * tkj; // A[k][i] = c*tki - s*A[k][j];
             A[m][k][col_j] = s * tki + c * tkj; // A[k][j] = s*tki + c*A[k][j];
         }
     }
 }
 
-template <typename DT, int MAXN, int NCU, int ACUN>
-void update_V(DT V[NCU][ACUN][MAXN], DT V_i[NCU][ACUN], DT V_j[NCU][ACUN], int cols, int col_i, int col_j, DT s, DT c) {
+template <typename T, int MAXN, int NCU, int ACUN>
+void update_V(T V[NCU][ACUN][MAXN], T V_i[NCU][ACUN], T V_j[NCU][ACUN], int cols, int col_i, int col_j, T s, T c) {
 #pragma HLS inline off
 CALC_V:
     // for(int k=0; k<cols; k++){
@@ -162,64 +161,64 @@ CALC_V:
 #pragma HLS UNROLL
             // tki = V[k][i];
             // tkj = V[k][j];
-            DT tki = V_i[m][k];
-            DT tkj = V_j[m][k];
+            T tki = V_i[m][k];
+            T tkj = V_j[m][k];
             V[m][k][col_i] = c * tki - s * tkj; // V[k][i] = c*tki - s*V[k][j];
             V[m][k][col_j] = s * tki + c * tkj; // V[k][j] = s*tki + c*V[k][j];
         }
     }
 }
 
-template <typename DT, int MAXM, int MAXN, int MCU, int ACUM, int NCU, int ACUN>
-void update_AV(DT A[MCU][ACUM][MAXN],
-               DT V[NCU][ACUN][MAXN],
-               DT A_i[MCU][ACUM],
-               DT A_j[MCU][ACUM],
-               DT V_i[NCU][ACUN],
-               DT V_j[NCU][ACUN],
+template <typename T, int MAXM, int MAXN, int MCU, int ACUM, int NCU, int ACUN>
+void update_AV(T A[MCU][ACUM][MAXN],
+               T V[NCU][ACUN][MAXN],
+               T A_i[MCU][ACUM],
+               T A_j[MCU][ACUM],
+               T V_i[NCU][ACUN],
+               T V_j[NCU][ACUN],
                int rows,
                int cols,
                int col_i,
                int col_j,
-               DT s,
-               DT c) {
+               T s,
+               T c) {
 #pragma HLS DATAFLOW
-    update_A<DT, MAXM, MAXN, MCU, ACUM>(A, A_i, A_j, rows, cols, col_i, col_j, s, c);
-    update_V<DT, MAXN, NCU, ACUN>(V, V_i, V_j, cols, col_i, col_j, s, c);
+    update_A<T, MAXM, MAXN, MCU, ACUM>(A, A_i, A_j, rows, cols, col_i, col_j, s, c);
+    update_V<T, MAXN, NCU, ACUN>(V, V_i, V_j, cols, col_i, col_j, s, c);
 }
 
 //! Read two columns of A into two seperate Bram
-template <typename DT, int MAXM, int MAXN, int MCU, int ACUM>
-void read_and_gen_2x2(DT A[MCU][ACUM][MAXN],
-                      DT A_i[MCU][ACUM],
-                      DT A_j[MCU][ACUM],
+template <typename T, int MAXM, int MAXN, int MCU, int ACUM>
+void read_and_gen_2x2(T A[MCU][ACUM][MAXN],
+                      T A_i[MCU][ACUM],
+                      T A_j[MCU][ACUM],
                       int rows,
                       int cols,
                       int col_i,
                       int col_j,
-                      hls::stream<DT>& alpha_strm,
-                      hls::stream<DT>& beta_strm,
-                      hls::stream<DT>& gamma_strm) {
+                      hls::stream<T>& alpha_strm,
+                      hls::stream<T>& beta_strm,
+                      hls::stream<T>& gamma_strm) {
 #pragma HLS inline off
-    DT alpha = 0;
-    DT beta = 0;
-    DT gamma = 0;
+    T alpha = 0;
+    T beta = 0;
+    T gamma = 0;
 
     const int DEP = 16;
     // used for accumulate alpha*alpha, beta*beta, gamma*gamma
-    DT alpha_acc[MCU][DEP];
+    T alpha_acc[MCU][DEP];
 #pragma HLS resource variable = alpha_acc core = RAM_2P_BRAM
 #pragma HLS ARRAY_PARTITION variable = alpha_acc complete dim = 0
-    DT beta_acc[MCU][DEP];
+    T beta_acc[MCU][DEP];
 #pragma HLS resource variable = beta_acc core = RAM_2P_BRAM
 #pragma HLS ARRAY_PARTITION variable = beta_acc complete dim = 0
-    DT gamma_acc[MCU][DEP];
+    T gamma_acc[MCU][DEP];
 #pragma HLS resource variable = gamma_acc core = RAM_2P_BRAM
 #pragma HLS ARRAY_PARTITION variable = gamma_acc complete dim = 0
 
-    DT alpha_sum[DEP];
-    DT beta_sum[DEP];
-    DT gamma_sum[DEP];
+    T alpha_sum[DEP];
+    T beta_sum[DEP];
+    T gamma_sum[DEP];
 
 INIT_ACC:
     for (int t = 0; t < DEP; t++) {
@@ -247,8 +246,8 @@ CALC_ELEMENTS:
         for (int m = 0; m < MCU; m++) {
 #pragma HLS UNROLL
             if (k * MCU + m < rows) {
-                DT Aki = A[m][k][col_i];
-                DT Akj = A[m][k][col_j];
+                T Aki = A[m][k][col_i];
+                T Akj = A[m][k][col_j];
                 A_i[m][k] = Aki; // store to extra bram, so no need to read URAM again when updating A
                 A_j[m][k] = Akj;
                 alpha_acc[m][k % DEP] += Aki * Aki;
@@ -277,9 +276,9 @@ ACCU:
     }
 
     // sum 16 data to 8
-    DT alpha_sum_tmp0[8];
-    DT beta_sum_tmp0[8];
-    DT gamma_sum_tmp0[8];
+    T alpha_sum_tmp0[8];
+    T beta_sum_tmp0[8];
+    T gamma_sum_tmp0[8];
     for (int k = 0; k < 8; k++) {
 #pragma HLS PIPELINE
         alpha_sum_tmp0[k] = alpha_sum[2 * k] + alpha_sum[2 * k + 1];
@@ -288,9 +287,9 @@ ACCU:
     }
 
     // sum 8 data to 4
-    DT alpha_sum_tmp1[4];
-    DT beta_sum_tmp1[4];
-    DT gamma_sum_tmp1[4];
+    T alpha_sum_tmp1[4];
+    T beta_sum_tmp1[4];
+    T gamma_sum_tmp1[4];
     for (int k = 0; k < 4; k++) {
 #pragma HLS PIPELINE
         alpha_sum_tmp1[k] = alpha_sum_tmp0[2 * k] + alpha_sum_tmp0[2 * k + 1];
@@ -298,9 +297,9 @@ ACCU:
         gamma_sum_tmp1[k] = gamma_sum_tmp0[2 * k] + gamma_sum_tmp0[2 * k + 1];
     }
     // sum 4 data to 2
-    DT alpha_sum_tmp2[2];
-    DT beta_sum_tmp2[2];
-    DT gamma_sum_tmp2[2];
+    T alpha_sum_tmp2[2];
+    T beta_sum_tmp2[2];
+    T gamma_sum_tmp2[2];
     for (int k = 0; k < 2; k++) {
 #pragma HLS PIPELINE
         alpha_sum_tmp2[k] = alpha_sum_tmp1[2 * k] + alpha_sum_tmp1[2 * k + 1];
@@ -318,8 +317,8 @@ ACCU:
 }
 
 //! Read two columns (i and j) of V into two seperate Bram V_i[N] and V_j[N]
-template <typename DT, int MAXN, int NCU, int ACUN>
-void read_V_2cols(DT V[NCU][ACUN][MAXN], DT V_i[NCU][ACUN], DT V_j[NCU][ACUN], int cols, int col_i, int col_j) {
+template <typename T, int MAXN, int NCU, int ACUN>
+void read_V_2cols(T V[NCU][ACUN][MAXN], T V_i[NCU][ACUN], T V_j[NCU][ACUN], int cols, int col_i, int col_j) {
 #pragma HLS inline off
     for (int k = 0; k < ACUN; k++) {
 #pragma HLS PIPELINE
@@ -335,39 +334,39 @@ void read_V_2cols(DT V[NCU][ACUN][MAXN], DT V_i[NCU][ACUN], DT V_j[NCU][ACUN], i
 }
 
 //! read 2 columns(i and j) of data from A matrix and V matrix
-template <typename DT, int MAXM, int MAXN, int MCU, int ACUM, int NCU, int ACUN>
-void read_to_2cols(DT A[MCU][ACUM][MAXN],
-                   DT V[NCU][ACUN][MAXN],
-                   DT A_i[MCU][ACUM],
-                   DT A_j[MCU][ACUM],
-                   DT V_i[NCU][ACUN],
-                   DT V_j[NCU][ACUN],
+template <typename T, int MAXM, int MAXN, int MCU, int ACUM, int NCU, int ACUN>
+void read_to_2cols(T A[MCU][ACUM][MAXN],
+                   T V[NCU][ACUN][MAXN],
+                   T A_i[MCU][ACUM],
+                   T A_j[MCU][ACUM],
+                   T V_i[NCU][ACUN],
+                   T V_j[NCU][ACUN],
                    int rows,
                    int cols,
                    int col_i,
                    int col_j,
-                   hls::stream<DT>& alpha_strm,
-                   hls::stream<DT>& beta_strm,
-                   hls::stream<DT>& gamma_strm) {
+                   hls::stream<T>& alpha_strm,
+                   hls::stream<T>& beta_strm,
+                   hls::stream<T>& gamma_strm) {
 #pragma HLS DATAFLOW
-    read_and_gen_2x2<DT, MAXM, MAXN, MCU, ACUM>(A, A_i, A_j, rows, cols, col_i, col_j, alpha_strm, beta_strm,
-                                                gamma_strm);
-    read_V_2cols<DT, MAXN, NCU, ACUN>(V, V_i, V_j, cols, col_i, col_j);
+    read_and_gen_2x2<T, MAXM, MAXN, MCU, ACUM>(A, A_i, A_j, rows, cols, col_i, col_j, alpha_strm, beta_strm,
+                                               gamma_strm);
+    read_V_2cols<T, MAXN, NCU, ACUN>(V, V_i, V_j, cols, col_i, col_j);
 }
 
 } // end of namespace internal
 
 /**
  * @brief This function implements singular value decomposition of matrix A using one-sided Jacobi algorihtm.
-   \f{equation*} {A = U \Sigma {V}^T, }\f}
+   \f{equation*} {A = U \Sigma {V}^T}\f}
    where \f$A\f$ is a dense matrix of size \f$rows \times cols\f$, \f$U\f$ is
    \f$rows \times rows\f$ matrix with orthonormal columns, \f$V\f$ is \f$cols \times cols\f$
    matrix with orthonormal columns, and \f$\Sigma\f$ is diagonal matrix.\n
-   The maximum matrix size supported in FPGA is templated by MAXN, MAXM.
+   The maximum matrix size supported in FPGA is templated by NCMAX, NRMAX.
  *
- * @tparam DT: the data type of gesvj
- * @tparam MAXM: the maximum size (rows) of supported gesvj
- * @tparam MAXN: the maximum size (cols) of supported gesvj
+ * @tparam T: the data type of gesvj
+ * @tparam NRMAX: the maximum size (rows) of supported gesvj
+ * @tparam NCMAX: the maximum size (cols) of supported gesvj
  * @tparam MCU: the partition number of M
  * @tparam NCU: the partition number of N
  * @param rows: the size of matrix row
@@ -377,42 +376,42 @@ void read_to_2cols(DT A[MCU][ACUM][MAXN],
  * @param output_S: the output S of svd
  * @param output_V: the output V of svd
  **/
-template <typename DT, int MAXM, int MAXN, int MCU, int NCU>
+template <typename T, int NRMAX, int NCMAX, int MCU, int NCU>
 void gesvj(int rows,
            int cols,
-           DT input_mat[MAXM * MAXN],
-           DT output_U[MAXM * MAXM],
-           DT output_S[MAXN],
-           DT output_V[MAXN * MAXN]) {
+           T input_mat[NRMAX * NCMAX],
+           T output_U[NRMAX * NRMAX],
+           T output_S[NCMAX],
+           T output_V[NCMAX * NCMAX]) {
     // num of elements in each MCU
-    const int ACUM = (MAXM + MCU - 1) / MCU;
+    const int ACUM = (NRMAX + MCU - 1) / MCU;
     // num of elements in each NCU
-    const int ACUN = (MAXN + NCU - 1) / NCU;
+    const int ACUN = (NCMAX + NCU - 1) / NCU;
 
-    DT A[MCU][ACUM][MAXN];
+    T A[MCU][ACUM][NCMAX];
 #pragma HLS RESOURCE variable = A core = RAM_T2P_URAM
 #pragma HLS ARRAY_PARTITION variable = A dim = 1
-    DT U[MAXM][MAXM];
+    T U[NRMAX][NRMAX];
 #pragma HLS RESOURCE variable = U core = RAM_T2P_URAM
-    DT V[NCU][ACUN][MAXN];
+    T V[NCU][ACUN][NCMAX];
 #pragma HLS RESOURCE variable = V core = RAM_T2P_URAM
 #pragma HLS ARRAY_PARTITION variable = V dim = 1
-    DT A_i[MCU][ACUM];
+    T A_i[MCU][ACUM];
 #pragma HLS RESOURCE variable = A_i core = RAM_S2P_BRAM
 #pragma HLS ARRAY_PARTITION variable = A_i dim = 1
-    DT A_j[MCU][ACUM];
+    T A_j[MCU][ACUM];
 #pragma HLS RESOURCE variable = A_j core = RAM_S2P_BRAM
 #pragma HLS ARRAY_PARTITION variable = A_j dim = 1
-    DT V_i[NCU][ACUN];
+    T V_i[NCU][ACUN];
 #pragma HLS RESOURCE variable = V_i core = RAM_S2P_BRAM
 #pragma HLS ARRAY_PARTITION variable = V_i dim = 1
-    DT V_j[NCU][ACUN];
+    T V_j[NCU][ACUN];
 #pragma HLS RESOURCE variable = V_j core = RAM_S2P_BRAM
 #pragma HLS ARRAY_PARTITION variable = V_j dim = 1
 
-    const int S_SIZE = MAXM > MAXN ? MAXN : MAXM;
+    const int S_SIZE = NRMAX > NCMAX ? NCMAX : NRMAX;
     const int ssize = rows > cols ? cols : rows;
-    DT S[S_SIZE]; //??what if M>N?@TODO
+    T S[S_SIZE]; //??what if M>N?
 #pragma HLS RESOURCE variable = S core = RAM_S2P_BRAM
 
 INIT_S:
@@ -424,10 +423,10 @@ INIT_S:
 
 INIT_U:
     for (int i = 0; i < rows; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXM max = MAXM
+#pragma HLS LOOP_TRIPCOUNT min = NRMAX max = NRMAX
         for (int j = 0; j < rows; j++) {
 #pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = MAXM max = MAXM
+#pragma HLS LOOP_TRIPCOUNT min = NRMAX max = NRMAX
             if (i == j) {
                 U[i][j] = 1.0;
             } else {
@@ -438,10 +437,10 @@ INIT_U:
 // initialize V matrix to diagonal
 INIT_V:
     for (int i = 0; i < cols; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXN max = MAXN
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX max = NCMAX
         for (int j = 0; j < cols; j++) {
 #pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = MAXN max = MAXN
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX max = NCMAX
             if (i == j) {
                 V[i % NCU][i / NCU][j] = 1.0;
             } else {
@@ -453,9 +452,9 @@ INIT_V:
 // read A from DDR
 READ_A:
     for (int i = 0; i < rows; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXM max = MAXM
+#pragma HLS LOOP_TRIPCOUNT min = NRMAX max = NRMAX
         for (int j = 0; j < cols; j++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXN max = MAXN
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX max = NCMAX
 #pragma HLS PIPELINE II = 1
             A[i % MCU][i / MCU][j] = input_mat[i * cols + j];
 #ifndef __SYNTHESIS__
@@ -471,29 +470,29 @@ READ_A:
 #endif
     }
 
-    hls::stream<DT> alpha_strm;
+    hls::stream<T> alpha_strm;
 #pragma HLS STREAM variable = alpha_strm depth = 16 dim = 1
-    hls::stream<DT> beta_strm;
+    hls::stream<T> beta_strm;
 #pragma HLS STREAM variable = beta_strm depth = 16 dim = 1
-    hls::stream<DT> gamma_strm;
+    hls::stream<T> gamma_strm;
 #pragma HLS STREAM variable = gamma_strm depth = 16 dim = 1
-    hls::stream<DT> s_strm;
+    hls::stream<T> s_strm;
 #pragma HLS STREAM variable = s_strm depth = 8 dim = 1
-    hls::stream<DT> c_strm;
+    hls::stream<T> c_strm;
 #pragma HLS STREAM variable = c_strm depth = 8 dim = 1
-    hls::stream<DT> alpha_update_strm;
+    hls::stream<T> alpha_update_strm;
 #pragma HLS STREAM variable = alpha_update_strm depth = 16 dim = 1
-    hls::stream<DT> beta_update_strm;
+    hls::stream<T> beta_update_strm;
 #pragma HLS STREAM variable = beta_update_strm depth = 16 dim = 1
-    hls::stream<DT> gamma_update_strm;
+    hls::stream<T> gamma_update_strm;
 #pragma HLS STREAM variable = gamma_update_strm depth = 16 dim = 1
-    hls::stream<DT> conv_strm;
+    hls::stream<T> conv_strm;
 #pragma HLS STREAM variable = conv_strm depth = 8 dim = 1
 
-    DT converge = 1.0;
+    T converge = 1.0;
 
-    DT epsilon = 1.e-8;
-    if (sizeof(DT) == sizeof(float)) {
+    T epsilon = 1.e-8;
+    if (sizeof(T) == sizeof(float)) {
         epsilon = 1.e-7;
     }
 
@@ -507,25 +506,25 @@ CONV_WHILE:
 
     LOOP_COLS:
         for (int i = 1; i < cols; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXN max = MAXN
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX max = NCMAX
         LOOP_i:
             for (int j = 0; j < i; j++) {
 // clang-format off
-#pragma HLS LOOP_TRIPCOUNT min = MAXN/2 max = MAXN/2
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX/2 max = NCMAX/2
                 // clang-format on
-                internal::read_to_2cols<DT, MAXM, MAXN, MCU, ACUM, NCU, ACUN>(A, V, A_i, A_j, V_i, V_j, rows, cols, i,
-                                                                              j, alpha_strm, beta_strm, gamma_strm);
+                internal::read_to_2cols<T, NRMAX, NCMAX, MCU, ACUM, NCU, ACUN>(A, V, A_i, A_j, V_i, V_j, rows, cols, i,
+                                                                               j, alpha_strm, beta_strm, gamma_strm);
 
-                DT alpha = alpha_strm.read();
-                DT beta = beta_strm.read();
-                DT gamma = gamma_strm.read();
+                T alpha = alpha_strm.read();
+                T beta = beta_strm.read();
+                T gamma = gamma_strm.read();
                 internal::svd_and_conv(alpha, beta, gamma, conv_strm, s_strm, c_strm);
 
-                DT s = s_strm.read();
-                DT c = c_strm.read();
-                internal::update_AV<DT, MAXM, MAXN, MCU, ACUM, NCU, ACUN>(A, V, A_i, A_j, V_i, V_j, rows, cols, i, j, s,
-                                                                          c);
-                DT conv_tmp = conv_strm.read();
+                T s = s_strm.read();
+                T c = c_strm.read();
+                internal::update_AV<T, NRMAX, NCMAX, MCU, ACUM, NCU, ACUN>(A, V, A_i, A_j, V_i, V_j, rows, cols, i, j,
+                                                                           s, c);
+                T conv_tmp = conv_strm.read();
                 converge = hls::max(converge, conv_tmp);
             }
         }
@@ -533,11 +532,11 @@ CONV_WHILE:
 
     // calculate the S diagonal matrix
     const int DEP = 16;
-    DT accu_s = 0;
-    DT AUS_accu[DEP];
+    T accu_s = 0;
+    T AUS_accu[DEP];
 CALC_US:
     for (int j = 0; j < cols; j++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXN max = MAXN
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX max = NCMAX
         accu_s = 0;
         for (int i = 0; i < DEP; i++) {
 #pragma HLS UNROLL
@@ -545,8 +544,8 @@ CALC_US:
         }
         for (int i = 0; i < rows; i++) {
 #pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = MAXM max = MAXM
-            DT Aij = A[i % MCU][i / MCU][j];
+#pragma HLS LOOP_TRIPCOUNT min = NRMAX max = NRMAX
+            T Aij = A[i % MCU][i / MCU][j];
             AUS_accu[i % DEP] += Aij * Aij;
         }
         for (int m = 0; m < DEP; m++) {
@@ -556,7 +555,7 @@ CALC_US:
         accu_s = hls::sqrt(accu_s);
         for (int i = 0; i < rows; i++) {
 #pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = MAXM max = MAXM
+#pragma HLS LOOP_TRIPCOUNT min = NRMAX max = NRMAX
             U[i][j] = A[i % MCU][i / MCU][j] / accu_s;
             if (i == j) {
                 S[i] = accu_s;
@@ -568,9 +567,9 @@ CALC_US:
 // output S, U, V and store
 OUT_U:
     for (int i = 0; i < rows; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXM max = MAXM
+#pragma HLS LOOP_TRIPCOUNT min = NRMAX max = NRMAX
         for (int j = 0; j < rows; j++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXM max = MAXM
+#pragma HLS LOOP_TRIPCOUNT min = NRMAX max = NRMAX
 #pragma HLS PIPELINE II = 1
             output_U[i * rows + j] = U[i][j];
         }
@@ -580,16 +579,16 @@ OUT_U:
 OUT_S:
     for (int i = 0; i < outssize; i++) {
 #pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = MAXN max = MAXM
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX max = NRMAX
         output_S[i] = S[i];
     }
 
 OUT_V:
     for (int i = 0; i < cols; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = MAXN max = MAXN
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX max = NCMAX
         for (int j = 0; j < cols; j++) {
 #pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = MAXN max = MAXN
+#pragma HLS LOOP_TRIPCOUNT min = NCMAX max = NCMAX
             output_V[i * cols + j] = V[i % NCU][i / NCU][j];
         }
     }

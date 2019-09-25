@@ -22,8 +22,9 @@
 #ifndef _XF_SOLVER_L1_GTSV_PCR_
 #define _XF_SOLVER_L1_GTSV_PCR_
 
-// #include <hls_stream.h>
-// #include <iostream>
+#ifndef _SYNTHESIS_
+#include <iostream>
+#endif
 
 namespace xf {
 namespace solver {
@@ -31,7 +32,7 @@ namespace solver {
 namespace internal {
 
 // gtsv, log2 sweeps, 1 CU
-template <class T, unsigned int N>
+template <typename T, unsigned int N>
 void gtsv_multisweeps_1cu(T low1[N], T diag1[N], T up1[N], T rhs1[N], T low2[N], T diag2[N], T up2[N], T rhs2[N]) {
 #pragma HLS dependence variable = low1 inter false
 #pragma HLS dependence variable = diag1 inter false
@@ -169,7 +170,7 @@ LoopLines:
 }; // end of gtsv_multisweeps_1cu
 
 // gtsv, log2 sweeps, n CU (n>=2)
-template <class T, unsigned int N, unsigned int NCU>
+template <typename T, unsigned int N, unsigned int NCU>
 void gtsv_multisweeps_ncu(T low1[N], T diag1[N], T up1[N], T rhs1[N], T low2[N], T diag2[N], T up2[N], T rhs2[N]) {
 #pragma HLS dependence variable = low1 inter false
 #pragma HLS dependence variable = diag1 inter false
@@ -336,7 +337,6 @@ LoopLines:
                     unsigned int addw = (i - 1) * NCU2 + r;
 
                     if (addw < N2o) { // write out
-                        // std::cout << i <<"  " << r << " " << addw << std::endl;
                         if (sweepeven) {
                             low2[addw] = low[addr];
                             diag2[addw] = diag[addr];
@@ -357,7 +357,6 @@ LoopLines:
                     unsigned int addw = N2o + (i - 2) * NCU2 + rNCU2;
 
                     if ((addw >= N2o) && (addw < N)) {
-                        // std::cout << i <<"  " << r << " " << addw << std::endl;
                         if (sweepeven) {
                             low2[addw] = cachelow[idx2][rNCU2];
                             diag2[addw] = cachediag[idx2][rNCU2];
@@ -382,7 +381,6 @@ LoopLines:
                     unsigned int addw = N2o + (i - 1) * NCU2 + rNCU2;
 
                     if (addw < N) { // write out
-                        // std::cout << i <<"  " << r << " " << addw << " " << std::endl;
                         if (sweepeven) {
                             low2[addw] = low[addr];
                             diag2[addw] = diag[addr];
@@ -398,12 +396,11 @@ LoopLines:
                 }; // end of write out: NCU/2+Nwc to NCU-1
             }      // end of write out
         }
-        // std::cout << std::endl;
     }; // end of iterations
 };     // end of gtsv_sweeps_ncu
 
 // gtsv, 1 sweep, 1 CU
-template <class T, unsigned int N, unsigned int NCU>
+template <typename T, unsigned int N, unsigned int NCU>
 void gtsv_singlesweep(
     T inlow[N], T indiag[N], T inup[N], T inrhs[N], T outlow[N], T outdiag[N], T outup[N], T outrhs[N]) {
 #pragma HLS dependence variable = inlow inter false
@@ -611,7 +608,7 @@ LoopLines:
 }; // end of gtsv_singlesweep
 
 // gtsv, 1 sweep, 1 CU
-template <class T, unsigned int N, unsigned int NCU, bool POW2>
+template <typename T, unsigned int N, unsigned int NCU, bool POW2>
 void gtsv_singlesweep(T inlow[N],
                       T indiag[N],
                       T inup[N],
@@ -636,8 +633,6 @@ void gtsv_singlesweep(T inlow[N],
     const unsigned int NCU2 = NCU >> 1;
     const int Ns = N2o % NCU - NCU2;
     const unsigned int Nwc = (Ns >= 0) ? Ns : -Ns; // write cache size
-
-    //        std::cout << "Nwc: " << Nwc << std::endl;
 
     T a[NCU + 2];
     T b[NCU + 2];
@@ -767,7 +762,6 @@ LoopLines:
                 unsigned int addr = r * 2;
                 unsigned int addw = i * NCU2 + r;
 
-                //            std::cout << addr << " " << addw << std::endl;
                 if (addw < N2o) {
                     outlow[addw] = low[addr];
                     outdiag[addw] = diag[addr];
@@ -789,8 +783,6 @@ LoopLines:
                 cacherhs[idx1][r] = rhs[addr];
                 cacheadd[idx1][r] = addw;
 
-                // std::cout << addr << " " << addw << std::endl;
-
                 if (i > 0) {
                     unsigned int addwc = cacheadd[idx2][r];
                     if (addwc < N) {
@@ -807,7 +799,6 @@ LoopLines:
                 unsigned int addr = r * 2 + 1;
                 unsigned int addw = N2o + i * NCU2 + r;
 
-                //            std::cout << addr << " " << addw << std::endl;
                 if (addw < N) {
                     outlow[addw] = low[addr];
                     outdiag[addw] = diag[addr];
@@ -833,18 +824,7 @@ LoopLines:
     };
 };
 
-/*!
-  @brief Tri-diagonal linear solver. Compute solution to linear system with a tridiagonal matrix. Parallel Cyclic
-  Reduction method.
-  @param T data type (support float and double)
-  @param N matrix size
-  @param NCU number of compute units
-  @param matDiagLow lower diagonal of matrix
-  @param matDiag diagonal of matrix
-  @param matDiagUp upper diagonal of matrix
-  @param rhs right-hand side
-*/
-template <class T, unsigned int N, unsigned int NCU>
+template <typename T, unsigned int N, unsigned int NCU>
 int gtsv_core(unsigned int n, T matDiagLow[N], T matDiag[N], T matDiagUp[N], T rhs[N]) {
     // compute log2(N)
     const unsigned int clzN = __builtin_clz(N);
@@ -860,7 +840,6 @@ int gtsv_core(unsigned int n, T matDiagLow[N], T matDiag[N], T matDiagUp[N], T r
     }
 #endif
 
-    // check NCU = power of 2
     const unsigned int clzNCU = __builtin_clz(NCU);
     const unsigned int ctzNCU = __builtin_ctz(NCU);
     const bool power2 = ((clzNCU + ctzNCU) == nBits) ? true : false;
@@ -906,14 +885,11 @@ int gtsv_core(unsigned int n, T matDiagLow[N], T matDiag[N], T matDiagUp[N], T r
     };
 
     for (unsigned int s = 0; s < (logN >> 1); s++) {
-        internal::gtsv_singlesweep<T, N, NCU, power2>(matDiagLow, matDiag, matDiagUp, rhs, outlow, outdiag, outup,
-                                                      outrhs, inidx, outidx);
-        internal::gtsv_singlesweep<T, N, NCU, power2>(outlow, outdiag, outup, outrhs, matDiagLow, matDiag, matDiagUp,
-                                                      rhs, outidx, inidx);
+        internal::gtsv_singlesweep<T, N, NCU>(matDiagLow, matDiag, matDiagUp, rhs, outlow, outdiag, outup, outrhs);
+        internal::gtsv_singlesweep<T, N, NCU>(outlow, outdiag, outup, outrhs, matDiagLow, matDiag, matDiagUp, rhs);
     };
     if (logN % 2 == 1) {
-        internal::gtsv_singlesweep<T, N, NCU, power2>(matDiagLow, matDiag, matDiagUp, rhs, outlow, outdiag, outup,
-                                                      outrhs, inidx, outidx);
+        internal::gtsv_singlesweep<T, N, NCU>(matDiagLow, matDiag, matDiagUp, rhs, outlow, outdiag, outup, outrhs);
     };
 
     const unsigned int nIter = ((unsigned int)(N + NCU - 1)) / NCU;
@@ -932,11 +908,6 @@ LoopWrite:
             };
         }
     }
-    //       for(int i=0;i<N;i++){
-    //         std::cout << inidx[i]+1 << " ";
-    //       }
-    //       std::cout << std::endl;
-
     return 0;
 };
 } // end of internal name space
@@ -945,16 +916,16 @@ LoopWrite:
   @brief Tri-diagonal linear solver. Compute solution to linear system with a tridiagonal matrix. Parallel Cyclic
   Reduction method.
   @param T data type (support float and double)
-  @param N matrix size
+  @param NMAX matrix size
   @param NCU number of compute units
   @param matDiagLow lower diagonal of matrix
   @param matDiag diagonal of matrix
   @param matDiagUp upper diagonal of matrix
   @param rhs right-hand side
 */
-template <class T, unsigned int N, unsigned int NCU>
+template <typename T, unsigned int NMAX, unsigned int NCU>
 int gtsv(unsigned int n, T* matDiagLow, T* matDiag, T* matDiagUp, T* rhs) {
-    T DiagLow[N], Diag[N], DiagUp[N], RHS[N];
+    T DiagLow[NMAX], Diag[NMAX], DiagUp[NMAX], RHS[NMAX];
 
 LoopRead:
     for (int i = 0; i < n; i++) {
@@ -965,7 +936,7 @@ LoopRead:
         RHS[i] = rhs[i];
     };
 
-    internal::gtsv_core<T, N, NCU>(n, DiagLow, Diag, DiagUp, RHS);
+    internal::gtsv_core<T, NMAX, NCU>(n, DiagLow, Diag, DiagUp, RHS);
 
 LoopWrite:
     for (int i = 0; i < n; i++) {

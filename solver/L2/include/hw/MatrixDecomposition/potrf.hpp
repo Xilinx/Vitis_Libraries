@@ -22,9 +22,7 @@
 #ifndef _XF_SOLVER_POTRF_HPP_
 #define _XF_SOLVER_POTRF_HPP_
 
-#include "ap_fixed.h"
-#include "hls_math.h"
-#include <stdint.h>
+#include <hls_math.h>
 
 namespace xf {
 namespace solver {
@@ -109,7 +107,7 @@ Loop_add_3:
 
     tmp3_j = tmp3[0] + tmp3[1];
 
-    tmp1_j = sqrt(dataA[j % NCU][j / NCU][j] - tmp3_j);
+    tmp1_j = hls::sqrt(dataA[j % NCU][j / NCU][j] - tmp3_j);
     dataA[j % NCU][j / NCU][j] = tmp1_j;
 }
 
@@ -141,24 +139,24 @@ Loop_col:
 } // namespace internal
 /**
  * @brief This function computes the Cholesky decomposition of matrix \f$A\f$ \n
- *           \f{equation*} {A = L {L}^T, }\f}
+ *           \f{equation*} {A = L {L}^T}\f}
  *                     where \f$A\f$ is a dense symmetric positive-definite matrix of size \f$m \times m\f$, \f$L\f$ is
  * a lower triangular matrix, and \f${L}^T\f$ is the transposed matrix of \f$L\f$.\n
    The maximum matrix size supported in FPGA is templated by NMAX.
  *
  * @tparam T data type (support float and double)
- * @tparam NMAX maximum number of input symmetric matrix size
+ * @tparam NMAX maximum number of rows/columns of input matrix
  * @tparam NCU number of computation unit
- * @param[in] m number of symmetric matrix A size
+ * @param[in] m number of rows/cols of matrix A
  * @param[in,out] A input matrix of size \f$m \times m\f$
  * @param[in] lda leading dimention of input matrix A
- * @param[out] info return value, if info=0, the Cholesky factorization is successful
+ * @param[out] info output info (unused)
  */
 
 template <typename T, int NMAX, int NCU>
 void potrf(int m, T* A, int lda, int& info) {
     if (NMAX == 1)
-        A[0] = sqrt(A[0]);
+        A[0] = hls::sqrt(A[0]);
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
 #pragma HLS array_partition variable = matA dim = 1
@@ -186,4 +184,4 @@ void potrf(int m, T* A, int lda, int& info) {
 
 } // namespace solver
 } // namespace xf
-#endif //#ifndef XF_SOLVENCU_POTNCUF_HPP
+#endif

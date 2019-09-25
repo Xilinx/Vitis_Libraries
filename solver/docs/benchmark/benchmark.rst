@@ -14,12 +14,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+
 *********************************************
 Quality and Performance
 *********************************************
 
-This section will provide the quality and peformance results for this library. It could help user to estimate their results.
-Add this chapter in the future.
+This section shows the quality and peformance results for this library.
 
 .. toctree::
    :maxdepth: 1
+
+   ../guide_L2/MatrixDecomposition/gesvdj/gesvdj.rst

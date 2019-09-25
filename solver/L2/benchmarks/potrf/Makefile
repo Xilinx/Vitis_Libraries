@@ -204,8 +204,6 @@ else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/ || /u250/'))
 kernel_potrf_0_VPP_CFLAGS += \
   --sp kernel_potrf_0_1.dataA:bank0
 CXXFLAGS += -DUSE_DDR
-else
-$(warning Unsupported platform $(XPLATFORM))
 endif
 
 XFREQUENCY := 300

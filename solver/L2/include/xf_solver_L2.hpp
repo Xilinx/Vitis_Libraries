@@ -33,8 +33,10 @@
 
 // Linear solver
 #include "hw/LinearSolver/pomatrixinverse.hpp"
+#include "hw/LinearSolver/gematrixinverse.hpp"
 #include "hw/LinearSolver/trtrs.hpp"
 #include "hw/LinearSolver/polinearsolver.hpp"
+#include "hw/LinearSolver/gelinearsolver.hpp"
 #include "hw/LinearSolver/gtsv_pcr.hpp"
 
 // Eigen value solver

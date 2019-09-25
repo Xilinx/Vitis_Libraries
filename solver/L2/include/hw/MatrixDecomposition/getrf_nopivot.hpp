@@ -22,22 +22,17 @@
 #ifndef _XF_SOLVER_GETRF_NOPIVOT_
 #define _XF_SOLVER_GETRF_NOPIVOT_
 
-#include "hls_stream.h"
-
-#include <iostream>
-
 namespace xf {
 namespace solver {
 
 namespace internal {
 
 // update submatrix
-template <class T, int NRCU, int NCMAX>
+template <typename T, int NRCU, int NCMAX>
 void rowUpdate(T A[NRCU][NCMAX], T pivot[NCMAX], int rs, int re, int cs, int ce) {
     T a00 = pivot[cs];
 
     T Acs[NRCU];
-    // pragma HLS resource variable=Acs core=XPM_MEMORY uram
 
     int nrows = re - rs + 1;
     int ncols = ce - cs;
@@ -58,14 +53,13 @@ LoopMulSub:
 }
 
 // core part of getrf (no pivoting)
-template <class T, int NRCU, int NCMAX, int NCU>
+template <typename T, int NRCU, int NCMAX, int NCU>
 void getrf_nopivot_core(int m, int n, T A[NCU][NRCU][NCMAX], int lda) {
 LoopSweeps:
     for (int s = 0; s < (m - 1); s++) {
         T pivot[NCU][NCMAX];
 #pragma HLS array_partition variable = pivot dim = 1
 #pragma HLS resource variable = pivot core = RAM_2P_BRAM
-    // #pragma HLS resource variable=pivot core=XPM_MEMORY uram
 
     LoopPivot:
         for (int k = s; k < n; k++) {
@@ -107,27 +101,26 @@ LoopSweeps:
 
 /**
  * @brief This function computes the LU decomposition (without pivoting) of matrix \f$A\f$ \n
-          \f{equation*} {A = L U, }\f}
-          where \f$A\f$ is a dense matrix of size \f$m \times n\f$, \f$L\f$ is a lower triangular matrix with unit
+          \f{equation*} {A = L U}\f}
+          where \f$A\f$ is a dense matrix of size \f$n \times n\f$, \f$L\f$ is a lower triangular matrix with unit
  diagonal, and \f$U\f$ is a upper triangular matrix. This function does not implement pivoting.\n
-   The maximum matrix size supported in FPGA is templated by NRMAX and NCMAX.
+   The maximum matrix size supported in FPGA is templated by NMAX.
  *
  * @tparam T data type (support float and double)
- * @tparam NRMAX maximum number of rows/cols for input matrix
+ * @tparam NMAX maximum number of rows/cols of input matrix
  * @tparam NCU number of computation unit
- * @param[in] n real row/col number of input matrix
+ * @param[in] n number of rows/cols of matrix A
  * @param[in,out] A input matrix
  * @param[in] lda leading dimention of input matrix A
- * @param[out] info return value, if info=0, the LU factorization is successful
+ * @param[out] info output info (unused)
  */
-template <class T, int NMAX, int NCU>
+template <typename T, int NMAX, int NCU>
 void getrf_nopivot(int n, T* A, int lda, int& info) {
     const int NRCU = int((NMAX + NCU - 1) / NCU);
 
     T matA[NCU][NRCU][NMAX];
 #pragma HLS array_partition variable = matA dim = 1 complete
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
-// #pragma HLS resource variable=matA core=RAM_2P_BRAM
 
 LoopRead:
     for (int r = 0; r < n; r++) {

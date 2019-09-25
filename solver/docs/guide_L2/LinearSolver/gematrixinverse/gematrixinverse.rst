@@ -15,13 +15,13 @@
    limitations under the License.
 
 *******************************************************
-Lower-Upper Decomposition (GETRF_NOPIVOT)
+General Matrix Inverse (GEMATRIXINVERSE)
 *******************************************************
 
-This function computes the LU decomposition (without pivoting) of matrix :math:`A`
+This function computes the inverse matrix of :math:`A`
 
 .. math::
-    A = L U
+        {A}^{-1}
 
-where :math:`A` is a dense matrix of size :math:`m \times m`, :math:`L` is a lower triangular matrix with unit diagonal, and :math:`U` is a upper triangular matrix. This function does not implement pivoting.
+where :math:`A` is a dense general matrix of size :math:`m \times m`.
 The maximum matrix size supported in FPGA is templated by NMAX.

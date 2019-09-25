@@ -18,6 +18,9 @@
 .. toctree::
       :hidden:
 
+Library Overview
+=================
+
 Requirements
 ------------
 
@@ -29,13 +32,14 @@ Software requirements
 
 Hardware requirements
 ~~~~~~~~~~~~~~~~~~~~~
-
-Alveo U200 cards or Alveo U250 cards or Alveo U280 cards.
+ - `Alveo U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html>`_
+ - `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html>`_
+ - `Alveo U280 <https://www.xilinx.com/products/boards-and-kits/alveo/u280.html>`_
 
 License
 -------
 
-`Apache 2.0 license <https://www.apache.org/licenses/LICENSE-2.0>`_.
+    Licensed using the `Apache 2.0 license <https://www.apache.org/licenses/LICENSE-2.0>`_::
 
     Copyright 2019 Xilinx, Inc.
     

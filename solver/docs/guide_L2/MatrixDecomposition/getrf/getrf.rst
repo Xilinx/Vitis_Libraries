@@ -23,5 +23,5 @@ This function computes the LU decomposition (with partial pivoting) of matrix :m
 .. math::
     A = L U
 
-where :math:`A` is a dense matrix of size :math:`m \times n`, :math:`L` is a lower triangular matrix with unit diagonal, and :math:`U` is a upper triangular matrix. This function implement partial pivoting.
-The maximum matrix size supported in FPGA is templated by NRMAX and NCMAX.
+where :math:`A` is a dense matrix of size :math:`n \times n`, :math:`L` is a lower triangular matrix with unit diagonal, and :math:`U` is a upper triangular matrix. This function implement partial pivoting.
+The maximum matrix size supported in FPGA is templated by NMAX.

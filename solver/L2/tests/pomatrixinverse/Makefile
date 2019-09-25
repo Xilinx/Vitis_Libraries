@@ -19,7 +19,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/benchmarks/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/tests/*}')
 
 .SECONDEXPANSION:
 
@@ -177,38 +177,32 @@ debug:
 	@echo "KERNELS are $(KERNELS)"
 	@echo "> KERNEL_NAMES are $(KERNEL_NAMES)"
 	@echo "> XO_DIR is $(XO_DIR)"
-	@echo "> kernel_gesvdj_0_SRCS is $(kernel_gesvdj_0_SRCS)"
-	@echo "> kernel_gesvdj_0_HDRS is $(kernel_gesvdj_0_HDRS)"
-	@echo "> kernle_gesvdj_0_VPP_CFLAGS is $(kernel_gesvdj_0_VPP_CFLAGS)"
+	@echo "> kernel_pomatrixinverse_0_SRCS is $(kernel_pomatrixinverse_0_SRCS)"
+	@echo "> kernel_pomatrixinverse_0_HDRS is $(kernel_pomatrixinverse_0_HDRS)"
+	@echo "> kernle_pomatrixinverse_0_VPP_CFLAGS is $(kernel_pomatrixinverse_0_VPP_CFLAGS)"
 
 XFLIB_DIR = $(abspath $(XF_PROJ_ROOT))
-KSRC_DIR = $(XFLIB_DIR)/L2/benchmarks/gesvdj
+KSRC_DIR = $(XFLIB_DIR)/L2/tests/pomatrixinverse
 
-XCLBIN_NAME := kernel_gesvdj
-KERNELS := kernel_gesvdj_0:kernel_gesvdj.cpp
+XCLBIN_NAME := kernel_pomatrixinverse
+KERNELS := kernel_pomatrixinverse_0:kernel_pomatrixinverse.cpp
 
-kernel_gesvdj_0_EXTRA_HDRS = $(XFLIB_DIR)/L2/include/xf_solver_L2.hpp
+kernel_pomatrixinverse_0_EXTRA_HDRS = $(XFLIB_DIR)/L2/include/xf_solver_L2.hpp
 # FIXME still many missing
 # must provide path
 
 VPP_CFLAGS += -I$(HLS_DIR)
-kernel_gesvdj_0_VPP_CFLAGS += -I$(XFLIB_DIR)/L2/include \
+kernel_pomatrixinverse_0_VPP_CFLAGS += -I$(XFLIB_DIR)/L2/include \
 		       -I$(XFLIB_DIR)/ext
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
-kernel_gesvdj_0_VPP_CFLAGS += \
-  --sp kernel_gesvdj_0_1.dataA:DDR[0] \
-  --sp kernel_gesvdj_0_1.dataU:DDR[0] \
-  --sp kernel_gesvdj_0_1.dataV:DDR[0] \
-  --sp kernel_gesvdj_0_1.sigma:DDR[0]
+kernel_pomatrixinverse_0_VPP_CFLAGS += \
+  --sp kernel_pomatrixinverse_0_1.dataA:DDR[0]
 CXXFLAGS += -DUSE_DDR
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/ || /u250/'))
-kernel_gesvdj_0_VPP_CFLAGS += \
-  --sp kernel_gesvdj_0_1.dataA:bank0 \
-  --sp kernel_gesvdj_0_1.dataU:bank0 \
-  --sp kernel_gesvdj_0_1.dataV:bank0 \
-  --sp kernel_gesvdj_0_1.sigma:bank0
+kernel_pomatrixinverse_0_VPP_CFLAGS += \
+  --sp kernel_pomatrixinverse_0_1.dataA:bank0
 CXXFLAGS += -DUSE_DDR
 endif
 
@@ -218,14 +212,14 @@ XFREQUENCY := 300
 
 SRC_DIR = $(CUR_DIR)
 
-EXE_NAME = test_gesvdj
+EXE_NAME = test_pomatrixinverse
 HOST_ARGS = -xclbin $(XCLBIN_FILE) 
 
-SRCS = test_gesvdj.cpp
+SRCS = test_pomatrixinverse.cpp
 
 # must provide path
-test_gesvdj_EXTRA_HDRS += $(EXT_DIR)/xcl2/xcl2.hpp
-test_gesvdj_CXXFLAGS += -I $(EXT_DIR)/xcl2 -I $(KSRC_DIR) -I $(EXT_DIR)/MatrixGen/
+test_pomatrixinverse_EXTRA_HDRS += $(EXT_DIR)/xcl2/xcl2.hpp
+test_pomatrixinverse_CXXFLAGS += -I $(EXT_DIR)/xcl2 -I $(KSRC_DIR) -I $(EXT_DIR)/MatrixGen/
 
 CXXFLAGS += -D XDEVICE=$(XDEVICE) -g
 
