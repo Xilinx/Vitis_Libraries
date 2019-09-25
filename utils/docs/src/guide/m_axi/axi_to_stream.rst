@@ -36,7 +36,7 @@ is positive integer multiple of alignment width and the stream's width just equa
 and alignment width are assumed to be multiple of 8-bit char.
 
 The axiToStream for general data is relatively universal compared with the axiToStream for aligned data,
-so it causes more resource. The data length should be in number of char.the data width cloud be unaligned or aligned,
+so it causes more resource. The data length should be in number of 8-bit char. The data width cloud be unaligned or aligned,
 e.g. compressed binary files. AXI port is assumed to have width as multiple of 8-bit char.
 
 .. CAUTION::
@@ -53,5 +53,5 @@ This primitive performs axiToStream in two modules working simultaneously.
 2. ``split_vec_to_aligned``: It consumes the ``_WAxi`` width stream, splits and aligns the wide data to
    stream width, and writes the data into stream.
 
-This ``axiToStream`` primitve has only one port for axi ptr and one port for stream output.
+This ``axiToStream`` primitive has only one port for axi ptr and one port for stream output.
 

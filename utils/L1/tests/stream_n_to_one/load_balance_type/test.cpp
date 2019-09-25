@@ -73,7 +73,7 @@ void produce_0(hls::stream<float> c_istrms[NSTRM],
                hls::stream<bool> e_c_istrms[NSTRM],
                hls::stream<float> c_ostrms[NSTRM],
                hls::stream<bool> e_c_ostrms[NSTRM]) {
-#pragma dataflow
+#pragma HLS dataflow
     for (int i = 0; i < NSTRM; ++i) {
 #pragma HLS unroll
         produce_one_s0(c_istrms[i], e_c_istrms[i], c_ostrms[i], e_c_ostrms[i]);
@@ -85,7 +85,7 @@ void produce_1(hls::stream<float> c_istrms[NSTRM],
                hls::stream<bool> e_c_istrms[NSTRM],
                hls::stream<float> c_ostrms[NSTRM],
                hls::stream<bool> e_c_ostrms[NSTRM]) {
-#pragma dataflow
+#pragma HLS dataflow
     for (int i = 0; i < NSTRM; ++i) {
 #pragma HLS unroll
         if (i < 2)
@@ -102,7 +102,7 @@ void produce_2(hls::stream<float> c_istrms[NSTRM],
                hls::stream<bool> e_c_istrms[NSTRM],
                hls::stream<float> c_ostrms[NSTRM],
                hls::stream<bool> e_c_ostrms[NSTRM]) {
-#pragma dataflow
+#pragma HLS dataflow
     for (int i = 0; i < 2; ++i) {
 #pragma HLS unroll
         produce_one_s0(c_istrms[i], e_c_istrms[i], c_ostrms[i], e_c_ostrms[i]);

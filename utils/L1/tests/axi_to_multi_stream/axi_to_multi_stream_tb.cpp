@@ -53,13 +53,10 @@ void top_func(ap_uint<AXI_WIDTH> rbuf[BUF_DEPTH],
               hls::stream<DT2>& r_strm2) {
     // clang-format off
     ;
-#pragma HLS INTERFACE m_axi port = rbuf offset = slave bundle = gmem_in1 latency = 8 \
+#pragma HLS INTERFACE m_axi port = rbuf offset = slave bundle = gmem_in1 latency = 125 \
     num_read_outstanding = 32 max_read_burst_length = 32
     ;
 // clang-format on
-
-#pragma HLS ARRAY_PARTITION variable = len
-#pragma HLS ARRAY_PARTITION variable = offset
 
 #pragma HLS DATAFLOW
 

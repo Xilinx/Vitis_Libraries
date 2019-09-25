@@ -39,7 +39,7 @@ namespace utils_hw {
  * In another word, the start offset is specified by element count from
  * the beginning of a vector of AXI port width.
  *
- * This primitive assumes the width of AXI port width is positive integer
+ * This primitive assumes the width of AXI port is positive integer
  * multiple of data element's alignment width.
  *
  * The alignment width is assumed to be multiple of 8-bit char.

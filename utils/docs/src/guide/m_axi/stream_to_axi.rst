@@ -60,5 +60,5 @@ The implementation of the two modules is shown as follows,
 where ``N = _WAxi/_WStrm`` , ``not enough one axi`` is the state of ``counter_for_axi < N`` and it would be instead of 0.
 ``not enough one burst`` is the state of ``counter_for_burst < NBurst`` and it would be as a burst to write.
 
-This ``streamToAxi`` primitve has only one port for axi ptr and one port for stream output.
+This ``streamToAxi`` primitive has only one port for axi ptr and one port for stream output.
 
