@@ -22,7 +22,7 @@ Random Number Generator
 Overview
 =========
 
-Random Number Generator (RNG) is one of the core utilities needed by Monte Carlo Simulation. 
+`Random Number Generator` (RNG) is one of the core utilities needed by Monte Carlo Simulation. 
 We provide RNGs that generate uniform distribution and normal distribution. The detailed supported RNGs are listed below.
 
 ============================== ================================== =================== ==========================
@@ -31,8 +31,6 @@ RNG name                       Distribution generated             DataType suppo
 MT19937                        Uniform Distribution in (0,1)      float, double       Mersenne Twister (MT19937)
 MT2203                         Uniform Distribution in (0,1)      float, double       Mersenne Twister (MT2203)
 MT19937IcnRng                  Normal Distribution N(0,1)         float, double       Inverse CDF Transformation
-MT19937IcnRng                  Normal Distribution N(0,1)         float, double       Inverse CDF Transformation
-MT2203IcnRng                   Normal Disrtibution N(0,1)         float, double       Inverse CDF Transformation
 MT2203IcnRng                   Normal Distribution N(0,1)         float, double       Inverse CDF Transformation
 MT19937BoxMullerNomralRng      Normal Distribution N(0,1)         float, double       Box Muller Transformation
 MultiVariateNormalRng          Multi Variate Normal Distribution  float, double       Cholesky Decomposition

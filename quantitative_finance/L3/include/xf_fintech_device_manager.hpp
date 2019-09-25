@@ -25,7 +25,6 @@
 #include "xf_fintech_device.hpp"
 
 namespace xf {
-
 namespace fintech {
 
 /**
@@ -67,14 +66,11 @@ class DeviceManager {
     DeviceManager();
     virtual ~DeviceManager();
 
-   private:
     void createDeviceList(void);
     void deleteDeviceList(void);
 
-   private:
     static DeviceManager* m_instance; // SINGLETON
 
-   private:
     std::vector<Device*> m_deviceList;
 };
 

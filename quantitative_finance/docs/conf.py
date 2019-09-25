@@ -44,7 +44,7 @@ else:
 
 # -- Project information -----------------------------------------------------
 
-project = 'XF FinTech Library'
+project = 'Vitis Quantitative Finance Library'
 copyright = '2019, Xilinx Inc.'
 author = 'Xilinx Inc.'
 
@@ -101,7 +101,9 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'rst/namespace_xf.rst']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 
+                    'rst_L*/namespace_xf*.rst', 'rst_L*/namespace_std.rst', 
+                    'rst_L*/index.rst', 'rst_L*/global.rst']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
@@ -175,7 +177,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'XfFinTechLibrary.tex', 'XF FinTech Library Documentation',
+    (master_doc, 'XfFinTechLibrary.tex', 'Vitis Quantitative Library Documentation',
      'Xilinx Inc.', 'manual'),
 ]
 
@@ -185,7 +187,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'xf_security', 'XF FinTech Library Documentation',
+    (master_doc, 'xf_fintech', 'Vitis Quantitative Library Documentation',
      [author], 1)
 ]
 
@@ -196,8 +198,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'XfFinTechLibrary', 'XF FinTech Library Documentation',
-     author, 'XfFinTechLibrary', 'One line description of project.',
+    (master_doc, 'Vitis Quantitative Library', 'Vitis Quantitative Library Documentation',
+     author, 'Vitis Quantitative Library', 'One line description of project.',
      'Miscellaneous'),
 ]
 

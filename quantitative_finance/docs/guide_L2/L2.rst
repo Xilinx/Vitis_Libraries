@@ -24,3 +24,4 @@ L2 Pricing Engine Kernel User Guide
    kernel_design.rst
    kernel_api.rst
    kernel_benchmark.rst
+   other_engines.rst

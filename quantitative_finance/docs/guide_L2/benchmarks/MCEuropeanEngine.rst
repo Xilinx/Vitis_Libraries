@@ -30,72 +30,71 @@ Highlights
 The performance of the MCEuropeanEngine is shown in the table below, our cold run has 488X and warn run has 1954X compared to baseline.
 Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2690 v4 @3.20GHz, 8 cores per processor and 2 threads per core.
 
-.. _tab_input_parameter:
+.. _tab_MCEE_Execution_Time:
 
-.. table:: performance 
-    :align: center
+.. table:: Performance
 
    +-------------------------+-----------------------------------------+
-   | platform                |             Execution time              |
+   | Platform                |             Execution time              |
    |                         +-----------------+-----------------------+
    |                         | cold run        | warm run              |
    +-------------------------+-----------------+-----------------------+
-   | Baseline                | 25.9ms          | 25.9m                 |
+   | Baseline                | 20.155ms        | 20.155ms              |
    +-------------------------+-----------------+-----------------------+
-   | FinTech on U250         | 0.053ms         | 0.01325ms             |
+   | Runtime on U250         | 0.053ms         | 0.01325ms             |
    +-------------------------+-----------------+-----------------------+
-   | Accelaration Ratio      | 488X            | 1954X                 |
+   | Accelaration Ratio      | 380X            | 1521X                 |
    +-------------------------+-----------------+-----------------------+
 
-.. _tab_input_parameter:
+.. _tab_MCEE_input_parameter:
 
-.. table:: application scenario
-    :align: center
+.. table:: Application Scenario
 
     +---------------+----------------------------+
     |  Option Type  | put                        |
     +---------------+----------------------------+
     |  strike       | 40                         |
-    +---------------+ ---------------------------+
+    +---------------+----------------------------+
     |  underlying   | 36                         |
-    +---------------+ ---------------------------+
+    +---------------+----------------------------+
     | risk-free rate| 6%                         |
-    +---------------+ ---------------------------+
+    +---------------+----------------------------+
     |  volatility   | 20%                        |
-    +---------------+ ---------------------------+
+    +---------------+----------------------------+
     | dividend yield| 0                          |
-    +---------------+ ---------------------------+
+    +---------------+----------------------------+
     |  maturity     | 1 year                     |
-    +---------------+ ---------------------------+
+    +---------------+----------------------------+
     |  tolerance    | 0.02                       |
-    +---------------+ ---------------------------+
-    |  workload     | 1 steps, 47000 paths     |
-    +---------------+ ---------------------------+
+    +---------------+----------------------------+
+    |  workload     |   1 steps, 47000 paths     |
+    +---------------+----------------------------+
 
 Profiling
 =================
 The resource utilization and performance of MCEuropeanEngine on U250 FPGA card is listed in the following tables.
+There are 4 PUs on Alveo U250 to pricing the option in parallel.  Each PU have the same resource utilization.
 
 .. _tab_MCEE_resource:
 
 .. table:: Resource utilization report of European Option APIs on U250 
     :align: center
 
-    +---------------+----------------------------+--------+--------+------+------+-----+
-    | Implemetation |            Kernels         | LUT    | FF     | BRAM | URAM | DSP |
-    +---------------+----------------------------+--------+--------+------+------+-----+
-    |               |       kernel_mc_0          | 234072 | 376207 | 49   | 0    | 1594| 
-    |               |      (UN config: 8)        |        |        |      |      |     |
-    |               +----------------------------+--------+--------+------+------+-----+
-    | 4-kernel      |       kernle_mc_1          | 234072 | 376208 | 49   | 0    | 1594|
-    |               |      (UN config: 8)        |        |        |      |      |     |
-    |               +----------------------------+--------+--------+------+------+-----+
-    |               |       kernel_mc_2          | 234072 | 376208 | 49   | 0    | 1594|
-    |               |      (UN config: 8)        |        |        |      |      |     |
-    |               +----------------------------+--------+--------+------+------+-----+
-    |               |       kernel_mc_3          | 234072 | 376210 | 49   | 0    | 1594|
-    |               |      (UN config: 8)        |        |        |      |      |     |
-    +---------------+----------------------------+--------+--------+------+------+-----+
+    +---------------+----------------------------+--------+---------+------+------+-------+
+    | Implemetation |            Kernels         | LUT    | FF      | BRAM | URAM | DSP   |
+    +---------------+----------------------------+--------+---------+------+------+-------+
+    | 1 PU          |       kernel_mc_0          | 234072 | 376207  | 49   | 0    | 1594  | 
+    |               |      (UN config: 8)        |        |         |      |      |       |
+    +---------------+----------------------------+--------+---------+------+------+-------+
+    | 4 PUs         |       kernel_mc_0          | 936288 | 1504828 | 196  | 0    | 6376  |
+    |               |       kernel_mc_1          |        |         |      |      |       |
+    |               |       kernel_mc_2          |        |         |      |      |       |
+    |               |       kernel_mc_3          |        |         |      |      |       |
+    +---------------+----------------------------+--------+---------+------+------+-------+
+    | total resource of board                    | 1728000| 3456000 | 2688 | 1280 | 12288 |
+    +---------------+----------------------------+--------+---------+------+------+-------+
+    | utilization ratio (not include platform)   | 54.18% | 43.54%  | 7.29%| 0    | 51.88%|
+    +---------------+----------------------------+--------+---------+------+------+-------+
 
 :numref:`tab_MCEE_resource` gives the resource utilization report of four MCEuropeanEngine PUs. Note that the resource statistics are under specific UN configurations. These UN configurations are the templated parameters of the corresponding API.
 
@@ -111,7 +110,7 @@ The performance of this demo is listed in :numref:`tab_MCEE_performance`. In thi
     |    Engine     | Frequency | Execution Time (ms)      |
     |               |           +------------+-------------+
     |               |           | kernel     | E2E         | 
-    +---------------+-----------+------------+-------------+-
+    +---------------+-----------+------------+-------------+
     |   4 PUs       |  250MHz   | 7.1ms      | 53ms        |  
     |               |           | (1000 loop)| (1000 loop) |   
     +---------------+-----------+------------+-------------+
@@ -131,7 +130,7 @@ There four MCEuropeaEngine PUs are placed different SLRs on U250. Due to place a
 .. note:: 
   **Analyzation of the execution time of MCEuropeanEngine**
 
-  There are four PUs. Each PU could execution one application at one time. When there are multiple applications, they are distributed on different PUs and could by executed at the same time. So the warm run time is 1/4 of the cold run.
+  There are 4 PUs. Each PU could execution one application at one time. When there are multiple applications, they are distributed on different PUs and could by executed at the same time. So the warm run time is 1/4 of the cold run.
 
 
 .. toctree::

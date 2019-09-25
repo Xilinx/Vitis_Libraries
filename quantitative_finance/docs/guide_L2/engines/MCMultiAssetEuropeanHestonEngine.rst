@@ -13,9 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*******************************************
+***************************************************
 Internal Design of MCMultiAssetEuropeanHestonEngine
-*******************************************
+***************************************************
 
 
 Overview
@@ -36,7 +36,7 @@ Implementation
 This engine is similar to MCEuropeanHestonEngine.
 The main difference is that it have additional stage to calculate random variables that have certain correlation.
 Assume there're :math:`N` underlying asset, each asset needs :math:`2` random variable, :math:`2N` random variable in total.
-The correlation matrix is and :math:`2N` by :math:`2N` matrix, but the righ upper triangle is all zeros after LU decomposition, leaving only :math:`(2N + 1)N` non-zero elements. By cutting of none zeros elements, it will save nearly half DSPs to calculate correlated random variables.
+The correlation matrix is and :math:`2N` by :math:`2N` matrix, but the right upper triangle is all zeros after LU decomposition, leaving only :math:`(2N + 1)N` non-zero elements. By cutting of none zeros elements, it will save nearly half DSPs to calculate correlated random variables.
 
 
 .. image:: /images/mcht_masset.png
@@ -53,6 +53,6 @@ The first three is relatively simple dealing with negative volatility.
 kDTQuadraticExponential and kDTQuadraticExponential Martingale use better approximation method to get better precision result, and take more resource. 
 
 Optimization comes in two parts. 
-First and the most is optimization of L1 functions. 
-The second is we save one call of cumulative distribution function since we can get this value directly from RNGs. 
-The second part may not hold when dealing with multiple underlying asset in the future because it may lose direct link of gaussian random number and its corresponding uniform random number.
+
+- 1. The first and also the most is optimization of L1 functions. 
+- 2. Save one call of cumulative distribution function in single underlying assets since it can get the value directly from RNGs. It may not work for multiple underlying assets because it will lose direct link between Gaussian random number and its corresponding uniform random number.

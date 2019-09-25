@@ -120,7 +120,7 @@ void Matrices::createA(std::map<std::pair<int, int>, double>& sparse_map_A,
      * terms in V
      * A2 vector is ordered differently with v inner so can't use row,col for that
      * assignment
-      */
+     */
     double temp, temp2;
 
     for (j = 0; j < m2 - 1; j++) {

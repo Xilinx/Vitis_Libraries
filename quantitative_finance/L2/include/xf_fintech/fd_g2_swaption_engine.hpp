@@ -1249,8 +1249,8 @@ void FdG2SwaptionEngine<DT, _exSize, _xGridMax, _yGridMax, _layoutSizeMax>::solv
     retVal[_layoutSize - 1] = buff;
 
 loop_solve_reverse_y:
-    for (int j = _yGrid - 1; j >= 0; --j) {
-        for (int i = _xGrid - 1; i >= 0; --i) {
+    for (int j = (int)_yGrid - 1; j >= 0; --j) {
+        for (int i = (int)_xGrid - 1; i >= 0; --i) {
 #pragma HLS pipeline
             Size at = i + j * _xGrid;
             Size ri = j + i * _yGrid;

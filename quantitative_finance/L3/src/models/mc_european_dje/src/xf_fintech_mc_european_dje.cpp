@@ -25,19 +25,17 @@
 
 using namespace xf::fintech;
 
-const char* MCEuropeanDJE::KERNEL_NAMES[] = {"kernel_mc_0", "kernel_mc_1", "kernel_mc_2", "kernel_mc_3"};
+const char* MCEuropeanDJE::KERNEL_NAMES[] = {"kernel_mc_0"};
 
 typedef struct _XCLBINLookupElement {
     Device::DeviceType deviceType;
     std::string xclbinName;
 } XCLBINLookupElement;
 
-static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {
-    {Device::DeviceType::U50, "mc_european_dowjones.xclbin"}, // BUG-257 changing names to match output
-                                                              // from L2
-    {Device::DeviceType::U200, "mc_european_dowjones.xclbin"},
-    {Device::DeviceType::U250, "mc_european_dowjones.xclbin"},
-    {Device::DeviceType::U280, "mc_european_dowjones.xclbin"}};
+static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "mc_european_dowjones.xclbin"},
+                                                    {Device::DeviceType::U200, "mc_european_dowjones.xclbin"},
+                                                    {Device::DeviceType::U250, "mc_european_dowjones.xclbin"},
+                                                    {Device::DeviceType::U280, "mc_european_dowjones.xclbin"}};
 
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);

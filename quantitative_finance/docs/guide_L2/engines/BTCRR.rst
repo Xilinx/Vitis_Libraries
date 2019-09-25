@@ -21,7 +21,7 @@ Internal Design of Cox-Ross-Rubinstein Binomial Tree
 Overview
 ========
 
-The Cox-Ross-Rubinstein Binomial Tree method is a numerical implementation of the assumptions in the Black-Scholes financial model.  It is described in more detail in the "Numerical Methods" section here.
+The Cox-Ross-Rubinstein Binomial Tree method is a numerical implementation of the assumptions in the Black-Scholes financial model. The detail is described in the "Numerical Methods" section here.
 
 The equations for obtaining the option price can be found online (see for example https://en.wikipedia.org/wiki/Binomial_options_pricing_model) and will not be reproduced here. 
 
@@ -42,17 +42,16 @@ These input parameters are in the form of a structure that contains:
 - q - Dividend yield
 - N - Height of the binomial tree
 
-This function is mostly standard C++ with the exception of using the HLS maths library in place of the standard C++ library.
-Layered on top of this is the HLS specific kernel wrapper which is responsible for gathering the input data sets (from DDR or HBM for example), converting to parallel streams and passing into the kernel. 
+This function is mostly standard C++ with some exception of using the HLS maths library to replace it.
+Layered on top of the design is the HLS specific kernel wrapper which is responsible for gathering the input data sets (from DDR or HBM for example), converting them to parallel streams and passing them into the kernel. 
 It then writes the results back out. This level is where the HLS #pragmas are used to control the amount of pipelining and unrolling.
 
 
-
-bt_engine (bt_engine.h)
+bt_engine (bt_engine.hpp)
 =======================
 
-The code is a implementation of the Cox, Ross, & Rubinstein (CRR) method and is templated to accept different data types (float/double). With the exception of the use of the HLS math library, it 
-uses standard C++ and allows the code to be easily used in a software only environment by swapping to the standard math namespace. 
+The code is a implementation of the Cox, Ross, & Rubinstein (CRR) method and is template to accept different data types (float/double). 
+It uses standard C++ and allows the code to be easily used in a software only environment by swapping to the standard math namespace. 
 
 The implementation is broken into a number of steps:
 
@@ -86,9 +85,7 @@ binomialtreekernel (binomialtreekernel.cpp)
 
 The kernel is the HLS wrapper level which implements the pipelining and parallelization to allow high throughput. The kernel uses a dataflow methodology to pass the data through the design.
 
-The top level in and out ports are 512 bit wide, designed to match the whole DDR bus width and allowing vector access. In the case of float data type (4 bytes), sixteen parameters can be accessed from the bus in parallel. Each port is connected to its own AXI master with arbitration handled by the AXI switch and DDR controller under the hood.
-
-
+The top leveli's input and output ports are 512 bit wide, which is designed to match the whole DDR bus width and allowing vector access. In the case of float data type (4 bytes), sixteen parameters can be accessed from the bus in parallel. Each port is connected to its own AXI master with arbitration handled by the AXI switch and DDR controller under the hood.
 
 
 Resource Utilization
@@ -133,17 +130,13 @@ The number of engines in a build may be configured by the user.  For an example 
 Throughput
 ==========
 
-The demo application code Makefile has a check target option which can be used to verify the output from the Binomial tree Kernel compared to CPU/Quantlib and the throughput.
+The demo application Makefile has a check target option which can be used to verify the output from the Binomial tree Kernel compared to CPU/Quantlib and the throughput.
 
 For a 1 engine kernel with a tree height of 1024 we obtain a throughput of approximately 0.7K option calculations per second. 
 
 For a 4 engine kernel with a tree height of 1024 we obtain a throughput of approximately 2.7K option calculations per second.
 
 Both these values are obtained when calculating 49 options (i.e. the stock and volatility test grid). The values are the same, whether European or American option prices are being calculated. 
-
-
-
-
 
 .. toctree::
    :maxdepth: 1

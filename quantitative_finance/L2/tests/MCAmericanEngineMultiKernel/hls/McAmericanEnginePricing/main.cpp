@@ -82,10 +82,6 @@ int main(int argc, char* argv[]) {
 
     xf::fintech::MCAmericanEngineCalibrate<double, 2, 2>(timeLength, riskFreeRate, strike, optionType, pOut, mOut,
                                                          coefOut, calibSamples, timeSteps);
-    //  std::string
-    //  coeffile("/proj/xcohdstaff1/shaodong/sdprojects_git/xf_fintech_shaodong/tests/McAmericanEngine/kernel_2/coefdata.csv");
-    //  writecoef(10, coefOut, coeffile);
-    //  readcoef(10, coefOut, coeffile);
 
     TEST_DT outputs[1];
     kernel_2_top(underlying, volatility, dividendYield, riskFreeRate, timeLength, strike, optionType, seed2, coefOut,

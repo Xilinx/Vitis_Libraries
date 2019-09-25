@@ -114,12 +114,9 @@ int main(int argc, const char* argv[]) {
     ArgParser parser(argc, argv);
     std::string mode;
     std::string xclbin_path;
-    if (parser.getCmdOption("-mode", mode) && mode == "fpga") {
-        // run_fpga = true;
-        if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-            std::cout << "ERROR:xclbin path is not set!\n";
-            return 1;
-        }
+    if (!parser.getCmdOption("-xclbin", xclbin_path)) {
+        std::cout << "ERROR:xclbin path is not set!\n";
+        return 1;
     }
     // AXI depth
     int data_size = depthP;            //= depthP = 1024(calibrate samples)*10(steps)

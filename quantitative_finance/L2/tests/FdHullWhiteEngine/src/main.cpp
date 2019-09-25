@@ -26,6 +26,25 @@
 #include "utils.hpp"
 #include "FDHWE_kernel.hpp"
 
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
+
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -58,14 +77,10 @@ int main(int argc, const char* argv[]) {
 
     // cmd parser
     ArgParser parser(argc, argv);
-    std::string mode;
     std::string xclbin_path;
-    if (parser.getCmdOption("-mode", mode) && mode == "fpga") {
-        // run_fpga = true;
-        if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-            std::cout << "ERROR:xclbin path is not set!\n";
-            return 1;
-        }
+    if (!parser.getCmdOption("-xclbin", xclbin_path)) {
+        std::cout << "ERROR:xclbin path is not set!\n";
+        return 1;
     }
 
     // number of call for kernel
@@ -83,9 +98,9 @@ int main(int argc, const char* argv[]) {
     // setup k0 params
     int err = 0;
     mytype minErr = 1e-8;
-    unsigned int _tGrid = 100;
+    unsigned int _tGrid = 10;
     unsigned int _ETSize = 5;
-    unsigned int _xGrid = 51;
+    unsigned int _xGrid = 11;
     unsigned int _legPSize = 5;
     unsigned int _legRSize = 5;
 
@@ -222,6 +237,10 @@ loop_iborPeriod:
         } else if (4000 == _tGrid) {
             NPV_golden = 13.1971381639543281; // t = 4000, x = 51
         }
+    } else if (11 == _xGrid) {
+        if (10 == _tGrid) {
+            NPV_golden = 13.13811089598575;
+        }
     }
 /*
 // ITM
@@ -254,33 +273,33 @@ NPV_golden = 2.6210458836641473;		// t = 120, x = 101
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[7];
-    mext_o[0].flags = XCL_MEM_DDR_BANK0;
     mext_o[0].obj = stoppingTimes_alloc;
     mext_o[0].param = 0;
 
-    mext_o[1].flags = XCL_MEM_DDR_BANK0;
     mext_o[1].obj = payerAccrualTime_alloc;
     mext_o[1].param = 0;
 
-    mext_o[2].flags = XCL_MEM_DDR_BANK0;
     mext_o[2].obj = receiverAccrualTime_alloc;
     mext_o[2].param = 0;
 
-    mext_o[3].flags = XCL_MEM_DDR_BANK0;
     mext_o[3].obj = receiverAccrualPeriod_alloc;
     mext_o[3].param = 0;
 
-    mext_o[4].flags = XCL_MEM_DDR_BANK0;
     mext_o[4].obj = iborTime_alloc;
     mext_o[4].param = 0;
 
-    mext_o[5].flags = XCL_MEM_DDR_BANK0;
     mext_o[5].obj = iborPeriod_alloc;
     mext_o[5].param = 0;
 
-    mext_o[6].flags = XCL_MEM_DDR_BANK0;
     mext_o[6].obj = output;
     mext_o[6].param = 0;
+    for (int i = 0; i < 7; ++i) {
+#ifndef USE_HBM
+        mext_o[i].flags = XCL_MEM_DDR_BANK0;
+#else
+        mext_o[i].flags = XCL_BANK0;
+#endif
+    }
 
     // create device buffer and map dev buf to host buf
     cl::Buffer stoppingTimes_buf, payerAccrualTime_buf, receiverAccrualTime_buf, receiverAccrualPeriod_buf,

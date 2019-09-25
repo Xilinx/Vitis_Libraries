@@ -13,9 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-*********************************
+*************************************
 Garman-Kohlhagen Closed-Form Solution
-*********************************
+*************************************
 
 .. toctree::
    :maxdepth: 1
@@ -56,7 +56,7 @@ The form of this equation is the same as the Black Scholes Merton closed form so
 
 r, the risk free interest rate is replaced by :math:`r_d`, the domestic interest rate
 
-q, the dividend yield is replaced by :math:`r_f`, the foreign interrest rate
+q, the dividend yield is replaced by :math:`r_f`, the foreign interest rate
 
 References
 ==========

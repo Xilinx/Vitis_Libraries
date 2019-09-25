@@ -144,7 +144,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -202,23 +202,12 @@ HLS_DIR	= $(XF_CASE_ROOT)/../../include
 HLS_DIR2 = $(XF_CASE_ROOT)/../../../L1/include
 
 XCLBIN_NAME := MCEHGEngine_k0
-#KERNEL_IDS = 0
 KERNELS := MCEHGEngine_k0:mcengine_top.cpp
 KERNEL= MCEHGEngine_k0
 
 VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include -I$(XFLIB_DIR)/L2/include
 VPP_CFLAGS += -DHW_EMU_DEBUG  --xp param:hw_em.enableProtocolChecker=true
 
-ifeq ($(TARGET),sw_emu)
-    VPP_CFLAGS += -D VIVADO_HLS_SIM
-endif
-ifeq ($(TARGET),hw_emu)
-    VPP_CFLAGS += -D VIVADO_HLS_SIM
-endif
-
-ifneq ($(XILINX_VIVADO_HLS),)
-    VPP_CFLAGS += --include $(XILINX_VIVADO_HLS)/include
-endif
 
 ifeq ($(DATATYPE),double)
     VPP_CFLAGS += -D DPRAGMA
@@ -226,6 +215,19 @@ endif
 
 MCEHGEngine_k0_VPP_CFLAGS += --sp MCEHGEngine_k0.m_axi_gmem0:bank0
 MCEHGEngine_k0_VPP_CFLAGS += --sp MCEHGEngine_k0.m_axi_gmem1:bank0
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+# U50
+    VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem0:HBM[0]
+    VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem1:HBM[0]
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u2[50]0/'))
+# U200 and U250
+    VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem0:bank0
+    VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem1:bank0
+else
+$(warning Unsupported platform $(XPLATFORM))
+endif
+
 
 VPP_CFLAGS += --xp prop:solution.hls_pre_tcl=$(CUR_DIR)/hls_pre_tcl.tcl
 
@@ -237,11 +239,7 @@ VPP_LFLAGS += --nk $(KERNEL):1:$(KERNEL)
 SRC_DIR = $(CUR_DIR)/host
 
 EXE_NAME = host
-ifeq ($(TARGET),cpu)
-    HOST_ARGS += -mode cpu
-else
-    HOST_ARGS = -mode fpga -xclbin $(XCLBIN_FILE)
-endif
+HOST_ARGS = -xclbin $(XCLBIN_FILE)
 
 SRCS = main
 
@@ -250,8 +248,6 @@ main_CXXFLAGS += -I$(KSRC_DIR) -I$(EXT_DIR)/xcl2
 
 CXXFLAGS += -D XDEVICE=$(XDEVICE) -I$(XFLIB_DIR)/L1/include/  -I$(XFLIB_DIR)/L2/include/
 CXXFLAGS += -DPRAGMA
-CXXFLAGS += -DVIVADO_HLS_SIM
-CXXFLAGS += -DHW_EMU_DEBUG
 
 HOST_CCOPT = DBG
 ifeq (${HOST_CCOPT},DBG)
@@ -259,6 +255,9 @@ ifeq (${HOST_CCOPT},DBG)
 endif
 ifeq (${HOST_CCOPT},OPT)
     CXXFLAGS += -O3
+endif
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+    CXXFLAGS += -DUSE_HBM
 endif
 
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule

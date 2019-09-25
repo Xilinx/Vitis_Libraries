@@ -107,7 +107,7 @@ int main() {
     Golden[1] = -0.206203666499685800417296377418;
     Golden[2] = 0.391362006544230478510826287675;
     Golden[3] = 1.0093712978332951557547403354;
-    double error;
+    double error = 0;
     for (int i = 0; i < NA; ++i) {
         error += abs(output[i] - Golden[i]);
     }

@@ -21,7 +21,7 @@ Internal Design of Tree Bermudan Swaption Engine
 
 Overview
 ========
-Swap engine, swaption engine, capfloor engine, and callable engine are all pricing engines to calculate price. 
+Swap engine, swaption engine, capfloor engine and callable engine are all pricing engines to calculate price. 
 
 The swap is mainly an interest rate swap. For both parties to the swap, the buyer need execute a specified swap agreement with the issuer on a specified future date.
 
@@ -44,7 +44,7 @@ As shown in Figure 1, this engine uses the framework of Tree Lattice in L1. It h
 
 1. According to the input, the time grid and the corresponding counter of exercise times and payment times of fixed or floating interest rate are obtained (All time points are relative values based on the reference date the unit is year, and the engine only supports the case where the time point is not less than 0).
 2. By calling the function setup of framework, the floating interest rates and tree related parameters are calculated from 0 to N time point by time point to prepare the interest rates and the tree related parameters for subsequent calculations.
-3. Take treeSwaptionEngine for example, by calling to the function rollback of framework using the same structure of the tree, the NPV is calculated as shown in Figure 2 from N to 0 time point by time point. The implementation is shown in Figure 2, where arrows indicate data flow.
+3. Take treeSwaptionEngine, for example, by calling to the function rollback of framework using the same structure of the tree, the NPV is calculated as shown in Figure 2 from N to 0 time point by time point. The implementation is shown in Figure 2, where arrows indicate data flow.
 
 
 .. _my-figure2:

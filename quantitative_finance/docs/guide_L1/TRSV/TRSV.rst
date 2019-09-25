@@ -29,7 +29,7 @@ Implementation
 
 The solver works on a row-based scheme. For each row of diagonals it applies a reduction procedure. 
 Each row is processed :math:`\log_2N -1` times, which leads to a complete reduction of the upper and lower diagonals.
-The input matrix is stored as a three vectors, one for each diagonal.
+The input matrix is stored as three vectors, one for each diagonal.
 Thanks to parallel nature of cyclic reduction algorithm a parametrized number of compute units could be set to work simultaneously on one matrix; the whole matrix is then divided amongst a number of compute units. 
  
 Since the algorithm needs access to 3 consecutive rows of matrix only 3 rows are stored in at a time (for each compute unit).

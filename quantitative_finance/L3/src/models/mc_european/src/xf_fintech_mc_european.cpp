@@ -25,7 +25,8 @@
 
 using namespace xf::fintech;
 
-const char* MCEuropean::KERNEL_NAMES[] = {"kernel_mc_0", "kernel_mc_1", "kernel_mc_2", "kernel_mc_3"};
+// const char* MCEuropean::KERNEL_NAMES[] = {"kernel_mc_0", "kernel_mc_1", "kernel_mc_2", "kernel_mc_3"};
+const char* MCEuropean::KERNEL_NAMES[] = {"mc_euro_k"};
 
 typedef struct _XCLBINLookupElement {
     Device::DeviceType deviceType;
@@ -33,10 +34,10 @@ typedef struct _XCLBINLookupElement {
 } XCLBINLookupElement;
 
 static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {
-    {Device::DeviceType::U50, "kernel_mc.xclbin"}, // BUG-257 changing names to match output from L2
-    {Device::DeviceType::U200, "kernel_mc.xclbin"},
-    {Device::DeviceType::U250, "kernel_mc.xclbin"},
-    {Device::DeviceType::U280, "kernel_mc.xclbin"}};
+    {Device::DeviceType::U50, "mc_euro_k.xclbin"}, // BUG-257 changing names to match output from L2
+    {Device::DeviceType::U200, "mc_euro_k.xclbin"},
+    {Device::DeviceType::U250, "mc_euro_k.xclbin"},
+    {Device::DeviceType::U280, "mc_euro_k.xclbin"}};
 
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);
@@ -51,6 +52,7 @@ MCEuropean::MCEuropean() {
         m_hostOutputBuffers[i] = nullptr;
         m_pHWBuffers[i] = nullptr;
     }
+    m_pSeedBuf = nullptr;
 }
 
 MCEuropean::~MCEuropean() {
@@ -86,6 +88,7 @@ int MCEuropean::createOCLObjects(Device* device) {
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
     aligned_allocator<KDataType> allocator;
+    aligned_allocator<unsigned int> allocator_seed;
     std::string xclbinName;
 
     cl::Device clDevice;
@@ -163,29 +166,56 @@ int MCEuropean::createOCLObjects(Device* device) {
         }
     }
 
+    if (cl_retval == CL_SUCCESS) {
+        m_hostSeed = allocator_seed.allocate(2);
+        m_hostSeed[0] = 1;
+        m_hostSeed[1] = 10001;
+    }
+
     ////////////////////////////
     // Setup HW BUFFER OPTIONS
     ////////////////////////////
     if (cl_retval == CL_SUCCESS) {
-        m_hwBufferOptions[0] = {XCL_MEM_DDR_BANK0, m_hostOutputBuffers[0], 0};
-        m_hwBufferOptions[1] = {XCL_MEM_DDR_BANK1, m_hostOutputBuffers[1], 0};
-        m_hwBufferOptions[2] = {XCL_MEM_DDR_BANK2, m_hostOutputBuffers[2], 0};
-        m_hwBufferOptions[3] = {XCL_MEM_DDR_BANK3, m_hostOutputBuffers[3], 0};
+        if (NUM_KERNELS >= 1) {
+            m_hwBufferOptions[0] = {XCL_MEM_DDR_BANK0, m_hostOutputBuffers[0], 0};
+        }
+
+        if (NUM_KERNELS >= 2) {
+            m_hwBufferOptions[1] = {XCL_MEM_DDR_BANK1, m_hostOutputBuffers[1], 0};
+        }
+
+        if (NUM_KERNELS >= 3) {
+            m_hwBufferOptions[2] = {XCL_MEM_DDR_BANK2, m_hostOutputBuffers[2], 0};
+        }
+
+        if (NUM_KERNELS >= 4) {
+            m_hwBufferOptions[3] = {XCL_MEM_DDR_BANK3, m_hostOutputBuffers[3], 0};
+        }
+    }
+
+    if (cl_retval == CL_SUCCESS) {
+        m_hwSeed = {XCL_MEM_DDR_BANK0, m_hostSeed, 0};
     }
 
     ////////////////////////////////
     // Allocate HW BUFFER Objects
     ////////////////////////////////
+
     if (cl_retval == CL_SUCCESS) {
         for (i = 0; i < NUM_KERNELS; i++) {
             m_pHWBuffers[i] =
-                new cl::Buffer(*m_pContext, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                new cl::Buffer(*m_pContext, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                (size_t)(OUTDEP * sizeof(KDataType)), &m_hwBufferOptions[i], &cl_retval);
 
             if (cl_retval != CL_SUCCESS) {
                 break; // out of loop
             }
         }
+    }
+
+    if (cl_retval == CL_SUCCESS) {
+        m_pSeedBuf = new cl::Buffer(*m_pContext, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                    sizeof(unsigned int), &m_hwSeed, &cl_retval);
     }
 
     if (cl_retval != CL_SUCCESS) {
@@ -201,6 +231,7 @@ int MCEuropean::releaseOCLObjects(void) {
     int retval = XLNX_OK;
     unsigned int i;
     aligned_allocator<KDataType> allocator;
+    aligned_allocator<unsigned int> allocator_seed;
 
     for (i = 0; i < NUM_KERNELS; i++) {
         if (m_pHWBuffers[i] != nullptr) {
@@ -208,9 +239,19 @@ int MCEuropean::releaseOCLObjects(void) {
             m_pHWBuffers[i] = nullptr;
         }
 
+        if (m_pSeedBuf != nullptr) {
+            delete (m_pSeedBuf);
+            m_pSeedBuf = nullptr;
+        }
+
         if (m_hostOutputBuffers[i] != nullptr) {
             allocator.deallocate((KDataType*)(m_hostOutputBuffers[i]), OUTDEP);
             m_hostOutputBuffers[i] = nullptr;
+        }
+
+        if (m_hostSeed != nullptr) {
+            allocator_seed.deallocate((unsigned int*)(m_hostSeed), 2);
+            m_hostSeed = nullptr;
         }
 
         if (m_pKernels[i] != nullptr) {
@@ -392,15 +433,15 @@ int MCEuropean::runInternal(OptionType optionType,
     unsigned int i;
 
     OptionType multipleOptionType[NUM_KERNELS];
-    KDataType multipleStockPrice[NUM_KERNELS];
-    KDataType multipleStrikePrice[NUM_KERNELS];
-    KDataType multipleRiskFreeRate[NUM_KERNELS];
-    KDataType multipleDividendYield[NUM_KERNELS];
-    KDataType multipleVolatility[NUM_KERNELS];
-    KDataType multipleTimeToMaturity[NUM_KERNELS];
-    KDataType multipleRequiredTolerance[NUM_KERNELS];
+    double multipleStockPrice[NUM_KERNELS];
+    double multipleStrikePrice[NUM_KERNELS];
+    double multipleRiskFreeRate[NUM_KERNELS];
+    double multipleDividendYield[NUM_KERNELS];
+    double multipleVolatility[NUM_KERNELS];
+    double multipleTimeToMaturity[NUM_KERNELS];
+    double multipleRequiredTolerance[NUM_KERNELS];
     unsigned int multipleRequiredSamples[NUM_KERNELS];
-    KDataType multipleOptionPrice[NUM_KERNELS];
+    double multipleOptionPrice[NUM_KERNELS];
 
     m_runStartTime = std::chrono::high_resolution_clock::now();
 
@@ -467,36 +508,33 @@ int MCEuropean::runInternal(OptionType* optionType,
                             unsigned int numAssets) {
     int retval = XLNX_OK;
     unsigned int timeSteps = 1;
-    unsigned int loop_nm = 1; // correct?
-    unsigned int maxSamples = INT_MAX;
+    unsigned int loop_nm = 1;
     KDataType totalOutput = 0.0;
     unsigned int i, j;
+    std::vector<cl::Memory> outVector;
 
     m_runStartTime = std::chrono::high_resolution_clock::now();
 
     if (deviceIsPrepared()) {
         for (i = 0; i < numAssets; i++) {
-            m_pKernels[i]->setArg(0, loop_nm);
-            m_pKernels[i]->setArg(1, (KDataType)stockPrice[i]);
-            m_pKernels[i]->setArg(2, (KDataType)volatility[i]);
-            m_pKernels[i]->setArg(3, (KDataType)dividendYield[i]);
-            m_pKernels[i]->setArg(4, (KDataType)riskFreeRate[i]);
-            m_pKernels[i]->setArg(5, (KDataType)timeToMaturity[i]);
-            m_pKernels[i]->setArg(6, (KDataType)strikePrice[i]);
-            m_pKernels[i]->setArg(7, (bool)optionType[i]);
-            m_pKernels[i]->setArg(8, *(m_pHWBuffers[i]));
+            m_pKernels[i]->setArg(0, (KDataType)stockPrice[i]);
+            m_pKernels[i]->setArg(1, (KDataType)volatility[i]);
+            m_pKernels[i]->setArg(2, (KDataType)dividendYield[i]);
+            m_pKernels[i]->setArg(3, (KDataType)riskFreeRate[i]);
+            m_pKernels[i]->setArg(4, (KDataType)timeToMaturity[i]);
+            m_pKernels[i]->setArg(5, (KDataType)strikePrice[i]);
+            m_pKernels[i]->setArg(6, (unsigned int)optionType[i]);
+            m_pKernels[i]->setArg(7, *m_pSeedBuf);
+            m_pKernels[i]->setArg(8, *m_pHWBuffers[i]);
             m_pKernels[i]->setArg(9, (KDataType)requiredTolerance[i]);
             m_pKernels[i]->setArg(10, requiredSamples[i]);
             m_pKernels[i]->setArg(11, timeSteps);
-            m_pKernels[i]->setArg(12, maxSamples);
 
             m_pCommandQueue->enqueueTask(*(m_pKernels[i]), nullptr, nullptr);
         }
 
         m_pCommandQueue->flush();
         m_pCommandQueue->finish();
-
-        std::vector<cl::Memory> outVector;
 
         for (i = 0; i < numAssets; i++) {
             outVector.push_back(*(m_pHWBuffers[i]));

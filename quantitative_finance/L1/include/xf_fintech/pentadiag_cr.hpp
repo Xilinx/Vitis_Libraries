@@ -251,29 +251,26 @@ void pentadiag_step(T a[P_SIZE],
 
 /**
 * @brief Solves for u in linear system Pu = r \n
-*
 * It calls function pentadiag_step for each step until all diagonals instead of
-main are zeros (or very close to zero).
+* main are zeros (or very close to zero).
 * Result U is made by dividing Each of elements of right hand vactor (\a v) by
-main diagonal (\a c) \n
+* main diagonal (\a c) \n
 * Structure of input matrix: \n
 *  | c d e 0 0 | \n
 *  | b c d e 0 | \n
 *  | a b c d e | \n
 *  | 0 a b c d | \n
-*  | 0 0 a b c | \n
+*  | 0 0 a b c |
 *@tparam T data type used in whole function (double by default)
 *@tparam P_SIZE Size of the operating matrix
 *@tparam logN Number of steps for algorithm
-*@param[in] c - Main diagonal \n
-*@param[in] b - First lower \n
-*@param[in] a - Second lower \n
-*@param[in] d - First upper \n
-*@param[in] e - Second upper \n
-
-*@param[in]     v - Right hand side vector of length n \n
-*@param[out]    u - Vectors of unknows to solve for \n
-
+*@param[in] c Main diagonal
+*@param[in] b First lower
+*@param[in] a Second lower
+*@param[in] d First upper
+*@param[in] e Second upper
+*@param[in]     v Right hand side vector of length n
+*@param[out]    u Vectors of unknows to solve for
 */
 template <typename T, unsigned int P_SIZE, unsigned int logN>
 void pentadiagCr(T a[P_SIZE], T b[P_SIZE], T c[P_SIZE], T d[P_SIZE], T e[P_SIZE], T v[P_SIZE], T u[P_SIZE]) {

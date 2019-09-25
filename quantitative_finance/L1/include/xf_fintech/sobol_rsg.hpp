@@ -170,9 +170,9 @@ const ap_uint<63> initPara[128] = {0x0,
 } // internal
 
 /**
- * @brief SobolRsg is a multi-dimensions sobol sequence generator.
+ * @brief SobolRsg is a multi-dimensional sobol sequence generator.
  *
- * @tparam DIM maximum length of output sequence, maximum is 128
+ * @tparam DIM sobol sequence dimension, maximum is 128
  */
 
 template <int DIM>
@@ -250,9 +250,10 @@ class SobolRsg {
         }
     }
     /**
-     * @brief each call of next() generate list of sobol sequences
+     * @brief each call of next() generates sobol sequence numbers in DIM
+     * dimensions, one number per dimension
      *
-     * @param seqOut sobol results of DIM
+     * @param seqOut sobol results in DIM dimensions
      */
     void next(ap_ufixed<W, 0> seqOut[DIM]) {
 //#ddpragma HLS inline off
@@ -311,10 +312,11 @@ class SobolRsg {
     }
 };
 
-/*
- * First dimension sobol sequence generator.
+/**
  *
- * */
+ * @brief One dimensional sobol sequence generator.
+ *
+ */
 class SobolRsg1D {
    private:
     /// Bit width of element in state vector

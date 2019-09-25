@@ -56,26 +56,19 @@ In the provided solver, the PDE is the Heston Pricing Model [HESTON1993]_. Using
 
 where:
 
-:math:`u`
-   the price of the European option;
+:math:`u` - the price of the European option;
 
-:math:`s`
-   the underlying price of the asset;
+:math:`s` - the underlying price of the asset;
 
-:math:`v`
-   the volatility of the underlying price;
+:math:`v` - the volatility of the underlying price;
 
-:math:`\sigma`
-   the volatility of the volatility;
+:math:`\sigma` - the volatility of the volatility;
 
-:math:`\rho`
-   the correlation of Weiner processes;
+:math:`\rho` - the correlation of Weiner processes;
 
-:math:`\kappa`
-   the mean-reversion rate;
+:math:`\kappa` - the mean-reversion rate;
 
-:math:`\eta`
-   the long term mean. 
+:math:`\eta` - the long term mean. 
 
 The Heston PDE then describes the evolution of an option price over time (:math:`t`) and a solution of this PDE results in the specific option price for an :math:`(s,v)` pair for a given maturity date :math:`T`. The finite difference solver maps the :math:`(s,v)` pair onto a 2D discrete grid, and solves for option price :math:`u(s,v)` after :math:`N` time-steps.
 
@@ -106,7 +99,7 @@ To simplify the calculation, we use :math:`\ln{S(j\Delta)}` instead of :math:`S`
 Where :math:`Z_S` and :math:`Z_\nu` are two uniform distributed random numbers that have correlation :math:`\rho`
 
 Although :math:`\nu` is non-negative in continuous form, it would become negative if we use the Euler-Maruyama form above directly. 
-There're several variations to solve this issue, here we provide 5 of most commonly used.
+There are several variations to solve this issue, here we provide 5 of most commonly used.
 
 **kDTReflection**: use absolute value of the volatility of the last iteration.
 

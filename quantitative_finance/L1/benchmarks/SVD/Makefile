@@ -144,7 +144,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -221,16 +221,18 @@ ifneq ($(XILINX_VIVADO_HLS),)
     VPP_CFLAGS += --include $(XILINX_VIVADO_HLS)/include
 endif
 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vcu1525/'))
-# VCU
-    VPP_CFLAGS += --xp param:compiler.userPostSysLinkTcl=$(CUR_DIR)/userPostSysLink.tcl
-    VPP_CFLAGS+= $(foreach id,$(KERNEL_IDS),--sp $(KERNEL)_$(id).m_axi_gmem0:bank$(id))
-    VPP_CFLAGS+= $(foreach id,$(KERNEL_IDS),--sp $(KERNEL)_$(id).m_axi_gmem1:bank$(id))
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+# U50
+    VPP_CFLAGS+= --sp $(KERNEL)_0.m_axi_gmem0:HBM[0]
+    VPP_CFLAGS+= --sp $(KERNEL)_0.m_axi_gmem1:HBM[0]
+    VPP_CFLAGS+= --sp $(KERNEL)_0.m_axi_gmem2:HBM[0]
+    VPP_CFLAGS+= --sp $(KERNEL)_0.m_axi_gmem3:HBM[0]
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u2[50]0/'))
 # U200 and U250
-    VPP_CFLAGS += --xp param:compiler.userPostSysLinkTcl=$(CUR_DIR)/userPostSysLink.tcl
-    VPP_CFLAGS += $(foreach id,$(KERNEL_IDS),--sp $(KERNEL)_$(id).m_axi_gmem0:bank$(id))
-    VPP_CFLAGS += $(foreach id,$(KERNEL_IDS),--sp $(KERNEL)_$(id).m_axi_gmem1:bank$(id))
+    VPP_CFLAGS += --sp $(KERNEL)_0.m_axi_gmem0:bank0
+    VPP_CFLAGS += --sp $(KERNEL)_0.m_axi_gmem1:bank0
+    VPP_CFLAGS += --sp $(KERNEL)_0.m_axi_gmem2:bank0
+    VPP_CFLAGS += --sp $(KERNEL)_0.m_axi_gmem3:bank0
 else
 $(warning Unsupported platform $(XPLATFORM))
 endif
@@ -265,6 +267,10 @@ endif
 
 ifeq (${HOST_CCOPT},OPT)
     CXXFLAGS += -O3
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+    CXXFLAGS += -DUSE_HBM
 endif
 
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule

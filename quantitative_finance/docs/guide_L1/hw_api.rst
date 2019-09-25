@@ -14,11 +14,6 @@
    limitations under the License.
 
 
-
-.. toctree::
-   :maxdepth: 2
-
-
 RNG
 -----------------------
 
@@ -46,7 +41,6 @@ Defined in <xf_fintech/sobol_rsg.hpp>
      :class: overview-code-block
 
      class :ref:`SobolRsg <doxid-classxf_1_1fintech_1_1_sobol_rsg>`
-
      class :ref:`SobolRsg1D <doxid-classxf_1_1fintech_1_1_sobol_rsg1_d>`
 
 
@@ -102,7 +96,7 @@ OrnsteinUhlenbeckProcess
 ----------------------------
                                                                                                                                                        
 Defined in <xf_fintech/ornstein_uhlenbeck_process.hpp>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
      :class: overview-code-block
@@ -203,7 +197,7 @@ Defined in <xf_fintech/bk_model.hpp>
 .. ref-code-block:: cpp
      :class: overview-code-block
 
-     class :ref:`BKModel <details-doxid-classxf_1_1fintech_1_1_b_k_model>`
+     class :ref:`BKModel <doxid-classxf_1_1fintech_1_1_b_k_model>`
 
 
 BSModel
@@ -217,5 +211,9 @@ Defined in <xf_fintech/bs_model.hpp>
 
      class :ref:`BSModel <doxid-classxf_1_1fintech_1_1_b_s_model>`
 
+.. toctree::
+   :maxdepth: 2
+
 .. include:: ../rst_L1/namespace_xf_fintech.rst
-    :start-line: 261
+    :start-after: FunctionSection
+

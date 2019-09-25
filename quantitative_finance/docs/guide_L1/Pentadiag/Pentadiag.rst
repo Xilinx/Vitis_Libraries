@@ -29,7 +29,7 @@ Implementation
 ==============
 
 The solver works on a row-based scheme. For each row of diagonals, it applies a reduction procedure. 
-Each row is processed :math:`\log_2N -1` times, which leads to a complete reduction of the upper and lower diagonals. Although experiments have shown that the algorithm fails for the number of steps greater than 8. In that case, it is recommended to limit the number of steps to 8.
+Each row is processed :math:`\log_2N -1` times, which leads to a complete reduction of the upper and lower diagonals. Because many experiments show that the algorithm fails for the number of steps greater than 8. In that case, it is recommended to limit the number of steps to 8.
 The input matrix is stored as five vectors, one for each diagonal.
 
 Since the algorithm needs random memory access in every iteration, 3 copies of the whole matrix are stored internally in the solver to allow full pipelining of the implementation. 

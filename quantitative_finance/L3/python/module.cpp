@@ -75,7 +75,6 @@ PYBIND11_MODULE(xf_fintech_python, m) {
                                    timeToMaturity, requiredTolerance, &optionPrice);
 
                  return std::make_tuple(retval, optionPrice);
-
              })
 
         .def("run",
@@ -132,7 +131,6 @@ PYBIND11_MODULE(xf_fintech_python, m) {
             for (auto i : optionPriceVector) outputResults.append(i);
 
             return retval;
-
         });
 
     py::class_<MCEuropeanDJE>(m, "MCEuropeanDJE")
@@ -356,8 +354,53 @@ PYBIND11_MODULE(xf_fintech_python, m) {
                  }
 
                  return retval;
-
              });
+
+
+    py::class_<CFBlackScholesMerton>(m, "CFBlackScholesMerton")
+        .def(py::init<unsigned int>())
+
+        .def("claimDevice", &CFBlackScholesMerton::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("releaseDevice", &CFBlackScholesMerton::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("deviceIsPrepared", &CFBlackScholesMerton::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
+        .def("lastruntime", &CFBlackScholesMerton::getLastRunTime)
+
+        .def("run", [](CFBlackScholesMerton& self, std::vector<float> stockPriceList, std::vector<float> strikePriceList,
+                       std::vector<float> volatilityList, std::vector<float> riskFreeRateList,
+                       std::vector<float> timeToMaturityList, std::vector<float> dividendYieldList,
+                       // Above are Input Buffers   - Below are Output Buffers
+                       py::list optionPriceList, py::list deltaList, py::list gammaList, py::list vegaList,
+                       py::list thetaList, py::list rhoList,
+                       // Underneath is just the format chosen, as using the C++ example
+                       OptionType optionType, unsigned int numAssets)
+
+             {
+                 int retval;
+
+                 py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+                 for (unsigned int i = 0; i < numAssets; i++) {
+                     self.stockPrice[i] = stockPriceList[i];
+                     self.strikePrice[i] = strikePriceList[i];
+                     self.volatility[i] = volatilityList[i];
+                     self.riskFreeRate[i] = riskFreeRateList[i];
+                     self.timeToMaturity[i] = timeToMaturityList[i];
+                     self.dividendYield[i] = dividendYieldList[i];
+                 }
+                 retval = self.run(optionType, numAssets);
+
+                 // so after the execution these should be filled with results -> transfer to python lists
+                 for (unsigned int i = 0; i < numAssets; i++) {
+                     optionPriceList.append(self.optionPrice[i]);
+                     deltaList.append(self.delta[i]);
+                     gammaList.append(self.gamma[i]);
+                     vegaList.append(self.vega[i]);
+                     thetaList.append(self.theta[i]);
+                     rhoList.append(self.rho[i]);
+                 }
+
+                 return retval;
+             });
+
 
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;

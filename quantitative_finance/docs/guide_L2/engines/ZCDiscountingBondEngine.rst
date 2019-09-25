@@ -21,16 +21,16 @@ Internal Design of Zero Coupon Bond Engine
 
 Overview
 ========
-A zero-coupon bond is a bond that is purchased at a price below the face value of the bond, does not pay coupon during the contract period, and repays the face value at the time of maturity.
+A zero-coupon bond is a bond which is purchased at a price below the face value of the bond. It does not pay coupon during the contract period, and repays the face value at the time of maturity.
 
 Implemention
 ============
-This engine uses the linear interpolation mothed in L1 to calculate the pricing value based on time (the difference between the maturity date and the reference date, unit is year) and face value. The linear interpolation mothed implements 1D linear interpolation. 
+This engine uses the linear interpolation method in L1 to calculate the pricing value based on time (the difference between the maturity date and the reference date, unit is year) and face value. The linear interpolation method implements 1D linear interpolation. 
 
 Profiling
 =========
 
-The hardware resources are listed in the following table (vivado 18.3 report).
+The hardware resources are listed in the following table (Vivado 18.3 report).
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -40,9 +40,5 @@ The hardware resources are listed in the following table (vivado 18.3 report).
     +-----------------+----------+----------+----------+----------+---------+-----------------+
     |  ZCBondEngine   |    0     |    0     |    46    |   12478  |  7997   |       2.580     |
     +-----------------+----------+----------+----------+----------+---------+-----------------+
-
-
-The following table shows the performance improvement in compare with CPU based Quantlib result on U250. (FPGA System Clock: 300MHz)
-
 
 

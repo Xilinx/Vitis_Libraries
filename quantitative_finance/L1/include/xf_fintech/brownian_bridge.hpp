@@ -28,7 +28,7 @@ namespace xf {
 namespace fintech {
 
 /**
- * @brief brownian bridge transform using inverse simulation.
+ * @brief Brownian bridge transformation using inverse simulation.
  *
  * @tparam DT data type supported include float and double.
  * @tparam SZ maximum length of input sequence, maximum is 1024.
@@ -79,14 +79,17 @@ class BrownianBridge {
     }
 
    public:
-    // default constructor
+    /**
+     * @brief  Default constructor
+     *
+     */
     BrownianBridge() {}
 
     /**
-     * @brief  transform in_strm to out_strm using browain bridge transformation
+     * @brief  Transform in_strm to out_strm using browain bridge transformation
      *
-     * @param in_strm transform a input sequence to a output sequence.
-     * @param out_strm the output applys to brownian bride disribution.
+     * @param in_strm stream containing input sequence
+     * @param out_strm stream containing output sequence which applys to brownian bridge disribution
      *
      */
     void transform(hls::stream<DT>& in_strm, hls::stream<DT>& out_strm) {
@@ -140,8 +143,10 @@ class BrownianBridge {
             out_strm.write(o);
         }
     }
+
     /**
-     * @brief initialize
+     * @brief Initialize weights, indices, standard deviations used in
+     * transformation
      *
      * @param size_in the lenght of sequence to be transformed.
      */

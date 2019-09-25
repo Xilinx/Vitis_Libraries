@@ -22,6 +22,9 @@
 namespace xf {
 namespace fintech {
 
+/**
+ * Display context error message to stdout
+ */
 void ContextErrorCallback(const char* errInfo, const void* privateInfo, size_t cb, void* userData);
 
 } // end namespace fintech

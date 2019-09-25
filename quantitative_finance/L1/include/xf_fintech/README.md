@@ -1,1 +1,1 @@
-include header file of Finance library
+Header files of Vitis Quantitative Finance library

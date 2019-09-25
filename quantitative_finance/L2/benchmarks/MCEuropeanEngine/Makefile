@@ -144,7 +144,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -214,44 +214,42 @@ KSRC_DIR = $(CUR_DIR)/kernel
 
 XCLBIN_NAME := kernel_mc
 KERNEL = kernel_mc
-KERNEL_IDS = 0 1 2 3
-KERNELS = $(foreach id,$(KERNEL_IDS),$(KERNEL)_$(id))
 
+kernel_mc_0_VPP_CFLAGS += -D KN_0 -D KERNEL_NMAE=kernel_mc_0
+kernel_mc_1_VPP_CFLAGS += -D KN_1 -D KERNEL_NMAE=kernel_mc_1
 HLS_L1_DIR = $(XF_CASE_ROOT)/../../../L1/include
 HLS_L2_DIR = $(XF_CASE_ROOT)/../../include
 
 kernel_mc_0_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
 kernel_mc_1_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
-kernel_mc_2_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
-kernel_mc_3_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
-kernel_mc_0_VPP_CFLAGS += -D KN_0 -D KERNEL_NMAE=kernel_mc_0
-kernel_mc_1_VPP_CFLAGS += -D KN_1 -D KERNEL_NMAE=kernel_mc_1
-kernel_mc_2_VPP_CFLAGS += -D KN_2 -D KERNEL_NMAE=kernel_mc_2
-kernel_mc_3_VPP_CFLAGS += -D KN_3 -D KERNEL_NMAE=kernel_mc_3
-
-VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/ -I$(XFLIB_DIR)/L2/include/ -I$(XFLIB_DIR)/L2/include
-
-ifeq ($(TARGET),sw_emu)
-    VPP_CFLAGS += -D VIVADO_HLS_SIM
-    CXXFLAGS += -DSW_EMU
-endif
-ifeq ($(TARGET),hw_emu)
-    VPP_CFLAGS += -D VIVADO_HLS_SIM
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+     KERNEL_IDS = 0 1
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+     KERNEL_IDS = 0 1
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+     KERNEL_IDS = 0 1 2 3
+     kernel_mc_2_VPP_CFLAGS += -D KN_2 -D KERNEL_NMAE=kernel_mc_2
+     kernel_mc_3_VPP_CFLAGS += -D KN_3 -D KERNEL_NMAE=kernel_mc_3
+     kernel_mc_2_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
+     kernel_mc_3_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
 endif
 
-ifneq ($(XILINX_VIVADO_HLS),)
-    VPP_CFLAGS += -I$(XILINX_VIVADO_HLS)/include
-endif
+KERNELS = $(foreach id,$(KERNEL_IDS),$(KERNEL)_$(id))
+
+
+
+
+VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/ -I$(XFLIB_DIR)/L2/include/
 
 DATATYPE ?= double
 ifeq ($(DATATYPE),double)
     VPP_CFLAGS += -D DPRAGMA
 endif
 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vcu1525/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 # VCU
-    VPP_CFLAGS += $(foreach id,$(KERNEL_IDS),--sp $(KERNEL)_$(id).m_axi_gmem:bank$(id))
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+    VPP_CFLAGS += $(foreach id,$(KERNEL_IDS),--sp $(KERNEL)_$(id).m_axi_gmem:HBM[$(id)])
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/ || /u200/'))
 # U200 and U250
     VPP_CFLAGS += $(foreach id,$(KERNEL_IDS),--sp $(KERNEL)_$(id).m_axi_gmem:bank$(id))
 else
@@ -259,7 +257,13 @@ $(warning Unsupported platform $(XPLATFORM))
 endif
 
 VPP_LFLAGS += $(foreach id,$(KERNEL_IDS), --nk $(KERNEL)_$(id):1:$(KERNEL)_$(id))
-VPP_LFLAGS += $(foreach id,$(KERNEL_IDS), --slr $(KERNEL)_$(id):SLR$(id))
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/ || /u250/'))
+    VPP_LFLAGS += $(foreach id,$(KERNEL_IDS), --slr $(KERNEL)_$(id):SLR$(id))
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+    VPP_LFLAGS += --slr $(KERNEL)_0:SLR0
+    VPP_LFLAGS += --slr $(KERNEL)_1:SLR2
+endif
 
 # -----------------------------------------------------------------------------
 # TODO:                           host setup
@@ -268,7 +272,7 @@ SRC_DIR = $(CUR_DIR)/src
 
 EXE_NAME = test
 
-HOST_ARGS = -mode fpga -xclbin $(XCLBIN_FILE) 
+HOST_ARGS = -xclbin $(XCLBIN_FILE) 
 ifeq ($(TARGET),hw_emu)
 HOST_ARGS += -p 1024
 endif
@@ -282,6 +286,11 @@ test_CXXFLAGS += -I $(EXT_DIR)/xcl2 -I $(KSRC_DIR)
 
 CXXFLAGS += -D XDEVICE=$(XDEVICE) -I$(XFLIB_DIR)/L1/include/ -I$(XFLIB_DIR)/L2/include/
 
+ifeq ($(TARGET),sw_emu)
+    CXXFLAGS += -DSW_EMU
+endif
+
+
 HOST_CCOPT ?= DBG
 ifeq (${HOST_CCOPT},DBG)
     CXXFLAGS += -g
@@ -289,6 +298,16 @@ endif
 
 ifeq (${HOST_CCOPT},OPT)
     CXXFLAGS += -O3
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+    CXXFLAGS += -DUSE_HBM
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/ || /u200/'))
+    CXXFLAGS += -DKN=2
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+    CXXFLAGS += -DKN=4
 endif
 
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule

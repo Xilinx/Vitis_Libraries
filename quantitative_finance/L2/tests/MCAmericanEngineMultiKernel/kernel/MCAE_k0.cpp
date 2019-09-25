@@ -47,18 +47,6 @@ extern "C" void MCAE_k0(TEST_DT underlying,
 #pragma HLS INTERFACE s_axilite port = timeSteps bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#ifndef __SYNTHESIS__
-    std::cout << "underlying is " << underlying << std::endl;
-    std::cout << "volatility is " << volatility << std::endl;
-    std::cout << "riskFreeRate is " << riskFreeRate << std::endl;
-    std::cout << "dividendYield is " << dividendYield << std::endl;
-    std::cout << "timeLength is " << timeLength << std::endl;
-    std::cout << "strike is " << strike << std::endl;
-    std::cout << "optionType is " << optionType << std::endl;
-    std::cout << "calibSamples is " << calibSamples << std::endl;
-    std::cout << "timeSteps is " << timeSteps << std::endl;
-#endif
-
     bool option = (optionType) ? 1 : 0;
     ap_uint<32> seeds[2];
     seeds[0] = 123456;

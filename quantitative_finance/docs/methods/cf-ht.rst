@@ -23,8 +23,7 @@ Heston Model Closed-Form Solution
 Overview
 ========
 
-The `Heston Model`_ , published by Steven Heston in his 1993 paper "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options" [HEST1993]_ extends the 
-well-known Black-Scholes options pricing model by adding a stochastic process for the stock volatility.  
+The `Heston Model`_ , published by Steven Heston in paper "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options" in 1993 [HEST1993]_ , extends the well-known Black-Scholes options pricing model by adding a stochastic process for the stock volatility.  
 
 .. _Heston Model: https://en.wikipedia.org/wiki/Heston_model
 
@@ -68,7 +67,7 @@ where:
    \alpha = -\frac{w^2}{2} - \frac{iw}{2} ;       \beta = \alpha - \rho.\eta. i. w ;       \gamma = \frac{\eta^2}{2} 
 
 To obtain a solution for Call :math:`C_0` the integrands in the :math:`\Pi_1` and :math:`\Pi_2` terms must be evaluated using a selected numeric integration technique suited to integration from 0 to ∞, and 
-the internal chacteristic function terms must be obtained using complex-number computation.    
+the internal characteristic function terms must be obtained using complex-number computation.    
 
 
 
@@ -77,5 +76,5 @@ References
 
 .. [HEST1993] Heston, S. L., "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options", The Review of Financial Studies (1993)
 
-.. [CHRSO2014] Crisostomo, R., "An Analysis of the Heston Stochastic Volatility Model: Implementation and Calibration using Matlab", CNMV Working Paper 58: 1–46, (2014).
+.. [CHRSO2014] Crisostomo, R., "An Analysis of the Heston Stochastic Volatility Model: Implementation and Calibration using Matlab", CNMV Working Paper 58: 1-46, (2014).
 

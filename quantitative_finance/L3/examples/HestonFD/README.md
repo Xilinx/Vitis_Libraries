@@ -23,9 +23,9 @@ To build the command line executable (heston_cl) from this directory
 
 # Run Instuctions
 
-Copy the prebuild kernel files to this directory
+Copy the prebuilt kernel files from /*path to xf_fintech*/L2/tests/FdEuropeanHestonEngine/ to this directory
 
-**fd.xclbin**
+**fd_heston_kernel_u250_m8192_double.xclbin**
 
 
 To run the command line exe and generate the interpolated NPV

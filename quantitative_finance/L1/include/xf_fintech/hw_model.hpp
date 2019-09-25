@@ -54,7 +54,7 @@ class HWModel {
    public:
     HWModel() {}
     /**
-     * @brief initialization initialize parameter
+     * @brief initialize parameters
      *
      * @param r floating benchmark annual interest rate
      * @param spread spreads on interest rates
@@ -70,7 +70,7 @@ class HWModel {
     }
 
     /**
-     * @brief discount calculate the discount after time dt
+     * @brief calculate the discount after time dt
      *
      * @param t the current timepoint
      * @param dt The difference between the next timepoint and the current timepoint
@@ -89,7 +89,7 @@ class HWModel {
     }
 
     /**
-     * @brief treeShortRate calcutate short-rate of dt at t for TreeEngine
+     * @brief calcutate short-rate of dt at t for TreeEngine
      *
      * @param tree class TrinomialTree
      * @param endCnt end counter of timepoints
@@ -161,9 +161,6 @@ class HWModel {
                     DT price_tmp1 = state_price_disc * probs[0];
                     DT price_tmp2 = state_price_disc * probs[1];
                     DT price_tmp3 = state_price_disc * probs[2];
-#ifndef __SYNTHESIS__
-                    cout << "index=" << index << endl;
-#endif
                     if (flag == 0) {
                         flag = 1;
                     } else if (index == index_d) {
@@ -257,12 +254,7 @@ class HWModel {
             DT values2_1 = values4[1] + values4[3];
             DT value = values2_0 + values2_1;
             DT tmp_r = rate_ * (t + dt);
-#ifndef __SYNTHESIS__
-            rate_last = (std::log(value) + tmp_r); /// dt;
-            cout << "rates=" << rate_last / dt << endl;
-#else
             rate_last = (hls::log(value) + tmp_r); /// dt;
-#endif
             rates[i] = rate_last;
         }
     }
@@ -286,7 +278,7 @@ class HWModel<DT, void, 0> {
    public:
     HWModel() {}
     /**
-     * @brief initialization initialize parameter
+     * @brief initialize parameters
      *
      * @param r floating benchmark annual interest rate
      * @param spread spreads on interest rates
@@ -302,12 +294,11 @@ class HWModel<DT, void, 0> {
     }
 
     /**
-     * @brief fdShortRate calcutate short-rate of dt at t for fd Engine
+     * @brief calcutate short-rate of dt at t for fd Engine
      *
      * @param t the current timepoint
      * @return finite difference short-rates
      */
-
     DT fdShortRate(DT t) {
 #pragma HLS inline off
         DT forwardrate = rate_;
@@ -320,7 +311,7 @@ class HWModel<DT, void, 0> {
     }
 
     /**
-     * @brief discountBond calculate the discount after time dt
+     * @brief calculate the discount after time dt
      *
      * @param t the current timepoint
      * @param T The timepoint

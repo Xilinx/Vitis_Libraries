@@ -18,7 +18,6 @@ Pricing Engine Kernel Design
 **************************************
 
 .. toctree::
-   :maxdepth:2
 
    engines/MCEuropeanEngine.rst
    engines/MCEuropeanHestonEngine.rst
@@ -28,14 +27,17 @@ Pricing Engine Kernel Design
    engines/MCCliquetEngine.rst
    engines/MCAmericanEngine.rst
    engines/MCMultiAssetEuropeanHestonEngine.rst
+   engines/MCHullWhiteCapFloorEngine.rst
    engines/MCEuropeanHestonGreeksEngine.rst
+   engines/MCMC.rst
    engines/CFBlackScholesMerton.rst
    engines/CFHeston.rst
    engines/M76.rst
    engines/GarmanKohlhagen.rst
+   engines/Quanto.rst
    engines/BTCRR.rst
    engines/FDHullWhiteEngine.rst
-   engines/FdmG2SwaptionEngine.rst
+   engines/FDG2SwaptionEngine.rst
    engines/TreeEngine.rst
    engines/CPICapFloorEngine.rst
    engines/InflationCapFloorEngine.rst

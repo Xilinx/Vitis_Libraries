@@ -45,15 +45,6 @@ extern "C" void MCAE_k1(TEST_DT timeLength,
 #pragma HLS INTERFACE s_axilite port = timeSteps bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#ifndef __SYNTHESIS__
-    std::cout << "timeLength is " << timeLength << std::endl;
-    std::cout << "riskFreeRate is " << riskFreeRate << std::endl;
-    std::cout << "strike is " << strike << std::endl;
-    std::cout << "optionType is " << optionType << std::endl;
-    std::cout << "calibSamples is " << calibSamples << std::endl;
-    std::cout << "timeSteps is " << timeSteps << std::endl;
-#endif
-
     bool option = (optionType) ? 1 : 0;
 
     xf::fintech::MCAmericanEngineCalibrate<TEST_DT, UN_K2_PATH, UN_K2_STEP>(

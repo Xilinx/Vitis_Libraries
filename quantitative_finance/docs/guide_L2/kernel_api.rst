@@ -25,7 +25,7 @@ CPICapFloorEngine
 -----------------------
                                                                                                                                                        
 Defined in <xf_fintech/cpi_capfloor_engine.hpp>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
      :class: overview-code-block
@@ -37,7 +37,7 @@ DiscountingBondEngine
 -----------------------
                                                                                                                                                        
 Defined in <xf_fintech/discounting_bond_engine.hpp>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
      :class: overview-code-block
@@ -49,7 +49,7 @@ InflationCapFloorEngine
 -----------------------
                                                                                                                                                        
 Defined in <xf_fintech/inflation_capfloor_engine.hpp>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
      :class: overview-code-block
@@ -61,7 +61,7 @@ FdHullWhiteEngine
 -----------------------
                                                                                                                                                        
 Defined in <xf_fintech/fd_hullwhite_engine.hpp>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
      :class: overview-code-block
@@ -73,7 +73,7 @@ FdG2SwaptionEngine
 -----------------------
                                                                                                                                                        
 Defined in <xf_fintech/fd_g2_swaption_engine.hpp>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. ref-code-block:: cpp
      :class: overview-code-block
@@ -84,6 +84,5 @@ Defined in <xf_fintech/fd_g2_swaption_engine.hpp>
 
 
 .. include:: ../rst_L2/namespace_xf_fintech.rst
-   :start-line: 157 
-.. :start-: FunctionSection
+   :start-after: FunctionSection
 

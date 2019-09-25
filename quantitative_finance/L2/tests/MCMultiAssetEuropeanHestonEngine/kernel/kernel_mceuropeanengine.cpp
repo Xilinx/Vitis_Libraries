@@ -35,14 +35,14 @@ extern "C" void kernel_mc_0(unsigned int loop_num,
                             unsigned int requiredSamples,
                             unsigned int timeSteps,
                             unsigned int maxSamples) {
-#pragma HLS INTERFACE m_axi port = underlying bundle = gmem latency = 125
-#pragma HLS INTERFACE m_axi port = sigma bundle = gmem latency = 125
-#pragma HLS INTERFACE m_axi port = v0 bundle = gmem latency = 125
-#pragma HLS INTERFACE m_axi port = theta bundle = gmem latency = 125
-#pragma HLS INTERFACE m_axi port = kappa bundle = gmem latency = 125
-#pragma HLS INTERFACE m_axi port = rho bundle = gmem latency = 125
-#pragma HLS INTERFACE m_axi port = dividendYield bundle = gmem latency = 125
-#pragma HLS INTERFACE m_axi port = outputs bundle = gmem latency = 125
+#pragma HLS INTERFACE m_axi port = underlying bundle = gmem0 latency = 125
+#pragma HLS INTERFACE m_axi port = sigma bundle = gmem1 latency = 125
+#pragma HLS INTERFACE m_axi port = v0 bundle = gmem2 latency = 125
+#pragma HLS INTERFACE m_axi port = theta bundle = gmem3 latency = 125
+#pragma HLS INTERFACE m_axi port = kappa bundle = gmem4 latency = 125
+#pragma HLS INTERFACE m_axi port = rho bundle = gmem5 latency = 125
+#pragma HLS INTERFACE m_axi port = dividendYield bundle = gmem6 latency = 125
+#pragma HLS INTERFACE m_axi port = outputs bundle = gmem7 latency = 125
 
 #pragma HLS INTERFACE s_axilite port = loop_num bundle = control
 #pragma HLS INTERFACE s_axilite port = underlying bundle = control

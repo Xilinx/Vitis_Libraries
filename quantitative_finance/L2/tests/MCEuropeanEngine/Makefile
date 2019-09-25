@@ -144,7 +144,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -206,24 +206,25 @@ HLS_L2_DIR = $(XF_CASE_ROOT)/../../include
 
 mc_euro_k_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
 
-VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/ -I$(XFLIB_DIR)/L2/include/ -I$(XFLIB_DIR)/L2/include
+VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/ -I$(XFLIB_DIR)/L2/include/ 
 
 DATATYPE ?= double
 ifeq ($(DATATYPE),double)
     VPP_CFLAGS += -D DPRAGMA
 endif
 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vcu1525/'))
-# VCU
-    VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem0:DDR[0]
-    VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem1:DDR[0]
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+# U50
+    VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem0:HBM[0]
+    VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem1:HBM[0]
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u2[50]0/'))
 # U200 and U250
     VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem0:bank0
     VPP_CFLAGS += --sp $(KERNEL).m_axi_gmem1:bank0
+else
+$(warning Unsupported platform $(XPLATFORM))
 endif
 
-VPP_LFLAGS += --slr $(KERNEL):SLR0
 VPP_LFLAGS += --nk $(KERNEL):1:$(KERNEL)
 
 # -----------------------------------------------------------------------------
@@ -251,6 +252,9 @@ endif
 
 ifeq (${HOST_CCOPT},OPT)
     CXXFLAGS += -O3
+endif
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+    CXXFLAGS += -DUSE_HBM
 endif
 
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule

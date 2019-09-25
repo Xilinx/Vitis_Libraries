@@ -144,7 +144,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -218,7 +218,15 @@ SRC_DIR = $(CUR_DIR)/src/host
 
 EXE_NAME = bs_test
 
-HOST_ARGS = $(XCLBIN_FILE) 16384
+HOST_ARGS = $(XCLBIN_FILE) 
+
+ifeq ($(TARGET),sw_emu)
+HOST_ARGS += 16384
+else ifeq ($(TARGET),hw_emu)
+HOST_ARGS += 4096
+else 
+HOST_ARGS += 4194304
+endif
 
 SRCS = bs_test bsm_model
 

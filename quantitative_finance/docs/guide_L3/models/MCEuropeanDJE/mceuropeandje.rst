@@ -30,9 +30,6 @@ In normal Monte Carlo operation, the following operations are done:
 * Calculate the option price at a future date for each asset
 * Calculate Payoff of each asset
 * Derate payoff for each asset
-|
-|
-|
 
 MC DJE 
 *******
@@ -40,11 +37,8 @@ The operation of the Dow Jones Engine is subtly different:
 
 * Calculate the stock price for each stock
 * Calculate the average of **ALL** the assets using a supplied Dow Divisor
-|
-|
+
 Typically the DJIA is calculated using 30 specific stocks.  The **MCEuropeanDJE** class can take data arrays for any number of assets.
-|
-|
 
 
 

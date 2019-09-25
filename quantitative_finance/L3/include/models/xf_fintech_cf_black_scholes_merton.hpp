@@ -23,20 +23,20 @@ namespace xf {
 namespace fintech {
 
 /**
-* @class CFBlackScholesMerton
-*
-* @brief This class implements the Closed Form Black Scholes Merton model.
-*
-* @details The parameter passed to the constructor controls the size of the
-* underlying buffers that will be allocated.
-* This prameter therefore controls the maximum number of assets that can be
-* processed per call to run()
-*
-* It is intended that the user will populate the input buffers with appropriate
-* asset data prior to calling run()
-* When run completes, the calculated output data will be available in the
-* relevant output buffers.
-*/
+ * @class CFBlackScholesMerton
+ *
+ * @brief This class implements the Closed Form Black Scholes Merton model.
+ *
+ * @details The parameter passed to the constructor controls the size of the
+ * underlying buffers that will be allocated.
+ * This prameter therefore controls the maximum number of assets that can be
+ * processed per call to run()
+ *
+ * It is intended that the user will populate the input buffers with appropriate
+ * asset data prior to calling run()
+ * When run completes, the calculated output data will be available in the
+ * relevant output buffers.
+ */
 class CFBlackScholesMerton : public CFBlackScholes {
    public:
     CFBlackScholesMerton(unsigned int maxAssetsPerRun);
@@ -46,17 +46,19 @@ class CFBlackScholesMerton : public CFBlackScholes {
     KDataType* dividendYield;
 
     /**
-    * This method is used to begin processing the asset data that is in the input
-    * buffers.
-    * If this function returns successfully, calculated results are available in
-    * the output buffers.
-    *
-    * @param optionType The option type of ALL the assets data
-    * @param numAssets The number of assets to process.
-    */
+     * This method is used to begin processing the asset data that is in the input
+     * buffers.
+     * If this function returns successfully, calculated results are available in
+     * the output buffers.
+     *
+     * @param optionType The option type of ALL the assets data
+     * @param numAssets The number of assets to process.
+     */
     int run(OptionType optionType, unsigned int numAssets);
 
    private:
+    const char* getKernelName(void);
+    std::string getXCLBINName(Device* device);
     int releaseOCLObjects(void);
     int createOCLObjects(Device* device);
     void allocateBuffers(unsigned int numRequestedElements);

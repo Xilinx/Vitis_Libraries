@@ -20,11 +20,11 @@ Internal Design of MCEuropeanEngine
 Overview
 =========
 
-Using the Monte Carlo Simulation to estimate the value of European Option. Here, we assume the process of asset price applies to Black-Scholes process. 
+This engine uses Monte Carlo Simulation to estimate the value of European Option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
 
-European option is a kind of vanilla option and non path-dependent. The option has the right
-not the obligation, to exercise the option at the maturity time. That is to say, the payoff
-only related to the price of the underlying asset at the maturity time.
+European option is a kind of vanilla option and not path dependent. The option has the right
+but not the obligation, to be exercised at the maturity time. That is to say, the payoff
+is only related to the price of the underlying asset at the maturity time.
 
 The payoff is calculated as follows:
 
@@ -37,8 +37,5 @@ Where :math:`K` is the strike value and :math:`S` is the spot price of underlyin
 Implementation 
 ===============
 
-In Monte Carlo Framework, the path generator is specified with Black-Scholes. For path pricer, it fetches the logS from the input stream, calculates the payoff based on above formula and discounts it to time 0 for option price.
-
-
-
+In Monte Carlo Framework, the path generator is specified with Black-Scholes. For path pricer, it fetches the `logS` from the input stream, calculates the payoff based on above formula and discounts it to time 0 for option price.
 

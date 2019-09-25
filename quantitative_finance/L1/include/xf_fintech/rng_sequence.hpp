@@ -191,11 +191,13 @@ class CORRAND_2_Sequence<DT, RNG, SampleNum, ASSETS, false> {
 #pragma HLS unroll
             rngInst[i].seedInitialization(seed[i]);
         }
+        firstcall = true;
+        corrand.init();
     }
 
-    CORRAND_2<DT, SampleNum, ASSETS> corrand;
+    CORRAND_2<DT, SampleNum, ASSETS, 1> corrand;
 
-    CORRAND_2_Sequence() : firstcall(true) {}
+    CORRAND_2_Sequence() {}
 
     void rawRand(ap_uint<16> steps, ap_uint<16> paths, RNG rngInst[2], hls::stream<DT> randStrm[2]) {
         int local_steps;
@@ -221,13 +223,9 @@ class CORRAND_2_Sequence<DT, RNG, SampleNum, ASSETS, false> {
         }
     }
 
-    void rawRand_s(hls::stream<ap_uint<16> >& steps_strm,
-                   hls::stream<ap_uint<16> >& paths_strm,
-                   RNG rngInst[2],
-                   hls::stream<DT> randStrm[2]) {
-        ap_uint<16> steps, paths;
+    void rawRand_s(hls::stream<ap_uint<16> >& steps_strm, RNG rngInst[2], hls::stream<DT> randStrm[2]) {
+        ap_uint<16> steps;
         steps = steps_strm.read();
-        paths = paths_strm.read();
 
         int local_steps;
         DT z0, z1;
@@ -240,7 +238,7 @@ class CORRAND_2_Sequence<DT, RNG, SampleNum, ASSETS, false> {
 
         for (int i = 0; i < local_steps; i++) {
             for (int j = 0; j < ASSETS; j++) {
-                for (int k = 0; k < paths; k++) {
+                for (int k = 0; k < SampleNum; k++) {
 #pragma HLS pipeline II = 1
                     for (int m = 0; m < 2; m++) {
 #pragma HLS unroll
@@ -254,77 +252,21 @@ class CORRAND_2_Sequence<DT, RNG, SampleNum, ASSETS, false> {
 
     void _NextSeq(hls::stream<ap_uint<16> >& steps_strm1,
                   hls::stream<ap_uint<16> >& steps_strm2,
-                  hls::stream<ap_uint<16> >& paths_strm1,
-                  hls::stream<ap_uint<16> >& paths_strm2,
                   RNG rngInst[2],
                   hls::stream<DT> corrRandStrmOut[2]) {
 #pragma HLS DATAFLOW
         hls::stream<DT> randStrm[2];
 #pragma HLS stream variable = randStrm depth = 1024
-        rawRand_s(steps_strm1, paths_strm1, rngInst, randStrm);
-        corrand.corrPathCube_s(steps_strm2, paths_strm2, randStrm[0], randStrm[1], corrRandStrmOut[0],
-                               corrRandStrmOut[1]);
+        rawRand_s(steps_strm1, rngInst, randStrm);
+        corrand.corrPathCube(steps_strm2, randStrm[0], randStrm[1], corrRandStrmOut[0], corrRandStrmOut[1]);
     }
 
     void NextSeq(ap_uint<16> steps, ap_uint<16> paths, RNG rngInst[2], hls::stream<DT> corrRandStrmOut[2]) {
-        hls::stream<ap_uint<16> > scalar_strm[4];
+        hls::stream<ap_uint<16> > scalar_strm[2];
 #pragma HLS stream variable = scalar_strm depth = 4
         scalar_strm[0].write(steps);
         scalar_strm[1].write(steps);
-        scalar_strm[2].write(paths);
-        scalar_strm[3].write(paths);
-        _NextSeq(scalar_strm[0], scalar_strm[1], scalar_strm[2], scalar_strm[3], rngInst, corrRandStrmOut);
-    }
-};
-
-template <typename DT, typename RNG, int SampleNum, int ASSETS>
-class CORRAND_2_Sequence<DT, RNG, SampleNum, ASSETS, true> {
-   public:
-    const static unsigned int OutN = 4;
-    bool firstcall;
-    ap_uint<32> seed[2];
-
-    void Init(RNG rngInst[2]) {
-        for (int i = 0; i < 2; i++) {
-#pragma HLS unroll
-            rngInst[i].seedInitialization(seed[i]);
-        }
-    }
-
-    CORRAND_2<DT, SampleNum, ASSETS> corrand;
-
-    CORRAND_2_Sequence() : firstcall(true) {}
-
-    void rawRand(ap_uint<16> steps, ap_uint<16> paths, RNG rngInst[2], hls::stream<DT> randStrm[2]) {
-        int local_steps;
-        DT z0, z1;
-        if (firstcall) {
-            local_steps = steps + 1;
-            firstcall = false;
-        } else {
-            local_steps = steps;
-        }
-
-        for (int i = 0; i < local_steps; i++) {
-            for (int j = 0; j < ASSETS; j++) {
-                for (int k = 0; k < paths; k++) {
-#pragma HLS pipeline II = 1
-                    for (int m = 0; m < 2; m++) {
-#pragma HLS unroll
-                        DT z = rngInst[m].next();
-                        randStrm[m].write(z);
-                    }
-                }
-            }
-        }
-    }
-
-    void NextSeq(ap_uint<16> steps, ap_uint<16> paths, RNG rngInst[2], hls::stream<DT> corrRandStrmOut[4]) {
-#pragma HLS DATAFLOW
-        hls::stream<DT> randStrm[2];
-        rawRand(steps, paths, rngInst, randStrm);
-        corrand.corrPathCube(steps, paths, randStrm[0], randStrm[1], corrRandStrmOut[0], corrRandStrmOut[1],
-                             corrRandStrmOut[2], corrRandStrmOut[3]);
+        _NextSeq(scalar_strm[0], scalar_strm[1], rngInst, corrRandStrmOut);
     }
 };
 

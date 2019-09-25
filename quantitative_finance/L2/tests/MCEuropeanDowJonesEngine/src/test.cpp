@@ -25,6 +25,24 @@
 #define NUM_ASSETS 30
 #define DIA_DIVISOR 0.14748071991788
 
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
+
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -137,7 +155,11 @@ int main(int argc, const char* argv[]) {
 
     DtUsed* out0 = aligned_alloc<DtUsed>(OUTDEP);
     cl_mem_ext_ptr_t mext_out;
+#ifndef USE_HBM
     mext_out = {XCL_MEM_DDR_BANK0, out0, 0};
+#else
+    mext_out = {XCL_BANK0, out0, 0};
+#endif
 
     cl::Buffer out_buff;
     out_buff = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
@@ -151,6 +173,19 @@ int main(int argc, const char* argv[]) {
               << "  maximum samples:  " << maxSamples << std::endl
               << "  timesteps:        " << timeSteps << std::endl
               << std::endl;
+
+    std::string mode_emu = "hw";
+    if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
+        mode_emu = std::getenv("XCL_EMULATION_MODE");
+    }
+    std::cout << "[INFO]Running in " << mode_emu << " mode" << std::endl;
+    int asset_nm = NUM_ASSETS;
+
+    if (mode_emu.compare("hw_emu") == 0) {
+        asset_nm = 10;
+    } else {
+        asset_nm = NUM_ASSETS;
+    }
 
     for (int i = 0; i < NUM_ASSETS; i++) {
         int j = 0;

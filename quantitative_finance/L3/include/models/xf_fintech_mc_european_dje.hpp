@@ -38,12 +38,27 @@ class MCEuropeanDJE : public OCLController {
     virtual ~MCEuropeanDJE();
 
    public:
-    // The following constant defines the number of KERNELS that have been built
-    // in the HW...
-    static const int NUM_KERNELS = 4;
+    /**
+     * The following constant defines the number of KERNELS that have been built
+     * in the HW...
+     */
+    static const int NUM_KERNELS = 1;
 
     /**
      * Process arrays of asset data, until required TOLERANCE is met...
+     *
+     * @param optionType either American/European Call or Put
+     * @param stockPrice the stock price
+     * @param strikePrice the strike price
+     * @param riskFreeRate the risk free interest rate
+     * @param dividendYield the dividend yield
+     * @param volatility the volatility
+     * @param timeToMaturity the time to maturity
+     * @param requiredTolerance the required tolerance
+     * @param numAssets the number of assets
+     * @param dowDivisor the Dow Divisor
+     * @param DJIAOutput the returned Dow Jones Industrial Average
+     *
      */
     int run(OptionType* optionType,
             double* stockPrice,
@@ -59,6 +74,19 @@ class MCEuropeanDJE : public OCLController {
 
     /**
      * Process arrays of asset data, for REQUIRED NUMBER OF SAMPLES...
+     *
+     * @param optionType either American/European Call or Put
+     * @param stockPrice the stock price
+     * @param strikePrice the strike price
+     * @param riskFreeRate the risk free interest rate
+     * @param dividendYield the dividend yield
+     * @param volatility the volatility
+     * @param timeToMaturity the time to maturity
+     * @param requiredSamples the required samples
+     * @param numAssets the number of assets
+     * @param dowDivisor the Dow Divisor
+     * @param DJIAOutput the returned Dow Jones Industrial Average
+     *
      */
     int run(OptionType* optionType,
             double* stockPrice,
@@ -74,10 +102,10 @@ class MCEuropeanDJE : public OCLController {
 
    public:
     /**
-    * This method returns the time the execution of the last call to run() took
-    *
-    * @returns Execution time in microseconds
-    */
+     * This method returns the time the execution of the last call to run() took
+     *
+     * @returns Execution time in microseconds
+     */
     long long int getLastRunTime(void);
 
    private:

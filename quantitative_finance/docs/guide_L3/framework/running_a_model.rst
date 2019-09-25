@@ -31,11 +31,6 @@ To run a model there are 4 basic steps:
 	* Release the device so it may be used by other objects.
 
 
-
-
-
-
-
 Example
 *******
 .. code-block:: c++
@@ -46,20 +41,11 @@ Example
 
 	using namespace xf::fintech;
 
-
-
-
 	int retval = XLNX_OK;
 	int i;
 
-
-
 	// Instantiate a Monte-Carlo European object...
 	MCEuropean mcEuropean;
-
-
-
-
 
 	// Some input data...
 	OptionType  optionType   = Put;
@@ -73,15 +59,8 @@ Example
 	
 	double optionPrice;	// output
 
-
-
-
-
 	// Claim the device for use by our object...
 	retval = mcEuropean.claimDevice(pChosenDevice);
-
-
-
 
 	if(retval == XLNX_OK)
 	{
@@ -98,7 +77,6 @@ Example
 		}
 	}
 
-
 	//Release the device...
 	retval = mcEuropean.releaseDevice();
 
@@ -107,13 +85,6 @@ Example
 
 In the above example *pChosenDevice* is a pointer to a Device object.  This acquired by enumerating available devices (see :ref:`Device Enumeration <device_enumeration>`)
   
-
-
-
-
-
-
-
 
 Claiming the device
 *******************
@@ -136,7 +107,6 @@ To switch between several different models the user must:
 	* Release the device
 
 
-
 Example of using multiple models
 *********************************
 .. code-block:: c++
@@ -147,21 +117,12 @@ Example of using multiple models
 
 	using namespace xf::fintech;
 
-
-
-
 	int retval = XLNX_OK;
 	int i;
-
-
 
 	// Instantiate both a Monte-Carlo European and a Monte-Carlo American object...
 	MCEuropean mcEuropean;
 	MCAmerican mcAmerican;
-
-
-
-
 
 	// Some input data...
 	OptionType  optionType   = Put;
@@ -175,15 +136,8 @@ Example of using multiple models
 	
 	double optionPrice;	// output
 
-
-
-
-
 	// Claim the device for use by our FIRST model object...
 	retval = mcEuropean.claimDevice(pChosenDevice);
-
-
-
 
 	if(retval == XLNX_OK)
 	{
@@ -200,22 +154,13 @@ Example of using multiple models
 		}
 	}
 
-
 	//Release the device...
 	retval = mcEuropean.releaseDevice();
 
-
-
 	//////////////////////////////////////////////////////////////////////////////////
-
-
-
 
 	// Claim the device for use by our SECOND model object...
 	retval = mcAmerican.claimDevice(pChosenDevice);
-
-
-
 
 	if(retval == XLNX_OK)
 	{
@@ -232,14 +177,8 @@ Example of using multiple models
 		}
 	}
 
-
 	//Release the device...
 	retval = mcAmerican.releaseDevice();
-
-
-
-
-
 
 
 Notes
@@ -247,10 +186,5 @@ Notes
 
 	* A device may only be claimed by a single model object at a time.
 	* A model object may only claim a single device at a time.
-
-
-
-
-
 
 

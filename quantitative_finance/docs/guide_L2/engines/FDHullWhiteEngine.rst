@@ -15,7 +15,7 @@
 
 
 ********************************************************************************
-Internal Design of Finite-difference Hull-White Bermudan Swaption Pricing Engine
+Internal Design of Finite-Difference Hull-White Bermudan Swaption Pricing Engine
 ********************************************************************************
 
 Overview
@@ -29,7 +29,7 @@ In Bermudan swaption, the owner is allowed to enter the swap on several pre-spec
 Implementation
 ==============
 
-The pricing process of finite-difference Hull-White Bermudan swaption engine is shown in the figure below:
+The pricing process of Finite-Difference Hull-White Bermudan Swaption engine is shown in the figure below:
 
 .. image:: /images/fd_hullwhite_bermudan_swaption_engine_workflow.png
         :alt: pricing process of FdHullWhiteEngine
@@ -45,7 +45,7 @@ After Initialization, the pricing engine evolves back step by step from the last
         :width: 100%
         :align: center
 
-Since engineInitialization process will be executed for only once, while applyTo process will run :math:`\_ETSize` times in a single pricing process, additionally, both of them have a latency which is much shorter than douglasSchemeStep process, so they’re optimized for minimum resource utilizations with a reasonable overall latency. But as with douglasSchemeStep process, we try our best to decrease its latency to reduce the latency of the whole pricing process.
+Since engineInitialization process will be executed for only once, while applyTo process will run :math:`\_ETSize` times in a single pricing process, additionally, both of them have a latency which is much shorter than douglasSchemeStep process, so they’re optimized for minimum resource utilizations with a reasonable overall latency. But as with douglasSchemeStep process, we try our best to decrease its latency to reduce the whole latency in the pricing process.
 
 Mesher
 ======
@@ -62,7 +62,7 @@ Differential operator
 
 In finite-difference methods, a differential operator :math:`D` is used to transform a function :math:`f(x)` into one of its derivatives, for instance :math:`{f}'(x)` or :math:`{f}''(x)`. As differentiation is linear, so it can be written as a matrix while using linear algebra methods to solve it. As you know, FDM doesn’t give the exact discretization of the derivative but an approximation, like :math:`{f}'_{i}={f}'(x_{i})+\epsilon _{i}`, notice that the error will decreasing along with the decreasing of the spacing of the grid, say, the tighter the grids (including :math:`t` axis and :math:`x` axis), the better approximation quality, but the worse simulation duration.
 
-As you may refer to Tylor’s polynomial, we just provide differential operators including the first derivative and the second derivative to obtain a manageable approximation error, they can be defined as:
+As you may refer to Tylor’s polynomial, we just provide differential operators including the first and the second derivative to obtain a manageable approximation error, they can be defined as:
 
 .. math::
         {f}'{(x_{i})}\approx \frac{f(x_{i+1})-f(x_{i-1})}{2(x_{i}-x_{i-1})}
@@ -82,7 +82,7 @@ As we can see from the equations that the value of the derivative at any given i
         &  &  &  &  & l_{n-2} & m_{n-1}
         \end{bmatrix}
 
-To save storage resources and avoid redundant computations, we store the upper, main, and lower diagonals of the matrix in the :math:`dzMap\_` of the pricing engine and compute it by Thomson algorithm while evolving back instead of a traditional matrix with a large number of zeros and many meaningless additions and multiplications in the pricing process. 
+To save storage resources and avoid redundant computations, we store the upper, main, and lower diagonals of the matrix in the :math:`dzMap\_` of the pricing engine and compute it by Thomson algorithm while evolving back, instead of using a traditional matrix with a large number of zeros and many meaningless additions and multiplications in the pricing process. 
 
 Evolution scheme
 ================
@@ -106,7 +106,7 @@ Which can be simplified as:
 .. math::
         f(t)=(I-\Delta t\cdot D)\cdot f(t+\Delta t)
 
-That only simple matrix multiplication is needed to approximate the equation which is mentioned at the first of this subsection makes the EE scheme the simplest scheme in FDM.
+That only simple matrix multiplication is needed to approximate the equation which is mentioned at the first of this subsection makes the EE scheme becomes the simplest one in FDM.
 
 The Implicit Euler (IE) scheme can be written this way:
 
@@ -131,7 +131,7 @@ The formula transforms to EE scheme if we set :math:`\theta =0`, and it transfor
 Profiling
 =========
 
-The hardware resource utilizations and timing performance for a single finite-difference Hull-White bermudan swaption prcing engine with :math:`\_xGridMax=101` are listed in :numref:`tab1FDHWU` below:
+The hardware resource utilizations and timing performance for a single Finite-Difference Hull-White Bermudan Swaption prcing engine with :math:`\_xGridMax=101` are listed in :numref:`tab1FDHWU` below:
 
 .. _tab1FDHWU:
 

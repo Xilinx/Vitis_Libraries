@@ -25,6 +25,24 @@
 #include "ap_int.h"
 #include "utils.hpp"
 #include "mcengine_top.hpp"
+#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+#define XCL_BANK0 XCL_BANK(0)
+#define XCL_BANK1 XCL_BANK(1)
+#define XCL_BANK2 XCL_BANK(2)
+#define XCL_BANK3 XCL_BANK(3)
+#define XCL_BANK4 XCL_BANK(4)
+#define XCL_BANK5 XCL_BANK(5)
+#define XCL_BANK6 XCL_BANK(6)
+#define XCL_BANK7 XCL_BANK(7)
+#define XCL_BANK8 XCL_BANK(8)
+#define XCL_BANK9 XCL_BANK(9)
+#define XCL_BANK10 XCL_BANK(10)
+#define XCL_BANK11 XCL_BANK(11)
+#define XCL_BANK12 XCL_BANK(12)
+#define XCL_BANK13 XCL_BANK(13)
+#define XCL_BANK14 XCL_BANK(14)
+#define XCL_BANK15 XCL_BANK(15)
 
 class ArgParser {
    public:
@@ -67,12 +85,9 @@ int main(int argc, const char* argv[]) {
     std::string xclbin_path;
     std::string mode_emu = "hw";
 #ifndef HLS_TEST
-    if (parser.getCmdOption("-mode", mode) && mode == "fpga") {
-        // run_fpga = true;
-        if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-            std::cout << "ERROR:xclbin path is not set!\n";
-            return 1;
-        }
+    if (!parser.getCmdOption("-xclbin", xclbin_path)) {
+        std::cout << "ERROR:xclbin path is not set!\n";
+        return 1;
     }
 
     if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
@@ -126,14 +141,19 @@ int main(int argc, const char* argv[]) {
     cl::Kernel kernel_Engine(program, "MCBarrierNoBiasEngine_k0");
     std::cout << "kernel has been created" << std::endl;
 
-    cl_mem_ext_ptr_t mext_o[5];
-    mext_o[0].flags = XCL_MEM_DDR_BANK0;
+    cl_mem_ext_ptr_t mext_o[2];
     mext_o[0].obj = outputs;
     mext_o[0].param = 0;
 
-    mext_o[1].flags = XCL_MEM_DDR_BANK0;
     mext_o[1].obj = seed;
     mext_o[1].param = 0;
+    for (int i = 0; i < 2; ++i) {
+#ifndef USE_HBM
+        mext_o[i].flags = XCL_MEM_DDR_BANK0;
+#else
+        mext_o[i].flags = XCL_BANK0;
+#endif
+    }
 
     // create device buffer and map dev buf to host buf
     cl::Buffer output_buf;

@@ -29,6 +29,7 @@ extern "C" void TREE_k0(int type,
                         int floatingCnt[FloatingLen],
                         int fixedCnt[FixedLen],
                         DT NPV[N]) {
+#ifndef HLS_TEST
 #pragma HLS INTERFACE m_axi port = NPV bundle = gmem0 offset = slave
 #pragma HLS INTERFACE m_axi port = initTime bundle = gmem1 offset = slave
 #pragma HLS INTERFACE m_axi port = exerciseCnt bundle = gmem2 offset = slave
@@ -45,6 +46,7 @@ extern "C" void TREE_k0(int type,
 #pragma HLS INTERFACE s_axilite port = fixedCnt bundle = control
 #pragma HLS INTERFACE s_axilite port = initSize bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
+#endif
 
     DT a = 0.16046325834281869;
     DT sigma = 0.0037370022855109613;

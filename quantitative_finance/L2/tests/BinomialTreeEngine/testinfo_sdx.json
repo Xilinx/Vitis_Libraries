@@ -17,7 +17,6 @@
     }, 
     "test_type": [
         "sdx_sw_emu", 
-        "sdx_hw_emu", 
         "sdx_hw"
     ]
 }
