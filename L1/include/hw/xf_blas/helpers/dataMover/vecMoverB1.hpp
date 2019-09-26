@@ -18,7 +18,7 @@
  * @file vecMoverB1.hpp
  * @brief common data movers for vectors used in BLAS L1 routines.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_VECMOVERB1_HPP

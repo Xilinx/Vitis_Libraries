@@ -18,7 +18,7 @@
  * @file trmMatMoverB2.hpp
  * @brief data movers for triangular matrices and corresponding vectors.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_TRMMATMOVERB2_HPP

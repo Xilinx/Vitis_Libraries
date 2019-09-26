@@ -18,7 +18,7 @@
  * @file symMatMoverB2.hpp
  * @brief data movers for symmetric matrices and corresponding vectors.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_SYMMATMOVERB2_HPP
