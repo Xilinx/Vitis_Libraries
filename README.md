@@ -2,6 +2,9 @@
 Vitis software development platform includes an extensive set of open-source, performance-optimized libraries that offer out-of-the-box acceleration with minimal to zero-code changes to your existing applications, without the need to reimplement your algorithms from scratch to harness the benefits of Xilinx adaptive compute.
 
 Whether you want to accelerate existing applications in your Data Center using Xilinx Alveo Accelerator cards or design the most-efficient state-of-the-art AI-powered smart sensors for the Edge, Vitis accelerated-libraries and a rich ecosystem of accelerated solutions offers you the best starting point.
+
+[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/)
+
 # Comprehensive Set of Domain-Specific Accelerated Libraries
 Access a broad range of pre-optimized libraries that you can call as a software API to bring plug-n-play acceleration in your application or customize to design your own accelerator for Xilinx platforms across edge to cloud.
 
