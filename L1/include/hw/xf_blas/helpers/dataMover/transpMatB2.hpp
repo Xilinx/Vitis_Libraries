@@ -18,7 +18,7 @@
  * @file transpMatB2.hpp
  * @brief datamovers for symmetric matrices and vectors used in BLAS L2 routines.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_TRANSPMATB2_HPP

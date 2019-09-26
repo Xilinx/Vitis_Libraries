@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath('docs'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'XF BLAS Library'
+project = 'Vitis BLAS Library'
 copyright = '2019, Xilinx Inc.'
 author = 'Xilinx Inc.'
 
@@ -156,7 +156,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'XfBlasLibrary.tex', 'XF BLAS Library Documentation',
+    (master_doc, 'XfBlasLibrary.tex', 'Vitis BLAS Library Documentation',
      'Xilinx Inc.', 'manual'),
 ]
 
@@ -166,7 +166,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'blaslibrary', 'XF BLAS Library Documentation',
+    (master_doc, 'blaslibrary', 'Vitis BLAS Library Documentation',
      [author], 1)
 ]
 
@@ -177,7 +177,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'XfBlasLibrary', 'XF BLAS Library Documentation',
+    (master_doc, 'XfBlasLibrary', 'Vitis BLAS Library Documentation',
      author, 'XfBlasLibrary', 'One line description of project.',
      'Miscellaneous'),
 ]
