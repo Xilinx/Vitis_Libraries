@@ -34,7 +34,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -76,6 +76,6 @@ void axpy(unsigned int p_n,
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 #endif

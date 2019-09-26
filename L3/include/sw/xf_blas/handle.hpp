@@ -26,12 +26,12 @@
 using namespace std;
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 class BLASHostHandle {
    public:
-    vector<shared_ptr<BLASHost> > m_handlePtr;
+    unordered_map<unsigned int, vector<shared_ptr<BLASHost> > > m_handlePtr;
     static BLASHostHandle& instance() {
         static BLASHostHandle theInstance;
         return theInstance;
@@ -54,7 +54,7 @@ class ConfigDict {
 };
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

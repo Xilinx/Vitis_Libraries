@@ -18,7 +18,7 @@
 #define XF_BLAS_TRMV_HPP
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 /*!
   @brief Diagonal matrix - vector multiplication
@@ -93,7 +93,7 @@ LoopLines:
 }
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

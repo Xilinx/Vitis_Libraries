@@ -33,7 +33,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -43,7 +43,7 @@ namespace blas {
  * @tparam t_LogParEntries log2 of the number of parallelly processed entries in the input vector
  * @tparam t_IndexType the datatype of the index
  *
- * @param p_n the number of stided entries entries in the input vector p_x, p_n % l_ParEntries == 0
+ * @param p_n the number of entries in the input vector p_x, p_n % l_ParEntries == 0
  * @param p_x the input stream of packed vector entries
  * @param p_result the resulting index, which is 0 if p_n <= 0
  */
@@ -53,7 +53,6 @@ void amax(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntri
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
-    unsigned int l_numElem = p_n >> t_LogParEntries;
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_abs;
 #pragma HLS stream variable = l_abs depth = 2
 #pragma HLS DATAFLOW
@@ -63,7 +62,7 @@ void amax(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntri
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

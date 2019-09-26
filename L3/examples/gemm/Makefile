@@ -1,3 +1,4 @@
+ 
 #
 # Copyright 2019 Xilinx, Inc.
 #
@@ -14,26 +15,110 @@
 # limitations under the License.
 #
 
-ifndef XILINX_XRT
-    $(error XILINX_XRT not defined)
+# -----------------------------------------------------------------------------
+#                          project common settings
+
+MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+
+.SECONDEXPANSION:
+
+# -----------------------------------------------------------------------------
+#                            common tool setup
+
+
+.PHONY: help
+
+help::
+	@echo ""
+	@echo "Makefile Usage:"
+	@echo ""
+	@echo "  make host "
+	@echo "      Command to generate host."
+	@echo ""
+	@echo "  make clean "
+	@echo "      Command to remove the generated non-hardware files."
+	@echo ""
+	@echo "  make cleanall"
+	@echo "      Command to remove all the generated files."
+	@echo ""
+
+ifeq (,$(XILINX_XRT))
+XILINX_XRT = /opt/xilinx/xrt
+endif
+export XILINX_XRT
+.PHONY: check_xrt
+check_xrt:
+ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
+	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
 endif
 
-SW_API_DIR = ../../include/sw
+export PATH := $(XILINX_XRT)/bin:$(PATH)
 
-#------------------------------host----------------------------------
+ifeq (,$(LD_LIBRARY_PATH))
+LD_LIBRARY_PATH := $(XILINX_XRT)/lib
+else
+LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
+endif
 
-CXX = g++
-HOST_CXXFLAGS = -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-unused-parameter -Wno-unused-variable
-HOST_INCLUDE = -I$(XILINX_XRT)/include -I$(SW_API_DIR)
-HOST_LIB = -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
+# -----------------------------------------------------------------------------
+# BEGIN_XF_MK_USER_SECTION
+# -----------------------------------------------------------------------------
 
-XFBLAS_dataType = short
+XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
+XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
-#------------------------------dummies-------------------------------
+XCLBIN_FILE :=
+KERNELS :=
+
+# -----------------------------------------------------------------------------
+
+SRC_DIR = $(CUR_DIR)
+
+EXE_NAME = gemm_example
+HOST_ARGS =
+
+SRCS = gemm_example.cpp
+
+CXXFLAGS += -g -I$(XILINX_XRT)/include -I $(XFLIB_DIR)/L3/include/sw
+
+
+XFBLAS_dataType ?= short
+
+# -----------------------------------------------------------------------------
+# END_XF_MK_USER_SECTION
+# -----------------------------------------------------------------------------
 
 .PHONY: all
+all: host 
 
-all: clean gemm_example.exe
+OBJ_DIR_BASE ?= obj
+BIN_DIR_BASE ?= bin
+
+
+OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
+BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
+
+RUN_ENV =
+OBJ_FILES = 
+EXTRA_OBJS = 
+
+CXX := xcpp
+CC := gcc
+
+CXXFLAGS += -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-unused-parameter -Wno-unused-variable
+CFLAGS +=
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -lxilinxopencl
+LDFLAGS += -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
+
+EXE_EXT ?= exe
+EXE_FILE ?= $(EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
+
+$(EXE_FILE): $(SRCS) | check_xrt 
+	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+
+.PHONY: host
+host: check_xrt $(EXE_FILE)
 
 short: gemm_example.exe
 
@@ -43,17 +128,38 @@ common: gemm_common_example.exe
 
 pre_allocated: gemm_pre_allocated_example.exe
 
-clean: 
-	rm -rf *.exe
-
 gemm_example.exe: gemm_example.cpp
-	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=short -o $@ $^ $(HOST_LIB)
+	$(CXX) -D XFBLAS_dataType=short -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 gemm_example_float.exe: gemm_example.cpp
-	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=float -o $@ $^ $(HOST_LIB)
+	$(CXX) -D XFBLAS_dataType=float -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 	
 gemm_common_example.exe: gemm_common_example.cpp
-	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
+	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 gemm_pre_allocated_example.exe: gemm_pre_allocated_example.cpp
-	$(CXX) $(HOST_CXXFLAGS) $(HOST_INCLUDE) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(HOST_LIB)
+	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+
+
+# -----------------------------------------------------------------------------
+#                                clean up
+
+clean:
+ifneq (,$(OBJ_DIR_BASE))
+	rm -rf $(CUR_DIR)/$(OBJ_DIR_BASE)*
+endif
+ifneq (,$(BIN_DIR_BASE))
+	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*
+endif
+	rm -rf *.exe
+
+cleanall: clean 
+	rm -rf *.log plist $(DATA_STAMP)
+
+.PHONY: run 
+
+run: host 
+
+check: run
+
+

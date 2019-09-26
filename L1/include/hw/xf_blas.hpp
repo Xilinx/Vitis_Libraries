@@ -50,9 +50,9 @@
 
 // BLAS L3 function modules
 
+//#include "xf_blas/gemm.hpp"
 /* TODO
  *
-#include "xf_blas/gemm.hpp"
  *
 */
 

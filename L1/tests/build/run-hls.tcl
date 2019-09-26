@@ -42,11 +42,7 @@ config_compile -ignore_long_run_time
 
 source $TESTDIR/$DIRECTIVE_FILE
 
-if {$opt(part) == "vu9p"} {
-  set_part {xcvu9p-fsgd2104-2-i} -tool vivado
-} else {
-  set_part {xcvu9p-flgb2104-2-i} -tool vivado
-}
+set_part $opt(part) -tool vivado
 
 create_clock -period 3.333333 -name default
 
