@@ -52,13 +52,13 @@ int AccumulateImageKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     XF_TNAME(SRC_T, NPC) pxl_pack1, pxl_pack2;
 RowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -67,7 +67,7 @@ RowLoop:
             pxl_pack2 = (XF_SNAME(WORDWIDTH_SRC))src2.read(i * width + j);
         ProcLoop:
             for (k = 0, l = 0; k < ((8 << XF_BITSHIFT(NPC)) * PLANES); k += XF_IN_STEP, l += XF_OUT_STEP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 XF_CTUNAME(SRC_T, NPC) pxl1 = pxl_pack1.range(k + 7, k);
@@ -98,7 +98,7 @@ void accumulate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 #endif
     uint16_t lwidth = src2.cols >> XF_BITSHIFT(NPC);
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

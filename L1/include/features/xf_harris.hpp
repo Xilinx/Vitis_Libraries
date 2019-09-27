@@ -79,7 +79,7 @@ void xFCornerHarrisDetector(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> score(img_height, img_width);
     xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> thresh(img_height, img_width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=gradx_2.data depth=2
     #pragma HLS STREAM variable=grady_2.data depth=2
     #pragma HLS STREAM variable=gradxy.data depth=2
@@ -88,9 +88,9 @@ void xFCornerHarrisDetector(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     #pragma HLS STREAM variable=gradxyg.data depth=2
     #pragma HLS STREAM variable=score.data depth=2
     #pragma HLS STREAM variable=thresh.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
@@ -102,7 +102,7 @@ void xFCornerHarrisDetector(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> grady1_mat(img_height, img_width);
         xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> grady2_mat(img_height, img_width);
 
-        // clang-format off
+// clang-format off
         #pragma HLS STREAM variable=gradx_mat.data depth=2
         #pragma HLS STREAM variable=grady_mat.data depth=2
         #pragma HLS STREAM variable=gradx1_mat.data depth=2
@@ -136,7 +136,7 @@ void xFCornerHarrisDetector(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradx2_mat(img_height, img_width);
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady2_mat(img_height, img_width);
 
-        // clang-format off
+// clang-format off
         #pragma HLS STREAM variable=gradx_mat.data depth=2
         #pragma HLS STREAM variable=grady_mat.data depth=2
         #pragma HLS STREAM variable=gradx1_mat.data depth=2
@@ -189,7 +189,7 @@ void cornerHarris(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
                   uint16_t threshold,
                   uint16_t k) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 

@@ -125,7 +125,7 @@ XF_SNAME(WORDWIDTH)
 PackPixels(ap_uint8_t* buf) {
     XF_SNAME(WORDWIDTH) val;
     for (int k = 0, l = 0; k < XF_WORDDEPTH(WORDWIDTH); k += 8, l++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         // Get bits from certain range of positions.
@@ -145,7 +145,7 @@ void ExtractUYVYPixels(XF_SNAME(WORDWIDTH) pix, ap_uint8_t* buf) {
     int pos = 0;
     val = (XF_SNAME(WORDWIDTH))pix;
     for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH)); k += 8) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         uint8_t p;
@@ -166,7 +166,7 @@ void ExtractRGBAPixels(XF_SNAME(WORDDEPTH) pix, uint8_t* buf) {
     XF_SNAME(WORDDEPTH) val;
     val = (XF_SNAME(WORDDEPTH))pix;
     for (k = 0; k < XF_WORDDEPTH(WORDDEPTH); k += 8) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         // Get bits from certain range of positions.
@@ -184,7 +184,7 @@ XF_SNAME(WORDWIDTH)
 PackRGBAPixels(ap_uint8_t* buf) {
     XF_SNAME(WORDWIDTH) val;
     for (int k = 0, l = 0; k < (XF_WORDDEPTH(WORDWIDTH)); k += 8, l++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         // Get bits from certain range of positions.
@@ -765,7 +765,7 @@ static uint8_t saturate_cast(int32_t Value, int32_t offset, int fbits) {
  * 	An offset of 16 is added to the resultant value
  ***************************************************************************/
 static uint8_t CalculateY(uint8_t R, uint8_t G, uint8_t B) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     // 1.15 * 8.0 = 9.15
@@ -780,7 +780,7 @@ static uint8_t CalculateY(uint8_t R, uint8_t G, uint8_t B) {
  * an offset of 128 is added to the resultant value
  **********************************************************************/
 static uint8_t CalculateU(uint8_t R, uint8_t G, uint8_t B) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t U = ((short int)R2U * R) + ((short int)G2U * G) + ((short int)B2U * B) + F_05;
@@ -794,7 +794,7 @@ static uint8_t CalculateU(uint8_t R, uint8_t G, uint8_t B) {
  * an offset of 128 is added to the resultant value
  **********************************************************************/
 static uint8_t CalculateV(uint8_t R, uint8_t G, uint8_t B) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t V = ((short int)R2V * R) + ((short int)G2V * G) + ((short int)B2V * B) + F_05;
@@ -807,7 +807,7 @@ static uint8_t CalculateV(uint8_t R, uint8_t G, uint8_t B) {
  * R = 1.164*Y + 1.596*V = 0.164*Y + 0.596*V + Y + V
  **********************************************************************/
 static uint8_t CalculateR(uint8_t Y, int32_t V2Rtemp, int8_t V) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t R = (short int)Y2R * Y + V2Rtemp + F_05;
@@ -820,7 +820,7 @@ static uint8_t CalculateR(uint8_t Y, int32_t V2Rtemp, int8_t V) {
  * G = 1.164*Y - 0.813*V - 0.391*U = 0.164*Y - 0.813*V - 0.391*U + Y
  **********************************************************************/
 static uint8_t CalculateG(uint8_t Y, int32_t U2Gtemp, int32_t V2Gtemp) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t G = (short int)Y2G * Y + U2Gtemp + V2Gtemp + F_05;
@@ -833,7 +833,7 @@ static uint8_t CalculateG(uint8_t Y, int32_t U2Gtemp, int32_t V2Gtemp) {
  * B = 1.164*Y + 2.018*U = 0.164*Y + Y + 0.018*U + 2*U
  **********************************************************************/
 static uint8_t CalculateB(uint8_t Y, int32_t U2Btemp, int8_t U) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t B = (short int)Y2B * Y + U2Btemp + F_05;
@@ -846,7 +846,7 @@ static uint8_t CalculateB(uint8_t Y, int32_t U2Btemp, int8_t U) {
  * GRAY = 0.299*R + 0.587*G + 0.114*B
  **********************************************************************/
 static uint8_t CalculateGRAY(uint8_t R, uint8_t G, uint8_t B) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t GRAY = (R * (short int)_CVT_WEIGHT1) + (G * (short int)_CVT_WEIGHT2) + (B * (short int)_CVT_WEIGHT3);
@@ -864,7 +864,7 @@ static uint8_t CalculateGRAY(uint8_t R, uint8_t G, uint8_t B) {
  *	z	0.019334	0.119193	0.950257	B
  **********************************************************************/
 static uint8_t Calculate_X(uint8_t R, uint8_t G, uint8_t B) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t X = (R * (short int)_CVT_X1) + (G * (short int)_CVT_X2) + (B * (short int)_CVT_X3);
@@ -873,7 +873,7 @@ static uint8_t Calculate_X(uint8_t R, uint8_t G, uint8_t B) {
     return (sat_X);
 }
 static uint8_t Calculate_Y(uint8_t R, uint8_t G, uint8_t B) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t Y = (R * (short int)_CVT_Y1) + (G * (short int)_CVT_Y2) + (B * (short int)_CVT_Y3);
@@ -882,7 +882,7 @@ static uint8_t Calculate_Y(uint8_t R, uint8_t G, uint8_t B) {
     return (sat_Y);
 }
 static uint8_t Calculate_Z(uint8_t R, uint8_t G, uint8_t B) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t Z = (R * (short int)_CVT_Z1) + (G * (short int)_CVT_Z2) + (B * (short int)_CVT_Z3);
@@ -899,7 +899,7 @@ static uint8_t Calculate_Z(uint8_t R, uint8_t G, uint8_t B) {
  *	B	0.055648	-0.204043	1.057311	Z
  **********************************************************************/
 static uint8_t Calculate_R(uint8_t X, uint8_t Y, uint8_t Z) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t R = (X * (short int)_CVT_R1) + (Y * (short int)_CVT_R2) + (Z * (short int)_CVT_R3);
@@ -909,7 +909,7 @@ static uint8_t Calculate_R(uint8_t X, uint8_t Y, uint8_t Z) {
     return (sat_R);
 }
 static uint8_t Calculate_G(uint8_t X, uint8_t Y, uint8_t Z) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t G = (X * (short int)_CVT_G1) + (Y * (short int)_CVT_G2) + (Z * (short int)_CVT_G3);
@@ -918,7 +918,7 @@ static uint8_t Calculate_G(uint8_t X, uint8_t Y, uint8_t Z) {
     return (sat_G);
 }
 static uint8_t Calculate_B(uint8_t X, uint8_t Y, uint8_t Z) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t B = (X * (short int)_CVT_B1) + (Y * (short int)_CVT_B2) + (Z * (short int)_CVT_B3);
@@ -935,7 +935,7 @@ static uint8_t Calculate_B(uint8_t X, uint8_t Y, uint8_t Z) {
  *
  **********************************************************************/
 static uint8_t Calculate_CR(uint8_t R, uint8_t Y) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t CR = ((R - Y) * (short int)CR_WEIGHT);
@@ -945,7 +945,7 @@ static uint8_t Calculate_CR(uint8_t R, uint8_t Y) {
     return (sat_CR);
 }
 static uint8_t Calculate_CB(uint8_t B, uint8_t Y) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t CB = ((B - Y) * (short int)CB_WEIGHT);
@@ -968,7 +968,7 @@ static uint8_t Calculate_CB(uint8_t B, uint8_t Y) {
 #define Ycrcb2B 58098 // 1.773
 
 static uint8_t Calculate_Ycrcb2R(uint8_t Y, uint8_t cr) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t R = Ycrcb2R * (cr - 128);
@@ -976,7 +976,7 @@ static uint8_t Calculate_Ycrcb2R(uint8_t Y, uint8_t cr) {
     return (sat_R);
 }
 static uint8_t Calculate_Ycrcb2G(uint8_t Y, uint8_t cr, uint8_t cb) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -995,7 +995,7 @@ static uint8_t Calculate_Ycrcb2G(uint8_t Y, uint8_t cr, uint8_t cb) {
     return (res);
 }
 static uint8_t Calculate_Ycrcb2B(uint8_t Y, uint8_t cb) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int32_t B = Ycrcb2B * (cb - 128);

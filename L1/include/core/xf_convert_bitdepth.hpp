@@ -71,13 +71,13 @@ void xfConvertBitDepthKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 ROW_LOOP:
     for (row = 0; row < _height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
 
     COL_LOOP:
         for (col = 0; col < _width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TRIP_CNT max=TRIP_CNT
             #pragma HLS LOOP_FLATTEN off
             #pragma HLS pipeline
@@ -88,7 +88,7 @@ ROW_LOOP:
 
         Extract:
             for (j = 0, k = 0, i = 0; j < (1 << XF_BITSHIFT(NPC)); j++, k += in_step, i += out_step) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
 
@@ -131,7 +131,7 @@ void convertTo(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
              (_convert_type == XF_CONVERT_16U_TO_32S) || (_convert_type == XF_CONVERT_16S_TO_32S)) &&
             " conversion type is not valid "));
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

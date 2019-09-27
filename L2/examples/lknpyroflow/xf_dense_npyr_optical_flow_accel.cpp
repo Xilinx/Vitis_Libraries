@@ -23,7 +23,7 @@ void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
                             ap_uint<OUTPUT_PTR_WIDTH>* img_outy,
                             int rows,
                             int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_curr  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_prev  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=img_outx  offset=slave bundle=gmem3
@@ -34,26 +34,26 @@ void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC> in_curr_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_curr_mat.data depth=2
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC> in_prev_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_prev_mat.data depth=2
     // clang-format on
 
     xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC> outx_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=outx_mat.data depth=2
     // clang-format on
 
     xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC> outy_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=outy_mat.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

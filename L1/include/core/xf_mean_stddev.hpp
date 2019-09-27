@@ -36,7 +36,7 @@ void xFStddevkernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat1,
                     unsigned short _dst_stddev[XF_CHANNELS(TYPE, NPC)],
                     uint16_t height,
                     uint16_t width) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     ap_uint<4> j;
@@ -46,7 +46,7 @@ void xFStddevkernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat1,
     uint64_t sum[PLANES];                                       //={0};
 // ap_uint<8> val[(1<<XF_BITSHIFT(NPC))*PLANES];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_var_vals complete dim=0
     #pragma HLS ARRAY_PARTITION variable=tmp_sum_vals complete dim=0
     #pragma HLS ARRAY_PARTITION variable=sum complete dim=0
@@ -55,7 +55,7 @@ void xFStddevkernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat1,
     //#pragma HLS ARRAY_PARTITION variable=val complete dim=0
 
     for (j = 0; j < ((1 << XF_BITSHIFT(NPC)) * PLANES); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         tmp_var_vals[j] = 0;
@@ -69,13 +69,13 @@ void xFStddevkernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat1,
     ap_uint<13> row, col;
 Row_Loop1:
     for (row = 0; row < height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
 
     Col_Loop1:
         for (col = 0; col < (width >> XF_BITSHIFT(NPC)); col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
             #pragma HLS pipeline II=1
             #pragma HLS LOOP_FLATTEN OFF
@@ -86,7 +86,7 @@ Row_Loop1:
 
         Extract1:
             for (int p = 0; p < XF_NPIXPERCYCLE(NPC) * PLANES; p++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 #pragma HLS DEPENDENCE variable=tmp_var_vals intra false
                 // clang-format on
@@ -102,7 +102,7 @@ Row_Loop1:
 
     for (int c = 0; c < PLANES; c++) {
         for (j = 0; j < (1 << XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             sum[c] = (sum[c] + tmp_sum_vals[j * PLANES + c]);
@@ -113,7 +113,7 @@ Row_Loop1:
     ap_uint<16 *PLANES> mean_acc = 0, stddev_acc = 0;
 
     for (int c = 0; c < PLANES; c++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         unsigned int tempmean = 0;
@@ -142,10 +142,10 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void meanStdDev(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                 unsigned short _mean[XF_CHANNELS(SRC_T, NPC)],
                 unsigned short _stddev[XF_CHANNELS(SRC_T, NPC)]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
-    // clang-format on
-    //#pragma HLS dataflow
+// clang-format on
+//#pragma HLS dataflow
 
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1 || SRC_T == XF_8UC3 || SRC_T == XF_8UC4) &&

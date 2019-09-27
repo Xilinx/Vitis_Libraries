@@ -70,13 +70,13 @@ void xFboundingboxkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                          int num_box,
                          unsigned short height,
                          unsigned short width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) val_src = 0, val_dst = 0;
     ap_uint<13> r[MAX_BOXES], c[MAX_BOXES], r_new[MAX_BOXES], c_new[MAX_BOXES];
     XF_TNAME(SRC_T, NPC) color_box[MAX_BOXES];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=r complete
     #pragma HLS ARRAY_PARTITION variable=c complete
     #pragma HLS ARRAY_PARTITION variable=r_new complete
@@ -90,7 +90,7 @@ void xFboundingboxkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> r_idx = 0, r_newidx = 0, c_idx = 0, c_newidx = 0;
 
     for (ap_uint<13> i = 0; i < num_box; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=MAX_BOXES max=MAX_BOXES
         #pragma HLS UNROLL
         // clang-format on
@@ -105,12 +105,12 @@ void xFboundingboxkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         r_new[i] = (roi[i].y + roi[i].height);
     }
     for (int i = 0; i < (num_box); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=MAX_BOXES max=MAX_BOXES
         #pragma HLS PIPELINE
         // clang-format on
         for (int j = 0, k = 0; j < (XF_CHANNELS(SRC_T, NPC)); j++, k += XF_DTPIXELDEPTH(SRC_T, NPC)) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             color_box[i].range(k + (XF_DTPIXELDEPTH(SRC_T, NPC) - 1), k) = color[i].val[j];
@@ -118,19 +118,19 @@ void xFboundingboxkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     }
 
     for (ap_uint<13> b = 0; b < num_box; b++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=MAX_BOXES max=MAX_BOXES
-        // clang-format on
+    // clang-format on
     colLoop:
         for (ap_uint<13> j = c[b]; j < (c_new[b]); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             #pragma HLS pipeline
             // clang-format on
             _src_mat.write(r[b] * width + j, color_box[b]);
         }
         for (ap_uint<13> j = c[b]; j < (c_new[b]); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             #pragma HLS pipeline
             // clang-format on
@@ -140,7 +140,7 @@ void xFboundingboxkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     rowLoop1:
         for (ap_uint<13> i = (r[b] + 1); i < (r_new[b] - 1); i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
             #pragma HLS pipeline
             // clang-format on
@@ -173,7 +173,7 @@ void boundingbox(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                "ROI area exceeds the input image area");
     }
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 

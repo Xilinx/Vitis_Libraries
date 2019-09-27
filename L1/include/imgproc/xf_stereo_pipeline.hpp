@@ -146,28 +146,28 @@ void xFInitUndistortRectifyMapInverseKernel(CM_T* cameraMatrix,
                                             uint16_t rows,
                                             uint16_t cols,
                                             int noRotation = false) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
     CM_T cameraMatrixHLS[CM_SIZE];
     CM_T distCoeffsHLS[N];
     CM_T iRnewCameraMatrixHLS[CM_SIZE];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=cameraMatrixHLS complete dim=0
     #pragma HLS ARRAY_PARTITION variable=distCoeffsHLS complete dim=0
     #pragma HLS ARRAY_PARTITION variable=iRnewCameraMatrixHLS complete dim=0
     // clang-format on
 
     for (int i = 0; i < CM_SIZE; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE II=1
         // clang-format on
         cameraMatrixHLS[i] = cameraMatrix[i];
         iRnewCameraMatrixHLS[i] = ir[i];
     }
     for (int i = 0; i < N; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE II=1
         // clang-format on
         distCoeffsHLS[i] = distCoeffs[i];
@@ -184,12 +184,12 @@ void xFInitUndistortRectifyMapInverseKernel(CM_T* cameraMatrix,
     int idx = 0;
 loop_height:
     for (int i = 0; i < rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
+    // clang-format on
     loop_width:
         for (int j = 0; j < cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE II=1
             // clang-format on
@@ -224,7 +224,7 @@ void InitUndistortRectifyMapInverse(ap_fixed<32, 12>* cameraMatrix,
                                     xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& _mapy_mat,
                                     int _cm_size,
                                     int _dc_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

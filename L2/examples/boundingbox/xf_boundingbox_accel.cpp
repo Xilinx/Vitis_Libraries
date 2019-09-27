@@ -19,13 +19,13 @@
 extern "C" {
 void boundingbox_accel(
     ap_uint<INPUT_PTR_WIDTH>* in_img, int* roi, int color_info[MAX_BOXES][4], int height, int width, int num_box) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=in_img  		offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=roi  	    	offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=color_info  	offset=slave bundle=gmem3
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
  
     #pragma HLS INTERFACE s_axilite port=roi            	 bundle=control
     #pragma HLS INTERFACE s_axilite port=color_info          bundle=control

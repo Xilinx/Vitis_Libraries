@@ -24,8 +24,8 @@
 #include "imgproc/xf_duplicateimage.hpp"
 
 // Set the image height and width
-#define HEIGHT 128 // 2160
-#define WIDTH 3840 // 3840
+#define HEIGHT 2160 // 2160
+#define WIDTH 3840  // 3840
 
 //#define WB_TYPE 1
 
@@ -33,7 +33,7 @@
 #define NPC1 XF_NPPC1
 #endif
 #if RO
-#define NPC1 XF_NPPC4
+#define NPC1 XF_NPPC2
 #endif
 
 #define IN_TYPE XF_8UC3

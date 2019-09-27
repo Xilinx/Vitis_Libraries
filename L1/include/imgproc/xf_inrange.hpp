@@ -42,13 +42,13 @@ void inrangeproc(XF_SNAME(WORDWIDTH_SRC) & val_src,
     ap_uint<8> tmp_val1 = 0;
 
     for (ap_uint<13> k = 0; k < (1 << XF_BITSHIFT(NPC)); k++) {
-        // clang-format off
+// clang-format off
     #pragma HLS unroll
         // clang-format on
         p = val_src.range(k * XF_PIXELDEPTH(DEPTH_SRC) + (XF_PIXELDEPTH(DEPTH_SRC) - 1), k * XF_PIXELDEPTH(DEPTH_SRC));
 
         for (ap_uint<13> ch = 0, idx = 0; ch < XF_CHANNELS(SRC_T, NPC); ch++, idx += XF_DTPIXELDEPTH(SRC_T, NPC)) {
-            // clang-format off
+// clang-format off
       #pragma HLS unroll
             // clang-format on
             tmp_val1 = p.range(idx + (XF_DTPIXELDEPTH(SRC_T, NPC) - 1), idx);
@@ -103,14 +103,14 @@ void xFinRangeKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> i, j, k, c;
 rowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
     #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
       #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
       #pragma HLS pipeline
             // clang-format on
@@ -120,8 +120,7 @@ rowLoop:
             inrangeproc<WORDWIDTH_SRC, WORDWIDTH_DST, DEPTH_SRC, DEPTH_DST, SRC_T, NPC>(val_src, tmp_val, channel_out,
                                                                                         _lower_thresh, _upper_thresh);
 
-            _dst_mat.write(i * width + j,
-                           tmp_val); // writing the val_dst into output stream _dst
+            _dst_mat.write(i * width + j, tmp_val); // writing the val_dst into output stream _dst
         }
     }
 }
@@ -144,7 +143,7 @@ void inRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
-    // clang-format off
+// clang-format off
   #pragma HLS INLINE OFF
     // clang-format on
 

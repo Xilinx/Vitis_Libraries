@@ -34,19 +34,19 @@ void arithm_accel(
 #pragma HLS INTERFACE s_axilite  port=scale 			          bundle=control
 // clang-format on
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput1.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
@@ -84,7 +84,7 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
 #pragma HLS INTERFACE s_axilite  port=scale 			          bundle=control
 // clang-format on
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
@@ -92,13 +92,13 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput2(height, width);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput1.data depth=2
     #pragma HLS STREAM variable=imgInput2.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
@@ -113,7 +113,7 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
                                                               ,
                                                               scale
 #endif
-    );
+                                                              );
 #else
     xf::cv::FUNCT_NAME<TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, imgInput2, imgOutput);
 #endif
@@ -129,7 +129,7 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
 #if SCALAR
 void arithm_accel(
     ap_uint<PTR_WIDTH>* img_in1, unsigned char* scl_in, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=scl_in        offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=img_out      	 offset=slave  bundle=gmem2
@@ -143,12 +143,12 @@ void arithm_accel(
     unsigned char scl[XF_CHANNELS(TYPE, NPC1)];
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput1.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

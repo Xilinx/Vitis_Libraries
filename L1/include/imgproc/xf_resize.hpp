@@ -34,7 +34,7 @@ template <int INTERPOLATION_TYPE,
           int NPC,
           int MAX_DOWN_SCALE>
 void resize(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC>& _src, xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

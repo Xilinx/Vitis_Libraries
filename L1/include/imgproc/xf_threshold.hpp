@@ -53,14 +53,14 @@ void xFThresholdKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> i, j, k;
 rowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -69,7 +69,7 @@ rowLoop:
                 (XF_SNAME(WORDWIDTH_SRC))(_src_mat.read(i * width + j)); // reading the source stream _src into val_src
 
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += XF_PIXELDEPTH(DEPTH)) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src.range(k + (XF_PIXELDEPTH(DEPTH) - 1), k);
@@ -123,7 +123,7 @@ void Threshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

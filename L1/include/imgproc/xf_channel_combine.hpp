@@ -46,13 +46,13 @@ void xfChannelCombineKernel(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
     ap_uint<13> i, j, k;
 RowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             XF_TNAME(DST_T, NPC) res;
@@ -64,7 +64,7 @@ RowLoop:
 
         ProcLoop:
             for (k = 0; k < (noofbits << XF_BITSHIFT(NPC)); k += noofbits) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 int y = k * XF_CHANNELS(DST_T, NPC);
@@ -97,13 +97,13 @@ void xfChannelCombineKernel(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
 
 RowLoop:
     for (int i = 0; i < rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             XF_TNAME(DST_T, NPC) res;
@@ -114,7 +114,7 @@ RowLoop:
 
         ProcLoop:
             for (int k = 0; k < (noofbits << XF_BITSHIFT(NPC)); k += noofbits) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 int y = k * XF_CHANNELS(DST_T, NPC);
@@ -145,13 +145,13 @@ void xfChannelCombineKernel(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
 
 RowLoop:
     for (int i = 0; i < rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             XF_TNAME(DST_T, NPC) res;
@@ -161,7 +161,7 @@ RowLoop:
 
         ProcLoop:
             for (int k = 0; k < (noofbits << XF_BITSHIFT(NPC)); k += noofbits) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 int y = k * XF_CHANNELS(DST_T, NPC);
@@ -225,24 +225,24 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC2) &&
            "Source image should be of 1 channel and destination image of 2 channels");
-    //	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+//	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
     hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
     hls::stream<XF_TNAME(DST_T, NPC)> _out;
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     #pragma HLS DATAFLOW
-    // clang-format on
+// clang-format on
 
 Read_Mat_Loop:
     for (int i = 0; i < _src1.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_src1.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             // clang-format on
@@ -255,11 +255,11 @@ Read_Mat_Loop:
 
 Write_Mat_Loop:
     for (int i = 0; i < _dst.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_dst.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             // clang-format on
@@ -281,25 +281,25 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC3) &&
            "Source image should be of 1 channel and destination image of 3 channels");
-    //	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+//	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
     hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in3;
     hls::stream<XF_TNAME(DST_T, NPC)> _out;
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     #pragma HLS DATAFLOW
-    // clang-format on
+// clang-format on
 
 Read_Mat_Loop:
     for (int i = 0; i < _src1.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_src1.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             // clang-format on
@@ -313,11 +313,11 @@ Read_Mat_Loop:
 
 Write_Mat_Loop:
     for (int i = 0; i < _dst.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_dst.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             // clang-format on
@@ -341,7 +341,7 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC4) &&
            "Source image should be of 1 channel and destination image of 4 channels");
-    //	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+//	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
     hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
     hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
@@ -349,18 +349,18 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     hls::stream<XF_TNAME(SRC_T, NPC)> _in4;
     hls::stream<XF_TNAME(DST_T, NPC)> _out;
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     #pragma HLS DATAFLOW
-    // clang-format on
+// clang-format on
 
 Read_Mat_Loop:
     for (int i = 0; i < _src1.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_src1.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             // clang-format on
@@ -375,11 +375,11 @@ Read_Mat_Loop:
 
 Write_Mat_Loop:
     for (int i = 0; i < _dst.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_dst.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             // clang-format on

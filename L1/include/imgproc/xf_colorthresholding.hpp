@@ -36,7 +36,7 @@ void apply_threshold(unsigned char low_thresh[MAXCOLOR][3],
                      ap_uint<8>& h,
                      ap_uint<8>& s,
                      ap_uint<8>& v) {
-    // clang-format off
+// clang-format off
   #pragma HLS inline off
     // clang-format on
 
@@ -90,11 +90,11 @@ void xFInRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     _upper_thresh[XF_CHANNELS(SRC_T, NPC)]; //=(XF_PTNAME(DEPTH))upper_thresh;
 
     for (uint16_t row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
     #pragma HLS LOOP_TRIPCOUNT max = ROWS
         // clang-format on
         for (uint16_t col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
       #pragma HLS PIPELINE
       #pragma HLS LOOP_TRIPCOUNT max = COLS
             // clang-format on
@@ -124,19 +124,19 @@ void colorthresholding(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                        xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
                        unsigned char low_thresh[MAXCOLORS * 3],
                        unsigned char high_thresh[MAXCOLORS * 3]) {
-    // clang-format off
+// clang-format off
   #pragma HLS INLINE OFF
   #pragma HLS DATAFLOW
     // clang-format on
 
     unsigned char low_th[MAXCOLORS][3], high_th[MAXCOLORS][3];
-    // clang-format off
+// clang-format off
   #pragma HLS ARRAY_PARTITION variable = low_th dim = 1 complete
   #pragma HLS ARRAY_PARTITION variable = high_th dim = 1 complete
     // clang-format on
     uint16_t j = 0;
     for (uint16_t i = 0; i < (MAXCOLORS); i++) {
-        // clang-format off
+// clang-format off
     #pragma HLS PIPELINE
         // clang-format on
 

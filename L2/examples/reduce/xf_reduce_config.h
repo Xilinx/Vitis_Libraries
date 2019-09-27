@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _XF_THRESHOLD_CONFIG_H_
-#define _XF_THRESHOLD_CONFIG_H_
+#ifndef _XF_REDUCE_CONFIG_H_
+#define _XF_REDUCE_CONFIG_H_
 
 #include "hls_stream.h"
 #include "ap_int.h"
@@ -92,4 +92,4 @@
 #endif
 #endif
 
-#endif // end of _XF_THRESHOLD_CONFIG_H_
+#endif // end of _XF_REDUCE_CONFIG_H_

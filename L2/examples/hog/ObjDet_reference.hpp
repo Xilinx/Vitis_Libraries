@@ -17,6 +17,18 @@
 #ifndef __OBJDET_REFERENCE__
 #define __OBJDET_REFERENCE__
 
+#if __SDSOC
+#undef __ARM_NEON__
+#undef __ARM_NEON
+#include "opencv2/core/core.hpp"
+#include "opencv2/core/operations.hpp"
+#define __ARM_NEON__
+#define __ARM_NEON
+#else
+#include "opencv2/core/core.hpp"
+#include "opencv2/core/operations.hpp"
+#endif
+
 using namespace cv;
 using namespace std;
 
@@ -39,10 +51,10 @@ struct AURHOGDescriptor {
           gammaCorrection(true),
           nlevels(AURHOGDescriptor::DEFAULT_NLEVELS) {}
 
-    AURHOGDescriptor(Size _winSize,
-                     Size _blockSize,
-                     Size _blockStride,
-                     Size _cellSize,
+    AURHOGDescriptor(cv::Size _winSize,
+                     cv::Size _blockSize,
+                     cv::Size _blockStride,
+                     cv::Size _cellSize,
                      int _nbins,
                      int _derivAperture = 1,
                      double _winSigma = -1,
@@ -67,19 +79,22 @@ struct AURHOGDescriptor {
     size_t AURgetDescriptorSize() const;
     double AURgetWinSigma() const;
 
-    virtual void AURcompute(const Mat& img,
+    virtual void AURcompute(const cv::Mat& img,
                             std::vector<float>& descriptors,
-                            Size winStride = Size(),
-                            Size padding = Size(),
-                            const std::vector<Point>& locations = std::vector<Point>()) const;
+                            cv::Size winStride = cv::Size(),
+                            cv::Size padding = cv::Size(),
+                            const std::vector<cv::Point>& locations = std::vector<cv::Point>()) const;
 
-    virtual void AURcomputeGradient(
-        const Mat& img, Mat& grad, Mat& angleOfs, Size paddingTL = Size(), Size paddingBR = Size()) const;
+    virtual void AURcomputeGradient(const cv::Mat& img,
+                                    cv::Mat& grad,
+                                    cv::Mat& angleOfs,
+                                    cv::Size paddingTL = cv::Size(),
+                                    cv::Size paddingBR = cv::Size()) const;
 
-    Size winSize;
-    Size blockSize;
-    Size blockStride;
-    Size cellSize;
+    cv::Size winSize;
+    cv::Size blockSize;
+    cv::Size blockStride;
+    cv::Size cellSize;
     int nbins;
     int derivAperture;
     double winSigma;
@@ -98,6 +113,7 @@ void cmToRmConv(std::vector<float>& descriptorsValues, float* OCVdesc, int total
     int nohcpb = XF_BLOCK_WIDTH / XF_CELL_WIDTH;
     int nob_tb = XF_NO_OF_BINS * nohcpb * novcpb;
     int novbpw_tb = ((XF_WIN_HEIGHT / XF_CELL_HEIGHT) - 1), nohbpw_tb = ((XF_WIN_WIDTH / XF_CELL_WIDTH) - 1);
+    int no_of_desc_per_window = nob_tb * novbpw_tb * nohbpw_tb;
 
     int arr_idx = 0, row_idx = 0, col_idx = 0, win_shift_val = 0;
 
@@ -107,6 +123,8 @@ void cmToRmConv(std::vector<float>& descriptorsValues, float* OCVdesc, int total
             arr_idx = (((row_idx * nohbpw_tb) * nob_tb) + (col_idx * nob_tb));
 
             for (int j = 0; j < nob_tb; j++) {
+                int out_idx = win_shift_val + arr_idx + j;
+                int in_idx = win_shift_val + (i * nob_tb) + j;
                 OCVdesc[win_shift_val + arr_idx + j] = descriptorsValues[win_shift_val + (i * nob_tb) + j];
             }
 
@@ -178,12 +196,12 @@ double AURHOGDescriptor::AURgetWinSigma() const {
 }
 
 void AURHOGDescriptor::AURcomputeGradient(
-    const Mat& img, Mat& grad, Mat& qangle, Size paddingTL, Size paddingBR) const {
-    Size gradsize(img.cols + paddingTL.width + paddingBR.width, img.rows + paddingTL.height + paddingBR.height);
+    const cv::Mat& img, cv::Mat& grad, cv::Mat& qangle, cv::Size paddingTL, cv::Size paddingBR) const {
+    cv::Size gradsize(img.cols + paddingTL.width + paddingBR.width, img.rows + paddingTL.height + paddingBR.height);
     grad.create(gradsize, CV_32FC2);  // <magnitude*(1-alpha), magnitude*alpha>
     qangle.create(gradsize, CV_8UC2); // [0..nbins-1] - quantized gradient orientation
-    Size wholeSize;
-    Point roiofs;
+    cv::Size wholeSize;
+    cv::Point roiofs;
     img.locateROI(wholeSize, roiofs);
 
     int i, x, y;
@@ -212,10 +230,10 @@ void AURHOGDescriptor::AURcomputeGradient(
     int width = gradsize.width;
     AutoBuffer<float> _dbuf(width * 4);
     float* dbuf = _dbuf;
-    Mat Dx(1, width, CV_32F, dbuf);
-    Mat Dy(1, width, CV_32F, dbuf + width);
-    Mat Mag(1, width, CV_32F, dbuf + width * 2);
-    Mat Angle(1, width, CV_32F, dbuf + width * 3);
+    cv::Mat Dx(1, width, CV_32F, dbuf);
+    cv::Mat Dy(1, width, CV_32F, dbuf + width);
+    cv::Mat Mag(1, width, CV_32F, dbuf + width * 2);
+    cv::Mat Angle(1, width, CV_32F, dbuf + width * 3);
 
     int _nbins = nbins;
     float angleScale = (float)(_nbins / CV_PI);
@@ -356,7 +374,7 @@ struct AURHOGCache {
     struct BlockData {
         BlockData() : histOfs(0), imgOffset() {}
         int histOfs;
-        Point imgOffset;
+        cv::Point imgOffset;
     };
 
     struct PixData {
@@ -368,23 +386,23 @@ struct AURHOGCache {
 
     AURHOGCache();
     AURHOGCache(const AURHOGDescriptor* descriptor,
-                const Mat& img,
-                Size paddingTL,
-                Size paddingBR,
+                const cv::Mat& img,
+                cv::Size paddingTL,
+                cv::Size paddingBR,
                 bool useCache,
-                Size cacheStride);
+                cv::Size cacheStride);
     virtual ~AURHOGCache(){};
     virtual void init(const AURHOGDescriptor* descriptor,
-                      const Mat& img,
-                      Size paddingTL,
-                      Size paddingBR,
+                      const cv::Mat& img,
+                      cv::Size paddingTL,
+                      cv::Size paddingBR,
                       bool useCache,
-                      Size cacheStride);
+                      cv::Size cacheStride);
 
-    Size windowsInImage(Size imageSize, Size winStride) const;
-    Rect getWindow(Size imageSize, Size winStride, int idx) const;
+    cv::Size windowsInImage(cv::Size imageSize, cv::Size winStride) const;
+    cv::Rect getWindow(cv::Size imageSize, cv::Size winStride, int idx) const;
 
-    const float* getBlock(Point pt, float* buf);
+    const float* getBlock(cv::Point pt, float* buf);
     virtual void normalizeBlockHistogram(float* histogram) const;
 
     vector<PixData> pixData;
@@ -392,15 +410,15 @@ struct AURHOGCache {
 
     bool useCache;
     vector<int> ymaxCached;
-    Size winSize, cacheStride;
-    Size nblocks, ncells;
+    cv::Size winSize, cacheStride;
+    cv::Size nblocks, ncells;
     int blockHistogramSize;
     int count1, count2, count4;
-    Point imgoffset;
+    cv::Point imgoffset;
     Mat_<float> blockCache;
     Mat_<uchar> blockCacheFlags;
 
-    Mat grad, qangle;
+    cv::Mat grad, qangle;
     const AURHOGDescriptor* descriptor;
 };
 
@@ -411,20 +429,20 @@ AURHOGCache::AURHOGCache() {
 }
 
 AURHOGCache::AURHOGCache(const AURHOGDescriptor* _descriptor,
-                         const Mat& _img,
-                         Size _paddingTL,
-                         Size _paddingBR,
+                         const cv::Mat& _img,
+                         cv::Size _paddingTL,
+                         cv::Size _paddingBR,
                          bool _useCache,
-                         Size _cacheStride) {
+                         cv::Size _cacheStride) {
     init(_descriptor, _img, _paddingTL, _paddingBR, _useCache, _cacheStride);
 }
 
 void AURHOGCache::init(const AURHOGDescriptor* _descriptor,
-                       const Mat& _img,
-                       Size _paddingTL,
-                       Size _paddingBR,
+                       const cv::Mat& _img,
+                       cv::Size _paddingTL,
+                       cv::Size _paddingBR,
                        bool _useCache,
-                       Size _cacheStride) {
+                       cv::Size _cacheStride) {
     descriptor = _descriptor;
     cacheStride = _cacheStride;
     useCache = _useCache;
@@ -433,20 +451,20 @@ void AURHOGCache::init(const AURHOGDescriptor* _descriptor,
     imgoffset = _paddingTL;
 
     winSize = descriptor->winSize;
-    Size blockSize = descriptor->blockSize;
-    Size blockStride = descriptor->blockStride;
-    Size cellSize = descriptor->cellSize;
+    cv::Size blockSize = descriptor->blockSize;
+    cv::Size blockStride = descriptor->blockStride;
+    cv::Size cellSize = descriptor->cellSize;
     int i, j, nbins = descriptor->nbins;
     int rawBlockSize = blockSize.width * blockSize.height;
 
-    nblocks = Size((winSize.width - blockSize.width) / blockStride.width + 1,
-                   (winSize.height - blockSize.height) / blockStride.height + 1);
-    ncells = Size(blockSize.width / cellSize.width, blockSize.height / cellSize.height);
+    nblocks = cv::Size((winSize.width - blockSize.width) / blockStride.width + 1,
+                       (winSize.height - blockSize.height) / blockStride.height + 1);
+    ncells = cv::Size(blockSize.width / cellSize.width, blockSize.height / cellSize.height);
     blockHistogramSize = ncells.width * ncells.height * nbins;
 
     if (useCache) {
-        Size cacheSize((grad.cols - blockSize.width) / cacheStride.width + 1,
-                       (winSize.height / cacheStride.height) + 1);
+        cv::Size cacheSize((grad.cols - blockSize.width) / cacheStride.width + 1,
+                           (winSize.height / cacheStride.height) + 1);
         blockCache.create(cacheSize.height, cacheSize.width * blockHistogramSize);
         blockCacheFlags.create(cacheSize);
         size_t cacheRows = blockCache.rows;
@@ -573,18 +591,19 @@ void AURHOGCache::init(const AURHOGDescriptor* _descriptor,
         for (i = 0; i < nblocks.height; i++) {
             BlockData& data = blockData[j * nblocks.height + i];
             data.histOfs = (j * nblocks.height + i) * blockHistogramSize;
-            data.imgOffset = Point(j * blockStride.width, i * blockStride.height);
+            data.imgOffset = cv::Point(j * blockStride.width, i * blockStride.height);
         }
 }
 
-const float* AURHOGCache::getBlock(Point pt, float* buf) {
+const float* AURHOGCache::getBlock(cv::Point pt, float* buf) {
     float* blockHist = buf;
     assert(descriptor != 0);
 
+    cv::Size blockSize = descriptor->blockSize;
     pt += imgoffset;
 
     if (useCache) {
-        Point cacheIdx(pt.x / cacheStride.width, (pt.y / cacheStride.height) % blockCache.rows);
+        cv::Point cacheIdx(pt.x / cacheStride.width, (pt.y / cacheStride.height) % blockCache.rows);
         if (pt.y != ymaxCached[cacheIdx.y]) {
             Mat_<uchar> cacheRow = blockCacheFlags.row(cacheIdx.y);
             cacheRow = (uchar)0;
@@ -608,6 +627,8 @@ const float* AURHOGCache::getBlock(Point pt, float* buf) {
     for (k = 0; k < C1; k++) {
         const PixData& pk = _pixData[k];
         const float* a = gradPtr + pk.gradOfs;
+        float w = pk.gradWeight * pk.histWeights[0];
+        int t_a = a[0] + a[1];
         const uchar* h = qanglePtr + pk.qangleOfs;
         int h0 = h[0], h1 = h[1];
         float* hist = blockHist + pk.histOfs[0];
@@ -617,32 +638,48 @@ const float* AURHOGCache::getBlock(Point pt, float* buf) {
         hist[h1] = t1;
     }
 
-    int frac_1[128] = {1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0};
-    int frac_2[128] = {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
-                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                       0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1};
+    int total = (blockSize.height >> 2) * (blockSize.width >> 2) * 8;
+    int frac_1[total]; // =
+                       // {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0};
+    int frac_2[total]; // =
+                       // {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1};
+
+    bool flag_frac = false;
+    for (int fl = 0; fl < total; fl++) {
+        if (fl < (total >> 2)) {
+            if ((fl % (blockSize.width >> 2)) == 0) flag_frac = !flag_frac;
+            frac_1[fl] = flag_frac;
+        } else if (fl < ((total >> 2) * 2)) {
+            frac_1[fl] = 1;
+        } else if (fl < ((total >> 2) * 3)) {
+            frac_1[fl] = 0;
+        } else {
+            if ((fl % (blockSize.width >> 2)) == 0) flag_frac = !flag_frac;
+            frac_1[fl] = flag_frac;
+        }
+        frac_2[fl] = !frac_1[fl];
+    }
     int idx = 0;
     int total_idx = 0;
 
     for (; k < C2; k++) {
         const PixData& pk = _pixData[k];
         const float* a = gradPtr + pk.gradOfs;
-        float t0, t1, a0 = a[0], a1 = a[1];
+        float w, t0, t1, a0 = a[0], a1 = a[1];
+        int t_a = a[0] + a[1];
 
         const uchar* h = qanglePtr + pk.qangleOfs;
         int h0 = h[0], h1 = h[1];
 
         float* hist = blockHist + pk.histOfs[0];
+        w = pk.gradWeight * pk.histWeights[0];
         t0 = hist[h0] + a0 * frac_1[total_idx];
         t1 = hist[h1] + a1 * frac_1[total_idx];
         hist[h0] = t0;
         hist[h1] = t1;
 
         hist = blockHist + pk.histOfs[1];
+        w = pk.gradWeight * pk.histWeights[1];
         t0 = hist[h0] + a0 * frac_2[total_idx];
         t1 = hist[h1] + a1 * frac_2[total_idx];
         hist[h0] = t0;
@@ -652,45 +689,74 @@ const float* AURHOGCache::getBlock(Point pt, float* buf) {
         total_idx++;
     }
 
+    int fac_1 = 1;
+    int fac_2 = 0;
+    int fac_3 = 1;
+    int fac_4 = 0;
+
     idx = 0;
     total_idx = 0;
-    int f1[64] = {1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int f2[64] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                  1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0};
-    int f3[64] = {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
-                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int f4[64] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1};
+
+    total = (blockSize.height >> 2) * (blockSize.width >> 2) * 4;
+    int f1[total]; // =
+                   // {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    int f2[total]; // =
+                   // {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0};
+    int f3[total]; // =
+                   // {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    int f4[total]; // =
+                   // {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1};
+
+    flag_frac = false;
+    for (int fl = 0; fl < total; fl++) {
+        if (fl < (total >> 1)) {
+            if ((fl % (blockSize.width >> 2)) == 0) flag_frac = !flag_frac;
+            f1[fl] = flag_frac;
+            f3[fl] = !flag_frac;
+            f2[fl] = 0;
+            f4[fl] = 0;
+        } else {
+            if ((fl % (blockSize.width >> 2)) == 0) flag_frac = !flag_frac;
+            f2[fl] = flag_frac;
+            f4[fl] = !flag_frac;
+            f1[fl] = 0;
+            f3[fl] = 0;
+        }
+    }
 
     for (; k < C4; k++) {
         const PixData& pk = _pixData[k];
         const float* a = gradPtr + pk.gradOfs;
-        float t0, t1, a0 = a[0], a1 = a[1];
+        float w, t0, t1, a0 = a[0], a1 = a[1];
         const uchar* h = qanglePtr + pk.qangleOfs;
         int h0 = h[0], h1 = h[1];
+        int t_a = a[0] + a[1];
 
         float* hist;
 
         hist = blockHist + pk.histOfs[0];
+        w = pk.gradWeight * pk.histWeights[0];
         t0 = hist[h0] + a0 * f1[total_idx];
         t1 = hist[h1] + a1 * f1[total_idx];
         hist[h0] = t0;
         hist[h1] = t1;
 
         hist = blockHist + pk.histOfs[1];
+        w = pk.gradWeight * pk.histWeights[1];
         t0 = hist[h0] + a0 * f2[total_idx];
         t1 = hist[h1] + a1 * f2[total_idx];
         hist[h0] = t0;
         hist[h1] = t1;
 
         hist = blockHist + pk.histOfs[2];
+        w = pk.gradWeight * pk.histWeights[2];
         t0 = hist[h0] + a0 * f3[total_idx];
         t1 = hist[h1] + a1 * f3[total_idx];
         hist[h0] = t0;
         hist[h1] = t1;
 
         hist = blockHist + pk.histOfs[3];
+        w = pk.gradWeight * pk.histWeights[3];
         t0 = hist[h0] + a0 * f4[total_idx];
         t1 = hist[h1] + a1 * f4[total_idx];
         hist[h0] = t0;
@@ -725,36 +791,39 @@ void AURHOGCache::normalizeBlockHistogram(float* _hist) const {
     for (i = 0; i < sz; i++) hist[i] *= scale;
 }
 
-Size AURHOGCache::windowsInImage(Size imageSize, Size winStride) const {
-    return Size((imageSize.width - winSize.width) / winStride.width + 1,
-                (imageSize.height - winSize.height) / winStride.height + 1);
+cv::Size AURHOGCache::windowsInImage(cv::Size imageSize, cv::Size winStride) const {
+    return cv::Size((imageSize.width - winSize.width) / winStride.width + 1,
+                    (imageSize.height - winSize.height) / winStride.height + 1);
 }
 
-Rect AURHOGCache::getWindow(Size imageSize, Size winStride, int idx) const {
+cv::Rect AURHOGCache::getWindow(cv::Size imageSize, cv::Size winStride, int idx) const {
     int nwindowsX = (imageSize.width - winSize.width) / winStride.width + 1;
     int y = idx / nwindowsX;
     int x = idx - nwindowsX * y;
-    return Rect(x * winStride.width, y * winStride.height, winSize.width, winSize.height);
+    return cv::Rect(x * winStride.width, y * winStride.height, winSize.width, winSize.height);
 }
-template <typename Size>
-static inline Size gcd1(Size a, Size b) {
+template <typename Size_t>
+static inline Size_t gcd1(Size_t a, Size_t b) {
     if (a < b) std::swap(a, b);
     while (b > 0) {
-        Size r = a % b;
+        Size_t r = a % b;
         a = b;
         b = r;
     }
     return a;
 }
 
-void AURHOGDescriptor::AURcompute(
-    const Mat& img, vector<float>& descriptors, Size winStride, Size padding, const vector<Point>& locations) const {
-    if (winStride == Size()) winStride = cellSize;
-    Size cacheStride(gcd1(winStride.width, blockStride.width), gcd1(winStride.height, blockStride.height));
+void AURHOGDescriptor::AURcompute(const cv::Mat& img,
+                                  vector<float>& descriptors,
+                                  cv::Size winStride,
+                                  cv::Size padding,
+                                  const vector<cv::Point>& locations) const {
+    if (winStride == cv::Size()) winStride = cellSize;
+    cv::Size cacheStride(gcd1(winStride.width, blockStride.width), gcd1(winStride.height, blockStride.height));
     size_t nwindows = locations.size();
     padding.width = (int)alignSize(std::max(padding.width, 0), cacheStride.width);
     padding.height = (int)alignSize(std::max(padding.height, 0), cacheStride.height);
-    Size paddedImgSize(img.cols + padding.width * 2, img.rows + padding.height * 2);
+    cv::Size paddedImgSize(img.cols + padding.width * 2, img.rows + padding.height * 2);
 
     AURHOGCache cache(this, img, padding, padding, nwindows == 0, cacheStride);
 
@@ -770,19 +839,19 @@ void AURHOGDescriptor::AURcompute(
     for (size_t i = 0; i < nwindows; i++) {
         float* descriptor = &descriptors[i * dsize];
 
-        Point pt0;
+        cv::Point pt0;
         if (!locations.empty()) {
             pt0 = locations[i];
             if (pt0.x < -padding.width || pt0.x > img.cols + padding.width - winSize.width || pt0.y < -padding.height ||
                 pt0.y > img.rows + padding.height - winSize.height)
                 continue;
         } else {
-            pt0 = cache.getWindow(paddedImgSize, winStride, (int)i).tl() - Point(padding);
+            pt0 = cache.getWindow(paddedImgSize, winStride, (int)i).tl() - cv::Point(padding);
         }
 
         for (int j = 0; j < nblocks; j++) {
             const AURHOGCache::BlockData& bj = blockData[j];
-            Point pt = pt0 + bj.imgOffset;
+            cv::Point pt = pt0 + bj.imgOffset;
 
             float* dst = descriptor + bj.histOfs;
             const float* src = cache.getBlock(pt, dst);

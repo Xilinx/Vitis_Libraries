@@ -1,8 +1,10 @@
 ## Level 2: Kernels and Engines
 
-Level 2 contains the host-callable kernels and engines for various xfOpenCV functions.
+Level 2 contains the host-callable kernels and engines for various Vitis Vision functions.
 
-'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of xfOpenCV functions to build for Vitis.
+'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of Vitis Vision functions to build for Vitis.
+
+'build' folder inside 'examples' folder has makefile that would build the default configuration of the function.
 
 'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform software emulation, hardware emulation and hardware build of the corresponding function in examples folder, based on the 'Board' the user selects.
 
@@ -12,7 +14,7 @@ source < path-to-Vitis-installation-directory >/settings64.sh
 
 source < path-to-XRT-installation-directory >/setenv.sh
 
-export DEVICE=< path-to-platform-directory >/<platform>.xpfm
+export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
 **For PCIe devices:**
 

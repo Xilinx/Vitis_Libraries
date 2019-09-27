@@ -199,7 +199,7 @@ int main(int argc, char** argv) {
                             0,               // offset
                             image_out_size,
                             out_img.data // Data will be stored here
-    );
+                            );
 
     // Clean up:
     queue.finish();

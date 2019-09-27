@@ -37,7 +37,7 @@ int sumKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 
     ap_uint<64> internal_sum[PLANES];
     for (int i = 0; i < PLANES; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         internal_sum[i] = 0;
@@ -49,13 +49,13 @@ int sumKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 RowLoop:
 
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN OFF
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on

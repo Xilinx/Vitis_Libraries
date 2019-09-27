@@ -31,7 +31,7 @@ class kernel_add {
    public:
     template <int DEPTH>
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
-        // clang-format off
+// clang-format off
         #pragma HLS inline
         // clang-format on
         // for the input type of 8U
@@ -64,7 +64,7 @@ class kernel_sub {
    public:
     template <int DEPTH>
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
-        // clang-format off
+// clang-format off
         #pragma HLS inline
         // clang-format on
         // for the input type of 8U
@@ -97,7 +97,7 @@ class kernel_subRS {
    public:
     template <int DEPTH>
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
-        // clang-format off
+// clang-format off
         #pragma HLS inline
         // clang-format on
         // for the input type of 8U
@@ -131,7 +131,7 @@ class kernel_max {
    public:
     template <int DEPTH>
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
-        // clang-format off
+// clang-format off
         #pragma HLS inline
         // clang-format on
         XF_PTNAME(DEPTH) Max = 0;
@@ -149,7 +149,7 @@ class kernel_min {
    public:
     template <int DEPTH>
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
-        // clang-format off
+// clang-format off
         #pragma HLS inline
         // clang-format on
         XF_PTNAME(DEPTH) Min = 0;
@@ -167,7 +167,7 @@ class kernel_compare {
    public:
     template <int DEPTH>
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int comp_op) {
-        // clang-format off
+// clang-format off
         #pragma HLS inline
         // clang-format on
         XF_PTNAME(DEPTH) Min = 0;
@@ -199,7 +199,7 @@ class kernel_set {
    public:
     template <int DEPTH>
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int comp_op) {
-        // clang-format off
+// clang-format off
         #pragma HLS inline
         // clang-format on
 
@@ -210,7 +210,7 @@ class kernel_zero {
    public:
     template <int DEPTH>
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int comp_op) {
-        // clang-format off
+// clang-format off
         #pragma HLS inline
         // clang-format on
 
@@ -243,14 +243,14 @@ void xFAbsDiffKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     int STEP = XF_PIXELDEPTH(DEPTH) / PLANES;
 rowLoop:
     for (i = 0; i < image_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -262,7 +262,7 @@ rowLoop:
 
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += XF_PIXELDEPTH(DEPTH)) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src1.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
@@ -301,14 +301,14 @@ void xFBitwiseANDKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     int STEP = XF_PIXELDEPTH(DEPTH) / PLANES;
 rowLoop:
     for (i = 0; i < image_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -320,7 +320,7 @@ rowLoop:
 
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src1.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
@@ -359,14 +359,14 @@ void xFBitwiseORKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     int STEP = XF_PIXELDEPTH(DEPTH) / PLANES;
 rowLoop:
     for (i = 0; i < image_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -377,7 +377,7 @@ rowLoop:
 
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src1.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
@@ -415,14 +415,14 @@ void xFBitwiseNOTKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     int STEP = XF_PIXELDEPTH(DEPTH) / PLANES;
 rowLoop:
     for (i = 0; i < image_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -430,7 +430,7 @@ rowLoop:
 
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src.range(k + (STEP - 1), k);      // Get bits from certain range of positions.
@@ -468,14 +468,14 @@ void xFBitwiseXORKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     int STEP = XF_PIXELDEPTH(DEPTH) / PLANES;
 rowLoop:
     for (i = 0; i < image_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -486,7 +486,7 @@ rowLoop:
 
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src1.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
@@ -537,14 +537,14 @@ void xFMulKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     unsigned long long int idx = 0;
 rowLoop:
     for (i = 0; i < image_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -555,7 +555,7 @@ rowLoop:
                 (XF_SNAME(WORDWIDTH_SRC))(src2.read(i * image_width + j)); // reading the data from the second stream
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src1.range(k + (STEP - 1), k); // Get bits from certain range of positions.
@@ -595,7 +595,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void absdiff(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -614,7 +614,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void bitwise_and(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
 // clang-format on
 #ifndef __SYNTHESIS__
@@ -634,7 +634,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void bitwise_or(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
@@ -659,7 +659,7 @@ void bitwise_not(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<SRC_T, RO
     //	assert(((src.rows <= ROWS ) && (src.cols <= COLS) ) && "ROWS and COLS should be greater than input image");
 
     uint16_t image_width = src.cols >> XF_BITSHIFT(NPC);
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -677,7 +677,7 @@ void bitwise_xor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS) && (src2.rows <= ROWS) && (src2.cols <= COLS)) &&
            "ROWS and COLS should be greater than input image");
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -692,7 +692,7 @@ void multiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
               float scale) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
 // clang-format on
 #ifndef __SYNTHESIS__
@@ -747,14 +747,14 @@ void xFarithm_proc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
 
 rowLoop:
     for (i = 0; i < image_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -765,7 +765,7 @@ rowLoop:
             }
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src1.range(k + (STEP - 1), k); // Get bits from certain range of positions.
@@ -788,7 +788,7 @@ template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void add(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -810,7 +810,7 @@ template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void addS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
           unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -836,7 +836,7 @@ template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void SubS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
           unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -862,7 +862,7 @@ template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void SubRS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
            unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -887,7 +887,7 @@ template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -909,7 +909,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -934,7 +934,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -955,7 +955,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -980,7 +980,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -999,7 +999,7 @@ template <int CMP_OP, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
              unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -1026,7 +1026,7 @@ template <int CMP_OP, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -1047,7 +1047,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void set(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
@@ -1069,7 +1069,7 @@ void set(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
 /* Zero API call*/
 template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void zero(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);

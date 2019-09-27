@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 
     cv::Mat image_input, image_output, diff_img;
 
-    // Reading in the image:
+// Reading in the image:
 #if GRAY
     image_input = cv::imread(argv[1], 0);
 #else

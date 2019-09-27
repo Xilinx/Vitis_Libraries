@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 
     cv::Mat in_img, in_gray, out_img, ocv_ref, diff, lut_mat;
 
-    // Reading in the color image:
+// Reading in the color image:
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     int height = in_img.rows;
     int width = in_img.cols;
 
-    // Memory allocation for the output images:
+// Memory allocation for the output images:
 #if GRAY
     out_img.create(in_img.rows, in_img.cols, in_img.depth());
     ocv_ref.create(in_img.rows, in_img.cols, in_img.depth());

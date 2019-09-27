@@ -69,14 +69,14 @@ void xFMagnitudeKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
 
 rowLoop:
     for (int i = 0; i < (imgheight); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (int j = 0; j < (imgwidth); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -88,7 +88,7 @@ rowLoop:
 
         procLoop:
             for (int k = 0; k < proc_loop; k += step) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
 
@@ -144,7 +144,7 @@ void magnitude(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_matx,
            "Input and output image should be of same size");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 

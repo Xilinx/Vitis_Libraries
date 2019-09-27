@@ -19,7 +19,7 @@
 extern "C" {
 void gaussian_filter_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols, float sigma) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=sigma     bundle=control
@@ -29,15 +29,15 @@ void gaussian_filter_accel(
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_mat.data depth=2
     // clang-format on
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> out_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=out_mat.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

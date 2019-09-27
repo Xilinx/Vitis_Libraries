@@ -55,7 +55,7 @@ namespace cv {
 
 template <typename T, int buf_size>
 int g_kernel(T imgblock[5][buf_size], int loop) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     int res = -(imgblock[0][2 + loop] + imgblock[2][0 + loop] + imgblock[2][4 + loop] + imgblock[4][2 + loop]) +
@@ -68,7 +68,7 @@ int g_kernel(T imgblock[5][buf_size], int loop) {
 // R at a B location and B at a R location
 template <typename T, int buf_size>
 int rb_kernel(T imgblock[5][buf_size], int loop) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     int16_t t1 = (imgblock[0][2 + loop] + imgblock[2][0 + loop] + imgblock[2][4 + loop] + imgblock[4][2 + loop]);
@@ -84,7 +84,7 @@ int rb_kernel(T imgblock[5][buf_size], int loop) {
 //**** R at a G location in R row ****** B at a Green location in a B row *******
 template <typename T, int buf_size>
 int rgr_bgb_kernel(T imgblock[5][buf_size], int loop) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     int16_t t1 = imgblock[0][2 + loop] + imgblock[4][2 + loop];
@@ -101,7 +101,7 @@ int rgr_bgb_kernel(T imgblock[5][buf_size], int loop) {
 // R at a G location in a B row and B at a G location in R row
 template <typename T, int buf_size>
 int rgb_bgr_kernel(T imgblock[5][buf_size], int loop) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     int16_t t1 = (imgblock[2][0 + loop] + imgblock[2][4 + loop]);
@@ -228,17 +228,17 @@ void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_mat, xf::cv::Mat<DST_T
     const int __BHEIGHTMINUSONE = __BHEIGHT - 1;
     const int __BWIDTH = NPC + __BHEIGHTMINUSONE + (((NPC - 1) >> 1) << 1);
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     XF_TNAME(SRC_T, NPC) linebuffer[__BHEIGHTMINUSONE][COLS >> XF_BITSHIFT(NPC)];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=linebuffer core=RAM_T2P_URAM
         #pragma HLS array reshape variable=linebuffer dim=1 factor=4 cyclic
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=linebuffer core=RAM_T2P_BRAM
         #pragma HLS array_partition variable=linebuffer complete dim=1
         // clang-format on
@@ -248,18 +248,18 @@ void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_mat, xf::cv::Mat<DST_T
     const int post_read_count = pre_read_count + 2;             // 4-4-6
     const int end_read_count = ((NPC << 1) >> (NPC * NPC)) + 1; // 2-1-1
 
-    // clang-format off
+// clang-format off
     #pragma HLS array_partition variable=imgblock complete dim=0
     // clang-format on
 
     int lineStore = 3, read_index = 0, write_index = 0;
 LineBuffer:
     for (int i = 0; i < 2; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=2 max=2
         // clang-format on
         for (int j = 0; j<src_mat.cols>> XF_BITSHIFT(NPC); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
             #pragma HLS pipeline ii=1
             // clang-format on
@@ -275,7 +275,7 @@ LineBuffer:
 
 Row_Loop:
     for (int i = 0; i < src_mat.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         int bram_read_count = 0;
@@ -308,7 +308,7 @@ Row_Loop:
     /*Image left corner case */
     Zero:
         for (int p = 0; p < 4; ++p) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE ii=1
             // clang-format on
             for (int k = 0; k < NPC + 2; k++) {
@@ -319,7 +319,7 @@ Row_Loop:
     /*Filling the data in the first four rows of 5x5/5x6/5x10 window from linebuffer */
     Datafill:
         for (int n = 0, w = 0, v = 0; n < pre_read_count; ++n, ++v) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             imgblock[0][2 + NPC + n] = linebuffer[line0][w].range((step + step * v) - 1, step * v);
@@ -333,7 +333,7 @@ Row_Loop:
 
     Col_Loop:
         for (int j = 0; j < ((src_mat.cols) >> XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE ii=1
             #pragma HLS dependence variable=linebuffer inter false
             #pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC

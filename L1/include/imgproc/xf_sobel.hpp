@@ -50,7 +50,7 @@ xFGradientX3x3(XF_PTNAME(DEPTH_SRC) t0,
                XF_PTNAME(DEPTH_SRC) b0,
                XF_PTNAME(DEPTH_SRC) b1,
                XF_PTNAME(DEPTH_SRC) b2) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
 
@@ -98,7 +98,7 @@ xFGradientY3x3(XF_PTNAME(DEPTH_SRC) t0,
                XF_PTNAME(DEPTH_SRC) b0,
                XF_PTNAME(DEPTH_SRC) b1,
                XF_PTNAME(DEPTH_SRC) b2) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
 
@@ -136,7 +136,7 @@ void xFSobel3x3(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
                 XF_PTNAME(DEPTH_SRC) * src_buf1,
                 XF_PTNAME(DEPTH_SRC) * src_buf2,
                 XF_PTNAME(DEPTH_SRC) * src_buf3) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
 
@@ -150,7 +150,7 @@ void xFSobel3x3(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
 Compute_Grad_Loop:
     for (ap_uint<5> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
         int p = 0;
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += 8) {
@@ -204,7 +204,7 @@ void ProcessSobel3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                      ap_uint<13> row,
                      int& read_index,
                      int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -214,7 +214,7 @@ void ProcessSobel3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -315,7 +315,7 @@ void xFSobelFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     src_buf1[XF_NPIXPERCYCLE(NPC) + 2],
         src_buf2[XF_NPIXPERCYCLE(NPC) + 2], // Temporary buffers to hold input data for processing
         src_buf3[XF_NPIXPERCYCLE(NPC) + 2];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -325,12 +325,12 @@ void xFSobelFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // Line buffer to hold image data
     XF_SNAME(WORDWIDTH_SRC) buf[3][(COLS >> XF_BITSHIFT(NPC))]; // Line buffer
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS array reshape variable=buf dim=1 factor=3 cyclic
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
@@ -340,7 +340,7 @@ void xFSobelFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) // Top row border care
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -351,7 +351,7 @@ Clear_Row_Loop:
 
 Row_Loop: // Process complete image
     for (row = 1; row < img_height + 1; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         if (row_ind == 2) // Indexes to hold maintain the row index
@@ -456,7 +456,7 @@ xFGradientX5x5(XF_PTNAME(DEPTH_SRC) * src_buf1,
                XF_PTNAME(DEPTH_SRC) * src_buf3,
                XF_PTNAME(DEPTH_SRC) * src_buf4,
                XF_PTNAME(DEPTH_SRC) * src_buf5) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     XF_PTNAME(DEPTH_DST) g_x = 0, out_val = 0;
@@ -531,7 +531,7 @@ xFGradientY5x5(XF_PTNAME(DEPTH_SRC) * src_buf1,
                XF_PTNAME(DEPTH_SRC) * src_buf3,
                XF_PTNAME(DEPTH_SRC) * src_buf4,
                XF_PTNAME(DEPTH_SRC) * src_buf5) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     XF_PTNAME(DEPTH_DST) g_y = 0, out_val = 0;
@@ -595,13 +595,13 @@ void xFSobel5x5(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
                 XF_PTNAME(DEPTH_SRC) * src_buf3,
                 XF_PTNAME(DEPTH_SRC) * src_buf4,
                 XF_PTNAME(DEPTH_SRC) * src_buf5) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
-    // clang-format on
+// clang-format on
 
 Compute_Grad_Loop:
     for (ap_uint<5> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=8 max=8
         #pragma HLS UNROLL
         // clang-format on
@@ -653,7 +653,7 @@ void ProcessSobel5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                      ap_uint<13> row,
                      int& read_index,
                      int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) buf0, buf1, buf2, buf3, buf4;
@@ -664,7 +664,7 @@ void ProcessSobel5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -696,7 +696,7 @@ Col_Loop:
                                                       src_buf4, src_buf5);
 
         for (ap_uint<4> i = 0; i < 4; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             src_buf1[i] = src_buf1[buf_size - (4 - i)];
@@ -776,7 +776,7 @@ void xFSobelFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_PTNAME(DEPTH_DST) GradientValuesX[XF_NPIXPERCYCLE(NPC)];
     XF_PTNAME(DEPTH_DST) GradientValuesY[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=GradientValuesX complete dim=1
     #pragma HLS ARRAY_PARTITION variable=GradientValuesY complete dim=1
     // clang-format on
@@ -786,7 +786,7 @@ void xFSobelFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_PTNAME(DEPTH_SRC)
     src_buf1[XF_NPIXPERCYCLE(NPC) + 4], src_buf2[XF_NPIXPERCYCLE(NPC) + 4], src_buf3[XF_NPIXPERCYCLE(NPC) + 4],
         src_buf4[XF_NPIXPERCYCLE(NPC) + 4], src_buf5[XF_NPIXPERCYCLE(NPC) + 4];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -799,12 +799,12 @@ void xFSobelFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // Temporary buffer to hold image data from five rows
     XF_SNAME(WORDWIDTH_SRC) buf[5][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
         #pragma HLS array reshape variable=buf dim=1 factor=5 cyclic
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
@@ -814,7 +814,7 @@ void xFSobelFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -827,7 +827,7 @@ Clear_Row_Loop:
 
 Read_Row2_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -838,7 +838,7 @@ Read_Row2_Loop:
 
 Row_Loop:
     for (row = 2; row < img_height + 2; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -912,7 +912,7 @@ Row_Loop:
             _dst_matx.write(write_index, inter_valx);
             _dst_maty.write(write_index++, inter_valy);
         } else {
-            // clang-format off
+// clang-format off
             #pragma HLS ALLOCATION instances=xFGradientX5x5 limit=1 function
             #pragma HLS ALLOCATION instances=xFGradientY5x5 limit=1 function
             // clang-format on
@@ -933,7 +933,7 @@ Row_Loop:
             _dst_maty.write(write_index++, inter_valy);
 
             for (ap_uint<4> i = 0; i < 4; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 src_buf1[i] = src_buf1[buf_size - (4 - i)];
@@ -998,7 +998,7 @@ xFGradientX7x7(XF_PTNAME(DEPTH_SRC) * src_buf1,
                XF_PTNAME(DEPTH_SRC) * src_buf5,
                XF_PTNAME(DEPTH_SRC) * src_buf6,
                XF_PTNAME(DEPTH_SRC) * src_buf7) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     #pragma HLS PIPELINE II=1
     // clang-format on
@@ -1151,7 +1151,7 @@ xFGradientY7x7(XF_PTNAME(DEPTH_SRC) * src_buf1,
                XF_PTNAME(DEPTH_SRC) * src_buf5,
                XF_PTNAME(DEPTH_SRC) * src_buf6,
                XF_PTNAME(DEPTH_SRC) * src_buf7) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     #pragma HLS PIPELINE II=1
     // clang-format on
@@ -1268,11 +1268,11 @@ void xFSobel7x7(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
                 XF_PTNAME(DEPTH_SRC) src_buf5[XF_NPIXPERCYCLE(NPC) + 6],
                 XF_PTNAME(DEPTH_SRC) src_buf6[XF_NPIXPERCYCLE(NPC) + 6],
                 XF_PTNAME(DEPTH_SRC) src_buf7[XF_NPIXPERCYCLE(NPC) + 6]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     for (ap_uint<9> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=8 max=8
         #pragma HLS UNROLL
         // clang-format on
@@ -1329,7 +1329,7 @@ void ProcessSobel7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                      ap_uint<13> row,
                      int& read_index,
                      int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) buf0, buf1, buf2, buf3, buf4, buf5, buf6;
@@ -1338,7 +1338,7 @@ void ProcessSobel7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1443,7 +1443,7 @@ void RightBorder7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     if ((NPC == XF_NPPC8)) {
         for (i = 0; i < 8; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=8 max=8
             #pragma HLS unroll
             // clang-format on
@@ -1456,7 +1456,7 @@ void RightBorder7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
             src_buf7[buf_size + i - (XF_NPIXPERCYCLE(NPC))] = 0;
         }
         for (i = 0; i < 3; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=3 max=3
             #pragma HLS unroll
             // clang-format on
@@ -1486,7 +1486,7 @@ void RightBorder7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         src_buf7[6] = 0;
 
         for (ap_uint<5> k = 0; k < 3; k++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=3 max=3
             #pragma HLS ALLOCATION instances=xFGradientX7x7 limit=1 function
             #pragma HLS ALLOCATION instances=xFGradientY7x7 limit=1 function
@@ -1538,7 +1538,7 @@ void xFSobelFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // Gradient output values stored in these buffer
     XF_PTNAME(DEPTH_DST) GradientValuesX[XF_NPIXPERCYCLE(NPC)];
     XF_PTNAME(DEPTH_DST) GradientValuesY[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=GradientValuesX complete dim=1
     #pragma HLS ARRAY_PARTITION variable=GradientValuesY complete dim=1
     // clang-format on
@@ -1548,7 +1548,7 @@ void xFSobelFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     src_buf1[XF_NPIXPERCYCLE(NPC) + 6], src_buf2[XF_NPIXPERCYCLE(NPC) + 6], src_buf3[XF_NPIXPERCYCLE(NPC) + 6],
         src_buf4[XF_NPIXPERCYCLE(NPC) + 6], src_buf5[XF_NPIXPERCYCLE(NPC) + 6];
     XF_PTNAME(DEPTH_SRC) src_buf6[XF_NPIXPERCYCLE(NPC) + 6], src_buf7[XF_NPIXPERCYCLE(NPC) + 6];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -1563,12 +1563,12 @@ void xFSobelFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_SNAME(WORDWIDTH_SRC) buf[7][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
         #pragma HLS array reshape variable=buf dim=1 factor=7 cyclic
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
@@ -1576,7 +1576,7 @@ void xFSobelFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     row_ind = 3;
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1589,7 +1589,7 @@ Clear_Row_Loop:
 
 Read_Row1_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1600,7 +1600,7 @@ Read_Row1_Loop:
 
 Read_Row2_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1611,7 +1611,7 @@ Read_Row2_Loop:
 
 Row_Loop:
     for (row = 3; row < img_height + 3; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         // modify the buffer indices to re use
@@ -1674,7 +1674,7 @@ Row_Loop:
         }
 
         for (i = 0; i < 6; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             src_buf1[i] = 0;
@@ -1715,7 +1715,7 @@ template <int BORDER_TYPE,
 void Sobel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_matx,
            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_maty) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

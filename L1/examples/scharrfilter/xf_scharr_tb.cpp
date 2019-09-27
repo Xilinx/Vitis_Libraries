@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     cv::Mat hls_grad_x, hls_grad_y;
     cv::Mat diff_grad_x, diff_grad_y;
 
-    // reading in the gray image
+// reading in the gray image
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else

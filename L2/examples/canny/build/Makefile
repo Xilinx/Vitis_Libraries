@@ -20,8 +20,8 @@
 MK_PATH       := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR       := $(patsubst %/,%,$(dir $(MK_PATH)))
 CASE_ROOT     ?= $(CUR_DIR)
-#PLATFORM_REPO_PATHS=/proj/xbuilds/2019.1_Scout_daily_latest/internal_platforms/xilinx_u200_xdma_201830_2
-#DEVICE = /proj/xbuilds/2019.1_Scout_daily_latest/internal_platforms/xilinx_u200_xdma_201830_2/xilinx_u200_xdma_201830_2.xpfm
+
+
 #MK_COMMON_DIR := mk
 
 # Below should point to library repo
@@ -194,18 +194,20 @@ data: $(DATA_STAMP)
 
 KSRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/canny
 XFREQUENCY 		:= 300
+VIVADO_FREQUENCY        =$(shell echo $$(( $(XFREQUENCY) * 1000000 )))
 
 XCLBIN_NAME 	:= krnl_canny
-KER_NAME    	:= canny_accel:xf_canny_accel.cpp
-KER_NAME1    	:= edgetracing_accel:xf_edgetracing_accel.cpp
+KER_NAME    	:= canny_accel
+KERNELS += $(KER_NAME):xf_canny_accel.cpp
+KER_NAME1    	:= edgetracing_accel
+KERNELS += $(KER_NAME1):xf_edgetracing_accel.cpp
 
 VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB -D__SDA_MEM_MAP__
 
-$(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore
+$(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
 $(KER_NAME1)_VPP_CFLAGS := -D__SDA_MEM_MAP__
 
-KERNELS     	+= $(KER_NAME)  $(KER_NAME1)
 
 # -----------------------------------------------------------------------------
 #                           host setup

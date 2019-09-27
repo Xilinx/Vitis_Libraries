@@ -25,7 +25,7 @@ CASE_ROOT     ?= $(CUR_DIR)
 #MK_COMMON_DIR := mk
 
 # Below should point to library repo
-XF_LIB_DIR    ?= $(abspath $(CASE_ROOT)/../../../..)
+XF_LIB_DIR    ?= $(abspath $(CASE_ROOT)/../../..)
 MK_COMMON_DIR := $(XF_LIB_DIR)/ext/makefile_templates
 
 .SECONDEXPANSION:
@@ -196,7 +196,8 @@ KSRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/convertbitdepth
 XFREQUENCY 		:= 300
 
 XCLBIN_NAME 	:= krnl_convertbitdepth
-KER_NAME    	:= convertbitdepth_accel:xf_convertbitdepth_accel.cpp
+KER_NAME    	:= convertbitdepth
+KERNELS += $(KER_NAME):xf_convertbitdepth_accel.cpp
 
 VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
@@ -204,7 +205,6 @@ VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 
 $(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore
 
-KERNELS     	+= $(KER_NAME)
 
 # -----------------------------------------------------------------------------
 #                           host setup
@@ -213,7 +213,7 @@ SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/convertbitdepth
 
 EXE_NAME  		:= convertbitdepth
 HOST_ARGS 		= $(SRC_DIR)/data/4k.jpg #$(XCLBIN_FILE)
-SRCS      		:= xf_convertbitdepth_tb xf_convertbitdepth_accel
+SRCS      		:= xf_convertbitdepth_tb
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB

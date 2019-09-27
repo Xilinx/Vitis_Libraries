@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     cv::Mat hls_grad_x, hls_grad_y;
     cv::Mat diff_grad_x, diff_grad_y;
 
-    // reading in the gray image
+// reading in the gray image
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else
@@ -90,8 +90,7 @@ int main(int argc, char** argv) {
     cl::Kernel krnl(program, "scharr_accel");
 
     std::vector<cl::Memory> inBufVec, outBufVec1, outBufVec2;
-    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY,
-                             (height * width * CH_TYPE)); //,in_img.data);
+    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * CH_TYPE)); //,in_img.data);
     cl::Buffer imageFromDevice1(context, CL_MEM_WRITE_ONLY,
                                 (height * width * CH_TYPE)); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_x.data);
     cl::Buffer imageFromDevice2(context, CL_MEM_WRITE_ONLY,

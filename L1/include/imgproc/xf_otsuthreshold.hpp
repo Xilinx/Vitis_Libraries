@@ -25,7 +25,7 @@ namespace xf {
 namespace cv {
 
 static void xfOtsuKernel(uint32_t _hist[0][256], uint16_t _height, uint16_t _width, uint8_t& thresh) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
 
@@ -73,7 +73,7 @@ static void xfOtsuKernel(uint32_t _hist[0][256], uint16_t _height, uint16_t _wid
 
 HISTOGRAM_NORM_LOOP:
     for (uint16_t i = 0; i < 256; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         tmp1 = (ap_uint<45>)_hist[0][i];
@@ -82,7 +82,7 @@ HISTOGRAM_NORM_LOOP:
     }
 SUM_LOOP:
     for (uint16_t i = 0; i < 256; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         sum = sum + i * HistArray[i]; // sum is expressed in Q8.24
@@ -90,7 +90,7 @@ SUM_LOOP:
 
 THRESHOLD_LOOP:
     for (uint16_t i = 0; i < 256; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT	min=256 max=256
         #pragma HLS PIPELINE
         // clang-format on
@@ -143,7 +143,7 @@ void OtsuThreshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, uint8_t& _thre
     uint32_t hist[XF_CHANNELS(SRC_T, NPC)][256];
     uint8_t thresh;
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     #pragma HLS interface ap_fifo port=hist
     // clang-format on

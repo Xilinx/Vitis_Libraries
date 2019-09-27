@@ -35,7 +35,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc -argv { ../../../../../../../examples/lkdensepyrof/data/im0.png ../../../../../../../examples/lkdensepyrof/data/im1.png} -clean
+  csim_design -compiler gcc -argv " ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/data/im0.png ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/data/im1.png " -clean
 }
 
 if {$CSYNTH == 1} {
@@ -43,7 +43,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv { ../../../../../../../examples/lkdensepyrof/data/im0.png ../../../../../../../examples/lkdensepyrof/data/im1.png}
+  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/data/im0.png ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/data/im1.png "
 }
 
 if {$VIVADO_SYN == 1} {

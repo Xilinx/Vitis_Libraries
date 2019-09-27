@@ -16,9 +16,10 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
+#include "xf_convert_bitdepth_config.h"
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
+    if (argc != 2) {
         std::cout << "Usage: " << argv[0] << "<INPUT IMAGE PATH >" << std::endl;
         return EXIT_FAILURE;
     }
@@ -27,10 +28,10 @@ int main(int argc, char** argv) {
     cv::Mat in_gray, input_img; //, ocv_ref;
 
     // Reading in the image:
-    in_img = cv::imread(argv[2], 0);
+    in_img = cv::imread(argv[1], 0);
 
     if (in_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -85,6 +86,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, shift));
     OCL_CHECK(err, err = kernel.setArg(2, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(3, height));
+    OCL_CHECK(err, err = kernel.setArg(4, width));
 
     // Initialize the buffers:
     cl::Event event;

@@ -26,7 +26,7 @@ void addweighted(ap_uint<PTR_IN_WIDTH>* img_in1,
                  ap_uint<PTR_OUT_WIDTH>* img_out,
                  int height,
                  int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0
 
     #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1
@@ -46,13 +46,13 @@ void addweighted(ap_uint<PTR_IN_WIDTH>* img_in1,
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput2(height, width);
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput1.data depth=2
     #pragma HLS STREAM variable=imgInput2.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

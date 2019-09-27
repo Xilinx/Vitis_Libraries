@@ -26,6 +26,9 @@
 #ifndef XF_OUT_STEP
 #define XF_OUT_STEP 8
 #endif
+
+#define R_GAIN 63872
+#define B_GAIN 44032
 /* calculates the weighted sum of 2 inut images */
 
 namespace xf {
@@ -70,18 +73,12 @@ RowLoop:
                 if ((BFORMAT == XF_BAYER_RG) && (NPC == XF_NPPC2)) {
                     if (i % 2 != 0 && k == 8) {
                         XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)(v1 * 1.34375);
-                        if (v2 > 255)
-                            t = 255;
-                        else
-                            t = v2;
+                        short v2 = (short)((v1 * B_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
                     } else if (i % 2 == 0 && k == 0) {
                         XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)(v1 * 1.94921875);
-                        if (v2 > 255)
-                            t = 255;
-                        else
-                            t = v2;
+                        short v2 = (short)((v1 * R_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
                     } else {
                         t = pxl1;
                     }
@@ -90,18 +87,12 @@ RowLoop:
                 if ((BFORMAT == XF_BAYER_RG) && (NPC == XF_NPPC1)) {
                     if (i % 2 == 0 && j == 0) {
                         XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)(v1 * 1.94921875); //(v1*1.34375);
-                        if (v2 > 255)
-                            t = 255;
-                        else
-                            t = v2;
+                        short v2 = (short)((v1 * R_GAIN) >> 15); //(v1*1.34375);
+                        t = (v2 > 255) ? 255 : v2;
                     } else if (i % 2 != 0 && j != 0) {
                         XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)(v1 * 1.34375);
-                        if (v2 > 255)
-                            t = 255;
-                        else
-                            t = v2;
+                        short v2 = (short)((v1 * B_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
                     } else {
                         t = pxl1;
                     }
@@ -121,7 +112,7 @@ void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1, xf::cv::Mat<SRC_T, R
 #ifndef __SYNTHESIS__
     assert(((src1.rows == dst.rows) && (src1.cols == dst.cols)) && "Input and output image should be of same size");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
-    // assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8) ) && "NPC must be XF_NPPC1, XF_NPPC8 ");
+// assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8) ) && "NPC must be XF_NPPC1, XF_NPPC8 ");
 #endif
     short width = src1.cols >> XF_BITSHIFT(NPC);
 
@@ -129,6 +120,6 @@ void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1, xf::cv::Mat<SRC_T, R
                       XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
                       (COLS >> XF_BITSHIFT(NPC))>(src1, dst, src1.rows, width);
 }
-} // namespace cv
-} // namespace xf
+}
+}
 #endif //_XF_GC_HPP_

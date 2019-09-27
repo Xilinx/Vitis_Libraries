@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     cv::Mat in_img, out_img, ocv_ref;
     cv::Mat diff;
 
-    // reading in the image
+// reading in the image
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    // create memory for output images
+// create memory for output images
 #if GRAY
     ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
     out_img.create(in_img.rows, in_img.cols, CV_8UC1);

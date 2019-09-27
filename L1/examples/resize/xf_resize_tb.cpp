@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     out_height = NEWHEIGHT;
     out_width = NEWWIDTH;
 
-    /*OpenCV resize function*/
+/*OpenCV resize function*/
 
 #if INTERPOLATION == 0
     cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_NN);
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
     float err_per;
     xf::cv::absDiff(result_ocv, imgOutput, error);
-    xf::cv::analyzeDiff(error, 1, err_per);
+    xf::cv::analyzeDiff(error, 5, err_per);
     xf::cv::imwrite("hls_out.png", imgOutput);
     cv::imwrite("resize_ocv.png", result_ocv);
     cv::imwrite("error.png", error);

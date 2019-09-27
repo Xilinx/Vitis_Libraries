@@ -25,7 +25,7 @@ void channel_combine(ap_uint<PTR_IN_WIDTH>* img_in1,
                      ap_uint<PTR_OUT_WIDTH>* img_out,
                      int height,
                      int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=img_in3       offset=slave  bundle=gmem2
@@ -44,15 +44,15 @@ void channel_combine(ap_uint<PTR_IN_WIDTH>* img_in1,
 
     const int sdepth = 2;
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput1.data depth=sdepth
     #pragma HLS STREAM variable=imgInput2.data depth=sdepth
     #pragma HLS STREAM variable=imgInput3.data depth=sdepth
     #pragma HLS STREAM variable=imgInput4.data depth=sdepth
     #pragma HLS STREAM variable=imgOutput.data depth=sdepth
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

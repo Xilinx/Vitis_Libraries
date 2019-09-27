@@ -172,28 +172,28 @@ void findGradients(unsigned char* currImg3,
     // AK,ZoTech: this buffer needs initialization as workaround to exclude "X" values in co-sim.
     unsigned char lineBuffer[NUM_LINES + 1][MAXWIDTH];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS array_reshape variable=lineBuffer complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS array_partition variable=lineBuffer complete dim=1
         // clang-format on
     }
 
     unsigned char curr_img_buf[2][MAXWIDTH];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS array_reshape variable=curr_img_buf complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS array_partition variable=curr_img_buf complete dim=1
         // clang-format on
     }
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=lineBuffer   core=RAM_2P_URAM
         #pragma HLS RESOURCE variable=curr_img_buf core=RAM_2P_URAM
         // clang-format on
@@ -207,12 +207,12 @@ void findGradients(unsigned char* currImg3,
     int lineStore = totalLinesInBuffer / 2;
 L3:
     for (ap_uint<16> I = 0; I < (rows + totalLinesInBuffer / 2); I++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXHEIGHT // 1080 + 11-81
-        // clang-format on
+    // clang-format on
     L4:
         for (ap_uint<16> j = 0; j < cols + 1; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXWIDTH
             #pragma HLS pipeline ii=1
             #pragma HLS LOOP_FLATTEN OFF

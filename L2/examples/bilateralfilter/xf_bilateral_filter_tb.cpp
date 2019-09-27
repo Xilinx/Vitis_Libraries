@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    // create memory for output image
+// create memory for output image
 #if GRAY
     ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
     out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 
     cv::imwrite("output_ocv.png", ocv_ref);
 
-    // OpenCL section:
+// OpenCL section:
 #if GRAY
     size_t image_in_size_bytes = in_img.rows * in_img.cols * 1 * sizeof(unsigned char);
 #else

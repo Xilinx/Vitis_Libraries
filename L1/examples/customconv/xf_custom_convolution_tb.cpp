@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
 #if GRAY
     in_img = cv::imread(argv[1], 0); // reading in the gray image
 #else
-    in_img = cv::imread(argv[1], 1);                   // reading in the gray image
+    in_img = cv::imread(argv[1], 1); // reading in the gray image
 #endif
 
     if (in_img.data == NULL) {
@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    /////////////////    OpenCV reference   /////////////////
+/////////////////    OpenCV reference   /////////////////
 #if GRAY
 #if OUT_8U
     out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image

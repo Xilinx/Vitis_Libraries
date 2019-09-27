@@ -25,9 +25,7 @@ typedef struct __rgba {
     unsigned char r, g, b;
     unsigned char a; // can be unused
 } rgba_t;
-typedef struct __rgb {
-    unsigned char r, g, b;
-} rgb_t;
+typedef struct __rgb { unsigned char r, g, b; } rgb_t;
 
 typedef cv::Vec<unsigned short, 3> Vec3u;
 typedef cv::Vec<unsigned char, 3> Vec3ucpt;

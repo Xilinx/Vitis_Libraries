@@ -35,7 +35,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc -argv { ../../../../../../../examples/channelcombine/data/128x128_1.png ../../../../../../../examples/channelcombine/data/128x128_2.png ../../../../../../../examples/channelcombine/data/128x128_3.png ../../../../../../../examples/channelcombine/data/128x128_4.png} -clean
+  csim_design -compiler gcc -argv " ${XF_PROJ_ROOT}/L1/examples/channelcombine/data/128x128_1.png ${XF_PROJ_ROOT}/L1/examples/channelcombine/data/128x128_2.png ${XF_PROJ_ROOT}/L1/examples/channelcombine/data/128x128_3.png ${XF_PROJ_ROOT}/L1/examples/channelcombine/data/128x128_4.png " -clean
 }
 
 if {$CSYNTH == 1} {
@@ -43,7 +43,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv { ../../../../../../../examples/channelcombine/data/128x128_1.png ../../../../../../../examples/channelcombine/data/128x128_2.png ../../../../../../../examples/channelcombine/data/128x128_3.png ../../../../../../../examples/channelcombine/data/128x128_4.png}
+  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/channelcombine/data/128x128_1.png ${XF_PROJ_ROOT}/L1/examples/channelcombine/data/128x128_2.png ${XF_PROJ_ROOT}/L1/examples/channelcombine/data/128x128_3.png ${XF_PROJ_ROOT}/L1/examples/channelcombine/data/128x128_4.png "
 }
 
 if {$VIVADO_SYN == 1} {

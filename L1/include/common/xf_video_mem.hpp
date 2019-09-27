@@ -42,7 +42,7 @@ template <int ROWS, int COLS, typename T>
 class Window {
    public:
     Window(){
-    // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
         #pragma HLS ARRAY_PARTITION variable=val dim=2 complete
         // clang-format on
@@ -107,9 +107,9 @@ class Window {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::shift_pixels_left() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -119,11 +119,11 @@ void Window<ROWS, COLS, T>::shift_pixels_left() {
 
     XF_SIZE_T i, j;
     for (i = 0; i < ROWS; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (j = 0; j < COLS - 1; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             val[i][j] = val[i][j + 1];
@@ -151,9 +151,9 @@ void Window<ROWS, COLS, T>::shift_pixels_left() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::shift_pixels_right() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -163,11 +163,11 @@ void Window<ROWS, COLS, T>::shift_pixels_right() {
 
     XF_SIZE_T i, j;
     for (i = 0; i < ROWS; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (j = COLS - 1; j > 0; j--) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             val[i][j] = val[i][j - 1];
@@ -195,9 +195,9 @@ void Window<ROWS, COLS, T>::shift_pixels_right() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::shift_pixels_up() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -207,11 +207,11 @@ void Window<ROWS, COLS, T>::shift_pixels_up() {
 
     XF_SIZE_T i, j;
     for (i = 0; i < ROWS - 1; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (j = 0; j < COLS; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             val[i][j] = val[i + 1][j];
@@ -239,9 +239,9 @@ void Window<ROWS, COLS, T>::shift_pixels_up() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::shift_pixels_down() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -251,11 +251,11 @@ void Window<ROWS, COLS, T>::shift_pixels_down() {
 
     XF_SIZE_T i, j;
     for (i = ROWS - 1; i > 0; i--) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (j = 0; j < COLS; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             val[i][j] = val[i - 1][j];
@@ -282,7 +282,7 @@ void Window<ROWS, COLS, T>::shift_pixels_down() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_pixel(T value, int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(row >= 0 && row < ROWS && col >= 0 && col < COLS);
@@ -315,9 +315,9 @@ void Window<ROWS, COLS, T>::insert_pixel(T value, int row, int col) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_row(T value[COLS], int row) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -327,7 +327,7 @@ void Window<ROWS, COLS, T>::insert_row(T value[COLS], int row) {
 
     XF_SIZE_T j;
     for (j = 0; j < COLS; j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         val[row][j] = value[j];
@@ -354,9 +354,9 @@ void Window<ROWS, COLS, T>::insert_row(T value[COLS], int row) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_top_row(T value[COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -387,9 +387,9 @@ void Window<ROWS, COLS, T>::insert_top_row(T value[COLS]) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_bottom_row(T value[COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -420,9 +420,9 @@ void Window<ROWS, COLS, T>::insert_bottom_row(T value[COLS]) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_col(T value[ROWS], int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -432,7 +432,7 @@ void Window<ROWS, COLS, T>::insert_col(T value[ROWS], int col) {
 
     XF_SIZE_T i;
     for (i = 0; i < ROWS; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         val[i][col] = value[i];
@@ -459,9 +459,9 @@ void Window<ROWS, COLS, T>::insert_col(T value[ROWS], int col) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_left_col(T value[ROWS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -492,9 +492,9 @@ void Window<ROWS, COLS, T>::insert_left_col(T value[ROWS]) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_right_col(T value[ROWS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #ifdef __DEBUG__
     std::cout << "Window Elements: ";
@@ -525,7 +525,7 @@ void Window<ROWS, COLS, T>::insert_right_col(T value[ROWS]) {
  */
 template <int ROWS, int COLS, typename T>
 T& Window<ROWS, COLS, T>::getval(int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(row >= 0 && row < ROWS && col >= 0 && col < COLS);
@@ -537,7 +537,7 @@ T& Window<ROWS, COLS, T>::getval(int row, int col) {
  */
 template <int ROWS, int COLS, typename T>
 T& Window<ROWS, COLS, T>::operator()(int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     return getval(row, col);
@@ -574,7 +574,7 @@ void Window<ROWS, COLS, T>::window_print() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::shift_left() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     shift_pixels_left(); // take upper-left point as origin
@@ -587,7 +587,7 @@ void Window<ROWS, COLS, T>::shift_left() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::shift_right() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     shift_pixels_right(); // take upper-left point as origin
@@ -600,7 +600,7 @@ void Window<ROWS, COLS, T>::shift_right() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::shift_up() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     shift_pixels_up(); // take upper-left point as origin
@@ -613,7 +613,7 @@ void Window<ROWS, COLS, T>::shift_up() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::shift_down() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     shift_pixels_down(); // take upper-left point as origin
@@ -626,7 +626,7 @@ void Window<ROWS, COLS, T>::shift_down() {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert(T value, int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     insert_pixel(value, row, col);
@@ -639,7 +639,7 @@ void Window<ROWS, COLS, T>::insert(T value, int row, int col) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_top(T value[COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     insert_bottom_row(value);
@@ -652,7 +652,7 @@ void Window<ROWS, COLS, T>::insert_top(T value[COLS]) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_bottom(T value[COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     insert_top_row(value);
@@ -665,7 +665,7 @@ void Window<ROWS, COLS, T>::insert_bottom(T value[COLS]) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_left(T value[ROWS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     insert_right_col(value);
@@ -678,7 +678,7 @@ void Window<ROWS, COLS, T>::insert_left(T value[ROWS]) {
  */
 template <int ROWS, int COLS, typename T>
 void Window<ROWS, COLS, T>::insert_right(T value[ROWS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     insert_left_col(value);
@@ -695,7 +695,7 @@ void Window<ROWS, COLS, T>::insert_right(T value[ROWS]) {
 _LB_TPLT_DEC class LineBuffer {
    public:
     LineBuffer() {
-        // clang-format off
+// clang-format off
         #pragma HLS dependence variable=val inter false
         #pragma HLS dependence variable=val intra false
         // clang-format on
@@ -705,42 +705,42 @@ _LB_TPLT_DEC class LineBuffer {
 
         switch (MEM_TYPE) {
             case RAM_1P_BRAM:
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=val core=RAM_1P_BRAM
                 // clang-format on
                 break;
             case RAM_1P_URAM:
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=val core=RAM_1P_URAM
                 // clang-format on
                 break;
             case RAM_2P_BRAM:
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=val core=RAM_2P_BRAM
                 // clang-format on
                 break;
             case RAM_2P_URAM:
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=val core=RAM_2P_URAM
                 // clang-format on
                 break;
             case RAM_S2P_BRAM:
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=val core=RAM_S2P_BRAM
                 // clang-format on
                 break;
             case RAM_S2P_URAM:
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=val core=RAM_S2P_URAM
                 // clang-format on
                 break;
             case RAM_T2P_BRAM:
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=val core=RAM_T2P_BRAM
                 // clang-format on
                 break;
             case RAM_T2P_URAM:
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=val core=RAM_T2P_URAM
                 // clang-format on
                 break;
@@ -749,11 +749,11 @@ _LB_TPLT_DEC class LineBuffer {
         }
 
         if (RESHAPE_FACTOR == 1) {
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=val complete dim=1
             // clang-format on
         } else {
-            // clang-format off
+// clang-format off
             #pragma HLS array reshape variable=val factor=RESHAPE_FACTOR  dim=1
             // clang-format on
         }
@@ -807,7 +807,7 @@ _LB_TPLT_DEC class LineBuffer {
  * Assumes new values will be placed in top row = 0
  */
 _LB_TPLT void _LB_::shift_pixels_down(int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(col >= 0 && col < COLS);
@@ -820,7 +820,7 @@ _LB_TPLT void _LB_::shift_pixels_down(int col) {
 
     XF_SIZE_T i;
     for (i = ROWS - 1; i > 0; i--) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         val[i][col] = val[i - 1][col];
@@ -850,7 +850,7 @@ _LB_TPLT void _LB_::shift_pixels_down(int col) {
  * Assumes new values will be placed in top row = ROWS-1
  */
 _LB_TPLT void _LB_::shift_pixels_up(int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(col >= 0 && col < COLS);
@@ -863,7 +863,7 @@ _LB_TPLT void _LB_::shift_pixels_up(int col) {
 
     XF_SIZE_T i;
     for (i = 0; i < ROWS - 1; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         val[i][col] = val[i + 1][col];
@@ -892,7 +892,7 @@ _LB_TPLT void _LB_::shift_pixels_up(int col) {
  * Inserts a new value in bottom row= ROWS-1 of the linebuffer
  */
 _LB_TPLT void _LB_::insert_bottom_row(T value, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(col >= 0 && col < COLS);
@@ -925,7 +925,7 @@ _LB_TPLT void _LB_::insert_bottom_row(T value, int col) {
  * Inserts a new value in top row=0 of the linebuffer
  */
 _LB_TPLT void _LB_::insert_top_row(T value, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(col >= 0 && col < COLS);
@@ -958,13 +958,13 @@ _LB_TPLT void _LB_::insert_top_row(T value, int col) {
  * Get a column value of the linebuffer
  */
 _LB_TPLT void _LB_::get_col(T value[ROWS], int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(col >= 0 && col < COLS);
     XF_SIZE_T i;
     for (i = 0; i < ROWS; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         value[i] = val[i][col];
@@ -974,8 +974,8 @@ _LB_TPLT void _LB_::get_col(T value[ROWS], int col) {
 /* Line buffer getval
  * Returns the data value in the line buffer at position row, col
  */
-_LB_TPLT T& _LB_ ::getval(int row, int col) {
-    // clang-format off
+_LB_TPLT T& _LB_::getval(int row, int col) {
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(row >= 0 && row < ROWS && col >= 0 && col < COLS);
@@ -986,7 +986,7 @@ _LB_TPLT T& _LB_ ::getval(int row, int col) {
  * Returns the data value in the line buffer at position row, col
  */
 _LB_TPLT T& _LB_::operator()(int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     return getval(row, col);
@@ -998,7 +998,7 @@ _LB_TPLT T& _LB_::operator()(int row, int col) {
  * Assumes new values will be placed in bottom row(=0)
  */
 _LB_TPLT void _LB_::shift_down(int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     shift_pixels_down(col);
@@ -1010,7 +1010,7 @@ _LB_TPLT void _LB_::shift_down(int col) {
  * Assumes new values will be placed in top row(=ROWS-1)
  */
 _LB_TPLT void _LB_::shift_up(int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     shift_pixels_up(col);
@@ -1022,7 +1022,7 @@ _LB_TPLT void _LB_::shift_up(int col) {
  * Inserts a new value in bottom row(=0)
  */
 _LB_TPLT void _LB_::insert_bottom(T value, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     insert_top_row(value, col);
@@ -1034,7 +1034,7 @@ _LB_TPLT void _LB_::insert_bottom(T value, int col) {
  * Inserts a new value in top row(=ROWS-1)
  */
 _LB_TPLT void _LB_::insert_top(T value, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     insert_bottom_row(value, col);

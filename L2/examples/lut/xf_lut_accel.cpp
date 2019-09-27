@@ -19,7 +19,7 @@
 extern "C" {
 
 void lut_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char* lut_ptr, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=lut_ptr        offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
@@ -33,12 +33,12 @@ void lut_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char* lut_ptr, ap_uint<PTR_W
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

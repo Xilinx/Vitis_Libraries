@@ -58,13 +58,13 @@ int AddWeightedKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     XF_SNAME(WORDWIDTH_SRC) pxl_pack1, pxl_pack2;
 RowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN OFF
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on

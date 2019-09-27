@@ -71,7 +71,7 @@ extern const unsigned char icvSaturate8u_cv[];
 
 template <int SRC_T, int ROWS, int COLS, int NPC>
 void bgr2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     #pragma HLS DATAFLOW
     // clang-format on
@@ -123,11 +123,11 @@ void bgr2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, R
     int vr, vg;
 
     for (uint16_t row = 0; row < _src_mat.rows; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT max=ROWS
         // clang-format on
         for (uint16_t col = 0; col < _src_mat.cols; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT max=COLS
             #pragma HLS PIPELINE
             // clang-format on

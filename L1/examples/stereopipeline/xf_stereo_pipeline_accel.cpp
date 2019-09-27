@@ -34,7 +34,7 @@ void stereopipeline_accel(xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>& l
                           ap_fixed<32, 12>* irA_r_fix,
                           int _cm_size,
                           int _dc_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi depth=9 port=cameraMA_l_fix offset=direct bundle=cameraMA
     #pragma HLS INTERFACE m_axi depth=9 port=cameraMA_r_fix offset=direct bundle=cameraMA
     #pragma HLS INTERFACE m_axi depth=9 port=distC_l_fix offset=direct bundle=distC

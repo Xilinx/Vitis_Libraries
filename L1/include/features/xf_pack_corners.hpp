@@ -31,12 +31,12 @@ void auFillList(ap_uint<32> listcorners[MAXSIZE],
     ap_uint<9> i;
     uint32_t EOL = 0;
     for (i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
 
         for (int crn_cnt = 0; crn_cnt < cor_cnts[i]; crn_cnt++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             XF_SNAME(WORDWIDTH_DST) val = tmp_cor_bufs[i][crn_cnt];
@@ -54,11 +54,11 @@ void auFillList_points(ap_uint32_t* listcorners,
                        int* cor_cnts) {
     int sz = 0;
     for (int i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (int crn_cnt = 0; crn_cnt < cor_cnts[i]; crn_cnt++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             listcorners[i * sz + crn_cnt] = (ap_uint32_t)(tmp_cor_bufs[i][crn_cnt]);
@@ -76,7 +76,7 @@ void auCheckForCorners(XF_SNAME(IN_WW) val,
     XF_SNAME(OUT_WW) tmp_store[(1 << XF_BITSHIFT(NPC))];
 
     for (ap_uint<9> i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         ap_uint<9> shift = i << 3;
@@ -109,12 +109,12 @@ void xFWriteCornersToList(hls::stream<XF_SNAME(IN_WW)>& _max_sup,
         uint32_t EOL = 0;
         ap_uint<13> row, col;
         for (row = 0; row < img_height; row++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=ROWS max = ROWS
             #pragma HLS LOOP_FLATTEN off
             // clang-format on
             for (col = 0; col < img_width; col++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=SRC_TC max = SRC_TC
                 #pragma HLS pipeline
                 // clang-format on
@@ -135,25 +135,25 @@ void xFWriteCornersToList(hls::stream<XF_SNAME(IN_WW)>& _max_sup,
     } else {
         XF_SNAME(OUT_WW) tmp_corbufs[(1 << XF_BITSHIFT(NPC))][(MAXPNTS >> XF_BITSHIFT(NPC))];
         uint16_t corners_cnt[(1 << XF_BITSHIFT(NPC))];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=corners_cnt complete dim=0
         #pragma HLS ARRAY_PARTITION variable=tmp_corbufs complete dim=1
         // clang-format on
 
         for (ap_uint<9> i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             corners_cnt[i] = 0;
         }
         ap_uint<13> row, col;
         for (row = 0; row < img_height; row++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=ROWS max = ROWS
             #pragma HLS LOOP_FLATTEN off
             // clang-format on
             for (col = 0; col < img_width; col++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=SRC_TC max = SRC_TC
                 #pragma HLS pipeline
                 // clang-format on

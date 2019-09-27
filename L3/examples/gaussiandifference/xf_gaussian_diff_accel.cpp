@@ -19,10 +19,12 @@
 extern "C" {
 
 void gaussiandiference(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WIDTH>* img_out, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1  
     #pragma HLS INTERFACE s_axilite  port=sigma 			          bundle=control
+	#pragma HLS INTERFACE s_axilite  port=rows 			          bundle=control
+	#pragma HLS INTERFACE s_axilite  port=cols 			          bundle=control
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
@@ -34,7 +36,7 @@ void gaussiandiference(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WIDT
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgin5(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=imgin1.data depth=2
     #pragma HLS STREAM variable=imgin2.data depth=2
@@ -42,9 +44,9 @@ void gaussiandiference(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WIDT
     #pragma HLS STREAM variable=imgin4.data depth=2
     #pragma HLS STREAM variable=imgin5.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

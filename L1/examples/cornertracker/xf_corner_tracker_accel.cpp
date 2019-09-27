@@ -44,12 +44,12 @@ void cornerTracker(xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>& flow,
 
     // Computing the image pyramid and harris corners in parallel
     if (*harris_flag == true) {
-        // clang-format off
+// clang-format off
         #pragma SDS async(1)
         // clang-format on
         xf::cv::cornerHarris<FILTER_WIDTH, BLOCK_WIDTH, NMS_RADIUS, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(
             inHarris, outHarris, Thresh, k);
-        // clang-format off
+// clang-format off
         #pragma SDS async(2)
         // clang-format on
         xf::cv::cornersImgToList<MAXCORNERS, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(outHarris, list, &nCorners);
@@ -57,17 +57,17 @@ void cornerTracker(xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>& flow,
 
     // creating image pyramid
     for (int pyr_comp = 0; pyr_comp < NUM_LEVELS - 1; pyr_comp++) {
-        // clang-format off
+// clang-format off
         #pragma SDS async(3)
         #pragma SDS resource(1)
         // clang-format on
         xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(mat_imagepyr1[pyr_comp], mat_imagepyr1[pyr_comp + 1]);
-        // clang-format off
+// clang-format off
         #pragma SDS async(4)
         #pragma SDS resource(2)
         // clang-format on
         xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(mat_imagepyr2[pyr_comp], mat_imagepyr2[pyr_comp + 1]);
-        // clang-format off
+// clang-format off
         #pragma SDS wait(3)
         #pragma SDS wait(4)
         // clang-format on
@@ -118,7 +118,7 @@ void cornerTracker(xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>& flow,
         } // end iterative coptical flow computation
     }     // end pyramidal iterative optical flow HLS computation
     if (*harris_flag == true) {
-        // clang-format off
+// clang-format off
         #pragma SDS wait(1)
         #pragma SDS wait(2)
         // clang-format on

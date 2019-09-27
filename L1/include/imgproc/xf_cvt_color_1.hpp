@@ -35,12 +35,12 @@ void write_y(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     XF_SNAME(WORDWIDTH_SRC) tmp;
     unsigned long long int idx = 0;
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
         // clang-format on
         for (int j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             tmp = src_y.read(i * width + j);
@@ -65,13 +65,13 @@ void KernNv122Yuv4(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
     bool evenBlock = true;
 RowLoop:
     for (i = 0; i < (height >> 1); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
@@ -110,7 +110,7 @@ void KernNv122Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
                    uint16_t height,
                    uint16_t width) {
     hls::stream<XF_SNAME(WORDWIDTH_UV)> uvStream;
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=&uvStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
@@ -123,13 +123,13 @@ void KernNv122Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
     bool evenRow = true, evenBlock = true;
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
@@ -172,7 +172,7 @@ RowLoop:
     }
     if (height & 1) {
         for (int i = 0; i < width; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             uvStream.read();
@@ -192,13 +192,13 @@ void KernNv122Iyuv(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
     ap_uint<13> i, j;
 RowLoop:
     for (i = 0; i<height>> 1; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < (width >> 1); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -229,13 +229,13 @@ void KernNv212Yuv4(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _vu,
     bool evenBlock = true;
 RowLoop:
     for (i = 0; i < (height >> 1); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
@@ -274,7 +274,7 @@ void KernNv212Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
                    uint16_t height,
                    uint16_t width) {
     hls::stream<XF_SNAME(WORDWIDTH_VU)> vuStream;
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=&vuStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
@@ -288,13 +288,13 @@ void KernNv212Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
     bool evenRow = true, evenBlock = true;
 RowLoop:
     for (i = 0; i < (height); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
@@ -338,7 +338,7 @@ RowLoop:
     }
     if (height & 1) {
         for (i = 0; i < width; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             vuStream.read();
@@ -358,13 +358,13 @@ void KernNv212Iyuv(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _vu,
     unsigned long long int idx = 0, idx1 = 0;
 RowLoop:
     for (i = 0; i < (height >> 1); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < (width >> 1); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -387,7 +387,7 @@ void KernIyuv2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
     unsigned long long int idx = 0, idx1 = 0;
     ap_uint<13> i, j;
     hls::stream<XF_SNAME(WORDWIDTH_SRC)> uStream, vStream;
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=&uStream  depth=COLS
     #pragma HLS STREAM variable=&vStream  depth=COLS
     // clang-format on
@@ -401,13 +401,13 @@ void KernIyuv2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
     bool evenRow = true, evenBlock = true;
 RowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
@@ -459,12 +459,12 @@ void KernIyuv2Yuv4(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _in_u,
                    uint16_t height,
                    uint16_t width) {
     hls::stream<XF_SNAME(WORDWIDTH)> inter_u;
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=inter_u depth=COLS
     // clang-format on
 
     hls::stream<XF_SNAME(WORDWIDTH)> inter_v;
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=inter_v depth=COLS
     // clang-format on
 
@@ -476,13 +476,13 @@ void KernIyuv2Yuv4(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _in_u,
     unsigned long long int idx = 0, idx1 = 0, in_idx1 = 0, in_idx2 = 0;
 RowLoop:
     for (int i = 0; i < ((height >> 2) << 1); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN
         #pragma HLS LOOP_TRIPCOUNT min=rTC max=rTC
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0, k = 0; j < (width >> 1); j++, k += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=cTC max=cTC
             // clang-format on
@@ -500,7 +500,7 @@ RowLoop:
             inter_v.write(IVPacked);
         }
         for (int j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             // clang-format on
             _u_image.write((((i * 2) + 1) * (width) + j), inter_u.read());
@@ -530,15 +530,15 @@ void KernIyuv2Nv12(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _u,
     unsigned long long int idx = 0;
 RowLoop:
     for (i = 0; i<height>> 1; i++) {
-        // Reading the plane interleaved U and V data from streams,
-        // packing them in pixel interleaved and writing out to UV stream
-        // clang-format off
+// Reading the plane interleaved U and V data from streams,
+// packing them in pixel interleaved and writing out to UV stream
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=rTC max=rTC
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < (width >> 1); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=cTC max=cTC
             // clang-format on
@@ -563,13 +563,13 @@ void KernRgba2Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
     unsigned long long int idx = 0;
 RowLoop:
     for (int i = 0; i < height; ++i) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN OFF
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; ++j) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             #pragma HLS PIPELINE
             // clang-format on
@@ -607,13 +607,13 @@ void KernRgba2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
     unsigned long long int idx = 0, idx1 = 0;
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
@@ -664,13 +664,13 @@ void KernRgba2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
 
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
@@ -721,13 +721,13 @@ void KernRgba2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
 
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
@@ -764,13 +764,13 @@ void KernYuyv2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
     unsigned long long int idx = 0;
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -829,13 +829,13 @@ void KernYuyv2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
     bool evenRow = true;
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -881,13 +881,13 @@ void KernYuyv2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
     bool evenRow = true;
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -925,13 +925,13 @@ void KernYuyv2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
 
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -972,13 +972,13 @@ void KernUyvy2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
 
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -1033,13 +1033,13 @@ void KernUyvy2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
     unsigned long long int idx = 0, idx1 = 0;
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -1089,13 +1089,13 @@ void KernUyvy2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
     unsigned long long int idx = 0, idx1 = 0;
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -1140,13 +1140,13 @@ void KernUyvy2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
 
 RowLoop:
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on

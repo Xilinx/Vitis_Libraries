@@ -24,14 +24,15 @@ void customconv(ap_uint<PTR_IN_WIDTH>* img_in,
                 ap_uint<PTR_OUT_WIDTH>* img_out,
                 int rows,
                 int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
    
     #pragma HLS INTERFACE m_axi      port=filter        offset=slave  bundle=gmem1
-    #pragma HLS INTERFACE s_axilite  port=filter 			          bundle=control
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
    
     #pragma HLS INTERFACE s_axilite  port=shift 			          bundle=control
+	#pragma HLS INTERFACE s_axilite  port=rows 			          bundle=control
+	#pragma HLS INTERFACE s_axilite  port=cols 			          bundle=control
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 

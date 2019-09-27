@@ -20,22 +20,22 @@ extern "C" {
 
 void hog_descriptor_accel(
     ap_uint<PTR_IN_WIDTH>* img_in, ap_uint<PTR_OUT_WIDTH>* desc_out, int rows, int cols, int _desc_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=desc_out       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE s_axilite  port=rows        	bundle=control
     #pragma HLS INTERFACE s_axilite  port=cols	      	bundle=control
     #pragma HLS INTERFACE s_axilite  port=_desc_size	bundle=control
     #pragma HLS INTERFACE s_axilite  port=return        bundle=control
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, NPC> imgInput(rows, cols);
     xf::cv::Mat<OUT_TYPE, 1, XF_DESC_SIZE, NPC> descOutput(1, _desc_size);
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=descOutput.data depth=2
     // clang-format on

@@ -20,7 +20,7 @@ extern "C" {
 
 void houghlines_accel(
     ap_uint<PTR_WIDTH>* img_in, short threshold, short maxlines, float* arrayy, float* arrayx, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in    offset=slave  bundle=gmem0
    
     #pragma HLS INTERFACE m_axi      port=arrayy    offset=slave  bundle=gmem1
@@ -36,11 +36,11 @@ void houghlines_accel(
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

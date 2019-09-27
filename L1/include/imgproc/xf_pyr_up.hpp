@@ -30,7 +30,7 @@ void xFpyrUpKernel(xf::cv::Mat<DEPTH, ROWS, COLS, NPC>& _src,
                    xf::cv::Mat<DEPTH, 2 * ROWS, 2 * COLS, NPC>& _dst,
                    unsigned short in_rows,
                    unsigned short in_cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     #pragma HLS DATAFLOW
     // clang-format on
@@ -41,11 +41,11 @@ void xFpyrUpKernel(xf::cv::Mat<DEPTH, ROWS, COLS, NPC>& _src,
     unsigned short output_width = in_cols << 1;
     int read_pointer = 0, write_pointer = 0;
     for (int i = 0; i < output_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j < output_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_FLATTEN OFF
@@ -63,11 +63,11 @@ void xFpyrUpKernel(xf::cv::Mat<DEPTH, ROWS, COLS, NPC>& _src,
         _filter_in, _filter_out, 5, XF_BORDER_REPLICATE, output_height, output_width);
 
     for (int i = 0; i < output_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j < output_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_FLATTEN OFF
@@ -83,7 +83,7 @@ void xFpyrUpKernel(xf::cv::Mat<DEPTH, ROWS, COLS, NPC>& _src,
 
 template <int TYPE, int ROWS, int COLS, int NPC = 1>
 void pyrUp(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, 2 * ROWS, 2 * COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     unsigned short input_height = _src.rows;

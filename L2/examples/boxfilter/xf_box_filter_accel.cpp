@@ -18,7 +18,7 @@
 
 extern "C" {
 void box_filter_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
     
@@ -32,16 +32,16 @@ void box_filter_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDT
     const int pNPC1 = NPIX;
 
     xf::cv::Mat<IN_T, HEIGHT, WIDTH, NPIX> in_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_mat.data depth=2
     // clang-format on
 
     xf::cv::Mat<IN_T, HEIGHT, WIDTH, NPIX> _dst(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=_dst.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

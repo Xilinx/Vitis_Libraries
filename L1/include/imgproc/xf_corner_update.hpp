@@ -42,11 +42,11 @@ void cornerUpdate(unsigned long* list_fix,
     unsigned int flowuv_br;
 
     for (int li = 0; li < nCorners; li++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXCORNERSNO
         // clang-format on
         for (int lj = 0; lj < 6; lj++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE II=1
             // clang-format on
             if (lj == 0) {

@@ -231,20 +231,20 @@ template <int N, typename T>
 class Scalar {
    public:
     Scalar() {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
         // clang-format on
         assert(N > 0);
     }
     Scalar(T v0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
         // clang-format on
         assert(N >= 1 && "Scalar must have enough channels for constructor.");
         val[0] = v0;
     }
     Scalar(T v0, T v1) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
         // clang-format on
         assert(N >= 2 && "Scalar must have enough channels for constructor.");
@@ -252,7 +252,7 @@ class Scalar {
         val[1] = v1;
     }
     Scalar(T v0, T v1, T v2) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
         // clang-format on
         assert(N >= 3 && "Scalar must have enough channels for constructor.");
@@ -261,7 +261,7 @@ class Scalar {
         val[2] = v2;
     }
     Scalar(T v0, T v1, T v2, T v3) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
         // clang-format on
         assert(N >= 4 && "Scalar must have enough channels for constructor.");
@@ -286,11 +286,11 @@ class Scalar {
 
 template <int N, typename T>
 void Scalar<N, T>::operator=(T value) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         val[k] = value;
@@ -299,12 +299,12 @@ void Scalar<N, T>::operator=(T value) {
 
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator+(T value) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] + value;
@@ -314,12 +314,12 @@ Scalar<N, T> Scalar<N, T>::operator+(T value) {
 
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator+(Scalar<N, T> s) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] + s.val[k];
@@ -329,12 +329,12 @@ Scalar<N, T> Scalar<N, T>::operator+(Scalar<N, T> s) {
 
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator-(T value) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] - value;
@@ -344,12 +344,12 @@ Scalar<N, T> Scalar<N, T>::operator-(T value) {
 
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator-(Scalar<N, T> s) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] - s.val[k];
@@ -359,12 +359,12 @@ Scalar<N, T> Scalar<N, T>::operator-(Scalar<N, T> s) {
 
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator*(T value) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] * value;
@@ -374,12 +374,12 @@ Scalar<N, T> Scalar<N, T>::operator*(T value) {
 
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator*(Scalar<N, T> s) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] * s.val[k];
@@ -389,12 +389,12 @@ Scalar<N, T> Scalar<N, T>::operator*(Scalar<N, T> s) {
 
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator/(T value) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] / value;
@@ -404,12 +404,12 @@ Scalar<N, T> Scalar<N, T>::operator/(T value) {
 
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator/(Scalar<N, T> s) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] / s.val[k];
@@ -474,7 +474,7 @@ class Mat {
 
 template <int T, int ROWS, int COLS, int NPC>
 const int Mat<T, ROWS, COLS, NPC>::type() const {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     return (T);
@@ -482,14 +482,14 @@ const int Mat<T, ROWS, COLS, NPC>::type() const {
 
 template <int T, int ROWS, int COLS, int NPC>
 const int Mat<T, ROWS, COLS, NPC>::depth() const {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     return XF_DTPIXELDEPTH(T, NPC);
 }
 template <int T, int ROWS, int COLS, int NPC>
 const int Mat<T, ROWS, COLS, NPC>::channels() const {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     return XF_CHANNELS(T, NPC);
@@ -497,7 +497,7 @@ const int Mat<T, ROWS, COLS, NPC>::channels() const {
 
 template <int T, int ROWS, int COLS, int NPPC>
 inline void Mat<T, ROWS, COLS, NPPC>::init(int _rows, int _cols, bool allocate) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -619,7 +619,7 @@ inline Mat<T, ROWS, COLS, NPC>& Mat<T, ROWS, COLS, NPC>::operator=(const Mat& sr
 
 template <int T, int ROWS, int COLS, int NPPC>
 inline Mat<T, ROWS, COLS, NPPC>::Mat() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -628,9 +628,9 @@ inline Mat<T, ROWS, COLS, NPPC>::Mat() {
 
 template <int T, int ROWS, int COLS, int NPPC>
 inline Mat<T, ROWS, COLS, NPPC>::Mat(int _rows, int _cols, void* _data) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
-    // clang-format on
+// clang-format on
 
 #if defined __SDA_MEM_MAP__ //(__SDSCC__)  && defined (__SYNTHESIS__)
     init(_rows, _cols, false);
@@ -643,7 +643,7 @@ inline Mat<T, ROWS, COLS, NPPC>::Mat(int _rows, int _cols, void* _data) {
 
 template <int T, int ROWS, int COLS, int NPPC>
 inline Mat<T, ROWS, COLS, NPPC>::Mat(int _rows, int _cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -652,7 +652,7 @@ inline Mat<T, ROWS, COLS, NPPC>::Mat(int _rows, int _cols) {
 
 template <int T, int ROWS, int COLS, int NPPC>
 inline Mat<T, ROWS, COLS, NPPC>::Mat(Size _sz) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -671,7 +671,7 @@ inline XF_TNAME(T, NPPC) Mat<T, ROWS, COLS, NPPC>::read(int index) {
 
     // Packing data
     for (int i = 0; i < NPPC; ++i) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         for (int j = 0; j < XF_CHANNELS(T, NPPC); ++j) {
@@ -813,7 +813,7 @@ inline void Mat<T, ROWS, COLS, NPPC>::copyTo(void* _input) {
 
 template <int T, int ROWS, int COLS, int NPPC>
 inline unsigned char* Mat<T, ROWS, COLS, NPPC>::copyFrom() {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 

@@ -20,7 +20,7 @@
 #include <ap_int.h>
 #include "xf_config_params.h"
 #include "common/xf_common.hpp"
-#include "imgproc/xf_lut.hpp"
+#include "imgproc/xf_gammacorrection.hpp"
 
 // Set the image height and width
 #define HEIGHT 128

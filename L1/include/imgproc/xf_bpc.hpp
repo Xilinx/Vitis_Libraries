@@ -317,7 +317,7 @@ BORDER_INIT:
 // ----------------------------------
 ROW_LOOP:
     for (ROW_IDX_T r = (K_ROWS >> 1); r < _src.rows + (K_ROWS >> 1); r++) {
-        //#pragma HLS PIPELINE
+//#pragma HLS PIPELINE
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = ROWS
         process_row(r, _src, _dst);
         update_row_idx();
@@ -459,7 +459,7 @@ void badpixelcorrection(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src, xf::cv::Mat<T
 #undef _NP_IN_PREV
 #undef _DST_PIX_WIDTH
 
-} // namespace cv
 } // namespace xf
+}
 
 #endif //_XF_BPC_HPP_

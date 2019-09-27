@@ -45,11 +45,11 @@ class xFBitWidth<_Num, 0> {
 
 template <typename T>
 T xFabsdiff2(T a, T b) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int x = a - b;
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=x core=AddSubnS
     // clang-format on
     T r;
@@ -66,7 +66,7 @@ class xFMinSAD {
    public:
     template <typename T, typename T_idx>
     static void find(T a[SIZE], T_idx& loc, T& val) {
-        // clang-format off
+// clang-format off
         #pragma HLS INLINE
         #pragma HLS array_partition variable=a complete dim=0
         // clang-format on
@@ -75,13 +75,13 @@ class xFMinSAD {
         T a2[SIZE - SIZE / 2];
 
         for (int i = 0; i < SIZE / 2; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             a1[i] = a[i];
         }
         for (int i = 0; i < SIZE - SIZE / 2; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             a2[i] = a[i + SIZE / 2];
@@ -107,7 +107,7 @@ class xFMinSAD<1> {
    public:
     template <typename T, typename T_idx>
     static void find(T a[1], T_idx& loc, T& val) {
-        // clang-format off
+// clang-format off
         #pragma HLS INLINE
         // clang-format on
 
@@ -121,7 +121,7 @@ class xFMinSAD<2> {
    public:
     template <typename T, typename T_idx>
     static void find(T a[2], T_idx& loc, T& val) {
-        // clang-format off
+// clang-format off
         #pragma HLS INLINE
         #pragma HLS array_partition variable=a complete dim=0
         // clang-format on
@@ -146,7 +146,7 @@ void xFUpdateTextureSum(unsigned char window[WSIZE][L_WIN_COLS],
                         int col,
                         int cap,
                         int text_sum[WSIZE]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -155,7 +155,7 @@ void xFUpdateTextureSum(unsigned char window[WSIZE][L_WIN_COLS],
 
 text_sum_loop1:
     for (int i = 0; i < WSIZE; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         col_sums += (i > row ? 0 : xFabsdiff2((int)(l_tmp[i]), cap)) -
@@ -170,7 +170,7 @@ text_sum_loop1:
 
     // shift right
     for (int j = WSIZE - 1; j >= 1; j--) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         text_sum[j] = text_sum[j - 1];
@@ -183,18 +183,18 @@ text_sum_loop1:
 
 template <typename T, int ROWS, int COLS>
 void xFShiftRight(T buf[ROWS][COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
-    // clang-format on
+// clang-format on
 
 shift_right_loop2:
     for (unsigned char j = COLS - 1; j >= 1; j--) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
-        // clang-format on
+    // clang-format on
     shift_right_loop1:
         for (unsigned char i = 0; i < ROWS; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             buf[i][j] = buf[i][j - 1];
@@ -204,12 +204,12 @@ shift_right_loop2:
 
 template <int ROWS, int COLS, typename T>
 void xFInsertLeft(T buf[ROWS][COLS], T tmp[ROWS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
 // clang-format on
 insert_right_loop1:
     for (unsigned char i = 0; i < ROWS; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         buf[i][0] = tmp[i];
@@ -222,7 +222,7 @@ short int xFSADComputeInc(T l_win[WSIZE][L_WIN_COLS],
                           unsigned char d,
                           unsigned short col,
                           short int sad_cols_d[WSIZE]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     short int a_sum = 0, b_sum = 0;
@@ -270,12 +270,12 @@ void xFSADBlockMatching(hls::stream<XF_TNAME(WORDWIDTH_SRC, 1)>& left,
     XF_TNAME(WORDWIDTH_SRC, 1) left_line_buf[WSIZE][BUF_SIZE];
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=left_line_buf core=RAM_2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=left_line_buf cyclic factor=WSIZE dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=left_line_buf complete dim=1
         // clang-format on
     }
@@ -283,24 +283,24 @@ void xFSADBlockMatching(hls::stream<XF_TNAME(WORDWIDTH_SRC, 1)>& left,
     XF_TNAME(WORDWIDTH_SRC, 1) right_line_buf[WSIZE][BUF_SIZE];
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=right_line_buf core=RAM_2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=right_line_buf cyclic factor=WSIZE dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=right_line_buf complete dim=1
         // clang-format on
     }
 
     // create the left and right window buffers.
     unsigned char l_window[WSIZE][LWINWIDTH];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=l_window complete dim=2
     #pragma HLS ARRAY_PARTITION variable=l_window complete dim=1
     // clang-format on
     unsigned char r_window[WSIZE][RWINWIDTH];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=r_window complete dim=2
     #pragma HLS ARRAY_PARTITION variable=r_window complete dim=1
     // clang-format on
@@ -311,66 +311,66 @@ void xFSADBlockMatching(hls::stream<XF_TNAME(WORDWIDTH_SRC, 1)>& left,
     short int FILTERED = 0; //((state.minDisparity - 1) << 4);
     unsigned char cap = state.preFilterCap;
     unsigned char l_tmp[WSIZE];
-    // clang-format off
+// clang-format off
     #pragma HLS array_partition variable=l_tmp complete dim=0
     // clang-format on
     unsigned char r_tmp[WSIZE];
-    // clang-format off
+// clang-format off
     #pragma HLS array_partition variable=r_tmp complete dim=0
     // clang-format on
     int text_sum[WSIZE];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=text_sum complete dim=0
     // clang-format on
     int sad[NDISP_UNIT];
-    // clang-format off
+// clang-format off
     #pragma HLS array_partition variable=sad complete dim=0
     // clang-format on
 
     short int sad_cols[NDISP_UNIT][WSIZE];
-    // clang-format off
+// clang-format off
     #pragma HLS array_partition variable=sad_cols complete dim=0
     // clang-format on
 
     int minsad[COLS + WSIZE - 1];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=minsad core=RAM_S2P_URAM
         // clang-format on
     }
     XF_TNAME(WORDWIDTH_DST, 1) mind[BUF_SIZE];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=mind core=RAM_S2P_URAM
         // clang-format on
     }
     bool skip[BUF_SIZE];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=skip core=RAM_S2P_URAM
         // clang-format on
     }
 
 loop_row:
     for (unsigned short row = 0; row < height + WSIZE - 1; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROW_TC max=ROW_TC
-        // clang-format on
+    // clang-format on
 
     loop_mux:
         for (unsigned char sweep = 0; sweep < state.sweepFactor; sweep++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=SWEEP_FACT max=SWEEP_FACT
-            // clang-format on
+        // clang-format on
 
         loop_sad_init:
             for (unsigned char d = 0; d < NDISP_UNIT; d++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 sad[d] = 0;
                 for (unsigned char i = 0; i < WSIZE; i++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     sad_cols[d][i] = 0;
@@ -378,11 +378,11 @@ loop_row:
             }
         loop_col:
             for (unsigned short col = 0; col < width + WSIZE - 1; col++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=COL_TC max=COL_TC
-                // clang-format on
+// clang-format on
 
-                // clang-format off
+// clang-format off
                 #pragma HLS loop_flatten
                 #pragma HLS pipeline II=1
                 // clang-format on
@@ -393,14 +393,14 @@ loop_row:
                     // load and shifting buffs
                     // shift down
                     for (unsigned char sd = WSIZE - 1; sd > 0; sd--) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS unroll
                         // clang-format on
                         left_line_buf[sd][col] = left_line_buf[sd - 1][col];
                     }
 
                     for (unsigned char sd = WSIZE - 1; sd > 0; sd--) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS unroll
                         // clang-format on
                         right_line_buf[sd][col] = right_line_buf[sd - 1][col];
@@ -444,31 +444,31 @@ loop_row:
 
                 int skip_val[BUF_SIZE];
                 if (USE_URAM) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS RESOURCE variable=skip_val core=RAM_S2P_URAM
                     // clang-format on
                 }
                 int edge_neighbor[BUF_SIZE];
                 if (USE_URAM) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS RESOURCE variable=edge_neighbor core=RAM_S2P_URAM
                     // clang-format on
                 }
                 int edge[BUF_SIZE];
                 if (USE_URAM) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS RESOURCE variable=edge core=RAM_S2P_URAM
                     // clang-format on
                 }
                 int minsad_p[BUF_SIZE];
                 if (USE_URAM) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS RESOURCE variable=minsad_p core=RAM_S2P_URAM
                     // clang-format on
                 }
                 int minsad_n[BUF_SIZE];
                 if (USE_URAM) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS RESOURCE variable=minsad_n core=RAM_S2P_URAM
                     // clang-format on
                 }
@@ -591,7 +591,7 @@ loop_row:
 /* Support function for the Image Clip function */
 template <int NPC>
 void xFImageClipUtility(int i, int j, int k, int height, int width, int* pix) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     if (i < 1 || i > height - 2 || (j * (1 << XF_BITSHIFT(NPC)) + k < 1) ||
@@ -608,21 +608,21 @@ void xFImageClip(xf::cv::Mat<SRC_T, ROWS, COLS, 1>& src,
                  short int width) {
 loop_row_clip:
     for (short i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     loop_col_clip:
         for (short j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TC max=COLS_TC
             // clang-format on
             XF_TNAME(SRC_T, 1) tmp = src.read(i * (width >> XF_BITSHIFT(NPC)) + j);
             XF_TNAME(DST_T, 1) tmp_out;
             for (int k = 0; k < (1 << XF_BITSHIFT(NPC)); k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 int pix = (XF_PTNAME(DEPTH_SRC))tmp.range((k + 1) * XF_PIXELDEPTH(DEPTH_SRC) - 1,
@@ -643,13 +643,13 @@ template <int ROWS, int COLS, int NPC, int DEPTH_SRC, int DEPTH_DST, int SRC_T, 
 void xFReadOutStream(xf::cv::Mat<SRC_T, ROWS, COLS, 1>& src, short int height, short int width) {
 loop_row_clip:
     for (short i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     loop_col_clip:
         for (short j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TC max=COLS_TC
             // clang-format on
@@ -666,15 +666,15 @@ void xFStereoPreProcess(xf::cv::Mat<SRC_T, ROWS, COLS, 1>& in_mat,
                         int preFilterCap,
                         short int height,
                         short int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     xf::cv::Mat<FILTER_T, ROWS, COLS, 1> in_sobel_x(height, width);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_sobel_x.data depth=2
     // clang-format on
     xf::cv::Mat<FILTER_T, ROWS, COLS, 1> in_sobel_y(height, width);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_sobel_y.data depth=2
     // clang-format on
 
@@ -702,16 +702,16 @@ void xFFindStereoCorrespondenceLBMNO_pipeline(hls::stream<XF_TNAME(SRC_T, NPC)>&
                                               xf::cv::xFSBMState<WSIZE, NDISP, NDISP_UNIT>& sbmstate,
                                               short int height,
                                               short int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     xf::cv::Mat<SRC_T, ROWS, COLS, NPC> _left_mat(height, width);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=_left_mat.data depth=2
     // clang-format on
     xf::cv::Mat<SRC_T, ROWS, COLS, NPC> _right_mat(height, width);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=_right_mat.data depth=2
     // clang-format on
 
@@ -720,13 +720,13 @@ void xFFindStereoCorrespondenceLBMNO_pipeline(hls::stream<XF_TNAME(SRC_T, NPC)>&
 
     hls::stream<XF_TNAME(DST_T, NPC)> _disp_strm("disparity stream");
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     int TC = (ROWS * COLS);
     for (int i = 0; i < height * width; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline ii=1
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         // clang-format on
@@ -746,7 +746,7 @@ void xFFindStereoCorrespondenceLBMNO_pipeline(hls::stream<XF_TNAME(SRC_T, NPC)>&
         left_clipped, right_clipped, _disp_strm, sbmstate, height, width);
 
     for (int i = 0; i < height * width; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline ii=1
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         // clang-format on
@@ -775,7 +775,7 @@ void xFFindStereoCorrespondenceLBMNO(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _left_
     hls::stream<XF_TNAME(SRC_T, NPC)> right_clipped("right_clipped");
 
     hls::stream<XF_TNAME(DST_T, NPC)> _disp_strm("disparity stream");
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
@@ -793,7 +793,7 @@ void xFFindStereoCorrespondenceLBMNO(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _left_
         left_clipped, right_clipped, _disp_strm, sbmstate, height, width);
 
     for (int i = 0; i < height * width; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline ii=1
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         // clang-format on
@@ -809,9 +809,9 @@ void xFFindStereoCorrespondenceLBM_pipeline(hls::stream<XF_TNAME(SRC_T, NPC)>& _
                                             xf::cv::xFSBMState<WSIZE, NDISP, NDISP_UNIT>& sbmstate,
                                             short int height,
                                             short int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
-    // clang-format on
+// clang-format on
 
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " SRC_T must be XF_8UC1 ");
@@ -872,7 +872,7 @@ void StereoBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _left_mat,
               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _right_mat,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _disp_mat,
               xf::cv::xFSBMState<WSIZE, NDISP, NDISP_UNIT>& sbmstate) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

@@ -38,13 +38,13 @@ void xFDuplicate(hls::stream<XF_TNAME(SRC_T, NPC)>& _src_mat,
     ap_uint<13> row, col;
 Row_Loop:
     for (row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     Col_Loop:
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=240 max=240
             #pragma HLS pipeline
             // clang-format on
@@ -60,11 +60,11 @@ template <int SRC_T, int ROWS, int COLS, int NPC>
 void duplicateMat(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst1,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst2) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS dataflow
     // clang-format on
 
@@ -72,15 +72,15 @@ void duplicateMat(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     hls::stream<XF_TNAME(SRC_T, NPC)> dst;
     hls::stream<XF_TNAME(SRC_T, NPC)> dst1;
 
-    /********************************************************/
+/********************************************************/
 
 Read_yuyv_Loop:
     for (int i = 0; i < _src.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_src.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             #pragma HLS loop_flatten off
@@ -93,11 +93,11 @@ Read_yuyv_Loop:
                                                                                         _src.cols);
 
     for (int i = 0; i < _dst1.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_dst1.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             #pragma HLS loop_flatten off

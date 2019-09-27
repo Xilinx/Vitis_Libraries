@@ -27,7 +27,7 @@ void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                             float inputMax,
                             float outputMin,
                             float outputMax) {
-    // clang-format off
+// clang-format off
 #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
 #pragma HLS INTERFACE m_axi     port=img_inp1  offset=slave bundle=gmem2
 #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem3
@@ -43,21 +43,21 @@ void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> in_mat;
-    // clang-format off
+// clang-format off
 #pragma HLS stream variable=in_mat.data depth=2
     // clang-format on
     in_mat.rows = rows;
     in_mat.cols = cols;
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> in_mat1;
-    // clang-format off
+// clang-format off
 #pragma HLS stream variable=in_mat1.data depth=2
     // clang-format on
     in_mat1.rows = rows;
     in_mat1.cols = cols;
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> out_mat;
-    // clang-format off
+// clang-format off
 #pragma HLS stream variable=out_mat.data depth=2
     // clang-format on
     out_mat.rows = rows;

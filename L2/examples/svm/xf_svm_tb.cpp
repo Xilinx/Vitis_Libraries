@@ -16,17 +16,13 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
+#include "xf_svm_config.h"
 
 /*****************************************************************************
  * 	 main function: SVM core
  *****************************************************************************/
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    std::vector<int16_t> in_1(IN_ARRAY_HEIGHT_1 * IN_ARRAY_WIDTH_1), in_2(IN_ARRAY_HEIGHT_2 * IN_ARRAY_WIDTH_2);
+    std::vector<int16_t> in_1(IN_ARRAY_SIZE_1 * IN_ARRAY_SIZE_1), in_2(IN_ARRAY_SIZE_2 * IN_ARRAY_SIZE_2);
 
     float a = 0, bias = 0.567;
 
@@ -70,10 +66,8 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
-    std::string binaryFile = argv[1];
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_svm");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 

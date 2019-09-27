@@ -24,28 +24,28 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* inImgPyr1,
                     int pyr_w,
                     int pyr_out_h,
                     int pyr_out_w) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=inImgPyr1  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=outImgPyr1  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=inImgPyr2  offset=slave bundle=gmem3
     #pragma HLS INTERFACE m_axi     port=outImgPyr2  offset=slave bundle=gmem4
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite port=inImgPyr1  bundle=control
     #pragma HLS INTERFACE s_axilite port=outImgPyr1  bundle=control
     #pragma HLS INTERFACE s_axilite port=inImgPyr2     bundle=control
     #pragma HLS INTERFACE s_axilite port=outImgPyr2     bundle=control
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite port=pyr_h     bundle=control
     #pragma HLS INTERFACE s_axilite port=pyr_w     bundle=control
     #pragma HLS INTERFACE s_axilite port=pyr_out_h     bundle=control
     #pragma HLS INTERFACE s_axilite port=pyr_out_w     bundle=control
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite port=return   bundle=control
     // clang-format on
 
@@ -53,33 +53,33 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* inImgPyr1,
     const int pCOLS = WIDTH;
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr1_in_mat;
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=pyr1_in_mat.data depth=pCOLS/XF_NPPC1
     // clang-format on
     pyr1_in_mat.rows = pyr_h;
     pyr1_in_mat.cols = pyr_w;
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr1_out_mat;
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=pyr1_out_mat.data depth=pCOLS/XF_NPPC1
     // clang-format on
     pyr1_out_mat.rows = pyr_out_h;
     pyr1_out_mat.cols = pyr_out_w;
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr2_in_mat;
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=pyr2_in_mat.data depth=pCOLS/XF_NPPC1
     // clang-format on
     pyr2_in_mat.rows = pyr_h;
     pyr2_in_mat.cols = pyr_w;
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr2_out_mat;
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=pyr2_out_mat.data depth=pCOLS/XF_NPPC1
     // clang-format on
     pyr2_out_mat.rows = pyr_out_h;
     pyr2_out_mat.cols = pyr_out_w;
 
 // creating image pyramid
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(inImgPyr1, pyr1_in_mat);

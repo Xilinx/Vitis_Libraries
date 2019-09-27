@@ -43,7 +43,7 @@ void densePyrOpticalFlow(xf::cv::Mat<XF_8UC1, ROWS, COLS, XF_NPPC1>& _current_im
                          const unsigned char scale_up_flag,
                          float scale_in,
                          ap_uint<1> init_flag) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     xFLKOpticalFlowDenseKernel<ROWS, COLS, NUM_PYR_LEVELS, NUM_LINES, WINSIZE, FLOW_WIDTH, FLOW_INT, USE_URAM>(

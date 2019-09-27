@@ -73,14 +73,14 @@ void xFHOGPhaseMagnitudeKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _gradx_stre
 
 rowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN OFF
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS PIPELINE
             // clang-format on
@@ -95,7 +95,7 @@ rowLoop:
 
         procLoop:
             for (k = 0, l = 0; k < proc_loop_src, l < proc_loop_dst; k += step_src, l += step_dst) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
 

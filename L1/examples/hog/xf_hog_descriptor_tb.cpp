@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // Converting the image type based on the configuration
+// Converting the image type based on the configuration
 #if GRAY_T
     cvtColor(img_raw, img, CV_BGR2GRAY);
 #elif RGB_T
@@ -68,18 +68,18 @@ int main(int argc, char** argv) {
     int dim = (total_no_of_windows * XF_NODPW);
 
     /////////////     Reference for HOG implementation     /////////
-    AURHOGDescriptor d(Size(XF_WIN_WIDTH, XF_WIN_HEIGHT), Size(XF_BLOCK_WIDTH, XF_BLOCK_HEIGHT),
-                       Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), XF_NO_OF_BINS);
+    AURHOGDescriptor d(cv::Size(XF_WIN_WIDTH, XF_WIN_HEIGHT), cv::Size(XF_BLOCK_WIDTH, XF_BLOCK_HEIGHT),
+                       cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), XF_NO_OF_BINS);
 
     vector<float> descriptorsValues;
-    vector<Point> locations;
+    vector<cv::Point> locations;
 #if RGB_T
     cvtColor(img_raw, img_raw, CV_BGR2RGB);
 #endif
 #if GRAY_T
-    d.AURcompute(img, descriptorsValues, Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), Size(0, 0), locations);
+    d.AURcompute(img, descriptorsValues, cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(0, 0), locations);
 #elif RGB_T
-    d.AURcompute(img_raw, descriptorsValues, Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), Size(0, 0), locations);
+    d.AURcompute(img_raw, descriptorsValues, cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(0, 0), locations);
 #endif
 
     float* ocv_out_fl = (float*)malloc(dim * sizeof(float));
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
 
     float* out_fl = (float*)malloc(dim * sizeof(float));
 
-    // converting the fixed point data to floating point data for comparison
+// converting the fixed point data to floating point data for comparison
 #if REPETITIVE_BLOCKS
     for (int i = 0; i < dim; i++) {
         out_fl[i] = ((float)output1[i] / (float)65536.0);

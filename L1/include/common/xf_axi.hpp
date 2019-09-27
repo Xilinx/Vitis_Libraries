@@ -32,7 +32,7 @@ void cvMat2AXIvideoxf(cv::Mat& cv_mat, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_vi
 
 template <int W, int NPC>
 void xfAXISetBitFields(ap_uint<W>& pix, IplImage* img, int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     int start = 0;
@@ -84,7 +84,7 @@ void xfAXISetBitFields(ap_uint<W>& pix, IplImage* img, int row, int col) {
 }
 template <int W, int NPC>
 void xfAXISetBitFields(ap_axiu<W, 1, 1, 1>& axi, IplImage* img, int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     xfAXISetBitFields<W, NPC>(axi.data, img, row, col);
@@ -131,7 +131,7 @@ void cvMat2AXIvideoxf(cv::Mat& cv_mat, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_vi
 }
 template <int NPC, int W>
 void xfAXIGetBitFields(ap_uint<W> pix, IplImage* img, int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     CvScalar cv_pix;
@@ -189,7 +189,7 @@ void xfAXIGetBitFields(ap_uint<W> pix, IplImage* img, int row, int col) {
 }
 template <int NPC, int W>
 void xfAXIGetBitFields(ap_axiu<W, 1, 1, 1> axi, IplImage* img, int row, int col) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     xfAXIGetBitFields<NPC, W>(axi.data, img, row, col);

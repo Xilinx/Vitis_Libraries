@@ -27,7 +27,7 @@ void mean_shift_accel(xf::cv::Mat<XF_8UC4, XF_HEIGHT, XF_WIDTH, XF_NPPC1>& inMat
                       uint8_t frame_status,
                       uint8_t no_objects,
                       uint8_t no_of_iterations) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi depth=10 port=tlx offset=direct bundle=in
     #pragma HLS INTERFACE m_axi depth=10 port=tly offset=direct bundle=in
     #pragma HLS INTERFACE m_axi depth=10 port=obj_height offset=direct bundle=in

@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    // Pixel depth conversion:
+// Pixel depth conversion:
 #if T_8U
     in_img.convertTo(in_conv, CV_8UC1);
 #elif T_16U

@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     cv::Mat hls_grad_x, hls_grad_y;
     cv::Mat diff_grad_x, diff_grad_y;
 
-    // reading in the color image
+// reading in the color image
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else
@@ -142,8 +142,8 @@ int main(int argc, char** argv) {
     q.enqueueReadBuffer(imageFromDevice1, CL_TRUE, 0, (height * width * CH_TYPE), hls_grad_x.data);
     q.enqueueReadBuffer(imageFromDevice2, CL_TRUE, 0, (height * width * CH_TYPE), hls_grad_y.data);
     q.finish();
-    /////////////////////////////////////// end of CL ////////////////////////
-    //////////////////  Compute Absolute Difference ////////////////////
+/////////////////////////////////////// end of CL ////////////////////////
+//////////////////  Compute Absolute Difference ////////////////////
 #if (FILTER_WIDTH == 3 | FILTER_WIDTH == 5)
     absdiff(c_grad_x_1, hls_grad_x, diff_grad_x);
     absdiff(c_grad_y_1, hls_grad_y, diff_grad_y);

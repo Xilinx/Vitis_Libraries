@@ -62,13 +62,13 @@ void xfChannelExtractKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 RowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -77,7 +77,7 @@ RowLoop:
 
         ProcLoop:
             for (k = 0; k < (noofbits << XF_BITSHIFT(NPC)); k += noofbits) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 y = k * (XF_CHANNELS(SRC_T, NPC));
@@ -104,11 +104,11 @@ void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     assert(((_dst_mat.rows <= ROWS) && (_dst_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC4 || SRC_T == XF_8UC3) && (DST_T == XF_8UC1) &&
            "Source image should be of 4 channels and destination image of 1 channel");
-    //	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+//	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
     short width = _src_mat.cols >> XF_BITSHIFT(NPC);
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

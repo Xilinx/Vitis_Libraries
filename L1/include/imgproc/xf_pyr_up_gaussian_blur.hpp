@@ -25,23 +25,23 @@ template <int NPC, int DEPTH, int WIN_SZ, int WIN_SZ_SQ, int PLANES>
 void xFPyrUpApplykernel(XF_PTUNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)],
                         XF_PTUNAME(DEPTH) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
                         ap_uint<8> win_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<32> array[WIN_SZ_SQ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=array complete dim=1
     // clang-format on
 
     int array_ptr = 0;
 Compute_Grad_Loop:
     for (int copy_arr = 0; copy_arr < WIN_SZ; copy_arr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         #pragma HLS UNROLL
         // clang-format on
         for (int copy_in = 0; copy_in < WIN_SZ; copy_in++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -96,19 +96,19 @@ void xFPyrUpProcessWindow(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
                           ap_uint<13> row_ind[WIN_SZ],
                           ap_uint<13> row,
                           ap_uint<8> win_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     XF_TNAME(DEPTH, NPC) buf_cop[WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf_cop complete dim=1
     // clang-format on
 
     uint16_t npc = XF_NPIXPERCYCLE(NPC);
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width + (WIN_SZ >> 1); col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN OFF
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         #pragma HLS pipeline
@@ -119,7 +119,7 @@ Col_Loop:
             buf[row_ind[win_size - 1]][col] = 0;
 
         for (int copy_buf_var = 0; copy_buf_var < WIN_SZ; copy_buf_var++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -130,7 +130,7 @@ Col_Loop:
             }
         }
         for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -147,12 +147,12 @@ Col_Loop:
         }
 
         for (int wrap_buf = 0; wrap_buf < WIN_SZ; wrap_buf++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             // clang-format on
             for (int col_warp = 0; col_warp < WIN_SZ - 1; col_warp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 // clang-format on
@@ -173,7 +173,7 @@ void xf_pyrup_gaussian_nxn(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
                            uint16_t img_height,
                            uint16_t img_width) {
     ap_uint<13> row_ind[WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=row_ind complete dim=1
     // clang-format on
 
@@ -182,12 +182,12 @@ void xf_pyrup_gaussian_nxn(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
     ap_uint<13> row, col;
 
     XF_TNAME(DEPTH, NPC) OutputValues[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=OutputValues complete dim=1
     // clang-format on
 
     XF_PTUNAME(DEPTH) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=2
     // clang-format on
@@ -195,7 +195,7 @@ void xf_pyrup_gaussian_nxn(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
     XF_TNAME(DEPTH, NPC) P0;
 
     XF_TNAME(DEPTH, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     // clang-format on
@@ -203,7 +203,7 @@ void xf_pyrup_gaussian_nxn(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
     // initializing row index
 
     for (int init_row_ind = 0; init_row_ind < win_size; init_row_ind++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         // clang-format on
         row_ind[init_row_ind] = init_row_ind;
@@ -211,11 +211,11 @@ void xf_pyrup_gaussian_nxn(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
 
 read_lines:
     for (int init_buf = row_ind[win_size >> 1]; init_buf < row_ind[win_size - 1]; init_buf++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         // clang-format on
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
             #pragma HLS LOOP_FLATTEN OFF
             #pragma HLS pipeline
@@ -226,11 +226,11 @@ read_lines:
 
     // takes care of top borders
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         // clang-format on
         for (int init_buf = 0; init_buf<WIN_SZ>> 1; init_buf++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -240,7 +240,7 @@ read_lines:
 
 Row_Loop:
     for (row = (win_size >> 1); row < img_height + (win_size >> 1); row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         P0 = 0;
@@ -250,7 +250,7 @@ Row_Loop:
         // update indices
         ap_uint<13> zero_ind = row_ind[0];
         for (int init_row_ind = 0; init_row_ind < WIN_SZ - 1; init_row_ind++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on

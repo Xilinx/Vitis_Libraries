@@ -22,13 +22,13 @@ void cornerTracker(
     ap_uint<INPUT_PTR_WIDTH>* inHarris, unsigned int* list, unsigned int* params, int harris_rows, int harris_cols)
 
 {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=inHarris  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=list  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=params  offset=slave bundle=gmem3
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite port=harris_rows     bundle=control
     #pragma HLS INTERFACE s_axilite port=harris_cols     bundle=control
     #pragma HLS INTERFACE s_axilite port=return   bundle=control

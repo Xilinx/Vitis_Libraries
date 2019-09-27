@@ -27,7 +27,7 @@
  */
 template <typename SRC_T>
 bool xFFindMaxRad1(SRC_T t0, SRC_T t1, SRC_T t2, SRC_T m0, SRC_T m1, SRC_T m2, SRC_T b0, SRC_T b1, SRC_T b2) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     bool Max = false;
@@ -44,12 +44,12 @@ void xFSuppressionRad1(DST_T* Maxarray,
                        XF_PTNAME(IN_DEPTH) * l00_buf,
                        XF_PTNAME(IN_DEPTH) * l10_buf,
                        XF_PTNAME(IN_DEPTH) * l20_buf) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
 // clang-format on
 Suppression_Loop:
     for (ap_uint<8> i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         bool Max = xFFindMaxRad1(l00_buf[i], l00_buf[i + 1], l00_buf[i + 2], l10_buf[i], l10_buf[i + 1], l10_buf[i + 2],
@@ -77,7 +77,7 @@ void ProcessMax1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                  bool flag,
                  int& read_index,
                  int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     ap_uint<5> nms_bufsize = ((1 << XF_BITSHIFT(NPC)) + 2);
@@ -86,7 +86,7 @@ void ProcessMax1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -138,7 +138,7 @@ void xFMaxSuppressionRad1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     ap_uint<2> tp, mid, bottom;
     uint16_t shift = 0;
     XF_PTNAME(OUT_DEPTH) Array[(1 << XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Array complete dim=1
     // clang-format on
 
@@ -148,7 +148,7 @@ void xFMaxSuppressionRad1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // Temporary buffers to hold image data from three rows.
     XF_PTNAME(IN_DEPTH)
     l00_buf[(1 << XF_BITSHIFT(NPC)) + 2], l10_buf[(1 << XF_BITSHIFT(NPC)) + 2], l20_buf[(1 << XF_BITSHIFT(NPC)) + 2];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=l00_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=l10_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=l20_buf complete dim=1
@@ -158,14 +158,14 @@ void xFMaxSuppressionRad1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     // Line buffer to hold the image data
     XF_SNAME(IN_WW) buf[3][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
     row_ind = 1;
 Clear_first_Row:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -176,7 +176,7 @@ Clear_first_Row:
     row_ind++;
 Row_Loop:
     for (row = 1; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS
         // clang-format on
@@ -219,7 +219,8 @@ Row_Loop:
             }
             xfPackPixels<NPC, OUT_WW, OUT_DEPTH>(&Array[0], P0, 0, 1, shift);
             // P0.range(((8 << XF_BITSHIFT(NPC))-1), ((8 << XF_BITSHIFT(NPC))-8)) = Array[0];				// Get bits
-            // from certain range of positions.
+            // from
+            // certain range of positions.
             _dst_mat.write(write_index++, (P0));
             shift = 0;
             P0 = 0;
@@ -253,7 +254,7 @@ Row_Loop:
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -302,7 +303,7 @@ bool xFFindMaxRad2(SRC_T l22,
                    SRC_T l32,
                    SRC_T l33,
                    SRC_T l42) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     bool Max = false;
@@ -323,12 +324,12 @@ void xFSuppressionRad2(DST_T* Maxarray,
                        XF_PTNAME(IN_DEPTH) * l20_buf,
                        XF_PTNAME(IN_DEPTH) * l30_buf,
                        XF_PTNAME(IN_DEPTH) * l40_buf) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
 // clang-format on
 Suppression_Loop:
     for (ap_uint<5> i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         bool Max = xFFindMaxRad2(l20_buf[i + 2], l00_buf[i + 2], l10_buf[i + 1], l10_buf[i + 2], l10_buf[i + 3],
@@ -362,7 +363,7 @@ void ProcessRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                  bool flag,
                  int& read_pointer,
                  int& write_pointer) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     ap_uint<8> nms_bufsize = (1 << XF_BITSHIFT(NPC)) + 4;
@@ -371,7 +372,7 @@ void ProcessRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -391,7 +392,7 @@ Col_Loop:
         xFSuppressionRad2<NPC, IN_DEPTH>(Array, l00_buf, l10_buf, l20_buf, l30_buf, l40_buf);
 
         for (ap_uint<4> i = 0; i < 4; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             l00_buf[i] = l00_buf[nms_bufsize - (4 - i)];
@@ -438,7 +439,7 @@ void xFMaxSuppressionRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     int read_pointer = 0, write_pointer = 0;
 
     XF_PTNAME(OUT_DEPTH) Array[(1 << XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Array complete dim=1
     // clang-format on
 
@@ -446,7 +447,7 @@ void xFMaxSuppressionRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_PTNAME(IN_DEPTH)
     l00_buf[(1 << XF_BITSHIFT(NPC)) + 4], l10_buf[(1 << XF_BITSHIFT(NPC)) + 4], l20_buf[(1 << XF_BITSHIFT(NPC)) + 4];
     XF_PTNAME(IN_DEPTH) l30_buf[(1 << XF_BITSHIFT(NPC)) + 4], l40_buf[(1 << XF_BITSHIFT(NPC)) + 4];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=l00_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=l10_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=l20_buf complete dim=1
@@ -460,7 +461,7 @@ void xFMaxSuppressionRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(OUT_WW) inter_valx = 0;
     uint16_t npc = XF_NPIXPERCYCLE(NPC);
     XF_SNAME(IN_WW) buf[5][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
@@ -469,7 +470,7 @@ void xFMaxSuppressionRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -481,7 +482,7 @@ Clear_Row_Loop:
 
 Read_Row1_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -491,7 +492,7 @@ Read_Row1_Loop:
 
 Row_Loop:
     for (row = 2; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         // modify the buffer indices to re use
@@ -541,7 +542,7 @@ Row_Loop:
         if (row >= 2) {
             if ((NPC == XF_NPPC8) || (NPC == XF_NPPC16)) {
                 for (i = 4; i < nms_bufsize; i++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     l00_buf[i] = 0;
@@ -579,7 +580,7 @@ Row_Loop:
 
             lbufLoop3:
                 for (i = 0; i < 4; i++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     l00_buf[i] = l00_buf[nms_bufsize - (4 - i)];
@@ -648,7 +649,7 @@ Border_Row_Loop:
 
     Clear_Row_Loop1:
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -689,7 +690,7 @@ Border_Row_Loop:
             _dst_mat.write(write_pointer++, (inter_valx));
         lbufLoop33:
             for (i = 0; i < 4; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 l00_buf[i] = l00_buf[nms_bufsize - (4 - i)];
@@ -749,7 +750,7 @@ void xFSuppressionRad3(SRC_T* Maxarray,
                        DST_T* l50_buf,
                        DST_T* l60_buf) {
     for (ap_uint<8> i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         bool Max =
@@ -776,7 +777,7 @@ void xFMaxSuppressionRad3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     int read_pointer = 0, write_pointer = 0;
 
     XF_PTNAME(OUT_DEPTH) Array[(1 << XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Array complete dim=1
     // clang-format on
 
@@ -787,7 +788,7 @@ void xFMaxSuppressionRad3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     l00_buf[(1 << XF_BITSHIFT(NPC)) + 6], l10_buf[(1 << XF_BITSHIFT(NPC)) + 6], l20_buf[(1 << XF_BITSHIFT(NPC)) + 6],
         l30_buf[(1 << XF_BITSHIFT(NPC)) + 6], l40_buf[(1 << XF_BITSHIFT(NPC)) + 6];
     XF_PTNAME(IN_DEPTH) l50_buf[(1 << XF_BITSHIFT(NPC)) + 6], l60_buf[(1 << XF_BITSHIFT(NPC)) + 6];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=l00_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=l10_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=l20_buf complete dim=1
@@ -802,7 +803,7 @@ void xFMaxSuppressionRad3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(IN_WW) tmp_in;
     XF_SNAME(OUT_WW) inter_valx = 0;
     XF_SNAME(IN_WW) buf[7][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
 
@@ -810,7 +811,7 @@ void xFMaxSuppressionRad3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -821,7 +822,7 @@ Clear_Row_Loop:
 
 Read_Row1_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -831,7 +832,7 @@ Read_Row1_Loop:
 
 Read_Row2_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -841,7 +842,7 @@ Read_Row2_Loop:
 
 Read_Row3_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -851,7 +852,7 @@ Read_Row3_Loop:
 
 Row_Loop:
     for (row = 3; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         // modify the buffer indices to re use
@@ -913,7 +914,7 @@ Row_Loop:
             bottom3 = 6;
         }
         for (i = 0; i < 6; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             l00_buf[i] = 0;
@@ -928,7 +929,7 @@ Row_Loop:
 
     Col_Loop:
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -954,7 +955,7 @@ Row_Loop:
             xFSuppressionRad3<NPC>(Array, l00_buf, l10_buf, l20_buf, l30_buf, l40_buf, l50_buf, l60_buf);
 
             for (i = 0; i < 6; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 l00_buf[i] = l00_buf[nms_bufsize - (6 - i)];
@@ -967,7 +968,7 @@ Row_Loop:
             }
             if (col == 0) {
                 for (k = 3; k < (1 << XF_BITSHIFT(NPC)); k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     shift = (k - 3) << 3;
@@ -975,7 +976,7 @@ Row_Loop:
                 }
             } else {
                 for (k = 0; k < 3; k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     shift = ((1 << XF_BITSHIFT(NPC)) - 3 + k) << 3;
@@ -983,7 +984,7 @@ Row_Loop:
                 }
                 _dst_mat.write(write_pointer++, (inter_valx));
                 for (k = 3; k < (1 << XF_BITSHIFT(NPC)); k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     shift = (k - 3) << 3;
@@ -995,7 +996,7 @@ Row_Loop:
 
         if (row >= 3) {
             for (i = 0; i < 8; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 l00_buf[i] = l00_buf[nms_bufsize - (6 + i)];
@@ -1017,7 +1018,7 @@ Row_Loop:
                                      &l60_buf[2]);
 
             for (k = 0; k < 3; k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 shift = ((1 << XF_BITSHIFT(NPC)) - 3 + k) << 3;
@@ -1033,12 +1034,12 @@ Row_Loop:
 
 Border_Row_Loop:
     for (row = 0; row < 3; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=3 max=3
         // clang-format on
 
         for (i = 0; i < 6; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=6 max=6
             #pragma HLS unroll
             // clang-format on
@@ -1051,7 +1052,7 @@ Border_Row_Loop:
             l60_buf[i] = 0;
         }
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -1104,7 +1105,7 @@ Border_Row_Loop:
             xFSuppressionRad3<NPC>(Array, l00_buf, l10_buf, l20_buf, l30_buf, l40_buf, l50_buf, l60_buf);
 
             for (i = 0; i < 6; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 l00_buf[i] = l00_buf[nms_bufsize - (6 - i)];
@@ -1117,7 +1118,7 @@ Border_Row_Loop:
             }
             if (col == 0) {
                 for (k = 3; k < (1 << XF_BITSHIFT(NPC)); k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     shift = (k - 3) << 3;
@@ -1125,7 +1126,7 @@ Border_Row_Loop:
                 }
             } else {
                 for (k = 0; k < 3; k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     shift = ((1 << XF_BITSHIFT(NPC)) - 3 + k) << 3;
@@ -1133,7 +1134,7 @@ Border_Row_Loop:
                 }
                 _dst_mat.write(write_pointer++, (inter_valx));
                 for (k = 3; k < (1 << XF_BITSHIFT(NPC)); k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     shift = (k - 3) << 3;
@@ -1152,7 +1153,7 @@ Border_Row_Loop:
             xFFindMaxRad3(&l00_buf[2], &l10_buf[2], &l20_buf[2], &l30_buf[2], &l40_buf[2], &l50_buf[2], &l60_buf[2]);
 
         for (k = 0; k < 3; k++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             shift = ((1 << XF_BITSHIFT(NPC)) - 3 + k) << 3;

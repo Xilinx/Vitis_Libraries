@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "canny.prj"
+set PROJ "gammacorrection.prj"
 set SOLN "sol1"
 
 if {![info exists CLKP]} {
@@ -25,9 +25,9 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files ${XF_PROJ_ROOT}/L1/examples/canny/xf_canny_accel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb ${XF_PROJ_ROOT}/L1/examples/canny/xf_canny_tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-set_top canny_accel
+add_files ${XF_PROJ_ROOT}/L1/examples/gammacorrection/xf_gammacorrection_accel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb ${XF_PROJ_ROOT}/L1/examples/gammacorrection/xf_gammacorrection_tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+set_top autowhitebalance_accel
 
 open_solution -reset $SOLN
 
@@ -35,7 +35,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc -argv { ../../../../../../../examples/canny/data/128x128.png } -clean
+  csim_design -compiler gcc -argv " ${XF_PROJ_ROOT}/L1/examples/gammacorrection/data/128x128.png " -clean
 }
 
 if {$CSYNTH == 1} {
@@ -43,7 +43,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv { ../../../../../../../examples/canny/data/im0.png }
+  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/gammacorrection/data/im0.png "
 }
 
 if {$VIVADO_SYN == 1} {

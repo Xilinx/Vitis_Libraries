@@ -25,7 +25,7 @@ void color_detect(ap_uint<PTR_IN_WIDTH>* img_in,
                   ap_uint<PTR_OUT_WIDTH>* img_out,
                   int rows,
                   int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
    
     #pragma HLS INTERFACE m_axi      port=low_thresh    offset=slave  bundle=gmem1
@@ -42,44 +42,44 @@ void color_detect(ap_uint<PTR_IN_WIDTH>* img_in,
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
-    // clang-format off
+// clang-format off
   #pragma HLS stream variable=imgInput.data depth=2
     // clang-format on
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> rgb2hsv(rows, cols);
-    // clang-format off
+// clang-format off
  #pragma HLS stream variable=rgb2hsv.data depth=2
     // clang-format on
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper1(rows, cols);
-    // clang-format off
+// clang-format off
  #pragma HLS stream variable=imgHelper1.data depth=2
     // clang-format on
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper2(rows, cols);
-    // clang-format off
+// clang-format off
  #pragma HLS stream variable=imgHelper2.data depth=2
     // clang-format on
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper3(rows, cols);
-    // clang-format off
+// clang-format off
  #pragma HLS stream variable=imgHelper3.data depth=2
     // clang-format on
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper4(rows, cols);
-    // clang-format off
+// clang-format off
  #pragma HLS stream variable=imgHelper4.data depth=2
     // clang-format on
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
-    // clang-format off
+// clang-format off
  #pragma HLS stream variable=imgOutput.data depth=2
     // clang-format on
 
     // Copy the shape data:
     unsigned char _kernel[FILTER_SIZE * FILTER_SIZE];
     for (unsigned int i = 0; i < FILTER_SIZE * FILTER_SIZE; ++i) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         _kernel[i] = process_shape[i];
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
     // Retrieve xf::cv::Mat objects from img_in data:

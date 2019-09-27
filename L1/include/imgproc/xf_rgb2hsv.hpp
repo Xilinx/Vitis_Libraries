@@ -71,7 +71,7 @@ extern const unsigned char icvSaturate8u_cv1[];
 
 template <int SRC_T, int ROWS, int COLS, int NPC>
 void rgb2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     //#pragma HLS DATAFLOW
@@ -126,11 +126,11 @@ void rgb2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, R
     int vr, vg;
 
     for (uint16_t row = 0; row < _src_mat.rows; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT max=ROWS
         // clang-format on
         for (uint16_t col = 0; col < (_src_mat.cols >> XF_BITSHIFT(NPC)); col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT max=COLS
             #pragma HLS PIPELINE
             // clang-format on

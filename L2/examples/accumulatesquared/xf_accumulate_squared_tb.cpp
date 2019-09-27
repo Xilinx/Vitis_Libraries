@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 
     int height = in_gray.rows;
     int width = in_gray.cols;
-    // Allocate memory or the input and output images:
+// Allocate memory or the input and output images:
 #if GRAY
     cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_16U, 1);
     cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_16U, 1);

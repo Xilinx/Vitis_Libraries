@@ -19,7 +19,7 @@
 extern "C" {
 
 void convertbitdepth(ap_uint<PTR_IN_WIDTH>* img_in, int shift, ap_uint<PTR_OUT_WIDTH>* img_out, int height, int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE s_axilite  port=shift			      bundle=control
@@ -34,8 +34,8 @@ void convertbitdepth(ap_uint<PTR_IN_WIDTH>* img_in, int shift, ap_uint<PTR_OUT_W
 // clang-format off
 #pragma HLS stream variable=imgInput.data depth=2
 #pragma HLS stream variable=imgOutput.data depth=2
-    // clang-format on
-
+// clang-format on
+#pragma HLS DATAFLOW
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
 

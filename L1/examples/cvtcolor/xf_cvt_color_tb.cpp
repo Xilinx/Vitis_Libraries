@@ -2715,7 +2715,8 @@ int main(int argc, char** argv) {
         if ((diffpix > 1) || (diffpix < -1)) {
             fprintf(fpp3, "%d	loc:%d\n", (unsigned char)diffpix, c);
             //				fprintf(fpp,"%d (dut:%d, cv:%d),%d,(r-%d g-%d b-%d)\n",(short
-            //int)diffpix,(unsigned char)outputimg.data[c],(unsigned char)ocv_outputimg.data[c],c,(unsigned
+            //int)diffpix,(unsigned
+            // char)outputimg.data[c],(unsigned char)ocv_outputimg.data[c],c,(unsigned
             // char)imgInput.data[c].chnl[1][0],(unsigned char)imgInput.data[c].chnl[1][2],(unsigned
             // char)imgInput.data[c].chnl[1][3]);
         }

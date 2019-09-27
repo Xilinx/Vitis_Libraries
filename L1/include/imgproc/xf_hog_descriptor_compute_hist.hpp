@@ -57,7 +57,7 @@
  ***************************************************************************/
 template <int DEPTH, typename hist_type, int NOB, int BIN_STRIDE_FIX>
 void xFDHOGbilinearNO(XF_PTNAME(DEPTH) p, XF_PTNAME(DEPTH) m, uint16_t* bin_center, hist_type* bin) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -162,20 +162,20 @@ void xFDHOGcomputeHistNO(hls::stream<XF_SNAME(WORDWIDTH)>& _phase_strm,
 
     // NPC copied of the histogram array
     hist_type bin[NOB];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=bin complete dim=1
 // clang-format on
 
 // initializing the histogram array with zero
 loop_i_init_zero:
     for (i = 0; i < nohc; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
-        // clang-format on
+    // clang-format on
 
     loop_j_init_zero:
         for (j = 0; j < NOB; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             HA[i][j] = 0;
@@ -186,14 +186,14 @@ cell_height_loop:
     for (i = 0; i < CELL_HEIGHT; i++) {
     no_of_horz_cell_loop:
         for (r = 0; r < nohc; r++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=NOHC max=NOHC
             #pragma HLS PIPELINE
-            // clang-format on
+        // clang-format on
 
         init_bin_loop_k:
             for (k = 0; k < NOB; k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 bin[k] = 0;
@@ -226,7 +226,7 @@ cell_height_loop:
         tmp_ssv_computation:
             for (k = 0; k < NOB; k++) // adder tree inferred
             {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 tmp += (HA[r][k] * HA[r][k]);
@@ -258,7 +258,7 @@ void xFDHOGbilinearRO(XF_PTNAME(DEPTH) p,
                       uchar_t* index_2,
                       hist_type* part_1,
                       hist_type* part_2) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -323,16 +323,16 @@ void xFDHOGbilinearRO(XF_PTNAME(DEPTH) p,
  ***************************************************************************/
 template <int NPC, int NOB, typename hist_type, int NOHC>
 void xFDHOGBinRO(hist_type bin[][NOB], hist_type HA[][NOB], uint16_t j) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
 // clang-format on
 
 // add all the 8 copies of the temporary array into single copy
 accumulate_to_bin_0_k:
     for (uchar_t k = 0; k < NOB; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
-        // clang-format on
+    // clang-format on
 
     accumulate_to_bin_0_l:
         for (uchar_t l = 1; l < (1 << XF_BITSHIFT(NPC)); l++) {
@@ -343,7 +343,7 @@ accumulate_to_bin_0_k:
 // accumulating the temporary histogram to HA array
 accumulate_HA:
     for (uchar_t k = 0; k < NOB; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
 

@@ -24,7 +24,7 @@ namespace cv {
 
 template <int W, typename T>
 void AXIGetBitFields(ap_uint<W> pix, int start, int w, T& val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(start >= 0 && start + w <= W);
@@ -33,7 +33,7 @@ void AXIGetBitFields(ap_uint<W> pix, int start, int w, T& val) {
 
 template <int W>
 void AXIGetBitFields(ap_uint<W> pix, int start, int w, float& val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(w == 32 && start >= 0 && start + w <= W);
@@ -43,7 +43,7 @@ void AXIGetBitFields(ap_uint<W> pix, int start, int w, float& val) {
 
 template <int W>
 void AXIGetBitFields(ap_uint<W> pix, int start, int w, double& val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(w == 64 && start >= 0 && start + w <= W);
@@ -53,7 +53,7 @@ void AXIGetBitFields(ap_uint<W> pix, int start, int w, double& val) {
 
 template <int W, typename T>
 void AXIGetBitFields(ap_axiu<W, 1, 1, 1> axi, int start, int w, T& val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     AXIGetBitFields(axi.data, start, w, val);
@@ -61,7 +61,7 @@ void AXIGetBitFields(ap_axiu<W, 1, 1, 1> axi, int start, int w, T& val) {
 
 template <int W, typename T>
 void AXISetBitFields(ap_uint<W>& pix, int start, int w, T val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(start >= 0 && start + w <= W);
@@ -70,7 +70,7 @@ void AXISetBitFields(ap_uint<W>& pix, int start, int w, T val) {
 
 template <int W>
 void AXISetBitFields(ap_uint<W>& pix, int start, int w, float val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(w == 32 && start >= 0 && start + w <= W);
@@ -80,7 +80,7 @@ void AXISetBitFields(ap_uint<W>& pix, int start, int w, float val) {
 
 template <int W>
 void AXISetBitFields(ap_uint<W>& pix, int start, int w, double val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     assert(w == 64 && start >= 0 && start + w <= W);
@@ -90,7 +90,7 @@ void AXISetBitFields(ap_uint<W>& pix, int start, int w, double val) {
 
 template <int W, typename T>
 void AXISetBitFields(ap_axiu<W, 1, 1, 1>& axi, int start, int w, T val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     AXISetBitFields(axi.data, start, w, val);

@@ -20,7 +20,7 @@ extern "C" {
 
 void warptransform_accel(
     ap_uint<PTR_WIDTH>* img_in, float* transform, ap_uint<PTR_WIDTH>* img_out, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=transform     offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
@@ -32,12 +32,12 @@ void warptransform_accel(
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
@@ -45,7 +45,7 @@ void warptransform_accel(
     float transform_matrix[9];
 
     for (unsigned int i = 0; i < 9; ++i) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         transform_matrix[i] = transform[i];

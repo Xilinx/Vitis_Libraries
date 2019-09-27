@@ -314,6 +314,6 @@ void preProcess(hls::stream<ap_uint<INPUT_PTR_WIDTH_T> >& srcStrm,
     OutBitWidthConvert<CPW_T, NPC_T, WO_T, OUTPUT_PTR_WIDTH_T, strm_width_out>(dstStrmOut, dstStrm, loop_count);
     Strm2Arr<OUTPUT_PTR_WIDTH_T, T_CHANNELS_T, CPW_T, NPC_T, WO_T>(dstStrm, out, rows, cols);
 }
-} // namespace cv
-} // namespace xf
+}
+}
 #endif

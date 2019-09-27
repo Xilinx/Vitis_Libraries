@@ -237,7 +237,7 @@ int main(int argc, char** argv) {
                       ,
                       CV_EXTRA_ARG
 #endif
-    );
+                      );
 #endif
 #endif
 
@@ -253,7 +253,7 @@ int main(int argc, char** argv) {
                       ,
                       CV_EXTRA_ARG
 #endif
-    );
+                      );
 #endif
 #endif
 #endif
