@@ -20,7 +20,7 @@ extern "C" {
 
 void reduce_accel(
     ap_uint<PTR_IN_WIDTH>* img_in, unsigned char dimension, ap_uint<PTR_OUT_WIDTH>* img_out, int height, int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE s_axilite  port=dimension 		      bundle=control
@@ -29,13 +29,15 @@ void reduce_accel(
     #pragma HLS INTERFACE s_axilite  port=return		      bundle=control
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput;
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
     xf::cv::Mat<OUT_TYPE, ONE_D_HEIGHT, ONE_D_WIDTH, XF_NPPC1> imgOutput;
 
 // clang-format off
+
 #pragma HLS STREAM variable=imgInput.data depth=2
 #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
+#pragma HLS DATAFLOW
 
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);

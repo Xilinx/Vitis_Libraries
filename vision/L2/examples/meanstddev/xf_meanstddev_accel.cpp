@@ -19,7 +19,7 @@
 extern "C" {
 
 void meanstddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned short* stddev, int height, int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=mean          offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=stddev        offset=slave  bundle=gmem2
@@ -30,11 +30,11 @@ void meanstddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

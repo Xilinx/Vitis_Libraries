@@ -33,7 +33,7 @@ void kalmanfilter_accel(ap_uint<32>* in_A,
                         ap_uint<32>* out_X,
                         ap_uint<32>* out_U,
                         ap_uint<32>* out_D) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=in_A      offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=in_B      offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=in_Uq     offset=slave  bundle=gmem2
@@ -68,7 +68,7 @@ void kalmanfilter_accel(ap_uint<32>* in_A,
     xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> Uout_mat;
     xf::cv::Mat<TYPE, KF_N, 1, NPC1> Dout_mat;
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=A_mat.data depth=2
     #pragma HLS STREAM variable=B_mat.data depth=2
     #pragma HLS STREAM variable=Uq_mat.data depth=2
@@ -83,9 +83,9 @@ void kalmanfilter_accel(ap_uint<32>* in_A,
     #pragma HLS STREAM variable=Xout_mat.data depth=2
     #pragma HLS STREAM variable=Uout_mat.data depth=2
     #pragma HLS STREAM variable=Dout_mat.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

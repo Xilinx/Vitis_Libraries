@@ -18,7 +18,7 @@
 
 extern "C" {
 void integral_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
    
@@ -28,16 +28,16 @@ void integral_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_mat.data depth=2
     // clang-format on
 
     xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, NPC1> out_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=out_mat.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

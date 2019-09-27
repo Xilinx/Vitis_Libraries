@@ -51,13 +51,13 @@ void HOGDescriptor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat, xf::cv::Mat<DST
     hls::stream<XF_SNAME(XF_576UW)> _block_strm;
     hls::stream<XF_TNAME(DST_T, NPC)> desc_strm;
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     int IN_TC = (ROWS * COLS >> XF_BITSHIFT(NPC));
     for (int i = 0; i < _in_mat.size; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline ii=1
         #pragma HLS LOOP_TRIPCOUNT min=1 max=IN_TC
         // clang-format on
@@ -99,7 +99,7 @@ void HOGDescriptor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat, xf::cv::Mat<DST
 
     int OUT_TC = (ROWS * COLS >> XF_BITSHIFT(NPC));
     for (int i = 0; i < _desc_mat.size; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline ii=1
         #pragma HLS LOOP_TRIPCOUNT min=1 max=IN_TC
         // clang-format on

@@ -72,7 +72,7 @@ void xFTrackmulBlkReadIn(XF_TNAME(SRC_T, NPC) ptr[1],
                          int x1,
                          int y1,
                          unsigned short buf_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int cols = _in_mat.cols;
@@ -81,7 +81,7 @@ void xFTrackmulBlkReadIn(XF_TNAME(SRC_T, NPC) ptr[1],
 
 loop_blockread_inner:
     for (int j = 0; j < buf_size; j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE II=1
         #pragma HLS LOOP_TRIPCOUNT min=20 max=IN_TC
         // clang-format on
@@ -117,7 +117,7 @@ void xFTrackmulBlkRead(hls::stream<XF_TNAME(SRC_T, NPC)>& input1,
 
 loop_blockread_outer:
     for (int i = 0; i < obj_hgt; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         #pragma HLS LOOP_TRIPCOUNT min=20 max=ROWS avg=ROWS
         // clang-format on
@@ -197,11 +197,11 @@ void xFTrackmulHist(hls::stream<XF_SNAME(WORDWIDTH)>& input,
                     QuPuTYPE Pu[_MST_TOTAL_BINS_],
                     BINTYPE BIN[ROWS * COLS],
                     uint8_t frame_status) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=BIN cyclic factor=2 dim=1
     #pragma HLS DEPENDENCE variable=BIN array inter false
     // clang-format on
@@ -230,13 +230,13 @@ loop_hist_init:
 
 loop_hist_height:
     for (uint16_t i = 0; i < obj_hgt; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=20 max=ROWS
-        // clang-format on
+    // clang-format on
 
     loop_hist_width:
         for (uint16_t j = 0; j < buf_size; j = j + 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_FLATTEN off
             #pragma HLS PIPELINE
             #pragma HLS LOOP_TRIPCOUNT min=20 max=IN_TC
@@ -259,7 +259,7 @@ loop_hist_height:
 // Accumulate the temporary histograms
 loop_hist_accumulate:
     for (uint16_t i = 0; i < _MST_TOTAL_BINS_; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=512 max=512 avg=512
         #pragma HLS PIPELINE
         // clang-format on
@@ -274,7 +274,7 @@ loop_hist_accumulate:
 /*xFTrackmulSqrt: Finds the square root of the given number using an xFTrackmulSqrtLut
  */
 static int xFTrackmulSqrt(int temp) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -338,14 +338,14 @@ void xFTrackmulWeight(QuPuTYPE Qu[_MST_TOTAL_BINS_],
 
 loop_weight_height:
     for (uint16_t i = 0; i < obj_hgt; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=20 max=ROWS avg=ROWS
         // clang-format on
         y_off = i * obj_wdt;
 
     loop_weight_width:
         for (uint16_t j = 0; j < buf_size; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_FLATTEN off
             #pragma HLS PIPELINE
             #pragma HLS LOOP_TRIPCOUNT min=20 max=IN_TC avg=IN_TC
@@ -449,13 +449,13 @@ void xFTrackmulFindhist(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
                         QuPuTYPE Pu[_MST_TOTAL_BINS_],
                         BINTYPE BIN[ROWS * COLS],
                         uint8_t frame_status) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
     hls::stream<XF_TNAME(SRC_T, NPC)> input2;
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
@@ -510,7 +510,7 @@ void xFTrackmulKernelFunc(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
 
     // storage to hold the bins values of each pixel
     uint16_t BIN[ROWS * COLS];
-    // clang-format off
+// clang-format off
     #pragma HLS DEPENDENCE variable=BIN array intra false
     // clang-format on
 
@@ -521,7 +521,7 @@ void xFTrackmulKernelFunc(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
 // For other frames, find histogram as well as centroid in iterative manner
 loop_iterations:
     for (uint8_t i = 0; i < loop_count; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXITERS avg=MAXITERS
         // clang-format on
 
@@ -596,9 +596,9 @@ void xFMeanShiftKernel(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
 
 loop_objects:
     for (uint8_t i = 0; i < no_objects; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXOBJ
-        // clang-format on
+// clang-format on
 
 #ifndef __SYNTHESIS__
         assert((obj_wdt[i] % 2 == 0) && "object width must be in multiples of two");

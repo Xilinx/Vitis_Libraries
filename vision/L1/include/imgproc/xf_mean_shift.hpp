@@ -42,7 +42,7 @@ void MeanShift(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat,
     uint16_t track_status[MAXOBJ];
 
     for (int i = 0; i < no_objects; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXOBJ
         #pragma HLS PIPELINE II=1
         // clang-format on
@@ -59,7 +59,7 @@ void MeanShift(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat,
         _in_mat, tlx, tly, _obj_height, _obj_width, dispx, dispy, track_status, frame_status, no_objects, no_iters);
 
     for (int i = 0; i < no_objects; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXOBJ
         #pragma HLS PIPELINE II=1
         // clang-format on

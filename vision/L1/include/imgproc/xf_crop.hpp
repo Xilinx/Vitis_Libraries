@@ -58,7 +58,7 @@ void read_roi_row(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     cnt = 0;
 
     for (ap_uint<13> j = 0; j < col_loop_cnt; j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
         #pragma HLS PIPELINE II=1
         // clang-format on
@@ -103,7 +103,7 @@ void write_roi_row(int cnt,
                    int write_offset,
                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
     for (int k = 0; k < cnt; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
         #pragma HLS PIPELINE II=1
         // clang-format on
@@ -122,18 +122,18 @@ void xFcropkernel_memorymapped(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                                xf::cv::Rect_<unsigned int>& roi,
                                unsigned short height,
                                unsigned short width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     // Ping-Pong buffer declaration:
     XF_TNAME(SRC_T, NPC) buf0[COLS >> XF_BITSHIFT(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf0 core=RAM_S2P_BRAM
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) buf1[COLS >> XF_BITSHIFT(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf1 core=RAM_S2P_BRAM
     // clang-format on
 
@@ -180,7 +180,7 @@ void xFcropkernel_memorymapped(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 rowLoop:
     for (ap_uint<32> i = 1; i < roi.height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -242,14 +242,14 @@ void xFcropkernel_stream(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 rowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -258,7 +258,7 @@ rowLoop:
                 (XF_SNAME(WORDWIDTH_SRC))(_src_mat.read(i * width + j)); // reading the source stream _src into val_src
 
             for (k = 0; k < NPC; k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 int col = (j * NPC) + k;
@@ -300,7 +300,7 @@ void crop(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // Width in terms of NPPC
     width = _src_mat.cols >> XF_BITSHIFT(NPC);
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

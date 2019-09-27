@@ -90,7 +90,7 @@ static void readMatRows16(
     ap_uint<16>* src, hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& pixStream, int rows, int cols, int size) {
     unsigned int count = 0;
     for (int i = 0; i < size; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS*ROWS/NPC
         #pragma HLS PIPELINE
         // clang-format on
@@ -107,7 +107,7 @@ template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void writeMatRowsRGBA16(
     hls::stream<rgba_t>& pixStream0, hls::stream<rgba_t>& pixStream1, ap_uint<64>* dst, int rows, int cols, int size) {
     for (int i = 0; i < size; ++i) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS*COLS/NPC
         #pragma HLS PIPELINE
         // clang-format on
@@ -134,7 +134,7 @@ template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void pack2Vectors(
     hls::stream<float>& flow0, hls::stream<float>& flow1, ap_uint<64>* out_flow, int rows, int cols, int size) {
     for (int i = 0; i < size; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS*COLS/NPC
         #pragma HLS PIPELINE
         // clang-format on
@@ -177,7 +177,7 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
 {
     pix_t img1Col0[(WINDOW_SIZE + 1)], img2Col0[(WINDOW_SIZE + 1)];
     pix_t img1Col1[(WINDOW_SIZE + 1)], img2Col1[(WINDOW_SIZE + 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=img1Col0 complete dim=0
     #pragma HLS ARRAY_PARTITION variable=img2Col0 complete dim=0
     #pragma HLS ARRAY_PARTITION variable=img1Col1 complete dim=0
@@ -185,7 +185,7 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
     // clang-format on
 
     static pix_t img1Win[2 * (WINDOW_SIZE + 1)], img2Win[1 * (WINDOW_SIZE + 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=img1Win complete dim=0
     #pragma HLS ARRAY_PARTITION variable=img2Win complete dim=0
     // clang-format on
@@ -210,23 +210,23 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
     int zIdx = -(WINDOW_SIZE / 2 - 1);
     int nIdx = zIdx + WINDOW_SIZE / 2 - 1;
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_MAP variable=csIxixO instance=csO vertical
     #pragma HLS ARRAY_MAP variable=csIxiyO instance=csO vertical
     #pragma HLS ARRAY_MAP variable=csIyiyO instance=csO vertical
     #pragma HLS ARRAY_MAP variable=csDixO  instance=csO vertical
     #pragma HLS ARRAY_MAP variable=csDiyO  instance=csO vertical
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_MAP variable=csIxixE instance=csE vertical
     #pragma HLS ARRAY_MAP variable=csIxiyE instance=csE vertical
     #pragma HLS ARRAY_MAP variable=csIyiyE instance=csE vertical
     #pragma HLS ARRAY_MAP variable=csDixE  instance=csE vertical
     #pragma HLS ARRAY_MAP variable=csDiyE  instance=csE vertical
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_MAP variable=cbIxixO instance=cb vertical
     #pragma HLS ARRAY_MAP variable=cbIxiyO instance=cb vertical
     #pragma HLS ARRAY_MAP variable=cbIyiyO instance=cb vertical
@@ -240,44 +240,44 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
     // clang-format on
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=csIxixO core=RAM_2P_URAM
         #pragma HLS RESOURCE variable=csIxixE core=RAM_2P_URAM
         #pragma HLS RESOURCE variable=cbIxixO core=RAM_2P_URAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=csIxixO core=RAM_2P_BRAM
         #pragma HLS RESOURCE variable=csIxixE core=RAM_2P_BRAM
         #pragma HLS RESOURCE variable=cbIxixO core=RAM_2P_BRAM
         // clang-format on
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS DEPENDENCE variable=csIxixO inter RAW false
     #pragma HLS DEPENDENCE variable=csIxiyO inter RAW false
     #pragma HLS DEPENDENCE variable=csIyiyO inter RAW false
     #pragma HLS DEPENDENCE variable=csDixO  inter RAW false
     #pragma HLS DEPENDENCE variable=csDiyO  inter RAW false
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DEPENDENCE variable=csIxixE inter WAR false
     #pragma HLS DEPENDENCE variable=csIxiyE inter WAR false
     #pragma HLS DEPENDENCE variable=csIyiyE inter WAR false
     #pragma HLS DEPENDENCE variable=csDixE  inter WAR false
     #pragma HLS DEPENDENCE variable=csDiyE  inter WAR false
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DEPENDENCE variable=cbIxixO inter RAW false
     #pragma HLS DEPENDENCE variable=cbIxiyO inter RAW false
     #pragma HLS DEPENDENCE variable=cbIyiyO inter RAW false
     #pragma HLS DEPENDENCE variable=cbDixO  inter RAW false
     #pragma HLS DEPENDENCE variable=cbDiyO  inter RAW false
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DEPENDENCE variable=cbIxixE inter RAW false
     #pragma HLS DEPENDENCE variable=cbIxiyE inter RAW false
     #pragma HLS DEPENDENCE variable=cbIyiyE inter RAW false
@@ -289,11 +289,11 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
     int csIxixR1, csIxiyR1, csIyiyR1, csDixR1, csDiyR1;
 
     for (int r = 0; r < rows; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int c = 0; c < cols / 2; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/2
             #pragma HLS PIPELINE
             // clang-format on
@@ -302,7 +302,7 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
             int csIxixL1 = 0, csIxiyL1 = 0, csIyiyL1 = 0, csDixL1 = 0, csDiyL1 = 0;
 
             for (int wr = 0; wr < (WINDOW_SIZE + 1); ++wr) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
                 // clang-format on
                 mywide_t<XF_NPIXPERCYCLE(NPC)> tmp1 = img1Col[wr].read();
@@ -425,7 +425,7 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
             diy_out1.write(diy);
 
             for (int i = 0; i < (WINDOW_SIZE + 1); i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
                 // clang-format on
                 img1Win[i * 2] = img1Col0[i];
@@ -468,7 +468,7 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
     // cleaning these vars would pollute the subsequent frames.
     // TODO zero in the line buffer instead, for r < WINDOW_SIZE
     for (int r = 0; r < (WINDOW_SIZE + 1); r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
         #pragma HLS UNROLL
         // clang-format on
@@ -481,7 +481,7 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
         img2Col1[r] = 0;
     }
     for (int r = 0; r < cols / 2; ++r) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
         #pragma HLS PIPELINE
         // clang-format on
@@ -527,11 +527,11 @@ static void computeFlow16(hls::stream<int>& ixix,
                           int cols,
                           int size) {
     for (int r = 0; r < rows; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int c = 0; c < cols / 2; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/2
             #pragma HLS PIPELINE
             // clang-format on
@@ -571,11 +571,11 @@ template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void getOutPix16(
     hls::stream<float>& fx, hls::stream<float>& fy, hls::stream<rgba_t>& out_pix, int rows, int cols, int size) {
     for (int r = 0; r < rows; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int c = 0; c < cols / 2; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/2
             #pragma HLS PIPELINE
             // clang-format on
@@ -604,12 +604,12 @@ static void lbWrapper16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& f0Stream,
     static pix_t lb1[(WINDOW_SIZE + 1)][COLS / XF_NPIXPERCYCLE(NPC)][XF_NPIXPERCYCLE(NPC)],
         lb2[(WINDOW_SIZE + 1)][COLS / XF_NPIXPERCYCLE(NPC)][XF_NPIXPERCYCLE(NPC)];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_MAP variable=lb1 instance=lbMap vertical
     #pragma HLS ARRAY_MAP variable=lb2 instance=lbMap vertical
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_RESHAPE variable=lb1 complete dim=1
     #pragma HLS ARRAY_RESHAPE variable=lb2 complete dim=1
     #pragma HLS ARRAY_RESHAPE variable=lb1 complete dim=3
@@ -617,19 +617,19 @@ static void lbWrapper16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& f0Stream,
     // clang-format on
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=lb1 core=RAM_T2P_URAM
         #pragma HLS RESOURCE variable=lb2 core=RAM_T2P_URAM
         // clang-format on
     }
 
     for (int r = 0; r < rows; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         #pragma HLS LOOP_FLATTEN OFF
         // clang-format on
         for (int c = 0; c < cols / 2; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/2
             #pragma HLS pipeline
             // clang-format on
@@ -666,12 +666,12 @@ static void lbWrapper16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& f0Stream,
 
     // cleanup
     for (int c = 0; c < cols / 2; c++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/2
         #pragma HLS PIPELINE
         // clang-format on
         for (int r = 0; r < (WINDOW_SIZE + 1); r++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
             // clang-format on
             for (int k = 0; k < XF_NPIXPERCYCLE(NPC); k++) {
@@ -691,14 +691,14 @@ static void flowWrap16(
 //#pragma HLS data_pack variable=frame1
 //#pragma HLS data_pack variable=framef
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     // ddr <-> kernel streams. Stream depths are probably too large and can be
     // trimmed
     hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > f0Stream, f1Stream;
-    // clang-format off
+// clang-format off
     #pragma HLS data_pack variable=f0Stream
     #pragma HLS data_pack variable=f1Stream
     #pragma HLS STREAM variable=f0Stream depth=16
@@ -712,7 +712,7 @@ static void flowWrap16(
     // #pragma HLS STREAM variable=ff1Stream depth=16
 
     hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(WINDOW_SIZE + 1)], img2Col[(WINDOW_SIZE + 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS data_pack variable=img1Col
     #pragma HLS data_pack variable=img2Col
     #pragma HLS STREAM variable=img1Col  depth=16
@@ -723,7 +723,7 @@ static void flowWrap16(
 
     hls::stream<int> ixix0, ixiy0, iyiy0, dix0, diy0;
     hls::stream<float> fx0("fx0"), fy0("fy0");
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=ixix0 depth=16
     #pragma HLS STREAM variable=ixiy0 depth=16
     #pragma HLS STREAM variable=iyiy0 depth=16
@@ -735,7 +735,7 @@ static void flowWrap16(
 
     hls::stream<int> ixix1, ixiy1, iyiy1, dix1, diy1;
     hls::stream<float> fx1("fx1"), fy1("fy1");
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=ixix1 depth=16
     #pragma HLS STREAM variable=ixiy1 depth=16
     #pragma HLS STREAM variable=iyiy1 depth=16
@@ -776,7 +776,7 @@ static void flowWrap16(
 template <int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
 static void fpga_optflow16(
     ap_uint<16>* frame0, ap_uint<16>* frame1, ap_uint<64>* flowx, ap_uint<64>* flowy, int rows, int cols, int size) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -792,7 +792,7 @@ template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void readMatRows(ap_uint<8>* matB, hls::stream<pix_t>& pixStream, int rows, int cols, int size) {
     const int WORD_SIZE = (NPC == XF_NPPC1) ? 1 : 2;
     for (int i = 0; i < size; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS*ROWS/NPC
         #pragma HLS PIPELINE
         // clang-format on
@@ -809,7 +809,7 @@ static void readMatRows(ap_uint<8>* matB, hls::stream<pix_t>& pixStream, int row
 template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void writeMatRowsRGBA(hls::stream<rgba_t>& pixStream, unsigned int* dst, int rows, int cols, int size) {
     for (int i = 0; i < size; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS*COLS/NPC
         #pragma HLS PIPELINE
         // clang-format on
@@ -837,14 +837,14 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
                         int cols,
                         int size) {
     pix_t img1Col_[(WINDOW_SIZE + 1)], img2Col_[(WINDOW_SIZE + 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=img1Col_ complete dim=0
     #pragma HLS ARRAY_PARTITION variable=img2Col_ complete dim=0
     // clang-format on
 
     static pix_t img1Win[2 * (WINDOW_SIZE + 1)], img2Win[1 * (WINDOW_SIZE + 1)];
     static int ixix = 0, ixiy = 0, iyiy = 0, dix = 0, diy = 0;
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=img1Win complete dim=0
     #pragma HLS ARRAY_PARTITION variable=img2Win complete dim=0
     // clang-format on
@@ -860,7 +860,7 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
     int zIdx = -(WINDOW_SIZE - 2);
     int nIdx = zIdx + WINDOW_SIZE - 2;
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_MAP variable=csIxix instance=cs vertical
     #pragma HLS ARRAY_MAP variable=csIxiy instance=cs vertical
     #pragma HLS ARRAY_MAP variable=csIyiy instance=cs vertical
@@ -869,24 +869,24 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
     // clang-format on
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=csIxix core=RAM_2P_URAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=csIxix core=RAM_2P_BRAM
         // clang-format on
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS DEPENDENCE variable=csIxix inter RAW false
     #pragma HLS DEPENDENCE variable=csIxiy inter RAW false
     #pragma HLS DEPENDENCE variable=csIyiy inter RAW false
     #pragma HLS DEPENDENCE variable=csDix  inter RAW false
     #pragma HLS DEPENDENCE variable=csDiy  inter RAW false
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_MAP variable=cbIxix instance=cb vertical
     #pragma HLS ARRAY_MAP variable=cbIxiy instance=cb vertical
     #pragma HLS ARRAY_MAP variable=cbIyiy instance=cb vertical
@@ -895,16 +895,16 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
     // clang-format on
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=cbIxix core=RAM_2P_URAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=cbIxix core=RAM_2P_BRAM
         // clang-format on
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS DEPENDENCE variable=cbIxix inter RAW false
     #pragma HLS DEPENDENCE variable=cbIxiy inter RAW false
     #pragma HLS DEPENDENCE variable=cbIyiy inter RAW false
@@ -915,11 +915,11 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
     int csIxixR, csIxiyR, csIyiyR, csDixR, csDiyR;
 
     for (int r = 0; r < rows; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int c = 0; c < cols; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE II=1
             // clang-format on
@@ -938,7 +938,7 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
             }
 
             for (int wr = 0; wr < (WINDOW_SIZE + 1); ++wr) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
                 // clang-format on
                 img1Col_[wr] = img1Col[wr].read();
@@ -985,13 +985,13 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
             // img1Delayed. write (0);
 
             for (int i = 0; i < (WINDOW_SIZE + 1); i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
                 // clang-format on
                 img1Win[i * 2] = img1Win[i * 2 + 1];
             }
             for (int i = 0; i < (WINDOW_SIZE + 1); ++i) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
                 // clang-format on
                 img1Win[i * 2 + 1] = img1Col_[i];
@@ -1020,7 +1020,7 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
     // cleaning these vars would pollute the subsequent frames.
     // TODO zero in the line buffer instead, for r < WINDOW_SIZE
     for (int r = 0; r < (WINDOW_SIZE + 1); r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
         #pragma HLS UNROLL
         // clang-format on
@@ -1031,7 +1031,7 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
         img2Col_[r] = 0;
     }
     for (int r = 0; r < cols; ++r) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
         #pragma HLS PIPELINE II=1
         // clang-format on
@@ -1066,11 +1066,11 @@ static void computeFlow(hls::stream<int>& ixix,
                         int cols,
                         int size) {
     for (int r = 0; r < rows; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int c = 0; c < cols; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE
             // clang-format on
@@ -1112,7 +1112,7 @@ static void writeOutput8(hls::stream<float>& fx_in,
                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
                          int size) {
     for (int r = 0; r < size; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS*COLS
         #pragma HLS PIPELINE
         // clang-format on
@@ -1132,11 +1132,11 @@ static void writeOutput8(hls::stream<float>& fx_in,
 template <int ROWS, int COLS, int NPC>
 static void getOutPix(float* fx, float* fy, pix_t* p, hls::stream<rgba_t>& out_pix, int rows, int cols, int size) {
     for (int r = 0; r < rows; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int c = 0; c < cols; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE
             // clang-format on
@@ -1163,30 +1163,30 @@ static void lbWrapper(hls::stream<pix_t>& f0Stream,
                       int cols,
                       int size) {
     static pix_t lb1[(WINDOW_SIZE + 1)][COLS], lb2[(WINDOW_SIZE + 1)][COLS];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_MAP variable=lb1 instance=lbMap vertical
     #pragma HLS ARRAY_MAP variable=lb2 instance=lbMap vertical
     #pragma HLS ARRAY_RESHAPE variable=lb1 complete dim=1
     #pragma HLS ARRAY_RESHAPE variable=lb2 complete dim=1
     // clang-format on
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=lb1 core=RAM_T2P_URAM
         #pragma HLS RESOURCE variable=lb2 core=RAM_T2P_URAM
         // clang-format on
     }
 loop_rows:
     for (int r = 0; r < rows; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         #pragma HLS LOOP_FLATTEN OFF
-        // clang-format on
+    // clang-format on
     loop_cols:
         for (int c = 0; c < cols; c++) {
-            // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
         #pragma HLS pipeline
-            // clang-format on
+        // clang-format on
 
         // shift up both linebuffers at col=c
         loop_ws:
@@ -1211,12 +1211,12 @@ loop_rows:
 
     // cleanup
     for (int c = 0; c < cols; c++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
         #pragma HLS PIPELINE
         // clang-format on
         for (int r = 0; r < (WINDOW_SIZE + 1); r++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WINDOW_SIZE+1
             // clang-format on
             lb1[r][c] = 0;
@@ -1234,7 +1234,7 @@ static void flowWrap(ap_uint<8>* frame0,
                      int rows,
                      int cols,
                      int size) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     #pragma HLS DATAFLOW
     // clang-format on
@@ -1243,7 +1243,7 @@ static void flowWrap(ap_uint<8>* frame0,
     // trimmed
     hls::stream<pix_t> f0Stream("f0Stream"), f1Stream("f1Stream");
     hls::stream<pix_t> f0Delayed("f0Delayed");
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=f0Stream depth=16
     #pragma HLS STREAM variable=f1Stream depth=16
     // clang-format on
@@ -1257,21 +1257,21 @@ static void flowWrap(ap_uint<8>* frame0,
     hls::stream<int> ixix, ixiy, iyiy, dix, diy;
     hls::stream<float> fx, fy;
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=ixix depth=16
     #pragma HLS STREAM variable=ixiy depth=16
     #pragma HLS STREAM variable=iyiy depth=16
     #pragma HLS STREAM variable=dix depth=16
     #pragma HLS STREAM variable=diy depth=16
-    // clang-format on
-    // #pragma HLS STREAM variable=fx  depth=16
-    // #pragma HLS STREAM variable=fy  depth=16
-    // clang-format off
+// clang-format on
+// #pragma HLS STREAM variable=fx  depth=16
+// #pragma HLS STREAM variable=fy  depth=16
+// clang-format off
     #pragma HLS STREAM variable=img1Col  depth=16
     #pragma HLS STREAM variable=img2Col  depth=16
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=img1Col complete dim=0
     #pragma HLS ARRAY_PARTITION variable=img2Col complete dim=0
     // clang-format on
@@ -1303,7 +1303,7 @@ static void fpga_optflow8(ap_uint<8>* frame0,
                           int rows,
                           int cols,
                           int size) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 

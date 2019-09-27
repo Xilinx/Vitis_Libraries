@@ -24,7 +24,7 @@ void stereolbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
                      ap_uint<PTR_OUT_WIDTH>* img_out,
                      int rows,
                      int cols) {
-    // clang-format off
+// clang-format off
 	#pragma HLS INTERFACE m_axi      port=img_in_l      offset=slave  bundle=gmem0
 	#pragma HLS INTERFACE m_axi      port=img_in_r      offset=slave  bundle=gmem1
 	#pragma HLS INTERFACE m_axi      port=bm_state_in   offset=slave  bundle=gmem2
@@ -45,13 +45,13 @@ void stereolbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
     bmState.textureThreshold = bm_state_in[2];
     bmState.minDisparity = bm_state_in[3];
 
-    // clang-format off
+// clang-format off
 	#pragma HLS STREAM variable=imgInputL.data depth=2
 	#pragma HLS STREAM variable=imgInputR.data depth=2
 	#pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
 	#pragma HLS DATAFLOW
     // clang-format on
 

@@ -54,7 +54,7 @@ void xFLUTKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src,
     uchar_t lut[npc * PLANES][256];
 
     if ((NPC != 0) || (PLANES != 1)) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=lut complete dim=1
         // clang-format on
     }
@@ -73,14 +73,14 @@ void xFLUTKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src,
 
 rowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -91,7 +91,7 @@ rowLoop:
             int c = 0;
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += XF_IN_STEP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 XF_PTNAME(DEPTH) p;
@@ -138,18 +138,18 @@ void LUT(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, ROWS, COL
     hls::stream<XF_TNAME(SRC_T, NPC)> _src_stream;
     hls::stream<XF_TNAME(SRC_T, NPC)> _dst_stream;
     hls::stream<unsigned char> _lut_stream;
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     #pragma HLS dataflow
-    // clang-format on
+// clang-format on
 
 Read_Loop:
     for (int i = 0; i < _src.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_src.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             #pragma HLS loop_flatten off
@@ -160,7 +160,7 @@ Read_Loop:
 
 Read_LUT:
     for (int i = 0; i < 256; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline ii=1
         #pragma HLS LOOP_TRIPCOUNT min=1 max=256
         // clang-format on
@@ -171,11 +171,11 @@ Read_LUT:
                XF_WORDWIDTH(SRC_T, NPC)>(_src_stream, _dst_stream, _lut_stream, _src.rows, _src.cols);
 
     for (int i = 0; i < _dst.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_dst.cols)>> (XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             #pragma HLS loop_flatten off

@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 
     cv::Mat in_img, in_gray, out_img, ocv_ref, diff, lut_mat;
 
-    /*  reading in the color image  */
+/*  reading in the color image  */
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else

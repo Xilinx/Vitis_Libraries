@@ -24,19 +24,13 @@ void cornerupdate_accel(unsigned long* list_fix,
                         bool harris_flag,
                         int flow_rows,
                         int flow_cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=list_fix  offset=slave bundle=gmem7
     #pragma HLS INTERFACE m_axi     port=list  offset=slave bundle=gmem8
     #pragma HLS INTERFACE m_axi     port=flow_vectors  offset=slave bundle=gmem9
-    // clang-format on
+// clang-format on
 
-    // clang-format off
-    #pragma HLS INTERFACE s_axilite port=list_fix     bundle=control
-    #pragma HLS INTERFACE s_axilite port=list     bundle=control
-    #pragma HLS INTERFACE s_axilite port=flow_vectors     bundle=control
-    // clang-format on
-
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite port=nCorners     bundle=control
     #pragma HLS INTERFACE s_axilite port=harris_flag     bundle=control
     #pragma HLS INTERFACE s_axilite port=flow_rows     bundle=control

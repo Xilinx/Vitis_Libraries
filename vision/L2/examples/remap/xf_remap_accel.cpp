@@ -20,7 +20,7 @@ extern "C" {
 
 void remap_accel(
     ap_uint<PTR_IMG_WIDTH>* img_in, float* map_x, float* map_y, ap_uint<PTR_IMG_WIDTH>* img_out, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=map_x         offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=map_y         offset=slave  bundle=gmem2
@@ -37,7 +37,7 @@ void remap_accel(
 
     const int HEIGHT_WIDTH_LOOPCOUNT = HEIGHT * WIDTH / XF_NPIXPERCYCLE(NPC);
     for (unsigned int i = 0; i < rows * cols; ++i) {
-        // clang-format off
+// clang-format off
 	#pragma HLS LOOP_TRIPCOUNT min=1 max=HEIGHT_WIDTH_LOOPCOUNT
         #pragma HLS PIPELINE II=1
         // clang-format on
@@ -47,14 +47,14 @@ void remap_accel(
         mapY.write_float(i, map_y_val);
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=mapX.data depth=2
     #pragma HLS STREAM variable=mapY.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

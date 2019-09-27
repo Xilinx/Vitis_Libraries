@@ -50,7 +50,7 @@ xFGradientX(XF_PTNAME(DEPTH_SRC) vt0,
             XF_PTNAME(DEPTH_SRC) vb0,
             XF_PTNAME(DEPTH_SRC) vb1,
             XF_PTNAME(DEPTH_SRC) vb2) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     /*	XF_PTNAME(DEPTH_DST) temp_g;
@@ -121,7 +121,7 @@ xFGradientY(XF_PTNAME(DEPTH_SRC) vt0,
             XF_PTNAME(DEPTH_SRC) vb0,
             XF_PTNAME(DEPTH_SRC) vb1,
             XF_PTNAME(DEPTH_SRC) vb2) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     /*	XF_PTNAME(DEPTH_DST) temp_g;
@@ -184,7 +184,7 @@ void xFScharr3x3(XF_PTNAME(DEPTH_DST) GradientvaluesX[XF_NPIXPERCYCLE(NPC)],
                  XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 2],
                  XF_PTNAME(DEPTH_SRC) src_buf2[XF_NPIXPERCYCLE(NPC) + 2],
                  XF_PTNAME(DEPTH_SRC) src_buf3[XF_NPIXPERCYCLE(NPC) + 2]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     int STEP;
@@ -196,12 +196,12 @@ void xFScharr3x3(XF_PTNAME(DEPTH_DST) GradientvaluesX[XF_NPIXPERCYCLE(NPC)],
 
 Compute_Grad_Loop:
     for (ap_uint<5> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         int p = 0;
         for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += 8) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
 
@@ -256,7 +256,7 @@ void ProcessScharr3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                       ap_uint<13> row,
                       int& read_index,
                       int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -266,7 +266,7 @@ void ProcessScharr3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -358,7 +358,7 @@ void xFScharrFilterKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     src_buf1[XF_NPIXPERCYCLE(NPC) + 2],
         src_buf2[XF_NPIXPERCYCLE(NPC) + 2], // Temporary buffers to hold input data for processing
         src_buf3[XF_NPIXPERCYCLE(NPC) + 2];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -376,7 +376,7 @@ void xFScharrFilterKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) // Top row border care
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -389,7 +389,7 @@ Clear_Row_Loop:
 
 Row_Loop: // Process complete image
     for (row = 1; row < img_height + 1; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         if (row_ind == 2) // Indexes to hold maintain the row index
@@ -437,7 +437,7 @@ Row_Loop: // Process complete image
             }
 
             for (ap_uint<5> i = 0, k = 0; i < PLANES; i++, k += 8) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 GradientValuesX[0].range(q + (STEP - 1), q) = xFGradientX<DEPTH_SRC, DEPTH_DST>(
@@ -477,7 +477,7 @@ template <int BORDER_TYPE, int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1
 void Scharr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_matx,
             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_maty) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

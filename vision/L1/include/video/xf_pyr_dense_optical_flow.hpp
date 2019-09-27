@@ -33,9 +33,9 @@ void stitch_stream_fixed_int(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& in_st
                              unsigned int rows,
                              unsigned int cols,
                              unsigned int level) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
-    // clang-format on
+// clang-format on
 
 #if DEBUG
     char name[200];
@@ -45,11 +45,11 @@ void stitch_stream_fixed_int(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& in_st
     FILE* fpV = fopen(name, "w");
 #endif
     for (ap_uint<16> i = 0; i < rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXHEIGHT
         // clang-format on
         for (ap_uint<16> j = 0; j < cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXWIDTH
             #pragma HLS pipeline ii=1
             #pragma HLS LOOP_FLATTEN OFF
@@ -89,9 +89,9 @@ void split_stream_int_fixed(unsigned int* instream,
                             unsigned int rows,
                             unsigned int cols,
                             unsigned int level) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
-    // clang-format on
+// clang-format on
 
 #if DEBUG
     char name[200];
@@ -101,11 +101,11 @@ void split_stream_int_fixed(unsigned int* instream,
     FILE* fpV = fopen(name, "w");
 #endif
     for (ap_uint<16> i = 0; i < rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXHEIGHT
         // clang-format on
         for (ap_uint<16> j = 0; j < cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXWIDTH
             #pragma HLS pipeline ii=1
             #pragma HLS LOOP_FLATTEN OFF
@@ -171,9 +171,9 @@ void find_flow(hls::stream<ap_fixed<SIXIY_WIDTH, SIXIY_INT> >& strmSigmaIx2,
                unsigned int level,
                bool scale_up_flag,
                ap_uint<1> init_flag) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
-    // clang-format on
+// clang-format on
 
 #if DEBUG
     char filename0[200];
@@ -188,11 +188,11 @@ void find_flow(hls::stream<ap_fixed<SIXIY_WIDTH, SIXIY_INT> >& strmSigmaIx2,
 #endif
     int count = 0;
     for (ap_uint<16> i = 0; i < rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXHEIGHT
         // clang-format on
         for (ap_uint<16> j = 0; j < cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXWIDTH
             #pragma HLS pipeline ii=1
             #pragma HLS LOOP_FLATTEN OFF
@@ -315,7 +315,7 @@ void xFLKOpticalFlowDenseKernel(unsigned char* currImg,
     const int ITCMP_WIDTH = FLOW_WIDTH + 12 + 4;
     const int ITCMP_INT = FLOW_INT + 12;
 
-    // clang-format off
+// clang-format off
     #pragma HLS dataflow
     // clang-format on
     hls::stream<ap_int<9> > strmIx("Ix"), strmIy("Iy");
@@ -332,21 +332,21 @@ void xFLKOpticalFlowDenseKernel(unsigned char* currImg,
     hls::stream<bool> flagU("compute flowU flag"), flagV("compute flowV flag");
 // Ix, Iy, and It will be consumed at the same time and without any d
 // Giving them a 64 depth buffer just in case.
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=&strmIx            depth=64   dim=1
     #pragma HLS STREAM variable=&strmIy            depth=64   dim=1
     #pragma HLS STREAM variable=&strmIt_float      depth=64   dim=1
     #pragma HLS STREAM variable=&flagU             depth=5000 dim=1
     #pragma HLS STREAM variable=&flagV             depth=5000 dim=1
-    // clang-format on
+// clang-format on
 
 // Flow U and V _in1 will be consumed at most 17*Width cycles after the _scaled.
 // 1920*17= 32640 (17 is arrived at by trial and experiment)
 // This ideally has to be taken care of by the data flow module.
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=&strmFlowU_in1     depth=32640 dim=1
     #pragma HLS STREAM variable=&strmFlowV_in1     depth=32640 dim=1
-    // clang-format on
+// clang-format on
 #ifndef __SYNTHESIS__
     assert(rows <= MAXHEIGHT);
     assert(cols <= MAXWIDTH);

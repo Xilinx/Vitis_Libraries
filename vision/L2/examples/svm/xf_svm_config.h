@@ -35,4 +35,10 @@
 // Set the optimization type:
 #define NPC1 XF_NPPC1
 
+#define INDEX_ARR_1 0
+#define INDEX_ARR_2 0
+
+#define IN_FRAC_BITS_1 15
+#define IN_FRAC_BITS_2 15
+
 #endif // end of _XF_SVM_CONFIG_H_

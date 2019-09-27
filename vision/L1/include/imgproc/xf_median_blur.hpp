@@ -29,25 +29,25 @@ template <int PLANES, int NPC, int DEPTH, int WIN_SZ, int WIN_SZ_SQ>
 void xFMedianProc(XF_PTUNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)],
                   XF_PTUNAME(DEPTH) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
                   ap_uint<8> win_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_PTUNAME(DEPTH) out_val;
     XF_PTUNAME(DEPTH) array[WIN_SZ_SQ];
     XF_PTUNAME(DEPTH) array_channel[WIN_SZ_SQ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=array complete dim=1
     // clang-format on
 
     int array_ptr = 0;
 Compute_Grad_Loop:
     for (int copy_arr = 0; copy_arr < WIN_SZ; copy_arr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         #pragma HLS UNROLL
         // clang-format on
         for (int copy_in = 0; copy_in < WIN_SZ; copy_in++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -56,12 +56,12 @@ Compute_Grad_Loop:
         }
     }
     for (int channel = 0, k = 0; channel < PLANES; channel++, k += 8) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=PLANES
         #pragma HLS UNROLL
         // clang-format on
         for (int p = 0; p < WIN_SZ_SQ; p++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ_SQ
             #pragma HLS UNROLL
             // clang-format on
@@ -70,7 +70,7 @@ Compute_Grad_Loop:
 
     xFApplyMaskLoop:
         for (int16_t j = 0; j <= WIN_SZ_SQ - 1; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS LOOP_FLATTEN off
             // clang-format on
@@ -79,7 +79,7 @@ Compute_Grad_Loop:
             xFSortLoop1:
                 for (int i = 0; i <= ((WIN_SZ_SQ >> 1) - 1); i++) // even sort
                 {
-                    // clang-format off
+// clang-format off
                     #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                     #pragma HLS unroll
                     // clang-format on
@@ -96,7 +96,7 @@ Compute_Grad_Loop:
             xFSortLoop2:
                 for (int i = 0; i <= ((WIN_SZ_SQ >> 1) - 1); i++) // odd sort WINDOW_SIZE_H>>1 -1
                 {
-                    // clang-format off
+// clang-format off
                     #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                     #pragma HLS unroll
                     // clang-format on
@@ -134,12 +134,12 @@ void ProcessMedian3x3(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
                       ap_uint<8> win_size,
                       int& rd_ind,
                       int& wr_ind) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     XF_TNAME(TYPE, NPC) buf_cop[WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf_cop complete dim=1
     // clang-format on
 
@@ -151,12 +151,12 @@ void ProcessMedian3x3(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
         col_loop_var = 1;
     }
     for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         #pragma HLS unroll
         // clang-format on
         for (int ext_copy = 0; ext_copy < npc + WIN_SZ - 1; ext_copy++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             src_buf[extract_px][ext_copy] = 0;
@@ -165,7 +165,7 @@ void ProcessMedian3x3(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < ((img_width) >> XF_BITSHIFT(NPC)) + col_loop_var; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC/NPC
         #pragma HLS pipeline
         #pragma HLS LOOP_FLATTEN OFF
@@ -179,7 +179,7 @@ Col_Loop:
 
         if (NPC == XF_NPPC8) {
             for (int copy_buf_var = 0; copy_buf_var < WIN_SZ; copy_buf_var++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 #pragma HLS UNROLL
                 // clang-format on
@@ -197,7 +197,7 @@ Col_Loop:
             XF_PTUNAME(TYPE) src_buf_temp_copy_extract[XF_NPIXPERCYCLE(NPC)];
 
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 #pragma HLS unroll
                 // clang-format on
@@ -206,18 +206,18 @@ Col_Loop:
                 xfExtractPixels<NPC, XF_WORDWIDTH(TYPE, NPC), XF_DEPTH(TYPE, NPC)>(src_buf_temp_copy_extract, toextract,
                                                                                    0);
                 for (int ext_copy = 0; ext_copy < npc; ext_copy++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     src_buf_temp_copy[extract_px][ext_copy] = src_buf_temp_copy_extract[ext_copy];
                 }
             }
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 // clang-format on
                 for (int col_warp = 0; col_warp < (WIN_SZ >> 1); col_warp++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                     // clang-format on
@@ -232,11 +232,11 @@ Col_Loop:
 
             if (col == 0) {
                 for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                     // clang-format on
                     for (int col_warp = 0; col_warp < npc + (WIN_SZ >> 1); col_warp++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                         // clang-format on
@@ -247,7 +247,7 @@ Col_Loop:
 
             XF_PTUNAME(TYPE) src_buf_temp_med_apply[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)];
             for (int applymedian = 0; applymedian < npc; applymedian++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 for (int copyi = 0; copyi < WIN_SZ; copyi++) {
@@ -269,11 +269,11 @@ Col_Loop:
             }
 
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 // clang-format on
                 for (int col_warp = 0; col_warp < (WIN_SZ >> 1); col_warp++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                     // clang-format on
@@ -282,11 +282,11 @@ Col_Loop:
             }
 
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 // clang-format on
                 for (int col_warp = 0; col_warp < npc; col_warp++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                     // clang-format on
@@ -296,7 +296,7 @@ Col_Loop:
 
         } else {
             for (int copy_buf_var = 0; copy_buf_var < WIN_SZ; copy_buf_var++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 #pragma HLS UNROLL
                 // clang-format on
@@ -307,7 +307,7 @@ Col_Loop:
                 }
             }
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 #pragma HLS UNROLL
                 // clang-format on
@@ -327,12 +327,12 @@ Col_Loop:
                 wr_ind++;
             }
             for (int wrap_buf = 0; wrap_buf < WIN_SZ; wrap_buf++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                 // clang-format on
                 for (int col_warp = 0; col_warp < WIN_SZ - 1; col_warp++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
                     // clang-format on
@@ -354,19 +354,19 @@ void xFMedian3x3(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
                  uint16_t img_height,
                  uint16_t img_width) {
     ap_uint<13> row_ind[WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=row_ind complete dim=1
     // clang-format on
 
     uint16_t shift_x = 0;
     ap_uint<13> row, col;
     XF_PTUNAME(TYPE) OutputValues[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=OutputValues complete dim=1
     // clang-format on
 
     XF_PTUNAME(TYPE) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=2
     // clang-format on
@@ -374,7 +374,7 @@ void xFMedian3x3(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     XF_TNAME(TYPE, NPC) P0;
 
     XF_TNAME(TYPE, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     // clang-format on
@@ -382,7 +382,7 @@ void xFMedian3x3(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     // initializing row index
 
     for (int init_row_ind = 0; init_row_ind < win_size; init_row_ind++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         // clang-format on
         row_ind[init_row_ind] = init_row_ind;
@@ -391,11 +391,11 @@ void xFMedian3x3(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     int rd_ind = 0;
 read_lines:
     for (int init_buf = row_ind[win_size >> 1]; init_buf < row_ind[win_size - 1]; init_buf++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         // clang-format on
         for (col = 0; col<img_width>> XF_BITSHIFT(NPC); col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TC/NPC
             #pragma HLS pipeline
             #pragma HLS LOOP_FLATTEN OFF
@@ -407,11 +407,11 @@ read_lines:
 
     // takes care of top borders
     for (col = 0; col<img_width>> XF_BITSHIFT(NPC); col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC/NPC
         // clang-format on
         for (int init_buf = 0; init_buf<WIN_SZ>> 1; init_buf++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -422,7 +422,7 @@ read_lines:
     int wr_ind = 0;
 Row_Loop:
     for (row = (win_size >> 1); row < img_height + (win_size >> 1); row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
 
@@ -435,7 +435,7 @@ Row_Loop:
         // update indices
         ap_uint<13> zero_ind = row_ind[0];
         for (int init_row_ind = 0; init_row_ind < WIN_SZ - 1; init_row_ind++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -447,7 +447,7 @@ Row_Loop:
 
 template <int FILTER_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC = 1>
 void medianBlur(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

@@ -22,32 +22,31 @@ void sgbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
                 ap_uint<PTR_IN_WIDTH>* img_in_r,
                 unsigned char penalty_small,
                 unsigned char penalty_large,
-                ap_uint<PTR_OUT_WIDTH>* img_out) {
-    // clang-format off
+                ap_uint<PTR_OUT_WIDTH>* img_out,
+                int rows,
+                int cols) {
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in_l      offset=slave  bundle=gmem0
-    #pragma HLS INTERFACE s_axilite  port=img_in_l 			          bundle=control
     #pragma HLS INTERFACE m_axi      port=img_in_r      offset=slave  bundle=gmem1
-    #pragma HLS INTERFACE s_axilite  port=img_in_r 			          bundle=control
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
-    #pragma HLS INTERFACE s_axilite  port=img_out 			          bundle=control
     #pragma HLS INTERFACE s_axilite  port=penalty_small  	          bundle=control
     #pragma HLS INTERFACE s_axilite  port=penalty_large  	          bundle=control
+	#pragma HLS INTERFACE s_axilite  port=rows  	          		  bundle=control
+	#pragma HLS INTERFACE s_axilite  port=cols  	          		  bundle=control
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputL;
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputR;
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput;
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputL(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputR(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
 
-    const int COLS = WIDTH;
-    const int NPPC = NPC1;
-    // clang-format off
-    #pragma HLS STREAM variable=imgInputL.data depth=COLS/NPPC
-    #pragma HLS STREAM variable=imgInputR.data depth=COLS/NPPC
-    #pragma HLS STREAM variable=imgOutput.data depth=COLS/NPPC
-    // clang-format on
+// clang-format off
+    #pragma HLS STREAM variable=imgInputL.data depth=2
+    #pragma HLS STREAM variable=imgInputR.data depth=2
+    #pragma HLS STREAM variable=imgOutput.data depth=2
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

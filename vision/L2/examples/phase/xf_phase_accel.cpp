@@ -22,34 +22,34 @@ void phase_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                  int rows,
                  int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp1  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_inp2  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem3
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite port=rows     bundle=control
     #pragma HLS INTERFACE s_axilite port=cols     bundle=control
     #pragma HLS INTERFACE s_axilite port=return   bundle=control
     // clang-format on
 
     xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _src1(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=_src1.data depth=2
     // clang-format on
 
     xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _src2(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=_src2.data depth=2
     // clang-format on
 
     xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _dst(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=_dst.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

@@ -341,23 +341,23 @@ void saveDisparityMap(float* disparity, int rows, int cols, int ndisparity, std:
 } // end saveDisparityMap
 
 int main(int argc, char** argv) {
-    if (argc != 4) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
         return EXIT_FAILURE;
     }
 
     cv::Mat in_imgL, in_imgR, hls_out;
 
     // Reading in images:
-    in_imgL = cv::imread(argv[2], 0);
-    in_imgR = cv::imread(argv[3], 0);
+    in_imgL = cv::imread(argv[1], 0);
+    in_imgR = cv::imread(argv[2], 0);
 
     if (in_imgL.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
         return EXIT_FAILURE;
     }
     if (in_imgR.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[3] << std::endl;
+        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -371,6 +371,9 @@ int main(int argc, char** argv) {
     // OpenCL section:
     size_t image_in_size_bytes = in_imgL.rows * in_imgL.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = image_in_size_bytes;
+
+    int height = in_imgL.rows;
+    int width = in_imgL.cols;
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -387,10 +390,8 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
     // Load binary:
-    unsigned fileBufSize;
-    std::string binaryFile = argv[1];
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_sgbm");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -408,6 +409,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(2, small_penalty));
     OCL_CHECK(err, err = kernel.setArg(3, large_penalty));
     OCL_CHECK(err, err = kernel.setArg(4, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(5, height));
+    OCL_CHECK(err, err = kernel.setArg(6, width));
 
     // Initialize the buffers:
     cl::Event event;
@@ -457,7 +460,7 @@ int main(int argc, char** argv) {
     cv::Mat disp_mat(in_imgL.rows, in_imgL.cols, CV_8UC1);
     for (int r = 0; r < in_imgL.rows; r++) {
         for (int c = 0; c < in_imgL.cols; c++) {
-            disp_mat.at<unsigned char>(r, c) = (unsigned char)(disparity[r * WIDTH + c]);
+            disp_mat.at<unsigned char>(r, c) = (unsigned char)(disparity[r * in_imgL.cols + c]);
         }
     }
 

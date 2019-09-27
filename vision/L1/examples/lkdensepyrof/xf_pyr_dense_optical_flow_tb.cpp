@@ -23,9 +23,7 @@ typedef struct __rgba {
     IN_TYPE r, g, b;
     IN_TYPE a; // can be unused
 } rgba_t;
-typedef struct __rgb {
-    IN_TYPE r, g, b;
-} rgb_t;
+typedef struct __rgb { IN_TYPE r, g, b; } rgb_t;
 
 typedef cv::Vec<unsigned short, 3> Vec3u;
 typedef cv::Vec<IN_TYPE, 3> Vec3ucpt;

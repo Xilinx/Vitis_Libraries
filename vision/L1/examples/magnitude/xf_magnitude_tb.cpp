@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
     out_img.create(in_img.rows, in_img.cols, CV_16S);
     diff.create(in_img.rows, in_img.cols, CV_16S);
 
-    /////////////////    OpenCV reference  /////////////////
+/////////////////    OpenCV reference  /////////////////
 #if L1NORM
 
     ComputeMagnitude(c_grad_x, c_grad_y, ocv_ref1);

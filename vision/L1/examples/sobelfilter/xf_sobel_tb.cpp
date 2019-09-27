@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     cv::Mat hls_grad_x, hls_grad_y;
     cv::Mat diff_grad_x, diff_grad_y;
 
-    // reading in the color image
+// reading in the color image
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
         imwrite("out_hlsy.jpg", hls_grad_y);
 */
 
-    //////////////////  Compute Absolute Difference ////////////////////
+//////////////////  Compute Absolute Difference ////////////////////
 #if (FILTER_WIDTH == 3 | FILTER_WIDTH == 5)
     xf::cv::absDiff(c_grad_x_1, imgOutputx, diff_grad_x);
     xf::cv::absDiff(c_grad_y_1, imgOutputy, diff_grad_y);

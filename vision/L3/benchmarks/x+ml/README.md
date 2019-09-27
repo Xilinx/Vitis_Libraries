@@ -1,6 +1,6 @@
 ## ML + X Benchmark
 
-This example shows how various xfOpenCV funtions can be used to accelerate preprocessing of input images before feeding them to a Deep Neural Network (DNN) accelerator.
+This example shows how various Vitis Vision funtions can be used to accelerate preprocessing of input images before feeding them to a Deep Neural Network (DNN) accelerator.
 
 This specific application shows how pre-processing for Googlenet_v1 can be accelerated which involves resizing the input image to 224 x 224 size followed by mean subtraction.
 
@@ -20,7 +20,7 @@ source < path-to-Vitis-installation-directory >/settings64.sh
 
 source < part-to-XRT-installation-directory >/setenv.sh
 
-export DEVICE=< path-to-platform-directory >/<platform>.xpfm
+export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
 **For PCIe devices:**
 

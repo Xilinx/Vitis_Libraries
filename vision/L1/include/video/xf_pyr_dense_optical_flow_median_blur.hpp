@@ -20,13 +20,13 @@ template <int NPC, int DEPTH, int WIN_SZ, int WIN_SZ_SQ, int FLOW_WIDTH, int FLO
 void auMedianProc(ap_fixed<FLOW_WIDTH, FLOW_INT> OutputValues[1],
                   ap_fixed<FLOW_WIDTH, FLOW_INT> src_buf[WIN_SZ][1 + (WIN_SZ - 1)],
                   ap_uint<8> win_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     ap_fixed<FLOW_WIDTH, FLOW_INT> array[WIN_SZ_SQ];
 // #pragma HLS RESOURCE variable=array core=DSP48
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=array complete dim=1
     // clang-format on
 
@@ -35,12 +35,12 @@ void auMedianProc(ap_fixed<FLOW_WIDTH, FLOW_INT> OutputValues[1],
 // return;
 Compute_Grad_Loop:
     for (int copy_arr = 0; copy_arr < WIN_SZ; copy_arr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
         #pragma HLS UNROLL
         // clang-format on
         for (int copy_in = 0; copy_in < WIN_SZ; copy_in++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -48,12 +48,12 @@ Compute_Grad_Loop:
             array_ptr++;
         }
     }
-    // OutputValues[0] = array[(WIN_SZ_SQ)>>1];
-    // return;
+// OutputValues[0] = array[(WIN_SZ_SQ)>>1];
+// return;
 
 auApplyMaskLoop:
     for (int16_t j = 0; j <= WIN_SZ_SQ - 1; j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
         // clang-format on
         int16_t tmp = j & 0x0001;
@@ -61,7 +61,7 @@ auApplyMaskLoop:
         auSortLoop1:
             for (int i = 0; i <= ((WIN_SZ_SQ >> 1) - 1); i++) // even sort
             {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
                 #pragma HLS unroll
                 // clang-format on
@@ -80,7 +80,7 @@ auApplyMaskLoop:
         auSortLoop2:
             for (int i = 0; i <= ((WIN_SZ_SQ >> 1) - 1); i++) // odd sort WINDOW_SIZE_H>>1 -1
             {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
                 #pragma HLS unroll
                 // clang-format on
@@ -124,19 +124,19 @@ void ProcessMedian3x3(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& _src_mat,
                       ap_uint<13> row_ind[WIN_SZ],
                       ap_uint<13> row,
                       ap_uint<8> win_size) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     ap_fixed<FLOW_WIDTH, FLOW_INT> buf_cop[WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf_cop complete dim=1
     // clang-format on
 
     uint16_t npc = 1;
 Col_Loop:
     for (ap_uint<16> col = 0; col < img_width + (WIN_SZ >> 1); col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         #pragma HLS pipeline
         #pragma HLS LOOP_FLATTEN OFF
@@ -148,7 +148,7 @@ Col_Loop:
             buf[row_ind[win_size - 1]][col] = 0;
 
         for (int copy_buf_var = 0; copy_buf_var < WIN_SZ; copy_buf_var++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -170,7 +170,7 @@ Col_Loop:
         // else
         {
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
                 #pragma HLS UNROLL
                 // clang-format on
@@ -196,12 +196,12 @@ Col_Loop:
         }
 
         for (int wrap_buf = 0; wrap_buf < WIN_SZ; wrap_buf++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
             // clang-format on
             for (int col_warp = 0; col_warp < WIN_SZ - 1; col_warp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
                 // clang-format on
@@ -236,7 +236,7 @@ void auMedian3x3(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& _src_mat,
                  uint16_t img_height,
                  uint16_t img_width) {
     ap_uint<13> row_ind[WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=row_ind complete dim=1
     // clang-format on
 
@@ -245,12 +245,12 @@ void auMedian3x3(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& _src_mat,
     ap_uint<16> row, col;
 
     ap_fixed<FLOW_WIDTH, FLOW_INT> OutputValues[1];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=OutputValues complete dim=1
     // clang-format on
 
     ap_fixed<FLOW_WIDTH, FLOW_INT> src_buf[WIN_SZ][1 + (WIN_SZ - 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=2
     // clang-format on
@@ -260,12 +260,12 @@ void auMedian3x3(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& _src_mat,
     ap_fixed<FLOW_WIDTH, FLOW_INT> buf[WIN_SZ][(COLS >> NPC)];
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_RESHAPE variable=buf complete dim=1
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
         // clang-format on
@@ -273,7 +273,7 @@ void auMedian3x3(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& _src_mat,
     // initializing row index
 
     for (int init_row_ind = 0; init_row_ind < win_size; init_row_ind++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         // clang-format on
         row_ind[init_row_ind] = init_row_ind;
@@ -281,11 +281,11 @@ void auMedian3x3(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& _src_mat,
 
 read_lines:
     for (int init_buf = row_ind[win_size >> 1]; init_buf < row_ind[win_size - 1]; init_buf++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=WIN_SZ
         // clang-format on
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             #pragma HLS LOOP_FLATTEN OFF
@@ -296,11 +296,11 @@ read_lines:
 
     // takes care of top borders
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         // clang-format on
         for (int init_buf = 0; init_buf<WIN_SZ>> 1; init_buf++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -310,7 +310,7 @@ read_lines:
 
 Row_Loop:
     for (row = (win_size >> 1); row < img_height + (win_size >> 1); row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
 
@@ -331,7 +331,7 @@ Row_Loop:
         // update indices
         ap_uint<13> zero_ind = row_ind[0];
         for (int init_row_ind = 0; init_row_ind < WIN_SZ - 1; init_row_ind++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=WIN_SZ max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -360,12 +360,12 @@ void auMedianBlur(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& _src,
                   int _border_type,
                   uint16_t imgheight,
                   uint16_t imgwidth) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
-    // clang-format on
+// clang-format on
 
-    // #pragma HLS license key=IPAUVIZ_CV_BASIC
-    // assert(_border_type == AU_BORDER_CONSTANT && "Only AU_BORDER_CONSTANT is supported");
+// #pragma HLS license key=IPAUVIZ_CV_BASIC
+// assert(_border_type == AU_BORDER_CONSTANT && "Only AU_BORDER_CONSTANT is supported");
 
 #ifndef __SYNTHESIS__
     assert(((imgheight <= ROWS) && (imgwidth <= COLS)) && "ROWS and COLS should be greater than input image");

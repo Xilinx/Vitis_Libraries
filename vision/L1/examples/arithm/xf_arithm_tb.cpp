@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
                       ,
                       CV_EXTRA_ARG
 #endif
-    );
+                      );
     //	cv::absdiff		(in_gray1,in_gray2,ocv_ref);
     //	cv::add			(in_gray1,in_gray2,ocv_ref);
     //	cv::subtract	(in_gray1,in_gray2,ocv_ref);
@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
                       ,
                       CV_EXTRA_ARG
 #endif
-    );
+                      );
 
     //	cv::add		(in_gray1,val,ocv_ref);
     //	cv::subtract(in_gray1,val,ocv_ref);	//subs

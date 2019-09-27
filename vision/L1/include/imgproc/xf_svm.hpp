@@ -50,7 +50,7 @@ ap_int<XF_PIXELDEPTH(DST_T)> xfSVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC>& in_1,
                                    uchar_t frac2,
                                    uint16_t n,
                                    uchar_t* out_frac) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -59,7 +59,7 @@ ap_int<XF_PIXELDEPTH(DST_T)> xfSVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC>& in_1,
 
 svmCoreLoop:
     for (int i = 0; i < n; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=N max=N avg=N
         #pragma HLS PIPELINE
         // clang-format on

@@ -38,8 +38,8 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // cv::extractChannel(in_img, in_img,1);
-    // create memory for output image
+// cv::extractChannel(in_img, in_img,1);
+// create memory for output image
 #if GRAY
     ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
     out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image

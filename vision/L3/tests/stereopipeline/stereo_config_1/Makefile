@@ -20,8 +20,8 @@
 MK_PATH       := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR       := $(patsubst %/,%,$(dir $(MK_PATH)))
 CASE_ROOT     ?= $(CUR_DIR)
-#PLATFORM_REPO_PATHS=/proj/xbuilds/2019.1_Scout_daily_latest/internal_platforms/xilinx_u200_xdma_201830_2
-#DEVICE = /proj/xbuilds/2019.1_Scout_daily_latest/internal_platforms/xilinx_u200_xdma_201830_2/xilinx_u200_xdma_201830_2.xpfm
+
+
 #MK_COMMON_DIR := mk
 
 # Below should point to library repo
@@ -197,18 +197,19 @@ KSRC_DIR 		:= $(XF_LIB_DIR)/L3/examples/stereopipeline
 ifeq ($(BOARD), Zynq)
 XFREQUENCY 		:= 150
 else
-XFREQUENCY 		:= 300
+strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
+VIVADO_FREQUENCY        =$(shell echo $$(( $(XFREQUENCY) * 1000000 )))
 endif
 
 XCLBIN_NAME 	:= krnl_stereopipeline
-KER_NAME    	:= stereopipeline_accel:xf_stereo_pipeline_accel.cpp
+KER_NAME    	:= stereopipeline_accel
+KERNELS += $(KER_NAME):xf_stereo_pipeline_accel.cpp
 
 VPP_CFLAGS  	+= -I$(XF_LIB_DIR)/include -I. -I$(XF_LIB_DIR)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 
 $(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore
 
-KERNELS     	+= $(KER_NAME)
 
 # -----------------------------------------------------------------------------
 #                           host setup

@@ -35,7 +35,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC>
 void write(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
            xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)> s,
            int ind) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -46,7 +46,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC>
 void fetchingmatdata(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
                      xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)> s,
                      int val) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     write(img, s, val);
@@ -55,7 +55,7 @@ void fetchingmatdata(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
 template <int SRC_T, int ROWS, int COLS, int NPC>
 xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)> read(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
                                                                    int index) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -69,7 +69,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC>
 void fillingdata(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
                  xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)>& s,
                  int index) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -98,7 +98,7 @@ Unpack a AXI video stream into a xf::cv::Mat<> object
 
 template <int W, int T, int ROWS, int COLS, int NPC>
 int AXIvideo2xfMat(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, xf::cv::Mat<T, ROWS, COLS, NPC>& img) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -115,7 +115,7 @@ int AXIvideo2xfMat(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, xf::cv::Ma
     bool sof = 0;
 loop_wait_for_start:
     while (!sof) { // checking starting of frame
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline II=1
         #pragma HLS loop_tripcount avg=0 max=0
         // clang-format on
@@ -127,7 +127,7 @@ loop_height:
         bool eol = 0;
     loop_width:
         for (int j = 0; j < (cols / NPC); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS loop_flatten off
             #pragma HLS pipeline II=1
             // clang-format on
@@ -154,7 +154,7 @@ loop_height:
         }
     loop_wait_for_eol:
         while (!eol) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline II=1
             #pragma HLS loop_tripcount avg=0 max=0
             // clang-format on
@@ -174,7 +174,7 @@ loop_height:
  */
 template <int W, int T, int ROWS, int COLS, int NPC>
 int xfMat2AXIvideo(xf::cv::Mat<T, ROWS, COLS, NPC>& img, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     int res = 0, index = 0, depth;
@@ -196,7 +196,7 @@ loop_height:
     for (int i = 0; i < rows; i++) {
     loop_width:
         for (int j = 0; j < (cols / NPC); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS loop_flatten off
             #pragma HLS pipeline II=1
             // clang-format on

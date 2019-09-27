@@ -20,7 +20,7 @@ extern "C" {
 
 void erosion(
     ap_uint<PTR_WIDTH>* img_in, unsigned char* process_shape, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=process_shape offset=slave  bundle=gmem1
    #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
@@ -38,13 +38,13 @@ void erosion(
     // Copy the shape data:
     unsigned char _kernel[FILTER_SIZE * FILTER_SIZE];
     for (unsigned int i = 0; i < FILTER_SIZE * FILTER_SIZE; ++i) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         _kernel[i] = process_shape[i];
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
     // Retrieve xf::cv::Mat objects from img_in data:

@@ -37,9 +37,7 @@ typedef struct __rgba {
     unsigned char r, g, b;
     unsigned char a; // can be unused
 } rgba_t;
-typedef struct __rgb {
-    unsigned char r, g, b;
-} rgb_t;
+typedef struct __rgb { unsigned char r, g, b; } rgb_t;
 
 typedef cv::Vec<unsigned short, 3> Vec3u;
 typedef cv::Vec<unsigned char, 3> Vec3ucpt;
@@ -598,7 +596,7 @@ int main(int argc, char** argv) {
         gly.release();
         outputimage.release();
 
-        // Print PyrDown outputimage
+// Print PyrDown outputimage
 #if 1
 
         for (int kk = 0; kk < NUM_LEVELS; kk++) {

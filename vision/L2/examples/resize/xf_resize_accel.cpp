@@ -23,7 +23,7 @@ void resize_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                   int cols_in,
                   int rows_out,
                   int cols_out) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows_in              bundle=control
@@ -34,16 +34,16 @@ void resize_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> in_mat(rows_in, cols_in);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_mat.data depth=2
     // clang-format on
 
     xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T> out_mat(rows_out, cols_out);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=out_mat.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

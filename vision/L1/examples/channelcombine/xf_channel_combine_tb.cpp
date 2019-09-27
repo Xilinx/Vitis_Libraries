@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
     channel_combine_accel(imgInput1, imgInput2, imgOutput);
 #endif
 
-    // Write output image
+// Write output image
 #if !TWO_INPUT
     xf::cv::imwrite("hls_out.jpg", imgOutput);
     cv::imwrite("out_ocv.jpg", merged);

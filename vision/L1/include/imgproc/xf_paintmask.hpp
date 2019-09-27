@@ -54,7 +54,7 @@ void xFpaintmaskKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_PTNAME(DEPTH) p, mask;
     short int depth = XF_DTPIXELDEPTH(SRC_T, NPC) / XF_CHANNELS(SRC_T, NPC);
     XF_PTNAME(DEPTH) arr_color[XF_CHANNELS(SRC_T, NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=arr_color dim=1 complete
     // clang-format on
     for (int i = 0; i < (XF_CHANNELS(SRC_T, NPC)); i++) {
@@ -63,14 +63,14 @@ void xFpaintmaskKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> i, j, k, planes;
 rowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
         // clang-format on
         ap_uint<8> channels = XF_CHANNELS(SRC_T, NPC);
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -80,7 +80,7 @@ rowLoop:
             in_mask = (XF_SNAME(WORDWIDTH_MASK))(
                 _in_mask.read(i * width + j)); // reading the input mask stream _in_mask into in_mask
             for (k = 0, planes = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += depth, planes++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src.range(k + (depth - 1), k);
@@ -117,7 +117,7 @@ void paintmask(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8");
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

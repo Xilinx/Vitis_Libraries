@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
     ROI_height[4] = 100;
     ROI_width[4] = 100;
 
-    //	int num_box= 3;
+//	int num_box= 3;
 //////////////////////////////////end of Feeding ROI///////////////////////////////////////
 #if GRAY
     int color_info[MAX_BOXES][3] = {{255}, {255}, {255}, {150}, {56}};
@@ -112,8 +112,8 @@ int main(int argc, char** argv) {
     out_img.create(in_img.rows, in_img.cols, CV_8UC4);
 #endif
 
-    ////////////////  reference code  ////////////////
-    // clock_gettime(CLOCK_MONOTONIC, &start_time);
+////////////////  reference code  ////////////////
+// clock_gettime(CLOCK_MONOTONIC, &start_time);
 
 #if GRAY
     for (int i = 0; i < num_box; i++) {

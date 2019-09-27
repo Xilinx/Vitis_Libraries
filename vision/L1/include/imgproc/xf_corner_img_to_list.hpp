@@ -28,7 +28,7 @@ void cornersImgToList(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     int cornerCount = 0;
     for (unsigned short i = 0; i < _src.rows; i++) {
         for (unsigned short j = 0; j < _src.cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE
             // clang-format on
             ap_uint<8> tempValue = _src.read(i * _src.cols + j);
@@ -45,7 +45,7 @@ void cornersImgToList(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     }
     *ncorners = cornerCount;
     for (int i = cornerCount; i < MAXCORNERSNO; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         list[i] = 0;

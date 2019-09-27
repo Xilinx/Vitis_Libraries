@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
     q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width * 2), out_img.data);
 
     q.finish();
-    /////////////////////////////////////// end of CL ////////////////////////
+/////////////////////////////////////// end of CL ////////////////////////
 
 #if DEGREES
     /////   writing the difference between the OpenCV and the Kernel output into a text file /////

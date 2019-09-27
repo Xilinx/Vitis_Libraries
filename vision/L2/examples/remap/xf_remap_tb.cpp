@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     cv::Mat src, ocv_remapped, hls_remapped;
     cv::Mat map_x, map_y, diff;
 
-    // Reading in the image:
+// Reading in the image:
 #if GRAY
     src = cv::imread(argv[1], 0); // read image Grayscale
 #else
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     hls_remapped.create(src.rows, src.cols, src.type()); // create memory for output images
     diff.create(src.rows, src.cols, src.type());
 
-    // Initialize the float maps:
+// Initialize the float maps:
 #if READ_MAPS_FROM_FILE
     // read the float map data from the file (code could be alternated for reading from image)
     FILE *fp_mx, *fp_my;

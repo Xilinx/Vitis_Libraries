@@ -34,10 +34,10 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    /*  convert to gray  */
-    // cvtColor(in_img,in_gray,CV_BGR2GRAY);
+/*  convert to gray  */
+// cvtColor(in_img,in_gray,CV_BGR2GRAY);
 
-    /*  convert to 16S type  */
+/*  convert to 16S type  */
 #if T_8U
     in_img.convertTo(in_conv, CV_8UC1);
 #elif T_16U

@@ -66,7 +66,7 @@ void xFDHOGKernel(hls::stream<XF_SNAME(WORDWIDTH)> _in_stream[NOC],
     hls::stream<XF_SNAME(MAT_WW)> grad_x_stream, grad_y_stream;
     hls::stream<XF_SNAME(XF_16UW)> phase_stream("phase_stream"), mag_stream("mag_stream");
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

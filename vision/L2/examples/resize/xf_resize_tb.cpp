@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     out_height = NEWHEIGHT;
     out_width = NEWWIDTH;
 
-    // OpenCL section:
+// OpenCL section:
 #if GRAY
     size_t image_in_size_bytes = in_height * in_width * 1 * sizeof(unsigned char);
     size_t image_out_size_bytes = out_height * out_width * 1 * sizeof(unsigned char);
@@ -136,9 +136,9 @@ int main(int argc, char** argv) {
                                        result_hls.data)); // Data will be stored here
 
     q.finish();
-    /////////////////////////////////////// end of CL ///////////////////////////////////////
+/////////////////////////////////////// end of CL ///////////////////////////////////////
 
-    /*OpenCV resize function*/
+/*OpenCV resize function*/
 #if INTERPOLATION == 0
     cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_NN);
 #endif
@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 
     cv::absdiff(result_hls, result_ocv, error);
     float err_per;
-    xf::cv::analyzeDiff(error, 1, err_per);
+    xf::cv::analyzeDiff(error, 5, err_per);
 
     return 0;
 }

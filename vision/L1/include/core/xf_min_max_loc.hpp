@@ -77,7 +77,7 @@ void xFMinMaxLocKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     // temporary arrays to hold the min and max vals
     int32_t min_val_tmp[(1 << XF_BITSHIFT(NPC)) + 1], max_val_tmp[(1 << XF_BITSHIFT(NPC)) + 1];
     ap_uint<26> min_loc_tmp[(1 << XF_BITSHIFT(NPC)) + 1], max_loc_tmp[(1 << XF_BITSHIFT(NPC)) + 1];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=min_val_tmp complete
     #pragma HLS ARRAY_PARTITION variable=max_val_tmp complete
     #pragma HLS ARRAY_PARTITION variable=min_loc_tmp complete
@@ -87,7 +87,7 @@ void xFMinMaxLocKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 // creating an array for minimum and maximum values, depending upon the type of optimization
 fillTempBuf:
     for (i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         min_val_tmp[i] = ((1 << (step - 1)) - 1);
@@ -96,7 +96,7 @@ fillTempBuf:
 
 rowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
         // clang-format on
@@ -104,7 +104,7 @@ rowLoop:
         col_ind = 0;
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COL_TRIP max=COL_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -112,14 +112,14 @@ rowLoop:
             // reading the data from the stream
             val_in = _src.read(i * width + j);
             XF_PTNAME(DEPTH) pixel_buf[(1 << XF_BITSHIFT(NPC)) + 1];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=pixel_buf complete dim=1
             // clang-format on
 
             ap_uint<9> k = 0;
         processLoop:
             for (l = 0; l < (1 << XF_BITSHIFT(NPC)); l++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 // packing the data from val_in to pixel buffer
@@ -218,7 +218,7 @@ void minMaxLoc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 or XF_NPPC16");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 

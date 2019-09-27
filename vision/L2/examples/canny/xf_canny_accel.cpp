@@ -23,13 +23,13 @@ void canny_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                  int cols,
                  int low_threshold,
                  int high_threshold) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
 
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite port=rows     bundle=control
     #pragma HLS INTERFACE s_axilite port=cols     bundle=control
     #pragma HLS INTERFACE s_axilite port=low_threshold     bundle=control
@@ -38,16 +38,16 @@ void canny_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, INTYPE> in_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_mat.data depth=2
     // clang-format on
 
     xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> dst_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=dst_mat.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

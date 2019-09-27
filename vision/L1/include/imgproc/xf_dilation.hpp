@@ -29,7 +29,7 @@ template <int PLANES, int DEPTH, int K_ROWS, int K_COLS>
 void dilate_function_apply(XF_PTUNAME(DEPTH) * OutputValue,
                            XF_PTUNAME(DEPTH) src_buf[K_ROWS][K_COLS],
                            unsigned char kernel[K_ROWS][K_COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -37,18 +37,18 @@ void dilate_function_apply(XF_PTUNAME(DEPTH) * OutputValue,
 
 Apply_dilate_Loop:
     for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += depth) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=PLANES
         #pragma HLS UNROLL
         // clang-format on
         XF_PTNAME(DEPTH) max = 0;
         for (ap_uint<13> k_rows = 0; k_rows < K_ROWS; k_rows++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS
             #pragma HLS UNROLL
             // clang-format on
             for (ap_uint<13> k_cols = 0; k_cols < K_COLS; k_cols++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=K_COLS
                 #pragma HLS UNROLL
                 // clang-format on
@@ -80,13 +80,13 @@ void Process_function_d(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
                         ap_uint<13> row,
                         int& rd_ind,
                         int& wr_ind) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     XF_TNAME(TYPE, NPC) buf_cop[K_ROWS];
     XF_PTUNAME(TYPE) OutputValue;
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf_cop complete dim=1
     // clang-format on
 
@@ -95,12 +95,12 @@ void Process_function_d(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
 
     ///////////////////////////////	Initializing src_buf buffer to zero	///////////////////////
     for (int k_row = 0; k_row < K_ROWS; k_row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS
         #pragma HLS unroll
         // clang-format on
         for (int k_col = 0; k_col < (npc + K_COLS - 1); k_col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=K_COLS
             #pragma HLS unroll
             // clang-format on
@@ -112,7 +112,7 @@ Col_Loop:
     for (ap_uint<13> col = 0; col < ((img_width) >> XF_BITSHIFT(NPC)) + col_loop_var;
          col++) // Image width should be multiple of NPC
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         #pragma HLS pipeline
         #pragma HLS LOOP_FLATTEN OFF
@@ -128,7 +128,7 @@ Col_Loop:
         }
 
         for (int idx = 0; idx < K_ROWS; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=K_ROWS max=K_ROWS
             #pragma HLS UNROLL
             // clang-format on
@@ -143,7 +143,7 @@ Col_Loop:
 
         /////////////////////	Extracting 8 pixels from packed data ////////////////////////
         for (int extract_px = 0; extract_px < K_ROWS; extract_px++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS
             #pragma HLS unroll
             // clang-format on
@@ -151,7 +151,7 @@ Col_Loop:
             xfExtractPixels<NPC, XF_WORDWIDTH(TYPE, NPC), XF_DEPTH(TYPE, NPC)>(src_buf_temp_copy_extract,
                                                                                buf_cop[extract_px], 0);
             for (int ext_copy = 0; ext_copy < npc; ext_copy++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 src_buf[extract_px][(K_COLS - 1) + ext_copy] = src_buf_temp_copy_extract[ext_copy];
@@ -163,7 +163,7 @@ Col_Loop:
         XF_PTUNAME(TYPE) OutputValues[XF_NPIXPERCYCLE(NPC)];
 
         for (int iter = 0; iter < npc; iter++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             // clang-format on
             for (int copyi = 0; copyi < K_ROWS; copyi++) {
@@ -208,11 +208,11 @@ Col_Loop:
         ////////////////////	Shifting the buffers in 8-pixel mode////////////////////////
 
         for (ap_uint<13> extract_px = 0; extract_px < K_ROWS; extract_px++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=K_ROWS max=K_ROWS
             // clang-format on
             for (ap_uint<13> col_warp = 0; col_warp < (K_COLS - 1); col_warp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 #pragma HLS LOOP_TRIPCOUNT min=K_COLS max=K_COLS
                 // clang-format on
@@ -233,7 +233,7 @@ void xfdilate(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
               uint16_t img_width,
               unsigned char kernel[K_ROWS][K_COLS]) {
     ap_uint<13> row_ind[K_ROWS];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=row_ind complete dim=1
     // clang-format on
 
@@ -241,7 +241,7 @@ void xfdilate(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     ap_uint<13> row, col;
 
     XF_PTUNAME(TYPE) src_buf[K_ROWS][XF_NPIXPERCYCLE(NPC) + (K_COLS - 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=2
     // clang-format on
@@ -249,7 +249,7 @@ void xfdilate(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     XF_TNAME(TYPE, NPC) P0;
 
     XF_TNAME(TYPE, NPC) buf[K_ROWS][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
@@ -257,7 +257,7 @@ void xfdilate(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     // initializing row index
 
     for (int init_row_ind = 0; init_row_ind < K_ROWS; init_row_ind++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS
         // clang-format on
         row_ind[init_row_ind] = init_row_ind;
@@ -268,11 +268,11 @@ void xfdilate(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
 // Reading the first row of image and initializing the buf
 read_lines:
     for (ap_uint<13> i_row = (K_ROWS >> 1); i_row < (K_ROWS - 1); i_row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS
         // clang-format on
         for (ap_uint<13> i_col = 0; i_col<img_width>> XF_BITSHIFT(NPC); i_col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TC/NPC
             #pragma HLS pipeline
             #pragma HLS LOOP_FLATTEN OFF
@@ -285,11 +285,11 @@ read_lines:
 // takes care of top borders ( intializing them with first row of image)
 init_boarder:
     for (ap_uint<13> i_row = 0; i_row<K_ROWS>> 1; i_row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS
         // clang-format on
         for (ap_uint<13> i_col = 0; i_col<img_width>> XF_BITSHIFT(NPC); i_col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TC/NPC
             #pragma HLS UNROLL
             // clang-format on
@@ -300,7 +300,7 @@ init_boarder:
     int wr_ind = 0;
 Row_Loop:
     for (row = (K_ROWS >> 1); row < img_height + (K_ROWS >> 1); row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
 
@@ -311,7 +311,7 @@ Row_Loop:
         // update indices (by cyclic shifting )
         ap_uint<13> zero_ind = row_ind[0];
         for (ap_uint<13> init_row_ind = 0; init_row_ind < K_ROWS - 1; init_row_ind++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=K_ROWS
             #pragma HLS UNROLL
             // clang-format on
@@ -333,7 +333,7 @@ template <int BORDER_TYPE,
 void dilate(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
             xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst,
             unsigned char _kernel[K_ROWS * K_COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -364,7 +364,7 @@ void dilate(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
 #define NEW_K_COLS (K_COLS + ((ITERATIONS - 1) * (K_COLS - 1)))
 
         unsigned char kernel_new[NEW_K_ROWS][NEW_K_COLS];
-        // clang-format off
+// clang-format off
         #pragma HLS array partition variable=kernel_new dim=0
         // clang-format on
         for (unsigned char i = 0; i < NEW_K_ROWS; i++) {
@@ -377,7 +377,7 @@ void dilate(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
                  NEW_K_ROWS, NEW_K_COLS>(_src, _dst, imgheight, imgwidth, kernel_new);
     } else {
         unsigned char kernel[K_ROWS][K_COLS];
-        // clang-format off
+// clang-format off
         #pragma HLS array partition variable=kernel complete dim=0
         // clang-format on
         for (unsigned char i = 0; i < K_ROWS; i++) {

@@ -57,13 +57,13 @@ void xFreduceKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_DST) internal_res;
 
     XF_SNAME(WORDWIDTH_DST) line_buf[(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=line_buf core=RAM_S2P_BRAM
     // clang-format on
 
     if (dim == 0) {
         for (int i = 0; i < (width >> XF_BITSHIFT(NPC)); i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             // clang-format on
             line_buf[i] = _src_mat.read(i);
@@ -80,7 +80,7 @@ void xFreduceKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     }
 rowLoop:
     for (i = var; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
         // clang-format on
@@ -93,7 +93,7 @@ rowLoop:
         }
     colLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -168,7 +168,7 @@ void reduce(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

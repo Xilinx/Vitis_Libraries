@@ -27,7 +27,7 @@ void load_data(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& inStrm,
                ap_ufixed<SCALE_WIDTH, SCALE_INT> scaleI,
                ap_fixed<SCCMP_WIDTH, SCCMP_INT>& fracI,
                int& prevIceil) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     // Calculate the input row needed to compute the current output
@@ -42,7 +42,7 @@ void load_data(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& inStrm,
         // setting a flag that the input is read
         flagLoaded = 1;
         for (int i = 0; i < cols; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXWIDTH
             #pragma HLS pipeline ii=1
             #pragma HLS LOOP_FLATTEN OFF
@@ -64,7 +64,7 @@ ap_fixed<FLOW_WIDTH, FLOW_INT> compute_result(ap_fixed<SCCMP_WIDTH, SCCMP_INT> f
                                               ap_fixed<FLOW_WIDTH, FLOW_INT> i1,
                                               ap_fixed<FLOW_WIDTH, FLOW_INT> i2,
                                               ap_fixed<FLOW_WIDTH, FLOW_INT> i3) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     ap_fixed<18, 1> fi = (fracI);
@@ -102,7 +102,7 @@ void process(ap_fixed<FLOW_WIDTH, FLOW_INT> buf[MAXWIDTH],
              ap_ufixed<SCALE_WIDTH, SCALE_INT> scaleJ,
              ap_fixed<SCCMP_WIDTH, SCCMP_INT> fracI,
              int mul) {
-    // clang-format off
+// clang-format off
     #pragma HLS array_partition variable=buffer dim=1 complete
     #pragma HLS inline off
     // clang-format on
@@ -112,7 +112,7 @@ void process(ap_fixed<FLOW_WIDTH, FLOW_INT> buf[MAXWIDTH],
     ap_fixed<FLOW_WIDTH, FLOW_INT> i0 = 0, i1 = 0, i2 = 0, i3 = 0;
 L3:
     for (ap_uint<16> j = 0; j < outCols; j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXWIDTH
         #pragma HLS pipeline
         #pragma HLS LOOP_FLATTEN OFF
@@ -264,17 +264,17 @@ void scale_up(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& inStrm,
               int mul,
               const bool scale_up_flag,
               float scale_comp) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     // Buffer to store two rows of the input image. These rows are updated in the process function
     ap_fixed<FLOW_WIDTH, FLOW_INT> buffer[2][MAXWIDTH];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS array_reshape variable=buffer dim=1 complete
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS array_partition variable=buffer dim=1 complete
         // clang-format on
     }
@@ -283,7 +283,7 @@ void scale_up(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& inStrm,
     ap_fixed<FLOW_WIDTH, FLOW_INT> buf0[MAXWIDTH], buf1[MAXWIDTH];
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS array_reshape variable=buf0 dim=1 complete
         #pragma HLS array_reshape variable=buf1 dim=1 complete
         #pragma HLS RESOURCE variable=buffer core=RAM_S2P_URAM
@@ -312,11 +312,11 @@ void scale_up(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& inStrm,
     // output stream
     if (scale_up_flag == 0) {
         for (ap_uint<16> i = 0; i < outRows; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXHEIGHT
             // clang-format on
             for (ap_uint<16> j = 0; j < outCols; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXWIDTH
                 #pragma HLS pipeline II=1
                 #pragma HLS LOOP_FLATTEN OFF
@@ -334,7 +334,7 @@ void scale_up(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& inStrm,
     // run the ping pong buffer for outRows -1 times
     L2:
         for (ap_uint<16> i = 0; i < outRows - 1; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=MAXHEIGHT
             // clang-format on
             if (flag == 0) {

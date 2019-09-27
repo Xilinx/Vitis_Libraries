@@ -24,7 +24,7 @@ void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
                      ap_uint<PTR_WIDTH>* img_out,
                      int height,
                      int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=mask_in       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=color   	offset=slave  bundle=gmem2
@@ -38,13 +38,13 @@ void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
     xf::cv::Mat<M_TYPE, HEIGHT, WIDTH, NPC1> maskInput(height, width);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=maskInput.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

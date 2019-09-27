@@ -20,7 +20,7 @@ extern "C" {
 
 void bilateralfilter(
     ap_uint<PTR_WIDTH>* img_in, float sigma_color, float sigma_space, int rows, int cols, ap_uint<PTR_WIDTH>* img_out) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE s_axilite  port=sigma_color 		          bundle=control
@@ -33,12 +33,12 @@ void bilateralfilter(
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

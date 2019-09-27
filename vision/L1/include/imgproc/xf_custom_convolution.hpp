@@ -35,18 +35,18 @@ namespace cv {
 template <int DEPTH_SRC, int DEPTH_DST, int filter_height, int filter_width, int NPC, int buf_width, typename buf_type>
 XF_PTNAME(DEPTH_DST)
 xFApplyCustomFilter(buf_type _lbuf[][buf_width], short int _kernel[][filter_width], int ind, unsigned char shift) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     XF_PTNAME(DEPTH_DST) res = 0;
     ap_int32_t tmp_res = 0;
     ap_int24_t conv_val[filter_height][filter_width];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=conv_val complete dim=0
     // clang-format on
 
     ap_int32_t row_sum[filter_height], fix_res = 0, tmp_row_sum = 0;
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=row_sum complete dim=1
     // clang-format on
 
@@ -55,14 +55,14 @@ xFApplyCustomFilter(buf_type _lbuf[][buf_width], short int _kernel[][filter_widt
 // performing kernel operation and storing in the temporary buffer
 filterLoopI:
     for (uchar i = 0; i < filter_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         arr_ind = ind;
 
     filterLoopJ:
         for (uchar j = 0; j < filter_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             conv_val[i][j] = (_lbuf[i][arr_ind] * _kernel[i][j]);
@@ -73,14 +73,14 @@ filterLoopI:
 // accumulating the row sum values of the temporary buffer
 addFilterLoopI:
     for (uchar i = 0; i < filter_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         tmp_row_sum = 0;
 
     addFilterLoopJ:
         for (uchar j = 0; j < filter_width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             tmp_row_sum += conv_val[i][j];
@@ -91,7 +91,7 @@ addFilterLoopI:
 // adding the row_sum buffer elements and storing in the result
 resultFilterLoopI:
     for (uchar i = 0; i < filter_height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         fix_res += row_sum[i];
@@ -140,13 +140,13 @@ void xFComputeCustomFilter(XF_PTNAME(DEPTH_SRC) _lbuf[][buf_width],
                            short int _kernel[][filter_width],
                            XF_PTNAME(DEPTH_DST) * _mask_value,
                            unsigned char shift) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
 // clang-format on
 // computes the filter operation depending upon the mode of parallelism
 computeFilterLoop:
     for (ap_uint<5> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         _mask_value[j] =
@@ -186,7 +186,7 @@ void Convolution_Process(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                          ap_uint<13> row,
                          int& rd_ind,
                          int& wr_ind) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     uchar step = XF_PIXELDEPTH(DEPTH_DST);
@@ -194,7 +194,7 @@ void Convolution_Process(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 mainColLoop:
     for (ap_uint<13> col = 0; col < (image_width); col++) // Width of the image
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS PIPELINE
         // clang-format on
@@ -211,7 +211,7 @@ mainColLoop:
     // loading the data from the input buffer to the temporary buffer
     fillTempBuffer_1:
         for (uchar l = 0; l < filter_height; l++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             tmp_buf[l] = buf[index[l]][col];
@@ -220,7 +220,7 @@ mainColLoop:
     // extracting the pixels from the temporary buffer to the line buffer
     extractPixelsLoop_1:
         for (uchar l = 0; l < filter_height; l++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             xfExtractPixels<NPC, WORDWIDTH_SRC, DEPTH_SRC>(&lbuf[l][(filter_width - 1)], tmp_buf[l], 0);
@@ -238,7 +238,7 @@ mainColLoop:
             if ((XF_NPIXPERCYCLE(NPC) - filter_width_factor) >= 0) {
             packMaskToTempRes_1:
                 for (uchar l = 0; l < (XF_NPIXPERCYCLE(NPC) - FW); l++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS LOOP_TRIPCOUNT min=F_COUNT max=F_COUNT
                     #pragma HLS UNROLL
                     // clang-format on
@@ -256,7 +256,7 @@ mainColLoop:
 
         packMaskToTempRes_2:
             for (uchar l = 0; l < FW; l++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=FW max=FW
                 #pragma HLS UNROLL
                 // clang-format on
@@ -273,7 +273,7 @@ mainColLoop:
 
         packMaskToTempRes_3:
             for (ap_uint<13> l = 0; l < (XF_NPIXPERCYCLE(NPC) - FW); l++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=F_COUNT max=F_COUNT
                 #pragma HLS UNROLL
                 // clang-format on
@@ -285,12 +285,12 @@ mainColLoop:
     // re-initializing the line buffers
     copyEndPixelsI_1:
         for (uchar i = 0; i < filter_height; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
-            // clang-format on
+        // clang-format on
         copyEndPixelsJ_1:
             for (uchar l = 0; l < (filter_width - 1); l++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 lbuf[i][l] = lbuf[i][XF_NPIXPERCYCLE(NPC) + l];
@@ -335,33 +335,33 @@ void xFCustomConvolutionKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 
     uchar row_ind = 0, row_ptr = 0;
     unsigned char index[filter_height];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=index complete dim=1
     // clang-format on
 
     XF_SNAME(WORDWIDTH_DST) P0;
     XF_SNAME(WORDWIDTH_SRC) buf[filter_height][COLS >> XF_BITSHIFT(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
 
     XF_PTNAME(DEPTH_SRC) lbuf[filter_height][XF_NPIXPERCYCLE(NPC) + filter_width - 1];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=lbuf complete dim=0
     // clang-format on
 
     XF_SNAME(WORDWIDTH_SRC) tmp_buf[filter_height];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_buf complete dim=1
     // clang-format on
 
     XF_PTNAME(DEPTH_DST) mask_value[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=mask_value complete dim=1
     // clang-format on
 
     XF_PTNAME(DEPTH_DST) col_border_mask[(filter_width >> 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=col_border_mask complete dim=1
     // clang-format on
 
@@ -378,12 +378,12 @@ colFactorLoop:
 // initializing the first two rows to zeros
 fillBufZerosI:
     for (uchar i = 0; i < (filter_height >> 1); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
-        // clang-format on
+    // clang-format on
     fillBufZerosJ:
         for (ap_uint<13> j = 0; j < (img_width); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_COUNT max=COLS_COUNT
             #pragma HLS UNROLL
             // clang-format on
@@ -395,12 +395,12 @@ fillBufZerosI:
 // reading the first two rows from the input stream
 readTopBorderI:
     for (uchar i = 0; i < (filter_height >> 1); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
-        // clang-format on
+    // clang-format on
     readTopBorderJ:
         for (ap_uint<13> j = 0; j < (img_width); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_COUNT max=COLS_COUNT
             #pragma HLS PIPELINE
             // clang-format on
@@ -413,7 +413,7 @@ readTopBorderI:
 // row loop from 1 to the end of the image
 mainRowLoop:
     for (ap_uint<13> row = (filter_height >> 1); row < (img_height + ((filter_height >> 1))); row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -422,7 +422,7 @@ mainRowLoop:
     // index calculation
     settingIndex_1:
         for (int l = 0; l < filter_height; l++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             if (row_ptr >= filter_height) row_ptr = 0;
@@ -433,12 +433,12 @@ mainRowLoop:
     // initializing the line buffer to zero
     fillingLineBufferZerosI_1:
         for (uchar i = 0; i < filter_height; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
-            // clang-format on
+        // clang-format on
         fillingLineBufferZerosJ_1:
             for (uchar j = 0; j < (filter_width - 1); j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 lbuf[i][j] = 0;
@@ -457,12 +457,12 @@ mainRowLoop:
     // initializing the line buffers to zero
     fillingLineBufferZerosI_2:
         for (uchar i = 0; i < filter_height; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
-            // clang-format on
+        // clang-format on
         fillingLineBufferZerosJ_2:
             for (ap_uint<13> l = (filter_width - 1); l < buf_size; l++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 lbuf[i][l] = 0;
@@ -473,7 +473,7 @@ mainRowLoop:
         if ((filter_width >> 1) > 0) {
         getMaskValue_1:
             for (uchar i = 0; i < (filter_width >> 1); i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 col_border_mask[i] = xFApplyCustomFilter<DEPTH_SRC, DEPTH_DST, filter_height, filter_width, NPC>(
@@ -485,7 +485,7 @@ mainRowLoop:
 
     packMaskToTempRes_4:
         for (uchar l = 0; l < FW; l++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=FW max=FW
             #pragma HLS UNROLL
             // clang-format on
@@ -499,7 +499,7 @@ mainRowLoop:
 
     colFactorLoopBorder:
         for (ap_uint<13> c = 0; c < col_factor; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COL_FACTOR_COUNT max=COL_FACTOR_COUNT
             // clang-format on
 
@@ -526,7 +526,7 @@ void xFApplyFilter2D(XF_PTNAME(DEPTH_SRC) _kernel_pixel[F_HEIGHT][F_WIDTH],
                      short int _kernel_filter[F_HEIGHT][F_WIDTH],
                      XF_PTNAME(DEPTH_DST) & out,
                      unsigned char shift) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
 
@@ -579,7 +579,7 @@ FILTER_LOOP_HEIGHT:
     }
 }
 static int borderInterpolate(int p, int len, int borderType) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -612,7 +612,7 @@ static void xFFilter2Dkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 {
     XF_SNAME(WORDWIDTH_SRC) fillvalue = 0;
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
 
@@ -631,7 +631,7 @@ static void xFFilter2Dkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     assert(rows <= ROWS);
     assert(cols <= COLS);
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=col_buf complete dim=0
     #pragma HLS ARRAY_PARTITION variable=&_filter_kernel complete dim=0
     #pragma HLS ARRAY_PARTITION variable=src_kernel_win complete dim=0
@@ -655,7 +655,7 @@ ROW_LOOP:
     COL_LOOP:
         for (j = 0; j < widthloop; j++) {
 // This DEPENDENCE pragma is necessary because the border mode handling is not affine.
-            // clang-format off
+// clang-format off
             #pragma HLS DEPENDENCE array inter false
             #pragma HLS LOOP_FLATTEN OFF
             #pragma HLS PIPELINE
@@ -673,7 +673,7 @@ ROW_LOOP:
                     src_kernel_win[row][col] = src_kernel_win[row][col - 1];
 
             for (ap_int<8> buf_row = 0; buf_row < K_HEIGHT; buf_row++) {
-                // Fetch the column from the line buffer to shift into the window.
+// Fetch the column from the line buffer to shift into the window.
 #ifndef __SYNTHESIS__
                 assert((x < COLS));
 #endif
@@ -750,9 +750,9 @@ void filter2D(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
               short int filter[FILTER_HEIGHT * FILTER_WIDTH],
               unsigned char _shift) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
 #ifndef __SYNTHESIS__
     assert(((_src_mat.rows <= ROWS) && (_src_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
@@ -760,7 +760,7 @@ void filter2D(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     unsigned short img_height = _src_mat.rows;
 
     short int lfilter[FILTER_HEIGHT][FILTER_WIDTH];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=lfilter complete dim=0
     // clang-format on
     for (unsigned char i = 0; i < FILTER_HEIGHT; i++) {

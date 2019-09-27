@@ -27,7 +27,7 @@ open_project -reset $PROJ
 
 add_files ${XF_PROJ_ROOT}/L1/examples/sgbm/xf_sgbm_accel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 add_files -tb ${XF_PROJ_ROOT}/L1/examples/sgbm/xf_sgbm_tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-set_top sgbm_accel
+set_top semiglobalbm_accel
 
 open_solution -reset $SOLN
 
@@ -35,7 +35,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc -argv { ../../../../../../../examples/sgbm/data/128x128.png } -clean
+  csim_design -compiler gcc -argv " ${XF_PROJ_ROOT}/L1/examples/sgbm/data/left.png ${XF_PROJ_ROOT}/L1/examples/sgbm/data/right.png " -clean
 }
 
 if {$CSYNTH == 1} {
@@ -43,7 +43,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv { ../../../../../../../examples/sgbm/data/im0.png }
+  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/sgbm/data/left.png ${XF_PROJ_ROOT}/L1/examples/sgbm/data/right.png "
 }
 
 if {$VIVADO_SYN == 1} {

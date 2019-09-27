@@ -27,16 +27,16 @@ void HarrisImg(ap_uint<INPUT_PTR_WIDTH>* inHarris,
     const int pCOLS = WIDTH;
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> in_harris_mat(harris_rows, harris_cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_harris_mat.data depth=2
     // clang-format on
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> out_harris_mat(harris_rows, harris_cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=out_harris_mat.data depth=2
     // clang-format on
 
     {
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
 

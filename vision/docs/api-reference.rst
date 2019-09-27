@@ -1,8 +1,8 @@
-.. _lib-api-reference:
+.. _libapireference:
 
-##############################
+##################################
 xfOpenCV Library API Reference
-##############################
+##################################
 
 To facilitate local memory allocation on FPGA devices, the xfOpenCV
 library functions are provided in templates with compile-time
@@ -13,9 +13,9 @@ copied back to ``cv::Mat`` to write it into the memory.
 
 .. _xf-mat-class:
 
-*******************************
+
 xf::Mat Image Container Class
-*******************************
+=================================
 
 ``xf::Mat`` is a template class that serves as a container for storing
 image data and its attributes.
@@ -25,7 +25,7 @@ image data and its attributes.
 .. _xfmat-calls-def:
 
 Class Definition
-==================
+------------------
 
 
 .. code:: c

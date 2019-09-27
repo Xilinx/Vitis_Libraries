@@ -75,7 +75,7 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 
     // partitioning across the dim-2 to restrict the BRAM utilization
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_RESHAPE variable=HA_1 cyclic factor=9 dim=2
         #pragma HLS ARRAY_RESHAPE variable=HA_2 cyclic factor=9 dim=2
         #pragma HLS ARRAY_RESHAPE variable=HA_3 cyclic factor=9 dim=2
@@ -84,13 +84,13 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
         #pragma HLS RESOURCE variable=HA_3 core=RAM_S2P_URAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=HA_1 complete dim=2
         #pragma HLS ARRAY_PARTITION variable=HA_2 complete dim=2
         #pragma HLS ARRAY_PARTITION variable=HA_3 complete dim=2
-        // clang-format on
-        // specifying the dual-port BRAM
-        // clang-format off
+// clang-format on
+// specifying the dual-port BRAM
+// clang-format off
         #pragma HLS RESOURCE variable=HA_1 core=RAM_S2P_BRAM
         #pragma HLS RESOURCE variable=HA_2 core=RAM_S2P_BRAM
         #pragma HLS RESOURCE variable=HA_3 core=RAM_S2P_BRAM
@@ -99,7 +99,7 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 
     // array to hold the sum of squared values of each cell
     ap_uint<48> ssv_1[NOHC], ssv_2[NOHC], ssv_3[NOHC];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=ssv_1 core=RAM_S2P_BRAM
     #pragma HLS RESOURCE variable=ssv_2 core=RAM_S2P_BRAM
     #pragma HLS RESOURCE variable=ssv_3 core=RAM_S2P_BRAM
@@ -107,13 +107,13 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 
     // bin center computation, in the Q9.7 format
     uint16_t bin_center[NOB];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=bin_center complete dim=0
     // clang-format on
 
     uint16_t offset = ((BIN_STRIDE << 7) >> 1), bi = 0;
     for (uchar_t i = 0; i < NOB; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
 
@@ -135,7 +135,7 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 // loop running for vertical block number of times
 verticalBlockLoop:
     for (bi = 0; bi < (novb - 1); bi++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=NOVB-1 max=NOVB-1
         // clang-format on
         if (idx == 2) {

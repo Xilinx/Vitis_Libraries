@@ -19,7 +19,7 @@
 extern "C" {
 void channel_extract_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_rgba, ap_uint<OUTPUT_PTR_WIDTH>* img_gray, uint16_t channel, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_rgba  	offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_gray  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 bundle=control
@@ -29,19 +29,19 @@ void channel_extract_accel(
     // clang-format on
 
     xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, XF_NPPC1> imgInput0;
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=imgInput0.data depth=2
     // clang-format on
     imgInput0.rows = rows;
     imgInput0.cols = cols;
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> imgOutput0;
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=imgOutput0.data depth=2
     // clang-format on
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, XF_NPPC1>(img_rgba, imgInput0);

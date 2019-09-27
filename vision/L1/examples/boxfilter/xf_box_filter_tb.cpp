@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    /*  convert to specific types  */
+/*  convert to specific types  */
 #if T_8U
     in_img.convertTo(in_conv_img, CV_8U); // Size conversion
 #elif T_16U
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     ocv_ref.create(in_img.rows, in_img.cols, in_conv_img.depth()); // create memory for output image
     diff.create(in_img.rows, in_img.cols, in_conv_img.depth());    // create memory for output image
 
-    /////////////////    OpenCV reference  /////////////////
+/////////////////    OpenCV reference  /////////////////
 #if FILTER_SIZE_3
     cv::boxFilter(in_conv_img, ocv_ref, -1, cv::Size(3, 3), cv::Point(-1, -1), true, cv::BORDER_CONSTANT);
 #elif FILTER_SIZE_5

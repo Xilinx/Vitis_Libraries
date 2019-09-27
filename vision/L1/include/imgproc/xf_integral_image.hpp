@@ -31,7 +31,7 @@ void XFIntegralImageKernel(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC>& _src_mat,
                            xf::cv::Mat<DST_TYPE, ROWS, COLS, NPC>& _dst_mat,
                            uint16_t height,
                            uint16_t width) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     XF_SNAME(XF_32UW) linebuff[COLS];
@@ -41,7 +41,7 @@ void XFIntegralImageKernel(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> i, j;
 RowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -51,7 +51,7 @@ RowLoop:
 
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             #pragma HLS LOOP_FLATTEN OFF
             #pragma HLS PIPELINE
@@ -78,9 +78,9 @@ RowLoop:
 
 template <int SRC_TYPE, int DST_TYPE, int ROWS, int COLS, int NPC>
 void integral(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<DST_TYPE, ROWS, COLS, NPC>& _dst_mat) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
     assert(((_src_mat.rows <= ROWS) && (_dst_mat.cols <= COLS)) &&

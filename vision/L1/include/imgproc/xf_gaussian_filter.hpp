@@ -29,7 +29,7 @@ namespace xf {
 namespace cv {
 
 static void weightsghcalculation3x3(float sigma, unsigned char* weights) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -61,7 +61,7 @@ static void weightsghcalculation3x3(float sigma, unsigned char* weights) {
 }
 
 static void weightsghcalculation5x5(float sigma, unsigned char weights[5]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -93,7 +93,7 @@ static void weightsghcalculation5x5(float sigma, unsigned char weights[5]) {
 }
 
 static void weightsghcalculation7x7(float sigma, unsigned char weights[7]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -139,7 +139,7 @@ xFapplygaussian3x3(XF_PTNAME(DEPTH) D1,
                    XF_PTNAME(DEPTH) D8,
                    XF_PTNAME(DEPTH) D9,
                    unsigned char* weights) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     XF_PTNAME(DEPTH) out_pix = 0;
@@ -176,7 +176,7 @@ xfapplygaussian5x5(XF_PTNAME(DEPTH) * src_buf1,
                    XF_PTNAME(DEPTH) * src_buf4,
                    XF_PTNAME(DEPTH) * src_buf5,
                    unsigned char weights[5]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     unsigned int sum = 0.0, sumval = 0;
@@ -236,7 +236,7 @@ xfapplygaussian7x7(XF_PTNAME(DEPTH) * src_buf1,
                    XF_PTNAME(DEPTH) * src_buf6,
                    XF_PTNAME(DEPTH) * src_buf7,
                    unsigned char weights[7]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -307,18 +307,18 @@ void auGaussian3x3(XF_PTNAME(DEPTH) * OutputValues,
                    XF_PTNAME(DEPTH) * src_buf2,
                    XF_PTNAME(DEPTH) * src_buf3,
                    unsigned char weights[3]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     int p = 0;
     ap_uint<24> val;
 Compute_Grad_Loop:
     for (ap_uint<5> j = 0; j < (XF_NPIXPERCYCLE(NPC)); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += 8) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
 
@@ -351,7 +351,7 @@ void ProcessGaussian3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                         unsigned char* weights,
                         int& read_index,
                         int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -361,7 +361,7 @@ void ProcessGaussian3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -441,14 +441,14 @@ void xfGaussianFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_PTNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=OutputValues complete dim=1
     // clang-format on
 
     XF_PTNAME(DEPTH)
     src_buf1[XF_NPIXPERCYCLE(NPC) + 2] = {0}, src_buf2[XF_NPIXPERCYCLE(NPC) + 2] = {0},
                                     src_buf3[XF_NPIXPERCYCLE(NPC) + 2] = {0};
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -457,7 +457,7 @@ void xfGaussianFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH) P0;
 
     XF_SNAME(WORDWIDTH) buf[3][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
@@ -465,7 +465,7 @@ void xfGaussianFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -477,7 +477,7 @@ Clear_Row_Loop:
 
 Row_Loop:
     for (row = 1; row < img_height + 1; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         if (row_ind == 2) {
@@ -551,7 +551,7 @@ void xFGaussian5x5(XF_PTNAME(DEPTH) * OutputValues,
                    XF_PTNAME(DEPTH) * src_buf4,
                    XF_PTNAME(DEPTH) * src_buf5,
                    unsigned char weights[5]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_PTNAME(DEPTH) val = 0, p = 0;
@@ -585,7 +585,7 @@ void ProcessGaussian5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                         unsigned char weights[5],
                         int& read_index,
                         int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_SNAME(WORDWIDTH) buf0, buf1, buf2, buf3, buf4;
@@ -596,7 +596,7 @@ void ProcessGaussian5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -629,7 +629,7 @@ Col_Loop:
                                                              src_buf5, weights);
 
         for (ap_uint<4> i = 0; i < 4; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             src_buf1[i] = src_buf1[buf_size - (4 - i)];
@@ -694,7 +694,7 @@ void xFGaussianFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_PTNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=OutputValues complete dim=1
     // clang-format on
 
@@ -703,7 +703,7 @@ void xFGaussianFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_PTNAME(DEPTH)
     src_buf1[XF_NPIXPERCYCLE(NPC) + 4], src_buf2[XF_NPIXPERCYCLE(NPC) + 4], src_buf3[XF_NPIXPERCYCLE(NPC) + 4],
         src_buf4[XF_NPIXPERCYCLE(NPC) + 4], src_buf5[XF_NPIXPERCYCLE(NPC) + 4];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -715,7 +715,7 @@ void xFGaussianFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH) inter_valx = 0;
 
     XF_SNAME(WORDWIDTH) buf[5][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
@@ -724,7 +724,7 @@ void xFGaussianFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -737,7 +737,7 @@ Clear_Row_Loop:
 
 Read_Row2_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -748,7 +748,7 @@ Read_Row2_Loop:
 
 Row_Loop:
     for (row = 2; row < img_height + 2; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -799,7 +799,7 @@ Row_Loop:
 
         if ((NPC == XF_NPPC8) || (NPC == XF_NPPC16)) {
             for (i = 0; i < 6; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 src_buf1[buf_size + i - (XF_NPIXPERCYCLE(NPC)) + 2] = 0;
@@ -821,7 +821,7 @@ Row_Loop:
             _out_mat.write(write_index++, inter_valx);
 
         } else {
-            // clang-format off
+// clang-format off
             #pragma HLS ALLOCATION instances=xfapplygaussian5x5 limit=1
             // clang-format on
             src_buf1[buf_size - 1] = 0;
@@ -836,7 +836,7 @@ Row_Loop:
 
             _out_mat.write(write_index++, inter_valx);
             for (ap_uint<4> i = 0; i < 4; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 src_buf1[i] = src_buf1[buf_size - (4 - i)];
@@ -870,11 +870,11 @@ void xFGaussian7x7(XF_PTNAME(DEPTH) * OutputValues,
                    XF_PTNAME(DEPTH) * src_buf6,
                    XF_PTNAME(DEPTH) * src_buf7,
                    unsigned char weights[7]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     for (ap_uint<9> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=8 max=8
         #pragma HLS UNROLL
         // clang-format on
@@ -913,7 +913,7 @@ void ProcessGaussian7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                         unsigned char weights[7],
                         int& read_index,
                         int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_SNAME(WORDWIDTH) buf0, buf1, buf2, buf3, buf4, buf5, buf6;
@@ -922,7 +922,7 @@ void ProcessGaussian7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1009,7 +1009,7 @@ void xFGaussianFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_PTNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=OutputValues complete dim=1
     // clang-format on
 
@@ -1018,7 +1018,7 @@ void xFGaussianFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     src_buf1[XF_NPIXPERCYCLE(NPC) + 6], src_buf2[XF_NPIXPERCYCLE(NPC) + 6], src_buf3[XF_NPIXPERCYCLE(NPC) + 6],
         src_buf4[XF_NPIXPERCYCLE(NPC) + 6], src_buf5[XF_NPIXPERCYCLE(NPC) + 6];
     XF_PTNAME(DEPTH) src_buf6[XF_NPIXPERCYCLE(NPC) + 6], src_buf7[XF_NPIXPERCYCLE(NPC) + 6];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -1032,7 +1032,7 @@ void xFGaussianFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     uint16_t shiftx = 0;
 
     XF_SNAME(WORDWIDTH) buf[7][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
@@ -1040,7 +1040,7 @@ void xFGaussianFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     row_ind = 3;
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1053,7 +1053,7 @@ Clear_Row_Loop:
 
 Read_Row1_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1064,7 +1064,7 @@ Read_Row1_Loop:
 
 Read_Row2_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1075,7 +1075,7 @@ Read_Row2_Loop:
 
 Row_Loop:
     for (row = 3; row < img_height + 3; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         // modify the buffer indices to re use
@@ -1138,7 +1138,7 @@ Row_Loop:
         }
 
         for (i = 0; i < 6; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             src_buf1[i] = 0;
@@ -1157,7 +1157,7 @@ Row_Loop:
 
         if ((NPC == XF_NPPC8) || (NPC == XF_NPPC16)) {
             for (i = 0; i < 8; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=8 max=8
                 #pragma HLS unroll
                 // clang-format on
@@ -1171,7 +1171,7 @@ Row_Loop:
             }
 
             for (i = 0; i < 3; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=3
                 #pragma HLS unroll
                 // clang-format on
@@ -1197,7 +1197,7 @@ Row_Loop:
             src_buf7[6] = 0;
 
             for (i = 0; i < 3; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=3
                 #pragma HLS unroll
                 #pragma HLS ALLOCATION instances=xfapplygaussian7x7 limit=1
@@ -1237,7 +1237,7 @@ Row_Loop:
 
 template <int FILTER_SIZE, int BORDER_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void GaussianBlur(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst, float sigma) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -1245,7 +1245,7 @@ void GaussianBlur(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, 
 
     if (FILTER_SIZE == XF_FILTER_3X3) {
         unsigned char weights[3];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=weights complete dim=1
         // clang-format on
         weightsghcalculation3x3(sigma, weights);
@@ -1254,7 +1254,7 @@ void GaussianBlur(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, 
                                                                                   weights);
     } else if (FILTER_SIZE == XF_FILTER_5X5) {
         unsigned char weights[5];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=weights complete dim=1
         // clang-format on
         weightsghcalculation5x5(sigma, weights);
@@ -1263,7 +1263,7 @@ void GaussianBlur(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, 
                                                                                          imgwidth, weights);
     } else if (FILTER_SIZE == XF_FILTER_7X7) {
         unsigned char weights[7];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=weights complete dim=1
         // clang-format on
         weightsghcalculation7x7(sigma, weights);

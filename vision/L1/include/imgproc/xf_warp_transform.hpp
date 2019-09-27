@@ -47,7 +47,7 @@ void store_EvOd_image1(XF_TNAME(DEPTH, NPC) in_pixel,
                        XF_TNAME(DEPTH, NPC) store1_pt_2OdR_EvC[(STORE_LINES >> 2)][COLS],
                        XF_TNAME(DEPTH, NPC) store1_pt_2EvR_OdC[(STORE_LINES >> 2)][COLS],
                        XF_TNAME(DEPTH, NPC) store1_pt_2OdR_OdC[(STORE_LINES >> 2)][COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     //	const int COLS = COLS;
@@ -87,7 +87,7 @@ retrieve_EvOd_image1(int i,
                      XF_TNAME(DEPTH, NPC) store1_pt_2OdR_EvC[(STORE_LINES >> 2)][COLS],
                      XF_TNAME(DEPTH, NPC) store1_pt_2EvR_OdC[(STORE_LINES >> 2)][COLS],
                      XF_TNAME(DEPTH, NPC) store1_pt_2OdR_OdC[(STORE_LINES >> 2)][COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     //	const int COLS = COLS;
@@ -141,7 +141,7 @@ retrieve_EvOd_image4x1(int i,
                        XF_TNAME(DEPTH, NPC) store1_pt_2OdR_EvC[(STORE_LINES >> 2)][COLS],
                        XF_TNAME(DEPTH, NPC) store1_pt_2EvR_OdC[(STORE_LINES >> 2)][COLS],
                        XF_TNAME(DEPTH, NPC) store1_pt_2OdR_OdC[(STORE_LINES >> 2)][COLS]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     //	const int COLS = COLS;
@@ -260,7 +260,7 @@ retrieve_EvOd_image4x1(int i,
         }
     }
     for (ap_uint<10> c = 0, k = 0; c < PLANES; c++, k += 8) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         op_val1 = (A * px00.range(k + 7, k));
@@ -279,12 +279,12 @@ void store_in_UramNN(XF_TNAME(DEPTH, NPC) in_pixel,
                      ap_uint<16> i,
                      ap_uint<16> j,
                      ap_uint<64> bufUram[PLANES][STORE_LINES][(COLS + 7) / 8]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     static XF_TNAME(DEPTH, NPC) sx8[8];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=sx8 complete dim=1
     // clang-format on
     sx8[j % 8] = in_pixel;
@@ -304,7 +304,7 @@ void store_in_UramBL(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
                      ap_uint<24> pixval[PLANES],
                      ap_uint<48> pixval_2[PLANES],
                      ap_uint<24> prev_pixval[PLANES]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -326,7 +326,7 @@ void store_in_UramBL(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
     }*/
 
     ap_uint<24> lineBuf[PLANES][(COLS + 1) / 2];
-    // clang-format off
+// clang-format off
     #pragma HLS resource variable=lineBuf core=RAM_S2P_BRAM latency=1
     #pragma HLS ARRAY_PARTITION variable=lineBuf dim=1
     // clang-format on
@@ -336,7 +336,7 @@ void store_in_UramBL(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
     static XF_TNAME(DEPTH, NPC) in_pixel;
     if (j < img_cols) in_pixel = input_image.read();
     for (int pl = 0, bit = 0; pl < PLANES; pl++, bit += 8) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         if (store_col && (j != 0)) {
@@ -380,13 +380,13 @@ void store_in_UramBL(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
 template <int COLS, int PLANES, int STORE_LINES, int DEPTH, int NPC>
 XF_TNAME(DEPTH, NPC)
 retrieve_UramNN(int i, int j, ap_uint<64> bufUram[PLANES][STORE_LINES][(COLS + 7) / 8]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     i = i > (STORE_LINES - 1) ? (i - STORE_LINES) : ((i < 0) ? (i + STORE_LINES) : i);
     XF_TNAME(DEPTH, NPC) dx8[8];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=dx8 complete dim=1
     // clang-format on
     for (int pl = 0, bit = 0; pl < PLANES; pl++, bit += 8)
@@ -398,7 +398,7 @@ template <int COLS, int PLANES, int STORE_LINES, int DEPTH, int NPC>
 XF_TNAME(DEPTH, NPC)
 retrieve_UramBL(
     int i, int j, int A, int B, int C, int D, ap_uint<72> bufUram[PLANES][(STORE_LINES + 1) / 2][(COLS + 1) / 2]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -406,7 +406,7 @@ retrieve_UramBL(
 
     XF_TNAME(DEPTH, NPC) d3x3[9];
     XF_TNAME(DEPTH, NPC) op_val;
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=d3x3 complete dim=0
     // clang-format on
 
@@ -459,13 +459,13 @@ int xFwarpTransformKernel(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
                           float P_matrix[9],
                           short img_rows,
                           short img_cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
-    // clang-format on
-    // dividing memory (0:STORE_LINES-1,0:COLS-1) to ensure that the same memory
-    // is not accesses more than once per iteration
-    // removing intra and inter read dependencies between the reads and writes of memories
-    // declaring them as true port brams
+// clang-format on
+// dividing memory (0:STORE_LINES-1,0:COLS-1) to ensure that the same memory
+// is not accesses more than once per iteration
+// removing intra and inter read dependencies between the reads and writes of memories
+// declaring them as true port brams
 #ifndef __SYNTHESIS__
     assert(((img_rows <= ROWS) && (img_cols <= COLS)) && "ROWS and COLS should be greater than input image");
 
@@ -478,7 +478,7 @@ int xFwarpTransformKernel(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
     XF_TNAME(DEPTH, NPC) store1_pt_2EvR_OdC[((STORE_LINES + 3) >> 2)][COLS];
     XF_TNAME(DEPTH, NPC) store1_pt_2OdR_EvC[((STORE_LINES + 3) >> 2)][COLS];
     XF_TNAME(DEPTH, NPC) store1_pt_2OdR_OdC[((STORE_LINES + 3) >> 2)][COLS];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=store1_pt_2EvR_EvC complete dim=1
     #pragma HLS ARRAY_PARTITION variable=store1_pt_2EvR_OdC complete dim=1
     #pragma HLS ARRAY_PARTITION variable=store1_pt_2OdR_EvC complete dim=1
@@ -499,14 +499,14 @@ int xFwarpTransformKernel(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
 
     // URAM based storages
     ap_uint<64> bufUramNN[PLANES][STORE_LINES][(COLS + 7) / 8];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE   variable=bufUramNN core= RAM_T2P_URAM latency=2
     #pragma HLS dependence variable=bufUramNN inter false
     #pragma HLS ARRAY_PARTITION variable=bufUramNN complete dim=1
     // clang-format on
     // URAM storage garnularity for BL inerpolation is 3x3-pel block in 2x2-pel picture grid, it fits to one URAM word
     ap_uint<72> bufUramBL[PLANES][(STORE_LINES + 1) / 2][(COLS + 1) / 2];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE   variable=bufUramBL core=RAM_T2P_URAM latency=2
     #pragma HLS dependence variable=bufUramBL inter false
     #pragma HLS ARRAY_PARTITION variable=bufUramBL complete dim=1
@@ -519,18 +519,18 @@ int xFwarpTransformKernel(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
 
     // copying transformation matrix to a local variable
     float R[3][3];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=R complete dim=1
     #pragma HLS ARRAY_PARTITION variable=R complete dim=2
 // clang-format on
 COPY_MAT1:
     for (i = 0; i < 3; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=3 max=3 avg=3
-        // clang-format on
+    // clang-format on
     COPY_MAT2:
         for (j = 0; j < 3; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=3 max=3 avg=3
             // clang-format on
             R[i][j] = float(P_matrix[i * 3 + j]);
@@ -539,7 +539,7 @@ COPY_MAT1:
     // output of the transformation matrix multiplication
     // partitioning the array to avoid memory read/write operations
     image_comp output_vec[3];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=output_vec complete dim=1
     // clang-format on
 
@@ -575,7 +575,7 @@ COPY_MAT1:
     ap_uint<24> prev_pixval[PLANES];
 
     for (int pl = 0; pl < PLANES; pl++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         temppix[pl] = 0;
@@ -587,14 +587,14 @@ COPY_MAT1:
 // main loop
 MAIN_ROWS:
     for (i = 0; i < (img_rows + START_ROW); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         // Initialize for every row
         store_col = 1;
     MAIN_COLS:
         for (j = 0; j < (img_cols + 1); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_FLATTEN off
@@ -760,7 +760,7 @@ template <int STORE_LINES,
 void warpTransform(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
                    xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
                    float P_matrix[9]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     #pragma HLS DATAFLOW
     // clang-format on
@@ -768,11 +768,11 @@ void warpTransform(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
     hls::stream<XF_TNAME(TYPE, NPC)> out_stream;
 
     for (int i = 0; i < _src_mat.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_src_mat.cols)>> XF_BITSHIFT(NPC); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             // clang-format on
@@ -785,11 +785,11 @@ void warpTransform(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
                           INTERPOLATION_TYPE, USE_URAM>(in_stream, out_stream, P_matrix, _src_mat.rows, _src_mat.cols);
 
     for (int i = 0; i < _dst_mat.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j<(_dst_mat.cols)>> XF_BITSHIFT(NPC); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE
             // clang-format on

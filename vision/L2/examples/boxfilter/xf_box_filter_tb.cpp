@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    /*  convert to specific types  */
+/*  convert to specific types  */
 #if T_8U
     in_img.convertTo(in_conv_img, CV_8U); // Size conversion
     int in_bytes = 1;
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     out_img.create(in_img.rows, in_img.cols, in_conv_img.depth()); // create memory for output image
     diff.create(in_img.rows, in_img.cols, in_conv_img.depth());    // create memory for output image
 
-    /////////////////    OpenCV reference  /////////////////
+/////////////////    OpenCV reference  /////////////////
 #if FILTER_SIZE_3
     cv::boxFilter(in_conv_img, ocv_ref, -1, cv::Size(3, 3), cv::Point(-1, -1), true, cv::BORDER_CONSTANT);
 #elif FILTER_SIZE_5
@@ -79,8 +79,14 @@ int main(int argc, char** argv) {
     cl::Program program(context, devices, bins);
     cl::Kernel krnl(program, "box_filter_accel");
 
+    printf("before  cl buffer .... !!!\n");
+
     cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * in_bytes));
     cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width * in_bytes));
+
+    printf("after  cl buffer .... !!!\n");
+
+    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, height * width * in_bytes, in_conv_img.data);
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);
@@ -88,7 +94,7 @@ int main(int argc, char** argv) {
     krnl.setArg(2, height);
     krnl.setArg(3, width);
 
-    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, height * width * in_bytes, in_img.data);
+    printf("after kernel args .... !!!\n");
 
     // Profiling Objects
     cl_ulong start = 0;

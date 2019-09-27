@@ -75,14 +75,14 @@ void xfPhaseKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
 
 rowLoop:
     for (ap_uint<13> i = 0; i < (imgheight); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (ap_uint<13> j = 0; j < (imgwidth); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -94,7 +94,7 @@ rowLoop:
 
         procLoop:
             for (ap_uint<9> k = 0; k < proc_loop; k += step) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 p = val_src1.range(k + (step - 1), k); // Get bits from certain range of positions.
@@ -159,7 +159,7 @@ void phase(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_matx,
     uint16_t imgwidth = _src_matx.cols >> XF_BITSHIFT(NPC);
     uint16_t imgheight = _src_matx.rows;
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

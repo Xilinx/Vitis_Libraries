@@ -51,6 +51,6 @@ struct ap_axiu {
 };
 
 // typedef ap_axis<int D, int U, int TI, int TD> ap_axis_unsigned<int D, int U, int TI, int TD>;
-} // namespace cv
 } // namespace xf
+} // namespace cv
 #endif

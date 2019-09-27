@@ -29,7 +29,7 @@ void arithm_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
                                    ,
                                    EXTRA_ARG
 #endif
-    ); // MaxS, MinS, set)
+                                   ); // MaxS, MinS, set)
 
     //		xf::cv::absdiff< TYPE, HEIGHT, WIDTH, NPC1 >(imgInput1,imgInput2,imgOutput);
     //		xf::cv::add<XF_CONVERT_POLICY_SATURATE, TYPE, HEIGHT, WIDTH, NPC1 >(imgInput1,imgInput2,imgOutput);
@@ -38,10 +38,11 @@ void arithm_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
     //		xf::cv::bitwise_or<TYPE, HEIGHT, WIDTH, NPC1 >(imgInput1,imgInput2,imgOutput);
     //		xf::cv::bitwise_not<TYPE, HEIGHT, WIDTH, NPC1>(imgInput1,imgOutput);
     //		xf::cv::bitwise_xor< TYPE, HEIGHT, WIDTH, NPC1 >(imgInput1,imgInput2,imgOutput);
-    //		xf::cv::multiply< XF_CONVERT_POLICY_SATURATE,TYPE, HEIGHT, WIDTH, NPC1
-    //>(imgInput1,imgInput2,imgOutput,0.05); 		xf::cv::Max< TYPE, HEIGHT,
-    //WIDTH,NPC1>(imgInput1,imgInput2,imgOutput); 		xf::cv::Min< TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgInput2,imgOutput);
-    //				xf::cv::compare<XF_CMP_NE, TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgInput2,imgOutput);
+    //		xf::cv::multiply< XF_CONVERT_POLICY_SATURATE,TYPE, HEIGHT, WIDTH,
+    //NPC1>(imgInput1,imgInput2,imgOutput,0.05);
+    //		xf::cv::Max< TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgInput2,imgOutput);
+    //		xf::cv::Min< TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgInput2,imgOutput);
+    //		xf::cv::compare<XF_CMP_NE, TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgInput2,imgOutput);
     //		xf::cv::zero<TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgOutput);
 }
 
@@ -55,12 +56,9 @@ void arithm_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
     //	xf::cv::SubS	<XF_CONVERT_POLICY_SATURATE, TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,scl,imgOutput);
     //	xf::cv::SubRS   <XF_CONVERT_POLICY_SATURATE, TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,scl,imgOutput);
     //	xf::cv::compareS<XF_CMP_LE,                  TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,scl,imgOutput);
-    //	xf::cv::MaxS    < 							 TYPE, HEIGHT,
-    // WIDTH,NPC1>(imgInput1,scl,imgOutput);
-    //	xf::cv::MinS< 							 TYPE, HEIGHT,
-    // WIDTH,NPC1>(imgInput1,scl,imgOutput);
-    //	xf::cv::set<							 TYPE, HEIGHT,
-    // WIDTH,NPC1>(imgInput1,scl,imgOutput);
+    //	xf::cv::MaxS    <TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,scl,imgOutput);
+    //	xf::cv::MinS    <TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,scl,imgOutput);
+    //	xf::cv::set     <TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,scl,imgOutput);
 
     xf::cv::FUNCT_NAME<
 #ifdef EXTRA_PARM

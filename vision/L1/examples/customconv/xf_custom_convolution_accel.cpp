@@ -20,7 +20,7 @@ void Filter2d_accel(xf::cv::Mat<INTYPE, HEIGHT, WIDTH, NPC_T>& _src,
                     xf::cv::Mat<OUTTYPE, HEIGHT, WIDTH, NPC_T>& _dst,
                     short int* filter_ptr,
                     unsigned char shift) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi depth=9 port=filter_ptr offset=direct bundle=filter_ptr
     // clang-format on
 

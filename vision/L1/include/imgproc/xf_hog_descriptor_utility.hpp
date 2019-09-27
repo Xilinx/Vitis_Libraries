@@ -37,7 +37,7 @@ static char xFIdentifySignBits(ap_uint<24> in_val) {
 
 signBitsLoop:
     for (ap_uint<5> i = 0; i < 24; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=24 max=24
         #pragma HLS PIPELINE II=1
         // clang-format on
@@ -123,13 +123,13 @@ void xFHOGReadFromStreamKernel(hls::stream<INPUT_TYPE>& in_stream,
 
 row_loop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
 
     col_loop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE
             #pragma HLS LOOP_FLATTEN off
             #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
@@ -143,7 +143,7 @@ row_loop:
 
         no_of_channel_loop:
             for (k = 0; k < NOS; k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=NOS max=NOS
                 #pragma HLS UNROLL
                 // clang-format on
@@ -218,7 +218,7 @@ void xFWriteHOGDescKernelRB(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _block_strm,
     // feature buffer to hold the block data
     XF_SNAME(WORDWIDTH_SRC) feature_buf[NOVBPW][NOHB], block_data_1, block_data_2;
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=feature_buf core=RAM_1P_URAM
         // clang-format on
     }
@@ -237,13 +237,13 @@ void xFWriteHOGDescKernelRB(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _block_strm,
 // Initial filling of the BRAM (feature buffer)
 loop_vert_blocks_per_win_1:
     for (i = 0; i < NOVBPW; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN
-        // clang-format on
+    // clang-format on
 
     loop_horiz_blocks_per_win_1:
         for (j = 0; j < nohb; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=NOHB max=NOHB
             #pragma HLS pipeline
             // clang-format on
@@ -256,7 +256,7 @@ loop_vert_blocks_per_win_1:
 // Vertical window loop
 main_vert_win:
     for (i = 0; i < novw; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=NOVW max=NOVW
         #pragma HLS LOOP_FLATTEN off
         // clang-format on
@@ -265,7 +265,7 @@ main_vert_win:
     // Setting the row index for circular buffer organization
     settingIndex_1:
         for (j = 0; j < NOVBPW; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
 
@@ -277,16 +277,16 @@ main_vert_win:
     // horizontal Window loop
     main_horiz_win:
         for (j = 0; j < nohw; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=NOHW max=NOHW
             #pragma HLS LOOP_FLATTEN
-            // clang-format on
-            // vertical block loop
+        // clang-format on
+        // vertical block loop
         main_vert_blocks_per_win_2:
             for (x = 0; x < NOVBPW; x++) {
             main_horiz_blocks_per_win_2:
                 for (y = 0; y < NOHBPW; y++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS PIPELINE
                     // clang-format on
                     block_data_2 = feature_buf[row_idx_buf[x]][j + y];
@@ -346,7 +346,7 @@ main_vert_win:
         // filling the newer last block's data
         if (i != (novw - 1)) {
             for (j = 0; j < (NOHBPW - 1); j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS pipeline
                 // clang-format on
                 block_data_1 = _block_strm.read();
@@ -440,7 +440,7 @@ void xFWriteHOGDescKernelNRB(hls::stream<XF_SNAME(WORDWIDTH)>& _block_strm,
 
 write_loop_1:
     for (i = 0; i < (novb * nohb); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS PIPELINE
         // clang-format on
@@ -494,9 +494,9 @@ void xFWriteHOGDescNRB(hls::stream<XF_SNAME(WORDWIDTH)>& _block_strm,
             ((COLS / CELL_WIDTH) - ((BLOCK_WIDTH / CELL_WIDTH) - 1)), (sizeof(OUTPUT_TYPE) << 3),
             ((NOB * (BLOCK_WIDTH / CELL_WIDTH) * (BLOCK_HEIGHT / CELL_HEIGHT) * sizeof(XF_PTNAME(DEPTH))) /
              sizeof(OUTPUT_TYPE)),
-            sizeof(OUTPUT_TYPE),
-            ((ROWS / CELL_HEIGHT) - ((BLOCK_HEIGHT / CELL_HEIGHT) - 1)) *
-                ((COLS / CELL_WIDTH) - ((BLOCK_WIDTH / CELL_WIDTH) - 1))>(_block_strm, _desc_strm, novb, nohb);
+            sizeof(OUTPUT_TYPE), ((ROWS / CELL_HEIGHT) - ((BLOCK_HEIGHT / CELL_HEIGHT) - 1)) *
+                                     ((COLS / CELL_WIDTH) - ((BLOCK_WIDTH / CELL_WIDTH) - 1))>(_block_strm, _desc_strm,
+                                                                                               novb, nohb);
     } else {
         assert(((HOG_TYPE == XF_SHOG) || (HOG_TYPE == XF_DHOG)) && "HOG_TYPE must be either XF_SHOG or XF_DHOG");
     }
@@ -649,14 +649,14 @@ void xFHOGDuplicateKernel(hls::stream<XF_SNAME(WORDWIDTH)>& _src_strm,
     ap_uint<16> i, j;
 Row_Loop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN OFF
-        // clang-format on
+    // clang-format on
 
     Col_Loop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS PIPELINE
             // clang-format on
@@ -692,7 +692,7 @@ void xFHOGDuplicate(hls::stream<XF_SNAME(WORDWIDTH)>& _src_strm,
 #define Wg 1
 template <int OBN, int W, int I, ap_q_mode _AP_Q, ap_o_mode _AP_O>
 ap_uint<OBN> xFSqrtHOG(ap_ufixed<W, I, _AP_Q, _AP_O> x) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -713,7 +713,7 @@ ap_uint<OBN> xFSqrtHOG(ap_ufixed<W, I, _AP_Q, _AP_O> x) {
     ap_ufixed<W + Wg + 1, I + 1> result = 0;
     ap_ufixed<W + Wg + 2, I + 2> x2 = x;
     for (uchar_t i = W + Wg - offset; i > (I - 1) / 2; i -= 1) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
 

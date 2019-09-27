@@ -127,7 +127,7 @@ static void register_rho_stg1_sin(ap_fixed<28, 13, AP_RND>& rho_stg1_sino,
                                   ap_fixed<28, 13, AP_RND> rho_stg1_sini,
                                   ap_fixed<16, 1, AP_RND> sinvals,
                                   bool j_eq_width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     if (j_eq_width) // Update when it is the last pixel of row
@@ -153,7 +153,7 @@ void xfVoting(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
               ap_uint<12> accum[AngleN + 1][rhoN + 1],
               ap_uint<12> height,
               ap_uint<12> width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
 // clang-format on
 
@@ -161,13 +161,13 @@ void xfVoting(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 // Make all votes as "0"
 loop_init_r:
     for (ap_uint<13> r = 0; r < rhoN + 1; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=rhoN
         #pragma HLS PIPELINE
-        // clang-format on
+    // clang-format on
     loop_init_n:
         for (ap_uint<13> n = 0; n < AngleN + 1; n++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=AngleN
             // clang-format on
             accum[n][r] = 0;
@@ -188,7 +188,7 @@ loop_init:
     for (ap_uint<10> n = 0, ang = (MINTHETA * 2); n < AngleN;
          ang = ang + (theta), n++) // Assumtion is theta is in 6.1 format
     {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         #pragma HLS LOOP_TRIPCOUNT min=1 max=AngleN
         // clang-format on
@@ -204,7 +204,7 @@ loop_init:
         rho_stg2[(AngleN)];              // sin and cos value register (13.15)
     ap_uint<12> accval_reg_set1[AngleN]; // [MINTHETA, MAXTHETA) angles
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=accval_reg_set1 complete dim=0
     #pragma HLS ARRAY_PARTITION variable=rho_stg1_cos complete dim=0
     #pragma HLS ARRAY_PARTITION variable=rho_stg1_sin complete dim=0
@@ -246,7 +246,7 @@ loop_init:
     // FILE *fpang = fopen("hlsang.txt","w");
     // Initialization of all registers
     for (ap_uint<10> ki = 0; ki < (AngleN); ki++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
         rho_stg1_sin[ki] = (-wdt * cosvals[ki]) + (-hei * sinvals[ki]); // 13.15
@@ -275,7 +275,7 @@ loop_init:
 // Row loop
 LOOPI:
     for (ap_uint<13> i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         XF_PTNAME(DEPTH) img_pixel_val;
@@ -283,7 +283,7 @@ LOOPI:
     // Column loop
     LOOPJ:
         for (ap_uint<12> j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE
             #pragma HLS DEPENDENCE  array inter false
@@ -298,7 +298,7 @@ LOOPI:
         LOOPN1:
             for (ap_uint<10> n = 0; n < (AngleN); n++) // angle loop
             {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
 
@@ -380,7 +380,7 @@ LOOPI:
 /* Left over pixel computation. Flushing the pipeline*/
 LOOPN2:
     for (ap_uint<10> n = 0; n < (AngleN); n++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
 
@@ -402,12 +402,12 @@ void thinningCompare(ap_uint<12> vote_at_rho_theta[AngleN + 1],
                      bool cond4,
                      bool four_conds[AngleN],
                      short threshold) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
 // clang-format on
 CONDLOOP:
     for (ap_uint<10> ang2 = 0; ang2 < AngleN; ang2++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         cond1 = (vote_at_rho_theta[ang2 + 1] > vote_at_rho_theta[ang2]) ? 1 : 0;
@@ -439,7 +439,7 @@ void xfThinning(ap_uint<12> accumulator[AngleN + 1][rhoN + 1], short threshold) 
     bool cond1, cond2[AngleN + 1], cond3, cond4, four_conds[AngleN + 1], four_conds_reg[AngleN + 1],
         four_conds_reg_2[AngleN + 1];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=cond2 complete dim=0
     #pragma HLS ARRAY_PARTITION variable=vote_at_rho_theta complete dim=0
     #pragma HLS ARRAY_PARTITION variable=vote_at_rho_theta_reg complete dim=0
@@ -450,7 +450,7 @@ void xfThinning(ap_uint<12> accumulator[AngleN + 1][rhoN + 1], short threshold) 
 
     // Initialization
     for (ap_uint<10> ang1 = 0; ang1 < AngleN + 1; ang1++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         vote_at_rho_theta_reg[ang1] = 0;
@@ -462,13 +462,13 @@ void xfThinning(ap_uint<12> accumulator[AngleN + 1][rhoN + 1], short threshold) 
 
 RHOLOOPTHINNING:
     for (ap_uint<13> r = 0; r < rhoN + 1; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
-        //#pragma HLS PIPELINE
+    // clang-format on
+    //#pragma HLS PIPELINE
     THINNINGINIT:
         for (ap_uint<10> ang1 = 0; ang1 < AngleN; ang1++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             vote_at_rho_theta[ang1 + 1] = accumulator[ang1][r];
@@ -481,7 +481,7 @@ RHOLOOPTHINNING:
 
     THINWRITELOOP:
         for (ap_uint<10> ang3 = 0; ang3 < AngleN; ang3++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             if (four_conds_reg_2[ang3 + 1] && (r > 1)) accumulator[ang3][r - 2] = 0;
@@ -501,7 +501,7 @@ RHOLOOPTHINNING:
  *****************************************************************/
 template <int rhoN>
 void get_maxval_index(ap_uint<12> input_array[rhoN + 1], ap_uint<12>& maxval, ap_uint<12>& max_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -511,7 +511,7 @@ void get_maxval_index(ap_uint<12> input_array[rhoN + 1], ap_uint<12>& maxval, ap
 RHOLOOP:
     for (ap_uint<13> r = 0; r < rhoN; r++) // diagonal loop; Value @rhoN+1 is 0 anyway
     {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
 
@@ -558,14 +558,14 @@ void xfSorting(ap_uint<12> accumulator[AngleN + 1][rhoN + 1],
     ap_uint<12> maxrho = 0;
     ap_uint<10> maxangle = 0;
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=local_max complete
     #pragma HLS ARRAY_PARTITION variable=local_max_rho complete
     // clang-format on
 
     // Initialize local max (make max vote vale as 0 for each angle)
     for (ap_uint<10> i = 0; i < AngleN; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         local_max[i] = 0;
@@ -576,12 +576,12 @@ void xfSorting(ap_uint<12> accumulator[AngleN + 1][rhoN + 1],
 MAINL:
     for (ap_uint<12> li = 0; li < linesmax; li++) // linesMax loop
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=linesMax
         // clang-format on
         for (ap_uint<10> n = 0; n < AngleN; n++) // Theta loop
         {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             get_maxval_index<rhoN>(accumulator[n], local_max[n], local_max_rho[n]);
@@ -591,7 +591,7 @@ MAINL:
         ap_uint<12> maxfinal = 0;
     THETAL:
         for (ap_uint<10> n = 0; n < AngleN; n++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE
             // clang-format on
             if (local_max[n] > maxfinal) // Vote comparision
@@ -637,7 +637,7 @@ void xfHoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                   ap_uint<12> height,
                   ap_uint<12> width,
                   short linesmax) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -660,7 +660,7 @@ void xfHoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // are handled in the design. But we need memory for pad data on right
     ap_uint<12> accum[((2 * (MAXTHETA - MINTHETA)) / theta) + 1][(DIAG) + 1];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=accum complete dim=1
     #pragma HLS RESOURCE variable=accum core=RAM_T2P_BRAM
     // clang-format on
@@ -711,9 +711,9 @@ void HoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                 float outputtheta[MAXLINES],
                 short threshold,
                 short linesmax) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
 #ifndef __SYNTHESIS__
     assert(((_src_mat.rows <= ROWS) && (_src_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((NPC == XF_NPPC1) && "NPC must be XF_NPPC1");

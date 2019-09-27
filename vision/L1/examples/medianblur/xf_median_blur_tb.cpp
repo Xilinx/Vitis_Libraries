@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 
     unsigned short in_width, in_height;
 
-    /*  reading the gray/color image  */
+/*  reading the gray/color image  */
 #if GRAY
     in_img = cv::imread(argv[1], 0);
     ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);

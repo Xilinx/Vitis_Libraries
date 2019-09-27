@@ -1,11 +1,20 @@
-# xFopencv
-The xfOpenCV library is a set of 60+ kernels, optimized for Xilinx FPGAs and SoCs, based on the OpenCV computer vision library. The kernels in the xfOpenCV library are optimized and supported in the Xilinx SDx Tool Suite.
+# Vitis Vision Library
+The Vitis Vision library is a set of 60+ kernels, optimized for Xilinx FPGAs and SoCs, based on the OpenCV computer vision library. The kernels in the Vitis Vision library are optimized and supported in the Xilinx Vitis Tool Suite.
+
+# DESIGN FILE HIERARCHY
+The library is organized into the following folders -
+
+| Folder Name | Contents |
+| :------------- | :------------- |
+| L1 | Examples that evaluate the Vitis Vision kernels, and demonstrate the kernels' use model in HLS flow |
+| L2 | Examples that evaluate the Vitis Vision kernels, and demonstrate the kernels' use model in Vitis flow.  |
+| L3 | Applications formed by stitching a pipeline of Vitis Vision functions |
+| ext | Utility function used in the opencl host code |
 
 The organization of contents in each folder is described in the readmes of the respective folders.
 
-
 ## HARDWARE and SOFTWARE REQUIREMENTS
-The xfOpenCV library is designed to work with Zynq, Zynq Ultrascale+, and Alveo FPGAs. The library has been verified on zcu102, zcu104 and U200 boards.
+The Vitis Vision library is designed to work with Zynq, Zynq Ultrascale+, and Alveo FPGAs. The library has been verified on zcu102, zcu104 and U200 boards.
 
 Vitis 2019.2 Development Environment is required to work with the library.
 
@@ -14,13 +23,21 @@ Vitis 2019.2 Development Environment is required to work with the library.
 U200 platform, available in the Vitis tool, is required to build and run the library functions on U200 PCIe board. Same applies for Zynq based platforms.
 
 ## OTHER INFORMATION
-Full User Guide for xfOpenCV and using OpenCV on Xilinx devices Check here:
+Full User Guide for Vitis Vision and using OpenCV on Xilinx devices Check here:
 [Xilinx OpenCV User Guide][]
 
+## SUPPORT
+For questions and to get help on this project or your own projects, visit the [Xilinx Forums][].
 
-  [3-Clause BSD License]: LICENSE.txt
-  [Repository Contribution README]: CONTRIBUTING.md
-  [Xilinx OpenCV User Guide]: https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1233-xilinx-opencv-user-guide.pdf
-  [UG1233]:
-  https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1233-xilinx-opencv-user-guide.pdf
+## LICENSE AND CONTRIBUTING TO THE REPOSITORY
+The source for this project is licensed under the [Apache License][]
+
+To contribute to this project, follow the guidelines in the [Repository Contribution README][]
+
+## ACKNOWLEDGEMENTS
+This library is written by developers at
+- [Xilinx](http://www.xilinx.com)
+
+#### Known Issues:
+1. Windows OS has path length limitations, kernel names must be smaller than 25 characters.
   

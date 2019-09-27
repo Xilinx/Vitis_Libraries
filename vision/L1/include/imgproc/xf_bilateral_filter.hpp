@@ -44,17 +44,17 @@ static void xFBilateralProc(XF_DTUNAME(DEPTH, NPC) OutputValues[XF_NPIXPERCYCLE(
                             ap_uint<8> win_size,
                             ap_ufixed<FPRES_SC, 1> exp_lut_sigma_color[WIN_SZ * WIN_SZ][NUM_DIST][256 * PLANES],
                             ap_int<8> distances_array_revmap[(WIN_SZ >> 1) * (WIN_SZ >> 1) + 1]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_DTUNAME(DEPTH, NPC) pixel_mat[WIN_SZ][WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=pixel_mat complete dim=1
     #pragma HLS ARRAY_PARTITION variable=pixel_mat complete dim=2
     // clang-format on
     for (int i = 0; i < WIN_SZ; i++) {
         for (int j = 0; j < WIN_SZ; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             pixel_mat[i][j] = src_buf[i][j];
@@ -67,7 +67,7 @@ static void xFBilateralProc(XF_DTUNAME(DEPTH, NPC) OutputValues[XF_NPIXPERCYCLE(
     XF_DTUNAME(DEPTH, NPC) tmp;
     ap_int<24> diffpx;
     for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += 8) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         weight_sum = 0;
@@ -75,7 +75,7 @@ static void xFBilateralProc(XF_DTUNAME(DEPTH, NPC) OutputValues[XF_NPIXPERCYCLE(
         buf_indx = 0;
         for (ap_uint<5> i = 0; i < WIN_SZ; i++) {
             for (ap_uint<5> j = 0; j < WIN_SZ; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 ap_uint<8> sub = WIN_SZ >> 1;
@@ -150,12 +150,12 @@ static void ProcessBilateralNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
                                 ap_int<8> distances_array_revmap[(WIN_SZ >> 1) * (WIN_SZ >> 1) + 1],
                                 int& rd_ind,
                                 int& wr_ind) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
     XF_TNAME(DEPTH, NPC) buf_cop[WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf_cop complete dim=1
     // clang-format on
 
@@ -167,12 +167,12 @@ static void ProcessBilateralNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
         col_loop_var = 1;
     }
     for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
         #pragma HLS unroll
         // clang-format on
         for (int ext_copy = 0; ext_copy < npc + WIN_SZ - 1; ext_copy++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             src_buf[extract_px][ext_copy] = 0;
@@ -181,7 +181,7 @@ static void ProcessBilateralNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < ((img_width) >> XF_BITSHIFT(NPC)) + col_loop_var; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         #pragma HLS pipeline
         #pragma HLS LOOP_FLATTEN OFF
@@ -191,7 +191,7 @@ Col_Loop:
 
         if (NPC == XF_NPPC8) {
             for (int copy_buf_var = 0; copy_buf_var < WIN_SZ; copy_buf_var++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                 #pragma HLS UNROLL
                 // clang-format on
@@ -209,7 +209,7 @@ Col_Loop:
             XF_DTUNAME(DEPTH, NPC) src_buf_temp_copy_extract[XF_NPIXPERCYCLE(NPC)];
 
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                 #pragma HLS unroll
                 // clang-format on
@@ -218,18 +218,18 @@ Col_Loop:
                                                                                      toextract, 0);
                 // xfExtractPixels(src_buf_temp_copy_extract, toextract, 0);
                 for (int ext_copy = 0; ext_copy < npc; ext_copy++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     src_buf_temp_copy[extract_px][ext_copy] = src_buf_temp_copy_extract[ext_copy];
                 }
             }
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                 // clang-format on
                 for (int col_warp = 0; col_warp < (WIN_SZ >> 1); col_warp++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                     // clang-format on
@@ -244,11 +244,11 @@ Col_Loop:
 
             if (col == 0) {
                 for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                     // clang-format on
                     for (int col_warp = 0; col_warp < npc + (WIN_SZ >> 1); col_warp++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                         // clang-format on
@@ -259,7 +259,7 @@ Col_Loop:
 
             XF_DTUNAME(DEPTH, NPC) src_buf_temp_med_apply[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)];
             for (int applymedian = 0; applymedian < npc; applymedian++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 for (int copyi = 0; copyi < WIN_SZ; copyi++) {
@@ -281,11 +281,11 @@ Col_Loop:
             }
 
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                 // clang-format on
                 for (int col_warp = 0; col_warp < (WIN_SZ >> 1); col_warp++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                     // clang-format on
@@ -294,11 +294,11 @@ Col_Loop:
             }
 
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                 // clang-format on
                 for (int col_warp = 0; col_warp < npc; col_warp++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                     // clang-format on
@@ -308,7 +308,7 @@ Col_Loop:
 
         } else {
             for (int copy_buf_var = 0; copy_buf_var < WIN_SZ; copy_buf_var++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                 #pragma HLS UNROLL
                 // clang-format on
@@ -319,7 +319,7 @@ Col_Loop:
                 }
             }
             for (int extract_px = 0; extract_px < WIN_SZ; extract_px++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                 #pragma HLS UNROLL
                 // clang-format on
@@ -335,12 +335,12 @@ Col_Loop:
                 _dst_mat.write(wr_ind++, OutputValues[0]);
             }
             for (int wrap_buf = 0; wrap_buf < WIN_SZ; wrap_buf++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                 // clang-format on
                 for (int col_warp = 0; col_warp < WIN_SZ - 1; col_warp++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
                     // clang-format on
@@ -374,11 +374,11 @@ static void xFBilateralFilterNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
                                  uint16_t img_width,
                                  ap_ufixed<FPRES_SC, 1> exp_lut_sigma_color[WIN_SZ * WIN_SZ][NUM_DIST][256 * PLANES],
                                  ap_int<8> distances_array_revmap[(WIN_SZ >> 1) * (WIN_SZ >> 1) + 1]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<13> row_ind[WIN_SZ];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=row_ind complete dim=1
     // clang-format on
 
@@ -386,12 +386,12 @@ static void xFBilateralFilterNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> row, col;
     int rd_ind = 0, wr_ind = 0;
     XF_DTUNAME(DEPTH, NPC) OutputValues[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=OutputValues complete dim=1
     // clang-format on
 
     XF_DTUNAME(DEPTH, NPC) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=2
     // clang-format on
@@ -399,7 +399,7 @@ static void xFBilateralFilterNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
     XF_TNAME(DEPTH, NPC) P0;
 
     XF_TNAME(DEPTH, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     // clang-format on
@@ -407,7 +407,7 @@ static void xFBilateralFilterNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
     // initializing row index
 
     for (int init_row_ind = 0; init_row_ind < win_size; init_row_ind++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
         // clang-format on
         row_ind[init_row_ind] = init_row_ind;
@@ -415,11 +415,11 @@ static void xFBilateralFilterNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
 
 read_lines:
     for (int init_buf = row_ind[win_size >> 1]; init_buf < row_ind[win_size - 1]; init_buf++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
         // clang-format on
         for (col = 0; col<img_width>> XF_BITSHIFT(NPC); col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
             #pragma HLS pipeline
             #pragma HLS LOOP_FLATTEN OFF
@@ -430,11 +430,11 @@ read_lines:
 
     // takes care of top borders
     for (col = 0; col<img_width>> XF_BITSHIFT(NPC); col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=TC
         // clang-format on
         for (int init_buf = 0; init_buf<WIN_SZ>> 1; init_buf++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -444,7 +444,7 @@ read_lines:
 
 Row_Loop:
     for (row = (win_size >> 1); row < img_height + (win_size >> 1); row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
 
@@ -456,7 +456,7 @@ Row_Loop:
         // update indices
         ap_uint<13> zero_ind = row_ind[0];
         for (int init_row_ind = 0; init_row_ind < WIN_SZ - 1; init_row_ind++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=3 max=WIN_SZ
             #pragma HLS UNROLL
             // clang-format on
@@ -474,7 +474,7 @@ static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat
                                     uint16_t imgwidth,
                                     float sigma_color,
                                     float sigma_space) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     #pragma HLS ALLOCATION instances=xf::cv::xFBilateralFloatMul limit=1 function
     #pragma HLS ALLOCATION instances=xf::cv::xFBilateralFloatInv limit=1 function
@@ -516,7 +516,7 @@ static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat
     // the following code computes all the valid (squares of) distances
     // The size of the array is NUM_DIST for the given window size
     ap_uint<8> distances_array[(WIN_SZ >> 1) * (WIN_SZ >> 1) + 1];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=distances_array complete dim=1
     // clang-format on
     int dist_index = 0;
@@ -535,7 +535,7 @@ static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat
     // 1, 2, 4, 5, 8, 9 if directly index, take 9 locations while they just need 6
     // This reverse map stores the location for each of the square distances
     ap_int<8> distances_array_revmap[(WIN_SZ >> 1) * (WIN_SZ >> 1) + 1];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=distances_array_revmap complete dim=1
     // clang-format on
     int index = 0;
@@ -556,13 +556,13 @@ static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat
     // The numbers 4, 12 and 28 are the Number of valid pixels for a circular window in the square window
     static const int array_size = comp_sz;
     ap_ufixed<FPRES_SC, 1> exp_lut_sigma_color[WIN_SZ * WIN_SZ][NUM_DIST][256 * PLANES];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=exp_lut_sigma_color complete dim=1
     #pragma HLS ARRAY_PARTITION variable=exp_lut_sigma_color complete dim=2
     // clang-format on
 
     if (NPC == 8) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=exp_lut_sigma_color complete dim=3
         // clang-format on
     }
@@ -570,11 +570,11 @@ static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat
     for (unsigned int m = 0; m < (256 * PLANES); m++) {
         ap_uint<32> jsq = (ap_uint<16>)m * (ap_uint<16>)m;
         for (int i = 0; i < NUM_DIST; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE
             // clang-format on
             for (unsigned short k = 0; k < array_size; k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 exp_lut_sigma_color[k][i][m] = xf::cv::xFBilateralFloatMul(
@@ -595,7 +595,7 @@ void bilateralFilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
                      xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
                      float sigma_color,
                      float sigma_space) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 

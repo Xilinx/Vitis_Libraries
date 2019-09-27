@@ -40,7 +40,7 @@ namespace cv {
 template <int DEPTH_SRC, int DEPTH_DST>
 XF_PTNAME(DEPTH_DST)
 xFComputeTransform5x5(XF_PTNAME(DEPTH_SRC) src_buf[5][5]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
 
@@ -49,11 +49,11 @@ xFComputeTransform5x5(XF_PTNAME(DEPTH_SRC) src_buf[5][5]) {
 
     int idx = 0;
     for (int i = 0; i < 5; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         for (int j = 0; j < 5; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
 
@@ -83,14 +83,14 @@ void xFProcessCensusTransform5x5(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src_mat,
                                  ap_uint<4> bottom1,
                                  ap_uint<4> bottom2,
                                  ap_uint<13> row) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) buf0, buf1, buf2, buf3, buf4;
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
         #pragma HLS pipeline
         // clang-format on
@@ -109,7 +109,7 @@ Col_Loop:
 
         for (ap_uint<4> i = 0; i < 5; i++) {
             for (ap_uint<4> j = 0; j < 4; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 src_buf[i][j] = src_buf[i][j + 1];
@@ -138,13 +138,13 @@ void xFCensus5x5(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src_mat,
 
     // Temporary buffers to hold image data from five rows
     XF_PTNAME(DEPTH_SRC) src_buf[5][5];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=0
     // clang-format on
 
     // Temporary buffer to hold image data from five rows
     XF_SNAME(WORDWIDTH_SRC) buf[5][COLS];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
@@ -153,7 +153,7 @@ void xFCensus5x5(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
         #pragma HLS pipeline
         // clang-format on
@@ -165,7 +165,7 @@ Clear_Row_Loop:
 
 Read_Row2_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
         #pragma HLS pipeline
         // clang-format on
@@ -175,7 +175,7 @@ Read_Row2_Loop:
 
 Row_Loop:
     for (row = 2; row < img_height + 2; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -213,11 +213,11 @@ Row_Loop:
         }
 
         for (int i = 0; i < 5; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             for (int j = 0; j < 4; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 src_buf[i][j] = 0;
@@ -229,12 +229,12 @@ Row_Loop:
             bottom2, row);
 
         for (int i = 0; i < 5; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             src_buf[i][4] = 0;
         }
-        // clang-format off
+// clang-format off
         #pragma HLS ALLOCATION instances=xFComputeTransform5x5 limit=1 function
         // clang-format on
         censusVal = xFComputeTransform5x5<DEPTH_SRC, DEPTH_DST>(src_buf);
@@ -242,14 +242,14 @@ Row_Loop:
 
         for (ap_uint<4> i = 0; i < 5; i++) {
             for (ap_uint<4> j = 0; j < 4; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 src_buf[i][j] = src_buf[i][j + 1];
             }
         }
         for (int i = 0; i < 5; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             src_buf[i][4] = 0;
@@ -271,7 +271,7 @@ class xFMinSAD {
    public:
     template <typename T, typename T_idx>
     static void find(T a[SIZE], T_idx& loc, T& val) {
-        // clang-format off
+// clang-format off
         #pragma HLS INLINE
         #pragma HLS array_partition variable=a complete dim=0
         // clang-format on
@@ -280,13 +280,13 @@ class xFMinSAD {
         T a2[SIZE - SIZE / 2];
 
         for (int i = 0; i < SIZE / 2; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             a1[i] = a[i];
         }
         for (int i = 0; i < SIZE - SIZE / 2; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             a2[i] = a[i + SIZE / 2];
@@ -312,7 +312,7 @@ class xFMinSAD<1> {
    public:
     template <typename T, typename T_idx>
     static void find(T a[1], T_idx& loc, T& val) {
-        // clang-format off
+// clang-format off
         #pragma HLS INLINE
         // clang-format on
 
@@ -326,7 +326,7 @@ class xFMinSAD<2> {
    public:
     template <typename T, typename T_idx>
     static void find(T a[2], T_idx& loc, T& val) {
-        // clang-format off
+// clang-format off
         #pragma HLS INLINE
         #pragma HLS array_partition variable=a complete dim=0
         // clang-format on
@@ -354,12 +354,13 @@ void xFCensusTransformKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src,
                              uint8_t _border_type,
                              uint16_t img_height,
                              uint16_t img_width) {
+#ifndef _SYNTHESIS_
     assert(((_window_size == XF_FILTER_3X3) || (_window_size == XF_FILTER_5X5)) &&
            ("Filter width must be either 3 or 5"));
     assert(_border_type == XF_BORDER_CONSTANT && "Only XF_BORDER_CONSTANT is supported");
     assert(((img_height <= ROWS) && (img_width <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((NPC == XF_NPPC1) && ("NPC must be XF_NPPC1"));
-
+#endif
     xFCensus5x5<ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST>(_src, _dst, img_height, img_width);
 } // end of wrapper function
 
@@ -369,7 +370,7 @@ void xFSGBMcomputecost(hls::stream<ap_uint<24> >& _src_census24_l,
                        hls::stream<ap_uint<8> > _cost[PU],
                        int height,
                        int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     #pragma HLS ARRAY_PARTITION variable=_cost complete dim=1 // TODO
     // clang-format on
@@ -377,19 +378,19 @@ void xFSGBMcomputecost(hls::stream<ap_uint<24> >& _src_census24_l,
     ap_uint<24> l_val;
     ap_uint<24> r_val;
     ap_uint<24> r_buff[NDISP];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=r_buff complete dim=1
-    // clang-format on
+// clang-format on
 
 loop_height:
     for (int r = 0; r < height; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
+    // clang-format on
 
     loop_sweep:
         for (int i = 0; i < NDISP; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             r_buff[i] = 0;
@@ -397,18 +398,18 @@ loop_height:
 
     loop_width:
         for (int c = 0; c < width; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             // clang-format on
             if (PU == NDISP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS PIPELINE II=1
                 // clang-format on
             }
 
         loop_sweep_inside:
             for (int i = 0; i < NDISP / PU; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS PIPELINE II=1
                 #pragma HLS loop_flatten
                 // clang-format on
@@ -426,7 +427,7 @@ loop_height:
 
             loop_parallel_unit:
                 for (int j = 0; j < PU; j++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     ap_uint<24> xor_val = l_val ^ r_buff[i * PU + j];
@@ -434,7 +435,7 @@ loop_height:
 
                 loop_hamming_sum:
                     for (int k = 0; k < 24; k++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS LOOP_TRIPCOUNT min=1 max=24
                         // clang-format on
 
@@ -449,7 +450,7 @@ loop_height:
 }
 
 static uint8_t min_of_4(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     uint8_t res, res1, res2;
@@ -467,7 +468,7 @@ static uint8_t fn_reg(uint8_t value) {
 
 template <typename T>
 static T fn_reg_scalar(T scalar) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline //off
     // clang-format on
     //#pragma HLS interface register port=return
@@ -489,7 +490,7 @@ void xFSGBMoptimization(hls::stream<ap_uint<8> > _cost[PU],
     // was partitioned in a cyclic manner, which will allow us to access
     //     PU consecutive array indexes to be accessed in parallel
     uint8_t Lr[R - 1][NDISP][COLS];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=Lr core=RAM_T2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=Lr complete dim=1
     #pragma HLS ARRAY_PARTITION variable=Lr complete dim=2
@@ -497,18 +498,18 @@ void xFSGBMoptimization(hls::stream<ap_uint<8> > _cost[PU],
     //	#pragma HLS ARRAY_PARTITION variable=Lr cyclic factor=CYC_PART dim=2
 
     uint8_t Lr_r1[NDISP];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Lr_r1 complete dim=1
     // clang-format on
     uint8_t Lr_r1_tmp[PU];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Lr_r1_tmp complete dim=1
     // clang-format on
 
     // array to store r0 data for the computation of next pixel in the raster scan manner, so one pixel's Lr data is
     // sufficient
     uint8_t Lr_r0[NDISP];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Lr_r0 complete dim=0
     // clang-format on
 
@@ -516,14 +517,14 @@ void xFSGBMoptimization(hls::stream<ap_uint<8> > _cost[PU],
     // this array works as a queue, after initialization, reads the data from BRAM to the last index while the first
     // index is off loaded.
     uint8_t tmp_store_Lr[R][PU + 2];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_store_Lr complete dim=0
     // clang-format on
 
     // array to hold the first four min values, first dimension R is for directions, second one to hold first four min
     // values. This array consumes BRAMs holds for all direction except 180 degree
     uint8_t Lr_min[R - 1][COLS];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Lr_min complete dim=1
     // clang-format on
     // array to temporarily hold the data for r1 direction
@@ -534,35 +535,35 @@ void xFSGBMoptimization(hls::stream<ap_uint<8> > _cost[PU],
     // temporary array which reads in the data from Lr_min array. This array will be using in the processing block. The
     // min arrays will always be in a sorted
     uint8_t tmp_Lr_min[R];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_Lr_min complete dim=1
     // clang-format on
     // suffix post to temporarily store the min values before writing to the BRAM.
     // Post buffers are used for computation of minimum on the run, and the data are finally dumped into Lr_min array
     uint8_t tmp_Lr_min_post[R];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_Lr_min_post complete dim=1
     // clang-format on
     // dim 1 is for directions, and dim 2 for parallel units. This is an intermediary array which hold the computed Lr
     // for min computation
     uint8_t store_lr_for_min[R][PU];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=store_lr_for_min complete dim=0
-    // clang-format on
+// clang-format on
 
 loop_row:
     for (int ro = 0; ro < height; ro++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
+    // clang-format on
 
     loop_col:
         for (int co = 0; co < width; co++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             // clang-format on
             if (PU == NDISP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS PIPELINE II=2
                 // clang-format on
             }
@@ -570,7 +571,7 @@ loop_row:
             uint8_t min_d0, min_cost0; // vs
         disp_loop:
             for (int d = 0; d < NDISP / PU; d++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS PIPELINE II=2
                 #pragma HLS DEPENDENCE variable=Lr array intra false
                 #pragma HLS DEPENDENCE variable=Lr array inter false
@@ -582,19 +583,19 @@ loop_row:
                     /////// Initialization of the process array from the BRAMs ///////
                     for (int r = 0; r < R; r++) // previous disparity for d=0 is initialized with zero
                     {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         tmp_store_Lr[r][0] = 0;
                     }
 
                     for (int pu = 0; pu < PU; pu++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         tmp_store_Lr[0][pu + 1] = Lr_r0[pu];
                         for (int r = 1; r < R; r++) {
-                            // clang-format off
+// clang-format off
                             #pragma HLS UNROLL
                             // clang-format on
                             tmp_store_Lr[r][pu + 1] = Lr[r - 1][pu][co + r - 2];
@@ -609,7 +610,7 @@ loop_row:
                     else
                         tmp_store_Lr[0][PU + 1] = 0;
                     for (int r = 1; r < R; r++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         if (PU < NDISP)
@@ -622,7 +623,7 @@ loop_row:
                     // vs tmp_Lr_min[0] = r0_min;
                     tmp_Lr_min[0] = tmp_Lr_min_post[0];
                     for (int r = 1; r < R; r++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         tmp_Lr_min[r] = Lr_min[r - 1][co + r - 2];
@@ -630,27 +631,27 @@ loop_row:
 
                     // initialize the post buffer with max values, helps in comparisons while sorting
                     for (int r = 0; r < R; r++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         tmp_Lr_min_post[r] = MAX_UCHAR;
                     }
                 } else {
                     for (int r = 0; r < R; r++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         tmp_store_Lr[r][0] = tmp_store_Lr[r][PU];
                         tmp_store_Lr[r][1] = tmp_store_Lr[r][PU + 1];
                     }
                     for (int pu = 1; pu < PU; pu++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         uint16_t disp_idx = (d * PU + pu);
                         tmp_store_Lr[0][pu + 1] = Lr_r0[disp_idx];
                         for (int r = 1; r < R; r++) {
-                            // clang-format off
+// clang-format off
                             #pragma HLS UNROLL
                             // clang-format on
                             tmp_store_Lr[r][pu + 1] = Lr[r - 1][disp_idx][co + r - 2];
@@ -663,7 +664,7 @@ loop_row:
                     else
                         tmp_store_Lr[0][PU + 1] = 0;
                     for (int r = 1; r < R; r++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         if (disp_idx < NDISP)
@@ -675,7 +676,7 @@ loop_row:
 
             loop_pu:
                 for (int pu = 0; pu < PU; pu++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     uint8_t cpd = (uint8_t)_cost[pu].read();
@@ -683,7 +684,7 @@ loop_row:
 
                 loop_directions:
                     for (int r = 0; r < R; r++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         // mink minimum of all disparity, mini minimum of all disparity except d-1, d, d+1
@@ -705,7 +706,7 @@ loop_row:
 
                         uint8_t tmini, tminv;
                         uint8_t tmp_arr[4];
-                        // clang-format off
+// clang-format off
                         #pragma HLS ARRAY_PARTITION variable=tmp_arr complete dim=1
                         // clang-format on
                         tmp_arr[0] = lr_d;
@@ -722,13 +723,13 @@ loop_row:
 
                         // process block
                         uint8_t lr_tmp;
-                        // clang-format off
+// clang-format off
                         #pragma HLS RESOURCE variable=lr_tmp core=AddSub_DSP
                         // clang-format on
                         lr_tmp = cpd - (uint8_t)lr_mink;
 
                         uint8_t lr;
-                        // clang-format off
+// clang-format off
                         #pragma HLS RESOURCE variable=lr_tmp core=AddSub_DSP
                         // clang-format on
                         lr = lr_tmp + tminv;
@@ -766,7 +767,7 @@ loop_row:
                 if (min_cost0 < tmp_Lr_min_post[0]) tmp_Lr_min_post[0] = min_cost0;
 
                 for (int r = 1; r < R; r++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     uint8_t min_d, min_cost;
@@ -776,7 +777,7 @@ loop_row:
 
                 // updating the previous
                 for (int pu = 0; pu < PU; pu++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     int disp_idx = d * PU + pu;
@@ -798,7 +799,7 @@ loop_row:
 
                     r1_min = tmp_Lr_min_post[1];
                     for (int r = 2; r < R; r++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         Lr_min[r - 1][co] = tmp_Lr_min_post[r];
@@ -816,22 +817,22 @@ void xfSGBMcomputedisparity(hls::stream<ap_uint<16> > _agg_cost[PU],
                             hls::stream<ap_uint<8> >& _dst,
                             int height,
                             int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
     const int TOTAL_ITER = NDISP / PU;
 
     for (int r = 0; r < height; r++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int c = 0; c < width; c++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             // clang-format on
             if (PU == NDISP) {
-                // clang-format off
+// clang-format off
                 #pragma HLS PIPELINE II=1
                 // clang-format on
             }
@@ -842,7 +843,7 @@ void xfSGBMcomputedisparity(hls::stream<ap_uint<16> > _agg_cost[PU],
             ap_uint<8> min_disp;
 
             for (int i = 0; i < TOTAL_ITER; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS PIPELINE II=1
                 #pragma HLS LOOP_FLATTEN
                 // clang-format on
@@ -868,6 +869,7 @@ void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
                   uint8_t p1,
                   uint8_t p2) {
+#ifndef _SYNTHESIS_
     assert((SRC_T == XF_8UC1) && " WORDWIDTH_SRC must be XF_8UC1 ");
     assert((DST_T == XF_8UC1) && " WORDWIDTH_DST must be XF_8UC1 ");
     assert((NPC == XF_NPPC1) && " NPC must be XF_NPPC1 ");
@@ -878,6 +880,7 @@ void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
     assert(((R == 2) || (R == 3) || (R == 4)) && "Number of directions R must be '2', '3' or '4' ");
     assert((p1 < p2) && "p1 must be always less than p2");
     assert((p2 <= 100) && "Maximum value of p2 must be 100 ");
+#endif
 
     hls::stream<XF_TNAME(SRC_T, NPC)> _src_l;
     hls::stream<XF_TNAME(SRC_T, NPC)> _src_r;
@@ -894,7 +897,7 @@ void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
 
     hls::stream<XF_TNAME(DST_T, NPC)> _dst;
 
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     #pragma HLS DATAFLOW
     // clang-format on
@@ -904,11 +907,11 @@ void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
 
     // Reading data from Mat to stream
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS LOOP_FLATTEN off
             #pragma HLS PIPELINE
@@ -926,11 +929,11 @@ void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
                                                          width);
 
     for (int i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS LOOP_FLATTEN off
             #pragma HLS PIPELINE
@@ -948,11 +951,11 @@ void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
 
     // write back from stream to Mat
     for (int i = 0; i < _dst_mat.rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j < _dst_mat.cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS LOOP_FLATTEN off
             #pragma HLS PIPELINE

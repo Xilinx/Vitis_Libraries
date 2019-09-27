@@ -19,7 +19,7 @@
 extern "C" {
 void dilation_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, unsigned char* kernel, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=kernel  offset=slave bundle=gmem3
@@ -29,23 +29,23 @@ void dilation_accel(
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> in_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=in_mat.data depth=2
     // clang-format on
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> out_mat(rows, cols);
-    // clang-format off
+// clang-format off
     #pragma HLS stream variable=out_mat.data depth=2
     // clang-format on
 
     unsigned char locKernel[FILTER_SIZE * FILTER_SIZE];
     for (int ki = 0; ki < (FILTER_SIZE * FILTER_SIZE); ki++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         locKernel[ki] = kernel[ki];
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

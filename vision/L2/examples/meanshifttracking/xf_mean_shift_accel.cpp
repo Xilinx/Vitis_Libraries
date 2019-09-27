@@ -30,7 +30,7 @@ void mean_shift_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                       uint8_t no_of_iterations,
                       int rows,
                       int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  depth=2073600 offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=tlx  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=tly  offset=slave bundle=gmem2

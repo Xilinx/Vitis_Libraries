@@ -37,7 +37,7 @@ xFGaussianFixed3x3(XF_PTNAME(DEPTH_SRC) t0,
                    XF_PTNAME(DEPTH_SRC) b0,
                    XF_PTNAME(DEPTH_SRC) b1,
                    XF_PTNAME(DEPTH_SRC) b2) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -62,13 +62,13 @@ void xFAverageGaussian3x3(XF_PTNAME(DEPTH_SRC) * Maskvalues,
                           XF_PTNAME(DEPTH_SRC) * src_buf1,
                           XF_PTNAME(DEPTH_SRC) * src_buf2,
                           XF_PTNAME(DEPTH_SRC) * src_buf3) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
-    // clang-format on
+// clang-format on
 
 Compute_Grad_Loop:
     for (int j = 0; j < (1 << XF_BITSHIFT(NPC)); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         Maskvalues[j] =
@@ -95,7 +95,7 @@ void ProcessAverageGaussian3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                                ap_uint<13> row,
                                int& read_index,
                                int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -105,7 +105,7 @@ void ProcessAverageGaussian3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -172,13 +172,13 @@ void xFAverageGaussianMask3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_PTNAME(DEPTH_SRC) OutputValues[XF_NPIXPERCYCLE(NPC)];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=OutputValues complete dim=1
     // clang-format on
 
     XF_PTNAME(DEPTH_SRC)
     src_buf1[XF_NPIXPERCYCLE(NPC) + 2], src_buf2[XF_NPIXPERCYCLE(NPC) + 2], src_buf3[XF_NPIXPERCYCLE(NPC) + 2];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -187,7 +187,7 @@ void xFAverageGaussianMask3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_SRC) P0;
 
     XF_SNAME(WORDWIDTH_SRC) buf[3][(COLS >> XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
@@ -195,7 +195,7 @@ void xFAverageGaussianMask3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -207,7 +207,7 @@ Clear_Row_Loop:
 
 Row_Loop:
     for (row = 1; row < img_height + 1; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         if (row_ind == 2) {

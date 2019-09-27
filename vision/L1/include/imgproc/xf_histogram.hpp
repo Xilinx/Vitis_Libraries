@@ -34,7 +34,7 @@ void xFHistogramKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // Temporary array used while computing histogram
     uint32_t tmp_hist[(PLANES << XF_BITSHIFT(NPC))][256] = {0};
     uint32_t tmp_hist1[(PLANES << XF_BITSHIFT(NPC))][256] = {0};
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
     #pragma HLS ARRAY_PARTITION variable=tmp_hist1 complete dim=1
     // clang-format on
@@ -45,11 +45,11 @@ void xFHistogramKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 HIST_INITIALIZE_LOOP:
     for (ap_uint<10> i = 0; i < 256; i++) //
     {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         for (ap_uint<5> j = 0; j < (1 << XF_BITSHIFT(NPC) * PLANES); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=256 max=256
             // clang-format on
             tmp_hist[j][i] = 0;
@@ -59,12 +59,12 @@ HIST_INITIALIZE_LOOP:
 
 HISTOGRAM_ROW_LOOP:
     for (ap_uint<13> row = 0; row < imgheight; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     HISTOGRAM_COL_LOOP:
         for (ap_uint<13> col = 0; col < (imgwidth); col = col + 2) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE II=2
             #pragma HLS LOOP_FLATTEN OFF
             #pragma HLS LOOP_TRIPCOUNT min=SRC_TC max=SRC_TC
@@ -78,7 +78,7 @@ HISTOGRAM_ROW_LOOP:
 
         EXTRACT_UPDATE:
             for (ap_uint<9> i = 0, j = 0; i < ((8 << XF_BITSHIFT(NPC)) * PLANES); j++, i += 8) {
-                // clang-format off
+// clang-format off
                 #pragma HLS DEPENDENCE variable=tmp_hist array intra false
                 #pragma HLS DEPENDENCE variable=tmp_hist1 array intra false
                 #pragma HLS UNROLL
@@ -99,13 +99,13 @@ HISTOGRAM_ROW_LOOP:
     uint32_t plane[PLANES];
 COPY_LOOP:
     for (ap_uint<10> i = 0; i < 256; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
         cnt = 0;
         p = 0;
         for (ap_uint<5> j = 0, k = 0; j < ((1 << XF_BITSHIFT(NPC)) * PLANES); j++, k++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
 
@@ -134,7 +134,7 @@ void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, uint32_t* histogram) {
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
@@ -147,7 +147,7 @@ void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, uint32_t* histogram) {
 
     for (int i = 0; i < (XF_CHANNELS(SRC_T, NPC)); i++) {
         for (int j = 0; j < 256; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=256
             #pragma HLS PIPELINE
             #pragma HLS LOOP_FLATTEN off

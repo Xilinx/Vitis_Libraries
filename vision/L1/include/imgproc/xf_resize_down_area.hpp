@@ -54,7 +54,7 @@ static void flag_index_generator(ap_uint<32> Xscale,
                                  unsigned short in_width,
                                  unsigned short inImg_ncpr,
                                  ap_uint<16>* output_buffer_index_next_out) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -106,11 +106,11 @@ static void flag_index_generator(ap_uint<32> Xscale,
         fract_bits_Xindex_out_previous = (ap_uint<16>)(Xindex_output[0] - X_1PixelWeight);
 
     for (int ta_idx = 0; ta_idx < NUM_PB; ta_idx++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (int pb_in = 0; pb_in < NUM_INPB; pb_in++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             ap_uint<16> int_bits_Xindex_out = (Xindex_output[pb_in] - 0x41) >> 16;
@@ -199,7 +199,7 @@ static void flag_index_generator(ap_uint<32> Xscale,
 
     bool DDR_wr_en_tmp;
     if ((((Yaxis_overlap_en == 1 || (Yindex_output_tmp.range(31, 16) != Yindex_output_prev_tmp.range(31, 16)))) ||
-         (Yindex_output_precision_error < 65)) ||
+         (Yindex_output_precision_error <= 65)) ||
         row_index == (in_height - 1)) {
         if ((ouput_index_write_counter <= output_buffer_index_next || (in_col_index == (inImg_ncpr)-1)) &&
             (Yindex_output_prev_precision_error > 65))
@@ -223,11 +223,11 @@ static void flag_index_generator(ap_uint<32> Xscale,
     }
 
     for (int ta_idx = 0; ta_idx < NUM_PB; ta_idx++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (int pb_in = 0; pb_in < NUM_INPB; pb_in++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
 
@@ -248,7 +248,7 @@ static void flag_index_generator(ap_uint<32> Xscale,
 
 template <int SIZE>
 void treeAdder(ap_uint<32> in1[SIZE], ap_uint<32>* output) {
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=in1 complete dim=1
     #pragma HLS inline
     // clang-format on
@@ -260,7 +260,7 @@ void treeAdder(ap_uint<32> in1[SIZE], ap_uint<32>* output) {
 
     if ((SIZE / 2) != 0) {
         for (ap_uint<10> idx = 0; idx < (SIZE / 2); idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             add1_out[idx] = in1[2 * idx] + in1[2 * idx + 1];
@@ -269,7 +269,7 @@ void treeAdder(ap_uint<32> in1[SIZE], ap_uint<32>* output) {
 
     if ((SIZE / 4) != 0) {
         for (ap_uint<10> idx = 0; idx < (SIZE / 4); idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             add2_out[idx] = add1_out[2 * idx] + add1_out[2 * idx + 1];
@@ -278,7 +278,7 @@ void treeAdder(ap_uint<32> in1[SIZE], ap_uint<32>* output) {
 
     if ((SIZE / 8) != 0) {
         for (ap_uint<10> idx = 0; idx < (SIZE / 8); idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             add3_out[idx] = add2_out[2 * idx] + add2_out[2 * idx + 1];
@@ -287,7 +287,7 @@ void treeAdder(ap_uint<32> in1[SIZE], ap_uint<32>* output) {
 
     if ((SIZE / 16) != 0) {
         for (ap_uint<10> idx = 0; idx < (SIZE / 16); idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             add4_out[idx] = add3_out[2 * idx] + add3_out[2 * idx + 1];
@@ -317,7 +317,7 @@ static void processBlock(bool inflag_TA[NUM_INPB],
                          ap_uint<AREADOWN_PARTIAL_RESULT_BITS>* procBlock_out) {
     ap_uint<32> mul_out[NPC];
     for (int pixelproc = 0; pixelproc < NPC; pixelproc++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         ap_uint<8> in_data;
@@ -360,11 +360,11 @@ static void CoreProcessDownArea(ap_uint<17> Wx[NUM_PB][NUM_INPB],
                                 ap_uint<17> Wx_for_Nplus1_Procblock) {
     ap_uint<8> read_word_extract[PLANES][NUM_PB];
     for (int pixel = 0, bit1 = 0; pixel < NUM_PB; pixel++, bit1 += (PLANES * 8)) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (int channel = 0, bit2 = 0; channel < PLANES; channel++, bit2 += 8) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (pixel < NPC)
@@ -376,11 +376,11 @@ static void CoreProcessDownArea(ap_uint<17> Wx[NUM_PB][NUM_INPB],
     }
 
     for (int procblock_index = 0; procblock_index < NUM_PB + 1; procblock_index++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (int plane_index = 0, bit = 0; plane_index < PLANES; plane_index++, bit += 8) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
 
@@ -426,7 +426,7 @@ static void update_output_buffer(bool DDR_write_en,
                                  ap_uint<AREADOWN_PARTIAL_RESULT_BITS> PB_out_overlap[PLANES][NUM_PB + 1],
                                  bool Yaxis_overlap_en,
                                  ap_uint<8> DDR_write_data[PLANES][NPC]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     bool output_col_index_bit0 = write_index_col[0];
@@ -438,12 +438,12 @@ static void update_output_buffer(bool DDR_write_en,
     ap_uint<AREADOWN_PARTIAL_RESULT_BITS> DDR_write1_temp_overlap[PLANES][NPC];
 
     for (int plane_id = 0; plane_id < PLANES; plane_id++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
 
         for (ap_uint<8> accum_idx = 0, index_pixel = 0; accum_idx < 2 * NPC; accum_idx++, index_pixel++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
 
@@ -451,7 +451,7 @@ static void update_output_buffer(bool DDR_write_en,
             ap_uint<AREADOWN_PARTIAL_RESULT_BITS> data_mux_out_overlap; //
             ap_uint<NUM_PB + 1> data_mux_out_status;
             for (ap_uint<16> out_idx = 0; out_idx < (NUM_PB + 1); out_idx++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 ap_uint<LOG2_PB + 1> out_index_val = output_buffer_Colindex[out_idx].range(LOG2_PB, 0);
@@ -505,11 +505,11 @@ static void update_output_buffer(bool DDR_write_en,
     }
 
     for (int plane_id = 0; plane_id < PLANES; plane_id++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (ap_uint<8> index_pixel = 0; index_pixel < NPC; index_pixel++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             ap_uint<AREADOWN_PARTIAL_RESULT_BITS> temp_sum;
@@ -579,11 +579,11 @@ void xFResizeAreaDownScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_i
 
     //## X-direction output index(Q16.16), which is used for each Process block output.
     ap_uint<32> Xindex_output[NUM_PB];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Xindex_output complete dim=0
     // clang-format on
     ap_uint<32> Xindex_output_initial[NUM_PB];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Xindex_output_initial complete dim=0
     // clang-format on
 
@@ -591,11 +591,11 @@ void xFResizeAreaDownScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_i
     //## TRUE - input data is mappped to multiplier
     //## FALSE- multiplier input is zero
     bool inflag_TA_prev[NUM_INPB];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=inflag_TA_prev complete dim=0
     // clang-format on
     for (ap_uint<8> idx = 1; idx <= NUM_PB; idx++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
         Xindex_output_initial[idx - 1] = X_1PixelWeight * idx;
@@ -628,26 +628,26 @@ void xFResizeAreaDownScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_i
 
     //## output buffer
     ap_uint<AREADOWN_PARTIAL_RESULT_BITS> ouput_buffer[PLANES][NUM_PB][DEPTH_OUTBUFFER];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=ouput_buffer complete dim=1
     #pragma HLS ARRAY_PARTITION variable=ouput_buffer complete dim=2
     // clang-format on
 
     ap_uint<AREADOWN_PARTIAL_RESULT_BITS> accum_reg[PLANES][NPC * 2];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=accum_reg complete dim=0
     // clang-format on
     ap_uint<AREADOWN_PARTIAL_RESULT_BITS> accum_reg_overlap[PLANES][NPC * 2];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=accum_reg_overlap complete dim=0
     // clang-format on
     for (int dim2 = 0; dim2 < NPC * 2; dim2++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         #pragma HLS unroll
         // clang-format on
         for (int dim1 = 0; dim1 < PLANES; dim1++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             accum_reg[dim1][dim2] = 0;
@@ -656,15 +656,15 @@ void xFResizeAreaDownScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_i
     }
 
     for (ap_uint<16> dim3 = 0; dim3 < DEPTH_OUTBUFFER; dim3++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
         for (int dim2 = 0; dim2 < NUM_PB; dim2++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             for (int dim1 = 0; dim1 < PLANES; dim1++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 ouput_buffer[dim1][dim2][dim3] = 0;
@@ -684,20 +684,20 @@ void xFResizeAreaDownScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_i
 
 LOOP_ROW:
     for (ap_uint<16> row_index = 0; row_index < height; row_index++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=SRC_ROWS
-        // clang-format on
+    // clang-format on
 
     LOOP_COL:
         for (int col_index = 0, col_index_next = 1; col_index < in_col_loop_bound; col_index++, col_index_next++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=SRC_TC
             #pragma HLS pipeline
             #pragma HLS DEPENDENCE variable=ouput_buffer inter false
             // clang-format on
 
             for (int idx = 0; idx < NUM_PB; idx++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 if (col_index == 0) {
@@ -722,20 +722,20 @@ LOOP_ROW:
             ///////////////////////////////////////////////////////////
 
             ap_uint<16> output_buffer_index[NUM_PB + 1];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=output_buffer_index complete dim=0
             // clang-format on
             //## input flag for each input of process block.
             bool inflag_TA[NUM_PB][NUM_INPB];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=inflag_TA complete dim=0
             // clang-format on
             bool inflag_for_Nplus1_Procblock;
             ap_uint<17> Wx_for_Nplus1_Procblock;
             ap_uint<17> Wx[NUM_PB][NUM_INPB]; // Q1.16
-                                              // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=Wx complete dim=0
-                                              // clang-format on
+            // clang-format on
 
             bool DDR_wr_en;
             bool out_buffer_wr_en;
@@ -764,14 +764,14 @@ LOOP_ROW:
                 Wy1 = 0;
             }
             //## output data of each process block
-            ap_uint<AREADOWN_PARTIAL_RESULT_BITS> PB_out[PLANES][NUM_PB + 1];         // Q8.8
-                                                                                      // clang-format off
+            ap_uint<AREADOWN_PARTIAL_RESULT_BITS> PB_out[PLANES][NUM_PB + 1]; // Q8.8
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=PB_out complete dim=0
-                                                                                      // clang-format on
+            // clang-format on
             ap_uint<AREADOWN_PARTIAL_RESULT_BITS> PB_out_overlap[PLANES][NUM_PB + 1]; // Q8.8
-                                                                                      // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=PB_out_overlap complete dim=0
-                                                                                      // clang-format on
+            // clang-format on
 
             //## CoreProcess has "NUM_PB" process blocks. Each process block has "NUM_INPB" 3-input multiplier and Tree
             // adder to accumulate multiplier output.
@@ -783,7 +783,7 @@ LOOP_ROW:
                 Wx, Wy1, inflag_TA, read_word, PB_out_overlap, Wx_for_Nplus1_Procblock);
 
             ap_uint<8> DDR_write_data[PLANES][NPC];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=DDR_write_data complete dim=0
             // clang-format on
             update_output_buffer<PLANES, NUM_PB, LOG2_PB, DST_COLS, DEPTH_OUTBUFFER, NPC>(
@@ -795,11 +795,11 @@ LOOP_ROW:
                 XF_TNAME(DEPTH, NPC) out_pix;
                 ap_uint<PLANES * 8> plane_tmp;
                 for (int pixel = 0, bit1 = 0; pixel < NPC; pixel++, bit1 += (PLANES * 8)) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS unroll
                     // clang-format on
                     for (int channel = 0, bit2 = 0; channel < PLANES; channel++, bit2 += 8) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS unroll
                         // clang-format on
                         plane_tmp.range(bit2 + 7, bit2) = DDR_write_data[channel][pixel];

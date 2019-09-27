@@ -27,7 +27,7 @@ void crop_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
 //	void crop_accel(ap_uint<INPUT_PTR_WIDTH> *img_in, ap_uint<OUTPUT_PTR_WIDTH> *_dst,int *roi, int height, int
 // width)
 {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_in  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=_dst  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=_dst1  offset=slave bundle=gmem3

@@ -32,7 +32,7 @@
  */
 static void CoreProcessUpArea(
     uchar_t A0, uchar_t B0, uchar_t A1, uchar_t B1, uint32_t Wx, uint32_t Wy, uchar_t* pixel) {
-    // clang-format off
+// clang-format off
     #pragma HLS PIPELINE
     // clang-format on
     uint32_t Wxy;
@@ -64,7 +64,7 @@ static XF_TNAME(DEPTH, NPC) ProcessBlockAreaUp(ap_uint<13> Offset[],
                                                XF_TNAME(DEPTH, NPC) D1[2],
                                                ap_uint<13> blockstart,
                                                ap_uint<13> indoffset) {
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=D0 dim=1
     #pragma HLS ARRAY_PARTITION variable=D1 dim=1
     #pragma HLS INLINE
@@ -103,7 +103,7 @@ static XF_TNAME(DEPTH, NPC) ProcessBlockAreaUp(ap_uint<13> Offset[],
     xfExtractPixels<NPC, WORDWIDTH, XF_DEPTH(DEPTH, NPC)>(line1_1, D1[1], 0);
 
     for (int ii = 0; ii < 2 * (1 << XF_BITSHIFT(NPC)); ii++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         if (ii < (1 << XF_BITSHIFT(NPC))) {
@@ -119,7 +119,7 @@ static XF_TNAME(DEPTH, NPC) ProcessBlockAreaUp(ap_uint<13> Offset[],
     int shift = 0;
 process_block_loop:
     for (i = 0; i < (1 << XF_BITSHIFT(NPC)); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         // input_read = (NPC == XF_NPPC1) ?0:Offset[indoffset+i] - block_start_ind;
@@ -148,7 +148,7 @@ process_block_loop:
     return val;
 }
 static uint64_t xFUDivAreaUp(uint64_t in_n, unsigned short in_d) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     uint64_t out_res = in_n / in_d;
@@ -178,17 +178,17 @@ void xFResizeAreaUpScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_in,
     uint32_t Hweight[DST_COLS],
         Vweight[DST_ROWS + 1]; // buffers which hold the weights for each corresponding input pixels
     if (NPC == XF_NPPC8) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=Hoffset cyclic factor=8 dim=1
         #pragma HLS ARRAY_PARTITION variable=Hweight cyclic factor=8 dim=1
         // clang-format on
     } else if (NPC == XF_NPPC4) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=Hoffset cyclic factor=4 dim=1
         #pragma HLS ARRAY_PARTITION variable=Hweight cyclic factor=4 dim=1
         // clang-format on
     } else if (NPC == XF_NPPC2) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=Hoffset cyclic factor=2 dim=1
         #pragma HLS ARRAY_PARTITION variable=Hweight cyclic factor=2 dim=1
         // clang-format on
@@ -223,7 +223,7 @@ void xFResizeAreaUpScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_in,
 //	inv_Xscale_float = (out_width<<XF_BITSHIFT(NPC))/(float)(width<<XF_BITSHIFT(NPC));
 //	inv_Yscale_float = out_height/(float)height;
 
-    // clang-format off
+// clang-format off
     #pragma HLS ALLOCATION instances=xFUDivAreaUp limit=1 function
     // clang-format on
     Xscale = xFUDivAreaUp((uint64_t)(width)*POW32, out_width);
@@ -238,7 +238,7 @@ void xFResizeAreaUpScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_in,
     short Hstart_index = 0;
 Hoffset_loop:
     for (x = 0, ii = 0; x < out_width; x++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         #pragma HLS LOOP_TRIPCOUNT min=1 max=DST_COLS
         // clang-format on
@@ -263,7 +263,7 @@ Hoffset_loop:
 /* Calculating required Vertical parameters*/
 Voffset_loop:
     for (x = 0; x < out_height; x++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         #pragma HLS LOOP_TRIPCOUNT min=1 max=DST_ROWS
         // clang-format on
@@ -290,7 +290,7 @@ Voffset_loop:
     ap_uint<2> l0 = 0, l1 = 1, l2 = 2, read_into = 2;
     ap_uint<16> lind0 = 0, lind1 = 1, lind2 = 65535, out_j = 0;
     for (x = 0; x < imgInput_ncpr; x++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         #pragma HLS LOOP_TRIPCOUNT min=1 max = SRC_TC
         // clang-format on
@@ -300,7 +300,7 @@ Voffset_loop:
     }
     out_j++;
     for (x = 0; x < imgInput_ncpr; x++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         #pragma HLS LOOP_TRIPCOUNT min=1 max = SRC_TC
         // clang-format on
@@ -312,7 +312,7 @@ Voffset_loop:
 
 outerloop:
     for (j = 0; j < out_height; j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max = DST_ROWS
         // clang-format on
         if (read_flag) {
@@ -356,7 +356,7 @@ outerloop:
         for (i = 0; i < out_width;
              i = i + (1 << XF_BITSHIFT(NPC))) /// loop on column  --  processing 8 pixels at a time
         {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE
             #pragma HLS LOOP_FLATTEN OFF
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DST_TC avg=DST_TC
@@ -372,7 +372,7 @@ outerloop:
                 if (read_into == 0) {
                     lbuf_in0[i >> XF_BITSHIFT(NPC)] = stream_in.read(read_index++);
                     for (k = 0; k < 2; k++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         if ((k + bufferIndex) < imgInput_ncpr) {
@@ -386,7 +386,7 @@ outerloop:
                 } else if (read_into == 1) {
                     lbuf_in1[i >> XF_BITSHIFT(NPC)] = stream_in.read(read_index++);
                     for (k = 0; k < 2; k++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         if ((k + bufferIndex) < imgInput_ncpr) {
@@ -400,7 +400,7 @@ outerloop:
                 } else {
                     lbuf_in2[i >> XF_BITSHIFT(NPC)] = stream_in.read(read_index++);
                     for (k = 0; k < 2; k++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         if ((k + bufferIndex) < imgInput_ncpr) {
@@ -414,7 +414,7 @@ outerloop:
                 }
             } else {
                 for (k = 0; k < 2; k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     if ((k + bufferIndex) < imgInput_ncpr) {

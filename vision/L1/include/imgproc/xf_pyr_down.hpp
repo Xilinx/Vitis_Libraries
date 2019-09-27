@@ -30,18 +30,18 @@ void xFpyrDownKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
                      xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst,
                      unsigned short in_rows,
                      unsigned short in_cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
     hls::stream<XF_TNAME(TYPE, NPC)> _filter_in;
     hls::stream<XF_TNAME(TYPE, NPC)> _filter_out;
     unsigned int read_pointer = 0;
     for (int i = 0; i < in_rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j < in_cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE II=1
             // clang-format on
@@ -54,11 +54,11 @@ void xFpyrDownKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
 
     unsigned int write_ptr = 0;
     for (int i = 0; i < in_rows; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         for (int j = 0; j < in_cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
             #pragma HLS PIPELINE II=1
             // clang-format on
@@ -74,7 +74,7 @@ void xFpyrDownKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
 
 template <int TYPE, int ROWS, int COLS, int NPC, bool USE_URAM = false>
 void pyrDown(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     unsigned short input_height = _src.rows;

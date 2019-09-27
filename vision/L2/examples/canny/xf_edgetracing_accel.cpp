@@ -18,14 +18,14 @@
 
 extern "C" {
 void edgetracing_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem3
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem4
     #pragma HLS INTERFACE s_axilite port=img_inp  bundle=control
     #pragma HLS INTERFACE s_axilite port=img_out  bundle=control
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE s_axilite port=rows     bundle=control
     #pragma HLS INTERFACE s_axilite port=cols     bundle=control
     #pragma HLS INTERFACE s_axilite port=return   bundle=control

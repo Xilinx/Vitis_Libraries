@@ -29,7 +29,7 @@ void crop_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC>& _src,
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> _src2(_src.rows, _src.cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> _src3(_src.rows, _src.cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> _src4(_src.rows, _src.cols);
-    // clang-format off
+// clang-format off
     #pragma HLS dataflow
     // clang-format on
     xf::cv::duplicateMat<TYPE, HEIGHT, WIDTH, NPC>(_src, _src1, _src2);

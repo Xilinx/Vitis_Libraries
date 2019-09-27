@@ -50,7 +50,7 @@ static void applyEqn(ap_uint<2>& x0,
                      ap_uint<2>& x5,
                      ap_uint<2>& x6,
                      ap_uint<2>& x7) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
 
@@ -83,7 +83,7 @@ void PixelProcessNew(ap_uint<PIXEL_PROCESS_BITS> k1,
                      ap_uint<PIXEL_PROCESS_BITS>& l1,
                      ap_uint<PIXEL_PROCESS_BITS>& l2,
                      ap_uint<PIXEL_PROCESS_BITS>& l3) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -92,7 +92,7 @@ void PixelProcessNew(ap_uint<PIXEL_PROCESS_BITS> k1,
     ap_uint<2> z1[PIXELS], z2[PIXELS], z3[PIXELS];
 
     for (int i = 0, j = 0; i < PIXEL_PROCESS_BITS; i += 2, j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         x1[j] = k1.range(i + 1, i);
@@ -102,14 +102,14 @@ void PixelProcessNew(ap_uint<PIXEL_PROCESS_BITS> k1,
 
 PL_1:
     for (int i = 1; i < PIXELS - 1; i += 3) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         applyEqn(x1[i - 1], x1[i], x1[i + 1], x2[i - 1], x2[i], x2[i + 1], x3[i - 1], x3[i], x3[i + 1]);
     }
 
     for (int i = 0; i < PIXELS; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         y1[i] = x1[i];
@@ -119,14 +119,14 @@ PL_1:
 
 PL_2:
     for (int i = 2; i < PIXELS; i += 3) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         applyEqn(y1[i - 1], y1[i], y1[i + 1], y2[i - 1], y2[i], y2[i + 1], y3[i - 1], y3[i], y3[i + 1]);
     }
 
     for (int i = 0; i < PIXELS; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         z1[i] = y1[i];
@@ -136,7 +136,7 @@ PL_2:
 
 PL_3:
     for (int i = 3; i < PIXELS - 1; i += 3) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         applyEqn(z1[i - 1], z1[i], z1[i + 1], z2[i - 1], z2[i], z2[i + 1], z3[i - 1], z3[i], z3[i + 1]);
@@ -158,14 +158,14 @@ void TopDown(ap_uint<64> iBuff[BRAMS][DEPTH],
              int bdrows,
              int ram_row_depth) {
     ap_uint<64> arr1[BRAMS], arr2[BRAMS], arr4[BRAMS];
-    // clang-format off
+// clang-format off
     #pragma HLS array_partition variable=arr1 complete
     #pragma HLS array_partition variable=arr2 complete
     #pragma HLS array_partition variable=arr4 complete
     // clang-format on
 
     ap_uint<4> arr3[BRAMS], arr5[BRAMS];
-    // clang-format off
+// clang-format off
     #pragma HLS array_partition variable=arr3 complete
     #pragma HLS array_partition variable=arr5 complete
     // clang-format on
@@ -175,7 +175,7 @@ void TopDown(ap_uint<64> iBuff[BRAMS][DEPTH],
     for (int j = 0; j < 3; j++) {
     RD_INIT:
         for (int i = 0; i < BRAMS; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             #pragma HLS loop_tripcount min=38 max=38
             // clang-format on
@@ -198,7 +198,7 @@ void TopDown(ap_uint<64> iBuff[BRAMS][DEPTH],
 
         RD:
             for (int i = 0; i < BRAMS; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 #pragma HLS loop_tripcount min=38 max=38
                 // clang-format on
@@ -212,7 +212,7 @@ void TopDown(ap_uint<64> iBuff[BRAMS][DEPTH],
 
         RD1:
             for (int i = 1, k = 0; i < BRAMS - 3; i += 3, k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 #pragma HLS loop_tripcount min=38 max=38
                 // clang-format on
@@ -241,7 +241,7 @@ void TopDown(ap_uint<64> iBuff[BRAMS][DEPTH],
 
         RD2:
             for (int ii = 0; ii < BRAMS; ii++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 #pragma HLS loop_tripcount min=38 max=38
                 // clang-format on
@@ -283,12 +283,12 @@ static void xfEdgeTracing(xf::cv::Mat<DST_T, HEIGHT, WIDTH, NPC_DST>& _dst,
     ap_uint<64> iBuff[BRAMS_TOTAL][BRAM_DEPTH];
 
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=iBuff core=RAM_T2P_URAM
         #pragma HLS array_partition variable=iBuff dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=iBuff core=RAM_T2P_BRAM
         #pragma HLS array_partition variable=iBuff dim=1
         // clang-format on
@@ -305,7 +305,7 @@ static void xfEdgeTracing(xf::cv::Mat<DST_T, HEIGHT, WIDTH, NPC_DST>& _dst,
     int overlap = (bramsetsval * bdrows) - slice_h;
     int bramtotal = bramsetsval + 2;
 
-    //# Inter Iterations
+//# Inter Iterations
 
 INTER_ITERATION_LOOP:
     for (int inter_i = 0; inter_i < INTER_ITERATIONS; inter_i++) {
@@ -329,7 +329,7 @@ INTER_ITERATION_LOOP:
 
         Read_N_Arrange:
             for (unsigned int i = 0; i < lBound; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS loop_tripcount min=16200 max=16800
                 #pragma HLS pipeline II=1
                 #pragma HLS DEPENDENCE variable=iBuff inter false
@@ -384,7 +384,7 @@ INTER_ITERATION_LOOP:
 
         Write:
             for (unsigned int i = 0; i < lBound; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS loop_tripcount min=16200 max=16800
                 #pragma HLS pipeline
                 // clang-format on
@@ -411,11 +411,11 @@ INTER_ITERATION_LOOP:
 FIN_WR_LOOP:
     for (int ii = 0; ii < height; ii++) {
 // memcpy(oBuff, nms_in + ii * (width >> 2), width << 1);
-        // clang-format off
+// clang-format off
         #pragma HLS loop_tripcount min=HEIGHT max=HEIGHT
         // clang-format on
         for (int k = 0; k < ram_row_depth; k++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS loop_tripcount min=RAM_ROW_DEPTH max=RAM_ROW_DEPTH
             // clang-format on
@@ -426,7 +426,7 @@ FIN_WR_LOOP:
         ap_uint<9> pixel = 0;
     WR_FIN_PIPE:
         for (int j = 0, bit = 0; j < width / 8; j++, bit += 16) {
-            // clang-format off
+// clang-format off
             #pragma HLS loop_tripcount min=WIDTH/8 max=WIDTH/8
             #pragma HLS pipeline
             // clang-format on
@@ -450,7 +450,7 @@ FIN_WR_LOOP:
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC_SRC, int NPC_DST, bool USE_URAM = false>
 void EdgeTracing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC_SRC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC_DST>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     xfEdgeTracing<SRC_T, DST_T, NPC_SRC, NPC_DST, ROWS, COLS, USE_URAM>(_dst, _src, _dst.rows, _dst.cols);

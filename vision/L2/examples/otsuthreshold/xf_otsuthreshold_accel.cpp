@@ -19,7 +19,7 @@
 extern "C" {
 
 void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char* Otsuval, int height, int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=Otsuval       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE s_axilite  port=height		      bundle=control
@@ -29,7 +29,7 @@ void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char* Otsuval, int
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
 

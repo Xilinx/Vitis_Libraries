@@ -43,10 +43,14 @@ int main(int argc, char** argv) {
 #endif
 
     unsigned char dimension = DIM;
-
+    size_t image_out_size_bytes;
     // OpenCL section:
     size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
-    size_t image_out_size_bytes = dst_hls.rows * dst_hls.cols * sizeof(unsigned char);
+    if ((REDUCTION_OP == XF_REDUCE_AVG) || (REDUCTION_OP == XF_REDUCE_SUM)) {
+        image_out_size_bytes = dst_hls.rows * dst_hls.cols * sizeof(int);
+    } else {
+        image_out_size_bytes = dst_hls.rows * dst_hls.cols * sizeof(unsigned char);
+    }
 
     int height = in_img.rows;
     int width = in_img.cols;
@@ -95,6 +99,7 @@ int main(int argc, char** argv) {
                                             image_in_size_bytes, // Size in bytes
                                             in_img.data,         // Pointer to the data to copy
                                             nullptr, &event));
+
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel, NULL, &event));
     clWaitForEvents(1, (const cl_event*)&event);

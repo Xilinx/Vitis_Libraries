@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    // cvtColor(in_img,in_gray,CV_BGR2GRAY);
+// cvtColor(in_img,in_gray,CV_BGR2GRAY);
 
 #if !(XF_CONVERT8UTO16S || XF_CONVERT8UTO16U || XF_CONVERT8UTO32S)
     in_img.convertTo(input_img, OCV_INTYPE);
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     unsigned short int height = in_img.rows;
     unsigned short int width = in_img.cols;
 
-    ///////////////// 	Opencv  Reference  ////////////////////////
+///////////////// 	Opencv  Reference  ////////////////////////
 
 #if !(XF_CONVERT8UTO16S || XF_CONVERT8UTO16U || XF_CONVERT8UTO32S)
     input_img.convertTo(ocv_ref, OCV_OUTTYPE);

@@ -40,7 +40,7 @@ void xFRemapNNI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 uint16_t rows,
                 uint16_t cols) {
     XF_TNAME(DST_T, NPC) buf[WIN_ROW][COLS];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
 
@@ -48,17 +48,17 @@ void xFRemapNNI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     int read_pointer_src = 0, read_pointer_map = 0, write_pointer = 0;
 
     ap_uint<64> bufUram[PLANES][WIN_ROW][(COLS + 7) / 8];
-    // clang-format off
+// clang-format off
     #pragma HLS resource variable=bufUram core=RAM_T2P_URAM latency=2
-    // clang-format on
-    //#pragma HLS dependence variable=bufUram inter false
-    // clang-format off
+// clang-format on
+//#pragma HLS dependence variable=bufUram inter false
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=bufUram complete dim=2
     #pragma HLS ARRAY_PARTITION variable=bufUram complete dim=1
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) sx8[8];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=sx8 complete dim=1
     // clang-format on
 
@@ -75,14 +75,14 @@ void xFRemapNNI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 
 loop_height:
     for (int i = 0; i < rows + ishift; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN OFF
         #pragma HLS LOOP_TRIPCOUNT min=1 max=row_tripcount
-        // clang-format on
+    // clang-format on
 
     loop_width:
         for (int j = 0; j < cols; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE II=1
             #pragma HLS dependence variable=buf     inter false
             #pragma HLS dependence variable=bufUram inter false
@@ -96,11 +96,11 @@ loop_height:
                 if (USE_URAM) {
                     sx8[j % 8] = s;
                     for (int pl = 0, bit = 0; pl < PLANES; pl++, bit += 8) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         for (int k = 0; k < 8; k++) {
-                            // clang-format off
+// clang-format off
                             #pragma HLS UNROLL
                             // clang-format on
                             bufUram[pl][i % WIN_ROW][j / 8](k * 8 + 7, k * 8) = sx8[k](bit + 7, bit);
@@ -123,7 +123,7 @@ loop_height:
                 if (in_range)
                     if (USE_URAM) {
                         XF_TNAME(DST_T, NPC) dx9[8];
-                        // clang-format off
+// clang-format off
                         #pragma HLS ARRAY_PARTITION variable=dx9 complete dim=1
                         // clang-format on
                         for (int pl = 0, bit = 0; pl < PLANES; pl++, bit += 8) {
@@ -165,13 +165,13 @@ void xFRemapLI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 
     // URAM storage garnularity is 3x3-pel block in 2x2-pixel picture grid, it fits to one URAM word
     ap_uint<72> bufUram[PLANES][(WIN_ROW + 1) / 2][(COLS + 1) / 2];
-    // clang-format off
+// clang-format off
     #pragma HLS resource variable=bufUram core=RAM_T2P_URAM latency=2
     #pragma HLS array_partition complete variable=bufUram dim=1
     // clang-format on
 
     ap_uint<24> lineBuf[PLANES][(COLS + 1) / 2];
-    // clang-format off
+// clang-format off
     #pragma HLS resource variable=lineBuf core=RAM_S2P_BRAM latency=1
     #pragma HLS array_partition complete variable=lineBuf dim=1
     // clang-format on
@@ -201,7 +201,7 @@ void xFRemapLI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     ap_uint<72> tempbuf[PLANES];
 
     for (int pl = 0; pl < PLANES; pl++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         temppix[pl] = 0;
@@ -213,7 +213,7 @@ void xFRemapLI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 
 loop_height:
     for (int i = 0; i < rows + ishift; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN OFF
         #pragma HLS LOOP_TRIPCOUNT min=1 max=row_tripcount
         // clang-format on
@@ -223,7 +223,7 @@ loop_height:
 
     loop_width:
         for (int j = 0; j < cols + 1; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE II=1
             #pragma HLS dependence variable=buf     inter false
             #pragma HLS dependence variable=bufUram inter false
@@ -241,7 +241,7 @@ loop_height:
 
             if (USE_URAM && i < rows) {
                 for (int pl = 0, bit = 0; pl < PLANES; pl++, bit += 8) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     if (store_col && (j != 0)) {
@@ -313,19 +313,19 @@ loop_height:
                                  x >= 0 && x_fl <= (cols - 1));
 
                 int xa0, xa1, ya0, ya1;
-                // The buffer is essentially cyclic partitioned, but we have
-                // to do this manually because HLS can't figure it out.
-                // The code below is wierd, but it is this code expanded.
-                //  if ((y % WIN_ROW) % 2) {
-                //                     // Case 1, where y hits in bank 1 and ynext in bank 0
-                //                     ya0 = (ynext%WIN_ROW)/2;
-                //                     ya1 = (y%WIN_ROW)/2;
-                //                 } else {
-                //                     // The simpler case, where y hits in bank 0 and ynext hits in bank 1
-                //                     ya0 = (y%WIN_ROW)/2;
-                //                     ya1 = (ynext%WIN_ROW)/2;
-                //                 }
-                // Both cases reduce to this, if WIN_ROW is a multiple of two.
+// The buffer is essentially cyclic partitioned, but we have
+// to do this manually because HLS can't figure it out.
+// The code below is wierd, but it is this code expanded.
+//  if ((y % WIN_ROW) % 2) {
+//                     // Case 1, where y hits in bank 1 and ynext in bank 0
+//                     ya0 = (ynext%WIN_ROW)/2;
+//                     ya1 = (y%WIN_ROW)/2;
+//                 } else {
+//                     // The simpler case, where y hits in bank 0 and ynext hits in bank 1
+//                     ya0 = (y%WIN_ROW)/2;
+//                     ya1 = (ynext%WIN_ROW)/2;
+//                 }
+// Both cases reduce to this, if WIN_ROW is a multiple of two.
 #ifndef __SYNTHESIS__
                 assert(((WIN_ROW & 1) == 0) && "WIN_ROW must be a multiple of two");
 #endif
@@ -341,7 +341,7 @@ loop_height:
 
                     if (USE_URAM) {
                         XF_TNAME(DST_T, NPC) d3x3[9];
-                        // clang-format off
+// clang-format off
                         #pragma HLS ARRAY_PARTITION variable=d3x3 complete
                         // clang-format on
 
@@ -423,10 +423,10 @@ void remap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _remapped_mat,
            xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& _mapx_mat,
            xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& _mapy_mat) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     #pragma HLS dataflow
-    // clang-format on
+// clang-format on
 
 #ifndef __SYNTHESIS__
     assert((MAP_T == XF_32FC1) && "The MAP_T must be XF_32FC1");

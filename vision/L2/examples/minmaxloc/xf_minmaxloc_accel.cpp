@@ -20,7 +20,7 @@ extern "C" {
 
 void minmaxloc_accel(
     ap_uint<PTR_WIDTH>* img_in, int32_t* min_max_value, uint16_t* min_max_loc_xy, int height, int width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in          offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=min_max_value   offset=slave  bundle=gmem1
     #pragma HLS INTERFACE m_axi      port=min_max_loc_xy  offset=slave  bundle=gmem2
@@ -34,11 +34,11 @@ void minmaxloc_accel(
     int32_t min_value, max_value;
     uint16_t _min_locx, _min_locy, _max_locx, _max_locy;
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

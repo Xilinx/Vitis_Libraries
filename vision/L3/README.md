@@ -1,10 +1,14 @@
 ## Level 3: Pipeline Applications
 
-This directory contains whole applications formed by stitching a pipleine of xfOpenCV funtions. The host code shows how to call this multiple functions in OpenCL.
+This directory contains whole applications formed by stitching a pipeline of Vitis Vision functions. The host code shows how to call this multiple functions in OpenCL.
 
-'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of xfOpenCV functions to build for Vitis.
+'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of Vitis Vision functions to build for Vitis.
+
+'build' folder inside 'examples' folder has makefile that would build the default configuration of the function.
 
 'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform software emulation, hardware emulation and hardware build of the corresponding function in examples folder, based on the 'Board' the user selects.
+
+'benchmarks' directory has applications ready to build that give out their performance comparison against other architectures.
 
 ### Commands to run:
 

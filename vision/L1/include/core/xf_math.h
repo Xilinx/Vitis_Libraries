@@ -2945,7 +2945,7 @@ static unsigned int Inverse32(unsigned short x, int M, char* N) {
             tmpx = x1;
             block = 0;
             for (tmp = 0; tmp < 4; tmp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=4 max=4 avg=4
                 #pragma HLS pipeline
                 // clang-format on
@@ -2959,7 +2959,7 @@ static unsigned int Inverse32(unsigned short x, int M, char* N) {
             block = 4;
             tmpx = x2;
             for (tmp = 0; tmp < 4; tmp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=4 max=4 avg=4
                 #pragma HLS pipeline
                 // clang-format on
@@ -2973,7 +2973,7 @@ static unsigned int Inverse32(unsigned short x, int M, char* N) {
             block = 8;
             tmpx = x3;
             for (tmp = 0; tmp < 4; tmp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=4 max=4 avg=4
                 #pragma HLS pipeline
                 // clang-format on
@@ -2987,7 +2987,7 @@ static unsigned int Inverse32(unsigned short x, int M, char* N) {
             block = 12;
             tmpx = x4;
             for (tmp = 0; tmp < 4; tmp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=4 max=4 avg=4
                 #pragma HLS pipeline
                 // clang-format on
@@ -3037,7 +3037,7 @@ static unsigned int Inverse(unsigned short x, int M, char* N) {
             tmpx = x1;
             block = 0;
             for (tmp = 0; tmp < 4; tmp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=4 max=4 avg=4
                 #pragma HLS pipeline
                 // clang-format on
@@ -3051,7 +3051,7 @@ static unsigned int Inverse(unsigned short x, int M, char* N) {
             block = 1;
             tmpx = x2;
             for (tmp = 0; tmp < 4; tmp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=4 max=4 avg=4
                 #pragma HLS pipeline
                 // clang-format on
@@ -3065,7 +3065,7 @@ static unsigned int Inverse(unsigned short x, int M, char* N) {
             block = 2;
             tmpx = x3;
             for (tmp = 0; tmp < 4; tmp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=4 max=4 avg=4
                 #pragma HLS pipeline
                 // clang-format on
@@ -3079,7 +3079,7 @@ static unsigned int Inverse(unsigned short x, int M, char* N) {
             block = 3;
             tmpx = x4;
             for (tmp = 0; tmp < 4; tmp++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=4 max=4 avg=4
                 #pragma HLS pipeline
                 // clang-format on
@@ -3112,7 +3112,7 @@ static char IdentifySignBits(ap_int<24> in_val) {
 
 signBitsLoop:
     while (flag == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=24 max=24
         #pragma HLS PIPELINE
         // clang-format on
@@ -3437,7 +3437,7 @@ static int Sqrt(unsigned int D) {
     int tmpQ, tmpR;
 
     for (i = 15; i >= 0; i--) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
         if (R >= 0) {

@@ -35,13 +35,13 @@ void xFDuplicate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> row, col;
 Row_Loop:
     for (row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     Col_Loop:
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -83,19 +83,19 @@ void xFSquare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_PTNAME(IN_DEPTH) src_buf[(1 << XF_BITSHIFT(NPC))];
     XF_PTNAME(OUT_DEPTH) dst_buf[(1 << XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf complete dim=1
     #pragma HLS ARRAY_PARTITION variable=dst_buf complete dim=1
 // clang-format on
 Row_Loop:
     for (row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     Col_Loop:
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -104,7 +104,7 @@ Row_Loop:
 
         Square_Loop:
             for (ap_uint<9> k = 0; k < (1 << XF_BITSHIFT(NPC)); k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 XF_PTNAME(IN_DEPTH) val;
@@ -167,7 +167,7 @@ void xFMultiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat1,
     XF_SNAME(OUT_WW) tmp_dst;
     XF_PTNAME(IN_DEPTH) src_buf1[(1 << XF_BITSHIFT(NPC))], src_buf2[(1 << XF_BITSHIFT(NPC))];
     XF_PTNAME(OUT_DEPTH) dst_buf[(1 << XF_BITSHIFT(NPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=dst_buf complete dim=1
@@ -178,13 +178,13 @@ void xFMultiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat1,
 
 Row_Loop:
     for (row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     Col_Loop:
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -196,7 +196,7 @@ Row_Loop:
             xfExtractPixels<NPC, IN_WW, IN_DEPTH>(src_buf2, tmp_src2, 0);
 
             for (ap_uint<9> k = 0; k < (1 << XF_BITSHIFT(NPC)); k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 XF_PTNAME(IN_DEPTH) val1 = src_buf1[k];
@@ -244,13 +244,13 @@ void xFThreshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Row_Loop:
     for (uint16_t row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     Col_Loop:
         for (uint16_t col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -258,7 +258,7 @@ Row_Loop:
 
         Threshold_Loop:
             for (i = 0, j = 0; i < (32 << XF_BITSHIFT(NPC)); i += 32) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 buf1 = tmp_src.range(i + 31, i);
@@ -274,7 +274,7 @@ Row_Loop:
             tmp_src = 0;
 
             for (i = 0; i < npc; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 uint32_t tmp = res[i];
@@ -319,15 +319,15 @@ void xFComputeScore(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1_mat,
     ap_int<32> tmp_res[2];
     ap_int<32> det_res;
     ap_int<17> trace_res;
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=trace_res core=DSP48 latency=2
     // clang-format on
     ap_int<50> trace_res1;
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=trace_res1 core=DSP48 latency=2
     // clang-format on
     ap_int<32> trace_res2;
-    // clang-format off
+// clang-format off
     #pragma HLS RESOURCE variable=trace_res2 core=DSP48 latency=2
     // clang-format on
     ap_uint<13> row, col;
@@ -336,13 +336,13 @@ void xFComputeScore(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1_mat,
 
 Row_Loop:
     for (row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     Col_Loop:
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -352,7 +352,7 @@ Row_Loop:
 
         Determinant_Loop:
             for (i = 0, j = 0; i < in_sumloop; i += in_step) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 XF_PTNAME(IN_DEPTH) val1, val2, val3;

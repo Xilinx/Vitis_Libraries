@@ -58,7 +58,7 @@ xFApplyMask3x3(XF_PTNAME(DEPTH) _i00,
                XF_PTNAME(DEPTH) _i20,
                XF_PTNAME(DEPTH) _i21,
                XF_PTNAME(DEPTH) _i22) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     XF_PTNAME(DEPTH) res;
@@ -85,14 +85,14 @@ void xFComputeMaskValues3x3(XF_PTNAME(DEPTH) * _mask_value,
                             XF_PTNAME(DEPTH) * _l00_buf,
                             XF_PTNAME(DEPTH) * _l10_buf,
                             XF_PTNAME(DEPTH) * _l20_buf) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<5> filter_loop = XF_NPIXPERCYCLE(NPC);
 
 computeMaskValueLoop:
     for (ap_uint<5> j = 0; j < filter_loop; j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         _mask_value[j] =
@@ -122,7 +122,7 @@ void ProcessBox3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                    int& wr_ind)
 
 {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) buf0, buf1, buf2;
@@ -132,7 +132,7 @@ void ProcessBox3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 colLoop1:
     for (ap_uint<13> col = 0; col < img_width; col++) // Width of the image
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS_COUNT max=COLS_COUNT
         #pragma HLS pipeline
         // clang-format on
@@ -208,7 +208,7 @@ void xFBoxFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     int rd_ind = 0, wr_ind = 0;
 
     XF_PTNAME(DEPTH) mask_value[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=mask_value complete dim=1
     // clang-format on
 
@@ -226,12 +226,12 @@ void xFBoxFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_SRC) P0;
     XF_SNAME(WORDWIDTH_SRC) buf[3][COLS >> XF_BITSHIFT(NPC)]; // Line Buffer to hold image row data
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
         #pragma HLS array reshape variable=buf dim=1 factor=3 cyclic
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
@@ -239,7 +239,7 @@ void xFBoxFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 bufColLoop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS_COUNT max=COLS_COUNT
         #pragma HLS pipeline
         // clang-format on
@@ -256,7 +256,7 @@ bufColLoop:
 ROWLOOP:
     for (row = 1; row < img_height + 1; row++) // Height of the image
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -345,7 +345,7 @@ xFGradient5x5(XF_PTNAME(DEPTH_SRC) D0,
               XF_PTNAME(DEPTH_SRC) D22,
               XF_PTNAME(DEPTH_SRC) D23,
               XF_PTNAME(DEPTH_SRC) D24) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     // clang-format on
     XF_PTNAME(DEPTH_SRC) g = 0;
@@ -377,13 +377,13 @@ void xFComputeMask5x5(XF_PTNAME(DEPTH_SRC) * Gradientvalues,
                       XF_PTNAME(DEPTH_SRC) * src_buf3,
                       XF_PTNAME(DEPTH_SRC) * src_buf4,
                       XF_PTNAME(DEPTH_SRC) * src_buf5) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
-    // clang-format on
+// clang-format on
 
 Compute_Grad_Loop:
     for (int j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=8 max=8
         #pragma HLS UNROLL
         // clang-format on
@@ -427,7 +427,7 @@ void ProcessBox5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                    ap_uint<13> row,
                    int& rd_ind,
                    int& wr_ind) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<8> buf_size = XF_NPIXPERCYCLE(NPC) + 4;
@@ -438,7 +438,7 @@ void ProcessBox5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -470,7 +470,7 @@ Col_Loop:
         xFComputeMask5x5<NPC, DEPTH, WORDWIDTH_AP>(GradientValues, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5);
 
         for (ap_uint<4> i = 0; i < 4; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             src_buf1[i] = src_buf1[buf_size - (4 - i)];
@@ -531,7 +531,7 @@ void xFBoxFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     ap_uint<8> i;
     XF_PTNAME(DEPTH) GradientValues[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=GradientValues complete dim=1
     // clang-format on
 
@@ -539,7 +539,7 @@ void xFBoxFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_PTNAME(DEPTH)
     src_buf1[XF_NPIXPERCYCLE(NPC) + 4], src_buf2[XF_NPIXPERCYCLE(NPC) + 4], src_buf3[XF_NPIXPERCYCLE(NPC) + 4],
         src_buf4[XF_NPIXPERCYCLE(NPC) + 4], src_buf5[XF_NPIXPERCYCLE(NPC) + 4];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -552,12 +552,12 @@ void xFBoxFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // Temporary buffer to hold image data from five rows
     XF_SNAME(WORDWIDTH_SRC) buf[5][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
         #pragma HLS array reshape variable=buf dim=1 factor=5 cyclic
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
@@ -566,7 +566,7 @@ void xFBoxFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -578,7 +578,7 @@ Clear_Row_Loop:
 
 Read_Row2_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -588,7 +588,7 @@ Read_Row2_Loop:
 
 Row_Loop:
     for (row = 2; row < img_height + 2; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -638,7 +638,7 @@ Row_Loop:
 
         if ((NPC == XF_NPPC8) || (NPC == XF_NPPC16)) {
             for (i = 0; i < 6; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 src_buf1[buf_size + i - (XF_NPIXPERCYCLE(NPC)) + 2] = 0;
@@ -661,7 +661,7 @@ Row_Loop:
             xfPackPixels<NPC, WORDWIDTH_DST, DEPTH>(&GradientValues[0], inter_val, 0, 2, shift);
             _dst_mat.write(wr_ind++, inter_val);
         } else {
-            // clang-format off
+// clang-format off
             #pragma HLS ALLOCATION instances=xFGradient5x5 limit=1 function
             // clang-format on
             GradientValues[0] = xFGradient5x5<DEPTH, WORDWIDTH_AP>(
@@ -714,7 +714,7 @@ xFGradient7x7(XF_PTNAME(DEPTH_SRC) * src_buf1,
               XF_PTNAME(DEPTH_SRC) * src_buf5,
               XF_PTNAME(DEPTH_SRC) * src_buf6,
               XF_PTNAME(DEPTH_SRC) * src_buf7) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE off
     #pragma HLS PIPELINE II=1
     // clang-format on
@@ -779,11 +779,11 @@ void xFComputeMask7x7(XF_PTNAME(DEPTH_SRC) * Gradientvalues,
                       XF_PTNAME(DEPTH_SRC) * src_buf5,
                       XF_PTNAME(DEPTH_SRC) * src_buf6,
                       XF_PTNAME(DEPTH_SRC) * src_buf7) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     for (ap_uint<9> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=8 max=8
         #pragma HLS UNROLL
         // clang-format on
@@ -800,12 +800,12 @@ void xFCopyDataBox(XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
                    XF_PTNAME(DEPTH_SRC) src_buf5[XF_NPIXPERCYCLE(NPC) + 6],
                    XF_PTNAME(DEPTH_SRC) src_buf6[XF_NPIXPERCYCLE(NPC) + 6],
                    XF_PTNAME(DEPTH_SRC) src_buf7[XF_NPIXPERCYCLE(NPC) + 6]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<5> buf_size = (XF_NPIXPERCYCLE(NPC) + 6);
     for (ap_uint<4> i = 0; i < 6; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=6 max=6
         #pragma HLS unroll
         // clang-format on
@@ -834,7 +834,7 @@ void xFExtractDataBox(XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
                       XF_SNAME(WORDWIDTH_SRC) buf4,
                       XF_SNAME(WORDWIDTH_SRC) buf5,
                       XF_SNAME(WORDWIDTH_SRC) buf6) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     xfExtractPixels<NPC, WORDWIDTH_SRC, DEPTH_SRC>(&src_buf1[6], buf0, 0);
@@ -881,7 +881,7 @@ void ProcessBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                    ap_uint<13> row,
                    int& rd_ind,
                    int& wr_ind) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
 
@@ -893,7 +893,7 @@ void ProcessBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Col_Loop:
     for (ap_uint<13> col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -976,7 +976,7 @@ void RightBorderBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
                        uint16_t& shiftx,
                        ap_uint<13> row,
                        int& wr_ind) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<4> i;
@@ -987,7 +987,7 @@ void RightBorderBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
     if (row >= 3) {
         if ((NPC == XF_NPPC8)) {
             for (i = 0; i < 8; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=8 max=8
                 #pragma HLS unroll
                 // clang-format on
@@ -1001,7 +1001,7 @@ void RightBorderBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
             }
 
             for (i = 0; i < 3; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=3
                 #pragma HLS unroll
                 // clang-format on
@@ -1023,7 +1023,7 @@ void RightBorderBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
             src_buf7[6] = 0;
 
             for (i = 0; i < 3; i++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=3
                 #pragma HLS ALLOCATION instances=xFGradient7x7 limit=1 function
                 // clang-format on
@@ -1063,7 +1063,7 @@ void xFBoxFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     int rd_ind = 0, wr_ind = 0;
     // Gradient output values stored in these buffer
     XF_PTNAME(DEPTH) GradientValues[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=GradientValues complete dim=1
     // clang-format on
 
@@ -1072,7 +1072,7 @@ void xFBoxFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     src_buf1[XF_NPIXPERCYCLE(NPC) + 6], src_buf2[XF_NPIXPERCYCLE(NPC) + 6], src_buf3[XF_NPIXPERCYCLE(NPC) + 6],
         src_buf4[XF_NPIXPERCYCLE(NPC) + 6], src_buf5[XF_NPIXPERCYCLE(NPC) + 6], src_buf6[XF_NPIXPERCYCLE(NPC) + 6],
         src_buf7[XF_NPIXPERCYCLE(NPC) + 6];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=src_buf3 complete dim=1
@@ -1088,12 +1088,12 @@ void xFBoxFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_SNAME(WORDWIDTH_SRC) buf[7][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
         #pragma HLS array reshape variable=buf dim=1 factor=7 cyclic
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
@@ -1102,7 +1102,7 @@ void xFBoxFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 Clear_Row_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1115,7 +1115,7 @@ Clear_Row_Loop:
 
 Read_Row1_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1126,7 +1126,7 @@ Read_Row1_Loop:
 
 Read_Row2_Loop:
     for (col = 0; col < img_width; col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
         #pragma HLS pipeline
         // clang-format on
@@ -1137,7 +1137,7 @@ Read_Row2_Loop:
 
 Row_Loop:
     for (row = 3; row < img_height + 3; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         // modify the buffer indices to re use
@@ -1200,7 +1200,7 @@ Row_Loop:
         }
 
         for (i = 0; i < 6; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             src_buf1[i] = 0;
@@ -1230,9 +1230,9 @@ Row_Loop:
 
 template <int BORDER_TYPE, int FILTER_TYPE, int SRC_T, int ROWS, int COLS, int NPC, bool USE_URAM = false>
 void boxFilter(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
 #ifndef __SYNTHESIS__
     assert(((FILTER_TYPE == XF_FILTER_3X3) || (FILTER_TYPE == XF_FILTER_5X5) || (FILTER_TYPE == XF_FILTER_7X7)) &&
            ("Filter width should be 3 or 5 or 7."));

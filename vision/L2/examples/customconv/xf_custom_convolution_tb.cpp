@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    /////////////////    OpenCV reference   /////////////////
+/////////////////    OpenCV reference   /////////////////
 #if GRAY
 #if OUT_8U
     out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image

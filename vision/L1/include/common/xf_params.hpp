@@ -212,6 +212,11 @@ enum _structuring_element_shape {
     XF_SHAPE_CROSS = 2,
 
 };
+enum _wb_type {
+    XF_WB_GRAY = 0,
+    XF_WB_SIMPLE = 1,
+};
+
 // Phase computation
 enum _phase_params { XF_RADIANS = 0, XF_DEGREES = 1 };
 typedef _phase_params XF_phase_params_e;

@@ -25,7 +25,7 @@ namespace xf {
 namespace cv {
 template <int PROC>
 float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=dot_in1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=dot_in2 complete dim=1
     #pragma HLS inline off
@@ -44,7 +44,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     float mul_out[PROC];
     for (ap_uint<10> idx = 0; idx < PROC; idx++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         mul_out[idx] = dot_in1[idx] * dot_in2[idx];
@@ -61,7 +61,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     if (TA_L1 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L1; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L1 - 1 && PROC % 2 == 1)
@@ -73,7 +73,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     if (TA_L2 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L2; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L2 - 1 && TA_L1 % 2 == 1)
@@ -85,7 +85,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     if (TA_L3 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L3; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L3 - 1 && TA_L2 % 2 == 1)
@@ -97,7 +97,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     if (TA_L4 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L4; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L4 - 1 && TA_L3 % 2 == 1)
@@ -109,7 +109,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     if (TA_L5 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L5; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L5 - 1 && TA_L4 % 2 == 1)
@@ -121,7 +121,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     if (TA_L6 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L6; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L6 - 1 && TA_L5 % 2 == 1)
@@ -133,7 +133,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     if (TA_L7 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L7; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L7 - 1 && TA_L6 % 2 == 1)
@@ -145,7 +145,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
     if (TA_L8 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L8; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L8 - 1 && TA_L7 % 2 == 1)
@@ -180,7 +180,7 @@ float KF_dotProduct(float dot_in1[PROC], float dot_in2[PROC]) {
 
 template <int DEPTH>
 void KF_treeAdder(float in1[DEPTH], float* output) {
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=in1 complete dim=1
     #pragma HLS inline
     // clang-format on
@@ -206,7 +206,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
     if (TA_L1 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L1; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L1 - 1 && DEPTH % 2 == 1)
@@ -218,7 +218,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
     if (TA_L2 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L2; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L2 - 1 && TA_L1 % 2 == 1)
@@ -230,7 +230,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
     if (TA_L3 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L3; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L3 - 1 && TA_L2 % 2 == 1)
@@ -242,7 +242,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
     if (TA_L4 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L4; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L4 - 1 && TA_L3 % 2 == 1)
@@ -254,7 +254,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
     if (TA_L5 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L5; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L5 - 1 && TA_L4 % 2 == 1)
@@ -266,7 +266,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
     if (TA_L6 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L6; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L6 - 1 && TA_L5 % 2 == 1)
@@ -278,7 +278,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
     if (TA_L7 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L7; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L7 - 1 && TA_L6 % 2 == 1)
@@ -290,7 +290,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
     if (TA_L8 != 0) {
         for (ap_uint<10> idx = 0; idx < TA_L8; idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             if (idx == TA_L8 - 1 && TA_L7 % 2 == 1)
@@ -325,7 +325,7 @@ void KF_treeAdder(float in1[DEPTH], float* output) {
 
 template <int PROC>
 void KF_scaleSub(float in1[PROC], float scale, float in2[PROC], float out[PROC]) {
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=in1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=in2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=out complete dim=1
@@ -335,7 +335,7 @@ void KF_scaleSub(float in1[PROC], float scale, float in2[PROC], float out[PROC])
     float scale_neg = -scale;
 
     for (int idx = 0; idx < PROC; idx++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         out[idx] = in1[idx] + (scale_neg * in2[idx]);
@@ -344,13 +344,13 @@ void KF_scaleSub(float in1[PROC], float scale, float in2[PROC], float out[PROC])
 
 template <int PROC>
 void KF_scale(float in[PROC], float scale, float out[PROC]) {
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=in complete dim=1
     #pragma HLS ARRAY_PARTITION variable=out complete dim=1
     #pragma HLS inline off
     // clang-format on
     for (int idx = 0; idx < PROC; idx++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         out[idx] = scale * in[idx];
@@ -359,14 +359,14 @@ void KF_scale(float in[PROC], float scale, float out[PROC]) {
 
 template <int PROC>
 void KF_add(float in1[PROC], float in2[PROC], float out[PROC]) {
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=in1 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=in2 complete dim=1
     #pragma HLS ARRAY_PARTITION variable=out complete dim=1
     #pragma HLS inline off
     // clang-format on
     for (int idx = 0; idx < PROC; idx++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         out[idx] = in1[idx] + in2[idx];
@@ -375,11 +375,11 @@ void KF_add(float in1[PROC], float in2[PROC], float out[PROC]) {
 
 template <int N_STATE, int TYPE, int NPC>
 void KF_X_write(float xu_vector[512], xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Xout_mat) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     for (int ptr = 0; ptr < N_STATE; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
         Xout_mat.write_float(ptr, xu_vector[ptr]);
@@ -391,7 +391,7 @@ void KF_UD_write(float U_matrix[PROC_MU][UMAT_DEPTH],
                  float D_vector[512],
                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uout_mat,
                  xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dout_mat) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -401,7 +401,7 @@ void KF_UD_write(float U_matrix[PROC_MU][UMAT_DEPTH],
     ap_uint<32> counter3 = 0;   // for dim2
 LOOPI_U:
     for (int ptr = 0; ptr < N_STATE * N_STATE; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -427,7 +427,7 @@ LOOPI_U:
     }
 
     for (int ptr = 0; ptr < N_STATE; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
         Dout_mat.write_float(ptr, D_vector[ptr]);
@@ -449,17 +449,22 @@ void MeasUpdate_1x(float Uin_matrix[PROC_MU][UMAT_DEPTH],
     //	f1= h(1) & g1 = f1*D(1) & a0 = r
     //  ---------------------------
     //					<a0,a1>			|	Dbar(1) = D(1)*a0/a1			<a1,a2>		|	Dbar(2) = D(2)*a1/a2			<a2,a3>
-    //|..| Dbar(n) = D(n)*a(n-1)/a(n) 	f1'=f1/a0		<f1',f2,g2>		|	Ubar1= U1-f1'k1 ->
-    // f2'=f2/a1 <f2',f3,g3>	|	Ubar2= U2-f2'k2 -> f3'=f3/a2	<f3',f4,g4>	|..|	Ubar(n)= Un-fn'kn ->
+    //|..|
+    // Dbar(n) = D(n)*a(n-1)/a(n) 	f1'=f1/a0		<f1',f2,g2>		|	Ubar1= U1-f1'k1 ->
+    // f2'=f2/a1
+    //<f2',f3,g3>	|	Ubar2= U2-f2'k2 -> f3'=f3/a2	<f3',f4,g4>	|..|	Ubar(n)= Un-fn'kn ->
     // f(n+1)'=f(n+1)/a(n) 	k1 = {0,0..0}		<k1,g1>		|	k2 = k1 + g1U1
     //<k2,g2>		|	k3 = k2 + g2U2					<k3,g3>		|..|	k(n+1) = k(n) +
     // g(n+1)U(n+1)_sv
     //	f2 = U2*h						|	f3 = U3*h									|	f4 = U4*h									|..|	f(n+2)
-    //= mulAcc
+    //=
+    // mulAcc
     //	g2 = f2*D(2)					|	g3 = f3*D(3)								|	g4 = f4*D(4)								|..|	g(n+2)
-    //= f(n+2)*g(n+2)
+    //=
+    // f(n+2)*g(n+2)
     //	a1 = a0 + f1g1					|	a2 = a1 + f2g2								|	a3 = a2 + f3g3								|..|	a(n+1) = a(n)
-    //+ f(n+1)g(n+1)
+    //+
+    // f(n+1)g(n+1)
     //##############################################################################################################
     //	a0 pass							|	a1 pass										|	a2
     //pass
@@ -468,43 +473,49 @@ void MeasUpdate_1x(float Uin_matrix[PROC_MU][UMAT_DEPTH],
     //  |   a3 compute/pass								|..|
     //###############################################################################################################
     // a_prev = a0,a_up = a1 <a_prev,a_up>	|	Dbar(1)=D(1)*a_prev/a_up	<a_prev,a_up>	|	Dbar(2)=D(2)*a_prev/a_up
-    // |..| Dbar(n)=D(n)*a_prev/a_up 	f'=f1/a_prev   <f',f_nex,g_nex>	|	Ubar1=U1-f'K
+    // |..|
+    // Dbar(n)=D(n)*a_prev/a_up 	f'=f1/a_prev   <f',f_nex,g_nex>	|	Ubar1=U1-f'K
     // ->f'=f_nex/a_up<f',f_nex,g_nex>|
     // Ubar2=U2-f'K -> f'=f/a_up					|..|	Ubar(n)=U(n)-f'K -> f'=f/a_up
     //	k=k1			<K,g>			|	K= K + g*U1					<k,g>			|	K= K + g*U2									|..|	K= K
-    //+ g*U2
+    //+
+    // g*U2
     //	g=g1							|	/*a1*/a_prev = a_up							|	/*a2*/a_prev = a_up							|..|	/*a(n)*/a_prev
-    //= a_up 									|	/*a2*/a_up   = a_up +f_nex*g_nex
-    // |	/*a3*/a_up   = a_up + f_nex*g_nex
+    //=
+    // a_up 									|	/*a2*/a_up   = a_up +f_nex*g_nex			|	/*a3*/a_up   = a_up +
+    // f_nex*g_nex
     //|..|	/*a(n+1)*/a_up   = a_up +f_nex*g_nex
     //									|	g = g_nex									|	g = g_nex									|..|	g
-    //= g_nex
+    //=
+    // g_nex
     //	f=f2							|	f_nex = U3*h								|	f_nex = f4 = U4*h							|..|
-    //f_nex= f(n+2)
+    //f_nex=
+    // f(n+2)
     //	g=g2							|	g_nex = g3 = f*D(3)							|	g_nex = g4 = f4*D(4)						|..|
-    //g_nex= g(n+2)=D(n+4)
+    //g_nex=
+    // g(n+2)=D(n+4)
     //*************
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=Uin_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=Uin_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=Uin_matrix complete dim=1
         // clang-format on
     }
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=Uout_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=Uout_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=Uout_matrix complete dim=1
         // clang-format on
     }
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=h_vector complete dim=0
     #pragma HLS inline off
     // clang-format on
@@ -522,15 +533,15 @@ void MeasUpdate_1x(float Uin_matrix[PROC_MU][UMAT_DEPTH],
         f_dash = f_dash_div;
 
     float kg_vector[PROC_MU][DEPTH_MU];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=kg_vector complete dim=0
     // clang-format on
     for (int i = 0; i < PROC_MU; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         for (int j = 0; j < DEPTH_MU; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             kg_vector[i][j] = 0;
@@ -550,7 +561,7 @@ void MeasUpdate_1x(float Uin_matrix[PROC_MU][UMAT_DEPTH],
 
 LOOP2:
     for (int state = 0, u_offset = 0; state < N_STATE; state++, u_offset += DEPTH_MU) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline II=10
         // clang-format on
 
@@ -576,16 +587,16 @@ LOOP2:
         // For timing sake & II , Uin_matrix data is loaded in Uin0_col & Uin2_col
         float Uin0_col[PROC_MU][DEPTH_MU];
         float Uin2_col[PROC_MU][DEPTH_MU];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=Uin0_col complete dim=0
         #pragma HLS ARRAY_PARTITION variable=Uin2_col complete dim=0
         // clang-format on
         for (int i = 0; i < PROC_MU; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             for (int j = 0; j < DEPTH_MU; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
 
@@ -603,15 +614,15 @@ LOOP2:
         }
 
         float tmp_kg_vector[PROC_MU][DEPTH_MU];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=tmp_kg_vector complete dim=0
         // clang-format on
         for (int i = 0; i < PROC_MU; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             for (int j = 0; j < DEPTH_MU; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 tmp_kg_vector[i][j] = kg_vector[i][j];
@@ -619,22 +630,22 @@ LOOP2:
         }
 
         float Uout_col[PROC_MU][DEPTH_MU];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=Uout_col complete dim=0
-        // clang-format on
+    // clang-format on
     LOOP5:
         for (ap_uint<8> u_seq = 0, var = 0; u_seq < DEPTH_MU; u_seq++, var += PROC_MU) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             float u_readchunk[PROC_MU];
             float k_readchunk[PROC_MU];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=u_readchunk complete dim=1
             #pragma HLS ARRAY_PARTITION variable=k_readchunk complete dim=1
             // clang-format on
             for (ap_uint<8> loadin = 0; loadin < PROC_MU; loadin++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 u_readchunk[loadin] = Uin0_col[loadin][u_seq];
@@ -644,7 +655,7 @@ LOOP2:
             KF_scaleSub<PROC_MU>(u_readchunk, f_dash, k_readchunk, u_writechunk);
 
             for (ap_uint<8> loadin = 0; loadin < PROC_MU; loadin++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 Uout_col[loadin][u_seq] = u_writechunk[loadin];
@@ -653,11 +664,11 @@ LOOP2:
         } // u seq loop
 
         for (int i = 0; i < PROC_MU; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             for (int j = 0; j < DEPTH_MU; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
 
@@ -677,12 +688,12 @@ LOOP2:
         float gu_vector[PROC_MU][DEPTH_MU];
     LOOP61:
         for (ap_uint<8> k_seq = 0, var = 0; k_seq < DEPTH_MU; k_seq++, var += PROC_MU) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             float u_readchunk[PROC_MU];
             for (ap_uint<8> loadin = 0; loadin < PROC_MU; loadin++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 u_readchunk[loadin] = Uin0_col[loadin][k_seq];
@@ -692,7 +703,7 @@ LOOP2:
             KF_scale<PROC_MU>(u_readchunk, g_value, gu_writechunk);
 
             for (ap_uint<8> loadin = 0; loadin < PROC_MU; loadin++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 gu_vector[loadin][k_seq] = gu_writechunk[loadin];
@@ -701,13 +712,13 @@ LOOP2:
 
     LOOP62:
         for (ap_uint<8> k_seq = 0, var = 0; k_seq < DEPTH_MU; k_seq++, var += PROC_MU) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             float k_readchunk[PROC_MU];
             float gu_readchunk[PROC_MU];
             for (ap_uint<8> loadin = 0; loadin < PROC_MU; loadin++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 k_readchunk[loadin] = tmp_kg_vector[loadin][k_seq];
@@ -718,7 +729,7 @@ LOOP2:
             KF_add<PROC_MU>(k_readchunk, gu_readchunk, k_writechunk);
 
             for (ap_uint<8> loadin = 0; loadin < PROC_MU; loadin++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 kg_vector[loadin][k_seq] = k_writechunk[loadin];
@@ -732,22 +743,22 @@ LOOP2:
         //### f and g calculation
         g_value = g_nex;
         float dot_out[DEPTH_MU];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=dot_out complete dim=1
-        // clang-format on
+    // clang-format on
     LOOP7:
         for (ap_uint<10> dot_seq = 0, var = 0; dot_seq < DEPTH_MU; dot_seq++, var += PROC_MU) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
             float dot_in1[PROC_MU];
             float dot_in2[PROC_MU];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=dot_in1 complete dim=1
             #pragma HLS ARRAY_PARTITION variable=dot_in2 complete dim=1
             // clang-format on
             for (ap_uint<10> loadin = 0; loadin < PROC_MU; loadin++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 dot_in1[loadin] = Uin2_col[loadin][dot_seq];
@@ -765,7 +776,7 @@ LOOP2:
     } // state loop
 
     for (ap_uint<8> x_update = 0; x_update < N_STATE; x_update++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
         float kg_temp = kg_vector[x_update % PROC_MU][x_update / PROC_MU] / alpha_prev;
@@ -785,23 +796,23 @@ LOOP2:
 template <int N_STATE, int PROC_TU, int DEPTH_TU, int TMAT_DEPTH, int UQMAT_DEPTH, bool URAM_EN>
 void load_Uq(float T_matrix[PROC_TU][TMAT_DEPTH], float Uq_matrix[UQMAT_DEPTH]) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 1) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=Uq_matrix core=RAM_S2P_URAM
         // clang-format on
     }
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -809,7 +820,7 @@ void load_Uq(float T_matrix[PROC_TU][TMAT_DEPTH], float Uq_matrix[UQMAT_DEPTH]) 
     ap_uint<32> offset_inc = N_STATE;
 LOOPI_UQ:
     for (int ptr = 0; ptr < N_STATE * N_STATE; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -855,28 +866,28 @@ void MeasUpdate(float U_matrix[PROC_MU][UMAT_DEPTH],
                 bool X_write_en,
                 bool UD_write_en) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=U_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=H_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=H_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=H_matrix complete dim=1
         // clang-format on
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -884,11 +895,11 @@ void MeasUpdate(float U_matrix[PROC_MU][UMAT_DEPTH],
 
     float Uint_matrix[PROC_MU][UMAT_DEPTH];
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=Uint_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=Uint_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=Uint_matrix complete dim=1
         // clang-format on
@@ -907,7 +918,7 @@ void MeasUpdate(float U_matrix[PROC_MU][UMAT_DEPTH],
     if (EKF_EN == 0) {
     LOOP1:
         for (ap_uint<8> ddr_ptr = 0; ddr_ptr < M_MEAS; ddr_ptr++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             // clang-format on
             ry_vector[ddr_ptr + M_MEAS] = y_mat.read_float(ddr_ptr);
@@ -922,7 +933,7 @@ void MeasUpdate(float U_matrix[PROC_MU][UMAT_DEPTH],
         ap_uint<32> offset_incH = 0;
     LOOPI_H:
         for (int ptr = 0; ptr < N_STATE; ptr++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             // clang-format on
             ap_uint<10> dim1 = ptr % PROC_MU;
@@ -956,17 +967,17 @@ LOOP2:
         }
 
         float h_vector[PROC_MU][DEPTH_MU];
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=h_vector complete dim=0
-        // clang-format on
+    // clang-format on
     LOOPHM:
         for (ap_uint<8> i = 0; i < DEPTH_MU; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_FLATTEN off
             #pragma HLS pipeline
             // clang-format on
             for (ap_uint<8> j = 0; j < PROC_MU; j++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
 
@@ -1037,42 +1048,42 @@ void MeasUpdate_wrapper(float U_matrix[PROC_MU][UMAT_DEPTH],
                         bool X_write_en,
                         bool UD_write_en) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=U_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=H_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=H_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=H_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
-    // clang-format on
+// clang-format on
 
 LOOP1:
     for (int itr1 = 0; itr1 < 1; itr1++) {
@@ -1123,14 +1134,14 @@ void gemv(float AB_matrix[PROC_MU][ABMAT_DEPTH],
           ap_uint<10> vector_offset_in,
           ap_uint<10> vector_offset_out,
           ap_uint<8> outer_loop_bound) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
 // clang-format on
 
 // New Gemv design with 1 multipliers and 1 adders
 LOOP1:
     for (ap_uint<8> outer_loop = 0; outer_loop < outer_loop_bound; outer_loop++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=128 max=128
         // clang-format on
         float input_x = xu_vector[vector_offset_in + outer_loop];
@@ -1144,7 +1155,7 @@ LOOP1:
 
     LOOPF1:
         for (ap_uint<10> inner_loop = 0; inner_loop < N_STATE; inner_loop++) {
-            // clang-format off
+// clang-format off
             #pragma HLS loop_flatten off
             #pragma HLS DEPENDENCE variable=xu_vector inter false
             #pragma HLS pipeline
@@ -1190,7 +1201,7 @@ LOOP1:
 
 template <int N_STATE, int C_CTRL, int PROC_MU, int DEPTH_MU, int DEPTH_MU_CTRL, int ABMAT_DEPTH, int UMAT_DEPTH>
 void state_predict(float AB_matrix[PROC_MU][ABMAT_DEPTH], float xu_vector[512]) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     for (ap_uint<2> iteration = 0; iteration < 2; iteration++) {
@@ -1234,47 +1245,47 @@ void gemm_update(float AB_matrix[PROC_MU][ABMAT_DEPTH],
                  ap_uint<10> out_col_cnt,
                  ap_uint<10> iteration) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=U_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=AB_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=AB_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=AB_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
 // clang-format on
 LOOP2:
     for (ap_uint<10> out_row0 = 0; out_row0 < N_STATE; out_row0++) {
     LOOP3:
         for (ap_uint<10> out_col_idx = 0; out_col_idx < out_col_cnt; out_col_idx++) {
-            // clang-format off
+// clang-format off
             #pragma HLS loop_flatten
             #pragma HLS LOOP_TRIPCOUNT min=128 max=128
             #pragma HLS DEPENDENCE variable=T_matrix inter false
@@ -1298,7 +1309,7 @@ LOOP2:
             float input1_dotproduct[PROC_MU * 2];
             float input2_dotproduct[PROC_MU * 2];
             for (ap_uint<8> idx = 0; idx < PROC_MU; idx++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 input1_dotproduct[idx] = AB_matrix[idx][dim2_0_Amatrix];
@@ -1338,40 +1349,40 @@ void AU_compute(float AB_matrix[PROC_MU][ABMAT_DEPTH],
                 float U_matrix[PROC_MU][UMAT_DEPTH],
                 float T_matrix[PROC_TU][TMAT_DEPTH]) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=U_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=AB_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=AB_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=AB_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -1428,26 +1439,26 @@ void update_T_matrix(float Tj_vector[PROC_TU][DPDQ_DEPTH],
                      float D_vector[512],
                      ap_uint<10> u_col_num) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
     }
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     float Dn_value = 0;
     float dotOutInt_ti_Deltaj[DEPTH_TU];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=dotOutInt_ti_Deltaj complete dim=1
     // clang-format on
     for (int i = 0; i < DEPTH_TU; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         dotOutInt_ti_Deltaj[i] = 0;
@@ -1456,24 +1467,24 @@ void update_T_matrix(float Tj_vector[PROC_TU][DPDQ_DEPTH],
     float U_value_in = 0;
 
     float Ti_ping[PROC_TU][DEPTH_TU];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Ti_ping complete dim=0
     // clang-format on
     float Ti_pong[PROC_TU][DEPTH_TU];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Ti_pong complete dim=0
-    // clang-format on
+// clang-format on
 
-    //#########################
-    // 1st iteration of LOOPM_1, T matrix's rows will not be updated
-    // since this loop is running in ping-pong, 1st iteration will be ideal for U_value and T matrix
-    // After 1st iteration, T matrix row index = u_row_num+1
+//#########################
+// 1st iteration of LOOPM_1, T matrix's rows will not be updated
+// since this loop is running in ping-pong, 1st iteration will be ideal for U_value and T matrix
+// After 1st iteration, T matrix row index = u_row_num+1
 
 LOOPM_1:
     for (ap_int<16> u_row_num = u_col_num, start = 0; u_row_num >= -1; u_row_num--, start++) {
     LOOPM_2:
         for (ap_uint<10> depth_num = 0; depth_num < DEPTH_TU; depth_num++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=128*16 max=128*16
             #pragma HLS DEPENDENCE variable=T_matrix inter false
             #pragma HLS pipeline
@@ -1485,7 +1496,7 @@ LOOPM_1:
             index_num2 = (u_row_num + 1) * DEPTH_TU + depth_num;
 
             float Ti_chunk[PROC_TU];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=Ti_chunk complete dim=1
             // clang-format on
 
@@ -1511,16 +1522,16 @@ LOOPM_1:
             } // idx loop
 
             float Tj_for_delta[PROC_TU];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=Tj_for_delta complete dim=1
             // clang-format on
             float deltaj_chunk[PROC_TU];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=deltaj_chunk complete dim=1
             // clang-format on
 
             for (ap_uint<10> idx = 0; idx < PROC_TU; idx++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 Tj_for_delta[idx] = Tj_vector[idx][depth_num];
@@ -1564,7 +1575,7 @@ LOOPM_1:
             KF_scaleSub<PROC_TU>(Ti_select, U_value_in, Tj_for_delta, Ti_update_chunk);
 
             for (ap_uint<10> idx = 0; idx < PROC_TU; idx++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
                 if (u_row_num != u_col_num) {
@@ -1586,17 +1597,17 @@ void load_TjDeltaj_vector(float T_matrix[PROC_TU][TMAT_DEPTH],
                           float D_vector[512],
                           ap_uint<10> u_col_num) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
     }
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Tj_vector complete dim=1
     #pragma HLS ARRAY_PARTITION variable=Deltaj_vector complete dim=1
     #pragma HLS inline off
@@ -1605,7 +1616,7 @@ void load_TjDeltaj_vector(float T_matrix[PROC_TU][TMAT_DEPTH],
     ap_uint<10> dim1_D = N_STATE;
     for (ap_uint<14> idx1 = 0; idx1 < (DEPTH_TU); idx1++) {
         for (ap_uint<8> idx2 = 0; idx2 < PROC_TU; idx2++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             // clang-format on
             ap_uint<16> dim2 = (idx1 + u_col_num * DEPTH_TU);
@@ -1630,37 +1641,37 @@ template <int N_STATE,
           bool URAM_EN>
 void UD_compute(float T_matrix[PROC_TU][TMAT_DEPTH], float U_matrix[PROC_MU][UMAT_DEPTH], float D_vector[512]) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=U_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
     }
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
     float Tj_vector[PROC_TU][DPDQ_DEPTH];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Tj_vector complete dim=1
     // clang-format on
     float Deltaj_vector[PROC_TU][DPDQ_DEPTH];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=Deltaj_vector complete dim=1
     // clang-format on
 
@@ -1703,9 +1714,9 @@ void TimeUpdate(float T_matrix[PROC_TU][TMAT_DEPTH],
                 bool X_write_en,
                 bool UD_write_en) {
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
-    // clang-format on
+// clang-format on
 
 LOOP1:
     for (int itr1 = 0; itr1 < 1; itr1++) {
@@ -1771,57 +1782,57 @@ void initialization(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
                     float Uq_matrix[UQMAT_DEPTH],
                     bool read_opt_flag) {
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=H_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=H_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=H_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=U_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=AB_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=AB_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=AB_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
     }
 
     if (URAM_EN == 1) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=Uq_matrix core=RAM_S2P_URAM
         // clang-format on
     }
 
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -1837,7 +1848,7 @@ void initialization(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
     ap_uint<32> counter3 = 0;   // for dim2
 LOOPI_U:
     for (int ptr = 0; ptr < U0_loop_cnt; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -1864,12 +1875,12 @@ LOOPI_U:
 
 LOOPHZ:
     for (int ptr_zero = 0, dim2 = (DEPTH_MU - 1); ptr_zero < M_MEAS; ptr_zero++, dim2 += DEPTH_MU) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
         for (int dim1 = 0; dim1 < PROC_MU; dim1++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
 
@@ -1883,7 +1894,7 @@ LOOPHZ:
 
     LOOPI_H:
         for (int ptr = 0; ptr < M_MEAS * N_STATE; ptr++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             // clang-format on
             ap_uint<32> offset = offset_incH + counter_Hrow;
@@ -1909,7 +1920,7 @@ LOOPHZ:
 
 LOOPI_R:
     for (int ptr = 0; ptr < R_loop_cnt; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -1919,7 +1930,7 @@ LOOPI_R:
 //******************************Load X0 ****************************//
 LOOPI_X:
     for (int ptr = 0; ptr < N_STATE; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -1935,7 +1946,7 @@ LOOPI_X:
 
 LOOPI_D:
     for (int ptr = 0; ptr < D0_loop_cnt; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -1944,7 +1955,7 @@ LOOPI_D:
 
 LOOPI_T1:
     for (int ptr = 0; ptr < D0_loop_cnt; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -1956,12 +1967,12 @@ LOOPI_T1:
     ap_uint<16> dim2 = (DEPTH_MU - 1);
 LOOPAZ:
     for (int ptr_zero = 0; ptr_zero < 2 * N_STATE; ptr_zero++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
         for (int dim1 = 0; dim1 < PROC_MU; dim1++) {
-            // clang-format off
+// clang-format off
             #pragma HLS unroll
             // clang-format on
 
@@ -1977,7 +1988,7 @@ LOOPAZ:
     ap_uint<32> counter_Arow = 0;
 LOOPI_A:
     for (int ptr = 0; ptr < N_STATE * N_STATE; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -2005,7 +2016,7 @@ LOOPI_A:
 
 LOOPI_B:
     for (int ptr = 0; ptr < B_loop_cnt; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -2031,7 +2042,7 @@ LOOPI_B:
 
 LOOPI_T2:
     for (int ptr = 0; ptr < Dq_loop_cnt; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -2048,7 +2059,7 @@ LOOPI_T2:
     ap_uint<32> offset_inc = N_STATE;
 LOOPI_UQ:
     for (int ptr = 0; ptr < Uq_loop_cnt; ptr++) {
-        // clang-format off
+// clang-format off
         #pragma HLS pipeline
         // clang-format on
 
@@ -2089,7 +2100,7 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
                       xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uout_mat,
                       xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dout_mat,
                       unsigned char flag) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 
@@ -2107,11 +2118,11 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
 
     static float H_matrix[PROC_MU][HMAT_DEPTH];
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=H_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=H_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=H_matrix complete dim=1
         // clang-format on
@@ -2119,11 +2130,11 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
 
     static float U_matrix[PROC_MU][UMAT_DEPTH];
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=U_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
         // clang-format on
@@ -2135,11 +2146,11 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
 
     static float AB_matrix[PROC_MU][ABMAT_DEPTH];
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=AB_matrix complete dim=1
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=AB_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=AB_matrix complete dim=1
         // clang-format on
@@ -2147,12 +2158,12 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
 
     static float T_matrix[PROC_TU][TMAT_DEPTH];
     if (URAM_EN == 0) {
-        // clang-format off
+// clang-format off
         #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
         #pragma HLS resource variable=T_matrix core=RAM_S2P_BRAM
         // clang-format on
     } else {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=T_matrix core=RAM_S2P_URAM
         #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
         // clang-format on
@@ -2160,7 +2171,7 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
 
     static float Uq_matrix[UQMAT_DEPTH];
     if (URAM_EN == 1) {
-        // clang-format off
+// clang-format off
         #pragma HLS RESOURCE variable=Uq_matrix core=RAM_S2P_URAM
         // clang-format on
     }

@@ -54,13 +54,13 @@ void xFDuplicate_rows(xf::cv::Mat<IN_T, ROWS, COLS, NPC>& _src_mat, // hls::stre
     ap_uint<13> row, col;
 Row_Loop:
     for (row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
     Col_Loop:
         for (col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
             // clang-format on
@@ -95,20 +95,20 @@ void xFPackNMS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,  // hls::stream< X
     int read_ind = 0, write_ind = 0;
 rowLoop:
     for (int i = 0; i < (imgheight); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (int j = 0; j < col_loop_count; j = j + (num_clks_32pix)) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS/32 max=COLS/32
             #pragma HLS pipeline
             // clang-format on
 
             for (int k = 0; k < num_clks_32pix; k++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 val.range(k * 2 * NPC + (NPC * 2 - 1), k * 2 * NPC) = _src_mat.read(read_ind++);
@@ -141,7 +141,7 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                    unsigned char _highthreshold,
                    uint16_t img_height,
                    uint16_t img_width) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     if (NPC == 8) {
@@ -156,7 +156,7 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC> phase_mat(img_height, img_width);
         xf::cv::Mat<XF_2UC1, ROWS, COLS, NPC> nms_mat(img_height, img_width);
 
-        // clang-format off
+// clang-format off
         #pragma HLS STREAM variable=gaussian_mat.data depth=2
         #pragma HLS STREAM variable=gradx_mat.data depth=2
         #pragma HLS STREAM variable=gradx1_mat.data depth=2
@@ -164,26 +164,26 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         #pragma HLS STREAM variable=grady_mat.data depth=2
         #pragma HLS STREAM variable=grady1_mat.data depth=2
         #pragma HLS STREAM variable=grady2_mat.data depth=2
-        // clang-format on
-        //#pragma HLS STREAM variable=magnitude_mat.data depth=2
-        //#pragma HLS STREAM variable=phase_mat.data depth=2
-        // clang-format off
+// clang-format on
+//#pragma HLS STREAM variable=magnitude_mat.data depth=2
+//#pragma HLS STREAM variable=phase_mat.data depth=2
+// clang-format off
         #pragma HLS STREAM variable=nms_mat.data depth=2
         // clang-format on
 
         if (NORM_TYPE == 1) {
-            // clang-format off
+// clang-format off
             #pragma HLS STREAM variable=phase_mat.data depth=TC1
             #pragma HLS STREAM variable=magnitude_mat.data depth=2
             // clang-format on
         } else {
-            // clang-format off
+// clang-format off
             #pragma HLS STREAM variable=phase_mat.data depth=2
             #pragma HLS STREAM variable=magnitude_mat.data depth=TC1
             // clang-format on
         }
 
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         xFAverageGaussianMask3x3<SRC_T, SRC_T, ROWS, COLS, DEPTH_IN, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC))>(
@@ -218,7 +218,7 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC> phase_mat(img_height, img_width);
         xf::cv::Mat<XF_2UC1, ROWS, COLS, NPC> nms_mat(img_height, img_width);
 
-        // clang-format off
+// clang-format off
         #pragma HLS STREAM variable=gaussian_mat.data depth=2
         #pragma HLS STREAM variable=gradx_mat.data depth=2
         #pragma HLS STREAM variable=gradx1_mat.data depth=2
@@ -226,26 +226,26 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         #pragma HLS STREAM variable=grady_mat.data depth=2
         #pragma HLS STREAM variable=grady1_mat.data depth=2
         #pragma HLS STREAM variable=grady2_mat.data depth=2
-        // clang-format on
-        //#pragma HLS STREAM variable=magnitude_mat.data depth=2
-        //#pragma HLS STREAM variable=phase_mat.data depth=2
-        // clang-format off
+// clang-format on
+//#pragma HLS STREAM variable=magnitude_mat.data depth=2
+//#pragma HLS STREAM variable=phase_mat.data depth=2
+// clang-format off
         #pragma HLS STREAM variable=nms_mat.data depth=2
         // clang-format on
 
         if (NORM_TYPE == 1) {
-            // clang-format off
+// clang-format off
             #pragma HLS STREAM variable=phase_mat.data depth=TC1
             #pragma HLS STREAM variable=magnitude_mat.data depth=2
             // clang-format on
         } else {
-            // clang-format off
+// clang-format off
             #pragma HLS STREAM variable=phase_mat.data depth=2
             #pragma HLS STREAM variable=magnitude_mat.data depth=TC1
             // clang-format on
         }
 
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
 
@@ -311,9 +311,9 @@ void Canny(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
            xf::cv::Mat<DST_T, ROWS, COLS, NPC1>& _dst_mat,
            unsigned char _lowthreshold,
            unsigned char _highthreshold) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
+// clang-format on
 #ifndef __SYNTHESIS__
     assert(((NORM_TYPE == XF_L1NORM) || (NORM_TYPE == XF_L2NORM)) &&
            "The _norm_type must be 'XF_L1NORM' or'XF_L2NORM'");

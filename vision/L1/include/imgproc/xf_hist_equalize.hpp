@@ -45,12 +45,12 @@ void xFEqualize(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     in_buf, temp_buf;
     // Array to hold the values after cumulative distribution
     ap_uint<8> cum_hist[256];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=cum_hist complete dim=1
     // clang-format on
     // Temporary array to hold data
     ap_uint<8> tmp_cum_hist[(1 << XF_BITSHIFT(NPC))][256];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_cum_hist complete dim=1
     // clang-format on
     // Array which holds histogram of the image
@@ -71,7 +71,7 @@ void xFEqualize(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     cum_hist[0] = 0;
 Normalize_Loop:
     for (ap_uint<9> i = 1; i < 256; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=256 max=256
         #pragma HLS PIPELINE
         // clang-format on
@@ -82,11 +82,11 @@ Normalize_Loop:
     }
 
     for (ap_uint<9> i = 0; i < 256; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         for (ap_uint<5> j = 0; j < (1 << XF_BITSHIFT(NPC)); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             ap_uint<8> tmpval = cum_hist[i];
@@ -96,12 +96,12 @@ Normalize_Loop:
 
 NORMALISE_ROW_LOOP:
     for (ap_uint<13> row = 0; row < img_height; row++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     NORMALISE_COL_LOOP:
         for (ap_uint<13> col = 0; col < img_width; col++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=SRC_TC max=SRC_TC
             #pragma HLS PIPELINE
             #pragma HLS LOOP_FLATTEN OFF
@@ -109,7 +109,7 @@ NORMALISE_ROW_LOOP:
             in_buf = _src1.read(row * img_width + col);
         Normalise_Extract:
             for (ap_uint<9> i = 0, j = 0; i < (8 << XF_BITSHIFT(NPC)); j++, i += 8) {
-                // clang-format off
+// clang-format off
                 #pragma HLS DEPENDENCE variable=tmp_cum_hist array intra false
                 #pragma HLS unroll
                 // clang-format on
@@ -131,7 +131,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void equalizeHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
 

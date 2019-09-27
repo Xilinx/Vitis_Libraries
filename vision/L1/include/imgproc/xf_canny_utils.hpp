@@ -138,14 +138,14 @@ void xFNMS3x3(XF_PTNAME(DEPTH_OUT) * _mask_value,
               XF_PTNAME(DEPTH_PHASE) * _angle_buf,
               uchar_t _low_threshold,
               uchar_t _high_threshold) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<5> filter_loop = XF_NPIXPERCYCLE(NPC);
 
 ComputeMaxLoop:
     for (ap_uint<6> j = 0; j < filter_loop; j++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         _mask_value[j] = xFFindmax3x3<DEPTH_IN, DEPTH_PHASE, DEPTH_OUT>(
@@ -193,7 +193,7 @@ void ProcessNms3x3canny(
     int& read_index1,
     int& read_index2,
     int& write_index) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     uint16_t step_out = XF_PIXELDEPTH(DEPTH_OUT), max_loop_out = XF_WORDDEPTH(WORDWIDTH_DST);
@@ -202,7 +202,7 @@ void ProcessNms3x3canny(
 colLoop1:
     for (ap_uint<13> col = 0; col < (imgwidth); col++) // Width of the image
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS_COUNT max=COLS_COUNT
         #pragma HLS pipeline
         // clang-format on
@@ -234,7 +234,7 @@ colLoop1:
 
         P0loop1:
             for (ap_uint<6> i = 0; i < (max_loop_out - step_out); i += step_out) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=NPC max=NPC
                 #pragma HLS unroll
                 // clang-format on
@@ -247,7 +247,7 @@ colLoop1:
 
         P0loop2:
             for (ap_uint<6> i = 0; i < (max_loop_out - step_out); i += step_out) {
-                // clang-format off
+// clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=NPC max=NPC
                 #pragma HLS unroll
                 // clang-format on
@@ -305,7 +305,7 @@ void xFSuppression3x3(
 
     XF_PTNAME(DEPTH_OUT)
     nmsvalue[XF_NPIXPERCYCLE(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=nmsvalue complete dim=1
     // clang-format on
 
@@ -321,22 +321,22 @@ void xFSuppression3x3(
     XF_SNAME(WORDWIDTH_DST) P0;
     XF_SNAME(WORDWIDTH_PHASE) ang, angle[2][COLS >> XF_BITSHIFT(NPC)];
 
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=angle complete dim=1
     // clang-format on
 
     XF_SNAME(WORDWIDTH_SRC) buf[3][COLS >> XF_BITSHIFT(NPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
     XF_PTNAME(DEPTH_PHASE) angle_buf[XF_NPIXPERCYCLE(NPC) + 2];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=angle_buf complete dim=1
-    // clang-format on
+// clang-format on
 
 bufColLoop:
     for (ap_uint<13> col = 0; col < (imgwidth); col++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=COLS_COUNT max=COLS_COUNT
         #pragma HLS pipeline
         // clang-format on
@@ -354,7 +354,7 @@ bufColLoop:
 rowLoop:
     for (ap_uint<13> row = 1; row < (imgheight + 1); row++) // Height of the image
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
 
@@ -442,14 +442,14 @@ void xFAngleKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1, // hls::stream<XF
     int16_t result;
 rowLoop:
     for (ap_uint<13> i = 0; i < (imgheight); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-        // clang-format on
+    // clang-format on
 
     colLoop:
         for (ap_uint<13> j = 0; j < (imgwidth); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
             // clang-format on
@@ -461,7 +461,7 @@ rowLoop:
 
         procLoop:
             for (ap_uint<13> k = 0, pix = 0; k < proc_loop; k += step, pix += 16) {
-                // clang-format off
+// clang-format off
                 #pragma HLS unroll
                 // clang-format on
 
@@ -477,7 +477,7 @@ rowLoop:
                 int TG22 = (int)(0.4142135623730950488016887242097 * (1 << CANNY_SHIFT) + 0.5);
 
                 int tg22x;
-                // clang-format off
+// clang-format off
                 #pragma HLS RESOURCE variable=tg22x core=MulnS
                 // clang-format on
                 tg22x = xa * TG22;
@@ -522,7 +522,7 @@ void xFAngle(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1, // hls::stream<XF_SNAME
              xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst,  // hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst,
              uint16_t imgheight,
              uint16_t imgwidth) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     imgwidth = imgwidth >> XF_BITSHIFT(NPC);

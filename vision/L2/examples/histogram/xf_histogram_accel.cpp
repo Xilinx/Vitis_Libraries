@@ -19,21 +19,22 @@
 extern "C" {
 
 void histogram_accel(ap_uint<PTR_WIDTH>* img_in, unsigned int* histogram, int rows, int cols) {
-    // clang-format off
+// clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in       offset=slave     bundle=gmem0
     
     #pragma HLS INTERFACE m_axi      port=histogram    offset=slave     bundle=gmem1
-    #pragma HLS INTERFACE s_axilite  port=histogram 			        bundle=control
+	#pragma HLS INTERFACE s_axilite  port=rows 			          bundle=control
+	#pragma HLS INTERFACE s_axilite  port=cols 			          bundle=control
     #pragma HLS INTERFACE s_axilite  port=return 			            bundle=control
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
 
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
-    // clang-format on
+// clang-format on
 
-    // clang-format off
+// clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 

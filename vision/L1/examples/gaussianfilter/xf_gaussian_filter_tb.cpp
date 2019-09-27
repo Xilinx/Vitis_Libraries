@@ -31,13 +31,13 @@ int main(int argc, char** argv) {
 #if GRAY
     in_img = cv::imread(argv[1], 0); // reading in the color image
 #else
-    in_img = cv::imread(argv[1], 1);                   // reading in the color image
+    in_img = cv::imread(argv[1], 1); // reading in the color image
 #endif
     if (!in_img.data) {
         printf("Failed to load the image ... !!!");
         return -1;
     }
-    // extractChannel(in_img, in_img, 1);
+// extractChannel(in_img, in_img, 1);
 #if GRAY
 
     out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image

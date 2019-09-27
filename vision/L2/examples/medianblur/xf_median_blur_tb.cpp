@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 
     cv::Mat in_img, out_img, ocv_ref, diff;
 
-    //  Reading in the image:
+//  Reading in the image:
 #if GRAY
     in_img = cv::imread(argv[1], 0); // reading in the gray image
 #else
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    // create memory for output image
+// create memory for output image
 #if GRAY
     ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
     out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     // OpenCV reference:
     cv::medianBlur(in_img, ocv_ref, WINDOW_SIZE);
 
-    // OpenCL section:
+// OpenCL section:
 #if GRAY
     size_t image_in_size_bytes = in_img.rows * in_img.cols * 1 * sizeof(unsigned char);
 #else

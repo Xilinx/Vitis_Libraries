@@ -35,7 +35,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc -argv { ../../../../../../../examples/remap/data/HD.jpeg  ../../../../../../../examples/remap/data/map_x.txt ../../../../../../../examples/remap/data/map_y.txt} -clean
+  csim_design -compiler gcc -argv " ${XF_PROJ_ROOT}/L1/examples/remap/data/128x128.png " -clean
 }
 
 if {$CSYNTH == 1} {
@@ -43,7 +43,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv { ../../../../../../../examples/remap/data//HD.jpeg  ../../../../../../../examples/remap/data/map_x.txt ../../../../../../../examples/remap/data/map_y.txt }
+  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/remap/data/128x128.png "
 }
 
 if {$VIVADO_SYN == 1} {

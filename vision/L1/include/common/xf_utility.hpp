@@ -33,13 +33,13 @@ namespace cv {
 template <int NPC, int WORDWIDTH, int PIXELDEPTH>
 void xfPackPixels(
     XF_PTNAME(PIXELDEPTH) * tmp_buf, XF_SNAME(WORDWIDTH) & val, uint16_t pos, int16_t loopIter, uint16_t& shift) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<8> STEP = XF_PIXELDEPTH(PIXELDEPTH);
 
     for (ap_int<9> i = 0; i < loopIter; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS unroll
         // clang-format on
         XF_PTUNAME(PIXELDEPTH) tmp = tmp_buf[pos];
@@ -51,7 +51,7 @@ void xfPackPixels(
 
 template <int NPC, int WORDWIDTH, int PIXELDEPTH>
 void xfExtractPixels(XF_PTNAME(PIXELDEPTH) * tmp_buf, XF_SNAME(WORDWIDTH) & val1, int pos) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline off
     // clang-format on
     XF_SNAME(WORDWIDTH) v = val1;
@@ -60,7 +60,7 @@ void xfExtractPixels(XF_PTNAME(PIXELDEPTH) * tmp_buf, XF_SNAME(WORDWIDTH) & val1
     int STEP = XF_PIXELDEPTH(PIXELDEPTH);
 Extract_pixels_loop:
     for (int i = 0; i < (1 << (XF_BITSHIFT(NPC))); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         tmp_buf[pos + i] = v.range(shift + STEP - 1, shift);
@@ -83,7 +83,7 @@ void xfExtractData(XF_PTNAME(DEPTH_SRC) * src_buf1,
                    XF_SNAME(WORDWIDTH_SRC) buf4,
                    XF_SNAME(WORDWIDTH_SRC) buf5,
                    XF_SNAME(WORDWIDTH_SRC) buf6) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     xfExtractPixels<NPC, WORDWIDTH_SRC, DEPTH_SRC>(&src_buf1[6], buf0, 0);
@@ -103,7 +103,7 @@ void xfCopyData(XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
                 XF_PTNAME(DEPTH_SRC) src_buf5[XF_NPIXPERCYCLE(NPC) + 6],
                 XF_PTNAME(DEPTH_SRC) src_buf6[XF_NPIXPERCYCLE(NPC) + 6],
                 XF_PTNAME(DEPTH_SRC) src_buf7[XF_NPIXPERCYCLE(NPC) + 6]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     ap_uint<5> buf_size = (XF_NPIXPERCYCLE(NPC) + 6);
@@ -111,7 +111,7 @@ void xfCopyData(XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
     ap_uint<4> ind = buf_size - 6;
 
     for (i = 0; i < 6; i++, ind++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=6 max=6
         #pragma HLS unroll
         // clang-format on
@@ -180,12 +180,12 @@ void xFDuplicateStream(hls::stream<XF_SNAME(WORDWIDTH)>& in_strm,
                        int imwidth,
                        int imheight) {
     for (int i = 0; i < imheight; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=IN_BH max=IN_BH
         #pragma HLS LOOP_FLATTEN off
         // clang-format on
         for (int j = 0; j < (imwidth >> NPC); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=IN_BW max=IN_BW
             // clang-format on
@@ -211,7 +211,7 @@ class accel_utils {
         int loop_count = (((rows * cols * pixel_width) + PTR_WIDTH - 1) / PTR_WIDTH);
 
         for (int i = 0; i < loop_count; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TRIPCOUNT
             #pragma HLS PIPELINE
             // clang-format on
@@ -247,7 +247,7 @@ class accel_utils {
         int strm_cnt_disply = 0;
     L1:
         for (int i = 0; i < loop_count; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TRIPCOUNT
             #pragma HLS PIPELINE
             // clang-format on
@@ -295,7 +295,7 @@ class accel_utils {
 
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
     void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
@@ -321,7 +321,7 @@ class accel_utils {
         int loop_count = (((rows * cols * pixel_width) + PTR_WIDTH - 1) / PTR_WIDTH);
 
         for (int i = 0; i < loop_count; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TRIPCOUNT
             #pragma HLS PIPELINE
             // clang-format on
@@ -332,7 +332,7 @@ class accel_utils {
 
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
     void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
@@ -380,7 +380,7 @@ class accel_utils {
 
     L1:
         for (int i = 0; i < loop_count; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TRIPCOUNT
             #pragma HLS PIPELINE
             // clang-format on
@@ -426,7 +426,7 @@ class accel_utils {
         int loop_count = (((rows * cols * pixel_width) + PTR_WIDTH - 1) / PTR_WIDTH);
 
         for (int i = 0; i < loop_count; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TRIPCOUNT
             #pragma HLS PIPELINE
             // clang-format on
@@ -436,7 +436,7 @@ class accel_utils {
 
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
     void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
@@ -464,7 +464,7 @@ class accel_utils {
         int loop_count = (((rows * cols * pixel_width) + PTR_WIDTH - 1) / PTR_WIDTH);
 
         for (int i = 0; i < loop_count; i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=1 max=TRIPCOUNT
             #pragma HLS PIPELINE
             // clang-format on
@@ -476,7 +476,7 @@ class accel_utils {
 
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
     void xfMat2axiStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dstPtr) {
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&

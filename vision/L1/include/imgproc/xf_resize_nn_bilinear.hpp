@@ -33,7 +33,7 @@ void interpolatePixel(XF_CTUNAME(DEPTH, NPPC) A0,
                       ap_ufixed<12, 2> Wx,
                       ap_ufixed<12, 2> Wy,
                       XF_CTUNAME(DEPTH, NPPC) & pixel) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     if (INTERPOLATION_TYPE == XF_INTERPOLATION_NN) {
@@ -72,7 +72,7 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
                         ap_ufixed<WEIGHT_WIDTH, WEIGHT_INT> Wx[XF_NPIXPERCYCLE(NPPC)],
                         ap_ufixed<WEIGHT_WIDTH, WEIGHT_INT> Wy,
                         XF_TNAME(DEPTH, NPPC) & pixel) {
-    // clang-format off
+// clang-format off
     #pragma HLS inline
     // clang-format on
     const int PIXELDEPTH = XF_DTPIXELDEPTH(DEPTH, NPPC);
@@ -85,23 +85,23 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
            "Insufficient number of words to resize in X");
 
     XF_PTUNAME(DEPTH) unpackX1[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=unpackX1 complete dim=1
     // clang-format on
     XF_PTUNAME(DEPTH) unpackX2[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=unpackX2 complete dim=1
     // clang-format on
     XF_PTUNAME(DEPTH) outputPixel[XF_NPIXPERCYCLE(NPPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=outputPixel complete dim=1
     // clang-format on
     for (int k = 0; k < NUMBEROFINPUTWORDS; k++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         for (int i = 0; i < XF_NPIXPERCYCLE(NPPC); i++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             unpackX1[k * XF_NPIXPERCYCLE(NPPC) + i] =
@@ -113,24 +113,24 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
         }
     }
     for (int i = 0; i < XF_NPIXPERCYCLE(NPPC); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
 
         for (int k = 0; k < XF_CHANNELS(DEPTH, NPPC); k++) {
-            // clang-format off
+// clang-format off
             #pragma HLS UNROLL
             // clang-format on
             XF_CTUNAME(DEPTH, NPPC) unpackX1temp[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=unpackX1temp complete dim=1
             // clang-format on
             XF_CTUNAME(DEPTH, NPPC) unpackX2temp[XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS];
-            // clang-format off
+// clang-format off
             #pragma HLS ARRAY_PARTITION variable=unpackX2temp complete dim=1
             // clang-format on
             for (int l = 0; l < XF_NPIXPERCYCLE(NPPC) * NUMBEROFINPUTWORDS; l++) {
-                // clang-format off
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
                 unpackX1temp[l] = unpackX1[l].range((k + 1) * PIXELDEPTH - 1, k * PIXELDEPTH);
@@ -146,7 +146,7 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
     }
 
     for (int i = 0; i < XF_NPIXPERCYCLE(NPPC); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS UNROLL
         // clang-format on
         pixel.range((i + 1) * XF_DTPIXELDEPTH(DEPTH, NPPC) * XF_CHANNELS(DEPTH, NPPC) - 1,
@@ -154,7 +154,7 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
     }
 }
 static uint64_t xfUDivResize(uint64_t in_n, unsigned short in_d) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     uint64_t out_res = in_n / in_d;
@@ -164,11 +164,11 @@ static uint64_t xfUDivResize(uint64_t in_n, unsigned short in_d) {
 template <int NPPC, int T_SCALE_WIDTH, int T_SCALE_INT, int T_COMP_INDEX_WIDTH, int T_COMP_INDEX_INT>
 void scaleMult(ap_ufixed<T_SCALE_WIDTH, T_SCALE_INT> scalex,
                ap_fixed<T_COMP_INDEX_WIDTH, T_COMP_INDEX_INT> scaleXParallel[XF_NPIXPERCYCLE(NPPC)]) {
-    // clang-format off
+// clang-format off
     #pragma HLS INLINE
     // clang-format on
     for (int i = 0; i < XF_NPIXPERCYCLE(NPPC); i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS PIPELINE
         // clang-format on
         scaleXParallel[i] = (ap_fixed<T_COMP_INDEX_WIDTH, T_COMP_INDEX_INT>)scalex * (ap_uint<8>)i;
@@ -275,7 +275,7 @@ template <int SRC_TYPE,
           int MAX_DOWN_SCALE>
 void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
                       xf::cv::Mat<SRC_TYPE, OUTHEIGHT, OUTWIDTH, NPPC>& imgOutput) {
-    // clang-format off
+// clang-format off
     #pragma HLS ALLOCATION instances=scaleCompute limit=1 function
     #pragma HLS ALLOCATION instances=xfUDivResize limit=1 function
     // clang-format on
@@ -315,13 +315,13 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
     int imgOutput_cols_align_npc = ((imgOutput.cols + (NPPC - 1)) >> XF_BITSHIFT(NPPC)) << XF_BITSHIFT(NPPC);
 
     ap_fixed<COMP_INDEX_WIDTH, COMP_INDEX_INT> scaleXParallel[XF_NPIXPERCYCLE(NPPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=scaleXParallel complete dim=1
     // clang-format on
     scaleMult<NPPC, SCALE_WIDTH, SCALE_INT, COMP_INDEX_WIDTH, COMP_INDEX_INT>(scalex, scaleXParallel);
 
     XF_TNAME(SRC_TYPE, NPPC) line_buffer[3][BUFFER_DUP_FACTOR][(INWIDTH + NPPC - 1) >> (XF_BITSHIFT(NPPC))];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=line_buffer complete dim=1
     #pragma HLS ARRAY_PARTITION variable=line_buffer complete dim=2
     // clang-format on
@@ -330,11 +330,11 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
     int output_write_pointer = 0;
     for (int i = 0; i < 2; i++) // read two rows
     {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=2
         // clang-format on
         for (int j = 0; j < (imgInput_cols_align_npc >> (XF_BITSHIFT(NPPC))); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE
             #pragma HLS LOOP_TRIPCOUNT min=1 max=INWIDTH/NPPC
             // clang-format on
@@ -355,22 +355,22 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
     const int LOOPCOUNTROW = (INHEIGHT > OUTHEIGHT) ? INHEIGHT : OUTHEIGHT;
     const int LOOPCOUNTCOL = (INWIDTH > OUTWIDTH) ? INWIDTH : OUTWIDTH;
     ap_uint<INDEX_INT> indexx[XF_NPIXPERCYCLE(NPPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=indexx complete dim=1
     // clang-format on
     ap_uint<INDEX_INT> indexy = 0;
     ap_uint<INDEX_INT> nextYScale = 0;
     ap_ufixed<WEIGHT_WIDTH, WEIGHT_INT> WeightX[XF_NPIXPERCYCLE(NPPC)];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=WeightX complete dim=1
     // clang-format on
     ap_ufixed<WEIGHT_WIDTH, WEIGHT_INT> WeightY = 0;
     XF_TNAME(SRC_TYPE, NPPC) P0Buf[BUFFER_DUP_FACTOR << 1];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=P0Buf complete dim=1
     // clang-format on
     XF_TNAME(SRC_TYPE, NPPC) P1Buf[BUFFER_DUP_FACTOR << 1];
-    // clang-format off
+// clang-format off
     #pragma HLS ARRAY_PARTITION variable=P1Buf complete dim=1
     // clang-format on
 
@@ -378,14 +378,14 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
     ap_fixed<COMP_INDEX_WIDTH, COMP_INDEX_INT> indexy_pre_comp = 0;
 
     for (int i = 0; i < loop_row_count; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPCOUNTROW
         // clang-format on
 
         scaleCompute<INDEX_INT, COMP_INDEX_WIDTH, COMP_INDEX_INT, SCALE_WIDTH, SCALE_INT, INTERPOLATION_TYPE>(
             output_rows_count, scaley, indexy_pre_comp);
         for (int j = 0; j < (loop_col_count >> (XF_BITSHIFT(NPPC))); j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS PIPELINE
             #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPCOUNTCOL/NPPC
             // clang-format on
@@ -419,7 +419,7 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
 
             if (indexstores == 0) {
                 for (int k = 0; k < BUFFER_DUP_FACTOR; k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     int idx = (indexx[0] >> XF_BITSHIFT(NPPC)) + (k << 1);
@@ -432,7 +432,7 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
                 }
                 if (flag_write) {
                     for (int k = 0; k < BUFFER_DUP_FACTOR; k++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         line_buffer[2][k][j] = read_pixel;
@@ -440,7 +440,7 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
                 }
             } else if (indexstores == 1) {
                 for (int k = 0; k < BUFFER_DUP_FACTOR; k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     int idx = (indexx[0] >> XF_BITSHIFT(NPPC)) + (k << 1);
@@ -453,7 +453,7 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
                 }
                 if (flag_write) {
                     for (int k = 0; k < BUFFER_DUP_FACTOR; k++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         line_buffer[0][k][j] = read_pixel;
@@ -461,7 +461,7 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
                 }
             } else {
                 for (int k = 0; k < BUFFER_DUP_FACTOR; k++) {
-                    // clang-format off
+// clang-format off
                     #pragma HLS UNROLL
                     // clang-format on
                     int idx = (indexx[0] >> XF_BITSHIFT(NPPC)) + (k << 1);
@@ -474,7 +474,7 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
                 }
                 if (flag_write) {
                     for (int k = 0; k < BUFFER_DUP_FACTOR; k++) {
-                        // clang-format off
+// clang-format off
                         #pragma HLS UNROLL
                         // clang-format on
                         line_buffer[1][k][j] = read_pixel;
@@ -487,7 +487,7 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
                 if (j < (imgOutput_cols_align_npc >> (XF_BITSHIFT(NPPC)))) {
                     if (indexy == read_rows_count - 1) {
                         for (int k = 0; k < BUFFER_WORDS; k++) {
-                            // clang-format off
+// clang-format off
                             #pragma HLS UNROLL
                             // clang-format on
                             P0Buf[k] = P1Buf[k];
