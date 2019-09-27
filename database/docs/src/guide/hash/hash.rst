@@ -58,7 +58,7 @@ Therefore, within the ensurement of consistency (limited by the working frequenc
 
 Therefore, the results of the development with different input bit widths are shown in the following tables. 
 The 512-bit input is optimal when the operating frequency of 300 MHz is satisfied. 
-After running vivado synthesis/implementation, the compare-table as follows:
+After running Vivado synthesis/implementation, the comparison tables are as follows:
 
 1. Murmur3:
 

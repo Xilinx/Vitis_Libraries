@@ -196,7 +196,7 @@ debug:
 # -----------------------------------------------------------------------------
 # TODO:                          kernel setup
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/benchmarks/*}')
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 KSRC_DIR  = $(CUR_DIR)/kernel
@@ -217,15 +217,15 @@ VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
-hash_aggr_kernel_VPP_CFLAGS += --config conn_u280.ini
+VPP_LFLAGS += --config conn_u280.ini
 CXXFLAGS += -DUSE_HBM
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 # U250
-hash_aggr_kernel_VPP_CFLAGS += --config conn_u250.ini
+VPP_LFLAGS += --config conn_u250.ini
 CXXFLAGS += -DUSE_DDR
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 # U200
-hash_aggr_kernel_VPP_CFLAGS += --config conn_u200.ini
+VPP_LFLAGS += --config conn_u200.ini
 CXXFLAGS += -DUSE_DDR
 else
 $(warning Unsupported platform $(XPLATFORM))

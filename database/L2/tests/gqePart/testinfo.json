@@ -1,24 +1,24 @@
 {
-    "case_name": "jks.L2_gqePart",
-    "disable": 0,
+    "case_name": "jks.L2_gqePart", 
+    "disable": 0, 
     "jobs": [
         {
-            "dependency": [],
-            "env": null,
-            "files": [],
-            "index": 0,
-            "max_memory_MB": 32768,
-            "max_time_min": 400,
+            "dependency": [], 
+            "env": null, 
+            "files": [], 
+            "index": 0, 
+            "max_memory_MB": 32768, 
+            "max_time_min": 400, 
             "server": "lsf"
         }
-    ],
+    ], 
     "machine": {
         "shell": "u280"
-    },
+    }, 
     "test_type": [
-        "sdx_sw_emu",
-        "sdx_hw_emu",
-        "sdx_hw"
-    ],
+        "vitis_sw_emu", 
+        "vitis_hw_emu", 
+        "vitis_hw"
+    ], 
     "category": "canary"
 }

@@ -90,7 +90,7 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan 1 column from DDR/HBM buffers.
+ * @brief Scan 1 column from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
  * @tparam vec_len number of items to be scanned as a vector from AXI port.
@@ -194,7 +194,7 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan 2 columns from DDR/HBM buffers.
+ * @brief Scan 2 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
  * @tparam vec_len number of items to be scanned as a vector from AXI port.
@@ -317,7 +317,7 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan 3 columns from DDR/HBM buffers.
+ * @brief Scan 3 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
  * @tparam vec_len number of items to be scanned as a vector from AXI port.
@@ -464,7 +464,7 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan 4 columns from DDR/HBM buffers.
+ * @brief Scan 4 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
  * @tparam vec_len number of items to be scanned as a vector from AXI port.
@@ -631,7 +631,7 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan 5 columns from DDR/HBM buffers.
+ * @brief Scan 5 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
  * @tparam vec_len number of items to be scanned as a vector from AXI port.
@@ -821,7 +821,7 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan 6 columns from DDR/HBM buffers.
+ * @brief Scan 6 columns from DDR/HBM buffers.
  *
  * @tparam burst_len burst read length, must be supported by MC.
  * @tparam vec_len number of items to be scanned as a vector from AXI port.
@@ -945,7 +945,7 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan one column from DDR/HBM buffers, emit multiple rows
+ * @brief Scan one column from DDR/HBM buffers, emit multiple rows
  * concurrently.
  *
  * @tparam burst_len burst read length, must be supported by MC.
@@ -1030,7 +1030,7 @@ SPLIT_COL_VEC:
 namespace xf {
 namespace database {
 /**
- * @brief scan two columns from DDR/HBM buffers, emit multiple rows
+ * @brief Scan two columns from DDR/HBM buffers, emit multiple rows
  * concurrently.
  *
  * @tparam burst_len burst read length, must be supported by MC.
@@ -1127,7 +1127,7 @@ SPLIT_COL_VEC_II_NOT_1:
 namespace xf {
 namespace database {
 /**
- * @brief scan three columns from DDR/HBM buffers, emit multiple rows
+ * @brief Scan three columns from DDR/HBM buffers, emit multiple rows
  * concurrently.
  *
  * @tparam burst_len burst read length, must be supported by MC.

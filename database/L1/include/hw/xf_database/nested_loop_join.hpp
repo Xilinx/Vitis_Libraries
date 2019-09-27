@@ -36,7 +36,7 @@
 namespace xf {
 namespace database {
 /**
- * @brief nested loop join function
+ * @brief Nested loop join function
  *
  * @tparam KEY_T the type of the key of left table
  * @tparam LEFT_FIELD_T the type of the field of left table

@@ -46,7 +46,7 @@ The details of API description is shown in :ref:`hashPartition <cid-xf::database
   - CHNM=1
   - COL_NM=8
 
-In the typical setup, the PU number is 1 because there are only one DDR for input and one DDR for output. The resourse consumption of the setup is shown below:
+In the typical setup, the PU number is 1 because there are only one DDR for input and one DDR for output. The resource consumption of the setup is shown below:
 
   - LUT: 26363
   - Register: 45762

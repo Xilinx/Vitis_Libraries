@@ -18,7 +18,7 @@
 Typical Use Cases
 =================
 
-Database acceleration can be achieved in different granularity and flexibility, and this library supports the following use case:
+Database acceleration can be achieved in different granularity and flexibility, and this library supports the following use cases:
 
 +--------------------------------+----------------------------------------------------------------------------------------------+
 | Acceleration Scope             | Developer's Usage of Database Library                                                        |

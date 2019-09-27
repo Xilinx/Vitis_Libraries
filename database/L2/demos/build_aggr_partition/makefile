@@ -22,6 +22,10 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 
 .SECONDEXPANSION:
 
+.PHONY: help
+help:
+	@echo "Please refer to README.md in parent directory for makefile usage."
+
 # -----------------------------------------------------------------------------
 #                            common tool setup
 
@@ -247,13 +251,13 @@ $(foreach k,$(KERNELS),$(eval $(call kernel_hdr_dep,$(k))))
 
 
 $(XO_DIR)/%.xo: VPP_CFLAGS += $($(*)_VPP_CFLAGS)
-$(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | mkopts.ini check_vpp
+$(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp
 	@echo -e "----\nCompiling kernel $*..."
 	mkdir -p $(XO_DIR)
 	$(VPP) -o $@ --kernel $* --compile $(filter %.cpp,$^) \
 		$(VPP_CFLAGS)
 
-$(XCLBIN_FILE): $(XO_FILES) | mkopts.ini check_vpp
+$(XCLBIN_FILE): $(XO_FILES) | check_vpp
 	@echo -e "----\nCompiling xclbin..."
 	mkdir -p $(XCLBIN_DIR)
 	$(VPP) -o $@ --link $^ \

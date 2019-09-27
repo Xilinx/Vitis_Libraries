@@ -58,7 +58,7 @@ use :ref:`splitCol <cid-xf::database::splitCol>` to split the output to columns.
 
 There is a deep relation in the template parameters of the primitive. 
 In general, the maximum capacity of rows and depth of hash entry is limited by the size of HTB. 
-Each PU has one HTB in this design, and the size of one HTB is equal to the size of one psudo-channel in HBM. 
+Each PU has one HTB in this design, and the size of one HTB is equal to the size of one pseudo-channel in HBM. 
 Here is an example of row capacity when PU=8:
 
   +----------+----------+--------------+--------------+--------------+--------------------------+-------------------+

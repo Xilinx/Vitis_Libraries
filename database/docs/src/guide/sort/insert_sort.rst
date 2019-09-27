@@ -53,7 +53,7 @@ It takes five steps to finish the sort processing of a stream with limited max s
 
 1.Build a group of shift registers, and the number of shift register is the maximum sort number;
 
-2.Boardcasting the input value to every shift registers, then comapring size between the internal value of each shift register and the input value. For descending sort, run step3. Otherwise, run step4;
+2.Broadcasting the input value to every shift registers, then comparing size between the internal value of each shift register and the input value. For descending sort, run step3. Otherwise, run step4;
 
 3.For descending sort, we should build a internal ascending array. If the input value is larger than array[i], then right shift array[i]. If the input value is less than array[i] and larger than array[i+1], insert input value to array[i+1];
 

@@ -22,6 +22,10 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 
 .SECONDEXPANSION:
 
+.PHONY: help
+help:
+	@echo "Please refer to README.md in parent directory for makefile usage."
+
 # -----------------------------------------------------------------------------
 #                            common tool setup
 

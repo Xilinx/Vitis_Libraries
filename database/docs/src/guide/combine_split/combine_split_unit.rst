@@ -53,9 +53,9 @@ Due to different numbers of input streams of combineUnit / output streams of spi
 
 - 5-stream-output split unit
 
-For the combine unit, the input streams are combined from left to right, with the corresponding iputs from stream1 to streamN. (aka. output stream = [input stream1, input stream2, ..., input streamN]).
+For the combine unit, the input streams are combined from left to right, with the corresponding inputs from stream1 to streamN. (aka. output stream = [input stream1, input stream2, ..., input streamN]).
 
-For the split unit, the output streams are splited from right to left, with the corresponding inputs from stream1 to streamN. (aka. [output streamN, ..., output stream2, output stream1] = input stream). 
+For the split unit, the output streams are split from right to left, with the corresponding inputs from stream1 to streamN. (aka. [output streamN, ..., output stream2, output stream1] = input stream). 
 
 .. CAUTION::
     - All input/output streams are ap_uint<> data type.

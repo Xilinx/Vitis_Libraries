@@ -171,7 +171,7 @@ XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
 # BEGIN_XF_MK_USER_SECTION
 # -----------------------------------------------------------------------------
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../../..
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L3/tests/*}')
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 XCLBIN_FILE :=

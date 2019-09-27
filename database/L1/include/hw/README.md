@@ -1,1 +1,1 @@
-This directory contains kernel headers from Vitis Database Library.
+This directory contains L1 primitive headers for Vitis Database Library.

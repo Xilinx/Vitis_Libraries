@@ -183,8 +183,8 @@ performance.
    :scale: 60%
    :align: center
 
-Also, both input and output table's data structure is same as join kernel. The whole configuration is
-composed of 128 32-bit slot. And the detail map of configuration buffer are listed in the table:
+Also, the data structure of input and output tables is same as join kernel. The whole configuration is
+composed of 128 32-bit slot. And the details of configuration buffers are listed in the table:
 
 +-------------+----------------------+------------------------+
 | Module      |  Module Config Width |      Position          |
@@ -253,8 +253,8 @@ To reduce the size of intermediate data, it is equipped with dynamic filter like
    :align: center
 
 The internal of this kernel is illustrated in the figure above. It consists of two input buffers and one output buffer.
-Firstly, input table is scanned into multiple columns and then perform filter if related condition is given
-in configuration buffer. After that, each row will be dispatched into various buckets based on the hash value of
+Firstly, the kernel scans the input tables into multiple columns and then it filters them (if the related condition is
+given in configuration buffer). After that, each row will be dispatched into various buckets based on the hash value of
 primary key. Finally, every full hash bucket will trigger on one burst write into output buffer.
 
 The details for hash partition is shown in the following figure. One URAM array is used to buffer one burst length rows
@@ -267,7 +267,7 @@ output format with other kernels.
    :align: center
 
 To simplify the design, GQE partition kernel can reuse the scan and filter configuration with GQE join kernel. Also,
-as mentioned above, both input and output table's data structure is same as join kernel.
+as mentioned above, the data structure of input and output tables is the same as join kernel.
 
 The hardware resource utilization of single hash partition is shown in the table below (work as 200MHz).
 

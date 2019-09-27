@@ -1,5 +1,5 @@
 {
-    "case_name": "jks.L1_aggregate", 
+    "case_name": "jks.L1_duplicate_col", 
     "disable": 0, 
     "jobs": [
         {
