@@ -88,8 +88,8 @@ numfig_format = {'figure': 'Figure %s', 'table': 'Table %s', 'code-block': 'Code
 
 
 # Configure 'Edit on GitHub' extension
-edit_on_github_project = 'Xilinx/<https://gitenterprise.xilinx.com/FaaSApps/xf_solver.git>'
-edit_on_github_branch = 'master/<docs>'
+edit_on_github_project = 'Xilinx/<ENTER GITHUB REPO PATH HERE>'
+edit_on_github_branch = 'master/<ENTER DOC FOLDER HIERARCHY HERE>'
 
 html_copy_source = False
 html_show_sourcelink = False
