@@ -1,4 +1,4 @@
-Components: XF FinTech Library
+Components: Vitis Quantitative Finance Library
 
                               Apache License
                         Version 2.0, January 2004

@@ -22,7 +22,7 @@ Overview
 ========
 
 MCMC is a computer-driven sampling method. It allows one to characterize a distribution without knowing all of the distribution's mathematical properties
-by randomly sampling values out of the distribution. A particular strength of MCMC is that it can be used to draw samples from distributions 
+by randomly sampling values out of the distribution. A particular strength of MCMC is that it can be used to draw samples from distributions
 even when all that is known about the distribution is how to calculate the density for different samples. This implementation is Population MCMC using Parallel Tempering.
 Multi-chain implementation allows to generate samples from multi-mode distribution
 
@@ -46,18 +46,15 @@ The architecture of the engine is presented on diagram below:
 
 Resource Utilization
 ====================
-.. table:: Table 1 Hardware resources on U200 (%of SLR)
+.. table:: Table 1 Hardware resources on U200
     :align: center
 
     +----------------------+----------+----------+----------+----------+---------+-----------------+
     |  Engine              |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | clock period(ns)|
     +----------------------+----------+----------+----------+----------+---------+-----------------+
-    |  CPICapFloorEngine   |    3%    |    0     |    30%   |   10%    |  18%    |       2.902     |
+    |  MCMCEngine          |    6     |    0     |    657   |   76208  |   64026 |       2.902     |
     +----------------------+----------+----------+----------+----------+---------+-----------------+
 
-Throughput
-==========
-TBD
 
 
 .. toctree::

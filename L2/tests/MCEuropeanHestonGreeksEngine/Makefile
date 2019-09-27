@@ -228,7 +228,7 @@ else
 $(warning Unsupported platform $(XPLATFORM))
 endif
 
-
+VPP_CFLAGS += --xp prop:solution.hls_pre_tcl=$(CUR_DIR)/hls_pre_tcl.tcl
  
 VPP_LFLAGS += --nk $(KERNEL):1:$(KERNEL)
 

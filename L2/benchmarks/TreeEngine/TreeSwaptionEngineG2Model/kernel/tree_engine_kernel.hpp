@@ -30,9 +30,9 @@ using namespace xf::fintech;
 #define K2 1
 #else
 #define N 1000
-#define K 3
+#define K 2
 #ifndef U200
-#define K2 3
+#define K2 2
 #else
 #define K2 1
 #endif
