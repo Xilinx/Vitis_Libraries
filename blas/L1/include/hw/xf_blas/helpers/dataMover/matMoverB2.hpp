@@ -18,7 +18,7 @@
  * @file matMoverB2.hpp
  * @brief common datamovers for matrices and vectors used in BLAS L2 routines.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_MATMOVERB2_HPP

@@ -1,6 +1,6 @@
-# XF BLAS Library
+# Vitis BLAS Library
 
-XF BLAS Library is an Vitis library for accelerating linear algebra functions.
+Vitis BLAS Library is an Vitis library for accelerating linear algebra functions.
 
 [Comprehensive documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_blas)
 
