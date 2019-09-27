@@ -13,7 +13,7 @@
         }
     ], 
     "machine": {
-        "shell": "u250" 
+        "shell": "u250"
     }, 
     "test_type": [
         "hls_csim", 

@@ -42,7 +42,7 @@ After Initialization, the pricing engine evolves back step by step from the last
 
 .. image:: /images/fd_hullwhite_engine_evolveback_process.png
         :alt: evolveback process of FdHullWhiteEngine
-        :width: 100%
+        :width: 60%
         :align: center
 
 Since engineInitialization process will be executed for only once, while applyTo process will run :math:`\_ETSize` times in a single pricing process, additionally, both of them have a latency which is much shorter than douglasSchemeStep process, so they’re optimized for minimum resource utilizations with a reasonable overall latency. But as with douglasSchemeStep process, we try our best to decrease its latency to reduce the whole latency in the pricing process.
@@ -54,7 +54,7 @@ In order to describe the desired range for the underlying value, we utilize the 
 
 .. image:: /images/fd_hullwhite_engine_mesher.png
         :alt: mesher of FdHullWhiteEngine
-        :width: 100%
+        :width: 60%
         :align: center
 
 Differential operator

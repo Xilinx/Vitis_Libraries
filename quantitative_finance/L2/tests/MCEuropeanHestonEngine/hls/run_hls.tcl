@@ -18,7 +18,6 @@ set_top kernel_mc_0
 config_debug 
 
 set WORKDIR "$::env(PWD)/.."
-#set XILINX_SDX "$::env(XILINX_SDX)"
 
 
 add_files "${WORKDIR}/kernel/kernel_mceuropeanengine.cpp" -cflags " -D KN_0  -D DPRAGMA -g -D VIVADO_HLS_SIM -I ${WORKDIR}/kernel -I ${WORKDIR}/src -I ${WORKDIR}/../../include -D HLS_TEST"
@@ -37,9 +36,6 @@ config_compile -name_max_length 256
 set host_argv "-mode fpga"
 
 csim_design -argv "$host_argv" -compiler clang
-#csim_design -argv "$host_argv"
-# -ldflags "-L${XILINX_SDX}/runtime/lib/x86_64 -lxilinxopencl"
-#exit
 
 csynth_design
 

@@ -21,16 +21,16 @@ Internal Design of CPI CapFloor Engine
 
 Overview
 ========
-A CPI Cap/Floor is a call/put on the CPI. 
+A consumer price index (CPI) Cap/Floor is a call/put on the CPI. 
 
 Implemention
 ============
-This engine uses the linear interpolation method in L1 to calculate the pricing value based on time (the difference between the maturity date and the reference date, unit is year) and strike rate. The linear interpolation mothed implements 2D linear interpolation. 
+This engine uses the linear interpolation method (:math:`linearInterpolation2D`) as defined in L1 to calculate the price based on time (the difference between the maturity date and the reference date with unit in year) and strike rate. The linear interpolation mothed implements 2-dimensional linear interpolation. 
 
 Profiling
 =========
 
-The hardware resources are listed in the following table (vivado 18.3 report).
+The hardware resource utilizations are listed in the following table (from Vivado 18.3 report).
 
 .. table:: Table 1 Hardware resources
     :align: center

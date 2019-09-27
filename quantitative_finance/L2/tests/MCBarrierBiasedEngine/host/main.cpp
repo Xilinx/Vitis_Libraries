@@ -64,11 +64,13 @@ class ArgParser {
     std::vector<std::string> mTokens;
 };
 
-void printResult(float* out, float golden, float tol, int loopNum) {
+int printResult(float* out, float golden, float tol, int loopNum) {
     if (std::fabs(*out - golden) > tol) {
         std::cout << "Expected value: " << golden << std::endl;
         std::cout << "FPGA result:    " << *out << std::endl;
+        return 1;
     }
+    return 0;
 }
 
 int main(int argc, const char* argv[]) {
@@ -292,9 +294,7 @@ int main(int argc, const char* argv[]) {
     if (num_rep > 1) {
         printResult(out0_a, expectedVal, maxErrorAllowed, loopNum);
     }
-    printResult(out0_b, expectedVal, maxErrorAllowed, loopNum);
 
     std::cout << "Execution time " << tvdiff(&st_time, &end_time) << std::endl;
-
-    return 0;
+    return printResult(out0_b, expectedVal, maxErrorAllowed, loopNum);
 }

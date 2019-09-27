@@ -356,7 +356,6 @@ PYBIND11_MODULE(xf_fintech_python, m) {
                  return retval;
              });
 
-
     py::class_<CFBlackScholesMerton>(m, "CFBlackScholesMerton")
         .def(py::init<unsigned int>())
 
@@ -365,14 +364,15 @@ PYBIND11_MODULE(xf_fintech_python, m) {
         .def("deviceIsPrepared", &CFBlackScholesMerton::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
         .def("lastruntime", &CFBlackScholesMerton::getLastRunTime)
 
-        .def("run", [](CFBlackScholesMerton& self, std::vector<float> stockPriceList, std::vector<float> strikePriceList,
-                       std::vector<float> volatilityList, std::vector<float> riskFreeRateList,
-                       std::vector<float> timeToMaturityList, std::vector<float> dividendYieldList,
-                       // Above are Input Buffers   - Below are Output Buffers
-                       py::list optionPriceList, py::list deltaList, py::list gammaList, py::list vegaList,
-                       py::list thetaList, py::list rhoList,
-                       // Underneath is just the format chosen, as using the C++ example
-                       OptionType optionType, unsigned int numAssets)
+        .def("run",
+             [](CFBlackScholesMerton& self, std::vector<float> stockPriceList, std::vector<float> strikePriceList,
+                std::vector<float> volatilityList, std::vector<float> riskFreeRateList,
+                std::vector<float> timeToMaturityList, std::vector<float> dividendYieldList,
+                // Above are Input Buffers   - Below are Output Buffers
+                py::list optionPriceList, py::list deltaList, py::list gammaList, py::list vegaList, py::list thetaList,
+                py::list rhoList,
+                // Underneath is just the format chosen, as using the C++ example
+                OptionType optionType, unsigned int numAssets)
 
              {
                  int retval;
@@ -401,6 +401,55 @@ PYBIND11_MODULE(xf_fintech_python, m) {
                  return retval;
              });
 
+    py::class_<CFQuanto>(m, "Quanto")
+        .def(py::init<unsigned int>())
+
+        .def("claimDevice", &CFQuanto::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("releaseDevice", &CFQuanto::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("deviceIsPrepared", &CFQuanto::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
+        .def("lastruntime", &CFQuanto::getLastRunTime)
+
+        .def("run", [](CFQuanto& self, std::vector<float> stockPriceList, std::vector<float> strikePriceList,
+                       std::vector<float> volatilityList, std::vector<float> timeToMaturityList,
+                       std::vector<float> domesticRateList, std::vector<float> foreignRateList,
+                       std::vector<float> dividendYieldList, std::vector<float> exchangeRateList,
+                       std::vector<float> exchangeRateVolatilityList, std::vector<float> correlationList,
+                       // Above are Input Buffers   - Below are Output Buffers
+                       py::list optionPriceList, py::list deltaList, py::list gammaList, py::list vegaList,
+                       py::list thetaList, py::list rhoList,
+                       // Underneath are the values passed in as part of the call
+                       OptionType optionType, unsigned int numAssets)
+
+             {
+                 int retval;
+
+                 py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+                 for (unsigned int i = 0; i < numAssets; i++) {
+                     self.stockPrice[i] = stockPriceList[i];
+                     self.strikePrice[i] = strikePriceList[i];
+                     self.volatility[i] = volatilityList[i];
+                     self.timeToMaturity[i] = timeToMaturityList[i];
+                     self.domesticRate[i] = domesticRateList[i];
+                     self.foreignRate[i] = foreignRateList[i];
+                     self.dividendYield[i] = dividendYieldList[i];
+                     self.exchangeRate[i] = exchangeRateList[i];
+                     self.exchangeRateVolatility[i] = exchangeRateVolatilityList[i];
+                     self.correlation[i] = correlationList[i];
+                 }
+                 retval = self.run(optionType, numAssets);
+
+                 // so after the execution these should be filled with results -> transfer to python lists
+                 for (unsigned int i = 0; i < numAssets; i++) {
+                     optionPriceList.append(self.optionPrice[i]);
+                     deltaList.append(self.delta[i]);
+                     gammaList.append(self.gamma[i]);
+                     vegaList.append(self.vega[i]);
+                     thetaList.append(self.theta[i]);
+                     rhoList.append(self.rho[i]);
+                 }
+
+                 return retval;
+             });
 
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;

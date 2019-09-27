@@ -21,30 +21,30 @@ Internal Design of Tree Bermudan Swaption Engine
 
 Overview
 ========
-Swap engine, swaption engine, capfloor engine and callable engine are all pricing engines to calculate price. 
+Swap engine, swaption engine, capfloor engine and callable engine are all pricing engines to price the interested products. 
 
-The swap is mainly an interest rate swap. For both parties to the swap, the buyer need execute a specified swap agreement with the issuer on a specified future date.
+The swap is mainly an interest rate swap. For both parties to the swap, the buyer needs execute a specified swap agreement with the issuer on a specified future date.
 
 The swaption mainly refers to an option to do swap. The buyer acquires the right but not the obligation to enter into a specified swap agreement with the issuer on a specified future date. 
 
-The capfloor include 2 interest rate derivatives: cap, floor. For the interest rate cap, the buyer receives payments from the issuer at the end of each period in which the interest rate exceeds the agreed strike price. For interest rate floor, he buyer receives payments from the issuer at the end of each period in which the interest rate is below the agreed strike price.
+The capfloor include 2 interest rate derivatives: cap, floor. For the interest rate cap, the buyer receives payments from the issuer at the end of each period in which the interest rate exceeds the agreed strike price. For interest rate floor, the buyer receives payments from the issuer at the end of each period in which the interest rate is below the agreed strike price.
 
 The callable bond is a type of bond that provides the issuer of the bond with the right, but not the obligation, to redeem the bond on a specified future date before its maturity date.
 
 Implemention
 ============
-As shown in Figure 1, this engine uses the framework of Tree Lattice in L1. It has a Rate Model and 1 or 2 Stochastic Process as input. The process is as follows:
+As shown in the figure below, this engine uses the framework of Tree Lattice in L1. It has a Rate Model and 1 or 2 Stochastic Process as input.
 
 .. _my-figure1:
 .. figure:: /images/tree/treeEngine.png
     :alt: Figure 1 treeSwaptionEngine architecture on FPGA
-    :width: 80%
+    :width: 60%
     :align: center
 
 
-1. According to the input, the time grid and the corresponding counter of exercise times and payment times of fixed or floating interest rate are obtained (All time points are relative values based on the reference date the unit is year, and the engine only supports the case where the time point is not less than 0).
-2. By calling the function setup of framework, the floating interest rates and tree related parameters are calculated from 0 to N time point by time point to prepare the interest rates and the tree related parameters for subsequent calculations.
-3. Take treeSwaptionEngine, for example, by calling to the function rollback of framework using the same structure of the tree, the NPV is calculated as shown in Figure 2 from N to 0 time point by time point. The implementation is shown in Figure 2, where arrows indicate data flow.
+1. From the input parameters, the time grid and the corresponding counter of exercise times and payment times of fixed or floating interest rate are obtained (All time points are relative values based on the reference date in year, and the engine only supports the case where the time point is not less than 0).
+2. By calling the function setup of the framework, the floating interest rates and tree related parameters are calculated from 0 to N timepoint-by-timepoint to prepare the interest rates and the tree related parameters for the following calculations.
+3. Take treeSwaptionEngine, for example, by calling the function rollback of the framework using the same structure of the tree, the net present value (NPV) is calculated from N to 0 timepoint-by-timepoint. The implementation is shown in the figure below, where the data flow along with the arrows.
 
 
 .. _my-figure2:
@@ -58,7 +58,7 @@ As shown in Figure 1, this engine uses the framework of Tree Lattice in L1. It h
 Profiling
 =========
 
-The hardware resources are listed in the following table (vivado 18.3 report).
+The hardware resources are listed in the following table (from Vivado 18.3 report).
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -80,13 +80,13 @@ The hardware resources are listed in the following table (vivado 18.3 report).
     +-----------------------+----------------+----------+----------+----------+----------+---------+-----------------+
     |  treeSwapEngine       |  HWModel       |    104   |    0     |    408   |   84628  |  65744  |       3.896     |
     +-----------------------+----------------+----------+----------+----------+----------+---------+-----------------+
-    |  treeCapFloprEngine   |  HWModel       |    104   |    0     |    364   |   79489  |  64863  |       3.180     |
+    |  treeCapFloorEngine   |  HWModel       |    104   |    0     |    364   |   79489  |  64863  |       3.180     |
     +-----------------------+----------------+----------+----------+----------+----------+---------+-----------------+
     |  treeCallableEngine   |  HWModel       |    104   |    0     |    320   |   76577  |  62445  |       3.043     |
     +-----------------------+----------------+----------+----------+----------+----------+---------+-----------------+
 
 
-The following table shows the performance improvement in compare with CPU based Quantlib result on U250. (treeSwaptionEngine+G2Model FPGA System Clock: 250MHz, others FPGA System Clock: 300MHz)
+The following table shows the comparison of the performance between U250 result and CPU based Quantlib result. (treeSwaptionEngine+G2Model FPGA System Clock: 250MHz, others FPGA System Clock: 300MHz)
 
 
 .. table:: Table 2 Comparison between CPU and FPGA
@@ -124,7 +124,7 @@ The following table shows the performance improvement in compare with CPU based 
     |                      |               | FPGA Execution time-HLS(ms)| 0.28  | 0.61  | 5.61  | 18.16  |
     +----------------------+---------------+----------------------------+-------+-------+-------+--------+
     |                      |               | CPU Execution time(ms)     | 0.7   | 3.4   | 217.6 | 1581.3 |
-    |  treeCapFloprEngine  |    HWModel    +----------------------------+-------+-------+-------+--------+
+    |  treeCapFloorEngine  |    HWModel    +----------------------------+-------+-------+-------+--------+
     |                      |               | FPGA Execution time-HLS(ms)| 0.30  | 0.64  | 5.89  | 18.51  |
     +----------------------+---------------+----------------------------+-------+-------+-------+--------+
     |                      |               | CPU Execution time(ms)     | 1.4   | 3.5   | 155.2 | 1142.0 |

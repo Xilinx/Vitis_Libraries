@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #include <stdio.h>
 #include <string.h>
 
@@ -26,7 +25,6 @@
 using namespace xf::fintech;
 
 int main() {
-    
     // population mcmc fintech model
     PopMCMC popmcmc;
 

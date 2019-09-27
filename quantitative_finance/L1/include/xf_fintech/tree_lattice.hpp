@@ -38,7 +38,7 @@ namespace xf {
 namespace fintech {
 
 /**
- * @brief TreeLattice
+ * @brief Generalized structure compatible with different models and instruments
  *
  * @tparam DT date type supported include float and double.
  * @tparam Model short-rate model for Tree Engine

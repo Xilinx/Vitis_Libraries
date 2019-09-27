@@ -24,12 +24,12 @@
 #include "xf_fintech/stochastic_process.hpp"
 using namespace xf::fintech;
 
-#define N 1000
-
 #ifdef HW_EMU_TEST
+#define N 1
 #define K 1
 #define K2 1
 #else
+#define N 1000
 #define K 3
 #ifndef U200
 #define K2 3

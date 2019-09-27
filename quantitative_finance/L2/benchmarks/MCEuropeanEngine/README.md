@@ -1,20 +1,20 @@
 # Monte-Carlo European Engine
-This is a benchmark of MC (Monte-Carlo) European Engine using the SDx environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
 
 
 ## Prerequisites
 
 - Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted
 - Xilinx runtime (XRT) installed
-- Xilinx SDx 2018.3 installed and configured
+- Xilinx Vitis 2019.2 installed and configured
 
 ## Building
 The demonstration application and kernel is built using a command line Makefile flow.
 
 ### Step 1 :
-Setup the build environment using the SDx and XRT scripts:
+Setup the build environment using the Vitis and XRT scripts:
 
-            source <install path>/SDx/2018.3/settings64.sh
+            source <install path>/Vitis/2019.2/settings64.sh
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :
@@ -62,18 +62,18 @@ for the testbench, process it via the engine and compare to the expected result,
 The timing performance of the MCEuropeanEngine is shown in the table below, where timesteps is 1, requiredSamples is 16383, and FPGA frequency is 250MHz.
 The execution time is the average of 1000 runs.
 
-| platform                |         Execution time           | 
-|                         |-----------------|----------------|
-| ----------------------- | cold run        |   warm run     |
-| QuantLib 1.15 on CentOS | 20.155  ms      |   20.155 ms    |
-| FinTech on U250         | 0.053 ms        |   0.01325ms    |  
-| Accelaration Ratio      | 380X            |   1521X        |
+| platform                | Execution time (cold run) | Execution time (warm run) |
+| ----------------------- |---------------------------|---------------------------|
+| QuantLib 1.15 on CentOS | 20.155  ms                |   20.155 ms               |
+| FinTech on U250         | 0.053 ms                  |   0.01325ms               |  
+| Accelaration Ratio      | 380X                      |   1521X                   |
 
 
 
 ##  Resource Utilization
 
 The hardware resources are listed in the following table (vivado 18.3 report).
+
 | BRAM | URAM | DSP  | FF      | LUT    |
 | ---- | ---- | ---- | ------- | ------ |
 | 196  | 0    | 6376 | 1504833 | 936288 |

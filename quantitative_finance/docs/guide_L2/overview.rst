@@ -38,39 +38,77 @@ There is also a Binomial Tree (Cox-Ross-Rubinstein) engine that will calculate p
 
 The main feature for each pricing engines is as the following table.
 
-+-----------------------+-----------+-------------+----------------+
-|Pricing Engines        |Option     |Model        |Solution Method |
-+-----------------------+-----------+-------------+----------------+
-|MCEuropeanEngine       |European   |Black-Scholes| Monte Carlo    |
-+-----------------------+-----------+             +                +
-|MCAsianAPEngine        |Asian      |             |                |
-+-----------------------+           +             +                +
-|MCAsianGPEngine        |           |             |                |
-+-----------------------+           +             +                +
-|MCAsianASEngine        |           |             |                |
-+-----------------------+-----------+             +                +
-|MCCliquetEngine        |Cliquet    |             |                |
-+-----------------------+-----------+             +                +
-|MCDigitalEngine        |Digital    |             |                |
-+-----------------------+-----------+             +                +
-|MCBarrierEngine        |Barrier    |             |                |
-+-----------------------+           +             +                +
-|MCBarrierNoBiasEngine  |           |             |                |
-+-----------------------+-----------+             +                +
-|MCAmericanEngine       |American   |             |                |
-+-----------------------+-----------+-------------+                +
-|MCEuropeanHestonEngine |European   |Heston       |                |
-+-----------------------+           +             +                +
-|MCMultiAssetEuropean/  |European   |             |                |
-|HestonEngine           |           |             |                |
-+-----------------------+-----------+-------------+----------------+
-|FdHullWhiteEgnine      |Bermudan   |Hull-White   |finite-differen/|
-|                       |           |             |ce methods      |
-+-----------------------+-----------+-------------+----------------+
-|CFBlackScholes         |European   |Black-Scholes| Closed Form    |
-+-----------------------+-----------+-------------+                +
-|CFHeston               |European   |Heston       |                |
-+-----------------------+-----------+-------------+----------------+
-|BTCRR                  |European   |Cox-Ross-    | Binomial Tree  |
-|                       |American   | Rubinstein  |                |
-+-----------------------+-----------+-------------+----------------+
++-------------------------+--------------------+----------------------------+--------------------------+
+|Pricing Engines          |Option              |Model                       |Solution Method           |
++-------------------------+--------------------+----------------------------+--------------------------+
+|MCEuropeanEngine         |European            |Black-Scholes               | Monte Carlo              |
++-------------------------+--------------------+                            +                          +
+|MCAsianAPEngine          |Asian               |                            |                          |
++-------------------------+                    +                            +                          +
+|MCAsianGPEngine          |                    |                            |                          |
++-------------------------+                    +                            +                          +
+|MCAsianASEngine          |                    |                            |                          |
++-------------------------+--------------------+                            +                          +
+|MCCliquetEngine          |Cliquet             |                            |                          |
++-------------------------+--------------------+                            +                          +
+|MCDigitalEngine          |Digital             |                            |                          |
++-------------------------+--------------------+                            +                          +
+|MCBarrierEngine          |Barrier             |                            |                          |
++-------------------------+                    +                            +                          +
+|MCBarrierNoBiasEngine    |                    |                            |                          |
++-------------------------+--------------------+                            +                          +
+|MCAmericanEngine         |American            |                            |                          |
++-------------------------+--------------------+----------------------------+                          +
+|MCEuropeanHestonEngine   |European            |Heston                      |                          |
++-------------------------+                    +                            +                          +
+|MCMultiAssetEuropean/    |                    |                            |                          |
+|HestonEngine             |                    |                            |                          |
++-------------------------+--------------------+----------------------------+--------------------------+
+|CFBlackScholes           |European            |Black-Scholes               | Closed Form              |
++-------------------------+--------------------+----------------------------+                          +
+|CFHeston                 |European            |Heston                      |                          |
++-------------------------+--------------------+----------------------------+--------------------------+
+|BTCRR                    |European            |Cox-Ross-Rubinstein         | Binomial Tree            |
+|                         |American            |                            |                          |
++-------------------------+--------------------+----------------------------+--------------------------+
+|FdHullWhiteEngine        |Swaption            |Hull-White                  |finite-difference methods |
++-------------------------+                    +----------------------------+                          +
+|FdG2SwaptionEngine       |                    |Two-additive factor Gaussian|                          |
++-------------------------+                    +----------------+-----------+--------------------------+
+|treeSwaptionEngine       |                    |Hull-White                  |Trinomial Tree            |
+|                         |                    |Black-Barasinski            |                          |
+|                         |                    |Cox-Ingersoll-Ross          |                          |
+|                         |                    |Extended Cox-Ingersoll-Ross |                          |
+|                         |                    |Vasicek                     |                          |
+|                         |                    |Two-additive factor Gaussian|                          |
++-------------------------+--------------------+----------------------------+                          +
+|treeSwapEngine           |Swap                |Hull-White                  |Trinomial Tree            |
+|                         |                    |Black-Barasinski            |                          |
+|                         |                    |Cox-Ingersoll-Ross          |                          |
+|                         |                    |Extended Cox-Ingersoll-Ross |                          |
+|                         |                    |Vasicek                     |                          |
+|                         |                    |Two-additive factor Gaussian|                          |
++-------------------------+--------------------+----------------------------+                          +
+|treeCapFloorEngine       |Cap/Floor           |Hull-White                  |Trinomial Tree            |
+|                         |                    |Black-Barasinski            |                          |
+|                         |                    |Cox-Ingersoll-Ross          |                          |
+|                         |                    |Extended Cox-Ingersoll-Ross |                          |
+|                         |                    |Vasicek                     |                          |
+|                         |                    |Two-additive factor Gaussian|                          |
++-------------------------+--------------------+----------------------------+                          +
+|treeCallableBondEngine   |Callable Bond       |Hull-White                  |Trinomial Tree            |
+|                         |                    |Black-Barasinski            |                          |
+|                         |                    |Cox-Ingersoll-Ross          |                          |
+|                         |                    |Extended Cox-Ingersoll-Ross |                          |
+|                         |                    |Vasicek                     |                          |
+|                         |                    |Two-additive factor Gaussian|                          |
++-------------------------+--------------------+----------------------------+--------------------------+
+|MCHullWhiteCapFloorEngine|Cap/Floor           |Hull-White                  |Monte Carlo               |
++-------------------------+--------------------+----------------------------+--------------------------+
+|CPICapFloorEngine        |CPI Cap/Floor       | --                         |Close Form                |
++-------------------------+--------------------+----------------------------+                          +
+|DiscountingBondEngine    |Discounting Bond    | --                         |                          |
++-------------------------+--------------------+----------------------------+                          +
+|InflationCapFloorEngine  |Inflation Cap/Floor | --                         |                          |
++-------------------------+--------------------+----------------------------+--------------------------+
+

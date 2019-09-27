@@ -1,64 +1,90 @@
 # Vitis Quantitative Finance Library
 
 The Vitis Quantitative Finance Library is an fundamental library aimed at providing a comprehensive FPGA acceleration library for quantitative finance.
-It is a free/open-source for a variety of real use case, such as modeling, trading, evaluation, risk-management and so on.
+It is an open-sourced library for a variety of real use cases, such as modeling, trading, evaluation, risk-management and so on.
 
-The Vitis Quantitative Finance Library provides comprehensive tools from the bottom up for quantitative finance. It includes the lowest level modules and functions, the pre-defined middle kernel level, and the third level as pure software APIs working with pre-defined hardware overlays.
+The Vitis Quantitative Finance Library provides comprehensive tools from the bottom up for quantitative finance. It includes the lowest level containing basic modules and functions, the middle level providing pre-defined kernels, and the third level as pure software APIs working with pre-defined hardware overlays.
 
-* At the lowest level (L1), it offers useful statistical functions, numerical methods and linear algebra functions to support practical user to implement advanced modeling, such as RNG, Monte Carlo, SVD, specialist matrix solvers and so on.
+* At the lowest level (L1), it offers useful statistical functions, numerical methods and linear algebra functions to support practical user to implement advanced modeling, such as Random Number Generator (RNG), Monte Carlo Simulation (MC), Singular Value Decomposition (SVD), unique matrix solvers and so on.
 
-* In the middle level (L2), pricing engines kernel are provided to evaluate common finance derivatives, such as equity products, interest-rate products, FX products, and credit products.
+* In the middle level (L2), pricing engines are provided as kernel to evaluate common finance derivatives, such as equity products, interest-rate products, foreign exchange (FX) products, and credit products.
 
-* The software API level (L3) wraps the details of offloading acceleration with pre-built binary (overlay) and allow users to accelerate supported pricing tasks on Alveo cards without hardware development.
+* The software API level (L3) wraps the details of offloading acceleration with pre-built binary (overlay) and allow users to accelerate supported pricing tasks on Alveo cards without engaging hardware development.
 
 Check the [comprehensive HTML documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_fintech/index.html) for more details.
 
 ## Library Contents
 
+| Library Class    | Description | Layer |
+|------------------|-------------|-------|
+| MT19937 | Random number generator | L1 |
+| MT2203 | Random number generator | L1 |
+| MT19937IcnRng | Random number generator | L1 |
+| MT19937BoxMullerNormalRng | Random number generator | L1 |
+| MT2203IcnRng | Random number generator | L1 |
+| MultiVariateNormalRng | Random number generator | L1 |
+| SobolRsg | Multi-dimensional sobol sequence generator | L1 |
+| SobolRsg1D | One-dimensional sobol sequence generator | L1 |
+| BrownianBridge | Brownian bridge transformation using inverse simulation | L1 |
+| TrinomialTree | Lattice-based trinomial tree structure | L1 |
+| TreeLattice | Generalized structure compatible with different models and instruments | L1 |
+| Fdm1dMesher | One-dimensional discretization | L1 |
+| OrnsteinUhlenbeckProcess | A simple stochastic process derived from RNG | L1 |
+| StochasticProcess1D | Stochastic process for CIR and ECIR models to simulate rate volatility | L1 |
+| HWModel | Hull-White model for tree engine | L1 |
+| G2Model | Two-additive-factor gaussian model for tree engine | L1 |
+| ECIRModel | Extended Cox-Ingersoll-Ross model | L1 |
+| CIRModel | Cox-Ingersoll-Ross model for tree engine | L1 |
+| VModel | Vasicek model for tree engine | L1 |
+| HestonModel | Heston process | L1 |
+| BKModel | Black-Karasinski model for tree engine | L1 |
+| BSModel | Black-Scholes process | L1 |
+| CPICapFloorEngine | Pricing Consumer price index (CPI) using cap/floor methods | L2 |
+| DiscountingBondEngine | Engine used to price discounting bond | L2 |
+| InflationCapFloorEngine | Pricing inflation using cap/floor methods | L2 |
+| FdHullWhiteEngine | Bermudan swaption pricing engine using finite-difference methods based on Hull-White model | L2 |
+| FdG2SwaptionEngine | Bermudan swaption pricing engine using finite-difference methods based on two-additive-factor gaussian model | L2 |
+| DeviceManager | Used to enumerate available Xilinx devices | L3 |
+| Device | A class representing an individual accelerator card | L3 |
+| Trace | Used to control debug trace output | L3 |
+
+
 | Library Function | Description | Layer |
 |------------------|-------------|-------|
-| Mersenne Twister RNG (MT19937) | Random number generator | L1 |
-| Mersenne Twister RNG (MT2203) | Random number generator | L1 |
-| RNG (LUT-SR)         | Random number generator.  | L1    |
-| RNG (Gaussian)       | Random number generator.  | L1    |
-| Box-Muller Transform | Produces normal distribution from a uniform one. | L1 |
-| 1-dimensional  Sobol  | Quasi-random number generator.      | L1    |
-| Multi-dimensional  Sobol  | Quasi-random number generator.      | L1    |
-| Inverse Cumulative Normal Distribution | | L1 |
-| Brownian Bridge Transform |  | L1 |
-| Jacobi SVD | Singular Value Decomposition using the Jacobi method | L1 |
-| Monte Carlo (discretization quantization)        |                           | L1    |
-| Tridiagonal Solver | Solver for tridiagonal systems of equations using PCR | L1 |
-| Pentadiagonal Solver | Solver for pentadiagonal systems of equations using PCR | L1 |
-| 1-dimentional Stochastic Process | derived by RNGs | L1 |
-| Ornstein Uhlenbeck Process | A simple stochastic process derived by RNGs | L1 |
-| Mesher | Discretization | L1 |
-| Monte-Carlo Heston         | Monte-Carlo Heston (model only). | L2    |
-| Monte-Carlo European Heston | Monte-Carlo simulation of European-style options using Heston model | L2 |
-| Monte-Carlo European Heston Greeks | Measure sensitivity of derivative values | L2 |
-| Monte-Carlo Black-Scholes European | Monte-Carlo simulation of European-style options using the Black-Scholes model | L2 |
-| Monte-Carlo Multi-Asset European Heston | Monte-Carlo simulation of European-style options for multiple underlying asset | L2 |
-| Monte-Carlo Black-Scholes American | Monte-Carlo simulation of American-style options using the Black-Scholes model | L2 |
-| Monte-Carlo Black-Scholes Digital  | Monte-Carlo simulation of digital (all-or-nothing) option using the Black-Scholes model | L2 |
-| Monte-Carlo Black-Scholes Asian    | Monte-Carlo simulation of Asian-style options using the Black-Scholes model | L2 |
-| Monte-Carlo Black-Scholes Barrier  | Monte-Carlo simulation of barrier options using the Black-Scholes model | L2 |
-| Monte-Carlo Cliquet | Monte-Carlo simulation of cliquet option | L2 |
-| Markov Chain of Monte-Carlo | For sampling | L2 |
-| Closed Form Black Scholes Merton | Derivate investment instruments | L2 |
-| Closed Form Heston | Add stochastic volatility | L2 |
-| Closed Form Merton 76 | Add random jump to Black Scholes model | L2 |
-| Garman Kohlhagen | Model for foreign exchange based on Black Scholes Merton | L2 |
-| Quanto | | L2 |
-| Cox-Ross-Rubinstein Binomial Tree | Numerical assumptions in black-Scholes model | L2 |
-| Tree Bermudan Swaption | | L2 |
-| CPI CapFloor | Use linear interpolation | L2 |
-| Inflation CapFloor | Year-on-year inflation cap/floor | L2 |
-| Zero Coupon Bond | | L2 |
-| Monte-Carlo Hull-White | Monte-Carlo simulation of cap/floor using Hull-White model | L2 |
-| Finite-Difference Heston | Solution of the Heston model using an ADI finite-difference solver | L2 |
-| Finite-Difference Hull-White Bermudan Swaption Pricing | Estimate Bermudan Swaption based on FDM | L2 |
-| Finite-Difference G2 Bermudan Swaption Pricing | Estimate Bermudan Swaption based on FDM | L2 |
-| Host API | Unified Host-callable API for the simulation engines | L3 |
+| svd | Jacobi singular value decomposition | L1 |
+| mcSimulation | Monte-Carlo Framework implementation | L1 |
+| pentadiagCr | Solves for u in linear system Pu = r | L1 |
+| boxMullerTransform | Box-Muller transform from uniform random number to normal random number | L1 |
+| inverseCumulativeNormalPPND7 | Inverse Cumulative transform from random number to normal random number | L1 |
+| inverseCumulativeNormalAcklam | Inverse CumulativeNormal using Acklam’s approximation to transform uniform random number to normal random number | L1 |
+| trsvCore | Tridiagonal linear solver | L1 |
+| binomialTreeEngine | Binomial tree engine using Cox, Ross & Rubinstein | L2 |
+| cfBSMEngine | Single option price plus associated Greeks | L2 |
+| FdDouglas | Top level callable function to perform the Douglas ADI method | L2 |
+| hcfEngine | Engine for Hestion Closed Form Solution | L2 |
+| M76Engine | Engine for the Merton Jump Diffusion Model | L2 |
+| MCEuropeanEngine | European Option Pricing Engine using Monte Carlo Method | L2 |
+| MCEuropeanPriBypassEngine | Path pricer bypass variant | L2 |
+| MCEuropeanHestonEngine | European Option Pricing Engine using Monte Carlo Method based on Heston valuation model | L2 |
+| MCMultiAssetEuropeanHestonEngine | Multiple Asset European Option Pricing Engine using Monte Carlo Method based on Heston valuation model | L2 |
+| MCAmericanEnginePreSamples | PreSample kernel: this kernel samples some amount of path and store them to external memory | L2 |
+| MCAmericanEngineCalibrate | Calibrate kernel: this kernel reads the sample price data from external memory and use them to calculate the coefficient | L2 |
+| MCAmericanEnginePricing | Pricing kernel | L2 |
+| MCAmericanEngine | Calibration process and pricing process all in one kernel | L2 |
+| MCAsianGeometricAPEngine | Asian Arithmetic Average Price Engine using Monte Carlo Method Based on Black-Scholes Model (geometric average version) | L2 |
+| MCAsianArithmeticAPEngine | Asian Arithmetic Average Price Engine using Monte Carlo Method Based on Black-Scholes Model (arithmetic average version) | L2 |
+| MCAsianArithmeticASEngine | Asian Arithmetic Average Strike Engine using Monte Carlo Method Based on Black-Scholes Model (arithmetic average version) | L2 |
+| MCBarrierNoBiasEngine | Barrier Option Pricing Engine using Monte Carlo Simulation (using brownian bridge to generate the non-biased result) | L2 |
+| MCBarrierEngine | Barrier Option Pricing Engine using Monte Carlo Simulation | L2 |
+| MCCliquetEngine | Cliquet Option Pricing Engine using Monte Carlo Simulation | L2 |
+| MCDigitalEngine | Digital Option Pricing Engine using Monte Carlo Simulation | L2 |
+| MCEuropeanHestonGreeksEngine | European Option Greeks Calculating Engine using Monte Carlo Method based on Heston valuation model | L2 |
+| MCHullWhiteCapFloorEngine | Cap/Floor Pricing Engine using Monte Carlo Simulation | L2 |
+| McmcCore | Uses multiple Markov Chains to allow drawing samples from multi mode target distribution functions | L2 |
+| treeSwaptionEngine | Tree swaption pricing engine using trinomial tree based on 1D lattice method | L2 |
+| treeSwapEngine | Tree swap pricing engine using trinomial tree based on 1D lattice method | L2 |
+| treeCapFloprEngine | Tree cap/floor engine using trinomial tree based on 1D lattice method | L2 |
+| treeCallableEngine | Tree callable fixed rate bond pricing engine using trinomial tree based on 1D lattice method | L2 |
 
 ## Requirements
 
@@ -70,11 +96,6 @@ Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.
 With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 [devtoolset-6](https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/).
 
-### Dependencies
-
-The Vitis Quantitative Finance Library also needs the XF RNG and XF BLAS libraries; these should be cloned or unpacked
-at the same directory level as the Vitis Quantitative Finance library.
-
 ### PCIE Accelerator Card
 
 Hardware modules and kernels are designed to work with Alveo cards. Specific requirements are noted against each kernel or demonstration. Hardware builds for Alveo board targets require package installs as per:
@@ -83,16 +104,17 @@ Hardware modules and kernels are designed to work with Alveo cards. Specific req
 
 ### Shell Environment
 
-Setup the build environment using the Vitis and XRT scripts:
+Setup the build environment using the Vitis and XRT scripts, and set the PLATFORM_REPO_PATHS to installation folder of platform files.
 
 ```console
     $ source <install path>/Vitis/2019.2/settings64.sh
     $ source /opt/xilinx/xrt/setup.sh
+    $ export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
 
 ## Design Flows
 
-Recommended design flows are categorised by the target level:
+Recommended design flows are categorized by the target level:
 
 * L1
 * L2
@@ -104,55 +126,48 @@ The common tool and library prerequisites that apply across all design flows are
 
 L1 provides the low-level primitives used to build kernels.
 
-The recommend flow to evaluate and test L1 components uses the Vivado HLS tool. A top level C/C++ testbench (typically `main.cpp`) prepares the input data, passes this to the design under test (typically `dut.cpp` which makes the L1 level library calls) then performs any output data post processing and validation checks.
+The recommended flow to evaluate and test L1 components is described as follows using the Vivado HLS tool. A top level C/C++ testbench (typically `main.cpp` or `tb.cpp`) prepares the input data, passes this to the design under test (typically `dut.cpp` which makes the L1 level library calls) then performs any output data post processing and validation checks.
 
-A Makefile is used to drive this flow with available steps including `CSIM` (high level simulation), `CSYNTH` (high level synthesis to RTL) and `COSIM` (cosimulation between software testbench and generated RTL). The flow is launched from the shell by calling `make` with variables set as in the example below:
+A Makefile is used to drive this flow with available steps including `CSIM` (high level simulation), `CSYNTH` (high level synthesis to RTL), `COSIM` (cosimulation between software testbench and generated RTL), VIVADO_SYN (synthesis by Vivado), and VIVADO_IMPL (implementation by Vivado). The flow is launched from the shell by calling `make` with variables set as in the example below:
 
 ```console
-$ . /opt/xilinx/xrt/setup.sh
-$ export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-$ cd L1/tests/ICD/
-$ make CSIM=1 CSYNTH=0 COSIM=0 check # Only run C++ simulation
+# entering specific unit test project
+$ cd L1/tests/specific_algorithm/
+# Only run C++ simulation on U250
+$ make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 DEVICE=u250_xdma_201830_1
 ```
 
-With no make variables set (i.e. `make check`), the Makefile will high level simulate, synthesize to RTL and cosimulate.
+As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization, timing performance, latency and throughput. The output files of interest can be located at the location examples as below where the file names are correlated with the source code. i.e. the callable functions within the design under test.
 
-As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilisation, timing performance, latency and throughput. The output files of interest can be located at the location examples as below where the file names are correlated with the source code. i.e. the callable functions within the design under test.
-
-    Simulation Log: L1/tests/ICD/prj/sol/csim/report/ICN_top_csim.log
-    Synthesis Report: L1/tests/ICD/prj/sol/syn/report/ICN_top_csynth.rpt
+    Simulation Log: <library_root>/L1/tests/bk_model/prj/solution1/csim/report/dut_csim.log
+    Synthesis Report: <library_root>/L1/tests/bk_model/prj/solution1/syn/report/dut_csynth.rpt
 
 ### L2
 
 L2 provides the pricing engine APIs presented as kernels.
 
-There are two available flows for evaluating and testing L2 components. The first of these is the Vivado HLS testbench Makefile-driven flow as previously described for L1 components:
+The available flow for L2 based around the SDAccel tool facilitates the generation and packaging of pricing engine kernels along with the required host application for configuration and control. In addition to supporting FPGA platform targets, emulation options are available for preliminary investigations or where dedicated access to a hardware platform may not be available. Two emulation options are available, software emulation performs a high level simulation of the pricing engine while hardware emulation performs a cycle-accurate simulation of the generated RTL for the kernel. This flow is makefile driven from the console where the target is selected as a command line parameter as in the examples below:
 
 ```console
-$ cd L2/tests/McEuropeanEngine/
-$ make CSIM=1 CSYNTH=0 COSIM=0 check # Only run C++ simulation
-```
+$ cd L2/tests/GarmanKohlhagenEngine
 
-Again, the default is to run high level simulation, synthesize to RTL and cosimulate.
+# build and run one of the following using U250 platform
+#  * software emulation
+#  * hardware emulation
+#  * actual deployment on physical platform
 
-A second available flow for L2 based around the SDAccel tool facilitates the generation and packaging of pricing engine kernels along with the required host application for configuration and control. In addition to supporting FPGA platform targets, emulation options are available for preliminary investigations or where dedicated access to a hardware platform may not be available. Two emulation options are available, software emulation which performs a high level simulation of the pricing engine and hardware emulation which performs a cycle-accurate simulation of the generated RTL for the kernel. This flow is makefile driven from the console where the target is selected as a command line parameter as in the examples below:
+$ make run TARGET=sw_emu DEVICE=u250_xdma_201830_1
+$ make run TARGET=hw_emu DEVICE=u250_xdma_201830_1
+$ make run TARET=hw DEVICE=u250_xdma_201830_1
 
-```console
-$ cd L2/demos/MCEuropeanEngine
-
-# run one of the following, software emulation, hardware emulation or actual deployment on physical platform
-$ make run_sw_emu
-$ make run_hw_emu
-$ make run_hw
-
-# after a hardware system build has been completed, execution can be repeated by running the host executable and passing it the xclbin as an argument
-$ ./bin/test.exe -mode fpga -xclbin xclbin/kernel_mc_u250_hw.xclbin
+# delete all xclbin and host binary
+$ make cleanall
 ```
 
 The outputs of this flow are packaged kernel binaries (xclbin files) that can be downloaded to the FPGA platform and host executables to configure and co-ordinate data transfers. The output files of interest can be located at the locations examples as below where the file names are correlated with the source code
 
-    Host Executable: L2/demos/MCEuropeanEngine/bin/test.exe
-    Kernel Packaged Binary: L2/demos/MCEuropeanEngine/xclbin/kernel_mc_u250_hw.xclbin
+    Host Executable: L2/tests/GarmanKohlhagenEngine/bin_#DEVICE/gk_test.exe
+    Kernel Packaged Binary: L2/tests/GarmanKohlhagenEngine/xclbin_#DEVICE_#TARGET/gk_kernel.xclbin #ARGS
 
 This flow can be used to verify functional correctness in hardware and enable real world performance to be measured.
 

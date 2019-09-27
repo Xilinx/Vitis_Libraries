@@ -19,7 +19,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_CASE_ROOT ?= $(CUR_DIR)
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/benchmarks/*}')
 
 .SECONDEXPANSION:
 
@@ -197,8 +197,7 @@ debug:
 
 KERNEL_DIR = $(CUR_DIR)/kernel
 
-XF_CASE_ROOT ?= $(CUR_DIR)
-XFLIB_DIR = $(abspath $(XF_CASE_ROOT)/../../..)
+XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/kernel
 
 XCLBIN_NAME := kernel_svd
@@ -240,9 +239,7 @@ endif
 VPP_CFLAGS += $(foreach id,$(KERNEL_IDS),--nk $(KERNEL)_$(id):1:$(KERNEL)_$(id))
 
 XFREQUENCY = 300
-VPP_CFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
-VPP_CFLAGS += --xp "prop:solution.kernel_compiler_margin=12.5000"
-VPP_CFLAGS += --include $(KERNEL_DIR) --include $(HOST_DIR) --include $(HLS_DIR) --include $(HOST_DIR)/include 
+  VPP_CFLAGS += --include $(KERNEL_DIR) --include $(HOST_DIR) --include $(HLS_DIR) --include $(HOST_DIR)/include 
 
 # -----------------------------------------------------------------------------
 # TODO:                           host setup
@@ -306,8 +303,7 @@ VPP = v++
 VPP_CFLAGS += -I$(KSRC_DIR)
 VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
 VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 8 \
-  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
+VPP_LFLAGS += --optimize 2 --jobs 8
 
 KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
 XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)

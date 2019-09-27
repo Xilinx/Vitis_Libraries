@@ -37,14 +37,14 @@ The framework of Monte Carlo Simulations is as follows. The top module Monte Car
 
 .. image:: /images/mc1.PNG
    :alt: topmontecarlo
-   :width: 80%
+   :width: 60%
    :align: center
 
 Every MCM generates a batch of paths. The number of MCM (M) is a template parameter, the maximum of which is related to the FPGA resource. Each MCM includes an RNG module, a path generator module, a path pricer module, and an accumulator. Both all these modules are in dataflow region and connected with *hls::stream*.
 
 .. image:: /images/mc2.PNG
    :alt: mcm
-   :width: 80%
+   :width: 60%
    :align: center
 
 RNG module generates the normal random numbers. Currently, only generating pseudo-random number is supported. The detailed implementation of RNG inside may refer to the RNG section.
@@ -58,7 +58,7 @@ Accumulator sums together the option value and square of option value on all the
 
 .. image:: /images/acc.PNG
    :alt: acc
-   :width: 60%
+   :width: 40%
    :align: center
 
 Antithetic paths 
@@ -75,7 +75,7 @@ Antithetic paths
 
 .. image:: /images/mc3.PNG
    :alt: mcm_anti
-   :width: 80%
+   :width: 50%
    :align: center
  
    

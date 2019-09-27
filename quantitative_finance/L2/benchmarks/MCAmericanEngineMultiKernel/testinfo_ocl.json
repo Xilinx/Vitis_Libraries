@@ -1,0 +1,23 @@
+{
+    "case_name": "jks.L2.MCAmericanEngine_MultiKernel", 
+    "disable": 0, 
+    "jobs": [
+        {
+            "dependency": [], 
+            "env": null, 
+            "files": [], 
+            "index": 0, 
+            "max_memory_MB": 32768, 
+            "max_time_min": 420, 
+            "server": "lsf"
+        }
+    ], 
+    "machine": {
+        "shell": "u250"
+    }, 
+    "test_type": [
+        "vitis_sw_emu", 
+        "vitis_hw_emu", 
+        "vitis_hw"
+    ]
+}

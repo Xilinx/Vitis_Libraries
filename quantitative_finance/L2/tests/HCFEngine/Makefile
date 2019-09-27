@@ -19,7 +19,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_CASE_ROOT ?= $(CUR_DIR)
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/tests/*}')
 
 .SECONDEXPANSION:
 
@@ -213,14 +213,14 @@ else
 	DEVICE_PART := unknown
 endif
 
-XFLIB_DIR = $(abspath $(XF_CASE_ROOT)/../../..)
+XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/src
 
 XCLBIN_NAME := hcf_$(TARGET)_$(DEVICE_PART)_$(TEST_DT)
 KERNELS = hcf_kernel:hcf_kernel.cpp
 
-HLS_L1_DIR = $(XF_CASE_ROOT)/../../../L1/include
-HLS_L2_DIR = $(XF_CASE_ROOT)/../../include
+HLS_L1_DIR = $(XF_PROJ_ROOT)/L1/include
+HLS_L2_DIR = $(XF_PROJ_ROOT)/L2/include
 
 hcf_kernel_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
 hcf_kernel_VPP_CFLAGS += -I$(KSRC_DIR)
@@ -292,8 +292,7 @@ VPP = v++
 VPP_CFLAGS += -I$(KSRC_DIR)
 VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
 VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 8 \
-  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
+VPP_LFLAGS += --optimize 2 --jobs 8
 
 KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
 XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)

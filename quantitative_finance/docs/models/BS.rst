@@ -22,8 +22,7 @@ Black-Scholes Model
 
 Overview
 =========
-The Black-Scholes Model is a mathematical model for the dynamics of a financial market containing the 
-deviation investment instrument (from viki).
+The Black-Scholes Model is a mathematical model for the dynamics of a financial market containing derivative investment instruments (from wikipedia).
 
 This section explains the stochastic differential equation (stock price process) in continue form and in discrete form (used as stock price process).
 They are core part for option pricing. 
@@ -35,8 +34,8 @@ The Continue form of Black-Scholes is:
 .. math::
    dS_t = \mu S_t dt + \sigma S_t dz
 
-where :math:`S_t` is the stock price at time t. :math:`\mu` is the stock's expected rate of return. :math:`\sigma` is the volatility of the stock price.
-The random variable :math:`z` follows Winear process, i.e. :math:`z` satisfies the follows the equation.    
+where :math:`S_t` is the stock price at time :math:`t`. :math:`\mu` is the stock's expected rate of return. :math:`\sigma` is the volatility of the stock price.
+The random variable :math:`z` follows Winear process, i.e. :math:`z` satisfies the following equation.    
 
   1. The change of :math:`\Delta z` during a sample period of time :math:`\Delta t` is :math:`\Delta z = \epsilon \sqrt{\Delta t}`, where :math:`\epsilon` has a standardized normal distribution :math:`\phi(0,1)`. 
   2. The value of :math:`\Delta z` for any two different short intervals of time, :math:`\Delta t`, are independent.
@@ -104,7 +103,7 @@ Its equivalent form is:
 .. math::
    S(t+\Delta t) = S(t)\exp [(\mu - \frac{\sigma^2}{2})\Delta t + \sigma \epsilon \sqrt{\Delta t}]
 
-Above formula is used to generate the path for :math:`S`. In order to optimize the multiplication of :math:`S` with adder operator in path pricer, in our implementation, the B-S path generator
+The formula above is used to generate the path for :math:`S`. In order to optimize the multiplication of :math:`S` with adder operator in path pricer, in our implementation, the B-S path generator
 will fetch the normal random number :math:`\epsilon` from RNG sequence and output the :math:`\ln S` to path pricer.
 
 .. image:: /images/bs_1.PNG
@@ -112,8 +111,8 @@ will fetch the normal random number :math:`\epsilon` from RNG sequence and outpu
    :width: 80%
    :align: center
 
-Because there is accumulation of :math:`\ln S`, the II could not be 1. Here, change order between paths and steps. Because the input random number are totally independent, the change of order will not affect
-the accurate of result. The pseudo-code is as follows.
+Because there is accumulation of :math:`\ln S`, the initiation interval (II) cannot achieve 1. Here, change order between paths and steps. Because the input random number are totally independent, 
+the change of order will not affect the accurate of the result. The pseudo-code is shown as follows.
 
 
 .. image:: /images/bs.PNG

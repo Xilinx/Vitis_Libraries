@@ -92,8 +92,7 @@ int main() {
                    cfBlackScholesMerton.vega[i], cfBlackScholesMerton.theta[i], cfBlackScholesMerton.rho[i]);
 
             if (!check_result(cfBlackScholesMerton.optionPrice[i], test_data[i].exp, tolerance)) {
-                printf("[XLNX] expected(%8.5f), got (%8.5f)\n", test_data[i].exp,
-                       cfBlackScholesMerton.optionPrice[i]);
+                printf("[XLNX] expected(%8.5f), got (%8.5f)\n", test_data[i].exp, cfBlackScholesMerton.optionPrice[i]);
             }
         }
 

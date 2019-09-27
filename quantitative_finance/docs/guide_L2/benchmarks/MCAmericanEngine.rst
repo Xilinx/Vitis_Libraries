@@ -21,14 +21,14 @@ Benchmark of American Option Pricing Engine
 
 Overview
 ========
-This is a benchmark of MC (Monte-Carlo) European Engine using the SDx environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
 
 
 Highlights
 ==========
 
-The performance of the MCAmericanEngine is shown in the table below, our cold run has 488X and warm run has 1954X compared to baseline.
-Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2667 v3 @3.200GHz, 8 cores per procssor and 2 threads per core.
+The performance of the MCAmericanEngine is shown in the table below, our cold run has 176X and warm run has 529X compared to baseline.
+Baseline is Quantlib, a Widely Used C++ Open Source Library, running on CPU with 1 thread. The  CPU is Intel(R) Xeon(R) CPU E5-2667 v3 @3.200GHz, 8 cores per procssor and 2 threads per core.
 
 
 .. _tab_MCAE_Execution_Time:
@@ -74,7 +74,7 @@ Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform
 
 Profiling
 =================
-The resource utilization and performance of MCAmericanEngine on U250 FPGA card is listed in the following tables.
+The resource utilization and performance of MCAmericanEngine on U250 FPGA card is listed in the following tables (using viviado 2018.3).
 
 .. _tab_MCAE_resource:
 

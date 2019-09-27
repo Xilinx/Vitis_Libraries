@@ -21,9 +21,9 @@ Internal Design of Finite-Difference G2 Bermudan Swaption Pricing Engine
 Overview
 ========
 
-The pricing engine is based on Finite-difference methods (FDM) to estimate the value of Bermudan Swaption. Here, we used the two-additive-factor gaussian G2 model instead of single-factor Hull-White model. The implemented concepts of finite-differences models are introduced in the following article `Internal Design of Finite-difference Hull-White Bermudan Swaption Pricing Engine`.
+The pricing engine is based on Finite-difference methods (FDM) to estimate the value of Bermudan Swaption. Here, we used the two-additive-factor gaussian (G2) model instead of single-factor Hull-White model. The concept of finite-difference methods is introduced in the article `Internal Design of Finite-difference Hull-White Bermudan Swaption Pricing Engine`.
 
-Here, the owner is allowed to enter the swap on several pre-specified dates as well as coupon dates of the underlying swap. Notice that we evaluate the value of the swaption as a payer who pay the fixed leg and receive the floating leg of the interest rates.
+For a swaption, the owner is allowed to enter the swap on several pre-specified dates as well as coupon dates of the underlying swap. Notice that we evaluate the value of the swaption as a payer who pay the fixed leg and receive the floating leg of the interest rates.
 
 
 Implementation
@@ -33,10 +33,10 @@ The pricing process of Finite-Difference G2 Bermudan Swaption engine is shown in
 
 .. figure:: /images/fdmg2swaptionengine.PNG
     :alt: pricing process of FdmG2SwaptionEngine
-    :width: 100%
+    :width: 60%
     :align: center
 
-As we can see from the figure, the engine has three main modules: Initialization ,calculate and NPV. The former one is responsible for engine initialization: reading specific time points of the swaption from BRAM and  setting initial values. The second part is the main process that contains model initialization, meshers initialization using Ornstein-Uhlenbeck process, and builds up the derivative on x and y direction.
+As we can see from the figure, the engine has three main modules: Initialization, calculate and NPV. The former one is responsible for engine initialization: reading specific time points of the swaption from BRAM and setting initial values. The second part is the main process that contains model initialization, meshers initialization using Ornstein-Uhlenbeck process, and builds up the derivative on x and y dimension.
 
 The main logic of the engine is coded in the rollback method. We go backwards from a later time(maturity) to an earlier time in a given number of steps. This gives us a length :math:`dt` for each step, which is set as the time step for the evolver. Then we start going back step by step, each time going from the current time `t` to the next time, :math:`t-dt`. We have just made the step from :math:`t_{4}` to :math:`t_{3}` as described in the following paragraph, and it will set the control variable `hit` to true. It will also decrease the step size of the evolver :math:`t_{4}-s`. It will lead to the stopping time point, immediately after performing the step. Another similar change of step would happen if there were  more than one stopping times in a single step; the code would then step from one to the other. Finally, the code will enter the hitted branch. It performs the remaining step :math:`s-t_{3}` and then resets the step of the evolver to the default value.So the process is ready for the next regular step to :math:`t_{2}`. Notice the last time is :math:`stopping\_time[1]` instead of :math:`stopping\_time[0]`. 
 

@@ -26,7 +26,7 @@ Defined in <xf_fintech/rng.hpp>
      class :ref:`MT19937<doxid-classxf_1_1fintech_1_1_m_t19937>`
      class :ref:`MT2203<doxid-classxf_1_1fintech_1_1_m_t2203>`
      class :ref:`MT19937IcnRng<doxid-classxf_1_1fintech_1_1_m_t19937_icn_rng>`
-     class :ref:`MT19937BoxMullerNomralRng<doxid-classxf_1_1fintech_1_1_m_t19937_box_muller_nomral_rng>`
+     class :ref:`MT19937BoxMullerNomralRng<doxid-classxf_1_1fintech_1_1_m_t19937_box_muller_normal_rng>`
      class :ref:`MT2203IcnRng<doxid-classxf_1_1fintech_1_1_m_t2203_icn_rng>`
      class :ref:`MultiVariateNormalRng<doxid-classxf_1_1fintech_1_1_multi_variate_normal_rng>`
 

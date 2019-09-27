@@ -1,6 +1,6 @@
-## Level 2: Kernels and Engines
+## Vitis Tests for L2 kernels
 
-Level 2 contains the host-callable kernels and engines for pricing a variety of financial products.
+This folder contains basic test for each of L2 level kernels. 
+They are meant to discover simple regression errors. 
 
-More details are available in the [full documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_fintech/index.html).
-
+More details for each kernel are available in the [full documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_fintech/index.html).

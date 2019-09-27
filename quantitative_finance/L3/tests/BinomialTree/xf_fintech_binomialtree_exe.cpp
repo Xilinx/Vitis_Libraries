@@ -25,7 +25,6 @@
 using namespace xf::fintech;
 
 int main() {
-
     // binomial tree fintech model...
     BinomialTree bt;
 

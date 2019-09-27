@@ -12,5 +12,6 @@ The `DEVICE` variable specifies a platform, and the makefile will query the actu
 
 ```
 make run CSIM=1 COSIM=1 DEVICE=u250_xdma_201830_1 PLATFORM_REPO_PATHS=/my/path/to/xilinx/platforms
+```
 
 Here the `PLATFORM_REPO_PATHS` helps the tool to find the platform file (.xpfm).

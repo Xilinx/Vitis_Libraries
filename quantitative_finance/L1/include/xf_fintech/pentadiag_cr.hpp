@@ -46,11 +46,19 @@ namespace internal {
 based on the paper.
 *
 * Structure of input matrix: \n
-*  | c d e 0 0 | \n
-*  | b c d e 0 | \n
-*  | a b c d e | \n
-*  | 0 a b c d | \n
-*  | 0 0 a b c | \n
+*
+* \rst
+*
+* .. math::
+*	\begin{vmatrix}
+*	a & d & e & 0 & 0\\
+*	b & c & d & e & 0\\
+*	a & b & c & d & e\\
+*	0 & a & b & c & d\\
+*	0 & 0 & a & b & c
+*	\end{vmatrix}
+* \endrst
+*
 *@tparam T data type used in whole function (double by default)
 *@tparam P_SIZE Size of the operating matrix
 *@param[in] c - Main diagonal \n

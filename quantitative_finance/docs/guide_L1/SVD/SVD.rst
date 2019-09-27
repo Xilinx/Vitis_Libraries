@@ -23,8 +23,9 @@ Overview
 
 The `singular value decomposition` (SVD) is a very useful technique for dealing with general dense matrix problems. Recent years, SVD has become a computationally viable tool for solving a wide variety of problems raised in many practical applications, such as least-squares data fitting, image compression, facial recognition, principal component analysis, latent semantic analysis, and computing the 2-norm, condition number, and numerical rank of a matrix. 
 
-For more information, please refer **"Jack Dongarra, Mark Gates, Azzam Haidar. The Singular Value Decomposition: Anatomy of Optimizing an Algorithm for Extreme Scale. 2018 SIAM Review, vol.60, No.4, pp.808-865"**
+For more information, please refer to `SVD`_.
 
+.. _`SVD`: http://www.netlib.org/utk/people/JackDongarra/PAPERS/svd-sirev-M111773R.pdf
 
 Theory
 ========
@@ -34,10 +35,10 @@ The SVD of an m-by-n matrix A is given by
 .. math::
             A = U \Sigma V^T (A = U \Sigma V^H \, in \, the \, complex \, case)
 
-where :math:`U` and :math:`V` are orthogonal (unitary) matrixed and :math:`\Sigma` is an m-by-n matrix with real diagonal elements.
+where :math:`U` and :math:`V` are orthogonal (unitary) matrix and :math:`\Sigma` is an m-by-n matrix with real diagonal elements.
 
-Theoretically, the SVD can be characterized by the fact that the singular values are the square roots of eigenvalues of :math:`A^TA`, the columns of :math:`V` are the corresponding eigenvectors, and the columns of U are the eigenvectors of :math:`AA^T`, assuming distinct singular values. The approximation can simplify the general m-by-n matrix SVD problem to a general symmetric matrix SVD problem. 
-Due to the roundoff errors in the formulation of :math:`AA^T` and :math:`A^TA`, the accuracy has a slight influence, but if we don't need too high accuracy, the approximation can largely reduce the complexity of calculation.
+Theoretically, the SVD can be characterized by the fact that the singular values are the square roots of eigenvalues of :math:`A^TA`, the columns of :math:`V` are the corresponding eigenvectors, and the columns of :math:`U` are the eigenvectors of :math:`AA^T`, assuming distinct singular values. The approximation can simplify the general m-by-n matrix SVD problem to a general symmetric matrix SVD problem. 
+Due to the roundoff errors in the formulation of :math:`AA^T` and :math:`A^TA`, the accuracy is influenced slightly, but if we don't need a high-accuracy, the approximation can largely reduce the complexity of calculation.
 
 There are two dominant categories of SVD algorithms for dense matrix: bidiagonalization methods and Jacobi methods. The classical bidiagonalization method is a long sequential calculation, FPGA has no advantage in that case. In contrast, Jacobi methods apply plane rotations to the entire matrix A. Two-sided Jacobi methods iteratively apply rotations on both sides of matrix A to bring it to diagonal form, while one-sided Hestenes Jacobi methods apply rotations on one side to orthogonalize the columns of matrix A and bring :math:`A^TA` to diagonal form. While Jacobi methods are often slower than bidiagonalization methods, they have better potential in unrolling and pipelining. 
 
@@ -95,7 +96,7 @@ SVD workflow:
     :width: 80%
     :align: center
     
-The input parameters for the 4x4 SVD function is the 4x4 matrix :math:`A`, and the outputs matrix are respectively matrix :math:`U`, :math:`V`, :math:`\Sigma`. As shown in the above figure, the SVD process has 4 main steps:
+The input parameters for the 4x4 SVD function is the 4x4 matrix :math:`A`, and the output matrices are :math:`U`, :math:`V`, and :math:`\Sigma` respectively. As shown in the above figure, the SVD process has 4 main steps:
 
 1. Find the max value of matrix :math:`A`;
 2. Divide all member of A by :math:`max(A)` and initiate :math:`U`, :math:`\Sigma`, :math:`V`;
@@ -110,7 +111,7 @@ The next step is to decompose the rotation matrix from original matrix :math:`A`
 
 
 .. note::
-    The SVD function is a customized function designated to solve the decomposition for a 4X4 symmetric matrix. It has some tradeoffs between resources and latency. A general SVD solver is under development, it will be updated in the next release.
+    The SVD function in this library is a customized function designated to solve the decomposition for a 3X3 or 4X4 symmetric matrix. It has some tradeoffs between resources and latency. A general SVD solver can be found in Vitis Solver Library.
 
 
 Profiling

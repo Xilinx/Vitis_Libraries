@@ -37,7 +37,7 @@ Example
 	:linenos:
 
 	#include <vector>
-	#include "xf_fintech_api.h"
+	#include "xf_fintech_api.hpp"
 
 	using namespace xf::fintech;
 
@@ -113,7 +113,7 @@ Example of using multiple models
 	:linenos:
 
 	#include <vector>
-	#include "xf_fintech_api.h"
+	#include "xf_fintech_api.hpp"
 
 	using namespace xf::fintech;
 
