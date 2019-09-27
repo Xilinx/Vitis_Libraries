@@ -171,7 +171,7 @@ XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
 # -----------------------------------------------------------------------------
 # BEGIN_XF_MK_USER_SECTION
 # -----------------------------------------------------------------------------
-# TODO:                 data creation and other user targets
+#                  data creation and other user targets
 
 # a (typically hidden) file as stamp
 DATA_STAMP :=
@@ -192,7 +192,7 @@ debug:
 	@echo "bs_test_EXTRA_HDRS is $(bs_test_EXTRA_HDRS)"
 	@echo "> bs_test_HDRS is $(bs_test_HDRS)"
 # -----------------------------------------------------------------------------
-# TODO:                          kernel setup
+#                           kernel setup
 
 XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/src/kernel
@@ -210,7 +210,7 @@ VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/ -I$(XFLIB_DIR)/L2/include/
 
 
 # -----------------------------------------------------------------------------
-# TODO:                           host setup
+#                            host setup
 
 SRC_DIR = $(CUR_DIR)/src/host
 
@@ -440,4 +440,3 @@ check: run
 build: xclbin host
 
 # MK_INC_END vitis_test_rules.mk
-
