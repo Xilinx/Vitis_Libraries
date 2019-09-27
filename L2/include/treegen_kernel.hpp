@@ -22,7 +22,7 @@
  * @file treegen_kernel.hpp
  * @brief Header for tree generator kernel used in zlib compression.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "zlib_config.h"

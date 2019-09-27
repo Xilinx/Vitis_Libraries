@@ -21,7 +21,7 @@
  * @file mm2s.hpp
  * @brief Header for modules used for memory mapped to streaming interface conversion.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"

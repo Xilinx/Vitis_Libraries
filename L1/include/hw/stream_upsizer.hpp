@@ -21,7 +21,7 @@
  * @file stream_upsizer.hpp
  * @brief Header for stream upsizer module.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"
@@ -87,7 +87,7 @@ void upsizerEos(hls::stream<ap_uint<IN_WIDTH> >& inStream,
                 hls::stream<ap_uint<OUT_WIDTH> >& outStream,
                 hls::stream<bool>& outStream_eos) {
     // Constants
-    const int c_byteWidth = 8; // 8bit is each BYTE
+    const int c_byteWidth = IN_WIDTH;
     const int c_upsizeFactor = OUT_WIDTH / c_byteWidth;
     const int c_inSize = IN_WIDTH / c_byteWidth;
 

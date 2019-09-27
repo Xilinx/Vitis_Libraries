@@ -22,7 +22,7 @@
  * @file zlib_decompress_stream_kernel.hpp
  * @brief Header for zlib decompression streaming kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include <stdio.h>

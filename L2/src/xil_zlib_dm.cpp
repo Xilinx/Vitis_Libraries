@@ -18,7 +18,7 @@
  * @file xil_zlib_dm_kernel.cpp
  * @brief Source for data mover kernel for streaming data to zlib decompression streaming kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "zlib_dm_kernel.hpp"

@@ -22,7 +22,7 @@
  * @file lz77_compress_kernel.hpp
  * @brief Header for lz77 compression kernel used in zlib compression.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "zlib_config.h"
@@ -30,7 +30,9 @@
 #include "lz_optional.hpp"
 #include "stream_downsizer.hpp"
 #include "zlib_stream_utils.hpp"
-
+#include "stream_upsizer.hpp"
+#include "mm2s.hpp"
+#include "s2mm.hpp"
 #include "hls_stream.h"
 
 #include <stdio.h>

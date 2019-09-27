@@ -21,15 +21,15 @@
  * @file common.h
  * @brief Header for defining common constants, types and macros.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "hls_stream.h"
 
-#include <stdio.h>
-#include <stdint.h>
-#include <assert.h>
 #include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 // config
 

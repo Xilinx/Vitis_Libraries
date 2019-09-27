@@ -21,16 +21,12 @@
  * @file snappy_decompress.hpp
  * @brief Header for modules used for snappy decompression kernle
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"
-#include "snappy_config.h"
 
-#define BIT 8
-#define LOW_OFFSET 8
-
-typedef ap_uint<BIT> uintV_t;
+typedef ap_uint<8> uintV_t;
 typedef ap_uint<32> encoded_dt;
 
 namespace xf {
@@ -171,8 +167,5 @@ snappy_decompress:
 
 } // namespace compression
 } // namespace xf
-
-#undef BIT
-#undef LOW_OFFSET
 
 #endif // _XFCOMPRESSION_SNAPPY_DECOMPRESS_HPP_

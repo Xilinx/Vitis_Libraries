@@ -14,8 +14,14 @@
  * limitations under the License.
  *
  */
-#include "xil_lz4.hpp"
 #include "xxhash.h"
+#include <iostream>
+#include <cassert>
+#include <vector>
+#include "xcl2.hpp"
+#include <iomanip>
+#include "xil_lz4.hpp"
+#include "lz4_specs.hpp"
 
 #define BLOCK_SIZE 64
 #define KB 1024
@@ -25,8 +31,11 @@
 #define MAGIC_BYTE_3 77
 #define MAGIC_BYTE_4 24
 #define FLG_BYTE 104
+#define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
+namespace lz4_specs = xf::compression;
 
-uint64_t xfLz4::getEventDurationNs(const cl::Event& event) {
+// Get the duration of input event
+uint64_t getEventDurationNs(const cl::Event& event) {
     uint64_t start_time = 0, end_time = 0;
 
     event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &start_time);
@@ -34,7 +43,10 @@ uint64_t xfLz4::getEventDurationNs(const cl::Event& event) {
     return (end_time - start_time);
 }
 
-uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
+uint64_t xfLz4::compressFile(std::string& inFile_name,
+                             std::string& outFile_name,
+                             uint64_t input_size,
+                             bool file_list_flag) {
     if (m_switch_flow == 0) { // Xilinx FPGA compression flow
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
@@ -64,20 +76,20 @@ uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name
         uint8_t block_size_header = 0;
         switch (m_block_size_in_kb) {
             case 64:
-                outFile.put(BSIZE_STD_64KB);
-                block_size_header = BSIZE_STD_64KB;
+                outFile.put(lz4_specs::BSIZE_STD_64KB);
+                block_size_header = lz4_specs::BSIZE_STD_64KB;
                 break;
             case 256:
-                outFile.put(BSIZE_STD_256KB);
-                block_size_header = BSIZE_STD_256KB;
+                outFile.put(lz4_specs::BSIZE_STD_256KB);
+                block_size_header = lz4_specs::BSIZE_STD_256KB;
                 break;
             case 1024:
-                outFile.put(BSIZE_STD_1024KB);
-                block_size_header = BSIZE_STD_1024KB;
+                outFile.put(lz4_specs::BSIZE_STD_1024KB);
+                block_size_header = lz4_specs::BSIZE_STD_1024KB;
                 break;
             case 4096:
-                outFile.put(BSIZE_STD_4096KB);
-                block_size_header = BSIZE_STD_4096KB;
+                outFile.put(lz4_specs::BSIZE_STD_4096KB);
+                block_size_header = lz4_specs::BSIZE_STD_4096KB;
                 break;
             default:
                 std::cout << "Invalid Block Size" << std::endl;
@@ -100,7 +112,7 @@ uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name
         // Header CRC
         outFile.put((uint8_t)(xxh >> 8));
         // LZ4 overlap & multiple compute unit compress
-        enbytes = compress(in.data(), out.data(), input_size, host_buffer_size);
+        enbytes = compress(in.data(), out.data(), input_size, host_buffer_size, file_list_flag);
         // Writing compressed data
         outFile.write((char*)out.data(), enbytes);
 
@@ -221,7 +233,10 @@ int xfLz4::release() {
     return 0;
 }
 
-uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
+uint64_t xfLz4::decompressFile(std::string& inFile_name,
+                               std::string& outFile_name,
+                               uint64_t input_size,
+                               bool file_list_flag) {
     if (m_switch_flow == 0) {
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
@@ -254,16 +269,16 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
         // printf("block_size %d \n", c);
 
         switch (c) {
-            case BSIZE_STD_64KB:
+            case lz4_specs::BSIZE_STD_64KB:
                 m_block_size_in_kb = 64;
                 break;
-            case BSIZE_STD_256KB:
+            case lz4_specs::BSIZE_STD_256KB:
                 m_block_size_in_kb = 256;
                 break;
-            case BSIZE_STD_1024KB:
+            case lz4_specs::BSIZE_STD_1024KB:
                 m_block_size_in_kb = 1024;
                 break;
-            case BSIZE_STD_4096KB:
+            case lz4_specs::BSIZE_STD_4096KB:
                 m_block_size_in_kb = 4096;
                 break;
             default:
@@ -290,7 +305,7 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
 
         uint64_t debytes;
         // Decompression Overlapped multiple cu solution
-        debytes = decompress(in.data(), out.data(), (input_size - 15), original_size, host_buffer_size);
+        debytes = decompress(in.data(), out.data(), (input_size - 15), original_size, host_buffer_size, file_list_flag);
         outFile.write((char*)out.data(), debytes);
         // Close file
         inFile.close();
@@ -303,8 +318,12 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
     }
 }
 
-uint64_t xfLz4::decompress(
-    uint8_t* in, uint8_t* out, uint64_t input_size, uint64_t original_size, uint32_t host_buffer_size) {
+uint64_t xfLz4::decompress(uint8_t* in,
+                           uint8_t* out,
+                           uint64_t input_size,
+                           uint64_t original_size,
+                           uint32_t host_buffer_size,
+                           bool file_list_flag) {
     uint32_t max_num_blks = (host_buffer_size) / (m_block_size_in_kb * 1024);
 
     for (uint32_t i = 0; i < MAX_COMPUTE_UNITS; i++) {
@@ -444,13 +463,13 @@ uint64_t xfLz4::decompress(
                 uint32_t tmp = compressed_size;
                 tmp >>= 24;
 
-                if (tmp == NO_COMPRESS_BIT) {
+                if (tmp == lz4_specs::NO_COMPRESS_BIT) {
                     uint8_t b1 = compressed_size;
                     uint8_t b2 = compressed_size >> 8;
                     uint8_t b3 = compressed_size >> 16;
 
-                    if (b3 == BSIZE_NCOMP_64 || b3 == BSIZE_NCOMP_4096 || b3 == BSIZE_NCOMP_256 ||
-                        b3 == BSIZE_NCOMP_1024) {
+                    if (b3 == lz4_specs::BSIZE_NCOMP_64 || b3 == lz4_specs::BSIZE_NCOMP_4096 ||
+                        b3 == lz4_specs::BSIZE_NCOMP_256 || b3 == lz4_specs::BSIZE_NCOMP_1024) {
                         compressed_size = block_size_in_bytes;
                     } else {
                         uint32_t size = 0;
@@ -554,13 +573,13 @@ uint64_t xfLz4::decompress(
                     uint32_t tmp = compressed_size;
                     tmp >>= 24;
 
-                    if (tmp == NO_COMPRESS_BIT) {
+                    if (tmp == lz4_specs::NO_COMPRESS_BIT) {
                         uint8_t b1 = compressed_size;
                         uint8_t b2 = compressed_size >> 8;
                         uint8_t b3 = compressed_size >> 16;
 
-                        if (b3 == BSIZE_NCOMP_64 || b3 == BSIZE_NCOMP_4096 || b3 == BSIZE_NCOMP_256 ||
-                            b3 == BSIZE_NCOMP_1024) {
+                        if (b3 == lz4_specs::BSIZE_NCOMP_64 || b3 == lz4_specs::BSIZE_NCOMP_4096 ||
+                            b3 == lz4_specs::BSIZE_NCOMP_256 || b3 == lz4_specs::BSIZE_NCOMP_1024) {
                             compressed_size = block_size_in_bytes;
                         } else {
                             uint32_t size = 0;
@@ -695,8 +714,13 @@ uint64_t xfLz4::decompress(
     std::cout << "Total Write Time " << total_write_time << std::endl;
     std::cout << "Total Read Time " << total_read_time << std::endl;
 #endif
-    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl
-              << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+    if (file_list_flag == 0) {
+        std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl
+                  << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+    } else {
+        std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1 << "\t\t";
+        std::cout << std::fixed << std::setprecision(2) << kernel_throughput_in_mbps_1;
+    }
 
     for (uint32_t dBuf = 0; dBuf < D_COMPUTE_UNIT; dBuf++) {
         for (uint32_t flag = 0; flag < overlap_buf_count; flag++) {
@@ -712,7 +736,8 @@ uint64_t xfLz4::decompress(
 // This version of compression does overlapped execution between
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
-uint64_t xfLz4::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size) {
+uint64_t xfLz4::compress(
+    uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size, bool file_list_flag) {
     // printf("host_buffer_size %d \n", host_buffer_size);
     uint32_t max_num_blks = (host_buffer_size) / (m_block_size_in_kb * 1024);
 
@@ -864,20 +889,20 @@ uint64_t xfLz4::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_
                             out[outIdx++] = 0;
                             out[outIdx++] = 0;
 
-                            if (block_size == MAX_BSIZE_64KB)
-                                out[outIdx++] = BSIZE_NCOMP_64;
-                            else if (block_size == MAX_BSIZE_256KB)
-                                out[outIdx++] = BSIZE_NCOMP_256;
-                            else if (block_size == MAX_BSIZE_1024KB)
-                                out[outIdx++] = BSIZE_NCOMP_1024;
-                            else if (block_size == MAX_BSIZE_4096KB)
-                                out[outIdx++] = BSIZE_NCOMP_4096;
+                            if (block_size == lz4_specs::MAX_BSIZE_64KB)
+                                out[outIdx++] = lz4_specs::BSIZE_NCOMP_64;
+                            else if (block_size == lz4_specs::MAX_BSIZE_256KB)
+                                out[outIdx++] = lz4_specs::BSIZE_NCOMP_256;
+                            else if (block_size == lz4_specs::MAX_BSIZE_1024KB)
+                                out[outIdx++] = lz4_specs::BSIZE_NCOMP_1024;
+                            else if (block_size == lz4_specs::MAX_BSIZE_4096KB)
+                                out[outIdx++] = lz4_specs::BSIZE_NCOMP_4096;
 
-                            out[outIdx++] = NO_COMPRESS_BIT;
+                            out[outIdx++] = lz4_specs::NO_COMPRESS_BIT;
                         } else {
                             std::memcpy(&out[outIdx], &block_size, 3);
                             outIdx += 3;
-                            out[outIdx++] = NO_COMPRESS_BIT;
+                            out[outIdx++] = lz4_specs::NO_COMPRESS_BIT;
                         }
                         std::memcpy(&out[outIdx], &in[brick_flag_idx * host_buffer_size + index], block_size);
                         outIdx += block_size;
@@ -987,16 +1012,16 @@ uint64_t xfLz4::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_
                         out[outIdx++] = 0;
                         out[outIdx++] = 0;
 
-                        if (block_size == MAX_BSIZE_64KB)
-                            out[outIdx++] = BSIZE_NCOMP_64;
-                        else if (block_size == MAX_BSIZE_256KB)
-                            out[outIdx++] = BSIZE_NCOMP_256;
-                        else if (block_size == MAX_BSIZE_1024KB)
-                            out[outIdx++] = BSIZE_NCOMP_1024;
-                        else if (block_size == MAX_BSIZE_4096KB)
-                            out[outIdx++] = BSIZE_NCOMP_4096;
+                        if (block_size == lz4_specs::MAX_BSIZE_64KB)
+                            out[outIdx++] = lz4_specs::BSIZE_NCOMP_64;
+                        else if (block_size == lz4_specs::MAX_BSIZE_256KB)
+                            out[outIdx++] = lz4_specs::BSIZE_NCOMP_256;
+                        else if (block_size == lz4_specs::MAX_BSIZE_1024KB)
+                            out[outIdx++] = lz4_specs::BSIZE_NCOMP_1024;
+                        else if (block_size == lz4_specs::MAX_BSIZE_4096KB)
+                            out[outIdx++] = lz4_specs::BSIZE_NCOMP_4096;
 
-                        out[outIdx++] = NO_COMPRESS_BIT;
+                        out[outIdx++] = lz4_specs::NO_COMPRESS_BIT;
                     } else {
                         uint8_t temp = 0;
                         temp = block_size;
@@ -1005,7 +1030,7 @@ uint64_t xfLz4::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_
                         out[outIdx++] = temp;
                         temp = block_size >> 16;
                         out[outIdx++] = temp;
-                        out[outIdx++] = NO_COMPRESS_BIT;
+                        out[outIdx++] = lz4_specs::NO_COMPRESS_BIT;
                     }
                     std::memcpy(&out[outIdx], &in[brick_flag_idx * host_buffer_size + index], block_size);
                     outIdx += block_size;
@@ -1024,8 +1049,13 @@ uint64_t xfLz4::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_
     std::cout << "Total Write Time " << total_write_time << std::endl;
     std::cout << "Total Read Time " << total_read_time << std::endl;
 #endif
-    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl
-              << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+    if (file_list_flag == 0) {
+        std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl
+                  << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+    } else {
+        std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1 << "\t\t";
+        std::cout << std::fixed << std::setprecision(2) << kernel_throughput_in_mbps_1;
+    }
 
     for (uint32_t cu = 0; cu < C_COMPUTE_UNIT; cu++) {
         for (uint32_t flag = 0; flag < overlap_buf_count; flag++) {

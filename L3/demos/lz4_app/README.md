@@ -61,7 +61,7 @@ Note: Overall throughput can still be increased with multiple compute units.
 #### Hardware
 
 ```
-  make run TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
+  make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
   Note: This command compiles for hardware execution. It generates kernel binary ".xclbin" file. 
         This file is placed in ./build/xclbin*/ directory under LZ4 folder.
 ```
@@ -77,19 +77,21 @@ While using PARALLEL_BLOCK (8 default) the generated executable would be
         1. To execute single file for compression :  ./build/xil_lz4_8b -cx <compress xclbin> -c <file_name>
         2. To execute single file for decompression: ./build/xil_lz4_8b -dx <decompress xclbin> -d <file_name.lz4>
         3. To validate multiple files together:       ./build/xil_lz4_8b -cx <compress xclbin> -dx <decompress xclbin> -l <files.list>
-            3.a. <files.list>: Contains multiple file names with current path    
+            3.a. <files.list>: Contains multiple file names with current path
+        4. To execute single file for compression and decompression : ./build/xil_lz4_8b -cx <compress xclbin> -dx <decompress xclbin> -v <file_name>    
         
   Note: Default arguments are set in Makefile
 
   Help:
         ===============================================================================================
-        Usage: application.exe -[-h-cx-c-l-dx-d-B-x]
+        Usage: application.exe -[-h-cx-c-l-dx-d-v-B-x]
                 --help,             -h      Print Help Options   Default: [false]
                 --compress_xclbin   -cx     Compress binary
                 --compress,         -c      Compress
                 --file_list,        -l      List of Input Files
                 --decompress_xclbin -dx     Decompress binary
                 --decompress,       -d      Decompress
+                --validate          -v      Single file validate for Compress and Decompress
                 --block_size,       -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
                 --flow,             -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd]   Default:[1]
         ===============================================================================================

@@ -4,10 +4,10 @@
    contain the root `toctree` directive.
 
 
-XF Compression Library
-======================
+Vitis Data Compression Library
+=========================
 
-XF Data Compression Library is an open-sourced Vitis library written in C++ for accelerating data compression applications in a variety of use cases. It now covers two levels of acceleration: the module level and the pre-defined kernel level, and will evolve to offer the third level as pure software APIs working with pre-defined hardware overlays.
+Vitis Data Compression Library is an open-sourced data compression library written in C++ for accelerating data compression applications in a variety of use cases. It now covers two levels of acceleration: the module level and the pre-defined kernel level, and will evolve to offer the third level as pure software APIs working with pre-defined hardware overlays.
 
 | **L1:** At module level, it provides optimized hardware implementation of the core LZ based and data compression specific modules like lz4 compress and snappy compress.
 | **L2:** In kernel level, a demo on couple of data compression algorithms are shown via kernel which internally uses the optimized hardware modules.

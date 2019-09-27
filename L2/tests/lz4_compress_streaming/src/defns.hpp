@@ -18,7 +18,7 @@
  * @file defns.hpp
  * @brief Header for including common header files
  *
- * This file is part of XF Compression Library demo host code for lz4 compression.
+ * This file is part of Vitis Data Compression Library demo host code for lz4 compression.
  */
 #ifndef _XFCOMPRESSION_DEFNS_HPP_
 #define _XFCOMPRESSION_DEFNS_HPP_

@@ -15,15 +15,6 @@
  *
  */
 #include "xil_zlib.hpp"
-#define BLOCK_SIZE 64
-#define KB 1024
-#define MAGIC_HEADER_SIZE 4
-#define MAGIC_BYTE_1 4
-#define MAGIC_BYTE_2 34
-#define MAGIC_BYTE_3 77
-#define MAGIC_BYTE_4 24
-#define FLG_BYTE 104
-
 #define FORMAT_0 31
 #define FORMAT_1 139
 #define VARIANT 8
@@ -142,7 +133,7 @@ uint32_t xil_zlib::compress_file(std::string& inFile_name, std::string& outFile_
     compress_API_time_ns_1 += duration;
 
     float throughput_in_mbps_1 = (float)input_size * 1000 / compress_API_time_ns_1.count();
-    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl;
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     // Pack zlib encoded stream .gz file
     zip(inFile_name, outFile, zlib_out.data(), enbytes);
@@ -350,7 +341,7 @@ uint32_t xil_zlib::decompress_file(std::string& inFile_name, std::string& outFil
     decompress_API_time_ns_1 += duration;
 
     float throughput_in_mbps_1 = (float)debytes * 1000 / decompress_API_time_ns_1.count();
-    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl;
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     outFile.write((char*)out.data(), debytes);
 

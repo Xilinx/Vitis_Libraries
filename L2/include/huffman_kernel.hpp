@@ -22,7 +22,7 @@
  * @file huffman_kernel.hpp
  * @brief Header for huffman kernel used in zlib compression.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 // L1 modules
 #include "lz_optional.hpp"

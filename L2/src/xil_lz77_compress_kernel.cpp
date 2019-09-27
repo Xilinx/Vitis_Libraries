@@ -19,11 +19,14 @@
  * @file xil_lz77_compress_kernel.cpp
  * @brief Source for lz77 compression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 #include "lz77_compress_kernel.hpp"
 
 #define MIN_BLOCK_SIZE 128
+
+#define GMEM_DWIDTH 512
+#define GMEM_BURST_SIZE 16
 
 // LZ4 Compress STATES
 #define WRITE_TOKEN 0
@@ -67,12 +70,15 @@ typedef ap_uint<64> lz77_compressd_dt;
 
 void lz77Divide(hls::stream<xf::compression::compressd_dt>& inStream,
                 hls::stream<ap_uint<32> >& outStream,
-                hls::stream<uint16_t>& outStreamSize,
+                hls::stream<bool>& endOfStream,
                 hls::stream<uint32_t>& outStreamTree,
+                hls::stream<uint32_t>& compressedSize,
                 uint32_t input_size,
                 uint32_t core_idx) {
     if (input_size == 0) {
-        outStreamSize << 0;
+        compressedSize << 0;
+        outStream << 0;
+        endOfStream << 1;
         outStreamTree << 9999;
         return;
     }
@@ -99,6 +105,7 @@ dtree_init:
     uint32_t loc_idx = 0;
 
     xf::compression::compressd_dt nextEncodedValue = inStream.read();
+    uint32_t cSizeCntr = 0;
 lz77_divide:
     for (uint32_t i = 0; i < input_size; i++) {
 #pragma HLS LOOP_TRIPCOUNT min = 1048576 max = 1048576
@@ -111,7 +118,7 @@ lz77_divide:
         uint8_t tCh = tmpEncodedValue.range(7, 0);
         uint8_t tLen = tmpEncodedValue.range(15, 8);
         uint16_t tOffset = tmpEncodedValue.range(31, 16);
-
+        // printf("tCh %d tLen %d tOffset %d \n", tCh, tLen, tOffset);
         uint32_t ltreeIdx, dtreeIdx;
         if (tLen > 0) {
             ltreeIdx = length_code[tLen - 3] + LITERALS + 1;
@@ -127,17 +134,14 @@ lz77_divide:
         lcl_dyn_dtree[dtreeIdx]++;
 
         outStream << tmpEncodedValue;
-        out_cntr += 4;
-
-        if (out_cntr >= 512) {
-            outStreamSize << out_cntr;
-            out_cntr = 0;
-        }
+        endOfStream << 0;
+        cSizeCntr++;
     }
 
-    if (out_cntr) outStreamSize << out_cntr;
-
-    outStreamSize << 0;
+    // printf("cSizeCntr %d \n", cSizeCntr);
+    compressedSize << (cSizeCntr * 4);
+    outStream << 0;
+    endOfStream << 1;
 
     for (uint32_t i = 0; i < LTREE_SIZE; i++) outStreamTree << lcl_dyn_ltree[i];
 
@@ -146,8 +150,9 @@ lz77_divide:
 
 void lz77Core(hls::stream<xf::compression::uintMemWidth_t>& inStream512,
               hls::stream<xf::compression::uintMemWidth_t>& outStream512,
-              hls::stream<uint16_t>& outStream512Size,
+              hls::stream<bool>& outStream512Eos,
               hls::stream<uint32_t>& outStreamTree,
+              hls::stream<uint32_t>& compressedSize,
               uint32_t max_lit_limit[PARALLEL_BLOCK],
               uint32_t input_size,
               uint32_t core_idx) {
@@ -159,14 +164,14 @@ void lz77Core(hls::stream<xf::compression::uintMemWidth_t>& inStream512,
     hls::stream<uint8_t> litOut("litOut");
     hls::stream<lz77_compressd_dt> lenOffsetOut("lenOffsetOut");
     hls::stream<ap_uint<32> > lz77Out("lz77Out");
-    hls::stream<uint16_t> lz77OutSize("lz77OutSize");
+    hls::stream<bool> lz77Out_eos("lz77Out_eos");
 #pragma HLS STREAM variable = inStream depth = xf::compression::c_gmemBurstSize
 #pragma HLS STREAM variable = compressdStream depth = xf::compression::c_gmemBurstSize
 #pragma HLS STREAM variable = boosterStream depth = xf::compression::c_gmemBurstSize
 #pragma HLS STREAM variable = litOut depth = max_literal_count
 #pragma HLS STREAM variable = lenOffsetOut depth = xf::compression::c_gmemBurstSize
 #pragma HLS STREAM variable = lz77Out depth = 1024
-#pragma HLS STREAM variable = lz77OutSize depth = xf::compression::c_gmemBurstSize
+#pragma HLS STREAM variable = lz77Out_eos depth = xf::compression::c_gmemBurstSize
 
 #pragma HLS RESOURCE variable = inStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
@@ -174,16 +179,15 @@ void lz77Core(hls::stream<xf::compression::uintMemWidth_t>& inStream512,
 #pragma HLS RESOURCE variable = litOut core = FIFO_SRL
 #pragma HLS RESOURCE variable = lenOffsetOut core = FIFO_SRL
 #pragma HLS RESOURCE variable = lz77Out core = FIFO_SRL
-#pragma HLS RESOURCE variable = lz77OutSize core = FIFO_SRL
+#pragma HLS RESOURCE variable = lz77Out_eos core = FIFO_SRL
 
 #pragma HLS dataflow
     xf::compression::streamDownsizer<uint32_t, xf::compression::kGMemDWidth, 8>(inStream512, inStream, input_size);
     xf::compression::lzCompress<MATCH_LEN, MATCH_LEVEL, LZ_DICT_SIZE, BIT, MIN_OFFSET, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(
         inStream, compressdStream, input_size, left_bytes);
     xf::compression::lzBooster<MAX_MATCH_LEN, OFFSET_WINDOW>(compressdStream, boosterStream, input_size, left_bytes);
-    lz77Divide(boosterStream, lz77Out, lz77OutSize, outStreamTree, input_size, core_idx);
-    xf::compression::upsizerSizeStream<uint16_t, 32, xf::compression::kGMemDWidth>(lz77Out, lz77OutSize, outStream512,
-                                                                                   outStream512Size);
+    lz77Divide(boosterStream, lz77Out, lz77Out_eos, outStreamTree, compressedSize, input_size, core_idx);
+    xf::compression::upsizerEos<uint16_t, 32, GMEM_DWIDTH>(lz77Out, lz77Out_eos, outStream512, outStream512Eos);
 }
 
 void lz77(const xf::compression::uintMemWidth_t* in,
@@ -195,189 +199,34 @@ void lz77(const xf::compression::uintMemWidth_t* in,
           uint32_t max_lit_limit[PARALLEL_BLOCK],
           uint32_t* dyn_ltree_freq,
           uint32_t* dyn_dtree_freq) {
-    hls::stream<xf::compression::uintMemWidth_t> inStream512_0("lz77inStream512_0");
-    hls::stream<uint16_t> outStream512Size_0("outStream512Size_0");
-    hls::stream<xf::compression::uintMemWidth_t> outStream512_0("outStream512_0");
-    hls::stream<uint32_t> stream_ltree_0("stream_ltree_0");
-#pragma HLS STREAM variable = outStream512Size_0 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = inStream512_0 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = outStream512_0 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = stream_ltree_0 depth = xf::compression::c_gmemBurstSize
+    hls::stream<xf::compression::uintMemWidth_t> inStreamMemWidth[PARALLEL_BLOCK];
+    hls::stream<bool> outStreamMemWidthEos[PARALLEL_BLOCK];
+    hls::stream<xf::compression::uintMemWidth_t> outStreamMemWidth[PARALLEL_BLOCK];
+    hls::stream<uint32_t> outStreamTreeData[PARALLEL_BLOCK];
+#pragma HLS STREAM variable = outStreamMemWidthEos depth = 2
+#pragma HLS STREAM variable = inStreamMemWidth depth = xf::compression::c_gmemBurstSize
+#pragma HLS STREAM variable = outStreamMemWidth depth = xf::compression::c_gmemBurstSize
+#pragma HLS STREAM variable = outStreamTreeData depth = xf::compression::c_gmemBurstSize
+#pragma HLS STREAM variable = outStreamMemWidthEos depth = xf::compression::c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = outStream512Size_0 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream512_0 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512_0 core = FIFO_SRL
-#pragma HLS RESOURCE variable = stream_ltree_0 core = FIFO_SRL
-
-#if PARALLEL_BLOCK > 1
-    hls::stream<xf::compression::uintMemWidth_t> inStream512_1("lz77inStream512_1");
-    hls::stream<uint16_t> outStream512Size_1("outStream512Size_1");
-    hls::stream<xf::compression::uintMemWidth_t> outStream512_1("outStream512_1");
-    hls::stream<uint32_t> stream_ltree_1("stream_ltree_1");
-#pragma HLS STREAM variable = outStream512Size_1 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = inStream512_1 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = outStream512_1 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = stream_ltree_1 depth = xf::compression::c_gmemBurstSize
-
-#pragma HLS RESOURCE variable = outStream512Size_1 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream512_1 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512_1 core = FIFO_SRL
-#pragma HLS RESOURCE variable = stream_ltree_1 core = FIFO_SRL
-#endif
-
-#if PARALLEL_BLOCK > 2
-    hls::stream<xf::compression::uintMemWidth_t> inStream512_2("lz77inStream512_2");
-    hls::stream<uint16_t> outStream512Size_2("outStream512Size_2");
-    hls::stream<xf::compression::uintMemWidth_t> outStream512_2("outStream512_2");
-    hls::stream<uint32_t> stream_ltree_2("stream_ltree_2");
-#pragma HLS STREAM variable = outStream512Size_2 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = inStream512_2 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = outStream512_2 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = stream_ltree_2 depth = xf::compression::c_gmemBurstSize
-
-#pragma HLS RESOURCE variable = outStream512Size_2 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream512_2 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512_2 core = FIFO_SRL
-#pragma HLS RESOURCE variable = stream_ltree_2 core = FIFO_SRL
-
-    hls::stream<xf::compression::uintMemWidth_t> inStream512_3("lz77inStream512_3");
-    hls::stream<uint16_t> outStream512Size_3("outStream512Size_3");
-    hls::stream<xf::compression::uintMemWidth_t> outStream512_3("outStream512_3");
-    hls::stream<uint32_t> stream_ltree_3("stream_ltree_3");
-#pragma HLS STREAM variable = outStream512Size_3 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = inStream512_3 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = outStream512_3 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = stream_ltree_3 depth = xf::compression::c_gmemBurstSize
-
-#pragma HLS RESOURCE variable = outStream512Size_3 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream512_3 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512_3 core = FIFO_SRL
-#pragma HLS RESOURCE variable = stream_ltree_3 core = FIFO_SRL
-#endif
-
-#if PARALLEL_BLOCK > 4
-    hls::stream<xf::compression::uintMemWidth_t> inStream512_4("lz77inStream512_4");
-    hls::stream<uint16_t> outStream512Size_4("outStream512Size_4");
-    hls::stream<xf::compression::uintMemWidth_t> outStream512_4("outStream512_4");
-    hls::stream<uint32_t> stream_ltree_4("stream_ltree_4");
-#pragma HLS STREAM variable = outStream512Size_4 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = inStream512_4 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = outStream512_4 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = stream_ltree_4 depth = xf::compression::c_gmemBurstSize
-
-#pragma HLS RESOURCE variable = outStream512Size_4 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream512_4 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512_4 core = FIFO_SRL
-#pragma HLS RESOURCE variable = stream_ltree_4 core = FIFO_SRL
-
-    hls::stream<xf::compression::uintMemWidth_t> inStream512_5("lz77inStream512_5");
-    hls::stream<uint16_t> outStream512Size_5("outStream512Size_5");
-    hls::stream<xf::compression::uintMemWidth_t> outStream512_5("outStream512_5");
-    hls::stream<uint32_t> stream_ltree_5("stream_ltree_5");
-#pragma HLS STREAM variable = outStream512Size_5 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = inStream512_5 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = outStream512_5 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = stream_ltree_5 depth = xf::compression::c_gmemBurstSize
-
-#pragma HLS RESOURCE variable = outStream512Size_5 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream512_5 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512_5 core = FIFO_SRL
-#pragma HLS RESOURCE variable = stream_ltree_5 core = FIFO_SRL
-
-    hls::stream<xf::compression::uintMemWidth_t> inStream512_6("lz77inStream512_6");
-    hls::stream<uint16_t> outStream512Size_6("outStream512Size_6");
-    hls::stream<xf::compression::uintMemWidth_t> outStream512_6("outStream512_6");
-    hls::stream<uint32_t> stream_ltree_6("stream_ltree_6");
-#pragma HLS STREAM variable = outStream512Size_6 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = inStream512_6 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = outStream512_6 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = stream_ltree_6 depth = xf::compression::c_gmemBurstSize
-
-#pragma HLS RESOURCE variable = outStream512Size_6 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream512_6 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512_6 core = FIFO_SRL
-#pragma HLS RESOURCE variable = stream_ltree_6 core = FIFO_SRL
-
-    hls::stream<xf::compression::uintMemWidth_t> inStream512_7("lz77inStream512_7");
-    hls::stream<uint16_t> outStream512Size_7("outStream512Size_7");
-    hls::stream<xf::compression::uintMemWidth_t> outStream512_7("outStream512_7");
-    hls::stream<uint32_t> stream_ltree_7("stream_ltree_7");
-#pragma HLS STREAM variable = outStream512Size_7 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = inStream512_7 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = outStream512_7 depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = stream_ltree_7 depth = xf::compression::c_gmemBurstSize
-
-#pragma HLS RESOURCE variable = outStream512Size_7 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream512_7 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512_7 core = FIFO_SRL
-#pragma HLS RESOURCE variable = stream_ltree_7 core = FIFO_SRL
-#endif
+    hls::stream<uint32_t> compressedSize[PARALLEL_BLOCK];
 
 #pragma HLS dataflow
-    xf::compression::gzMm2s<xf::compression::kGMemDWidth, xf::compression::kGMemBurstSize>(in, input_idx, inStream512_0,
-#if PARALLEL_BLOCK > 1
-                                                                                           inStream512_1,
-#endif
-#if PARALLEL_BLOCK > 2
-                                                                                           inStream512_2, inStream512_3,
-#endif
-#if PARALLEL_BLOCK > 4
-                                                                                           inStream512_4, inStream512_5,
-                                                                                           inStream512_6, inStream512_7,
-#endif
+    // MM2S Call
+    xf::compression::mm2sNb<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth, input_size);
 
-                                                                                           input_size);
+    for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
+#pragma HLS UNROLL
+        // lz77Core is instantiated based on the PARALLEL BLOCK
+        lz77Core(inStreamMemWidth[i], outStreamMemWidth[i], outStreamMemWidthEos[i], outStreamTreeData[i],
+                 compressedSize[i], max_lit_limit, input_size[i], i);
+    }
 
-    lz77Core(inStream512_0, outStream512_0, outStream512Size_0, stream_ltree_0, max_lit_limit, input_size[0], 0);
-#if PARALLEL_BLOCK > 1
-    lz77Core(inStream512_1, outStream512_1, outStream512Size_1, stream_ltree_1, max_lit_limit, input_size[1], 1);
-#endif
-
-#if PARALLEL_BLOCK > 2
-    lz77Core(inStream512_2, outStream512_2, outStream512Size_2, stream_ltree_2, max_lit_limit, input_size[2], 2);
-    lz77Core(inStream512_3, outStream512_3, outStream512Size_3, stream_ltree_3, max_lit_limit, input_size[3], 3);
-#endif
-
-#if PARALLEL_BLOCK > 4
-    lz77Core(inStream512_4, outStream512_4, outStream512Size_4, stream_ltree_4, max_lit_limit, input_size[4], 4);
-    lz77Core(inStream512_5, outStream512_5, outStream512Size_5, stream_ltree_5, max_lit_limit, input_size[5], 5);
-    lz77Core(inStream512_6, outStream512_6, outStream512Size_6, stream_ltree_6, max_lit_limit, input_size[6], 6);
-    lz77Core(inStream512_7, outStream512_7, outStream512Size_7, stream_ltree_7, max_lit_limit, input_size[7], 7);
-#endif
-
-    xf::compression::s2mmCompressFreq<uint32_t, xf::compression::kGMemBurstSize, xf::compression::kGMemDWidth>(
-        out, dyn_ltree_freq, dyn_dtree_freq, output_idx, outStream512_0,
-#if PARALLEL_BLOCK > 1
-        outStream512_1,
-#endif
-#if PARALLEL_BLOCK > 2
-        outStream512_2, outStream512_3,
-#endif
-#if PARALLEL_BLOCK > 4
-        outStream512_4, outStream512_5, outStream512_6, outStream512_7,
-#endif
-
-        outStream512Size_0,
-#if PARALLEL_BLOCK > 1
-        outStream512Size_1,
-#endif
-#if PARALLEL_BLOCK > 2
-        outStream512Size_2, outStream512Size_3,
-#endif
-#if PARALLEL_BLOCK > 4
-        outStream512Size_4, outStream512Size_5, outStream512Size_6, outStream512Size_7,
-#endif
-        stream_ltree_0,
-#if PARALLEL_BLOCK > 1
-        stream_ltree_1,
-#endif
-#if PARALLEL_BLOCK > 2
-        stream_ltree_2, stream_ltree_3,
-#endif
-#if PARALLEL_BLOCK > 4
-        stream_ltree_4, stream_ltree_5, stream_ltree_6, stream_ltree_7,
-#endif
-        output_size);
+    // S2MM Call
+    xf::compression::s2mmEosNbFreq<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(
+        out, output_idx, outStreamMemWidth, outStreamMemWidthEos, outStreamTreeData, compressedSize, output_size,
+        input_size, dyn_ltree_freq, dyn_dtree_freq);
+    // printf("Done with S2mm \n");
 }
 
 extern "C" {

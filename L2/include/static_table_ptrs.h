@@ -22,7 +22,7 @@
  * @file statis_table_ptrs.h
  * @brief Header for defining constants used in zlib compression.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 const uint8_t static_litml_op[512] = {

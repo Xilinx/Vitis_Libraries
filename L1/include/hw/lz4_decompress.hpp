@@ -21,11 +21,10 @@
  * @file lz4_decompress.hpp
  * @brief Header for modules used in LZ4 decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"
-#include "lz4_config.h"
 
 namespace xf {
 namespace compression {

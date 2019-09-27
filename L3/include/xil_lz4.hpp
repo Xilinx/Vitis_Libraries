@@ -18,13 +18,11 @@
  * @file xil_lz4.hpp
  * @brief Header for LZ4 host functionality
  *
- * This file is part of XF Compression Library host code for lz4 compression.
+ * This file is part of Vitis Data Compression Library host code for lz4 compression.
  */
 
 #ifndef _XFCOMPRESSION_XIL_LZ4_HPP_
 #define _XFCOMPRESSION_XIL_LZ4_HPP_
-
-#include "defns.hpp"
 
 /**
  * Maximum compute units supported
@@ -43,56 +41,15 @@
 /**
  * Default block size
  */
+#ifndef BLOCK_SIZE_IN_KB
 #define BLOCK_SIZE_IN_KB 64
-
+#endif
 /**
  * Value below is used to associate with
  * Overlapped buffers, ideally overlapped
  * execution requires 2 resources per invocation
  */
 #define OVERLAP_BUF_COUNT 2
-
-/**
- * Maximum number of blocks based on host buffer size
- */
-#define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
-
-/**
- * Below are the codes as per LZ4 standard for
- * various maximum block sizes supported.
- */
-#define BSIZE_STD_64KB 0x40
-#define BSIZE_STD_256KB 0x50
-#define BSIZE_STD_1024KB 0x60
-#define BSIZE_STD_4096KB 0x70
-
-/**
- * Maximum block sizes supported by LZ4
- */
-#define MAX_BSIZE_64KB (64 * 1024)
-#define MAX_BSIZE_256KB (256 * 1024)
-#define MAX_BSIZE_1024KB (1024 * 1024)
-#define MAX_BSIZE_4096KB (4096 * 1024)
-
-/**
- * This value is used to set
- * uncompressed block size value.
- * 4th byte is always set to below
- * and placed as uncompressed byte
- */
-#define NO_COMPRESS_BIT 128
-
-/**
- * In case of uncompressed block
- * Values below are used to set
- * 3rd byte to following values
- * w.r.t various maximum block sizes
- * supported by standard
- */
-#define BSIZE_NCOMP_64 1
-#define BSIZE_NCOMP_256 4
-#define BSIZE_NCOMP_1024 16
-#define BSIZE_NCOMP_4096 64
 
 /**
  *  xfLz4 class. Class containing methods for LZ4
@@ -114,35 +71,36 @@ class xfLz4 {
     int release();
 
     /**
-     * @brief Compress.
+     * @brief This module does the sequential execution of compression
+     * where all the I/O operations and kernel execution are done one
+     * after another in sequential order.
      *
      * @param in input byte sequence
      * @param out output byte sequence
      * @param actual_size input size
      * @param host_buffer_size host buffer size
      */
-    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
+    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size, bool file_list_flag);
 
     /**
-     * @brief Compress the input file.
-     *
-     * @param inFile_name input file name
-     * @param outFile_name output file name
-     * @param actual_size input size
-     */
-    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    * @brief Decompress.
+    *
+    * @param in input byte sequence
+    * @param out output byte sequence
+    * @param actual_size input size
+    * @param original_size original size
+    * @param host_buffer_size host buffer size
+    */
+    uint64_t decompress(uint8_t* in,
+                        uint8_t* out,
+                        uint64_t actual_size,
+                        uint64_t original_size,
+                        uint32_t host_buffer_size,
+                        bool file_list_flag);
 
     /**
-     * @brief Decompress the input file.
-     *
-     * @param inFile_name input file name
-     * @param outFile_name output file name
-     * @param actual_size input size
-     */
-    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
-
-    /**
-     * @brief Decompress.
+     * @brief This module does the memory mapped execution of decompression
+     * where the I/O operations and kernel execution is done in sequential order
      *
      * @param in input byte sequence
      * @param out output byte sequence
@@ -150,15 +108,25 @@ class xfLz4 {
      * @param original_size original size
      * @param host_buffer_size host buffer size
      */
-    uint64_t decompress(
-        uint8_t* in, uint8_t* out, uint64_t actual_size, uint64_t original_size, uint32_t host_buffer_size);
+
+    uint64_t decompressFile(std::string& inFile_name,
+                            std::string& outFile_name,
+                            uint64_t actual_size,
+                            bool file_list_flag);
 
     /**
-     * @brief Get the duration of input event
+     * @brief This module is provided to support compress API and
+     * it's not recommended to use for high throughput.
      *
-     * @param event event to get duration for
+     * @param inFile_name input file name
+     * @param outFile_name output file name
+     * @param actual_size input size
      */
-    uint64_t getEventDurationNs(const cl::Event& event);
+
+    uint64_t compressFile(std::string& inFile_name,
+                          std::string& outFile_name,
+                          uint64_t actual_size,
+                          bool file_list_flag);
 
     /**
      * Binary flow compress/decompress

@@ -22,7 +22,7 @@
  * @file huffman_fixed_table.h
  * @brief Header for defining constants used in huffman kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 const int fixed_lenlit_table[] = {

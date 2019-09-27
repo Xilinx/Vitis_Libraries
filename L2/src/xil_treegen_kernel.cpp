@@ -19,7 +19,7 @@
  * @file xil_treegen_kernel.cpp
  * @brief Source for treegen kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 #include "treegen_kernel.hpp"
 

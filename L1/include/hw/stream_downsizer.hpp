@@ -21,7 +21,7 @@
  * @file stream_downsizer.hpp
  * @brief Header for stream downsizer module.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"

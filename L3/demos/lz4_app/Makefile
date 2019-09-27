@@ -239,6 +239,7 @@ EXE_NAME := xil_lz4_8b
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
 CXXFLAGS +=-I$(XFLIB_DIR)/L3/include/
+CXXFLAGS +=-I$(XFLIB_DIR)/L1/include/hw/
 CXXFLAGS +=-I$(XILINX_XRT)/include/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/xcl2/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/cmdparser/

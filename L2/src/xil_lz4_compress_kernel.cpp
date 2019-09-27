@@ -18,7 +18,7 @@
  * @file xil_lz4_compress_kernel.cpp
  * @brief Source for LZ4 compression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "lz4_compress_kernel.hpp"
@@ -43,12 +43,13 @@
 
 const int c_gmemBurstSize = (2 * GMEM_BURST_SIZE);
 const int c_sizeStreamDepth = 8;
+const int c_lz4MaxLiteralCount = MAX_LIT_COUNT;
 
 // namespace hw_compress {
 
 void lz4Core(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
              hls::stream<xf::compression::uintMemWidth_t>& outStreamMemWidth,
-             hls::stream<bool>& outStreamMemWidthSize,
+             hls::stream<bool>& outStreamMemWidthEos,
              hls::stream<uint32_t>& compressedSize,
              uint32_t max_lit_limit[PARALLEL_BLOCK],
              uint32_t input_size,
@@ -86,10 +87,10 @@ void lz4Core(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
                                                                  left_bytes);
     xf::compression::lzBooster<MAX_MATCH_LEN, BOOSTER_OFFSET_WINDOW>(bestMatchStream, boosterStream, input_size,
                                                                      left_bytes);
-    xf::compression::lz4Divide(boosterStream, litOut, lenOffsetOut, input_size, max_lit_limit, core_idx);
+    xf::compression::lz4Divide<MAX_LIT_COUNT>(boosterStream, litOut, lenOffsetOut, input_size, max_lit_limit, core_idx);
     xf::compression::lz4Compress(litOut, lenOffsetOut, lz4Out, lz4Out_eos, compressedSize, input_size);
     xf::compression::upsizerEos<uint16_t, BIT, GMEM_DWIDTH>(lz4Out, lz4Out_eos, outStreamMemWidth,
-                                                            outStreamMemWidthSize);
+                                                            outStreamMemWidthEos);
 }
 
 /**
@@ -110,15 +111,15 @@ void lz4(const xf::compression::uintMemWidth_t* in,
          uint32_t output_size[PARALLEL_BLOCK],
          uint32_t max_lit_limit[PARALLEL_BLOCK]) {
     hls::stream<xf::compression::uintMemWidth_t> inStreamMemWidth[PARALLEL_BLOCK];
-    hls::stream<bool> outStreamMemWidthSize[PARALLEL_BLOCK];
+    hls::stream<bool> outStreamMemWidthEos[PARALLEL_BLOCK];
     hls::stream<xf::compression::uintMemWidth_t> outStreamMemWidth[PARALLEL_BLOCK];
-#pragma HLS STREAM variable = outStreamMemWidthSize depth = 2
+#pragma HLS STREAM variable = outStreamMemWidthEos depth = 2
 #pragma HLS STREAM variable = inStreamMemWidth depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStreamMemWidth depth = c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = outStreamMemWidthSize_0 core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStreamMemWidth_0 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamMemWidth_0 core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStreamMemWidthEos core = FIFO_SRL
+#pragma HLS RESOURCE variable = inStreamMemWidth core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStreamMemWidth core = FIFO_SRL
 
     hls::stream<uint32_t> compressedSize[PARALLEL_BLOCK];
     uint32_t left_bytes = 64;
@@ -128,12 +129,12 @@ void lz4(const xf::compression::uintMemWidth_t* in,
     for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
 #pragma HLS UNROLL
         // lz4Core is instantiated based on the PARALLEL_BLOCK
-        lz4Core(inStreamMemWidth[i], outStreamMemWidth[i], outStreamMemWidthSize[i], compressedSize[i], max_lit_limit,
+        lz4Core(inStreamMemWidth[i], outStreamMemWidth[i], outStreamMemWidthEos[i], compressedSize[i], max_lit_limit,
                 input_size[i], i);
     }
 
     xf::compression::s2mmEosNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(
-        out, output_idx, outStreamMemWidth, outStreamMemWidthSize, compressedSize, output_size);
+        out, output_idx, outStreamMemWidth, outStreamMemWidthEos, compressedSize, output_size);
 }
 //} // namespace end
 

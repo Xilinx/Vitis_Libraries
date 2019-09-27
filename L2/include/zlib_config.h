@@ -21,7 +21,7 @@
  * @file zlib_config.h
  * @brief Header for configuration for zlib compression and decompression kernels.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 //#define MAX_LIT_COUNT 4096

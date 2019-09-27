@@ -1,4 +1,3 @@
-#
 # Copyright 2019 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +35,7 @@ help::
 #						Build Environment Setup
 
 include ./utils.mk
+include ./config.mk
 
 TOOL_VERSION ?= 2019.2
 
@@ -74,47 +74,47 @@ endif
 export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
 
 ifeq (,$(LD_LIBRARY_PATH))
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib
+  LD_LIBRARY_PATH := $(XILINX_XRT)/lib
 else
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
+  LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
+  export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
 # sw_emu, hw_emu, hw
 TARGET ?= sw_emu
 ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
+  $(error TARGET is not sw_emu, hw_emu or hw)
 endif
 
 # Target device
-DEVICE ?= xilinx_u200_qdma_201910_1
+DEVICE ?= xilinx_u200_xdma_201830_2
 
 ifneq (,$(wildcard $(DEVICE)))
-# Use DEVICE as a file path
-XPLATFORM := $(DEVICE)
+  # Use DEVICE as a file path
+  XPLATFORM := $(DEVICE)
 else
-# Use DEVICE as a file name pattern
-DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
+  # Use DEVICE as a file name pattern
+  DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
+  # Match the name
 ifneq (,$(PLATFORM_REPO_PATHS))
-XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+  XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
+  XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
 endif
 ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+  XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
+  XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
 endif
 ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+  XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
+  XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
 endif
 endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Available platforms are: $(XPLATFORMS)
+Avaialble platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -147,8 +147,10 @@ XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
 
 BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
-SRC_DIR := $(XFLIB_DIR)/L2/demos/
-TB_DIR := lz4_streaming/
+SRC_DIR := $(XFLIB_DIR)/L2/demos/lz4_streaming/
+TB_DIR := $(XFLIB_DIR)/L2/tests/lz4_streaming_tb/
+
+TB_SRC_DIR := $(XFLIB_DIR)/L2/tests/src/
 
 # ------------------------------------------------------------
 #                      kernel setup
@@ -163,7 +165,8 @@ HLS_SRC_DIR = $(XFLIB_DIR)/L1/include/hw
 # Compilation flags
 VPP_FLAGS = -I$(HLS_SRC_DIR) \
 			 -I$(KSRC_DIR) \
-			 -I$(XFLIB_DIR)/L2/include/
+			 -I$(XFLIB_DIR)/L2/include/ \
+			 -I$(TB_SRC_DIR)
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_FLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
 
@@ -172,84 +175,104 @@ VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
 			--report_dir $(CUR_DIR)/reports/_x.$(TARGET)
 
 # Linking flags
-VPP_LINK_FLAGS = --optimize 2 --jobs 8 
+VPP_LINK_FLAGS = --optimize 2 --jobs 8 \
 
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				 --report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
 
-XCLBIN_FILE_C = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress.xclbin
-XCLBIN_FILE_D = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/decompress.xclbin
+XCLBIN_FILE_C = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_streaming.xclbin
+XCLBIN_FILE_D = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/decompress_streaming.xclbin
 
-XO_FILES = $(TEMP_DIR)/xf_compress.xo \
-		   $(TEMP_DIR)/xf_decompress.xo
+XO_FILES = $(TEMP_DIR)/xf_compress_streaming.xo \
+		   $(TEMP_DIR)/xf_compress_datamover.xo \
+		   $(TEMP_DIR)/xf_decompress_streaming.xo \
+		   $(TEMP_DIR)/xf_decompress_datamover.xo
+		   
 
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/xil_lz4_compress_stream_kernel.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/xil_lz4_decompress_stream_kernel.cpp
+COMPRESS_STREAM_KERNEL_SRCS = $(KSRC_DIR)/xil_lz4_compress_stream_kernel.cpp
+COMP_DATAMOVER_KERNEL_SRCS = $(TB_SRC_DIR)/xil_block_comp_datamover_kernel.cpp
+DECOMPRESS_STREAM_KERNEL_SRCS = $(KSRC_DIR)/xil_lz4_decompress_stream_kernel.cpp
+DECOMP_DATAMOVER_KERNEL_SRCS = $(TB_SRC_DIR)/xil_block_decomp_datamover_kernel.cpp
 
-COMPRESS_KERNEL_NAME = xilLz4CompressStream
-DECOMPRESS_KERNEL_NAME = xilLz4DecompressStream
+COMPRESS_STREAM_KERNEL_NAME = xilLz4CompressStream
+COMP_DATAMOVER_KERNEL_NAME = xilCompDatamover
+DECOMPRESS_STREAM_KERNEL_NAME = xilLz4DecompressStream
+DECOMP_DATAMOVER_KERNEL_NAME = xilDecompDatamover
 
-KERNELS = $(COMPRESS_KERNEL_NAME)
-KERNELS += $(DECOMPRESS_KERNEL_NAME)
+KERNELS = $(COMPRESS_STREAM_KERNEL_NAME)
+KERNELS += $(COMP_DATAMOVER_KERNEL_NAME)
+KERNELS += $(DECOMPRESS_STREAM_KERNEL_NAME)
+KERNELS += $(DECOMP_DATAMOVER_KERNEL_NAME)
 
 # ------------------------------------------------------------
 #                      kernel rules
 
 # Building kernel
-$(TEMP_DIR)/xf_compress.xo: $(COMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xf_compress_streaming.xo: $(COMPRESS_STREAM_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling compression kernel $*..."
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(COMPRESS_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(COMPRESS_STREAM_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
 
 
-$(TEMP_DIR)/xf_decompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xf_compress_datamover.xo: $(COMP_DATAMOVER_KERNEL_SRCS) $(HLS_SRC_DIR)
+	@echo -e "----\nCompiling compression kernel $*..."
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(COMP_DATAMOVER_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
+
+
+$(TEMP_DIR)/xf_decompress_streaming.xo: $(DECOMPRESS_STREAM_KERNEL_SRCS) $(HLS_SRC_DIR)
+	@echo -e "----\nCompiling compression kernel $*..."
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMPRESS_STREAM_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
+
+$(TEMP_DIR)/xf_decompress_datamover.xo: $(DECOMP_DATAMOVER_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling decompression kernel $*..."
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMPRESS_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMP_DATAMOVER_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
 
 
 # xclbin Binary creation
-$(XCLBIN_FILE_C): $(TEMP_DIR)/xf_compress.xo
+$(XCLBIN_FILE_C): $(TEMP_DIR)/xf_compress_streaming.xo $(TEMP_DIR)/xf_compress_datamover.xo
 	mkdir -p $(BUILD_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS)/Compress/ -l \
+	--config $(CUR_DIR)/compress.ini \
 	-o'$@' $(+)
 
-$(XCLBIN_FILE_D): $(TEMP_DIR)/xf_decompress.xo
+$(XCLBIN_FILE_D): $(TEMP_DIR)/xf_decompress_streaming.xo $(TEMP_DIR)/xf_decompress_datamover.xo
 	mkdir -p $(BUILD_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS)/Decompress/ -l \
+	--config $(CUR_DIR)/decompress.ini \
 	-o'$@' $(+)
-
 
 # ------------------------------------------------------------
 #                       host setup
 
 CXX := xcpp
 HOST_EXE := xil_lz4_streaming
-#EXE_EXT = exe
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
-CXXFLAGS +=-I$(XFLIB_DIR)/L2/tests/lz4_streaming_tb/src/
+CXXFLAGS +=-I$(TB_SRC_DIR)
 CXXFLAGS +=-I$(XILINX_XRT)/include/
+
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/xcl2/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/cmdparser/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/logger/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
 
 #Host and Common sources
-SRCS += $(SRC_DIR)/$(TB_DIR)/src/host.cpp
-SRCS += $(SRC_DIR)/$(TB_DIR)/src/xil_lz4_streaming.cpp
+SRCS += $(SRC_DIR)/src/host.cpp
+SRCS += $(TB_SRC_DIR)/xil_lz4_streaming.cpp
 SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
-CXXFLAGS += -fmessage-length=0 -std=c++14 -O0 \
+CXXFLAGS += -fmessage-length=0
 		-DXDEVICE=$(XDEVICE) \
 	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread
 
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
-LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -std=c++14 -DVERBOSE -lstdc++
-#LDFLAGS +=  -std=c++0x
+LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -std=c++0x -DVERBOSE
 
 EXE_FILE = $(BUILD_DIR)/$(HOST_EXE)
 
@@ -260,7 +283,7 @@ EXE_FILE = $(BUILD_DIR)/$(HOST_EXE)
 $(EXE_FILE): $(SRCS) | check_vpp check_xrt check_platform
 	@echo -e "----\nCompiling host $(notdir $@)..."
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) -g
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 
 # ------------------------------------------------------------
@@ -275,11 +298,10 @@ host: $(EXE_FILE) | check_vpp check_xrt check_platform
 xclbin: $(XCLBIN_FILE_C) $(XCLBIN_FILE_D)
 
 cleank:
-	rm -f _x_temp.*/*.xo
+	rm -f _x_temp*/*.xo
 	rm -f $(BUILD_DIR)/*.xclbin
-	rm -rf _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* sample_*
-	rm -rf _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	rm -rf _x_temp.*/
+	rm -rf _x_temp*/_x.* _x_temp*/.Xil _x_temp*/profile_summary.* sample_*
+	rm -rf _x_temp*/dltmp* _x_temp*/kernel_info.dat _x_temp*/*.log
 	
 cleanh:
 	rm -rf $(EXE_FILE)
@@ -289,8 +311,8 @@ cleanh:
 
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
-	-$(RMDIR) $(TEMP_DIR) $(CUR_DIR)/reports *.csv
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd*
+	-$(RMDIR) _x_temp* $(CUR_DIR)/reports
+	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* 
 
 clean: cleanh
 
@@ -301,7 +323,8 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -cx $(XCLBIN_FILE_C) -dx $(XCLBIN_FILE_D) -l $(XFLIB_DIR)/common/test.list
+HOST_ARGS = -cx $(XCLBIN_FILE_C) -dx $(XCLBIN_FILE_D) -v $(XFLIB_DIR)/common/data/sample.txt 
+
 
 ifeq ($(TARGET),sw_emu)
   RUN_ENV = export XCL_EMULATION_MODE=sw_emu
@@ -315,7 +338,7 @@ else ifeq ($(TARGET),hw)
 endif
 
 
-run: host xclbin $(EMU_CONFIG) $(DAT_STAMP)
+run: host xclbin $(EMU_CONFIG)
 	$(RUN_ENV); \
 	$(EXE_FILE) $(HOST_ARGS)
 

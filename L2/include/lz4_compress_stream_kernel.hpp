@@ -21,7 +21,7 @@
  * @file lz4_compress_stream_kernel.hpp
  * @brief Header for LZ4 compression stream based kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include <stdio.h>
@@ -31,25 +31,17 @@
 #include "ap_axi_sdata.h"
 #include <ap_int.h>
 
-#include "axi_stream_utils.hpp"
+#include "kernel_stream_utils.hpp"
 #include "lz_compress.hpp"
 #include "lz_optional.hpp"
-#include "lz4_config.h"
 #include "lz4_compress.hpp"
+
+#define MAX_LIT_COUNT 4096
 
 // Kernel top functions
 extern "C" {
-/**
- * @brief LZ4 compression streaming kernel
- *
- * @param inAxiStream           Input axi stream
- * @param outAxiStream          Output axi stream
- * @param compressedSizeAxis    Axi stream to transfer compressed data size
- * @param inputSize             Input data size
- */
-void xilLz4CompressStream(hls::stream<xf::compression::hStream8b_t>& inAxiStream,
-                          hls::stream<xf::compression::hStream8b_t>& outAxiStream,
-                          hls::stream<xf::compression::hStream32b_t>& compressedSizeAxis,
+void xilLz4CompressStream(hls::stream<xf::compression::kStream8b_t>& inaxistream,
+                          hls::stream<xf::compression::kStream8b_t>& outaxistream,
                           uint32_t inputSize);
 }
 

@@ -27,16 +27,16 @@
 #define MATCH_LEN 6
 #define MATCH_LEVEL 6
 
+const int c_lz4MaxLiteralCount = MAX_LIT_COUNT;
+
 extern "C" {
-void xilLz4CompressStream(hls::stream<xf::compression::hStream8b_t>& inaxistream,
-                          hls::stream<xf::compression::hStream8b_t>& outaxistream,
-                          hls::stream<xf::compression::hStream32b_t>& compressedsizeaxis,
+void xilLz4CompressStream(hls::stream<xf::compression::kStream8b_t>& inaxistream,
+                          hls::stream<xf::compression::kStream8b_t>& outaxistream,
                           uint32_t inputSize) {
     uint32_t leftBytes = 64;
 
 #pragma HLS interface axis port = inaxistream
 #pragma HLS interface axis port = outaxistream
-#pragma HLS interface axis port = compressedsizeaxis
 #pragma HLS interface s_axilite port = inputSize bundle = control
 #pragma HLS interface s_axilite port = return bundle = control
 
@@ -55,8 +55,8 @@ void xilLz4CompressStream(hls::stream<xf::compression::hStream8b_t>& inaxistream
 #pragma HLS STREAM variable = compressdStream depth = 8
 #pragma HLS STREAM variable = bestMatchStream depth = 8
 #pragma HLS STREAM variable = boosterStream depth = 8
-#pragma HLS STREAM variable = litOut depth = c_lz4MaxLiteralCount
-#pragma HLS STREAM variable = lenOffsetOut depth = c_gmemBurstSize
+#pragma HLS STREAM variable = litOut depth = xf::compression::c_lz4MaxLiteralCount
+#pragma HLS STREAM variable = lenOffsetOut depth = xf::compression::c_gmemBurstSize
 #pragma HLS STREAM variable = lz4OutEos depth = 8
 
 #pragma HLS RESOURCE variable = inStream core = FIFO_SRL
@@ -70,15 +70,17 @@ void xilLz4CompressStream(hls::stream<xf::compression::hStream8b_t>& inaxistream
 #pragma HLS dataflow
     uint32_t litLimit[1];
     litLimit[0] = 0; // max_lit_limit;
-    // printf("In Kernel - Input size: %d\n", inputSize);
-    xf::compression::axis2hlsStreamFixedSize(inaxistream, inStream, inputSize);
+
+    xf::compression::kStreamRead<8>(inaxistream, inStream, inputSize);
+
     xf::compression::lzCompress<MATCH_LEN, MATCH_LEVEL, LZ_DICT_SIZE, BIT, MIN_OFFSET, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(
         inStream, compressdStream, inputSize, leftBytes);
     xf::compression::lzBestMatchFilter<MATCH_LEN, OFFSET_WINDOW>(compressdStream, bestMatchStream, inputSize,
                                                                  leftBytes);
     xf::compression::lzBooster<MAX_MATCH_LEN, OFFSET_WINDOW>(bestMatchStream, boosterStream, inputSize, leftBytes);
-    xf::compression::lz4Divide(boosterStream, litOut, lenOffsetOut, inputSize, litLimit, 0);
+    xf::compression::lz4Divide<MAX_LIT_COUNT>(boosterStream, litOut, lenOffsetOut, inputSize, litLimit, 0);
     xf::compression::lz4Compress(litOut, lenOffsetOut, outStream, lz4OutEos, compressedSize, inputSize);
-    xf::compression::hlsStream2axis(outStream, lz4OutEos, outaxistream, compressedSize, compressedsizeaxis);
+
+    xf::compression::kStreamWrite<8>(outaxistream, outStream, lz4OutEos, compressedSize);
 }
 }

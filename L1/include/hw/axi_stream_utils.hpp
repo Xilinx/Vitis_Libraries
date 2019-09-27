@@ -172,7 +172,7 @@ void streamDataDm2k(hls::stream<ap_uint<STREAMDWIDTH> >& in,
  */
 void streamDataK2dm(hls::stream<ap_uint<8> >& out,
                     hls::stream<bool>& bytEos,
-                    hls::stream<uint32_t>& encodedSize,
+                    hls::stream<uint32_t>& dataSize,
                     hls::stream<kStream8b_t>& dmOutStream) {
     // read data from decompression kernel output to global memory output
     kStream8b_t dataout;
@@ -186,7 +186,25 @@ void streamDataK2dm(hls::stream<ap_uint<8> >& out,
         out << dataout.data;
         outSize++;
     } while (!last);
-    encodedSize << outSize - 1; // read encoded size from decompression kernel
+    dataSize << outSize - 1; // read encoded size from decompression kernel
+}
+
+/**
+ * @brief Read data from kernel axi stream byte by byte and write to hls stream for given output size.
+ *
+ * @param out           output hls stream
+ * @param dmOutStream   input kernel axi stream to be read
+ * @param dataSize      size of data in streams
+ *
+ */
+void streamDataK2dmFixedSize(hls::stream<ap_uint<8> >& out, hls::stream<kStream8b_t>& dmOutStream, uint32_t dataSize) {
+    // read data from decompression kernel output to global memory output
+    kStream8b_t dataout;
+    for (uint32_t i = 0; i < dataSize; i++) {
+#pragma HLS PIPELINE II = 1
+        dataout = dmOutStream.read();
+        out << dataout.data;
+    }
 }
 
 } // end compression

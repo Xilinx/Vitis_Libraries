@@ -18,7 +18,7 @@
  * @file xil_zlib_decompress_stream_kernel.cpp
  * @brief Source for zlib decompression stream kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "xil_zlib_decompress_stream_kernel.hpp"
