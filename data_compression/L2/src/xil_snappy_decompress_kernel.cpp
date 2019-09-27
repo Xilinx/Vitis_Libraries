@@ -18,7 +18,7 @@
  * @file xil_snappy_decompress_kernel.cpp
  * @brief Source for snappy decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 #include <stdio.h>
 #include <stdint.h>

@@ -21,7 +21,7 @@
  * @file s2mm.hpp
  * @brief Header for modules used for streaming to memory mapped interface conversion.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"
@@ -137,6 +137,133 @@ void s2mmEosNb(ap_uint<DATAWIDTH>* out,
     for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
 #pragma HLS PIPELINE II = 1
         output_size[i] = compressedSize[i].read();
+    }
+}
+
+template <class STREAM_SIZE_DT, int BURST_SIZE, int DATAWIDTH, int NUM_BLOCKS>
+void s2mmEosNbFreq(ap_uint<DATAWIDTH>* out,
+                   const uint32_t output_idx[PARALLEL_BLOCK],
+                   hls::stream<ap_uint<DATAWIDTH> > inStream[PARALLEL_BLOCK],
+                   hls::stream<bool> endOfStream[PARALLEL_BLOCK],
+                   hls::stream<uint32_t> inStreamTree[PARALLEL_BLOCK],
+                   hls::stream<uint32_t> compressedSize[PARALLEL_BLOCK],
+                   STREAM_SIZE_DT output_size[PARALLEL_BLOCK],
+                   const STREAM_SIZE_DT input_size[PARALLEL_BLOCK],
+                   STREAM_SIZE_DT* dyn_ltree_freq,
+                   STREAM_SIZE_DT* dyn_dtree_freq) {
+    const int c_byteSize = 8;
+    const int c_wordSize = DATAWIDTH / c_byteSize;
+    const int c_maxBurstSize = BURST_SIZE;
+
+    const int c_lTreeSize = 1024;
+    const int c_dTreeSize = 64;
+    const int c_bLTreeSize = 64;
+    const int c_maxCodeSize = 16;
+
+    ap_uint<PARALLEL_BLOCK> is_pending = 1;
+    ap_uint<DATAWIDTH> local_buffer[PARALLEL_BLOCK][BURST_SIZE];
+#pragma HLS ARRAY_PARTITION variable = local_buffer dim = 1 complete
+#pragma HLS RESOURCE variable = local_buffer core = RAM_2P_LUTRAM
+
+    ap_uint<PARALLEL_BLOCK> end_of_stream = 0;
+    uint32_t read_size[PARALLEL_BLOCK];
+    uint32_t write_size[PARALLEL_BLOCK];
+    uint32_t write_idx[PARALLEL_BLOCK];
+    uint32_t burst_size[PARALLEL_BLOCK];
+#pragma HLS ARRAY PARTITION variable = read_size dim = 0 complete
+#pragma HLS ARRAY PARTITION variable = write_size dim = 0 complete
+#pragma HLS ARRAY PARTITION variable = write_idx dim = 0 complete
+#pragma HLS ARRAY PARTITION variable = burst_size dim = 0 complete
+
+    for (int i = 0; i < PARALLEL_BLOCK; i++) {
+#pragma HLS UNROLL
+        read_size[i] = 0;
+        write_size[i] = 0;
+        write_idx[i] = 0;
+    }
+
+    bool done = false;
+    uint32_t loc = 0;
+    uint32_t remaining_data = 0;
+
+    uint32_t inSizeCntr = 0;
+    while (is_pending != 0) {
+        done = false;
+        for (; done == false;) {
+#pragma HLS PIPELINE II = 1
+            for (uint8_t pb = 0; pb < NUM_BLOCKS; pb++) {
+#pragma HLS UNROLL
+                if (!endOfStream[pb].empty()) {
+                    bool eos_flag = endOfStream[pb].read();
+                    local_buffer[pb][write_idx[pb]] = inStream[pb].read();
+                    if (eos_flag) {
+                        end_of_stream.range(pb, pb) = 1;
+                        done = true;
+                    } else {
+                        read_size[pb] += 1;
+                        write_idx[pb] += 1;
+                    }
+                    if (read_size[pb] >= BURST_SIZE) {
+                        done = true;
+                    }
+                    burst_size[pb] = c_maxBurstSize;
+                    if (end_of_stream.range(pb, pb) && (read_size[pb] - write_size[pb]) < burst_size[pb]) {
+                        burst_size[pb] = (read_size[pb] > write_size[pb]) ? (read_size[pb] - write_size[pb]) : 0;
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < PARALLEL_BLOCK; i++) {
+            // Write the data to global memory
+            if ((read_size[i] > write_size[i]) && (read_size[i] - write_size[i]) >= burst_size[i]) {
+                uint32_t base_addr = output_idx[i] / c_wordSize;
+                uint32_t base_idx = base_addr + write_size[i];
+                uint32_t burst_size_in_words = (burst_size[i]) ? burst_size[i] : 0;
+                inSizeCntr += burst_size_in_words;
+                for (int j = 0; j < burst_size_in_words; j++) {
+#pragma HLS PIPELINE II = 1
+                    out[base_idx + j] = local_buffer[i][j];
+                }
+                write_size[i] += burst_size[i];
+                write_idx[i] = 0;
+            }
+        }
+
+        for (int i = 0; i < PARALLEL_BLOCK; i++) {
+#pragma HLS UNROLL
+            if (end_of_stream.range(i, i)) {
+                is_pending.range(i, i) = 0;
+            } else {
+                is_pending.range(i, i) = 1;
+            }
+        }
+    }
+
+    for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
+#pragma HLS PIPELINE II = 1
+        output_size[i] = compressedSize[i].read();
+    }
+
+    uint32_t val = 0;
+    for (uint32_t bIdx = 0; bIdx < PARALLEL_BLOCK; bIdx++) {
+        bool dist_read = true;
+    s2mm_ltree_freq:
+        for (uint32_t i = 0; i < c_lTreeSize; i++) {
+            val = inStreamTree[bIdx].read();
+            if (val == 9999) {
+                i = c_lTreeSize;
+                dist_read = false;
+            } else {
+                dyn_ltree_freq[bIdx * c_lTreeSize + i] = val;
+            }
+        }
+
+    s2mm_dtree_freq:
+        for (uint32_t j = 0; ((j < c_dTreeSize) && dist_read); j++) {
+            val = inStreamTree[bIdx].read();
+            dyn_dtree_freq[bIdx * c_dTreeSize + j] = val;
+        }
     }
 }
 
@@ -385,6 +512,27 @@ void s2mmEosNbZlib(ap_uint<DATAWIDTH>* out,
     }
 
     output_size[0] = outSize;
+}
+
+/**
+ * @brief This module reads N-bit data from stream based on
+ * size stream and writes the data to DDR. N is template parameter DATAWIDTH.
+ *
+ * @tparam DATAWIDTH Width of the input data stream
+ *
+ * @param out output memory address
+ * @param inStream input hls stream
+ * @param output_size output data size
+ */
+template <int DATAWIDTH>
+void s2mmSimple(ap_uint<DATAWIDTH>* out, hls::stream<ap_uint<DATAWIDTH> >& inStream, uint32_t output_size) {
+    uint8_t factor = DATAWIDTH / 8;
+    uint32_t itrLim = 1 + ((output_size - 1) / factor);
+s2mm_simple:
+    for (uint32_t i = 0; i < itrLim; i++) {
+#pragma HLS PIPELINE II = 1
+        out[i] = inStream.read();
+    }
 }
 
 } // namespace compression

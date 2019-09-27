@@ -24,8 +24,8 @@
 #define LZ_LOW_OFFSET 8 // This should be bigger than Pipeline Depth to handle inter dependency false case
 
 extern "C" {
-void xilLz4DecompressStream(hls::stream<xf::compression::hStream8b_t>& inaxistream,
-                            hls::stream<xf::compression::hStream8b_t>& outaxistream,
+void xilLz4DecompressStream(hls::stream<xf::compression::kStream8b_t>& inaxistream,
+                            hls::stream<xf::compression::kStream8b_t>& outaxistream,
                             uint32_t inputSize,
                             uint32_t outputSize) {
 #pragma HLS interface axis port = inaxistream
@@ -34,32 +34,22 @@ void xilLz4DecompressStream(hls::stream<xf::compression::hStream8b_t>& inaxistre
 #pragma HLS interface s_axilite port = outputSize bundle = control
 #pragma HLS interface s_axilite port = return bundle = control
 
-    hls::stream<uintVt> instreamV("instreamV");
-    hls::stream<xf::compression::compressd_dt> decompressdStream("decompressdStream");
-    hls::stream<uintVt> decompressedStream("decompressedStream");
+    hls::stream<xf::compression::compressd_dt> decompressedStream("decompressedStream");
     hls::stream<xf::compression::streamDt> inStream("inStream");
     hls::stream<xf::compression::streamDt> outStream("outStream");
 
 #pragma HLS STREAM variable = inStream depth = 2
 #pragma HLS STREAM variable = outStream depth = 2
-#pragma HLS STREAM variable = instreamV depth = 8
-#pragma HLS STREAM variable = decompressdStream depth = 8
 #pragma HLS STREAM variable = decompressedStream depth = 8
-
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = instreamV core = FIFO_SRL
-#pragma HLS RESOURCE variable = decompressdStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = decompressedStream core = FIFO_SRL
 
 #pragma HLS dataflow
 
-    // printf("Input : %d bytes\t", inputSize);
-    xf::compression::axis2hlsStreamFixedSize(inaxistream, inStream, inputSize);
-    xf::compression::lz4Decompress(inStream, decompressdStream, inputSize);
+    xf::compression::kStreamRead<8>(inaxistream, inStream, inputSize);
+
+    xf::compression::lz4Decompress(inStream, decompressedStream, inputSize);
     xf::compression::lzDecompress<LZ_HISTORY_SIZE, LZ_READ_STATE, LZ_MATCH_STATE, LZ_LOW_OFFSET_STATE, LZ_LOW_OFFSET>(
-        decompressdStream, outStream, outputSize);
-    xf::compression::hlsStream2axiStreamFixedSize(outStream, outaxistream, outputSize);
-    // printf("Done\n");
+        decompressedStream, outStream, outputSize);
+
+    xf::compression::kStreamWriteFixedSize<8>(outaxistream, outStream, outputSize);
 }
 }

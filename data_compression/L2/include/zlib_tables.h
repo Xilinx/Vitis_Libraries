@@ -22,7 +22,7 @@
  * @file zlib_tables.h
  * @brief Header for defining constants used in zlib compression.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #define LENGTH_CODES 29

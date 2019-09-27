@@ -21,7 +21,7 @@
  * @file lz_optional.hpp
  * @brief Header for modules used in LZ4 and snappy compression kernels.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"

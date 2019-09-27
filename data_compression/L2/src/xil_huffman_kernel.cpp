@@ -18,7 +18,7 @@
  * @file xil_huffman_kernel.cpp
  * @brief Source for huffman kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 #include "huffman_kernel.hpp"
 
@@ -439,7 +439,7 @@ huffman_loop:
             tCh = tmpEncodedValue.range(7, 0);
             tLen = tmpEncodedValue.range(15, 8);
             tOffset = tmpEncodedValue.range(31, 16);
-
+            // printf("tCh %d tLen %d tOffset %d \n", tCh, tLen, tOffset);
             dcode = d_code(tOffset, dist_code);
             lcode = length_code[tLen];
 
@@ -507,7 +507,6 @@ huffman_loop:
                 next_state = WRITE_TOKEN;
         }
     }
-
     uint32_t first_push = 0;
 
     // End of block as per GZip standard

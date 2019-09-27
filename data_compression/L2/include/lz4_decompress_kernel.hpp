@@ -20,7 +20,7 @@
  * @file lz4_decompress_kernel.hpp
  * @brief Header for LZ4 decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include <stdio.h>
@@ -36,7 +36,6 @@
 #include "stream_downsizer.hpp"
 #include "stream_upsizer.hpp"
 
-#include "lz4_config.h"
 #include "lz4_decompress.hpp"
 
 // Kernel top functions

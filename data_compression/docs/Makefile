@@ -47,7 +47,7 @@ install: .stamp/sphinx
 # different for L1 and L2
 .ONESHELL:
 .stamp/doxygen:
-	rm -rf doxygen/L1/xml doxygen/L2/xml doxygen/L2h/xml
+	rm -rf doxygen/L1/xml doxygen/L2/xml doxygen/L3/xml
 	cd doxygen/L1
 	doxygen ./Doxyfile
 	cd ../L2
@@ -104,6 +104,7 @@ cleanhtml:
 ultraclean:
 	rm -rf .stamp _build/html _build/doctrees
 	cd doxygen/
-	rm -rf L1/xml L2/xml L3/xml L1/rst L2/rst L3/rst
+	rm -rf L1/xml L2/xml L3/xml L1/rst L2/rst L3/rst L1/html L2/html L3/html
+	rm -rf L1/latex L2/latex L3/latex
 	cd ../
 

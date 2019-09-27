@@ -54,20 +54,18 @@ Note: Overall throughput can still be increased with multiple compute units.
 
 #### Emulation flows
 ```
-  make check TARGETS=<sw_emu/hw_emu> DEVICE=xilinx_u200_xdma_201830_2
+  make run TARGET=<sw_emu/hw_emu> DEVICE=xilinx_u200_xdma_201830_2
   
   Note: This command compiles for targeted emulation mode and executes the
-        application. To execute it on AWS F1 instance, please follow instructions
-        specific to AWS F1 emulation.
+        application.
 ```
 #### Hardware
 
 ```
-  make all TARGETS=hw DEVICE=xilinx_u200_xdma_201830_2
+  make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
 
   Note: This command compiles for hardware execution. It generates kernel binary ".xclbin" file. 
-        This file is placed in ./xclbin directory under Snappy folder. To execute it on AWS F1 instance, 
-        please follow instructions specific to AWS F1 deployment process.
+        This file is placed in ./build/xclbin*/ directory under Snappy folder.
 
 ```
 
@@ -82,23 +80,26 @@ While using PARALLEL_BLOCK (8 default) the generated executable would be
         1. To execute single file for compression :  ./build/xil_snappy_8b -cx <compress xclbin> -c <file_name>
         2. To execute single file for decompression: ./build/xil_snappy_8b -dx <decompress xclbin> -d <file_name.snappy>
         3. To validate various files together:       ./build/xil_snappy_8b -cx <compress xclbin> -dx <decompress xclbin> -l <files.list>
-            3.a. <files.list>: Contains various file names with current path    
+            3.a. <files.list>: Contains various file names with current path
+        4. To execute single file for compression and decompression : ./build/xil_snappy_8b -sx <compress_decompress xclbin> -v <file_name>    
         
    Note: Default arguments are set in Makefile
 
   Help:
 
         ===============================================================================================
-        Usage: application.exe -[-h-cx-c-l-dx-d-B-x]
+        Usage: application.exe -[-h-cx-c-l-dx-d-sx-v-B-x]
 
-                --help,             -h      Print Help Options   Default: [false]
-                --compress,         -c      Compress
-                --compress_xclbin   -cx     Compress binary
-                --file_list,        -l      List of Input Files
-                --decompress,       -d      Decompress
-                --decompress_xclbin -cx     Decompress binary
-                --block_size,       -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
-                --flow,             -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd]   Default:[1]
+                --help                  -h      Print Help Options   Default: [false]
+                --compress              -c      Compress
+                --compress_xclbin       -cx     Compress binary
+                --file_list             -l      List of Input Files
+                --decompresss           -d      Decompress
+                --decompress_xclbin     -dx     Decompress binary
+                --compress_decompress   -sx     Compress_Decompress binary
+                --validate              -v      Single file validate for Compress and Decompress 
+                --block_size            -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
+                --flow                  -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd]   Default:[1]
         ===============================================================================================
 
 ```

@@ -21,7 +21,7 @@
  * @file lz4_compress_kernel.hpp
  * @brief Header for LZ4 compression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include <stdio.h>
@@ -37,8 +37,9 @@
 #include "stream_downsizer.hpp"
 #include "stream_upsizer.hpp"
 
-#include "lz4_config.h"
 #include "lz4_compress.hpp"
+
+#define MAX_LIT_COUNT 4096
 
 // Kernel top functions
 extern "C" {

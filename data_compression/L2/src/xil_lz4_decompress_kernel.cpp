@@ -18,7 +18,7 @@
  * @file xil_lz4_decompress_kernel.cpp
  * @brief Source for LZ4 decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "lz4_decompress_kernel.hpp"
@@ -77,10 +77,10 @@ void lz4Dec(const xf::compression::uintMemWidth_t* in,
             const uint32_t output_size1[PARALLEL_BLOCK]) {
     hls::stream<xf::compression::uintMemWidth_t> inStreamMemWidth[PARALLEL_BLOCK];
     hls::stream<xf::compression::uintMemWidth_t> outStreamMemWidth[PARALLEL_BLOCK];
-#pragma HLS STREAM variable = inStreamMemWidth_0 depth = c_gmemBurstSize
-#pragma HLS STREAM variable = outStreamMemWidth_0 depth = c_gmemBurstSize
-#pragma HLS RESOURCE variable = inStreamMemWidth_0 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamMemWidth_0 core = FIFO_SRL
+#pragma HLS STREAM variable = inStreamMemWidth depth = c_gmemBurstSize
+#pragma HLS STREAM variable = outStreamMemWidth depth = c_gmemBurstSize
+#pragma HLS RESOURCE variable = inStreamMemWidth core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStreamMemWidth core = FIFO_SRL
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel

@@ -1,6 +1,6 @@
 # L3 Overlay APIs
-This directory contains pure-software APIs for
+This directory contains pure-software APIs
 
-* generating configuration bits for run-time-configurable primitives.
-* accessing LZ4 data compression algorithm overlay.
-* accesing Snappy data compression algorithm overlay.
+* to generate configuration bits for run-time-configurable primitives.
+* LZ4 data compression algorithm overlay.
+* Snappy data compression algorithm overlay.

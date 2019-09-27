@@ -65,8 +65,8 @@ void xil_compress_decompress_list(std::string& file_list,
             // Call Zlib compression
             uint64_t enbytes = xlz->compress_file(compress_in, compress_out, input_size);
 
-            std::cout << "\t\t" << (double)input_size / enbytes << "\t\t" << (double)input_size / 1000000 << "\t\t\t"
-                      << compress_in << std::endl;
+            std::cout << "\t\t" << (double)input_size / enbytes << "\t\t" << std::fixed << std::setprecision(3)
+                      << (double)input_size / 1000000 << "\t\t\t" << compress_in << std::endl;
         }
     }
 
@@ -104,7 +104,8 @@ void xil_compress_decompress_list(std::string& file_list,
             // Call Zlib decompression
             xlz->decompress_file(decompress_in, decompress_out, input_size, cu);
 
-            std::cout << "\t\t" << (double)input_size / 1000000 << "\t\t" << decompress_in << std::endl;
+            std::cout << std::fixed << std::setprecision(3) << "\t\t" << (double)input_size / 1000000 << "\t\t"
+                      << decompress_in << std::endl;
         } // While loop ends
     }
 }
@@ -135,7 +136,8 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
     // Xilinx ZLIB object
     xil_zlib* xlz;
     xlz = new xil_zlib(single_bin);
-    std::cout << "ZLIB_KT\t\tFile Size(MB)\t\tFile Name" << std::endl;
+
+    std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -151,7 +153,8 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
     // Call ZLIB compression
     // uint32_t enbytes =
     xlz->decompress_file(lz_decompress_in, lz_decompress_out, input_size, cu);
-    std::cout << std::fixed << std::setprecision(2) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(3) << std::endl
+              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 }
 
@@ -159,8 +162,8 @@ void xil_compress_top(std::string& compress_mod, std::string& single_bin) {
     // Xilinx ZLIB object
     xil_zlib* xlz;
     xlz = new xil_zlib(single_bin);
-    std::cout << "E2E\t\tZLIB_CR\t\tFile Size(MB)\t\tFile Name" << std::endl;
-    std::cout << "\n";
+
+    std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -177,8 +180,9 @@ void xil_compress_top(std::string& compress_mod, std::string& single_bin) {
     uint32_t enbytes = xlz->compress_file(lz_compress_in, lz_compress_out, input_size);
 
     std::cout.precision(3);
-    std::cout << std::fixed << std::setprecision(2) << "ZLIB_CR\t\t:" << (double)input_size / enbytes << std::endl
-              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(2) << std::endl
+              << "ZLIB_CR\t\t\t:" << (double)input_size / enbytes << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_compress_out.c_str() << std::endl;
@@ -219,6 +223,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string&
 
     std::cout << "\n";
 
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
+
     std::ifstream inFile(compress_decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
         std::cout << "Unable to open file";
@@ -234,8 +240,9 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string&
 
     // Call Zlib compression
     uint64_t enbytes = xlz->compress_file(compress_in, compress_out, input_size);
-    std::cout << std::fixed << std::setprecision(2) << "CR\t\t\t:" << (double)input_size / enbytes << std::endl
-              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(2) << std::endl
+              << "CR\t\t\t:" << (double)input_size / enbytes << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << compress_in << std::endl;
 
     // Decompress
@@ -245,6 +252,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string&
     std::cout << "                     Xilinx Zlib DeCompress                       " << std::endl;
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "\n";
+
+    std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
 
     // Decompress list of files
 
@@ -264,7 +273,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string&
     // Call Zlib decompression
     xlz->decompress_file(lz_decompress_in, lz_decompress_out, input_size, 0);
 
-    std::cout << std::fixed << std::setprecision(2) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(2) << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 
     // xlz.release();

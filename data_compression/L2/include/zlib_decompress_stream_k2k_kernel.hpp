@@ -22,7 +22,7 @@
  * @file zlib_decompress_stream_k2k_kernel.hpp
  * @brief Header for zlib decompression streaming(kernel to kernel) kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include <stdio.h>
@@ -30,7 +30,8 @@
 #include <assert.h>
 #include <ap_int.h>
 #include "hls_stream.h"
-#include "xil_inflate.h"
+#include "inflate_trees.hpp"
+#include "inflate_huffman.hpp"
 #include "zlib_config.h"
 #include "lz_decompress.hpp"
 #include "axi_stream_types.hpp"

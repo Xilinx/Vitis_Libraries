@@ -21,11 +21,10 @@
  * @file snappy_compress.hpp
  * @brief Header for modules used in snappy compression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"
-#include "snappy_config.h"
 
 #define MARKER 255
 
@@ -308,6 +307,7 @@ snappy_compress:
  * @param max_lit_limit Size for compressed stream
  * @param index size of input
  */
+template <int MAX_LIT_COUNT, int MAX_LIT_STREAM_SIZE>
 inline void snappyDivide(hls::stream<compressd_dt>& inStream,
                          hls::stream<uint8_t>& lit_outStream,
                          hls::stream<snappy_compressd_dt>& lenOffset_Stream,
@@ -315,7 +315,7 @@ inline void snappyDivide(hls::stream<compressd_dt>& inStream,
                          uint32_t max_lit_limit[PARALLEL_BLOCK],
                          uint32_t index) {
     if (input_size == 0) return;
-    assert(c_snappyMaxLiteralCount < c_snappyMaxLiteralStream);
+    assert(MAX_LIT_COUNT < MAX_LIT_STREAM_SIZE);
     uint8_t marker = MARKER;
     uint32_t out_idx = 0;
     uint8_t match_len = 0;
@@ -347,7 +347,7 @@ snappy_divide:
         } else {
             lit_outStream << tCh;
             lit_count++;
-            if (lit_count == c_snappyMaxLiteralCount) {
+            if (lit_count == MAX_LIT_COUNT) {
                 snappy_compressd_dt tmpValue;
                 tmpValue.range(63, 32) = lit_count;
                 tmpValue.range(15, 0) = 0;
@@ -362,7 +362,7 @@ snappy_divide:
         snappy_compressd_dt tmpValue;
         tmpValue.range(63, 32) = lit_count;
 
-        if (lit_count == c_snappyMaxLiteralCount) {
+        if (lit_count == MAX_LIT_COUNT) {
             lit_count_flag = 1;
             tmpValue.range(15, 0) = 0;
             tmpValue.range(31, 16) = 0;

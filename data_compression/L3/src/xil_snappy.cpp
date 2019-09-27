@@ -14,7 +14,14 @@
  * limitations under the License.
  *
  */
+#include <iostream>
+#include <cassert>
+#include <vector>
+#include <cstring>
+#include "xcl2.hpp"
+#include <iomanip>
 #include "xil_snappy.hpp"
+
 #define BLOCK_SIZE 64
 #define KB 1024
 #define MAGIC_HEADER_SIZE 4
@@ -23,8 +30,9 @@
 #define MAGIC_BYTE_3 77
 #define MAGIC_BYTE_4 24
 #define FLG_BYTE 104
+#define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
 
-uint64_t xilSnappy::getEventDurationNs(const cl::Event& event) {
+uint64_t getEventDurationNs(const cl::Event& event) {
     uint64_t start_time = 0, end_time = 0;
 
     event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &start_time);
@@ -32,7 +40,10 @@ uint64_t xilSnappy::getEventDurationNs(const cl::Event& event) {
     return (end_time - start_time);
 }
 
-uint64_t xilSnappy::compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
+uint64_t xilSnappy::compressFile(std::string& inFile_name,
+                                 std::string& outFile_name,
+                                 uint64_t input_size,
+                                 bool file_list_flag) {
     if (m_switch_flow == 0) { // Xilinx FPGA compression flow
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
@@ -72,7 +83,7 @@ uint64_t xilSnappy::compressFile(std::string& inFile_name, std::string& outFile_
         }
 
         // Snappy overlap & multiple compute unit compress
-        uint64_t enbytes = compress(in.data(), out.data(), input_size, host_buffer_size);
+        uint64_t enbytes = compress(in.data(), out.data(), input_size, host_buffer_size, file_list_flag);
 
         // Writing compressed data
         outFile.write((char*)out.data(), enbytes);
@@ -93,7 +104,10 @@ uint64_t xilSnappy::compressFile(std::string& inFile_name, std::string& outFile_
     }
 }
 
-uint64_t xilSnappy::decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
+uint64_t xilSnappy::decompressFile(std::string& inFile_name,
+                                   std::string& outFile_name,
+                                   uint64_t input_size,
+                                   bool file_list_flag) {
     if (m_switch_flow == 0) {
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
@@ -127,7 +141,7 @@ uint64_t xilSnappy::decompressFile(std::string& inFile_name, std::string& outFil
         // original_size, host_buffer_size);
 
         // Decompression Sequential multiple cus.
-        uint64_t debytes = decompressSequential(in.data(), out.data(), (input_size - 10));
+        uint64_t debytes = decompressSequential(in.data(), out.data(), (input_size - 10), file_list_flag);
         outFile.write((char*)out.data(), debytes);
 
         // Close file
@@ -147,7 +161,7 @@ uint64_t xilSnappy::decompressFile(std::string& inFile_name, std::string& outFil
     }
 }
 
-uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t input_size) {
+uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t input_size, bool file_list_flag) {
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
     uint32_t compute_cu = 1;
     uint32_t buf_size = BLOCK_SIZE_IN_KB * 1024;
@@ -386,7 +400,11 @@ uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t inp
     }
 
     float kernel_throughput_in_mbps_1 = (float)output_idx * 1000 / kernel_time_ns_1.count();
-    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+    if (file_list_flag == 0) {
+        std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+    } else {
+        std::cout << std::fixed << std::setprecision(2) << kernel_throughput_in_mbps_1;
+    }
 
     delete (buffer_input[0][0]);
     delete (buffer_output[0][0]);
@@ -486,7 +504,8 @@ int xilSnappy::release() {
 // This version of compression does overlapped execution between
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
-uint64_t xilSnappy::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size) {
+uint64_t xilSnappy::compress(
+    uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size, bool file_list_flag) {
     uint32_t block_size_in_bytes = m_block_size_in_kb * 1024;
 
     uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
@@ -789,8 +808,13 @@ uint64_t xilSnappy::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uin
     std::cout << "Total Write Time " << total_write_time << std::endl;
     std::cout << "Total Read Time " << total_read_time << std::endl;
 #endif
-    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl
-              << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+    if (file_list_flag == 0) {
+        std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl
+                  << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+    } else {
+        std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1 << "\t\t";
+        std::cout << std::fixed << std::setprecision(2) << kernel_throughput_in_mbps_1;
+    }
 
     for (int cu = 0; cu < C_COMPUTE_UNIT; cu++) {
         for (uint32_t flag = 0; flag < overlap_buf_count; flag++) {

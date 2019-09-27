@@ -22,7 +22,7 @@
  * @file zlib_dm_kernel.hpp
  * @brief Header for zlib data mover kernel which streams data to zlib decompression streaming kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "ap_axi_sdata.h"

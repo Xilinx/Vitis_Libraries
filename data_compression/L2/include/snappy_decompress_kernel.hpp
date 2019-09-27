@@ -21,7 +21,7 @@
  * @file snappy_decompress_kernel.hpp
  * @brief C++ Header for snappy decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 #include <stdio.h>
 #include <stdint.h>
@@ -36,7 +36,6 @@
 #include "stream_downsizer.hpp"
 #include "stream_upsizer.hpp"
 
-#include "snappy_config.h"
 #include "snappy_decompress.hpp"
 
 extern "C" {

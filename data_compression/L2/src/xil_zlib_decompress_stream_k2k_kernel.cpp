@@ -18,7 +18,7 @@
  * @file xil_zlib_decompress_stream_k2k_kernel.cpp
  * @brief Source for zlib decompression streaming(kernel to kernel) kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "zlib_decompress_stream_k2k_kernel.hpp"
@@ -101,7 +101,7 @@ void xil_inflate(hls::stream<xf::compression::kStream16b_t>& inaxistream,
 
     kStreamReadZlibDecomp(inaxistream, outdownstream, input_size);
 
-    bitUnPacker(outdownstream, bitunpackstream, bitendofstream, input_size);
+    xf::compression::bitUnPacker(outdownstream, bitunpackstream, bitendofstream, input_size);
 
     xf::compression::lzDecompressZlibEos_new<HISTORY_SIZE, LOW_OFFSET>(bitunpackstream, bitendofstream, uncompoutstream,
                                                                        byte_eos, outsize_val);

@@ -25,6 +25,10 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
 
     xlz.m_bin_flow = 1;
 
+#ifdef VERBOSE
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
+#endif
+
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
         std::cout << "Unable to open file";
@@ -55,8 +59,9 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
 
 #ifdef VERBOSE
     std::cout.precision(3);
-    std::cout << std::fixed << std::setprecision(2) << "SNAPPY_CR\t\t:" << (double)input_size / enbytes << std::endl
-              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(2) << std::endl
+              << "SNAPPY_CR\t\t:" << (double)input_size / enbytes << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_compress_out.c_str() << std::endl;
@@ -160,8 +165,8 @@ void xilCompressDecompressList(xilSnappy& xlz,
         // Call SNAPPY compression
         uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size);
         if (c_flow == 0) {
-            std::cout << "\t\t" << (double)input_size / enbytes << "\t\t\t" << (double)input_size / 1000000 << "\t\t\t"
-                      << lz_compress_in << std::endl;
+            std::cout << "\t\t" << (double)input_size / enbytes << "\t\t\t" << std::fixed << std::setprecision(3)
+                      << (double)input_size / 1000000 << "\t\t\t" << lz_compress_in << std::endl;
         } else {
             std::cout << std::fixed << std::setprecision(3);
             std::cout << (double)input_size / 1000000 << "\t\t\t" << lz_compress_in << std::endl;
@@ -234,7 +239,8 @@ void xilCompressDecompressList(xilSnappy& xlz,
         xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size);
 
         if (d_flow == 0) {
-            std::cout << "\t\t" << (double)input_size / 1000000 << "\t\t\t" << lz_decompress_in << std::endl;
+            std::cout << std::fixed << std::setprecision(3) << "\t\t" << (double)input_size / 1000000 << "\t\t\t"
+                      << lz_decompress_in << std::endl;
         } else {
             std::cout << std::fixed << std::setprecision(3);
             std::cout << (double)input_size / 1000000 << "\t\t" << lz_decompress_in << std::endl;
@@ -393,6 +399,10 @@ void xilDecompressTop(std::string& decompress_mod, std::string& single_bin) {
 
     xlz.m_bin_flow = 0;
 
+#ifdef VERBOSE
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
+#endif
+
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
         std::cout << "Unable to open file";
@@ -411,7 +421,8 @@ void xilDecompressTop(std::string& decompress_mod, std::string& single_bin) {
     // Call SNAPPY decompression
     xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size);
 #ifdef VERBOSE
-    std::cout << std::fixed << std::setprecision(2) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(3) << std::endl
+              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_decompress_out.c_str() << std::endl;
@@ -432,6 +443,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, uint32_t blo
     std::cout << "--------------------------------------------------------------" << std::endl;
 
     std::cout << "\n";
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
 
     std::ifstream inFile(compress_decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -451,8 +463,9 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, uint32_t blo
 
     // Call LZ4 compression
     uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size);
-    std::cout << std::fixed << std::setprecision(2) << "SNAPPY_CR\t\t:" << (double)input_size / enbytes << std::endl
-              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(2) << std::endl
+              << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
 
     // De-Compression
@@ -465,6 +478,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, uint32_t blo
     std::cout << "                     Xilinx De-Compress                       " << std::endl;
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "\n";
+
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
 
     // Decompress list of files
     // This loop does LZ4 decompress on list
@@ -487,7 +502,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, uint32_t blo
     xlz.m_switch_flow = 0;
     xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size1);
 
-    std::cout << std::fixed << std::setprecision(2) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(3) << std::endl
+              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 
     // Validate

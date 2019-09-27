@@ -18,13 +18,11 @@
  * @file xil_snappy.hpp
  * @brief Header for snappy host functionality
  *
- * This file is part of XF Compression Library host code for snappy compression.
+ * This file is part of Vitis Data Compression Library host code for snappy compression.
  */
 
 #ifndef _XFCOMPRESSION_XIL_SNAPPY_HPP_
 #define _XFCOMPRESSION_XIL_SNAPPY_HPP_
-
-#include "defns.hpp"
 
 /**
  * Maximum compute units supported
@@ -50,7 +48,9 @@
 /**
  * Default block size
  */
+#ifndef BLOCK_SIZE_IN_KB
 #define BLOCK_SIZE_IN_KB 64
+#endif
 
 /**
  * Value below is used to associate with
@@ -58,11 +58,6 @@
  * execution requires 2 resources per invocation
  */
 #define OVERLAP_BUF_COUNT 2
-
-/**
- * Maximum number of blocks based on host buffer size
- */
-#define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
 
 /**
  *  xilSnappy class. Class containing methods for snappy
@@ -84,48 +79,53 @@ class xilSnappy {
     int release();
 
     /**
-     * @brief Compress.
+     * @brief This module does the overlapped execution of compression
+     * between Kernel and Host. I/O operations between Host and
+     * Device are overlapped with kernel execution between multiple
+     * compute units.
      *
      * @param in input byte sequence
      * @param out output byte sequence
      * @param actual_size input size
      * @param host_buffer_size host buffer size
      */
-    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
+    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size, bool file_list_flag);
 
     /**
-     * @brief Compress the input file.
+    * @brief Decompress sequential.
+    *
+    * @param in input byte sequence
+    * @param out output byte sequence
+    * @param actual_size input size
+    */
+    uint64_t decompressSequential(uint8_t* in, uint8_t* out, uint64_t actual_size, bool file_list_flag);
+
+    /**
+    * @brief This module is provided to support compress API and
+    * it's not recommended to use for high throughput.
+    *
+    * @param inFile_name input file name
+    * @param outFile_name output file name
+    * @param actual_size input size
+    */
+    uint64_t compressFile(std::string& inFile_name,
+                          std::string& outFile_name,
+                          uint64_t actual_size,
+                          bool file_list_flag);
+
+    /**
+     * @brief This module is provided to support decompress API and
+     * not recommended to use for higher throughput.
      *
      * @param inFile_name input file name
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
 
-    /**
-     * @brief Decompress the input file.
-     *
-     * @param inFile_name input file name
-     * @param outFile_name output file name
-     * @param actual_size input size
-     */
-    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
-
-    /**
-     * @brief Decompress sequential.
-     *
-     * @param in input byte sequence
-     * @param out output byte sequence
-     * @param actual_size input size
-     */
-    uint64_t decompressSequential(uint8_t* in, uint8_t* out, uint64_t actual_size);
-
-    /**
-     * @brief Get the duration of input event
-     *
-     * @param event event to get duration for
-     */
-    uint64_t getEventDurationNs(const cl::Event& event);
+    uint64_t decompressFile(std::string& inFile_name,
+                            std::string& outFile_name,
+                            uint64_t actual_size,
+                            bool file_list_flag);
 
     /**
      * Binary flow compress/decompress

@@ -21,11 +21,10 @@
  * @file lz4_compress.hpp
  * @brief Header for modules used in LZ4 compression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "common.h"
-#include "lz4_config.h"
 
 namespace xf {
 namespace compression {
@@ -159,6 +158,8 @@ lz4_compress:
  * into two output streams, one literal stream and the other matchlen and
  * offset stream.
  *
+ * @tparam MAX_LIT_COUNT maximum literal count
+ *
  * @param inStream reference of input literals stream
  * @param lit_outStream Offset-length stream for literals in input stream
  * @param lenOffset_Stream output data stream
@@ -166,6 +167,7 @@ lz4_compress:
  * @param max_lit_limit Size for compressed stream
  * @param index size of input
  */
+template <int MAX_LIT_COUNT>
 static void lz4Divide(hls::stream<compressd_dt>& inStream,
                       hls::stream<uint8_t>& lit_outStream,
                       hls::stream<lz4_compressd_dt>& lenOffset_Stream,
@@ -189,7 +191,7 @@ lz4_divide:
         uint16_t tOffset = tmpEncodedValue.range(31, 16);
         uint32_t match_offset = tOffset;
 
-        if (lit_count >= c_lz4MaxLiteralCount) {
+        if (lit_count >= MAX_LIT_COUNT) {
             lit_count_flag = 1;
         } else if (tLen) {
             uint8_t match_len = tLen - 4; // LZ4 standard
@@ -212,7 +214,7 @@ lz4_divide:
     if (lit_count) {
         lz4_compressd_dt tmpValue;
         tmpValue.range(63, 32) = lit_count;
-        if (lit_count == c_lz4MaxLiteralCount) {
+        if (lit_count == MAX_LIT_COUNT) {
             lit_count_flag = 1;
             tmpValue.range(15, 0) = 777;
             tmpValue.range(31, 16) = 777;

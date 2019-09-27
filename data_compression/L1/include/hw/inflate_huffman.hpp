@@ -21,7 +21,7 @@
  * @file inflate_huffman.h
  * @brief Header for defining functions used in inflate algorithm used in zlib decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 //#include "common.h"

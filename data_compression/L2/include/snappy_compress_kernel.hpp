@@ -21,7 +21,7 @@
  * @file snappy_compress_kernel.hpp
  * @brief C++ Header for snappy compression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 #include <stdio.h>
 #include <stdint.h>
@@ -35,9 +35,17 @@
 #include "s2mm.hpp"
 #include "stream_downsizer.hpp"
 #include "stream_upsizer.hpp"
-
-#include "snappy_config.h" // namespace specific to snappy
 #include "snappy_compress.hpp"
+
+//#define LARGE_LIT_RANGE 1
+
+#ifdef LARGE_LIT_RANGE
+#define MAX_LIT_COUNT 4090
+#define MAX_LIT_STREAM_SIZE 4096
+#else
+#define MAX_LIT_COUNT 60
+#define MAX_LIT_STREAM_SIZE 64
+#endif
 
 extern "C" {
 /**

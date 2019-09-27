@@ -22,7 +22,7 @@
  * @file zlib_decompress_kernel.hpp
  * @brief Header for zlib decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 #include "zlib_config.h"
 #include "lz_decompress.hpp"

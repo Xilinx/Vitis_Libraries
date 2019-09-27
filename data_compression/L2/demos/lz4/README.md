@@ -23,7 +23,7 @@ kernels with 8 engines for single compute unit. It is possible to extend number 
 
 | Design | LUT | LUTMEM | REG | BRAM | URAM| DSP | Fmax (MHz) |
 | --------------- | --- | ------ | --- | ---- | --- | -----| -----|
-| Compression     | 515161(5.11%) | 14161(2.47%)|63838(3.01%)|58(3.20%) | 48(5.00%)|1(0.01%)|300|
+| Compression     | 51516(5.11%) | 14161(2.47%)|63838(3.01%)|58(3.20%) | 48(5.00%)|1(0.01%)|300|
 | Decompression     | 30651(2.98%) | 13708(2.39%)|39520(1.85%)|146(7.93%)|0|1(0.01%)|300|
 
 
@@ -56,8 +56,7 @@ Note: Overall throughput can still be increased with multiple compute units.
   make run TARGET=<sw_emu/hw_emu> DEVICE=xilinx_u200_xdma_201830_2
   
   Note: This command compiles for targeted emulation mode and executes the
-        application. To execute it on AWS F1 instance, please follow instructions
-        specific to AWS F1 emulation.
+        application.
 ```
 #### Hardware
 
@@ -65,8 +64,7 @@ Note: Overall throughput can still be increased with multiple compute units.
   make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
 
   Note: This command compiles for hardware execution. It generates kernel binary ".xclbin" file. 
-        This file is placed in ./build/xclbin*/ directory under LZ4 folder. To execute it on AWS F1 instance, 
-        please follow instructions specific to AWS F1 deployment process.
+        This file is placed in ./build/xclbin*/ directory under LZ4 folder.
 
 ```
 
@@ -81,23 +79,26 @@ While using PARALLEL_BLOCK (8 default) the generated executable would be
         1. To execute single file for compression :  ./build/xil_lz4_8b -cx <compress xclbin> -c <file_name>
         2. To execute single file for decompression: ./build/xil_lz4_8b -dx <decompress xclbin> -d <file_name.lz4>
         3. To validate various files together:       ./build/xil_lz4_8b -cx <compress xclbin> -dx <decompress xclbin> -l <files.list>
-            3.a. <files.list>: Contains various file names with current path    
+            3.a. <files.list>: Contains various file names with current path  
+        4. To execute single file for compression and decompression : ./build/xil_lz4_8b -sx <compress_decompress xclbin> -v <file_name>  
         
    Note: Default arguments are set in Makefile
 
   Help:
 
         ===============================================================================================
-        Usage: application.exe -[-h-cx-c-l-dx-d-B-x]
+        Usage: application.exe -[-h-cx-c-l-dx-d-sx-v-B-x]
 
-                --help,             -h      Print Help Options   Default: [false]
-                --compress_xclbin   -cx     Compress binary
-                --compress,         -c      Compress
-                --file_list,        -l      List of Input Files
-                --decompress_xclbin -dx     Decompress binary
-                --decompress,       -d      Decompress
-                --block_size,       -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
-                --flow,             -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd]   Default:[1]
+                --help                  -h      Print Help Options   Default: [false]
+                --compress_xclbin       -cx     Compress binary
+                --compress              -c      Compress
+                --file_list             -l      List of Input Files
+                --decompress_xclbin     -dx     Decompress binary
+                --decompress            -d      Decompress
+                --compress_decompress   -sx     Compress_Decompress binary
+                --validate              -v      Single file validate for Compress and Decompress  
+                --block_size            -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
+                --flow                  -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd]   Default:[1]
         ===============================================================================================
 
 ```
