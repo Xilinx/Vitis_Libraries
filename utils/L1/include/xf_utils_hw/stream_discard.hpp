@@ -22,7 +22,7 @@
  * @file stream_discard.hpp
  * @brief discard streams.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 // Forward decl

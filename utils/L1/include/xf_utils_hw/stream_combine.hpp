@@ -23,7 +23,7 @@
  * @file stream_combine.hpp
  * @brief combine multiple streams into a wider one to share end signal.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 // Forward decl ======================================================

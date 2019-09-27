@@ -20,7 +20,7 @@
  * @file common.hpp
  * @brief Shared logic in utilities library.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 #include "xf_utils_hw/types.hpp"

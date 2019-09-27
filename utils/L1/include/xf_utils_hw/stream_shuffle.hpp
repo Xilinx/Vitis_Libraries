@@ -23,7 +23,7 @@
  * @file stream_shuffle.hpp
  * @brief Unidirectional cross-bar of streams.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 // Forward decl ===============================================================
