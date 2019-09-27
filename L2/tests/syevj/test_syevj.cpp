@@ -80,19 +80,19 @@ int main(int argc, const char* argv[]) {
     }
     if (!parser.getCmdOption("-M", num_str)) {
         dataAM = 4;
-        std::cout << "INFO:number runs is not set!\n";
+        std::cout << "INFO:row size M is not set!\n";
     } else {
         dataAM = std::stoi(num_str);
     }
     if (!parser.getCmdOption("-N", num_str)) {
         dataAN = 4;
-        std::cout << "INFO:number runs is not set!\n";
+        std::cout << "INFO:column size N is not set!\n";
     } else {
         dataAN = std::stoi(num_str);
     }
     if (!parser.getCmdOption("-seed", num_str)) {
         seed = 12;
-        std::cout << "INFO:number runs is not set!\n";
+        std::cout << "INFO:seed is not set!\n";
     } else {
         seed = std::stoi(num_str);
     }

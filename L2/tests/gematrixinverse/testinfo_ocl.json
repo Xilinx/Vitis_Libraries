@@ -16,9 +16,9 @@
         "shell": "u250"
     }, 
     "test_type": [
-        "sdx_sw_emu", 
-        "sdx_hw_emu", 
-        "sdx_hw"
+        "vitis_sw_emu", 
+        "vitis_hw_emu", 
+        "vitis_hw"
     ], 
     "category": "canary"
 }

@@ -86,7 +86,7 @@ int main(int argc, const char* argv[]) {
     }
     if (!parser.getCmdOption("-N", num_str)) {
         dataAN = 4;
-        std::cout << "INFO:coloumn size N is not set!\n";
+        std::cout << "INFO:column size N is not set!\n";
     } else {
         dataAN = std::stoi(num_str);
     }

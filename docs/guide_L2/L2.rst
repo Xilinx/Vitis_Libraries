@@ -20,7 +20,6 @@ L2 Module User Guide
 .. toctree::
    :maxdepth: 1
 
-
 Supported Numerical Methods
 ---------------------------
 .. toctree::
