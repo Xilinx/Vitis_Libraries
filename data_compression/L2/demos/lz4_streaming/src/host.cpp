@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-#include "xil_lz4_streaming.hpp"
+#include "lz4_stream.hpp"
 #include <fstream>
 #include <vector>
 #include "cmdlineparser.h"

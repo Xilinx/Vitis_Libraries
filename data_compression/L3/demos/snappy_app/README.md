@@ -11,7 +11,7 @@ This application is accelerated using generic hardware architecture for LZ based
 
 ![LZx decompress select](../../../common/img/lzx_decomp.png) <br />
 
-For more details refer this [link](https://gitenterprise.xilinx.com/heeran/xil_snappy/blob/master/README.md)
+For more details refer this [link](https://xilinx.github.io/Vitis_Libraries/data_compression/source/L2/design.html)
 
 
 ## Results

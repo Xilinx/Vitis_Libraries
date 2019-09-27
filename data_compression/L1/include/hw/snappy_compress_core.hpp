@@ -31,6 +31,28 @@ const int c_snappyMaxLiteralStream = 4096;
 
 typedef ap_uint<BIT> uintV_t;
 
+/**
+ * @brief Snappy compress engine which runs over the snappy core modules.
+ *
+ * @tparam MIN_OFFSET lowest match distance supported
+ * @tparam MIN_MATCH  minimum match length
+ * @tparam LZ_MAX_OFFSET_LIMIT maximum offset limit
+ * @tparam OFFSET_WINDOW maximum distance of the match that can go
+ * @tparam BOOSTER_OFFSET_WINDOW maximum distance of the match that can go
+ * @tparam LZ_DICT_SIZE dictionary size
+ * @tparam MAX_MATCH_LEN max match length supported
+ * @tparam MATCH_LEN match length
+ * @tparam MATCH_LEVEL number of levels for a match
+ *
+ * @param inStream input data from Stream
+ * @param snappyOut snappy output data
+ * @param snappyOut_eos end of stream for output
+ * @param compressedSize compressed size stream
+ * @param max_lit_limit maximum literals can go before match
+ * @param input_size input data size
+ * @param core_idx engine index
+ */
+
 template <int MIN_OFFSET,
           int MIN_MATCH,
           int LZ_MAX_OFFSET_LIMIT,

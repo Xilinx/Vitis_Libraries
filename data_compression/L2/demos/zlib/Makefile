@@ -90,7 +90,7 @@ $(error TARGET is not sw_emu, hw_emu or hw)
 endif
 
 # Target device
-DEVICE ?= xilinx_u200_qdma_201910_1
+DEVICE ?= xilinx_u200_xdma_201830_2
 
 ifneq (,$(wildcard $(DEVICE)))
 # Use DEVICE as a file path
@@ -148,8 +148,8 @@ XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
 
 BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
-SRC_DIR := $(XFLIB_DIR)/L2/demos/
-TB_DIR := zlib/
+SRC_DIR := $(XFLIB_DIR)/L2/demos/zlib/
+TB_DIR := $(XFLIB_DIR)/L2/tests/src/
 
 # ------------------------------------------------------------
 #                      kernel setup
@@ -191,10 +191,10 @@ XO_FILES_C = $(TEMP_DIR)/xf_compress_lz77.xo \
 		  	 
 XO_FILES_D = $(TEMP_DIR)/xf_zlib_decompress.xo
 
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/xil_lz77_compress_kernel.cpp
-HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/xil_huffman_kernel.cpp
-TREEGEN_KERNEL_SRCS = $(KSRC_DIR)/xil_treegen_kernel.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/xil_zlib_decompress_kernel.cpp
+COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
+HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/huffman_mm.cpp
+TREEGEN_KERNEL_SRCS = $(KSRC_DIR)/treegen_mm.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_mm.cpp
 
 COMPRESS_KERNEL_NAME = xilLz77Compress
 HUFFMAN_KERNEL_NAME = xilHuffmanKernel
@@ -247,6 +247,7 @@ HOST_EXE := xil_zlib
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
 CXXFLAGS +=-I$(XFLIB_DIR)/L2/include/
+CXXFLAGS +=-I$(TB_DIR)/
 CXXFLAGS +=-I$(XILINX_XRT)/include/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/xcl2/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/cmdparser/
@@ -254,8 +255,8 @@ CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/logger/
 CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
 
 #Host and Common sources
-SRCS += $(SRC_DIR)/$(TB_DIR)/src/host.cpp
-SRCS += $(SRC_DIR)/$(TB_DIR)/src/xil_zlib.cpp
+SRCS += $(SRC_DIR)/src/host.cpp
+SRCS += $(TB_DIR)/zlib.cpp
 SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp

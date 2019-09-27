@@ -300,6 +300,9 @@ snappy_compress:
  * into two output streams, one literal stream and the other matchlen and
  * offset stream.
  *
+ * @tparam MAX_LIT_COUNT maximum literal count
+ * @tparam MAX_LIT_STREAM_SIZE max literal size
+ * @tparam PARALLEL_UNITS determined based on number of parallel engines
  * @param inStream reference of input literals stream
  * @param lit_outStream Offset-length stream for literals in input stream
  * @param lenOffset_Stream output data stream
@@ -307,12 +310,12 @@ snappy_compress:
  * @param max_lit_limit Size for compressed stream
  * @param index size of input
  */
-template <int MAX_LIT_COUNT, int MAX_LIT_STREAM_SIZE>
+template <int MAX_LIT_COUNT, int MAX_LIT_STREAM_SIZE, int PARALLEL_UNITS>
 inline void snappyDivide(hls::stream<compressd_dt>& inStream,
                          hls::stream<uint8_t>& lit_outStream,
                          hls::stream<snappy_compressd_dt>& lenOffset_Stream,
                          uint32_t input_size,
-                         uint32_t max_lit_limit[PARALLEL_BLOCK],
+                         uint32_t max_lit_limit[PARALLEL_UNITS],
                          uint32_t index) {
     if (input_size == 0) return;
     assert(MAX_LIT_COUNT < MAX_LIT_STREAM_SIZE);

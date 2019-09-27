@@ -148,9 +148,8 @@ XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
 BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
 SRC_DIR := $(XFLIB_DIR)/L2/demos/lz4_streaming/
-TB_DIR := $(XFLIB_DIR)/L2/tests/lz4_streaming_tb/
 
-TB_SRC_DIR := $(XFLIB_DIR)/L2/tests/src/
+TB_DIR := $(XFLIB_DIR)/L2/tests/src/
 
 # ------------------------------------------------------------
 #                      kernel setup
@@ -166,7 +165,7 @@ HLS_SRC_DIR = $(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS = -I$(HLS_SRC_DIR) \
 			 -I$(KSRC_DIR) \
 			 -I$(XFLIB_DIR)/L2/include/ \
-			 -I$(TB_SRC_DIR)
+			 -I$(TB_DIR)
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_FLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
 
@@ -189,10 +188,10 @@ XO_FILES = $(TEMP_DIR)/xf_compress_streaming.xo \
 		   $(TEMP_DIR)/xf_decompress_datamover.xo
 		   
 
-COMPRESS_STREAM_KERNEL_SRCS = $(KSRC_DIR)/xil_lz4_compress_stream_kernel.cpp
-COMP_DATAMOVER_KERNEL_SRCS = $(TB_SRC_DIR)/xil_block_comp_datamover_kernel.cpp
-DECOMPRESS_STREAM_KERNEL_SRCS = $(KSRC_DIR)/xil_lz4_decompress_stream_kernel.cpp
-DECOMP_DATAMOVER_KERNEL_SRCS = $(TB_SRC_DIR)/xil_block_decomp_datamover_kernel.cpp
+COMPRESS_STREAM_KERNEL_SRCS = $(KSRC_DIR)/lz4_compress_stream.cpp
+COMP_DATAMOVER_KERNEL_SRCS = $(TB_DIR)/block_comp_dm.cpp
+DECOMPRESS_STREAM_KERNEL_SRCS = $(KSRC_DIR)/lz4_decompress_stream.cpp
+DECOMP_DATAMOVER_KERNEL_SRCS = $(TB_DIR)/block_decomp_dm.cpp
 
 COMPRESS_STREAM_KERNEL_NAME = xilLz4CompressStream
 COMP_DATAMOVER_KERNEL_NAME = xilCompDatamover
@@ -251,7 +250,7 @@ CXX := xcpp
 HOST_EXE := xil_lz4_streaming
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
-CXXFLAGS +=-I$(TB_SRC_DIR)
+CXXFLAGS +=-I$(TB_DIR)
 CXXFLAGS +=-I$(XILINX_XRT)/include/
 
 CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/xcl2/
@@ -261,7 +260,7 @@ CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
 
 #Host and Common sources
 SRCS += $(SRC_DIR)/src/host.cpp
-SRCS += $(TB_SRC_DIR)/xil_lz4_streaming.cpp
+SRCS += $(TB_DIR)/lz4_stream.cpp
 SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp

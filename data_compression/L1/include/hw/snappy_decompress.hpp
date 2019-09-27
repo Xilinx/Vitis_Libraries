@@ -35,9 +35,23 @@ namespace compression {
 /**
  * @brief This module decodes the compressed data based on the snappy decompression format
  *
+ * @tparam READ_STATE current state
+ * @tparam MATCH_STATE match the characters
+ * @tparam LOW_OFFSET_STATE matching the lowest distance characters
+ * @tparam READ_TOKEN read from stream
+ * @tparam READ_LITERAL read literals
+ * @tparam READ_LITLEN_60 standard specific literal length
+ * @tparam READ_LITLEN_61 standard specific literal length
+ * @tparam READ_LITLEN_60_CONT standard specific literal length
+ * @tparam READ_OFFSET read offset
+ * @tparam READ_OFFSET_C01 standard specific offset support
+ * @tparam READ_OFFSET_C10 standard specific offset support
+ * @tparam READ_LITLEN_61_CONT continue standard specific literal length
+ * @tparam READ_OFFSET_C10_CONT continue standard specific offset
+ *
  * @param inStream input stream
  * @param outStream output stream
- * @param input_size input size
+ * @param input_size input data size
  */
 static void snappyDecompress(hls::stream<uintV_t>& inStream, hls::stream<encoded_dt>& outStream, uint32_t input_size) {
     // Snappy Decoder states

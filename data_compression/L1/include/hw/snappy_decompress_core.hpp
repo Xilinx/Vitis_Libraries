@@ -26,6 +26,16 @@
 
 typedef ap_uint<BIT> uintV_t;
 
+/**
+ * @brief Snappy decompress engine that run the snappy core modules
+ *
+ *
+ * @param inStream input stream
+ * @param snappyOut output stream
+ * @param _input_size input data size
+ * @param _output_size output data size
+ */
+
 template <int READ_STATE, int MATCH_STATE, int LOW_OFFSET_STATE, int LOW_OFFSET, int HISTORY_SIZE>
 void snappy_decompress_engine(hls::stream<uintV_t>& inStream,
                               hls::stream<uintV_t>& snappyOut,

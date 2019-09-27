@@ -104,25 +104,6 @@ lz_bestMatchFilter_left_over:
  * @param input_size intput size
  * @param left_bytes last 64 left over bytes
  *
- * @par Example
- * Following is simple demonstartion of booster input and output.
- *
- * **Input:** even though HAPPY BIRTHDAY can be matched fully but match length
- * is still 6 due to MATCH_LEN
- *  Input stream each data is 32bit and contains following:
- * - character data  (8bit)     - .....HAPPY BIRTHDAY .......... HAPPY BIRTHDAY
- * - match length    (8bit)     - .....000000000000001..........060000000000000
- * - offset          (16bit)    - .....xy....p......k............x0000000000000
- *
- * **Output** - with booster technique match length is increased to 14
- * - character data  (8bit)     - .....HAPPY BIRTHDAY .......... HAPPY BIRTHDAY
- * - match length    (8bit)     - .....000000000000001..........0140000000000000
- * - offset          (16bit)    - .....xy....p......k............x0000000000000
- *
- * @note
- * - Improves Compression Ratio
- * - Increase in BRAM resources for BOOSTER_OFFSET_WINDOW local memory
- *
 */
 template <int MAX_MATCH_LEN, int BOOSTER_OFFSET_WINDOW>
 void lzBooster(hls::stream<compressd_dt>& inStream,

@@ -16,7 +16,7 @@ Since all the kernel code is developed in HLS C++ with the permissive Apache 2.0
 users can easily tailor, optimize or combine with property logic at any levels. Demos of different
 data compression acceleration are also provided with the library for easy on-boarding.
 
-Check the [comprehensive HTML document](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_compression/) for more details.
+Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/data_compression/) for more details.
 
 ## Requirements
 ### Software Platform
@@ -46,7 +46,7 @@ By offloading compression to FPGA, we achieved 3.6x speedup against single threa
 a 4.4x speedup against single core Snappy (v1.1.4). Benchmark evaluation of compression performance 
 is of reference Silesia Corpus.
 
-For detailed information, please reference to the [benchmark section](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_compression/source/results.html) of document.
+For detailed information, please reference to the [benchmark section](https://xilinx.github.io/Vitis_Libraries/data_compression/source/results.html) of document.
 
 ## LICENSE
 Licensed using the [Apache 2.0 license.](https://www.apache.org/licenses/LICENSE-2.0)

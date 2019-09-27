@@ -159,6 +159,7 @@ lz4_compress:
  * offset stream.
  *
  * @tparam MAX_LIT_COUNT maximum literal count
+ * @tparam PARALLEL_UNITS determined based on number of parallel engines
  *
  * @param inStream reference of input literals stream
  * @param lit_outStream Offset-length stream for literals in input stream
@@ -167,12 +168,12 @@ lz4_compress:
  * @param max_lit_limit Size for compressed stream
  * @param index size of input
  */
-template <int MAX_LIT_COUNT>
+template <int MAX_LIT_COUNT, int PARALLEL_UNITS>
 static void lz4Divide(hls::stream<compressd_dt>& inStream,
                       hls::stream<uint8_t>& lit_outStream,
                       hls::stream<lz4_compressd_dt>& lenOffset_Stream,
                       uint32_t input_size,
-                      uint32_t max_lit_limit[PARALLEL_BLOCK],
+                      uint32_t max_lit_limit[PARALLEL_UNITS],
                       uint32_t index) {
     if (input_size == 0) return;
 

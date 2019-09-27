@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-#include "xil_zlib.hpp"
+#include "zlib.hpp"
 #include <fstream>
 #include <vector>
 #include "cmdlineparser.h"

@@ -28,6 +28,7 @@
 
 namespace xf {
 namespace compression {
+
 /**
  * @brief This module writes the literals to the output stream as is
  * and when match length and offset are read, the literals will be read from
@@ -43,6 +44,7 @@ namespace compression {
  * @param outStream output stream
  * @param original_size original size
  */
+
 template <int HISTORY_SIZE, int READ_STATE, int MATCH_STATE, int LOW_OFFSET_STATE, int LOW_OFFSET>
 void lzDecompress(hls::stream<compressd_dt>& inStream, hls::stream<ap_uint<8> >& outStream, uint32_t original_size) {
     uint8_t local_buf[HISTORY_SIZE];

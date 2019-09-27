@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-#include "xil_lz4.hpp"
+#include "lz4.hpp"
 #include "cmdlineparser.h"
 
 void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string& single_bin) {

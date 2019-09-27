@@ -31,6 +31,27 @@ typedef ap_uint<32> compressd_dt;
 typedef ap_uint<64> lz4_compressd_dt;
 typedef ap_uint<BIT> uintV_t;
 
+/**
+ * @brief Lz4 compression engine.
+ *
+ * @tparam MIN_OFFSET lowest match distance
+ * @tparam MIN_MATCH minimum match length
+ * @tparam LZ_MAX_OFFSET_LIMIT maximum offset limit
+ * @tparam OFFSET_WINDOW maximum possible distance of the match
+ * @tparam BOOSTER_OFFSET_WINDOW maximum distance of match for booster
+ * @tparam LZ_DICT_SIZE dictionary size
+ * @tparam MAX_MATCH_LEN maximum match length supported
+ * @tparam MATCH_LEN match length
+ * @tparam MATCH_LEVEL number of levels to check for match
+ *
+ * @param inStream input hls stream
+ * @param lz4Out output hls stream
+ * @param lz4Out_eos output end of stream indicator
+ * @param lz4OutSize output compressed size
+ * @param max_lit_limit maximum literals before match
+ * @param input_size input data size
+ * @param core_idx engine index
+ */
 template <int MIN_OFFSET,
           int MIN_MATCH,
           int LZ_MAX_OFFSET_LIMIT,

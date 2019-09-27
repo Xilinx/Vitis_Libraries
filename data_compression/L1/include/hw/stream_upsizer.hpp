@@ -28,23 +28,24 @@
 
 namespace xf {
 namespace compression {
-/**
- * @brief This module reads IN_WIDTH from the input stream and accumulate
- * the consecutive reads until OUT_WIDTH and writes the OUT_WIDTH data to
- * output stream
- *
- * @tparam SIZE_DT stream size class instance
- * @tparam IN_WIDTH input data width
- * @tparam OUT_WIDTH output data width
- *
- * @param inStream input stream
- * @param outStream output stream
- * @param original_size original stream size
- */
 template <class SIZE_DT, int IN_WIDTH, int OUT_WIDTH>
 void streamUpsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
                    hls::stream<ap_uint<OUT_WIDTH> >& outStream,
                    SIZE_DT original_size) {
+    /**
+     * @brief This module reads IN_WIDTH from the input stream and accumulate
+     * the consecutive reads until OUT_WIDTH and writes the OUT_WIDTH data to
+     * output stream
+     *
+     * @tparam SIZE_DT stream size class instance
+     * @tparam IN_WIDTH input data width
+     * @tparam OUT_WIDTH output data width
+     *
+     * @param inStream input stream
+     * @param outStream output stream
+     * @param original_size original stream size
+     */
+
     if (original_size == 0) return;
     ap_uint<OUT_WIDTH> shift_register;
     uint8_t factor = OUT_WIDTH / IN_WIDTH;
@@ -67,25 +68,25 @@ void streamUpsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
     outStream << shift_register;
 }
 
-/**
- * @brief This module reads IN_WIDTH data from input stream based
- * on end of stream and accumulate the consecutive reads until
- * OUT_WIDTH and then writes OUT_WIDTH data to output stream.
- *
- * @tparam SIZE_DT stream size class instance
- * @tparam IN_WIDTH input data width
- * @tparam OUT_WIDTH output data width
- *
- * @param inStream input stream
- * @param inStream_eos input end of stream flag
- * @param outStream output stream
- * @param outStream_eos output end of stream flag
- */
 template <class SIZE_DT, int IN_WIDTH, int OUT_WIDTH>
 void upsizerEos(hls::stream<ap_uint<IN_WIDTH> >& inStream,
                 hls::stream<bool>& inStream_eos,
                 hls::stream<ap_uint<OUT_WIDTH> >& outStream,
                 hls::stream<bool>& outStream_eos) {
+    /**
+     * @brief This module reads IN_WIDTH data from input stream based
+     * on end of stream and accumulate the consecutive reads until
+     * OUT_WIDTH and then writes OUT_WIDTH data to output stream.
+     *
+     * @tparam SIZE_DT stream size class instance
+     * @tparam IN_WIDTH input data width
+     * @tparam OUT_WIDTH output data width
+     *
+     * @param inStream input stream
+     * @param inStream_eos input end of stream flag
+     * @param outStream output stream
+     * @param outStream_eos output end of stream flag
+     */
     // Constants
     const int c_byteWidth = IN_WIDTH;
     const int c_upsizeFactor = OUT_WIDTH / c_byteWidth;
