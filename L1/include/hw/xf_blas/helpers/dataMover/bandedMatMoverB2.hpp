@@ -18,7 +18,7 @@
  * @file bandedMatMoverB1.hpp
  * @brief data movers for banded matrices and corresponding vectors.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_BANDEDMATMOVERB2_HPP

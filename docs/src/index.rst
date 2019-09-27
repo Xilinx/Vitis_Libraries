@@ -14,10 +14,10 @@
    limitations under the License.
 
 =====================
-XF BLAS Library
+Vitis BLAS Library
 =====================
 
-XF BLAS Library is a fast FPGA-accelerated implementation of the standard basic
+Vitis BLAS Library is a fast FPGA-accelerated implementation of the standard basic
 linear algebra subroutines (BLAS). Three types of implementations are provided
 in this library, namely L1 primitives, L2 kernels and L3 software APIs. Those 
 implementations are organized in their corresponding directories L1, L2 and L3.

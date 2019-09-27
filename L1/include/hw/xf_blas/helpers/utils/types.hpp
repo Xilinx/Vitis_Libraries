@@ -18,7 +18,7 @@
  * @file types.hpp
  * @brief common datatypes for L1 modules.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_TYPES_HPP
