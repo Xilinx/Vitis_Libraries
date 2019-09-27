@@ -18,9 +18,7 @@
     "test_type": [
         "hls_csim",
         "hls_csynth",
-        "hls_cosim",
-        "hls_vivado_syn",
-        "hls_vivado_impl"
+        "hls_cosim"
     ], 
     "category": "canary"
 }
