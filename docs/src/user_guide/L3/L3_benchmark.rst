@@ -24,7 +24,7 @@ For benchmark code references please follow the link below.
 
 Please see `XFBLAS L3 benchmark folder`_ for more benchmark cases. 
 
-.. _XFBLAS L3 benchmark folder: https://gitenterprise.xilinx.com/FaaSApps/xf_blas/tree/master/L3/benchmarks
+.. _XFBLAS L3 benchmark folder: ../../../../L3/benchmarks
 
 .. toctree::
    :maxdepth: 2
