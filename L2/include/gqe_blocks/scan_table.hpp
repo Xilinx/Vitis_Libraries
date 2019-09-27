@@ -23,8 +23,8 @@
  * This file is part of Vitis Database Library
  */
 
-#ifndef GQE_SCAN_TABLE_H
-#define GQE_SCAN_TABLE_H
+#ifndef GQE_SCAN_TABLE_HPP
+#define GQE_SCAN_TABLE_HPP
 
 #ifndef __SYNTHESIS__
 #include <iostream>
@@ -36,6 +36,10 @@
 #include "xf_database/scan_cmp_str_col.hpp"
 #include "xf_database/types.hpp"
 #include "xf_database/utils.hpp"
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 /**
  * @brief burst read ddr and transform col data into stream
@@ -738,55 +742,8 @@ void scan_table(hls::stream<ap_int<64> >& config,
                                                  out_strms, e_out_strms);
 }
 
-/*
-template <int COL_NM, int CH_NM>
-void Scan_Wrapper(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* ptr_A,
-                  ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* ptr_B,
-                  hls::stream<int8_t>& cid_A_strm, // may read once or twice
-                  hls::stream<int8_t>& cid_B_strm, // may read none or once
-                  hls::stream<bool>& join_on_strm,
-                  hls::stream<ap_uint<8 * TPCH_INT_SZ> >
-out_strm[CH_NM][COL_NM],
-                  hls::stream<bool> e_out_strm[CH_NM]) {
- // if join_on, read from A buf twice, and B buf once
-// else, read fromm A buf once.
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
-  bool join_on = join_on_strm.read();
-  if (join_on) {
-    scan_to_channel<COL_NM, CH_NM>(ptr_A, cid_A_strm, out_strm, e_out_strm);
-#ifndef __SYNTHESIS__
-    int s_a = 0;
-    for (int ch = 0; ch < CH_NM; ++ch) {
-      s_a += out_strm[ch][0].size();
-    }
-    printf("***** scanned %d rows from A.\n", s_a);
 #endif
-    scan_to_channel<COL_NM, CH_NM>(ptr_A, cid_A_strm, out_strm, e_out_strm);
-#ifndef __SYNTHESIS__
-    int s_a2 = 0;
-    for (int ch = 0; ch < CH_NM; ++ch) {
-      s_a2 += out_strm[ch][0].size();
-    }
-    printf("***** scanned %d rows from A.\n", s_a2 - s_a);
-#endif
-    scan_to_channel<COL_NM, CH_NM>(ptr_B, cid_B_strm, out_strm, e_out_strm);
-#ifndef __SYNTHESIS__
-    int s_b = 0;
-    for (int ch = 0; ch < CH_NM; ++ch) {
-      s_b += out_strm[ch][0].size();
-    }
-    printf("***** scanned %d rows from B.\n", s_b - s_a2);
-#endif
-  } else {
-    scan_to_channel<COL_NM, CH_NM>(ptr_A, cid_A_strm, out_strm, e_out_strm);
-#ifndef __SYNTHESIS__
-    int s_a = 0;
-    for (int ch = 0; ch < CH_NM; ++ch) {
-      s_a += out_strm[ch][0].size();
-    }
-    printf("***** scanned %d rows from A.\n", s_a);
-#endif
-  }
-}
-*/
-#endif // GQE_SCAN_TO_CHANNEL_H

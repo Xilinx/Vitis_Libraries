@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __FILTER_PART__
-#define __FILTER_PART__
+#ifndef GQE_FILTER_PART_HPP
+#define GQE_FILTER_PART_HPP
 
 #ifndef __SYNTHESIS__
 #include <stdio.h>
@@ -26,6 +26,10 @@
 #include "xf_database/dynamic_filter.hpp"
 
 #include "gqe_blocks/gqe_types.hpp"
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 template <int STRM_NM>
 void dup_filter_config(hls::stream<ap_uint<32> >& filter_cfg_single,
@@ -227,5 +231,9 @@ void filter_wrapper(hls::stream<ap_uint<32> >& fcfg_strm,
         filter_ongoing<COL_IN_NM, COL_OUT_NM, CH_NM>(join_on, fcfg_strm, ch_istrm, e_ch_istrm, ch_ostrm, e_ch_ostrm);
     }
 }
+
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
 #endif

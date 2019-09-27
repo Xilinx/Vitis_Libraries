@@ -196,7 +196,7 @@ debug:
 # -----------------------------------------------------------------------------
 # TODO:                          kernel setup
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/demos/*}')
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 KSRC_DIR = $(CUR_DIR)/kernel

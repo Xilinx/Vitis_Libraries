@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __HASHJOIN_PART__
-#define __HASHJOIN_PART__
+#ifndef GQE_HASH_JOIN_PART_HPP
+#define GQE_HASH_JOIN_PART_HPP
 
 #include <hls_stream.h>
 #include <ap_int.h>
@@ -26,7 +26,14 @@
 
 #include "gqe_blocks/gqe_types.hpp"
 #include "gqe_blocks/stream_helper.hpp"
+
+#ifndef __SYNTHESIS__
 #include <iostream>
+#endif
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 template <int COL_NM>
 void Split_1D(hls::stream<ap_uint<8 * TPCH_INT_SZ * COL_NM> >& in_strm,
@@ -41,10 +48,8 @@ void Split_1D(hls::stream<ap_uint<8 * TPCH_INT_SZ * COL_NM> >& in_strm,
         for (int i = 0; i < COL_NM; i++) {
 #pragma HLS unroll
             out_strm[i].write(tmp(8 * TPCH_INT_SZ * (i + 1) - 1, 8 * TPCH_INT_SZ * i));
-            //            if(cnt<10) std::cout<<(int)tmp(8 * TPCH_INT_SZ * (i + 1) - 1, 8 * TPCH_INT_SZ * i)<<" ";
         }
         cnt++;
-        //        if(cnt<10)std::cout<<"==========="<<std::endl;
         e_out_strm.write(false);
     }
     e_out_strm.write(true);
@@ -81,21 +86,11 @@ void hash_join_channel_adapter(bool mk_on,
             for (int c = 0; c < COL_NM; ++c) {
 #pragma HLS unroll
                 d_tmp[c] = in_strm[c].read();
-                //                if(cnt<10)std::cout<<d_tmp[c]<<" ";
             }
-            //            if(cnt<10)std::cout<<"\\\\\\\\\\\\\\\\"<<std::endl;
             cnt++;
 
             key_tmp.range(8 * TPCH_INT_SZ - 1, 0) = d_tmp[0];
             key_tmp.range(8 * TPCH_INT_SZ * 2 - 1, 8 * TPCH_INT_SZ) = mk_on ? d_tmp[1] : ap_uint<8 * TPCH_INT_SZ>(0);
-
-#if 0
-            if (mk_on) {
-              if (r == 2) {
-                printf("DualKeyB:%d %d\n", d_tmp[0].to_int(), d_tmp[1].to_int());
-              }
-            }
-#endif
 
             for (int c = 0; c < PLD_NM; ++c) {
 #pragma HLS unroll
@@ -108,7 +103,6 @@ void hash_join_channel_adapter(bool mk_on,
             pld_strm.write(pld_tmp);
             e_join_pld_strm.write(false);
         }
-        //        std::cout<<"====ROUND "<<r<<" FINISH===="<<std::endl;
         e_join_pld_strm.write(true);
     }
 }
@@ -180,9 +174,6 @@ void hash_join_plus_adapter(bool jn_on,
     printf("Hash joined row %d\n", joined_strm.size());
 #endif
 
-    // 4 jpay
-    // xf::utils_hw::stream_split<448, 8 * TPCH_INT_SZ, COL_OUT_NM>(joined_strm, e_joined_strm, out_strm, e_out_strm,
-    //                                                             xf::utils_hw::lsb_side_t());
     Split_1D<COL_OUT_NM>(joined_strm, e_joined_strm, out_strm, e_out_strm);
 }
 
@@ -226,7 +217,9 @@ void hash_join_wrapper(hls::stream<ap_uint<3> >& join_flag_strm,
             stb_buf0, stb_buf1, stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
         int pu1 = pu_end_status_strm.read();
         int pu2 = pu_end_status_strm.read();
+#ifndef __SYNTHESIS__
         printf("Hash join finished pu1 = %d, pu2 = %d", pu1, pu2);
+#endif
     }
 }
 
@@ -293,5 +286,9 @@ void hash_join_bypass(hls::stream<bool>& jn_on_strm,
         o_e_strm.write(true);
     }
 }
+
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
 #endif

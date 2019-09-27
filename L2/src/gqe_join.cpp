@@ -32,6 +32,10 @@
 #include <ap_int.h>
 #include <hls_stream.h>
 
+namespace xf {
+namespace database {
+namespace gqe {
+
 static void eval_wrapper(hls::stream<ap_uint<289> >& alu_cfg_strm,
                          hls::stream<ap_uint<8 * TPCH_INT_SZ> >& key0_strm,
                          hls::stream<ap_uint<8 * TPCH_INT_SZ> >& key1_strm,
@@ -206,6 +210,10 @@ void scan_wrapper_top(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* ptr_A,
                        out_strm, e_out_strm);
 }
 
+} // namespace gqe
+} // namespace database
+} // namespace xf
+
 extern "C" void gqeJoin(ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_A[TEST_BUF_DEPTH],
                         ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_B[TEST_BUF_DEPTH],
                         ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_C[TEST_BUF_DEPTH],
@@ -308,7 +316,9 @@ extern "C" void gqeJoin(ap_uint<8 * TPCH_INT_SZ * VEC_LEN> buf_A[TEST_BUF_DEPTH]
 
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-// clang-format on
+    // clang-format on
+    using namespace xf::database::gqe;
+
 #pragma HLS dataflow
     const int jn_on_nm = 8;
     const int agg_on_nm = 3;

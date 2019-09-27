@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _AGGGREGATE_H_
-#define _AGGGREGATE_H_
+#ifndef GQE_AGGR_PART_HPP
+#define GQE_AGGR_PART_HPP
 
 #include <ap_int.h>
 #include <hls_stream.h>
@@ -23,6 +23,10 @@
 
 #include "gqe_blocks/gqe_types.hpp"
 #include <iostream>
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 template <int N>
 void e_sink(hls::stream<bool> e_strm[N]) {
@@ -255,5 +259,9 @@ static void aggregate(hls::stream<ap_uint<8 * TPCH_INT_SZ> > in_strm[5],
                       hls::stream<bool>& e_in_strm,
                       hls::stream<ap_uint<8 * TPCH_INT_SZ> > out_strm[5],
                       hls::stream<bool>& e_out_strm);
+
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
 #endif

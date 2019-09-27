@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __group_aggregate_PART__
-#define __group_aggregate_PART__
+#ifndef GQE_GROUP_AGGREGATE_PART_HPP
+#define GQE_GROUP_AGGREGATE_PART_HPP
 
 #include <hls_stream.h>
 #include <ap_int.h>
@@ -23,6 +23,10 @@
 #include "xf_database/hash_group_aggregate.hpp"
 
 #include "gqe_blocks/gqe_types.hpp"
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 // duplicate stream with double strm end
 template <int WStrm, int COL_NM>
@@ -321,5 +325,9 @@ void group_aggregate_wrapper(
     merge_column<_WStrm, _ColNM>(merge_column_cfg, strm_key_out, strm_pld_out[0], strm_pld_out[1], strm_pld_out[2],
                                  e4_strm, strm_out, strm_e_out);
 }
+
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
 #endif

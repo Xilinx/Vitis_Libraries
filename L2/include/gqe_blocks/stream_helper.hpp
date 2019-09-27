@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef XF_DATABASE_L2_STREAM_HELPER_HPP
-#define XF_DATABASE_L2_STREAM_HELPER_HPP
+#ifndef GQE_STREAM_HELPER_HPP
+#define GQE_STREAM_HELPER_HPP
 
 #include "ap_int.h"
 #include "hls_stream.h"
 #include <iostream>
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 /* @brief stream_demux switch one common input stream to one of several seperate output stream
  *
@@ -338,4 +342,8 @@ void demux_wrapper(hls::stream<bool>& join_on_strm,
     }
 }
 
-#endif // XF_DATABASE_L2_STREAM_HELPER_HPP
+} // namespace gqe
+} // namespace database
+} // namespace xf
+
+#endif

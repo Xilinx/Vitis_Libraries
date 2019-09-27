@@ -14,39 +14,36 @@
  * limitations under the License.
  */
 
-#ifndef RKA_TYPES_H
-#define RKA_TYPES_H
+#ifndef GQE_TYPES_HPP
+#define GQE_TYPES_HPP
 
 // XXX inline with tpch_read_2.h
 #include <stdint.h>
+
+namespace xf {
+namespace database {
+namespace gqe {
+
 typedef int32_t TPCH_INT;
+typedef int32_t MONEY_T;
+typedef int32_t DATE_T;
+typedef int32_t KEY_T;
 
-#define TPCH_INT_SZ sizeof(TPCH_INT)
-
-typedef TPCH_INT MONEY_T;
-typedef TPCH_INT DATE_T;
-typedef TPCH_INT KEY_T;
-
-#define TPCH_INT_SZ sizeof(TPCH_INT)
-#define MONEY_SZ sizeof(TPCH_INT)
-#define DATE_SZ sizeof(TPCH_INT)
-#define KEY_SZ sizeof(TPCH_INT)
+#define TPCH_INT_SZ sizeof(int32_t)
+#define MONEY_SZ sizeof(int32_t)
+#define DATE_SZ sizeof(int32_t)
+#define KEY_SZ sizeof(int32_t)
 
 #define VEC_LEN 16
 
-#define FILTER_MAX_ROW 1 << 20
-#define HASHJOIN_MAX_ROW 1 << 20
-#define AGGREGATE_MAX_ROW 1 << 20
+#define FILTER_MAX_ROW (1 << 20)
+#define HASHJOIN_MAX_ROW (1 << 20)
+#define AGGREGATE_MAX_ROW (1 << 20)
 
 #define BURST_LEN 32
-///
-///#define S2_NM  16
-///#define S3_NM  16
-///#define S4_NM  16
-///#define S5_NM  16
-///#define S6_NM  16
-///#define D_DEPTH (L_MAX_ROW / VEC_LEN + 1)
-///
-///#define BURST_LEN 64
 
-#endif // TABLE_DT_H
+} // namespace gqe
+} // namespace database
+} // namespace xf
+
+#endif

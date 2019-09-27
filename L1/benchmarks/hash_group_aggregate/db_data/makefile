@@ -16,7 +16,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../../..
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/benchmarks/*}')
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 SSBDIR = $(XFLIB_DIR)/ext/ssb_dbgen

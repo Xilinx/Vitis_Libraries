@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __LOAD_CONFIG__
-#define __LOAD_CONFIG__
+#ifndef GQE_LOAD_CONFIG_HPP
+#define GQE_LOAD_CONFIG_HPP
 
 #ifndef __SYNTHESIS__
 #include <stdio.h>
@@ -25,6 +25,10 @@
 #include <hls_stream.h>
 
 #include "gqe_blocks/gqe_types.hpp"
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 template <int width = 64>
 ap_uint<width> ext_64(ap_uint<512> data, int bias) {
@@ -334,5 +338,9 @@ void load_config(ap_uint<8 * TPCH_INT_SZ>* ptr,
     direct_aggr_cfg_strm.write(direct_aggr_cfg);
     write_out_cfg_strm.write(write_out_cfg);
 }
+
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
 #endif
