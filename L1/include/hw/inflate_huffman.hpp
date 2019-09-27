@@ -18,15 +18,11 @@
 #define _XFCOMPRESSION_INFLATE_HUFFMAN_HPP_
 
 /**
- * @file inflate_huffman.h
- * @brief Header for defining functions used in inflate algorithm used in zlib decompression kernel.
+ * @file inflate_huffman.hpp
+ * @brief Header for module used in ZLIB decompress kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
-
-//#include "common.h"
-//#include "hls_stream.h"
-//#include <ap_int.h>
 
 #define MAXBITS 15
 #define TCODESIZE 2048
@@ -47,48 +43,59 @@
 #define BIT 8
 
 #define READBITS(n) \
-    while (bits < (uint32_t)(n)) NEXTBYTE();
+    while (bits_cntr < (uint32_t)(n)) NEXTBYTE();
 
-#define NEXTBYTE()                                     \
-    {                                                  \
-        curInSize -= 2;                                \
-        uint16_t temp_lcl = (uint16_t)inStream.read(); \
-        in_cntr += 2;                                  \
-        bitbuffer += (uint64_t)(temp_lcl) << bits;     \
-        bits += 16;                                    \
+#define NEXTBYTE()                                      \
+    {                                                   \
+        curInSize -= 2;                                 \
+        uint16_t temp_lcl = (uint16_t)inStream.read();  \
+        in_cntr += 2;                                   \
+        bitbuffer += (uint64_t)(temp_lcl) << bits_cntr; \
+        bits_cntr += 16;                                \
     }
 
 #define BITS(n) ((uint32_t)bitbuffer & ((1 << (n)) - 1))
 
 #define DUMPBITS(n)    \
     bitbuffer >>= (n); \
-    bits -= (uint32_t)(n);
+    bits_cntr -= (uint32_t)(n);
 
 namespace xf {
 namespace compression {
-void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
-                 hls::stream<xf::compression::compressd_dt>& outStream,
-                 hls::stream<bool>& endOfStream,
-                 uint32_t input_size) {
+
+/**
+ * @brief This module does bit unpacking and generates a LZ77 byte compressed
+ * data and trasfer to lz_decompress module for further byte unpacking
+ *
+ * @param inStream input bit packed data
+ * @param outStream output lz77 compressed output in the form of 32bit packets
+ * (Literals, Match Length, Distances)
+ * @param endOfStream output completion of execution
+ * @param input_size input data size
+ */
+
+void huffBitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
+                     hls::stream<xf::compression::compressd_dt>& outStream,
+                     hls::stream<bool>& endOfStream,
+                     uint32_t input_size) {
     uint64_t bitbuffer = 0;
     uint32_t curInSize = input_size;
-    uint32_t left = -1;
-    uint8_t bits = 0;
+    uint8_t bits_cntr = 0;
 
-    uint8_t here_op = 0;
-    uint8_t here_bits = 0;
-    uint16_t here_val = 0;
+    uint8_t current_op = 0;
+    uint8_t current_bits = 0;
+    uint16_t current_val = 0;
 
     uint8_t len = 0;
 
     const uint16_t order[19] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
 
     uint8_t dynamic_last = 0;
-    uint32_t dynamic_nlen = 0;      // No of length code lengths
-    uint32_t dynamic_ndist = 0;     // No of dist code lengths
-    uint32_t dynamic_ncode = 0;     // No of code length code lenghts
-    uint32_t dynamic_curInSize = 0; // No of code lengths in lens
-    uint16_t dynamic_lens[512];     // temp storatge for code lengths
+    uint32_t dynamic_nlen = 0;
+    uint32_t dynamic_ndist = 0;
+    uint32_t dynamic_ncode = 0;
+    uint32_t dynamic_curInSize = 0;
+    uint16_t dynamic_lens[512];
 
     uint32_t in_cntr = 0;
 
@@ -111,7 +118,6 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
         done = false;
 
         if (next_state == HEADER_STATE) {
-            // printme("HEADER_STATE \n");
             done = true;
             READBITS(16);
             DUMPBITS(4);
@@ -119,15 +125,13 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
             next_state = TREE_PMBL_STATE;
 
             bitbuffer = 0;
-            bits = 0;
+            bits_cntr = 0;
         } else if (next_state == TREE_PMBL_STATE) {
-            // printme("tree PMBL State %d bits %d input_size %d in_cntr %d\n", bitbuffer, bits, input_size, in_cntr);
             done = true;
 
             if (bitbuffer == 0) READBITS(3);
 
             dynamic_last = BITS(1);
-            // printme("[PMBL]: dynamic_last %d bitbuffer %d \n", dynamic_last, bitbuffer);
             DUMPBITS(1);
 
             switch (BITS(2)) {
@@ -147,23 +151,19 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
             DUMPBITS(2);
 
         } else if (next_state == STORE_STATE) {
-            // printme("store state bits %d bitbuffer %d\n", bits, bitbuffer);
             done = true;
-            bitbuffer >>= bits & 7;
-            bits -= bits & 7;
-            // printme("bits %d bitbuffer %d\n", bits, bitbuffer);
+            bitbuffer >>= bits_cntr & 7;
+            bits_cntr -= bits_cntr & 7;
 
             READBITS(32);
-            // printme("[Read32]: bitbuffer %d bits %d \n", bitbuffer, bits);
-            if (bits > 32) {
+            if (bits_cntr > 32) {
                 bitbuffer >>= 32;
-                bits = bits - 32;
+                bits_cntr = bits_cntr - 32;
             } else {
                 bitbuffer = 0;
-                bits = 0;
+                bits_cntr = 0;
             }
 
-            // next_state = TREE_PMBL_STATE;
             if (dynamic_last) {
                 next_state = COMPLETE_STATE;
             } else {
@@ -171,7 +171,6 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
             }
 
         } else if (next_state == DYNAMIC_STATE) {
-            // printme("dynamic state \n");
             done = true;
             READBITS(14);
             dynamic_nlen = BITS(5) + 257; // Max 288
@@ -186,7 +185,6 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
             dynamic_curInSize = 0;
 
             while (dynamic_curInSize < dynamic_ncode) {
-                //////printme("In BITLENHUFF \n");
                 READBITS(3);
                 dynamic_lens[order[dynamic_curInSize++]] = (uint16_t)BITS(3);
                 DUMPBITS(3);
@@ -204,20 +202,20 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
             // Figure out codes for LIT/ML and DIST
             while (dynamic_curInSize < dynamic_nlen + dynamic_ndist) {
                 for (;;) {
-                    here_op = array_codes_op[BITS(dynamic_lenbits)];
-                    here_bits = array_codes_bits[BITS(dynamic_lenbits)];
-                    here_val = array_codes_val[BITS(dynamic_lenbits)];
-                    if ((uint32_t)(here_bits) <= bits) break;
+                    current_op = array_codes_op[BITS(dynamic_lenbits)];
+                    current_bits = array_codes_bits[BITS(dynamic_lenbits)];
+                    current_val = array_codes_val[BITS(dynamic_lenbits)];
+                    if ((uint32_t)(current_bits) <= bits_cntr) break;
                     NEXTBYTE();
                 }
 
-                if (here_val < 16) {
-                    DUMPBITS(here_bits);
-                    dynamic_lens[dynamic_curInSize++] = here_val;
+                if (current_val < 16) {
+                    DUMPBITS(current_bits);
+                    dynamic_lens[dynamic_curInSize++] = current_val;
                 } else {
-                    if (here_val == 16) {
-                        READBITS(here_bits + 2);
-                        DUMPBITS(here_bits);
+                    if (current_val == 16) {
+                        READBITS(current_bits + 2);
+                        DUMPBITS(current_bits);
 
                         if (dynamic_curInSize == 0) done = false;
 
@@ -225,15 +223,15 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                         copy = 3 + BITS(2);
                         DUMPBITS(2);
 
-                    } else if (here_val == 17) {
-                        READBITS(here_bits + 3);
-                        DUMPBITS(here_bits);
+                    } else if (current_val == 17) {
+                        READBITS(current_bits + 3);
+                        DUMPBITS(current_bits);
                         len = 0;
                         copy = 3 + BITS(3);
                         DUMPBITS(3);
                     } else {
-                        READBITS(here_bits + 7);
-                        DUMPBITS(here_bits);
+                        READBITS(current_bits + 7);
+                        DUMPBITS(current_bits);
                         len = 0;
                         copy = 11 + BITS(7);
                         DUMPBITS(7);
@@ -252,11 +250,7 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                                                   &array_codes_bits[used], &array_codes_val[used], &dynamic_distbits,
                                                   &dused);
             next_state = BYTEGEN_STATE;
-            // printme("Done with code_gen \n");
-            // printme("incntr %d \n", in_cntr);
-            // done = false;
         } else if (next_state == BYTEGEN_STATE) {
-            // printme("byte_gen state \n");
             done = true;
             if (curInSize >= 6) {
                 // mask length codes 1st level
@@ -265,9 +259,9 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                 uint32_t dist_mask = (1 << dynamic_distbits) - 1;
 
                 // Read from the table
-                uint8_t here_op = 0;
-                uint8_t here_bits = 0;
-                uint16_t here_val = 0;
+                uint8_t current_op = 0;
+                uint8_t current_bits = 0;
+                uint16_t current_val = 0;
 
                 uint8_t* mltable_op = array_codes_op;
                 uint8_t* mltable_bits = array_codes_bits;
@@ -297,17 +291,17 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                 uint32_t cntr = 0;
 
                 // Read from inStream
-                if (bits < 15) {
+                if (bits_cntr < 15) {
                     uint16_t temp = inStream.read();
                     in_cntr += 2;
-                    bitbuffer += (uint64_t)(temp) << bits;
-                    bits += 16;
+                    bitbuffer += (uint64_t)(temp) << bits_cntr;
+                    bits_cntr += 16;
                 }
 
                 uint32_t lidx = bitbuffer & lit_mask;
-                here_op = mltable_op[lidx];
-                here_bits = mltable_bits[lidx];
-                here_val = mltable_val[lidx];
+                current_op = mltable_op[lidx];
+                current_bits = mltable_bits[lidx];
+                current_val = mltable_val[lidx];
                 bool read_ml_bram = false;
                 bool read_dist_bram = false;
                 uint32_t didx = 0;
@@ -323,26 +317,26 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                     // INSTREAM: 1
                     // OUTSTREAM: 1
                     if (curr_stage == LITERAL_STAGE) {
-                        uint32_t temp = (uint32_t)(here_bits);
+                        uint32_t temp = (uint32_t)(current_bits);
                         bitbuffer >>= temp;
-                        bits -= temp;
-                        ml_op = (uint32_t)(here_op);
+                        bits_cntr -= temp;
+                        ml_op = (uint32_t)(current_op);
 
                         // Push Literal
                         // Otherwise fill length
                         if (ml_op == 0) {
-                            tmpVal.range(7, 0) = (uint16_t)(here_val);
+                            tmpVal.range(7, 0) = (uint16_t)(current_val);
                             tmpVal.range(31, 8) = 0;
-                            // printf("%c", here_val);
+                            // printf("%c", current_val);
                             outStream << tmpVal;
                             endOfStream << 0;
                             curr_stage = LITERAL_STAGE;
 
-                            if (bits < 15) {
+                            if (bits_cntr < 15) {
                                 uint16_t temp = inStream.read();
                                 in_cntr += 2;
-                                bitbuffer += (uint64_t)(temp) << bits;
-                                bits += 16;
+                                bitbuffer += (uint64_t)(temp) << bits_cntr;
+                                bits_cntr += 16;
                             }
 
                             lidx = bitbuffer & lit_mask;
@@ -357,30 +351,29 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                         // INSTREAM: 1
                         // OUTSTREAM: NIL
                         if (ml_op & 16) {
-                            len = (uint16_t)(here_val);
+                            len = (uint16_t)(current_val);
                             ml_op &= 15;
                             if (ml_op) {
                                 len += (uint32_t)bitbuffer & ((1 << ml_op) - 1);
                                 bitbuffer >>= ml_op;
-                                bits -= ml_op;
+                                bits_cntr -= ml_op;
                             }
                             tmpVal.range(31, 16) = len;
                             tmpVal.range(7, 0) = 0;
-                            // printf("\tlen %d ", len);
                             curr_stage = MATCH_DIST_STAGE;
 
-                            if (bits < 15) {
+                            if (bits_cntr < 15) {
                                 uint16_t temp = inStream.read();
                                 in_cntr += 2;
-                                bitbuffer += (uint64_t)(temp) << bits;
-                                bits += (2 * BIT);
+                                bitbuffer += (uint64_t)(temp) << bits_cntr;
+                                bits_cntr += (2 * BIT);
                             }
 
                             didx = bitbuffer & dist_mask;
                             read_dist_bram = true;
                         } else if ((ml_op & 64) == 0) {
                             curr_stage = LITERAL_STAGE;
-                            lidx = here_val + (bitbuffer & ((1 << ml_op) - 1));
+                            lidx = current_val + (bitbuffer & ((1 << ml_op) - 1));
                             read_ml_bram = true;
                         } else if (ml_op & 32) {
                             // Termination Condition
@@ -395,15 +388,15 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                         // This stage generates output
                         // INSTREAM: 1
                         // OUTSTREAM: 1
-                        uint32_t temp = (uint32_t)(here_bits);
+                        uint32_t temp = (uint32_t)(current_bits);
                         bitbuffer >>= temp;
-                        bits -= temp;
-                        dist_op = (uint32_t)(here_op);
+                        bits_cntr -= temp;
+                        dist_op = (uint32_t)(current_op);
 
                         if (dist_op & 16) {
                             curr_stage = MATCH_DIST_WRITE_STAGE;
                         } else if ((dist_op & 64) == 0) {
-                            didx = here_val + (bitbuffer & ((1 << dist_op) - 1));
+                            didx = current_val + (bitbuffer & ((1 << dist_op) - 1));
                             read_dist_bram = true;
                             curr_stage = MATCH_DIST_STAGE;
                         } else {
@@ -411,22 +404,22 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                             done = 1;
                         }
                     } else if (curr_stage == MATCH_DIST_WRITE_STAGE) {
-                        dist = (uint32_t)(here_val);
+                        dist = (uint32_t)(current_val);
                         dist_op &= 15;
                         dist += (uint32_t)bitbuffer & ((1 << dist_op) - 1);
                         bitbuffer >>= dist_op;
-                        bits -= dist_op;
+                        bits_cntr -= dist_op;
 
                         tmpVal.range(15, 0) = dist;
                         outStream << tmpVal;
                         endOfStream << 0;
                         curr_stage = LITERAL_STAGE;
 
-                        if (bits < 15) {
+                        if (bits_cntr < 15) {
                             uint16_t temp = inStream.read();
                             in_cntr += 2;
-                            bitbuffer += (uint64_t)(temp) << bits;
-                            bits += (2 * BIT);
+                            bitbuffer += (uint64_t)(temp) << bits_cntr;
+                            bits_cntr += (2 * BIT);
                         }
 
                         lidx = bitbuffer & lit_mask;
@@ -435,24 +428,24 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                     }
                     if (read_ml_bram) {
                         read_ml_bram = false;
-                        here_op = mltable_op[lidx];
-                        here_bits = mltable_bits[lidx];
-                        here_val = mltable_val[lidx];
+                        current_op = mltable_op[lidx];
+                        current_bits = mltable_bits[lidx];
+                        current_val = mltable_val[lidx];
                     }
 
                     if (read_dist_bram) {
                         read_dist_bram = false;
-                        here_op = disttable_op[didx];
-                        here_bits = disttable_bits[didx];
-                        here_val = disttable_val[didx];
+                        current_op = disttable_op[didx];
+                        current_bits = disttable_bits[didx];
+                        current_val = disttable_val[didx];
                     }
 
                     // Read inStream
-                    if (bits < 15) {
+                    if (bits_cntr < 15) {
                         uint16_t temp = inStream.read();
                         in_cntr += 2;
-                        bitbuffer += (uint64_t)(temp) << bits;
-                        bits += (2 * BIT);
+                        bitbuffer += (uint64_t)(temp) << bits_cntr;
+                        bits_cntr += (2 * BIT);
                     }
 
                 } // Top for-loop ends hre
@@ -466,8 +459,6 @@ void bitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
         }
 
     } // While end
-
-    // printme("input_size %d in_cntr %d \n", input_size, in_cntr);
 
     uint32_t leftover = input_size - in_cntr;
     if (leftover) {

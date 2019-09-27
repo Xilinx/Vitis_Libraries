@@ -17,14 +17,23 @@
 #ifndef _XFCOMPRESSION_DEFLATE_TREES_HPP_
 #define _XFCOMPRESSION_DEFLATE_TREES_HPP_
 
-// Find the minimum among the two subtrees
-#define findmin(tree_freq, n, m, depth) \
-    (tree_freq[n] < tree_freq[m] || (tree_freq[n] == tree_freq[m] && depth[n] <= depth[m]))
+/**
+ * @file deflate_trees.hpp
+ * @brief Header for modules used in Tree Generation kernel.
+ *
+ * This file is part of XF Compression Library.
+ */
+
+bool findmin(uint32_t* tree_freq, uint32_t val1, uint32_t val2, uint8_t* tree_dist) {
+#pragma HLS INLINE
+    bool result = (tree_freq[val1] < tree_freq[val2] ||
+                   (tree_freq[val1] == tree_freq[val2] && tree_dist[val1] <= tree_dist[val2]));
+    return result;
+}
 
 #define MAX_BITS 15
 
-#define LOW 1
-#define MAX(a, b) (a >= b ? a : b)
+#define LEAST_VAL 1
 
 namespace xf {
 namespace compression {
@@ -44,7 +53,6 @@ bitreverse:
     return res >> 1;
 }
 
-// Balance the tree
 inline void reduceHeap(
     uint32_t* tree_freq, uint32_t* heap, uint8_t* depth, uint16_t heapLength, uint16_t curr_val, uint16_t startIdx) {
 #pragma HLS INLINE
@@ -66,16 +74,22 @@ reduceHeap:
     heap[startIdx] = curr_val;
 }
 
-/* the arguments must not have side effects */
+/**
+ * @brief This module generates huffman codes for either literal, distance or
+ * bitlength data.
+ *
+ * @param tree_freq input frequency data of literals, distances or bit lengths
+ * @param tree_codes output huffman codes data
+ * @param tree_blen output huffan codes bit lengths
+ * @param tree_root input buffer to construct codes and bit length information
+ */
+
 template <uint32_t ELEMS, uint32_t MAX_LENGTH>
-inline uint32_t constructTree(
-    uint32_t* tree_freq, uint32_t* tree_codes, uint32_t* tree_blen, uint32_t* tree_root, uint32_t base_extended) {
+inline uint32_t huffConstructTree(uint32_t* tree_freq, uint32_t* tree_codes, uint32_t* tree_blen, uint32_t* tree_root) {
 #pragma HLS INLINE
     const uint32_t elems = ELEMS;
     const uint32_t max_length = MAX_LENGTH;
 
-    // Upper boundary of non-zero value
-    // for a given tree
     int lcl_max_code = -1;
 
     uint32_t node = elems;
@@ -86,9 +100,6 @@ inline uint32_t constructTree(
     uint32_t max_heap = HEAP_SIZE;
     tree_freq[256] = 1;
 
-// Initial heap built wrt least frequent in
-// heap location smallest i.e., 1 and leafs
-// @ 2*n and 2*n+1 locations
 freq_cnt:
     for (uint32_t n = 0; n < elems; n++) {
 #pragma HLS LOOP_TRIPCOUNT min = elems max = elems
@@ -102,7 +113,6 @@ freq_cnt:
     }
 
     const uint32_t s_trip = elems / 2;
-// Create subheap in increasing order
 subheap:
     for (uint32_t node_lcl = heapLength / 2; node_lcl >= 1; node_lcl--) {
 #pragma HLS LOOP_TRIPCOUNT min = s_trip max = s_trip
@@ -110,41 +120,31 @@ subheap:
         xf::compression::reduceHeap(tree_freq, heap, depth, heapLength, heap[node_lcl], node_lcl);
     }
 
-// Construct the huffman tree by repeatedly combining the least two frequent
-// nodes
 huffman_tree:
     for (; heapLength >= 2;) {
 #pragma HLS LOOP_TRIPCOUNT min = elems max = elems
 #pragma HLS PIPELINE II = 1
-        uint32_t node_trav = heap[LOW];
-        heap[LOW] = heap[heapLength--];
-        xf::compression::reduceHeap(tree_freq, heap, depth, heapLength, heap[LOW], LOW);
-        uint32_t m = heap[LOW]; // m = node of least frequency
+        uint32_t node_trav = heap[LEAST_VAL];
+        heap[LEAST_VAL] = heap[heapLength--];
+        xf::compression::reduceHeap(tree_freq, heap, depth, heapLength, heap[LEAST_VAL], LEAST_VAL);
+        uint32_t h_val = heap[LEAST_VAL];
 
-        heap[--max_heap] = node_trav; // keep the nodes sorted by frequency
-        heap[--max_heap] = m;
+        heap[--max_heap] = node_trav;
+        heap[--max_heap] = h_val;
 
-        // Create a new node father of node_lcl and m
-        tree_freq[node] = tree_freq[node_trav] + tree_freq[m];
-        depth[node] = (uint8_t)(MAX(depth[node_trav], depth[m]) + 1);
-        tree_root[node_trav] = tree_root[m] = (uint16_t)node;
+        tree_freq[node] = tree_freq[node_trav] + tree_freq[h_val];
+        depth[node] = (uint8_t)((depth[node_trav] >= (depth[h_val] + 1)) ? depth[node_trav] : (depth[h_val] + 1));
+        tree_root[node_trav] = tree_root[h_val] = (uint16_t)node;
 
-        // and insert the new node in the heap
-        heap[LOW] = node++;
-        xf::compression::reduceHeap(tree_freq, heap, depth, heapLength, heap[LOW], LOW);
+        heap[LEAST_VAL] = node++;
+        xf::compression::reduceHeap(tree_freq, heap, depth, heapLength, heap[LEAST_VAL], LEAST_VAL);
     }
 
-    heap[--max_heap] = heap[LOW];
+    heap[--max_heap] = heap[LEAST_VAL];
 
-    // ***********************************************************
-    //              Generate Bit Lengths
-    // ***********************************************************
-
-    int base = base_extended;
     int overflow = 0;
     uint16_t bitlength_cntr[MAX_BITS + 1];
 
-// Initialize bitlength_cntr array
 genbitlen:
     for (uint32_t bits = 0; bits <= MAX_BITS; bits++) {
 #pragma HLS LOOP_TRIPCOUNT min = 15 max = 15
@@ -152,9 +152,6 @@ genbitlen:
         bitlength_cntr[bits] = 0;
     }
 
-    // Calculate bitlength
-    // overflow may occur for bltree
-    // Below is the top most element on heap
     tree_blen[heap[max_heap]] = 0;
 
     uint32_t temp_h = 0;
@@ -171,17 +168,13 @@ blen_update:
         }
         tree_blen[n_bgen] = bits;
 
-        // Overwrite dad tree
-        if (n_bgen > lcl_max_code) continue; // not a leaf node
+        if (n_bgen > lcl_max_code) continue;
 
         bitlength_cntr[bits]++;
         temp_h = h + 1;
-    } // for loop bit length gen ends
-    // printf("after a loop \n");
+    }
 
     if (overflow != 0) {
-    // printf("Inside overflow \n");
-    // Find the first bit length which could increase
     overflow_1:
         for (uint32_t i_over = overflow; i_over > 0; i_over -= 2) {
 #pragma HLS LOOP_TRIPCOUNT min = 15 max = 15
@@ -192,49 +185,33 @@ blen_update:
 #pragma HLS LOOP_TRIPCOUNT min = elems max = elems
                 bits--;
 
-            bitlength_cntr[bits]--;        // move one leaf down the tree
-            bitlength_cntr[bits + 1] += 2; // move one overflow item as its brother
+            bitlength_cntr[bits]--;
+            bitlength_cntr[bits + 1] += 2;
             bitlength_cntr[max_length]--;
         }
 
-    // printf("after bitlength do-while \n");
-    // Now recompute all bit lengths scanning in increasing frequency
-    // h is still equal to heapsize
-    // It is easier to reconstruct all the lengths instead of fixing only
-    // the wrong ones.
     overflow_2:
         for (uint32_t bits = max_length; bits != 0; bits--) {
 #pragma HLS LOOP_TRIPCOUNT min = 15 max = 15
 #pragma HLS PIPELINE II = 1
-            // printf("berore bitlength_cntr \n");
             uint32_t n_bgen = bitlength_cntr[bits];
 
             while (n_bgen != 0) {
 #pragma HLS LOOP_TRIPCOUNT min = elems max = elems
-                // printf("berore heap\n");
                 uint32_t m_bgen = heap[--temp_h];
                 if (m_bgen > lcl_max_code) continue;
 
                 if (tree_blen[m_bgen] != bits) {
-                    // printf("berore tree_blen\n");
                     tree_blen[m_bgen] = bits;
-                    // printf("after tree_blen\n");
                 }
                 n_bgen--;
             }
         }
-        // printf("after bits maxlength loop \n");
     }
 
-    // printf("Before Generate Codes \n");
-    // ***********************************************************
-    //              Generate Codes
-    // ***********************************************************
-    uint16_t next_code[MAX_BITS + 1]; // Next code value for each bit length
-    uint16_t code = 0;                // Running code value
+    uint16_t next_code[MAX_BITS + 1];
+    uint16_t code = 0;
 
-// Use distribution counts to generate the code values
-// without bit reversal
 gencode:
     for (uint32_t bits = 1; bits <= MAX_BITS; bits++) {
 #pragma HLS LOOP_TRIPCOUNT min = 15 max = 15
@@ -249,9 +226,7 @@ code_update:
 #pragma HLS PIPELINE II = 1
         uint32_t len = tree_blen[n_cgen];
         if (len == 0) continue;
-        // Now reverse the bits
         tree_codes[n_cgen] = reverseBits(next_code[len]++, len);
-        // printf("n_cgen %d code %d tree_blen %d\n", n_cgen, tree_codes[n_cgen], tree_blen[n_cgen]);
     }
 
     return lcl_max_code;

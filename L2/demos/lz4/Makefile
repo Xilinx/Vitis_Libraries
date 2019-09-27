@@ -182,8 +182,8 @@ XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_decompress.xclbi
 XO_FILES = $(TEMP_DIR)/xf_compress.xo \
 		   $(TEMP_DIR)/xf_decompress.xo
 
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/xil_lz4_compress_kernel.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/xil_lz4_decompress_kernel.cpp
+COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/lz4_compress_mm.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/lz4_decompress_mm.cpp
 
 COMPRESS_KERNEL_NAME = xilLz4Compress
 DECOMPRESS_KERNEL_NAME = xilLz4Decompress
@@ -231,7 +231,7 @@ CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
 
 #Host and Common sources
 SRCS += $(SRC_DIR)/src/host.cpp
-SRCS += $(TB_DIR)/xil_lz4.cpp
+SRCS += $(TB_DIR)/lz4.cpp
 SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp

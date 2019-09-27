@@ -184,8 +184,8 @@ XCLBIN_FILE_D = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/decompress.xclbin
 XO_FILES = $(TEMP_DIR)/xf_compress.xo \
 		   $(TEMP_DIR)/xf_decompress.xo
 
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/xil_snappy_compress_kernel.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/xil_snappy_decompress_kernel.cpp
+COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/snappy_compress_mm.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/snappy_decompress_mm.cpp
 
 COMPRESS_KERNEL_NAME = xilSnappyCompress
 DECOMPRESS_KERNEL_NAME = xilSnappyDecompress
@@ -250,7 +250,7 @@ CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
 SRCS += host.cpp
 
 EXTRA_OBJS += xil_snappy xcl2 cmdlineparser logger xxhash
-xil_snappy_SRCS = $(XFLIB_DIR)/L3/src/xil_snappy.cpp
+xil_snappy_SRCS = $(XFLIB_DIR)/L3/src/snappy.cpp
 xcl2_SRCS = $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 cmdlineparser_SRCS = $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 logger_SRCS = $(XFLIB_DIR)/common/libs/logger/logger.cpp

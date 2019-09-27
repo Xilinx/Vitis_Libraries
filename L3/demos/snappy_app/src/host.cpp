@@ -14,10 +14,10 @@
  * limitations under the License.
  *
  */
-#include <iomanip>
 #include "cmdlineparser.h"
-#include "xcl2.hpp"
-#include "xil_snappy.hpp"
+#include "snappy.hpp"
+
+using namespace xf::compression;
 
 int validate(std::string& inFile_name, std::string& outFile_name) {
     std::string command = "cmp " + inFile_name + " " + outFile_name;

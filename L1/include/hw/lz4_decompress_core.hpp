@@ -28,6 +28,20 @@
 typedef ap_uint<32> compressd_dt;
 typedef ap_uint<BIT> uintV_t;
 
+/**
+ * @brief Lz4 decompression engine.
+ *
+ * @tparam READ_STATE read state
+ * @tparam MATCH_STATE match state
+ * @tparam LOW_OFFSET_STATE matching the lowest distance characters
+ * @tparam LOW_OFFSET lowest offset
+ * @tparam HISTORY_SIZE match history size
+ *
+ * @param instream input hls stream
+ * @param outstream output hls stream
+ * @param _input_size input data size
+ * @param _output_size output data size
+ */
 template <int READ_STATE, int MATCH_STATE, int LOW_OFFSET_STATE, int LOW_OFFSET, int HISTORY_SIZE>
 void lz4_decompress_engine(hls::stream<uintV_t>& instream,
                            hls::stream<uintV_t>& outstream,

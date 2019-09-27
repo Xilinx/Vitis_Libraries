@@ -28,23 +28,6 @@
 
 namespace xf {
 namespace compression {
-/**
- * @brief This module reads DATAWIDTH data from stream until end of
- * stream happens and writes the data to DDR. Reading data from multiple
- * data streams is non-blocking which is done using empty() API.
- *
- * @tparam STREAM_SIZE_DT Stream size class instance
- * @tparam BURST_SIZE burst size of the data transfers
- * @tparam DATAWIDTH width of data bus
- * @tparam NUM_BLOCKS number of blocks
- *
- * @param out output memory address
- * @param output_idx output index
- * @param inStream input stream
- * @param endOfStream end flag for stream
- * @param compressedSize size of compressed stream
- * @param output_size output size
- */
 template <class STREAM_SIZE_DT, int BURST_SIZE, int DATAWIDTH, int NUM_BLOCKS>
 void s2mmEosNb(ap_uint<DATAWIDTH>* out,
                const uint32_t output_idx[PARALLEL_BLOCK],
@@ -52,6 +35,24 @@ void s2mmEosNb(ap_uint<DATAWIDTH>* out,
                hls::stream<bool> endOfStream[PARALLEL_BLOCK],
                hls::stream<uint32_t> compressedSize[PARALLEL_BLOCK],
                STREAM_SIZE_DT output_size[PARALLEL_BLOCK]) {
+    /**
+     * @brief This module reads DATAWIDTH data from stream until end of
+     * stream happens and writes the data to DDR. Reading data from multiple
+     * data streams is non-blocking which is done using empty() API.
+     *
+     * @tparam STREAM_SIZE_DT Stream size class instance
+     * @tparam BURST_SIZE burst size of the data transfers
+     * @tparam DATAWIDTH width of data bus
+     * @tparam NUM_BLOCKS number of blocks
+     *
+     * @param out output memory address
+     * @param output_idx output index
+     * @param inStream input stream
+     * @param endOfStream end flag for stream
+     * @param compressedSize size of compressed stream
+     * @param output_size output size
+     */
+
     const int c_byteSize = 8;
     const int c_wordSize = DATAWIDTH / c_byteSize;
     const int c_maxBurstSize = BURST_SIZE;
@@ -115,10 +116,14 @@ void s2mmEosNb(ap_uint<DATAWIDTH>* out,
                 uint32_t base_addr = output_idx[i] / c_wordSize;
                 uint32_t base_idx = base_addr + write_size[i];
                 uint32_t burst_size_in_words = (burst_size[i]) ? burst_size[i] : 0;
-                for (int j = 0; j < burst_size_in_words; j++) {
+
+                if (burst_size_in_words > 0) {
+                    for (int j = 0; j < burst_size_in_words; j++) {
 #pragma HLS PIPELINE II = 1
-                    out[base_idx + j] = local_buffer[i][j];
+                        out[base_idx + j] = local_buffer[i][j];
+                    }
                 }
+
                 write_size[i] += burst_size[i];
                 write_idx[i] = 0;
             }
@@ -151,6 +156,29 @@ void s2mmEosNbFreq(ap_uint<DATAWIDTH>* out,
                    const STREAM_SIZE_DT input_size[PARALLEL_BLOCK],
                    STREAM_SIZE_DT* dyn_ltree_freq,
                    STREAM_SIZE_DT* dyn_dtree_freq) {
+    /**
+     * @brief This module reads DATAWIDTH data from stream until end of
+     * stream happens and writes the data to DDR. Reading data from multiple
+     * data streams is non-blocking which is done using empty() API. It also
+     * collects the huffman codes and bit length data and copies to DDR.
+     *
+     * @tparam STREAM_SIZE_DT Stream size class instance
+     * @tparam BURST_SIZE burst size of the data transfers
+     * @tparam DATAWIDTH width of data bus
+     * @tparam NUM_BLOCKS number of blocks
+     *
+     * @param out output global memory address
+     * @param output_idx output index
+     * @param inStream input stream contains final output data
+     * @param endOfStream input stream indicates end of the input stream
+     * @param inStreamTree input stream contains huffman codes and bitlength data
+     * @param compressedSize output stream contains compressed size of each block
+     * @param output_size output global memory address that holds compress sizes
+     * @param input_size input global memory address indicates block size
+     * @param dyn_ltree_freq output literal frequency data
+     * @param dyn_dtree_freq output distance frequency data
+     *
+     */
     const int c_byteSize = 8;
     const int c_wordSize = DATAWIDTH / c_byteSize;
     const int c_maxBurstSize = BURST_SIZE;
@@ -186,7 +214,6 @@ void s2mmEosNbFreq(ap_uint<DATAWIDTH>* out,
     uint32_t loc = 0;
     uint32_t remaining_data = 0;
 
-    uint32_t inSizeCntr = 0;
     while (is_pending != 0) {
         done = false;
         for (; done == false;) {
@@ -220,10 +247,12 @@ void s2mmEosNbFreq(ap_uint<DATAWIDTH>* out,
                 uint32_t base_addr = output_idx[i] / c_wordSize;
                 uint32_t base_idx = base_addr + write_size[i];
                 uint32_t burst_size_in_words = (burst_size[i]) ? burst_size[i] : 0;
-                inSizeCntr += burst_size_in_words;
-                for (int j = 0; j < burst_size_in_words; j++) {
+
+                if (burst_size_in_words > 0) {
+                    for (int j = 0; j < burst_size_in_words; j++) {
 #pragma HLS PIPELINE II = 1
-                    out[base_idx + j] = local_buffer[i][j];
+                        out[base_idx + j] = local_buffer[i][j];
+                    }
                 }
                 write_size[i] += burst_size[i];
                 write_idx[i] = 0;
@@ -267,26 +296,27 @@ void s2mmEosNbFreq(ap_uint<DATAWIDTH>* out,
     }
 }
 
-/**
- * @brief This module reads DATAWIDTH data from stream based on
- * size stream and writes the data to DDR. Reading data from
- * multiple data streams is non-blocking which is done using empty() API.
- *
- * @tparam STREAM_SIZE_DT Stream size class instance
- * @tparam BURST_SIZE burst size of the data transfers
- * @tparam DATAWIDTH width of data bus
- * @tparam NUM_BLOCKS number of blocks
- *
- * @param out output memory address
- * @param output_idx output index
- * @param inStream input stream
- * @param input_size input size
- */
 template <class STREAM_SIZE_DT, int BURST_SIZE, int DATAWIDTH, int NUM_BLOCKS>
 void s2mmNb(ap_uint<DATAWIDTH>* out,
             const uint32_t output_idx[PARALLEL_BLOCK],
             hls::stream<ap_uint<DATAWIDTH> > inStream[PARALLEL_BLOCK],
             const STREAM_SIZE_DT input_size[PARALLEL_BLOCK]) {
+    /**
+     * @brief This module reads DATAWIDTH data from stream based on
+     * size stream and writes the data to DDR. Reading data from
+     * multiple data streams is non-blocking which is done using empty() API.
+     *
+     * @tparam STREAM_SIZE_DT Stream size class instance
+     * @tparam BURST_SIZE burst size of the data transfers
+     * @tparam DATAWIDTH width of data bus
+     * @tparam NUM_BLOCKS number of blocks
+     *
+     * @param out output memory address
+     * @param output_idx output index
+     * @param inStream input stream
+     * @param input_size input size
+     */
+
     const int c_byteSize = 8;
     const int c_wordSize = DATAWIDTH / c_byteSize;
     const int c_maxBurstSize = c_wordSize * BURST_SIZE;
@@ -348,9 +378,12 @@ void s2mmNb(ap_uint<DATAWIDTH>* out,
                 uint32_t base_addr = output_idx[i] + write_size[i];
                 uint32_t base_idx = base_addr / c_wordSize;
                 uint32_t burst_size_in_words = (burst_size[i]) ? ((burst_size[i] - 1) / c_wordSize + 1) : 0;
-                for (int j = 0; j < burst_size_in_words; j++) {
+
+                if (burst_size_in_words > 0) {
+                    for (int j = 0; j < burst_size_in_words; j++) {
 #pragma HLS PIPELINE II = 1
-                    out[base_idx + j] = local_buffer[i][j];
+                        out[base_idx + j] = local_buffer[i][j];
+                    }
                 }
                 write_size[i] += burst_size[i];
                 write_idx[i] = 0;
@@ -367,27 +400,28 @@ void s2mmNb(ap_uint<DATAWIDTH>* out,
     }
 }
 
-/**
- * @brief This module reads DATAWIDTH data from stream based on
- * size stream and writes the data to DDR.
- *
- * @tparam STREAM_SIZE_DT Stream size class instance
- * @tparam BURST_SIZE burst size of the data transfers
- * @tparam DATAWIDTH width of data bus
- * @tparam NUM_BLOCKS number of blocks
- *
- * @param out output memory address
- * @param output_idx output index
- * @param inStream input stream
- * @param endOfStream stream to indicate end of data stream
- * @param outSize output data size
- */
 template <class STREAM_SIZE_DT, int BURST_SIZE, int DATAWIDTH, int NUM_BLOCKS>
 void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
                    hls::stream<ap_uint<DATAWIDTH> >& inStream,
                    hls::stream<bool>& endOfStream,
                    hls::stream<uint32_t>& outSize,
                    uint32_t* output_size) {
+    /**
+     * @brief This module reads DATAWIDTH data from stream based on
+     * size stream and writes the data to DDR.
+     *
+     * @tparam STREAM_SIZE_DT Stream size class instance
+     * @tparam BURST_SIZE burst size of the data transfers
+     * @tparam DATAWIDTH width of data bus
+     * @tparam NUM_BLOCKS number of blocks
+     *
+     * @param out output memory address
+     * @param output_idx output index
+     * @param inStream input stream
+     * @param endOfStream stream to indicate end of data stream
+     * @param outSize output data size
+     */
+
     uint32_t out_idx = 0;
 s2mm_eos_simple:
     for (bool eos = endOfStream.read(); eos == false; eos = endOfStream.read())
@@ -398,134 +432,19 @@ s2mm_eos_simple:
     output_size[0] = outSize.read();
 }
 
-/**
- * @brief This module reads DATAWIDTH data from stream based on
- * size stream and writes the data to DDR. Reading data from
- * multiple data streams is non-blocking which is done using empty() API.
- *
- * @tparam STREAM_SIZE_DT Stream size class instance
- * @tparam BURST_SIZE burst size of the data transfers
- * @tparam DATAWIDTH width of data bus
- * @tparam NUM_BLOCKS number of blocks
- *
- * @param out output memory address
- * @param output_idx output index
- * @param inStream input stream
- * @param endOfStream stream to indicate end of data stream
- * @param outSize output data size
- */
-template <class STREAM_SIZE_DT, int BURST_SIZE, int DATAWIDTH, int NUM_BLOCKS>
-void s2mmEosNbZlib(ap_uint<DATAWIDTH>* out,
-                   const uint32_t output_idx[PARALLEL_BLOCK],
-                   hls::stream<ap_uint<DATAWIDTH> >& inStream,
-                   hls::stream<bool>& endOfStream,
-                   STREAM_SIZE_DT output_size[PARALLEL_BLOCK],
-                   uint32_t outSize) {
-    const int c_byteSize = 8;
-    const int c_wordSize = DATAWIDTH / c_byteSize;
-    const int c_maxBurstSize = BURST_SIZE;
-
-    ap_uint<NUM_BLOCKS> is_pending = 1;
-    ap_uint<DATAWIDTH> local_buffer[PARALLEL_BLOCK][BURST_SIZE];
-#pragma HLS ARRAY_PARTITION variable = local_buffer dim = 1 complete
-#pragma HLS RESOURCE variable = local_buffer core = RAM_2P_LUTRAM
-
-    ap_uint<PARALLEL_BLOCK> end_of_stream = 0;
-    uint32_t read_size[PARALLEL_BLOCK];
-    uint32_t write_size[PARALLEL_BLOCK];
-    uint32_t write_idx[PARALLEL_BLOCK];
-    uint32_t burst_size[PARALLEL_BLOCK];
-#pragma HLS ARRAY PARTITION variable = read_size dim = 0 complete
-#pragma HLS ARRAY PARTITION variable = write_size dim = 0 complete
-#pragma HLS ARRAY PARTITION variable = write_idx dim = 0 complete
-#pragma HLS ARRAY PARTITION variable = burst_size dim = 0 complete
-
-    for (int i = 0; i < PARALLEL_BLOCK; i++) {
-#pragma HLS UNROLL
-        read_size[i] = 0;
-        write_size[i] = 0;
-        write_idx[i] = 0;
-    }
-
-    bool done = false;
-    uint32_t loc = 0;
-    uint32_t remaining_data = 0;
-
-    while (is_pending != 0) {
-        done = false;
-        // printme("Running front done %d !!\n", done);
-        for (; done == false;) {
-#pragma HLS PIPELINE II = 1
-            for (uint8_t pb = 0; pb < NUM_BLOCKS; pb++) {
-#pragma HLS UNROLL
-                if (!endOfStream.empty()) {
-                    bool eos_flag = endOfStream.read();
-                    local_buffer[pb][write_idx[pb]] = inStream.read();
-                    if (eos_flag) {
-                        // printme("eos_flag %d pb %d\n", eos_flag, pb);
-                        end_of_stream.range(pb, pb) = 1;
-                        done = true;
-                    } else {
-                        // printme("eos_flag %d pb %d\n", eos_flag, pb);
-                        read_size[pb] += 1;
-                        write_idx[pb] += 1;
-                    }
-                    if (read_size[pb] >= BURST_SIZE) {
-                        done = true;
-                    }
-                    burst_size[pb] = c_maxBurstSize;
-                    if (end_of_stream.range(pb, pb) && (read_size[pb] - write_size[pb]) < burst_size[pb]) {
-                        burst_size[pb] = (read_size[pb] > write_size[pb]) ? (read_size[pb] - write_size[pb]) : 0;
-                    }
-                }
-            }
-        }
-
-        // printme("Waiting for sometihg \n");
-
-        for (int i = 0; i < PARALLEL_BLOCK; i++) {
-            // Write the data to global memory
-            if ((read_size[i] > write_size[i]) && (read_size[i] - write_size[i]) >= burst_size[i]) {
-                uint32_t base_addr = output_idx[i] / c_wordSize;
-                uint32_t base_idx = base_addr + write_size[i];
-                uint32_t burst_size_in_words = (burst_size[i]) ? burst_size[i] : 0;
-                for (int j = 0; j < burst_size_in_words; j++) {
-#pragma HLS PIPELINE II = 1
-                    out[base_idx + j] = local_buffer[i][j];
-                }
-                write_size[i] += burst_size[i];
-                write_idx[i] = 0;
-            }
-        }
-
-        for (int i = 0; i < NUM_BLOCKS; i++) {
-#pragma HLS UNROLL
-            if (end_of_stream.range(i, i)) {
-                is_pending.range(i, i) = 0;
-            } else {
-                is_pending.range(i, i) = 1;
-            }
-            // printme("i %d is_pending %d \n", i, (uint8_t)is_pending.range(i,i));
-        }
-
-        // printme("Running last!! %d\n", done);
-    }
-
-    output_size[0] = outSize;
-}
-
-/**
- * @brief This module reads N-bit data from stream based on
- * size stream and writes the data to DDR. N is template parameter DATAWIDTH.
- *
- * @tparam DATAWIDTH Width of the input data stream
- *
- * @param out output memory address
- * @param inStream input hls stream
- * @param output_size output data size
- */
 template <int DATAWIDTH>
 void s2mmSimple(ap_uint<DATAWIDTH>* out, hls::stream<ap_uint<DATAWIDTH> >& inStream, uint32_t output_size) {
+    /**
+     * @brief This module reads N-bit data from stream based on
+     * size stream and writes the data to DDR. N is template parameter DATAWIDTH.
+     *
+     * @tparam DATAWIDTH Width of the input data stream
+     *
+     * @param out output memory address
+     * @param inStream input hls stream
+     * @param output_size output data size
+     */
+
     uint8_t factor = DATAWIDTH / 8;
     uint32_t itrLim = 1 + ((output_size - 1) / factor);
 s2mm_simple:
