@@ -19,9 +19,11 @@
 Quality and Performance
 *********************************************
 
-This section shows the quality and peformance results for this library.
+This section shows the quality and peformance results.
 
 .. toctree::
    :maxdepth: 1
 
-   ../guide_L2/MatrixDecomposition/gesvdj/gesvdj.rst
+   ../guide_L2/Benchmark/gtsv.rst
+   ../guide_L2/Benchmark/gesvdj.rst
+   ../guide_L2/Benchmark/gesvj.rst

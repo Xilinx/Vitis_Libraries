@@ -1,8 +1,8 @@
-# XF Solver Library
+# Vitis Solver Library
 
 ## Overview
 
-XF Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers.
+Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers.
 
 Currently this includes the following operations for dense matrix
   - Matrix decomposition

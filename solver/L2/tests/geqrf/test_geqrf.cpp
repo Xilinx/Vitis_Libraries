@@ -74,21 +74,25 @@ int main(int argc, const char* argv[]) {
     }
     if (!parser.getCmdOption("-runs", num_str)) {
         num_runs = 1;
+        std::cout << "INFO:row size M is not set!\n";
     } else {
         num_runs = std::stoi(num_str);
     }
     if (!parser.getCmdOption("-M", num_str)) {
         numRow = 16;
+        std::cout << "INFO:row size M is not set!\n";
     } else {
         numRow = std::stoi(num_str);
     }
     if (!parser.getCmdOption("-N", num_str)) {
         numCol = 16;
+        std::cout << "INFO:column size N is not set!\n";
     } else {
         numCol = std::stoi(num_str);
     }
     if (!parser.getCmdOption("-seed", num_str)) {
         seed = 12;
+        std::cout << "INFO:seed is not set!\n";
     } else {
         seed = std::stoi(num_str);
     }

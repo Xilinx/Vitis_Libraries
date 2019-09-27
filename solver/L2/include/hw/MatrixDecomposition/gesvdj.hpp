@@ -1090,7 +1090,7 @@ Loop_init_I:
 
 /**
  * @brief Symmetric Matrix Jacobi based Singular Value Decomposition (GESVDJ) .
-   \f{equation*} {A = U \Sigma {V}^T, }\f}
+   \f{equation*} {A = U \Sigma {V}^T}\f}
    where \f$A\f$ is a dense symmetric matrix of size \f$m \times m\f$, \f$U\f$ and \f$V\f$
    are \f$m \times m\f$ matrix with orthonormal columns, and \f$\Sigma\f$ is diagonal matrix.\n
    The maximum matrix size supported in FPGA is templated by NMAX.

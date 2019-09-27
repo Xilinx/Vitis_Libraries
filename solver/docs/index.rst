@@ -14,51 +14,46 @@
    limitations under the License.
 
 **********************
-XF Solver Library
+Vitis Solver Library
 **********************
 
-XF Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers.
+Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers.
 
 Currently this includes the following operations for dense matrix
 
-  - Matrix decomposition
+* Matrix decomposition
 
-    - Cholesky decomposition for symmetric positive definite matrix
-    - LU decomposition without pivoting and with partial pivoting
-    - QR decomposition for general matrix
-    - SVD decomposition (single value decomposition) for symmetric matrix and non-symmetric matrix (Jacobi method)
+  * Cholesky decomposition for symmetric positive definite matrix
+  * LU decomposition without pivoting and with partial pivoting
+  * QR decomposition for general matrix
+  * SVD decomposition (single value decomposition) for symmetric matrix and non-symmetric matrix (Jacobi method)
 
-  - Linear solver
+* Linear solver
 
-    - Tridiagonal linear solver (Parallel cyclic reduction method)
-    - Linear solver for triangular matrix
-    - Linear solver for symmetric and non-symmetric matrix
-    - Matrix inverse for symmetric and non-symmetric matrix
+  * Tridiagonal linear solver (Parallel cyclic reduction method)
+  * Linear solver for triangular matrix
+  * Linear solver for symmetric and non-symmetric matrix
+  * Matrix inverse for symmetric and non-symmetric matrix
 
-  - Eigenvalue solver
+* Eigenvalue solver
 
-    - Jacobi eigenvalue solver for symmetric matrix
+  * Jacobi eigenvalue solver for symmetric matrix
 
-Overview
-=========
 
 .. toctree::
+   :caption: Overview
    :maxdepth: 2
 
    overview.rst
 
-User Guide
-===========
-
 .. toctree::
+   :caption: User Guide
    :maxdepth: 2
 
    guide_L2/L2.rst
 
-Benchmark Result
-================
-
 .. toctree::
+   :caption: Benchmark Result
    :maxdepth: 1
    
    benchmark/benchmark.rst

@@ -103,7 +103,7 @@ LoopSweeps:
  * @brief This function computes the LU decomposition (without pivoting) of matrix \f$A\f$ \n
           \f{equation*} {A = L U}\f}
           where \f$A\f$ is a dense matrix of size \f$n \times n\f$, \f$L\f$ is a lower triangular matrix with unit
- diagonal, and \f$U\f$ is a upper triangular matrix. This function does not implement pivoting.\n
+ diagonal, and \f$U\f$ is an upper triangular matrix. This function does not implement pivoting.\n
    The maximum matrix size supported in FPGA is templated by NMAX.
  *
  * @tparam T data type (support float and double)
