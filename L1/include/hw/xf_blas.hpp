@@ -16,7 +16,7 @@
 
 /**
  * @file xf_blas.hpp
- * @brif Top-level header for XF BLAS Library.
+ * @brif Top-level header for Vitis BLAS Library.
  *
  */
 

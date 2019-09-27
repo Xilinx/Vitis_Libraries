@@ -18,7 +18,7 @@
  * @file swap.hpp
  * @brief BLAS Level 1 swap template function implementation.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_SWAP_HPP

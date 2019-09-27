@@ -19,7 +19,7 @@
 
 /**
  * @file xf_blas.hpp
- * @brief Top-level header for XF BLAS Libaray level-3.
+ * @brief Top-level header for Vitis BLAS Libaray level-3.
  */
 
 #include "xf_blas/wrapper.hpp"
