@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __WRITE_INFO__
-#define __WRITE_INFO__
+#ifndef GQE_WRITE_INFO_HPP
+#define GQE_WRITE_INFO_HPP
 
 #include "gqe_types.hpp"
 #include <ap_int.h>
 #include <hls_stream.h>
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 // for gqe_aggr
 template <int _WStrm, int _Lens>
@@ -28,5 +32,9 @@ void write_info(hls::stream<ap_uint<_WStrm> >& info_strm, ap_uint<_WStrm>* buff)
         buff[addr++] = info_strm.read();
     }
 }
+
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
 #endif

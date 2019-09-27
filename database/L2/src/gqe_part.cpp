@@ -24,6 +24,10 @@
 #include "gqe_blocks/write_for_hp.hpp"
 #include "xf_database/hash_partition.hpp"
 
+namespace xf {
+namespace database {
+namespace gqe {
+
 void load_config(ap_uint<8 * TPCH_INT_SZ * VEC_LEN> ptr[9],
                  const int col_index,
                  bool& mk_on,
@@ -151,6 +155,10 @@ void hash_partition_wrapper(bool mk_on,
         mk_on, k_depth, bit_num_strm, key_strm, pld_strm, e_strm, o_bkpu_num_strm, o_nm_strm, out_strm);
 }
 
+} // namespace gqe
+} // namespace database
+} // namespace xf
+
 /**
  * @breif GQE partition kernel
  *
@@ -192,7 +200,10 @@ extern "C" void gqePart(const int k_depth,
 #pragma HLS INTERFACE s_axilite port = buf_B bundle = control
 #pragma HLS INTERFACE s_axilite port = buf_D bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
-// clang-format on
+
+    // clang-format on
+    using namespace xf::database::gqe;
+
 #pragma HLS DATAFLOW
 
     bool mk_on;

@@ -100,6 +100,8 @@ extern "C" void gqeAggr(                                        //
 // clang-format on
 #pragma HLS dataflow
 
+    using namespace xf::database::gqe;
+
     const int n_channel = 4;
     const int n_column = 8;
 

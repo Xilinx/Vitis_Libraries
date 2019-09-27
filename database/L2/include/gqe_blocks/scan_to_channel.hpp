@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef GQE_SCAN_TO_CHANNEL_H
-#define GQE_SCAN_TO_CHANNEL_H
+#ifndef GQE_SCAN_TO_CHANNEL_HPP
+#define GQE_SCAN_TO_CHANNEL_HPP
 
 #ifndef __SYNTHESIS__
 #include <stdio.h>
@@ -26,6 +26,10 @@
 #include "xf_database/utils.hpp"
 #include "xf_database/types.hpp"
 #include <iostream>
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 template <int burst_len, int vec_len, int size0, int col_num>
 void _read_to_colvec(ap_uint<8 * size0 * vec_len>* ptr,
@@ -263,4 +267,8 @@ void scan_wrapper(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* ptr_A,
     }
 }
 
-#endif // GQE_SCAN_TO_CHANNEL_H
+} // namespace gqe
+} // namespace database
+} // namespace xf
+
+#endif // GQE_SCAN_TO_CHANNEL_HPP

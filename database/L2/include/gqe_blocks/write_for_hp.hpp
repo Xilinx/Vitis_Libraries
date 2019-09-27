@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _WRITE_TABLE_H_
-#define _WRITE_TABLE_H_
+#ifndef GQE_WRITE_TABLE_HPP
+#define GQE_WRITE_TABLE_HPP
 
 #ifndef __SYNTHESIS__
 #include <iostream>
@@ -23,6 +23,10 @@
 #include <ap_int.h>
 #include <hls_stream.h>
 #include "gqe_part.hpp"
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 template <int elem_size, int vec_len, int col_num>
 void countForBurst(hls::stream<ap_uint<elem_size> > i_post_Agg[col_num],
@@ -254,5 +258,9 @@ void writeTable(hls::stream<ap_uint<elem_size> > post_Agg[col_num],
     burstWrite<elem_size, vec_len, col_num>(counter_post_Agg, mid_write_cfg_strm, mid_bit_num_strm, ptr,
                                             counter_loc_strm, counter_nm_strm, counter_rnm_strm);
 }
+
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
 #endif

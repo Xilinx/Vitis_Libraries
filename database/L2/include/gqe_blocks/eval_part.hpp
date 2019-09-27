@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __EVAL_PART__
-#define __EVAL_PART__
+#ifndef GQE_EVAL_PART_HPP
+#define GQE_EVAL_PART_HPP
 
 #include <hls_stream.h>
 #include <ap_int.h>
@@ -23,6 +23,10 @@
 #include "xf_utils_hw/stream_dup.hpp"
 #include "xf_database/dynamic_eval.hpp"
 #include "gqe_blocks/gqe_types.hpp"
+
+namespace xf {
+namespace database {
+namespace gqe {
 
 // scaling
 template <int WStrm = 32>
@@ -297,5 +301,9 @@ void multi_dynamic_eval_wrapper(hls::stream<ap_uint<32> >& alu_cfg_strm,
                                                    e_in_strm[i], out_strm[i], e_out_strm[i]);
     }
 }
+
+} // namespace gqe
+} // namespace database
+} // namespace xf
 
 #endif
