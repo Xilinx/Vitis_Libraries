@@ -51,7 +51,19 @@ int main() {
 
     // get test result
     ap_uint<2048> result;
-    rsa_test(message, modulus, exponent, result);
+    hls::stream<ap_uint<32> > messageStrm, modulusStrm, exponentStrm, resultStrm;
+
+    for (int i = 0; i < 64; i++) {
+        messageStrm.write(message.range(i * 32 + 31, i * 32));
+        modulusStrm.write(modulus.range(i * 32 + 31, i * 32));
+        exponentStrm.write(exponent.range(i * 32 + 31, i * 32));
+    }
+
+    rsa_test(messageStrm, modulusStrm, exponentStrm, resultStrm);
+
+    for (int i = 0; i < 64; i++) {
+        result.range(i * 32 + 31, i * 32) = resultStrm.read();
+    }
     //
     std::cout << "modulus:  " << modulus << std::endl;
     std::cout << "pub key:  " << exponent << std::endl;

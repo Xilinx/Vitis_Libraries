@@ -16,9 +16,9 @@
 
 source settings.tcl
 
-set PROJ "aesTest.prj"
+set PROJ "prj"
 set SOLN "solution1"
-set CLKP 3.33
+set CLKP 4
 
 open_project -reset $PROJ
 
@@ -30,7 +30,7 @@ open_solution -reset $SOLN
 
 set_part $XPART
 create_clock -period $CLKP -name default
-set_clock_uncertainty 1.05
+set_clock_uncertainty 0.42
 
 if {$CSIM == 1} {
   csim_design

@@ -15,4 +15,9 @@
  */
 
 #include "xf_security/asymmetric.hpp"
-void rsa_test(ap_uint<2048> message, ap_uint<2048> N, ap_uint<2048> key, ap_uint<2048>& result);
+#include <hls_stream.h>
+
+void rsa_test(hls::stream<ap_uint<32> >& messageStrm,
+              hls::stream<ap_uint<32> >& NStrm,
+              hls::stream<ap_uint<32> >& keyStrm,
+              hls::stream<ap_uint<32> >& resultStrm);
