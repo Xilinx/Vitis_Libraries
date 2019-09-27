@@ -27,7 +27,7 @@ BLAKE2 is a set of cryptographic hash functions defined in
 `RFC 7693`_: The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC).
 
 The BLAKE2 family consists of 2 hash functions, and both of them provide security superior to SHA-2.
-The BLAKE2B is optimized for 64-bit platforms, while the BLAKE2S is optimized for 8- to 32-bit platforms.
+The BLAKE2B is optimized for 64-bit platforms, while the BLAKE2S is optimized for 8-bit to 32-bit platforms.
 
 Currently this library supports BLAKE2B algorithm.
 
@@ -52,8 +52,8 @@ As we can see from the figure, the BLAKE2B hash calculation can be partitioned i
 * The disgest part iteratively computes the hash values. Loop-carried dependency
   is enforced by the algorithm, and thus this part cannot reach II=1.
 
-As these two parts can work independently, they are designed into parallel dataflow processes,
-connected by streams (FIFO's).
+As these two parts can work independently, they are designed into parallel dataflow process,
+connected by streams (FIFOs).
 
 Performance
 ===========

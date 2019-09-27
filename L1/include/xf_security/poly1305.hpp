@@ -17,7 +17,7 @@
 /**
  * @file poly1305.hpp
  * @brief header file for poly1305.
- * This file part of XF Security Library.
+ * This file part of Vitis Security Library.
  *
  */
 

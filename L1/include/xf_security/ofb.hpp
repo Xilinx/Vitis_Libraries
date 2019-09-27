@@ -18,7 +18,7 @@
  *
  * @file ofb.hpp
  * @brief header file for Output Feedback (OFB) block cipher mode of operation.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing OFB mode with AES-128/192/256 and DES.
  * Loop-carried dependency is encforced by both encryption and decryption part of OFB mode.

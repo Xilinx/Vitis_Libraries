@@ -18,7 +18,7 @@
  *
  * @file blake2b.hpp
  * @brief header file for BLAKE2B related functions, including mixing, compression, padding, and computing functions.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail The algorithm takes a message and a key of arbitrary length (0 <= message length <= 2^128 bytes, 0 <= key
  * length <= 64 bytes) as its input,

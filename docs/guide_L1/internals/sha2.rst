@@ -49,11 +49,11 @@ As we can see from the figure, the SHA-2 hash calculation can be partitioned int
   and informs the down-stream parts that how many blocks do we have in this message.
   The message word size is 32-bit for SHA-224/SHA-256, 64-bit for the rest 4 algorithms,
   and each block has a size of 16 message words.
-* The disgest part iteratively computes the hash values. Loop-carried dependency
+* The digest part iteratively computes the hash values. Loop-carried dependency
   is enforced by the algorithm, and thus this part cannot reach II=1.
 
-As these two parts can work independently, they are designed into parallel dataflow processes,
-connected by streams (FIFO's).
+As these two parts can work independently, they are designed into parallel dataflow process,
+connected by streams (FIFOs).
 
 The dup_strm module is used to duplicate the number of block stream,
 and generateMsgSchedule module is responsible for generating the message word stream in sequence.
@@ -64,7 +64,7 @@ Performance
 SHA-224 and SHA-256
 -------------------
 
-As SHA-224 is simply truncated SHA-256 with different initilization values, they share
+As SHA-224 is simply truncated SHA-256 with different initialization values, and they share
 the same internal structure, as illustrated in the figure above.
 
 A single instance of SHA-256/SHA-224 function processes input message at the rate of
@@ -99,7 +99,7 @@ The hardware resource utilizations of SHA-256 is listed in :numref:`tab1SHA256` 
 SHA-384, SHA-512, SHA-512/224, and SHA-512/256
 ----------------------------------------------
 
-As SHA-384 and SHA-512/t is simply truncated SHA-512 with different initilization values, they share
+As SHA-384 and SHA-512/t is simply truncated SHA-512 with different initialization values, they share
 the same internal structure, as illustrated in the figure above.
 
 A single instance of one of SHA-384/SHA-512/SHA512-224/SHA512-256 processes input message at the rate of

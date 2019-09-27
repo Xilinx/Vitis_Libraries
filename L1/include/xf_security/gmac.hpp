@@ -17,7 +17,7 @@
 /**
  * @file gmac.hpp
  * @brief header file for Advanced Encryption Standard related working mode GMAC.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing multiplication in GF128 field, preMAC function to generate E(K,Y0) and hash subkey, and 2
  * overloads for GCM and GMAC.

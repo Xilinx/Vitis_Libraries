@@ -18,7 +18,7 @@
  *
  * @file sha3.hpp
  * @brief header file for SHA-3 related functions, including permutation-based hash and extendable-ouput functions.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail KECCAK_f is the permutation function which is equivalent to KECCAK-p[1600,24] as defined in the standard.
  * sha3Digest is the main digest part which is responsible for absorbing the input 64-bit message stream into 1600-bit

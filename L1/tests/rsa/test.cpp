@@ -16,7 +16,7 @@
 
 #include "test.hpp"
 void rsa_test(ap_uint<2048> message, ap_uint<2048> N, ap_uint<2048> key, ap_uint<2048>& result) {
-    xf::security::rsa<64, 32> inst;
+    xf::security::rsa<16, 128> inst;
     inst.updateKey(N, key);
     inst.process(message, result);
 }

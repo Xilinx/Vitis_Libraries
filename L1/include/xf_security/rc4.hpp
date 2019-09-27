@@ -17,7 +17,7 @@
 /**
  * @file rc4.h
  * @brief header file for Rivest Cipher 4(also known as ARC4 or ARCFOUR).
- * This file part of XF Security Library.
+ * This file part of Vitis Security Library.
  *
  */
 

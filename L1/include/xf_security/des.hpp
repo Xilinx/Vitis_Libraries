@@ -17,7 +17,7 @@
 /**
  * @file des.hpp
  * @brief header file for Data Encryption Standard relate function.
- * This file part of XF Security Library.
+ * This file part of Vitis Security Library.
  *
  * @detail Currently we have Aes256_Encryption for AES256 standard.
  */

@@ -20,10 +20,10 @@ HMAC Algorithms
 .. toctree::
    :maxdepth: 1
 
-HMAC is a message authentication code (MAC) using a hash function. It combines with any cryptographic hash function,for example,md5,sha1,sha256.
-Hash function is wrapped to a class as one template parameter in hmac and the wrapper class only has a static function(named hash) involving the hash function.
+HMAC is a message authentication code (MAC) using a hash function. It combines with any cryptographic hash function, for example, md5, sha1, sha256.
+Hash function is wrapped to a class as one template parameter in HMAC and the wrapper class only has a static function involving the hash function.
 HMAC uses the wrapper's hash function directly inside. The design makes combination HMAC algorithm with hash function more flexible. 
-In xf_security lib, the key width(keyW), message width(msgW), key and message length width(lenW), hash value width(hshW) and block size of each hash function are list as below.
+In xf_security lib, the key width (keyW), message width (msgW), key and message length width (lenW), hash value width (hshW) and block size of each hash function are list as below.
 
 Configuration
 =================================
@@ -51,9 +51,9 @@ Configuration
 Implementation
 =======================
 
-There are two implementations: in sequence and in parellel. If the macro XF_SECURITY_DECRYPT_HMAC_DATAFLOW is not defined, hmac calls the sequence version. The default is no definition it.
-Hmac consists of 3 parts: compute kipad and kopad, mhsh=hash(kipad+msg), hash(kopad+msh).
-kipad and kopad are  derived from the input key. When the length of key is greater than hash's block size, K=hash(key). kipad is K XOR kip while kopad is K XOR kop, in which kip is a constant consisting of repeated bytes valued 0x36 block size times and kop is repeating 0x5c.
+There are two implementations: in sequence and in parallel. If the macro `XF_SECURITY_DECRYPT_HMAC_DATAFLOW` is not defined (by default), HMAC will call the sequence version.
+HMAC consists of 3 parts: compute kipad and kopad, `mhsh=hash(kipad+msg)`, `hash(kopad+msh)`.
+kipad and kopad are derived from the input key. When the length of key is greater than hash's block size, `K=hash(key)`. kipad is `K XOR kip` while kopad is `K XOR kop`, in which kip is a constant consisting of repeated bytes valued 0x36 block size times and kop is repeating 0x5c.
 
 .. image:: /images/hmac_detail.png
    :alt: hmac
@@ -62,7 +62,7 @@ kipad and kopad are  derived from the input key. When the length of key is great
 
 
 
-Performance(Device: U250)
+Performance (Device: U250)
 =================================
 
 ============ ===== ====== ====== ======= ====== ===== ====== ====== =======

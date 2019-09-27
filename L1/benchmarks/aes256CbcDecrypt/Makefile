@@ -19,7 +19,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_CASE_ROOT ?= $(CUR_DIR)
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/benchmarks/*}')
 
 .SECONDEXPANSION:
 
@@ -195,11 +195,11 @@ debug:
 # -----------------------------------------------------------------------------
 # TODO:                          kernel setup
 
-XFLIB_DIR = $(abspath $(XF_CASE_ROOT)/../../../)
+XFLIB_DIR = $(abspath $(XF_PROJ_ROOT))
 KSRC_DIR = $(CUR_DIR)/kernel
 
-HLS_DIR	= $(XF_CASE_ROOT)/../../include
-HLS_DIR2 = $(XF_CASE_ROOT)/../../../L1/include
+HLS_DIR	= $(XF_PROJ_ROOT)/L2/include
+HLS_DIR2 = $(XF_PROJ_ROOT)/L1/include
 
 XCLBIN_NAME := aes256CbcDecryptKernel
 KERNELS := aes256CbcDecryptKernel:aes256CbcDecryptKernel.cpp

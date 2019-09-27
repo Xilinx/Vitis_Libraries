@@ -23,7 +23,7 @@ The MD4/MD5 Message-Digest Algorithms
 Overview
 ========
 
-The MD4/MD5 Message-Digest Algorithm is a hash-based cryptographic function, it takes a message of arbitrary length as its input, produces a 128-bit digest. Both MD4 and MD5 have a padding and appending process before digest the message of arbitrary length. The difference between MD4 and MD5 is the digest process, the MD4 have 3 round hash calculations while the MD5 have 4. For each round, both of them have intra loop-carried dependencies.
+The MD4/MD5 Message-Digest Algorithm is a hash-based cryptographic function. It takes a message of arbitrary length as its input and produces a 128-bit digest. Both MD4 and MD5 have a padding and appending process before digest the message of arbitrary length. The difference between MD4 and MD5 is the digest process. The MD4 have 3 round hash calculations while the MD5 have 4. For each round, both of them have intra loop-carried dependencies.
 
 Currently this library supports the following algorithms:
 
@@ -56,7 +56,7 @@ As we can see from the figures, the hash calculation can be partitioned into two
 
 * The digest part iteratively computes the hash values. Loop-carried dependency is enforced by the algorithm itself, thus this part cannot reach an initiation interval (II) = 1.
 
-As these two parts can work independently, they are designed into parallel dataflow processes, connected by streams (FIFO’s).
+As these two parts can work independently, they are designed into parallel dataflow processes, connected by streams (FIFOs).
 
 Performance
 ===========

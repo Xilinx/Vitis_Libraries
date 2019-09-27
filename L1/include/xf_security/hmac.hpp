@@ -18,7 +18,7 @@
 /**
  * @file hmac.hpp
  * @brief header file for HMAC.
- * This file part of XF Security Library.
+ * This file part of Vitis Security Library.
  * TODO
  * @detail .
  */

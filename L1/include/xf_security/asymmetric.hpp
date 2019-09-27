@@ -26,7 +26,7 @@ namespace security {
 /**
  * @brief RSA encryption/decryption class
  *
- * @tparam BlockWidth Basic multiplication width, should be picked according to cards.
+ * @tparam BlockWidth Basic multiplication width, should be picked according to cards. Current best is 16.
  * @tparam BlockNum Number of Blocks. keyLength = BlockNum * BlockWidth.
  */
 template <int BlockWidth, int BlockNum>
@@ -110,64 +110,72 @@ class rsa {
         upper = result.range(BlockWidth * 2 - 1, BlockWidth);
     }
 
+    void arrayMulAdd(ap_uint<BlockWidth> apart,
+                     ap_uint<BlockWidth * BlockNum> b,
+                     ap_uint<BlockWidth * BlockNum>& lower,
+                     ap_uint<BlockWidth * BlockNum>& higher,
+                     ap_uint<BlockWidth>& res) {
+#pragma HLS inline
+        const int BlockGrp = BlockNum / 4;
+
+        ap_uint<BlockWidth* BlockNum> tmplower = lower;
+
+        for (int j = 0; j < 4; j++) {
+#pragma HLS pipeline
+            ap_uint<BlockGrp * BlockWidth> lowergrp, highergrp;
+
+            for (int i = 0; i < BlockGrp; i++) {
+#pragma HLS unroll
+                ap_uint<BlockWidth> bpart, lowerpart, higherpart, newlowerpart, newhigherpart;
+
+                bpart = b.range(i * BlockWidth + BlockWidth - 1, i * BlockWidth);
+                lowerpart = tmplower.range(i * BlockWidth + BlockWidth - 1, i * BlockWidth);
+                higherpart = higher.range(i * BlockWidth + BlockWidth - 1, i * BlockWidth);
+
+                elementMulAdd(apart, bpart, lowerpart, higherpart, newlowerpart, newhigherpart);
+
+                lowergrp.range(i * BlockWidth + BlockWidth - 1, i * BlockWidth) = newlowerpart;
+                highergrp.range(i * BlockWidth + BlockWidth - 1, i * BlockWidth) = newhigherpart;
+            }
+
+            b >>= (BlockGrp * BlockWidth);
+            tmplower >>= (BlockGrp * BlockWidth);
+            higher >>= (BlockGrp * BlockWidth);
+
+            tmplower.range(BlockNum * BlockWidth - 1, (BlockNum - BlockGrp) * BlockWidth) = lowergrp;
+            higher.range(BlockNum * BlockWidth - 1, (BlockNum - BlockGrp) * BlockWidth) = highergrp;
+        }
+        res = tmplower.range(BlockWidth - 1, 0);
+        lower = tmplower >> BlockWidth;
+    }
+
     void bigIntMul(ap_uint<BlockWidth * BlockNum> a,
                    ap_uint<BlockWidth * BlockNum> b,
                    ap_uint<BlockWidth * BlockNum * 2>& c) {
+        ap_uint<BlockNum* BlockWidth> lower = 0;
+        ap_uint<BlockNum* BlockWidth> higher = 0;
+        ap_uint<BlockNum* BlockWidth> reslower = 0;
+        ap_uint<BlockNum* BlockWidth> reshigher = 0;
 #pragma HLS inline off
-        ap_uint<BlockWidth> lower[BlockNum * 2];
-        ap_uint<BlockWidth> upper[BlockNum * 2];
-#pragma HLS ARRAY_PARTITION variable = lower dim = 0
-#pragma HLS ARRAY_PARTITION variable = upper dim = 0
-
-    LOOP_i:
         for (int i = 0; i < BlockNum; i++) {
 #pragma HLS pipeline
-        LOOP_j:
-            for (int j = BlockNum - 1; j >= 0; j--) {
-#pragma HLS unroll
-#pragma HLS dependence variable = lower inter false
-#pragma HLS dependence variable = upper inter false
-                ap_uint<BlockWidth> opa, opb, opc, opd;
-                opa = a.range(i * BlockWidth + BlockWidth - 1, i * BlockWidth);
-                opb = b.range(j * BlockWidth + BlockWidth - 1, j * BlockWidth);
-                const int pos = i + j;
-                const int pre = pos - 1;
-                if (i == 0 || j == BlockNum - 1) {
-                    opc = 0;
-                } else {
-                    opc = lower[pos];
-                }
-                if (i == 0) {
-                    opd = 0;
-                } else {
-                    opd = upper[pre];
-                }
-                elementMulAdd(opa, opb, opc, opd, lower[pos], upper[pos]);
-            }
-            c.range(i * BlockWidth + BlockWidth - 1, i * BlockWidth) = lower[i];
+            ap_uint<BlockWidth> apart = a.range(BlockWidth - 1, 0);
+            a >>= BlockWidth;
+            ap_uint<BlockWidth> tmp;
+            arrayMulAdd(apart, b, lower, higher, tmp);
+            reslower >>= BlockWidth;
+            reslower.range(BlockNum * BlockWidth - 1, (BlockNum - 1) * BlockWidth) = tmp;
         }
-    LOOP_u:
-        ap_uint<1> move = 0;
-        for (int i = BlockNum; i < BlockNum * 2; i++) {
-#pragma HLS pipeline
-            ap_uint<BlockWidth> opl, opu;
-            if (i != BlockNum * 2 - 1) {
-                opl = lower[i];
-            } else {
-                opl = 0;
-            }
-            opu = upper[i - 1];
-            ap_uint<BlockWidth + 1> tmp = opl + opu + move;
-            c.range(i * BlockWidth + BlockWidth - 1, i * BlockWidth) = tmp.range(BlockWidth - 1, 0);
-            move = tmp[BlockWidth];
-        }
+        reshigher = lower + higher;
+        c.range(2 * BlockNum * BlockWidth - 1, BlockNum * BlockWidth) = reshigher;
+        c.range(BlockNum * BlockWidth - 1, 0) = reslower;
     }
 
     void REDC(ap_uint<BlockWidth * BlockNum * 2> t,
               ap_uint<BlockWidth * BlockNum> n,
               ap_uint<BlockWidth * BlockNum> np,
               ap_uint<BlockWidth * BlockNum>& result) {
-#pragma HLS inline off
+#pragma HLS inline
         ap_uint<BlockWidth * BlockNum> tmp1;
         ap_uint<BlockWidth * BlockNum * 2> tmp2;
         tmp1 = t.range(BlockWidth * BlockNum - 1, 0);                            // t mod R
@@ -203,10 +211,10 @@ class rsa {
     }
 
     /**
-     * @brief Encrypt message and get result
+     * @brief Encrypt message and get result. It does not include any padding scheme
      *
      * @param message Message to be encrypted/decrypted
-     * @param result Generated encrypted/decrypted result
+     * @param result Generated encrypted/decrypted result.
      */
     void process(ap_uint<keyLength> message, ap_uint<keyLength>& result) {
         // Transform message to its Montegomery representation, mr

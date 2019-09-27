@@ -19,7 +19,7 @@
  * @file ccm.hpp
  * @brief header file for Counter with Cipher Block
  * Chaining-Message Authentication Code (CCM) block cipher mode of operation.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing CCM mode with AES-128/192/256.
  * CCM = CTR + CBC-MAC.

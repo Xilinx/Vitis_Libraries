@@ -18,7 +18,7 @@
  *
  * @file cbc.hpp
  * @brief header file for Cipher Block Chaining (CBC) block cipher mode of operation.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing CBC mode with AES-128/192/256 and DES.
  * Loop-carried dependency is enforced by the CBC encryption algorithm,

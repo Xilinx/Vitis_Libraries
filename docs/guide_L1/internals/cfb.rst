@@ -29,7 +29,7 @@ the cipherkey length for DES should be 64 bits, and 128/192/256 bits for AES.
 Another limitation is that our working mode works on units of a fixed size (64 or 128 bits for 1 block),
 but text in the real world has a variety of lengths.
 So, the last block of the text provided to this primitive must be padded to 128 bits before encryption or decryption.
-Although, CFB1 and CFB8 modes share the same interface with CFB128 mode, the plaintext and ciphertext is prcossed bit-by-bit or byte-by-byte not block-by-block for CFB1 and CFB8 modes repectively.
+Although, CFB1 and CFB8 modes share the same interface with CFB128 mode, the plaintext and ciphertext is processed bit-by-bit or byte-by-byte not block-by-block for CFB1 and CFB8 modes respectively.
 
 Implementation on FPGA
 ======================
@@ -79,7 +79,7 @@ The algorithm flow chart is shown as follow, and the length of the text is denot
 
 As we can see from the chart, the encryption part of each CFB mode has loop-carried dependency which is enforced by the algorithm, the input block of each iteration (except for iteration 0) needs a feedback data from its last iteration.
 Thus, the initiation interval (II) of each CFB encryption mode cannot achieve an II = 1.
-However, the decryption part of each CFB mode has no dependencies, so it can achieve an II = 1.
+However, the decryption part of each CFB mode has no dependencies, so that it can achieve an II = 1.
 
 Profiling
 =========

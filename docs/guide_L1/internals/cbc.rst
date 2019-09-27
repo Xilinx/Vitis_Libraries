@@ -61,7 +61,7 @@ The algorithm flow chart is shown as follow:
 As we can see from the chart, the encryption part of CBC mode has loop-carried dependency which is enforced by the algorithm,
 then the input block of each iteration (except for iteration 0) needs a feedback data from its last iteration.
 Thus, the initiation interval (II) of CBC encryption cannot achieve an II = 1.
-However, the decryption part of CBC mode has no dependencies, so it can achieve an II = 1.
+However, the decryption part of CBC mode has no dependencies, so that it can achieve an II = 1.
 
 Profiling
 =========

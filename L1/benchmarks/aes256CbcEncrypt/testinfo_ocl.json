@@ -1,5 +1,5 @@
 {
-    "case_name": "jks.L1.benchmark_rc4Encrypt", 
+    "case_name": "jks.L1.benchmark_aes256CbcEncrypt", 
     "disable": 0, 
     "jobs": [
         {
@@ -16,9 +16,9 @@
         "shell": "u250"
     }, 
     "test_type": [
-        "sdx_sw_emu", 
-        "sdx_hw_emu", 
-        "sdx_hw"
+        "vitis_sw_emu", 
+        "vitis_hw_emu", 
+        "vitis_hw"
     ], 
     "category": "canary"
 }

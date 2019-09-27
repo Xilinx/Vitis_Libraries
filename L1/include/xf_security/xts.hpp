@@ -19,7 +19,7 @@
  * @file xts.hpp
  * @brief header file for XEX-based tweaked-codebook mode with ciphertext
  * stealing (XTS) block cipher mode of operation.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing XTS mode with AES-128/256.
  * There is no loop-carried dependency in both encryption and decryption parts of XTS mode.
