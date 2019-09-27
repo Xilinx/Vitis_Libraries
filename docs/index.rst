@@ -18,7 +18,7 @@ Vitis Quantitative Finance Library
 **********************************
 
 The Vitis Quantitative Finance Library is a Vitis Library aimed at providing a comprehensive FPGA acceleration library for quantitative finance. 
-It is an open-source library that can be used in a variety of financial applications, such as modeling, trading, evaluation and risk management.
+It is an open-sourced library that can be used in a variety of financial applications, such as modeling, trading, evaluation and risk management.
 
 The Vitis Quantitative Finance Library provides extensive APIs at three levels of abstraction:
 
@@ -32,230 +32,326 @@ Library Contents
 ================
 
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| Library Function                                                                               | Description               | Layer |
+| Library Class                                                                                  | Description               | Layer |
 +================================================================================================+===========================+=======+
-| :ref:`Mersenne Twister RNG MT19937 <cid-xf::fintech::mt19937>`                                 | Random number generator   | L1    |
+| :ref:`MT19937 <cid-xf::fintech::mt19937>`                                                      | Random number generator   | L1    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`Mersenne Twister RNG MT2203 <cid-xf::fintech::mt2203>`                                   | Random number generator   | L1    |
+| :ref:`MT2203 <cid-xf::fintech::mt2203>`                                                        | Random number generator   | L1    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| RNG (LUT-SR)                                                                                   | Random number generator   | L1    |
+| :ref:`MT19937IcnRng <cid-xf::fintech::mt19937icnrng>`                                          | Random number generator   | L1    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| RNG (Gaussian)                                                                                 | Random number generator   | L1    |
+| :ref:`MT2203IcnRng <cid-xf::fintech::mt2203icnrng>`                                            | Random number generator   | L1    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 |                                                                                                | Produces a normal         | L1    |
-| :ref:`Box-Muller Transform <cid-xf::fintech::mt19937boxmullernormalrng>`                       | distribution from a       |       |
+| :ref:`MT19937BoxMullerNormalRng <cid-xf::fintech::mt19937boxmullernormalrng>`                  | distribution from a       |       |
 |                                                                                                | uniform one               |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Quasi-random number       | L1    |
-|                                                                                                | generator                 |       |
-| :ref:`1-D Sobol <cid-xf::fintech::sobolrsg1d>`                                                 |                           |       |
+| :ref:`MultiVariateNormalRng <cid-xf::fintech::multivariatenormalrng>`                          | Random number generator   | L1    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 |                                                                                                | Quasi-random number       | L1    |
-|                                                                                                | generator                 |       |
-| :ref:`Multi-dimensional Sobol <cid-xf::fintech::sobolrsg>`                                     |                           |       |
+| :ref:`SobolRsg <cid-xf::fintech::sobolrsg>`                                                    | generator                 |       |
+|                                                                                                |                           |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`Inverse Cumulative Normal Distribution <cid-xf::fintech::inversecumulativenormalppnd7>`  |                           | L1    |
+|                                                                                                | Quasi-random number       | L1    |
+| :ref:`SobolRsg1D <cid-xf::fintech::sobolrsg1d>`                                                | generator                 |       |
+|                                                                                                |                           |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`Brownian Bridge Transform <cid-xf::fintech::brownianbridge>`                             |                           | L1    |
+|                                                                                                | Brownian bridge           | L1    |
+| :ref:`BrownianBridge <cid-xf::fintech::brownianbridge>`                                        | transformation using      |       |
+|                                                                                                | inverse simulation        |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Singular Value            | L1    |
-| :ref:`Jacobi SVD <cid-xf::fintech::svd>`                                                       | Decomposition using the   |       |
-|                                                                                                | Jacobi method             |       |
+| :ref:`TrinomialTree <cid-xf::fintech::trinomialtree>`                                          | Lattice-based trinomial   | L1    |
+|                                                                                                | tree structure            |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Solver for tridiagonal    | L1    |
-| :ref:`Tridiagonal Solver <cid-xf::fintech::trsvCore>`                                          | systems of equations      |       |
-|                                                                                                | using PCR                 |       |
+| :ref:`TreeLattice <cid-xf::fintech::treelattice>`                                              | Generalized structure     | L1    |
+|                                                                                                | compatible with different |       |
+|                                                                                                | models and instruments    |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Solver for pentadiagonal  | L1    |
-| :ref:`Pentadiagonal Solver <cid-xf::fintech::pentadiagCr>`                                     | systems of equations      |       |
-|                                                                                                | using PCR                 |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | 1-dimentional stochastic  |       |
-| :ref:`1-D Stochastic Process <cid-xf::fintech::stochasticprocess1d>`                           | process derived by RNG    | L1    |
+|                                                                                                | Discretization for finite |       |
+| :ref:`Fdm1dMesher <cid-xf::fintech::fdm1dmesher>`                                              | difference method         | L1    |
 |                                                                                                |                           |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 |                                                                                                | A simple stochastic       |       |
-| :ref:`Ornstein Uhlenbeck Process <cid-xf::fintech::ornsteinuhlenbeckprocess>`                  | process                   | L1    |
+| :ref:`OrnsteinUhlenbeckProcess <cid-xf::fintech::ornsteinuhlenbeckprocess>`                    | process                   | L1    |
 |                                                                                                |                           |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Discretization for finite |       |
-| :ref:`Mesher <cid-xf::fintech::fdm1dmesher>`                                                       | difference method         | L1    |
+|                                                                                                | 1-dimentional stochastic  |       |
+| :ref:`StochasticProcess1D <cid-xf::fintech::stochasticprocess1d>`                              | process derived by RNG    | L1    |
 |                                                                                                |                           |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo Heston (model | L2    |
-|                                                                                                | only)                     |       | 
-| :ref:`Monte-Carlo Heston <cid-xf::fintech::hestonmodel>`                                       |                           |       |
+| :ref:`HWModel <cid-xf::fintech::hwmodel>`                                                      | Hull-White model for      | L1    |
+|                                                                                                | tree engine               |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`G2Model <cid-xf::fintech::g2model>`                                                      | Two-additive-factor       | L1    |
+|                                                                                                | gaussian model for        |       |
+|                                                                                                | tree engine               |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`ECIRModel <cid-xf::fintech::ecirmodel>`                                                  | Extended Cox-Ingersoll-   | L1    |
+|                                                                                                | Ross model                |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`CIRModel <cid-xf::fintech::cirmodel>`                                                    | Cox-Ingersoll-Ross model  | L1    |
+|                                                                                                | for tree engine           |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`VModel <cid-xf::fintech::vmodel>`                                                        | Vasicek model for         | L1    |
+|                                                                                                | tree engine               |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`HestonModel <cid-xf::fintech::hestonmodel>`                                              | Heston process            | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`BKModel <cid-xf::fintech::bkmodel>`                                                      | Black-Karasinski model    | L1    |
+|                                                                                                | for tree engine           |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`BSModel <cid-xf::fintech::bsmodel>`                                                      | Black-Scholes process     | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`CPICapFloorEngine <cid-xf::fintech::cpicapfloorengine>`                                  | Pricing Consumer price    | L2    |
+|                                                                                                | index (CPI) using         |       |
+|                                                                                                | cap/floor methods         |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`DiscountingBondEngine <cid-xf::fintech::discountingbondengine>`                          | Engine used to price      | L2    |
+|                                                                                                | discounting bond          |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`InflationCapFloorEngine <cid-xf::fintech::inflationcapfloorengine>`                      | Pricing inflation using   | L2    |
+|                                                                                                | cap/floor methods         |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`FdHullWhiteEngine <cid-xf::fintech::fdhullwhiteengine>`                                  | Bermudan swaption pricing | L2    |
+|                                                                                                | engine using finite-      |       |
+|                                                                                                | difference methods based  |       |
+|                                                                                                | on Hull-White model       |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`FdG2SwaptionEngine <cid-xf::fintech::fdg2swaptionengine>`                                | Bermudan swaption pricing | L2    |
+|                                                                                                | engine using finite-      |       |
+|                                                                                                | difference methods based  |       |
+|                                                                                                | on two-additive-factor    |       |
+|                                                                                                | gaussian model            |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`DeviceManager <cid-xf::fintech::devicemanager>`                                          | Used to enumerate         | L3    |
+|                                                                                                | available Xilinx devices  |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`Device <cid-xf::fintech::device>`                                                        | A class representing an   | L3    |
+|                                                                                                | individual accelerator    |       |
+|                                                                                                | card                      |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`Trace <cid-xf::fintech::trace>`                                                          | Used to control debug     | L3    |
+|                                                                                                | trace output              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| Library Function                                                                               | Description               | Layer |
++================================================================================================+===========================+=======+
+|                                                                                                | Singular Value            | L1    |
+| :ref:`svd <cid-xf::fintech::svd>`                                                              | Decomposition using the   |       |
+|                                                                                                | Jacobi method             |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`mcSimulation <cid-xf::fintech::mcsimulation>`                                            | Monte-Carlo Framework     | L1    |
+|                                                                                                | implementation            |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+|                                                                                                | Solver for pentadiagonal  | L1    |
+| :ref:`pentadiagCr <cid-xf::fintech::pentadiagcr>`                                              | systems of equations      |       |
+|                                                                                                | using PCR                 |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`boxMullerTransform <cid-xf::fintech::boxmullertransform>`                                | Box-Muller transform from | L1    |
+|                                                                                                | uniform random number to  |       |
+|                                                                                                | normal random number      |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`inverseCumulativeNormalPPND7 <cid-xf::fintech::inversecumulativenormalppnd7>`            | Inverse Cumulative        | L1    |
+|                                                                                                | transform from random     |       |
+|                                                                                                | number to normal random   |       |
+|                                                                                                | number                    |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`inverseCumulativeNormalAcklam <cid-xf::fintech::inversecumulativenormalacklam>`          | Inverse CumulativeNormal  | L1    |
+|                                                                                                | using Acklam’s            |       |
+|                                                                                                | approximation to transform|       |
+|                                                                                                | uniform random number to  |       |
+|                                                                                                | normal random number      |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+|                                                                                                | Solver for tridiagonal    | L1    |
+| :ref:`trsvCore <cid-xf::fintech::trsvcore>`                                                    | systems of equations      |       |
+|                                                                                                | using PCR                 |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`binomialTreeEngine <cid-xf::fintech::binomialtreeengine>`                                | Binomial tree engine      | L2    |
+|                                                                                                | using CRR                 |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`cfBSMEngine <cid-xf::fintech::cfbsmengine>`                                              | Single option price plus  | L2    |
+|                                                                                                | associated Greeks         |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`FdDouglas <cid-xf::fintech::fddouglas>`                                                  | Top level callable        | L2    |
+|                                                                                                | function to perform the   |       |
+|                                                                                                | Douglas ADI method        |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`hcfEngine <cid-xf::fintech::hcfengine>`                                                  | Engine for Hestion        | L2    |
+|                                                                                                | Closed Form Solution      |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`M76Engine <cid-xf::fintech::m76engine>`                                                  | Engine for the Merton     | L2    |
+|                                                                                                | Jump Diffusion Model      |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 |                                                                                                | Monte-Carlo simulation of | L2    |
 |                                                                                                | European-style options    |       | 
-| :ref:`Monte-Carlo European <cid-xf::fintech::mceuropeanengine>`                                |                           |       |
+| :ref:`MCEuropeanEngine <cid-xf::fintech::mceuropeanengine>`                                    |                           |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`MCEuropeanPriBypassEngine <cid-xf::fintech::mceuropeanpribypassengine>`                  | Path pricer bypass variant| L2    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 |                                                                                                | Monte-Carlo simulation of | L2    |
 |                                                                                                | European-style options    |       | 
-| :ref:`Monte-Carlo European Heston <cid-xf::fintech::mceuropeanhestonengine>`                   | using Heston model        |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo simulation of | L2    |
-|                                                                                                | European-style options    |       |
-|                                                                                                | using the Black-Scholes   |       | 
-| :ref:`Monte-Carlo Black-Scholes European <cid-xf::fintech::mceuropeanengine>`                  | model                     |       |
+| :ref:`MCEuropeanHestonEngine <cid-xf::fintech::mceuropeanhestonengine>`                        | using Heston model        |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 |                                                                                                | Monte-Carlo simulation of | L2    |
 |                                                                                                | European-style options    |       |
 |                                                                                                | for multiple underlying   |       | 
-| :ref:`Monte-Carlo Multi-Asset European Heston <cid-xf::fintech::mceuropeanengine>`             | asset                     |       |
+| :ref:`MCmultiAssetEuropeanHestonEngine <cid-xf::fintech::mcmultiasseteuropeanhestonengine>`    | asset                     |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo simulation of | L2    |
-|                                                                                                | American-style options    |       |
-|                                                                                                | using the Black-Scholes   |       |
-| :ref:`Monte-Carlo Black-Scholes American <cid-xf::fintech::mcamericanengine>`                  | model                     |       |
+| :ref:`MCAmericanEnginePreSamples <cid-xf::fintech::mcamericanenginepresamples>`                | PreSample kernel: this    | L2    |
+|                                                                                                | kernel samples some amount|       |
+|                                                                                                | of path and store them    |       |
+|                                                                                                | to external memory        |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Measure sensitivity of    | L2    |
-|                                                                                                | derivative values         |       | 
-| :ref:`Monte-Carlo European Heston Greeks <cid-xf::fintech::mceuropeanhestongreeksengine>`      |                           |       |
+| :ref:`MCAmericanEngineCalibrate <cid-xf::fintech::mcamericanenginecalibrate>`                  | Calibrate kernel: this    | L2    |
+|                                                                                                | kernel reads the sample   |       |
+|                                                                                                | price data from external  |       |
+|                                                                                                | memory and use them to    |       |
+|                                                                                                | calculate the coefficient |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo simulation of | L2    |
-|                                                                                                | digital (all-or-nothing)  |       |
-|                                                                                                | option using the          |       |
-| :ref:`Monte-Carlo Black-Scholes Digital <cid-xf::fintech::mcdigitalengine>`                    | Black-Scholes model       |       |
+| :ref:`MCAmericanEnginePricing <cid-xf::fintech::mcamericanenginepricing>`                      | Pricing kernel            | L2    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo simulation of | L2    |
-|                                                                                                | Asian-style options using |       |
-| :ref:`Monte-Carlo Black-Scholes Asian <cid-xf::fintech::mcasianarithmeticapengine>`            | the Black-Scholes model   |       |
+| :ref:`MCAmericanEngine <cid-xf::fintech::mcamericanengine>`                                    | Calibration process and   | L2    |
+|                                                                                                | pricing process all in    |       |
+|                                                                                                | one kernel                |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo simulation of | L2    |
-|                                                                                                | barrier options using the |       |
-|                                                                                                | Black-Scholes model       |       |
-| :ref:`Monte-Carlo Black-Scholes Barrier <cid-xf::fintech::mcbarrierengine>`                    |                           |       |
+| :ref:`MCAsianGeometricAPEngine <cid-xf::fintech::mcasiangeometricapengine>`                    | Asian Arithmetic Average  | L2    |
+|                                                                                                | Price Engine using Monte  |       |
+|                                                                                                | Carlo Method Based on     |       |
+|                                                                                                | Black-Scholes Model :     |       |
+|                                                                                                | geometric average version |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo simulation of | L2    |
-|                                                                                                | cliquet option            |       | 
-| :ref:`Monte-Carlo Cliquet <cid-xf::fintech::mccliquetengine>`                                  |                           |       |
+| :ref:`MCAsianArithmeticAPEngine <cid-xf::fintech::mcasianarithmeticapengine>`                  | arithmetic average version| L2    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | For sampling              | L2    |
-|                                                                                                |                           |       | 
-| :ref:`Markov Chain of Monte-Carlo <cid-xf::fintech::mcmccore>`                                 |                           |       |
+| :ref:`MCAsianArithmeticASEngine <cid-xf::fintech::mcasianarithmeticasengine>`                  | Asian Arithmetic Average  | L2    |
+|                                                                                                | Strike Engine using Monte |       |
+|                                                                                                | Carlo Method Based on     |       |
+|                                                                                                | Black-Scholes Model :     |       |
+|                                                                                                | arithmetic average version|       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo simulation of | L2    |
-|                                                                                                | cap/floor using Hull-White|       |
-| :ref:`Monte-Carlo Hull-White <cid-xf::fintech::mchullwhitecapfloorengine>`                     | model                     |       |
+| :ref:`MCBarrierNoBiasEngine <cid-xf::fintech::mcbarriernobiasengine>`                          | Barrier Option Pricing    | L2    |
+|                                                                                                | Engine using Monte Carlo  |       |
+|                                                                                                | Simulation                |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Solution of the Heston    | L2    |
-|                                                                                                | model using an ADI        |       |
-| :ref:`Finite-Difference Heston <cid-xf::fintech::fddouglas>`                                   | finite-difference solver  |       |
+| :ref:`MCBarrierEngine <cid-xf::fintech::mcbarrierengine>`                                      | Barrier Option Pricing    | L2    |
+|                                                                                                | Engine using Monte Carlo  |       |
+|                                                                                                | Simulation                |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Derivate investment       | L2    |
-|                                                                                                | instruments               |       | 
-| :ref:`Closed Form Black Scholes Merton <cid-xf::fintech::cfbsmengine>`                         |                           |       |
+| :ref:`MCCliquetEngine <cid-xf::fintech::mccliquetengine>`                                      | Cliquet Option Pricing    | L2    |
+|                                                                                                | Engine using Monte Carlo  |       |
+|                                                                                                | Simulation                |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Add stochastic volatility | L2    |
-|                                                                                                |                           |       |
-| :ref:`Closed Form Heston <cid-xf::fintech::hcfengine>`                                         |                           |       |
+| :ref:`MCDigitalEngine <cid-xf::fintech::mcdigitalengine>`                                      | Digital Option Pricing    | L2    |
+|                                                                                                | Engine using Monte Carlo  |       |
+|                                                                                                | Simulation                |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Add random jump to Black  | L2    |
-|                                                                                                | Scholes model             |       |
-| :ref:`Closed Form Merton 76 <cid-xf::fintech::m76engine>`                                      |                           |       |
+| :ref:`MCEuropeanHestonGreeksEngine <cid-xf::fintech::mceuropeanhestongreeksengine>`            | European Option Greeks    | L2    |
+|                                                                                                | Calculating Engine using  |       |
+|                                                                                                | Monte Carlo Method based  |       |
+|                                                                                                | on Heston valuation model |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Model for foreign exchange| L2    |
-|                                                                                                | based on Black Scholes    |       |
-| :ref:`Garman Kohlhagen <cid-xf::fintech::m76engine>`                                           | Merton                    |       |
+| :ref:`MCHullWhiteCapFloorEngine <cid-xf::fintech::mchullwhitecapfloorengine>`                  | Cap/Floor Pricing Engine  | L2    |
+|                                                                                                | using Monte Carlo         |       |
+|                                                                                                | Simulation                |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                |                           | L2    |
-| :ref:`Quanto <cid-xf::fintech::m76engine>`                                                     |                           |       |
+| :ref:`McmcCore <cid-xf::fintech::mcmccore>`                                                    | Uses multiple Markov      | L2    |
+|                                                                                                | Chains to allow drawing   |       |
+|                                                                                                | samples from multi mode   |       |
+|                                                                                                | target distribution       |       |
+|                                                                                                | functions                 |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Numerical assumptions in  | L2    |
-|                                                                                                | black-Scholes model       |       |
-| :ref:`Cox-Ross-Rubinstein Binomial Tree <cid-xf::fintech::binomialtreeengine>`                 |                           |       |
+| :ref:`treeSwaptionEngine <cid-xf::fintech::treeswaptionengine>`                                | Tree swaption pricing     | L2    |
+|                                                                                                | engine using trinomial    |       |
+|                                                                                                | tree based on 1D lattice  |       |
+|                                                                                                | method                    |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Estimate Bermudan Swaption| L2    |
-| :ref:`Finite-Difference Hull-White Bermudan Swaption Pricing`                                  | based on FDM              |       |
+| :ref:`treeSwapEngine <cid-xf::fintech::treeswaptionengine-2>`                                  | Tree swap pricing engine  | L2    |
+|                                                                                                | using trinomial tree      |       |
+|                                                                                                | based on 1D lattice method|       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Estimate Bermudan Swaption| L2    |
-| :ref:`Finite-Difference G2 Bermudan Swaption Pricing`                                          | based on FDM              |       |
+| :ref:`treeCapFloprEngine <cid-xf::fintech::treeswapengine>`                                    | Tree cap/floor engine     | L2    |
+|                                                                                                | using trinomial tree based|       |
+|                                                                                                | on 1D lattice method      |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                |                           | L2    |
-| :ref:`Tree Bermudan Swaption`                                                                  |                           |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Use linear interpolation  | L2    |
-| :ref:`CPI CapFloor`                                                                            |                           |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Year-on-year inflation    | L2    |
-| :ref:`Inflation CapFloor`                                                                      | cap/floor                 |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                |                           | L2    |
-| :ref:`Zero Coupon Bond`                                                                        |                           |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-| Host API                                                                                       | Host-callable API for the | L3    |
-|                                                                                                | simulation                |       |
-|                                                                                                |                           |       |
+| :ref:`treeCallableEngine <cid-xf::fintech::treeswapengine-2>`                                  | Tree callable fixed rate  | L2    |
+|                                                                                                | bond pricing engine using |       |
+|                                                                                                | trinomial tree based on   |       |
+|                                                                                                | 1D lattice method         |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 
 Shell Environment
 =================
 
-Setup the build environment using the Vitis and XRT scripts::
+Setup the build environment using the Vitis and XRT scripts, and set the PLATFORM_REPO_PATHS to installation folder of platform files.
 
-    $ source <install path>/Vitis/2019.2/settings64.sh
-    $ source /opt/xilinx/xrt/setup.sh
+.. code-block:: bash
+
+    source <install path>/Vitis/2019.2/settings64.sh
+    source /opt/xilinx/xrt/setup.sh
+    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
 Design Flows
 ============
 
-Recommended design flows are categorised by the target level:
+Recommended design flows are categorized by the target level:
 
 * L1
 * L2
 * L3
 
-The common tool and library prerequisites that apply across all design flows are documented in the requirements section.
+The common tool and library prerequisites that apply across all design flows are documented in the requirements section above.
 
 L1
 --
 
 L1 provides the low-level primitives used to build kernels.
 
-The recommend flow to evaluate and test L1 components uses the Vivado HLS tool. A top level C/C++ testbench (typically ``main.cpp``) prepares the input data, passes this to the design under test (typically ``dut.cpp`` which makes the L1 level library calls) then performs any output data post-processing and validation checks.
+The recommend flow to evaluate and test L1 components is described as follows using the Vivado HLS tool. A top level C/C++ testbench (typically `main.cpp` or `tb.cpp`) prepares the input data, passes this to the design under test (typically `dut.cpp` which makes the L1 level library calls) then performs any output data post processing and validation checks.
 
-A Makefile is used to drive this flow with available steps including ``CSIM`` (high level simulation), ``CSYNTH`` (high level synthesis to RTL) and ``COSIM`` (cosimulation between software testbench and generated RTL). The flow is launched from the shell by calling ``make`` with variables set as in the example below::
+A Makefile is used to drive this flow with available steps including `CSIM` (high level simulation), `CSYNTH` (high level synthesis to RTL), `COSIM` (cosimulation between software testbench and generated RTL), VIVADO_SYN (synthesis by Vivado), and VIVADO_IMPL (implementation by Vivado). The flow is launched from the shell by calling `make` with variables set as in the example below:
 
-   $ . /opt/xilinx/xrt/setup.sh
-   $ export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-   $ cd L1/tests/ICD/
-   $ make CSIM=1 CSYNTH=0 COSIM=0 DEVICE=xilinx_u250_xdma_201830_2 check # Only run C++ simulation
+.. code-block:: bash
 
-As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilisation, timing performance, latency and throughput. The output files of interest can be located at the example locations as shown below where the file names are correlated with the source code, i.e., the callable functions within the design under test.
+    # entering specific unit test project
+    cd L1/tests/specific_algorithm/
+    # Only run C++ simulation on U250
+    make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 DEVICE=u250_xdma_201830_1
 
-::
+As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization, timing performance, latency and throughput. The output files of interest can be located at the location examples as below where the file names are correlated with the source code. i.e. the callable functions within the design under test.::
 
-   Simulation Log: L1/tests/ICD/prj/sol/csim/report/ICN_top_csim.log
-   Synthesis Report: L1/tests/ICD/prj/sol/syn/report/ICN_top_csynth.rpt
+    Simulation Log: <library_root>/L1/tests/bk_model/prj/solution1/csim/report/dut_csim.log
+    Synthesis Report: <library_root>/L1/tests/bk_model/prj/solution1/syn/report/dut_csynth.rpt
 
 L2
 --
 
 L2 provides the pricing engine APIs presented as kernels.
 
-The available flow for L2 based around the SDAccel tool facilitates the generation and packaging of pricing engine kernels along with the required host application for configuration and control. In addition to supporting FPGA platform targets, emulation options are available for preliminary investigations or where dedicated access to a hardware platform may not be available. Two emulation options are available, software emulation which performs a high level simulation of the pricing engine and hardware emulation which performs a cycle accurate simulation of the generated RTL for the kernel. This flow is makefile driven from the console where the target is selected as a command line parameter as in the examples below::
+The available flow for L2 based around the Vitis tool facilitates the generation and packaging of pricing engine kernels along with the required host application for configuration and control. In addition to supporting FPGA platform targets, emulation options are available for preliminary investigations or where dedicated access to a hardware platform may not be available. Two emulation options are available, software emulation performs a high level simulation of the pricing engine while hardware emulation performs a cycle-accurate simulation of the generated RTL for the kernel. This flow is makefile driven from the console where the target is selected as a command line parameter as in the examples below:
 
+.. code-block:: bash
 
-   $ cd L2/tests/McEuropeanEngine
-   
-   # run one of the following, software emulation, hardware    emulation or actual deployment on physical platform
-   $ make run_sw_emu DEVICE=xilinx_u250_xdma_201830_2
-   $ make run_hw_emu DEVICE=xilinx_u250_xdma_201830_2
-   $ make run_hw DEVICE=xilinx_u250_xdma_201830_2
-   
-   # after a hardware system build has been completed, execution  can be repeated by running the host executable and passing it   the xclbin as an argument
-   $ bin_xilinx_u250_xdma_201830_2/test.exe -mode fpga -xclbin xclbin_xilinx_u250_xdma_201830_2_sw_emu/kernel_mcae.xclbin
+    cd L2/tests/GarmanKohlhagenEngine
 
+    # build and run one of the following using U250 platform
 
-The outputs of this flow are packaged kernel binaries (xclbin files) that can be downloaded to the FPGA platform, and host executables to configure and co-ordinate data transfers. The output files of interest can be located at the example locations as shown below where the file names are correlated with the source code.
+    #  * software emulation
+    make run TARGET=sw_emu DEVICE=u250_xdma_201830_1
+    #  * hardware emulation
+    make run TARGET=hw_emu DEVICE=u250_xdma_201830_1
+    #  * actual deployment on physical platform
+    make run TARET=hw DEVICE=u250_xdma_201830_1
 
-::
+    # delete all xclbin and host binary
+    make cleanall
 
-    Host Executable: L2/tests/McEuropeanEngine/bin_xilinx_u250_xdma_201830_2/test.exe
-    Kernel Packaged Binary: L2/tests/McEuropeanEngine/xclbin_xilinx_u250_xdma_201830_2_sw_emu/kernel_mcae.xclbin
+The outputs of this flow are packaged kernel binaries (xclbin files) that can be downloaded to the FPGA platform and host executables to configure and co-ordinate data transfers. The output files of interest can be located at the locations examples as below where the file names are correlated with the source code.::
+
+    Host Executable: L2/tests/GarmanKohlhagenEngine/bin_#DEVICE/gk_test.exe
+    Kernel Packaged Binary: L2/tests/GarmanKohlhagenEngine/xclbin_#DEVICE_#TARGET/gk_kernel.xclbin #ARGS
 
 This flow can be used to verify functional correctness in hardware and enable real world performance to be measured.
+
 
 L3
 --
@@ -266,26 +362,30 @@ The flow for L3 is the only one where access to an FPGA platform is required.
 
 A prerequisite of this flow is that the packaged pricing engine kernel binaries (xclbin files) for the target FPGA platform target have been made available for download or have been custom built using the L2 flow described above.
 
-This flow is makefile driven from the console to initially generate a shared object (``L3/src/output/libxilinxfintech.so``)::
+This flow is makefile driven from the console to initially generate a shared object (``L3/src/output/libxilinxfintech.so``).
 
-   $ cd L3/src
-   $ source env.sh
-   $ make
+.. code-block:: bash
+
+   cd L3/src
+   source env.sh
+   make
 
 
 The shared object file is written to the example location as shown below::
 
     Library: L3/src/output/libxilinxfintech.so
 
-User applications can subsequently be built against this library as in the example provided::
+User applications can subsequently be built against this library as in the example provided
 
-   $ cd L3/examples/MonteCarlo
-   $ make all
-   $ cd output
+.. code-block:: bash
+
+   cd L3/examples/MonteCarlo
+   make all
+   cd output
 
    # manual step to copy or create symlinks to xclbin files in current directory
 
-   $ ./mc_example
+   ./mc_example
 
 
 .. toctree::

@@ -17,6 +17,8 @@
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/tests/*}')
+XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
+DCMTDIR = $(XFLIB_DIR)/ext/dcmt
 
 # MK_INC_BEGIN hls_common.mk
 
@@ -233,8 +235,11 @@ setup: | check_part
 	@cat ./settings.tcl
 	@echo "----"
 
+$(DCMTDIR)/dcmt/lib/libdcmt.a:
+	make -C $(DCMTDIR)
+
 HLS ?= vivado_hls
-runhls: setup | check_vivado
+runhls: setup | check_vivado $(DCMTDIR)/dcmt/lib/libdcmt.a
 	$(HLS) -f run_hls.tcl;
 
 clean:

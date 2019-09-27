@@ -42,7 +42,7 @@ In a later paper, Leisen & Reimer [LR1995]_ propose a method to increase the con
 
 .. image:: /images/bt_crr_1.PNG
    :alt: CRR Binomial Tree
-   :width: 100%
+   :width: 60%
    :align: center
 
 The diagram above shows an example of a binomial tree, where the number of time steps is :math:`n`. (Note that :math:`n` steps results in :math:`n + 1` separate propagated :math:`S` values after the `n`-th step.) 

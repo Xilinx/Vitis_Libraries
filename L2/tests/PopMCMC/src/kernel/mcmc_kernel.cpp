@@ -19,7 +19,7 @@
 #include <iostream>
 #endif
 /**
-* @brief Top level Sdx Kernel function.
+* @brief Top level Kernel function.
 *
 *@tparam DT                 - Data type used in whole kernel (double by default)
 *@tparam NCHAINS            - Number of chains

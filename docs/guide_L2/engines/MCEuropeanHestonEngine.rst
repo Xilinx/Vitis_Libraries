@@ -43,15 +43,16 @@ However, if it is not stable, MCM will move to the next round of calculation to 
    :width: 80%
    :align: center
 
+Optimization in two parts:
+
+- 1. Optimization of L1 functions. 
+- 2. Save one call of cumulative distribution function in single underlying assets since it can get the value directly from RNGs. It may not work for multiple underlying assets because it will lose direct link between Gaussian random number and its corresponding uniform random number.
+
 Variations 
 ==========
 
 In this release we provide five variations of Heston Model implementation, 
 including kDTFullTruncation, kDTPartialTruncation, kDTReflection, kDTQuadraticExponential and kDTQuadraticExponentialMartingale. 
 The first three are relatively simple when dealing with negative volatility. 
-kDTQuadraticExponential and kDTQuadraticExponentialMartingale use a better approximation method to get higher precision results, and take more resource. 
+kDTQuadraticExponential and kDTQuadraticExponentialMartingale use a better approximation method to get results with higher precision while taking more resource. 
 
-Optimization in two parts:
-
-- 1. Optimization of L1 functions. 
-- 2. Save one call of cumulative distribution function in single underlying assets since it can get the value directly from RNGs. It may not work for multiple underlying assets because it will lose direct link between Gaussian random number and its corresponding uniform random number.

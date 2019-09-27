@@ -96,10 +96,6 @@ int main() {
                    cfGarmanKohlhagen.optionPrice[i], cfGarmanKohlhagen.delta[i], cfGarmanKohlhagen.gamma[i],
                    cfGarmanKohlhagen.vega[i], cfGarmanKohlhagen.theta[i], cfGarmanKohlhagen.rho[i]);
 
-            if (!check_result(cfGarmanKohlhagen.optionPrice[i], test_data[i].exp, tolerance)) {
-                printf("[XLNX] expected(%8.5f), got (%8.5f)\n", test_data[i].exp,
-                       cfGarmanKohlhagen.optionPrice[i]);
-            }
         }
 
         printf(

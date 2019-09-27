@@ -21,15 +21,15 @@ Extended Cox-Ingersoll-Ross Model
 Overview
 =========
 
-In financial mathematics, by replacing the coefficients in the Cox-Ingersoll-Ross model with the time varying functions, the extended Cox-Ingersoll-Ross model is a mathematical model of the term structure of interest rates. It is a type of "one factor model" (short rate model) as it describes interest rate movements as driven by only one source of market risk. The model can be used in the valuation of interest rate derivatives (from Wiki).
-
-This section mainly introduces the implementation process of short-rate and discount, which is applied in Tree Engine. They are core part for option pricing. 
+In financial mathematics, by replacing the coefficients in the Cox-Ingersoll-Ross model with the time varying functions, the Extended Cox-Ingersoll-Ross (ECIR) model is a mathematical model of the term structure of interest rates. It is a type of "one factor model" (short rate model) as it describes interest rate movements as driven by only one source of market risk. The model can be used in the valuation of interest rate derivatives (from Wiki).
 
 Implementation
 ===================
-As an important part of Tree Engine, the class ECIRModel implements the single-factor extended Cox-Ingersoll-Ross model to calculate short-rate and discount,by using continuous compounding. Next, the implementation process is introduced.
+This section mainly introduces the implementation process of short-rate and discount, which is applied in Tree Engine. They are core part for option pricing. 
 
-1. a) The short-rate is calculated at time point :math:`t` with the duration :math:`dt` from 0 to N time point by time point by functions shortRate, initRate and iterRate. As the core part the function shortRate, The effect of the loop_rateModel is to calcutate result that satisfies the condition. For functions initRate and iterRate, their functions are similar. In order to achieve II=1, the array values16 or values3x16  is added to save the intermediate result. 
-   b) According to time points and tree related parameters to establish a trinomial tree structure from 0 to N time point by time point.
-2. The discount is calculated at time point :math:`t` with the duration :math:`dt` by function discount that based on the short-rate.
+As a critical part of Tree Engine, the class :math:`ECIRModel` implements the single-factor ECIR model to calculate short-rate and discount, by using continuous compounding. The implementation process is introduced as follows.
+
+1. a) The short-rate is calculated at time point :math:`t` with the duration :math:`dt` from 0 to N point-by-point by functions treeShortRate, initRate and iterRate. As the core part of the treeShortRate, the outer loop_rateModel is used to ensure the results under pre-specified tolerance. For the internal functions, the functionality of initRate and iterRate is similar with each other, but initRate can produce 3 intermediate results while the iterRate gives only one per iteration. In order to achieve intiation interval (II)=1, the array values16 is added to store the intermediate results. Then an addtion tree is performed subsequently for the whole process.
+   b) For implementing the generic Tree framework, the :math:`state\_price` calculating process is moved from Tree Lattice to this Model.
+2. The discount is calculated at time point :math:`t` with the duration :math:`dt` based on the short-rate.
 

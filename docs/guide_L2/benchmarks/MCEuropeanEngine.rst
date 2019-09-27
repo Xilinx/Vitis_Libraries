@@ -21,13 +21,13 @@ Benchmark of European Option Pricing Engine
 
 Overview
 ========
-This is a benchmark of MC (Monte-Carlo) European Engine using the SDx environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
 
 
 Highlights
 ==========
 
-The performance of the MCEuropeanEngine is shown in the table below, our cold run has 488X and warn run has 1954X compared to baseline.
+The performance of the MCEuropeanEngine is shown in the table below, our cold run has 488X and warm run has 1954X compared to baseline.
 Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2690 v4 @3.20GHz, 8 cores per processor and 2 threads per core.
 
 .. _tab_MCEE_Execution_Time:
@@ -67,12 +67,12 @@ Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform
     +---------------+----------------------------+
     |  tolerance    | 0.02                       |
     +---------------+----------------------------+
-    |  workload     |   1 steps, 47000 paths     |
+    |  workload     | 1 steps, 47000 paths       |
     +---------------+----------------------------+
 
 Profiling
 =================
-The resource utilization and performance of MCEuropeanEngine on U250 FPGA card is listed in the following tables.
+The resource utilization and performance of MCEuropeanEngine on U250 FPGA card is listed in the following tables (with Vivado 2018.3).
 There are 4 PUs on Alveo U250 to pricing the option in parallel.  Each PU have the same resource utilization.
 
 .. _tab_MCEE_resource:
@@ -83,8 +83,7 @@ There are 4 PUs on Alveo U250 to pricing the option in parallel.  Each PU have t
     +---------------+----------------------------+--------+---------+------+------+-------+
     | Implemetation |            Kernels         | LUT    | FF      | BRAM | URAM | DSP   |
     +---------------+----------------------------+--------+---------+------+------+-------+
-    | 1 PU          |       kernel_mc_0          | 234072 | 376207  | 49   | 0    | 1594  | 
-    |               |      (UN config: 8)        |        |         |      |      |       |
+    | 1 PU          | kernel_mc_0 (UN config:8)  | 234072 | 376207  | 49   | 0    | 1594  | 
     +---------------+----------------------------+--------+---------+------+------+-------+
     | 4 PUs         |       kernel_mc_0          | 936288 | 1504828 | 196  | 0    | 6376  |
     |               |       kernel_mc_1          |        |         |      |      |       |
@@ -106,7 +105,7 @@ The performance of this demo is listed in :numref:`tab_MCEE_performance`. In thi
 .. table:: Performance of European Option demos on U250 
     :align: center
 
-    +---------------+-------------------------+------------+
+    +---------------+-----------+--------------------------+
     |    Engine     | Frequency | Execution Time (ms)      |
     |               |           +------------+-------------+
     |               |           | kernel     | E2E         | 

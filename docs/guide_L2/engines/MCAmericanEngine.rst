@@ -33,7 +33,7 @@ Because the American option can be exercised anytime prior to the stock's expire
 3. Calculate the exercise price for previous time steps :math:`T-1`, compare it with the last exercise price, select the larger one.
 4. Keep rolling back to previous time steps until :math:`t` is :math:`0` and obtain the max exercise price :math:`V_t` as the optimal exercise price.
 
-In the above process, for each time step :math:`t`, conditional expectation :math:`E_t[Y_t|S_t]` of the payoff is computed according to Least-Squares Monte Carlo (LSMC) approach, proposed by Longstaff and Schwartz. Mathematically, these conditional expectations can be expressed as:
+In the process above, for each time step :math:`t`, conditional expectation :math:`E_t[Y_t|S_t]` of the payoff is computed according to Least-Squares Monte Carlo (LSMC) approach, proposed by Longstaff and Schwartz. Mathematically, these conditional expectations can be expressed as:
 
 .. math::
         E_t[Y_t|S_t] = \sum_{i=0}^{n}a_iB_i(S_t)
@@ -47,7 +47,7 @@ Here we employed polynomial function with weights as the basis functions, so the
 
 where 3 functions: 1, :math:`S_t` and :math:`S_t^2` are employed. The constant coefficients :math:`a`, :math:`b` and :math:`c` are the weights. 
 
-By adding immediate exercise value :math:`E_t(S_t)` to above Equation, and exchanging the side of elements, the equation is changed to 
+By adding immediate exercise value :math:`E_t(S_t)` to the Equation above, and exchanging the side of elements, the equation is changed to 
 
 .. math::
         a + bS_t + cS_t^2 + dE_t(S_t) = E_t[Y_t|S_t]
@@ -66,6 +66,7 @@ In the Theory Section, the pricing process is described. However, this process c
 .. figure:: /images/AM/overall_arch.png
         :alt: The McAmericanEngine structure
         :width: 50%
+th: 50%
         :align: center
 
 .. hint:: Why two processes are required in MCAmericanEngine and only one process, pricing, is enough for European Option Monte Carlo engine?
@@ -119,7 +120,7 @@ Corresponding to the two steps described above, the hardware architecture is sho
 .. _my-figure_presamples:
 .. figure:: /images/AM/presamples.png
         :alt: The McAmericanEngine structure
-        :width: 100%
+        :width: 60%
         :align: center
 
 We denote the process from RNG to generate matrix data :math:`B` and exercise price for each timestep :math:`t` as a Monte-Carlo-Model (MCM) in American Option Calibration Process. Each MCM process 1024 data. With a template parameter UN_PATH, more pieces of MCM can be instanced when hardware resources available. 
@@ -151,7 +152,7 @@ The implementation of step 3 and steps 4 is shown in :numref:`Figure %s <my-figu
 Besides, notice that since SVD is purely computing dependent, which is pretty slow in the design. Therefore, a template parameter UN_STEP is added to speed up the SVD calculation process.
 
 .. note::
-  It is worth mentioning that 4096 is only the default calibrate sample/path size. This number may change by customers' demands. However, the size number must equal to N*1024.
+  It is worth mentioning that 4096 is only the default calibrate sample/path size. This number may change by customers' demands. However, the size must be a multiple of 1024.
 
 
 Pricing Process
@@ -164,7 +165,7 @@ The theory of the pricing process is actually already introduced in the Theory S
 .. _my-figure_pricing:
 .. figure:: /images/AM/pricing.png
         :alt: The McAmericanEngine structure pricing
-        :width: 100%
+        :width: 60%
         :align: center
 
 1. Generate uniform random numbers with Mersenne Twister UNiform MT19937 Random Number Generator (RNG) followed by Inverse Cumulative Normal (ICN) uniform random numbers. Thereafter, generate independent stock paths with the uniform random numbers and Black-Sholes path generator. 
@@ -194,10 +195,10 @@ In our library, the MCAmerican Option Pricing with Monte Carlo simulation is pro
 The boundary between them is external memory access. For the calibration process, two APIs are provided. Calibration step 1 and 2 are wrapped as one kernel, namely, **MCAmericanEnginePreSamples**. Step 3 and step 4 compose another kernel **MCAmericanEngineCalibrate**. And pricing process as another kernel **MCAmericanEnginePricing** in this library. Because the pricing process is separated as a kernel, the data exchange between the calibration and pricing process may not through the BRAM any more. Thus, in the implementation, DDR/HBM is used as the coefficients data storage memory.
 
 
-With the three kernels, the kernel level pipeline by shortening the overall execution time could be achieved. However, employing kernel level pipeline requires a complex schedule from the host code side. An illustration of connection 3 kernels as a complete system is given in this part, which can be seen in :numref:`Figure %s <my-figure_sdx>`. Price data and :math:`B` matrix data are the outputs from kernel MCAmericanEnginePreSamples. For each timestep, path number (default 4096) price data B and x matrix data (a number of 9) need to be saved to DDR or HBM memory. 
+With the three kernels, the kernel level pipeline by shortening the overall execution time could be achieved. However, employing kernel level pipeline requires a complex schedule from the host code side. An illustration of connection 3 kernels as a complete system is given in this part, which can be seen in :numref:`Figure %s <my-figure_am>`. Price data and :math:`B` matrix data are the outputs from kernel MCAmericanEnginePreSamples. For each timestep, path number (default 4096) price data B and x matrix data (a number of 9) need to be saved to DDR or HBM memory. 
 
-.. _my-figure_sdx:
-.. figure:: /images/AM/sdx_structure.png
+.. _my-figure_am:
+.. figure:: /images/AM/AM_structure.png
         :alt: McAmericanEngine Vitis project architecture on FPGA
         :width: 60%
         :align: center

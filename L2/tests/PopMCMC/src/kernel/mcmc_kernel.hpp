@@ -15,7 +15,7 @@
  */
 /**
  *  @file mcmc_kernel.hpp
- *  @brief  Header file for SDX kernel wrapper
+ *  @brief  Header file for kernel wrapper
  */
 
 #ifndef _MCMC_KERNEL_H_
@@ -29,7 +29,7 @@
 #define DT double
 
 /**
-* @brief Top level Sdx Kernel function.  \n
+* @brief Top level Kernel function.  \n
 *
 *@tparam DT                 - Data type used in whole kernel (double by default)
 *@tparam NCHAINS            - Number of chains

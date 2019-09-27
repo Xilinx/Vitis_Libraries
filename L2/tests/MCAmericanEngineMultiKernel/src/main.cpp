@@ -138,10 +138,12 @@ int main(int argc, const char* argv[]) {
     // cmd parser
     ArgParser parser(argc, argv);
     std::string xclbin_path;
+#ifndef HLS_TEST
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "ERROR:xclbin path is not set!\n";
         return 1;
     }
+#endif
     std::string mode = "hw";
     if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
         mode = std::getenv("XCL_EMULATION_MODE");
@@ -183,6 +185,7 @@ int main(int argc, const char* argv[]) {
     int maxsamples = 0;
     double golden_output = 3.978;
     std::string num_str;
+    int loop_nm = 100;
     if (parser.getCmdOption("-cal", num_str)) {
         try {
             calibSamples = std::stoi(num_str);
@@ -206,9 +209,22 @@ int main(int argc, const char* argv[]) {
     }
 
     if (mode.compare("hw_emu") == 0) {
-        timeSteps = 1;
-        golden_output = 3.84;
+        timeSteps = UN_K2_STEP;
+        golden_output = 4.18;
+        loop_nm = 1;
+    } else if (mode.compare("sw_emu") == 0) {
+        loop_nm = 1;
     }
+    std::cout << "loop_nm: " << loop_nm << std::endl;
+    std::cout << "paths: " << requiredSamples << std::endl;
+#ifdef HLS_TEST
+    MCAE_k0(underlying, volatility, riskFreeRate, dividendYield, timeLength, strike, optionType, output_price_b,
+            output_mat_b, calibSamples, timeSteps);
+    MCAE_k1(timeLength, riskFreeRate, strike, optionType, output_price_b, output_mat_b, coef_b, calibSamples,
+            timeSteps);
+    MCAE_k2(underlying, volatility, dividendYield, riskFreeRate, timeLength, strike, optionType, coef_b, output_b,
+            requiredTolerance, requiredSamples, timeSteps);
+#else
     struct timeval start_time, end_time;
     // platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -467,7 +483,6 @@ int main(int argc, const char* argv[]) {
 #endif
 
     // number of call for kernel
-    int loop_nm = 1;
     std::vector<std::vector<cl::Event> > evt0(loop_nm);
     std::vector<std::vector<cl::Event> > evt1(loop_nm);
     std::vector<std::vector<cl::Event> > evt2(loop_nm);
@@ -512,12 +527,10 @@ int main(int argc, const char* argv[]) {
             q.enqueueMigrateMemObjects(ob_out_b, 1, &evt2[i], &evt3[i][0]);
         }
     }
+    q.flush();
     q.finish();
     gettimeofday(&end_time, 0);
     std::cout << "kernel end------" << std::endl;
-    std::cout << "Execution time " << tvdiff(&start_time, &end_time) << std::endl;
-
-    q.finish();
 
     TEST_DT out = output[0];
     std::cout << "output0 = " << out << std::endl;
@@ -538,16 +551,19 @@ int main(int argc, const char* argv[]) {
         out_price = (out + out2 + out_b + out2_b) / 2 / KN2;
         std::cout << "out_price = " << out_price << std::endl;
     }
-    // verify the output price with golden
-    // reference value:
-    //  - for 224 (UN_PATH=2, UN_STEP=2, UN_PRICING=4),
-    // notice that when the employed seed changes, the result also varies.
+
+    int exec_time = tvdiff(&start_time, &end_time);
+    double time_elapsed = double(exec_time) / 1000 / 1000;
+    std::cout << "FPGA execution time: " << time_elapsed << " s\n"
+              << "options number: " << loop_nm << " \n"
+              << "opt/sec: " << double(loop_nm) / time_elapsed << std::endl;
+
     double diff = std::fabs(out_price - golden_output);
-    if (diff < 0.02) {
-        std::cout << "PASSED!!! the output is confidential!" << std::endl;
-    } else {
-        std::cout << "FAILURE!!! incorrect ouput value calculated!" << std::endl;
+    if (diff > requiredTolerance) {
+        std::cout << "Output is wrong!" << std::endl;
+        return -1;
     }
+#endif
 
     return 0;
 }

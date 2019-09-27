@@ -19,7 +19,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_CASE_ROOT ?= $(CUR_DIR)
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/benchmarks/*}')
 
 .SECONDEXPANSION:
 
@@ -210,27 +210,23 @@ debug:
 # -----------------------------------------------------------------------------
 # TODO:                          kernel setup
 
-XFLIB_DIR = $(abspath $(XF_CASE_ROOT)/../../../../)
+XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/kernel
 
-HLS_DIR	= $(XF_CASE_ROOT)/../../../include
-HLS_DIR2 = $(XF_CASE_ROOT)/../../../../L1/include
+HLS_DIR	= $(XF_PROJ_ROOT)/L2/include
+HLS_DIR2 = $(XF_PROJ_ROOT)/L1/include
 
 XCLBIN_NAME := scanTreeKernel
 
 scanTreeKernel1_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
-scanTreeKernel2_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
 
 scanTreeKernel1_EXTRA_SRCS += $(KSRC_DIR)/scan_tree_kernel.cpp
 
 scanTreeKernel1_VPP_CFLAGS += -I$(KSRC_DIR)
-scanTreeKernel2_VPP_CFLAGS += -I$(KSRC_DIR)
 scanTreeKernel1_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel1
-scanTreeKernel2_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel2
 
 VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include -I$(XFLIB_DIR)/L2/include
-VPP_CFLAGS += -DHW_EMU_DEBUG  --xp param:hw_em.enableProtocolChecker=true
-
+VPP_CFLAGS += -DHW_EMU_DEBUG 
 DATATYPE ?= double
 
 ifeq ($(TARGET),hw_emu)
@@ -241,10 +237,31 @@ ifeq ($(DATATYPE),double)
     VPP_CFLAGS += -D DPRAGMA
 endif
 
+ifeq ($(TARGET),hw_emu) #u250
+    KERNEL_IDS = 1
+    KERNELS := scanTreeKernel1:scan_tree_kernel1.cpp
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+    VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem0:HBM[0]
+    VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem1:HBM[0]
+    VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem2:HBM[0]
+    VPP_CFLAGS += --slr scanTreeKernel1:SLR0
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/ || /u200/'))
+    VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem0:bank0
+    VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem1:bank0
+    VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem2:bank0
+    VPP_CFLAGS += --slr scanTreeKernel1:SLR0
+else
+$(warning Unsupported platform $(XPLATFORM))
+endif
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
     KERNEL_IDS = 1 2
     KERNELS := scanTreeKernel1:scan_tree_kernel1.cpp \
                scanTreeKernel2:scan_tree_kernel2.cpp
+
+    scanTreeKernel2_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
+    scanTreeKernel2_VPP_CFLAGS += -I$(KSRC_DIR)
+    scanTreeKernel2_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel2
 
     VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem0:HBM[0]
     VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem1:HBM[0]
@@ -261,13 +278,16 @@ else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
                scanTreeKernel2:scan_tree_kernel2.cpp \
     	       scanTreeKernel3:scan_tree_kernel3.cpp
 
+    scanTreeKernel2_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
     scanTreeKernel3_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
     
     scanTreeKernel3_EXTRA_SRCS += $(KSRC_DIR)/scan_tree_kernel.cpp
     
+    scanTreeKernel2_VPP_CFLAGS += -I$(KSRC_DIR)
     scanTreeKernel3_VPP_CFLAGS += -I$(KSRC_DIR)
 
     scanTreeKernel2_VPP_CFLAGS += -D U200
+    scanTreeKernel2_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel2
     scanTreeKernel3_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel3
     
     VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem0:bank0
@@ -290,15 +310,18 @@ else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
     	       scanTreeKernel3:scan_tree_kernel3.cpp \
     	       scanTreeKernel4:scan_tree_kernel4.cpp
 
+    scanTreeKernel2_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
     scanTreeKernel3_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
     scanTreeKernel4_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
 
     scanTreeKernel3_EXTRA_SRCS += $(KSRC_DIR)/scan_tree_kernel.cpp
     scanTreeKernel4_EXTRA_SRCS += $(KSRC_DIR)/scan_tree_kernel.cpp
     
+    scanTreeKernel2_VPP_CFLAGS += -I$(KSRC_DIR)
     scanTreeKernel3_VPP_CFLAGS += -I$(KSRC_DIR)
     scanTreeKernel4_VPP_CFLAGS += -I$(KSRC_DIR)
 
+    scanTreeKernel2_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel2
     scanTreeKernel3_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel3
     scanTreeKernel4_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel4
 
@@ -357,7 +380,9 @@ ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
     CXXFLAGS += -DUSE_HBM
 endif
 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+ifeq ($(TARGET),hw_emu)
+    CXXFLAGS += -DKN=1
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
     CXXFLAGS += -DKN=2
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
     CXXFLAGS += -DKN=3
@@ -398,8 +423,7 @@ VPP = v++
 VPP_CFLAGS += -I$(KSRC_DIR)
 VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
 VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 8 \
-  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
+VPP_LFLAGS += --optimize 2 --jobs 8
 
 KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
 XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)

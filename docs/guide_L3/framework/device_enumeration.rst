@@ -32,7 +32,7 @@ The following is an example to show how to enumerate ALL available Xilinx device
 	:linenos:
 
 	#include <vector>
-	#include "xf_fintech_api.h"
+	#include "xf_fintech_api.hpp"
 
 	using namespace xf::fintech;
 
@@ -73,7 +73,7 @@ NOTE - the string parameter is case-sensitive:
 	:linenos:
 
 	#include <vector>
-	#include "xf_fintech_api.h"
+	#include "xf_fintech_api.hpp"
 
 	using namespace xf::fintech;
 

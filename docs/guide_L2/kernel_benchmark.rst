@@ -23,5 +23,4 @@ Pricing Engines Demo
 
    benchmarks/MCEuropeanEngine.rst
    benchmarks/MCAmericanEngine.rst
-   benchmarks/TreeHWModelEngine.rst
-   benchmarks/TreeSwaptionEngine.rst
+   benchmarks/TreeEngine.rst

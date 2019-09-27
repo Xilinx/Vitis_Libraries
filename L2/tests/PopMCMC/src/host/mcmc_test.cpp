@@ -131,9 +131,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Kernel done!" << std::endl;
     std::cout << "Processed " << num_samples << " samples ";
     std::cout << "with " << NUM_CHAINS << " chains" << std::endl;
-    std::cout << "Samples saved to sdx_samples_out.csv" << std::endl;
+    std::cout << "Samples saved to vitis_samples_out.csv" << std::endl;
     std::cout << "Use Python plot_hist.py to plot histogram " << std::endl;
-    fp = fopen("sdx_samples_out.csv", "wb");
+    fp = fopen("vitis_samples_out.csv", "wb");
     for (unsigned int k = num_burn; k < num_samples; k++) {
         fprintf(fp, "%lf\n", sample[k]);
         if (k == num_samples - 1) {

@@ -31,22 +31,22 @@ the `YoYInflationBlackCapFloorEngine` is year-on-year inflation cap/floor engine
 .. _my-figure1:
 .. figure:: /images/inflationEngine.png
     :alt: Figure 1 architecture on FPGA
-    :width: 80%
+    :width: 50%
     :align: center
 
-As we can see from the figure, the engine mainly incudes 4 functions.
+As we can see from the figure, the engine mainly contains 4 functions.
 
 1. function discountFactor: the discount factor is calculated at the corresponding time point.
 2. function totalVariance: the total variance of volatility is calculated at the corresponding time point.
 3. function yoyRateImpl: the year-on-year forward rate is is calculated at the corresponding time point.
-4. function blackFormula: the black formula calculates the value of the option based on the results of the above three functions.
+4. function blackFormula: the black formula calculates the value of the option based on the results of the three functions mentioned above.
 
-Finally, adding the values of each time point is the final pricing value.
+Finally, the addition of the results from each time point is the final price (NPV).
 
 Profiling
 =========
 
-The hardware resources are listed in the following table (Vivado 19.1 report).
+The hardware resource utilizations are listed in the following table (from Vivado 19.1 report).
 
 .. table:: Table 1 Hardware resources
     :align: center

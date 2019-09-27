@@ -25,12 +25,12 @@ A zero-coupon bond is a bond which is purchased at a price below the face value 
 
 Implemention
 ============
-This engine uses the linear interpolation method in L1 to calculate the pricing value based on time (the difference between the maturity date and the reference date, unit is year) and face value. The linear interpolation method implements 1D linear interpolation. 
+This engine uses the linear interpolation method (:math:`linearInterpolation`) as defined in L1 to calculate the price based on time (the difference between the maturity date and the reference date with the unit in year) and face value. The linear interpolation method implements 1-dimensional linear interpolation. 
 
 Profiling
 =========
 
-The hardware resources are listed in the following table (Vivado 18.3 report).
+The hardware resource utilizations are listed in the following table (from Vivado 18.3 report).
 
 .. table:: Table 1 Hardware resources
     :align: center

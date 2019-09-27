@@ -4,9 +4,6 @@ Please refer to the specific README.md in the ./MCAmericanEngineMultiKernel subd
 ## Monte-Carlo European Engine
 Please refer to the specific README.md in the ./MCEuropeanEngine subdirectory
 
-## Tree Hull-White Model Engine
-Please refer to the specific README.md in the ./TreeHWModelEngine subdirectory
-
-## Tree Swaption Engine
-Please refer to the specific README.md in the ./TreeSwaptionEngine subdirectory
+## Tree Engine
+Please refer to the specific README.md in the ./TreeEngine subdirectory
 

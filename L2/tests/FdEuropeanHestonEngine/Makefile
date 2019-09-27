@@ -19,7 +19,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_CASE_ROOT ?= $(CUR_DIR)
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/tests/*}')
 
 .SECONDEXPANSION:
 
@@ -237,14 +237,14 @@ ifneq ($(CHECK_M_SIZE), $(FD_M_SIZE))
 $(error FD_M_SIZE must equal FD_M1 * FD_M2)
 endif
 
-XFLIB_DIR = $(abspath $(XF_CASE_ROOT)/../../..)
+XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/src/kernel
 
 XCLBIN_NAME = fd_heston_kernel_${DEVICE_PART}_${TARGET}_m${FD_M_SIZE}_${FD_DATA_TYPE}
 KERNELS = fd_kernel:fd_kernel.cpp
 
-HLS_L1_DIR = $(XF_CASE_ROOT)/../../../L1/include
-HLS_L2_DIR = $(XF_CASE_ROOT)/../../include
+HLS_L1_DIR = $(XF_PROJ_ROOT)/L1/include
+HLS_L2_DIR = $(XF_PROJ_ROOT)/L2/include
 
 fd_kernel_EXTRA_HDRS += $(wildcard $(HLS_L2_DIR)/*.hpp) $(wildcard $(HLS_L1_DIR)/*.hpp)
 fd_kernel_VPP_CFLAGS += -I $(KSRC_DIR)
@@ -328,8 +328,7 @@ VPP = v++
 VPP_CFLAGS += -I$(KSRC_DIR)
 VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
 VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 8 \
-  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
+VPP_LFLAGS += --optimize 2 --jobs 8
 
 KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
 XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)
@@ -362,7 +361,6 @@ $(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp
 	mkdir -p $(XO_DIR)
 	$(VPP) -o $@ --kernel $* --compile $(filter %.cpp,$^) \
 		$(VPP_CFLAGS) --xp prop:kernel.$*.kernel_flags=-std=c++0x --xp param:compiler.fsanitize=address,memory
-
 $(XCLBIN_FILE): $(XO_FILES) | check_vpp check_platform
 	@echo -e "----\nCompiling xclbin..."
 	mkdir -p $(XCLBIN_DIR)

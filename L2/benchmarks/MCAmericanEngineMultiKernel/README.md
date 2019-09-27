@@ -1,20 +1,20 @@
 # Monte-Carlo American Engine
-This is a benchmark of MC (Monte-Carlo) American Engine using the SDx environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of MC (Monte-Carlo) American Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
 
 
 ## Prerequisites
 
 - Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted
 - Xilinx runtime (XRT) installed
-- Xilinx SDx 2018.3 installed and configured
+- Xilinx Vitis 2019.2 installed and configured
 
 ## Building
 The demonstration application and kernel is built using a command line Makefile flow.
 
 ### Step 1 :
-Setup the build environment using the SDx and XRT scripts:
+Setup the build environment using the Vitis and XRT scripts:
 
-            source <install path>/SDx/2018.3/settings64.sh
+            source <install path>/Vitis/2019.2/settings64.sh
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :
@@ -60,13 +60,11 @@ for the testbench, process it via the engine and compare to the expected result,
 
 The timing performance of the MCAmericanEngine is shown in the table below, where timesteps is 100, requiredSamples is 24576, calibSamples is 4096, and FPGA frequency is 300MHz.
 
-| platform                |             Execution time              |
-|                         |-----------------------------------------|
-|                         |    cold run     |       warm run        |
-| ----------------------- | --------------- |-----------------------|
-| QuantLib 1.15 on CentOS | 1156.5ms        | 1156.5m               |
-| FinTech on U250         | 5.87ms          | 1.96ms                |
-| Accelaration Ratio      | 197X            | 590X                  |
+| platform                |    Execution time (cold run)     |       Execution time (warm run)        |
+| ----------------------- | -------------------------------- |----------------------------------------|
+| QuantLib 1.15 on CentOS | 1156.5ms                         | 1156.5m                                |
+| FinTech on U250         | 5.87ms                           | 1.96ms                                 |
+| Accelaration Ratio      | 197X                             | 590X                                   |
 
 
 

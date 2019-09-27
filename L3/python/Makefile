@@ -47,7 +47,7 @@ SRCS := $(shell find $(SRC_DIR) -maxdepth 4 -name '*.cpp')
 OBJ_FILES := $(addsuffix .o, $(basename $(SRCS)))
 EXTRA_OBJS :=
 
-CPPFLAGS = -DSDX_PLATFORM=$(SDX_PLATFORM) \
+CPPFLAGS = -DVITIS_PLATFORM=$(VITIS_PLATFORM) \
 			-std=c++11 -O3 -g -Wall -Wno-unknown-pragmas -c -fPIC \
 			-I$(XILINX_FINTECH_L3_INC) \
 			-I$(XILINX_FINTECH_L2_INC) \

@@ -175,7 +175,9 @@ int main(int argc, const char* argv[]) {
     devices.resize(1);
     cl::Program program(context, devices, xclBins);
     cl::Kernel kernel1_TreeEngine(program, "scanTreeKernel1");
+#if KN > 1
     cl::Kernel kernel2_TreeEngine(program, "scanTreeKernel2");
+#endif
 #if KN > 2
     cl::Kernel kernel3_TreeEngine(program, "scanTreeKernel3");
 #endif
@@ -253,12 +255,14 @@ int main(int argc, const char* argv[]) {
     kernel1_TreeEngine.setArg(j++, inputParam0_buf[0]);
     kernel1_TreeEngine.setArg(j++, inputParam1_buf[0]);
     kernel1_TreeEngine.setArg(j++, output_buf[0]);
-
+#if KN > 1
     j = 0;
     kernel2_TreeEngine.setArg(j++, len);
     kernel2_TreeEngine.setArg(j++, inputParam0_buf[1]);
     kernel2_TreeEngine.setArg(j++, inputParam1_buf[1]);
     kernel2_TreeEngine.setArg(j++, output_buf[1]);
+#endif
+
 #if KN > 2
     j = 0;
     kernel3_TreeEngine.setArg(j++, len);
@@ -275,7 +279,9 @@ int main(int argc, const char* argv[]) {
 #endif
     for (int i = 0; i < 1; ++i) {
         q.enqueueTask(kernel1_TreeEngine, nullptr, &events_kernel[0]);
+#if KN > 1
         q.enqueueTask(kernel2_TreeEngine, nullptr, &events_kernel[1]);
+#endif
 #if KN > 2
         q.enqueueTask(kernel3_TreeEngine, nullptr, &events_kernel[2]);
 #endif
@@ -294,11 +300,13 @@ int main(int argc, const char* argv[]) {
     std::cout << "Kernel-1 Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
     time_start = time1;
     time_end = time2;
+#if KN > 1
     events_kernel[1].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
     events_kernel[1].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
     std::cout << "Kernel-2 Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
     if (time_start > time1) time_start = time1;
     if (time_end < time2) time_end = time2;
+#endif
 #if KN > 2
     events_kernel[2].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
     events_kernel[2].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);

@@ -1231,7 +1231,7 @@ void MCAsianGeometricAPEngine(DT underlying,
 /**
  * @brief Asian Arithmetic Average Price Engine using Monte Carlo Method Based
  * on Black-Scholes Model.
- * The settlement price of the underlying asset at expiry time is the geomertic
+ * The settlement price of the underlying asset at expiry time is the arithmetic
  * average of asset price during the option lifetime.
  * @tparam DT Supported data type including double and float, which decides the
  * precision of output.
@@ -1382,8 +1382,8 @@ void MCAsianArithmeticAPEngine(DT underlying,
 /**
  * @brief Asian Arithmetic Average Strike Engine using Monte Carlo Method Based
  * on Black-Scholes Model.
- * The settlement price of the underlying asset at expiry time is the geomertic
- * average of asset price during the option lifetime.
+ * The settlement price of the underlying asset at expiry time is the asset price at expiry time, but the stock price is
+ * the arithmetic average of asset price during the option lifetime.
  *
  * @tparam DT Supported data type including double and float, which decides the
  * precision of output.

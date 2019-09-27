@@ -31,20 +31,20 @@ Digital options are attractive to buyers because the option payoff is a known co
    Here, we only support one type of digital options:
 
    * Cash-or-nothing option: Pays some fixed amount of cash if the option expires in the money.
-   * Asset-or-nothing option(no supported)
+   * Asset-or-nothing option (not supported)
 
 Implementation
 ===============
 
 The implementation of digital option pricing engine is very similar to the barrier option pricing engine. It also uses the Brownian Bridge to correct the hitting error.
-Here, the exercise of digital option could be at the expiry time or any time before the expiry time, which is configured the exEarly input arguments.
-When argument exEarly is false, the fixed cash is paid at the expiry time and it is discounted to time zero for the value of option. 
+Here, the exercise of digital option could be at the expiry time or any time between the expiry time and the 0 time, which is configured the by `exEarly` input arguments.
+When argument `exEarly` is false, the fixed cash is paid at the expiry time and it is discounted to time zero for the value of option. 
 Otherwise, once the maximum or the minimum of the asset price hits the strike value, the fixed cash is paid and it is discounted to time 0 for the value of option.
 
 
 In the following, we will take put digital option as an example to elaborate.
 Let :math:`T` be the maturity time of option. The maturity time :math:`T` is discretized by time steps :math:`N`. 
-The strike value is :math:`K`. :math:`C` is the fixed cash is paid when option is in the money.
+The strike value is :math:`K`. :math:`C` is the fixed cash which paid when option is in the money.
 
 The detailed procedure of Monte Carlo Simulation is as follows:
 

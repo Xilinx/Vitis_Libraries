@@ -30,7 +30,7 @@ namespace xf {
 namespace fintech {
 
 /**
- * @brief StochasticProcess1D
+ * @brief Stochastic process for CIR and ECIR models to simulate rate volatility
  *
  * @tparam DT data type supported include float and double
  *

@@ -59,5 +59,5 @@ This is an example output from the demonstration using a sw_emu target.
     Duration returned by profile API is 23853 ms ****                                                                                             
     Kernel done!                                                                                                                                   
     Processed 500 samples with 10 chains                                                                                                       
-    Samples saved to sdx_samples_out.csv                                                        
+    Samples saved to vitis_samples_out.csv                                                        
     Use Python plot_hist.py to plot histogram  

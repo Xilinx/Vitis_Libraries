@@ -22,16 +22,19 @@ Overview
 =========
 In financial mathematics, the Hull-White model is a model of future interest rates. In its most generic formulation, it belongs to the class of no-arbitrage models that are able to fit today's term structure of interest rates. It is relatively straightforward to translate the mathematical description of the evolution of future interest rates onto a tree or lattice and so interest rate derivatives such as Bermudan Swaptions can be valued in the model. The first Hull-White model was described by John C. Hull and Alan White in 1990. The model is still popular in the market today (from Wiki).
 
-This section mainly introduces the implementation process of short-rate and discount, which is applied in Tree Engine and FD (finite differences) Engine. They are core part for option pricing. 
-
 Implementation
 ===================
-As an important parts of the Tree Engine and FD Engine, the class HWModel implements the single-factor Hull-White model to calculate short-rate and discount by using continuous compounding, including 4 functions (treeShortRate, fdShortRate, discount, discountBond). Next, the implementation process is introduced.
+This section mainly introduces the implementation process of short-rate and discount, which is core part of option pricing, and applied in Tree Engine and FD (finite-difference method) Engine.
+
+As an important part of the Tree/ FD Engines, the class :math:`HWModel` implements the single-factor Hull-White model to calculate short-rate and discount by using continuous compounding, including 4 functions (treeShortRate, fdShortRate, discount, discountBond). The implementation process is introduced as follows:
 
 1. Function treeShortRate: 
-   a) The short-rates is calculated at time point :math:`t` with the duration :math:`dt` from 0 to N time point by time point. First, the variable value is calculated. In order to reduce latency, the array values16 is added to save the intermediate result. Then, the short rate is calculated based on variable value. 
-   b) According to timepoints and tree related parameters to establish a trinomial tree structure from 0 to N time point by time point.
+
+   a) The short-rates is calculated at time point :math:`t` with the duration :math:`dt` from 0 to N point-by-point. As in the calculation process, the variable :math:`value` needs to be calculated first. To improve the initiation interval (II), an array :math:`values16` is implemented to store the intermediate results from each iteration. Then, an addition tree is performed subsequently to achieve an II = 1 for the whole process. Finally, the short rate is calculated using variable :math:`value`.
+
+   b) For implementing the generic Tree framework, the :math:`state\_price` calculating process is moved from Tree Lattice to this Model.
+
 2. Function fdShortRate: The short-rate is calculated at time point :math:`t`.
-3. Function discount: The discount is calculated at time point :math:`t` with the duration :math:`dt` that based on the short-rate.
-4. Function discountBond: the discount bond is calculated at time point :math:`t` with the duration :math:`dt=T-t` that based on the short-rate.
+3. Function discount: The discount is calculated at time point :math:`t` with the duration :math:`dt` based on the short-rate.
+4. Function discountBond: The discount bond is calculated at time point :math:`t` with the duration :math:`dt=T-t` based on the short-rate.
 

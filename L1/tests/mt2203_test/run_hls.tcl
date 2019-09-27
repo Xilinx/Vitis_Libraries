@@ -24,9 +24,9 @@ open_project -reset $PROJ
 
 set libpath "${XF_PROJ_ROOT}/ext/dcmt/lib"
 
-add_files dut.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/ext/dcmt/include"
-add_files -tb tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/ext/dcmt/include "
-add_files -tb "${XF_PROJ_ROOT}/ext/dcmt/lib/libdcmt.a"
+add_files dut.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/ext/dcmt/dcmt/include"
+add_files -tb tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/ext/dcmt/dcmt/include "
+add_files -tb "${XF_PROJ_ROOT}/ext/dcmt/dcmt/lib/libdcmt.a"
 set_top dut
 
 open_solution -reset $SOLN

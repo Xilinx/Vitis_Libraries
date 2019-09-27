@@ -14,7 +14,7 @@
    limitations under the License.
 
 ====================================
-L2 Pricing Engine Kernel User Guide
+L2 Kernel User Guide
 ====================================
 
 .. toctree::

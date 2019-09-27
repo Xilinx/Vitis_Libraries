@@ -44,15 +44,16 @@ The correlation matrix is and :math:`2N` by :math:`2N` matrix, but the right upp
    :width: 80%
    :align: center
 
+Optimization comes in two parts. 
+
+- 1. The first and also the most is optimization of L1 functions. 
+- 2. Save one call of cumulative distribution function in single underlying assets since it can get the value directly from RNGs. It may not work for multiple underlying assets because it will lose direct link between Gaussian random number and its corresponding uniform random number.
+
 Variations 
 ==========
 
 In this release we provide five variations of Heston Model implementation, 
 including kDTFullTruncation, kDTPartialTruncation, kDTReflection, kDTQuadraticExponential and kDTQuadraticExponentialMartingale. 
 The first three is relatively simple dealing with negative volatility. 
-kDTQuadraticExponential and kDTQuadraticExponential Martingale use better approximation method to get better precision result, and take more resource. 
+kDTQuadraticExponential and kDTQuadraticExponential Martingale use better approximation method to get result with better precision while taking more resources.
 
-Optimization comes in two parts. 
-
-- 1. The first and also the most is optimization of L1 functions. 
-- 2. Save one call of cumulative distribution function in single underlying assets since it can get the value directly from RNGs. It may not work for multiple underlying assets because it will lose direct link between Gaussian random number and its corresponding uniform random number.

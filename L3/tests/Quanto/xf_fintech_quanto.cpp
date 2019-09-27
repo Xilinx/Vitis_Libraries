@@ -59,7 +59,6 @@ int main() {
     retval = cfQuanto.claimDevice(pChosenDevice);
 
     if (retval == XLNX_OK) {
-        int total_fails = 0;
         // Populate the asset data...
         for (unsigned int i = 0; i < numAssets; i++) {
             cfQuanto.stockPrice[i] = test_data[i].s;
@@ -94,16 +93,6 @@ int main() {
         for (unsigned int i = 0; i < numAssets; i++) {
             printf("[XLNX] | %5u | %8.5f | %8.5f | %8.5f | %8.5f | %8.5f | %8.5f |\n", i, cfQuanto.optionPrice[i],
                    cfQuanto.delta[i], cfQuanto.gamma[i], cfQuanto.vega[i], cfQuanto.theta[i], cfQuanto.rho[i]);
-
-            if (!check_result(cfQuanto.optionPrice[i], test_data[i].exp, tolerance)) {
-                printf(
-                    "[XLNX] | FAIL: s(%8.5f), k(%8.5f) rd(%8.5f), rf(%8.5f), v(%8.5f), q(%8.5f), t(%8.5f), E(%8.5f), "
-                    "fxv(%8.5f), corr(%8.5f)\n",
-                    test_data[i].s, test_data[i].k, test_data[i].rd, test_data[i].rf, test_data[i].v, test_data[i].q,
-                    test_data[i].t, test_data[i].E, test_data[i].fxv, test_data[i].corr);
-                printf("[XLNX] | FAIL: expected(%8.5f), got (%8.5f)\n", test_data[i].exp, cfQuanto.optionPrice[i]);
-                total_fails++;
-            }
         }
 
         printf(
@@ -113,7 +102,6 @@ int main() {
         printf("[XLNX] Processed %u assets in %lld us\n", numAssets, cfQuanto.getLastRunTime());
         printf("[XLNX] Comparing calculated value against expected value at a tolerance of %8.5f\n", tolerance);
         printf("[XLNX] Total tests = %d\n", numAssets);
-        printf("[XLNX] Total fails = %d\n", total_fails);
     }
 
     cfQuanto.releaseDevice();

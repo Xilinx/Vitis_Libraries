@@ -22,8 +22,9 @@ Pentadiagonal Matrix Solver
 Overview
 ========
 
-The Pentadiagonal Matrix Solver solves a Pentadiagonal linear system using parallel cyclic reduction (also known as odd-even elimination). More details about this algorithm can be found in the paper: C. Levit, "Parallel Solution of Pentadiagonal Systems Using Generalized Odd-Even Elimination", 1989.
+The Pentadiagonal Matrix Solver solves a Pentadiagonal linear system using parallel cyclic reduction (also known as odd-even elimination). More details about this algorithm can be found in the paper: `Penta Solver`_.
 
+.. _`Penta Solver`: https://www.academia.edu/8031041/Parallel_Solution_of_Pentadiagonal_Systems_Using_Generalized_Odd-Even_Elimination
 
 Implementation
 ==============
@@ -35,6 +36,6 @@ The input matrix is stored as five vectors, one for each diagonal.
 Since the algorithm needs random memory access in every iteration, 3 copies of the whole matrix are stored internally in the solver to allow full pipelining of the implementation. 
 
 .. caution::
-    Please note that the solver is very sensitive to zeros in *any* of the diagonals on input data. Due to the nature of the algorithm, any zeros on the three inner diagonals will lead to an attempt to divide-by-zero and the algorithm will fail.
+    Please note that the solver is very sensitive to zeros in **any** of the diagonals on input data. Due to the nature of the algorithm, any zeros on the three inner diagonals will lead to an attempt to divide-by-zero and the algorithm will fail.
 
 

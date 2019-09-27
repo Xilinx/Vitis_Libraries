@@ -17,7 +17,6 @@
 #ifndef _XF_FINTECH_HESTON_KERNEL_CONSTANTS_H_
 #define _XF_FINTECH_HESTON_KERNEL_CONSTANTS_H_
 
-#define TEST_SDX 1
 #define FD_dataType double
 #define FD_mSize 8192
 #define FD_memWidth 8

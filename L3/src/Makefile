@@ -42,7 +42,7 @@ OBJ_FILES := $(addsuffix .o, $(basename $(SRCS)))
 EXTRA_OBJS :=
 
 
-CPPFLAGS = -DSDX_PLATFORM=$(SDX_PLATFORM) \
+CPPFLAGS = -DVITIS_PLATFORM=$(VITIS_PLATFORM) \
 			-std=c++11 -O3 -g -Wall -Wno-unknown-pragmas -c -fPIC \
 			-I$(L2_INCLUDE_DIR) \
 			-I$(INCLUDE_DIR) \

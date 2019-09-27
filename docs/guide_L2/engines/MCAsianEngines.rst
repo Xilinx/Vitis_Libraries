@@ -42,10 +42,10 @@ When the average price of underlying asset is used as the strike price at the ex
    payoff of call option = :math:`\max(0, S_T - A(T))`
 
 Where :math:`T` is the time of maturity, :math:`A(T)` is the average price of asset during time :math:`T`, 
-:math:`K` is the fixed strike, :math:`S_T` is the price of underlying asset at maturity time.
+:math:`K` is the fixed strike, :math:`S_T` is the price of underlying asset at maturity.
 
 The average could be arithmetic or geometric, which is configurable. :math:`N` is the
-number of discrete steps from 0 to :math:`T`.
+number of discrete steps from :math:`0` to :math:`T`.
 
    Arithmetic average: :math:`A(T) = \frac{\sum_{i=0}^N S_i}{N}`
 
@@ -58,7 +58,7 @@ MCAsianAPEngine
 The pricing process of Asian Arithmetic Pricing engine is as follows:
 
 1. Generate independent stock paths by using Mersenne Twister Uniform MT19937 Random Number Generator (RNG) followed by Inverse Cumulative Normal Uniform Random Numbers.
-2. Start at :math:`t = 0` and calculate the stock price of each path firstly in order to achieve II = 1.
+2. Start at :math:`t = 0` and calculate the stock price of each path firstly in order to achieve initiation interval (II) = 1.
 3. Calculate arithmetic average and geometric average value of each path.
 
 .. math::
@@ -66,7 +66,7 @@ The pricing process of Asian Arithmetic Pricing engine is as follows:
 .. math::
         Price_{Geometric} = exp{( \frac{1}{M+1} * \sum_{i=0}^{M} (\log{S(i\Delta t)}) )} 
 
-4. Calculate the payoff difference of arithmetic average price and geometric average average price.
+4. Calculate the payoff difference of arithmetic average price and geometric average price.
 
 .. math::
         Payoff_{gap} = \max(0,Strike - Price_{Arithmetic}) - \max(0,Price_{Geometric} - Strike)\> for \> put \> options
@@ -81,7 +81,7 @@ The pricing architecture on FPGA can be shown as the following figure:
 .. _my-figureAP:
 .. figure:: /images/AP/framework.png
     :alt: McAsianAPEngine pricing architecture on FPGA
-    :width: 80%
+    :width: 60%
     :align: center
     
     
@@ -112,7 +112,7 @@ The pricing architecture on FPGA can be shown as the following figure:
 .. _my-figureAS:
 .. figure:: /images/AS/framework.png
     :alt: McAsianASEngine pricing architecture on FPGA
-    :width: 80%
+    :width: 60%
     :align: center
     
     
@@ -143,12 +143,13 @@ The pricing architecture on FPGA can be shown as the following figure:
 .. _my-figureGP:
 .. figure:: /images/GP/framework.png
     :alt: McAsianGPEngine pricing architecture on FPGA
-    :width: 80%
+    :width: 60%
     :align: center
     
     
 .. note::
-    :numref:`Figure.%s <my-figureAP>`,  :numref:`Figure.%s <my-figureAS>`,  :numref:`Figure.%s <my-figureGP>`  show the pricing part of McAsianAPEngine, McAsianASEngine and McAsianGPEngine respectively; the other parts, for example, PathGenerator, MCSimulation and other modules, are the same as in MCEuropeanEngine.
+
+    The 3 figures above shows the pricing part of McAsianAPEngine, McAsianASEngine and McAsianGPEngine respectively; the other parts, for example, PathGenerator, MCSimulation and other modules, are the same as in MCEuropeanEngine.
 
 
 Profiling

@@ -18,7 +18,7 @@ def target(x,temp):
 
 def plot_hist():
 
-    fin = open('sdx_samples_out.csv','rt')
+    fin = open('vitis_samples_out.csv','rt')
     data = fin.read()
     data = data.split('\n')
     data = [float(x) for x in data]

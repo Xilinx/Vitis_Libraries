@@ -22,7 +22,7 @@ Heston Model
 Overview
 =========
 Heston model is a mathematical model that describing dynamics of underlying asset price. 
-It is a stochastic volatility model which assume the volatility of the asset price is not constant but follows a random process. 
+It is a stochastic volatility model which assumes the volatility of the asset price is not constant but follows a random process. 
 In this case, volatility flows square root process which means volatility is always non-negative.
 
 
@@ -39,7 +39,7 @@ The continuous form of Heston Model is:
 .. math::
    Corr(W_t^S, W_t^\nu)) = \rho
 
-Where :math:`S_t` is random variable, represent a stock price at time t. 
+Where :math:`S_t` is random variable, represent a stock price at time :math:`t`. 
 :math:`\mu` is the stock's expected rate of return. 
 :math:`\sqrt[2]{\nu_t}` is the volatility of stock price and :math:`\nu_t` is also a random variable. 
 :math:`\theta` is the long term variance. 
@@ -47,8 +47,8 @@ Where :math:`S_t` is random variable, represent a stock price at time t.
 :math:`\sigma` is the volatility of the volatility. 
 :math:`\mathrm{d}W_t^S` and :math:`\mathrm{d}W_t^\nu` are Wiener processes with correlation :math:`\rho`. 
 
-Partial Differential Equation of Heston Model
-=============================================
+Partial Differential Equation (PED) of Heston Model
+===================================================
 In the provided solver, the PDE is the Heston Pricing Model [HESTON1993]_. Using the naming conventions of Hout & Foulon [HOUT2010]_, the PDE is given as:
 
 .. math::
@@ -86,7 +86,7 @@ The discrete form (Euler-Maruyama Form) of Heston Model is:
 Where :math:`\Delta` stands for unit timestep length. 
 :math:`S(j\Delta)` stands for S in j th timesteps, AKA :math:`S(j * \Delta t)`. 
 :math:`\nu(j\Delta)` has a similar meaning. 
-To simplify the calculation, we use :math:`\ln{S(j\Delta)}` instead of :math:`S` since multiplication becomes addition after \logarithm. 
+To simplify the process, we use :math:`\ln{S(j\Delta)}` instead of :math:`S` since multiplication becomes addition after \logarithm. 
 
 :math:`\Delta W_t^S` and :math:`\Delta W_t^\nu` could be calculated by:
 
@@ -120,6 +120,7 @@ There are several variations to solve this issue, here we provide 5 of most comm
 
 
 **kDTFullTruncation**: use only positive part or zero of volatility of the last iteration.
+
 :math:`\nu((j-1)\Delta)^+ = \nu((j-1)\Delta)` if :math:`\nu((j-1)\Delta) > 0` :math:`\nu((j-1)\Delta)^+ = 0` if :math:`\nu((j-1)\Delta) \leq 0`.
 
 .. math::
@@ -129,7 +130,7 @@ There are several variations to solve this issue, here we provide 5 of most comm
    \nu(j\Delta) = \nu((j-1)\Delta) + \kappa(\theta - \nu((j-1)\Delta)^+)\Delta + \sigma\sqrt[2]{\nu((j-1)\Delta)^+}\Delta W_t^\nu
 
 
-**kDTQuadraticExponential** and **kDTQuadraticExponentialMartingale** are more accurate variation, details could be found in reference papers. 
+**kDTQuadraticExponential** and **kDTQuadraticExponentialMartingale** are more accurate variation, details could be found in reference papers [ANDERSON2005]_. 
 They use a different approximation method to calculate :math:`\nu`, here's brief on its algorithm
 
 Step 1: we calculate first order moment and second order moment of :math:`\nu`.
@@ -175,10 +176,10 @@ Step 4.3: Calculate :math:`\nu(j\Delta)`
     \nu(j\Delta) = 0 \:\: if \:\: U_\nu \leq p
 
 .. math::
-    \nu(j\Delta) = \frac{1}{\beta}(\frac{\log{1-p}}{1-U_\nu}) \:\: if \:\:  p < U_\nu
+    \nu(j\Delta) = \frac{1}{\beta}(\frac{\log{(1-p)}}{1-U_\nu}) \:\: if \:\:  p < U_\nu
     
 It should be noticed that they both have two branches for value in different range. 
-These two branches have a similar calculation. 
+These two branches have a similar calculation process. 
 Furthermore, only one branch is active at the same time. 
 By merging these two branches into one branch and manually binding calculations to DSPs, it will cut off DSP cost. 
 This won't change its performance and accuracy.
@@ -189,7 +190,7 @@ Price at each time step is calculated using last time step's price and volatilit
 And we use 1-D array to store price and volatility of each path's history (last timestep).
 
 If the inner loop is timestep loop, as red arrows demonstrate in the diagram below, it will keep update the same array element until reaches max timesteps.
-Such operation can not achieve II=1 and will greatly slow down the calculation.
+Such operation can not achieve initiation interval (II)=1 and will greatly slow down the calculation process.
 If the inner loop is path loop, as green arrows demonstrate in the diagram below, it will keep updating different array element each time.
 Such operation will avoid dependency issue and reach II=1, which is used in this implementation.
 
