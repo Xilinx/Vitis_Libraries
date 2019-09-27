@@ -15,13 +15,13 @@ Other than the standard `TARGET` and `DEVICE` variable, the following variables 
 ```
 # To build the xclbin files for tests
 cd build_aggr_partition
-make xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=u280
+make xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=/path/to/u280/xpfm
 cd ..
 
 cd build_join_partition
-make xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=u280
+make xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=/path/to/u280/xpfm
 cd ..
 
 #To run a specific demo:
-make run TARGET=<sw_emu|hw_emu|hw> TB=<Q1|Q2|...> MODE=<FPGA|CPU> SF=<1|30> DEVICE=u280
+make run TARGET=<sw_emu|hw_emu|hw> TB=<Q1|Q2|...> MODE=<FPGA|CPU> SF=<1|30> DEVICE=/path/to/u280/xpfm
 ```

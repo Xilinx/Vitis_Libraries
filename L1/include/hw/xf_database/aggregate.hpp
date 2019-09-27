@@ -286,7 +286,7 @@ namespace database {
  * @brief Overload for most common aggregations.
  *
  * As shown below in the parameters, this function can calculate one of a range of statistics, including
- * minimal, maximal, average(mean), variance, L1 norm, L2 norm. It can also calculate the sum and count.
+ * minimal, maximal, average (mean), variance, L1 norm, L2 norm. It can also calculate the sum and count.
  *
  * The limitation in this function is that the output data type must match with the input data type. In some cases,
  * the sum or count may overflow the output type, but it can be safely covered by other aggregation overloads.

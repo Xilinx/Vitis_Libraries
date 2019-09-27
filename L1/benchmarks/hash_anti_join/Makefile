@@ -196,7 +196,7 @@ debug:
 # -----------------------------------------------------------------------------
 # TODO:                          kernel setup
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/benchmarks/*}')
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 KSRC_DIR = $(CUR_DIR)/kernel
@@ -217,7 +217,7 @@ VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
-join_kernel_VPP_CFLAGS += --config conn_u280.ini
+VPP_LFLAGS += --config conn_u280.ini
 CXXFLAGS += -DUSE_HBM
 else
 $(warning Unsupported platform $(XPLATFORM))

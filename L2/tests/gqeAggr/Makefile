@@ -187,7 +187,7 @@ debug:
 	@echo "> gqeAggr_VPP_CFLAGS is $(gqeAggr_VPP_CFLAGS)"
 
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/tests/*}')
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 # -----------------------------------------------------------------------------
@@ -215,7 +215,7 @@ gqeAggr_VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw \
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
-gqeAggr_VPP_LFLAGS += --config conn_u280.ini
+VPP_LFLAGS += --config conn_u280.ini
 else
 $(warning Unsupported platform $(XPLATFORM))
 endif

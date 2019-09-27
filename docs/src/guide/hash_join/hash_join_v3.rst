@@ -56,7 +56,7 @@ Each PU performs HASH-JOIN in 3 phases.
    Then, the overflow rows will be read in form one HBM and write out to another HBM. 
    The output address of overflow rows is according to the offset of its hash value.
    By operation of Merge, we can put the overflow rows into its right position and waiting for Probe. 
-   In order to provide high throughput in this operation, two dedicated HBM ports is required for each PU, which provides read and write accessibilitites at the same time.
+   In order to provide high throughput in this operation, two dedicated HBM ports is required for each PU, which provides read and write accessibilities at the same time.
    
 .. image:: /images/merge_sc_v3.png
    :alt: Merge

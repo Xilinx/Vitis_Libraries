@@ -36,7 +36,7 @@ which provides both ``gqeAggr`` and ``gqePart`` needs to be used.
 Performance Data
 ================
 
-The performance of FPGA accelerated query execution is compared against a C++ implementation of the query. 
+The performance of FPGA accelerated query execution is compared against a C++ implementation of the query.
 The result is summarized in the table below.
 
 For both FPGA and C++, time is measured assuming the data is already loaded into CPU main memory.
@@ -168,8 +168,6 @@ Runnig the Demos
 ================
 
 The demo code is located in ``L2/demos`` folder.
-A top makefile serves as unified entrance to build all host code.
-Two sub-folders, ``build_aggr_partition`` and ``build_join_partition``, are folders for
-compiling the two xclbins for the demo tests. As suggested by the folder name,
-both xclbin contains ``gqePart`` kernel, but with ``gqeJoin`` or ``gqeAggr`` kernel correspondingly.
+A top makefile serves as unified entrance to build all host code. Please refer the ``README`` file for detailed
+instructions.
 

@@ -24,7 +24,7 @@ Internals of Bloom-Filter
    :maxdepth: 1
 
 This document describes the structure and execution of bloom filter module,
-implemented as :ref:`dynamicEval <cid-xf::database::bfGen>` function.
+implemented as :ref:`bloomFilter <cid-xf::database::bfGen>` function.
 
 The structure of ``bloomFilter`` is described as below. The primitive have two function which are ``bv-update`` and ``bv-check``. 
 It takes BRAM or URAM as internal storage for bloom filter vectors. 

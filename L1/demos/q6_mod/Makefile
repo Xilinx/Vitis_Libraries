@@ -203,25 +203,26 @@ KSRC_DIR = $(CUR_DIR)/kernel
 
 KERNELS := filter_kernel
 
+XCLBIN_NAME := filter_kernel
+
 # must provide path
 filter_kernel_EXTRA_HDRS += $(SRC_DIR)/table_dt.hpp
 filter_kernel_VPP_CFLAGS += -I$(SRC_DIR)
 
 VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/hw
-VPP_CFLAGS += --config opts.ini
-XCLBIN_NAME := filter_kernel
+VPP_LFLAGS += --config opts.ini
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
-hash_aggr_kernel_VPP_CFLAGS += --config conn_u280.ini
+VPP_LFLAGS += --config conn_u280.ini
 CXXFLAGS += -DUSE_HBM
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 # U250
-hash_aggr_kernel_VPP_CFLAGS += --config conn_u250.ini
+VPP_LFLAGS += --config conn_u250.ini
 CXXFLAGS += -DUSE_DDR
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 # U200
-hash_aggr_kernel_VPP_CFLAGS += --config conn_u200.ini
+VPP_LFLAGS += --config conn_u200.ini
 CXXFLAGS += -DUSE_DDR
 else
 $(warning Unsupported platform $(XPLATFORM))

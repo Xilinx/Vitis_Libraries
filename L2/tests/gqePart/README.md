@@ -1,4 +1,4 @@
-# Vitis Tests for gqeAggr Kernel
+# Vitis Tests for gqePart Kernel
 
 **This kernel has only been tested on Alveo U280, the makefile does not support other devices.**
 

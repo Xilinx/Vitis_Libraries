@@ -37,7 +37,7 @@
 namespace xf {
 namespace database {
 /**
- * @brief one stream input static evaluation
+ * @brief One stream input static evaluation
  *
  * static_eval function calculates the experssion result that user defined.
  * This result will be passed to aggregate module as the input.
@@ -55,7 +55,7 @@ namespace database {
  *
  * \endrst
  *
- * in the above call, ``int`` is the data type of input of ``user_func``,
+ * In the above call, ``int`` is the data type of input of ``user_func``,
  * and ``long`` is the return type of ``user_func``.
  *
  * @tparam T the input stream type, inferred from argument
@@ -85,7 +85,7 @@ void staticEval(hls::stream<T>& in_strm,
 }
 
 /**
- * @brief two stream input static evaluation
+ * @brief Two stream input static evaluation
  *
  * static_eval function calculate the experssion result that user defined.
  * This result will be passed to aggregate module as the input.
@@ -104,7 +104,7 @@ void staticEval(hls::stream<T>& in_strm,
  *
  * \endrst
  *
- * in the above call, two ``int`` are the data type of input of
+ * In the above call, two ``int`` are the data type of input of
 * ``user_func``,
  * and ``long`` is the return type of ``user_func``.
  *
@@ -139,7 +139,7 @@ void staticEval(hls::stream<T1>& in1_strm,
 }
 
 /**
- * @brief three stream input static evaluation
+ * @brief Three stream input static evaluation
  *
  * static_eval function calculate the experssion result that user defined.
  * This result will be passed to aggregate module as the input.
@@ -159,7 +159,7 @@ void staticEval(hls::stream<T1>& in1_strm,
  *
  * \endrst
  *
- * in the above call, three ``int`` are the data type of input of
+ * In the above call, three ``int`` are the data type of input of
 * ``user_func``,
  * and ``long`` is the return type of ``user_func``.
  *
@@ -198,7 +198,7 @@ void staticEval(hls::stream<T1>& in1_strm,
 }
 
 /**
- * @brief four stream input static evaluation
+ * @brief Four stream input static evaluation
  *
  * static_eval function calculate the experssion result that user defined.
  * This result will be passed to aggregate module as the input.
@@ -218,7 +218,7 @@ void staticEval(hls::stream<T1>& in1_strm,
  *
  * \endrst
  *
- * in the above call, four ``int`` are the data type of input of
+ * In the above call, four ``int`` are the data type of input of
 * ``user_func``,
  * and ``long`` is the return type of ``user_func``.
  *
