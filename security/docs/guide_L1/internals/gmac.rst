@@ -73,7 +73,7 @@ The internal structure of GMAC is shown in the figure below:
 
 As we can see from the chart, the GMAC can be divided into two individual parts: The preGMAC and genGMAC.
 These two parts can work independently, so they are designed into parallel dataflow processes,
-connected by streams (FIFO's).
+connected by streams (FIFOs).
 
 There is an overload genGMAC for Galois/Counter Mode (GCM) cipher mode of operation, as it must work with the structure of GCM,
 the interface of the overload is a little bit more complex than the overload for GMAC.

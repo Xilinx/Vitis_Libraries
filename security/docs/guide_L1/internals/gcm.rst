@@ -27,9 +27,9 @@ The Galois/Counter Mode (GCM) is a typical block cipher modes of operation using
 In this version, we provide Advanced Encryption Standard (AES) processing ability,
 the cipherkey length for AES should be 128/192/256 bits.
 Our implementation takes a fix-sized (128 bits per block) payload and additional authenticated data (AAD) streams,
-but text in real world has a variety of lengths.
-Thus, you need to provide the length in bits acoompany with the data or the AAD.
-Meanwhile, the ciphers which is output from the primitive also comply to this pattern.
+but text may have a variety of length in different situation.
+Thus, you need to provide the length in bits accompany with the data or the AAD.
+Meanwhile, the ciphers which is the output of the primitive also comply to this pattern.
 
 Implementation on FPGA
 ======================
@@ -56,7 +56,7 @@ We support GCM mode including both encryption and decryption parts in this imple
     1. The bit-width of initialization vector must be precisely 96 as recommended in the standard
     to promote interoperablility, efficiency, and simplicity of the design.
 
-    2. We provide the MAC value instead of a FAIL flag in decryption part, therefore, you should compare the MAC
+    2. We provide the MAC value instead of a FAIL flag in decryption part, therefore, you should take care the MAC
     which is given by the encryption part to judge the authenticity of the data.
     If the data is authentic, then the MACs should be equal.
 
@@ -94,9 +94,9 @@ The internal structure of both encryption and decryption parts of GCM are shown 
 
 In our implementation, the encryption part of GCM mode has two modules, which are aesGctrEncrypt and genGMAC.
 Please be noticed that we use the first two iterations in aesGctrEncrypt to calculate the hash subkey (H) and E(K,Y0),
-and pass them onto the genGMAC module through streams in dataflow region instead of implementing the AES block cipher in genGMAC to save the resource utilizations.
-As the two modules can work independently, they are designed into parallel dataflow processes, and connected by streams (FIFO's).
-The decryption part can be deduced in the same way, the only difference is that the ciphertext and its length streams feed to genGMAC are directly taken from the input ports.
+and pass them onto the genGMAC module through streams in dataflow region instead of implementing the AES block cipher in genGMAC to save the resources.
+As the two modules can work independently, they are designed into parallel dataflow processes, and connected by streams (FIFOs).
+The decryption part can be deduced in the same way, the only difference is that the ciphertext and its length streams, which are feed to genGMAC, are directly taken from the input ports.
 
 Profiling
 =========

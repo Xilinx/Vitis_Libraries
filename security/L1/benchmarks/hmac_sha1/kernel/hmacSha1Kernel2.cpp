@@ -2,6 +2,7 @@
  * Copyright 2019 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -17,7 +18,7 @@
  *
  * @file aes256CbcEncryptKernel.cpp
  * @brief kernel code of Cipher Block Chaining (CBC) block cipher mode of operation.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing scan, distribute, encrypt, merge, and write-out functions.
  *

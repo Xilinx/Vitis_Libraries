@@ -19,7 +19,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_CASE_ROOT ?= $(CUR_DIR)
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/benchmarks/*}')
 
 .SECONDEXPANSION:
 
@@ -210,7 +210,7 @@ debug:
 # -----------------------------------------------------------------------------
 # TODO:                          kernel setup
 
-XFLIB_DIR = $(abspath $(XF_CASE_ROOT)/../../../)
+XFLIB_DIR = $(abspath $(XF_PROJ_ROOT))
 KSRC_DIR = $(CUR_DIR)/kernel
 
 XCLBIN_NAME := hmacSha1Kernel
@@ -225,8 +225,8 @@ hmacSha1Kernel_2_EXTRA_HDRS += $(XFLIB_DIR)/L1/include/xf_security/cbc.hpp
 hmacSha1Kernel_3_EXTRA_HDRS += $(XFLIB_DIR)/L1/include/xf_security/cbc.hpp
 hmacSha1Kernel_4_EXTRA_HDRS += $(XFLIB_DIR)/L1/include/xf_security/cbc.hpp
 
-HLS_DIR	= $(XF_CASE_ROOT)/../../include
-HLS_DIR2 = $(XF_CASE_ROOT)/../../../L1/include
+HLS_DIR	= $(XF_PROJ_ROOT)/L2/include
+HLS_DIR2 = $(XF_PROJ_ROOT)/L1/include
 
 VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_CFLAGS += -DHW_EMU_DEBUG  --xp param:hw_em.enableProtocolChecker=true

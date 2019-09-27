@@ -18,7 +18,7 @@
  *
  * @file cfb.hpp
  * @brief header file for Cipher Feedback (CFB) block cipher mode of operation.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing CFB1/CFB8/CFB128 modes with AES-128/192/256 and DES.
  * Loop-carried dependency is enforced by the CFB encryption algorithm,

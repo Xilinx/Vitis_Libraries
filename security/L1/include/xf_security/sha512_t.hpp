@@ -19,7 +19,7 @@
  * @file sha512_t.hpp
  * @brief header file for SHA-384, SHA-512, and SHA-512/t related functions, including both pre-processing and digest
  * functions.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail The algorithm takes a message of arbitrary length as its input, and produces a 512-bit final hash value.
  * The message digest of SHA-384, SHA-512, and SHA-512/t is obtained by truncating the final hash value to its left-most

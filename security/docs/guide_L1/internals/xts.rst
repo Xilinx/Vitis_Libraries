@@ -25,9 +25,9 @@ Overview
 
 The XTS working mode is a typical block cipher mode of operation using block cipher algorithm.
 The acronym of XTS stands for XEX Tweakable Block Ciphertext Stealing.
-According to this "ciphertext stealing" method, XTS can encrypt or decrypt sequnces of arbitary length of data block.
+According to this "ciphertext stealing" method, XTS can encrypt or decrypt sequences of arbitrary length of data block.
 i.e., data string that is 256 bits or 257 bits.
-Therefore, in XTS mode, the input or output data may also consist of a number of blocks in 128 bits followed by a seprated partial block which is not empty and less than 128 bits.
+Therefore, in XTS mode, the input or output data may also consist of a number of blocks in 128 bits followed by a separated partial block which is not empty and less than 128 bits.
 By IEEE Std 1619-2007, two cipherkeys in 256 bits are required in XTS mode. They are called tweakable key and encryption key, respectively.
 
 Implementation on FPGA
@@ -54,7 +54,7 @@ The algorithm flow chart is shown as follow:
    :width: 100%
    :align: center
 
-As we can see from the chart, dependency only exists in the first as well as the second to last block of XTS encryption flow. That is same as shown in XTS decryption flow.
+As we can see from the chart, the dependency of XTS encryption flow only exists between the first block and the second to last block. It is same as shown in XTS decryption flow.
 Therefore, the initiation interval (II) of XTS encryption and decryption mode can achieve 1.
 Notice that one one-word AES encryption module is instanced in XTS decryption.
 

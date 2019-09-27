@@ -64,11 +64,11 @@ In AddRoundKey step, states in each column operate XOR with roundkey of this rou
 Optimized Implementation on FPGA
 =================================
 
-Like in AES encryption, we seperate key expansion away from decryption. We must call updateKey() before use a nwe cipher key to decrypt message.
+Like in AES encryption, we separate key expansion away from decryption. We must call updateKey() before use a new cipher key to decrypt message.
 
 Based on similar consideration in AES encryption implementation, we also can merge inverse SubBytes and Inverse MixColumns into 
-one look-up table as long as operation flow is re-ordered appropriatly.
-Therefore, we adopt that Inverse MixColumns and AddRoundKey are exchanged each other in one operation round. 
+one look-up table as long as operation flow is re-ordered appropriately.
+Therefore, we adopt that Inverse MixColumns and AddRoundKey are exchanged with each other in one operation round. 
 However, generated key at KeyExpansion stage must be followed by one extra Inverse MixColumns operation for correct decryption. 
 It's worth to do because of hardware overhead of matrix multiplication in GF(2^8) will be reduced obviously. Furthermore, this addition operation
 will be executed only once for most case which plenty of blocks are decrypted with sharing the same cipher key. The optimzed flow is shown as below.
@@ -78,15 +78,14 @@ will be executed only once for most case which plenty of blocks are decrypted wi
    :width: 100%
    :align: center
 
-Since each round of procee needs one round key in reverse order, and that indicateds the dependency between KeyExpansion and decryption process.
-KeyExpansion is seprated from the whole decryption loop.
+Since each round of process needs one round key in reverse order, and that indicateds the dependency between KeyExpansion and decryption process.
+KeyExpansion is separated from the whole decryption loop.
 
-In addition, one same SubBytes process should be operated on round keys before they come into Inverse MixColumns step, in order to eliminate unnecessary inverse
-SubBytes operation in the common loop-up table within decryption process. And for the last round in one block decryption, Inverse MixColumns will be skipped.
+In addition, in order to eliminate unnecessary inverse SubBytes operation in the common loop-up table within decryption process, one same SubBytes process should be operated on round keys before they come into Inverse MixColumns step. For the last round in one block decryption, Inverse MixColumns will be skipped.
 
 
-AES-128 Decryption Performance(Device:U250)
-===========================================
+AES-128 Decryption Performance (Device:U250)
+============================================
 
 ==== ======= ======= ======= ===== ====== ====== ====== ========
  II    CLB     LUT     FF     DSP   BRAM   SRL    URAM   CP(ns)
@@ -95,8 +94,8 @@ AES-128 Decryption Performance(Device:U250)
 ==== ======= ======= ======= ===== ====== ====== ====== ========
 
 
-AES-192 Decryption Performance(Device:U250)
-===========================================
+AES-192 Decryption Performance (Device:U250)
+============================================
 
 ==== ======= ======= ======= ===== ====== ====== ====== ========
  II    CLB     LUT      FF    DSP   BRAM   SRL    URAM   CP(ns)
@@ -105,8 +104,8 @@ AES-192 Decryption Performance(Device:U250)
 ==== ======= ======= ======= ===== ====== ====== ====== ========
 
 
-AES-256 Decryption Performance(Device:U250)
-===========================================
+AES-256 Decryption Performance (Device:U250)
+============================================
 
 ==== ======= ======= ======= ===== ====== ====== ====== ========
  II    CLB     LUT      FF    DSP   BRAM   SRL    URAM   CP(ns)

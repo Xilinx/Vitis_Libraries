@@ -16,7 +16,7 @@
 
 /**
  * @file types.h
- * @brief This file is part of XF Security Library, contains type definitions.
+ * @brief This file is part of Vitis Security Library, contains type definitions.
  */
 
 #ifndef _XF_SECURITY_TYPES_HPP_

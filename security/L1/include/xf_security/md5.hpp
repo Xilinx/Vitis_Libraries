@@ -18,7 +18,7 @@
  *
  * @file md5.hpp
  * @brief header file for MD5 related functions, including pre-processing and digest functions.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail The algorithm takes a message of arbitrary length as its input,
  * and produces a 128-bit "fingerprint/message digest".

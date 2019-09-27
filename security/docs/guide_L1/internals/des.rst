@@ -21,11 +21,11 @@ DES and 3DES Algorithms
    :maxdepth: 1
 
 DES (Data Encryption Algorithm) is to encipher and decipher 64 bit data
-blocks using 64 bit key. The key is sheduled to construct 16 round keys.
+blocks using 64 bit key. The key is scheduled to construct 16 round keys.
 These round keys are used in encryption and decryption flow.
 
-In DES sepecification, data blocks and keys are composed of bits numbered
-from left to right, meaning the left most bit is bit one.
+In DES specification, data blocks and keys are composed of bits numbered
+from left to right, meaning that the left most bit is bit one.
 
 3DES (Triple DES) is an enhancement of DES. It needs 3 keys, and consists of
 3 rounds of DES. 
@@ -34,7 +34,7 @@ Algorithm Flow
 =======================
 
 The encryption flow is shown in the following figure. It consists initial
-permutation, 16 rounds of process using round keys, and final permutation.
+permutation, 16 rounds of process using round keys and final permutation.
 
 .. image:: /images/Enc.png
    :alt: DES encryption flow
@@ -44,7 +44,7 @@ permutation, 16 rounds of process using round keys, and final permutation.
 The decryption uses the similar flow in encryption, except the round keys are in
 reversed order.
 
-The function f used in encryption and decryption is depicted in the following
+The function `f` used in encryption and decryption is depicted in the following
 figure.
 
 .. image:: /images/function.png
@@ -74,8 +74,8 @@ Optimized Implementation on FPGA
 
 Key schedule just contains permuted choice and left shifting, which
 generates a mapping from bit positions in original key and bit positions in
-each round key. In a result, we can calculate the mapping beforehand, and 
-make the entire process in key shedule into direct assigments of round keys.
+each round key. As a result, we can calculate the mapping beforehand and 
+make the entire process in key schedule into direct assignments of round keys.
 
 The data block and key are using different endian approach from arbitrary
 precision data type defined in HLS, so endian convertion for original data block
@@ -90,10 +90,11 @@ The implemented DES encryption/decryption flow is shown in the following figure.
 
 The implemented 3DES flow uses dataflow among three DES modules. 
 
-Performance(Device: VU9P)
+Performance (Device: VU9P)
 =================================
 
 DES encryption
+--------------
 
 ==== ===== ====== ====== ===== ====== ===== ====== ========
  II   CLB   LUT     FF    DSP   BRAM   SRL   URAM   CP(ns)
@@ -102,6 +103,7 @@ DES encryption
 ==== ===== ====== ====== ===== ====== ===== ====== ========
 
 DES decryption
+--------------
 
 ==== ===== ====== ====== ===== ====== ===== ====== ========
  II   CLB   LUT     FF    DSP   BRAM   SRL   URAM   CP(ns)
@@ -110,6 +112,7 @@ DES decryption
 ==== ===== ====== ====== ===== ====== ===== ====== ========
 
 3DES encryption
+---------------
 
 ==== ====== ====== ====== ===== ====== ====== ====== ========
  II   CLB    LUT     FF    DSP   BRAM    SRL   URAM   CP(ns)
@@ -118,6 +121,7 @@ DES decryption
 ==== ====== ====== ====== ===== ====== ====== ====== ========
 
 3DES decryption
+---------------
 
 ==== ====== ====== ====== ===== ====== ====== ====== ========
  II   CLB    LUT     FF    DSP   BRAM    SRL   URAM   CP(ns)

@@ -45,7 +45,7 @@ As we can see from the figures, the hash calculation can be partitioned into two
 
 * The digest part iteratively computes the hash values. Loop-carried dependency is enforced by the algorithm itself, thus this part cannot reach an initiation interval (II) = 1.
 
-As these two parts can work independently, they are designed into parallel dataflow processes, connected by streams (FIFO’s).
+As the two parts can work independently, they are designed into parallel dataflow process, connected by streams (FIFOs).
 
 Performance
 ===========

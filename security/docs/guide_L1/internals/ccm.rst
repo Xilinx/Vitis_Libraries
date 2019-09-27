@@ -26,7 +26,7 @@ Overview
 The Counter with Cipher Block Chaining-Message Authentication Code (CCM) mode is a typical block cipher mode of operation using block cipher algorithm.
 In this version, we provide Advanced Encryption Standard (AES) processing ability,
 the cipherkey length for AES should be 128/192/256 bits.
-Unlike other working-modes in this library, this working-mode takes an arbitrary length of text in bytes and produces the ciphers with the same length.
+Unlike other primitives in this library, this primitive takes an arbitrary length of text in bytes and produces the ciphers with the same length.
 The MAC is generated simultaneously with the ciphers using the associated data (AD) in arbitrary length.
 Thus, you must provide the length of payload text and AD before encrypting/decrypting the text.
 
@@ -38,15 +38,15 @@ We support CCM mode including both encryption and decryption parts in this imple
 .. ATTENTION::
     The bit-width of the interfaces we provide is shown as follows:
 
-    +-----------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
-    |           |  payload  |   cipher   | cipherkey | nonce  | AD  |   tag  | lenPld | lenCph | lenAD |
-    +-----------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
-    |CCM-AES128 |    128    |    128     |    128    | 56-104 | 128 | 32-128 |   64   |   64   |   64  |
-    +-----------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
-    |CCM-AES192 |    128    |    128     |    192    | 56-104 | 128 | 32-128 |   64   |   64   |   64  |
-    +-----------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
-    |CCM-AES256 |    128    |    128     |    256    | 56-104 | 128 | 32-128 |   64   |   64   |   64  |
-    +-----------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
+    +------------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
+    |            |  payload  |   cipher   | cipherkey | nonce  | AD  |   tag  | lenPld | lenCph | lenAD |
+    +------------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
+    | CCM-AES128 |    128    |    128     |    128    | 56-104 | 128 | 32-128 |   64   |   64   |   64  |
+    +------------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
+    | CCM-AES192 |    128    |    128     |    192    | 56-104 | 128 | 32-128 |   64   |   64   |   64  |
+    +------------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
+    | CCM-AES256 |    128    |    128     |    256    | 56-104 | 128 | 32-128 |   64   |   64   |   64  |
+    +------------+-----------+------------+-----------+--------+-----+--------+--------+--------+-------+
 
     The bit-width for the nonce and the tag is specified by the template parameters _t and _q.
     Please read the API's specification for further information.
@@ -57,7 +57,7 @@ To maintain the same interface for both input and output ports, we do not provid
 .. CAUTION::
     Applicable conditions:
 
-    1. To verify the received data, you need to compare the tag which is output from the decrypting process with the tag from the encrypting process.
+    1. To verify the received data, you need to compare the tag which is the output of the decrypting process with the tag from the encrypting process.
     If they are equal, the received data is authentic.
 
 The algorithm flow chart of encryption part of CCM mode is shown as follow:
@@ -79,7 +79,7 @@ The algorithm flow chart of decryption part of CCM mode is shown as follow:
 
 The decryption part is very similar with the encryption part of CCM mode.
 The only difference is that we decrypt the ciphertext to plaintext in the decryption part.
-In decryption part of CCM mode, we don’t provide a bool flag to indicate whether the data is authentic or not.
+In decryption part of CCM mode, we don't provide a bool flag to indicate whether the data is authentic or not.
 You should compare the tag which the decryption part gives with the tag from CCM encryption part to judge the authenticity of the data.
 If the data is authentic, then the tags should be equal.
 
@@ -95,10 +95,10 @@ The internal data flow of both encryption and decryption parts of CCM mode is sh
    :width: 100%
    :align: center
 
-In our implementation, the CCM mode has four independent modules, which are dupStrm, formatting, aesCtrEncrypt/aesCtrDecrypt, and CBC_MAC.
-As the four modules can work independently, they are designed into parallel dataflow processes, and connected by streams (FIFO's).
-Loop-carried dependency is enforced by the algorithm to the CBC-MAC, so it cannot achieve an initiation internal (II) = 1.
-On the contrary, the input block for the single block cihper inside the mode can be directly calculated by the counter, it can achieve an II = 1 for the CTR part.
+In our implementation, the CCM mode has four independent modules which are dupStrm, formatting, aesCtrEncrypt/aesCtrDecrypt, and CBC_MAC.
+As the four modules can work independently, they are designed into parallel dataflow processes, and connected by streams (FIFOs).
+Loop-carried dependency is enforced by the algorithm to the CBC-MAC, so its initiation internal (II) cannot achieve 1.
+On the contrary, the input block for the single block cihper inside the mode can be directly calculated by the counter, it can achieve II = 1 for the CTR part.
 
 Profiling
 =========

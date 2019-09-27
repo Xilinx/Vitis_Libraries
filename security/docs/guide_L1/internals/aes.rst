@@ -61,7 +61,7 @@ During ShiftRows, last 3 rows of states are cyclically shifted over different nu
    :align: center
 
 During MixColumns, perform operation on each column of states.
-Basicallly it's use matrix multiplication to transform each column of states.
+Basically it use matrix multiplication to transform each column of states.
 Transform matrix is fixed and calculation treats each bytes as polynomials with coefficients in GF(2^8), modulo x^4 + 1.
 
 .. image:: /images/mixcolumns.png
@@ -79,16 +79,16 @@ During AddRoundKey, states are XOR with roundkey of this round.
 Optimized Implementation on FPGA
 =================================
 
-We seperate key expansion away from encryption. Which means we have to call updateKey() before use new cipher key to encrypt message.
+We seperate key expansion away from encryption. Which means we have to call updateKey() before using a new cipher key to encrypt message.
 
-Because SubBytes is independent of each byte's location in states and ShiftRows only shifts in integer of bytes, these two part could exchange their position in processing sequence without changing the result. Thoough no improvement is achieved here, this will benefit later optimizaiton.
+Because SubBytes is independent of each byte's location in states and ShiftRows only shifts in integer of bytes, these two part could exchange their position in processing sequence without changing the result. Although no improvement is achieved here, this will benefit later optimization.
 
 .. image:: /images/new_flow.png
    :alt: new flow
    :width: 100%
    :align: center
 
-The matrix multiplication in MixColumns is actually two parts: multiply bytes in column of states with bytes in row of the matrix, then add the result. Value of matrix elements could only be 01, 02 or 03. we can get the original result of SubBytes and its muplication of 01, 02 or 03 by one time table look up of a new S-Box called "sbox_mix_col_1". This could save a lot of logics to do multiplication.
+The matrix multiplication in MixColumns is actually two parts: multiply bytes in column of states with bytes in row of the matrix, then add the result. Value of matrix elements could only be 01, 02 or 03. We can get the original result of SubBytes and its multiplication of 01, 02 or 03 by one-time's look up of a new S-Box table called "sbox_mix_col_1". This could save a lot of logics to do multiplication.
 
 .. image:: /images/sbox_mix_col_1.png
    :alt: merge SubByte with MixColumns
@@ -98,8 +98,8 @@ The matrix multiplication in MixColumns is actually two parts: multiply bytes in
 Based on similar consideration, we also merge such multiplication in KeyExpansion into one time table look up of another new S-Box called "sbox_Rcon". Although sbox_Rcon and sbox_mix_col_1 are bigger than original S-Box, they all could be stored in 1 BRAM on chip. Such merges saves logics without additional resource cost.
 
 
-AES-128 Encryption Performance(Device: U250)
-============================================
+AES-128 Encryption Performance (Device: U250)
+=============================================
 
 ==== ====== ====== ====== ===== ====== ===== ====== ========
  II   CLB     LUT    FF    DSP   BRAM   SRL   URAM   CP(ns)
@@ -108,8 +108,8 @@ AES-128 Encryption Performance(Device: U250)
 ==== ====== ====== ====== ===== ====== ===== ====== ========
 
 
-AES-192 Encryption Performance(Device: U250)
-============================================
+AES-192 Encryption Performance (Device: U250)
+=============================================
 
 ==== ====== ======= ====== ===== ====== ===== ====== ========
  II   CLB     LUT     FF    DSP   BRAM   SRL   URAM   CP(ns)
@@ -118,8 +118,8 @@ AES-192 Encryption Performance(Device: U250)
 ==== ====== ======= ====== ===== ====== ===== ====== ========
 
 
-AES-256 Encryption Performance(Device: U250)
-============================================
+AES-256 Encryption Performance (Device: U250)
+=============================================
 
 ==== ====== ======= ======= ===== ====== ====== ====== ========
  II   CLB     LUT     FF     DSP   BRAM   SRL    URAM   CP(ns)

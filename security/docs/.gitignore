@@ -1,5 +1,3 @@
-xml
-rst
 .stamp
-*.sh
-*.swp
+rst_L?/
+xml_L?/

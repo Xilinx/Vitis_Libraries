@@ -56,8 +56,8 @@ The internal structure of SHA-3 algorithms can be shown as the figures below:
    :align: center
 
 
-As we can see from the figures, both SHA-3 and SHAKE hash calculation proess is much different from SHA-1 and SHA-2.
-Since the internal state array is updated iteratively by the input message and used in the next permutation,
+As we can see from the figures, hash calculation in both SHA-3 and SHAKE is much different from SHA-1 and SHA-2.
+Since the internal state array is updated iteratively (by the input message) and used in the next permutation,
 it cannot be partitioned into block generation part and digest part.
 
 Both the digest parts of SHA-3 and SHAKE pad or split the input message into fixed sized blocks (1600-bit for each),

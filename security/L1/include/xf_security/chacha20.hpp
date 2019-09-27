@@ -17,7 +17,7 @@
 /**
  * @file chacha20.hpp
  * @brief header file for ChaCha20.
- * This file part of XF Security Library.
+ * This file part of Vitis Security Library.
  *
  */
 

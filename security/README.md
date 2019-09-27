@@ -1,6 +1,6 @@
-# XF Security Library
+# Vitis Security Library
 
-XF Security Library is an open-sourced Vitis library written in C++ for accelerating security applications in a variety of use cases.
+Vitis Security Library is an open-sourced Vitis library written in C++ for accelerating security applications in a variety of use cases.
 
 It now covers one level of acceleration: the primitive level. In this level, it provides optimized hardware implementation of most common relational security algorithms.
 Such as, Synmmetric Block Cipher, Symmetirc Stream Cipher, Asymmetric Cryptography, Cipher Modes of Operations, Message Authentication Code, and Hash Function.
@@ -167,7 +167,7 @@ A Makefile is used to drive this flow with available steps including `CSIM` (hig
 
 As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization, timing performance, latency and throughput. The output files of interest can be located at the location of the test project where the path name is correlated with the algorithm. i.e. the callable function within the design under test.
 
-To run the SDx projects for benchmark evaluation and test, you may need the example below:
+To run the Vitis projects for benchmark evaluation and test, you may need the example below:
 
 ```console
 	$ ./opt/xilinx/xrt/setup.sh

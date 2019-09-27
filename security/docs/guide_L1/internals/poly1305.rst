@@ -32,18 +32,18 @@ The Poly1305 algorithm is defined in `RFC 8439`_.
 Implementation on FPGA
 ======================
 
-As shown in the above summary of reference 2.5.1, we can know the implementation process of the Poly1305 algorithm. In order to improve the timing and reduce the latency for HLS implementation, we optimize the multiplication and module operations in the algorithm. The optimization idea is:
+As shown in the above summary of reference 2.5.1, we can know the implementation process of the Poly1305 algorithm. In order to improve the timing and reduce the latency for HLS implementation, we optimize the multiplication and modulo operations in the algorithm. The optimization idea is:
 
 * In order to improve the timing for multiplication operation, the multiplier and the multiplicand are separated into 27-bit and 18-bit arrays, and the result is multiplied to obtain the final result.
 
-* For module operation :math:`X=mod(A,P)`, where :math:`P=2^{130}-5`, we can do special processing to reduce the latency. Please see the code for details.
+* For modulo operation :math:`X=mod(A,P)`, where :math:`P=2^{130}-5`, we can do special processing to reduce the latency. Please see the code for details.
 
 Performance
 ===========
 
-The hardware resource utilizations are listed in :numref:`tab1SHA1` below:
+The hardware resource utilizations are listed in :numref:`tabpoly1` below:
 
-.. _tab1SHA1:
+.. _tabpoly1:
 
 .. table:: Hardware resources for the Poly1305 (Vivado 2019.1) 
     :align: center

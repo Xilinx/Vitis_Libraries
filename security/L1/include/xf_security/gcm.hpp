@@ -18,7 +18,7 @@
  *
  * @file gcm.hpp
  * @brief header file for Galois/Counter Mode (GCM) block cipher mode of operation.
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing GCTR encryption and decryption implementations.
  * GCM = GCTR + GMAC.

@@ -60,7 +60,7 @@ The algorithm flow chart is shown as follow:
 
 As we can see from the chart, both encryption and decryption part of OFB mode has dependencies,
 so the input block of each iteration (except for iteration 0) needs a feedback data from its last iteration.
-Thus,the initiation interval (II) of OFB mode cannot achieve an II = 1.
+Thus, the initiation interval (II) of OFB mode cannot achieve an II = 1.
 
 Profiling
 =========

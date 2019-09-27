@@ -18,7 +18,7 @@
  *
  * @file rc4EncryptKernel.cpp
  * @brief kernel code of Rivest Cipher 4 (also known as ARC4 or ARCFOUR).
- * This file is part of XF Security Library.
+ * This file is part of Vitis Security Library.
  *
  * @detail Containing scan, distribute, encrypt, merge, and write-out functions.
  *
