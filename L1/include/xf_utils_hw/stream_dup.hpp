@@ -23,7 +23,7 @@
  * @file stream_dup.hpp
  * @brief duplicate stream and attach end signal to each dup.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 // Forward decl ======================================================

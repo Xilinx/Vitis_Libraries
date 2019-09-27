@@ -23,7 +23,7 @@
  * @file stream_split.hpp
  * @brief split one streams into multiple narrow ones.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 // Forward decl ======================================================

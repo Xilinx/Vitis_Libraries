@@ -22,7 +22,7 @@
  * @file stream_reorder.hpp
  * @brief utility to do window-reorder on a stream.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 // Forward decl ===============================================================

@@ -19,7 +19,7 @@
  * @brief This file is a template implement of loading data from AXI master to multi stream.
  * Xilinx.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 #ifndef XF_UTILS_HW_AXI_TO_MULTI_STRM_H

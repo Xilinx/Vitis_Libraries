@@ -20,7 +20,7 @@
  * @file enums.hpp
  * @brief Enum and tag-class definition.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 namespace xf {

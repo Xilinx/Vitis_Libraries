@@ -18,7 +18,7 @@
  * @file axi_to_stream.hpp
  * @brief This file provides loading data from AXI master to stream APIs.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 #ifndef XF_UTILS_HW_AXI_TO_STREAM_H

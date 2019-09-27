@@ -18,7 +18,7 @@
  * @file types.hpp
  * @brief This file contains type definitions.
  *
- * This file is part of XF Hardware Utilities Library.
+ * This file is part of Vitis Utility Library.
  */
 
 #ifndef XF_UTILS_HW_TYPES_H
