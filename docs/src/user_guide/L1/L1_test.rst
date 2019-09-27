@@ -32,7 +32,9 @@ Please navigate to directory L1/tests, and change the setting of environment var
 
 .. code-block:: bash
 
-   source ./set_env.sh
+   export XILINX_VITIS=${TA_PATH}/Vitis/2019.2
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
+   source ${XILINX_VIVADO}/settings64.sh
 
 3. Test L1 primitives
 ==============================
