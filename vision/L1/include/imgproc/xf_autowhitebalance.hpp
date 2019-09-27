@@ -78,8 +78,10 @@ int balanceWhiteKernel_simple(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     short int nElements = 256; // int(pow((float)bins, (float)depth));
 
     int hist[3][nElements];
-#pragma HLS RESOURCE variable = hist core = RAM_T2P_BRAM
-#pragma HLS ARRAY_PARTITION variable = hist complete dim = 1
+// clang-format off
+#pragma HLS RESOURCE variable=hist core=RAM_T2P_BRAM
+#pragma HLS ARRAY_PARTITION variable=hist complete dim=1
+    // clang-format on
 
     int val[3];
 
@@ -87,24 +89,31 @@ int balanceWhiteKernel_simple(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 
 INITIALIZE_HIST:
     for (int k = 0; k < 256; k++) {
+// clang-format off
 #pragma HLS PIPELINE
-#pragma HLS LOOP_TRIPCOUNT min = 256 max = 256
+#pragma HLS LOOP_TRIPCOUNT min=256 max=256
+    // clang-format on
     INITIALIZE:
         for (int hi = 0; hi < 3; hi++) {
+// clang-format off
 #pragma HLS UNROLL
+            // clang-format on
             hist[hi][k] = 0;
         }
     }
 
     // Temporary array used while computing histogram
     uint32_t tmp_hist[XF_NPIXPERCYCLE(NPC) * PLANES][256] = {0};
-#pragma HLS RESOURCE variable = tmp_hist core = RAM_T2P_BRAM
-
+// clang-format off
+#pragma HLS RESOURCE variable=tmp_hist core=RAM_T2P_BRAM
+    // clang-format on
     uint32_t tmp_hist1[XF_NPIXPERCYCLE(NPC) * PLANES][256] = {0};
-#pragma HLS RESOURCE variable = tmp_hist1 core = RAM_T2P_BRAM
+// clang-format off
+#pragma HLS RESOURCE variable=tmp_hist1 core=RAM_T2P_BRAM
 
-#pragma HLS ARRAY_PARTITION variable = tmp_hist complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = tmp_hist1 complete dim = 1
+#pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+#pragma HLS ARRAY_PARTITION variable=tmp_hist1 complete dim=1
+    // clang-format on
     XF_TNAME(SRC_T, NPC) in_buf, in_buf1, temp_buf;
 
     bool flag = 0;
@@ -112,9 +121,13 @@ INITIALIZE_HIST:
 HIST_INITIALIZE_LOOP:
     for (ap_uint<10> i = 0; i < 256; i++) //
     {
+// clang-format off
 #pragma HLS PIPELINE
+        // clang-format on
         for (ap_uint<5> j = 0; j < XF_NPIXPERCYCLE(NPC) * PLANES; j++) {
-#pragma HLS LOOP_TRIPCOUNT min = 256 max = 256
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=256 max=256
+            // clang-format on
             tmp_hist[j][i] = 0;
             tmp_hist1[j][i] = 0;
         }
@@ -123,23 +136,29 @@ HIST_INITIALIZE_LOOP:
 ROW_LOOP:
     for (ap_uint<13> row = 0; row != (height); row++) // histogram filling
     {
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = ROWS
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
+    // clang-format on
     COL_LOOP:
         for (ap_uint<13> col = 0; col < (width); col = col + 2) // histogram filling
         {
+// clang-format off
 #pragma HLS PIPELINE
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = TC / 2
-#pragma HLS DEPENDENCE variable = hist array intra false
-#pragma HLS DEPENDENCE variable = hist array inter false
+#pragma HLS LOOP_TRIPCOUNT min=1 max=TC/2
+#pragma HLS DEPENDENCE variable=hist array intra false
+#pragma HLS DEPENDENCE variable=hist array inter false
+            // clang-format on
 
             in_pix = src1.read(row * (width) + col);
             in_pix1 = src1.read((row * (width) + col) + 1);
 
         PLANES_LOOP:
             for (ap_uint<9> j = 0; j < XF_NPIXPERCYCLE(NPC) * PLANES; j++) {
-#pragma HLS DEPENDENCE variable = tmp_hist array intra false
-#pragma HLS DEPENDENCE variable = tmp_hist1 array intra false
+// clang-format off
+#pragma HLS DEPENDENCE variable=tmp_hist array intra false
+#pragma HLS DEPENDENCE variable=tmp_hist1 array intra false
 #pragma HLS UNROLL
+                // clang-format on
 
                 ap_uint<8> val = 0, val1 = 0;
                 val = in_pix.range(j * 8 + 7, j * 8);
@@ -156,7 +175,10 @@ ROW_LOOP:
                 ap_fixed<16, 12> interval = ap_fixed<24, 12>(maxValue - minValue) / bins;
 
                 for (ap_uint<2> k = 0; k < 2; ++k) {
+// clang-format off
+
 #pragma HLS UNROLL
+                    // clang-format on
 
                     currentBin = int((val - minValue + (ap_fixed<24, 12>)(1e-4f)) / interval);
                     currentBin1 = int((val1 - minValue1 + (ap_fixed<24, 12>)(1e-4f)) / interval);
@@ -182,12 +204,15 @@ ROW_LOOP:
     uint32_t plane[PLANES];
 COPY_LOOP:
     for (ap_uint<10> i = 0; i < 256; i++) {
+// clang-format off
 #pragma HLS pipeline
+        // clang-format on
         cnt = 0;
         p1 = 0;
         for (ap_uint<5> j = 0, k = 0; j < XF_NPIXPERCYCLE(NPC) * PLANES; j++, k++) {
+// clang-format off
 #pragma HLS UNROLL
-
+            // clang-format on
             uint32_t value = tmp_hist[j][i] + tmp_hist1[j][i];
             cnt = cnt + value;
             if (PLANES != 1) {
@@ -236,20 +261,22 @@ COPY_LOOP:
             int rval1 = (100 - s2) * total / 100;
 
             while (n1 + hist[j][p1] < rval) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = 255 max = 255
-#pragma HLS DEPENDENCE variable = hist array intra false
-
+// clang-format off
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_TRIPCOUNT min=255 max=255
+#pragma HLS DEPENDENCE variable=hist array intra false
+                // clang-format on
                 n1 += hist[j][p1++];
                 minValue[j] += interval;
             }
             p1 *= bins;
 
             while (n2 - hist[j][p2] > rval1) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS LOOP_TRIPCOUNT min = 255 max = 255
-#pragma HLS DEPENDENCE variable = hist array intra false
-
+// clang-format off
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_TRIPCOUNT min=255 max=255
+#pragma HLS DEPENDENCE variable=hist array intra false
+                // clang-format on
                 n2 -= hist[j][p2--];
                 maxValue[j] -= interval;
             }
@@ -280,14 +307,16 @@ COPY_LOOP:
 
 Row_Loop1:
     for (row = 0; row < height; row++) {
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+    // clang-format on
     Col_Loop1:
         for (col = 0; col < width; col++) {
-#pragma HLS LOOP_TRIPCOUNT min = COLS / NPC max = COLS / NPC
-#pragma HLS pipeline II = 1
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
+#pragma HLS pipeline II=1
 #pragma HLS LOOP_FLATTEN OFF
-
+            // clang-format on
             in_buf_n = src2.read(read_index++);
 
             ap_fixed<24, 12> value = 0;    //[3]={0,0,0};
@@ -296,8 +325,9 @@ Row_Loop1:
             ap_int<32> dstval = 0;         //[3]={0,0,0};
 
             for (int p = 0, bit = 0; p < XF_NPIXPERCYCLE(NPC) * PLANES; p++, bit = p % 3) {
+// clang-format off
 #pragma HLS unroll
-
+                // clang-format on
                 ap_uint<8> val = in_buf_n.range(p * 8 + 7, p * 8);
                 // dstval[p%3] = (newmax - newmin) * (val - minValue[p%3]) / (maxValue[p%3] - minValue[p%3]) + newmin;
 
@@ -354,16 +384,21 @@ int balanceWhiteKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     ap_ufixed<32, 32> tmpsum_vals[(1 << XF_BITSHIFT(NPC)) * PLANES];
 
     ap_ufixed<32, 32> sum[PLANES];
-
-#pragma HLS ARRAY_PARTITION variable = tmpsum_vals complete dim = 0
-#pragma HLS ARRAY_PARTITION variable = sum complete dim = 0
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable=tmpsum_vals complete dim=0
+#pragma HLS ARRAY_PARTITION variable=sum complete dim=0
+    // clang-format on
 
     for (j = 0; j < ((1 << XF_BITSHIFT(NPC)) * PLANES); j++) {
+// clang-format off
 #pragma HLS UNROLL
+        // clang-format on
         tmpsum_vals[j] = 0;
     }
     for (j = 0; j < PLANES; j++) {
+// clang-format off
 #pragma HLS UNROLL
+        // clang-format on
         sum[j] = 0;
     }
 
@@ -371,21 +406,24 @@ int balanceWhiteKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 
 Row_Loop:
     for (i = 0; i < height; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+    // clang-format on
     Col_Loop:
         for (j = 0; j < (width); j++) {
-#pragma HLS LOOP_TRIPCOUNT min = COLS / NPC max = COLS / NPC
-#pragma HLS pipeline II = 1
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
+#pragma HLS pipeline II=1
 #pragma HLS LOOP_FLATTEN OFF
-
+            // clang-format on
             XF_TNAME(SRC_T, NPC) in_buf;
             in_buf = src1.read(i * width + j);
 
         PLANES_LOOP:
             for (int p = 0; p < XF_NPIXPERCYCLE(NPC) * PLANES; p = p + PLANES) {
+// clang-format off
 #pragma HLS unroll
-
+                // clang-format on
                 ap_uint<8> val1 = in_buf.range(p * 8 + 7, p * 8);
                 ap_uint<8> val2 = in_buf.range(p * 8 + 15, p * 8 + 8);
                 ap_uint<8> val3 = in_buf.range(p * 8 + 23, p * 8 + 16);
@@ -404,7 +442,9 @@ Row_Loop:
 
     for (int c = 0; c < PLANES; c++) {
         for (j = 0; j < (1 << XF_BITSHIFT(NPC)); j++) {
+// clang-format off
 #pragma HLS UNROLL
+            // clang-format on
             sum[c] = (sum[c] + tmpsum_vals[j * PLANES + c]);
         }
     }
@@ -453,17 +493,22 @@ Row_Loop:
     i_gain[2] = (dinR1 * (1 << 8));
 
     for (i = 0; i < height; i++) {
-#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
 #pragma HLS LOOP_FLATTEN OFF
+    // clang-format on
     ColLoop1:
         for (j = 0; j < width; j++) {
-#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
 #pragma HLS pipeline
+            // clang-format on
             in_pix = src2.read(i * width + j);
 
             for (int p = 0; p < XF_NPIXPERCYCLE(NPC) * PLANES; p++) {
+// clang-format off
 #pragma HLS unroll
-
+                // clang-format on
                 ap_uint<8> val = in_pix.range(p * 8 + 7, p * 8);
                 ap_uint<8> outval = (unsigned char)((val * i_gain[p % 3]) >> 8);
 

@@ -4,15 +4,16 @@
 Vitis Vision Library
 ##############################
 
-Xilinx® xfOpenCV library is a FPGA device optimized xfOpenCV library intended for application
-developers using Zynq®-7000 SoC and Zynq® UltraScale+™ MPSoC and PCIE based (Virtex and U200 ...) devices. xfOpenCV library provides a software interface for computer vision functions accelerated on an FPGA device. 
+Xilinx® Vitis vision library is a FPGA device optimized Vitis vision library intended for application
+developers using Zynq®-7000 SoC and Zynq® UltraScale+™ MPSoC and PCIE based (Virtex and U200 ...) devices. 
+Vitis vision library provides a software interface for computer vision functions accelerated on an FPGA device. 
 
-xfOpenCV library functions are mostly similar in functionality to their OpenCV equivalent. Any deviations, if present, are documented.
+Vitis vision library functions are mostly similar in functionality to their OpenCV equivalent. Any deviations, if present, are documented.
 
 
 
-xfOpenCV Library User Guide
-=============================
+Vitis vision Library User Guide
+================================
 
 .. toctree::
    :maxdepth: 2
@@ -20,8 +21,8 @@ xfOpenCV Library User Guide
    overview
 
 
-xfOpenCV Library API Reference
-=================================
+Vitis vision Library API Reference
+===================================
    
 .. toctree::
    :maxdepth: 2

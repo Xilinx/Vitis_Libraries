@@ -204,8 +204,8 @@ KERNELS += $(KER_NAME1):xf_edgetracing_accel.cpp
 
 VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB -D__SDA_MEM_MAP__
+VPP_CFLAGS 	+= --xp vivado_prop:run.impl_1.strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
 
-$(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
 $(KER_NAME1)_VPP_CFLAGS := -D__SDA_MEM_MAP__
 
 

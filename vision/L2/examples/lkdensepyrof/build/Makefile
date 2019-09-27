@@ -205,7 +205,7 @@ VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 
 
-$(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
+VPP_CFLAGS += --xp vivado_prop:run.impl_1.strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
 
 
 # -----------------------------------------------------------------------------

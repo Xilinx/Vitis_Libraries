@@ -218,7 +218,8 @@ Row_Loop:
                 Array[0] = Max ? 255 : 0;
             }
             xfPackPixels<NPC, OUT_WW, OUT_DEPTH>(&Array[0], P0, 0, 1, shift);
-            // P0.range(((8 << XF_BITSHIFT(NPC))-1), ((8 << XF_BITSHIFT(NPC))-8)) = Array[0];				// Get bits
+            // P0.range(((8 << XF_BITSHIFT(NPC))-1), ((8 << XF_BITSHIFT(NPC))-8)) = Array[0];				// Get
+            // bits
             // from
             // certain range of positions.
             _dst_mat.write(write_index++, (P0));
