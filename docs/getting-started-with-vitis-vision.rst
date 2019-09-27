@@ -1,45 +1,41 @@
-.. _ariaid-title1:
 
-Getting Started with SDAccel
-============================
+Getting Started with Vitis Vision
+=================================
 
-This chapter provides details on using xfOpenCV in the SDAccel™
+This chapter provides details on using xfOpenCV in the Vitis™
 environment. The following sections would provide a description of the
 methodology to create a kernel, corresponding host code and a suitable
 makefile to compile an xfOpenCV kernel for any of the supported
-platforms in SDAccel. The subsequent section also explains the
+platforms in Vitis. The subsequent section also explains the
 methodology to verify the kernel in various emulation modes and on the
 hardware.
 
-.. _ariaid-title2:
 
 Prerequisites
 -------------
 
-#. Valid installation of SDx™ 2019.1 or later version and the
+#. Valid installation of Vitis™ 2019.2 or later version and the
    corresponding licenses.
 #. Install the xfOpenCV libraries, if you intend to use libraries
-   compiled differently than what is provided in SDx.
-#. Install the card for which the platform is supported in SDx 2019.1 or
+   compiled differently than what is provided in Vitis.
+#. Install the card for which the platform is supported in Vitis 2019.2 or
    later versions.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software
    interface to Xilinx FPGAs.
 #. libOpenCL.so must be installed if not present along with the
    platform.
 
-.. _ariaid-title3:
 
-SDAccel Design Methodology
+Vitis Design Methodology
 --------------------------
 
 There are three critical components in making a kernel work on a
-platform using SDAccel™:
+platform using Vitis™:
 
 #. Host code with OpenCL constructs
 #. Wrappers around HLS Kernel(s)
 #. Makefile to compile the kernel for emulation or running on hardware.
 
-.. _ariaid-title4:
 
 Host Code with OpenCL
 ~~~~~~~~~~~~~~~~~~~~~
@@ -69,7 +65,6 @@ following functions are executed using the host code:
    the FPGA. The function used in our examples for profiling is
    getProfilingInfo().
 
-.. _ariaid-title5:
 
 Wrappers around HLS Kernel(s)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,7 +75,7 @@ class. In addition, these kernels will work either in stream based
 (where complete image is read continuously) or memory mapped (where
 image data access is in blocks).
 
-SDAccel flow (OpenCL) requires kernel interfaces to be memory pointers
+Vitis flow (OpenCL) requires kernel interfaces to be memory pointers
 with width in power(s) of 2. So glue logic is required for converting
 memory pointers to xf::Mat class data type and vice-versa when
 interacting with xfOpenCV kernel(s). Wrapper(s) are build over the
@@ -88,45 +83,44 @@ kernel(s) with this glue logic. Below examples will provide a
 methodology to handle different kernel (xfOpenCV kernels located at
 <Github repo>/include) types (stream and memory mapped).
 
-.. _ariaid-title6:
 
 Stream Based Kernels
 ^^^^^^^^^^^^^^^^^^^^
 
 To facilitate the conversion of pointer to xf::Mat and vice versa, two
-adapter functions are included as part of xfOpenCV xf::Array2xfMat() and
-xf::xfMat2Array(). It is necessary for the xf::Mat objects to be invoked
+adapter functions are included as part of xfOpenCV xf::cv::Array2xfMat() and
+xf::cv::xfMat2Array(). It is necessary for the xf::Mat objects to be invoked
 as streams using HLS pragma with a minimum depth of 2. This results in a
 top-level (or wrapper) function for the kernel as shown below:
 
-.. code:: pre
+.. code:: c
 
    extern “C” 
    { 
    void func_top (ap_uint *gmem_in, ap_uint *gmem_out, ...) { 
-   xf::Mat<…> in_mat(…), out_mat(…);
+   xf::cv::Mat<…> in_mat(…), out_mat(…);
    #pragma HLS stream variable=in_mat.data depth=2
    #pragma HLS stream variable=out_mat.data depth=2
    #pragma HLS dataflow 
-   xf::Array2xfMat<…> (gmem_in, in_mat); 
+   xf::cv::Array2xfMat<…> (gmem_in, in_mat); 
    xf::xfopencv-func<…> (in_mat, out_mat…); 
-   xf::xfMat2Array<…> (gmem_out, out_mat); 
+   xf::cv::xfMat2Array<…> (gmem_out, out_mat); 
    }
    }
 
-The above illustration assumes that the data in xf::Mat is being
+The above illustration assumes that the data in xf::cv::Mat is being
 streamed in and streamed out. You can also create a pipeline with
 multiple functions in pipeline instead of just one xfopencv function.
 
 For the stream based kernels with different inputs of different sizes,
 multiple instances of the adapter functions are necessary. For this,
 
-.. code:: pre
+.. code:: c
 
    extern “C” { 
    void func_top (ap_uint *gmem_in1, ap_uint *gmem_in2, ap_uint *gmem_in3, ap_uint *gmem_out, ...) { 
-   xf::Mat<...,HEIGHT,WIDTH,…> in_mat1(…), out_mat(…);
-   xf::Mat<...,HEIGHT/4,WIDTH,…>  in_mat2(…), in_mat3(…); 
+   xf::cv::Mat<...,HEIGHT,WIDTH,…> in_mat1(…), out_mat(…);
+   xf::cv::Mat<...,HEIGHT/4,WIDTH,…>  in_mat2(…), in_mat3(…); 
    #pragma HLS stream variable=in_mat1.data depth=2
    #pragma HLS stream variable=in_mat2.data depth=2
    #pragma HLS stream variable=in_mat3.data depth=2
@@ -137,7 +131,7 @@ multiple instances of the adapter functions are necessary. For this,
    obj_b.Array2xfMat<…,HEIGHT/4,WIDTH,…> (gmem_in2, in_mat2); 
    obj_b.Array2xfMat<…,HEIGHT/4,WIDTH,…> (gmem_in3, in_mat3); 
    xf::xfopencv-func(in_mat1, in_mat2, int_mat3, out_mat…); 
-   xf::xfMat2Array<…> (gmem_out, out_mat); 
+   xf::cv::xfMat2Array<…> (gmem_out, out_mat); 
    }
    }
 
@@ -145,25 +139,23 @@ For the stream based implementations, the data must be fetched from the
 input AXI and must be pushed to xfMat as required by the xfcv kernels
 for that particular configuration. Likewise, the same operations must be
 performed for the output of the xfcv kernel. To perform this, two
-utility functions are provided, xf::Array2xfMat() and xf::xfMat2Array().
-
-.. _ariaid-title7:
+utility functions are provided, xf::cv::Array2xfMat() and xf::cv::xfMat2Array().
 
 Array2xfMat
 '''''''''''
 
-This function converts the input array to xf::Mat. The xfOpenCV kernel
-would require the input to be of type, xf::Mat. This function would read
-from the array pointer and write into xf::Mat based on the particular
-configuration (bit-depth, channels, pixel-parallelism) the xf::Mat was
+This function converts the input array to xf::cv::Mat. The xfOpenCV kernel
+would require the input to be of type, xf::cv::Mat. This function would read
+from the array pointer and write into xf::cv::Mat based on the particular
+configuration (bit-depth, channels, pixel-parallelism) the xf::cv::Mat was
 created.
 
-.. code:: pre
+.. code:: c
 
    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-   void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::Mat<MAT_T,ROWS,COLS,NPC>& dstMat)
+   void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& dstMat)
 
-.. table:: Table 1. Array2xfMat Parmater Description
+.. table:: Table. Array2xfMat Parmater Description
 
    +-----------------------------------+-----------------------------------+
    | Parameter                         | Description                       |
@@ -186,24 +178,23 @@ created.
    | srcPtr                            | Input pointer. Type of the        |
    |                                   | pointer based on the PTR_WIDTH.   |
    +-----------------------------------+-----------------------------------+
-   | dstMat                            | Output image of type xf::Mat      |
+   | dstMat                            | Output image of type xf::cv::Mat  |
    +-----------------------------------+-----------------------------------+
 
-.. _ariaid-title8:
 
 xfMat2Array
 '''''''''''
 
-This function converts the input xf::Mat to output array. The output of
-the xf::kernel function will be xf::Mat, and it will require to convert
+This function converts the input xf::cv::Mat to output array. The output of
+the xf::kernel function will be xf::cv::Mat, and it will require to convert
 that to output pointer.
 
-.. code:: pre
+.. code:: c
 
    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-   void xfMat2Array(xf::Mat<MAT_T,ROWS,COLS,NPC>& srcMat, ap_uint< PTR_WIDTH > *dstPtr)
+   void xfMat2Array(xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& srcMat, ap_uint< PTR_WIDTH > *dstPtr)
 
-.. table:: Table 2. xfMat2Array Parameter Description
+.. table:: Table . xfMat2Array Parameter Description
 
    +-----------------------------------+-----------------------------------+
    | Parameter                         | Description                       |
@@ -226,7 +217,7 @@ that to output pointer.
    | dstPtr                            | Output pointer. Type of the       |
    |                                   | pointer based on the PTR_WIDTH.   |
    +-----------------------------------+-----------------------------------+
-   | srcMat                            | Input image of type xf::Mat       |
+   | srcMat                            | Input image of type xf::cv::Mat   |
    +-----------------------------------+-----------------------------------+
 
 **Interface pointer widths**
@@ -234,7 +225,7 @@ that to output pointer.
 Minimum pointer widths for different configurations is shown in the
 following table:
 
-.. table:: Table 3. Minimum and maximum pointer widths for different mat
+.. table:: Table . Minimum and maximum pointer widths for different mat
 types
 
    +-----------------+-----------------+-----------------+-----------------+
@@ -257,7 +248,6 @@ types
    | XF_8UC3         | XF_NPPC16       | 512             | 512             |
    +-----------------+-----------------+-----------------+-----------------+
 
-.. _ariaid-title9:
 
 Memory Mapped Kernels
 ^^^^^^^^^^^^^^^^^^^^^
@@ -269,35 +259,33 @@ will require the image to be read in raster scan manner, which is not
 the case for the memory mapped kernels. The methodology to handle this
 case is as follows:
 
-.. code:: pre
+.. code:: c
 
    extern “C” 
    { 
    void func_top (ap_uint *gmem_in, ap_uint *gmem_out, ...) { 
-   xf::Mat<…> in_mat(…,gmem_in), out_mat(…,gmem_out);
+   xf::cv::Mat<…> in_mat(…,gmem_in), out_mat(…,gmem_out);
    xf::kernel<…> (in_mat, out_mat…); 
    }
    }
 
-The gmem pointers must be mapped to the xf::Mat objects during the
+The gmem pointers must be mapped to the xf::cv::Mat objects during the
 object creation, and then the memory mapped kernels are called with
 these mats at the interface. It is necessary that the pointer size must
 be same as the size required for the xf::xfopencv-func, unlike the
 streaming method where any higher size of the pointers (till 512-bits)
 are allowed.
 
-.. _ariaid-title10:
 
 Makefile
 ~~~~~~~~
 
 In the current use model, only a makefile based flow is provided to
-build applications with xfOpenCV on SDAccel. Examples for makefile are
+build applications with xfOpenCV on Vitis. Examples for makefile are
 provided in the samples section of GitHub.
 
-.. _ariaid-title11:
 
-Design example Using Library on SDAccel
+Design example Using Library on Vitis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Following is a multi-kernel example, where different kernel runs
@@ -317,7 +305,7 @@ required data. In the case of xfOpenCV example, the data is an image.
 Reading and writing of images are enabled using called to functions from
 xfOpenCV.
 
-.. code:: pre
+.. code:: c
 
    // setting up device and platform
        std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -400,7 +388,7 @@ xfOpenCV.
 
 Below is the top-level/wrapper function with all necessary glue logic.
 
-.. code:: pre
+.. code:: c
 
    // streaming based kernel
    #include "xf_canny_config.h"
@@ -419,18 +407,18 @@ Below is the top-level/wrapper function with all necessary glue logic.
    #pragma HLS INTERFACE s_axilite port=high_threshold     bundle=control
    #pragma HLS INTERFACE s_axilite port=return   bundle=control
 
-       xf::Mat<XF_8UC1, HEIGHT, WIDTH, INTYPE> in_mat(rows,cols);
+       xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, INTYPE> in_mat(rows,cols);
    #pragma HLS stream variable=in_mat.data depth=2
        
-       xf::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> dst_mat(rows,cols);
+       xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> dst_mat(rows,cols);
    #pragma HLS stream variable=dst_mat.data depth=2
        
        
        #pragma HLS DATAFLOW 
 
-       xf::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC1,HEIGHT,WIDTH,INTYPE>(img_inp,in_mat);
+       xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC1,HEIGHT,WIDTH,INTYPE>(img_inp,in_mat);
        xf::Canny<FILTER_WIDTH,NORM_TYPE,XF_8UC1,XF_2UC1,HEIGHT, WIDTH,INTYPE,XF_NPPC32,XF_USE_URAM>(in_mat,dst_mat,low_threshold,high_threshold);
-       xf::xfMat2Array<OUTPUT_PTR_WIDTH,XF_2UC1,HEIGHT,WIDTH,XF_NPPC32>(dst_mat,img_out);
+       xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH,XF_2UC1,HEIGHT,WIDTH,XF_NPPC32>(dst_mat,img_out);
        
        
    }
@@ -450,14 +438,13 @@ Below is the top-level/wrapper function with all necessary glue logic.
    #pragma HLS INTERFACE s_axilite port=return   bundle=control
 
 
-       xf::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> _dst1(rows,cols,img_inp);
-       xf::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC8> _dst2(rows,cols,img_out);
+       xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> _dst1(rows,cols,img_inp);
+       xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC8> _dst2(rows,cols,img_out);
        xf::EdgeTracing<XF_2UC1,XF_8UC1,HEIGHT, WIDTH, XF_NPPC32,XF_NPPC8,XF_USE_URAM>(_dst1,_dst2);
        
    }
    }
 
-.. _ariaid-title12:
 
 Evaluating the Functionality
 ----------------------------
@@ -467,16 +454,13 @@ emulation, hardware emulation, and running directly on a supported
 hardware with the FPGA. For PCIe based platforms, use the following
 commands to setup the environment:
 
-.. code:: pre
+.. code:: c
 
-   $ cd <path to the proj folder, where makefile is present>
-   $ source <path to the SDx installation folder>/SDx/<version number>/settings64.sh
+   $ cd <path to the folder where makefile is present>
+   $ source <path to the Vitis installation folder>/Vitis/<version number>/settings64.sh
    $ source <path to Xilinx_xrt>/packages/setenv.sh
-   $ export PLATFORM_PATH=<path to the platform folder>
-   $ export XLNX_SRC_PATH=<path to the xfOpenCV repo>
-   $ export XILINX_CL_PATH=/usr
+   $ export DEVICE=<path to the platform folder>
 
-.. _ariaid-title13:
 
 Software Emulation
 ~~~~~~~~~~~~~~~~~~
@@ -486,14 +470,16 @@ kernel. The time for compilation is minimal, and is therefore
 recommended to be the first step in testing the kernel. Following are
 the steps to build and run for the software emulation:
 
-.. code:: pre
+.. code:: c
 
-   $ make all TARGETS=sw_emu
-   $ export XCL_EMULATION_MODE=sw_emu
-   $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<sdx installation path>/SDx/2019.1/lnx64/tools/opencv:/usr/lib64
-   $ ./<executable> <args>
+	*For PCIe devices:*
+   $ make host xclbin TARGET=sw_emu
+   $ make run TARGET=sw_emu
+	*For embedded devices:*
+   $ export SYSROOT=< path-to-platform-sysroot >
+   $ make host xclbin TARGET=hw BOARD=Zynq 
+   $ make run TARGET=sw_emu
 
-.. _ariaid-title14:
 
 Hardware Emulation
 ~~~~~~~~~~~~~~~~~~
@@ -503,34 +489,39 @@ the C/C++ code. The simulation, since being done on RTL requires longer
 to complete when compared to software emulation. Following are the steps
 to build and run for the hardware emulation:
 
-.. code:: pre
+.. code:: c
 
-   $ make all TARGETS=hw_emu
-   $ export XCL_EMULATION_MODE=hw_emu
-   $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<sdx installation path>/SDx/2019.1/lnx64/tools/opencv:/usr/lib64
-   $ ./<executable> <args>
+	*For PCIe devices:*
+   $ make host xclbin TARGET=hw_emu
+   $ make run TARGET=hw_emu
+	*For embedded devices:*
+   $ export SYSROOT=< path-to-platform-sysroot >
+   $ make host xclbin TARGET=hw_emu BOARD=Zynq 
+   $ make run TARGET=hw_emu
 
-.. _ariaid-title15:
 
 Testing on the Hardware
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 To test on the hardware, the kernel must be compiled into a bitstream
-(building for hardware).
-
-.. code:: pre
-
-   $ make all TARGETS=hw
-
-This would consume some time since the C/C++ code must be converted to
+(building for hardware). This would consume some time since the C/C++ code must be converted to
 RTL, run through synthesis and implementation process before a bitstream
 is created. As a prerequisite the drivers has to be installed for
 corresponding DSA, for which the example was built for. Following are
-the steps to run the kernel on a hardware:
+the steps to build the kernel and run on a hardware:
 
-.. code:: pre
+.. code:: c
 
-   $ source /opt/xilinx/xrt/setup.sh
-   $ export XILINX_XRT=/opt/xilinx/xrt
-   $ cd <path to the executable and the corresponding xclbin>
-   $ ./<executable> <args>
+	*For PCIe devices:*
+   $ make host xclbin TARGET=hw
+   $ make run TARGET=hw
+	*For embedded devices:*
+   $ export SYSROOT=< path-to-platform-sysroot >
+   $ make host xclbin TARGET=hw BOARD=Zynq 
+   copy the generated sd_card folder contents to an SDCARD and run on the following commands on the board.
+   $ export LD_LIBRARY_PATH=< path-to-arm-compiled-opencv-libs >
+   $ export XILINX_XRT=/usr
+   $ ./< executable > < args >
+
+
+

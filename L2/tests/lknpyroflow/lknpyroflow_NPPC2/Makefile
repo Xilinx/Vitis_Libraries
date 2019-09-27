@@ -196,7 +196,7 @@ KSRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/lknpyroflow
 XFREQUENCY 		:= 300
 VIVADO_FREQUENCY        =$(shell echo $$(( $(XFREQUENCY) * 1000000 )))
 
-XCLBIN_NAME 	:= krnl_dense_npyr_optical_flow
+XCLBIN_NAME 	:= krnl_lknpyrof
 KER_NAME    	:= dense_non_pyr_of_accel
 KERNELS += $(KER_NAME):xf_dense_npyr_optical_flow_accel.cpp
 
@@ -212,7 +212,7 @@ $(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explo
 
 SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/lknpyroflow
 
-EXE_NAME  		:= dense_npyr_optical_flow
+EXE_NAME  		:= krnl_lknpyrflow
 HOST_ARGS 		= $(SRC_DIR)/data/4k_1.png $(SRC_DIR)/data/4k_2.png
 SRCS      		:= xf_dense_npyr_optical_flow_tb
 

@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
                         short int y, x;
                         y = j;
                         x = l;
-                        if (j > 0) cv::circle(out_img, cv::Point(x, y), 5, Scalar(0, 0, 255, 255), 2, 8, 0);
+                        if (j > 0) cv::circle(out_img, cv::Point(x, y), 5, cv::Scalar(0, 0, 255, 255), 2, 8, 0);
                     }
                 }
             }
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
                     short int y, x;
                     y = j;
                     x = i;
-                    if (j > 0) cv::circle(out_img, cv::Point(x, y), 5, Scalar(0, 0, 255, 255), 2, 8, 0);
+                    if (j > 0) cv::circle(out_img, cv::Point(x, y), 5, cv::Scalar(0, 0, 255, 255), 2, 8, 0);
                 }
             }
         }
@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
     for (int j = 1; j < ocv_out_img.rows - 1; j++) {
         for (int i = 1; i < ocv_out_img.cols - 1; i++) {
             if ((int)ocv_out_img.at<unsigned char>(j, i)) {
-                cv::circle(ocvpnts, cv::Point(i, j), 5, Scalar(0, 0, 255), 2, 8, 0);
+                cv::circle(ocvpnts, cv::Point(i, j), 5, cv::Scalar(0, 0, 255), 2, 8, 0);
                 ocv_points.push_back(cv::Point(i, j));
             }
         }

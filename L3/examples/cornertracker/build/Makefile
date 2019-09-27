@@ -192,24 +192,28 @@ data: $(DATA_STAMP)
 # -----------------------------------------------------------------------------
 #                          kernel setup
 
-KSRC_DIR 		:= $(XF_LIB_DIR)/L3/examples/cornertracker
-XFREQUENCY 		:= 300
-VIVADO_FREQUENCY        =$(shell echo $$(( $(XFREQUENCY) * 1000000 )))
+KSRC_DIR 		 := $(XF_LIB_DIR)/L3/examples/cornertracker
+XFREQUENCY 		 := 300 # in MHz
+VIVADO_FREQUENCY  = $(shell echo $$(( $(XFREQUENCY) * 1000000 ))) # in Hz
 
-XCLBIN_NAME 	:= krnl_cornertracker
-KER_NAME1    	:= pyr_dense_optical_flow_accel
-KERNELS += $(KER_NAME1):xf_pyr_dense_optical_flow_accel.cpp
-KER_NAME2	:= pyr_down_accel
-KERNELS += $(KER_NAME2):xf_pyr_down_accel.cpp
-KER_NAME3	:= cornerupdate_accel
-KERNELS += $(KER_NAME3):xf_cornerupdate_accel.cpp
-KER_NAME4	:= cornerTracker
-KERNELS += $(KER_NAME4):xf_corner_tracker_accel.cpp
+XCLBIN_NAME 	 := krnl_cornertracker
 
-VPP_CFLAGS  	+= -I$(XF_LIB_DIR)/include -I. -I$(XF_LIB_DIR)/L1/include
-VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB 
+KER_NAME1    	 := pyr_dense_optical_flow_accel
+KERNELS          += $(KER_NAME1):xf_pyr_dense_optical_flow_accel.cpp
 
-$(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
+KER_NAME2	     := pyr_down_accel
+KERNELS          += $(KER_NAME2):xf_pyr_down_accel.cpp
+
+KER_NAME3        := cornerupdate_accel
+KERNELS          += $(KER_NAME3):xf_cornerupdate_accel.cpp
+
+KER_NAME4	     := cornerTracker
+KERNELS          += $(KER_NAME4):xf_corner_tracker_accel.cpp
+
+VPP_CFLAGS  	 += -I$(XF_LIB_DIR)/include -I. -I$(XF_LIB_DIR)/L1/include
+VPP_CFLAGS  	 += -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB 
+VPP_CFLAGS       += --xp vivado_prop:run.impl_1.strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
+
 $(KER_NAME3)_VPP_CFLAGS := -D__SDA_MEM_MAP__
 
 
