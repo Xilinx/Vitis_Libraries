@@ -69,7 +69,9 @@ int main(int argc, char** argv) {
         y[i] = 0;
     }
 
-    XFBLAS_dataType *d_a, *d_x, *d_y;
+    XFBLAS_dataType* d_a = NULL;
+    XFBLAS_dataType* d_x = NULL;
+    XFBLAS_dataType* d_y = NULL;
 
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMV;
     xfblasStatus_t status = XFBLAS_STATUS_SUCCESS;

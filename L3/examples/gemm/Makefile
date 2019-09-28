@@ -129,16 +129,16 @@ common: gemm_common_example.exe
 pre_allocated: gemm_pre_allocated_example.exe
 
 gemm_example.exe: gemm_example.cpp
-	$(CXX) -D XFBLAS_dataType=short -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CC) -D XFBLAS_dataType=short -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 gemm_example_float.exe: gemm_example.cpp
-	$(CXX) -D XFBLAS_dataType=float -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CC) -D XFBLAS_dataType=float -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 	
 gemm_common_example.exe: gemm_common_example.cpp
-	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CC) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 gemm_pre_allocated_example.exe: gemm_pre_allocated_example.cpp
-	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CC) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 
 # -----------------------------------------------------------------------------

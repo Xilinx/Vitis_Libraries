@@ -40,7 +40,9 @@ int main(int argc, char** argv) {
 
     int i, j; // i-row index ,j- column index
 
-    XFBLAS_dataType *a, *b, *c;
+    XFBLAS_dataType* a = NULL;
+    XFBLAS_dataType* b = NULL;
+    XFBLAS_dataType* c = NULL;
 
     int padded_lda, padded_ldb, padded_ldc;
 
@@ -129,5 +131,8 @@ int main(int argc, char** argv) {
     xfblasFree(a);
     xfblasFree(b);
     xfblasFree(c);
+    free(a);
+    free(b);
+    free(c);
     xfblasDestroy();
 }

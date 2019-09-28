@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2019 Xilinx, Inc.
  *
@@ -33,6 +34,18 @@
 #include "gemm_helper.hpp"
 
 using namespace std;
+
+void readBin(char* mat, unsigned int row, unsigned int col, string dataDir, string name, unsigned int eleSize) {
+    ifstream inFile;
+    inFile.open(dataDir + name + to_string(row) + "_" + to_string(col) + ".bin", ifstream::binary);
+    if (inFile.is_open()) {
+        inFile.read((char*)mat, eleSize * row * col);
+        inFile.close();
+    } else {
+        cerr << "Could not find " << (dataDir + name + to_string(row) + "_" + to_string(col) + ".bin") << endl;
+        exit(1);
+    }
+}
 
 int main(int argc, char** argv) {
     if (argc < 3) {
@@ -78,91 +91,62 @@ int main(int argc, char** argv) {
 #endif
     }
 
-    int iteration = 2;
+    int iteration = 5;
     if (argc >= 9) {
         iteration = stoi(argv[l_argIdx++]);
         cout << "Read custom iteration: " << iteration << endl;
     }
 
     int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
-    XFBLAS_dataType **a, **b, **c, **goldenC;
 
-    a = (XFBLAS_dataType**)malloc(l_numKernel * sizeof(XFBLAS_dataType*));
-    b = (XFBLAS_dataType**)malloc(l_numKernel * sizeof(XFBLAS_dataType*));
-    c = (XFBLAS_dataType**)malloc(l_numKernel * sizeof(XFBLAS_dataType*));
-    goldenC = (XFBLAS_dataType**)malloc(l_numKernel * sizeof(XFBLAS_dataType*));
+    vector<XFBLAS_dataType*> goldenC;
 
     for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
-        posix_memalign((void**)&a[kernelIndex], 4096, m * k * sizeof(XFBLAS_dataType));
-        posix_memalign((void**)&b[kernelIndex], 4096, k * n * sizeof(XFBLAS_dataType));
-        posix_memalign((void**)&c[kernelIndex], 4096, m * n * sizeof(XFBLAS_dataType));
-        posix_memalign((void**)&goldenC[kernelIndex], 4096, m * n * sizeof(XFBLAS_dataType));
-    }
-
-    ifstream inFile;
-
-    for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
-        inFile.open(data_dir + "matA_in_" + to_string(m) + "_" + to_string(k) + ".bin", ifstream::binary);
-        if (inFile.is_open()) {
-            inFile.read((char*)a[kernelIndex], sizeof(XFBLAS_dataType) * m * k);
-            inFile.close();
-        } else {
-            cerr << "Error opening " << (data_dir + "matA_in_" + to_string(m) + "_" + to_string(k) + ".bin") << endl;
-            exit(1);
-        }
-
-        inFile.open(data_dir + "matB_in_" + to_string(k) + "_" + to_string(n) + ".bin", ifstream::binary);
-        if (inFile.is_open()) {
-            inFile.read((char*)b[kernelIndex], sizeof(XFBLAS_dataType) * k * n);
-            inFile.close();
-        } else {
-            cerr << "Error opening " << (data_dir + "matB_in_" + to_string(k) + "_" + to_string(n) + ".bin") << endl;
-            exit(1);
-        }
-
-        inFile.open(data_dir + "matC_in_" + to_string(m) + "_" + to_string(n) + ".bin", ifstream::binary);
-        if (inFile.is_open()) {
-            inFile.read((char*)c[kernelIndex], sizeof(XFBLAS_dataType) * m * n);
-            inFile.close();
-        } else {
-            cerr << "Error opening " << (data_dir + "matC_in_" + to_string(m) + "_" + to_string(n) + ".bin") << endl;
-            exit(1);
-        }
-
-        inFile.open(data_dir + "matC_out_" + to_string(m) + "_" + to_string(n) + ".bin", ifstream::binary);
-        if (inFile.is_open()) {
-            inFile.read((char*)goldenC[kernelIndex], sizeof(XFBLAS_dataType) * m * n);
-            inFile.close();
-        } else {
-            cerr << "Error opening " << (data_dir + "matC_out_" + to_string(m) + "_" + to_string(n) + ".bin") << endl;
-            exit(1);
-        }
+        XFBLAS_dataType* tmp_goldenC;
+        posix_memalign((void**)&tmp_goldenC, 4096, m * n * sizeof(XFBLAS_dataType));
+        readBin((char*)tmp_goldenC, m, n, data_dir, "matC_out_", sizeof(XFBLAS_dataType));
+        goldenC.push_back(tmp_goldenC);
     }
 
     TimePointType l_tp_start_time;
     TimePointType l_tp_create_time;
     l_tp_start_time = chrono::high_resolution_clock::now();
-
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
     xfblasStatus_t status =
         xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
 
     showTimeData("xfblasCreate", l_tp_start_time, l_tp_create_time);
 
-    xfblasDestroy(l_numKernel);
+    vector<XFBLAS_dataType*> resultC;
 
     TimePointType l_tp_loop[3];
-    chrono::duration<double> l_timeApiSum;
+    chrono::duration<double> l_timeApiSum = chrono::seconds(0);
 
     for (int i = 0; i < iteration; i++) {
-        xfblasStatus_t status =
-            xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
+        vector<XFBLAS_dataType *> a, b, c;
+
+        for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
+            XFBLAS_dataType *tmp_a, *tmp_b, *tmp_c;
+            posix_memalign((void**)&tmp_a, 4096, m * k * sizeof(XFBLAS_dataType));
+            memset(tmp_a, 0, m * k);
+            posix_memalign((void**)&tmp_b, 4096, k * n * sizeof(XFBLAS_dataType));
+            memset(tmp_b, 0, k * n);
+            posix_memalign((void**)&tmp_c, 4096, m * n * sizeof(XFBLAS_dataType));
+            memset(tmp_c, 0, m * n);
+            readBin((char*)tmp_a, m, k, data_dir, "matA_in_", sizeof(XFBLAS_dataType));
+            readBin((char*)tmp_b, k, n, data_dir, "matB_in_", sizeof(XFBLAS_dataType));
+            readBin((char*)tmp_c, m, n, data_dir, "matC_in_", sizeof(XFBLAS_dataType));
+            a.push_back(tmp_a);
+            b.push_back(tmp_b);
+            c.push_back(tmp_c);
+        }
+
         unsigned int l_tpIdx = 0;
         l_tp_loop[l_tpIdx] = chrono::high_resolution_clock::now();
         for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
-            status = xfblasMallocRestricted(m, k, sizeof(*a[kernelIndex]), a[kernelIndex], k, kernelIndex);
-            status = xfblasMallocRestricted(k, n, sizeof(*b[kernelIndex]), b[kernelIndex], n, kernelIndex);
-            status = xfblasMallocRestricted(m, n, sizeof(*c[kernelIndex]), c[kernelIndex], n, kernelIndex);
+            status = xfblasMallocRestricted(m, k, sizeof(XFBLAS_dataType), a[kernelIndex], k, kernelIndex);
+            status = xfblasMallocRestricted(k, n, sizeof(XFBLAS_dataType), b[kernelIndex], n, kernelIndex);
+            status = xfblasMallocRestricted(m, n, sizeof(XFBLAS_dataType), c[kernelIndex], n, kernelIndex);
 #ifdef XFBLAS_LAUNCH_ASYNC
             xfblasSetMatrixRestrictedAsync(a[kernelIndex], kernelIndex);
             xfblasSetMatrixRestrictedAsync(b[kernelIndex], kernelIndex);
@@ -198,26 +182,33 @@ int main(int argc, char** argv) {
         showTimeData("copyFromFpga", l_tp_loop[l_tpIdx], l_tp_loop[l_tpIdx + 1]);
         l_tpIdx++;
 
+        if (i == iteration - 1) {
+            for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
+                XFBLAS_dataType* tmp_c;
+                posix_memalign((void**)&tmp_c, 4096, m * n * sizeof(XFBLAS_dataType));
+                memcpy(tmp_c, c[kernelIndex], m * n * sizeof(XFBLAS_dataType));
+                resultC.push_back(tmp_c);
+            }
+        }
+
         for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
             xfblasFree(a[kernelIndex], kernelIndex);
             xfblasFree(b[kernelIndex], kernelIndex);
             xfblasFree(c[kernelIndex], kernelIndex);
         }
-        xfblasDestroy(l_numKernel);
+        xfblasFreeInstr();
         chrono::duration<double> l_timeApiLoop = l_tp_loop[l_tpIdx] - l_tp_loop[0];
         l_timeApiSum = l_timeApiSum + l_timeApiLoop;
 
-        if (i != iteration - 1) {
-            for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
-                inFile.open(data_dir + "matC_in_" + to_string(m) + "_" + to_string(n) + ".bin", ifstream::binary);
-                if (inFile.is_open()) {
-                    inFile.read((char*)c[kernelIndex], sizeof(XFBLAS_dataType) * m * n);
-                    inFile.close();
-                }
-            }
+        for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
+            free(a[kernelIndex]);
+            free(b[kernelIndex]);
+            free(c[kernelIndex]);
         }
+        a.clear();
+        b.clear();
+        c.clear();
     }
-
     chrono::duration<double> l_timeApi = l_timeApiSum / iteration;
     double l_timeMs = l_timeApi.count() * 1e3;
 
@@ -242,28 +233,25 @@ int main(int argc, char** argv) {
 
     for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
         cout << ">> Kernel #" << kernelIndex << " << ";
-        if (compareGemm(c[kernelIndex], goldenC[kernelIndex], m, n)) {
+        if (compareGemm(resultC[kernelIndex], goldenC[kernelIndex], m, n)) {
             cout << "Test passed!\n";
         } else {
             cout << "Test failed!\n";
         }
         for (i = 0; i < 10; i++) {
             for (j = 0; j < 10; j++) {
-                cout << (c[kernelIndex][IDX2R(i, j, k)]) << " ";
+                cout << (resultC[kernelIndex][IDX2R(i, j, k)]) << " ";
             }
             cout << "\n";
         }
     }
-    for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
-        free(a[kernelIndex]);
-        free(b[kernelIndex]);
-        free(c[kernelIndex]);
-    }
-    free(a);
-    free(b);
-    free(c);
 
-    // xfblasDestroy(l_numKernel);
+    for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
+        free(resultC[kernelIndex]);
+        free(goldenC[kernelIndex]);
+    }
+
+    xfblasDestroy(l_numKernel);
 
     return EXIT_SUCCESS;
 }
