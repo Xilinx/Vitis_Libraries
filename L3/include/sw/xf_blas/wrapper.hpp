@@ -791,6 +791,21 @@ xfblasStatus_t xfblasFree(void* A, unsigned int kernelIndex = 0, unsigned int de
 }
 
 /**
+ * @brief This function frees instrution
+ * @param kernelIndex index of kernel that is being used, default is 0
+ * @param deviceIndex index of device that is being used, default is 0
+ * @retval xfblasStatus_t 0 if the operation completed successfully
+ * @retval xfblasStatus_t 1 if the library was not initialized
+ */
+xfblasStatus_t xfblasFreeInstr(unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) {
+    if (ConfigDict::instance().m_dict.empty()) {
+        return XFBLAS_STATUS_NOT_INITIALIZED;
+    }
+    BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->clearInstrBuf();
+    return XFBLAS_STATUS_SUCCESS;
+}
+
+/**
  * @brief This function releases handle used by the XFBLAS library.
  * @param kernelNumber number of kernels that is being used, default is 1
  * @param deviceIndex index of device that is being used, default is 0
@@ -806,7 +821,7 @@ xfblasStatus_t xfblasDestroy(unsigned int kernelNumber = 1, unsigned int deviceI
         BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->clearInstrBuf();
         l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->closeContext(i);
     }
-
+    BLASHostHandle::instance().m_handlePtr[deviceIndex][0]->closeDevice();
     XFpgaHold::instance().m_xFpgaPtr.clear();
     BLASHostHandle::instance().m_handlePtr.clear();
     ConfigDict::instance().m_dict.clear();

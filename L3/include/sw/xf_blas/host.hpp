@@ -71,6 +71,7 @@ class XFpga {
         const xclBin* l_blob = (const xclBin*)l_header;
         if (xclLoadXclBin(m_handle, l_blob)) {
             *p_err = 1;
+            return;
         }
         // cout << "Finished downloading bitstream " << p_xclbin << "\n";
         const axlf* l_top = (const axlf*)l_header;
@@ -372,6 +373,7 @@ class XHost {
     }
 
     xfblasStatus_t closeContext(unsigned int p_kernelIndex) {
+        free(m_progBuf);
         xclFreeBO(m_fpga->m_handle, m_instrBufHandle);
         if (p_kernelIndex < (unsigned int)m_fpga->m_execHandles.size()) {
             xclFreeBO(m_fpga->m_handle, m_fpga->m_execHandles[p_kernelIndex]);
@@ -379,6 +381,7 @@ class XHost {
         xclCloseContext(m_fpga->m_handle, m_fpga->m_xclbinId, this->m_cuIndex);
         return XFBLAS_STATUS_SUCCESS;
     }
+    void closeDevice() { xclClose(m_fpga->m_handle); }
 };
 
 class BLASHost : public XHost {
