@@ -22,3 +22,5 @@ source < part-to-XRT-installation-directory >/setenv.sh
 export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
 make run CSIM=1 CSYNTH=1 COSIM=0
+
+Note : Please read "Getting started with HLS" section of [Vitis Vision documentation] (https://xilinx.github.io/Vitis_Libraries/vision/) for special cases, constraints and other full details.

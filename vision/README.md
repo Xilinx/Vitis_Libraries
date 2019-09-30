@@ -9,7 +9,7 @@ The library is organized into the following folders -
 | L1 | Examples that evaluate the Vitis Vision kernels, and demonstrate the kernels' use model in HLS flow |
 | L2 | Examples that evaluate the Vitis Vision kernels, and demonstrate the kernels' use model in Vitis flow.  |
 | L3 | Applications formed by stitching a pipeline of Vitis Vision functions |
-| ext | Utility function used in the opencl host code |
+| ext | Utility functions used in the opencl host code |
 
 The organization of contents in each folder is described in the readmes of the respective folders.
 
@@ -24,15 +24,15 @@ U200 platform, available in the Vitis tool, is required to build and run the lib
 
 ## OTHER INFORMATION
 Full User Guide for Vitis Vision and using OpenCV on Xilinx devices Check here:
-[Xilinx OpenCV User Guide][]
+[Xilinx Vitis Vision User Guide](https://xilinx.github.io/Vitis_Libraries/vision/)
 
 ## SUPPORT
-For questions and to get help on this project or your own projects, visit the [Xilinx Forums][].
+For questions and to get help on this project or your own projects, visit the [Xilinx Forums][] (link yet to be updated).
 
 ## LICENSE AND CONTRIBUTING TO THE REPOSITORY
-The source for this project is licensed under the [Apache License][]
+The source for this project is licensed under the [Apache License](http://www.apache.org/licenses/LICENSE-2.0)
 
-To contribute to this project, follow the guidelines in the [Repository Contribution README][]
+To contribute to this project, follow the guidelines in the [Repository Contribution README][] (link yet to be updated)
 
 ## ACKNOWLEDGEMENTS
 This library is written by developers at
