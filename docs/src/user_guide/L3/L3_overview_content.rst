@@ -46,15 +46,15 @@ XFBLAS level 3 library supports three different versions of APIs to support memo
 +--------------------------------+-------------------------------------+------------------------------+ 
 
 Restricted memory version
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^
   To use restricted memory version, user's input matrix sizes must be multiplier of certain configuration values that are used to build the FPGA bitstreams. Also, host memory is encouraged to be 4k aligned when using restricted memory version. Compared to the default memory version, even though there are requirements on the matrix sizes, restricted memory version could save extra memory copy in host side. 
 
 Default memory version
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
   This version has no limitations on user host memory, and it is easy to use. API functions will do the padding internally so this will lead to extra memory copy in host side. The result output matrix will also be the same sizes.
   
 Pre-allocated memory version
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   To use this version, users need to call API functions to allocate the device memory first, then fill in host memory that is mapped to device memory with values. There is no extra memory copy and the programming is easier compared to the other two versions. However, when filling in the matrices, users need to use the padded sizes, also the result output matrix's sizes are padded instead of the original ones. Please see examples for more usage information. 
   
   
@@ -92,7 +92,7 @@ The type is used for function status returns. All XFBLAS level 3 library functio
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
 | XFBLAS_STATUS_NOT_INITIALIZED | The XFBLAS library was not initialized. This is usually caused by not calling function xfblasCreate previously.   | 1      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
-| XFBLAS_STATUS_INVALID_VALUE   | An unsupported value or parameter was passed to the function. For example, an negative matrix size.                 | 2      |
+| XFBLAS_STATUS_INVALID_VALUE   | An unsupported value or parameter was passed to the function. For example, an negative matrix size.               | 2      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
 | XFBLAS_STATUS_ALLOC_FAILED    | Memory allocation failed inside the XFBLAS library.                                                               | 3      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
@@ -134,7 +134,7 @@ The xfblasOperation_t type indicates which operation needs to be performed with 
 2.3.1 xfblasCreate
 ^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasCreate(const char* xclbin, string configFile, const char* logFile, xfblasEngine_t engineName, unsigned int kernelNumber = 1, unsigned int deviceIndex = 0)
@@ -186,7 +186,7 @@ This function initializes the XFBLAS library and creates a handle for the specif
 2.3.2 xfblasFree
 ^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasFree(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -227,7 +227,7 @@ This function frees memory in FPGA device.
 2.3.3 xfblasDestroy
 ^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasDestroy(unsigned int kernelNumber = 1, unsigned int deviceIndex = 0)
@@ -261,7 +261,7 @@ This function releases handle used by the XFBLAS library.
 2.3.4 xfblasMalloc
 ^^^^^^^^^^^^^^^^^^^
         
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasMalloc(short** devPtr, int rows, int lda, int elemSize, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -317,7 +317,7 @@ This function allocates memory on the FPGA device.
 2.3.5 xfblasSetVector
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasSetVector(int n, int elemSize, short* x, int incx, short* d_x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -376,7 +376,7 @@ This function copies a vector in host memory to FPGA device memory. `xfblasMallo
 2.3.6 xfblasGetVector
 ^^^^^^^^^^^^^^^^^^^^^^
         
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasGetVector(int n, int elemSize, short* d_x, short* x, int incx, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -429,7 +429,7 @@ This function copies a vector in FPGA device memory to host memory.
 2.3.7 xfblasSetMatrix
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasSetMatrix(int rows, int cols, int elemSize, short* A, int lda, short* d_A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -491,7 +491,7 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
 2.3.8 xfblasGetMatrix
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasGetMatrix(int rows, int cols, int elemSize, short* d_A, short* A, int lda, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -548,7 +548,7 @@ This function copies a matrix in FPGA device memory to host memory.
 2.3.9 xfblasSetVectorAsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasSetVectorAsync(int n, int elemSize, short* x, int incx, short* d_x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -594,7 +594,7 @@ This function has the same functionality as `xfblasSetVector() <2.3.5 xfblasSetV
 2.3.10 xfblasGetVectorAsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasGetVectorAsync(int n, int elemSize, short* d_x, short* x, int incx, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -640,7 +640,7 @@ This function has the same functionality as `xfblasGetVector() <2.3.6 xfblasGetV
 2.3.11 xfblasSetMatrixAsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasSetMatrixAsync(int rows, int cols, int elemSize, short* A, int lda, short* d_A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -689,7 +689,7 @@ This function has the same functionality as `xfblasSetMatrix() <2.3.7 xfblasSetM
 2.3.12 xfblasGetMatrixAsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasGetMatrixAsync(int rows, int cols, int elemSize, short* d_A, short* A, int lda, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -740,7 +740,7 @@ This function has the same functionality as `xfblasGetMatrix() <2.3.8 xfblasGetM
 2.3.13 xfblasMallocRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasMallocRestricted(int rows, int cols, int elemSize, void* A, int lda, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -807,7 +807,7 @@ This function allocates memory for host row-major format matrix on the FPGA devi
 2.3.14 xfblasSetVectorRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasSetVectorRestricted(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -847,7 +847,7 @@ This function copies a vector in host memory to FPGA device memory. `xfblasMallo
 2.3.15 xfblasGetVectorRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasGetVectorRestricted(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -888,7 +888,7 @@ This function copies a matrix in FPGA device memory to host memory.
 2.3.16 xfblasSetMatrixRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasSetMatrixRestricted(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -928,7 +928,7 @@ This function copies a matrix in host memory to FPGA device memory. `xfblasMallo
 2.3.17 xfblasGetMatrixRestricted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasGetMatrixRestricted(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -968,7 +968,7 @@ This function copies a matrix in FPGA device memory to host memory.
 2.3.18 xfblasSetVectorRestrictedAsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasSetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -1001,7 +1001,7 @@ This function has the same functionality as `xfblasSetVectorRestricted() <2.3.14
 2.3.19 xfblasGetVectorRestrictedAsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasGetVectorRestrictedAsync(void* x, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -1035,7 +1035,7 @@ This function has the same functionality as `xfblasGetVectorRestricted() <2.3.15
 2.3.20 xfblasSetMatrixRestrictedAsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasSetMatrixRestrictedAsync(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -1068,7 +1068,7 @@ This function has the same functionality as `xfblasSetMatrixRestricted() <2.3.16
 2.3.21 xfblasGetMatrixRestrictedAsync
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasGetMatrixRestrictedAsync(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -1102,7 +1102,7 @@ This function has the same functionality as `xfblasGetMatrixRestricted() <2.3.17
 2.3.22 xfblasMallocManaged
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasMallocManaged(short** devPtr, int* paddedLda, int rows, int lda, int elemSize, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -1162,7 +1162,7 @@ This function allocates memory on the FPGA device, rewrites the leading dimensio
 2.3.23 xfblasKernelSynchronize
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     void xfblasKernelSynchronize()
@@ -1189,7 +1189,7 @@ This function will wait until all pending commands in all kernels have completed
 2.3.24 xfblasDeviceSynchronize
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasDeviceSynchronize(unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -1229,7 +1229,7 @@ This function will synchronize all the device memory to host memory.
 2.4.1 xfblasGemm
 ^^^^^^^^^^^^^^^^^^
 
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasGemm(xfblasOperation_t transa, xfblasOperation_t transb, int m, int n, int k, int alpha, void* A, int lda, void* B, int ldb, int beta, void* C, int ldc, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
@@ -1308,7 +1308,7 @@ This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + b
 2.4.2 xfblasGemv
 ^^^^^^^^^^^^^^^^^^
         
-.. ref-code-block:: cpp
+.. code-block:: cpp
     :class: title-code-block
 
     xfblasStatus_t xfblasGemv(xfblasOperation_t trans, int m, int n, int alpha, void* A, int lda, void* x, int incx, int beta, void* y, int incy, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0)
