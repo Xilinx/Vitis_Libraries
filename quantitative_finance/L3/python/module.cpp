@@ -133,6 +133,86 @@ PYBIND11_MODULE(xf_fintech_python, m) {
             return retval;
         });
 
+    py::class_<MCAmerican>(m, "MCAmerican")
+        .def(py::init())
+        .def("claimDevice", &MCAmerican::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("releaseDevice", &MCAmerican::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("deviceIsPrepared", &MCAmerican::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
+        .def("lastruntime", &MCAmerican::getLastRunTime)
+
+        .def("run",
+             [](MCAmerican& self, OptionType optionType, double stockPrice, double strikePrice, double riskFreeRate,
+                double dividendYield, double volatility, double timeToMaturity, double requiredTolerance) {
+                 int retval;
+                 double optionPrice;
+
+                 py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+
+                 retval = self.run(optionType, stockPrice, strikePrice, riskFreeRate, dividendYield, volatility,
+                                   timeToMaturity, requiredTolerance, &optionPrice);
+
+                 return std::make_tuple(retval, optionPrice);
+             })
+
+        .def("run",
+             [](MCAmerican& self, OptionType optionType, double stockPrice, double strikePrice, double riskFreeRate,
+                double dividendYield, double volatility, double timeToMaturity, unsigned int requiredNumSamples) {
+                 int retval;
+                 double optionPrice;
+
+                 py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+
+                 retval = self.run(optionType, stockPrice, strikePrice, riskFreeRate, dividendYield, volatility,
+                                   timeToMaturity, requiredNumSamples, &optionPrice);
+
+                 return std::make_tuple(retval, optionPrice);
+        });
+
+        //.def("run",
+        //     [](MCAmerican& self, std::vector<OptionType> optionTypeList, std::vector<double> stockPriceList,
+        //        std::vector<double> strikePriceList, std::vector<double> riskFreeRateList,
+        //        std::vector<double> dividendYieldList, std::vector<double> volatilityList,
+        //        std::vector<double> timeToMaturityList, std::vector<double> requiredToleranceList) {
+        //         int retval;
+        //         unsigned int numAssets = stockPriceList.size(); // use the length of the stock price list to determine
+        //                                                         // how many assets we are dealing with...
+        //         std::vector<double> optionPriceVector(numAssets);
+        //
+        //         py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+        //
+        //         retval = self.run(optionTypeList.data(), stockPriceList.data(), strikePriceList.data(),
+        //                           riskFreeRateList.data(), dividendYieldList.data(), volatilityList.data(),
+        //                           timeToMaturityList.data(), requiredToleranceList.data(), optionPriceVector.data(),
+        //                           numAssets);
+        //
+        //         return std::make_tuple(retval, optionPriceVector);
+        //     })
+        //
+        //.def("run", [](MCAmerican& self, std::vector<OptionType> optionTypeList, std::vector<double> stockPriceList,
+        //               std::vector<double> strikePriceList, std::vector<double> riskFreeRateList,
+        //               std::vector<double> dividendYieldList, std::vector<double> volatilityList,
+        //               std::vector<double> timeToMaturityList, std::vector<unsigned int> requiredNumSamples,
+        //               py::list outputResults) {
+        //    int retval;
+        //    unsigned int numAssets = stockPriceList.size(); // use the length of the stock price list to determine how
+        //                                                    // many assets we are dealing with...
+        //    std::vector<double> optionPriceVector(numAssets);
+        //
+        //    py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+        //
+        //    retval =
+        //        self.run(optionTypeList.data(), stockPriceList.data(), strikePriceList.data(), riskFreeRateList.data(),
+        //                 dividendYieldList.data(), volatilityList.data(), timeToMaturityList.data(),
+        //                 requiredNumSamples.data(), optionPriceVector.data(), numAssets);
+        //
+        //    for (auto i : optionPriceVector) outputResults.append(i);
+        //
+        //    return retval;
+        //
+
+
+
+
     py::class_<MCEuropeanDJE>(m, "MCEuropeanDJE")
         .def(py::init())
         .def("claimDevice", &MCEuropeanDJE::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
