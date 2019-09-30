@@ -27,7 +27,7 @@ open_project -reset $PROJ
 
 add_files ${XF_PROJ_ROOT}/L1/examples/badpixelcorrection/xf_badpixelcorrection_accel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 add_files -tb ${XF_PROJ_ROOT}/L1/examples/badpixelcorrection/xf_badpixelcorrection_tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-set_top autowhitebalance_accel
+set_top badpixelcorrection_accel
 
 open_solution -reset $SOLN
 
@@ -43,7 +43,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/badpixelcorrection/data/im0.png "
+  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/badpixelcorrection/data/hd.png "
 }
 
 if {$VIVADO_SYN == 1} {
