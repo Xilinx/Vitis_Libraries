@@ -20,12 +20,11 @@
 MK_PATH       := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR       := $(patsubst %/,%,$(dir $(MK_PATH)))
 CASE_ROOT     ?= $(CUR_DIR)
-#PLATFORM_REPO_PATHS=/proj/xbuilds/2019.1_Scout_daily_latest/internal_platforms/xilinx_u200_xdma_201830_2
-#DEVICE = /proj/xbuilds/2019.1_Scout_daily_latest/internal_platforms/xilinx_u200_xdma_201830_2/xilinx_u200_xdma_201830_2.xpfm
+
 #MK_COMMON_DIR := mk
 
 # Below should point to library repo
-XF_LIB_DIR    ?= $(abspath $(CASE_ROOT)/../../..)
+XF_LIB_DIR    ?= $(abspath $(CASE_ROOT)/../../../..)
 MK_COMMON_DIR := $(XF_LIB_DIR)/ext/makefile_templates
 
 .SECONDEXPANSION:

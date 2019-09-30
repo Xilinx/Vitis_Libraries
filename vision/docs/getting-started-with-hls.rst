@@ -1,6 +1,6 @@
 
 Getting Started with HLS
-========================
+#########################
 
 The Vitis vision library can be used to build applications in Vivado® HLS.
 This section provides details on how the Vitis vision library components can
@@ -30,7 +30,7 @@ functioning of the use model in Vivado HLS 2019.2:
 
 
 HLS Standalone Mode
--------------------
+===================
 
 The HLS standalone mode can be operated using the following two modes:
 
@@ -39,7 +39,7 @@ The HLS standalone mode can be operated using the following two modes:
 
 
 Tcl Script Mode
-~~~~~~~~~~~~~~~
+----------------
 
 Use the following steps to operate the HLS Standalone Mode using Tcl
 Script:
@@ -70,7 +70,7 @@ Setting flags for testbench files:
 
 
 GUI Mode
-~~~~~~~~
+--------
 
 Use the following steps to operate the HLS Standalone Mode using GUI:
 
@@ -111,7 +111,7 @@ Use the following steps to operate the HLS Standalone Mode using GUI:
 
 
 Constraints for Co-simulation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
 There are few limitations in performing co-simulation of the Vitis vision
 functions. They are:
@@ -127,7 +127,7 @@ functions. They are:
 
 
 AXI Video Interface Functions
------------------------------
+=============================
 
 Vitis vision has functions that will transform the xf::cv::Mat into Xilinx®
 Video Streaming interface and vice-versa. ``xf::cv::AXIvideo2xfMat()`` and
@@ -156,21 +156,21 @@ are used on the host side.
 
 
 AXIvideo2xfMat
-~~~~~~~~~~~~~~
+--------------
 
 The ``AXIvideo2xfMat`` function receives a sequence of images using the
 AXI4 Streaming Video and produces an ``xf::cv::Mat`` representation.
 
-API Syntax
-^^^^^^^^^^
+.. rubric:: API Syntax
+
 
 .. code:: c
 
    template<int W,int T,int ROWS, int COLS,int NPC>
    int AXIvideo2xfMat(hls::stream< ap_axiu<W,1,1,1> >& AXI_video_strm, xf::cv::Mat<T,ROWS, COLS, NPC>& img)
 
-Parameter Descriptions
-^^^^^^^^^^^^^^^^^^^^^^
+.. rubric:: Parameter Descriptions
+
 
 The following table describes the template and the function parameters.
 
@@ -210,26 +210,22 @@ For more information about AXI interface see UG761.
 
 
 xfMat2AXIvideo
-~~~~~~~~~~~~~~
+--------------
 
 The ``Mat2AXI`` video function receives an xf::cv::Mat representation of a
 sequence of images and encodes it correctly using the AXI4 Streaming
 video protocol.
 
-.. _api-syntax-1:
+.. rubric:: API Syntax
 
-API Syntax
-^^^^^^^^^^
 
 .. code:: c
 
    template<int W, int T, int ROWS, int COLS,int NPC>
    int xfMat2AXIvideo(xf::cv::Mat<T,ROWS, COLS,NPC>& img,hls::stream<ap_axiu<W,1,1,1> >& AXI_video_strm)
 
-.. _parameter-descriptions-1:
+.. rubric:: Parameter Descriptions
 
-Parameter Descriptions
-^^^^^^^^^^^^^^^^^^^^^^
 
 The following table describes the template and the function parameters.
 
@@ -269,25 +265,22 @@ HLS.
 
 
 cvMat2AXIvideoxf
-~~~~~~~~~~~~~~~~
+----------------
 
 The ``cvMat2Axivideoxf`` function receives image as cv::Mat
 representation and produces the AXI4 streaming video of image.
 
-.. _api-syntax-2:
+.. rubric:: API Syntax
 
-API Syntax
-^^^^^^^^^^
 
 .. code:: c
 
    template<int NPC,int W>
    void cvMat2AXIvideoxf(cv::Mat& cv_mat, hls::stream<ap_axiu<W,1,1,1> >& AXI_video_strm)
 
-.. _parameter-descriptions-2:
 
-Parameter Descriptions
-^^^^^^^^^^^^^^^^^^^^^^
+.. rubric:: Parameter Descriptions
+
 
 The following table describes the template and the function parameters.
 
@@ -313,25 +306,20 @@ The following table describes the template and the function parameters.
 
 
 AXIvideo2cvMatxf
-~~~~~~~~~~~~~~~~
+----------------
 
 The ``Axivideo2cvMatxf`` function receives image as AXI4 streaming video
 and produces the cv::Mat representation of image
 
-.. _api-syntax-3:
+.. rubric:: API Syntax
 
-API Syntax
-^^^^^^^^^^
 
 .. code:: c
 
    template<int NPC,int W>
    void AXIvideo2cvMatxf(hls::stream<ap_axiu<W,1,1,1> >& AXI_video_strm, cv::Mat& cv_mat) 
 
-.. _parameter-descriptions-3:
-
-Parameter Descriptions
-^^^^^^^^^^^^^^^^^^^^^^
+.. rubric:: Parameter Descriptions
 
 The following table describes the template and the function parameters.
 
