@@ -379,512 +379,310 @@ modifications.
 
 .. table:: Table : Video Processing Functions
 
-   +--------+------------------------------+------------------------------------+
-   | Functi | HLS Video Library -API       | Vitis vision Library-API           |
-   | ons    |                              |                                    |
-   +========+==============================+====================================+
-   | addS   | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int POLICY_TYPE,       |
-   |        | LS, int SRC_T, typename _T,  |  int SRC_T, int ROWS, int CO       |
-   |        | int DST_T>                   | LS, int NPC =1>                    |
-   |        |    void AddS(Mat<ROWS, COLS, |    void addS(xf::cv::Mat<SRC_T,    |
-   |        |  SRC_T>&src,Scalar<HLS_MAT_C | ROWS, COLS, NPC> & _src1, un       |
-   |        | N(SRC_T), _T> scl, Mat<ROWS, | signed char _scl[XF_CHANNELS       |
-   |        |  COLS, DST_T>& dst)          | (SRC_T,NPC)],xf::cv::Mat<SRC_T,    |
-   |        |                              | ROWS, COLS, NPC> & _dst)           |
-   +--------+------------------------------+------------------------------------+
-   | AddWei | .. code:: c                  | .. code:: c                        |
-   | ghted  |                              |                                    |
-   |        |    template<int ROWS, int CO |    template< int SRC_T,int D       |
-   |        | LS, int SRC1_T, int SRC2_T,  | ST_T, int ROWS, int COLS, in       |
-   |        | int DST_T, typename P_T>     | t NPC = 1>                         |
-   |        |    void AddWeighted(Mat<ROWS |    void addWeighted(xf::cv::Mat<   |
-   |        | , COLS, SRC1_T>& src1,P_T al | SRC_T, ROWS, COLS, NPC> & sr       |
-   |        | pha,Mat<ROWS, COLS, SRC2_T>& | c1,float alpha, xf::cv::Mat<SRC_   |
-   |        |  src2,P_T beta, P_T gamma,Ma | T, ROWS, COLS, NPC> & src2,f       |
-   |        | t<ROWS, COLS, DST_T>& dst)   | loat beta, float gama, xf::cv::M   |
-   |        |                              | at<DST_T, ROWS, COLS, NPC> &       |
-   |        |                              |  dst)                              |
-   +--------+------------------------------+------------------------------------+
-   | Cmp    | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int CMP_OP, int        |
-   |        | LS, int SRC1_T, int SRC2_T,  | SRC_T, int ROWS, int COLS, i       |
-   |        | int DST_T>                   | nt NPC =1>                         |
-   |        |    void Cmp(Mat<ROWS, COLS,  |    void compare(xf::cv::Mat<SRC_   |
-   |        | SRC1_T>& src1,Mat<ROWS, COLS | T, ROWS, COLS, NPC> & _src1,       |
-   |        | , SRC2_T>& src2,             |  xf::cv::Mat<SRC_T, ROWS, COLS,    |
-   |        |    Mat<ROWS, COLS, DST_T>& d | NPC> & _src2,xf::cv::Mat<SRC_T,    |
-   |        | st,int cmp_op)               | ROWS, COLS, NPC> & _dst)           |
-   +--------+------------------------------+------------------------------------+
-   | CmpS   | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int CMP_OP, int        |
-   |        | LS, int SRC_T, typename P_T, | SRC_T, int ROWS, int COLS, i       |
-   |        |  int DST_T>                  | nt NPC =1>                         |
-   |        |    void CmpS(Mat<ROWS, COLS, |    void compare(xf::cv::Mat<SRC_   |
-   |        |  SRC_T>& src,  P_T value, Ma | T, ROWS, COLS, NPC> & _src1,       |
-   |        | t<ROWS, COLS, DST_T>& dst, i |  unsigned char _scl[XF_CHANN       |
-   |        | nt cmp_op)                   | ELS(SRC_T,NPC)],xf::cv::Mat<SRC_   |
-   |        |                              | T, ROWS, COLS, NPC> & _dst)        |
-   +--------+------------------------------+------------------------------------+
-   | Max    | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T, int R       |
-   |        | LS, int SRC1_T, int SRC2_T,  | OWS, int COLS, int NPC =1>         |
-   |        | int DST_T>                   |    void Max(xf::cv::Mat<SRC_T, R   |
-   |        |    void Max(Mat<ROWS, COLS,  | OWS, COLS, NPC> & _src1, xf:       |
-   |        | SRC1_T>& src1,               | :Mat<SRC_T, ROWS, COLS, NPC>       |
-   |        |            Mat<ROWS, COLS, S |  & _src2,xf::cv::Mat<SRC_T, ROWS   |
-   |        | RC2_T>& src2,                | , COLS, NPC> & _dst)               |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>& dst)                  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | MaxS   | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template< int SRC_T, int        |
-   |        | LS, int SRC_T, typename _T,  | ROWS, int COLS, int NPC =1>        |
-   |        | int DST_T>                   |    void max(xf::cv::Mat<SRC_T, R   |
-   |        |    void MaxS(Mat<ROWS, COLS, | OWS, COLS, NPC> & _src1,  un       |
-   |        |  SRC_T>& src,                | signed char _scl[XF_CHANNELS       |
-   |        |    _T value, Mat<ROWS, COLS, | (SRC_T,NPC)],xf::cv::Mat<SRC_T,    |
-   |        |  DST_T>& dst)                | ROWS, COLS, NPC> & _dst)           |
-   +--------+------------------------------+------------------------------------+
-   | Min    | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template< int SRC_T, int        |
-   |        | LS, int SRC1_T, int SRC2_T,  | ROWS, int COLS, int NPC =1>        |
-   |        | int DST_T>                   |    void Min(xf::cv::Mat<SRC_T, R   |
-   |        |    void Min(Mat<ROWS, COLS,  | OWS, COLS, NPC> & _src1, xf:       |
-   |        | SRC1_T>& src1,               | :Mat<SRC_T, ROWS, COLS, NPC>       |
-   |        |            Mat<ROWS, COLS, S |  & _src2,xf::cv::Mat<SRC_T, ROWS   |
-   |        | RC2_T>& src2,                | , COLS, NPC> & _dst)               |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>& dst)                  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | MinS   | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template< int SRC_T, int        |
-   |        | LS, int SRC_T, typename _T,  | ROWS, int COLS, int NPC =1>        |
-   |        | int DST_T>                   |    void min(xf::cv::Mat<SRC_T, R   |
-   |        |    void MinS(Mat<ROWS, COLS, | OWS, COLS, NPC> & _src1,  un       |
-   |        |  SRC_T>& src,                | signed char _scl[XF_CHANNELS       |
-   |        |            _T value,Mat<ROWS | (SRC_T,NPC)],xf::cv::Mat<SRC_T,    |
-   |        | , COLS, DST_T>& dst)         | ROWS, COLS, NPC> & _dst)           |
-   +--------+------------------------------+------------------------------------+
-   | PaintM | .. code:: c                  | .. code:: c                        |
-   | ask    |                              |                                    |
-   |        |    template<int SRC_T,int MA |    template< int SRC_T,int M       |
-   |        | SK_T,int ROWS,int COLS>      | ASK_T, int ROWS, int COLS,in       |
-   |        |    void PaintMask(           | t NPC=1>                           |
-   |        |    Mat<ROWS,COLS,SRC_T>   &_ |    void paintmask(xf::cv::Mat<SR   |
-   |        | src,                         | C_T, ROWS, COLS, NPC> & _src       |
-   |        |    Mat<ROWS,COLS,MASK_T>&_ma | _mat, xf::cv::Mat<MASK_T, ROWS,    |
-   |        | sk,                          | COLS, NPC> & in_mask, xf::cv::Ma   |
-   |        |    Mat<ROWS,COLS,SRC_T>&_dst | t<SRC_T, ROWS, COLS, NPC> &        |
-   |        | ,Scalar<HLS_MAT_CN(SRC_T),HL | _dst_mat, unsigned char _col       |
-   |        | S_TNAME(SRC_T)> _color)      | or[XF_CHANNELS(SRC_T,NPC)])        |
-   +--------+------------------------------+------------------------------------+
-   | Reduce | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<typename INTER_S |    template< int REDUCE_OP,        |
-   |        | UM_T, int ROWS, int COLS, in | int SRC_T,int DST_T, int ROW       |
-   |        | t SRC_T, int DST_ROWS, int D | S, int COLS,int ONE_D_HEIGHT       |
-   |        | ST_COLS, int DST_T>          | , int ONE_D_WIDTH, int NPC=1       |
-   |        |    void Reduce(              | >                                  |
-   |        |             Mat<ROWS, COLS,  |    void reduce(xf::cv::Mat<SRC_T   |
-   |        | SRC_T> &src,                 | , ROWS, COLS, NPC> & _src_ma       |
-   |        |             Mat<DST_ROWS, DS | t,  xf::cv::Mat<DST_T, ONE_D_HEI   |
-   |        | T_COLS, DST_T> &dst,         | GHT, ONE_D_WIDTH, 1> & _dst_       |
-   |        |             int dim,         | mat, unsigned char dim)            |
-   |        |             int op=HLS_REDUC |                                    |
-   |        | E_SUM)                       |                                    |
-   +--------+------------------------------+------------------------------------+
-   | Zero   | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template< int SRC_T, int        |
-   |        | LS, int SRC_T, int DST_T>    | ROWS, int COLS, int NPC =1>        |
-   |        |    void Zero(Mat<ROWS, COLS, |    void zero(xf::cv::Mat<SRC_T,    |
-   |        |  SRC_T>& src,                | ROWS, COLS, NPC> & _src1,xf:       |
-   |        |              Mat<ROWS, COLS, | :Mat<SRC_T, ROWS, COLS, NPC>       |
-   |        |  DST_T>& dst)                |  & _dst)                           |
-   +--------+------------------------------+------------------------------------+
-   | Sum    | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<typename DST_T,  |    template< int SRC_T, int        |
-   |        | int ROWS, int COLS, int SRC_ | ROWS, int COLS, int NPC = 1>       |
-   |        | T>                           |    void sum(xf::cv::Mat<SRC_T, R   |
-   |        |    Scalar<HLS_MAT_CN(SRC_T), | OWS, COLS, NPC> & src1, doub       |
-   |        |  DST_T> Sum(                 | le sum[XF_CHANNELS(SRC_T,NPC       |
-   |        |            Mat<ROWS, COLS, S | )] )                               |
-   |        | RC_T>& src)                  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | SubS   | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int POLICY_TYPE,       |
-   |        | LS, int SRC_T, typename _T,  |  int SRC_T, int ROWS, int CO       |
-   |        | int DST_T>                   | LS, int NPC =1>                    |
-   |        |    void SubS(Mat<ROWS, COLS, |    void SubS(xf::cv::Mat<SRC_T,    |
-   |        |  SRC_T>& src,                | ROWS, COLS, NPC> & _src1,  u       |
-   |        |            Scalar<HLS_MAT_CN | nsigned char _scl[XF_CHANNEL       |
-   |        | (SRC_T), _T> scl,            | S(SRC_T,NPC)],xf::cv::Mat<SRC_T,   |
-   |        |            Mat<ROWS, COLS, D |  ROWS, COLS, NPC> & _dst)          |
-   |        | ST_T>& dst)                  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | SubRS  | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int POLICY_TYPE,       |
-   |        | LS, int SRC_T, typename _T,  |  int SRC_T, int ROWS, int CO       |
-   |        | int DST_T>                   | LS, int NPC =1>                    |
-   |        |    void SubRS(Mat<ROWS, COLS |    void SubRS(xf::cv::Mat<SRC_T,   |
-   |        | , SRC_T>& src,               |  ROWS, COLS, NPC> & _src1, u       |
-   |        |            Scalar<HLS_MAT_CN | nsigned char _scl[XF_CHANNEL       |
-   |        | (SRC_T), _T> scl,            | S(SRC_T,NPC)],xf::cv::Mat<SRC_T,   |
-   |        |            Mat<ROWS, COLS, D |  ROWS, COLS, NPC> & _dst)          |
-   |        | ST_T>& dst)                  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | Set    | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template< int SRC_T, int        |
-   |        | LS, int SRC_T, typename _T,  | ROWS, int COLS, int NPC =1>        |
-   |        | int DST_T>                   |    void set(xf::cv::Mat<SRC_T, R   |
-   |        |    void Set(Mat<ROWS, COLS,  | OWS, COLS, NPC> & _src1,  un       |
-   |        | SRC_T>& src,                 | signed char _scl[XF_CHANNELS       |
-   |        |            Scalar<HLS_MAT_CN | (SRC_T,NPC)],xf::cv::Mat<SRC_T,    |
-   |        | (SRC_T), _T> scl,            | ROWS, COLS, NPC> & _dst)           |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>& dst)                  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | Absdif | .. code:: c                  | .. code:: c                        |
-   | f      |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T, int R       |
-   |        | LS, int SRC1_T, int SRC2_T,  | OWS, int COLS, int NPC =1>         |
-   |        | int DST_T>                   |    void absdiff(xf::cv::Mat<SRC_   |
-   |        |    void AbsDiff(             | T, ROWS, COLS, NPC> & _src1,       |
-   |        |            Mat<ROWS, COLS, S | xf::cv::Mat<SRC_T, ROWS, COLS, N   |
-   |        | RC1_T>& src1,                | PC> & _src2,xf::cv::Mat<SRC_T, R   |
-   |        |            Mat<ROWS, COLS, S | OWS, COLS, NPC> & _dst)            |
-   |        | RC2_T>& src2,                |                                    |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>& dst)                  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | And    | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T, int R       |
-   |        | LS, int SRC1_T, int SRC2_T,  | OWS, int COLS, int NPC = 1>        |
-   |        | int DST_T>                   |    void bitwise_and(xf::cv::Mat<   |
-   |        |    void And(                 | SRC_T, ROWS, COLS, NPC> & _s       |
-   |        |            Mat<ROWS, COLS, S | rc1, xf::cv::Mat<SRC_T, ROWS, CO   |
-   |        | RC1_T>& src1,                | LS, NPC> & _src2, xf::cv::Mat<SR   |
-   |        |            Mat<ROWS, COLS, S | C_T, ROWS, COLS, NPC> &_dst)       |
-   |        | RC2_T>& src2,                |                                    |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>&  dst)                 |                                    |
-   +--------+------------------------------+------------------------------------+
-   | Dilate | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int Shape_type,i |    template<int BORDER_TYPE,       |
-   |        | nt ITERATIONS,int SRC_T, int |  int TYPE, int ROWS, int COL       |
-   |        |  DST_T, typename KN_T,int IM | S,int K_SHAPE,int K_ROWS,int       |
-   |        | G_HEIGHT,int IMG_WIDTH,int K |  K_COLS, int ITERATIONS, int       |
-   |        | _HEIGHT,int K_WIDTH>         |  NPC=1>                            |
-   |        |    void Dilate(Mat<IMG_HEIGH |    void dilate (xf::cv::Mat<TYPE   |
-   |        | T, IMG_WIDTH, SRC_T>&_src,Ma | , ROWS, COLS, NPC> & _src, x       |
-   |        | t<IMG_HEIGHT, IMG_WIDTH, DST | f::Mat<TYPE, ROWS, COLS, NPC       |
-   |        | _T&_dst,Window<K_HEIGHT,K_WI | > & _dst,unsigned char _kern       |
-   |        | DTH,KN_T>&_kernel)           | el[K_ROWS*K_COLS])                 |
-   +--------+------------------------------+------------------------------------+
-   | Duplic | .. code:: c                  | .. code:: c                        |
-   | ate    |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T, int R       |
-   |        | LS, int SRC_T, int DST_T>    | OWS, int COLS,int NPC>             |
-   |        |    void Duplicate(Mat<ROWS,  |    void duplicateMat(xf::cv::Mat   |
-   |        | COLS, SRC_T>& src,Mat<ROWS,  | <SRC_T, ROWS, COLS, NPC> & _       |
-   |        | COLS, DST_T>& dst1,Mat<ROWS, | src, xf::cv::Mat<SRC_T, ROWS, CO   |
-   |        |  COLS, DST_T>& dst2)         | LS, NPC> & _dst1,xf::cv::Mat<SRC   |
-   |        |                              | _T, ROWS, COLS, NPC> & _dst2       |
-   |        |                              | )                                  |
-   +--------+------------------------------+------------------------------------+
-   | Equali | .. code:: c                  | .. code:: c                        |
-   | zeHist |                              |                                    |
-   |        |    template<int SRC_T, int D |    template<int SRC_T, int R       |
-   |        | ST_T,int ROW, int COL>       | OWS, int COLS, int NPC = 1>        |
-   |        |    void EqualizeHist(Mat<ROW |    void equalizeHist(xf::cv::Mat   |
-   |        | , COL, SRC_T>&_src,Mat<ROW,  | <SRC_T, ROWS, COLS, NPC> & _       |
-   |        | COL, DST_T>&_dst)            | src,xf::cv::Mat<SRC_T, ROWS, COL   |
-   |        |                              | S, NPC> & _src1,xf::cv::Mat<SRC_   |
-   |        |                              | T, ROWS, COLS, NPC> & _dst)        |
-   +--------+------------------------------+------------------------------------+
-   | erode  | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int Shape_type,i |    template<int BORDER_TYPE,       |
-   |        | nt ITERATIONS,int SRC_T, int |  int TYPE, int ROWS, int COL       |
-   |        |  DST_T, typename KN_T,int IM | S,int K_SHAPE,int K_ROWS,int       |
-   |        | G_HEIGHT,int IMG_WIDTH,int K |  K_COLS, int ITERATIONS, int       |
-   |        | _HEIGHT,int K_WIDTH>         |  NPC=1>                            |
-   |        |    void Erode(Mat<IMG_HEIGHT |    void erode (xf::cv::Mat<TYPE,   |
-   |        | , IMG_WIDTH, SRC_T>&_src,Mat |  ROWS, COLS, NPC> & _src, xf::cv   |
-   |        | <IMG_HEIGHT,IMG_WIDTH,DST_T> | ::Mat<TYPE, ROWS, COLS, NPC>       |
-   |        | &_dst,Window<K_HEIGHT,K_WIDT |  & _dst,unsigned char _kerne       |
-   |        | H,KN_T>&_kernel)             | l[K_ROWS*K_COLS])                  |
-   +--------+------------------------------+------------------------------------+
-   | FASTX  | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int SRC_T,int RO |    template<int NMS,int SRC_       |
-   |        | WS,int COLS>                 | T,int ROWS, int COLS,int NPC       |
-   |        |    void FASTX(Mat<ROWS,COLS, | =1>                                |
-   |        | SRC_T> &_src,                |    void fast(xf::cv::Mat<SRC_T,    |
-   |        |    Mat<ROWS,COLS,HLS_8UC1>&_ | ROWS, COLS, NPC> & _src_mat,       |
-   |        | mask,HLS_TNAME(SRC_T)_thresh | xf::cv::Mat<SRC_T, ROWS, COLS, N   |
-   |        | old,bool _nomax_supression)  | PC> & _dst_mat,unsigned char       |
-   |        |                              |  _threshold)                       |
-   +--------+------------------------------+------------------------------------+
-   | Filter | .. code:: c                  | .. code:: c                        |
-   | 2D     |                              |                                    |
-   |        |    template<int SRC_T, int D |    template<int BORDER_TYPE,       |
-   |        | ST_T, typename KN_T, typenam | int FILTER_WIDTH,int FILTER_       |
-   |        | e POINT_T,                   | HEIGHT, int SRC_T,int DST_T,       |
-   |        |    int IMG_HEIGHT,int IMG_WI |  int ROWS, int COLS,int NPC>       |
-   |        | DTH,int K_HEIGHT,int K_WIDTH |    void filter2D(xf::cv::Mat<SRC   |
-   |        | >                            | _T, ROWS, COLS, NPC> & _src_       |
-   |        |    void Filter2D(Mat<IMG_HEI | mat,xf::cv::Mat<DST_T, ROWS, COL   |
-   |        | GHT, IMG_WIDTH, SRC_T> &_src | S, NPC> & _dst_mat,short int       |
-   |        | ,Mat<IMG_HEIGHT, IMG_WIDTH,  |  filter[FILTER_HEIGHT*FILTER       |
-   |        | DST_T>  &_dst,Window<K_HEIGH | _WIDTH],unsigned char _shift       |
-   |        | T,K_WIDTH,KN_T>&_kernel,Poin | )                                  |
-   |        | t_<POINT_T>anchor)           |                                    |
-   +--------+------------------------------+------------------------------------+
-   | Gaussi | .. code:: c                  | .. code:: c                        |
-   | anBlur |                              |                                    |
-   |        |    template<int KH,int KW,ty |    template<int FILTER_SIZE,       |
-   |        | pename BORDERMODE,int SRC_T, |  int BORDER_TYPE, int SRC_T,       |
-   |        | int DST_T,int ROWS,int COLS> |  int ROWS, int COLS,int NPC        |
-   |        |    void GaussianBlur(Mat<ROW | = 1>                               |
-   |        | S, COLS, SRC_T>              |    void GaussianBlur(xf::cv::Mat   |
-   |        |    &_src, Mat<ROWS, COLS, DS | <SRC_T, ROWS, COLS, NPC> & _       |
-   |        | T_T>                         | src, xf::cv::Mat<SRC_T, ROWS, CO   |
-   |        |    &_dst,double sigmaX=0,dou | LS, NPC> & _dst, float sigma       |
-   |        | ble sigmaY=0)                | )                                  |
-   +--------+------------------------------+------------------------------------+
-   | Harris | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int blockSize,in |    template<int FILTERSIZE,i       |
-   |        | t Ksize,typename KT,int SRC_ | nt BLOCKWIDTH, int NMSRADIUS       |
-   |        | T,int DST_T,int ROWS,int COL | ,int SRC_T,int ROWS, int COL       |
-   |        | S>                           | S,int NPC=1,bool USE_URAM=fa       |
-   |        |    void Harris(Mat<ROWS, COL | lse>                               |
-   |        | S, SRC_T>                    |    void cornerHarris(xf::cv::Mat   |
-   |        |    &_src,Mat<ROWS, COLS, DST | <SRC_T, ROWS, COLS, NPC> & s       |
-   |        | _T>&_dst,KT k,int threshold  | rc,xf::cv::Mat<SRC_T, ROWS, COLS   |
-   |        |                              | , NPC> & dst,uint16_t thresh       |
-   |        |                              | old, uint16_t k)                   |
-   +--------+------------------------------+------------------------------------+
-   | Corner | .. code:: c                  | .. code:: c                        |
-   | Harris |                              |                                    |
-   |        |    template<int blockSize,in |    template<int FILTERSIZE,i       |
-   |        | t Ksize,typename KT,int SRC_ | nt BLOCKWIDTH, int NMSRADIUS       |
-   |        | T,int DST_T,int ROWS,int COL | ,int SRC_T,int ROWS, int COL       |
-   |        | S>                           | S,int NPC=1,bool USE_URAM=fa       |
-   |        |    void CornerHarris(        | lse>                               |
-   |        |    Mat<ROWS, COLS, SRC_T>&_s |    void cornerHarris(xf::cv::Mat   |
-   |        | rc,Mat<ROWS, COLS, DST_T>&_d | <SRC_T, ROWS, COLS, NPC> & s       |
-   |        | st,KT k)                     | rc,xf::cv::Mat<SRC_T, ROWS, COLS   |
-   |        |                              | , NPC> & dst,uint16_t thresh       |
-   |        |                              | old, uint16_t k                    |
-   +--------+------------------------------+------------------------------------+
-   | HoughL | .. code:: c                  | .. code:: c                        |
-   | ines2  |                              |                                    |
-   |        |    template<unsigned int the |    template<unsigned int RHO       |
-   |        | ta,unsigned int rho,typename | ,unsigned int THETA,int MAXL       |
-   |        |  AT,typename RT,int SRC_T,in | INES,int DIAG,int MINTHETA,i       |
-   |        | t ROW,int COL,unsigned int l | nt MAXTHETA,int SRC_T, int R       |
-   |        | inesMax>                     | OWS, int COLS,int NPC>             |
-   |        |    void HoughLines2(Mat<ROW, |    void HoughLines(xf::cv::Mat<S   |
-   |        | COL,SRC_T> &_src,            | RC_T, ROWS, COLS, NPC> & _sr       |
-   |        |    Polar_<AT,RT> (&_lines)[l | c_mat,float outputrho[MAXLIN       |
-   |        | inesMax],unsigned int thresh | ES],float outputtheta[MAXLIN       |
-   |        | old)                         | ES],short threshold,short li       |
-   |        |                              | nesmax)                            |
-   +--------+------------------------------+------------------------------------+
-   | Integr | .. code:: c                  | .. code:: c                        |
-   | al     |                              |                                    |
-   |        |    template<int SRC_T, int D |    template<int SRC_TYPE,int       |
-   |        | ST_T,                        |  DST_TYPE, int ROWS, int COL       |
-   |        |    int ROWS,int COLS>        | S, int NPC>                        |
-   |        |    void Integral(Mat<ROWS, C |    void integral(xf::cv::Mat<SRC   |
-   |        | OLS, SRC_T>&_src,            | _TYPE, ROWS, COLS, NPC> & _s       |
-   |        |            Mat<ROWS+1, COLS+ | rc_mat, xf::cv::Mat<DST_TYPE, RO   |
-   |        | 1, DST_T>&_sum )             | WS, COLS, NPC> & _dst_mat)         |
-   +--------+------------------------------+------------------------------------+
-   | Merge  | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T, int D       |
-   |        | LS, int SRC_T, int DST_T>    | ST_T, int ROWS, int COLS, in       |
-   |        |    void Merge(               | t NPC=1>                           |
-   |        |            Mat<ROWS, COLS, S |    void merge(xf::cv::Mat<SRC_T,   |
-   |        | RC_T>& src0,                 |  ROWS, COLS, NPC> &_src1, xf       |
-   |        |            Mat<ROWS, COLS, S | ::Mat<SRC_T, ROWS, COLS, NPC       |
-   |        | RC_T>& src1,                 | > &_src2, xf::cv::Mat<SRC_T, ROW   |
-   |        |            Mat<ROWS, COLS, S | S, COLS, NPC> &_src3, xf::cv::Ma   |
-   |        | RC_T>& src2,                 | t<SRC_T, ROWS, COLS, NPC> &_       |
-   |        |            Mat<ROWS, COLS, S | src4, xf::cv::Mat<DST_T, ROWS, C   |
-   |        | RC_T>& src3,                 | OLS, NPC> &_dst)                   |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>& dst)                  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | MinMax | .. code:: c                  | .. code:: c                        |
-   | Loc    |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T,int RO       |
-   |        | LS, int SRC_T, typename P_T> | WS,int COLS,int NPC=0>             |
-   |        |    void MinMaxLoc(Mat<ROWS,  |    void minMaxLoc(xf::cv::Mat<SR   |
-   |        | COLS, SRC_T>& src,           | C_T, ROWS, COLS, NPC> & _src       |
-   |        |    P_T* min_val,P_T* max_val | ,int32_t *min_value, int32_t       |
-   |        | ,Point& min_loc,             |  *max_value,uint16_t *_minlo       |
-   |        |    Point& max_loc)           | cx, uint16_t *_minlocy, uint       |
-   |        |                              | 16_t *_maxlocx, uint16_t *_m       |
-   |        |                              | axlocy )                           |
-   +--------+------------------------------+------------------------------------+
-   | Mul    | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |     template<int POLICY_TYPE       |
-   |        | LS, int SRC1_T, int SRC2_T,  | , int SRC_T, int ROWS, int C       |
-   |        | int DST_T>                   | OLS, int NPC = 1>                  |
-   |        |    void Mul(Mat<ROWS, COLS,  |    void multiply(xf::cv::Mat<SRC   |
-   |        | SRC1_T>& src1,               | _T, ROWS, COLS, NPC> & src1,       |
-   |        |            Mat<ROWS, COLS, S |  xf::cv::Mat<SRC_T, ROWS, COLS,    |
-   |        | RC2_T>& src2,                | NPC> & src2, xf::cv::Mat<SRC_T,    |
-   |        |            Mat<ROWS, COLS, D | ROWS, COLS, NPC> & dst,float       |
-   |        | ST_T>& dst)                  |  scale)                            |
-   +--------+------------------------------+------------------------------------+
-   | Not    | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T, int R       |
-   |        | LS, int SRC_T, int DST_T>    | OWS, int COLS, int NPC = 1>        |
-   |        |    void Not(Mat<ROWS, COLS,  |    void bitwise_not(xf::cv::Mat<   |
-   |        | SRC_T>& src,                 | SRC_T, ROWS, COLS, NPC> & sr       |
-   |        |            Mat<ROWS, COLS, D | c, xf::cv::Mat<SRC_T, ROWS, COLS   |
-   |        | ST_T>& dst)                  | , NPC> & dst)                      |
-   +--------+------------------------------+------------------------------------+
-   | Range  | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T, int R       |
-   |        | LS, int SRC_T, int DST_T, ty | OWS, int COLS,int NPC=1>           |
-   |        | pename P_T>                  |    void inRange(xf::cv::Mat<SRC_   |
-   |        |    void Range(Mat<ROWS, COLS | T, ROWS, COLS, NPC> & src,un       |
-   |        | , SRC_T>& src,               | signed char lower_thresh,uns       |
-   |        |            Mat<ROWS, COLS, D | igned char upper_thresh,xf::cv::   |
-   |        | ST_T>& dst,                  | Mat<SRC_T, ROWS, COLS, NPC>        |
-   |        |            P_T start,P_T end | & dst)                             |
-   |        | )                            |                                    |
-   +--------+------------------------------+------------------------------------+
-   | Resize | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int SRC_T, int R |    template<int INTERPOLATIO       |
-   |        | OWS,int COLS,int DROWS,int D | N_TYPE, int TYPE, int SRC_RO       |
-   |        | COLS>                        | WS, int SRC_COLS, int DST_RO       |
-   |        |    void Resize (             | WS, int DST_COLS, int NPC, i       |
-   |        |            Mat<ROWS, COLS, S | nt MAX_DOWN_SCALE>                 |
-   |        | RC_T> &_src,                 |    void resize (xf::cv::Mat<TYPE   |
-   |        |            Mat<DROWS, DCOLS, | , SRC_ROWS, SRC_COLS, NPC> &       |
-   |        |  SRC_T> &_dst,               |  _src, xf::cv::Mat<TYPE, DST_ROW   |
-   |        |            int interpolation | S, DST_COLS, NPC> & _dst)          |
-   |        | =HLS_INTER_LINEAR )          |                                    |
-   +--------+------------------------------+------------------------------------+
-   | sobel  | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int XORDER, int  |    template<int BORDER_TYPE,       |
-   |        | YORDER, int SIZE, int SRC_T, | int FILTER_TYPE, int SRC_T,i       |
-   |        |  int DST_T, int ROWS,int COL | nt DST_T, int ROWS, int COLS       |
-   |        | S,int DROWS,int DCOLS>       | ,int NPC=1,bool USE_URAM = f       |
-   |        |    void Sobel (Mat<ROWS, COL | alse>                              |
-   |        | S, SRC_T>                    |    void Sobel(xf::cv::Mat<SRC_T,   |
-   |        |    &_src,Mat<DROWS, DCOLS, D |  ROWS, COLS, NPC> & _src_mat       |
-   |        | ST_T> &_dst)                 | ,xf::cv::Mat<DST_T, ROWS, COLS,    |
-   |        |                              | NPC> & _dst_matx,xf::cv::Mat<DST   |
-   |        |                              | _T, ROWS, COLS, NPC> & _dst_       |
-   |        |                              | maty)                              |
-   +--------+------------------------------+------------------------------------+
-   | split  | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int SRC_T, int D       |
-   |        | LS, int SRC_T, int DST_T>    | ST_T, int ROWS, int COLS, in       |
-   |        |    void Split(               | t NPC=1>                           |
-   |        |            Mat<ROWS, COLS, S |    void extractChannel(xf::cv::M   |
-   |        | RC_T>& src,                  | at<SRC_T, ROWS, COLS, NPC> &       |
-   |        |            Mat<ROWS, COLS, D |  _src_mat, xf::cv::Mat<DST_T, RO   |
-   |        | ST_T>& dst0,                 | WS, COLS, NPC> & _dst_mat, u       |
-   |        |            Mat<ROWS, COLS, D | int16_t _channel)                  |
-   |        | ST_T>& dst1,                 |                                    |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>& dst2,                 |                                    |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>& dst3)                 |                                    |
-   +--------+------------------------------+------------------------------------+
-   | Thresh | .. code:: c                  | .. code:: c                        |
-   | old    |                              |                                    |
-   |        |    template<int ROWS, int CO |    template<int THRESHOLD_TY       |
-   |        | LS, int SRC_T, int DST_T>    | PE, int SRC_T, int ROWS, int       |
-   |        |    void Threshold(           |  COLS,int NPC=1>                   |
-   |        |            Mat<ROWS, COLS, S |    void Threshold(xf::cv::Mat<SR   |
-   |        | RC_T>& src,                  | C_T, ROWS, COLS, NPC> & _src       |
-   |        |            Mat<ROWS, COLS, D | _mat,xf::cv::Mat<SRC_T, ROWS, CO   |
-   |        | ST_T>& dst,                  | LS, NPC> & _dst_mat,short in       |
-   |        |            HLS_TNAME(SRC_T)  | t thresh,short int maxval )        |
-   |        | thresh,                      |                                    |
-   |        |            HLS_TNAME(DST_T)  |                                    |
-   |        | maxval,                      |                                    |
-   |        |            int thresh_type)  |                                    |
-   +--------+------------------------------+------------------------------------+
-   | Scale  | .. code:: c                  | .. code:: c                        |
-   |        |                              |                                    |
-   |        |    template<int ROWS, int CO |    template< int SRC_T,int D       |
-   |        | LS, int SRC_T, int DST_T, ty | ST_T, int ROWS, int COLS, in       |
-   |        | pename P_T>                  | t NPC = 1>                         |
-   |        |    void Scale(Mat<ROWS, COLS |    void scale(xf::cv::Mat<SRC_T,   |
-   |        | , SRC_T>& src,Mat<ROWS, COLS |  ROWS, COLS, NPC> & src1, xf       |
-   |        | , DST_T>& dst, P_T scale=1.0 | ::Mat<DST_T, ROWS, COLS, NPC       |
-   |        | ,P_T shift=0.0)              | > & dst,float scale, float s       |
-   |        |                              | hift)                              |
-   +--------+------------------------------+------------------------------------+
-   | InitUn | .. code:: c                  | .. code:: c                        |
-   | distor |                              |                                    |
-   | tRecti |    template<typename CMT, ty |    template< int CM_SIZE, in       |
-   | fyMapI | pename DT, typename ICMT, in | t DC_SIZE, int MAP_T, int RO       |
-   | nverse | t ROWS, int COLS, int MAP1_T | WS, int COLS, int NPC >            |
-   |        | , int MAP2_T, int N>         |    void InitUndistortRectify       |
-   |        |    void InitUndistortRectify | MapInverse (                       |
-   |        | MapInverse (                 |            ap_fixed<32,12> *       |
-   |        |     Window<3,3, CMT> cameraM | cameraMatrix,                      |
-   |        | atrix,DT(&distCoeffs)[N],Win |            ap_fixed<32,12> *       |
-   |        | dow<3,3, ICMT> ir, Mat<ROWS, | distCoeffs,                        |
-   |        |  COLS, MAP1_T>  &map1,Mat<RO |            ap_fixed<32,12> *       |
-   |        | WS, COLS, MAP2_T>  &map2,int | ir,                                |
-   |        |  noRotation=false)           |            xf::cv::Mat<MAP_T, RO   |
-   |        |                              | WS, COLS, NPC> &_mapx_mat,xf       |
-   |        |                              | ::Mat<MAP_T, ROWS, COLS, NPC       |
-   |        |                              | > &_mapy_mat,int _cm_size, i       |
-   |        |                              | nt _dc_size)                       |
-   +--------+------------------------------+------------------------------------+
-   | Avg,   | .. code:: c                  | .. code:: c                        |
-   | mean,  |                              |                                    |
-   | AvgStd |    template<typename DST_T,  |    template<int SRC_T,int RO       |
-   | dev    | int ROWS, int COLS, int SRC_ | WS, int COLS,int NPC=1>void        |
-   |        | T>                           | meanStdDev(xf::cv::Mat<SRC_T, RO   |
-   |        |    DST_T Mean(Mat<ROWS, COLS | WS, COLS, NPC> & _src,unsign       |
-   |        | , SRC_T>& src)               | ed short* _mean,unsigned sho       |
-   |        |                              | rt* _stddev)                       |
-   +--------+------------------------------+------------------------------------+
-   | CvtCol | .. code:: c                  | `Color                             |
-   | or     |                              | Conversion <api-reference          |
-   |        |    template<typename CONVERS | .html#toi1504034269249>`__         |
-   |        | ION,int SRC_T, int DST_T,int |                                    |
-   |        |  ROWS,int COLS>              |                                    |
-   |        |    void CvtColor(Mat<ROWS, C |                                    |
-   |        | OLS, SRC_T>  &_src,          |                                    |
-   |        |            Mat<ROWS, COLS, D |                                    |
-   |        | ST_T>    &_dst)              |                                    |
-   +--------+------------------------------+------------------------------------+
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |   Functions                    |   HLS Video Library -API                                                                                                                                   |   xfOpenCV Library-API                                                                                                                                                                                            |
+   +================================+============================================================================================================================================================+===================================================================================================================================================================================================================+
+   | addS                           | template<int ROWS, int COLS, int SRC_T, typename \_T, int DST_T>                                                                                           | template<int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void AddS(Mat<ROWS, COLS, SRC_T>&src,Scalar<HLS_MAT_CN(SRC_T), \_T> scl, Mat<ROWS, COLS, DST_T>& dst)                                                      | void addS(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, unsigned char \_scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                          |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | AddWeighted                    | template<int ROWS, int COLS, int SRC1_T, int SRC2_T, int DST_T, typename P_T>                                                                              | template< int SRC_T,int DST_T, int ROWS, int COLS, int NPC = 1>                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void AddWeighted(Mat<ROWS, COLS, SRC1_T>& src1,P_T alpha,Mat<ROWS, COLS, SRC2_T>& src2,P_T beta, P_T gamma,Mat<ROWS, COLS, DST_T>& dst)                    | void addWeighted(xf::Mat<SRC_T, ROWS, COLS, NPC> & src1,float alpha, xf::Mat<SRC_T, ROWS, COLS, NPC> & src2,float beta, float gama, xf::Mat<DST_T, ROWS, COLS, NPC> & dst)                                        |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Cmp                            | template<int ROWS, int COLS, int SRC1_T, int SRC2_T, int DST_T>                                                                                            | template<int CMP_OP, int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Cmp(Mat<ROWS, COLS, SRC1_T>& src1,Mat<ROWS, COLS, SRC2_T>& src2,                                                                                      | void compare(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src2,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                          |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst,int cmp_op)                                                                                                                    |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | CmpS                           | template<int ROWS, int COLS, int SRC_T, typename P_T, int DST_T>                                                                                           | template<int CMP_OP, int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void CmpS(Mat<ROWS, COLS, SRC_T>& src, P_T value, Mat<ROWS, COLS, DST_T>& dst, int cmp_op)                                                                 | void compare(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, unsigned char \_scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                       |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Max                            | template<int ROWS, int COLS, int SRC1_T, int SRC2_T, int DST_T>                                                                                            | template<int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                               |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Max(Mat<ROWS, COLS, SRC1_T>& src1,                                                                                                                    | void Max(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src2,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC2_T>& src2,                                                                                                                             |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | MaxS                           | template<int ROWS, int COLS, int SRC_T, typename \_T, int DST_T>                                                                                           | template< int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void MaxS(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                     | void max(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, unsigned char \_scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                           |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | \_T value, Mat<ROWS, COLS, DST_T>& dst)                                                                                                                    |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Min                            | template<int ROWS, int COLS, int SRC1_T, int SRC2_T, int DST_T>                                                                                            | template< int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Min(Mat<ROWS, COLS, SRC1_T>& src1,                                                                                                                    | void Min(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src2,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC2_T>& src2,                                                                                                                             |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | MinS                           | template<int ROWS, int COLS, int SRC_T, typename \_T, int DST_T>                                                                                           | template< int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void MinS(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                     | void min(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, unsigned char \_scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                           |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | \_T value,Mat<ROWS, COLS, DST_T>& dst)                                                                                                                     |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | PaintMask                      | template<int SRC_T,int MASK_T,int ROWS,int COLS>                                                                                                           | template< int SRC_T,int MASK_T, int ROWS, int COLS,int NPC=1>                                                                                                                                                     |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void PaintMask(                                                                                                                                            | void paintmask(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src_mat, xf::Mat<MASK_T, ROWS, COLS, NPC> & in_mask, xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst_mat, unsigned char \_color[XF_CHANNELS(SRC_T,NPC)])               |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS,COLS,SRC_T> &_src,                                                                                                                                |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS,COLS,MASK_T>&_mask,                                                                                                                               |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS,COLS,SRC_T>&_dst,Scalar<HLS_MAT_CN(SRC_T),HLS_TNAME(SRC_T)> \_color)                                                                              |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Reduce                         | template<typename INTER_SUM_T, int ROWS, int COLS, int SRC_T, int DST_ROWS, int DST_COLS, int DST_T>                                                       | template< int REDUCE_OP, int SRC_T,int DST_T, int ROWS, int COLS,int ONE_D_HEIGHT, int ONE_D_WIDTH, int NPC=1>                                                                                                    |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Reduce(                                                                                                                                               | void reduce(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src_mat, xf::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, 1> & \_dst_mat, unsigned char dim)                                                                             |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T> &src,                                                                                                                               |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<DST_ROWS, DST_COLS, DST_T> &dst,                                                                                                                       |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | int dim,                                                                                                                                                   |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | int op=HLS_REDUCE_SUM)                                                                                                                                     |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Zero                           | template<int ROWS, int COLS, int SRC_T, int DST_T>                                                                                                         | template< int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Zero(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                     | void zero(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                                                                       |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Sum                            | template<typename DST_T, int ROWS, int COLS, int SRC_T>                                                                                                    | template< int SRC_T, int ROWS, int COLS, int NPC = 1>                                                                                                                                                             |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Scalar<HLS_MAT_CN(SRC_T), DST_T> Sum(                                                                                                                      | void sum(xf::Mat<SRC_T, ROWS, COLS, NPC> & src1, double sum[XF_CHANNELS(SRC_T,NPC)] )                                                                                                                             |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T>& src)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | SubS                           | template<int ROWS, int COLS, int SRC_T, typename \_T, int DST_T>                                                                                           | template<int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void SubS(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                     | void SubS(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, unsigned char \_scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                          |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Scalar<HLS_MAT_CN(SRC_T), \_T> scl,                                                                                                                        |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | SubRS                          | template<int ROWS, int COLS, int SRC_T, typename \_T, int DST_T>                                                                                           | template<int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void SubRS(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                    | void SubRS(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, unsigned char \_scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                         |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Scalar<HLS_MAT_CN(SRC_T), \_T> scl,                                                                                                                        |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Set                            | template<int ROWS, int COLS, int SRC_T, typename \_T, int DST_T>                                                                                           | template< int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Set(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                      | void set(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, unsigned char \_scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                           |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Scalar<HLS_MAT_CN(SRC_T), \_T> scl,                                                                                                                        |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Absdiff                        | template<int ROWS, int COLS, int SRC1_T, int SRC2_T, int DST_T>                                                                                            | template<int SRC_T, int ROWS, int COLS, int NPC =1>                                                                                                                                                               |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void AbsDiff(                                                                                                                                              | void absdiff(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src2,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                           |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC1_T>& src1,                                                                                                                             |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC2_T>& src2,                                                                                                                             |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | And                            | template<int ROWS, int COLS, int SRC1_T, int SRC2_T, int DST_T>                                                                                            | template<int SRC_T, int ROWS, int COLS, int NPC = 1>                                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void And(                                                                                                                                                  | void bitwise_and(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1, xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src2, xf::Mat<SRC_T, ROWS, COLS, NPC> &_dst)                                                                       |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC1_T>& src1,                                                                                                                             |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC2_T>& src2,                                                                                                                             |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Dilate                         | template<int Shape_type,int ITERATIONS,int SRC_T, int DST_T, typename KN_T,int IMG_HEIGHT,int IMG_WIDTH,int K_HEIGHT,int K_WIDTH>                          | template<int BORDER_TYPE, int TYPE, int ROWS, int COLS,int K_SHAPE,int K_ROWS,int K_COLS, int ITERATIONS, int NPC=1>                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Dilate(Mat<IMG_HEIGHT, IMG_WIDTH, SRC_T>&_src,Mat<IMG_HEIGHT, IMG_WIDTH, DST_T&_dst,Window<K_HEIGHT,K_WIDTH,KN_T>&_kernel)                            | void dilate (xf::Mat<TYPE, ROWS, COLS, NPC> & \_src, xf::Mat<TYPE, ROWS, COLS, NPC> & \_dst,unsigned char \_kernel[K_ROWS*K_COLS])                                                                                |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Duplicate                      | template<int ROWS, int COLS, int SRC_T, int DST_T>                                                                                                         | template<int SRC_T, int ROWS, int COLS,int NPC>                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Duplicate(Mat<ROWS, COLS, SRC_T>& src,Mat<ROWS, COLS, DST_T>& dst1,Mat<ROWS, COLS, DST_T>& dst2)                                                      | void duplicateMat(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src, xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst1,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst2)                                                                     |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | EqualizeHist                   | template<int SRC_T, int DST_T,int ROW, int COL>                                                                                                            | template<int SRC_T, int ROWS, int COLS, int NPC = 1>                                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void EqualizeHist(Mat<ROW, COL, SRC_T>&_src,Mat<ROW, COL, DST_T>&_dst)                                                                                     | void equalizeHist(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src1,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst)                                                                       |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | erode                          | template<int Shape_type,int ITERATIONS,int SRC_T, int DST_T, typename KN_T,int IMG_HEIGHT,int IMG_WIDTH,int K_HEIGHT,int K_WIDTH>                          | template<int BORDER_TYPE, int TYPE, int ROWS, int COLS,int K_SHAPE,int K_ROWS,int K_COLS, int ITERATIONS, int NPC=1>                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Erode(Mat<IMG_HEIGHT, IMG_WIDTH, SRC_T>&_src,Mat<IMG_HEIGHT,IMG_WIDTH,DST_T>&_dst,Window<K_HEIGHT,K_WIDTH,KN_T>&_kernel)                              | void erode (xf::Mat<TYPE, ROWS, COLS, NPC> & \_src, xf::Mat<TYPE, ROWS, COLS, NPC> & \_dst,unsigned char \_kernel[K_ROWS*K_COLS])                                                                                 |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | FASTX                          | template<int SRC_T,int ROWS,int COLS>                                                                                                                      | template<int NMS,int SRC_T,int ROWS, int COLS,int NPC=1>                                                                                                                                                          |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void FASTX(Mat<ROWS,COLS,SRC_T> &_src,                                                                                                                     | void fast(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src_mat,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst_mat,unsigned char \_threshold)                                                                                      |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS,COLS,HLS_8UC1>&_mask,HLS_TNAME(SRC_T)_threshold,bool \_nomax_supression)                                                                          |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Filter2D                       | template<int SRC_T, int DST_T, typename KN_T, typename POINT_T,                                                                                            | template<int BORDER_TYPE,int FILTER_WIDTH,int FILTER_HEIGHT, int SRC_T,int DST_T, int ROWS, int COLS,int NPC>                                                                                                     |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | int IMG_HEIGHT,int IMG_WIDTH,int K_HEIGHT,int K_WIDTH>                                                                                                     | void filter2D(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src_mat,xf::Mat<DST_T, ROWS, COLS, NPC> & \_dst_mat,short int filter[FILTER_HEIGHT*FILTER_WIDTH],unsigned char \_shift)                                         |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Filter2D(Mat<IMG_HEIGHT, IMG_WIDTH, SRC_T> &_src,Mat<IMG_HEIGHT, IMG_WIDTH, DST_T> &_dst,Window<K_HEIGHT,K_WIDTH,KN_T>&_kernel,Point_<POINT_T>anchor) |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | GaussianBlur                   | template<int KH,int KW,typename BORDERMODE,int SRC_T,int DST_T,int ROWS,int COLS>                                                                          | template<int FILTER_SIZE, int BORDER_TYPE, int SRC_T, int ROWS, int COLS,int NPC = 1>                                                                                                                             |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void GaussianBlur(Mat<ROWS, COLS, SRC_T>                                                                                                                   | void GaussianBlur(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src, xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst, float sigma)                                                                                                  |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | &_src, Mat<ROWS, COLS, DST_T>                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | &_dst,double sigmaX=0,double sigmaY=0)                                                                                                                     |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Harris                         | template<int blockSize,int Ksize,typename KT,int SRC_T,int DST_T,int ROWS,int COLS>                                                                        | template<int FILTERSIZE,int BLOCKWIDTH, int NMSRADIUS,int SRC_T,int ROWS, int COLS,int NPC=1,bool USE_URAM=false>                                                                                                 |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Harris(Mat<ROWS, COLS, SRC_T>                                                                                                                         | void cornerHarris(xf::Mat<SRC_T, ROWS, COLS, NPC> & src,xf::Mat<SRC_T, ROWS, COLS, NPC> & dst,uint16_t threshold, uint16_t k)                                                                                     |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | &_src,Mat<ROWS, COLS, DST_T>&_dst,KT k,int threshold                                                                                                       |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | CornerHarris                   | template<int blockSize,int Ksize,typename KT,int SRC_T,int DST_T,int ROWS,int COLS>                                                                        | template<int FILTERSIZE,int BLOCKWIDTH, int NMSRADIUS,int SRC_T,int ROWS, int COLS,int NPC=1,bool USE_URAM=false>                                                                                                 |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void CornerHarris(                                                                                                                                         | void cornerHarris(xf::Mat<SRC_T, ROWS, COLS, NPC> & src,xf::Mat<SRC_T, ROWS, COLS, NPC> & dst,uint16_t threshold, uint16_t k                                                                                      |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T>&_src,Mat<ROWS, COLS, DST_T>&_dst,KT k)                                                                                              |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | HoughLines2                    | template<unsigned int theta,unsigned int rho,typename AT,typename RT,int SRC_T,int ROW,int COL,unsigned int linesMax>                                      | template<unsigned int RHO,unsigned int THETA,int MAXLINES,int DIAG,int MINTHETA,int MAXTHETA,int SRC_T, int ROWS, int COLS,int NPC>                                                                               |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void HoughLines2(Mat<ROW,COL,SRC_T> &_src,                                                                                                                 | void HoughLines(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src_mat,float outputrho[MAXLINES],float outputtheta[MAXLINES],short threshold,short linesmax)                                                                 |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Polar_<AT,RT> (&_lines)[linesMax],unsigned int threshold)                                                                                                  |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Integral                       | template<int SRC_T, int DST_T,                                                                                                                             | template<int SRC_TYPE,int DST_TYPE, int ROWS, int COLS, int NPC>                                                                                                                                                  |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | int ROWS,int COLS>                                                                                                                                         | void integral(xf::Mat<SRC_TYPE, ROWS, COLS, NPC> & \_src_mat, xf::Mat<DST_TYPE, ROWS, COLS, NPC> & \_dst_mat)                                                                                                     |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Integral(Mat<ROWS, COLS, SRC_T>&_src,                                                                                                                 |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS+1, COLS+1, DST_T>&_sum )                                                                                                                          |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Merge                          | template<int ROWS, int COLS, int SRC_T, int DST_T>                                                                                                         | template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>                                                                                                                                                     |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Merge(                                                                                                                                                | void merge(xf::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::Mat<SRC_T, ROWS, COLS, NPC> &_src3, xf::Mat<SRC_T, ROWS, COLS, NPC> &_src4, xf::Mat<DST_T, ROWS, COLS, NPC> &_dst) |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T>& src0,                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T>& src1,                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T>& src2,                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T>& src3,                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | MinMaxLoc                      | template<int ROWS, int COLS, int SRC_T, typename P_T>                                                                                                      | template<int SRC_T,int ROWS,int COLS,int NPC=0>                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void MinMaxLoc(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                | void minMaxLoc(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src,int32_t \*min_value, int32_t \*max_value,uint16_t \*_minlocx, uint16_t \*_minlocy, uint16_t \*_maxlocx, uint16_t \*_maxlocy )                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | P_T\* min_val,P_T\* max_val,Point& min_loc,                                                                                                                |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Point& max_loc)                                                                                                                                            |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Mul                            | template<int ROWS, int COLS, int SRC1_T, int SRC2_T, int DST_T>                                                                                            | template<int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>                                                                                                                                             |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Mul(Mat<ROWS, COLS, SRC1_T>& src1,                                                                                                                    | void multiply(xf::Mat<SRC_T, ROWS, COLS, NPC> & src1, xf::Mat<SRC_T, ROWS, COLS, NPC> & src2, xf::Mat<SRC_T, ROWS, COLS, NPC> & dst,float scale)                                                                  |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC2_T>& src2,                                                                                                                             |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Not                            | template<int ROWS, int COLS, int SRC_T, int DST_T>                                                                                                         | template<int SRC_T, int ROWS, int COLS, int NPC = 1>                                                                                                                                                              |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Not(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                      | void bitwise_not(xf::Mat<SRC_T, ROWS, COLS, NPC> & src, xf::Mat<SRC_T, ROWS, COLS, NPC> & dst)                                                                                                                    |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst)                                                                                                                               |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Range                          | template<int ROWS, int COLS, int SRC_T, int DST_T, typename P_T>                                                                                           | template<int SRC_T, int ROWS, int COLS,int NPC=1>                                                                                                                                                                 |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Range(Mat<ROWS, COLS, SRC_T>& src,                                                                                                                    | void inRange(xf::Mat<SRC_T, ROWS, COLS, NPC> & src,unsigned char lower_thresh,unsigned char upper_thresh,xf::Mat<SRC_T, ROWS, COLS, NPC> & dst)                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst,                                                                                                                               |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | P_T start,P_T end)                                                                                                                                         |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Resize                         | template<int SRC_T, int ROWS,int COLS,int DROWS,int DCOLS>                                                                                                 | template<int INTERPOLATION_TYPE, int TYPE, int SRC_ROWS, int SRC_COLS, int DST_ROWS, int DST_COLS, int NPC, int MAX_DOWN_SCALE>                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Resize (                                                                                                                                              | void resize (xf::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC> & \_src, xf::Mat<TYPE, DST_ROWS, DST_COLS, NPC> & \_dst)                                                                                                      |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T> &_src,                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<DROWS, DCOLS, SRC_T> &_dst,                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | int interpolation=HLS_INTER_LINEAR )                                                                                                                       |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | sobel                          | template<int XORDER, int YORDER, int SIZE, int SRC_T, int DST_T, int ROWS,int COLS,int DROWS,int DCOLS>                                                    | template<int BORDER_TYPE,int FILTER_TYPE, int SRC_T,int DST_T, int ROWS, int COLS,int NPC=1,bool USE_URAM = false>                                                                                                |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Sobel (Mat<ROWS, COLS, SRC_T>                                                                                                                         | void Sobel(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src_mat,xf::Mat<DST_T, ROWS, COLS, NPC> & \_dst_matx,xf::Mat<DST_T, ROWS, COLS, NPC> & \_dst_maty)                                                                 |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | &_src,Mat<DROWS, DCOLS, DST_T> &_dst)                                                                                                                      |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | split                          | template<int ROWS, int COLS, int SRC_T, int DST_T>                                                                                                         | template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>                                                                                                                                                     |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Split(                                                                                                                                                | void extractChannel(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src_mat, xf::Mat<DST_T, ROWS, COLS, NPC> & \_dst_mat, uint16_t \_channel)                                                                                 |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T>& src,                                                                                                                               |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst0,                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst1,                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst2,                                                                                                                              |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst3)                                                                                                                              |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Threshold                      | template<int ROWS, int COLS, int SRC_T, int DST_T>                                                                                                         | template<int THRESHOLD_TYPE, int SRC_T, int ROWS, int COLS,int NPC=1>                                                                                                                                             |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Threshold(                                                                                                                                            | void Threshold(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src_mat,xf::Mat<SRC_T, ROWS, COLS, NPC> & \_dst_mat,short int thresh,short int maxval )                                                                        |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, SRC_T>& src,                                                                                                                               |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T>& dst,                                                                                                                               |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | HLS_TNAME(SRC_T) thresh,                                                                                                                                   |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | HLS_TNAME(DST_T) maxval,                                                                                                                                   |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | int thresh_type)                                                                                                                                           |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Scale                          | template<int ROWS, int COLS, int SRC_T, int DST_T, typename P_T>                                                                                           | template< int SRC_T,int DST_T, int ROWS, int COLS, int NPC = 1>                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void Scale(Mat<ROWS, COLS, SRC_T>& src,Mat<ROWS, COLS, DST_T>& dst, P_T scale=1.0,P_T shift=0.0)                                                           | void scale(xf::Mat<SRC_T, ROWS, COLS, NPC> & src1, xf::Mat<DST_T, ROWS, COLS, NPC> & dst,float scale, float shift)                                                                                                |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | InitUndistortRectifyMapInverse | template<typename CMT, typename DT, typename ICMT, int ROWS, int COLS, int MAP1_T, int MAP2_T, int N>                                                      | template< int CM_SIZE, int DC_SIZE, int MAP_T, int ROWS, int COLS, int NPC >                                                                                                                                      |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void InitUndistortRectifyMapInverse (                                                                                                                      | void InitUndistortRectifyMapInverse (                                                                                                                                                                             |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Window<3,3, CMT> cameraMatrix,DT(&distCoeffs)[N],Window<3,3, ICMT> ir, Mat<ROWS, COLS, MAP1_T> &map1,Mat<ROWS, COLS, MAP2_T> &map2,int noRotation=false)   | ap_fixed<32,12> \*cameraMatrix,                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            | ap_fixed<32,12> \*distCoeffs,                                                                                                                                                                                     |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            | ap_fixed<32,12> \*ir,                                                                                                                                                                                             |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            | xf::Mat<MAP_T, ROWS, COLS, NPC> &_mapx_mat,xf::Mat<MAP_T, ROWS, COLS, NPC> &_mapy_mat,int \_cm_size, int \_dc_size)                                                                                               |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Avg, mean, AvgStddev           | template<typename DST_T, int ROWS, int COLS, int SRC_T>                                                                                                    | template<int SRC_T,int ROWS, int COLS,int NPC=1>void meanStdDev(xf::Mat<SRC_T, ROWS, COLS, NPC> & \_src,unsigned short\* \_mean,unsigned short\* \_stddev)                                                        |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | DST_T Mean(Mat<ROWS, COLS, SRC_T>& src)                                                                                                                    |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | CvtColor                       | template<typename CONVERSION,int SRC_T, int DST_T,int ROWS,int COLS>                                                                                       | Color Conversion                                                                                                                                                                                                  |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | void CvtColor(Mat<ROWS, COLS, SRC_T> &_src,                                                                                                                |                                                                                                                                                                                                                   |
+   |                                |                                                                                                                                                            |                                                                                                                                                                                                                   |
+   |                                | Mat<ROWS, COLS, DST_T> &_dst)                                                                                                                              |                                                                                                                                                                                                                   |
+   +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
 
 
 Note: All the functions except Reduce can process N-pixels per clock
@@ -892,7 +690,7 @@ where N is power of 2.
 
 
 Using the Vitis vision Library
---------------------------
+-------------------------------
 
 This section describes using the Vitis vision library in the Vitis development
 environment.
@@ -1108,8 +906,8 @@ Changing the Hardware Kernel Configuration
 
 
 
-Using the Vitis vision Library Functions on Hardware
-------------------------------------------------
+Using the Vitis Vision Library Functions on Hardware
+-----------------------------------------------------
 
 The following table lists the Vitis vision library functions and the command
 to run the respective examples on hardware. It is assumed that your

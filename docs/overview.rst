@@ -1,14 +1,7 @@
-.. _xfopencvlibug:
-
-##################################
-Vitis Vision Library User Guide
-##################################
-
-
 .. _overview:
 
 Overview
-========
+########
 
 This document describes the FPGA device optimized Vitis vision library,
 called the Xilinx® Vitis vision library and is intended for application
@@ -20,7 +13,7 @@ Vitis vision library functions are mostly similar in functionality to their
 OpenCV equivalent. Any deviations, if present, are documented.
 
 Note: For more information on the Vitis vision library prerequisites, see
-the Prerequisites <getting-started-with-sdsoc.html#gyt1504034261161>__. To
+prerequisites_. To
 familiarize yourself with the steps required to use the Vitis vision library
 functions, see the Using the `Vitis vision
 Library <getting-started-with-sdsoc.html>`__.
@@ -28,7 +21,7 @@ Library <getting-started-with-sdsoc.html>`__.
 .. _basic-features:
 
 Basic Features
---------------
+===============
 
 All Vitis vision library functions follow a common format. The following
 properties hold true for all the functions.
@@ -50,7 +43,7 @@ Image Container Class <api-reference.html>`__.
 .. _xfopencv-kernel:
 
 Vitis Vision Kernel on Vitis
-----------------------------
+============================
 
 The Vitis vision library is designed to be used with the Vitis development
 environment. 
@@ -74,7 +67,7 @@ Class <api-reference.html>`__.
 .. _xfopencv-lib-contents:
 
 Vitis Vision Library Contents
------------------------------
+==============================
 
 The following table lists the contents of the Vitis vision library.
 
@@ -185,5 +178,7 @@ The following table lists the contents of the Vitis vision library.
 	+-----------------------------------+-----------------------------------+
 
 
-
+.. include:: getting-started-with-vitis-vision.rst 
+.. include:: getting-started-with-hls.rst
+.. include:: migrating-hls-video-library-to-vitis-vision.rst 
 .. include:: design-examples.rst 

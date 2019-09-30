@@ -1,7 +1,7 @@
 .. _design-example:
 
 Design Examples Using Vitis Vision Library
-==========================================
+###########################################
 
 All the hardware functions in the library have their own respective
 examples that are available in the github. This section provides details
@@ -12,20 +12,17 @@ the processor and the programmable logic. These examples also illustrate
 different ways to implement complex dataflow paths. The following
 examples are described in this section:
 
--  Iterative Pyramidal Dense Optical
-   Flow <design-examples.html#jcr1510602888334>__
--  Corner Tracking Using Optical
-   Flow <design-examples.html#ypx1510602888667>__
--  Color Detection <design-examples.html#dyn1510602889272>__
--  Difference of Gaussian
-   Filter <design-examples.html#fmq1510602889620>__
--  Stereo Vision Pipeline <design-examples.html#pmt1510602889961>__
--  X + ML Pipeline
+-  `Iterative Pyramidal Dense Optical Flow <#interactive-pyramidal>`_
+-  `Corner Tracking Using Optical Flow <#corner-tracking>`_
+-  `Color Detection <#color-detection>`_
+-  `Difference of Gaussian Filter <#difference-gaussian-filter>`_
+-  `Stereo Vision Pipeline <#stereo-vision>`_
+-  `X + ML Pipeline <#x-ml-pipeline>`_
 
 .. _interative-pyramidal:
 
 Iterative Pyramidal Dense Optical Flow
---------------------------------------
+======================================
 
 The Dense Pyramidal Optical Flow example uses the ``xf::cv::pyrDown`` and
 ``xf::cv::densePyrOpticalFlow`` hardware functions from the Vitis vision
@@ -65,9 +62,10 @@ processor calls the hardware function. Please note that the host
 function swaps the flow vector inputs and outputs to the hardware
 function to iteratively solve the optimization problem. 
 
+.. _corner-tracking:
 
 Corner Tracking Using Optical Flow
------------------------------------------
+===================================
 
 This example illustrates how to detect and track the characteristic
 feature points in a set of successive frames of video. A Harris corner
@@ -103,22 +101,18 @@ corners on a 720p image, adding very minimal latency to the pipeline.
 
 
 cornerUpdate()
-~~~~~~~~~~~~~~
+---------------
 
-.. _api-syntax-2:
+.. rubric:: API Syntax
 
-API Syntax
-^^^^^^^^^^
 
 .. code:: c
 
    template <unsigned int MAXCORNERSNO, unsigned int TYPE, unsigned int ROWS, unsigned int COLS, unsigned int NPC>
    void cornerUpdate(ap_uint<64> *list_fix, unsigned int *list, uint32_t nCorners, xf::cv::Mat<TYPE,ROWS,COLS,NPC> &flow_vectors, ap_uint<1> harris_flag)
 
-.. _parameter-descriptions-2:
+.. rubric:: Parameter Descriptions
 
-Parameter Descriptions
-^^^^^^^^^^^^^^^^^^^^^^
 
 The following table describes the template and the function parameters.
 
@@ -172,22 +166,18 @@ using the Vitis vision library.
 
 
 cornersImgToList()
-~~~~~~~~~~~~~~~~~~
+--------------------
 
-.. _api-syntax-3:
+.. rubric:: API Syntax
 
-API Syntax
-^^^^^^^^^^
 
 .. code:: c
 
    template <unsigned int MAXCORNERSNO, unsigned int TYPE, unsigned int ROWS, unsigned int COLS, unsigned int NPC>
    void cornersImgToList(xf::cv::Mat<TYPE,ROWS,COLS,NPC> &_src, unsigned int list[MAXCORNERSNO], unsigned int *ncorners)
 
-.. _parameter-descriptions-3:
+.. rubric:: Parameter Descriptions
 
-Parameter Descriptions
-^^^^^^^^^^^^^^^^^^^^^^
 
 The following table describes the function parameters.
 
@@ -213,7 +203,7 @@ The following table describes the function parameters.
 
 
 Image Processing
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~
 
 The following steps demonstrate the Image Processing procedure in the
 hardware pipeline
@@ -251,10 +241,10 @@ harris_flag is set, ``xf::cv::cornerUpdate`` tracks the corners in ‘list’
 memory location, otherwise it tracks the corners in ‘listfixed’ memory
 location.
 
-
+.. _color-detection: 
 
 Color Detection
----------------
+================
 
 The Color Detection algorithm is basically used for color object
 tracking and object detection, based on the color of the object. The
@@ -365,9 +355,10 @@ function, the output of that function is passed to the
 output image are returned.
 
 
+.. _difference-gaussian-filter: 
 
 Difference of Gaussian Filter
------------------------------
+==============================
 
 The Difference of Gaussian Filter example uses four hardware functions
 from the Vitis vision library. They are:
@@ -451,10 +442,10 @@ and imgin3, but here imgin3 has to wait up to at least one pixel of
 imgin4 generation. So, delay has applied for imgin3 and stored in
 imgin5. Finally the subtraction performed on imgin4 and imgin5.
 
-
+.. _stereo-vision: 
 
 Stereo Vision Pipeline
-----------------------
+========================
 
 Disparity map generation is one of the first steps in creating a three
 dimensional map of the environment. The Vitis vision library has components
@@ -585,8 +576,10 @@ The following code is for the pipeline.
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>(mat_disp, img_disp);
  }
 
+.. _x-ml-pipeline: 
+
 X + ML Pipeline
-----------------------
+================
 
 This example shows how various xfOpenCV funtions can be used to accelerate preprocessing of input images before feeding them to a Deep Neural Network (DNN) accelerator.
 
@@ -641,13 +634,11 @@ This piepeline is integrated with `xDNN
 <https://www.xilinx.com/support/documentation/white_papers/wp504-accel-dnns.pdf>`_ accelerator and `MLsuite <https://github.com/Xilinx/ml-suite>`_ to run Googlenet_v1 inference on Alveo-U200 accelerator card and achieved
 11 % speed up compared to software pre-procesing. 
 
+* Overall Performance (Images/sec):
 
+* with software pre-processing : 125 images/sec
 
-Overall Performance (Images/sec):
-
-with software pre-processing : 125 images/sec
-
-with hardware accelerated pre-processing : 140 images/sec
+* with hardware accelerated pre-processing : 140 images/sec
 
 
 .. |pp_image| image:: ./images/gnet_pp.png

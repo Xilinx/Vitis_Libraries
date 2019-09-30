@@ -1,6 +1,6 @@
 
 Getting Started with Vitis Vision
-=================================
+#################################
 
 This chapter provides details on using xfOpenCV in the Vitis™
 environment. The following sections would provide a description of the
@@ -10,9 +10,10 @@ platforms in Vitis. The subsequent section also explains the
 methodology to verify the kernel in various emulation modes and on the
 hardware.
 
+.. _prerequisites:
 
 Prerequisites
--------------
+=============
 
 #. Valid installation of Vitis™ 2019.2 or later version and the
    corresponding licenses.
@@ -27,7 +28,7 @@ Prerequisites
 
 
 Vitis Design Methodology
---------------------------
+=========================
 
 There are three critical components in making a kernel work on a
 platform using Vitis™:
@@ -38,7 +39,7 @@ platform using Vitis™:
 
 
 Host Code with OpenCL
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 Host code is compiled for the host machine that runs on the host and
 provides the data and control signals to the attached hardware with the
@@ -67,7 +68,7 @@ following functions are executed using the host code:
 
 
 Wrappers around HLS Kernel(s)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 All xfOpenCV kernels are provided with C++ function templates (located
 at <Github repo>/include) with image containers as objects of xf::Mat
@@ -85,7 +86,7 @@ methodology to handle different kernel (xfOpenCV kernels located at
 
 
 Stream Based Kernels
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
 To facilitate the conversion of pointer to xf::Mat and vice versa, two
 adapter functions are included as part of xfOpenCV xf::cv::Array2xfMat() and
@@ -142,7 +143,7 @@ performed for the output of the xfcv kernel. To perform this, two
 utility functions are provided, xf::cv::Array2xfMat() and xf::cv::xfMat2Array().
 
 Array2xfMat
-'''''''''''
+^^^^^^^^^^^
 
 This function converts the input array to xf::cv::Mat. The xfOpenCV kernel
 would require the input to be of type, xf::cv::Mat. This function would read
@@ -183,7 +184,7 @@ created.
 
 
 xfMat2Array
-'''''''''''
+^^^^^^^^^^^
 
 This function converts the input xf::cv::Mat to output array. The output of
 the xf::kernel function will be xf::cv::Mat, and it will require to convert
@@ -220,7 +221,8 @@ that to output pointer.
    | srcMat                            | Input image of type xf::cv::Mat   |
    +-----------------------------------+-----------------------------------+
 
-**Interface pointer widths**
+Interface pointer widths
+'''''''''''''''''''''''''
 
 Minimum pointer widths for different configurations is shown in the
 following table:
@@ -250,7 +252,7 @@ types
 
 
 Memory Mapped Kernels
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
 In the memory map based kernels such as crop, Mean-shift tracking and
 bounding box, the input read will be for particular block of memory
@@ -278,7 +280,7 @@ are allowed.
 
 
 Makefile
-~~~~~~~~
+---------
 
 In the current use model, only a makefile based flow is provided to
 build applications with xfOpenCV on Vitis. Examples for makefile are
@@ -286,7 +288,7 @@ provided in the samples section of GitHub.
 
 
 Design example Using Library on Vitis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 Following is a multi-kernel example, where different kernel runs
 sequentially in a pipeline to form an application. This example performs
@@ -297,7 +299,8 @@ background (0)), which is being fed into edge tracing, which filters out
 the weak edges. The prior works in a streaming based implementation and
 the later in a memory mapped manner.
 
-**Host code**
+Host code
+~~~~~~~~~
 
 The following is the Host code for the canny edge detection example. The
 host code sets up the OpenCL platform with the FPGA of processing
@@ -384,7 +387,8 @@ xfOpenCV.
        q.enqueueReadBuffer(imageFromDeviceedge, CL_TRUE, 0,(height*width),out_img_edge.data);
        q.finish();
 
-**Top level kernel**
+Top level kernel
+~~~~~~~~~~~~~~~~~
 
 Below is the top-level/wrapper function with all necessary glue logic.
 
@@ -447,7 +451,7 @@ Below is the top-level/wrapper function with all necessary glue logic.
 
 
 Evaluating the Functionality
-----------------------------
+=============================
 
 You can build the kernels and test the functionality through software
 emulation, hardware emulation, and running directly on a supported
@@ -463,7 +467,7 @@ commands to setup the environment:
 
 
 Software Emulation
-~~~~~~~~~~~~~~~~~~
+------------------
 
 Software emulation is equivalent to running a C-simulation of the
 kernel. The time for compilation is minimal, and is therefore
@@ -482,7 +486,7 @@ the steps to build and run for the software emulation:
 
 
 Hardware Emulation
-~~~~~~~~~~~~~~~~~~
+-------------------
 
 Hardware emulation runs the test on the generated RTL after synthesis of
 the C/C++ code. The simulation, since being done on RTL requires longer
@@ -501,7 +505,7 @@ to build and run for the hardware emulation:
 
 
 Testing on the Hardware
-~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 To test on the hardware, the kernel must be compiled into a bitstream
 (building for hardware). This would consume some time since the C/C++ code must be converted to

@@ -44,6 +44,8 @@ void customconv(ap_uint<PTR_IN_WIDTH>* img_in,
  #pragma HLS STREAM variable=imgOutput.data depth=2
     // clang-format on
 
+#pragma HLS DATAFLOW
+
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<PTR_IN_WIDTH, INTYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
 
