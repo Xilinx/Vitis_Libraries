@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-setenv PROJ_PATH $PWD/../
-setenv HTML_DEST_DIR $PWD/../../../ghpage_docs/xf_compression/
-setenv PATH $PATH\:$PWD/../../../tools/bin
-setenv PATH $PATH\:$PWD/../../../tools/share
+setenv PROJ_PATH `pwd`/../
+setenv HTML_DEST_DIR `pwd`/../../gh_pages/xf_compression/
+setenv PATH $PATH\:`pwd`/../../../../tools/bin
+setenv PATH $PATH\:`pwd`/../../../../tools/share

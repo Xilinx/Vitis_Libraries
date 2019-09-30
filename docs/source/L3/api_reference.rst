@@ -11,5 +11,5 @@ Overlay API Reference
    :maxdepth: 2
    :includehidden:
    
-   ../../doxygen/L3/rst/global.rst
+   ../../doxygen/L3/rst/class_xf_compression_xfLz4.rst
 
