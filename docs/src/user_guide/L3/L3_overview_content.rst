@@ -1383,6 +1383,5 @@ This function performs the matrix-vector multiplication y = alpha*op(A) x+ beta*
         
 3. Obtain FPGA bitstream 
 =========================
-FPGA bitstreams (xclbins) will be available to download from Xilinx websites in the future. Currently, xclbins could be found in `xf_blas/L3/overlay`_
+FPGA bitstreams (xclbins) will be available to download from Xilinx websites in the future. Currently, xclbins could be found in L3/overlay folder.
 
-.. _xf_blas/L3/overlay: ../../../../L3/overlay
