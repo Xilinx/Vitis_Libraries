@@ -51,7 +51,7 @@ if __name__== "__main__":
   parser.add_argument('--number', type=int, required=True, help='number of files')
   parser.add_argument('--ext', type=str, default='rpt', help='file extension')
   parser.add_argument('--time', type=int, default=60, help='number of seconds to poll')
-  parser.add_argument('--timeout', type=int, default=10000, help='number of seconds to time out')
+  parser.add_argument('--timeout', type=int, default=12000, help='number of seconds to time out')
   args = parser.parse_args()
   
   main(args)
