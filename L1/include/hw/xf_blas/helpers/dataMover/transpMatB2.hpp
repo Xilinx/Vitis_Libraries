@@ -40,21 +40,21 @@ void transpSymUpMatBlocks(unsigned int p_blocks,
 #pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 0
     for (unsigned int l_block = 0; l_block < p_blocks; l_block++) {
         // shuffle and store
-        int i=0;
+        int i = 0;
         do {
-#pragma HLS PIPELINE 
+#pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
             WideType<t_DataType, t_ParEntries> l_valOut;
 #pragma HLS ARRAY_PARTITION variable = l_valOut complete
             l_val = p_in.read();
-            for (int j=0; j<t_ParEntries; j++) {
-                l_valOut[j] = (i>j)? l_buf[i][j]: l_val[j];
+            for (int j = 0; j < t_ParEntries; j++) {
+                l_valOut[j] = (i > j) ? l_buf[i][j] : l_val[j];
                 l_buf[j][i] = l_val[j];
             }
             p_out.write(l_valOut);
             i++;
-        }while (i < t_ParEntries);
+        } while (i < t_ParEntries);
     }
 }
 
