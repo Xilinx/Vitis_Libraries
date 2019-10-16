@@ -16,7 +16,7 @@
 
 /**
  * @file xf_blas.hpp
- * @brif Top-level header for XF BLAS Library.
+ * @brif Top-level header for Vitis BLAS Library.
  *
  */
 
@@ -50,9 +50,9 @@
 
 // BLAS L3 function modules
 
+//#include "xf_blas/gemm.hpp"
 /* TODO
  *
-#include "xf_blas/gemm.hpp"
  *
 */
 

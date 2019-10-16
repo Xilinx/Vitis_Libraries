@@ -18,7 +18,7 @@
  * @file dotHelper.hpp
  * @brief BLAS Level 1 dot helper template function implementation.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_DOT_HELP_HPP
@@ -33,7 +33,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -151,7 +151,7 @@ class DotHelper<double, t_LogParEntries, t_IndexType, double> {
 };
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

@@ -18,7 +18,7 @@
  * @file trmMatMoverB2.hpp
  * @brief data movers for triangular matrices and corresponding vectors.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_TRMMATMOVERB2_HPP
@@ -29,7 +29,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 /**
  * @brief trmUp2Stream function that read the super-triangular matrix from memory to stream
@@ -156,6 +156,17 @@ void tpmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_Data
     }
 }
 
+/**
+ * @brief vec2TrmUpStream function that moves vector from memory to stream that matches the trmUp2Stream/tpmUp2Stream
+ * outputs
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_x vector input
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void vec2TrmUpStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     unsigned int l_blocks = p_n / t_ParEntries;
@@ -179,6 +190,17 @@ void vec2TrmUpStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_D
     }
 }
 
+/**
+ * @brief vec2TrmLoStream function that moves vector from memory to stream that matches the trmLo2Stream/tpmLo2Stream
+ * outputs
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of rows/cols in a square matrix
+ * @param p_x vector input
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void vec2TrmLoStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     unsigned int i = 0;
@@ -201,6 +223,6 @@ void vec2TrmLoStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_D
 }
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

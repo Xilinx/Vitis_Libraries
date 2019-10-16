@@ -21,7 +21,7 @@
 #include "host.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 class GemmArgs : public BLASArgs {
@@ -62,8 +62,12 @@ class GEMMHost : public BLASHost {
     GEMMHost() = delete;
     virtual ~GEMMHost() {}
     GEMMHost(const GEMMHost&) = delete;
-    GEMMHost(const char* p_xclbin, const char* p_logFile, xfblasStatus_t* p_status, unsigned int p_kernelIndex)
-        : BLASHost(p_xclbin, p_logFile, p_status, p_kernelIndex) {}
+    GEMMHost(const char* p_xclbin,
+             const char* p_logFile,
+             xfblasStatus_t* p_status,
+             unsigned int p_kernelIndex,
+             unsigned int p_deviceIndex)
+        : BLASHost(p_xclbin, p_logFile, p_status, p_kernelIndex, p_deviceIndex) {}
 
     virtual xfblasStatus_t addGEMMOp(void* p_a,
                                      void* p_b,
@@ -86,7 +90,7 @@ class GEMMHost : public BLASHost {
         }
         unsigned int handle_A, handle_B, handle_C, handle_bias;
         auto& l_devPtr = this->m_bufHandle;
-        
+
         handle_A = l_devPtr[p_a];
         handle_B = l_devPtr[p_b];
         handle_C = l_devPtr[p_c];
@@ -124,7 +128,7 @@ class GEMMHost : public BLASHost {
 };
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

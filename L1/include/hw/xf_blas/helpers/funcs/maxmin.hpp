@@ -18,7 +18,7 @@
  * @file maxmin.hpp
  * @brief BLAS Level 1 max and min template function implementation.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_MAXMIN_HPP
@@ -32,7 +32,7 @@
 #include "hls_stream.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 namespace {
@@ -200,7 +200,7 @@ void min(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

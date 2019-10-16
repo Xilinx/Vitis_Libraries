@@ -18,7 +18,7 @@
  * @file sum.hpp
  * @brief BLAS Level 1 sum template function implementation.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_PADDING_HPP
@@ -32,7 +32,7 @@
 #include "hls_stream.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -65,7 +65,7 @@ void padding(unsigned int p_n,
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

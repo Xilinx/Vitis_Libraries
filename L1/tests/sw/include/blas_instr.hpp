@@ -42,7 +42,7 @@ using namespace std;
 #define ENTRIES_PER_LINE 16
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 namespace {
 template <typename t_DataType>
@@ -385,7 +385,7 @@ ostream& operator<<(ostream& os, Instr& p_instr) {
 }
 
 } // end namespace blas
-} // end namespace linear_algebra
+
 } // end namespace xf
 
 #endif

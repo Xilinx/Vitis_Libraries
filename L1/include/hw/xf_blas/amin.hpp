@@ -18,7 +18,7 @@
  * @file amin.hpp
  * @brief BLAS Level 1 amin template function implementation.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_AMIN_HPP
@@ -33,7 +33,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 /**
@@ -53,7 +53,6 @@ void amin(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntri
 #ifndef __SYNTHESIS__
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
-    unsigned int l_numElem = p_n >> t_LogParEntries;
     hls::stream<WideType<t_DataType, 1 << t_LogParEntries> > l_abs;
 #pragma HLS stream variable = l_abs depth = 2
 #pragma HLS DATAFLOW
@@ -63,7 +62,7 @@ void amin(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntri
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

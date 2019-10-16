@@ -18,6 +18,7 @@ import pdb
 import traceback
 from blas_gen_bin import BLAS_ERROR
 from hls import HLS_ERROR
+from operation import OP_ERROR
 import threading
 import concurrent.futures
 from runTest import RunTest
@@ -52,7 +53,7 @@ def process(rt, statList, dictLock = threading.Lock(), makeLock = threading.Lock
     traceback.print_exception(type, value, tb)
   finally:
 
-    if rt.hls.cosim and rt.numSim > 0:
+    if rt.hls.benchmark and rt.numSim > 0:
       rpt = rt.writeReport(profile)
       print("Benchmark info for op %s is written in %s"%(rt.op.name, rpt))
 
@@ -83,9 +84,13 @@ def main(profileList, args):
     rt = RunTest(profile, args)
     argList.append(rt)
   try:
-    with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
+    if args.parallel == 1:
       for arg in argList:
-        executor.submit(process, arg, statList)
+        process(arg, statList)
+    else :
+      with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
+        for arg in argList:
+          executor.submit(process, arg, statList)
   finally:
     if args.id is None:
       statPath = os.path.join(os.getcwd(),"statistics.rpt") 
@@ -95,16 +100,22 @@ def main(profileList, args):
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
-  parser.add_argument('--makefile', type=str, default='Makefile', metavar='Makefile', help='path to the profile file')
+  parser.add_argument('--makefile', type=str, default='blas_gen.mk', metavar='Makefile', help='path to the profile file')
   parser.add_argument('--id', type=int, help='command line id')
   parser.add_argument('--parallel', type=int, default=1, help='number of parallel processes')
   profileGroup = parser.add_mutually_exclusive_group(required=True)
   profileGroup.add_argument('--profile', nargs='*', metavar='profile.json', help='list of path to profile files')
   profileGroup.add_argument('--operator', nargs='*',metavar='opName', help='list of test dirs in ./hw')
   
-  simGroup = parser.add_mutually_exclusive_group()
-  simGroup.add_argument('--csim', action='store_true', default=False, help='csim only')
-  simGroup.add_argument('--cosim', action='store_true', default=False, help='synthesis and cosim only')
+  parser.add_argument('--xpart', type=str, default='xcvu9p-flgb2104-2-i', help='xilinx part')
+
+  parser.add_argument('--override', action='store_true', default=False, help='override the\
+      following options from profile.')
+  parser.add_argument('--csim', action='store_true', default=False, help='do csim')
+  parser.add_argument('--csynth', action='store_true', default=False, help='do synthesis')
+  parser.add_argument('--cosim', action='store_true', default=False, help='do cosim')
+  parser.add_argument('--benchmark', action='store_true', default=False, help='do benchmark')
+
   args = parser.parse_args()
   
   if args.profile:

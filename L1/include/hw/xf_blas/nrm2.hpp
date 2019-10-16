@@ -18,7 +18,7 @@
  * @file nrm2.hpp
  * @brief BLAS Level 1 asum template function implementation.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_NRM2_HPP
@@ -34,7 +34,7 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 namespace {
@@ -95,7 +95,7 @@ void nrm2(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntri
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

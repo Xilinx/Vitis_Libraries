@@ -28,7 +28,7 @@
 #include "axpy.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
@@ -61,7 +61,7 @@ void symv(const unsigned int p_n,
 }
 
 /**
- * @brief symv function that returns the result vector of the mutiplication of a
+ * @brief symv function that returns the result vector of the multiplication of a
  * symmetric matrix and a vector y = alpha * M * x + beta * y
  *
  * @tparam t_DataType the data type of the vector entries
@@ -98,7 +98,7 @@ void symv(const unsigned int p_n,
 }
 
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

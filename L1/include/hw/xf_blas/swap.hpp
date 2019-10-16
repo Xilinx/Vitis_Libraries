@@ -18,7 +18,7 @@
  * @file swap.hpp
  * @brief BLAS Level 1 swap template function implementation.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_SWAP_HPP
@@ -34,10 +34,10 @@
 #include "xf_blas/helpers.hpp"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 /**
- * @brief swap function taht swap vector x and y
+ * @brief swap function that swap vector x and y
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
@@ -70,7 +70,7 @@ void swap(unsigned int p_n,
     }
 }
 } // end namespace blas
-} // namespace linear_algebra
+
 } // end namespace xf
 
 #endif

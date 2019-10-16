@@ -18,7 +18,7 @@
  * @file bandedMatMoverB1.hpp
  * @brief data movers for banded matrices and corresponding vectors.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_BANDEDMATMOVERB2_HPP
@@ -29,20 +29,9 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
-/**
- * @brief processUpSbMatStream function that moves the head paddings to the end of each super-diagonal
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_k number of super-diagonals
- * @param p_in stream of the super-diagonals not including main diagonal of a p_n x p_n symmetric banded matrix
- * @param p_out output stream of super-diagonals not including main diagonal with 0 paddings in the tails
- */
 template <typename t_DataType, unsigned int t_ParEntries, int t_LastRowIdx = 0>
 void processUpSbMatStream(unsigned int p_n,
                           unsigned int p_k,
@@ -93,17 +82,6 @@ void processUpSbMatStream(unsigned int p_n,
     }
 }
 
-/**
- * @brief processLoSbMatStream function that moves the tail paddings to the beginning of each super-diagonal
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_k number of sub-diagonals
- * @param p_in stream of the sub-diagonals including main diagonal of a p_n x p_n symmetric banded matrix
- * @param p_out output stream of sub-diagonals including main diagonal with 0 paddings at the beginnings
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void processLoSbMatStream(unsigned int p_n,
                           unsigned int p_k,
@@ -150,17 +128,6 @@ void processLoSbMatStream(unsigned int p_n,
     }
 }
 
-/**
- * @brief forwardSbMatStream function that forwards the diagonal streams
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_k number of diagonals
- * @param p_in stream of the diagonals of a p_n x p_n symmetric banded matrix
- * @param p_out the output copy of the input diagonal stream
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void forwardSbMatStream(unsigned int p_n,
                         unsigned int p_k,
@@ -176,19 +143,6 @@ void forwardSbMatStream(unsigned int p_n,
     }
 }
 
-/**
- * @brief mergeGbMatStream function that merges processed gbMat streams
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_ku number of super-diagonals
- * @param p_kl number of sub-diagonals
- * @param p_inUp stream of the processed super-diagonals, not including main diagonal
- * @param p_inLo stream of the processed sub_diagonals, including main diagonal
- * @param p_out the output gbMat stream
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void mergeGbMatStream(unsigned int p_n,
                       unsigned int p_ku,
@@ -213,18 +167,6 @@ void mergeGbMatStream(unsigned int p_n,
     }
 }
 
-/**
- * @brief readUpSbMat2Stream function that read the sbMat from Memory into the streams
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_k number of super-diagonals
- * @param p_a memory location of a p_n x p_n symmetric banded matrix with super-diagonals
- * @param p_outUp the stream of super-diagonals
- * @param p_outLo the stream of ready sub-diagonals
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readUpSbMat2Stream(unsigned int p_n,
                         unsigned int p_k,
@@ -255,18 +197,6 @@ void readUpSbMat2Stream(unsigned int p_n,
     }
 }
 
-/**
- * @brief readLoSbMat2Stream function that read the sbMat from memory into the streams
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_k number of sub-diagonals
- * @param p_a memory location of a p_n x p_n symmetric banded matrix with sub-diagonals
- * @param p_outUp the stream of ready super-diagonals
- * @param p_outLo the stream of sub-diagonals
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readLoSbMat2Stream(unsigned int p_n,
                         unsigned int p_k,
@@ -297,19 +227,6 @@ void readLoSbMat2Stream(unsigned int p_n,
     }
 }
 
-/**
- * @brief readVec2GbStream function that read the vector from memory into stream
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_ku number of super-diagonals
- * @param p_kl number of sub-siagonals
- * @param p_a memory location of vector x
- * @param p_outUp the vector stream of for super-diagonals
- * @param p_outLo the vector stream of for sub-diagonals
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readVec2GbStream(unsigned int p_n,
                       unsigned int p_ku,
@@ -340,19 +257,6 @@ void readVec2GbStream(unsigned int p_n,
     }
 }
 
-/**
- * @brief readGbMat2Stream function that read the gbMat from memory into the streams
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_ku number of super-diagonals
- * @param p_kl number of sub-diagonals
- * @param p_a memory location of a p_n x p_n symmetric banded matrix with sub-diagonals
- * @param p_outUp the stream of super-diagonals
- * @param p_outLo the stream of sub-diagonals including main diagonal
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readGbMat2Stream(unsigned int p_n,
                       unsigned int p_ku,
@@ -513,17 +417,6 @@ void vec2GbMatStream(unsigned int p_n,
     mergeGbMatStream<t_DataType, t_ParEntries>(p_n, p_ku, p_kl, l_strUpRes, l_strLoRes, p_out);
 } // end vec2GbMatStream
 
-/**
- * @brief readTbMat2Stream function that read the tbMat from Memory into the streams
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_k number of super/sub-diagonals
- * @param p_a memory location of a p_n x p_n symmetric banded matrix with super-diagonals
- * @param p_out the stream of diagonals
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readTbMat2Stream(unsigned int p_n,
                       unsigned int p_k,
@@ -541,17 +434,6 @@ void readTbMat2Stream(unsigned int p_n,
     }
 }
 
-/**
- * @brief readVec2TbStream function that read the vector from memory into stream
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_n number of rows/cols in a square matrix
- * @param p_k number of super/sub-diagonals
- * @param p_a memory location of vector x
- * @param p_out the vector stream of for diagonals
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readVec2TbStream(unsigned int p_n,
                       unsigned int p_k,
@@ -673,6 +555,6 @@ void vec2TbLoMatStream(unsigned int p_n,
 } // end vec2TbLoMatStream
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

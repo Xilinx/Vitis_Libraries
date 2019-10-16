@@ -20,7 +20,7 @@
 using namespace std;
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 typedef enum {
@@ -36,19 +36,12 @@ typedef enum {
     XFBLAS_STATUS_INVALID_PROGRAM  // 9
 } xfblasStatus_t;
 
-typedef enum { 
-  XFBLAS_ENGINE_GEMM, 
-  XFBLAS_ENGINE_GEMV 
-} xfblasEngine_t;
+typedef enum { XFBLAS_ENGINE_GEMM, XFBLAS_ENGINE_GEMV } xfblasEngine_t;
 
-typedef enum { 
-  XFBLAS_OP_N, 
-  XFBLAS_OP_T, 
-  XFBLAS_OP_C 
-} xfblasOperation_t;
+typedef enum { XFBLAS_OP_N, XFBLAS_OP_T, XFBLAS_OP_C } xfblasOperation_t;
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 
 #endif

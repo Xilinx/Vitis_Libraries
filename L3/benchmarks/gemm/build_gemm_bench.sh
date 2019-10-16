@@ -24,10 +24,11 @@ elif [ "$1" == "" ]; then
 else
   dataType=$(grep GEMX_dataType $1 | sed 's/^GEMX_dataType=//')
   numKernels=$(grep GEMX_numKernels $1 | sed 's/^GEMX_numKernels=//')
+  make cleanall
   echo ================================================
   echo Now build benchmark with $dataType type
   echo ================================================
-  make XFBLAS_dataType=${dataType} numKernels=${numKernels}
+  make host XFBLAS_dataType=${dataType} XFBLAS_numKernels=${numKernels}
 fi
 
 

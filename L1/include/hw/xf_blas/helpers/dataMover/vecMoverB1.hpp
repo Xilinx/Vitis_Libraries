@@ -18,7 +18,7 @@
  * @file vecMoverB1.hpp
  * @brief common data movers for vectors used in BLAS L1 routines.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_VECMOVERB1_HPP
@@ -29,7 +29,7 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
 template <unsigned int t_NumStreams, typename t_DataType>
@@ -72,24 +72,34 @@ void combineStream(unsigned int p_n,
     }
 }
 
-template <typename t_DataType>
-void mem2stream(unsigned int p_n, t_DataType* p_in, hls::stream<t_DataType>& p_out) {
+template <typename t_DataType, typename t_DesDataType = t_DataType>
+void mem2stream(unsigned int p_n, t_DataType* p_in, hls::stream<t_DesDataType>& p_out) {
     for (unsigned int i = 0; i < p_n; ++i) {
 #pragma HLS PIPELINE
-        t_DataType l_val = p_in[i];
+        t_DesDataType l_val = p_in[i];
         p_out.write(l_val);
     }
 } // end mem2stream
 
-template <typename t_DataType>
-void stream2mem(unsigned int p_n, hls::stream<t_DataType>& p_in, t_DataType* p_out) {
+template <typename t_DataType, typename t_DesDataType = t_DataType>
+void stream2mem(unsigned int p_n, hls::stream<t_DataType>& p_in, t_DesDataType* p_out) {
     for (unsigned int i = 0; i < p_n; ++i) {
 #pragma HLS PIPELINE
-        t_DataType l_val = p_in.read();
+        t_DesDataType l_val = p_in.read();
         p_out[i] = l_val;
     }
 } // end stream2mem
 
+/**
+ * @brief readVec2Stream function that moves vector from memory to stream
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of entries in a vectpr
+ * @param p_in vector input
+ * @param p_out output stream
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
 #ifndef __SYNTHESIS__
@@ -107,6 +117,16 @@ void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_D
     }
 } // end readVec2Stream
 
+/**
+ * @brief writeStream2Vec function that moves vector from stream to vector
+ *
+ * @tparam t_DataType the data type of the matrix entries
+ * @tparam t_ParEntries number of parallelly processed entries in the matrix
+ *
+ * @param p_n number of entries in a vectpr
+ * @param p_in vector stream input
+ * @param p_out vector output memory
+ */
 template <typename t_DataType, unsigned int t_ParEntries>
 void writeStream2Vec(hls::stream<WideType<t_DataType, t_ParEntries> >& p_in, unsigned int p_n, t_DataType* p_out) {
 #ifndef __SYNTHESIS__
@@ -125,6 +145,6 @@ void writeStream2Vec(hls::stream<WideType<t_DataType, t_ParEntries> >& p_in, uns
 } // end writeStream2Vec
 
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif

@@ -19,12 +19,12 @@
 
 /**
  * @file xf_blas.hpp
- * @brief Top-level header for XF BLAS Libaray level-3.
+ * @brief Top-level header for Vitis BLAS Libaray level-3.
  */
 
 #include "xf_blas/wrapper.hpp"
 #include "xf_blas/wrapper_async.hpp"
 
-using namespace xf::linear_algebra::blas;
+using namespace xf::blas;
 
 #endif

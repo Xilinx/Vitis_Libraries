@@ -18,7 +18,7 @@
  * @file transpMatB2.hpp
  * @brief datamovers for symmetric matrices and vectors used in BLAS L2 routines.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_TRANSPMATB2_HPP
@@ -29,59 +29,35 @@
 #include "ap_shift_reg.h"
 
 namespace xf {
-namespace linear_algebra {
+
 namespace blas {
 
-/**
- * @brief transpSymUpMat function that mirros the super-diagonals in a matrix block to sub-diagonals
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_blocks number of t_ParEntries x t_ParEntries matrix blocks
- * @param p_in input stream of matrix blocks
- * @param p_out output stream of symmetric matrix blocks
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void transpSymUpMatBlocks(unsigned int p_blocks,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
     t_DataType l_buf[t_ParEntries][t_ParEntries];
 #pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 0
-    for (unsigned int l_block = 0; l_block < p_blocks; ++l_block) {
+    for (unsigned int l_block = 0; l_block < p_blocks; l_block++) {
         // shuffle and store
-        for (unsigned int i = 0; i < t_ParEntries; ++i) {
-#pragma HLS PIPELINE
+        int i=0;
+        do {
+#pragma HLS PIPELINE 
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
+            WideType<t_DataType, t_ParEntries> l_valOut;
+#pragma HLS ARRAY_PARTITION variable = l_valOut complete
             l_val = p_in.read();
-            for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_buf[i][j] = l_val[j];
+            for (int j=0; j<t_ParEntries; j++) {
+                l_valOut[j] = (i>j)? l_buf[i][j]: l_val[j];
+                l_buf[j][i] = l_val[j];
             }
-        }
-
-        for (unsigned int i = 0; i < t_ParEntries; ++i) {
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val;
-#pragma HLS ARRAY_PARTITION variable = l_val complete
-            for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_val[j] = (i > j) ? l_buf[j][i] : l_buf[i][j];
-            }
-            p_out.write(l_val);
-        }
+            p_out.write(l_valOut);
+            i++;
+        }while (i < t_ParEntries);
     }
 }
 
-/**
- * @brief transpSymLoMat function that mirros the sub-diagonals in a matrix block to super-diagonals
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries number of parallelly processed entries in the matrix
- *
- * @param p_blocks number of t_ParEntries x t_ParEntries matrix blocks
- * @param p_in input stream of matrix blocks
- * @param p_out output stream of symmetric matrix blocks
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void transpSymLoMatBlocks(unsigned int p_blocks,
                           hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
@@ -111,16 +87,7 @@ void transpSymLoMatBlocks(unsigned int p_blocks,
         }
     }
 }
-/**
- * @brief transpMat function transposes matrix blocks
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries the number of parallely processed entries in the matrix
- *
- * @param p_blocks number of matrix blocks
- * @param p_in input stream of matrix blocks
- * @param p_out output stream of matrix blocks
- */
+
 template <typename t_DataType, unsigned int t_ParEntries>
 void transpMatBlocks(unsigned int p_blocks,
                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
@@ -151,16 +118,6 @@ void transpMatBlocks(unsigned int p_blocks,
     }
 }
 
-/**
- * @brief fwdMatBlocks function forwards matrix blocks
- *
- * @tparam t_DataType the data type of the matrix entries
- * @tparam t_ParEntries the number of parallely processed entries in the matrix
- *
- * @param p_blocks number of matrix blocks
- * @param p_in input stream of matrix blocks
- * @param p_out output stream of matrix blocks
- */
 template <typename t_DataType, unsigned int t_ParEntries>
 void fwdMatBlocks(unsigned int p_blocks,
                   hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
@@ -175,18 +132,6 @@ void fwdMatBlocks(unsigned int p_blocks,
     }
 }
 
-/**
- * @brief transpMemWordBlocks memWord wise transposer
- *
- * @tparam t_DataType data type of the matrix entries
- * @tparam t_MemWidth number of entries in one memory word
- * @tparam t_Rows number of rows in the block
- * @tparam t_Cols number of cols in the block
- *
- * @param p_blocks number of blocks
- * @param p_in input stream of memory words
- * @param p_out ouput transposed stream of memory words
- */
 template <typename t_DataType, unsigned int t_MemWidth, unsigned int t_Rows, unsigned int t_Cols>
 void transpMemWordBlocks(unsigned int p_blocks,
                          hls::stream<WideType<t_DataType, t_MemWidth> >& p_in,
@@ -217,18 +162,6 @@ void transpMemWordBlocks(unsigned int p_blocks,
     }
 }
 
-/**
- * @brief transpMemBlocks read data from device memory and transpose the memory blcok
- *
- * @tparam t_DataType data type of the matrix entries
- * @tparam t_MemWidth number of entries in one memory word
- * @tparam t_Rows number of rows in the block
- * @tparam t_Cols number of cols in the block
- *
- * @param p_blocks number of blocks
- * @param p_in input stream of memory words
- * @param p_out ouput transposed stream of memory words
- */
 template <typename t_DataType, unsigned int t_MemWidth, unsigned int t_Rows, unsigned int t_Cols>
 void transpMemBlocks(unsigned int p_blocks,
                      hls::stream<WideType<t_DataType, t_MemWidth> >& p_in,
@@ -275,6 +208,6 @@ void transpMemBlocks(unsigned int p_blocks,
     }
 }
 } // namespace blas
-} // namespace linear_algebra
+
 } // namespace xf
 #endif
