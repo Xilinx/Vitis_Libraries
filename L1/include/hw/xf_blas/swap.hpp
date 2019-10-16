@@ -37,7 +37,7 @@ namespace xf {
 
 namespace blas {
 /**
- * @brief swap function taht swap vector x and y
+ * @brief swap function that swap vector x and y
  *
  * @tparam t_DataType the data type of the vector entries
  * @tparam t_ParEntries number of parallelly processed entries in the packed input vector stream
