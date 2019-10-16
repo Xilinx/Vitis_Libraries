@@ -53,8 +53,10 @@ void gemv(const unsigned int p_m,
     combineStream<t_NumStreams>(l_y, p_y);
 }
 
-template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int, 
-         typename t_MacDataType = t_DataType>
+template <typename t_DataType,
+          unsigned int t_LogParEntries,
+          typename t_IndexType = unsigned int,
+          typename t_MacDataType = t_DataType>
 void gemv(const unsigned int p_m,
           const unsigned int p_n,
           hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_M,
