@@ -53,7 +53,8 @@ void gemv(const unsigned int p_m,
     combineStream<t_NumStreams>(l_y, p_y);
 }
 
-template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
+template <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int, 
+         typename t_MacDataType = t_DataType>
 void gemv(const unsigned int p_m,
           const unsigned int p_n,
           hls::stream<WideType<t_DataType, (1 << t_LogParEntries)> >& p_M,
@@ -63,7 +64,7 @@ void gemv(const unsigned int p_m,
     assert(p_n % (1 << t_LogParEntries) == 0);
 #endif
 #pragma HLS DATAFLOW
-    DotHelper<t_DataType, t_LogParEntries, t_IndexType>::dot(p_n, p_m, p_M, p_x, p_y);
+    DotHelper<t_DataType, t_LogParEntries, t_IndexType, t_MacDataType>::dot(p_n, p_m, p_M, p_x, p_y);
 }
 
 /**
