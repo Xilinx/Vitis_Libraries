@@ -12,7 +12,7 @@ if [ -f $STAT ]; then
   rm $STAT -rf
 fi
 
-source /group/xsjfarm/lsf/conf/profile.lsf
+source /group/xcofarm/lsf/conf/profile.lsf
 source set_env_xco.sh
 
 PYTHON=python3
