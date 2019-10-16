@@ -29,6 +29,7 @@ def poll(fileList, t, id_max, progress = 80):
       sys.stdout.flush()
       time.sleep(perT)
     sys.stdout.write('\b]\n')
+  return id == id_max
 
 
 def merge(fileList, filename):
@@ -39,8 +40,10 @@ def merge(fileList, filename):
 
 def main(args): 
   fileList = ['%s_%d.%s'%(args.basename, i, args.ext) for i in range(args.number) ]
-  poll(fileList, args.time, args.timeout/args.time)
-  merge(fileList, '%s.%s'%(args.basename,args.ext))
+  if poll(fileList, args.time, args.timeout/args.time):
+    print("Time out, please check the logfiles.")
+  else:
+    merge(fileList, '%s.%s'%(args.basename,args.ext))
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
