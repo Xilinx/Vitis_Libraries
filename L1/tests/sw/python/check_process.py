@@ -91,7 +91,7 @@ def main(args):
   if poll(jobs, args.time, args.timeout/args.time):
     print("Time out, please check the logfiles.")
   else:
-    merge(fileList, '%s.%s'%(args.basename,args.ext))
+    merge(jobs.statList, 'statistics.rpt')
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
@@ -101,4 +101,3 @@ if __name__== "__main__":
   args = parser.parse_args()
   
   main(args)
-
