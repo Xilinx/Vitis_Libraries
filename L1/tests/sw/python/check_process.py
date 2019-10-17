@@ -19,7 +19,6 @@ class Jobs:
     self.jobIds = list()
     self.statList = list()
     self.size = 0
-#    pdb.set_trace()
     pattern = "Job <(\d+)> is submitted"
     for i in range(len(jobList)):
       file = jobList[i]
@@ -35,7 +34,6 @@ class Jobs:
   def alive(self, id):
     commandLine = "bjobs %s"%id
     args = shlex.split(commandLine)
-    pdb.set_trace()
     result = subprocess.check_output(args).decode("utf-8")
     pattern = "not found"
     match = re.search(pattern, result)
