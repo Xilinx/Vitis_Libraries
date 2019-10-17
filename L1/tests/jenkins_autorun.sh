@@ -36,3 +36,6 @@ $PYTHON $PYCHECK --number $id
 if [ -f $STAT ]; then
   cat $STAT
 fi
+
+rm job_*
+rm statistics_*.rpt
