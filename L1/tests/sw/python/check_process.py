@@ -19,26 +19,30 @@ class Jobs:
     self.jobIds = list()
     self.statList = list()
     self.size = 0
-    pattern = "Job <\d+> is submitted"
+#    pdb.set_trace()
+    pattern = "Job <(\d+)> is submitted"
     for i in range(len(jobList)):
       file = jobList[i]
       with open(file, 'r') as f:
         content = f.read()
         match = re.search(pattern, content)
         if not match is None:
-          id = match.group()
+          id = match.group(1)
           self.jobIds.append(id)
           self.statList.append('statistics_%d.rpt'%i)
           self.size +=1
 
   def alive(self, id):
-    commandLine = "bjobs -u xbot | grep %d"%id
+    commandLine = "bjobs %s"%id
     args = shlex.split(commandLine)
-    result = subprocess.check_output(args)
-    if result is None:
-      return False
-    else:
+    pdb.set_trace()
+    result = subprocess.check_output(args).decode("utf-8")
+    pattern = "not found"
+    match = re.search(pattern, result)
+    if match is None:
       return True
+    else:
+      return False
 
   def aliveAny(self):
     a = [self.alive(id) for id in self.jobIds]
@@ -57,7 +61,7 @@ def poll(jobs, t, id_max, progress = 80):
     if alive:
       id_max+=1
     else:
-      if jobs.checks(fileList):
+      if jobs.checks():
         print("Polling finished.")
         break
     id+=1
