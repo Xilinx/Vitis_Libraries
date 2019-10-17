@@ -34,7 +34,7 @@ class Jobs:
   def alive(self, id):
     commandLine = "bjobs %s"%id
     args = shlex.split(commandLine)
-    result = subprocess.check_output(args).decode("utf-8")
+    result = subprocess.check_output(args, stderr=subprocess.STDOUT).decode("utf-8")
     pattern = "not found"
     match = re.search(pattern, result)
     if match is None:
@@ -54,15 +54,17 @@ class Jobs:
 
 def poll(jobs, t, id_max, progress = 80):
   id = 0
-  alive = jobs.aliveAny()
+  alive = True
   while id < id_max or alive:
+    id+=1
+
     if alive:
       id_max+=1
-    else:
-      if jobs.checks():
+
+    if jobs.checks():
         print("Polling finished.")
         break
-    id+=1
+
     print("Sleeping for %ds."%(t))
     perT = t / progress
     sys.stdout.write('%s: [='%Format(id))
@@ -89,14 +91,13 @@ def main(args):
   if poll(jobs, args.time, args.timeout/args.time):
     print("Time out, please check the logfiles.")
   else:
-    merge(fileList, '%s.%s'%(args.basename,args.ext))
+    merge(jobs.statList, 'statistics.rpt')
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
   parser.add_argument('--number', type=int, required=True, help='number of files')
   parser.add_argument('--time', type=int, default=60, help='number of seconds to poll')
-  parser.add_argument('--timeout', type=int, default=12000, help='number of seconds to time out')
+  parser.add_argument('--timeout', type=int, default=120, help='number of seconds to time out')
   args = parser.parse_args()
   
   main(args)
-
