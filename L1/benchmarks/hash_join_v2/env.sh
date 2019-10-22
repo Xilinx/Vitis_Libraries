@@ -14,5 +14,5 @@
 # limitations under the License.
 #
 
-export DEVICE=u280_xdma_201910_1
+export DEVICE=u280_xdma_201920_1
 echo "DEVICE: $DEVICE"

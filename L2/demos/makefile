@@ -42,6 +42,12 @@ help::
 	@echo "      Command to remove the generated non-hardware files."
 	@echo ""
 
+# Target check
+TARGET ?= sw_emu
+ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
+$(error TARGET is not sw_emu, hw_emu or hw)
+endif
+
 DEVICE ?= u280-es1_xdma_201830_1
 
 # MK_INC_BEGIN vivado.mk
@@ -96,12 +102,6 @@ LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-# Target check
-TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
 endif
 
 # MK_INC_END vitis.mk

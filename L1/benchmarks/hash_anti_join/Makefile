@@ -54,6 +54,12 @@ help::
 	@echo "      Command to remove all the generated files."
 	@echo ""
 
+# Target check
+TARGET ?= sw_emu
+ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
+$(error TARGET is not sw_emu, hw_emu or hw)
+endif
+
 # MK_INC_END vitis_help.mk
 
 # MK_INC_BEGIN vivado.mk
@@ -108,12 +114,6 @@ LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-# Target check
-TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
 endif
 
 # MK_INC_END vitis.mk
@@ -219,7 +219,7 @@ ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 # U280
 VPP_LFLAGS += --config conn_u280.ini
 CXXFLAGS += -DUSE_HBM
-else
+else ifneq (,$(XPLATFORM))
 $(warning Unsupported platform $(XPLATFORM))
 endif
 
