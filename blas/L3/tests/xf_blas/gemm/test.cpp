@@ -72,14 +72,15 @@ int main(int argc, char** argv) {
     readMatBin((char*)c, iterIndex, m, n, l_dataDir, "matC_in", sizeof(XFBLAS_dataType));
     readMatBin((char*)goldenC, iterIndex, m, n, l_dataDir, "matC_out", sizeof(XFBLAS_dataType));
 
-    XFBLAS_dataType *d_a, *d_b, *d_c;
+    XFBLAS_dataType* d_a = NULL;
+    XFBLAS_dataType* d_b = NULL;
+    XFBLAS_dataType* d_c = NULL;
 
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
     xfblasStatus_t status =
         xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
     if (status != XFBLAS_STATUS_SUCCESS) {
         cout << "Create Handle failed with error code: " << status << "\n";
-        xfblasDestroy();
         return EXIT_FAILURE;
     }
 
@@ -143,6 +144,8 @@ int main(int argc, char** argv) {
     free(a);
     free(b);
     free(c);
+    free(goldenC);
+    free(l_instr);
 
     xfblasDestroy(l_numKernel);
 

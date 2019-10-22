@@ -184,6 +184,7 @@ int main(int argc, char** argv) {
     free(a);
     free(x);
     free(y);
+    free(goldenY);
 
     xfblasDestroy(l_numKernel);
 

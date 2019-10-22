@@ -117,7 +117,7 @@ EXE_EXT ?= exe
 EXE_FILE = $(OUT_DIR)/$(OPERATOR_NAME)/test_$(XFBLAS_dataType).exe
 
 $(EXE_FILE): ./xf_blas/$(OPERATOR_NAME)/test.cpp | $(OPERATOR_NAME) check_xrt
-	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CC) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 $(OPERATOR_NAME) : $(OUT_DIR)
 	mkdir -p $(OUT_DIR)/$(OPERATOR_NAME)
