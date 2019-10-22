@@ -26,9 +26,9 @@
 #endif
 void chacha20Core(hls::stream<ap_uint<256> >& keyStrm,
                   hls::stream<ap_uint<128> >& counterStrm,
-                  hls::stream<ap_uint<8> >& plainStream,
+                  hls::stream<ap_uint<512> >& plainStream,
                   hls::stream<bool>& ePlainStream,
-                  hls::stream<ap_uint<8> >& cipherStream,
+                  hls::stream<ap_uint<512> >& cipherStream,
                   hls::stream<bool>& eCipherStream) {
     xf::security::chacha20(keyStrm, counterStrm, plainStream, ePlainStream, cipherStream, eCipherStream);
 }
@@ -59,17 +59,17 @@ bool test() {
     hls::stream<ap_uint<256> > key1Strm;
     hls::stream<bool> eKey1Strm;
     hls::stream<ap_uint<128> > counter1Strm;
-    hls::stream<ap_uint<8> > plainTextStrm;
+    hls::stream<ap_uint<512> > plainTextStrm;
     hls::stream<bool> ePlainTextStrm;
-    hls::stream<ap_uint<8> > cipherStream;
+    hls::stream<ap_uint<512> > cipherStream;
     hls::stream<bool> eCipherStream;
     // for decryption
     hls::stream<ap_uint<256> > key2Strm;
     hls::stream<bool> eKey2Strm;
     hls::stream<ap_uint<128> > counter2Strm;
-    hls::stream<ap_uint<8> > cipher2Strm;
+    hls::stream<ap_uint<512> > cipher2Strm;
     hls::stream<bool> eCipher2Strm;
-    hls::stream<ap_uint<8> > deText;
+    hls::stream<ap_uint<512> > deText;
     hls::stream<bool> eDetext;
 
     tv tsuit1(key1, counter1, nonce1, sizeof(plaintext1) / sizeof(unsigned char), plaintext1, ciphertext1);
@@ -94,9 +94,25 @@ bool test() {
     counter1Strm.write(counterNonce);
     counter2Strm.write(counterNonce);
     // plain text to stream
+    ap_uint<512> cbk = 0;
+    int ii = -1;
     for (int i = 0; i < tsuit.len; i++) {
-        ap_uint<8> c = tsuit.plain[i];
-        plainTextStrm.write(c);
+        ii = i % 64;
+        if (ii == 0) cbk = 0;
+        cbk.range((ii + 1) * 8 - 1, ii * 8) = tsuit.plain[i];
+        if (ii == 63) {
+#if !defined(__SYNTHESIS__) && XF_SECURITY_DECRYPT_DEBUG == 1
+            std::cout << "text:" << cbk << std::endl;
+#endif
+            plainTextStrm.write(cbk);
+            ePlainTextStrm.write(false);
+        }
+    }
+    if (ii != -1 && ii != 63) {
+#if !defined(__SYNTHESIS__) && XF_SECURITY_DECRYPT_DEBUG == 1
+        std::cout << "text:" << cbk << std::endl;
+#endif
+        plainTextStrm.write(cbk);
         ePlainTextStrm.write(false);
     }
     ePlainTextStrm.write(true);
@@ -108,15 +124,18 @@ bool test() {
     std::cout << "cipher text:" << std::endl;
 #endif
     while (!eCipherStream.read()) {
-        ap_uint<8> c = cipherStream.read();
+        ap_uint<512> cc = cipherStream.read();
+        for (int i = 0; i < 64 && cnt < tsuit.len; i++) {
+            ap_uint<8> c = cc.range(i * 8 + 7, i * 8);
 #if !defined(__SYNTHESIS__) && XF_SECURITY_DECRYPT_DEBUG == 1
-        std::cout << std::hex << c;
+            std::cout << std::hex << c;
 #endif
-        // check cipher text
-        if (c != ((short)(tsuit.cipher[cnt++]) & 0xff)) {
-            err = 1;
+            // check cipher text
+            if (c != ((short)(tsuit.cipher[cnt++]) & 0xff)) {
+                err = 1;
+            }
         }
-        cipher2Strm.write(c);
+        cipher2Strm.write(cc);
         eCipher2Strm.write(false);
     }
     eCipher2Strm.write(true);
@@ -130,18 +149,21 @@ bool test() {
 #if !defined(__SYNTHESIS__) && XF_SECURITY_DECRYPT_DEBUG == 1
     std::cout << std::hex << "recover text:" << std::endl;
 #endif
-    int cc = 0;
+    int ct = 0;
     while (!eDetext.read()) {
-        ap_uint<8> msg = deText.read();
+        ap_uint<512> msg = deText.read();
 #if !defined(__SYNTHESIS__) && XF_SECURITY_DECRYPT_DEBUG == 1
         std::cout << std::hex << msg;
 #endif
-        // check decrypted text
-        if (msg != ((short)(tsuit.plain[cc++]) & 0xff)) {
-            err = 1;
+        for (int i = 0; i < 64 && ct < tsuit.len; ++i) {
+            ap_uint<8> c = msg.range(i * 8 + 7, i * 8);
+            // check decrypted text
+            if (c != ((short)(tsuit.plain[ct++]) & 0xff)) {
+                err = 1;
+            }
         }
     }
-    if (cc != tsuit.len) err = 1;
+    if (ct != tsuit.len) err = 1;
 
 #if !defined(__SYNTHESIS__) && XF_SECURITY_DECRYPT_DEBUG == 1
     std::cout << std::endl;

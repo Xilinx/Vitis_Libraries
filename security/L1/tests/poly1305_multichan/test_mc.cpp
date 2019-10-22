@@ -20,7 +20,7 @@
 #if !defined(__SYNTHESIS__)
 #include <iostream>
 #endif
-
+#define N 16
 void poly1305Top(
     // stream in
     hls::stream<ap_uint<256> >& keyStrm,
@@ -29,7 +29,7 @@ void poly1305Top(
     hls::stream<bool>& endLenStrm,
     // stream out
     hls::stream<ap_uint<128> >& tagStrm) {
-    xf::security::poly1305(keyStrm, payloadStrm, lenPldStrm, endLenStrm, tagStrm);
+    xf::security::poly1305MultiChan<N>(keyStrm, payloadStrm, lenPldStrm, endLenStrm, tagStrm);
 }
 int testPoly1305() {
     ap_uint<128> golden;
@@ -56,8 +56,10 @@ int testPoly1305() {
     std::cout << "message size: " << sizeof(m0) / sizeof(unsigned char) << std::endl;
 #endif
     int len0 = 34;
-    lenPldStrm.write(len0);
     endLenStrm.write(true);
+    for (int ii = 0; ii < N; ii++) {
+        lenPldStrm.write(len0);
+    }
     ap_uint<128> pl0 = 0;
     for (int i = 0; i < len0 / 16.0; i++) {
         for (int j = 0; j < 16; j++) {
@@ -67,23 +69,27 @@ int testPoly1305() {
                 pl0.range(7 + j * 8, j * 8) = 0;
         }
         // std::cout << "pl0=" << std::hex << pl0 << std::endl;
-        payloadStrm.write(pl0);
+        for (int ii = 0; ii < N; ii++) {
+            payloadStrm.write(pl0);
+        }
     }
     ap_uint<128> payload1;
     ap_uint<64> lenPld1;
-    keyStrm.write(apK0);
+    for (int ii = 0; ii < N; ii++) {
+        keyStrm.write(apK0);
+    }
     endLenStrm.write(false);
     poly1305Top(keyStrm, payloadStrm, lenPldStrm, endLenStrm, tagStrm);
     ap_uint<128> tag;
-    tag = tagStrm.read();
+    for (int ii = 0; ii < N; ii++) {
+        tag = tagStrm.read();
 #if !defined(__SYNTHESIS__)
-    std::cout << std::hex << tag << std::endl;
+        std::cout << std::hex << tag << std::endl;
 //    std::cout << std::hex << golden << std::endl;
 #endif
-    if (tag == golden)
-        return 0;
-    else
-        return 1;
+        if (tag != golden) return 1;
+    }
+    return 0;
 }
 
 int main(int argc, char* argv[]) {

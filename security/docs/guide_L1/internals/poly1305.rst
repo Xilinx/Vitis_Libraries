@@ -36,21 +36,29 @@ As shown in the above summary of reference 2.5.1, we can know the implementation
 
 * In order to improve the timing for multiplication operation, the multiplier and the multiplicand are separated into 27-bit and 18-bit arrays, and the result is multiplied to obtain the final result.
 
-* For modulo operation :math:`X=mod(A,P)`, where :math:`P=2^{130}-5`, we can do special processing to reduce the latency. Please see the code for details.
+* For modulo operation :math:`X=mod(A,P)`, where :math:`P=2^{130}-5`, we could take some tricks to reduce the latency. First, let :math:`N=\frac{A-X}{P}`, the equation can be transformed to :math:`X=A-NP=A-2^{130}N+5N`. Then, let :math:`X1=mod(A,2^{130})` and :math:`N1=\frac{A}{2^{130}}`,  we can get :math:`X2=X1+5*N1`. Finally, if :math:`X2<P`, there is :math:`X=X2`, otherwise, let :math:`A=X2`, then repeat the previous step. For more information, please refer to the code.
+
+For the Poly1305, We provide two APIs: `poly1305` and `poly1305MultiChan`.
+
+* `poly1305` takes a 32-byte one-time key and a message and produces a 16-byte tag. This tag is used to authenticate the message.
+
+* `poly1305MultiChan` takes N 32-byte one-time keys and N messages and produces N 16-byte tags. These tags are used to authenticate the corresponding messages.
 
 Performance
 ===========
 
-The hardware resource utilizations are listed in :numref:`tabpoly1` below:
+The hardware resource utilizations are listed in :numref:`tabpoly` below:
 
-.. _tabpoly1:
+.. _tabpoly:
 
-.. table:: Hardware resources for the Poly1305 (Vivado 2019.1) 
+.. table:: Hardware resources for the Poly1305 (the poly1305MultiChan's N is 16) 
     :align: center
 
-    +----------+----------+----------+----------+-----------+-----------+-----------------+
-    |   BRAM   |    DSP   |    FF    |    LUT   |    CLB    |    SRL    | clock period(ns)|
-    +----------+----------+----------+----------+-----------+-----------+-----------------+
-    |     0    |     65   |   5776   |   2405   |   757     |    92     |      2.883      |
-    +----------+----------+----------+----------+-----------+-----------+-----------------+
+    +--------------------+----------+----------+----------+----------+-----------+-----------+-----------------+
+    |   API              |   BRAM   |    DSP   |    FF    |    LUT   |    CLB    |    SRL    | clock period(ns)|
+    +--------------------+----------+----------+----------+----------+-----------+-----------+-----------------+
+    |  poly1305          |     0    |    40    |   5269   |   2751   |    778    |    16     |      2.732      |
+    +--------------------+----------+----------+----------+----------+-----------+-----------+-----------------+
+    |  poly1305MultiChan |     0    |    40    |   5394   |   3216   |    834    |    90     |      2.727      |
+    +--------------------+----------+----------+----------+----------+-----------+-----------+-----------------+
 
