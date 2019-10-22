@@ -22,6 +22,8 @@
  */
 
 #include "block_comp_dm.hpp"
+const int kGMemBurstSize = 16;
+const int kGMemDWidth = 512;
 
 void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
                          xf::compression::uintMemWidth_t* out,
@@ -53,17 +55,15 @@ void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
     hls::stream<uint32_t> compSizeVal;
 
 #pragma HLS dataflow
-    xf::compression::mm2sSimple<xf::compression::kGMemDWidth, xf::compression::kGMemBurstSize>(in, instream512,
-                                                                                               input_size);
-    xf::compression::streamDownsizer<uint32_t, xf::compression::kGMemDWidth, 8>(instream512, outdownstream, input_size);
+    xf::compression::mm2sSimple<kGMemDWidth, kGMemBurstSize>(in, instream512, input_size);
+    xf::compression::streamDownsizer<uint32_t, kGMemDWidth, 8>(instream512, outdownstream, input_size);
 
     xf::compression::streamDataDm2k<8>(outdownstream, instream_orig, input_size);
     xf::compression::streamDataK2dm(compoutstream, lz4OutEos, compSizeVal, outstream_dest);
 
-    xf::compression::upsizerEos<uint16_t, 8, xf::compression::kGMemDWidth>(compoutstream, lz4OutEos, outstream512,
-                                                                           outstream512_eos);
-    xf::compression::s2mmEosSimple<uint32_t, xf::compression::kGMemBurstSize, xf::compression::kGMemDWidth, 1>(
-        out, outstream512, outstream512_eos, compSizeVal, compressed_size);
+    xf::compression::upsizerEos<uint16_t, 8, kGMemDWidth>(compoutstream, lz4OutEos, outstream512, outstream512_eos);
+    xf::compression::s2mmEosSimple<uint32_t, kGMemBurstSize, kGMemDWidth, 1>(out, outstream512, outstream512_eos,
+                                                                             compSizeVal, compressed_size);
 }
 
 extern "C" {

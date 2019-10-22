@@ -23,8 +23,12 @@
  *
  * This file is part of Vitis Data Compression Library.
  */
+#include "hls_stream.h"
 
-#include "common.h"
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 typedef ap_uint<8> uintV_t;
 typedef ap_uint<32> encoded_dt;

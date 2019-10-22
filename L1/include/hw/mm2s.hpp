@@ -23,11 +23,18 @@
  *
  * This file is part of Vitis Data Compression Library.
  */
+#include "hls_stream.h"
 
-#include "common.h"
-#include <string.h>
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
+
 namespace xf {
 namespace compression {
+
+const int kGMemDWidth = 512;
+typedef ap_uint<kGMemDWidth> uintMemWidth_t;
 
 const int c_lTreeSize = 1024;
 const int c_dTreeSize = 64;
@@ -176,15 +183,43 @@ void mm2sNbFreq(const ap_uint<DATAWIDTH>* in,
     uint32_t lcl_maxcode[PARALLEL_BLOCK * c_maxCodeSize];
 
     for (uint32_t blk = 0; blk < n_blocks; blk++) {
-        memcpy(lcl_ltree_codes[blk], &dyn_ltree_codes[blk * c_lTreeSize], c_lTreeSize * sizeof(uint32_t));
-        memcpy(lcl_ltree_blen[blk], &dyn_ltree_blen[blk * c_lTreeSize], c_lTreeSize * sizeof(uint32_t));
-        memcpy(lcl_dtree_codes[blk], &dyn_dtree_codes[blk * c_dTreeSize], c_dTreeSize * sizeof(uint32_t));
-        memcpy(lcl_dtree_blen[blk], &dyn_dtree_blen[blk * c_dTreeSize], c_dTreeSize * sizeof(uint32_t));
-        memcpy(lcl_bltree_codes[blk], &dyn_bltree_codes[blk * c_bLTreeSize], c_bLTreeSize * sizeof(uint32_t));
-        memcpy(lcl_bltree_blen[blk], &dyn_bltree_blen[blk * c_bLTreeSize], c_bLTreeSize * sizeof(uint32_t));
+    cpy_ltree_codes:
+        for (uint32_t ci = 0; ci < c_lTreeSize; ++ci) {
+#pragma HLS PIPELINE II = 1
+            lcl_ltree_codes[blk][ci] = dyn_ltree_codes[blk * c_lTreeSize + ci];
+        }
+    cpy_ltree_blen:
+        for (uint32_t ci = 0; ci < c_lTreeSize; ++ci) {
+#pragma HLS PIPELINE II = 1
+            lcl_ltree_blen[blk][ci] = dyn_ltree_blen[blk * c_lTreeSize + ci];
+        }
+    cpy_dtree_codes:
+        for (uint32_t ci = 0; ci < c_dTreeSize; ++ci) {
+#pragma HLS PIPELINE II = 1
+            lcl_dtree_codes[blk][ci] = dyn_dtree_codes[blk * c_dTreeSize + ci];
+        }
+    cpy_dtree_blen:
+        for (uint32_t ci = 0; ci < c_dTreeSize; ++ci) {
+#pragma HLS PIPELINE II = 1
+            lcl_dtree_blen[blk][ci] = dyn_dtree_blen[blk * c_dTreeSize + ci];
+        }
+    cpy_bltree_codes:
+        for (uint32_t ci = 0; ci < c_bLTreeSize; ++ci) {
+#pragma HLS PIPELINE II = 1
+            lcl_bltree_codes[blk][ci] = dyn_bltree_codes[blk * c_bLTreeSize + ci];
+        }
+    cpy_bltree_blen:
+        for (uint32_t ci = 0; ci < c_bLTreeSize; ++ci) {
+#pragma HLS PIPELINE II = 1
+            lcl_bltree_blen[blk][ci] = dyn_bltree_blen[blk * c_bLTreeSize + ci];
+        }
     }
 
-    memcpy(lcl_maxcode, &dyn_maxcodes[0], PARALLEL_BLOCK * c_maxCodeSize * sizeof(uint32_t));
+cpy_maxcodes:
+    for (uint32_t ci = 0; ci < PARALLEL_BLOCK * c_maxCodeSize; ++ci) {
+#pragma HLS PIPELINE II = 1
+        lcl_maxcode[ci] = dyn_maxcodes[ci];
+    }
 
     for (uint32_t blk = 0; blk < n_blocks; blk++) {
         stream_maxcode[blk] << lcl_maxcode[blk * 3];

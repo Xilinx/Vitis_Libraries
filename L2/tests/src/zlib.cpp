@@ -30,77 +30,9 @@ uint32_t get_file_size(std::ifstream& file) {
 }
 
 void zip(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
-#ifdef zlib_FLOW
-    // printme("In zlib FLOW \n");
-    // 2 bytes of magic header
-    outFile.put(FORMAT_0);
-    outFile.put(FORMAT_1);
-
-    // 1 byte Compression method
-    outFile.put(VARIANT);
-
-    // 1 byte flags
-    uint8_t flags = 0;
-    flags |= REAL_CODE;
-    outFile.put(flags);
-
-    // 4 bytes file modification time in unit format
-    unsigned long time_stamp = 0;
-    struct stat istat;
-    stat(inFile_name.c_str(), &istat);
-    time_stamp = istat.st_mtime;
-    // put_long(time_stamp, outFile);
-    uint8_t time_byte = 0;
-    time_byte = time_stamp;
-    outFile.put(time_byte);
-    time_byte = time_stamp >> 8;
-    outFile.put(time_byte);
-    time_byte = time_stamp >> 16;
-    outFile.put(time_byte);
-    time_byte = time_stamp >> 24;
-    outFile.put(time_byte);
-
-    // 1 byte extra flag (depend on compression method)
-    uint8_t deflate_flags = 0;
-    outFile.put(deflate_flags);
-
-    // 1 byte OPCODE - 0x03 for Unix
-    outFile.put(OPCODE);
-
-    // Dump file name
-    for (int i = 0; inFile_name[i] != '\0'; i++) {
-        outFile.put(inFile_name[i]);
-    }
-    outFile.put(0);
-#else
-    ////printme("In ZLIB flow");
     outFile.put(120);
     outFile.put(1);
-#endif
     outFile.write((char*)zip_out, enbytes);
-#ifdef zlib_FLOW
-    unsigned long ifile_size = istat.st_size;
-    uint8_t crc_byte = 0;
-    long crc_val = 0;
-    crc_byte = crc_val;
-    outFile.put(crc_byte);
-    crc_byte = crc_val >> 8;
-    outFile.put(crc_byte);
-    crc_byte = crc_val >> 16;
-    outFile.put(crc_byte);
-    crc_byte = crc_val >> 24;
-    outFile.put(crc_byte);
-
-    uint8_t len_byte = 0;
-    len_byte = ifile_size;
-    outFile.put(len_byte);
-    len_byte = ifile_size >> 8;
-    outFile.put(len_byte);
-    len_byte = ifile_size >> 16;
-    outFile.put(len_byte);
-    len_byte = ifile_size >> 24;
-    outFile.put(len_byte);
-#endif
     outFile.put(0);
     outFile.put(0);
     outFile.put(0);
@@ -151,9 +83,9 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 }
 
 // Constructor
-xil_zlib::xil_zlib(const std::string& binaryFileName) {
+xil_zlib::xil_zlib(const std::string& binaryFileName, uint8_t flow) {
     // Zlib Compression Binary Name
-    init(binaryFileName);
+    init(binaryFileName, flow);
 
     // printf("C_COMPUTE_UNIT \n");
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
@@ -279,7 +211,7 @@ xil_zlib::~xil_zlib() {
     }
 }
 
-int xil_zlib::init(const std::string& binaryFileName) {
+int xil_zlib::init(const std::string& binaryFileName, uint8_t flow) {
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -309,30 +241,40 @@ int xil_zlib::init(const std::string& binaryFileName) {
     devices.resize(1);
     m_program = new cl::Program(*m_context, devices, bins);
 
-    // Create Compress & Huffman kernels
-    for (int i = 0; i < C_COMPUTE_UNIT; i++) {
-        compress_kernel[i] = new cl::Kernel(*m_program, compress_kernel_names[i].c_str());
-    }
-    // Create Compress & Huffman kernels
-    for (int i = 0; i < H_COMPUTE_UNIT; i++) {
-        huffman_kernel[i] = new cl::Kernel(*m_program, huffman_kernel_names[i].c_str());
-    }
-
-    // Create Tree generation kernel
-    for (int i = 0; i < T_COMPUTE_UNIT; i++) {
-        treegen_kernel[i] = new cl::Kernel(*m_program, treegen_kernel_names[i].c_str());
-    }
-
-    // Create Decompress kernel
-    for (int i = 0; i < D_COMPUTE_UNIT; i++) {
-        decompress_kernel[i] = new cl::Kernel(*m_program, decompress_kernel_names[i].c_str());
+    if (flow == 0) {
+        // Create Compress & Huffman kernels
+        for (int i = 0; i < C_COMPUTE_UNIT; i++) {
+            compress_kernel[i] = new cl::Kernel(*m_program, compress_kernel_names[i].c_str());
+        }
+        // Create Compress & Huffman kernels
+        for (int i = 0; i < H_COMPUTE_UNIT; i++) {
+            huffman_kernel[i] = new cl::Kernel(*m_program, huffman_kernel_names[i].c_str());
+        }
+        // Create Tree generation kernel
+        for (int i = 0; i < T_COMPUTE_UNIT; i++) {
+            treegen_kernel[i] = new cl::Kernel(*m_program, treegen_kernel_names[i].c_str());
+        }
+    } else if (flow == 1) {
+        // Create Decompress kernel
+        for (int i = 0; i < D_COMPUTE_UNIT; i++) {
+            decompress_kernel[i] = new cl::Kernel(*m_program, decompress_kernel_names[i].c_str());
+        }
     }
 
     return 0;
 }
 
 int xil_zlib::release() {
+    if (m_bin_flow == 0) {
+        for (int i = 0; i < C_COMPUTE_UNIT; i++) delete (compress_kernel[i]);
+        for (int i = 0; i < H_COMPUTE_UNIT; i++) delete (huffman_kernel[i]);
+        for (int i = 0; i < T_COMPUTE_UNIT; i++) delete (treegen_kernel[i]);
+    } else if (m_bin_flow == 1) {
+        for (int i = 0; i < D_COMPUTE_UNIT; i++) delete (decompress_kernel[i]);
+    }
+
     delete (m_program);
+
     for (uint8_t i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
         delete (m_q[i]);
     }
@@ -340,15 +282,8 @@ int xil_zlib::release() {
     for (uint8_t flag = 0; flag < D_COMPUTE_UNIT; flag++) {
         delete (m_q_dec[flag]);
     }
+
     delete (m_context);
-
-    for (int i = 0; i < C_COMPUTE_UNIT; i++) delete (compress_kernel[i]);
-
-    for (int i = 0; i < H_COMPUTE_UNIT; i++) delete (huffman_kernel[i]);
-
-    for (int i = 0; i < T_COMPUTE_UNIT; i++) delete (treegen_kernel[i]);
-
-    for (int i = 0; i < D_COMPUTE_UNIT; i++) delete (decompress_kernel[i]);
 
     return 0;
 }
@@ -458,7 +393,7 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
 
     // If raw size is greater than 3GB
     // Limit it to 3GB
-    if (raw_size > (uint32_t)(3 * 1024 * 1024 * 1024)) raw_size = (uint32_t)(3 * 1024 * 1024 * 1024);
+    if (raw_size > 3U << (3 * 10)) raw_size = 3U << (3 * 10);
 
     m_q_dec[cu]->enqueueReadBuffer(*(buffer_out), CL_TRUE, 0, raw_size * sizeof(uint8_t), &out[0]);
 

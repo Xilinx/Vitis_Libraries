@@ -27,7 +27,7 @@ add_files lz4_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 add_files -tb lz4_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 
 # Set the top-level function
-set_top lz4_decompress_engine
+set_top lz4DecompressEngineRun
 
 # Create a solution
 open_solution -reset $SOLN

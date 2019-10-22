@@ -100,9 +100,9 @@ uint64_t xfLz4::compressFile(std::string& inFile_name,
 
         if ((m_block_size_in_kb * 1024) > input_size) host_buffer_size = m_block_size_in_kb * 1024;
 
-        uint8_t temp_buff[10] = {FLG_BYTE,         block_size_header, input_size,       input_size >> 8,
-                                 input_size >> 16, input_size >> 24,  input_size >> 32, input_size >> 40,
-                                 input_size >> 48, input_size >> 56};
+        uint64_t temp_buff[10] = {FLG_BYTE,         block_size_header, input_size,       input_size >> 8,
+                                  input_size >> 16, input_size >> 24,  input_size >> 32, input_size >> 40,
+                                  input_size >> 48, input_size >> 56};
 
         // xxhash is used to calculate hash value
         uint32_t xxh = XXH32(temp_buff, 10, 0);
@@ -176,44 +176,23 @@ int xfLz4::init(const std::string& binaryFile) {
     devices.resize(1);
 
     m_program = new cl::Program(*m_context, devices, bins);
+    std::string cu_id;
+    std::string comp_krnl_name = compress_kernel_names[0].c_str();
+    std::string decomp_krnl_name = decompress_kernel_names[0].c_str();
 
-    if (SINGLE_XCLBIN) {
-        std::string cu_id;
-        std::string comp_krnl_name = compress_kernel_names[0].c_str();
-        std::string decomp_krnl_name = decompress_kernel_names[0].c_str();
-
+    if (m_bin_flow) {
         // Create Compress kernels
         for (uint32_t i = 0; i < C_COMPUTE_UNIT; i++) {
             cu_id = std::to_string(i + 1);
             std::string krnl_name_full = comp_krnl_name + ":{" + comp_krnl_name + "_" + cu_id + "}";
             compress_kernel_lz4[i] = new cl::Kernel(*m_program, krnl_name_full.c_str());
         }
-
+    } else {
         // Create Decompress kernels
         for (uint32_t i = 0; i < D_COMPUTE_UNIT; i++) {
             cu_id = std::to_string(i + 1);
             std::string krnl_name_full = decomp_krnl_name + ":{" + decomp_krnl_name + "_" + cu_id + "}";
             decompress_kernel_lz4[i] = new cl::Kernel(*m_program, krnl_name_full.c_str());
-        }
-    } else {
-        std::string cu_id;
-        std::string comp_krnl_name = compress_kernel_names[0].c_str();
-        std::string decomp_krnl_name = decompress_kernel_names[0].c_str();
-
-        if (m_bin_flow) {
-            // Create Compress kernels
-            for (uint32_t i = 0; i < C_COMPUTE_UNIT; i++) {
-                cu_id = std::to_string(i + 1);
-                std::string krnl_name_full = comp_krnl_name + ":{" + comp_krnl_name + "_" + cu_id + "}";
-                compress_kernel_lz4[i] = new cl::Kernel(*m_program, krnl_name_full.c_str());
-            }
-        } else {
-            // Create Decompress kernels
-            for (uint32_t i = 0; i < D_COMPUTE_UNIT; i++) {
-                cu_id = std::to_string(i + 1);
-                std::string krnl_name_full = decomp_krnl_name + ":{" + decomp_krnl_name + "_" + cu_id + "}";
-                decompress_kernel_lz4[i] = new cl::Kernel(*m_program, krnl_name_full.c_str());
-            }
         }
     }
 

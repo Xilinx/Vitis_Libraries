@@ -27,52 +27,20 @@
 // Based on GZip spec
 #include "zlib_tables.hpp"
 
-#define MIN_BLOCK_SIZE 128
-
-#define GMEM_DWIDTH 512
-#define GMEM_BURST_SIZE 16
-
-// LZ4 Compress STATES
-#define WRITE_TOKEN 0
-#define WRITE_LIT_LEN 1
-#define WRITE_MATCH_LEN 2
-#define WRITE_LITERAL 3
-#define WRITE_OFFSET0 4
-#define WRITE_OFFSET1 5
-
-#define GET_DIFF_IF_BIG(x, y) (x > y) ? (x - y) : 0
-
-// LZ specific Defines
-#define BIT 8
-#define MIN_OFFSET 1
-//#define MIN_MATCH 4
-#define LZ_MAX_OFFSET_LIMIT 32768
-#define LZ_HASH_BIT 12
-#define LZ_DICT_SIZE (1 << LZ_HASH_BIT)
-#define MAX_MATCH_LEN 255
-#define OFFSET_WINDOW 32768
-#define MATCH_LEN 6
-//#define MIN_MATCH 4
-typedef ap_uint<MATCH_LEN * BIT> uintMatchV_t;
-#define MATCH_LEVEL 6
-#define DICT_ELE_WIDTH (MATCH_LEN * BIT + 24)
-
+typedef ap_uint<OUT_BYTES * BIT> uintOut_t;
 typedef ap_uint<DICT_ELE_WIDTH> uintDict_t;
 typedef ap_uint<MATCH_LEVEL * DICT_ELE_WIDTH> uintDictV_t;
-
-#define OUT_BYTES (4)
-typedef ap_uint<OUT_BYTES * BIT> uintOut_t;
+typedef ap_uint<MATCH_LEN * BIT> uintMatchV_t;
 typedef ap_uint<2 * OUT_BYTES * BIT> uintDoubleOut_t;
 typedef ap_uint<BIT * 32> compressdV_dt;
 typedef ap_uint<64> lz77_compressd_dt;
+typedef ap_uint<32> compressd_dt;
+const int kGMemBurstSize = 16;
+const int c_gmemBurstSize = (2 * kGMemBurstSize);
+const int kGMemDWidth = 512;
+typedef ap_uint<kGMemDWidth> uintMemWidth_t;
 
-#define MAX_MATCH 258
-#define MIN_MATCH 3
-#define LENGTH_CODES 29
-
-#define d_code(dist, dist_code) ((dist) < 256 ? dist_code[dist] : dist_code[256 + ((dist) >> 7)])
-
-void lz77Divide(hls::stream<xf::compression::compressd_dt>& inStream,
+void lz77Divide(hls::stream<compressd_dt>& inStream,
                 hls::stream<ap_uint<32> >& outStream,
                 hls::stream<bool>& endOfStream,
                 hls::stream<uint32_t>& outStreamTree,
@@ -104,7 +72,7 @@ dtree_init:
     uint8_t match_len = 0;
     uint32_t loc_idx = 0;
 
-    xf::compression::compressd_dt nextEncodedValue = inStream.read();
+    compressd_dt nextEncodedValue = inStream.read();
     uint32_t cSizeCntr = 0;
 lz77_divide:
     for (uint32_t i = 0; i < input_size; i++) {
@@ -112,7 +80,7 @@ lz77_divide:
 #pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = lcl_dyn_ltree inter false
 #pragma HLS dependence variable = lcl_dyn_dtree inter false
-        xf::compression::compressd_dt tmpEncodedValue = nextEncodedValue;
+        compressd_dt tmpEncodedValue = nextEncodedValue;
         if (i < (input_size - 1)) nextEncodedValue = inStream.read();
 
         uint8_t tCh = tmpEncodedValue.range(7, 0);
@@ -146,8 +114,8 @@ lz77_divide:
     for (uint32_t j = 0; j < DTREE_SIZE; j++) outStreamTree << lcl_dyn_dtree[j];
 }
 
-void lz77Core(hls::stream<xf::compression::uintMemWidth_t>& inStream512,
-              hls::stream<xf::compression::uintMemWidth_t>& outStream512,
+void lz77Core(hls::stream<uintMemWidth_t>& inStream512,
+              hls::stream<uintMemWidth_t>& outStream512,
               hls::stream<bool>& outStream512Eos,
               hls::stream<uint32_t>& outStreamTree,
               hls::stream<uint32_t>& compressedSize,
@@ -156,20 +124,20 @@ void lz77Core(hls::stream<xf::compression::uintMemWidth_t>& inStream512,
               uint32_t core_idx) {
     uint32_t left_bytes = 64;
     hls::stream<ap_uint<BIT> > inStream("inStream");
-    hls::stream<xf::compression::compressd_dt> compressdStream("compressdStream");
-    hls::stream<xf::compression::compressd_dt> boosterStream("boosterStream");
-    hls::stream<xf::compression::compressd_dt> boosterStream_freq("boosterStream");
+    hls::stream<compressd_dt> compressdStream("compressdStream");
+    hls::stream<compressd_dt> boosterStream("boosterStream");
+    hls::stream<compressd_dt> boosterStream_freq("boosterStream");
     hls::stream<uint8_t> litOut("litOut");
     hls::stream<lz77_compressd_dt> lenOffsetOut("lenOffsetOut");
     hls::stream<ap_uint<32> > lz77Out("lz77Out");
     hls::stream<bool> lz77Out_eos("lz77Out_eos");
-#pragma HLS STREAM variable = inStream depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = compressdStream depth = xf::compression::c_gmemBurstSize
-#pragma HLS STREAM variable = boosterStream depth = xf::compression::c_gmemBurstSize
+#pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
+#pragma HLS STREAM variable = compressdStream depth = c_gmemBurstSize
+#pragma HLS STREAM variable = boosterStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = litOut depth = max_literal_count
-#pragma HLS STREAM variable = lenOffsetOut depth = xf::compression::c_gmemBurstSize
+#pragma HLS STREAM variable = lenOffsetOut depth = c_gmemBurstSize
 #pragma HLS STREAM variable = lz77Out depth = 1024
-#pragma HLS STREAM variable = lz77Out_eos depth = xf::compression::c_gmemBurstSize
+#pragma HLS STREAM variable = lz77Out_eos depth = c_gmemBurstSize
 
 #pragma HLS RESOURCE variable = inStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
@@ -188,8 +156,8 @@ void lz77Core(hls::stream<xf::compression::uintMemWidth_t>& inStream512,
     xf::compression::upsizerEos<uint16_t, 32, GMEM_DWIDTH>(lz77Out, lz77Out_eos, outStream512, outStream512Eos);
 }
 
-void lz77(const xf::compression::uintMemWidth_t* in,
-          xf::compression::uintMemWidth_t* out,
+void lz77(const uintMemWidth_t* in,
+          uintMemWidth_t* out,
           const uint32_t input_idx[PARALLEL_BLOCK],
           const uint32_t output_idx[PARALLEL_BLOCK],
           const uint32_t input_size[PARALLEL_BLOCK],
@@ -199,9 +167,9 @@ void lz77(const xf::compression::uintMemWidth_t* in,
           uint32_t* dyn_dtree_freq) {
     const uint32_t c_gmemBSize = 32;
 
-    hls::stream<xf::compression::uintMemWidth_t> inStreamMemWidth[PARALLEL_BLOCK];
+    hls::stream<uintMemWidth_t> inStreamMemWidth[PARALLEL_BLOCK];
     hls::stream<bool> outStreamMemWidthEos[PARALLEL_BLOCK];
-    hls::stream<xf::compression::uintMemWidth_t> outStreamMemWidth[PARALLEL_BLOCK];
+    hls::stream<uintMemWidth_t> outStreamMemWidth[PARALLEL_BLOCK];
     hls::stream<uint32_t> outStreamTreeData[PARALLEL_BLOCK];
 #pragma HLS STREAM variable = outStreamMemWidthEos depth = c_gmemBSize
 #pragma HLS STREAM variable = inStreamMemWidth depth = c_gmemBSize
@@ -233,8 +201,8 @@ void lz77(const xf::compression::uintMemWidth_t* in,
 }
 
 extern "C" {
-void xilLz77Compress(const xf::compression::uintMemWidth_t* in,
-                     xf::compression::uintMemWidth_t* out,
+void xilLz77Compress(const uintMemWidth_t* in,
+                     uintMemWidth_t* out,
                      uint32_t* compressd_size,
                      uint32_t* in_block_size,
                      uint32_t* dyn_ltree_freq,

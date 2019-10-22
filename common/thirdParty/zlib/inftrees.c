@@ -28,12 +28,22 @@ const char inflate_copyright[] = " inflate 1.2.11 Copyright 1995-2017 Mark Adler
    table index bits.  It will differ if the request is greater than the
    longest code or if it is less than the shortest code.
  */
-int ZLIB_INTERNAL inflate_table(type, lens, codes, table, bits, work) codetype type;
-unsigned short FAR* lens;
+#if 0
+int ZLIB_INTERNAL inflate_table(type, lens, codes, table, bits, work)
+codetype type;
+unsigned short FAR *lens;
 unsigned codes;
-code FAR* FAR* table;
-unsigned FAR* bits;
-unsigned short FAR* work;
+code FAR * FAR *table;
+unsigned FAR *bits;
+unsigned short FAR *work;
+#else
+int ZLIB_INTERNAL inflate_table(codetype type,
+                                unsigned short FAR* lens,
+                                unsigned codes,
+                                code FAR* FAR* table,
+                                unsigned FAR* bits,
+                                unsigned short FAR* work)
+#endif
 {
     unsigned len;                            /* a code's length in bits */
     unsigned sym;                            /* index of code symbols */
@@ -220,6 +230,7 @@ unsigned short FAR* work;
         incr = 1U << (len - drop);
         fill = 1U << curr;
         min = fill; /* save offset to next table */
+
         do {
             fill -= incr;
             next[(huff >> drop) + fill] = here;
@@ -228,6 +239,7 @@ unsigned short FAR* work;
         /* backwards increment the len-bit code huff */
         incr = 1U << (len - 1);
         while (huff & incr) incr >>= 1;
+
         if (incr != 0) {
             huff &= incr - 1;
             huff += incr;
@@ -252,6 +264,7 @@ unsigned short FAR* work;
             /* determine length of next table */
             curr = len - drop;
             left = (int)(1 << curr);
+
             while (curr + drop < max) {
                 left -= count[curr + drop];
                 if (left <= 0) break;

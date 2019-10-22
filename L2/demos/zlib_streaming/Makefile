@@ -185,11 +185,11 @@ XCLBIN_FILE_D = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/decompress_k2k.xclbin
 XO_FILES = $(TEMP_DIR)/xf_zlib_datamover.xo \
 		   $(TEMP_DIR)/xf_zlib_decompress.xo
 
-DATAMOVER_KERNEL_SRCS = $(KSRC_DIR)/zlib_dm.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_stream_k2k.cpp
+DATAMOVER_KERNEL_SRCS = $(TB_DIR)/zlib_dm.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_stream.cpp
 
 DATAMOVER_KERNEL_NAME = xilZlibDm
-DECOMPRESS_KERNEL_NAME = xilDecompressStreamk2k
+DECOMPRESS_KERNEL_NAME = xilDecompressStream
 
 KERNELS = $(DATAMOVER_KERNEL_NAME)
 KERNELS += $(DECOMPRESS_KERNEL_NAME)
@@ -220,8 +220,7 @@ $(XCLBIN_FILE_D): $(XO_FILES)
 #                       host setup
 
 CXX := xcpp
-HOST_EXE := xil_zlib_stream_k2k
-#EXE_EXT = exe
+HOST_EXE := xil_zlib_stream
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
 CXXFLAGS +=-I$(XFLIB_DIR)/L2/include/
@@ -234,7 +233,7 @@ CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
 
 #Host and Common sources
 SRCS += $(SRC_DIR)/src/host.cpp
-SRCS += $(TB_DIR)/zlib_stream_k2k.cpp
+SRCS += $(TB_DIR)/zlib_stream.cpp
 SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
@@ -287,7 +286,7 @@ cleanh:
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
 	-$(RMDIR) $(TEMP_DIR) $(CUR_DIR)/reports *.csv $(CUR_DIR)/*.raw
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd*
+	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.raw
 
 clean: cleanh
 

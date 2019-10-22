@@ -38,6 +38,18 @@
 
 #include "snappy_decompress.hpp"
 
+#define GMEM_DWIDTH 512
+#define GMEM_BURST_SIZE 16
+
+#define MAX_OFFSET 65536
+#define HISTORY_SIZE MAX_OFFSET
+
+#define BIT 8
+#define READ_STATE 0
+#define MATCH_STATE 1
+#define LOW_OFFSET_STATE 2
+#define LOW_OFFSET 8 // This should be bigger than Pipeline Depth to handle inter dependency false case
+
 extern "C" {
 /**
  * @brief Snappy decompression kernel takes compressed data as input and process in

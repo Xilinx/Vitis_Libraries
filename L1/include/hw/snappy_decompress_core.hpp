@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 #include "hls_stream.h"
-#include "lz_decompress.hpp"
-#include "lz_optional.hpp"
-#include "snappy_decompress.hpp"
 #include <ap_int.h>
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 
+#include "snappy_decompress.hpp"
+#include "lz_decompress.hpp"
+#include "lz_optional.hpp"
+
 #define BIT 8
 
+typedef ap_uint<32> compressd_dt;
 typedef ap_uint<BIT> uintV_t;
 
 /**
@@ -43,13 +45,11 @@ void snappy_decompress_engine(hls::stream<uintV_t>& inStream,
                               const uint32_t _output_size) {
     uint32_t input_size = _input_size;
     uint32_t output_size = _output_size;
-    hls::stream<xf::compression::compressd_dt> decompressd_stream("decompressd_stream");
-
+    hls::stream<compressd_dt> decompressd_stream("decompressd_stream");
 #pragma HLS STREAM variable = decompressd_stream depth = 8
 #pragma HLS RESOURCE variable = decompressd_stream core = FIFO_SRL
 
 #pragma HLS dataflow
-
     xf::compression::snappyDecompress(inStream, decompressd_stream, input_size);
     xf::compression::lzDecompress<HISTORY_SIZE, READ_STATE, MATCH_STATE, LOW_OFFSET_STATE, LOW_OFFSET>(
         decompressd_stream, snappyOut, output_size);

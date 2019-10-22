@@ -82,9 +82,17 @@ void xilTreegenKernel(uint32_t* dyn_ltree_freq,
     uint32_t lcl_bltree_root[BLTREE_SIZE];
 
     for (uint8_t core_idx = 0; core_idx < blocks_per_chunk; core_idx++) {
-        // Copy Frequencies of Literal, Match Length and Distances to local buffers
-        memcpy(lcl_ltree_freq, &dyn_ltree_freq[core_idx * LTREE_SIZE], LTREE_SIZE * sizeof(uint32_t));
-        memcpy(lcl_dtree_freq, &dyn_dtree_freq[core_idx * DTREE_SIZE], DTREE_SIZE * sizeof(uint32_t));
+    // Copy Frequencies of Literal, Match Length and Distances to local buffers
+    copy_ltree_freq:
+        for (uint32_t ci = 0; ci < LTREE_SIZE; ++ci) {
+#pragma HLS PIPELINE II = 1
+            lcl_ltree_freq[ci] = dyn_ltree_freq[core_idx * LTREE_SIZE + ci];
+        }
+    copy_dtree_freq:
+        for (uint32_t ci = 0; ci < DTREE_SIZE; ++ci) {
+#pragma HLS PIPELINE II = 1
+            lcl_dtree_freq[ci] = dyn_dtree_freq[core_idx * DTREE_SIZE + ci];
+        }
 
         // Build Literal and Match length tree codes & bit lenghts
         uint32_t lit_max_code = xf::compression::huffConstructTree<LITERAL_CODES, MAX_BITS>(
@@ -173,17 +181,41 @@ void xilTreegenKernel(uint32_t* dyn_ltree_freq,
         max_codes[core_idx * 3 + 1] = dst_max_code;
         max_codes[core_idx * 3 + 2] = max_blindex;
 
-        // Copy data back to ddr  -- Literals / MLs
-        memcpy(&dyn_ltree_codes[core_idx * LTREE_SIZE], &lcl_ltree_codes[0], LTREE_SIZE * sizeof(uint32_t));
-        memcpy(&dyn_ltree_blen[core_idx * LTREE_SIZE], &lcl_ltree_blen[0], LTREE_SIZE * sizeof(uint32_t));
+    // Copy data back to ddr  -- Literals / MLs
+    copy2ddr_ltree_codes:
+        for (uint32_t ci = 0; ci < LTREE_SIZE; ++ci) {
+#pragma HLS PIPELINE II = 1
+            dyn_ltree_codes[core_idx * LTREE_SIZE + ci] = lcl_ltree_codes[ci];
+        }
+    copy2ddr_ltree_blen:
+        for (uint32_t ci = 0; ci < LTREE_SIZE; ++ci) {
+#pragma HLS PIPELINE II = 1
+            dyn_ltree_blen[core_idx * LTREE_SIZE + ci] = lcl_ltree_blen[ci];
+        }
 
-        // Copy data back to ddr -- Distances
-        memcpy(&dyn_dtree_codes[core_idx * DTREE_SIZE], &lcl_dtree_codes[0], DTREE_SIZE * sizeof(uint32_t));
-        memcpy(&dyn_dtree_blen[core_idx * DTREE_SIZE], &lcl_dtree_blen[0], DTREE_SIZE * sizeof(uint32_t));
+    // Copy data back to ddr -- Distances
+    copy2ddr_dtree_codes:
+        for (uint32_t ci = 0; ci < DTREE_SIZE; ++ci) {
+#pragma HLS PIPELINE II = 1
+            dyn_dtree_codes[core_idx * DTREE_SIZE + ci] = lcl_dtree_codes[ci];
+        }
+    copy2ddr_dtree_blen:
+        for (uint32_t ci = 0; ci < DTREE_SIZE; ++ci) {
+#pragma HLS PIPELINE II = 1
+            dyn_dtree_blen[core_idx * DTREE_SIZE + ci] = lcl_dtree_blen[ci];
+        }
 
-        // Copy data back to ddr -- Bit Lengths
-        memcpy(&dyn_bltree_codes[core_idx * BLTREE_SIZE], &lcl_bltree_codes[0], BLTREE_SIZE * sizeof(uint32_t));
-        memcpy(&dyn_bltree_blen[core_idx * BLTREE_SIZE], &lcl_bltree_blen[0], BLTREE_SIZE * sizeof(uint32_t));
+    // Copy data back to ddr -- Bit Lengths
+    copy2ddr_bltree_codes:
+        for (uint32_t ci = 0; ci < BLTREE_SIZE; ++ci) {
+#pragma HLS PIPELINE II = 1
+            dyn_bltree_codes[core_idx * BLTREE_SIZE + ci] = lcl_bltree_codes[ci];
+        }
+    copy2ddr_bltree_blen:
+        for (uint32_t ci = 0; ci < BLTREE_SIZE; ++ci) {
+#pragma HLS PIPELINE II = 1
+            dyn_bltree_blen[core_idx * BLTREE_SIZE + ci] = lcl_bltree_blen[ci];
+        }
     }
 }
 }

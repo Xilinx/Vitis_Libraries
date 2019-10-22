@@ -24,6 +24,8 @@
 
 #include "block_decomp_dm.hpp"
 
+const int kGMemBurstSize = 16;
+const int kGMemDWidth = 512;
 void __xf_decomp_datamover(xf::compression::uintMemWidth_t* in,
                            xf::compression::uintMemWidth_t* out,
                            uint32_t decompressed_size,
@@ -41,17 +43,15 @@ void __xf_decomp_datamover(xf::compression::uintMemWidth_t* in,
 #pragma HLS STREAM variable = outstream512 depth = 32
 
 #pragma HLS dataflow
-    xf::compression::mm2sSimple<xf::compression::kGMemDWidth, xf::compression::kGMemBurstSize>(in, instream512,
-                                                                                               input_size);
-    xf::compression::streamDownsizer<uint32_t, xf::compression::kGMemDWidth, 8>(instream512, outdownstream, input_size);
+    xf::compression::mm2sSimple<kGMemDWidth, kGMemBurstSize>(in, instream512, input_size);
+    xf::compression::streamDownsizer<uint32_t, kGMemDWidth, 8>(instream512, outdownstream, input_size);
 
     xf::compression::streamDataDm2k<8>(outdownstream, instream_orig, input_size);
     xf::compression::streamDataK2dmFixedSize(decompoutstream, outstream_dest, decompressed_size);
 
-    xf::compression::streamUpsizer<uint32_t, 8, xf::compression::kGMemDWidth>(decompoutstream, outstream512,
-                                                                              decompressed_size);
+    xf::compression::streamUpsizer<uint32_t, 8, kGMemDWidth>(decompoutstream, outstream512, decompressed_size);
 
-    xf::compression::s2mmSimple<xf::compression::kGMemDWidth>(out, outstream512, decompressed_size);
+    xf::compression::s2mmSimple<kGMemDWidth>(out, outstream512, decompressed_size);
 }
 
 extern "C" {

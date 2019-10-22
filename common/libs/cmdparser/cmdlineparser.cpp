@@ -306,24 +306,40 @@ bool CmdLineParser::isValid(const char* key) {
 }
 
 void CmdLineParser::printHelp() {
-    printf("===========================================================\n");
+    std::cout << "\n===========================================================\n";
     string strAllShortcuts = "";
-    for (size_t i = 0; i < m_vSwitches.size(); i++) {
-        CmdSwitch* pcmd = m_vSwitches[i];
-        if (pcmd && pcmd->shortcut.length() > 0) strAllShortcuts = strAllShortcuts + pcmd->shortcut;
+    for (auto pcmd : m_vSwitches) {
+        if (pcmd && !pcmd->shortcut.empty()) strAllShortcuts = strAllShortcuts + pcmd->shortcut;
     }
     // example
-    printf("Usage: %s -[%s]\n\n", m_appname.c_str(), strAllShortcuts.c_str());
+    std::cout << "Usage: " << m_appname << ", -[" << strAllShortcuts << "]\n\n";
+
+    // finding maximum
+    size_t first_max = 0;
+    size_t second_max = 0;
+    size_t third_max = 0;
+
+    for (auto pcmd : m_vSwitches) {
+        if (pcmd->key.size() > first_max) first_max = pcmd->key.size();
+        if (pcmd->shortcut.size() > second_max) second_max = pcmd->shortcut.size();
+        if (pcmd->desc.size() > third_max) third_max = pcmd->desc.size();
+    }
 
     // row by row
-    for (size_t i = 0; i < m_vSwitches.size(); i++) {
-        CmdSwitch* pcmd = m_vSwitches[i];
+    for (auto pcmd : m_vSwitches) {
+        int no_of_spaces_first = first_max - pcmd->key.size() + 5;
+        int no_of_spaces_second = second_max - pcmd->shortcut.size() + 5;
 
-        if (pcmd->default_value.length() > 0)
-            printf("\t%s, \t%s\t\t%s\t Default: [%s]\n", pcmd->key.c_str(), pcmd->shortcut.c_str(), pcmd->desc.c_str(),
-                   pcmd->default_value.c_str());
-        else
-            printf("\t%s, \t%s\t\t%s\n", pcmd->key.c_str(), pcmd->shortcut.c_str(), pcmd->desc.c_str());
+        std::cout << string(10, ' ') << pcmd->key << "," << string(no_of_spaces_first, ' ') << pcmd->shortcut
+                  << string(no_of_spaces_second, ' ') << pcmd->desc;
+
+        if (!pcmd->default_value.empty()) {
+            int no_of_spaces_third = third_max - pcmd->desc.size() + 5;
+
+            std::cout << string(no_of_spaces_third, ' ') << "Default: [" << pcmd->default_value << "]";
+        }
+
+        std::cout << std::endl;
     }
 }
 

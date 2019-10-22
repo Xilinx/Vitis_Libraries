@@ -23,29 +23,6 @@
 #include "huffman_mm.hpp"
 #include "zlib_tables.hpp"
 
-#define MIN_BLOCK_SIZE 116
-
-#define GMEM_DWIDTH 512
-#define GMEM_BURST_SIZE 16
-
-// DYNAMIC HUFFMAN Compress STATES
-#define WRITE_TOKEN 0
-#define ML_DIST_REP 1
-#define LIT_REP 2
-#define SEND_OUTPUT 3
-#define ML_EXTRA 4
-#define DIST_REP 5
-#define DIST_EXTRA 6
-
-// LZ specific Defines
-#define BIT 8
-
-#define d_code(dist, dist_code) ((dist) < 256 ? dist_code[dist] : dist_code[256 + ((dist) >> 7)])
-/* Mapping from a distance to a distance code. dist is the distance - 1 and
- *  * must not have side effects. dist_code[256] and dist_code[257] are never
- *   * used.
- *    */
-
 // 64bits/8bit = 8 Bytes
 typedef ap_uint<16> uintOutV_t;
 
@@ -131,16 +108,18 @@ bitpack:
         localBits.range(localBits_idx + 40 - 1, localBits_idx + 32) = 0xff;
         localBits_idx += 40;
     }
-
-    for (uint32_t i = 0; i < localBits_idx; i += 8) {
+    for (uint32_t i = 0; i < localBits_idx; i += 16) {
         uint16_t pack_byte = 0;
-        pack_byte = localBits.range(7, 0);
-        localBits >>= 8;
+        pack_byte = localBits.range(15, 0);
+        localBits >>= 16;
         outStream << pack_byte;
         outStreamEos << 0;
-        cSize_cntr++;
+        cSize_cntr += 2;
     }
-    compressedSize << cSize_cntr;
+    if (localBits_idx % 16 == 0)
+        compressedSize << cSize_cntr;
+    else
+        compressedSize << cSize_cntr - 1;
 
     outStream << 0;
     outStreamEos << 1;

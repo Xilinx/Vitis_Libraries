@@ -36,6 +36,16 @@
 #include "lz_optional.hpp"
 #include "lz4_compress.hpp"
 
+#define MIN_OFFSET 1
+#define MIN_MATCH 4
+#define LZ_MAX_OFFSET_LIMIT 65536
+#define OFFSET_WINDOW LZ_MAX_OFFSET_LIMIT
+#define LZ_HASH_BIT 12
+#define LZ_DICT_SIZE (1 << LZ_HASH_BIT)
+#define MAX_MATCH_LEN 255
+#define BIT 8
+#define MATCH_LEN 6
+#define MATCH_LEVEL 6
 #define MAX_LIT_COUNT 4096
 #define PARALLEL_BLOCK 8
 

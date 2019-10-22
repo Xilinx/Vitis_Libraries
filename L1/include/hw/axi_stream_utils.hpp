@@ -18,7 +18,6 @@
 #define _XFCOMPRESSION_AXI_STREAM_UTILS_HPP_
 
 #include "hls_stream.h"
-#include "common.h"
 #include "ap_axi_sdata.h"
 #include <stdio.h>
 #include <stdint.h>
@@ -27,6 +26,8 @@
 
 namespace xf {
 namespace compression {
+
+typedef ap_uint<8> streamDt;
 
 void axis2hlsStreamFixedSize(hls::stream<qdma_axis<8, 0, 0, 0> >& inputAxiStream,
                              hls::stream<streamDt>& inputStream,

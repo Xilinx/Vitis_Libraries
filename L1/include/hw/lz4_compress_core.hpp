@@ -25,7 +25,8 @@
 #include "lz_optional.hpp"
 
 #define BIT 8
-const int c_lz4MaxLiteralCount = 4096; // MAX_LIT_COUNT;
+#define MAX_LIT_COUNT 4096
+const int c_lz4MaxLiteralCount = MAX_LIT_COUNT;
 
 typedef ap_uint<32> compressd_dt;
 typedef ap_uint<64> lz4_compressd_dt;
@@ -99,6 +100,7 @@ void lz4_compress_engine(hls::stream<uintV_t>& inStream,
                                                                  left_bytes);
     xf::compression::lzBooster<MAX_MATCH_LEN, BOOSTER_OFFSET_WINDOW>(bestMatchStream, boosterStream, input_size,
                                                                      left_bytes);
-    xf::compression::lz4Divide(boosterStream, litOut, lenOffsetOut, input_size, max_lit_limit, core_idx);
+    xf::compression::lz4Divide<MAX_LIT_COUNT, PARALLEL_BLOCK>(boosterStream, litOut, lenOffsetOut, input_size,
+                                                              max_lit_limit, core_idx);
     xf::compression::lz4Compress(litOut, lenOffsetOut, lz4Out, lz4Out_eos, lz4OutSize, input_size);
 }

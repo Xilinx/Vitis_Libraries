@@ -218,8 +218,6 @@ setup: | check_part
 
 DECOMPRESS_OUT_DIR:=./build_decompress_ip
 
-CP = cp -rf
-
 decompress_srcs+=../../include/hw/snappy_decompress_core.hpp
 
 decompress_script=./run_decompress_hls.tcl 

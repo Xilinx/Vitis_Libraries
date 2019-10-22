@@ -18,7 +18,7 @@
 #define _XFCOMPRESSION_AXI_STREAM_UTILS_HPP_
 
 #include "hls_stream.h"
-#include "common.h"
+
 #include "ap_axi_sdata.h"
 #include <stdio.h>
 #include <stdint.h>

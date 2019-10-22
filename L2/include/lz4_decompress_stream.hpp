@@ -36,6 +36,13 @@
 #include "lz_optional.hpp"
 #include "lz4_decompress.hpp"
 
+#define LZ_MAX_OFFSET 65536
+#define LZ_HISTORY_SIZE LZ_MAX_OFFSET
+#define LZ_READ_STATE 0
+#define LZ_MATCH_STATE 1
+#define LZ_LOW_OFFSET_STATE 2
+#define LZ_LOW_OFFSET 8 // This should be bigger than Pipeline Depth to handle inter dependency false case
+
 // Kernel top functions
 extern "C" {
 

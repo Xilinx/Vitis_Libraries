@@ -39,6 +39,13 @@
 #include "hls_stream.h"
 #include <ap_int.h>
 
+#define BIT 8
+#define MIN_OFFSET 1
+#define MIN_MATCH 4
+#define LZ_MAX_OFFSET_LIMIT 32768
+#define HISTORY_SIZE LZ_MAX_OFFSET_LIMIT
+#define LOW_OFFSET 10
+
 extern "C" {
 /**
  * @brief Zlib decompression kernel top function.

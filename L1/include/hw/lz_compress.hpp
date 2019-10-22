@@ -23,10 +23,18 @@
  *
  * This file is part of Vitis Data Compression Library.
  */
-#include "common.h"
+#include "hls_stream.h"
+
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 namespace xf {
 namespace compression {
+
+typedef ap_uint<32> compressd_dt;
+
 /**
  * @brief This module reads input literals from stream and updates
  * match length and offset of each literal.

@@ -39,6 +39,29 @@
 #include <ap_int.h>
 #include "zlib_config.hpp"
 
+#define MIN_BLOCK_SIZE 116
+
+#define GMEM_DWIDTH 512
+#define GMEM_BURST_SIZE 16
+
+// DYNAMIC HUFFMAN Compress STATES
+#define WRITE_TOKEN 0
+#define ML_DIST_REP 1
+#define LIT_REP 2
+#define SEND_OUTPUT 3
+#define ML_EXTRA 4
+#define DIST_REP 5
+#define DIST_EXTRA 6
+
+// LZ specific Defines
+#define BIT 8
+
+#define d_code(dist, dist_code) ((dist) < 256 ? dist_code[dist] : dist_code[256 + ((dist) >> 7)])
+/* Mapping from a distance to a distance code. dist is the distance - 1 and
+ *  * must not have side effects. dist_code[256] and dist_code[257] are never
+ *   * used.
+ *    */
+
 extern "C" {
 /**
  * @brief Huffman kernel top function.
