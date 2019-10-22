@@ -16,14 +16,14 @@
 
 source settings.tcl
 
-set PROJ "poly1305.prj"
+set PROJ "poly1305_multichan.prj"
 set SOLN "sol"
 set CLKP 3.33
 
 open_project -reset $PROJ
 
-add_files test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files test_mc.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files -tb test_mc.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
 set_top poly1305Top
 
 open_solution -reset $SOLN

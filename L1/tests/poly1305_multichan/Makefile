@@ -109,6 +109,12 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
+# Target check
+TARGET ?= sw_emu
+ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
+$(error TARGET is not sw_emu, hw_emu or hw)
+endif
+
 # MK_INC_END vitis.mk
 # MK_INC_BEGIN vitis_set_platform.mk
 
@@ -164,7 +170,7 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
 override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.board.part" --platform $(firstword $(XPLATFORM)))
 endif
 endif
-check_part: check_platform check_vpp
+check_part: | check_platform
 ifeq (,$(XPART))
 	@echo "XPART is not set and cannot be inferred. Please run \`make help\` for usage info." && false
 endif

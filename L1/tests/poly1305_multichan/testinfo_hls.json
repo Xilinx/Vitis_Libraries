@@ -1,5 +1,5 @@
 {
-    "case_name": "jks.L1_poly1305", 
+    "case_name": "jks.L1_poly1305_multichan", 
     "disable": 0, 
     "jobs": [
         {
