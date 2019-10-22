@@ -63,8 +63,8 @@ autosectionlabel_prefix_document = True
 
 
 # Configure 'Edit on GitHub' extension
-edit_on_github_project = 'Xilinx/<ENTER GITHUB REPO PATH HERE>'
-edit_on_github_branch = 'master/<ENTER DOC FOLDER HIERARCHY HERE>'
+edit_on_github_project = 'Xilinx/Vitis_Libraries'
+edit_on_github_branch = 'master/blas/docs/src'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

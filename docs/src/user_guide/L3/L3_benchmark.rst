@@ -22,9 +22,7 @@ For benchmark code references please follow the link below.
 
 **1. XFBLAS L3 benchmark**
 
-Please see `XFBLAS L3 benchmark folder`_ for more benchmark cases. 
-
-.. _XFBLAS L3 benchmark folder: ../../../../L3/benchmarks
+Please see XFBLAS L3 benchmark folder for more benchmark cases. 
 
 .. toctree::
    :maxdepth: 2
