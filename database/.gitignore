@@ -5,4 +5,5 @@
 *.protoinst
 sample_*.ini
 jks.*
+make_gen_*.ini
 TestResults

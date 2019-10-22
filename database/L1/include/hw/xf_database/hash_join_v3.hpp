@@ -1424,8 +1424,8 @@ void merge_stb(ap_uint<32>& depth,
 #pragma HLS stream variable = e2_strm depth = 8
 
     hls::stream<ap_uint<KEYW> > key1_strm;
-#pragma HLS stream variable = key0_strm depth = 8
-#pragma HLS resource variable = key0_strm core = FIFO_SRL
+#pragma HLS stream variable = key1_strm depth = 8
+#pragma HLS resource variable = key1_strm core = FIFO_SRL
     hls::stream<ap_uint<HASHWH + HASHWL> > hash_strm;
 #pragma HLS stream variable = hash_strm depth = 8
 #pragma HLS resource variable = hash_strm core = FIFO_SRL
@@ -2906,8 +2906,8 @@ void merge_stb(
 #pragma HLS stream variable = e2_strm depth = 8
 
     hls::stream<ap_uint<KEYW> > key1_strm;
-#pragma HLS stream variable = key0_strm depth = 8
-#pragma HLS resource variable = key0_strm core = FIFO_SRL
+#pragma HLS stream variable = key1_strm depth = 8
+#pragma HLS resource variable = key1_strm core = FIFO_SRL
     hls::stream<ap_uint<HASHWH + HASHWL> > hash_strm;
 #pragma HLS stream variable = hash_strm depth = 8
 #pragma HLS resource variable = hash_strm core = FIFO_SRL
