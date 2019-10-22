@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define WIDTH 3840
-#define HEIGHT 2160
+#define WIDTH 128
+#define HEIGHT 128
 
 #define GRAY 0
 #define RGBA 1

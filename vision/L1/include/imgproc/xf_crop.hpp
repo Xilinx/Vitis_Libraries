@@ -151,7 +151,7 @@ void xFcropkernel_memorymapped(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     // Local variables and their initial values
     int col_offset = 0, write_offset = 0, pix_pos = 0, toggle_flag = 1;
-    int col_loop_cnt = 0, cnt = 0, start_loc = 0, end_loc = 0, offset;
+    int col_loop_cnt = 0, cnt = 0, start_loc = 0, end_loc = 0, offset = 0;
 
     ap_uint<32> start_pix_loc = 0; // Location of first pix in every row
     ap_uint<32> left_over_pix = 0; // Left over pixels in each row after reading col_loop_cnt-1 columns
@@ -187,6 +187,10 @@ rowLoop:
         start_loc = start_pix_loc;
         end_loc = _npc_;
 
+        if (i == 24) {
+            int val = 130;
+        }
+
         offset += width;
 
         if (toggle_flag) {
@@ -206,6 +210,8 @@ rowLoop:
     }
     // For last row
     if (roi.height == 1) {
+        write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(cnt, buf0, write_offset, _dst_mat);
+    } else if (toggle_flag == 1) {
         write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(cnt, buf0, write_offset, _dst_mat);
     } else {
         write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(cnt, buf1, write_offset, _dst_mat);

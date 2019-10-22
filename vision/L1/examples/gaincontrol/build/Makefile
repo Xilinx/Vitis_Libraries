@@ -51,7 +51,7 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-TOOL_VERSION ?= 2019.1
+TOOL_VERSION ?= 2019.2
 
 ifeq (,$(XILINX_VIVADO))
 XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
@@ -107,15 +107,7 @@ LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-# Target check
-TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
-endif
-
-# MK_INC_END vitis.mk
+endif# MK_INC_END vitis.mk
 # MK_INC_BEGIN vitis_set_platform.mk
 
 ifneq (,$(wildcard $(DEVICE)))
@@ -141,7 +133,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -161,9 +153,7 @@ ifneq (,$(word 2,$(XPLATFORM)))
 	@echo "$${MSG_DEVICE}" && false
 endif
 
-XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
-
-# MK_INC_END vitis_set_platform.mk
+XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))# MK_INC_END vitis_set_platform.mk
 ifeq (1, $(words $(XPLATFORM)))
 # Query the part name of device
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))

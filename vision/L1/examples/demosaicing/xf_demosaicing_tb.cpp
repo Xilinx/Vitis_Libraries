@@ -17,6 +17,8 @@
 #include "common/xf_headers.hpp"
 #include "xf_demosaicing_config.h"
 
+void demosaicImage(cv::Mat cfa_output, cv::Mat& output_image, int code);
+
 void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
     // FILE *fp = fopen("output.txt","w");
     for (int i = 0; i < img.rows; i++) {

@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_autowhitebalance_config.h"
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 template <typename T>

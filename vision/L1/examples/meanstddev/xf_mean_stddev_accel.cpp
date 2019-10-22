@@ -19,7 +19,7 @@
 void mean_stddev_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, _NPPC>& imgInput,
                        unsigned short mean[XF_CHANNELS(TYPE, _NPPC)],
                        unsigned short stddev[XF_CHANNELS(TYPE, _NPPC)]) {
-    //#pragma HLS interface ap_fifo depth=1 port=mean
-    //#pragma HLS interface ap_fifo depth=1 port=stddev
+#pragma HLS interface m_axi port = mean
+#pragma HLS interface m_axi port = stddev
     xf::cv::meanStdDev<TYPE, HEIGHT, WIDTH, _NPPC>(imgInput, mean, stddev);
 }

@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_stereoBM_config.h"
+#include "xf_stereolbm_config.h"
 
 using namespace std;
 

@@ -1,39 +1,53 @@
 ## ML + X Benchmark
 
-This example shows how various Vitis Vision funtions can be used to accelerate preprocessing of input images before feeding them to a Deep Neural Network (DNN) accelerator.
+In machine learning, data preprocessing is an integral step required to convert input data into a clean data set. A machine learning application receives data from multiple sources using multiple formats; this data needs to be transformed to format feasible for analysis before being passed to the model.
 
-This specific application shows how pre-processing for Googlenet_v1 can be accelerated which involves resizing the input image to 224 x 224 size followed by mean subtraction.
+This example shows how various Xilinx ® Vitis™ Vision accelerated library funtions can be used to accelerate preprocessing of input images before feeding them to a Deep Neural Network (DNN) accelerator.
+
+This specific application shows how pre-processing for Googlenet_v1 can be accelerated which involves resizing the input image to 224 x 224 size followed by mean subtraction. The below figure depicts the pipeline.
+
+![Googlenet pre-processing](./gnet_pp.JPG)
+
+
+The below code snippet shows the top level wrapper function which contains various Xilinx ® Vitis™ Vision accelerated library funtion calls.
+
+```c++
+void preprocessing ()
+{
+...
+        xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, NPC1>  (img_inp, imgInput0);
+        xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T,MAXDOWNSCALE> (imgInput0, out_mat);
+        xf::cv::accel_utils obj;
+        obj.xfMat2hlsStrm<INPUT_PTR_WIDTH, TYPE, NEWHEIGHT, NEWWIDTH, NPC_T, (NEWWIDTH*NEWHEIGHT/8)>(out_mat, resizeStrmout, srcMat_cols_align_npc);
+        xf::cv::preProcess <INPUT_PTR_WIDTH, OUTPUT_PTR_WIDTH, T_CHANNELS, CPW, HEIGHT, WIDTH, NPC_TEST, PACK_MODE, X_WIDTH, ALPHA_WIDTH, BETA_WIDTH, GAMMA_WIDTH, OUT_WIDTH, X_IBITS, ALPHA_IBITS, BETA_IBITS, GAMMA_IBITS, OUT_IBITS, SIGNED_IN, OPMODE> (resizeStrmout, img_out, params, rows_out, cols_out, th1, th2);
+
+
+```
 
 **Performance:**
 
-This pipeline is integrated with [xDNN](https://www.xilinx.com/support/documentation/white_papers/wp504-accel-dnns.pdf "xDNN whitepaper") accelerator and [MLsuite](https://github.com/Xilinx/ml-suite "ml-suite") to run Googlenet_v1 inference on [Alveo-U200](https://www.xilinx.com/products/boards-and-kits/alveo/u200.html "U200") accelerator card and achieved 11 % speed up compared to software pre-processing.
+Table below shows the speed up achieved comapred to various CPU implementations.
 
-**Overall Performance (Images/sec)**
+|              |  Intel(R) Xeon (R)   Silver 4100 CPU @ 2.10GHz, 8 core |  Intel(R) Core(TM) i7-4770 CPU @ 3.40GHz, 4 core |  FPGA   (Alveo-U200) |  Speedup   (Xeon/i7) |
+|:------------:|:------------------------------------------------------:|:------------------------------------------------:|:--------------------:|:--------------------:|
+| Googlenet_v1 |                         5.63 ms                        |                      59.9 ms                     |        1.1 ms        |        5x/54x        |
 
-with software pre-processing             : 125 images/sec
 
-with hardware accelerated pre-processing : 140 images/sec
 
-### Commands to run:
+### Commands to run for building the design:
 
 source < path-to-Vitis-installation-directory >/settings64.sh
 
 source < part-to-XRT-installation-directory >/setenv.sh
 
-export DEVICE=< path-to-platform-directory >/< platform >.xpfm
+export DEVICE=< path-to-platform-directory >/<platform>.xpfm
 
 **For PCIe devices:**
 
 make host xclbin TARGET=< sw_emu|hw_emu|hw >
-
-make run TARGET=< sw_emu|hw_emu|hw >
 
 **For embedded devices:**
 
 export SYSROOT=< path-to-platform-sysroot >
 
 make host xclbin TARGET=hw BOARD=Zynq 
-
-make run TARGET=< hw >
-
-copy the image.ub, xclbins and executable to an SDCARD and run on the board.

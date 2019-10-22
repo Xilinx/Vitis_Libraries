@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_stereoBM_config.h"
+#include "xf_stereolbm_config.h"
 
 void stereolbm_accel(xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>& leftMat,
                      xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>& rightMat,

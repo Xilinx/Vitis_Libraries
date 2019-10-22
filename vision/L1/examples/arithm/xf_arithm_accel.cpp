@@ -39,7 +39,7 @@ void arithm_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
     //		xf::cv::bitwise_not<TYPE, HEIGHT, WIDTH, NPC1>(imgInput1,imgOutput);
     //		xf::cv::bitwise_xor< TYPE, HEIGHT, WIDTH, NPC1 >(imgInput1,imgInput2,imgOutput);
     //		xf::cv::multiply< XF_CONVERT_POLICY_SATURATE,TYPE, HEIGHT, WIDTH,
-    // NPC1>(imgInput1,imgInput2,imgOutput,0.05);
+    //NPC1>(imgInput1,imgInput2,imgOutput,0.05);
     //		xf::cv::Max< TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgInput2,imgOutput);
     //		xf::cv::Min< TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgInput2,imgOutput);
     //		xf::cv::compare<XF_CMP_NE, TYPE, HEIGHT, WIDTH,NPC1>(imgInput1,imgInput2,imgOutput);

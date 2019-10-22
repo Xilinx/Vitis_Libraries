@@ -43,7 +43,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/badpixelcorrection/data/im0.png "
+  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/badpixelcorrection/data/hd.png "
 }
 
 if {$VIVADO_SYN == 1} {

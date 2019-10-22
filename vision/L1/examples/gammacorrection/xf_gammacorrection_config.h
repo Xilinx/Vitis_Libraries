@@ -24,7 +24,7 @@
 
 // Set the image height and width
 #define HEIGHT 128
-#define WIDTH 3840
+#define WIDTH 128
 
 #if NO
 #define NPC1 XF_NPPC1

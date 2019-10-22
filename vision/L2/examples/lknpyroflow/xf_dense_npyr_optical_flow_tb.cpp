@@ -24,7 +24,7 @@
 #define HLS 0
 
 #if !HLS
-#include <CL/cl.h>
+
 #include "xcl2.hpp"
 #endif
 

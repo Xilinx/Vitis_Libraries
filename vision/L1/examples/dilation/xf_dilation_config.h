@@ -25,8 +25,8 @@
 #include "xf_config_params.h"
 
 /* config width and height */
-#define WIDTH 3840
-#define HEIGHT 2160
+#define WIDTH 128
+#define HEIGHT 128
 
 /*  define the input and output types  */
 #if NO

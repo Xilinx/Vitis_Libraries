@@ -43,7 +43,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/convertbitdepth/data/im0.png "
+  cosim_design -argv " ${XF_PROJ_ROOT}/L1/examples/convertbitdepth/data/128x128.png "
 }
 
 if {$VIVADO_SYN == 1} {

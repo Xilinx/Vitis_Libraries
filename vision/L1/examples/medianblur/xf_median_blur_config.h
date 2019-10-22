@@ -28,8 +28,10 @@
 #else
 #if GRAY
 #define NPC1 XF_NPPC8
+#define NPxPC XF_NPPC8
 #else
 #define NPC1 XF_NPPC4
+#define NPxPC XF_NPPC4
 #endif
 #endif
 

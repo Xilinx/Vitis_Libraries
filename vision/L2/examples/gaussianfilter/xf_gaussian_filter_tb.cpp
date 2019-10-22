@@ -18,7 +18,6 @@
 #include "xf_gaussian_filter_config.h"
 #include <iostream>
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 using namespace std;

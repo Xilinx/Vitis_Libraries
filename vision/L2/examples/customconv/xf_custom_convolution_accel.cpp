@@ -42,7 +42,7 @@ void customconv(ap_uint<PTR_IN_WIDTH>* img_in,
 // clang-format off
  #pragma HLS STREAM variable=imgInput.data depth=2
  #pragma HLS STREAM variable=imgOutput.data depth=2
-    // clang-format on
+// clang-format on
 
 #pragma HLS DATAFLOW
 

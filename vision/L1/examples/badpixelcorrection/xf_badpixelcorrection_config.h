@@ -23,8 +23,8 @@
 #include "imgproc/xf_bpc.hpp"
 
 // Set the image height and width
-#define HEIGHT 2160 // 2160
-#define WIDTH 3840  // 3840
+#define HEIGHT 1080 // 128//2160
+#define WIDTH 1920  // 128//3840
 
 #define WB_TYPE 1
 

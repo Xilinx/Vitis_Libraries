@@ -19,7 +19,7 @@
 
 #define NMS 1
 
-#define WIDTH 3840
-#define HEIGHT 2160
+#define WIDTH 128
+#define HEIGHT 128
 
 #define MAXCORNERS 1024

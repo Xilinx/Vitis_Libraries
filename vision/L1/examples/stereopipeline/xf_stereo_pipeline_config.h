@@ -26,8 +26,8 @@
 #include "xf_config_params.h"
 
 /* config width and height */
-#define XF_HEIGHT 1080
-#define XF_WIDTH 1920
+#define XF_HEIGHT 720
+#define XF_WIDTH 1280
 
 #define XF_CAMERA_MATRIX_SIZE 9
 #define XF_DIST_COEFF_SIZE 5

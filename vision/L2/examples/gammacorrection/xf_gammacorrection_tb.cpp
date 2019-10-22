@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_gammacorrection_config.h"
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 float mean_pixel(cv::Mat img) {

@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_mean_shift_config.h"
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 #define _PROFILE_ 0

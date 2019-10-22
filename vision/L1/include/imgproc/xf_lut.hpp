@@ -36,20 +36,23 @@
 namespace xf {
 namespace cv {
 
-template <int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int COLS_TRIP>
-void xFLUTKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src,
-                 hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _dst,
-                 hls::stream<unsigned char>& _lutptr,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int PLANES,
+          int DEPTH,
+          int NPC,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int COLS_TRIP>
+void xFLUTKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+                 unsigned char* _lut,
                  uint16_t height,
                  uint16_t width) {
     width = width >> XF_BITSHIFT(NPC);
     ap_uint<13> i, j, k;
     uchar_t npc = XF_NPIXPERCYCLE(NPC);
-    uchar_t _lut[256];
-
-    for (i = 0; i < 256; i++) {
-        _lut[i] = _lutptr.read();
-    }
 
     uchar_t lut[npc * PLANES][256];
 
@@ -85,7 +88,7 @@ rowLoop:
             #pragma HLS pipeline
             // clang-format on
 
-            val_src = (XF_SNAME(WORDWIDTH_SRC))(_src.read()); // read the data from the input stream
+            val_src = (XF_SNAME(WORDWIDTH_SRC))(_src.read(i * width + j)); // read the data from the input stream
 
             uchar_t l = 0;
             int c = 0;
@@ -108,81 +111,25 @@ rowLoop:
                     l++;
                 }
             }
-            _dst.write(val_dst); // write the data into the output stream
+            _dst.write(i * width + j, val_dst); // write the data into the output stream
         }
     }
 }
-
-template <int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST>
-void LUT_kernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src,
-                hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst,
-                hls::stream<unsigned char>& _lut,
-                uint16_t height,
-                uint16_t width) {
-    //	assert((DEPTH == XF_8UP ) && "Depth must be XF_8UP");
-    //	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) &&
-    //			"NPC must be AU_NPPC1 or AU_NPPC8");
-    //	assert(((WORDWIDTH_SRC == XF_8UW) || (WORDWIDTH_SRC == XF_64UW)) &&
-    //			"WORDWIDTH_SRC must be AU_8UW or AU_64UW ");
-    //	assert(((WORDWIDTH_DST == XF_8UW) || (WORDWIDTH_DST == XF_64UW)) &&
-    //			"WORDWIDTH_DST must be AU_8UW or AU_64UW");
-    //	assert(((height <= ROWS ) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
-
-    xFLUTKernel<ROWS, COLS, PLANES, DEPTH, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, (COLS >> XF_BITSHIFT(NPC))>(
-        _src, _dst, _lut, height, width);
-    //	xFLUTKernel<ROWS,COLS,PLANES,NPC>(_src, _dst, _lut, height, width);
-}
-
 template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void LUT(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst, unsigned char* _lut) {
-    hls::stream<XF_TNAME(SRC_T, NPC)> _src_stream;
-    hls::stream<XF_TNAME(SRC_T, NPC)> _dst_stream;
-    hls::stream<unsigned char> _lut_stream;
 // clang-format off
     #pragma HLS INLINE OFF
-    #pragma HLS dataflow
-// clang-format on
-
-Read_Loop:
-    for (int i = 0; i < _src.rows; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int j = 0; j<(_src.cols)>> (XF_BITSHIFT(NPC)); j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
-            #pragma HLS PIPELINE
-            #pragma HLS loop_flatten off
-            // clang-format on
-            _src_stream.write((_src.read(i * (_src.cols >> (XF_BITSHIFT(NPC))) + j)));
-        }
-    }
-
-Read_LUT:
-    for (int i = 0; i < 256; i++) {
-// clang-format off
-        #pragma HLS pipeline ii=1
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=256
-        // clang-format on
-        _lut_stream.write(*(_lut + i));
-    }
-
-    LUT_kernel<ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-               XF_WORDWIDTH(SRC_T, NPC)>(_src_stream, _dst_stream, _lut_stream, _src.rows, _src.cols);
-
-    for (int i = 0; i < _dst.rows; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int j = 0; j<(_dst.cols)>> (XF_BITSHIFT(NPC)); j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
-            #pragma HLS PIPELINE
-            #pragma HLS loop_flatten off
-            // clang-format on
-            _dst.write(i * (_dst.cols >> (XF_BITSHIFT(NPC))) + j, _dst_stream.read());
-        }
-    }
+	unsigned char height=_src.rows;
+	unsigned char width=_src.cols;
+	
+	 #ifndef __SYNTHESIS__
+    	assert((SRC_T == XF_8UC1 ) ||(SRC_T == XF_8UC3 ) && "input type must be XF_8UC1 or XF_8UC3");
+    	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8");
+    	assert(((height <= ROWS ) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
+	#endif
+	
+    xFLUTKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
+               XF_WORDWIDTH(SRC_T, NPC),(COLS >> XF_BITSHIFT(NPC))>(_src, _dst, _lut, _src.rows, _src.cols);
 }
 } // namespace cv
 } // namespace xf

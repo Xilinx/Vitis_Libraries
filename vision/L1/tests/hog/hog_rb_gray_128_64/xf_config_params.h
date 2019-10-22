@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define XF_HEIGHT 1080
-#define XF_WIDTH 1920
+#define XF_HEIGHT 128
+#define XF_WIDTH 128
 
 /* Input type */
 #define GRAY_T 1

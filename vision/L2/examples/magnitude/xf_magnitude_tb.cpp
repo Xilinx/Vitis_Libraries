@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_magnitude_config.h"
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 ////////////    Reference for L1NORM    //////////

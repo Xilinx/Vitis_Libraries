@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include "xf_harris_config.h"
 #include "xf_ocv_ref.hpp"
-#include <CL/cl.h>
+
 #include "xcl2.hpp"
 int main(int argc, char** argv) {
     cv::Mat in_img, img_gray;

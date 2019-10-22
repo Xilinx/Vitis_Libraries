@@ -25,7 +25,8 @@ int main(int argc, char** argv) {
     }
 
     // Gamma correction LUT for example:
-    std::vector<unsigned char> lut = {
+    //    std::vector<unsigned char>
+    unsigned char lut[256] = {
         0,   16,  23,  28,  32,  36,  39,  42,  45,  48,  50,  53,  55,  58,  60,  62,  64,  66,  68,  70,  71,  73,
         75,  77,  78,  80,  81,  83,  84,  86,  87,  89,  90,  92,  93,  94,  96,  97,  98,  100, 101, 102, 103, 105,
         106, 107, 108, 109, 111, 112, 113, 114, 115, 116, 117, 118, 119, 121, 122, 123, 124, 125, 126, 127, 128, 129,
@@ -68,7 +69,7 @@ int main(int argc, char** argv) {
 #endif
     // OpenCL section:
     size_t image_in_size_bytes = in_img.rows * in_img.cols * in_img.channels() * sizeof(unsigned char);
-    size_t vec_in_size_bytes = lut.size() * sizeof(unsigned char);
+    size_t vec_in_size_bytes = 256 * sizeof(unsigned char);
     size_t image_out_size_bytes = image_in_size_bytes;
 
     cl_int err;
@@ -120,7 +121,7 @@ int main(int argc, char** argv) {
                                             CL_TRUE,           // blocking call
                                             0,                 // buffer offset in bytes
                                             vec_in_size_bytes, // Size in bytes
-                                            lut.data(),        // Pointer to the data to copy
+                                            lut,               // Pointer to the data to copy
                                             nullptr, &event));
 
     // Execute the kernel:
@@ -141,7 +142,7 @@ int main(int argc, char** argv) {
     cv::imwrite("hls_out.jpg", out_img);
 
     // OpenCV reference:
-    lut_mat = cv::Mat(1, 256, CV_8UC1, lut.data());
+    lut_mat = cv::Mat(1, 256, CV_8UC1, lut);
     cv::LUT(in_img, lut_mat, ocv_ref);
     cv::imwrite("ref_img.jpg", ocv_ref);
 

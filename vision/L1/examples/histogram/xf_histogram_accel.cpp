@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-
 #include "xf_histogram_config.h"
 
 void histogram_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, _NPPC>& imgInput, unsigned int* histogram) {
+    const int depth_val = 256 * imgInput.channels();
 
-#pragma HLS INTERFACE m_axi port=histogram depth=256 bundle=gmem0
+#pragma HLS INTERFACE m_axi port = histogram depth = depth_val bundle = gmem0
 
     xf::cv::calcHist<TYPE, HEIGHT, WIDTH, _NPPC>(imgInput, histogram);
 }

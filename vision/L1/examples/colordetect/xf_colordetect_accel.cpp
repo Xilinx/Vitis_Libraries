@@ -26,6 +26,9 @@ void colordetect_accel(xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPIX>& _src,
                        unsigned char* low_thresh,
                        unsigned char* high_thresh,
                        unsigned char kernel[FILTER_SIZE * FILTER_SIZE]) {
+#pragma HLS INTERFACE m_axi port = low_thresh bundle = gmem0 depth = 9
+#pragma HLS INTERFACE m_axi port = high_thresh bundle = gmem1 depth = 9
+
     xf::cv::bgr2hsv<XF_8UC3, HEIGHT, WIDTH, NPIX>(_src, _bgr2hsv);
     xf::cv::colorthresholding<XF_8UC3, XF_8UC1, MAXCOLORS, HEIGHT, WIDTH, NPIX>(_bgr2hsv, _inter1, low_thresh,
                                                                                 high_thresh);
