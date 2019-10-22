@@ -16,12 +16,7 @@
 
 #include "lz4_decompress_stream.hpp"
 
-#define LZ_MAX_OFFSET 65536
-#define LZ_HISTORY_SIZE LZ_MAX_OFFSET
-#define LZ_READ_STATE 0
-#define LZ_MATCH_STATE 1
-#define LZ_LOW_OFFSET_STATE 2
-#define LZ_LOW_OFFSET 8 // This should be bigger than Pipeline Depth to handle inter dependency false case
+typedef ap_uint<8> streamDt;
 
 extern "C" {
 void xilLz4DecompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
@@ -35,8 +30,8 @@ void xilLz4DecompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
 #pragma HLS interface s_axilite port = return bundle = control
 
     hls::stream<xf::compression::compressd_dt> decompressedStream("decompressedStream");
-    hls::stream<xf::compression::streamDt> inStream("inStream");
-    hls::stream<xf::compression::streamDt> outStream("outStream");
+    hls::stream<streamDt> inStream("inStream");
+    hls::stream<streamDt> outStream("outStream");
 
 #pragma HLS STREAM variable = inStream depth = 2
 #pragma HLS STREAM variable = outStream depth = 2

@@ -24,7 +24,12 @@
  * This file is part of Vitis Data Compression Library.
  */
 
-#include "common.h"
+#include "hls_stream.h"
+
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 namespace xf {
 namespace compression {

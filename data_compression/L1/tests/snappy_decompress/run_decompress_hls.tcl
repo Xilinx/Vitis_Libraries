@@ -23,11 +23,11 @@ set CLKP 2.5
 open_project -reset $PROJ
 
 # Add design and testbench files
-add_files snappy_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}L1/include/hw" 
-add_files -tb snappy_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}L1/include/hw"  
+add_files snappy_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb snappy_decompress_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 
 # Set the top-level function
-set_top snappy_decompress_engine
+set_top snappyDecompressEngineRun
 
 # Create a solution
 open_solution -reset $SOLN
@@ -37,16 +37,15 @@ set_part {xcu200}
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design 
-  csim_design -O -argv "${XF_PROJ_ROOT}/common/data/sample.txt.snappy ${XF_PROJ_ROOT}/common/data/sample.txt"
+  csim_design -O -argv "${XF_PROJ_ROOT}common/data/sample.txt.snappy ${XF_PROJ_ROOT}common/data/sample.txt"
 }
 
 if {$CSYNTH == 1} {
-  csynth_design
+  csynth_design  
 }
 
 if {$COSIM == 1} {
-  cosim_design -O -argv "${XF_PROJ_ROOT}/common/data/sample.txt.snappy ${XF_PROJ_ROOT}/common/data/sample.txt"
+  cosim_design -O -argv "${XF_PROJ_ROOT}common/data/sample.txt.snappy ${XF_PROJ_ROOT}common/data/sample.txt"
 }
 
 if {$VIVADO_SYN == 1} {

@@ -23,11 +23,17 @@
  *
  * This file is part of Vitis Data Compression Library.
  */
+#include "hls_stream.h"
 
-#include "common.h"
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 namespace xf {
 namespace compression {
+
+typedef ap_uint<32> compressd_dt;
 
 /**
  * @brief This module reads the compressed data from input stream

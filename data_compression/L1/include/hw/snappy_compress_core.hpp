@@ -25,8 +25,15 @@
 
 #define PARALLEL_BLOCK 1
 #include "snappy_compress.hpp"
+#ifdef LARGE_LIT_RANGE
+#define MAX_LIT_COUNT 4090
+#define MAX_LIT_STREAM_SIZE 4096
+#else
+#define MAX_LIT_COUNT 60
+#define MAX_LIT_STREAM_SIZE 64
+#endif
 
-const int c_snappyMaxLiteralStream = 4096;
+const int c_snappyMaxLiteralStream = MAX_LIT_STREAM_SIZE;
 #define BIT 8
 
 typedef ap_uint<BIT> uintV_t;
@@ -96,6 +103,7 @@ void snappy_compress_engine(hls::stream<ap_uint<8> >& inStream,
     xf::compression::lzBestMatchFilter<MATCH_LEN, OFFSET_WINDOW>(compressdStream, bestMatchStream, input_size,
                                                                  left_bytes);
     xf::compression::lzBooster<MAX_MATCH_LEN, OFFSET_WINDOW>(bestMatchStream, boosterStream, input_size, left_bytes);
-    xf::compression::snappyDivide(boosterStream, litOut, lenOffsetOut, input_size, max_lit_limit, core_idx);
+    xf::compression::snappyDivide<MAX_LIT_COUNT, MAX_LIT_STREAM_SIZE, PARALLEL_BLOCK>(
+        boosterStream, litOut, lenOffsetOut, input_size, max_lit_limit, core_idx);
     xf::compression::snappyCompress(litOut, lenOffsetOut, snappyOut, snappyOut_eos, compressedSize, input_size);
 }

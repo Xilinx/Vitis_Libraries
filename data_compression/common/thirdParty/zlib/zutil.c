@@ -148,7 +148,12 @@ void ZLIB_INTERNAL z_error(m) char* m;
 /* exported to allow conversion of error code to string for compress() and
  * uncompress()
  */
-const char* ZEXPORT zError(err) int err;
+#if 0
+const char * ZEXPORT zError(err)
+    int err;
+#else
+const char* ZEXPORT zError(int err)
+#endif
 { return ERR_MSG(err); }
 
 #if defined(_WIN32_WCE)
@@ -308,16 +313,26 @@ extern voidp calloc OF((uInt items, uInt size));
 extern void free OF((voidpf ptr));
 #endif
 
-voidpf ZLIB_INTERNAL zcalloc(opaque, items, size) voidpf opaque;
-unsigned items;
-unsigned size;
+#if 0
+voidpf ZLIB_INTERNAL zcalloc (opaque, items, size)
+    voidpf opaque;
+    unsigned items;
+    unsigned size;
+#else
+voidpf ZLIB_INTERNAL zcalloc(voidpf opaque, unsigned items, unsigned size)
+#endif
 {
     (void)opaque;
     return sizeof(uInt) > 2 ? (voidpf)malloc(items * size) : (voidpf)calloc(items, size);
 }
 
-void ZLIB_INTERNAL zcfree(opaque, ptr) voidpf opaque;
-voidpf ptr;
+#if 0
+void ZLIB_INTERNAL zcfree (opaque, ptr)
+    voidpf opaque;
+    voidpf ptr;
+#else
+void ZLIB_INTERNAL zcfree(voidpf opaque, voidpf ptr)
+#endif
 {
     (void)opaque;
     free(ptr);

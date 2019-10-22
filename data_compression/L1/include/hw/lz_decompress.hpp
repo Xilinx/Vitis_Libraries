@@ -24,10 +24,17 @@
  * This file is part of Vitis Data Compression Library.
  */
 
-#include "common.h"
+#include "hls_stream.h"
+
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 namespace xf {
 namespace compression {
+
+typedef ap_uint<32> compressd_dt;
 
 /**
  * @brief This module writes the literals to the output stream as is

@@ -74,8 +74,10 @@ namespace compression {
  * @param input_size input data size
  */
 
+typedef ap_uint<32> compressd_dt;
+
 void huffBitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
-                     hls::stream<xf::compression::compressd_dt>& outStream,
+                     hls::stream<compressd_dt>& outStream,
                      hls::stream<bool>& endOfStream,
                      uint32_t input_size) {
     uint64_t bitbuffer = 0;
@@ -286,7 +288,7 @@ void huffBitUnPacker(hls::stream<ap_uint<2 * BIT> >& inStream,
                 //  ML, Distances based on tables
                 // ********************************
                 uint8_t curr_stage = LITERAL_STAGE;
-                xf::compression::compressd_dt tmpVal;
+                compressd_dt tmpVal;
                 bool done = false;
                 uint32_t cntr = 0;
 

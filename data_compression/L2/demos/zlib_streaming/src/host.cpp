@@ -14,19 +14,19 @@
  * limitations under the License.
  *
  */
-#include "zlib_stream_k2k.hpp"
+#include "zlib_stream.hpp"
 #include <fstream>
 #include <vector>
 #include "cmdlineparser.h"
 
 void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin) {
     // Xilinx GZIP object
-    xil_zlib xlz;
+    xfZlibStream xlz;
 
     // GZIP Compression Binary Name
     std::string binaryFileName = decompress_bin;
 
-    // Create xil_zlib object
+    // Create xfZlibStream object
     xlz.init(binaryFileName);
 #ifdef VERBOSE
 // std::cout<<"\n";

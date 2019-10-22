@@ -27,7 +27,7 @@ add_files snappy_compress_test.cpp -cflags "-I${XF_PROJ_ROOT}L1/include/hw"
 add_files -tb snappy_compress_test.cpp -cflags "-I${XF_PROJ_ROOT}L1/include/hw"
 
 # Set the top-level function
-set_top snappy_compress_engine
+set_top snappyCompressEngineRun
 
 # Create a solution
 open_solution -reset $SOLN

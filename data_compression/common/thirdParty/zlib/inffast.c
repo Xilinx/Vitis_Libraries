@@ -47,8 +47,14 @@
       requires strm->avail_out >= 258 for each loop to avoid checking for
       output space.
  */
-void ZLIB_INTERNAL inflate_fast(strm, start) z_streamp strm;
-unsigned start; /* inflate()'s starting value for strm->avail_out */
+#include <stdio.h>
+#if 0
+void ZLIB_INTERNAL inflate_fast(strm, start)
+z_streamp strm;
+unsigned start;         /* inflate()'s starting value for strm->avail_out */
+#else
+void ZLIB_INTERNAL inflate_fast(z_streamp strm, unsigned start)
+#endif
 {
     struct inflate_state FAR* state;
     z_const unsigned char FAR* in;   /* local strm->next_in */
@@ -97,6 +103,9 @@ unsigned start; /* inflate()'s starting value for strm->avail_out */
     lmask = (1U << state->lenbits) - 1;
     dmask = (1U << state->distbits) - 1;
 
+    printf("lmask %d \n", lmask);
+    printf("dmask %d \n", dmask);
+
     /* decode literals and length/distances until end-of-block or not enough
        input data or output space */
     do {
@@ -107,6 +116,9 @@ unsigned start; /* inflate()'s starting value for strm->avail_out */
             bits += 8;
         }
         here = lcode[hold & lmask];
+
+        printf("here_op %d here_bits %d here_val %d index %d hold %d bits %d\n", here.op, here.bits, here.val,
+               hold & lmask, hold, bits);
     dolen:
         op = (unsigned)(here.bits);
         hold >>= op;

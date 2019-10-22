@@ -27,7 +27,7 @@ add_files lz4_compress_test.cpp -cflags "-I${XF_PROJ_ROOT}L1/include/hw"
 add_files -tb lz4_compress_test.cpp -cflags "-I${XF_PROJ_ROOT}L1/include/hw"
 
 # Set the top-level function
-set_top lz4_compress_engine
+set_top lz4CompressEngineRun
 
 # Create a solution
 open_solution -reset $SOLN

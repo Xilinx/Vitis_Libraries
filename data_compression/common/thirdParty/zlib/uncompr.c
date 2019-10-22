@@ -24,10 +24,16 @@
    Z_DATA_ERROR if the input data was corrupted, including if the input data is
    an incomplete zlib stream.
 */
-int ZEXPORT uncompress2(dest, destLen, source, sourceLen) Bytef* dest;
-uLongf* destLen;
-const Bytef* source;
-uLong* sourceLen;
+#include <stdio.h>
+#if 0
+int ZEXPORT uncompress2 (dest, destLen, source, sourceLen)
+    Bytef *dest;
+    uLongf *destLen;
+    const Bytef *source;
+    uLong *sourceLen;
+#else
+int ZEXPORT uncompress2(Bytef* dest, uLongf* destLen, const Bytef* source, uLong* sourceLen)
+#endif
 {
     z_stream stream;
     int err;
@@ -40,6 +46,7 @@ uLong* sourceLen;
         left = *destLen;
         *destLen = 0;
     } else {
+        // printf("In else part \n");
         left = 1;
         dest = buf;
     }
@@ -56,32 +63,39 @@ uLong* sourceLen;
     stream.next_out = dest;
     stream.avail_out = 0;
 
-    do {
-        if (stream.avail_out == 0) {
-            stream.avail_out = left > (uLong)max ? max : (uInt)left;
-            left -= stream.avail_out;
-        }
-        if (stream.avail_in == 0) {
-            stream.avail_in = len > (uLong)max ? max : (uInt)len;
-            len -= stream.avail_in;
-        }
-        err = inflate(&stream, Z_NO_FLUSH);
-    } while (err == Z_OK);
+    if (stream.avail_out == 0) {
+        stream.avail_out = left > (uLong)max ? max : (uInt)left;
+        left -= stream.avail_out;
+    }
+
+    if (stream.avail_in == 0) {
+        stream.avail_in = len > (uLong)max ? max : (uInt)len;
+        len -= stream.avail_in;
+    }
+
+    printf("inflate called \n");
+    err = inflate(&stream, Z_NO_FLUSH);
 
     *sourceLen -= len + stream.avail_in;
+
     if (dest != buf)
         *destLen = stream.total_out;
     else if (stream.total_out && err == Z_BUF_ERROR)
         left = 1;
 
     inflateEnd(&stream);
+
     return err == Z_STREAM_END
                ? Z_OK
                : err == Z_NEED_DICT ? Z_DATA_ERROR : err == Z_BUF_ERROR && left + stream.avail_out ? Z_DATA_ERROR : err;
 }
-
-int ZEXPORT uncompress(dest, destLen, source, sourceLen) Bytef* dest;
-uLongf* destLen;
-const Bytef* source;
-uLong sourceLen;
+#if 0
+int ZEXPORT uncompress (dest, destLen, source, sourceLen)
+    Bytef *dest;
+    uLongf *destLen;
+    const Bytef *source;
+    uLong sourceLen;
+#else
+int ZEXPORT uncompress(Bytef* dest, uLongf* destLen, const Bytef* source, uLong sourceLen)
+#endif
 { return uncompress2(dest, destLen, source, &sourceLen); }

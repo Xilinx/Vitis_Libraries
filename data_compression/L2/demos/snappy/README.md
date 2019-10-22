@@ -23,7 +23,7 @@ kernels with 8 engines for single compute unit. It is possible to extend number 
 
 | Design | LUT | LUTMEM | REG | BRAM | URAM| DSP | Fmax (MHz) |
 | --------------- | --- | ------ | --- | ---- | --- | -----| -----|
-| Compression on U200     | 52768(5.22%) | 13819(2.42%)|64896(3.05%)|146(8.04%) | 48(5.00%)|1(0.01%)|260|
+| Compression on U200     | 52768(5.22%) | 13819(2.42%)|64896(3.05%)|50(2.77%) | 48(5.00%)|1(0.01%)|300|
 | DeCompression on U200   | 30725(2.98%) | 13452(2.34%)|39448(1.83%)|146(7.93%) | 0|1(0.01%)|300|
 
 

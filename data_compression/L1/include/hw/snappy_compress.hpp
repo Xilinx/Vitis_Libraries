@@ -24,7 +24,12 @@
  * This file is part of Vitis Data Compression Library.
  */
 
-#include "common.h"
+#include "hls_stream.h"
+
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
 #define MARKER 255
 
@@ -34,6 +39,9 @@
 
 namespace xf {
 namespace compression {
+
+typedef ap_uint<64> snappy_compressd_dt;
+typedef ap_uint<32> compressd_dt;
 
 /**
  * @brief This module encodes the input data based on the snappy algorithm
