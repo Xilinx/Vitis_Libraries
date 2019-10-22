@@ -146,9 +146,8 @@ These API functions run on the first kernel by default, but they could support m
   
 **4. XFBLAS L3 example**
 
-Please see `XFBLAS L3 example folder`_ for more example cases. 
+Please see L3 example folder for more example cases. 
 
-.. _XFBLAS L3 example folder: ../../../../L3/examples
 
 .. toctree::
    :maxdepth: 2

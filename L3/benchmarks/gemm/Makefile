@@ -123,7 +123,7 @@ EXE_FILE ?= $(BIN_DIR)/$(EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
 $(EXE_FILE): $(SRCS) | check_xrt 
 	@echo -e "----\nCompiling host $(notdir $@)..."
 	mkdir -p $(BIN_DIR)
-	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CC) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 .PHONY: host
 host: check_xrt $(EXE_FILE)
