@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_pyr_dense_optical_flow_config.h"
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 /* Color Coding */

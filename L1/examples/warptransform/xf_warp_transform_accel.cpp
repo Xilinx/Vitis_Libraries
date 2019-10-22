@@ -19,8 +19,7 @@
 void warp_transform_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1>& _src,
                           xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1>& _dst,
                           float* R) {
-
-#pragma HLS INTERFACE m_axi port=R bundle=gmem0
+#pragma HLS INTERFACE m_axi port = R bundle = gmem0 depth = 9
 
     xf::cv::warpTransform<NUM_STORE_ROWS, START_PROC, TRANSFORM_TYPE, INTERPOLATION, TYPE, HEIGHT, WIDTH, XF_NPPC1,
                           XF_USE_URAM>(_src, _dst, R);

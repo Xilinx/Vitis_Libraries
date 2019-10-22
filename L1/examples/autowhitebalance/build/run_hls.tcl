@@ -27,7 +27,7 @@ open_project -reset $PROJ
 
 add_files ${XF_PROJ_ROOT}/L1/examples/autowhitebalance/xf_autowhitebalance_accel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 add_files -tb ${XF_PROJ_ROOT}/L1/examples/autowhitebalance/xf_autowhitebalance_tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-set_top badpixelcorrection_accel
+set_top autowhitebalance_accel
 
 open_solution -reset $SOLN
 

@@ -6032,7 +6032,7 @@ rowloop:
                 // clang-format on
 
                 //				Y0[l]   = CalculateY(RGB1[offset+0].range(7,0),
-                // RGB1[offset+0].range(15,8),
+                //RGB1[offset+0].range(15,8),
                 // RGB1[offset+0].range(23,16));
                 Y[l] = CalculateY(RGB1[l].range(7, 0), RGB1[l].range(15, 8), RGB1[l].range(23, 16));
                 if (evencol) {
@@ -6729,7 +6729,7 @@ rowloop:
                 // clang-format on
 
                 //				Y0[l]   = CalculateY(RGB1[offset+0].range(7,0),
-                // RGB1[offset+0].range(15,8),
+                //RGB1[offset+0].range(15,8),
                 // RGB1[offset+0].range(23,16));
                 Y[l] = CalculateY(RGB1[l].range(23, 16), RGB1[l].range(15, 8), RGB1[l].range(7, 0));
                 if (evencol) {
@@ -6737,7 +6737,7 @@ rowloop:
                     V[l / 2] = CalculateV(RGB1[l].range(23, 16), RGB1[l].range(15, 8), RGB1[l].range(7, 0));
 
                     //					U[l]    = CalculateU(RGB1[offset+0].range(7,0),
-                    // RGB1[offset+0].range(15,8),
+                    //RGB1[offset+0].range(15,8),
                     // RGB1[offset+0].range(23,16)); 					V[l]    =
                     // CalculateV(RGB1[offset+0].range(7,0),
                     // RGB1[offset+0].range(15,8), RGB1[offset+0].range(23,16));

@@ -64,7 +64,7 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-TOOL_VERSION ?= 2019.1
+TOOL_VERSION ?= 2019.2
 
 ifeq (,$(XILINX_VIVADO))
 XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
@@ -114,15 +114,7 @@ LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-# Target check
-TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
-endif
-
-# MK_INC_END vitis.mk
+endif# MK_INC_END vitis.mk
 
 # MK_INC_BEGIN vitis_set_platform.mk
 
@@ -149,7 +141,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -169,9 +161,7 @@ ifneq (,$(word 2,$(XPLATFORM)))
 	@echo "$${MSG_DEVICE}" && false
 endif
 
-XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
-
-# MK_INC_END vitis_set_platform.mk
+XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))# MK_INC_END vitis_set_platform.mk
 
 # Initial definition
 KERNELS     :=
@@ -204,7 +194,11 @@ VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 
 
-$(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore --clock.defaultFreqHz ${VIVADO_FREQUENCY}
+$(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore 
+
+ifeq ($(BOARD), Zynq)
+VPP_CFLAGS	+= --clock.defaultFreqHz ${VIVADO_FREQUENCY}
+endif
 
 
 # -----------------------------------------------------------------------------
@@ -213,7 +207,7 @@ $(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explo
 SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/inrange
 
 EXE_NAME  		:= inrange
-HOST_ARGS 		= $(SRC_DIR)/data/4k.jpg #$(XCLBIN_FILE)
+HOST_ARGS 		= $(XF_LIB_DIR)/data/4k.jpg #$(XCLBIN_FILE)
 SRCS      		:= xf_inrange_tb xf_inrange_accel
 
 # Macro definitions
@@ -335,7 +329,17 @@ BIN_DIR_SUFFIX ?= _$(XDEVICE)
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
 
-CXX := aarch64-linux-gnu-g++
+B_NAME = $(shell dirname $(XPLATFORM))
+
+ifeq ($(ARCH), aarch64)
+	CXX := aarch64-linux-gnu-g++
+	DEV_FAM = Ultrascale
+else ifeq ($(ARCH), aarch32)
+	CXX := arm-linux-gnueabihf-g++
+	DEV_FAM = 7Series
+endif
+
+SDCARD := sd_card
 
 CC := gcc
 
@@ -384,6 +388,90 @@ $(EXE_FILE): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platfor
 .PHONY: host
 host: $(EXE_FILE) | check_vpp check_xrt check_platform
 # MK_INC_END vitis_zynq_host_rules.mk
+# MK_INC_BEGIN vitis_zynq_test_rules.mk
+
+# -----------------------------------------------------------------------------
+#                                clean up
+
+clean:
+ifneq (,$(OBJ_DIR_BASE))
+	rm -rf $(CUR_DIR)/$(OBJ_DIR_BASE)*
+endif
+ifneq (,$(BIN_DIR_BASE))
+	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*
+endif
+
+cleanx:
+ifneq (,$(VPP_DIR_BASE))
+	rm -rf $(CUR_DIR)/$(VPP_DIR_BASE)*
+endif
+ifneq (,$(XO_DIR_BASE))
+	rm -rf $(CUR_DIR)/$(XO_DIR_BASE)*
+endif
+ifneq (,$(XCLBIN_DIR_BASE))
+	rm -rf $(CUR_DIR)/$(XCLBIN_DIR_BASE)*
+endif
+ifneq (,$(BIN_DIR_BASE))
+	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*/emconfig.json
+endif
+
+cleanall: clean cleanx
+	rm -rf *.log plist $(DATA_STAMP)
+
+# -----------------------------------------------------------------------------
+#                                simulation run
+
+$(BIN_DIR)/emconfig.json :
+	emconfigutil --platform $(XPLATFORM) --od $(BIN_DIR)
+
+    ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
+        EMU_CONFIG = $(BIN_DIR)/emconfig.json
+    endif
+
+emulate : host xclbin $(EMU_CONFIG) sd_card
+ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
+       RUN_ENV += mkdir -p sd_card/data/emulation;
+       RUN_ENV += cp -rf $(XILINX_VITIS)/data/emulation/unified sd_card/data/emulation;
+       RUN_ENV += mkfatimg sd_card sd_card.img 500000;
+       EMU_CMD = launch_emulator -no-reboot -runtime ocl -t $(TARGET) -sd-card-image sd_card.img -device-family $(DEV_FAM);
+else ifeq ($(TARGET), hw)
+       RUN_ENV += 
+       EMU_CMD += @echo "Please copy the contents of sd_card and input images to an SD Card and run on the board"
+endif
+
+
+sd_card : host xclbin
+	mkdir -p $(SDCARD)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
+	cp -rf $(XCLBIN_DIR)/*.xclbin $(SDCARD)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
+	cp -rf $(B_NAME)/sw/$(XDEVICE)/boot/generic.readme $(B_NAME)/sw/$(XDEVICE)/xrt/image/* $(EXE_FILE) $(HOST_ARGS) $(SDCARD)
+ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
+	@echo 'cd /mnt/' >> $(SDCARD)/init.sh
+	@echo 'export XILINX_VITIS=$$PWD' >> $(SDCARD)/init.sh
+	@echo 'export XCL_BINDIR=$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)' >> $(SDCARD)/init.sh
+	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(SDCARD)/init.sh
+	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> $(SDCARD)/init.sh
+	@echo 'reboot' >> $(SDCARD)/init.sh
+else ifeq ($(TARGET), hw)
+	@echo "sd_card folder already exists" #TODO
+endif
+
+
+.PHONY: run run_sw_emu run_hw_emu run_hw check
+
+run_sw_emu:
+	make TARGET=sw_emu run
+
+run_hw_emu:
+	make TARGET=hw_emu run
+
+run_hw:
+	make TARGET=hw run
+
+run: host xclbin $(EMU_CONFIG) emulate
+	$(RUN_ENV)
+	$(EMU_CMD)
+
+check: run# MK_INC_END vitis_zynq_test_rules.mk
 else
 # MK_INC_BEGIN vitis_host_rules.mk
 
@@ -441,8 +529,6 @@ $(EXE_FILE): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platfor
 host: $(EXE_FILE) | check_vpp check_xrt check_platform
 
 # MK_INC_END vitis_host_rules.mk
-endif
-
 # MK_INC_BEGIN vitis_test_rules.mk
 
 # -----------------------------------------------------------------------------
@@ -508,6 +594,9 @@ run: host xclbin $(EMU_CONFIG) $(DATA_STAMP)
 check: run
 
 # MK_INC_END vitis_test_rules.mk
+endif
+
+
 
 .PHONY: build
 build: xclbin host

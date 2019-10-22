@@ -35,7 +35,7 @@ typedef float image_oper;
 
 int main(int argc, char* argv[]) {
     cv::RNG rng;
-
+    cv::Mat diff_img, image_input, image_output, opencv_image;
     image_oper R[9];
     cv::Mat _transformation_matrix(TRMAT_DIM1, TRMAT_DIM2, CV_32FC1);
     cv::Mat _transformation_matrix_2(TRMAT_DIM1, TRMAT_DIM2, CV_32FC1);
@@ -90,29 +90,21 @@ int main(int argc, char* argv[]) {
         std::cout << "\n";
     }
 
-    cv::Mat image_input, image_output;
 #if RGBA
     image_input = cv::imread(argv[1], 1);
+    image_output.create(image_input.rows, image_input.cols, CV_8UC3);
+    diff_img.create(image_input.rows, image_input.cols, CV_8UC3);
+    opencv_image = cv::Mat::zeros(image_input.rows, image_input.cols, CV_8UC3);
 #else
     image_input = cv::imread(argv[1], 0);
+    image_output.create(image_input.rows, image_input.cols, CV_8UC1);
+    diff_img.create(image_input.rows, image_input.cols, CV_8UC1);
+    opencv_image = cv::Mat::zeros(image_input.rows, image_input.cols, CV_8UC1);
 #endif
-
-    image_output.create(image_input.rows, image_input.cols, image_input.depth());
-    cv::Mat diff_img;
-    diff_img.create(image_input.rows, image_input.cols, image_input.depth());
 
     if (image_input.data == NULL) {
         printf("Failed to load the image ... %s\n!", argv[1]);
         return -1;
-    }
-    cv::imwrite("input.png", image_input);
-
-    cv::Mat opencv_image;
-    opencv_image.create(image_input.rows, image_input.cols, image_input.depth());
-    for (int I1 = 0; I1 < opencv_image.rows; I1++) {
-        for (int J1 = 0; J1 < opencv_image.cols; J1++) {
-            opencv_image.at<ap_uint8_t>(I1, J1) = 0;
-        }
     }
 
 #if TRANSFORM_TYPE == 1
@@ -138,25 +130,19 @@ int main(int argc, char* argv[]) {
     static xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1> _src(image_input.rows, image_input.cols);
     static xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1> _dst(image_input.rows, image_input.cols);
 
-    //_src = xf::cv::imread<TYPE, HEIGHT, WIDTH, XF_NPPC1>(argv[1], 0);
     _src.copyTo(image_input.data);
-    // xf::cv::imwrite("xf_inp.png",_src);
 
     warp_transform_accel(_src, _dst, R);
 
-    xf::cv::imwrite("hls_out.jpg", _dst);
-
-    cv::imwrite("output.png", image_output);
-
     image_output.data = _dst.copyFrom();
-
+    cv::imwrite("hls_output.png", image_output);
     char output_opencv[] = "opencv_output.png";
     cv::imwrite(output_opencv, opencv_image);
 
     ap_uint8_t temp_px1 = 0, temp_px2 = 0, max_err = 0, min_err = 255;
     int num_errs = 0, num_errs1 = 0;
     float err_per = 0;
-    xf::cv::absDiff(opencv_image, _dst, diff_img);
+    cv::absdiff(opencv_image, image_output, diff_img);
     xf::cv::analyzeDiff(diff_img, 1, err_per);
 
     if (err_per > 0.05) {

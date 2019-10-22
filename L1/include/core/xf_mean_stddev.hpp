@@ -44,7 +44,7 @@ void xFStddevkernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat1,
     ap_uint<64> var[PLANES];                                    //={0};
     uint32_t tmp_sum_vals[(1 << XF_BITSHIFT(NPC)) * PLANES];    //={0};
     uint64_t sum[PLANES];                                       //={0};
-                                                                // ap_uint<8> val[(1<<XF_BITSHIFT(NPC))*PLANES];
+// ap_uint<8> val[(1<<XF_BITSHIFT(NPC))*PLANES];
 
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_var_vals complete dim=0

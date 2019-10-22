@@ -18,7 +18,6 @@
 #include "xf_stereo_pipeline_config.h"
 #include "cameraParameters.h"
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 #define _PROFILE_ 0

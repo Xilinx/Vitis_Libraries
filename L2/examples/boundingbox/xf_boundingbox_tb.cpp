@@ -30,7 +30,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 using namespace std;
 

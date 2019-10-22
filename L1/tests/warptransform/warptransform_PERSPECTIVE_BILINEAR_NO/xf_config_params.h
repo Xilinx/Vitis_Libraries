@@ -18,7 +18,7 @@
 #define NO 1 // 1 Pixel Processing
 
 // Number of rows in the input image
-#define HEIGHT 2160
+#define HEIGHT 128
 // Number of columns in  in the input image
 #define WIDTH 128
 

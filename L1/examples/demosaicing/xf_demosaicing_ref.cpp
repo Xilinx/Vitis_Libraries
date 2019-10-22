@@ -14,21 +14,9 @@
  * limitations under the License.
  */
 
-//#include "xf_headers.hpp"
-//#include "opencv2/imgproc/imgproc.hpp"
-#if __SDSCC__
-#undef __ARM_NEON__
-#undef __ARM_NEON
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#define __ARM_NEON__
-#define __ARM_NEON
-#else
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include "opencv2/imgproc/imgproc.hpp"
-#endif
 
 void demosaicImage(cv::Mat cfa_output, cv::Mat& output_image, int code) {
     int block[5][5];

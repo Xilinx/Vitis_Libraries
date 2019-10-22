@@ -20,7 +20,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_sobel_config.h"
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {

@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_cvt_color_config.h"
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 #define ERROR_THRESHOLD 2

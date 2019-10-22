@@ -757,12 +757,11 @@ template <int STORE_LINES,
           int COLS,
           int NPC,
           bool USE_URAM = false>
-void warpTransform(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
-                   xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
-                   float P_matrix[9]) {
+void warpTransformKrnl(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
+                       xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
+                       float P_matrix[9]) {
 // clang-format off
-    #pragma HLS INLINE OFF
-    #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
     // clang-format on
     hls::stream<XF_TNAME(TYPE, NPC)> in_stream;
     hls::stream<XF_TNAME(TYPE, NPC)> out_stream;
@@ -798,6 +797,25 @@ void warpTransform(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
             //_dst_mat.write(i*(_dst_mat.cols>>XF_BITSHIFT(NPC)) +j,in_stream.read());
         }
     }
+}
+
+template <int STORE_LINES,
+          int START_ROW,
+          int TRANSFORM,
+          bool INTERPOLATION_TYPE,
+          int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          bool USE_URAM = false>
+void warpTransform(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
+                   xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
+                   float P_matrix[9]) {
+// clang-format off
+    #pragma HLS INLINE OFF
+
+	warpTransformKrnl<STORE_LINES, START_ROW, TRANSFORM, INTERPOLATION_TYPE, TYPE, ROWS, COLS, NPC,
+                          USE_URAM>(_src_mat, _dst_mat, P_matrix);
 }
 } // namespace cv
 } // namespace xf

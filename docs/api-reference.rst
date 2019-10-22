@@ -1,31 +1,31 @@
-.. _libapireference:
+.. _lib-api-reference:
 
-
-Overview
+##################################
+Vitis Vision Library API Reference
 ##################################
 
-To facilitate local memory allocation on FPGA devices, the xfOpenCV
+To facilitate local memory allocation on FPGA devices, the Vitis vision
 library functions are provided in templates with compile-time
-parameters. Data is explicitly copied from ``cv::Mat`` to ``xf::Mat``
+parameters. Data is explicitly copied from ``cv::Mat`` to ``xf::cv::Mat``
 and is stored in physically contiguous memory to achieve the best
-possible performance. After processing, the output in ``xf::Mat`` is
+possible performance. After processing, the output in ``xf::cv::Mat`` is
 copied back to ``cv::Mat`` to write it into the memory.
 
 .. _xf-mat-class:
 
+**********************************
+xf::cv::Mat Image Container Class
+**********************************
 
-xf::Mat Image Container Class
-#############################
-
-``xf::Mat`` is a template class that serves as a container for storing
+``xf::cv::Mat`` is a template class that serves as a container for storing
 image data and its attributes.
 
-.. note:: The ``xf::Mat`` image container class is similar to the ``cv::Mat`` class of the OpenCV library.
+.. note:: The ``xf::cv::Mat`` image container class is similar to the ``cv::Mat`` class of the OpenCV library.
 
 .. _xfmat-calls-def:
 
 Class Definition
-================
+==================
 
 
 .. code:: c
@@ -85,10 +85,10 @@ Class Definition
 .. rubric:: Parameter Descriptions
 
 
-The following table lists the ``xf::Mat`` class parameters and their
+The following table lists the ``xf::cv::Mat`` class parameters and their
 descriptions:
 
-.. table:: Table xf::Mat Class Parameter Descriptions
+.. table:: Table 1. xf::cv::Mat Class .. rubric:: Parameter Descriptions
 
    +---------------+------------------------------------------------------+
    | Parameter     | Description                                          |
@@ -112,7 +112,7 @@ descriptions:
 
 The following table lists the member functions and their descriptions:
 
-.. table:: Table xf::Mat Member Function Descriptions
+.. table:: Table 2. xf::cv::Mat Member Function Descriptions
 
    +---------------+------------------------------------------------------+
    | Member        | Description                                          |
@@ -126,7 +126,7 @@ The following table lists the member functions and their descriptions:
    | \_cols)       |                                                      |
    +---------------+------------------------------------------------------+
    | Mat(const     | This constructor helps clone a Mat object to         |
-   | xf::Mat       | another. New memory will be allocated for the newly  |
+   | xf::cv::Mat   | another. New memory will be allocated for the newly  |
    | &_src)        | created constructor.                                 |
    +---------------+------------------------------------------------------+
    | Mat(int       | This constructor initializes the Mat object using    |
@@ -137,7 +137,7 @@ The following table lists the member functions and their descriptions:
    |               | member.                                              |
    +---------------+------------------------------------------------------+
    | convertTo(Mat | Refer to                                             |
-   | <DST_T,ROWS,  | `xf::convertTo <api-reference.html#xf-convertto>`    |
+   | <DST_T,ROWS,  |`xf::cv::convertTo<api-reference.html#xf-convertto>`  |
    | COLS, NPC>    |                                                      |
    | &dst, int     |                                                      |
    | otype, double |                                                      |
@@ -178,12 +178,12 @@ The following table lists the member functions and their descriptions:
    | =Mat()        | This is a default destructor of the Mat object.      |
    +---------------+------------------------------------------------------+
 
-Template parameters of the ``xf::Mat`` class are used to set the depth
+Template parameters of the ``xf::cv::Mat`` class are used to set the depth
 of the pixel, number of channels in the image, number of pixels packed
 per word, maximum number of rows and columns of the image. The following
 table lists the template parameters and their descriptions:
 
-.. table:: Table xf::Mat Template Parameter Descriptions
+.. table:: Table 3. xf::cv::Mat Template .. rubric:: Parameter Descriptions
 
    +---------------+------------------------------------------------------+
    | Parameters    | Description                                          |
@@ -204,7 +204,7 @@ table lists the template parameters and their descriptions:
 Pixel-Level Parallelism
 ========================
 
-The amount of parallelism to be implemented in a function from xfOpenCV
+The amount of parallelism to be implemented in a function from Vitis vision
 is kept as a configurable parameter. In most functions, there are two
 options for processing data.
 
@@ -214,7 +214,7 @@ options for processing data.
 The following table describes the options available for specifying the
 level of parallelism required in a particular function:
 
-.. table:: Table Options Available for Specifying the Level of Parallelism
+.. table:: Table 4. Options Available for Specifying the Level of Parallelism
 
    +----------+----------------------------------+
    | Option   | Description                      |
@@ -264,10 +264,10 @@ nomenclature of the parameter is listed below.
 For example, for an 8-bit pixel - unsigned - 1 channel the data type is
 ``XF_8UC1``.
 
-The following table lists the available data types for the ``xf::Mat``
+The following table lists the available data types for the ``xf::cv::Mat``
 class:
 
-.. table:: Table xf::Mat Class - Available Data Types
+.. table:: Table 5. xf::cv::Mat Class - Available Data Types
 
    +-------------+-----------------+--------------------+-----------------+
    | Option      | Number of bits  | Unsigned/ Signed/  | Number of       |
@@ -298,12 +298,12 @@ Manipulating Data Type
 -----------------------
 
 Based on the number of pixels to process per clock cycle and the type
-parameter, there are different possible data types. The xfOpenCV library
-uses these datatypes for internal processing and inside the ``xf::Mat``
+parameter, there are different possible data types. The Vitis vision library
+uses these datatypes for internal processing and inside the ``xf::cv::Mat``
 class. The following are a few supported types:
 
 -  ``XF_TNAME(TYPE,NPPC)`` resolves to the data type of the data member
-   of the ``xf::Mat`` object. For instance,
+   of the ``xf::cv::Mat`` object. For instance,
    ``XF_TNAME(XF_8UC1,XF_NPPC8)`` resolves to ``ap_uint<64>``.
 -  ``Word width = pixel depth * number of channels * number of pixels to process per             cycle (NPPC)``.
 -  ``XF_DTUNAME(TYPE,NPPC)`` resolves to the data type of the pixel. For
@@ -312,132 +312,33 @@ class. The following are a few supported types:
    For instance, ``XF_PTSNAME             (XF_16UC1,XF_NPPC2)`` resolves
    to ``unsigned             short``.
 
-.. note:: ``ap_uint<>``, ``ap_int<>``, ``ap_fixed<>``, and ``ap_ufixed<>`` types belong to the high-level synthesis (HLS) library. For more information, see the Vivado Design Suite User Guide: High-Level Synthesis (`UG902 <https://www.xilinx.com/cgi-bin/docs/rdoc?v=2019.1;d=ug902-vivado-high-level-synthesis.pdf>`_).
-
-Sample Illustration
-====================
-
-The following code illustrates the configurations that are required to
-build the gaussian filter on an image, using the SDSoC™ tool for Zynq®
-UltraScale™ platform.
-
-Note: In case of a real-time application, where the video is streamed
-in, it is recommended that the location of frame buffer is ``xf::Mat``
-and is processed using the library function. The resultant location
-pointer is passed to display IPs.
-
-`xf_config_params.h`
-
-.. code:: c
-
-   #define FILTER_SIZE_3 1
-   #define FILTER_SIZE_5 0
-   #define FILTER_SIZE_7 0
-   #define RO 0
-   #define NO 1
-
-   #if NO
-   #define NPC1 XF_NPPC1
-   #endif
-   #if RO
-   #define NPC1 XF_NPPC8
-   #endif
-
-`xf_gaussian_filter_tb.cpp`
-
-.. code:: c
-
-   int main(int argc, char **argv) 
-   {
-   cv::Mat in_img, out_img, ocv_ref;
-   cv::Mat in_gray, in_gray1, diff;
-   in_img = cv::imread(argv[1], 1); // reading in the color image
-           extractChannel(in_img, in_gray, 1);
-
-   xf::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput(in_img.rows,in_img.cols);
-   xf::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput(in_img.rows,in_img.cols);
-
-   imgInput.copyTo(in_gray.data);
-
-   gaussian_filter_accel(imgInput,imgOutput,sigma);
-
-   // Write output image
-   xf::imwrite("hls_out.jpg",imgOutput);
-   }
-
-`xf_gaussian_filter_accel.cpp`
-
-.. code:: c
-
-   #include "xf_gaussian_filter_config.h"
-
-   void gaussian_filter_accel(xf::Mat<XF_8UC1,HEIGHT,WIDTH,NPC1> &imgInput,xf::Mat<XF_8UC1,HEIGHT,WIDTH,NPC1>&imgOutput,float sigma)
-   {
-       xf::GaussianBlur<FILTER_WIDTH, XF_BORDER_CONSTANT, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput, imgOutput, sigma);
-   }
-
-`xf_gaussian_filter.hpp`
-
-.. code:: c
-
-   #pragma SDS data data_mover("_src.data":AXIDMA_SIMPLE)
-           #pragma SDS data data_mover("_dst.data":AXIDMA_SIMPLE)
-           #pragma SDS data access_pattern("_src.data":SEQUENTIAL)
-           #pragma SDS data copy("_src.data"[0:"_src.size"])
-           #pragma SDS data access_pattern("_dst.data":SEQUENTIAL)
-           #pragma SDS data copy("_dst.data"[0:"_dst.size"])
-           
-           template<int FILTER_SIZE, int BORDER_TYPE, int SRC_T, int ROWS, int COLS,int NPC = 1>
-           void GaussianBlur(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst, float sigma)
-           {
-           //function body
-           }
-
-The design fetches data from external memory (with the help of SDSoC
-data movers) and is transferred to the function in 8-bit or 64-bit
-packets, based on the configured mode. Assuming 8-bits per pixel, 8
-pixels can be packed into 64-bits. Therefore, 8 pixels are available to
-be processed in parallel.
-
-Enable the ``FILTER_SIZE_3`` and the ``NO`` macros in the `xf_config_params.h` file. The macro is used to set the filter size to ``3x3`` and ``#define NO 1`` macro enables 1 pixel parallelism.
-
-Specify the SDSoC tool specific pragmas, in the xf_gaussian_filter.hpp file.
-
-.. code:: c
-
-   #pragma SDS data data_mover("_src.data":AXIDMA_SIMPLE)
-   #pragma SDS data data_mover("_dst.data":AXIDMA_SIMPLE)
-   #pragma SDS data access_pattern("_src.data":SEQUENTIAL)
-   #pragma SDS data copy("_src.data"[0:"_src.size"])
-   #pragma SDS data access_pattern("_dst.data":SEQUENTIAL)
-   #pragma SDS data copy("_dst.data"[0:"_dst.size"])
-
-.. note:: For more information on the pragmas used for hardware accelerator functions in SDSoC, see SDSoC Environment User Guide (`UG1027 <https://www.xilinx.com/cgi-bin/docs/rdoc?v=2019.1;d=ug1027-sdsoc-user-guide.pdf>`).
+.. note:: ``ap_uint<>``, ``ap_int<>``, ``ap_fixed<>``, and ``ap_ufixed<>`` types belong to the high-level synthesis (HLS) library. For more information, see the Vivado Design Suite User Guide: High-Level
+Synthesis (`UG902 <https://www.xilinx.com/cgi-bin/docs/rdoc?v=2019.1;d=ug902-vivado-high-level-synthesis.pdf>`__).
 
 .. _xf-imread:
 
-xf::imread
+xf::cv::imread
 ===========
 
-The function `xf::imread` loads an image from the specified file path,
-copies into xf::Mat and returns it. If the image cannot be read (because
+The function `xf::cv::imread` loads an image from the specified file path,
+copies into xf::cv::Mat and returns it. If the image cannot be read (because
 of missing file, improper permissions, unsupported or invalid format),
 the function exits with a non-zero return code and an error statement.
 
-.. note:: In an HLS standalone mode like Cosim, use ``cv::imread`` followed by ``copyTo`` function, instead of ``xf::imread``.
+.. note:: In an HLS standalone mode like Cosim, use ``cv::imread`` followed by ``copyTo`` function, instead of ``xf::cv::imread``.
 
 .. rubric:: API Syntax
 
 .. code:: c
 
    template<int PTYPE, int ROWS, int COLS, int NPC>
-   xf::Mat<PTYPE, ROWS, COLS, NPC> imread (char *filename, int type)
+   xf::cv::Mat<PTYPE, ROWS, COLS, NPC> imread (char *filename, int type)
 
 .. rubric:: Parameter Descriptions
 
 The table below describes the template and the function parameters.
 
-.. table:: Table xf::imread Parameter Description
+.. table:: Table 6. xf::cv::imread Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -463,14 +364,14 @@ The table below describes the template and the function parameters.
 
 .. _ariaid-title4:
 
-xf::imwrite
+xf::cv::imwrite
 ===========
 
-The function xf::imwrite saves the image to the specified file from the
-given xf::Mat. The image format is chosen based on the file name
+The function xf::cv::imwrite saves the image to the specified file from the
+given xf::cv::Mat. The image format is chosen based on the file name
 extension. This function internally uses cv::imwrite for the processing.
 Therefore, all the limitations of cv::imwrite are also applicable to
-xf::imwrite.
+xf::cv::imwrite.
 
 .. rubric:: API Syntax
 
@@ -478,13 +379,13 @@ xf::imwrite.
 .. code:: c
 
    template <int PTYPE, int ROWS, int COLS, int NPC>
-   void imwrite(const char *img_name, xf::Mat<PTYPE, ROWS, COLS, NPC> &img)
+   void imwrite(const char *img_name, xf::cv::Mat<PTYPE, ROWS, COLS, NPC> &img)
 
 .. rubric:: Parameter Descriptions
 
 The table below describes the template and the function parameters.
 
-.. table:: Table xf::imwrite Parameter Description
+.. table:: Table 7. xf::cv::imwrite Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -502,16 +403,16 @@ The table below describes the template and the function parameters.
    +--------------+-------------------------------------------------------+
    | img_name     | Name of the file with the extension                   |
    +--------------+-------------------------------------------------------+
-   | img          | xf::Mat array to be saved                             |
+   | img          | xf::cv::Mat array to be saved                         |
    +--------------+-------------------------------------------------------+
 
 .. _xf-absdiff:
 
-xf::absDiff
+xf::cv::absDiff
 ============
 
-The function xf::absDiff computes the absolute difference between each
-individual pixels of an xf::Mat and a cv::Mat, and returns the
+The function xf::cv::absDiff computes the absolute difference between each
+individual pixels of an xf::cv::Mat and a cv::Mat, and returns the
 difference values in a cv::Mat.
 
 .. rubric:: API Syntax
@@ -519,13 +420,13 @@ difference values in a cv::Mat.
 .. code:: c
 
    template <int PTYPE, int ROWS, int COLS, int NPC>
-   void absDiff(cv::Mat &cv_img, xf::Mat<PTYPE, ROWS, COLS, NPC>& xf_img, cv::Mat &diff_img )
+   void absDiff(cv::Mat &cv_img, xf::cv::Mat<PTYPE, ROWS, COLS, NPC>& xf_img, cv::Mat &diff_img )
 
 .. rubric:: Parameter Descriptions
 
 The table below describes the template and the function parameters.
 
-.. table:: Table xf::absDiff Parameter Description
+.. table:: Table 8. xf::cv::absDiff Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -543,17 +444,17 @@ The table below describes the template and the function parameters.
    +--------------+-------------------------------------------------------+
    | cv_img       | cv::Mat array to be compared                          |
    +--------------+-------------------------------------------------------+
-   | xf_img       | xf::Mat array to be compared                          |
+   | xf_img       | xf::cv::Mat array to be compared                      |
    +--------------+-------------------------------------------------------+
    | diff_img     | Output difference image(cv::Mat)                      |
    +--------------+-------------------------------------------------------+
 
 .. _xf-convertto:
 
-xf::convertTo
+xf::cv::convertTo
 ==============
 
-The xf::convertTo function performs bit depth conversion on each
+The xf::cv::convertTo function performs bit depth conversion on each
 individual pixel of the given input image. This method converts the
 source pixel values to the target data type with appropriate casting.
 
@@ -568,13 +469,13 @@ converted image cannot be stored in the Mat of the input image.
 
 .. code:: c
 
-   template<int DST_T> void convertTo(xf::Mat<DST_T,ROWS, COLS, NPC> &dst, int ctype, double alpha=1, double beta=0)
+   template<int DST_T> void convertTo(xf::cv::Mat<DST_T,ROWS, COLS, NPC> &dst, int ctype, double alpha=1, double beta=0)
 
 .. rubric:: Parameter Descriptions
 
 The table below describes the template and function parameters.
 
-.. table:: Table xf::convertTo Parameter Description
+.. table:: Table 9. xf::cv::convertTo Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -627,18 +528,20 @@ The table below describes the template and function parameters.
 
 .. _xfopencv-lib-fns:
 
+****************************
+Vitis Vision Library Functions
+****************************
 
-xfOpenCV Library Functions
-###########################
-
-The xfOpenCV library is a set of select OpenCV functions optimized for
+The Vitis vision library is a set of select OpenCV functions optimized for
 Zynq-7000 and Zynq UltraScale+ MPSoC devices. The maximum resolution supported for all the functions is 4K, except
 Houghlines and HOG (RB mode).
 
-.. note:: `Resolution Conversion (Resize) <#resolution-conversion>`_ in 8 pixel per cycle mode, `Dense Pyramidal LK Optical Flow <#dense-pyramidal-lk-optical>`_, and `Dense Non-Pyramidal LK Optical Flow <#dense-non-pyramidal-lk-optical>`_ functions are not 
+.. note:: Resolution Conversion (Resize) <api-reference.html#pgv1504034282273> in 8 pixel per cycle mode, Dense Pyramidal LK Optical
+Flow <api-reference.html#bcx1504034274628>, and Dense Non-Pyramidal LK Optical Flow <api-reference.html#ktc1504034279546> functions are not 
 supported on the Zynq-7000 SoC ZC702 devices, due to the higher resource utilization.
 
-.. note:: Number of pixel per clock depends on the maximum bus width a device can support. For example: Zynq-7000 SoC has 64-bit interface and so for a pixel type 16UC1, maximum of four pixel per clock (XF_NPPC4) is possible.
+.. note:: Number of pixel per clock depends on the maximum bus width a device can support. For example: Zynq-7000 SoC has 64-bit interface and so for a pixel type
+16UC1, maximum of four pixel per clock (XF_NPPC4) is possible.
 
 .. _absdiff:
 
@@ -667,16 +570,16 @@ Where,
 
    template<int SRC_T, int ROWS, int COLS, int NPC=1>
    void absdiff(
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1,
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2,
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1,
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2,
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
 
 .. rubric:: Parameter Descriptions
 
 
 The following table describes the template and the function parameters.
 
-.. table:: Table absdiff Parameter Description
+.. table:: Table 11. absdiff Parameter Description
 
    +-----------------------------------+-----------------------------------+
    | Parameter                         | Description                       |
@@ -714,17 +617,18 @@ configurations, generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD (1080x1920)
 image.
 
-.. table:: Table absdiff Function Resource Utilization Summary
+.. table:: Table 12. absdiff Function Resource Utilization Summary
 
-    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
-    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-    +                +                           +----------------------+-----------+----+-----+-----+
-    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-    +================+===========================+======================+===========+====+=====+=====+
-    | 1 Pixel        | 300                       | 0                    | 0         | 62 | 67  | 17  |
-    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
-    | 8 Pixel        | 150                       | 0                    | 0         | 67 | 234 | 39  |
-    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
+
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
+| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
++                +                           +----------------------+-----------+----+-----+-----+
+|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
++================+===========================+======================+===========+====+=====+=====+
+| 1 Pixel        | 300                       | 0                    | 0         | 62 | 67  | 17  |
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
+| 8 Pixel        | 150                       | 0                    | 0         | 67 | 234 | 39  |
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -734,17 +638,17 @@ The following table summarizes the performance in different
 configurations, as generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
-.. table:: Table absdiff Function Performance Estimate Summary
+.. table:: Table 13. absdiff Function Performance Estimate Summary
 
-    +-----------------------------+------------------+
-    | Operating Mode              | Latency Estimate |
-    +                             +------------------+
-    |                             | Max Latency (ms) |
-    +=============================+==================+
-    | 1 pixel operation (300 MHz) | 6.9              |
-    +-----------------------------+------------------+
-    | 8 pixel operation (150 MHz) | 1.69             |
-    +-----------------------------+------------------+
++-----------------------------+------------------+
+| Operating Mode              | Latency Estimate |
++                             +------------------+
+|                             | Max Latency (ms) |
++=============================+==================+
+| 1 pixel operation (300 MHz) | 6.9              |
++-----------------------------+------------------+
+| 8 pixel operation (150 MHz) | 1.69             |
++-----------------------------+------------------+
 
 .. rubric:: Deviation from OpenCV
 
@@ -770,9 +674,9 @@ image (src2), and generates the accumulated result image (dst).
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1> 
    void accumulate (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
-   xf::Mat<int DST_T, int ROWS, int COLS, int NPC> dst )
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
+   xf::cv::Mat<int DST_T, int ROWS, int COLS, int NPC> dst )
 
 
 .. rubric:: Parameter Descriptions
@@ -780,7 +684,7 @@ image (src2), and generates the accumulated result image (dst).
 
 The following table describes the template and the function parameters.
 
-.. table:: Table accumulate Parameter Description
+.. table:: Table 14. accumulate Parameter Description
 
    +-----------------+----------------------------------------------------+
    | Parameter       | Description                                        |
@@ -815,7 +719,7 @@ The following table summarizes the resource utilization in different
 configurations, generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
-.. table:: Table accumulate Function Resource Utilization Summary
+.. table:: Table 15. accumulate Function Resource Utilization Summary
 
 
 +----------------+---------------------------+----------------------+-----------+----+-----+-----+
@@ -871,7 +775,7 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
   The src2 image acts as both input and output, as shown below:
 | |image2|
 
-Whereas, in the xfOpenCV implementation, the accumulated image is stored
+Whereas, in the Vitis vision implementation, the accumulated image is stored
 separately, as shown below:
 
 | 
@@ -901,9 +805,9 @@ of streams.
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1> 
    void accumulateSquare (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
-   xf::Mat<int DST_T, int ROWS, int COLS, int NPC> dst)
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
+   xf::cv::Mat<int DST_T, int ROWS, int COLS, int NPC> dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -911,7 +815,7 @@ of streams.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table accumulateSquare Parameter Description
+.. table:: Table 18. accumulateSquare Parameter Description
 
    +-------------+--------------------------------------------------------+
    | Parameter   | Description                                            |
@@ -946,7 +850,7 @@ configurations, generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD (1080x1920)
 image.
 
-.. table:: Table accumulateSquare Function Resource Utilization Summary
+.. table:: Table 19. accumulateSquare Function Resource Utilization Summary
 
 +----------------+---------------------------+----------------------+-----------+----+-----+-----+
 | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
@@ -963,7 +867,7 @@ The following table summarizes the resource utilization in different
 configurations, generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1 FPGA, to process 4K 3 Channel image.
 
-.. table:: Table accumulateSquare Function Resource Utilization Summary
+.. table:: Table 20. accumulateSquare Function Resource Utilization Summary
 
 
 +----------------+---------------------------+----------------------+-----------+----+-----+-----+
@@ -983,7 +887,7 @@ The following table summarizes the performance in different
 configurations, as generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
-.. table:: Table accumulateSquare Function Performance Estimate Summary
+.. table:: Table 21. accumulateSquare Function Performance Estimate Summary
 
 
 +-----------------------------+------------------+
@@ -1004,7 +908,7 @@ image. The src2 image acts as input as well as output.
 
 | 
 | |image5|
-| Whereas, in the xfOpenCV implementation, the accumulated squared image
+| Whereas, in the Vitis vision implementation, the accumulated squared image
   is stored separately. |image6|
 
 .. _accumulate-weighted:
@@ -1031,9 +935,9 @@ streams.
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1> 
    void accumulateWeighted (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
-   xf::Mat<int DST_T, int ROWS, int COLS, int NPC> dst, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
+   xf::cv::Mat<int DST_T, int ROWS, int COLS, int NPC> dst, 
    float alpha )
 
 
@@ -1042,7 +946,7 @@ streams.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table accumulateWeighted Parameter Description
+.. table:: Table 22. accumulateWeighted Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -1080,34 +984,34 @@ configurations, generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD (1080x1920)
 image.
 
-.. table:: Table accumulateWeighted Function Resource Utilization Summary
+.. table:: Table 23. accumulateWeighted Function Resource Utilization Summary
 
 
-    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
-    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-    +                +                           +----------------------+-----------+----+-----+-----+
-    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-    +================+===========================+======================+===========+====+=====+=====+
-    | 1 Pixel        | 300                       | 0                    | 5         |295 | 255 | 52  |
-    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
-    | 8 Pixel        | 150                       | 0                    | 19        |556 | 476 | 88  |
-    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
+| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
++                +                           +----------------------+-----------+----+-----+-----+
+|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
++================+===========================+======================+===========+====+=====+=====+
+| 1 Pixel        | 300                       | 0                    | 5         |295 | 255 | 52  |
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
+| 8 Pixel        | 150                       | 0                    | 19        |556 | 476 | 88  |
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 The following table summarizes the resource utilization in different
 configurations, generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3 Channel image.
 
-.. table:: Table accumulateWeighted Function Resource Utilization Summary
+.. table:: Table 24. accumulateWeighted Function Resource Utilization Summary
 
 
-    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
-    | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
-    +                +                           +----------------------+-----------+----+-----+-----+
-    |                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
-    +================+===========================+======================+===========+====+=====+=====+
-    | 1 Pixel        | 300                       | 0                    | 9         |457 | 387 | 95  |
-    +----------------+---------------------------+----------------------+-----------+----+-----+-----+
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
+| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
++                +                           +----------------------+-----------+----+-----+-----+
+|                |                           | BRAM_18K             | DSP_48Es  | FF | LUT | CLB |
++================+===========================+======================+===========+====+=====+=====+
+| 1 Pixel        | 300                       | 0                    | 9         |457 | 387 | 95  |
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
 
 
 .. rubric:: Performance Estimate
@@ -1117,17 +1021,17 @@ The following table summarizes the performance in different
 configurations, as generated using Vivado HLS 2019.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 
-.. table:: Table accumulateWeighted Function Performance Estimate Summary
+.. table:: Table 25. accumulateWeighted Function Performance Estimate Summary
 
-    +-----------------------------+------------------+
-    | Operating Mode              | Latency Estimate |
-    +                             +------------------+
-    |                             | Max Latency (ms) |
-    +=============================+==================+
-    | 1 pixel operation (300 MHz) | 6.9              |
-    +-----------------------------+------------------+
-    | 8 pixel operation (150 MHz) | 1.7              |
-    +-----------------------------+------------------+
++-----------------------------+------------------+
+| Operating Mode              | Latency Estimate |
++                             +------------------+
+|                             | Max Latency (ms) |
++=============================+==================+
+| 1 pixel operation (300 MHz) | 6.9              |
++-----------------------------+------------------+
+| 8 pixel operation (150 MHz) | 1.7              |
++-----------------------------+------------------+
 
 
 .. rubric:: Deviation from OpenCV
@@ -1138,7 +1042,7 @@ src2 image acts as input as well as output, as shown below:
 
 |image8|
 
-Whereas, in xfOpenCV implementation, the accumulated weighted image is
+Whereas, in Vitis vision implementation, the accumulated weighted image is
 stored separately.
 
 |image9|
@@ -1161,7 +1065,7 @@ Where (x,y) is the spatial coordinate of the pixel.
 .. code:: c
 
    template<int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC =1>
-   void addS(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void addS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)],xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -1261,7 +1165,7 @@ dst(x,y)= src1(x,y)*alpha+src2(x,y)*beta+ gamma
 .. code:: c
 
    template< int SRC_T , int DST_T,   int ROWS, int COLS, int NPC=1>
-   void addWeighted(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, float alpha, xf::Mat<SRC_T, ROWS, COLS, NPC> & _src2, float beta, float gamma, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void addWeighted(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, float alpha, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, float beta, float gamma, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -1354,188 +1258,6 @@ image.
 +-----------------------------+------------------+
 
 
-.. _autowhitebalance:
-Autowhitebalance
-=================
-**Grayworld whitebalancing algorithm:**
-
-This algorithm scales the values of pixels based on a gray-world assumption which states that the average of all channels should result in a gray image.
-It adds a modification which thresholds pixels based on their saturation value and only uses pixels below the provided threshold in finding average pixel values.
-Saturation is calculated using the following for a 3-channel RGB image per pixel I and is in the range [0, 1]:
-
-|image161|
-
-A threshold of 1 means that all pixels are used to white-balance, while a threshold of 0 means no pixels are used. Lower thresholds are useful in white-balancing saturated images.
-
-**Simple whitebalancing algorithm:**
-
-A simple white balance algorithm that works by independently stretching each of the input image channels to the specified range(maximum and minimum). Computes channel wise intensity histogram and ignores p% maximum and minimum values and finally normalize each channel with min and max. For increased robustness it ignores the top and bottom :math:`p\%\ \ (4\%\ is\ fixed)` \ of pixel values.
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template< int SRC_T,int DST_T, int ROWS, int COLS, int NPC = 1,bool WB_TYPE>void balanceWhite(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src1,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src2, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & dst,float thresh,float inputMin,float inputMax,float outputMin,float outputMax)
-
-.. rubric:: Parameter Descriptions
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table balanceWhite Parameter Description
-
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   Parameter   |   Description                                                                                                                |
-    +===============+==============================================================================================================================+
-    |   SRC_T       | Input Pixel Type.                                                                                                            |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   DST_T       | Output Pixel Type.                                                                                                           |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   ROWS        | Maximum height of input and output image (Must be multiple of NPC)                                                           |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   COLS        | Maximum width of input and output image (Must be multiple of NPC)                                                            |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   NPC         | Number of Pixels to be processed per cycle.                                                                                  |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   WB_TYPE     | White balance type. Supported types are Gray world and simple.                                                               |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   Src1        | Input image.                                                                                                                 |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   Src2        | Input image.                                                                                                                 |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   dst         | Output image.                                                                                                                |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   thresh      | Threshold value, which is used in gray world white balance method to compute average pixel values below the threshold value. |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   inputMin    | Input image range minimum value.                                                                                             |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   inputMax    | Input image range maximum value.                                                                                             |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   outputMin   | Output image range minimum value.                                                                                            |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   outputMax   | Output image range maximum value.                                                                                            |
-    +---------------+------------------------------------------------------------------------------------------------------------------------------+
-
-.. rubric:: Resource Utilization
-
-The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
-
-.. table:: Table balanceWhite Resource Utilization Summary
-
-    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
-    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
-    |                    |                         |                                                                      |
-    |                    |   (MHz)                 |                                                                      |
-    +                    +                         +--------------------------+--------------+--------+---------+---------+
-    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
-    +====================+=========================+==========================+==============+========+=========+=========+
-    | 1 pixel            | 300                     | 14                       | 10           | 4798   | 4953    | 1757    |
-    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
-    | 2 pixel            | 300                     | 14                       | 10           | 8335   | 8535    | 2901    |
-    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
-
-
-.. rubric:: Performance Estimate
-
-The following table summarizes a performance estimate of the kernel in
-different configurations, as generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
-
-.. table:: Table balanceWhite Function Performance Estimate Summary
-
-+--------------------+-------------------------+---------------------------------------------+
-|   Operating Mode   |   Operating Frequency   |   Latency Estimate                          |
-|                    |                         |                                             |
-|                    |   (MHz)                 |                                             |
-+                    +                         +---------------------------------------------+
-|                    |                         | **Max (ms)**                                |
-+====================+=========================+=============================================+
-| 1 pixel            | 300                     | 55.2 for still image(27.9 for video stream) |
-+--------------------+-------------------------+---------------------------------------------+
-| 2 pixel            | 300                     | 28 for still image(14.2 for video stream)   |
-+--------------------+-------------------------+---------------------------------------------+
-
-
-.. _badpixelcorrection:
-
-Badpixelcorrection
-===================
-
-An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. The Badpixelcorrection module removes the defective pixels in the image using below operation.
-
-If the middle pixel value is lesser than minimum neighborhood value, will consider minimum neighborhood value as mid pixel, otherwise mid pixel value is greater than maximum neighborhood value, will consider maximum neighborhood as mid pixel.
-
-.. rubric:: API Syntax
-
-.. code:: c
-
-template<int TYPE, int ROWS, int COLS, int NPPC=1, int BORDER_T=XF_BORDER_CONSTANT, int USE_URAM=0>void badpixelcorrection(xf::cv::Mat<TYPE, ROWS, COLS, NPPC> &_src,xf::cv::Mat<TYPE, ROWS, COLS, NPPC> &_dst)
-
-The following table describes the template and the function parameters.
-
-.. table:: Table badpixelcorrection Parameter Description
-
-    +-----------+---------------------------------------------------------------------+
-    | Parameter | Description                                                         |
-    +===========+=====================================================================+
-    | TYPE      | Input and Output Pixel Type.                                        |
-    +-----------+---------------------------------------------------------------------+
-    | ROWS      | Maximum height of input and output image (Must be multiple of NPPC) |
-    +-----------+---------------------------------------------------------------------+
-    | COLS      | Maximum width of input and output image (Must be multiple of NPPC)  |
-    +-----------+---------------------------------------------------------------------+
-    | NPPC      | Number of Pixels to be processed per cycle.                         |
-    +-----------+---------------------------------------------------------------------+
-    | BORDER_T  | Border Type supported is XF_BORDER_CONSTANT                         |
-    +-----------+---------------------------------------------------------------------+
-    | USE_URAM  | Enable to map storage structures to UltraRAM.                       |
-    +-----------+---------------------------------------------------------------------+
-    | \_src     | Input Bayer image                                                   |
-    +-----------+---------------------------------------------------------------------+
-    | \_dst     | Output Bayer image                                                  |
-    +-----------+---------------------------------------------------------------------+
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of the kernel in different configurations, generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
-
-.. table:: Table badpixelcorrection Resource Utilization Summary
-
-    +----------------+---------------------+----------------------+----------+------+------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate |          |      |      |       |
-    |                |                     |                      |          |      |      |       |
-    |                | (MHz)               |                      |          |      |      |       |
-    +                +                     +----------------------+----------+------+------+-------+
-    |                |                     | BRAM_18K             | DSP_48Es | FF   | LUT  | SLICE |
-    +================+=====================+======================+==========+======+======+=======+
-    | 1 pixel        | 300                 | 10                   | 0        | 979  | 744  | 355   |
-    +----------------+---------------------+----------------------+----------+------+------+-------+
-    | 2 pixel        | 300                 | 10                   | 0        | 1148 | 1177 | 458   |
-    +----------------+---------------------+----------------------+----------+------+------+-------+
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1, to process 4K image.
-
-.. table:: Table badpixelcorrection Resource Utilization Summary
-
-    +----------------+---------------------+------------------+
-    | Operating Mode | Operating Frequency | Latency Estimate |
-    |                |                     |                  |
-    |                | (MHz)               |                  |
-    +                +                     +------------------+   
-    |                |                     | Max (ms)         |
-    +================+=====================+==================+
-    | 1 pixel        | 300                 | 27.8             |
-    +----------------+---------------------+------------------+
-    | 2 pixel        | 300                 | 14.2             |
-    +----------------+---------------------+------------------+
-
-
-
-
 .. _bilateral-filter:
 
 Bilateral Filter
@@ -1566,8 +1288,8 @@ The gaussian filter is given by: |image14|
 
    template<int FILTER_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC=1> 
    void bilateralFilter (
-   xf::Mat<int TYPE, int ROWS, int COLS, int NPC> src, 
-   xf::Mat<int TYPE, int ROWS, int COLS, int NPC> dst,
+   xf::cv::Mat<int TYPE, int ROWS, int COLS, int NPC> src, 
+   xf::cv::Mat<int TYPE, int ROWS, int COLS, int NPC> dst,
    float sigma_space, float sigma_color )
 
 .. rubric:: Parameter Descriptions
@@ -1575,7 +1297,7 @@ The gaussian filter is given by: |image14|
 
 The following table describes the template and the function parameters.
 
-.. table:: Table bilateralFilter Parameter Description
+.. table:: Table 32. bilateralFilter Parameter Description
 
    +----------------------+-----------------------------------------------+
    | Parameter            | Description                                   |
@@ -1619,7 +1341,7 @@ different configurations, generated using Vivado HLS 2019.1 version tool
 for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to progress a grayscale HD
 (1080x1920) image.
 
-.. table:: Table bilateralFilter Resource Utilization Summary
+.. table:: Table 33. bilateralFilter Resource Utilization Summary
 
 +----------------+----------------+---------------------------+------------------+-----------+-------+-------+
 | Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate               |
@@ -1638,7 +1360,7 @@ The following table summarizes the resource utilization of the kernel in
 different configurations, generated using Vivado HLS 2019.1 version tool
 for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to progress a 4K 3 channel image.
 
-.. table:: Table bilateralFilter Resource Utilization Summary
+.. table:: Table 34. bilateralFilter Resource Utilization Summary
 
 
 +----------------+----------------+---------------------------+------------------+-----------+-------+-------+
@@ -1682,7 +1404,7 @@ image.
 .. rubric:: Deviation from OpenCV
 
 
-Unlike OpenCV, xfOpenCV only supports filter sizes of 3, 5 and 7.
+Unlike OpenCV, Vitis vision only supports filter sizes of 3, 5 and 7.
 
 .. _bit-depth-conversion:
 
@@ -1699,7 +1421,7 @@ required bit depth in the output image.
 .. code:: c
 
    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void convertTo(xf::Mat<SRC_T, ROWS, COLS, NPC> &_src_mat, xf::Mat<DST_T, ROWS, COLS, NPC> &_dst_mat, ap_uint<4> _convert_type, int _shift)
+   void convertTo(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src_mat, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_dst_mat, ap_uint<4> _convert_type, int _shift)
 
 
 .. rubric:: Parameter Descriptions
@@ -1861,9 +1583,9 @@ Where,
 
    template<int SRC_T, int ROWS, int COLS, int NPC=1> 
    void bitwise_and (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
 
 
 .. rubric:: Parameter Descriptions
@@ -1978,8 +1700,8 @@ Where,
 
    template<int SRC_T, int ROWS, int COLS, int NPC=1> 
    void bitwise_not (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
 
 
 .. rubric:: Parameter Descriptions
@@ -2089,9 +1811,9 @@ Where,
 
    template<int SRC_T, int ROWS, int COLS, int NPC=1> 
    void bitwise_or (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
 
 
 .. rubric:: Parameter Descriptions
@@ -2203,9 +1925,9 @@ Where,
 
    template<int SRC_T, int ROWS, int COLS, int NPC=1> 
    void bitwise_xor(
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2, 
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
 
 
 .. rubric:: Parameter Descriptions
@@ -2310,7 +2032,7 @@ The ``boxFilter`` function performs box filtering on the input image. Box filter
 .. code:: c
 
    template<int BORDER_TYPE,int FILTER_TYPE, int SRC_T, int ROWS, int COLS,int NPC=1,bool USE_URAM=false>
-   void boxFilter(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat)
+   void boxFilter(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat)
 
 .. _parameter-descriptions-17:
 
@@ -2451,7 +2173,7 @@ Where,
 .. code:: c
 
    template<int SRC_T, int ROWS, int COLS, int MAX_BOXES=1, int NPC=1>
-   void boundingbox(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, xf::Rect_<int> *roi , xf::Scalar<4,unsigned char > *color, int num_box)
+   void boundingbox(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, xf::cv::Rect_<int> *roi , xf::cv::Scalar<4,unsigned char > *color, int num_box)
 
 
 .. rubric:: Parameter Descriptions
@@ -2480,11 +2202,11 @@ The following table describes the template and the function parameters.
    +-------------------+--------------------------------------------------+
    | \_src_mat         | Input image                                      |
    +-------------------+--------------------------------------------------+
-   | roi               | ROI is a ``xf::Rect`` object that consists of    |
+   | roi               | ROI is a ``xf::cv::Rect`` object that consists of|
    |                   | the top left corner of the rectangle along with  |
    |                   | the height and width of the rectangle.           |
    +-------------------+--------------------------------------------------+
-   | color             | The ``xf::Scalar`` object consists of color      |
+   | color             | The ``xf::cv::Scalar`` object consists of color  |
    |                   | information for each box (ROI).                  |
    +-------------------+--------------------------------------------------+
    | num_box           | Number of boxes to be detected. It should be     |
@@ -2527,10 +2249,10 @@ image for highlighting 3 different boundaries (480x640, 100x200,
 | 1 pixel operation (300 MHz) | 0.15             |
 +-----------------------------+------------------+
 
-.. rubric:: xfOpenCV Reference
+.. rubric:: Vitis vision Reference
 
 
-The ``xf::boundingbox`` is complaint with below xfOpenCV function:
+The ``xf::cv::boundingbox`` is complaint with below Vitis vision function:
 
 .. code:: c
 
@@ -2584,24 +2306,24 @@ The .. rubric:: API Syntax for ``Canny`` is:
 .. code:: c
 
    template<int FILTER_TYPE,int NORM_TYPE,int SRC_T,int DST_T, int ROWS, int COLS,int NPC,int NPC1,bool USE_URAM=false>
-   void Canny(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<DST_T, ROWS, COLS, NPC1> & _dst_mat,unsigned char _lowthreshold,unsigned char _highthreshold)
+   void Canny(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<DST_T, ROWS, COLS, NPC1> & _dst_mat,unsigned char _lowthreshold,unsigned char _highthreshold)
 
 The .. rubric:: API Syntax for ``EdgeTracing`` is:
 
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS,int NPC_SRC,int NPC_DST,bool USE_URAM=false>
-   voidEdgeTracing(xf::Mat<SRC_T, ROWS, COLS, NPC_SRC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC_DST> & _dst)
+   voidEdgeTracing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC_SRC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC_DST> & _dst)
 
 
 
 .. rubric:: Parameter Descriptions
 
 
-The following table describes the ``xf::Canny`` template and function
+The following table describes the ``xf::cv::Canny`` template and function
 parameters:
 
-.. table:: Table 64. xf::Canny Parameter Description
+.. table:: Table 64. xf::cv::Canny Parameter Description
 
    +-----------------------+----------------------------------------------+
    | Parameter             | Description                                  |
@@ -2683,12 +2405,12 @@ parameters:
 .. rubric:: Resource Utilization
 
 
-The following table summarizes the resource utilization of ``xf::Canny``
+The following table summarizes the resource utilization of ``xf::cv::Canny``
 and ``EdgeTracing`` in different configurations, generated using Vivado
 HLS 2019.1 tool for the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a
 grayscale HD (1080x1920) image for Filter size is 3.
 
-.. table:: Table 66. xf::Canny and EdgeTracing Function Resource Utilization Summary
+.. table:: Table 66. xf::cv::Canny and EdgeTracing Function Resource Utilization Summary
 
 +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
 | Name           |Resource Utilization                                                                                                         |
@@ -2712,12 +2434,12 @@ grayscale HD (1080x1920) image for Filter size is 3.
 
 
 
-The following table summarizes the resource utilization of ``xf::Canny``
+The following table summarizes the resource utilization of ``xf::cv::Canny``
 and ``EdgeTracing`` in different configurations, generated using SDx
 2019.1 tool for the xczu7ev-ffvc1156-2-e FPGA, to process a grayscale 4K
 image for Filter size is 3.
 
-.. table:: Table 67. xf::Canny and EdgeTracing Function Resource Utilization Summary with UltraRAM Enable
+.. table:: Table 67. xf::cv::Canny and EdgeTracing Function Resource Utilization Summary with UltraRAM Enable
 
 
 +----------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+
@@ -2749,7 +2471,7 @@ the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920)
 image for L1NORM, filter size is 3 and including the edge linking
 module.
 
-.. table:: Table 68. xf::Canny and EdgeTracing Function Performance Estimate Summary
+.. table:: Table 68. xf::cv::Canny and EdgeTracing Function Performance Estimate Summary
 
 +-----------------------------+------------------+
 | Operating Mode              | Latency Estimate |
@@ -2782,7 +2504,7 @@ multi-channel image. The number of channels to be merged should be four.
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void merge(xf::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::Mat<SRC_T, ROWS, COLS, NPC> &_src3, xf::Mat<SRC_T, ROWS, COLS, NPC> &_src4, xf::Mat<DST_T, ROWS, COLS, NPC> &_dst)
+   void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src3, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src4, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -2908,7 +2630,7 @@ enumerated data type:
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1> 
-   void extractChannel(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat, uint16_t _channel)
+   void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat, uint16_t _channel)
 
 .. rubric:: Parameter Descriptions
 
@@ -3053,12 +2775,12 @@ YUV444 format. The function outputs Y, U, and V streams separately.
 .. code:: c
 
    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void rgba2yuv4(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::Mat<DST_T, ROWS, COLS, NPC> & _u_image, xf::Mat<DST_T, ROWS, COLS, NPC> & _v_image)
+   void rgba2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _u_image, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _v_image)
 
 .. code:: c
 
    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void rgb2yuv4(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::Mat<DST_T, ROWS, COLS, NPC> & _u_image, xf::Mat<DST_T, ROWS, COLS, NPC> & _v_image)
+   void rgb2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _u_image, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _v_image)
 
 .. rubric:: Parameter Descriptions
 
@@ -3151,12 +2873,12 @@ rows into a single row the planes size becomes (rows/4)*columns.
 .. code:: c
 
    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void rgba2iyuv(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::Mat<DST_T, ROWS/4, COLS, NPC> & _u_image, xf::Mat<DST_T, ROWS/4, COLS, NPC> & _v_image)
+   void rgba2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<DST_T, ROWS/4, COLS, NPC> & _u_image, xf::cv::Mat<DST_T, ROWS/4, COLS, NPC> & _v_image)
 
 .. code:: c
 
    template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void rgb2iyuv(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::Mat<DST_T, ROWS/4, COLS, NPC> & _u_image, xf::Mat<DST_T, ROWS/4, COLS, NPC> & _v_image)
+   void rgb2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<DST_T, ROWS/4, COLS, NPC> & _u_image, xf::cv::Mat<DST_T, ROWS/4, COLS, NPC> & _v_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -3245,7 +2967,7 @@ plane is of (rows/2)*(columns/2) size as U and V values are interleaved.
 .. code:: c
 
    template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1>
-   void rgba2nv12(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC> & _uv)
+   void rgba2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC> & _uv)
 
 
 .. rubric:: Parameter Descriptions
@@ -3334,7 +3056,7 @@ interleaved.
 .. code:: c
 
    template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1>
-   void rgba2nv21(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC> & _uv)
+   void rgba2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC> & _uv)
 
 
 .. rubric:: Parameter Descriptions
@@ -3423,7 +3145,7 @@ set of YUYV value gives 2 RGBA pixel values. YUYV is represented in
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void yuyv2rgba(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   void yuyv2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -3508,7 +3230,7 @@ set of YUYV value gives 2 Y values and 1 U and V value each.
 .. code:: c
 
    template<int SRC_T,int Y_T,int UV_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>
-   void yuyv2nv12(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<Y_T, ROWS, COLS, NPC> & _y_image,xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
+   void yuyv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y_image,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -3569,7 +3291,7 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a HD (1080x1920) image.
 
 
 .. rubric:: Performance Estimate
-
+''''''''''''''''''''
 
 The following table summarizes the performance of YUYV to NV12 for
 different configurations, as generated using Vivado HLS 2019.1 tool for
@@ -3607,7 +3329,7 @@ the IYUV(4:2:0) format.
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void yuyv2iyuv(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::Mat<DST_T, ROWS/4, COLS, NPC> & _u_image, xf::Mat<DST_T, ROWS/4, COLS, NPC> & _v_image)
+   void yuyv2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<DST_T, ROWS/4, COLS, NPC> & _u_image, xf::cv::Mat<DST_T, ROWS/4, COLS, NPC> & _v_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -3700,7 +3422,7 @@ two Y values and one U and V value each.
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void uyvy2iyuv(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _y_image,xf::Mat<DST_T, ROWS/4, COLS, NPC> & _u_image, xf::Mat<DST_T, ROWS/4, COLS, NPC> & _v_image)
+   void uyvy2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _y_image,xf::cv::Mat<DST_T, ROWS/4, COLS, NPC> & _u_image, xf::cv::Mat<DST_T, ROWS/4, COLS, NPC> & _v_image)
 
 .. rubric:: Parameter Descriptions
 
@@ -3791,7 +3513,7 @@ values where as RGBA is represented in 32-bit values.
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void uyvy2rgba(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   void uyvy2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -3874,7 +3596,7 @@ value each.
 .. code:: c
 
    template<int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1, int NPC_UV=1>
-   void uyvy2nv12(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<Y_T, ROWS, COLS, NPC> & _y_image,xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
+   void uyvy2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y_image,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -3973,12 +3695,12 @@ of the RGBA/RGB pixels. The data of the consecutive rows of size
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void iyuv2rgba(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<SRC_T, ROWS/4, COLS, NPC> & src_u,xf::Mat<SRC_T, ROWS/4, COLS, NPC> & src_v, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
+   void iyuv2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & src_u,xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & src_v, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
 
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void iyuv2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<SRC_T, ROWS/4, COLS, NPC> & src_u,xf::Mat<SRC_T, ROWS/4, COLS, NPC> & src_v, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
+   void iyuv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & src_u,xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & src_v, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
 
 
 .. rubric:: Parameter Descriptions
@@ -4066,7 +3788,7 @@ values are rearranged from plane interleaved to pixel interleaved.
 .. code:: c
 
    template<int SRC_T, int UV_T, int ROWS, int COLS, int NPC =1, int NPC_UV=1>
-   void iyuv2nv12(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<SRC_T, ROWS/4, COLS, NPC> & src_u,xf::Mat<SRC_T, ROWS/4, COLS, NPC> & src_v,xf::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
+   void iyuv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & src_u,xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & src_v,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -4169,7 +3891,7 @@ required data in the YUV444 format.
 .. code:: c
 
    template<int SRC_T, int ROWS, int COLS, int NPC=1>
-   void iyuv2yuv4(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<SRC_T, ROWS/4, COLS, NPC> & src_u,xf::Mat<SRC_T, ROWS/4, COLS, NPC> & src_v,xf::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::Mat<SRC_T, ROWS, COLS, NPC> & _u_image, xf::Mat<SRC_T, ROWS, COLS, NPC> & _v_image)
+   void iyuv2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & src_u,xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & src_v,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _u_image, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _v_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -4268,7 +3990,7 @@ interleaved to plane interleaved.
 .. code:: c
 
    template<int SRC_T, int UV_T, int ROWS, int COLS, int NPC=1, int NPC_UV=1>
-   void nv122iyuv(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::Mat<SRC_T, ROWS, COLS, NPC> & _y_image,xf::Mat<SRC_T, ROWS/4, COLS, NPC> & _u_image,xf::Mat<SRC_T, ROWS/4, COLS, NPC> & _v_image)
+   void nv122iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _y_image,xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & _u_image,xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & _v_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -4368,7 +4090,7 @@ and V value is duplicated (2x2) times.
 .. code:: c
 
    template<int SRC_T, int UV_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void nv122rgba(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y,xf::Mat<UV_T, ROWS/2, COLS/2, NPC> & src_uv,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
+   void nv122rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC> & src_uv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
 
 
 .. rubric:: Parameter Descriptions
@@ -4460,7 +4182,7 @@ represent one U plane and V plane of the YUV444 image format.
 .. code:: c
 
    template<int SRC_T,int UV_T, int ROWS, int COLS, int NPC=1, int NPC_UV=1>
-   void nv122yuv4(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::Mat<SRC_T, ROWS, COLS, NPC> & _u_image,xf::Mat<SRC_T, ROWS, COLS, NPC> & _v_image)
+   void nv122yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _u_image,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _v_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -4561,7 +4283,7 @@ rearranged from pixel interleaved to plane interleaved.
 .. code:: c
 
    template<int SRC_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>
-   void nv212iyuv(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::Mat<SRC_T, ROWS/4, COLS, NPC> & _u_image,xf::Mat<SRC_T, ROWS/4, COLS, NPC> & _v_image)
+   void nv212iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & _u_image,xf::cv::Mat<SRC_T, ROWS/4, COLS, NPC> & _v_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -4663,7 +4385,7 @@ each U and V value is duplicated (2x2) times.
 .. code:: c
 
    template<int SRC_T, int UV_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void nv212rgba(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC> & src_uv,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
+   void nv212rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC> & src_uv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
 
 
 .. rubric:: Parameter Descriptions
@@ -4754,7 +4476,7 @@ represent one U plane and V plane of YUV444 format.
 .. code:: c
 
    template<int SRC_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>
-   void nv212yuv4(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv, xf::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::Mat<SRC_T, ROWS, COLS, NPC> & _u_image, xf::Mat<SRC_T, ROWS, COLS, NPC> & _v_image)
+   void nv212yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _y_image, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _u_image, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _v_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -4860,7 +4582,7 @@ Where,
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void rgb2gray(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   void rgb2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 .. rubric:: Parameter Descriptions
 
@@ -4947,7 +4669,7 @@ Where,
 .. code:: c
 
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
-   void bgr2gray(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   void bgr2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5038,7 +4760,7 @@ R<-Y, G<-Y, B<-Y
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void gray2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void gray2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5131,7 +4853,7 @@ Where,
 .. code:: c
 
    template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>
-   void gray2bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   void gray2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5220,7 +4942,7 @@ HLS to RGB/BGR
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void hls2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void hls2bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void hls2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void hls2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5308,7 +5030,7 @@ RGB to XYZ
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2xyz(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5396,7 +5118,7 @@ BGR to XYZ
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2xyz(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5485,11 +5207,11 @@ color space.
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2ycrcb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2ycrcb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5579,11 +5301,11 @@ RGB/BGR to HSV
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2hsv(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1> void bgr2hsv(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1> void bgr2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5672,7 +5394,7 @@ RGB/BGR to HLS
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2hls(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2hls(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5763,11 +5485,11 @@ Where,
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void ycrcb2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void ycrcb2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void ycrcb2bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void ycrcb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5801,7 +5523,7 @@ The following table describes the template and the function parameters.
 
 
 .. rubric:: Resource Utilization
-
+''''''''''''''''''''
 
 The following table summarizes the resource utilization of YCrCb2RGB/BGR
 for different configurations, as generated in the Vivado HLS 2019.1
@@ -5857,11 +5579,11 @@ HSV to RGB/BGR
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void hsv2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void hsv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void hsv2bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void hsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -5946,32 +5668,32 @@ RGB data, each U and V value is duplicated (2x2) times.
 
 
 NV122RGB:
-~~~~~~~~~
+'''''''''
 
 .. code:: c
 
-   template<int SRC_T,int UV_T,int DST_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void nv122rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y,xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
+   template<int SRC_T,int UV_T,int DST_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void nv122rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
 
 NV122BGR:
-~~~~~~~~~
+'''''''''
 
 .. code:: c
 
-   template<int SRC_T,int UV_T,int DST_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void nv122bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y,xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
+   template<int SRC_T,int UV_T,int DST_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void nv122bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
 
 NV212RGB:
-~~~~~~~~~
+'''''''''
 
 .. code:: c
 
-   template<int SRC_T,int UV_T,int DST_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void nv212rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y,xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
+   template<int SRC_T,int UV_T,int DST_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void nv212rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
 
 NV212BGR:
-~~~~~~~~~
+'''''''''
 
 .. code:: c
 
-   template<int SRC_T,int UV_T,int DST_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void nv212bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
+   template<int SRC_T,int UV_T,int DST_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void nv212bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src_y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & src_uv, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst0)
 
 
 .. rubric:: Parameter Descriptions
@@ -6009,7 +5731,7 @@ The following table describes the template and the function parameters.
    +--------------+-------------------------------------------------------+
 
 .. rubric:: Resource Utilization
-
+''''''''''''''''''''
 
 The following table summarizes the resource utilization of ``NV12/NV21``
 to ``RGB/ BGR`` function in Normal mode (1 pixel), as generated in the
@@ -6057,19 +5779,17 @@ U/V plane with 2x2 sub-sampling.
 
 
 NV122NV21:
-~~~~~~~~~~
-
+''''''''''
 .. code:: c
 
    template<int SRC_Y,int SRC_UV,int ROWS,int COLS,int NPC=1,int NPC_UV=1>
-   void nv122nv21(xf::Mat<SRC_Y, ROWS, COLS, NPC> & _y,xf::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv,xf::Mat<SRC_Y, ROWS, COLS, NPC> & out_y,xf::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & out_uv)
+   void nv122nv21(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC> & _y,xf::cv::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv,xf::cv::Mat<SRC_Y, ROWS, COLS, NPC> & out_y,xf::cv::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & out_uv)
 
 NV212NV12:
-~~~~~~~~~~
-
+''''''''''
 .. code:: c
 
-   template<int SRC_Y, int SRC_UV, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv212nv12(xf::Mat<SRC_Y, ROWS, COLS, NPC> & _y, xf::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv, xf::Mat<SRC_Y, ROWS, COLS, NPC> & out_y, xf::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & out_uv)
+   template<int SRC_Y, int SRC_UV, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv212nv12(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC> & _y, xf::cv::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv, xf::cv::Mat<SRC_Y, ROWS, COLS, NPC> & out_y, xf::cv::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & out_uv)
 
 
 .. rubric:: Parameter Descriptions
@@ -6159,32 +5879,32 @@ RGB is represented in 24-bit values.
 
 
 NV122UYVY:
-~~~~~~~~~~
+''''''''''
 
 .. code:: c
 
-   template<int SRC_Y, int SRC_UV, int DST_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv122uyvy(xf::Mat<SRC_Y, ROWS, COLS, NPC> & _y,xf::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_Y, int SRC_UV, int DST_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv122uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC> & _y,xf::cv::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 NV122YUYV:
-~~~~~~~~~~
+''''''''''
 
 .. code:: c
 
-   template<int SRC_Y, int SRC_UV, int DST_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv122yuyv(xf::Mat<SRC_Y, ROWS, COLS, NPC> & _y, xf::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_Y, int SRC_UV, int DST_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv122yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC> & _y, xf::cv::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 NV212UYVY:
-~~~~~~~~~~
+''''''''''
 
 .. code:: c
 
-   template<int SRC_Y, int SRC_UV, int DST_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv212uyvy(xf::Mat<SRC_Y, ROWS, COLS, NPC> & _y, xf::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_Y, int SRC_UV, int DST_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv212uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC> & _y, xf::cv::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 NV212YUYV:
-~~~~~~~~~~
+''''''''''
 
 .. code:: c
 
-    template<int SRC_Y, int SRC_UV, int DST_T,int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv212yuyv(xf::Mat<SRC_Y, ROWS, COLS, NPC> & _y, xf::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv, xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+    template<int SRC_Y, int SRC_UV, int DST_T,int ROWS, int COLS, int NPC=1,int NPC_UV=1>void nv212yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC> & _y, xf::cv::Mat<SRC_UV, ROWS/2, COLS/2, NPC_UV> & _uv, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -6276,32 +5996,32 @@ YUYV/UYVY values gives 2 RGB pixel values. YUYV/UYVY is represented in
 
 
 YUYV2RGB:
-~~~~~~~~~~
+'''''''''
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void yuyv2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void yuyv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 YUYV2BGR:
-~~~~~~~~~
+'''''''''
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void yuyv2bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void yuyv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 UYVY2RGB
-~~~~~~~~~
+''''''''
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void uyvy2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void uyvy2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 UYVY2BGR:
-~~~~~~~~~
+'''''''''
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void uyvy2bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void uyvy2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -6380,19 +6100,19 @@ U/V plane with 2x2 sub sampling.
 .. rubric:: API Syntax
 
 
-UYVY2YUYV:
-~~~~~~~~~~~
+UYVY2YUYV :
+'''''''''''
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void uyvy2yuyv(xf::Mat<SRC_T, ROWS, COLS, NPC> & uyvy,xf::Mat<DST_T, ROWS, COLS, NPC> & yuyv)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void uyvy2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & uyvy,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & yuyv)
 
 YUYV2UYVY:
-~~~~~~~~~~
+''''''''''
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void yuyv2uyvy(xf::Mat<SRC_T, ROWS, COLS, NPC> & yuyv,xf::Mat<DST_T, ROWS, COLS, NPC> & uyvy)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void yuyv2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & yuyv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & uyvy)
 
 
 .. rubric:: Parameter Descriptions
@@ -6471,18 +6191,18 @@ and V value each.
 
 
 UYVY2NV21:
-~~~~~~~~~~
+''''''''''
 
 .. code:: c
 
-   template<int SRC_T,int Y_T,int UV_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void uyvy2nv21(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<Y_T, ROWS, COLS, NPC> & _y_image,xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
+   template<int SRC_T,int Y_T,int UV_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void uyvy2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y_image,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
 
 YUYV2NV21:
-~~~~~~~~~~~
+''''''''''
 
 .. code:: c
 
-   template<int SRC_T,int Y_T,int UV_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void yuyv2nv21(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<Y_T, ROWS, COLS, NPC> & _y_image,xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
+   template<int SRC_T,int Y_T,int UV_T,int ROWS,int COLS,int NPC=1,int NPC_UV=1>void yuyv2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y_image,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv_image)
 
 
 .. rubric:: Parameter Descriptions
@@ -6574,32 +6294,32 @@ sampled once for 2 rows and 2 columns (2x2) pixels. UV/VU plane is of
 .. rubric:: API Syntax
 
 RGB2NV12
-~~~~~~~~
+''''''''
 
 .. code:: c
 
-   template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void rgb2nv12(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv)
+   template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void rgb2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv)
 
 BGR2NV12
-~~~~~~~~~
+''''''''
 
 .. code:: c
 
-   template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void bgr2nv12(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv)
+   template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void bgr2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv)
 
 RGB2NV21
-~~~~~~~~
+''''''''
 
 .. code:: c
 
-   template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void rgb2nv21(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv)
+   template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void rgb2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv)
 
 BGR2NV21
-~~~~~~~~
+''''''''
 
 .. code:: c
 
-   template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void bgr2nv21(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv)
+   template <int SRC_T, int Y_T, int UV_T, int ROWS, int COLS, int NPC=1,int NPC_UV=1>void bgr2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y, xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & _uv)
 
 
 .. rubric:: Parameter Descriptions
@@ -6689,11 +6409,11 @@ or RGB to BGR format.
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -6771,28 +6491,28 @@ YUYV/UYVY is represented in 16-bit values whereas, RGB is represented in
 .. rubric:: API Syntax
 
 RGB to UYVY:
-~~~~~~~~~~~~
+'''''''''''''
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2uyvy(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 RGB to YUYV:
-~~~~~~~~~~~~
+'''''''''''''
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2yuyv(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void rgb2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 BGR to UYVY:
-~~~~~~~~~~~~
+'''''''''''''
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2uyvy(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
-BGR to YUYV:
-~~~~~~~~~~~~
+BGR to YUYV
+''''''''''''
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2yuyv(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void bgr2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -6872,7 +6592,7 @@ XYZ to RGB/BGR
 
 .. code:: c
 
-   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void xyz2rgb(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void xyz2bgr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst)
+   template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void xyz2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)template<int SRC_T,int DST_T,int ROWS,int COLS,int NPC=1>void xyz2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -6958,7 +6678,7 @@ the source image with low and high threshold values, and returns either
 .. code:: c
 
    template<int SRC_T,int DST_T,int MAXCOLORS, int ROWS, int COLS,int NPC>
-             void colorthresholding(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat,unsigned char low_thresh[MAXCOLORS*3], unsigned char high_thresh[MAXCOLORS*3])
+             void colorthresholding(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat,unsigned char low_thresh[MAXCOLORS*3], unsigned char high_thresh[MAXCOLORS*3])
 
 .. rubric:: Parameter Descriptions
 
@@ -7022,7 +6742,7 @@ is set to 255; else it is set to 0.
 .. code:: c
 
    template<int CMP_OP,  int SRC_T , int ROWS, int COLS, int NPC=1>
-   void compare(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -7139,7 +6859,7 @@ is set to 255, else it is set to 0.
 .. code:: c
 
    template<int CMP_OP,  int SRC_T , int ROWS, int COLS, int NPC=1>
-   void compareS(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void compareS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -7251,7 +6971,7 @@ P(X,Y) ≤ P(xi, yi) ≤ P(X’,Y’)
 .. code:: c
 
    template<int SRC_T, int ROWS, int COLS,int ARCH_TYPE=0,int NPC=1>
-   void crop(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<SRC_T, ROWS, COLS, NPC>  &_dst_mat,xf::Rect_<unsigned int> &roi)
+   void crop(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<SRC_T, ROWS, COLS, NPC>  &_dst_mat,xf::cv::Rect_<unsigned int> &roi)
 
 .. rubric:: Parameter Descriptions
 
@@ -7282,7 +7002,7 @@ The following table describes the template and the function parameters.
    +---------------+------------------------------------------------------+
    | \_dst_mat     | Output ROI image                                     |
    +---------------+------------------------------------------------------+
-   | roi           | ROI is a ``xf::Rect`` object that consists of the    |
+   | roi           | ROI is a ``xf::cv::Rect`` object that consists of the    |
    |               | top left corner of the rectangle along with the      |
    |               | height and width of the rectangle.                   |
    +---------------+------------------------------------------------------+
@@ -7337,20 +7057,20 @@ image for 3 ROIs (480x640, 100x200, 300x300).
 
 
 Multiple ROI Extraction
-------------------------
+''''''''''''''''''''''''
 
-You can call the ``xf::crop`` function multiple times in accel.cpp.
+You can call the ``xf::cv::crop`` function multiple times in accel.cpp.
 
 Multiple ROI Extraction Example
---------------------------------
+''''''''''''''''''''''''''''''''
 
 .. code:: c
 
-   void crop_accel(xf::Mat<TYPE, HEIGHT, WIDTH, NPIX> &_src,xf::Mat<TYPE,HEIGHT, WIDTH, NPIX> _dst[NUM_ROI],xf::Rect_<unsigned int> roi[NUM_ROI])
+   void crop_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPIX> &_src,xf::cv::Mat<TYPE,HEIGHT, WIDTH, NPIX> _dst[NUM_ROI],xf::cv::Rect_<unsigned int> roi[NUM_ROI])
 
 .. code:: c
 
-    {xf::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[0],roi[0]); xf::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[1],roi[1]); xf::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[2],roi[2]);}
+    {xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[0],roi[0]); xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[1],roi[1]); xf::cv::crop<TYPE, TYPE, HEIGHT, WIDTH, NPIX>(_src, _dst[2],roi[2]);}
 
 .. _custom-convolution:
 
@@ -7380,7 +7100,7 @@ parameter is set to zero.
 .. code:: c
 
    template<int BORDER_TYPE,int FILTER_WIDTH,int FILTER_HEIGHT, int SRC_T,int DST_T, int ROWS, int COLS,int NPC=1>
-   void filter2D(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat,short int filter[FILTER_HEIGHT*FILTER_WIDTH],unsigned char _shift)
+   void filter2D(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat,short int filter[FILTER_HEIGHT*FILTER_WIDTH],unsigned char _shift)
 
 .. rubric:: Parameter Descriptions
 
@@ -7521,7 +7241,7 @@ number of clock cycles.
 .. code:: c
 
    template<int MAXDELAY, int SRC_T, int ROWS, int COLS,int NPC=1 >
-             void delayMat(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+             void delayMat(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -7575,7 +7295,7 @@ single-CCD digital cameras.
 .. code:: c
 
    template<int BFORMAT, int SRC_T, int DST_T, int ROWS, int COLS, int NPC,bool USE_URAM=false>
-   void demosaicing(xf::Mat<SRC_T, ROWS, COLS, NPC> &src_mat, xf::Mat<DST_T, ROWS, COLS, NPC> &dst_mat)
+   void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &src_mat, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &dst_mat)
 
 
 .. rubric:: Parameter Descriptions
@@ -7647,8 +7367,8 @@ xczu7ev-ffvc1156-2-e FPGA.
 
 .. table:: Table 206. Demosaicing Function Resource Utilization Summary with UltraRAM Enabled
 
-+----------------+---------------------------+-----------------------+-----------+----+-----+-----+
-| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                 |
++----------------+---------------------------+----------------------+-----------+----+-----+-----+
+| Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                |
 +                +                           +------------+----------+-----------+----+-----+-----+
 |                |                           | BRAM_18K   | URAM     | DSP_48Es  | FF | LUT | CLB |
 +================+===========================+============+==========+===========+====+=====+=====+
@@ -7699,7 +7419,7 @@ pixel.
 .. code:: c
 
    template<int BORDER_TYPE, int TYPE, int ROWS, int COLS,int K_SHAPE,int K_ROWS,int K_COLS, int ITERATIONS, int NPC=1>
-   void dilate (xf::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::Mat<TYPE, ROWS, COLS, NPC> & _dst,unsigned char _kernel[K_ROWS*K_COLS])
+   void dilate (xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _dst,unsigned char _kernel[K_ROWS*K_COLS])
 
 
 .. rubric:: Parameter Descriptions
@@ -7835,7 +7555,7 @@ facilitates the duplication process of the FIFOs.
 .. code:: c
 
    template<int SRC_T, int ROWS, int COLS,int NPC=1>
-             void duplicateMat(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst1,xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst2)
+             void duplicateMat(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst1,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst2)
 
 .. rubric:: Parameter Descriptions
 
@@ -7883,7 +7603,7 @@ minimum value.
 .. code:: c
 
    template<int BORDER_TYPE, int TYPE, int ROWS, int COLS,int K_SHAPE,int K_ROWS,int K_COLS, int ITERATIONS, int NPC=1>
-   void erode (xf::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::Mat<TYPE, ROWS, COLS, NPC> & _dst,unsigned char _kernel[K_ROWS*K_COLS]) 
+   void erode (xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _dst,unsigned char _kernel[K_ROWS*K_COLS]) 
 
 
 .. rubric:: Parameter Descriptions
@@ -8031,7 +7751,7 @@ location, that location is marked with 255, otherwise it is zero.
 .. code:: c
 
    template<int NMS,int SRC_T,int ROWS, int COLS,int NPC=1>
-   void fast(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat,unsigned char _threshold)
+   void fast(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat,unsigned char _threshold)
 
 
 .. rubric:: Parameter Descriptions
@@ -8121,167 +7841,6 @@ with non-maximum suppression (NMS).
 +-----------------------------+------------------+------------------+------------------+
 
 
-.. _gaincontrol:
-
-
-Gaincontrol
-============
-
-The gain control modules improve the overall brightness of the input image. In this module, applying a multiplicative gain (weight) for red and blue channel of the input bayerized image.
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template< int BFORMAT,int SRC_T, int ROWS, int COLS, int NPC = 1>void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & dst)
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table gaincontrol Parameter Description
-
-+-----------+--------------------------------------------------------------------+
-| Parameter | Description                                                        |
-+===========+====================================================================+
-| BFORMAT   | Input Bayer pattern.                                               |
-+-----------+--------------------------------------------------------------------+
-| SRC_T     | Input and Output Pixel Type.                                       |
-+-----------+--------------------------------------------------------------------+
-| ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
-+-----------+--------------------------------------------------------------------+
-| COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
-+-----------+--------------------------------------------------------------------+
-| NPC       | Number of Pixels to be processed per cycle.                        |
-+-----------+--------------------------------------------------------------------+
-| Src1      | Input Bayer image                                                  |
-+-----------+--------------------------------------------------------------------+
-| dst       | Output Bayer image                                                 |
-+-----------+--------------------------------------------------------------------+
-
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of the kernel in different configurations, generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process 4K image.
-
-.. table:: Table gaincontrol Resource Utilization Summary
-
-+----------------+---------------------+----------------------+----------+-----+-----+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate |          |     |     |       |
-|                |                     |                      |          |     |     |       |
-|                | (MHz)               |                      |          |     |     |       |
-+                +                     +----------------------+----------+-----+-----+-------+
-|                |                     | BRAM_18K             | DSP_48Es | FF  | LUT | SLICE |
-+================+=====================+======================+==========+=====+=====+=======+
-| 1 pixel        | 300                 | 0                    | 3        | 233 | 95  | 59    |
-+----------------+---------------------+----------------------+----------+-----+-----+-------+
-| 2 pixel        | 300                 | 0                    | 3        | 235 | 95  | 59    |
-+----------------+---------------------+----------------------+----------+-----+-----+-------+
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1, to process a 4K image.
-
-+----------------+---------------------+------------------+
-| Operating Mode | Operating Frequency | Latency Estimate |
-|                |                     |                  |
-|                | (MHz)               |                  |
-+                +                     +------------------+
-|                |                     | Max (ms)         |
-+================+=====================+==================+
-| 1 pixel        | 300                 | 27.7             |
-+----------------+---------------------+------------------+
-| 2 pixel        | 300                 | 14.2             |
-+----------------+---------------------+------------------+
-
-
-
-
-.. _gammacorrection:
-
-
-Gammacorrection
-===============
-
-The gamma correction modules improves the overall brightness of image. The gamma loouptable is generated using the gamma value and with following equation.
-
-|image162|
-
-|image163|
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>void gammacorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,float gammaval)
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table gammacorrection Parameter Description
-
-+-----------+--------------------------------------------------------------------+
-| Parameter | Description                                                        |
-+===========+====================================================================+
-| SRC_T     | Input Pixel Type.                                                  |
-+-----------+--------------------------------------------------------------------+
-| DST_T     | Output Pixel Type.                                                 |
-+-----------+--------------------------------------------------------------------+
-| ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
-+-----------+--------------------------------------------------------------------+
-| COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
-+-----------+--------------------------------------------------------------------+
-| NPC       | Number of Pixels to be processed per cycle.                        |
-+-----------+--------------------------------------------------------------------+
-| src       | Input image                                                        |
-+-----------+--------------------------------------------------------------------+
-| dst       | Output image                                                       |
-+-----------+--------------------------------------------------------------------+
-| Gammaval  | Input gamma value for brightness increase.                         |
-+-----------+--------------------------------------------------------------------+
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of the kernel in different configurations, generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
-
-.. table:: Table gammacorrection Resource Utilization Summary
-
-+----------------+---------------------+----------------------+----------+------+------+------+
-| Operating Mode | Operating Frequency | Utilization Estimate |          |      |      |      |
-|                |                     |                      |          |      |      |      |
-|                | (MHz)               |                      |          |      |      |      |
-+                +                     +----------------------+----------+------+------+------+
-|                |                     | BRAM_18K             | DSP_48Es | FF   | LUT  | CLB  |
-+================+=====================+======================+==========+======+======+======+
-| 1 pixel        | 300                 | 13                   | 31       | 4261 | 3213 | 1295 |
-+----------------+---------------------+----------------------+----------+------+------+------+
-| 4 pixel        | 300                 | 22                   | 32       | 4297 | 3232 | 1261 |
-+----------------+---------------------+----------------------+----------+------+------+------+
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
-
-.. table:: Table gammacorrection Resource Utilization Summary
-
-+----------------+---------------------+------------------+
-| Operating Mode | Operating Frequency | Latency Estimate |
-|                |                     |                  |
-|                | (MHz)               |                  |
-+                +                     +------------------+
-|                |                     | Max (ms)         |
-+================+=====================+==================+
-| 1 pixel        | 300                 | 27.9             |
-+----------------+---------------------+------------------+
-| 4 pixel        | 300                 | 7                |
-+----------------+---------------------+------------------+
-
-
 .. _gaussian-filter:
 
 Gaussian Filter
@@ -8306,7 +7865,7 @@ zeroes and the values of |image68|, |image69| are equal.
 .. code:: c
 
    template<int FILTER_SIZE, int BORDER_TYPE, int SRC_T, int ROWS, int COLS, int NPC =  1>
-   void GaussianBlur(xf::Mat<SRC_T, ROWS, COLS, NPC> & src, xf::Mat<SRC_T, ROWS, COLS, NPC> & dst, float sigma)
+   void GaussianBlur(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & dst, float sigma)
 
 .. rubric:: Parameter Descriptions
 
@@ -8446,7 +8005,7 @@ For L2NORM normalization, the magnitude computed image is as follows:
 .. code:: c
 
    template< int NORM_TYPE ,int SRC_T,int DST_T, int ROWS, int COLS,int NPC=1>
-   void magnitude(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_matx,xf::Mat<DST_T, ROWS, COLS, NPC> & _src_maty,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat)
+   void magnitude(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_matx,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _src_maty,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat)
 
 .. rubric:: Parameter Descriptions
 
@@ -8556,7 +8115,7 @@ For degrees:
 .. code:: c
 
    template<int RET_TYPE ,int SRC_T,int DST_T, int ROWS, int COLS,int NPC=1 >
-   void phase(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_matx,xf::Mat<DST_T, ROWS, COLS, NPC> & _src_maty,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat)
+   void phase(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_matx,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _src_maty,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat)
 
 .. rubric:: Parameter Descriptions
 
@@ -8719,7 +8278,7 @@ contain a corner:
 
 
 Non-Maximum Suppression:
-------------------------
+'''''''''''''''''''''''''
 
 In non-maximum suppression (NMS) if radius = 1, then the bounding box is
 2*r+1 = 3.
@@ -8740,7 +8299,7 @@ Radius = 1
 +----------------------+----------------------+----------------------+
 
 Threshold:
-----------
+''''''''''
 
 A threshold=442, 3109 and 566 is used for 3x3, 5x5, and 7x7 filters
 respectively. This threshold is verified over 40 sets of images. The
@@ -8751,7 +8310,7 @@ location, that location is marked with 255, otherwise it is zero.
 .. code:: c
 
    template<int FILTERSIZE,int BLOCKWIDTH, int NMSRADIUS,int SRC_T,int ROWS, int COLS,int NPC=1,bool USE_URAM=false>
-   void cornerHarris(xf::Mat<SRC_T, ROWS, COLS, NPC> & src,xf::Mat<SRC_T, ROWS, COLS, NPC> & dst,uint16_t threshold, uint16_t k)
+   void cornerHarris(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & dst,uint16_t threshold, uint16_t k)
 
 .. rubric:: Parameter Descriptions
 
@@ -9714,7 +9273,7 @@ Histogram Computation
 .. code:: c
 
    template<int SRC_T,int ROWS, int COLS,int NPC=1>
-   void calcHist(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, uint32_t *histogram)
+   void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, uint32_t *histogram)
 
 .. rubric:: Parameter Descriptions
 
@@ -9838,7 +9397,7 @@ The intensities in the equalized image are computed as:
 .. code:: c
 
    template<int SRC_T, int ROWS, int COLS, int NPC = 1>
-   void equalizeHist(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1,xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void equalizeHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -9941,7 +9500,7 @@ window dimensions are 64x128, block dimensions are 16x16.
 .. code:: c
 
    template<int WIN_HEIGHT, int WIN_WIDTH, int WIN_STRIDE, int BLOCK_HEIGHT, int BLOCK_WIDTH, int CELL_HEIGHT, int CELL_WIDTH, int NOB, int DESC_SIZE, int IMG_COLOR, int OUTPUT_VARIANT, int SRC_T, int DST_T, int ROWS, int COLS, int NPC = XF_NPPC1,bool USE_URAM=false>
-   void HOGDescriptor(xf::Mat<SRC_T, ROWS, COLS, NPC> &_in_mat, xf::Mat<DST_T, 1, DESC_SIZE, NPC> &_desc_mat);
+   void HOGDescriptor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_in_mat, xf::cv::Mat<DST_T, 1, DESC_SIZE, NPC> &_desc_mat);
 
 
 .. rubric:: Parameter Descriptions
@@ -10007,9 +9566,9 @@ The following table describes the function parameters.
    +--------------+-------------------------------------------------------+
    | Parameters   | Description                                           |
    +==============+=======================================================+
-   | \_in_mat     | Input image, of xf::Mat type                          |
+   | \_in_mat     | Input image, of xf::cv::Mat type                          |
    +--------------+-------------------------------------------------------+
-   | \_desc_mat   | Output descriptors, of xf::Mat type                   |
+   | \_desc_mat   | Output descriptors, of xf::cv::Mat type                   |
    +--------------+-------------------------------------------------------+
 
 Where,
@@ -10204,7 +9763,7 @@ image.
 
 .. code:: c
 
-   void HoughLines(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,float outputrho[MAXLINES],float outputtheta[MAXLINES],short threshold,short linesmax)
+   void HoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,float outputrho[MAXLINES],float outputtheta[MAXLINES],short threshold,short linesmax)
 
 
 .. rubric:: Parameter Descriptions
@@ -10298,124 +9857,6 @@ Xczu9eg-ffvb1156-1-i-es1 to process a grayscale HD (1080x1920) image for
 | THETA=1, RHO=1 | 300                       | 12.5             |
 +----------------+---------------------------+------------------+
 
-
-
-.. _preprocessing-deep-neural-networks:
-
-Preprocessing for Deep Neural Networks
-======================================
-
-The input image are typically pre-processed before being fed for inference of different deep neural networks (DNNs). The preProcess function provides various modes to perform various preprocessing operations. The preprocessing function\ :math:`\ f(x`) can be described using below equations.
-
-|image164|
-
-The preProcess function supports operating modes presented in the below table:
-
-+---------+--------------------------------------------------+--------------------------------------+
-| Op Code | Operation                                        | Description                          |
-+=========+==================================================+======================================+
-| 0       | |image165|                                       | Mean subtraction                     |
-+---------+--------------------------------------------------+--------------------------------------+
-| 1       | |image166|                                       | Scale and clip                       |
-+---------+--------------------------------------------------+--------------------------------------+
-| 2       | |image167|                                       | Clipping                             |
-+---------+--------------------------------------------------+--------------------------------------+
-| 3       | |image168|                                       | Scale and bias                       |
-+---------+--------------------------------------------------+--------------------------------------+
-| 4       | |image169|                                       | Scale and bias with mean subtraction |
-+---------+--------------------------------------------------+--------------------------------------+
-| 5       | |image170|                                       | Complete operation                   |
-+---------+--------------------------------------------------+--------------------------------------+
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template <int INPUT_PTR_WIDTH_T,int OUTPUT_PTR_WIDTH_T, int T_CHANNELS_T, int CPW_T, int ROWS_T, int COLS_T, int NPC_T, bool PACK_MODE_T, int WX_T, int WA_T, int WB_T, int WY_T, int WO_T, int FX_T, int FA_T, int FB_T, int FY_T,int FO_T, bool SIGNED_IN_T, int OPMODE_T>
-
-   void preProcess(hls::stream<ap_uint<INPUT_PTR_WIDTH_T> > &srcStrm, ap_uint<OUTPUT_PTR_WIDTH_T> \*out, float params[3*T_CHANNELS_T], int rows, int cols, int th1, int th2)
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table gammacorrection Parameter Description
-
-+--------------------+----------------------------------------------+
-| Parameter          | Description                                  |
-+====================+==============================================+
-| srcStrm            | Input image stream                           |
-+--------------------+----------------------------------------------+
-| out                | Output pointer                               |
-+--------------------+----------------------------------------------+
-| params             | Array containing α, β and γ values           |
-+--------------------+----------------------------------------------+
-| rows               | Input image height                           |
-+--------------------+----------------------------------------------+
-| cols               | Input image width                            |
-+--------------------+----------------------------------------------+
-| th1                | Upper threshold                              |
-+--------------------+----------------------------------------------+
-| th2                | Lower threshold                              |
-+--------------------+----------------------------------------------+
-| INPUT_PTR_WIDTH_T  | Width of input pointer                       |
-+--------------------+----------------------------------------------+
-| OUTPUT_PTR_WIDTH_T | Width of output pointer                      |
-+--------------------+----------------------------------------------+
-| T_CHANNELS_T       | Total Channels                               |
-+--------------------+----------------------------------------------+
-| CPW_T              | Channels Packed per DDR Word                 |
-+--------------------+----------------------------------------------+
-| ROWS_T             | Max Height of Image                          |
-+--------------------+----------------------------------------------+
-| COLS_T             | Max Width of Image                           |
-+--------------------+----------------------------------------------+
-| NPC_T              | Number of pixels processed per clock         |
-+--------------------+----------------------------------------------+
-| PACK_MODE_T        | data format (pixel packed or channel packed) |
-+--------------------+----------------------------------------------+
-| WX_T               | x bit width                                  |
-+--------------------+----------------------------------------------+
-| WA_T               | alpha bit width                              |
-+--------------------+----------------------------------------------+
-| WB_T               | beta bit width                               |
-+--------------------+----------------------------------------------+
-| WY_T               | Gamma bit width                              |
-+--------------------+----------------------------------------------+
-| WO_T               | Output bit width                             |
-+--------------------+----------------------------------------------+
-| FX_T               | Number of integer bits for x                 |
-+--------------------+----------------------------------------------+
-| FA_T               | Number of integer bits for alpha             |
-+--------------------+----------------------------------------------+
-| FB_T               | Number of integer bits for beta              |
-+--------------------+----------------------------------------------+
-| FY_T               | Number of integer bits for gamma             |
-+--------------------+----------------------------------------------+
-| FO_T               | Number of integer bits for output            |
-+--------------------+----------------------------------------------+
-| SIGNED_IN_T        | Signed input flag                            |
-+--------------------+----------------------------------------------+
-| OPMODE_T           | Operating mode                               |
-+--------------------+----------------------------------------------+
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of preProcess for NPC_T =8, CPW_T=3 and OPMODE=0, for a maximum input image size of 1280x720 pixels. The results are after synthesis in Vitis 2019.2 for the Xilinx xcu200-fsgd2104-2-e FPGA at 300 MHz. Latency for this configuration is 0.7 ms.
-
-+----------------+---------------------+----------------------+----------+------+-------+-------+
-| Operating Mode | Operating Frequency | Utilization Estimate |          |      |       |       |
-|                |                     |                      |          |      |       |       |
-|                | (MHz)               |                      |          |      |       |       |
-+                +                     +----------------------+----------+------+-------+-------+
-|                |                     | BRAM_18K             | DSP_48Es | FF   | LUT   | SLICE |
-+================+=====================+======================+==========+======+=======+=======+
-| 8 pixel        | 300                 | 0                    | 2        | 7554 | 11127 | 2155  |
-+----------------+---------------------+----------------------+----------+------+-------+-------+
-
-
-
 .. _pyramid-up:
 
 Pyramid Up
@@ -10439,7 +9880,7 @@ padding, each output pixel is multiplied by 4.
 .. code:: c
 
    template<int TYPE, int ROWS, int COLS, int NPC> 
-   void pyrUp (xf::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::Mat<TYPE, ROWS, COLS, NPC> & _dst)
+   void pyrUp (xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -10548,7 +9989,7 @@ even columns. The resulting image size is |image90|.
 .. code:: c
 
    template<int TYPE, int ROWS, int COLS, int NPC,bool USE_URAM=false> 
-   void pyrDown (xf::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::Mat<TYPE, ROWS, COLS, NPC> & _dst)
+   void pyrDown (xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _dst)
 
 .. rubric:: Parameter Descriptions
 
@@ -10663,7 +10104,7 @@ InitUndistortRectifyMapInverse
 
 The ``InitUndistortRectifyMapInverse`` function generates mapx and mapy,
 based on a set of camera parameters, where mapx and mapy are inputs for
-the xf::remap function. That is, for each pixel in the location (u, v)
+the xf::cv::remap function. That is, for each pixel in the location (u, v)
 in the destination (corrected and rectified) image, the function
 computes the corresponding coordinates in the source image (the original
 image from camera). The InitUndistortRectifyMapInverse module is
@@ -10679,7 +10120,7 @@ format.
 .. code:: c
 
    template< int CM_SIZE, int DC_SIZE, int MAP_T, int ROWS, int COLS, int NPC >
-   void InitUndistortRectifyMapInverse ( ap_fixed<32,12> *cameraMatrix, ap_fixed<32,12> *distCoeffs, ap_fixed<32,12> *ir, xf::Mat<MAP_T, ROWS, COLS, NPC> &_mapx_mat, xf::Mat<MAP_T, ROWS, COLS, NPC> &_mapy_mat, int _cm_size, int _dc_size)
+   void InitUndistortRectifyMapInverse ( ap_fixed<32,12> *cameraMatrix, ap_fixed<32,12> *distCoeffs, ap_fixed<32,12> *ir, xf::cv::Mat<MAP_T, ROWS, COLS, NPC> &_mapx_mat, xf::cv::Mat<MAP_T, ROWS, COLS, NPC> &_mapy_mat, int _cm_size, int _dc_size)
 
 
 .. rubric:: Parameter Descriptions
@@ -10751,7 +10192,7 @@ Where (x,y) is the spatial coordinate of the pixel.
 .. code:: c
 
    template<int SRC_T, int ROWS, int COLS,int NPC=1>
-   void inRange(xf::Mat<SRC_T, ROWS, COLS, NPC> & src,unsigned char lower_thresh,unsigned char upper_thresh,xf::Mat<SRC_T, ROWS, COLS, NPC> & dst)
+   void inRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src,unsigned char lower_thresh,unsigned char upper_thresh,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -10855,7 +10296,7 @@ Integral Image
 .. code:: c
 
    template<int SRC_TYPE,int DST_TYPE, int ROWS, int COLS, int NPC=1>
-   void integral(xf::Mat<SRC_TYPE, ROWS, COLS, NPC> & _src_mat, xf::Mat<DST_TYPE, ROWS, COLS, NPC> & _dst_mat)
+   void integral(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC> & _src_mat, xf::cv::Mat<DST_TYPE, ROWS, COLS, NPC> & _dst_mat)
 
 
 .. rubric:: Parameter Descriptions
@@ -10993,10 +10434,10 @@ optical flow along with the scale is obtained.
 
    template< int NUM_PYR_LEVELS, int NUM_LINES, int WINSIZE, int FLOW_WIDTH, int FLOW_INT, int TYPE, int ROWS, int COLS, int NPC,bool USE_URAM=false>
    void densePyrOpticalFlow(
-   xf::Mat<TYPE,ROWS,COLS,NPC> & _current_img,
-   xf::Mat<TYPE,ROWS,COLS,NPC> & _next_image,
-   xf::Mat<XF_32UC1,ROWS,COLS,NPC> & _streamFlowin,
-   xf::Mat<XF_32UC1,ROWS,COLS,NPC> & _streamFlowout,
+   xf::cv::Mat<TYPE,ROWS,COLS,NPC> & _current_img,
+   xf::cv::Mat<TYPE,ROWS,COLS,NPC> & _next_image,
+   xf::cv::Mat<XF_32UC1,ROWS,COLS,NPC> & _streamFlowin,
+   xf::cv::Mat<XF_32UC1,ROWS,COLS,NPC> & _streamFlowout,
    const int level, const unsigned char scale_up_flag, float scale_in, ap_uint<1> init_flag)
 
 
@@ -11198,7 +10639,7 @@ equations and two unknowns:
 .. code:: c
 
    template<int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE,bool USE_URAM=false>
-   void DenseNonPyrLKOpticalFlow (xf::Mat<TYPE, ROWS, COLS, NPC> & frame0, xf::Mat<TYPE, ROWS, COLS, NPC> & frame1, xf::Mat<XF_32FC1, ROWS, COLS, NPC> & flowx, xf::Mat<XF_32FC1, ROWS, COLS, NPC> & flowy)
+   void DenseNonPyrLKOpticalFlow (xf::cv::Mat<TYPE, ROWS, COLS, NPC> & frame0, xf::cv::Mat<TYPE, ROWS, COLS, NPC> & frame1, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> & flowx, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> & flowy)
 
 
 .. rubric:: Parameter Descriptions
@@ -11439,24 +10880,24 @@ P to address the numerical accuracy/stability problems.
 .. code:: c
 
    template<int N_STATE, int M_MEAS, int C_CTRL, Int  MTU, int MMU, bool USE_URAM=0, bool EKF_EN=0, int TYPE, int NPC >
-   void KalmanFilter ( xf::Mat<TYPE, N_STATE, N_STATE, NPC>  &A_mat, 
+   void KalmanFilter ( xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>  &A_mat, 
    #if KF_C!=0
-   xf::Mat<TYPE, N_STATE, C_CTRL, NPC>   &B_mat, 
+   xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC>   &B_mat, 
    #endif
-   xf::Mat<TYPE, N_STATE, N_STATE, NPC>  &Uq_mat, 
-   xf::Mat<TYPE, N_STATE, 1, NPC>        &Dq_mat,  
-   xf::Mat<TYPE, M_MEAS, N_STATE, NPC>   &H_mat,
-   xf::Mat<TYPE, N_STATE, 1, NPC>        &X0_mat, 
-   xf::Mat<TYPE, N_STATE, N_STATE, NPC>  &U0_mat, 
-   xf::Mat<TYPE, N_STATE, 1, NPC>        &D0_mat, 
-   xf::Mat<TYPE, M_MEAS, 1, NPC>         &R_mat, 
+   xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>  &Uq_mat, 
+   xf::cv::Mat<TYPE, N_STATE, 1, NPC>        &Dq_mat,  
+   xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC>   &H_mat,
+   xf::cv::Mat<TYPE, N_STATE, 1, NPC>        &X0_mat, 
+   xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>  &U0_mat, 
+   xf::cv::Mat<TYPE, N_STATE, 1, NPC>        &D0_mat, 
+   xf::cv::Mat<TYPE, M_MEAS, 1, NPC>         &R_mat, 
    #if KF_C!=0
-   xf::Mat<TYPE, C_CTRL, 1, NPC>         &u_mat, 
+   xf::cv::Mat<TYPE, C_CTRL, 1, NPC>         &u_mat, 
    #endif
-   xf::Mat<TYPE, M_MEAS, 1, NPC>         &y_mat, 
-   xf::Mat<TYPE, N_STATE, 1, NPC>        &Xout_mat, 
-   xf::Mat<TYPE, N_STATE, N_STATE, NPC>  &Uout_mat, 
-   xf::Mat<TYPE, N_STATE, 1, NPC>        &Dout_mat, 
+   xf::cv::Mat<TYPE, M_MEAS, 1, NPC>         &y_mat, 
+   xf::cv::Mat<TYPE, N_STATE, 1, NPC>        &Xout_mat, 
+   xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>  &Uout_mat, 
+   xf::cv::Mat<TYPE, N_STATE, 1, NPC>        &Dout_mat, 
    unsigned char flag)
 
 
@@ -11642,7 +11083,7 @@ by taking average latency of 100 iteration.
 .. _extended-kalman-filter:
 
 Extended Kalman Filter
-----------------------
+''''''''''''''''''''''
 
 The Kalman filter estimates the state vector in a linear model. If the
 model is nonlinear, then a linearization procedure is performed to
@@ -11720,7 +11161,7 @@ R\ :sup:`p` and R\ :sup:`q` respectively, 1≤p, q≤n.
 | 
 
 Example for Extended Kalman Filter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''''''''
 
 .. code:: c
 
@@ -11785,7 +11226,7 @@ deviation are calculated as follows:
 .. code:: c
 
    template<int SRC_T,int ROWS, int COLS,int NPC=1>
-   void meanStdDev(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,unsigned short* _mean,unsigned short* _stddev)
+   void meanStdDev(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,unsigned short* _mean,unsigned short* _stddev)
 
 
 .. rubric:: Parameter Descriptions
@@ -11893,7 +11334,7 @@ dst(x,y)=max( src1(x,y) ,src2(x,y) )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void Max(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void Max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -11993,7 +11434,7 @@ dst(I)=maxS( src(I) ,scl )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void MaxS(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void MaxS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -12092,7 +11533,7 @@ value of the NxN neighborhood pixel values, for each pixel.
 .. code:: c
 
    template<int FILTER_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC> 
-   void medianBlur (xf::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::Mat<TYPE, ROWS, COLS, NPC> & _dst)
+   void medianBlur (xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -12216,7 +11657,7 @@ dst(I)=min( src1(I) ,src2(I) )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void Min(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void Min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -12316,7 +11757,7 @@ dst(x,y)=minS( src(x,y) ,scl )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void MinS(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void MinS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -12418,7 +11859,7 @@ image and location of those values.
 .. code:: c
 
    template<int SRC_T,int ROWS,int COLS,int NPC>
-   void minMaxLoc(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src,int32_t *max_value, int32_t *min_value,uint16_t *_minlocx, uint16_t *_minlocy, uint16_t *_maxlocx, uint16_t *_maxlocy )
+   void minMaxLoc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src,int32_t *max_value, int32_t *min_value,uint16_t *_minlocx, uint16_t *_minlocy, uint16_t *_maxlocx, uint16_t *_maxlocy )
 
 
 .. rubric:: Parameter Descriptions
@@ -12532,7 +11973,7 @@ recursive mean shift approach.
 .. code:: c
 
    template <int MAXOBJ, int MAXITERS, int OBJ_ROWS, int OBJ_COLS, int SRC_T, int ROWS, int COLS, int NPC> 
-   void MeanShift(xf::Mat<SRC_T, ROWS, COLS, NPC> &_in_mat, uint16_t* x1, uint16_t* y1, uint16_t* obj_height, uint16_t* obj_width, uint16_t* dx, uint16_t* dy, uint16_t* status, uint8_t frame_status, uint8_t no_objects, uint8_t no_iters );
+   void MeanShift(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_in_mat, uint16_t* x1, uint16_t* y1, uint16_t* obj_height, uint16_t* obj_width, uint16_t* dx, uint16_t* dy, uint16_t* status, uint8_t frame_status, uint8_t no_objects, uint8_t no_iters );
 
 
 .. rubric:: Template  Parameter Descriptions
@@ -12553,7 +11994,7 @@ The following table describes the template parameters.
    +--------------+-------------------------------------------------------+
    | OBJ_COLS     | Maximum width of the object to be tracked             |
    +--------------+-------------------------------------------------------+
-   | SRC_T        | Type of the input xf::Mat, must be XF_8UC4, 8-bit     |
+   | SRC_T        | Type of the input xf::cv::Mat, must be XF_8UC4, 8-bit     |
    |              | data with 4 channels                                  |
    +--------------+-------------------------------------------------------+
    | ROWS         | Maximum height of the image                           |
@@ -12662,7 +12103,7 @@ Where,\ |image145| is the class mean.
 
 .. code:: c
 
-   template<int SRC_T, int ROWS, int COLS,int NPC=1> void OtsuThreshold(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, uint8_t &_thresh)
+   template<int SRC_T, int ROWS, int COLS,int NPC=1> void OtsuThreshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, uint8_t &_thresh)
 
 
 .. rubric:: Parameter Descriptions
@@ -12750,7 +12191,7 @@ input image.
 .. code:: c
 
    template< int SRC_T,int MASK_T, int ROWS, int COLS,int NPC=1>
-   void paintmask(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, xf::Mat<MASK_T, ROWS, COLS, NPC> & in_mask, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat, unsigned char _color[XF_CHANNELS(SRC_T,NPC)])
+   void paintmask(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, xf::cv::Mat<MASK_T, ROWS, COLS, NPC> & in_mask, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat, unsigned char _color[XF_CHANNELS(SRC_T,NPC)])
 
 
 .. rubric:: Parameter Descriptions
@@ -12869,9 +12310,9 @@ the output operand.
 
    template<int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC=1> 
    void add (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1,  
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2,  
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1,  
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2,  
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
 
 
 .. rubric:: Parameter Descriptions
@@ -13003,9 +12444,9 @@ the output operand.
 
    template<int POLICY_TYPE, int SRC_T,int ROWS, int COLS, int NPC=1> 
    void multiply (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1,  
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2,  
-   xf::Mat<int SRC_T int ROWS, int COLS, int NPC> dst,
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1,  
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2,  
+   xf::cv::Mat<int SRC_T int ROWS, int COLS, int NPC> dst,
    float scale)
 
 
@@ -13137,9 +12578,9 @@ the output operand.
 
    template<int POLICY_TYPE int SRC_T, int ROWS, int COLS, int NPC=1> 
    void subtract (
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1,  
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2,  
-   xf::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src1,  
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> src2,  
+   xf::cv::Mat<int SRC_T, int ROWS, int COLS, int NPC> dst )
 
 
 .. rubric:: Parameter Descriptions
@@ -13260,7 +12701,7 @@ Reduction operation could be one of the following:
 
 .. code:: c
 
-   template< int REDUCE_OP, int SRC_T , int DST_T,  int ROWS, int COLS, int ONE_D_HEIGHT, int ONE_D_WIDTH,int NPC=1> void reduce(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, xf::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, 1> & _dst_mat, unsigned char dim)
+   template< int REDUCE_OP, int SRC_T , int DST_T,  int ROWS, int COLS, int ONE_D_HEIGHT, int ONE_D_WIDTH,int NPC=1> void reduce(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat, xf::cv::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, 1> & _dst_mat, unsigned char dim)
 
 
 .. rubric:: Parameter Descriptions
@@ -13370,10 +12811,10 @@ Remap
 
    template<int WIN_ROWS,int INTERPOLATION_TYPE, int SRC_T, int MAP_T, int DST_T, int ROWS, int COLS, int NPC = 1,bool USE_URAM=false>
 
-   void remap (xf::Mat<SRC_T, ROWS, COLS, NPC> &_src_mat,
-            xf::Mat<DST_T, ROWS, COLS, NPC> &_remapped_mat,
-            xf::Mat<MAP_T, ROWS, COLS, NPC> &_mapx_mat,
-            xf::Mat<MAP_T, ROWS, COLS, NPC> &_mapy_mat);
+   void remap (xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src_mat,
+            xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_remapped_mat,
+            xf::cv::Mat<MAP_T, ROWS, COLS, NPC> &_mapx_mat,
+            xf::cv::Mat<MAP_T, ROWS, COLS, NPC> &_mapy_mat);
 
 
 .. rubric:: Parameter Descriptions
@@ -13525,7 +12966,7 @@ up-scaling.
 .. code:: c
 
    template<int INTERPOLATION_TYPE, int TYPE, int SRC_ROWS, int SRC_COLS, int DST_ROWS, int DST_COLS, int NPC,int MAX_DOWN_SCALE> 
-   void resize (xf::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC> & _src, xf::Mat<TYPE, DST_ROWS, DST_COLS, NPC> & _dst)
+   void resize (xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC> & _src, xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -13599,13 +13040,13 @@ xczu9eg-ffvb1156-2-i-es2 FPGA.
 +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
 | Downscale Bilinear         | 1920X1080 TO 960X1080  | 1340                | 1846 | 8    | 2     | 3840X2160 TO 1920X1080      | 5159 | 3092 | 36   | 12    |
 +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-| Downscale Area             | 3840X2160 TO 1920X1080 | 2341                | 3550 | 44   | 24    | Configuration not supported |      |      |      |       |
+| Downscale Area             | 3840X2160 TO 1920X1080 | 6146                | 8338 | 19   | 10    | 3840X2160 TO 1920X1080      |17892 | 19758| 162  |  16   |
 +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
 | Upscale Nearest Neighbor   | 1920X1080 TO 3840X540  | 1089                | 1593 | 4    | 2     | 1920X1080 TO 3840X2160      | 1818 | 1686 | 4    | 6     |
 +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
 | Upscale Bilinear           | 1920X1080 TO 3840X540  | 1340                | 1846 | 8    | 2     | 1920X1080 TO 3840X2160      | 3697 | 2739 | 36   | 6     |
 +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
-| Upscale Area               | 1920X1080 TO 3840X2160 | 1312                | 2220 | 16   | 12    | Configuration not supported |      |      |      |       |
+| Upscale Area               | 1920X1080 TO 3840X2160 | 5811                | 8773 | 28   |  32   | 1920X1080 TO 3840X2160      |12214 |14003 |  98  | 24    |
 +----------------------------+------------------------+---------------------+------+------+-------+-----------------------------+------+------+------+-------+
 
 
@@ -13675,7 +13116,7 @@ color space and returns the HSV image as the output.
 .. code:: c
 
    template<int SRC_T, int ROWS, int COLS,int NPC=1>
-             void BGR2HSV(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat)
+             void BGR2HSV(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat)
 
 
 .. rubric:: Parameter Descriptions
@@ -13720,7 +13161,7 @@ dst(x,y)= src1(x,y)*scale+shift
 .. code:: c
 
    template< int SRC_T,int DST_T, int ROWS, int COLS, int NPC = 1>
-   void convertScaleAbs(xf::Mat<SRC_T, ROWS, COLS, NPC> & src1, xf::Mat<DST_T, ROWS, COLS, NPC> & dst,float scale, float shift)
+   void convertScaleAbs(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src1, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & dst,float scale, float shift)
 
 
 .. rubric:: Parameter Descriptions
@@ -13832,7 +13273,7 @@ For Kernel size 3x3:
 .. code:: c
 
    template<int BORDER_TYPE, int SRC_T,int DST_T, int ROWS, int COLS,int NPC=1>
-   void Scharr(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_matx,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_maty)
+   void Scharr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_matx,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_maty)
 
 
 .. rubric:: Parameter Descriptions
@@ -13959,7 +13400,7 @@ value and stores the result in dst.
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void set(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void set(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -14078,7 +13519,7 @@ processed.
 .. code:: c
 
    template<int BORDER_TYPE,int FILTER_TYPE, int SRC_T,int DST_T, int ROWS, int COLS,int NPC=1,bool USE_URAM=false>
-   void Sobel(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_matx,xf::Mat<DST_T, ROWS, COLS, NPC> & _dst_maty)
+   void Sobel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_matx,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_maty)
 
 
 .. rubric:: Parameter Descriptions
@@ -14231,7 +13672,7 @@ method for stereo disparity estimation aggregates the cost in terms of
 dissimilarity across multiple paths leading to a smoother estimate of
 the disparity map.
 
-For the semi-global method in xfOpenCV, census transform in conjunction
+For the semi-global method in Vitis vision, census transform in conjunction
 with Hamming distance is used for cost computation. The semiglobal
 optimization block is based on the implementation by Hirschmuller, but
 approximates the cost aggregation by considering only four directions.
@@ -14250,7 +13691,7 @@ compile-time input.
 
 .. code:: c
 
-   void SemiGlobalBM(xf::Mat<SRC_T,ROWS,COLS,NPC> & _src_mat_l, xf::Mat<SRC_T,ROWS,COLS,NPC> & _src_mat_r, xf::Mat<DST_T,ROWS,COLS,NPC> & _dst_mat, uint8_t p1, uint8_t p2) 
+   void SemiGlobalBM(xf::cv::Mat<SRC_T,ROWS,COLS,NPC> & _src_mat_l, xf::cv::Mat<SRC_T,ROWS,COLS,NPC> & _src_mat_r, xf::cv::Mat<DST_T,ROWS,COLS,NPC> & _dst_mat, uint8_t p1, uint8_t p2) 
 
 
 .. rubric:: Parameter Descriptions
@@ -14369,7 +13810,7 @@ the disparity value of zero.
 .. code:: c
 
    template <int WSIZE, int NDISP, int NDISP_UNIT, int SRC_T, int DST_T, int ROWS, int COLS, int NPC = XF_NPPC1,bool USE_URAM=false>
-   void StereoBM(xf::Mat<SRC_T, ROWS, COLS, NPC> &_left_mat, xf::Mat<SRC_T, ROWS, COLS, NPC> &_right_mat, xf::Mat<DST_T, ROWS, COLS, NPC> &_disp_mat, xf::xFSBMState<WSIZE,NDISP,NDISP_UNIT> &sbmstate);
+   void StereoBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_left_mat, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_right_mat, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_disp_mat, xf::cv::xFSBMState<WSIZE,NDISP,NDISP_UNIT> &sbmstate);
 
 
 .. rubric:: Parameter Descriptions
@@ -14532,7 +13973,7 @@ dst(I)= scl - src(I)
 .. code:: c
 
    template<int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC =1>
-   void subRS(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void subRS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)],xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -14631,7 +14072,7 @@ dst(I)= src(I) - scl
 .. code:: c
 
    template<int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC =1>
-   void subS(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)],xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void subS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)],xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -14728,7 +14169,7 @@ The sum function calculates the sum of all pixels in input image.
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void sum(xf::Mat<SRC_T, ROWS, COLS, NPC> & src1,double sum[XF_CHANNELS(SRC_T,NPC)])
+   void sum(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src1,double sum[XF_CHANNELS(SRC_T,NPC)])
 
 
 .. rubric:: Parameter Descriptions
@@ -14825,7 +14266,7 @@ product value with its fixed point type.
 .. code:: c
 
    template<int SRC1_T, int SRC2_T, int DST_T, int ROWS1, int COLS1, int ROWS2, int COLS2, int NPC=1, int N>
-   void SVM(xf::Mat<SRC1_T, ROWS1, COLS1, NPC> &in_1, xf::Mat<SRC2_T, ROWS2, COLS2, NPC> &in_2, uint16_t idx1, uint16_t idx2, uchar_t frac1, uchar_t frac2, uint16_t n, uchar_t *out_frac, ap_int<XF_PIXELDEPTH(DST_T)> *result)
+   void SVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC> &in_1, xf::cv::Mat<SRC2_T, ROWS2, COLS2, NPC> &in_2, uint16_t idx1, uint16_t idx2, uchar_t frac1, uchar_t frac2, uint16_t n, uchar_t *out_frac, ap_int<XF_PIXELDEPTH(DST_T)> *result)
 
 
 .. rubric:: Parameter Descriptions
@@ -14957,7 +14398,7 @@ function.
 .. code:: c
 
    template<int THRESHOLD_TYPE, int SRC_T, int ROWS, int COLS,int NPC=1>
-   void Threshold(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat,short int thresh,short int maxval ) 
+   void Threshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst_mat,short int thresh,short int maxval ) 
 
 
 .. rubric:: Parameter Descriptions
@@ -15250,7 +14691,7 @@ Where:
 .. code:: c
 
    template <int SRC_T, int ROWS, int COLS,int NPC=1>
-   void LUT(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst,unsigned char* _lut)
+   void LUT(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst,unsigned char* _lut)
 
 
 
@@ -15486,7 +14927,7 @@ dimensions of the dst1 by the third dimension
 .. code:: c
 
    template<int STORE_LINES, int START_ROW, int TRANSFORMATION_TYPE, int INTERPOLATION_TYPE, int SRC_T, int ROWS, int COLS, int NPC=1,bool USE_URAM=false>
-   void warpTransform(xf::Mat<SRC_T, ROWS, COLS, NPC> & src, xf::Mat<SRC_T, ROWS, COLS, NPC> & dst, float *transformation_matrix)
+   void warpTransform(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & dst, float *transformation_matrix)
 
 
 .. rubric:: Parameter Descriptions
@@ -15575,9 +15016,9 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a BGR 4K image.
 |                |                      |               |             |                     | LUTs                 | FFs  | DSPs | BRAMs |
 +================+======================+===============+=============+=====================+======================+======+======+=======+
 | Perspective    | Bilinear             | 100           | 50          | 300                 | 9192                 | 7910 | 48   | 616   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
++----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+
 | Perspective    | Nearest Neighbor     | 100           | 50          | 300                 | 10533                | 12055| 69   | 604   |
-+----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
++----------------+----------------------+---------------+-------------+---------------------+----------------------+-------+------+-------+
 | Affine         | Bilinear             | 100           | 50          | 300                 | 6397                 | 8415 | 35   | 604   |
 +----------------+----------------------+---------------+-------------+---------------------+----------------------+------+------+-------+
 
@@ -15653,7 +15094,7 @@ the result in dst.
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void zero(xf::Mat<SRC_T, ROWS, COLS, NPC> & _src1,xf::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void zero(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -16085,23 +15526,4 @@ Pattern Recognition, 2005.
    :class: image
 .. |image160| image:: ./images/iwp1554997301948.png
    :class: image
-.. |image161| image:: ./images/awbeq1.png
-   :class: image
-.. |image162| image:: ./images/gammaeq1.png
-   :class: image
-.. |image163| image:: ./images/gammaeq2.png
-   :class: image
-.. |image164| image:: ./images/eq1DNN.png
-   :class: image
-.. |image165| image:: ./images/eq2DNN.png
-   :class: image
-.. |image166| image:: ./images/eq3DNN.png
-   :class: image
-.. |image167| image:: ./images/eq7DNN.png
-   :class: image
-.. |image168| image:: ./images/eq4DNN.png
-   :class: image
-.. |image169| image:: ./images/eq5DNN.png
-   :class: image
-.. |image170| image:: ./images/eq6DNN.png
-   :class: image   
+

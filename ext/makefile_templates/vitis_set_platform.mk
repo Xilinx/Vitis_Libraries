@@ -18,7 +18,7 @@
 # DEVICE var.
 #
 # PLATFORM_REPO_PATHS is used for searching the platforms, if not found, tool folder will be searched,
-# if still no matck, the default path /opt/xilinx/platforms will be tried.
+# if still no match, the default path /opt/xilinx/platforms will be tried.
 
 # MK_BEGIN
 
@@ -45,7 +45,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -66,4 +66,3 @@ ifneq (,$(word 2,$(XPLATFORM)))
 endif
 
 XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
-

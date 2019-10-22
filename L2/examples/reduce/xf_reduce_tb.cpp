@@ -35,10 +35,10 @@ int main(int argc, char** argv) {
     }
 
 #if DIM
-    dst_hls.create(in_img.rows, 1, CV_8UC1);
+    dst_hls.create(in_img.rows, 1, CV_32SC1);
     ocv_ref.create(in_img.rows, 1, CV_8UC1);
 #else
-    dst_hls.create(1, in_img.cols, CV_8UC1);
+    dst_hls.create(1, in_img.cols, CV_32SC1);
     ocv_ref.create(1, in_img.cols, CV_8UC1);
 #endif
 

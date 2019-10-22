@@ -26,8 +26,8 @@
 typedef unsigned short int uint16_t;
 
 /* Define width and height of the image	*/
-#define XF_WIDTH 1920
-#define XF_HEIGHT 1080
+#define XF_WIDTH 128
+#define XF_HEIGHT 128
 
 #if GRAY
 #define TYPE XF_8UC1

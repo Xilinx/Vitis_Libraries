@@ -27,7 +27,17 @@ BIN_DIR_SUFFIX ?= _$(XDEVICE)
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
 
-CXX := aarch64-linux-gnu-g++
+B_NAME = $(shell dirname $(XPLATFORM))
+
+ifeq ($(ARCH), aarch64)
+	CXX := aarch64-linux-gnu-g++
+	DEV_FAM = Ultrascale
+else ifeq ($(ARCH), aarch32)
+	CXX := arm-linux-gnueabihf-g++
+	DEV_FAM = 7Series
+endif
+
+SDCARD := sd_card
 
 CC := gcc
 

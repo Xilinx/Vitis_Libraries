@@ -146,17 +146,16 @@ void arithm_accel(
 // clang-format off
     #pragma HLS STREAM variable=imgInput1.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
-// clang-format on
+    // clang-format on
+    for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
+        scl[i] = scl_in[i];
+    }
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in1, imgInput1);
-    for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
-        scl[i] = scl_in[i];
-    }
 
     // Run xfOpenCV kernel:
     xf::cv::FUNCT_NAME<

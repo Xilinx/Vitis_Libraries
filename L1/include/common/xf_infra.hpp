@@ -115,7 +115,7 @@ int AXIvideo2xfMat(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, xf::cv::Ma
     bool sof = 0;
 loop_wait_for_start:
     while (!sof) { // checking starting of frame
-                   // clang-format off
+// clang-format off
         #pragma HLS pipeline II=1
         #pragma HLS loop_tripcount avg=0 max=0
         // clang-format on

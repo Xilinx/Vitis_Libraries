@@ -19,7 +19,6 @@
 
 #include <sys/time.h>
 
-#include <CL/cl.h>
 #include "xcl2.hpp"
 
 int main(int argc, char* argv[]) {

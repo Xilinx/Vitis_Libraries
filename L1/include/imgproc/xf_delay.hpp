@@ -29,10 +29,10 @@ template <int MAXDELAY, int SRC_T, int ROWS, int COLS, int NPC>
 void delayMat(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
 
-// clang-format off
-    #pragma HLS dataflow
+    // clang-format off
+  //  #pragma HLS dataflow
     // clang-format on
 
     hls::stream<XF_TNAME(SRC_T, NPC)> src;
