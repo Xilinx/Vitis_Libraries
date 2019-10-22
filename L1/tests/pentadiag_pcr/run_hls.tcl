@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "pentadiag_pcr"
+set PROJ "pentadiag_pcr.prj"
 set SOLN "solution1"
 set CLKP 3.3333
 

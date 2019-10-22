@@ -196,7 +196,7 @@ pi2_loop:
 } // internal
 
 #define PI (3.14159265359f)
-/// @brief Engine for Hestion Closed Form Solution
+/// @brief Engine for Heston Closed Form Solution
 /// @param[in] input_data A structure containing the kerenl model parameters
 /// @return the calculated call value
 template <typename DT>

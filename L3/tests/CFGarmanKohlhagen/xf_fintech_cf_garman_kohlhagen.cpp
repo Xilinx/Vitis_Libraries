@@ -95,7 +95,6 @@ int main() {
             printf("[XLNX] | %5u | %8.5f | %8.5f | %8.5f | %8.5f | %8.5f | %8.5f |\n", i,
                    cfGarmanKohlhagen.optionPrice[i], cfGarmanKohlhagen.delta[i], cfGarmanKohlhagen.gamma[i],
                    cfGarmanKohlhagen.vega[i], cfGarmanKohlhagen.theta[i], cfGarmanKohlhagen.rho[i]);
-
         }
 
         printf(

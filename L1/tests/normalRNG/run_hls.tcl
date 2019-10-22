@@ -15,7 +15,7 @@
 #
 source settings.tcl
 
-set PROJ "prj"
+set PROJ "normalRNG.prj"
 set SOLN "sol"
 set CLKP 300MHz
 

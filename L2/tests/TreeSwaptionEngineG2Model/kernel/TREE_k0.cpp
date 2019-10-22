@@ -72,13 +72,12 @@ extern "C" void TREE_k0(int type,
 
     Model model;
     model.initialization(flatRate, a, sigma, b, eta, rho);
-    Process process1, process2;
-    process1.init(a, sigma, 0.0, 0.0);
-    process2.init(b, eta, 0.0, 0.0);
+    DT processParam1[4] = {a, sigma, 0.0, 0.0};
+    DT processParam2[4] = {b, eta, 0.0, 0.0};
 
-    treeSwaptionEngine<DT, Model, Process, DIM, LEN, LEN2>(model, process1, process2, type, fixedRate, timestep,
-                                                           initTime, initSize, exercise_cnt, floating_cnt, fixed_cnt,
-                                                           flatRate, nominal, x0, spread, rho, NPV);
+    treeSwaptionEngine<DT, Model, Process, DIM, LEN, LEN2>(model, processParam1, processParam2, type, fixedRate,
+                                                           timestep, initTime, initSize, exercise_cnt, floating_cnt,
+                                                           fixed_cnt, flatRate, nominal, x0, spread, rho, NPV);
 
 #ifndef __SYNTHESIS__
     cout << "type=" << type << ",NPV=" << NPV[0] << endl;

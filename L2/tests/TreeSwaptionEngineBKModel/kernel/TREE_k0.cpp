@@ -69,10 +69,9 @@ extern "C" void TREE_k0(int type,
 
     Model model;
     model.initialization(flatRate, spread);
-    Process process;
-    process.init(a, sigma, 0.0, 0.0);
+    DT processParam[4] = {a, sigma, 0.0, 0.0};
 
-    treeSwaptionEngine<DT, Model, Process, DIM, LEN, LEN2>(model, process, type, fixedRate, timestep, initTime,
+    treeSwaptionEngine<DT, Model, Process, DIM, LEN, LEN2>(model, processParam, type, fixedRate, timestep, initTime,
                                                            initSize, exercise_cnt, floating_cnt, fixed_cnt, flatRate,
                                                            nominal, x0, spread, NPV);
 

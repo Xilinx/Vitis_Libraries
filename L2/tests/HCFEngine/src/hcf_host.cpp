@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <CL/cl_ext_xilinx.h>
-#include <CL/opencl.h>
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>

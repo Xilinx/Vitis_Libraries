@@ -32,9 +32,9 @@ There are two layers to the kernel; the engine itself and the IO wrapper.
 The Engine (M76Engine.hpp)
 ==========================
 
-The engine performs a single Merton 76 Closed Form solution for a European Call Option in two parts. The first part calculates a series of Black Scholes solutions weighted by the random jump variable (Poisson Distribution). The second part sums these results to form the overall call price. The engine is split into two parts in order to minimise the latency (maximise throughput) of the overall design, and it is pipelined in order to maximise throughput when dealing with multiple call price calculations. The combination of nested loops and the inner loop, being a summing loop, makes pipelining difficult. So the summing loop is taken out of the engine loop in order to mitigate the pipeline issue. 
+The engine performs a single Merton 76 Closed Form solution for a European Call Option in two parts. The first part calculates a series of Black Scholes solutions weighted by the random jump variable (Poisson Distribution). The second part sums these results to form the overall call price. The engine is split into two parts in order to minimize the latency (maximize throughput) of the overall design, and it is pipelined in order to maximize throughput when dealing with multiple call price calculations. The combination of nested loops and the inner loop, being a summing loop, makes pipelining difficult. So the summing loop is taken out of the engine loop in order to mitigate the pipeline issue. 
 
-The m76 engine makes use of the Black Scholes Closed Form kernel. The Greeks are calculated by the Black Scholes kerenl but are ignored by the m76 kernel.
+The m76 engine makes use of the Black Scholes Closed Form kernel. The Greeks are calculated by the Black Scholes kernel but are ignored by the m76 kernel.
 
 The engine by default sums 100 iterations of weighted Black Scholes. It can be changed with the #define MAX_N in m76_engine_defn.hpp
 

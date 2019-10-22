@@ -28,14 +28,10 @@
 #include <iostream>
 
 typedef double DT;
-typedef xf::fintech::OrnsteinUhlenbeckProcess<DT> Process;
 typedef xf::fintech::G2Model<DT, void, 0> Model;
 
 void dut(DT t, DT T, DT x[2], DT flatRate, DT a, DT sigma, DT b, DT eta, DT rho, DT* discountBond, DT* shortRate) {
     Model model;
-    Process process1, process2;
-    process1.init(a, sigma, 0.0, 0.0);
-    process2.init(b, eta, 0.0, 0.0);
     model.initialization(flatRate, a, sigma, b, eta, rho);
     *discountBond = model.discountBond(t, T, x);
     *shortRate = model.shortRate(t, x, 0.0);

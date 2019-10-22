@@ -95,10 +95,10 @@ There are 4 PUs on Alveo U250 to pricing the option in parallel.  Each PU have t
     | utilization ratio (not include platform)   | 54.18% | 43.54%  | 7.29%| 0    | 51.88%|
     +---------------+----------------------------+--------+---------+------+------+-------+
 
-:numref:`tab_MCEE_resource` gives the resource utilization report of four MCEuropeanEngine PUs. Note that the resource statistics are under specific UN configurations. These UN configurations are the templated parameters of the corresponding API.
+:numref:`tab_MCEE_resource` gives the resource utilization report of four MCEuropeanEngine PUs (Processing Unit). Note that the resource statistics are under specific UN (Unroll Number) configurations. These UN configurations are the templated parameters of the corresponding API.
 
 The complete Vitis demos of European Option Engine are executed with a U250 card on Nimbix. 
-The performance of this demo is listed in :numref:`tab_MCEE_performance`. In this table, kernel execution time and end-to-end execution time are calculated. 
+The performance of this demo is listed in :numref:`tab_MCEE_performance`. In this table, kernel execution time and end-to-end execution time (E2E) are calculated. 
 
 .. _tab_MCEE_performance:
 

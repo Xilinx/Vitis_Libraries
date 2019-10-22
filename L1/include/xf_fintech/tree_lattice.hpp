@@ -60,7 +60,7 @@ class TreeLattice {
      * @brief setup setup parameter and initialize 1D framework of TreeLattice, and compute short-rate
      *
      * @param model short-rate model for Tree Engine
-     * @param process stochastic process
+     * @param process parameters of stochastic process
      * @param endCnt end counter of timepoints
      * @param r floating benchmark annual interest rate
      * @param x0 initial underlying
@@ -68,14 +68,14 @@ class TreeLattice {
      * @param dtime array the difference between the next timepoint and the current timepoint
      *
      */
-    void setup(Model& model, Process& process, unsigned endCnt, DT r, DT x0, DT* time, DT* dtime);
+    void setup(Model& model, DT* process, unsigned endCnt, DT r, DT x0, DT* time, DT* dtime);
 
     /**
      * @brief setup setup parameter and initialize 2D framework of TreeLattice, and compute short-rate
      *
      * @param model short-rate model for Tree Engine
-     * @param process1 stochastic process
-     * @param process2 stochastic process
+     * @param process1 parameters of stochastic process
+     * @param process2 parameters of stochastic process
      * @param endCnt end counter of timepoints
      * @param r floating benchmark annual interest rate
      * @param x0 initial underlying
@@ -83,7 +83,7 @@ class TreeLattice {
      * @param dtime array the difference between the next timepoint and the current timepoint
      *
      */
-    void setup(Model& model, Process& process1, Process& process2, unsigned endCnt, DT r, DT x0, DT* time, DT* dtime);
+    void setup(Model& model, DT* process1, DT* process2, unsigned endCnt, DT r, DT x0, DT* time, DT* dtime);
 
     /**
      * @brief rollback calculate pricing result
@@ -114,7 +114,7 @@ class TreeLattice<DT, Model, Process, Instrument, 1, LEN, LEN2> {
     TreeLattice() {}
 
     // initialize parameter, tree and model
-    void setup(Model& model, Process& process, unsigned endCnt, DT r, DT x0, DT* time, DT* dtime) {
+    void setup(Model& model, DT* process, unsigned endCnt, DT r, DT x0, DT* time, DT* dtime) {
 #pragma HLS inline
 #pragma HLS array_partition variable = tmp_values1 dim = 1 cyclic factor = 4
 #pragma HLS array_partition variable = tmp_values2 dim = 1 cyclic factor = 4
@@ -183,7 +183,7 @@ class TreeLattice<DT, Model, Process, Instrument, 2, LEN, LEN2> {
     TreeLattice() {}
 
     // initialize parameter, tree and model
-    void setup(Model& model, Process& process1, Process& process2, unsigned endCnt, DT r, DT x0, DT* time, DT* dtime) {
+    void setup(Model& model, DT* process1, DT* process2, unsigned endCnt, DT r, DT x0, DT* time, DT* dtime) {
 #pragma HLS inline
 #ifdef __SYNTHESIS__
 #pragma HLS array_partition variable = tmp_values1._2d_array dim = 1 cyclic factor = 4

@@ -45,7 +45,7 @@ Both :math:`\delta` and :math:`\gamma` measures the impact of price changes on o
 .. math::
         vega:\frac{\partial X_t}{\partial \sigma} 
 
-:math:`vega` measure the impact of volatility on option price. Atcually, the volatility changes over time. So, that means the option price will change
+:math:`vega` measure the impact of volatility on option price. Actually, the volatility changes over time. So, that means the option price will change
 over mature time.
 
 

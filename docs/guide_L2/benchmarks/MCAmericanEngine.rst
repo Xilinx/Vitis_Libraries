@@ -97,9 +97,9 @@ The resource utilization and performance of MCAmericanEngine on U250 FPGA card i
     |               |      (UN config: 4)        |        |        |      |      |     |
     +---------------+----------------------------+--------+--------+------+------+-----+
 
-:numref:`tab_MCAE_resource` gives the resource utilization report of four American option APIs. Note that the resource statistics are under specific UN configurations. These UN configurations are the templated parameters of the corresponding API.
+:numref:`tab_MCAE_resource` gives the resource utilization report of four American option APIs. Note that the resource statistics are under specific UN (Unroll Number) configurations. These UN configurations are the templated parameters of the corresponding API.
 
-The complete Vitis demos of American Option Engine are executed with a U250 card on Nimbix. The performance of two demos is listed in :numref:`tab_MCAE_performance`. In this table, kernel execution time and end-to-end execution time are calculated. Besides, for end-to-end execution time, since pipeline mode can be used, especially for 3-kernel version American option engine, pipeline mode execution time is also collected. 
+The complete Vitis demos of American Option Engine are executed with a U250 card on Nimbix. The performance of two demos is listed in :numref:`tab_MCAE_performance`. In this table, kernel execution time and end-to-end execution time (E2E) are calculated. Besides, for end-to-end execution time, since pipeline mode can be used, especially for 3-kernel version American option engine, pipeline mode execution time is also collected. 
 
 .. _tab_MCAE_performance:
 

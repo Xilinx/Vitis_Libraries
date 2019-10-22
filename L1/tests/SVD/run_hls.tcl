@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "prj"
+set PROJ "SVD.prj"
 set SOLN "sol"
 set CLKP 300MHz
 

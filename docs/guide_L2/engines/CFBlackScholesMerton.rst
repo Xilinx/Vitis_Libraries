@@ -40,7 +40,7 @@ Layered on top is the HLS specific kernel wrapper which is responsible for gathe
 cfBSMEngine (cf_bsm.hpp)
 ======================
 
-This is the code for the solver itself, and it is template to accept different data types. It uses standard C++ and allows the code to be easily used in a software only environment by swapping to the standard math namespace. The code is a straighforward implementation of the closed form equations above, with some small optimizations for FPGA implementation. In particular, it is clear from the equations that the price and Greeks contain many of the same elements, so the code implementation is structured to calculate these sub-components and reuse them in the subsequent calculations. It separates the computation into a number of smaller steps which can be computed in parallel. The process also improves throughput and reduces resource utilization. Another optimization is the calculation which require the Normal CDF (often called Phi). It is resource heavy in standard math library, so an approximation is used instead of the accurate result.
+This is the code for the solver itself, and it is templated to accept different data types. It uses standard C++ and allows the code to be easily used in a software only environment by swapping to the standard math namespace. The code is a straightforward implementation of the closed form equations above, with some small optimizations for FPGA implementation. In particular, it is clear from the equations that the price and Greeks contain many of the same elements, so the code implementation is structured to calculate these sub-components and reuse them in the subsequent calculations. It separates the computation into a number of smaller steps which can be computed in parallel. The process also improves throughput and reduces resource utilization. Another optimization is the calculation which require the Normal CDF (often called Phi). It is resource heavy in standard math library, so an approximation is used instead of the accurate result.
 
 
 bsm_kernel (bsm_kernel.cpp)
@@ -56,7 +56,7 @@ These ports are interfaced via functions in bus_interface.hpp which convert betw
 Theoretical throughput
 ======================
 
-The BSM solver demonstration is configured to build one kernel (consisting of some number of cfBSMEngine engines) that connected to a single DDR bank. This particular design is bandwidth constrained, so the number of usable engines can be determined by considering the data requirements as follows: one single cfBSMEngine instance requires 5 input parameters and returns 6 values (price and Greeks) for a total of 11 float values (44 bytes) transferred every clock cycle. At 200MHz for example, it requires a data bandwidth of 200e6 * 44 = 8.8GB/s.  The theoretical bandwith of a single DDR bank as used in the U200 is 19.2 GB/s so that two cfBSMEngine engines in parallel could achieve 17.6GB/s at perfect utilization. Three engines would exceed the capabilities of one DDR, as would two engines and a higher FMAX, so two engine is the configuration selected for the demonstration design. In practice of course, it will not be possible to achieve the theoretical maximum due to limitations in the AXI interconnect, DDR controller, access patterns and so on.
+The BSM solver demonstration is configured to build one kernel (consisting of some number of cfBSMEngine engines) that connected to a single DDR bank. This particular design is bandwidth constrained, so the number of usable engines can be determined by considering the data requirements as follows: one single cfBSMEngine instance requires 5 input parameters and returns 6 values (price and Greeks) for a total of 11 float values (44 bytes) transferred every clock cycle. At 200MHz for example, it requires a data bandwidth of 200e6 * 44 = 8.8GB/s.  The theoretical bandwidth of a single DDR bank as used in the U200 is 19.2 GB/s so that two cfBSMEngine engines in parallel could achieve 17.6GB/s at perfect utilization. Three engines would exceed the capabilities of one DDR, as would two engines and a higher FMAX, so two engine is the configuration selected for the demonstration design. In practice of course, it will not be possible to achieve the theoretical maximum due to limitations in the AXI interconnect, DDR controller, access patterns and so on.
 
 
 Resource Utilization
@@ -82,7 +82,7 @@ The hardware implementation, running on the U200 displays the kernel throughput 
 
     [bash]$ ./bsm_test ./xclbin/bsm_kernel.hw.u200.xclbin 4194304
 
-This achieves around 203 million options per second, which is approximately 8.9GB/s of data transferred. This is about half of the theoretical DDR bandwith, but around 80% of that achieved by the 'xbutil validate' DDR bandwidth test. This can be taken as a more realistic target as it includes any platform overhead which is also incurred in the BSM solver.
+This achieves around 203 million options per second, which is approximately 8.9GB/s of data transferred. This is about half of the theoretical DDR bandwidth, but around 80% of that achieved by the 'xbutil validate' DDR bandwidth test. This can be taken as a more realistic target as it includes any platform overhead which is also incurred in the BSM solver.
 
 .. toctree::
    :maxdepth: 1

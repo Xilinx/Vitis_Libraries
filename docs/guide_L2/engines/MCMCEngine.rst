@@ -31,10 +31,10 @@ The Engine (pop_mcmc.h)
 =======================
 
 The engine is templated to generate either a floating point (Float-32) samples or a double (Float-64) samples. Target distribution function is part of the engine.
-The Metropolis-Hastings algorithm is used for sampling. Proposal is genrated from Normal distribution using Inverse Cumulative Distributed Function based and Box-Muller transformation (MT19937IcnRng).
+The Metropolis-Hastings algorithm is used for sampling. Proposal is generated from Normal distribution using Inverse Cumulative Distributed Function based and Box-Muller transformation (MT19937IcnRng).
 There are 3 Random number generators in total working in parallel(One NRNG for proposal and two Uniform RNGs for acceptance function). The engine is split into two main processes :
 Chain sample and Chain exchange working in Dataflow region, both fully pipelined for chains. There were many additional optimizations applied for high performance.
-Part of proposal generation for next sample is running in parallel with current sample generation.  For memory optimisation only one sample is stored for each chain.
+Part of proposal generation for next sample is running in parallel with current sample generation.  For memory optimization only one sample is stored for each chain.
 The architecture of the engine is presented on diagram below:
 
 .. image:: /images/pop_mcmc_diagram.png

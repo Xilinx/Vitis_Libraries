@@ -22,7 +22,7 @@ Overview
 =========
 The conception of Mesher is used in the finite-difference (FD) method. Each mesher stores the discretization of one dimension. It has a array :math:`locations` that stores the discretization at points :math:`x_{0},x_{1},..,x_{n-1}`. It also has two other arrays :math:`dplus` and :math:`dminus` that store the `i-th` elements :math:`(x_{i+1}-x_{i})` and :math:`(x_{i}-x_{i-1})` respectively.     
 
-The multi-dimensional mesh for a finite-difference model is represented by multi 1-D meshers, which build the the full mesh by composing a 1-D mesh for every dimension.
+The multi-dimensional mesh for a finite-difference model is represented by multi 1-D meshers, which build the full mesh by composing a 1-D mesh for every dimension.
 
 Implementation
 ==============
