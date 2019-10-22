@@ -63,8 +63,7 @@ class TrinomialTree {
     // Minimum value of j per timepoints
     int j_min[LEN];
 
-    // xf::fintech::OrnsteinUhlenbeckProcess<DT> process
-    Process* process;
+    Process process;
 
     // calculate x
     DT calcuX(int j, DT dx, DT x0) {
@@ -79,16 +78,17 @@ class TrinomialTree {
     /**
      * @brief initialize parameters.
      *
-     * @param pro stochastic process.
+     * @param processParam parameters of stochastic process.
      * @param endCnt end counter of timepoints
      * @param x0_ initial underlying
      */
-    void initialization(Process& pro, unsigned endCnt, DT x0_) {
+    void initialization(DT processParam[4], unsigned endCnt, DT x0_) {
 #pragma HLS pipeline
+#pragma HLS resource variable = processParam core = RAM_2P_LUTRAM
 #pragma HLS resource variable = dx core = RAM_2P_BRAM
 #pragma HLS resource variable = j_min core = RAM_2P_BRAM
 #pragma HLS resource variable = j_max core = RAM_2P_BRAM
-        process = &pro;
+        process.init(processParam[0], processParam[1], processParam[2], processParam[3]);
         // parameter initialize
         x0 = x0_;
         dx[0] = 0.0;
@@ -114,7 +114,7 @@ class TrinomialTree {
      */
     void dxUpdateNoCalcu(int i, DT t, DT dt) {
 #pragma HLS inline
-        // v2 = process->variance(t,0.0,dt);
+        // v2 = process.variance(t,0.0,dt);
         v2 = arr_v2[i];
         // v = hls::sqrt(v2);
         v = arr_v[i];
@@ -137,7 +137,7 @@ class TrinomialTree {
 #pragma HLS resource variable = arr_v core = RAM_1P_BRAM
         dx_now = dx_next;
         // dx_now = dx[i];
-        v2 = process->variance(t, 0.0, dt);
+        v2 = process.variance(t, 0.0, dt);
         arr_v2[i] = v2;
 #ifndef __SYNTHESIS__
         v = std::sqrt(v2);
@@ -152,8 +152,8 @@ class TrinomialTree {
         j_max_now = j_max[i];
         DT x_min = calcuX(j_min_now, dx_now, x0);
         DT x_max = calcuX(j_max_now, dx_now, x0);
-        DT m_min = process->expectation(t, x_min, dt);
-        DT m_max = process->expectation(t, x_max, dt);
+        DT m_min = process.expectation(t, x_min, dt);
+        DT m_max = process.expectation(t, x_max, dt);
 #ifndef __SYNTHESIS__
         int k_min = std::round((m_min - x0) / dx_next) - 1;
         int k_max = std::round((m_max - x0) / dx_next) + 1;
@@ -178,7 +178,7 @@ class TrinomialTree {
     int calculateProbability(int j, DT t, DT dt, DT* probs) {
 #pragma HLS inline
         DT x = calcuX(j + j_min_now, dx_now, x0);
-        m = process->expectation(t, x, dt);
+        m = process.expectation(t, x, dt);
 #ifndef __SYNTHESIS__
         int k = std::round((m - x0) / dx_next); // floor:+0.5
 #else

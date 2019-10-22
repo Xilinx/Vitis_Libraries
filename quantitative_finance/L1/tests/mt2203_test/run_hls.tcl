@@ -15,7 +15,7 @@
 #
 source settings.tcl
 
-set PROJ "prj"
+set PROJ "mt2203_test.prj"
 set SOLN "sol"
 set CLKP 300MHz
 

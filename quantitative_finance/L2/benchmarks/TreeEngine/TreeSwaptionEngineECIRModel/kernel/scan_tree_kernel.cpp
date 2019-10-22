@@ -59,8 +59,7 @@ static void treeKernel(hls::stream<int>& typeStrm,
 
     Model model;
     model.initialization(flatRate, spread);
-    Process process;
-    process.init(a, sigma, 0.36440284225769976, 0.20683023322988522);
+    DT process[4] = {a, sigma, 0.36440284225769976, 0.20683023322988522};
 
     treeSwaptionEngine<DT, Model, Process, DIM, LEN, LEN2>(model, process, type, fixedRate, timestep, initTime,
                                                            initSize, exerciseCnt, floatingCnt, fixedCnt, flatRate,

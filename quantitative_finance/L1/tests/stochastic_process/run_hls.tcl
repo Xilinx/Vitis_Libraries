@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "prj"
+set PROJ "stochastic_process.prj"
 set SOLN "solution1"
 set CLKP 3.33
 

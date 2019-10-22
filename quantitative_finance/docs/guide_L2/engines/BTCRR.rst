@@ -50,7 +50,7 @@ It then writes the results back out. This level is where the HLS #pragmas are us
 bt_engine (bt_engine.hpp)
 =======================
 
-The code is a implementation of the Cox, Ross, & Rubinstein (CRR) method and is template to accept different data types (float/double). 
+The code is an implementation of the Cox, Ross, & Rubinstein (CRR) method and is template to accept different data types (float/double). 
 It uses standard C++ and allows the code to be easily used in a software only environment by swapping to the standard math namespace. 
 
 The implementation is broken into a number of steps:
@@ -85,7 +85,7 @@ binomialtreekernel (binomialtreekernel.cpp)
 
 The kernel is the HLS wrapper level which implements the pipelining and parallelization to allow high throughput. The kernel uses a dataflow methodology to pass the data through the design.
 
-The top leveli's input and output ports are 512 bit wide, which is designed to match the whole DDR bus width and allowing vector access. In the case of float data type (4 bytes), sixteen parameters can be accessed from the bus in parallel. Each port is connected to its own AXI master with arbitration handled by the AXI switch and DDR controller under the hood.
+The top level's input and output ports are 512 bit wide, which is designed to match the whole DDR bus width and allowing vector access. In the case of float data type (4 bytes), sixteen parameters can be accessed from the bus in parallel. Each port is connected to its own AXI master with arbitration handled by the AXI switch and DDR controller under the hood.
 
 
 Resource Utilization

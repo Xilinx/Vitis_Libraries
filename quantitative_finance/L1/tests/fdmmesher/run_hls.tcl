@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "prj"
+set PROJ "fdmmesher.prj"
 set SOLN "solution1"
 set CLKP 3.33
 

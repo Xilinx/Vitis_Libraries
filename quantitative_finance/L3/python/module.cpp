@@ -166,52 +166,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
                                    timeToMaturity, requiredNumSamples, &optionPrice);
 
                  return std::make_tuple(retval, optionPrice);
-        });
-
-        //.def("run",
-        //     [](MCAmerican& self, std::vector<OptionType> optionTypeList, std::vector<double> stockPriceList,
-        //        std::vector<double> strikePriceList, std::vector<double> riskFreeRateList,
-        //        std::vector<double> dividendYieldList, std::vector<double> volatilityList,
-        //        std::vector<double> timeToMaturityList, std::vector<double> requiredToleranceList) {
-        //         int retval;
-        //         unsigned int numAssets = stockPriceList.size(); // use the length of the stock price list to determine
-        //                                                         // how many assets we are dealing with...
-        //         std::vector<double> optionPriceVector(numAssets);
-        //
-        //         py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
-        //
-        //         retval = self.run(optionTypeList.data(), stockPriceList.data(), strikePriceList.data(),
-        //                           riskFreeRateList.data(), dividendYieldList.data(), volatilityList.data(),
-        //                           timeToMaturityList.data(), requiredToleranceList.data(), optionPriceVector.data(),
-        //                           numAssets);
-        //
-        //         return std::make_tuple(retval, optionPriceVector);
-        //     })
-        //
-        //.def("run", [](MCAmerican& self, std::vector<OptionType> optionTypeList, std::vector<double> stockPriceList,
-        //               std::vector<double> strikePriceList, std::vector<double> riskFreeRateList,
-        //               std::vector<double> dividendYieldList, std::vector<double> volatilityList,
-        //               std::vector<double> timeToMaturityList, std::vector<unsigned int> requiredNumSamples,
-        //               py::list outputResults) {
-        //    int retval;
-        //    unsigned int numAssets = stockPriceList.size(); // use the length of the stock price list to determine how
-        //                                                    // many assets we are dealing with...
-        //    std::vector<double> optionPriceVector(numAssets);
-        //
-        //    py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
-        //
-        //    retval =
-        //        self.run(optionTypeList.data(), stockPriceList.data(), strikePriceList.data(), riskFreeRateList.data(),
-        //                 dividendYieldList.data(), volatilityList.data(), timeToMaturityList.data(),
-        //                 requiredNumSamples.data(), optionPriceVector.data(), numAssets);
-        //
-        //    for (auto i : optionPriceVector) outputResults.append(i);
-        //
-        //    return retval;
-        //
-
-
-
+             });
 
     py::class_<MCEuropeanDJE>(m, "MCEuropeanDJE")
         .def(py::init())
@@ -531,6 +486,144 @@ PYBIND11_MODULE(xf_fintech_python, m) {
                  return retval;
              });
 
+    py::class_<m76::m76_input_data>(m, "m76_input_data")
+        .def(py::init())
+        .def_readwrite("S", &m76::m76_input_data::S)
+        .def_readwrite("sigma", &m76::m76_input_data::sigma)
+        .def_readwrite("K", &m76::m76_input_data::K)
+        .def_readwrite("r", &m76::m76_input_data::r)
+        .def_readwrite("T", &m76::m76_input_data::T)
+        .def_readwrite("lamb", &m76::m76_input_data::lambda)
+        .def_readwrite("kappa", &m76::m76_input_data::kappa)
+        .def_readwrite("delta", &m76::m76_input_data::delta);
+
+    py::class_<m76>(m, "m76")
+        .def(py::init())
+
+        .def("claimDevice", &m76::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("releaseDevice", &m76::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("deviceIsPrepared", &m76::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
+        // missing     .def("lastruntime", &m76::getLastRunTime)
+
+        .def("run", [](m76& self, std::vector<m76::m76_input_data> inputData,
+                       // Above are Input Buffers - Below is Output Buffer
+                       py::list outputData,
+                       // Underneath are the values passed in as part of the call
+                       int numOptions)
+
+             {
+                 int retval;
+                 std::vector<float> optionPriceVector(numOptions);
+                 // unsigned int numAssets = inputData.size();
+
+                 py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+
+                 retval = self.run(inputData.data(), optionPriceVector.data(), numOptions);
+
+                 // so after the execution these should be filled with results -> transfer to python lists
+                 for (int i = 0; i < numOptions; i++) {
+                     // optionPriceList.append(self.outputData[i]);
+                     outputData.append(optionPriceVector[i]);
+                 }
+
+                 return retval;
+
+             });
+
+    py::class_<hcf::hcf_input_data>(m, "hcf_input_data")
+        .def(py::init())
+        .def_readwrite("s0", &hcf::hcf_input_data::s0)
+        .def_readwrite("v0", &hcf::hcf_input_data::v0)
+        .def_readwrite("K", &hcf::hcf_input_data::K)
+        .def_readwrite("rho", &hcf::hcf_input_data::rho)
+        .def_readwrite("T", &hcf::hcf_input_data::T)
+        .def_readwrite("r", &hcf::hcf_input_data::r)
+        .def_readwrite("kappa", &hcf::hcf_input_data::kappa)
+        .def_readwrite("vvol", &hcf::hcf_input_data::vvol)
+        .def_readwrite("vbar", &hcf::hcf_input_data::vbar);
+
+    py::class_<hcf>(m, "hcf")
+        .def(py::init())
+
+        .def("claimDevice", &hcf::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("releaseDevice", &hcf::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("deviceIsPrepared", &hcf::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
+        // missing     .def("lastruntime", &hcf::getLastRunTime)
+
+        .def("run", [](hcf& self, std::vector<hcf::hcf_input_data> inputData,
+                       // Above are Input Buffers - Below is Output Buffer
+                       py::list outputData,
+                       // Underneath are the values passed in as part of the call
+                       int numOptions)
+
+             {
+                 int retval;
+                 std::vector<float> optionPriceVector(numOptions);
+                 // unsigned int numAssets = inputData.size();
+
+                 py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+
+                 retval = self.run(inputData.data(), optionPriceVector.data(), numOptions);
+
+                 // so after the execution these should be filled with results -> transfer to python lists
+                 for (int i = 0; i < numOptions; i++) {
+                     // optionPriceList.append(self.outputData[i]);
+                     outputData.append(optionPriceVector[i]);
+                 }
+
+                 return retval;
+
+             });
+
+    py::class_<CFGarmanKohlhagen>(m, "CFGarmanKohlhagen")
+        .def(py::init<unsigned int>())
+
+        .def("claimDevice", &CFGarmanKohlhagen::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("releaseDevice", &CFGarmanKohlhagen::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
+        .def("deviceIsPrepared", &CFGarmanKohlhagen::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
+        .def("lastruntime", &CFGarmanKohlhagen::getLastRunTime)
+
+        .def("run", [](CFGarmanKohlhagen& self, std::vector<float> stockPriceList, std::vector<float> strikePriceList,
+                       std::vector<float> volatilityList, std::vector<float> timeToMaturityList,
+                       std::vector<float> domesticRateList, std::vector<float> foreignRateList,
+                       // std::vector<float> dividendYieldList, std::vector<float> exchangeRateList,
+                       // std::vector<float> exchangeRateVolatilityList, std::vector<float> correlationList,
+                       // Above are Input Buffers   - Below are Output Buffers
+                       py::list optionPriceList, py::list deltaList, py::list gammaList, py::list vegaList,
+                       py::list thetaList, py::list rhoList,
+                       // Underneath are the values passed in as part of the call
+                       OptionType optionType, unsigned int numAssets)
+
+             {
+                 int retval;
+
+                 py::scoped_ostream_redirect outStream(std::cout, py::module::import("sys").attr("stdout"));
+                 for (unsigned int i = 0; i < numAssets; i++) {
+                     self.stockPrice[i] = stockPriceList[i];
+                     self.strikePrice[i] = strikePriceList[i];
+                     self.volatility[i] = volatilityList[i];
+                     self.timeToMaturity[i] = timeToMaturityList[i];
+                     self.domesticRate[i] = domesticRateList[i];
+                     self.foreignRate[i] = foreignRateList[i];
+                     // self.dividendYield[i] = dividendYieldList[i];
+                     // self.exchangeRate[i] = exchangeRateList[i];
+                     // self.exchangeRateVolatility[i] = exchangeRateVolatilityList[i];
+                     // self.correlation[i] = correlationList[i];
+                 }
+                 retval = self.run(optionType, numAssets);
+
+                 // so after the execution these should be filled with results -> transfer to python lists
+                 for (unsigned int i = 0; i < numAssets; i++) {
+                     optionPriceList.append(self.optionPrice[i]);
+                     deltaList.append(self.delta[i]);
+                     gammaList.append(self.gamma[i]);
+                     vegaList.append(self.vega[i]);
+                     thetaList.append(self.theta[i]);
+                     rhoList.append(self.rho[i]);
+                 }
+
+                 return retval;
+             });
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;
 #else

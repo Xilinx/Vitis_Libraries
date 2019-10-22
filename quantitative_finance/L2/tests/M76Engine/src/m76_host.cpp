@@ -17,8 +17,6 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <CL/opencl.h>
-#include <CL/cl_ext_xilinx.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <iomanip>

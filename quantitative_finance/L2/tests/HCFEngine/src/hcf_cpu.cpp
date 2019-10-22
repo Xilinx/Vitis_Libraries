@@ -52,14 +52,14 @@ TEST_DT pi1Integrand(struct xf::fintech::hcfEngineInputDataType<TEST_DT>* p, TES
     std::complex<TEST_DT> cf2 = charFunc(p, ww);
 
     std::complex<TEST_DT> tmp = (((std::complex<TEST_DT>)1i * w) * cf2);
-    return real(exp((std::complex<TEST_DT>)1i * (w * -log(p->K))) * (cf1 / tmp));
+    return real(exp((std::complex<TEST_DT>)1i * (w * (TEST_DT)-log(p->K))) * (cf1 / tmp));
 }
 
 TEST_DT pi2Integrand(struct xf::fintech::hcfEngineInputDataType<TEST_DT>* p, TEST_DT w) {
     std::complex<TEST_DT> ww = std::complex<TEST_DT>(w, 0);
     std::complex<TEST_DT> cf1 = charFunc(p, ww);
 
-    return real(exp((std::complex<TEST_DT>)1i * (w * -log(p->K))) * (cf1 / ((std::complex<TEST_DT>)1i * w)));
+    return real(exp((std::complex<TEST_DT>)1i * (w * (TEST_DT)-log(p->K))) * (cf1 / ((std::complex<TEST_DT>)1i * w)));
 }
 
 TEST_DT integrateForPi1(struct xf::fintech::hcfEngineInputDataType<TEST_DT>* p) {

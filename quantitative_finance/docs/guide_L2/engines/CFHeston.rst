@@ -44,7 +44,7 @@ The integration is performed using the trapezoidal rule with a configurable dw (
 IO Wrapper (hcf_kernel.cpp)
 ===========================
 
-The wrapper takes the input of a parameter array, and it iterates through the array calling the Engine for each entry. The results are returned also as an array in order to make full use of DMA in the FPGA. Because a batch data transaction is much faster than multiple single transactions. The data is firstly read from global memory into local memory, then processed in kernel and finally retunred from local memory back to global memory. This is done because the extra time required by the data copies is more than compensation by speedup the Engine in accessing local memory.
+The wrapper takes the input of a parameter array, and it iterates through the array calling the Engine for each entry. The results are returned also as an array in order to make full use of DMA in the FPGA. Because a batch data transaction is much faster than multiple single transactions. The data is firstly read from global memory into local memory, then processed in kernel and finally returned from local memory back to global memory. This is done because the extra time required by the data copies is more than compensation by speedup the Engine in accessing local memory.
 
 
 Resource Utilization

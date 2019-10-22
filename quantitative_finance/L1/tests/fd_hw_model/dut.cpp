@@ -28,7 +28,6 @@
 #include <iostream>
 
 typedef double DT;
-typedef xf::fintech::OrnsteinUhlenbeckProcess<DT> Process;
 typedef xf::fintech::HWModel<DT, void, 0> Model;
 
 void dut(DT t, DT T, DT flatRate, DT spread, DT a, DT sigma, DT* discountBond, DT* shortRate) {

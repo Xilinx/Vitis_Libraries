@@ -54,9 +54,9 @@ void dut(int endCnt,
 
     Model model;
     Tree tree[2];
-    Process process1, process2;
-    process1.init(a, sigma, 0.0, 0.0);
-    process2.init(b, eta, 0.0, 0.0);
+    DT process1[4] = {a, sigma, 0.0, 0.0};
+    DT process2[4] = {b, eta, 0.0, 0.0};
+
     tree[0].initialization(process1, endCnt, x0);
     tree[1].initialization(process2, endCnt, x0);
     model.initialization(flatRate, a, sigma, b, eta, rho);

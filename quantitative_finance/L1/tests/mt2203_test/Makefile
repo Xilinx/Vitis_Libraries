@@ -53,7 +53,7 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-TOOL_VERSION ?= 2019.1
+TOOL_VERSION ?= 2019.2
 
 ifeq (,$(XILINX_VIVADO))
 XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
@@ -111,12 +111,6 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
-# Target check
-TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
-endif
-
 # MK_INC_END vitis.mk
 # MK_INC_BEGIN vitis_set_platform.mk
 
@@ -172,7 +166,7 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
 override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.board.part" --platform $(firstword $(XPLATFORM)))
 endif
 endif
-check_part: | check_platform
+check_part: check_platform check_vpp
 ifeq (,$(XPART))
 	@echo "XPART is not set and cannot be inferred. Please run \`make help\` for usage info." && false
 endif
@@ -216,7 +210,6 @@ ifeq (1,$(COSIM))
 override CSYNTH := 1
 endif
 
-
 run: setup runhls
 
 setup: | check_part
@@ -243,7 +236,7 @@ runhls: setup | check_vivado $(DCMTDIR)/dcmt/lib/libdcmt.a
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf *prj *_hls.log settings.tcl
+	rm -rf *.prj *_hls.log settings.tcl
 
 .PHONY: check
 check: run

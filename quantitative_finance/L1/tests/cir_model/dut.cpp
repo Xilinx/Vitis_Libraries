@@ -51,8 +51,7 @@ void dut(int endCnt,
 
     Model model;
     Tree tree;
-    Process process;
-    process.init(a, sigma, theta, k);
+    DT process[4] = {a, sigma, theta, k};
     tree.initialization(process, endCnt, x0);
     model.initialization(flatRate, spread);
     model.treeShortRate(tree, endCnt, time, dtime, tmp_values1, tmp_values2, tmp_values1[3], rates);

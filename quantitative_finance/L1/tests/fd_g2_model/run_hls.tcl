@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "prj"
+set PROJ "fd_g2_model.prj"
 set SOLN "solution1"
 set CLKP 3.33
 

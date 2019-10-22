@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "tridiag_pcr"
+set PROJ "tridiag_pcr.prj"
 set SOLN "solution1"
 set CLKP 3.3333
 

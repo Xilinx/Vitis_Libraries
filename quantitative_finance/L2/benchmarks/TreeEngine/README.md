@@ -54,7 +54,7 @@ Assuming an Alveo U250 card with the XRT configured, the hardware build is run a
 
 ## Example Output
 
-The testbench of process it via the engine and compare to the expected result, displaying the worst case difference. For example, the following is from the software emulation:
+The testbench of process it via the engine and compare to the expected result, displaying the worst case difference. For example, the following is the key information from the software emulation:
 
 ```
 ----------------------Tree Bermudan (HW) Engine-----------------

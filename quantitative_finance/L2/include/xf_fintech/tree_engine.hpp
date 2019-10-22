@@ -49,7 +49,7 @@ namespace fintech {
  * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
- * @param process stochastic process that has been initialized
+ * @param process parameters of stochastic process
  * @param type 0: Payer, 1: Receiver
  * @param fixedRate fixed annual interest rate.
  * @param timestep estimate the number of discrete steps from 0 to T, T is the maturity time.
@@ -68,7 +68,7 @@ namespace fintech {
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
 void treeSwaptionEngine(Model& model,
-                        Process& process,
+                        DT* process,
                         int type,
                         DT fixedRate,
                         int timestep,
@@ -125,8 +125,8 @@ void treeSwaptionEngine(Model& model,
  * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
- * @param process1 1st dimensional stochastic process that has been initialized
- * @param process2 2nd dimensional stochastic process that has been initialized
+ * @param process1 1st dimensional parameters of stochastic process
+ * @param process2 2nd dimensional parameters of stochastic process
  * @param type 0: Payer, 1: Receiver
  * @param fixedRate fixed annual interest rate.
  * @param timestep estimate the number of discrete steps from 0 to T, T is the expiry time.
@@ -146,8 +146,8 @@ void treeSwaptionEngine(Model& model,
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
 void treeSwaptionEngine(Model& model,
-                        Process& process1,
-                        Process& process2,
+                        DT* process1,
+                        DT* process2,
                         int type,
                         DT fixedRate,
                         int timestep,
@@ -212,7 +212,7 @@ void treeSwaptionEngine(Model& model,
  * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
- * @param process stochastic process that has been initialized
+ * @param process parameters of stochastic process
  * @param type 0: Payer, 1: Receiver
  * @param fixedRate fixed annual interest rate.
  * @param timestep estimate the number of discrete steps from 0 to T, T is the expiry time.
@@ -230,7 +230,7 @@ void treeSwaptionEngine(Model& model,
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
 void treeSwapEngine(Model& model,
-                    Process& process,
+                    DT* process,
                     int type,
                     DT fixedRate,
                     int timestep,
@@ -284,8 +284,8 @@ void treeSwapEngine(Model& model,
  * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
- * @param process1 1st dimensional stochastic process that has been initialized
- * @param process2 2nd dimensional stochastic process that has been initialized
+ * @param process1 1st dimensional parameters of stochastic process
+ * @param process2 2nd dimensional parameters of stochastic process
  * @param type 0: Payer, 1: Receiver
  * @param fixedRate fixed annual interest rate.
  * @param timestep estimate the number of discrete steps from 0 to T, T is the expiry time.
@@ -304,8 +304,8 @@ void treeSwapEngine(Model& model,
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
 void treeSwapEngine(Model& model,
-                    Process& process1,
-                    Process& process2,
+                    DT* process1,
+                    DT* process2,
                     int type,
                     DT fixedRate,
                     int timestep,
@@ -355,7 +355,7 @@ void treeSwapEngine(Model& model,
  *
  * @tparam DT supported data type including double and float data type, which decides the precision of result.
  * @tparam Model short-rate model that has been initialized
- * @tparam Process stochastic process that has been initialized
+ * @tparam Process parameters of stochastic process
  * @tparam DIM 1D or 2D short-rate model
  * @tparam LEN maximum length of timestep, which affects the latency and resources utilization.
  * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
@@ -372,14 +372,14 @@ void treeSwapEngine(Model& model,
  * @param floatingCnt floating coupon timepoints count in initTime.
  * @param flatRate floating benchmark annual interest rate
  * @param nominal nominal principal
- * @param cfRate cap rate ans floor rate
+ * @param cfRate cap rate and floor rate
  * @param x0 initial underlying
  * @param spread spreads on interest rates
  * @param NPV is pricing result array of this engine
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
 void treeCapFloorEngine(Model& model,
-                        Process& process,
+                        DT* process,
                         int type,
                         DT fixedRate,
                         int timestep,
@@ -433,8 +433,8 @@ void treeCapFloorEngine(Model& model,
  * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
- * @param process1 1st dimensional stochastic process that has been initialized
- * @param process2 2nd dimensional stochastic process that has been initialized
+ * @param process1 1st dimensional parameters of stochastic process
+ * @param process2 2nd dimensional parameters of stochastic process
  * @param type 0: Cap, 1: Collar, 2: Floor
  * @param fixedRate fixed annual interest rate.
  * @param timestep estimate the number of discrete steps from 0 to T, T is the expiry time.
@@ -453,8 +453,8 @@ void treeCapFloorEngine(Model& model,
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
 void treeCapFloorEngine(Model& model,
-                        Process& process1,
-                        Process& process2,
+                        DT* process1,
+                        DT* process2,
                         int type,
                         DT fixedRate,
                         int timestep,
@@ -509,7 +509,7 @@ void treeCapFloorEngine(Model& model,
  * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
- * @param process stochastic process that has been initialized
+ * @param process parameters of stochastic process
  * @param type type of the callability, 0: Call, 1: Put
  * @param fixedRate fixed annual interest rate.
  * @param timestep estimate the number of discrete steps from 0 to T, T is the expiry time.
@@ -527,7 +527,7 @@ void treeCapFloorEngine(Model& model,
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
 void treeCallableEngine(Model& model,
-                        Process& process,
+                        DT* process,
                         int type,
                         DT fixedRate,
                         int timestep,
@@ -581,8 +581,8 @@ void treeCallableEngine(Model& model,
  * @tparam LEN2 maximum length of node of tree, which affects the latency and resources utilization.
  *
  * @param model short-rate model that has been initialized
- * @param process1 1st dimensional stochastic process that has been initialized
- * @param process2 2nd dimensional stochastic process that has been initialized
+ * @param process1 1st dimensional parameters of stochastic process
+ * @param process2 2nd dimensional parameters of stochastic process
  * @param type type of the callability, 0: Call, 1: Put
  * @param fixedRate fixed annual interest rate.
  * @param timestep estimate the number of discrete steps from 0 to T, T is the expiry time.
@@ -601,8 +601,8 @@ void treeCallableEngine(Model& model,
  */
 template <typename DT, typename Model, typename Process, int DIM, int LEN, int LEN2>
 void treeCallableEngine(Model& model,
-                        Process& process1,
-                        Process& process2,
+                        DT* process1,
+                        DT* process2,
                         int type,
                         DT fixedRate,
                         int timestep,

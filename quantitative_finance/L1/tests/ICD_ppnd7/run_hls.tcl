@@ -16,7 +16,7 @@
 
 source settings.tcl
 
-set PROJ "prj"
+set PROJ "ICD_ppnd7.prj"
 set SOLN "sol"
 set CLKP 300MHz
 
