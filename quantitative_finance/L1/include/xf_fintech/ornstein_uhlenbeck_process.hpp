@@ -61,7 +61,7 @@ class OrnsteinUhlenbeckProcess {
     /**
      * @brief The expertation E of the process
      *
-     * @param t0 the time at the begin of processing
+     * @param t0 the time at the beginning of processing
      * @param x0 the state of current value
      * @param dt the step of processing
      * @return the result of expectation
@@ -71,7 +71,7 @@ class OrnsteinUhlenbeckProcess {
     /**
      * @brief The standard deviation S of the process
      *
-     * @param t0 the time at the begin of processing
+     * @param t0 the time at the beginning of processing
      * @param x0 the state of current value
      * @param dt the step of processing
      * @return the result of standard deviation
@@ -81,7 +81,7 @@ class OrnsteinUhlenbeckProcess {
     /**
      * @brief The variance of the process
      *
-     * @param t0 the time at the begin of processing
+     * @param t0 the time at the beginning of processing
      * @param x0 the state of current value
      * @param dt the step of processing
      * @return the result of variance
@@ -89,7 +89,7 @@ class OrnsteinUhlenbeckProcess {
     DT variance(DT t0, DT x0, DT dt) const;
 
     /**
-     * @brief As this process will only be excuted for once in the prcing engine and it
+     * @brief As this process will only be executed for once in the prcing engine and it
      * is not the critical time consumer,then it is optimized for minimum resource
      * utilization while having a reasonable latency.
      *
