@@ -13,7 +13,7 @@
 Overview
 ========
 
-Vitis FFT library provides a fully synthesizable 2-Dimensional Fourier Transform as an L1 primitive. 
+Vitis DSP library provides a fully synthesizable 2-Dimensional Fast Fourier Transform(FFT) as an L1 primitive. 
 This L1 primitive is designed to be easily transformed into an L2 Vitis kernel by adding memory adapters. 
 The L1 primitive is designed to have a very wide streaming interface, as wide as device DDR memory  
 widths on boards like Xilinx U200, U250 and U280. Adding memory adapters requires a plugin at the FFT input 
@@ -166,9 +166,9 @@ Fixed Point 2-D FFT L1 Module Usage
 -----------------------------------
 To use the fixed point Vitis 2-D FFT L1 module in a C++ HLS design:
 
-1- Clone the Vitis FFT Library git repository and add the following path to compiler include path:
+1- Clone the Vitis DSP Library git repository and add the following path to compiler include path:
 
-         ``REPO_PATH/vitis_fft/L1/include/hw/vitis_2dfft/fixed/``
+         ``REPO_PATH/dsp/L1/include/hw/vitis_2dfft/fixed/``
 
 2- Include ``vt_fft.hpp``
 
@@ -244,9 +244,9 @@ Floating Point 2-D FFT L1 Module Usage
 --------------------------------------
 To use the Vitis 2-D FFT L1 module in a C++ HLS design:
 
-1- Clone the Vitis FFT Library git repository and add the following path to compiler include path:
+1- Clone the Vitis DSP Library git repository and add the following path to compiler include path:
 
-         ``REPO_PATH/vitis_fft/L1/include/hw/vitis_2dfft/float/``
+         ``REPO_PATH/dsp/L1/include/hw/vitis_2dfft/float/``
 
 2- Include ``vt_fft.hpp``
 
@@ -501,8 +501,8 @@ change the setting of environment variable **TA_PATH** to point to the installat
    export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
    source ${XILINX_VIVADO}/settings64.sh
 
-The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/L1/examples/2Dfix_impluse`` it can be simulated, synthesized or co-simulated as follows:
-Simply go to the directory ``REPO_PATH/L1/examples/2Dfix_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
+The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/dsp/L1/examples/2Dfix_impluse`` it can be simulated, synthesized or co-simulated as follows:
+Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfix_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
 
 
 
@@ -691,12 +691,12 @@ change the setting of environment variable **TA_PATH** to point to the installat
    export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
    source ${XILINX_VIVADO}/settings64.sh
 
-The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/L1/examples/2Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
-Simply go to the directory ``REPO_PATH/L1/examples/2Dfloat_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
+The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
+Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
 
 2-D FFT Tests 
 ----------------------------------------------------------
-Different tests are provided for fixed point and floating point 2-D FFT. These test can be ran indivisually using the makefile or they can all be lauched at the same time by using a provided script. All the 2-D FFT tests are in folder ``REPO_PATH/L1/tests/hw/2dfft``
+Different tests are provided for fixed point and floating point 2-D FFT. These test can be ran indivisually using the makefile or they can all be lauched at the same time by using a provided script. All the 2-D FFT tests are in folder ``REPO_PATH/dsp/L1/tests/hw/2dfft``
 
 Launching an Individual Test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -709,12 +709,12 @@ To launch an individual test first it is required to setup environment for lanch
    export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
    source ${XILINX_VIVADO}/settings64.sh
 
-Once the environment settings are done an idividual test can be launched by going to test folder ( any folder inside sub-directory at any level of ``REPO_PATH/L1/test/hw/`` that has Makefile is a test) and running the make command :
+Once the environment settings are done an idividual test can be launched by going to test folder ( any folder inside sub-directory at any level of ``REPO_PATH/dsp/L1/test/hw/`` that has Makefile is a test) and running the make command :
 ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``  you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
 
 Launching all the Tests Collectivey
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Scripts are provided in ``REPO_PATH/L1/test/`` to find and launch all the test inside the repo. These scripts will try to find all the tests with this ``test``  folder and launh them one by one and print the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that setup up Vitis HLS compiler paths and should look something like this:
+Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the test inside the repo. These scripts will try to find all the tests with this ``test``  folder and launh them one by one and print the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that setup up Vitis HLS compiler paths and should look something like this:
 
 .. code-block:: bash
 
