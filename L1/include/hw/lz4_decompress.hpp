@@ -109,6 +109,75 @@ lz4_decompressr:
     }
 }
 
+inline void lz4DecompressSimple(hls::stream<ap_uint<8> >& inStream,
+                                hls::stream<compressd_dt>& outStream,
+                                uint32_t input_size,
+                                bool uncomp_flag) {
+    enum lz4DecompressStates { READ_TOKEN, READ_LIT_LEN, READ_LITERAL, READ_OFFSET0, READ_OFFSET1, READ_MATCH_LEN };
+    enum lz4DecompressStates next_state = READ_TOKEN;
+    ap_uint<8> nextValue;
+    ap_uint<16> offset;
+    compressd_dt decompressdOut = 0;
+    uint32_t lit_len = 0;
+    uint32_t match_len = 0;
+    if (uncomp_flag == 1) {
+        next_state = READ_LITERAL;
+        lit_len = input_size;
+    }
+lz4_decompressr:
+    for (uint32_t i = 0; i < input_size; i++) {
+#pragma HLS PIPELINE II = 1
+        ap_uint<8> inValue = inStream.read();
+        if (next_state == READ_TOKEN) {
+            lit_len = inValue.range(7, 4);
+            match_len = inValue.range(3, 0);
+            if (lit_len == 0xF) {
+                next_state = READ_LIT_LEN;
+            } else if (lit_len) {
+                next_state = READ_LITERAL;
+            } else {
+                next_state = READ_OFFSET0;
+            }
+        } else if (next_state == READ_LIT_LEN) {
+            lit_len += inValue;
+            if (inValue != 0xFF) {
+                next_state = READ_LITERAL;
+            }
+        } else if (next_state == READ_LITERAL) {
+            compressd_dt outValue = 0;
+            outValue.range(7, 0) = inValue;
+            outStream << outValue;
+            lit_len--;
+            if (lit_len == 0) {
+                next_state = READ_OFFSET0;
+            }
+        } else if (next_state == READ_OFFSET0) {
+            offset.range(7, 0) = inValue;
+            next_state = READ_OFFSET1;
+        } else if (next_state == READ_OFFSET1) {
+            offset.range(15, 8) = inValue;
+            if (match_len == 0xF) {
+                next_state = READ_MATCH_LEN;
+            } else {
+                next_state = READ_TOKEN;
+                compressd_dt outValue = 0;
+                outValue.range(31, 16) = (match_len + 3); //+3 for LZ4 standard
+                outValue.range(15, 0) = (offset - 1);     //-1 for LZ4 standard
+                outStream << outValue;
+            }
+        } else if (next_state == READ_MATCH_LEN) {
+            match_len += inValue;
+            if (inValue != 0xFF) {
+                compressd_dt outValue = 0;
+                outValue.range(31, 16) = (match_len + 3); //+3 for LZ4 standard
+                outValue.range(15, 0) = (offset - 1);     //-1 for LZ4 standard
+                outStream << outValue;
+                next_state = READ_TOKEN;
+            }
+        }
+    }
+}
+
 } // namespace compression
 } // namespace xf
 #endif // _XFCOMPRESSION_LZ4_DECOMPRESS_HPP_
