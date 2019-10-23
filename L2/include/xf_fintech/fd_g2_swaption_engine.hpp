@@ -108,7 +108,7 @@ class FdG2SwaptionEngine {
      * @param theta Parameter used to build up the differential equation, the
      * pricing engine uses crank-nicolson algorithm, so default value of theta
      * should be 0.5.
-     * @param mu A fator for step.
+     * @param mu A factor for step.
      * @param nominal The nominal value of the swap.
      * @param fixedRate Fixed rate of the swaption. (per year)
      * @param rate Floating rate of the swaption. (per yaer)

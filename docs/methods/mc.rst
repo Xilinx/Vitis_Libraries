@@ -40,7 +40,7 @@ The framework of Monte Carlo Simulations is as follows. The top module Monte Car
    :width: 60%
    :align: center
 
-Every MCM generates a batch of paths. The number of MCM (M) is a template parameter, the maximum of which is related to the FPGA resource. Each MCM includes an RNG module, a path generator module, a path pricer module, and an accumulator. Both all these modules are in dataflow region and connected with *hls::stream*.
+Every MCM generates a batch of paths. The number of MCM (M) is a template parameter, the maximum of which is related to the FPGA resource. Each MCM includes an RNG module, a path generator module, a path pricer module, and an accumulator. All of these modules are in dataflow region and connected with *hls::stream*.
 
 .. image:: /images/mc2.PNG
    :alt: mcm

@@ -61,7 +61,7 @@ class StochasticProcess1D {
     /**
      * @brief the expertation E of the process
      *
-     * @param t0 the time at the begin of processing
+     * @param t0 the time at the beginning of processing
      * @param x0 the state of current value
      * @param dt the step of processing
      * @return the result of expectation
@@ -71,7 +71,7 @@ class StochasticProcess1D {
     /**
      * @brief the variance of the process
      *
-     * @param t0 the time at the begin of processing
+     * @param t0 the time at the beginning of processing
      * @param x0 the state of current value
      * @param dt the step of processing
      * @return the result of variance

@@ -74,7 +74,7 @@ class BSModel {
     }
 
     /**
-     * @brief calculate standard variance
+     * @brief stdDeviation calculate standard variance
      *
      */
     inline void stdDeviation() { stdDev = hls::sqrt(var); }

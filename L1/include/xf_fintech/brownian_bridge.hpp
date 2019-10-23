@@ -86,7 +86,7 @@ class BrownianBridge {
     BrownianBridge() {}
 
     /**
-     * @brief  Transform in_strm to out_strm using browain bridge transformation
+     * @brief  Transform in_strm to out_strm using brownian bridge transformation
      *
      * @param in_strm stream containing input sequence
      * @param out_strm stream containing output sequence which applys to brownian bridge disribution

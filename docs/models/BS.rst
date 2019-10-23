@@ -35,7 +35,7 @@ The Continue form of Black-Scholes is:
    dS_t = \mu S_t dt + \sigma S_t dz
 
 where :math:`S_t` is the stock price at time :math:`t`. :math:`\mu` is the stock's expected rate of return. :math:`\sigma` is the volatility of the stock price.
-The random variable :math:`z` follows Winear process, i.e. :math:`z` satisfies the following equation.    
+The random variable :math:`z` follows Wiener process, i.e. :math:`z` satisfies the following equation.    
 
   1. The change of :math:`\Delta z` during a sample period of time :math:`\Delta t` is :math:`\Delta z = \epsilon \sqrt{\Delta t}`, where :math:`\epsilon` has a standardized normal distribution :math:`\phi(0,1)`. 
   2. The value of :math:`\Delta z` for any two different short intervals of time, :math:`\Delta t`, are independent.

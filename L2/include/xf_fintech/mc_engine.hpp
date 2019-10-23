@@ -39,20 +39,20 @@ using namespace internal;
  * decides the precision of result, default double-precision data type.
  * @tparam UN number of Monte Carlo Module in parallel, which affects the
  * latency and resources utilization, default 10.
- * @tparam Antithetic anthithetic is used  for variance reduction, default this
+ * @tparam Antithetic antithetic is used  for variance reduction, default this
  * feature is disabled.
  * @param underlying intial value of underlying asset at time 0.
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
  * @param optionType option type. 1: put option, 0: call option.
  * @param seed array to store the inital seed for each RNG.
  * @param output output array.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop, default
+ * set, when reaching the required tolerance, simulation will stop, default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
@@ -153,14 +153,14 @@ void MCEuropeanEngine(DT underlying,
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
  * @param optionType option type. 1: put option, 0: call option.
  * @param seed array to store the inital seed for each RNG.
  * @param output output array.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop, default
+ * set, when reaching the required tolerance, simulation will stop, default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
@@ -264,7 +264,7 @@ void MCEuropeanPriBypassEngine(DT underlying,
  * kDTFullTruncation, kDTReflection, kDTQuadraticExponential and
  * kDTQuadraticExponentialMartingale, are supported, default
  * kDTQuadraticExponential.
- * @tparam Antithetic anthithetic is used  for variance reduction, default this
+ * @tparam Antithetic antithetic is used  for variance reduction, default this
  * feature is disabled.
  *
  * @param underlying the initial price of underlying asset at time 0.
@@ -283,7 +283,7 @@ void MCEuropeanPriBypassEngine(DT underlying,
  * @param seed the seeds used to initialize RNG.
  * @param outputs pricing result array of this engine.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop.
+ * set, when reaching the required tolerance, simulation will stop.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps the number of discrete steps from 0 to T, T is the expiry
@@ -321,7 +321,7 @@ void MCEuropeanHestonEngine(DT underlying,
     const OptionStyle sty = European;
     // const static bool Antithetic = false;
 
-    // paramters of Model
+    // parameters of Model
     DT dt = timeLength / timeSteps;                // dt
     DT sdt = hls::sqrt(dt);                        // sqrt(dt)
     DT kappa_dt = internal::FPTwoMul(kappa, dt);   // kappa * dt
@@ -454,7 +454,7 @@ void MCEuropeanHestonEngine(DT underlying,
  * @param seed the seeds used to initialize RNG.
  * @param outputs pricing result array of this engine.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- set, when reaching the required tolearance, simulation will stop.
+ set, when reaching the required tolerance, simulation will stop.
  * @param requiredSamples the samples number required. When reaching the
  required number, simulation will stop, default 1024.
  * @param timeSteps the number of discrete steps from 0 to T, T is the expiry
@@ -548,7 +548,7 @@ void MCMultiAssetEuropeanHestonEngine(DT underlying[ASSETS],
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
  * @param optionType option type. 1: put option, 0: call option.
@@ -671,7 +671,7 @@ void MCAmericanEnginePreSamples(DT underlying,
  * @tparam UN_STEP number of Monte Carlo Module in parallel (in time steps
  * dimension), which affects the latency and resources utilization, default 2.
  * [this Unroll is completely resource bounded, unrelated to other params]
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param riskFreeRate risk-free interest rate.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
@@ -784,7 +784,7 @@ void MCAmericanEngineCalibrate(DT timeLength,
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
  * @param optionType option type. 1: put option, 0: call option.
@@ -793,7 +793,7 @@ void MCAmericanEngineCalibrate(DT timeLength,
  * loaded from DDR or HBM
  * @param output the output price data (size=1), can be stroed in DDR or HBM
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop, default
+ * set, when reaching the required tolerance, simulation will stop, default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
@@ -920,7 +920,7 @@ void MCAmericanEnginePricing(DT underlying,
  * @tparam UN_PRICING number of Monte Carlo Module of pricing process in
  * parallel (in path dimension), which affects the latency and resources
  * utilization, default 2.
- *  Three unroll numbers UN_PATH, UN_STEP and UN_PRICING are indenpendent. Each
+ *  Three unroll numbers UN_PATH, UN_STEP and UN_PRICING are independent. Each
  * unroll number affects the execution speed of part of AmericanEngine. On-board
  * test reveals that
  *  the pricing phase takes longest time of execution. Therefore, setting larger
@@ -929,7 +929,7 @@ void MCAmericanEnginePricing(DT underlying,
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
  * @param optionType option type. 1: put option, 0: call option.
@@ -940,7 +940,7 @@ void MCAmericanEnginePricing(DT underlying,
  * location. It should be mapped to an external memory: DDR or HBM.
  * @param output the output price data (size=1), can be stroed in DDR or HBM
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop, default
+ * set, when reaching the required tolerance, simulation will stop, default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
@@ -1142,7 +1142,7 @@ void MCAmericanEngine(DT underlying,
  * @param requiredSamples  The samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps Number of interval, default 100.
- * @param maxSamples The maximum sample number. When reaching the it, the
+ * @param maxSamples The maximum sample number. When reaching it, the
  * simulation will stop, default 2147483648.
  *
  */
@@ -1257,7 +1257,7 @@ void MCAsianGeometricAPEngine(DT underlying,
  * @param requiredSamples  The samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps Number of interval, default 100.
- * @param maxSamples The maximum sample number. When reaching the it, the
+ * @param maxSamples The maximum sample number. When reaching it, the
  * simulation will stop, default 2147483648.
  *
  */
@@ -1404,13 +1404,13 @@ void MCAsianArithmeticAPEngine(DT underlying,
  * @param seed array of seed to initialize RNG.
  * @param output Output array.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop, default
+ * set, when reaching the required tolerance, simulation will stop, default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps the number of discrete steps from 0 to T, T is the expiry
  * time, default 100.
- * @param maxSamples the maximum sample number. When reaching the it, the
+ * @param maxSamples the maximum sample number. When reaching it, the
  * simulation will stop, default 2,147,483,648.
  *
  */
@@ -1510,7 +1510,7 @@ void MCAsianArithmeticASEngine(DT underlying,
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param barrier single barrier value.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
@@ -1519,16 +1519,16 @@ void MCAsianArithmeticASEngine(DT underlying,
  * @param optionType option type. 1: put option, 0: call option.
  * @param seed array to store the inital seeds of RNG.
  * @param output output array.
- * @param rebate rebate value which is paied when the option is not triggered,
+ * @param rebate rebate value which is paid when the option is not triggered,
  * default 0.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop, default
+ * set, when reaching the required tolerance, simulation will stop, default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps the number of discrete steps from 0 to T, T is the expiry
  * time, default 100.
- * @param maxSamples the maximum sample number. When reaching the it, the
+ * @param maxSamples the maximum sample number. When reaching it, the
  * simulation will stop, default 2,147,483,648.
  */
 template <typename DT = double, int UN = 10>
@@ -1625,7 +1625,7 @@ void MCBarrierNoBiasEngine(DT underlying,
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param barrier single barrier value.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
@@ -1634,16 +1634,16 @@ void MCBarrierNoBiasEngine(DT underlying,
  * @param optionType option type. 1: put option, 0: call option.
  * @param seed array to store the inital seeds for each RNG.
  * @param output output array.
- * @param rebate rebate value which is paied when the option is not triggered,
+ * @param rebate rebate value which is paid when the option is not triggered,
  * default 0.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop, default
+ * set, when reaching the required tolerance, simulation will stop, default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps the number of discrete steps from 0 to T, T is the expiry
  * time, default 100.
- * @param maxSamples the maximum sample number. When reaching the it, the
+ * @param maxSamples the maximum sample number. When reaching it, the
  * simulation will stop, default 2,147,483,648.
  */
 template <typename DT = double, int UN = 10>
@@ -1740,7 +1740,7 @@ void MCBarrierEngine(DT underlying,
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
  * @param optionType option type. 1: put option, 0: call option.
@@ -1748,13 +1748,13 @@ void MCBarrierEngine(DT underlying,
  * @param seed array to store the inital seeds of RNG.
  * @param output output array.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop. default
+ * set, when reaching the required tolerance, simulation will stop. default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps the number of discrete steps from 0 to T, T is the expiry
  * time, default 100.
- * @param maxSamples the maximum sample number. When reaching the it, the
+ * @param maxSamples the maximum sample number. When reaching it, the
  * simulation will stop, default 2,147,483,648.
  */
 template <typename DT = double, int UN = 10>
@@ -1830,7 +1830,7 @@ Init_Option_Para:
 }
 /**
  * @brief Digital Option Pricing Engine using Monte Carlo Simulation.
- * The B-S model is used to descirble dynamics of undelying asset price.
+ * The B-S model is used to describe dynamics of undelying asset price.
  *
  * @tparam DT supported data type including double and float data type, which
  * decides the precision of result, default double-precision data type.
@@ -1840,7 +1840,7 @@ Init_Option_Para:
  * @param volatility fixed volatility of underlying asset.
  * @param dividendYield the constant dividend rate for continuous dividends.
  * @param riskFreeRate risk-free interest rate.
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.
  * @param cashPayoff fixed payoff when option is exercised.
@@ -1850,13 +1850,13 @@ Init_Option_Para:
  * @param seed array to store the inital seeds for each RNG.
  * @param output output array.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop, default
+ * set, when reaching the required tolerance, simulation will stop, default
  * 0.02.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps the number of discrete steps from 0 to T, T is the expiry
  * time, default 100.
- * @param maxSamples the maximum sample number. When reaching the it, the
+ * @param maxSamples the maximum sample number. When reaching it, the
  * simulation will stop, default 2,147,483,648.
  */
 template <typename DT = double, int UN = 10>
@@ -1960,7 +1960,7 @@ void MCDigitalEngine(DT underlying,
  * @param seed the seeds used to initialize RNG.
  * @param greeks output calculated greeks.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop.
+ * set, when reaching the required tolerance, simulation will stop.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop, default 1024.
  * @param timeSteps the number of discrete steps from 0 to T, T is the expiry
@@ -2064,7 +2064,7 @@ void MCEuropeanHestonGreeksEngine(DT underlying,
 
 /**
  * @brief Cap/Floor Pricing Engine using Monte Carlo Simulation.
- * The Hull-White model is used to descirble dynamics of short-term interest.
+ * The Hull-White model is used to describe dynamics of short-term interest.
  * This engine assume a flat term structure.
  *
  * @tparam DT supported data type including double and float data type, which decides the precision of result, default
@@ -2076,16 +2076,16 @@ void MCEuropeanHestonGreeksEngine(DT underlying,
  * @param strike Strike rate of capfloor contract
  * @param isCap True for cap, false for floor
  * @param singlePeriod period between each settlement date.
- * @param alpha Hull White model paramter
+ * @param alpha Hull White model parameter
  * @param sigma Hull White model parameter
  * @param seed Array to store the inital seed for each RNG.
  * @param output Array to store result
  * @param requiredTolerance the tolerance required. If requiredSamples is not set, when reaching the required
- * tolearance, simulation will stop, default 0.02.
+ * tolerance, simulation will stop, default 0.02.
  * @param requiredSamples the samples number required. When reaching the required number, simulation will stop, default
  * 1024.
  * @param timeSteps the number of cap/floor settlement date.
- * @param maxSamples the maximum sample number. When reaching the it, the simulation will stop, default 2,147,483,648.
+ * @param maxSamples the maximum sample number. When reaching it, the simulation will stop, default 2,147,483,648.
  */
 
 template <typename DT = double, int UN = 1>

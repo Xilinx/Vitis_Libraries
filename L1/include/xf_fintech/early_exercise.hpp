@@ -1116,7 +1116,7 @@ void MCAmericanEngineCalibrate_dataflow(DT dt,
  * [this Unroll is completely resource bounded, unrelated to other params]
  * @param phase_start phase start
  * @param phase_end phase end
- * @param timeLength the time length of constract from start to end.
+ * @param timeLength the time length of contract from start to end.
  * @param riskFreeRate risk-free interest rate.
  * @param strike the strike price also known as exericse price, which is settled
  * in the contract.

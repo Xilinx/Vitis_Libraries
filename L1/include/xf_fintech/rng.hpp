@@ -885,11 +885,11 @@ class MT2203 {
     /// Address of head of state vector in array mt/mt_1
     ap_uint<A_W> addr_head;
 
-    /// Configurable Paramter A
+    /// Configurable Parameter A
     ap_uint<W> A;
-    /// Configurable Paramter B
+    /// Configurable Parameter B
     ap_uint<W> B;
-    /// Configurable Paramter C
+    /// Configurable Parameter C
     ap_uint<W> C;
 
    public:
@@ -1029,7 +1029,7 @@ class MT2203 {
 };
 
 /**
- * @brief Normally distributed random number generator based on InvserCumulative
+ * @brief Normally distributed random number generator based on InverseCumulative
  * function
  *
  * @tparam mType data type supported including float and double
@@ -1098,7 +1098,7 @@ class MT19937IcnRng {
 };
 
 /**
- * @brief Normally distributed random number generator based on InvserCumulative
+ * @brief Normally distributed random number generator based on InverseCumulative
  * function, output datatype is double.
  */
 template <>
@@ -1180,7 +1180,7 @@ class MT19937IcnRng<double> {
 };
 
 /**
- * @brief Normally distributed random number generator based on InvserCumulative
+ * @brief Normally distributed random number generator based on InverseCumulative
  * function, output datatype is float.
  */
 
@@ -1342,7 +1342,7 @@ class MT19937BoxMullerNormalRng {
 };
 
 /**
- * @brief Normally distributed random number generator based on InvserCumulative
+ * @brief Normally distributed random number generator based on InverseCumulative
  * function
  *
  * @tparam mType data type supported including float and double

@@ -23,7 +23,7 @@ Overview
 =========
 Heston model is a mathematical model that describing dynamics of underlying asset price. 
 It is a stochastic volatility model which assumes the volatility of the asset price is not constant but follows a random process. 
-In this case, volatility flows square root process which means volatility is always non-negative.
+In this case, volatility follows square root process which means volatility is always non-negative.
 
 
 Stochastic Process Equations of the Heston Model

@@ -218,7 +218,7 @@ void InitWrap(RNG rngInst[UnrollNm][VariateNum], RNGSeqT rngSeqInst[UnrollNm][1]
  * @param maxSamples the maximum sample number. When reaching it, the simulation
  * will stop.
  * @param requiredTolerance the tolerance required. If requiredSamples is not
- * set, when reaching the required tolearance, simulation will stop.
+ * set, when reaching the required tolerance, simulation will stop.
  * @param requiredSamples the samples number required. When reaching the
  * required number, simulation will stop.
  * @param pathGenInst instance of path generator.
