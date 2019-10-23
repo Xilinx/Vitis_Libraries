@@ -15,7 +15,7 @@
 
 Overview
 ========
-Vitis FFT offers a fully synthesizable Super Sample data Rate (SSR) FFT with a systolic
+Vitis DSP Library offers a fully synthesizable Super Sample data Rate (SSR) FFT with a systolic
 architecture to process multiple input samples every clock cycle. The number of samples
 processed in parallel per cycle is denoted by the SSR factor. The FFT is implemented as a C++
 template function that synthesizes into a streaming architecture. The FFT architecture used for implementation can be parametrized through template parameters, which are grouped in a C++ struct of type **ssr_fft_default_params**. A new structure can be defined by extending the default structure and re-defining required member constants as follows:
@@ -80,7 +80,7 @@ For the best results with fixed point type, limit the data bit width to 27 bits 
 
 Floating Point
 --------------
-1-D SSR FFT also supports synthesis for single precision floating point type. It may be synthesized for double precision but this has not been tested. For synthesizing a complex floating point type, it is required that std::complex type not to be used as a complex wrapper. Since this wrapper has some issues and it is required that a wrapper class provided with the Vitis FFT library called complex_wrapper<...> is used for wrapping complex float numbers.
+1-D SSR FFT also supports synthesis for single precision floating point type. It may be synthesized for double precision but this has not been tested. For synthesizing a complex floating point type, it is required that std::complex type not to be used as a complex wrapper. Since this wrapper has some issues and it is required that a wrapper class provided with the VitisDSP library called complex_wrapper<...> is used for wrapping complex float numbers.
 Also while synthesizing floating point 1-D SSR FFT the parameters in the structure which carry information such as scaling mode, twiddle factor storage bits, butterfly rounding mode etc. which are only related to fixed point data-path, carry no meaning. Instead FFT parameter structure can simply define relevant parameters as shown below:
 
 .. code-block:: cpp
@@ -257,14 +257,14 @@ SNR/RMS requirements for given application.
 
 1-D SSR FFT Library Usage
 =========================
-Following sections describe how to use Vitis FFT Library.
+Following sections describe how to use FFT from Vitis DSP Library.
 
 Fixed Point 1-D SSR FFT Usage
 -----------------------------
 The Vitis 1-D FFT L1 module can be used in a C++ HLS design by:
-1- cloning the Vitis FFT Library git repository and add the following path to compiler include path:
+1- cloning the Vitis DSP Library git repository and add the following path to compiler include path:
 
-         ``REPO_PATH/vitis_fft/L1/include/hw/vitis_fft/fixed/``
+         ``REPO_PATH/dsp/L1/include/hw/vitis_fft/fixed/``
 
 2- Include ``vt_fft.hpp``
 
@@ -331,9 +331,9 @@ Floating Point 1-D SSR FFT Usage
 --------------------------------
 The Vitis 1-D FFT L1 module can be used in a C++ HLS design by:
 
-1- Cloning the Vitis FFT Library git repository and add the following path to compiler include path:
+1- Cloning the Vitis DSP Library git repository and add the following path to compiler include path:
 
-         ``REPO_PATH/vitis_fft/L1/include/hw/vitis_fft/float/``
+         ``REPO_PATH/dsp/L1/include/hw/vitis_fft/float/``
 
 2- Include ``vt_fft.hpp``
 
@@ -656,8 +656,8 @@ change the setting of environment variable **TA_PATH** to point to the installat
    export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
    source ${XILINX_VIVADO}/settings64.sh
 
-The example discussed above is also provided as an example and available at the following path : ``REPO_PATH/L1/examples/1Dfix_impluse`` it can be simulated, synthesized or co-simulated as follows:
-Simply go to the directory ``REPO_PATH/L1/examples/1Dfix_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
+The example discussed above is also provided as an example and available at the following path : ``REPO_PATH/dsp/L1/examples/1Dfix_impluse`` it can be simulated, synthesized or co-simulated as follows:
+Simply go to the directory ``REPO_PATH/dsp/L1/examples/1Dfix_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
 
 
 
@@ -770,12 +770,12 @@ change the setting of environment variable **TA_PATH** to point to the installat
    export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
    source ${XILINX_VIVADO}/settings64.sh
 
-The example discussed above is also provided as an example and available at the following path : ``REPO_PATH/L1/examples/1Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
-Simply go to the directory ``REPO_PATH/L1/examples/1Dfloat_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
+The example discussed above is also provided as an example and available at the following path : ``REPO_PATH/dsp/L1/examples/1Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
+Simply go to the directory ``REPO_PATH/dsp/L1/examples/1Dfloat_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
 
 1-D FFT Tests 
 ----------------------------------------------------------
-Different tests are provided for fixed point and floating point 1-D FFT. These test can be ran indivisually using the makefile or they can all be lauched at the same time by using a provided script. All the 1-D FFT tests are in folder ``REPO_PATH/L1/tests/hw/1dfft``
+Different tests are provided for fixed point and floating point 1-D FFT. These test can be ran indivisually using the makefile or they can all be lauched at the same time by using a provided script. All the 1-D FFT tests are in folder ``REPO_PATH/dsp/L1/tests/hw/1dfft``
 
 Launching an Individual Test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -788,12 +788,12 @@ To launch an individual test first it is required to setup environment for lanch
    export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
    source ${XILINX_VIVADO}/settings64.sh
 
-Once the environment settings are done an idividual test can be launched by going to test folder ( any folder inside sub-directory at any level of ``REPO_PATH/L1/test/hw/1dfft`` that has Makefile is a test) and running the make command :
+Once the environment settings are done an idividual test can be launched by going to test folder ( any folder inside sub-directory at any level of ``REPO_PATH/dsp/L1/test/hw/1dfft`` that has Makefile is a test) and running the make command :
 ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``  you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
 
 Launching all the Tests Collectivey
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Scripts are provided in ``REPO_PATH/L1/test/`` to find and launch all the test inside the repo. These scripts will try to find all the tests with this ``test``  folder and launh them one by one and print the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that setup up Vitis HLS compiler paths and should look something like this:
+Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the test inside the repo. These scripts will try to find all the tests with this ``test``  folder and launh them one by one and print the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that setup up Vitis HLS compiler paths and should look something like this:
 
 .. code-block:: bash
 

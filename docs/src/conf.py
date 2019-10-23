@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath('docs'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Vitis FFT Library'
+project = 'Vitis DSP Library'
 copyright = '2019, Xilinx Inc.'
 author = 'Xilinx Inc.'
 
@@ -65,6 +65,11 @@ autosectionlabel_prefix_document = True
 # Configure 'Edit on GitHub' extension
 edit_on_github_project = 'Xilinx/<ENTER GITHUB REPO PATH HERE>'
 edit_on_github_branch = 'master/<ENTER DOC FOLDER HIERARCHY HERE>'
+
+# Disable show source link
+html_copy_source = False
+html_show_sourcelink = False
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -14,10 +14,11 @@
    limitations under the License.
 
 ========================
-Vitis FFT Library
+Vitis DSP Library
 ========================
 
-Vitis FFT Library is an implementation of Discrete Fourier Transform using Fast 
+Vitis DSP library provides implementation of different L1/L2/L3 primitives for digital signal processing. 
+Current version only provides implementation of Discrete Fourier Transform using Fast 
 Fourier Transform algorithm for acceleration on Xilinx FPGAs. The Library is planned
 to provide three types of implementations namely L1 primitives, L2 kernels and L3 software APIs. Those 
 implementations are organized in their corresponding directories L1, L2 and L3.
