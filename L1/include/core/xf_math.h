@@ -3160,6 +3160,13 @@ static unsigned int DivideYByX(unsigned short x, unsigned short y, int M1, int M
     return div_val;
 }
 static void findInverse24(ap_int<24>& x, int& M, int& N, unsigned int& inv_x, int* outM, int* outN) {
+    if (x == 0) { // if the denominator is '0', return the highest value with the highest integer bit and zero
+                  // fractional bits
+        inv_x = division_lut[0];
+        *outM = 16;
+        *outN = 0;
+        return;
+    }
     char sb = IdentifySignBits(x); // find number of sign bits
 
     ap_int24_t unsigned_x = (ap_int24_t)x.range(23 - sb, 0); // Extract the value without sign bits

@@ -24,34 +24,29 @@
 #include "imgproc/xf_demosaicing.hpp"
 #include "xf_config_params.h"
 
+#define PTR_IN_WIDTH 128
+#define PTR_OUT_WIDTH 128
+
 // Resolve input and output pixel type:
 #if T_8U
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC3
-#define PTR_IN_WIDTH 8
-#define PTR_OUT_WIDTH 32
 #endif
 #if T_10U
 #define IN_TYPE XF_10UC1
 #define OUT_TYPE XF_10UC3
-#define PTR_IN_WIDTH 16
-#define PTR_OUT_WIDTH 32
 #endif
 #if T_12U
 #define IN_TYPE XF_12UC1
 #define OUT_TYPE XF_12UC3
-#define PTR_IN_WIDTH 16
-#define PTR_OUT_WIDTH 32
 #endif
 #if T_16U
 #define IN_TYPE XF_16UC1
 #define OUT_TYPE XF_16UC3
-#define PTR_IN_WIDTH 16
-#define PTR_OUT_WIDTH 64
 #endif
 
 // Resolve optimization type:
-#define NPC1 XF_NPPC1
+#define NPC1 NPPC
 
 #if (T_16U || T_10U || T_12U)
 #define CV_INTYPE CV_16UC1
@@ -62,18 +57,5 @@
 #endif
 
 #define ERROR_THRESHOLD 1
-
-// Resolve Bayer pattern:
-#if BAYER_PATTERN == 0
-#define XF_PATTERN XF_BAYER_BG
-#elif BAYER_PATTERN == 1
-#define XF_PATTERN XF_BAYER_GB
-#elif BAYER_PATTERN == 2
-#define XF_PATTERN XF_BAYER_GR
-#elif BAYER_PATTERN == 3
-#define XF_PATTERN XF_BAYER_RG
-#else
-#define XF_PATTERN XF_BAYER_BG
-#endif
 
 #endif // _XF_DEMOSAICING_CONFIG_H_

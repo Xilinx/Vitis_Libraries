@@ -2,10 +2,10 @@
 Getting Started with Vitis Vision
 #################################
 
-This chapter provides details on using xfOpenCV in the Vitis™
+This chapter provides details on using Vitis Vision in the Vitis™
 environment. The following sections would provide a description of the
 methodology to create a kernel, corresponding host code and a suitable
-makefile to compile an xfOpenCV kernel for any of the supported
+makefile to compile an Vitis Vision kernel for any of the supported
 platforms in Vitis. The subsequent section also explains the
 methodology to verify the kernel in various emulation modes and on the
 hardware.
@@ -17,7 +17,7 @@ Prerequisites
 
 #. Valid installation of Vitis™ 2019.2 or later version and the
    corresponding licenses.
-#. Install the xfOpenCV libraries, if you intend to use libraries
+#. Install the Vitis Vision libraries, if you intend to use libraries
    compiled differently than what is provided in Vitis.
 #. Install the card for which the platform is supported in Vitis 2019.2 or
    later versions.
@@ -70,7 +70,7 @@ following functions are executed using the host code:
 Wrappers around HLS Kernel(s)
 -----------------------------
 
-All xfOpenCV kernels are provided with C++ function templates (located
+All Vitis Vision kernels are provided with C++ function templates (located
 at <Github repo>/include) with image containers as objects of xf::Mat
 class. In addition, these kernels will work either in stream based
 (where complete image is read continuously) or memory mapped (where
@@ -79,9 +79,9 @@ image data access is in blocks).
 Vitis flow (OpenCL) requires kernel interfaces to be memory pointers
 with width in power(s) of 2. So glue logic is required for converting
 memory pointers to xf::Mat class data type and vice-versa when
-interacting with xfOpenCV kernel(s). Wrapper(s) are build over the
+interacting with Vitis Vision kernel(s). Wrapper(s) are build over the
 kernel(s) with this glue logic. Below examples will provide a
-methodology to handle different kernel (xfOpenCV kernels located at
+methodology to handle different kernel (Vitis Vision kernels located at
 <Github repo>/include) types (stream and memory mapped).
 
 
@@ -89,7 +89,7 @@ Stream Based Kernels
 ~~~~~~~~~~~~~~~~~~~~
 
 To facilitate the conversion of pointer to xf::Mat and vice versa, two
-adapter functions are included as part of xfOpenCV xf::cv::Array2xfMat() and
+adapter functions are included as part of Vitis Vision xf::cv::Array2xfMat() and
 xf::cv::xfMat2Array(). It is necessary for the xf::Mat objects to be invoked
 as streams using HLS pragma with a minimum depth of 2. This results in a
 top-level (or wrapper) function for the kernel as shown below:
@@ -104,14 +104,14 @@ top-level (or wrapper) function for the kernel as shown below:
    #pragma HLS stream variable=out_mat.data depth=2
    #pragma HLS dataflow 
    xf::cv::Array2xfMat<…> (gmem_in, in_mat); 
-   xf::xfopencv-func<…> (in_mat, out_mat…); 
+   xf::Vitis Vision-func<…> (in_mat, out_mat…); 
    xf::cv::xfMat2Array<…> (gmem_out, out_mat); 
    }
    }
 
 The above illustration assumes that the data in xf::cv::Mat is being
 streamed in and streamed out. You can also create a pipeline with
-multiple functions in pipeline instead of just one xfopencv function.
+multiple functions in pipeline instead of just one Vitis Vision function.
 
 For the stream based kernels with different inputs of different sizes,
 multiple instances of the adapter functions are necessary. For this,
@@ -131,7 +131,7 @@ multiple instances of the adapter functions are necessary. For this,
    obj_a.Array2xfMat<…,HEIGHT,WIDTH,…> (gmem_in1, in_mat1);
    obj_b.Array2xfMat<…,HEIGHT/4,WIDTH,…> (gmem_in2, in_mat2); 
    obj_b.Array2xfMat<…,HEIGHT/4,WIDTH,…> (gmem_in3, in_mat3); 
-   xf::xfopencv-func(in_mat1, in_mat2, int_mat3, out_mat…); 
+   xf::Vitis-Vision-func(in_mat1, in_mat2, int_mat3, out_mat…); 
    xf::cv::xfMat2Array<…> (gmem_out, out_mat); 
    }
    }
@@ -145,7 +145,7 @@ utility functions are provided, xf::cv::Array2xfMat() and xf::cv::xfMat2Array().
 Array2xfMat
 ^^^^^^^^^^^
 
-This function converts the input array to xf::cv::Mat. The xfOpenCV kernel
+This function converts the input array to xf::cv::Mat. The Vitis Vision kernel
 would require the input to be of type, xf::cv::Mat. This function would read
 from the array pointer and write into xf::cv::Mat based on the particular
 configuration (bit-depth, channels, pixel-parallelism) the xf::cv::Mat was
@@ -221,6 +221,7 @@ that to output pointer.
    | srcMat                            | Input image of type xf::cv::Mat   |
    +-----------------------------------+-----------------------------------+
 
+
 Interface pointer widths
 '''''''''''''''''''''''''
 
@@ -250,6 +251,80 @@ types
    | XF_8UC3         | XF_NPPC16       | 512             | 512             |
    +-----------------+-----------------+-----------------+-----------------+
 
+Kernel-to-Kernel streaming
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are two utility functions available in Vitis Vision, axiStrm2xfMat and xfMat2axiStrm to support streaming 
+of data between two kernels. For more details on kernel-to-kernel streaming, refer to the "Streaming Data Transfers Between the
+Kernels" section of UG1277 document.
+
+axiStrm2xfMat
+^^^^^^^^^^^^^
+
+axiStrm2xfMat is used by consumer kernel to support streaming data transfer between two kernels. 
+Consumer kernel receives data from producer kernel through kernel streaming interface which is defined by hls:stream 
+with the ap_axiu< PTR_WIDTH, 0, 0, 0> data type. axiStrm2xfMat would read from AXI stream and write into xf::cv:Mat based 
+on particular configuration (bit-depth, channels, pixel-parallelism) the xf::cv:Mat was created.
+
+
+.. code:: c
+
+   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
+   void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat)
+
+.. table:: Table . Parameter description of axiStrm2xfMat function
+
+
+   +-----------------+-------------------------------------------------------------------------------------+
+   | Parameter	     |  Description                                                                        | 
+   +=================+=====================================================================================+
+   | PTR_WIDTH	     | 	Data width of the input pointer. The value must be power 2, starting from 8 to 512.|
+   +-----------------+-------------------------------------------------------------------------------------+
+   | MAT_T           |  Input Mat type. Example XF_8UC1, XF_16UC1, XF_8UC3 and XF_8UC4                     |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | ROWS            |  Maximum height of image                                                            |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | COLS            |  Maximum width of image                                                             |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | NPC             |  Number of pixels computed in parallel. Example XF_NPPC1, XF_NPPC8                  |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | srcPtr          |  Input image of type hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >                      |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | dstMat          |  Output image of type xf::cv::Mat                                                   |
+   +-----------------+-------------------------------------------------------------------------------------+
+
+xfMat2axiStrm
+^^^^^^^^^^^^^
+
+xfMat2axiStrm is used by producer kernel to support streaming data transfer between two kernels. 
+This function converts the input xf:cv::Mat to AXI stream based on particular configuration (bit-depth, channels, pixel-parallelism). 
+
+.. code:: c
+
+   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
+   void xfMat2axiStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dstPtr)
+
+.. table:: Table . Parameter description of xfMat2axiStrm function
+
+
+   +-----------------+-------------------------------------------------------------------------------------+
+   | Parameter	     |  Description                                                                        | 
+   +=================+=====================================================================================+
+   | PTR_WIDTH       | 	Data width of the input pointer. The value must be power 2, starting from 8 to 512.|
+   +-----------------+-------------------------------------------------------------------------------------+
+   | MAT_T           |  Input Mat type. Example XF_8UC1, XF_16UC1, XF_8UC3 and XF_8UC4                     |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | ROWS            |  Maximum height of image                                                            |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | COLS            |  Maximum width of image                                                             |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | NPC             |  Number of pixels computed in parallel. Example XF_NPPC1, XF_NPPC8                  |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | srcPtr          |  Input image of type hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >                      |
+   +-----------------+-------------------------------------------------------------------------------------+
+   | dstMat          |  Output image of type xf::cv::Mat                                                   |
+   +-----------------+-------------------------------------------------------------------------------------+
+
 
 Memory Mapped Kernels
 ~~~~~~~~~~~~~~~~~~~~~
@@ -274,7 +349,7 @@ case is as follows:
 The gmem pointers must be mapped to the xf::cv::Mat objects during the
 object creation, and then the memory mapped kernels are called with
 these mats at the interface. It is necessary that the pointer size must
-be same as the size required for the xf::xfopencv-func, unlike the
+be same as the size required for the xf::Vitis-Vision-func, unlike the
 streaming method where any higher size of the pointers (till 512-bits)
 are allowed.
 
@@ -283,8 +358,8 @@ Makefile
 ---------
 
 In the current use model, only a makefile based flow is provided to
-build applications with xfOpenCV on Vitis. Examples for makefile are
-provided in the samples section of GitHub.
+build applications with Vitis Vision on Vitis. Examples for makefile are
+provided in the examples and tests section of GitHub.
 
 
 Design example Using Library on Vitis
@@ -304,9 +379,9 @@ Host code
 
 The following is the Host code for the canny edge detection example. The
 host code sets up the OpenCL platform with the FPGA of processing
-required data. In the case of xfOpenCV example, the data is an image.
+required data. In the case of Vitis Vision example, the data is an image.
 Reading and writing of images are enabled using called to functions from
-xfOpenCV.
+Vitis Vision.
 
 .. code:: c
 
@@ -474,15 +549,23 @@ kernel. The time for compilation is minimal, and is therefore
 recommended to be the first step in testing the kernel. Following are
 the steps to build and run for the software emulation:
 
+*For PCIe devices:*
+
 .. code:: c
 
-	*For PCIe devices:*
    $ make host xclbin TARGET=sw_emu
+   
    $ make run TARGET=sw_emu
-	*For embedded devices:*
+   
+*For embedded devices:*
+
+.. code:: c
+
    $ export SYSROOT=< path-to-platform-sysroot >
-   $ make host xclbin TARGET=hw BOARD=Zynq 
-   $ make run TARGET=sw_emu
+   
+   $ make host xclbin TARGET=sw_emu BOARD=Zynq ARCH=< aarch64 | aarch32 >
+   
+   $ make run TARGET=sw_emu BOARD=Zynq ARCH=< aarch64 | aarch32 >
 
 
 Hardware Emulation
@@ -493,15 +576,24 @@ the C/C++ code. The simulation, since being done on RTL requires longer
 to complete when compared to software emulation. Following are the steps
 to build and run for the hardware emulation:
 
+*For PCIe devices:*
+
 .. code:: c
 
-	*For PCIe devices:*
    $ make host xclbin TARGET=hw_emu
+   
    $ make run TARGET=hw_emu
-	*For embedded devices:*
+   
+*For embedded devices:*
+
+
+.. code:: c
+
    $ export SYSROOT=< path-to-platform-sysroot >
-   $ make host xclbin TARGET=hw_emu BOARD=Zynq 
-   $ make run TARGET=hw_emu
+   
+   $ make host xclbin TARGET=hw_emu BOARD=Zynq ARCH=< aarch64 | aarch32 >
+   
+   $ make run TARGET=hw_emu BOARD=Zynq ARCH=< aarch64 | aarch32 >
 
 
 Testing on the Hardware
@@ -514,18 +606,35 @@ is created. As a prerequisite the drivers has to be installed for
 corresponding DSA, for which the example was built for. Following are
 the steps to build the kernel and run on a hardware:
 
+*For PCIe devices:*
+
 .. code:: c
 
-	*For PCIe devices:*
    $ make host xclbin TARGET=hw
+   
    $ make run TARGET=hw
-	*For embedded devices:*
+   
+*For embedded devices:*
+
+.. code:: c
+
    $ export SYSROOT=< path-to-platform-sysroot >
-   $ make host xclbin TARGET=hw BOARD=Zynq 
-   copy the generated sd_card folder contents to an SDCARD and run on the following commands on the board.
-   $ export LD_LIBRARY_PATH=< path-to-arm-compiled-opencv-libs >
-   $ export XILINX_XRT=/usr
-   $ ./< executable > < args >
+   
+   $ make host xclbin TARGET=hw BOARD=Zynq ARCH=< aarch64 | aarch32 >
+   
+   $ make run TARGET=hw BOARD=Zynq ARCH=< aarch64 | aarch32 >
+
+*Note1*. For non-DFX platforms, BOOT.BIN has to be manually copied from < build-directory >/< xclbin-folder >/sd\_card / to the top level sd_card folder.
+
+*Note2*. For hw run on embedded devices, copy the generated sd_card folder content to an SDCARD and run the following commands on the board:
+
+.. code:: c
+
+   cd /mnt
+   
+   export XCL_BINDIR=< xclbin-folder-present-in-the-sd_card > #For example, "export XCL_BINDIR=xclbin_zcu102_base_hw"
+   
+   ./< executable > < arguments >
 
 
 

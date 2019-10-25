@@ -193,7 +193,7 @@ KER_NAME1    	:= edgetracing_accel
 KERNELS += $(KER_NAME1):xf_edgetracing_accel.cpp
 
 VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
-VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB -D__SDA_MEM_MAP__
+VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 VPP_CFLAGS 	+= --xp vivado_prop:run.impl_1.strategy=Performance_Explore 
 
 ifeq ($(BOARD), Zynq)
@@ -210,7 +210,7 @@ SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/canny
 
 EXE_NAME  		:= canny
 HOST_ARGS 		= $(XF_LIB_DIR)/data/4k.jpg #$(XCLBIN_FILE)
-SRCS      		:= xf_canny_tb xf_canny_accel
+SRCS      		:= xf_canny_tb
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
@@ -420,7 +420,7 @@ endif
 
 cleanall: clean cleanx
 	rm -rf *.log plist $(DATA_STAMP)
-
+	rm -rf *.ini sd_card* emulation _vimage .Xil
 # -----------------------------------------------------------------------------
 #                                simulation run
 
@@ -442,8 +442,8 @@ else ifeq ($(TARGET), hw)
        EMU_CMD += @echo "Please copy the contents of sd_card and input images to an SD Card and run on the board"
 endif
 
-
 sd_card : host xclbin
+	@echo "Generating sd_card folder...."
 	mkdir -p $(SDCARD)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
 	cp -rf $(XCLBIN_DIR)/*.xclbin $(SDCARD)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
 	cp -rf $(B_NAME)/sw/$(XDEVICE)/boot/generic.readme $(B_NAME)/sw/$(XDEVICE)/xrt/image/* $(EXE_FILE) $(HOST_ARGS) $(SDCARD)
@@ -454,9 +454,14 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(SDCARD)/init.sh
 	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> $(SDCARD)/init.sh
 	@echo 'reboot' >> $(SDCARD)/init.sh
+	@echo "sd_card folder generation done!"
 else ifeq ($(TARGET), hw)
-	@echo "sd_card folder already exists" #TODO
+	@echo 'cp -rf $(XCLBIN_DIR)/BOOT.BIN $(SDCARD)/'
+	@echo 'export XCL_BINDIR=$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)' >> $(SDCARD)/init.sh
+	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> $(SDCARD)/init.sh
+	@echo "sd_card folder generation done!"
 endif
+
 
 
 .PHONY: run run_sw_emu run_hw_emu run_hw check
@@ -474,7 +479,8 @@ run: host xclbin $(EMU_CONFIG) emulate
 	$(RUN_ENV)
 	$(EMU_CMD)
 
-check: run# MK_INC_END vitis_zynq_test_rules.mk
+check: run
+# MK_INC_END vitis_zynq_test_rules.mk
 else
 # MK_INC_BEGIN vitis_host_rules.mk
 

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#define WIDTH 3840  // 7680//1920//
-#define HEIGHT 2160 // 4320//1080//
+#define WIDTH 128  // 3840//7680//1920//
+#define HEIGHT 128 // 2160//4320//1080//
+
 #define NPPC XF_NPPC1
 
 #define T_8U 0

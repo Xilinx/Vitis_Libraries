@@ -12,24 +12,32 @@ This directory contains whole applications formed by stitching a pipeline of Vit
 
 ### Commands to run:
 
-source < path-to-Vitis-installation-directory >/settings64.sh
+    source < path-to-Vitis-installation-directory >/settings64.sh
 
-source < part-to-XRT-installation-directory >/setenv.sh
+    source < part-to-XRT-installation-directory >/setenv.sh
 
-export DEVICE=< path-to-platform-directory >/<platform>.xpfm
+    export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
 **For PCIe devices:**
 
-make host xclbin TARGET=< sw_emu|hw_emu|hw >
+    make host xclbin TARGET=< sw_emu|hw_emu|hw >
 
-make run TARGET=< sw_emu|hw_emu|hw >
+    make run TARGET=< sw_emu|hw_emu|hw >
 
 **For embedded devices:**
 
-export SYSROOT=< path-to-platform-sysroot >
+    export SYSROOT=< path-to-platform-sysroot >
 
-make host xclbin TARGET=hw BOARD=Zynq 
+    make host xclbin TARGET=< sw_emu|hw_emu|hw > BOARD=Zynq ARCH=< aarch32 | aarch64 >
 
-make run TARGET=< hw >
+    make run TARGET=< sw_emu|hw_emu|hw >  BOARD=Zynq ARCH=< aarch32 | aarch64 > #This command will generate the sd_card folder
 
-copy the image.ub, xclbins and executable to an SDCARD and run on the board.
+**Note1**. For non-DFX platforms, BOOT.BIN has to be manually copied from < build-directory >/< xclbin-folder >/sd\_card / to the top level sd_card folder.
+
+**Note2**. For hw run on embedded devices, copy the generated sd_card folder content to an SDCARD and either run the "init.sh" or run the following commands on the board:
+
+    cd /mnt
+	   
+    export XCL_BINDIR=< xclbin-folder-present-in-the-sd_card > #For example, "export XCL_BINDIR=xclbin_zcu102_base_hw"
+	   
+    ./< executable > < arguments >

@@ -24,7 +24,7 @@
 #include "xf_config_params.h"
 
 // set 1 for video
-#define VIDEO_INPUT 1
+#define VIDEO_INPUT 0
 
 // total number of frames to be tracked
 #define TOTAL_FRAMES 100

@@ -43,7 +43,7 @@ void demosaicing_accel(ap_uint<PTR_IN_WIDTH>* img_in, ap_uint<PTR_OUT_WIDTH>* im
     xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::demosaicing<XF_PATTERN, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_USE_URAM>(imgInput, imgOutput);
+    xf::cv::demosaicing<BPATTERN, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_USE_URAM>(imgInput, imgOutput);
 
     // Convert _dst xf::cv::Mat object to output array:
     xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);

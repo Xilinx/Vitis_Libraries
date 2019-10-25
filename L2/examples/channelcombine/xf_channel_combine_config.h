@@ -41,7 +41,21 @@
 #endif
 
 // Set the input and output pixel depth:
+#if FOUR_INPUT
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC4
+#define CV_TYPE CV_8UC4
+#endif
+
+#if THREE_INPUT
+#define IN_TYPE XF_8UC1
+#define OUT_TYPE XF_8UC3
+#define CV_TYPE CV_8UC3
+#endif
+
+#if TWO_INPUT
+#define IN_TYPE XF_8UC1
+#define OUT_TYPE XF_8UC2
+#endif
 
 #endif //_XF_CHANNEL_COMBINE_CONFIG_H_
