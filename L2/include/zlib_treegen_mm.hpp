@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _XFCOMPRESSION_TREEGEN_KERNEL_HPP_
-#define _XFCOMPRESSION_TREEGEN_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_ZLIB_TREEGEN_MM_HPP_
+#define _XFCOMPRESSION_ZLIB_TREEGEN_MM_HPP_
 
 /**
  * @file treegen_kernel.hpp
@@ -32,7 +32,7 @@
 #include <assert.h>
 #include "hls_stream.h"
 #include <ap_int.h>
-#include "deflate_trees.hpp"
+#include "huffman_treegen.hpp"
 
 extern "C" {
 /**

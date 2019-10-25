@@ -241,7 +241,7 @@ int xil_zlib::init(const std::string& binaryFileName, uint8_t flow) {
     devices.resize(1);
     m_program = new cl::Program(*m_context, devices, bins);
 
-    if (flow == 0) {
+    if (flow == 0 || flow == 2) {
         // Create Compress & Huffman kernels
         for (int i = 0; i < C_COMPUTE_UNIT; i++) {
             compress_kernel[i] = new cl::Kernel(*m_program, compress_kernel_names[i].c_str());
@@ -254,7 +254,8 @@ int xil_zlib::init(const std::string& binaryFileName, uint8_t flow) {
         for (int i = 0; i < T_COMPUTE_UNIT; i++) {
             treegen_kernel[i] = new cl::Kernel(*m_program, treegen_kernel_names[i].c_str());
         }
-    } else if (flow == 1) {
+    }
+    if (flow == 1 || flow == 2) {
         // Create Decompress kernel
         for (int i = 0; i < D_COMPUTE_UNIT; i++) {
             decompress_kernel[i] = new cl::Kernel(*m_program, decompress_kernel_names[i].c_str());
@@ -265,11 +266,11 @@ int xil_zlib::init(const std::string& binaryFileName, uint8_t flow) {
 }
 
 int xil_zlib::release() {
-    if (m_bin_flow == 0) {
+    if (!m_bin_flow) {
         for (int i = 0; i < C_COMPUTE_UNIT; i++) delete (compress_kernel[i]);
         for (int i = 0; i < H_COMPUTE_UNIT; i++) delete (huffman_kernel[i]);
         for (int i = 0; i < T_COMPUTE_UNIT; i++) delete (treegen_kernel[i]);
-    } else if (m_bin_flow == 1) {
+    } else if (m_bin_flow) {
         for (int i = 0; i < D_COMPUTE_UNIT; i++) delete (decompress_kernel[i]);
     }
 

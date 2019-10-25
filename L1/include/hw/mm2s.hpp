@@ -446,6 +446,81 @@ mm2s_simple:
     }
 }
 
+template <int DATAWIDTH, int BURST_SIZE>
+void mm2s(const uintMemWidth_t* in,
+          uintMemWidth_t* head_prev_blk,
+          uintMemWidth_t* orig_input_data,
+          hls::stream<ap_uint<DATAWIDTH> >& outStream,
+          hls::stream<uint32_t>& outStreamSize,
+          uint32_t* compressd_size,
+          uint32_t* in_block_size,
+          uint32_t no_blocks,
+          uint32_t block_size_in_kb,
+          uint32_t head_res_size,
+          uint32_t offset) {
+    const int c_byte_size = 8;
+    const int c_word_size = DATAWIDTH / c_byte_size;
+    ap_uint<DATAWIDTH> buffer[BURST_SIZE];
+#pragma HLS RESOURCE variable = buffer core = RAM_2P_LUTRAM
+
+    uint32_t offset_gmem = offset ? offset / 64 : 0;
+
+    // Handle header or residue here
+    uint32_t block_stride = block_size_in_kb * 1024 / 64;
+
+    uint32_t blkCompSize = 0;
+    uint32_t origSize = 0;
+    uint32_t sizeInWord = 0;
+    uint32_t byteSize = 0;
+    // Run over number of blocks
+    for (int bIdx = 0; bIdx < no_blocks + 1; bIdx++) {
+        if (bIdx == 0) {
+            sizeInWord = head_res_size ? ((head_res_size - 1) / c_word_size + 1) : 0;
+            byteSize = head_res_size;
+        } else {
+            blkCompSize = compressd_size[bIdx - 1];
+            origSize = in_block_size[bIdx - 1];
+            // Put compress block & input block
+            // into streams for next block
+            sizeInWord = (blkCompSize - 1) / c_word_size + 1;
+            byteSize = blkCompSize;
+        }
+
+        // Send size in bytes
+        outStreamSize << byteSize;
+
+        // printf("[ %s ]blkCompSize %d origSize %d sizeInWord_512 %d offset %d head_res_size %d\n", __FUNCTION__,
+        // blkCompSize, origSize, sizeInWord, offset, head_res_size);
+
+        // Copy data from global memory to local
+        // Put it into stream
+        for (uint32_t i = 0; i < sizeInWord; i += BURST_SIZE) {
+            uint32_t chunk_size = BURST_SIZE;
+
+            if (i + BURST_SIZE > sizeInWord) chunk_size = sizeInWord - i;
+
+        memrd1:
+            for (uint32_t j = 0; j < chunk_size; j++) {
+#pragma HLS PIPELINE II = 1
+                if (bIdx == 0)
+                    buffer[j] = head_prev_blk[(offset_gmem + i) + j];
+                else if (blkCompSize == origSize)
+                    buffer[j] = orig_input_data[(block_stride * (bIdx - 1) + i) + j];
+                else
+                    buffer[j] = in[(block_stride * (bIdx - 1) + i) + j];
+            }
+
+        memrd2:
+            for (uint32_t j = 0; j < chunk_size; j++) {
+#pragma HLS PIPELINE II = 1
+                outStream << buffer[j];
+            }
+        }
+    }
+    // printf("%s Done \n", __FUNCTION__);
+    outStreamSize << 0;
+}
+
 } // namespace compression
 } // namespace xf
 

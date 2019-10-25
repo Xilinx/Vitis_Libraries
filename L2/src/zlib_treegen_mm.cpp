@@ -21,7 +21,7 @@
  *
  * This file is part of Vitis Data Compression Library.
  */
-#include "treegen_mm.hpp"
+#include "zlib_treegen_mm.hpp"
 
 extern "C" {
 void xilTreegenKernel(uint32_t* dyn_ltree_freq,

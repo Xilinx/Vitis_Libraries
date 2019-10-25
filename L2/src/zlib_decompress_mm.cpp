@@ -55,7 +55,7 @@ void xil_inflate(const uintMemWidth_t* in, uintMemWidth_t* out, uint32_t* encode
     xf::compression::mm2sSimple<kGMemDWidth, kGMemBurstSize>(in, inStream512, input_size);
     xf::compression::streamDownsizer<uint32_t, kGMemDWidth, 16>(inStream512, outDownStream, input_size);
 
-    xf::compression::huffBitUnPacker(outDownStream, bitUnPackStream, bitEndOfStream, input_size);
+    xf::compression::huffmanDecoder(outDownStream, bitUnPackStream, bitEndOfStream, input_size);
 
     xf::compression::lzDecompressZlibEos_new<HISTORY_SIZE, LOW_OFFSET>(bitUnPackStream, bitEndOfStream, uncompOutStream,
                                                                        byte_eos, outsize_val);

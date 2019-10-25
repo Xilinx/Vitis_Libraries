@@ -207,7 +207,7 @@ $(XCLBIN_FILE): $(TEMP_DIR)/xf_decompress.xo
 #                       host setup
 
 CXX := xcpp
-HOST_EXE := xil_lz4_8b
+HOST_EXE := xil_lz4
 #EXE_EXT = exe
 
 CXXFLAGS +=-I$(CUR_DIR)/src/

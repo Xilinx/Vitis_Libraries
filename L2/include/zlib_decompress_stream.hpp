@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _XFCOMPRESSION_ZLIB_DECOMPRESS_STREAM_KERNEL_HPP_
-#define _XFCOMPRESSION_ZLIB_DECOMPRESS_STREAM_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_ZLIB_DECOMPRESS_STREAM_HPP_
+#define _XFCOMPRESSION_ZLIB_DECOMPRESS_STREAM_HPP_
 
 /**
  * @file zlib_decompress_stream.hpp
@@ -30,8 +30,7 @@
 #include <assert.h>
 #include <ap_int.h>
 #include "hls_stream.h"
-#include "inflate_trees.hpp"
-#include "inflate_huffman.hpp"
+#include "huffman_decoder.hpp"
 #include "zlib_config.hpp"
 #include "lz_decompress.hpp"
 #include "ap_axi_sdata.h"

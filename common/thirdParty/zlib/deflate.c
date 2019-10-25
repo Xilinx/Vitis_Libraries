@@ -798,7 +798,7 @@ extern "C" {
 int xil_compress_top_buffer(uint8_t* in, uint8_t* out, int input_size) {
     // printf("In top buffer \n");
     // Xilinx ZLIB object
-    xil_zlib xlz("compress_decompress.xclbin");
+    xfZlib xlz("compress_decompress.xclbin");
 
     // Zlib compression
     int enbytes = xlz.compress_buffer((uint8_t*)in, (uint8_t*)out, input_size);

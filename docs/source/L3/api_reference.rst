@@ -12,4 +12,5 @@ Overlay API Reference
    :includehidden:
    
    ../../doxygen/L3/rst/class_xf_compression_xfLz4.rst
+   ../../doxygen/L3/rst/class_xf_compression_xfZlib.rst
 

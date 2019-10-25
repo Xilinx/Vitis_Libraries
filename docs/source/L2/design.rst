@@ -7,8 +7,11 @@
 Kernel Design
 =============
 
+LZ Data Compression
+===================
+
 Overview
----------
+--------
 
 Xilinx LZ data compression architecture is targeted for FPGAs. It aims to provide high throughput. This architecture is developed and tested on Xilinx Alveo U200. Even though this architecture is designed for LZ4 application, but it is generic enough to support various other LZ based data compression algorithms like Snappy, LZ77 and LZO.
 
@@ -54,6 +57,3 @@ The overall design remains similar to the compression kernel design. Input data 
 Each decompression engine module contains multiple sub-modules processing 1 byte per clock cycle. Since the modules work in pipelined fashion, therefore, the throughput of each decompression engine is 1 byte per clock cycle.
 
 The decompression engine desing also remains same for all LZ based algorithms. Only difference will be the **Decoding**	 sub-module in decompression engine module, which will be unique for each algorithm.
-
-
-
