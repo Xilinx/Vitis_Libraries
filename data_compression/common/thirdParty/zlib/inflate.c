@@ -632,7 +632,7 @@ extern "C" {
 int xil_decompress_top_buffer(uint8_t* in, uint8_t* out, int input_size) {
     // printf("In top buffer \n");
     // Xilinx ZLIB object
-    xil_zlib xlz("compress_decompress.xclbin");
+    xfZlib xlz("compress_decompress.xclbin");
 
     // Zlib compression
     int debytes = xlz.decompress_buffer((uint8_t*)in, (uint8_t*)out, input_size);

@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _XFCOMPRESSION_HUFFMAN_KERNEL_HPP_
-#define _XFCOMPRESSION_HUFFMAN_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_ZLIB_HUFFMAN_ENC_MM_HPP_
+#define _XFCOMPRESSION_ZLIB_HUFFMAN_ENC_MM_HPP_
 
 /**
  * @file huffman_kernel.hpp
@@ -38,7 +38,7 @@
 #include "hls_stream.h"
 #include <ap_int.h>
 #include "zlib_config.hpp"
-
+#include "huffman_encoder.hpp"
 #define MIN_BLOCK_SIZE 116
 
 #define GMEM_DWIDTH 512
@@ -57,10 +57,6 @@
 #define BIT 8
 
 #define d_code(dist, dist_code) ((dist) < 256 ? dist_code[dist] : dist_code[256 + ((dist) >> 7)])
-/* Mapping from a distance to a distance code. dist is the distance - 1 and
- *  * must not have side effects. dist_code[256] and dist_code[257] are never
- *   * used.
- *    */
 
 extern "C" {
 /**

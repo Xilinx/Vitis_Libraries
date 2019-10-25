@@ -88,7 +88,7 @@ void xil_inflate(hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistream,
 
     kStreamReadZlibDecomp(inaxistream, outdownstream, input_size);
 
-    xf::compression::huffBitUnPacker(outdownstream, bitunpackstream, bitendofstream, input_size);
+    xf::compression::huffmanDecoder(outdownstream, bitunpackstream, bitendofstream, input_size);
 
     xf::compression::lzDecompressZlibEos_new<HISTORY_SIZE, LOW_OFFSET>(bitunpackstream, bitendofstream, uncompoutstream,
                                                                        byte_eos, outsize_val);

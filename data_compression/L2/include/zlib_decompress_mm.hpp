@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _XFCOMPRESSION_ZLIB_DECOMPRESS_KERNEL_HPP_
-#define _XFCOMPRESSION_ZLIB_DECOMPRESS_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_ZLIB_DECOMPRESS_MM_HPP_
+#define _XFCOMPRESSION_ZLIB_DECOMPRESS_MM_HPP_
 
 /**
  * @file zlib_decompress_kernel.hpp
@@ -30,8 +30,7 @@
 #include "s2mm.hpp"
 #include "stream_upsizer.hpp"
 #include "stream_downsizer.hpp"
-#include "inflate_trees.hpp"
-#include "inflate_huffman.hpp"
+#include "huffman_decoder.hpp"
 
 #include <stdio.h>
 #include <stdint.h>

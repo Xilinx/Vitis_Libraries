@@ -26,7 +26,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include "xcl2.hpp"
-#include "gzip_config.hpp"
+#include "zlib_config.hpp"
 
 #define PARALLEL_ENGINES 8
 #define C_COMPUTE_UNIT 1

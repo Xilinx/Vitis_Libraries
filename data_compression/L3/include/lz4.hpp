@@ -96,6 +96,7 @@ class xfLz4 {
     * @param original_size original size
     * @param host_buffer_size host buffer size
     */
+
     uint64_t decompress(uint8_t* in,
                         uint8_t* out,
                         uint64_t actual_size,

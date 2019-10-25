@@ -31,9 +31,10 @@ void xil_compress_decompress_list(std::string& file_list,
                                   enum list_mode mode = BOTH) {
     // Create xil_zlib object
     xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin);
+    xlz = new xil_zlib(single_bin, 2);
 
     if (mode != ONLY_DECOMPRESS) {
+        xlz->m_bin_flow = 0;
         std::cout << "--------------------------------------------------------------" << std::endl;
         std::cout << "                     Xilinx Zlib Compress                          " << std::endl;
         std::cout << "--------------------------------------------------------------" << std::endl;
@@ -72,6 +73,7 @@ void xil_compress_decompress_list(std::string& file_list,
 
     // Decompress
     if (mode != ONLY_COMPRESS) {
+        xlz->m_bin_flow = 1;
         std::ifstream infilelist_dec(file_list.c_str());
         std::string line_dec;
 
@@ -135,7 +137,9 @@ void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::
 void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single_bin) {
     // Xilinx ZLIB object
     xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin);
+    xlz = new xil_zlib(single_bin, 1);
+
+    xlz->m_bin_flow = 1;
 
     std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
 
@@ -169,7 +173,9 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
 void xil_compress_top(std::string& compress_mod, std::string& single_bin) {
     // Xilinx ZLIB object
     xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin);
+    xlz = new xil_zlib(single_bin, 0);
+
+    xlz->m_bin_flow = 0;
 
     std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
 
@@ -231,7 +237,9 @@ void xil_validate(std::string& file_list, std::string& ext) {
 void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string& single_bin) {
     // Create xil_zlib object
     xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin);
+    xlz = new xil_zlib(single_bin, 2);
+
+    xlz->m_bin_flow = 0;
 
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "                     Xilinx Zlib Compress                          " << std::endl;
@@ -270,6 +278,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string&
               << "File Name\t\t:" << compress_in << std::endl;
 
     // Decompress
+
+    xlz->m_bin_flow = 1;
 
     std::cout << "\n";
     std::cout << "--------------------------------------------------------------" << std::endl;

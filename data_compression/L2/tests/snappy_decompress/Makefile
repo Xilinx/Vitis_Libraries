@@ -211,7 +211,7 @@ $(XCLBIN_FILE): $(TEMP_DIR)/xf_decompress.xo
 #                       host setup
 
 CXX := xcpp
-HOST_EXE := xil_snappy_8b
+HOST_EXE := xil_snappy
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
 CXXFLAGS +=-I$(TB_DIR)/

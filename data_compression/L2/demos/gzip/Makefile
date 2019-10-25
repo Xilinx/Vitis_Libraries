@@ -191,10 +191,10 @@ XO_FILES_C = $(TEMP_DIR)/xf_compress_lz77.xo \
 		  	 
 XO_FILES_D = $(TEMP_DIR)/xf_gzip_decompress.xo
 
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/gzip_lz77_compress_mm.cpp
-HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/huffman_mm.cpp
-TREEGEN_KERNEL_SRCS = $(KSRC_DIR)/treegen_mm.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/gzip_decompress_mm.cpp
+COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
+HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/zlib_huffman_enc_mm.cpp
+TREEGEN_KERNEL_SRCS = $(KSRC_DIR)/zlib_treegen_mm.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_mm.cpp
 
 COMPRESS_KERNEL_NAME = xilLz77Compress
 HUFFMAN_KERNEL_NAME = xilHuffmanKernel

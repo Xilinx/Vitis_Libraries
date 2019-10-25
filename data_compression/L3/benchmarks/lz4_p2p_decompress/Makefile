@@ -147,10 +147,9 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 
 BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
-SRC_DIR := $(XFLIB_DIR)/L3/demos/lz4_p2p_app/src
 
 XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
-SRC_DIR := $(XFLIB_DIR)/L3/demos/lz4_p2p_app/src
+SRC_DIR := $(XFLIB_DIR)/L3/benchmarks/lz4_p2p_decompress/src
 
 # ------------------------------------------------------------
 #                      kernel setup
@@ -222,7 +221,7 @@ BIN_DIR_SUFFIX ?= _$(XDEVICE)
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 
 CXX := xcpp
-EXE_NAME := xil_lz4_8b
+EXE_NAME := xil_lz4
 #EXE_EXT = exe
 
 CXXFLAGS +=-I$(CUR_DIR)/src/

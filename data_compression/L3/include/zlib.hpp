@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_XIL_ZLIB_HPP_
-#define _XFCOMPRESSION_XIL_ZLIB_HPP_
+#ifndef _XFCOMPRESSION_ZLIB_HPP_
+#define _XFCOMPRESSION_ZLIB_HPP_
 
 #include <iomanip>
 #include <iostream>
@@ -93,20 +93,125 @@ uint32_t get_file_size(std::ifstream& file);
 namespace xf {
 namespace compression {
 
-class xil_zlib {
+/**
+ *  xfZlib class. Class containing methods for Zlib
+ * compression and decompression to be executed on host side.
+ */
+class xfZlib {
    public:
+    /**
+     * @brief Initialize the class object.
+     *
+     * @param binaryFile file to be read
+     */
     int init(const std::string& binaryFile);
+    /**
+     * @brief release
+     *
+     */
     int release();
+
+    /**
+     * @brief This module does the overlapped execution of compression
+     * where data transfers and kernel computation are overlapped
+     *
+     * @param in input byte sequence
+     * @param out output byte sequence
+     * @param actual_size input size
+     * @param host_buffer_size host buffer size
+     * @param file_list_flag flag for list of files
+     */
+    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size, bool file_list_flag);
+
+    /**
+     * @brief This module does the overlapped execution of compression
+     * where data transfers and kernel computation are overlapped
+     *
+     * @param in input byte sequence
+     * @param out output byte sequence
+     * @param actual_size input size
+     * @param host_buffer_size host buffer size
+     */
+
     uint32_t compress(uint8_t* in, uint8_t* out, uint32_t actual_size, uint32_t host_buffer_size);
+
+    /**
+     * @brief This module does serial execution of decompression
+     * where data transfers and kernel execution in serial manner
+     *
+     * @param in input byte sequence
+     * @param out output byte sequence
+     * @param actual_size input size
+     * @param cu_run compute unit number
+     */
+
     uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run);
+
+    /**
+     * @brief In shared library flow this call can be used for compress buffer
+     * in overlapped manner. This is used in libz.so created.
+     *
+     *
+     * @param in input byte sequence
+     * @param out output byte sequence
+     * @param input_size input size
+     */
+
     int compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
+
+    /**
+     * @brief In shared library flow this call can be used for decompress buffer
+     * in serial manner. This is used in libz.so created.
+     *
+     *
+     * @param in input byte sequence
+     * @param out output byte sequence
+     * @param input_size input size
+     */
+
     int decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
+
+    /**
+     * @brief This module does file operations and invokes compress API which
+     * internally does zlib compression on FPGA in overlapped manner
+     *
+     * @param inFile_name input file name
+     * @param outFile_name output file name
+     * @param actual_size input size
+     */
+
     uint32_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
+
+    /**
+     * @brief This module does file operations and invokes decompress API which
+     * internally does zlib decompression on FPGA in overlapped manner
+     *
+     * @param inFile_name input file name
+     * @param outFile_name output file name
+     * @param input_size input size
+     * @param cu_run compute unit number
+     */
+
     uint32_t decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run);
+
+    /**
+     * @brief This module is used for profiling by using kernel events
+     *
+     * @param inFile_name kernel events
+     */
+
     uint64_t get_event_duration_ns(const cl::Event& event);
 
-    xil_zlib(const std::string& binaryFile);
-    ~xil_zlib();
+    /**
+     * @brief Class constructor
+     *
+     */
+    xfZlib(const std::string& binaryFile);
+
+    /**
+     * @brief Class destructor.
+     */
+    ~xfZlib();
 
    private:
     cl::Program* m_program;
@@ -132,7 +237,6 @@ class xil_zlib {
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_zlibout[MAX_DDCOMP_UNITS];
     std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressSize[MAX_DDCOMP_UNITS];
 
-    // Buffers related to Dynamic Huffman
 
     // Literal & length frequency tree
     std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_ltree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];

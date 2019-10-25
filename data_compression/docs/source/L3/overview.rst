@@ -7,6 +7,15 @@
 Overview
 ========
 
-Some text...
+This section provides usage of data compression applications at software API
+level. Applications provided in this section can be used in two ways. 
+
+.. code-block:: bash
+
+    a.  Use the L3/demos applications as-is 
+    b.  Create shared library out of L3/demos applications
+
+
+  
 
 

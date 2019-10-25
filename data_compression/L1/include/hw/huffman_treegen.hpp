@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_DEFLATE_TREES_HPP_
-#define _XFCOMPRESSION_DEFLATE_TREES_HPP_
+#ifndef _XFCOMPRESSION_HUFFMAN_TREEGEN_HPP_
+#define _XFCOMPRESSION_HUFFMAN_TREEGEN_HPP_
 
 /**
  * @file deflate_trees.hpp
@@ -74,6 +74,10 @@ reduceHeap:
     heap[startIdx] = curr_val;
 }
 
+
+template <uint32_t ELEMS, uint32_t MAX_LENGTH>
+inline uint32_t huffConstructTree(uint32_t* tree_freq, uint32_t* tree_codes, uint32_t* tree_blen, uint32_t* tree_root) {
+#pragma HLS INLINE
 /**
  * @brief This module generates huffman codes for either literal, distance or
  * bitlength data.
@@ -83,10 +87,6 @@ reduceHeap:
  * @param tree_blen output huffan codes bit lengths
  * @param tree_root input buffer to construct codes and bit length information
  */
-
-template <uint32_t ELEMS, uint32_t MAX_LENGTH>
-inline uint32_t huffConstructTree(uint32_t* tree_freq, uint32_t* tree_codes, uint32_t* tree_blen, uint32_t* tree_root) {
-#pragma HLS INLINE
     const uint32_t elems = ELEMS;
     const uint32_t max_length = MAX_LENGTH;
 

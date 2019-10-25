@@ -234,7 +234,7 @@ BIN_DIR_SUFFIX ?= _$(XDEVICE)
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 
 CXX := xcpp
-EXE_NAME := xil_lz4_8b
+EXE_NAME := xil_lz4
 #EXE_EXT = exe
 
 CXXFLAGS +=-I$(CUR_DIR)/src/

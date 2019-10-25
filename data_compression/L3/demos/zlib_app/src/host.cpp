@@ -31,9 +31,9 @@ void xil_compress_decompress_list(std::string& file_list,
                                   int cu,
                                   std::string& single_bin,
                                   enum list_mode mode = BOTH) {
-    // Create xil_zlib object
-    xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin);
+    // Create xfZlib object
+    xfZlib* xlz;
+    xlz = new xfZlib(single_bin);
 
     if (mode != ONLY_DECOMPRESS) {
         std::cout << "--------------------------------------------------------------" << std::endl;
@@ -136,8 +136,8 @@ void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::
 
 void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single_bin) {
     // Xilinx ZLIB object
-    xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin);
+    xfZlib* xlz;
+    xlz = new xfZlib(single_bin);
 
     std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
 
@@ -162,8 +162,8 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
 
 void xil_compress_top(std::string& compress_mod, std::string& single_bin) {
     // Xilinx ZLIB object
-    xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin);
+    xfZlib* xlz;
+    xlz = new xfZlib(single_bin);
 
     std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
 
@@ -215,9 +215,9 @@ void xil_validate(std::string& file_list, std::string& ext) {
 }
 
 void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string& single_bin) {
-    // Create xil_zlib object
-    xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin);
+    // Create xfZlib object
+    xfZlib* xlz;
+    xlz = new xfZlib(single_bin);
 
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "                     Xilinx Zlib Compress                          " << std::endl;

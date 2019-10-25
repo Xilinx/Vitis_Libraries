@@ -110,7 +110,7 @@ void zip(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uin
     outFile.put(0);
 }
 
-uint32_t xil_zlib::compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
+uint32_t xfZlib::compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
     std::chrono::duration<double, std::nano> compress_API_time_ns_1(0);
     std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
     std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
@@ -153,7 +153,7 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 }
 
 // Constructor
-xil_zlib::xil_zlib(const std::string& binaryFileName) {
+xfZlib::xfZlib(const std::string& binaryFileName) {
     // Zlib Compression Binary Name
     init(binaryFileName);
 
@@ -255,7 +255,7 @@ xil_zlib::xil_zlib(const std::string& binaryFileName) {
 }
 
 // Destructor
-xil_zlib::~xil_zlib() {
+xfZlib::~xfZlib() {
     release();
     uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
     for (uint32_t cu = 0; cu < C_COMPUTE_UNIT; cu++) {
@@ -281,7 +281,7 @@ xil_zlib::~xil_zlib() {
     }
 }
 
-int xil_zlib::decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) {
+int xfZlib::decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) {
     int output_length = 0;
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
@@ -292,7 +292,7 @@ int xil_zlib::decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) 
     return debytes;
 }
 
-int xil_zlib::compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) {
+int xfZlib::compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) {
     int output_length = 0;
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
@@ -314,7 +314,7 @@ int xil_zlib::compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) {
     return enbytes;
 }
 
-int xil_zlib::init(const std::string& binaryFileName) {
+int xfZlib::init(const std::string& binaryFileName) {
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -380,7 +380,7 @@ int xil_zlib::init(const std::string& binaryFileName) {
     return 0;
 }
 
-int xil_zlib::release() {
+int xfZlib::release() {
     delete (m_program);
     for (uint8_t i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
         delete (m_q[i]);
@@ -402,7 +402,7 @@ int xil_zlib::release() {
     return 0;
 }
 
-uint32_t xil_zlib::decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu) {
+uint32_t xfZlib::decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu) {
     // printme("In decompress_file \n");
     std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
     std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
@@ -442,7 +442,7 @@ uint32_t xil_zlib::decompress_file(std::string& inFile_name, std::string& outFil
     return debytes;
 }
 
-uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
+uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
     bool flag = false;
     if (input_size > 128 * 1024 * 1024) flag = true;
     // printme("Entered zlib decop \n");
@@ -507,7 +507,7 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
 
     // If raw size is greater than 3GB
     // Limit it to 3GB
-    if (raw_size > (uint32_t)(3 * 1024 * 1024 * 1024)) raw_size = (uint32_t)(3 * 1024 * 1024 * 1024);
+    if (raw_size > (3U << (3 * 10))) raw_size = (3U << (3 * 10));
 
     m_q_dec[cu]->enqueueReadBuffer(*(buffer_out), CL_TRUE, 0, raw_size * sizeof(uint8_t), &out[0]);
 
@@ -526,7 +526,7 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
 // This version of compression does overlapped execution between
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
-uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t host_buffer_size) {
+uint32_t xfZlib::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t host_buffer_size) {
     //////printme("In compress \n");
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
     uint32_t block_size_in_bytes = block_size_in_kb * 1024;
