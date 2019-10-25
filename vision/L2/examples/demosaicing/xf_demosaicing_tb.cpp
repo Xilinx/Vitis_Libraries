@@ -226,9 +226,9 @@ int main(int argc, char** argv) {
             cv::Vec3b ref_out = ref_output_image.at<cv::Vec3b>(i, j);
 #endif
 
-            int err_b = ((int)out[2] - (int)ref_out[0]);
+            int err_b = ((int)out[0] - (int)ref_out[0]);
             int err_g = ((int)out[1] - (int)ref_out[1]);
-            int err_r = ((int)out[0] - (int)ref_out[2]);
+            int err_r = ((int)out[2] - (int)ref_out[2]);
             err_r = abs(err_r);
             err_g = abs(err_g);
             err_b = abs(err_b);

@@ -24,8 +24,8 @@
 #include "xf_config_params.h"
 
 /* config width and height */
-#define XF_WIDTH 720
-#define XF_HEIGHT 1280
+#define XF_WIDTH 1280
+#define XF_HEIGHT 720
 
 void stereolbm_accel(xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>& leftMat,
                      xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>& rightMat,

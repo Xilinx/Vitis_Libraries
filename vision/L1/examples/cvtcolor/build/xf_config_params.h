@@ -30,7 +30,7 @@
 #define NV212RGB 0
 #define NV212YUV4 0
 
-#define RGBA2IYUV 0
+#define RGBA2IYUV 1
 #define RGBA2NV12 0
 #define RGBA2NV21 0
 #define RGBA2YUV4 0
@@ -51,7 +51,7 @@
 #define YUYV2RGB 0
 
 #define RGB2GRAY 0
-#define BGR2GRAY 1
+#define BGR2GRAY 0
 #define GRAY2RGB 0
 #define GRAY2BGR 0
 

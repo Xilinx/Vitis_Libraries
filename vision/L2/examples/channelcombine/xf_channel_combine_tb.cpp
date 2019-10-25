@@ -16,15 +16,31 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
+#include "xf_channel_combine_config.h"
 
 int main(int argc, char** argv) {
+#if FOUR_INPUT
     if (argc != 5) {
-        std::cout << "Usage: " << argv[0]
-                  << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2> <INPUT IMAGE PATH 3> <INPUT IMAGE PATH 4>\n Note : If "
-                     "running other than 4 input configuration, please modify testbench accordingly"
-                  << std::endl;
-        return EXIT_FAILURE;
+        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
+        fprintf(stderr,
+                "<Executable Name> <input image1 path> <input image2 path> <input image3 path> <input image4 path>\n");
+        return -1;
     }
+#endif
+#if THREE_INPUT
+    if (argc != 4) {
+        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
+        fprintf(stderr, "<Executable Name> <input image1 path> <input image2 path> <input image3 path> \n");
+        return -1;
+    }
+#endif
+#if TWO_INPUT
+    if (argc != 3) {
+        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
+        fprintf(stderr, "<Executable Name> <input image1 path> <input image2 path> \n");
+        return -1;
+    }
+#endif
 
     cv::Mat in_gray1, in_gray2;
     cv::Mat in_gray3, in_gray4;
@@ -34,35 +50,35 @@ int main(int argc, char** argv) {
     // Reading in the images:
     in_gray1 = cv::imread(argv[1], 0);
     in_gray2 = cv::imread(argv[2], 0);
+
+#if !TWO_INPUT
     in_gray3 = cv::imread(argv[3], 0);
+    if ((in_gray3.data == NULL)) {
+        fprintf(stderr, "Cannot open input images \n");
+        return 0;
+    }
+    // creating memory for diff image
+    diff.create(in_gray1.rows, in_gray1.cols, CV_TYPE);
+#endif
+
+#if FOUR_INPUT
+
     in_gray4 = cv::imread(argv[4], 0);
 
-    if (in_gray1.data == NULL) {
-        std::cout << "Cannot open image " << argv[1] << std::endl;
-        return EXIT_FAILURE;
+    if ((in_gray4.data == NULL)) {
+        fprintf(stderr, "Cannot open image 4\n");
+        return 0;
     }
 
-    if (in_gray2.data == NULL) {
-        std::cout << "Cannot open image " << argv[2] << std::endl;
-        return EXIT_FAILURE;
-    }
+#endif
 
-    if (in_gray3.data == NULL) {
-        std::cout << "Cannot open image " << argv[3] << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    if (in_gray4.data == NULL) {
-        std::cout << "Cannot open image " << argv[4] << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    // Allocate memory for the output images:
-    diff.create(in_gray1.rows, in_gray1.cols, CV_8UC4);
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC4);
-
+    // image height and width
     int height = in_gray1.rows;
     int width = in_gray1.cols;
+
+    // Allocate memory for the output images:
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC4);
+
     // OpenCL section:
     size_t image_in_size_bytes = in_gray1.rows * in_gray1.cols * in_gray1.channels() * sizeof(unsigned char);
     size_t image_out_size_bytes = out_img.rows * out_img.cols * out_img.channels() * sizeof(unsigned char);
@@ -93,11 +109,16 @@ int main(int argc, char** argv) {
     // Allocate the buffers:
     OCL_CHECK(err, cl::Buffer buffer_inImage1(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_inImage2(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
+#if !TWO_INPUT
     OCL_CHECK(err, cl::Buffer buffer_inImage3(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
+#endif
+#if FOUR_INPUT
     OCL_CHECK(err, cl::Buffer buffer_inImage4(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
+#endif
     OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
 
-    // Set kernel arguments:
+// Set kernel arguments:
+#if FOUR_INPUT
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage1));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_inImage2));
     OCL_CHECK(err, err = kernel.setArg(2, buffer_inImage3));
@@ -105,6 +126,24 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(4, buffer_outImage));
     OCL_CHECK(err, err = kernel.setArg(5, height));
     OCL_CHECK(err, err = kernel.setArg(6, width));
+#endif
+
+#if THREE_INPUT
+    OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage1));
+    OCL_CHECK(err, err = kernel.setArg(1, buffer_inImage2));
+    OCL_CHECK(err, err = kernel.setArg(2, buffer_inImage3));
+    OCL_CHECK(err, err = kernel.setArg(3, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(4, height));
+    OCL_CHECK(err, err = kernel.setArg(5, width));
+#endif
+
+#if TWO_INPUT
+    OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage1));
+    OCL_CHECK(err, err = kernel.setArg(1, buffer_inImage2));
+    OCL_CHECK(err, err = kernel.setArg(2, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(3, height));
+    OCL_CHECK(err, err = kernel.setArg(4, width));
+#endif
 
     // Initialize the buffers:
     cl::Event event;
@@ -122,21 +161,22 @@ int main(int argc, char** argv) {
                                             image_in_size_bytes, // Size in bytes
                                             in_gray2.data,       // Pointer to the data to copy
                                             nullptr, &event));
-
+#if !TWO_INPUT
     OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage3,     // buffer on the FPGA
                                             CL_TRUE,             // blocking call
                                             0,                   // buffer offset in bytes
                                             image_in_size_bytes, // Size in bytes
                                             in_gray3.data,       // Pointer to the data to copy
                                             nullptr, &event));
-
+#endif
+#if FOUR_INPUT
     OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage4,     // buffer on the FPGA
                                             CL_TRUE,             // blocking call
                                             0,                   // buffer offset in bytes
                                             image_in_size_bytes, // Size in bytes
                                             in_gray4.data,       // Pointer to the data to copy
                                             nullptr, &event));
-
+#endif
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel));
 
@@ -151,21 +191,29 @@ int main(int argc, char** argv) {
     // Clean up:
     queue.finish();
 
+#if !TWO_INPUT
     // Write the kernel output image:
     cv::imwrite("hls_out.jpg", out_img);
+#endif
 
     // OpenCV reference:
     std::vector<cv::Mat> bgr_planes;
     cv::Mat merged;
+#if (!TWO_INPUT)
     bgr_planes.push_back(in_gray3);
+#endif
     bgr_planes.push_back(in_gray2);
     bgr_planes.push_back(in_gray1);
+
+#if FOUR_INPUT
     bgr_planes.push_back(in_gray4);
+#endif
 
     cv::merge(bgr_planes, merged);
-    cv::imwrite("out_ocv.jpg", merged);
 
-    // Results verification:
+// Results verification:
+#if !TWO_INPUT
+    cv::imwrite("out_ocv.jpg", merged);
     cv::absdiff(merged, out_img, diff);
     cv::imwrite("diff.jpg", diff);
 
@@ -201,6 +249,6 @@ int main(int argc, char** argv) {
         std::cout << "ERROR: Test Failed." << std::endl;
         return EXIT_FAILURE;
     }
-
+#endif
     return 0;
 }

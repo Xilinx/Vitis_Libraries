@@ -428,7 +428,7 @@ endif
 
 cleanall: clean cleanx
 	rm -rf *.log plist $(DATA_STAMP)
-
+	rm -rf *.ini sd_card* emulation _vimage .Xil
 # -----------------------------------------------------------------------------
 #                                simulation run
 
@@ -450,8 +450,8 @@ else ifeq ($(TARGET), hw)
        EMU_CMD += @echo "Please copy the contents of sd_card and input images to an SD Card and run on the board"
 endif
 
-
 sd_card : host xclbin
+	@echo "Generating sd_card folder...."
 	mkdir -p $(SDCARD)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
 	cp -rf $(XCLBIN_DIR)/*.xclbin $(SDCARD)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
 	cp -rf $(B_NAME)/sw/$(XDEVICE)/boot/generic.readme $(B_NAME)/sw/$(XDEVICE)/xrt/image/* $(EXE_FILE) $(HOST_ARGS) $(SDCARD)
@@ -462,9 +462,14 @@ ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(SDCARD)/init.sh
 	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> $(SDCARD)/init.sh
 	@echo 'reboot' >> $(SDCARD)/init.sh
+	@echo "sd_card folder generation done!"
 else ifeq ($(TARGET), hw)
-	@echo "sd_card folder already exists" #TODO
+	@echo 'cp -rf $(XCLBIN_DIR)/BOOT.BIN $(SDCARD)/'
+	@echo 'export XCL_BINDIR=$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)' >> $(SDCARD)/init.sh
+	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> $(SDCARD)/init.sh
+	@echo "sd_card folder generation done!"
 endif
+
 
 
 .PHONY: run run_sw_emu run_hw_emu run_hw check
@@ -482,7 +487,8 @@ run: host xclbin $(EMU_CONFIG) emulate
 	$(RUN_ENV)
 	$(EMU_CMD)
 
-check: run# MK_INC_END vitis_zynq_test_rules.mk
+check: run
+# MK_INC_END vitis_zynq_test_rules.mk
 else
 # MK_INC_BEGIN vitis_host_rules.mk
 

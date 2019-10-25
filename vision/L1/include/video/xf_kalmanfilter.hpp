@@ -444,57 +444,30 @@ void MeasUpdate_1x(float Uin_matrix[PROC_MU][UMAT_DEPTH],
                    float r_value,
                    float z_value,
                    bool UDX_en) {
+    // clang-format off
     //** comment for Ubar Dbar
-    //*************
-    //	f1= h(1) & g1 = f1*D(1) & a0 = r
+    //    f1= h(1) & g1 = f1*D(1) & a0 = r
     //  ---------------------------
-    //					<a0,a1>			|	Dbar(1) = D(1)*a0/a1			<a1,a2>		|	Dbar(2) = D(2)*a1/a2			<a2,a3>
-    //|..|
-    // Dbar(n) = D(n)*a(n-1)/a(n) 	f1'=f1/a0		<f1',f2,g2>		|	Ubar1= U1-f1'k1 ->
-    // f2'=f2/a1
-    //<f2',f3,g3>	|	Ubar2= U2-f2'k2 -> f3'=f3/a2	<f3',f4,g4>	|..|	Ubar(n)= Un-fn'kn ->
-    // f(n+1)'=f(n+1)/a(n) 	k1 = {0,0..0}		<k1,g1>		|	k2 = k1 + g1U1
-    //<k2,g2>		|	k3 = k2 + g2U2					<k3,g3>		|..|	k(n+1) = k(n) +
-    // g(n+1)U(n+1)_sv
-    //	f2 = U2*h						|	f3 = U3*h									|	f4 = U4*h									|..|	f(n+2)
-    //=
-    // mulAcc
-    //	g2 = f2*D(2)					|	g3 = f3*D(3)								|	g4 = f4*D(4)								|..|	g(n+2)
-    //=
-    // f(n+2)*g(n+2)
-    //	a1 = a0 + f1g1					|	a2 = a1 + f2g2								|	a3 = a2 + f3g3								|..|	a(n+1) = a(n)
-    //+
-    // f(n+1)g(n+1)
+    //                  <a0,a1>       | Dbar(1) = D(1)*a0/a1            <a1,a2>      | Dbar(2) = D(2)*a1/a2         <a2,a3>     |..| Dbar(n) = D(n)*a(n-1)/a(n)
+    // f1'=f1/a0        <f1',f2,g2>   | Ubar1= U1-f1'k1 -> f2'=f2/a1    <f2',f3,g3>  | Ubar2= U2-f2'k2 -> f3'=f3/a2 <f3',f4,g4> |..| Ubar(n)= Un-fn'kn -> f(n+1)'=f(n+1)/a(n)
+    // k1 = {0,0..0}    <k1,g1>       | k2 = k1 + g1U1                    <k2,g2>    | k3 = k2 + g2U2               <k3,g3>     |..| k(n+1) = k(n) + g(n+1)U(n+1)_sv
+    // f2 = U2*h                      | f3 = U3*h                                    | f4 = U4*h                                |..| f(n+2) = mulAcc
+    // g2 = f2*D(2)                   | g3 = f3*D(3)                                 | g4 = f4*D(4)                             |..| g(n+2) = f(n+2)*g(n+2)
+    // a1 = a0 + f1g1                 | a2 = a1 + f2g2                               | a3 = a2 + f3g3                           |..| a(n+1) = a(n) + f(n+1)g(n+1)
     //##############################################################################################################
-    //	a0 pass							|	a1 pass										|	a2
-    //pass
-    //|..|
-    //  a1 compute/pass					|   a2 compute/pass
-    //  |   a3 compute/pass								|..|
+    // a0 pass                        | a1 pass                                      | a2 pass                                  |..|
+    // a1 compute/pass                | a2 compute/pass                              | a3 compute/pass                          |..|
     //###############################################################################################################
-    // a_prev = a0,a_up = a1 <a_prev,a_up>	|	Dbar(1)=D(1)*a_prev/a_up	<a_prev,a_up>	|	Dbar(2)=D(2)*a_prev/a_up
-    // |..|
-    // Dbar(n)=D(n)*a_prev/a_up 	f'=f1/a_prev   <f',f_nex,g_nex>	|	Ubar1=U1-f'K
-    // ->f'=f_nex/a_up<f',f_nex,g_nex>|
-    // Ubar2=U2-f'K -> f'=f/a_up					|..|	Ubar(n)=U(n)-f'K -> f'=f/a_up
-    //	k=k1			<K,g>			|	K= K + g*U1					<k,g>			|	K= K + g*U2									|..|	K= K
-    //+
-    // g*U2
-    //	g=g1							|	/*a1*/a_prev = a_up							|	/*a2*/a_prev = a_up							|..|	/*a(n)*/a_prev
-    //=
-    // a_up 									|	/*a2*/a_up   = a_up +f_nex*g_nex			|	/*a3*/a_up   = a_up +
-    // f_nex*g_nex
-    //|..|	/*a(n+1)*/a_up   = a_up +f_nex*g_nex
-    //									|	g = g_nex									|	g = g_nex									|..|	g
-    //=
-    // g_nex
-    //	f=f2							|	f_nex = U3*h								|	f_nex = f4 = U4*h							|..|
-    //f_nex=
-    // f(n+2)
-    //	g=g2							|	g_nex = g3 = f*D(3)							|	g_nex = g4 = f4*D(4)						|..|
-    //g_nex=
-    // g(n+2)=D(n+4)
+    // a_prev=a0,a_up=a1<a_prev,a_up> | Dbar(1)=D(1)*a_prev/a_up     <a_prev,a_up>   | Dbar(2)=D(2)*a_prev/a_up                 |..| Dbar(n)=D(n)*a_prev/a_up
+    // f'=f1/a_prev   <f',f_nex,g_nex>| Ubar1=U1-f'K ->f'=f_nex/a_up <f',f_nex,g_nex>| Ubar2=U2-f'K -> f'=f/a_up                |..| Ubar(n)=U(n)-f'K -> f'=f/a_up
+    // k=k1            <K,g>          | K= K + g*U1                  <k,g>           | K= K + g*U2                              |..| K= K + g*U2
+    // g=g1                           | /*a1*/a_prev = a_up                          | /*a2*/a_prev = a_up                      |..| /*a(n)*/a_prev = a_up
+    //                                | /*a2*/a_up   = a_up +f_nex*g_nex             | /*a3*/a_up   = a_up + f_nex*g_nex        |..| /*a(n+1)*/a_up   = a_up +f_nex*g_nex
+    //                                | g = g_nex                                    | g = g_nex                                |..| g = g_nex
+    // f=f2                           | f_nex = U3*h                                 | f_nex = f4 = U4*h                        |..| f_nex= f(n+2)
+    // g=g2                           | g_nex = g3 = f*D(3)                          | g_nex = g4 = f4*D(4)                     |..| g_nex= g(n+2)=D(n+4)
     //*************
+    // clang-format on
     if (URAM_EN == 0) {
 // clang-format off
         #pragma HLS ARRAY_PARTITION variable=Uin_matrix complete dim=1

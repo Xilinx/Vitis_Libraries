@@ -31,15 +31,16 @@ namespace cv {
  * 	ChannelCombine: combine multiple 8-bit planes into one
  *******************************************************************/
 template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC, int TC>
-void xfChannelCombineKernel(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
-                            hls::stream<XF_TNAME(SRC_T, NPC)>& _in2,
-                            hls::stream<XF_TNAME(SRC_T, NPC)>& _in3,
-                            hls::stream<XF_TNAME(SRC_T, NPC)>& _in4,
-                            hls::stream<XF_TNAME(DST_T, NPC)>& _out,
+void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in1,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in2,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in3,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in4,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out,
                             uint16_t height,
                             uint16_t width) {
     XF_TNAME(SRC_T, NPC) val1, val2, val3, val4;
 
+    width = width >> (XF_BITSHIFT(NPC));
     uchar_t channel1, channel2, channel3, channel4;
 
     const int noofbits = XF_DTPIXELDEPTH(SRC_T, NPC);
@@ -57,10 +58,10 @@ RowLoop:
             // clang-format on
             XF_TNAME(DST_T, NPC) res;
 
-            val1 = (XF_TNAME(SRC_T, NPC))(_in1.read());
-            val2 = (XF_TNAME(SRC_T, NPC))(_in2.read());
-            val3 = (XF_TNAME(SRC_T, NPC))(_in3.read());
-            val4 = (XF_TNAME(SRC_T, NPC))(_in4.read());
+            val1 = (XF_TNAME(SRC_T, NPC))(_in1.read(i * width + j));
+            val2 = (XF_TNAME(SRC_T, NPC))(_in2.read(i * width + j));
+            val3 = (XF_TNAME(SRC_T, NPC))(_in3.read(i * width + j));
+            val4 = (XF_TNAME(SRC_T, NPC))(_in4.read(i * width + j));
 
         ProcLoop:
             for (k = 0; k < (noofbits << XF_BITSHIFT(NPC)); k += noofbits) {
@@ -78,21 +79,22 @@ RowLoop:
 
                 res.range(y + (XF_PIXELWIDTH(DST_T, NPC) - 1), y) = result;
             } // ProcLoop
-            _out.write((XF_TNAME(DST_T, NPC))res);
+            _out.write((i * width + j), (XF_TNAME(DST_T, NPC))res);
         } // ColLoop
     }     // RowLoop
 }
 
 template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC, int TC>
-void xfChannelCombineKernel(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
-                            hls::stream<XF_TNAME(SRC_T, NPC)>& _in2,
-                            hls::stream<XF_TNAME(SRC_T, NPC)>& _in3,
-                            hls::stream<XF_TNAME(DST_T, NPC)>& _out,
+void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in1,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in2,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in3,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out,
                             uint16_t height,
                             uint16_t width) {
     XF_TNAME(SRC_T, NPC) val1, val2, val3;
     uchar_t channel1, channel2, channel3;
     const int noofbits = XF_DTPIXELDEPTH(SRC_T, NPC);
+    width = width >> (XF_BITSHIFT(NPC));
     int rows = height, cols = width;
 
 RowLoop:
@@ -108,9 +110,9 @@ RowLoop:
             // clang-format on
             XF_TNAME(DST_T, NPC) res;
 
-            val1 = (XF_TNAME(SRC_T, NPC))(_in1.read());
-            val2 = (XF_TNAME(SRC_T, NPC))(_in2.read());
-            val3 = (XF_TNAME(SRC_T, NPC))(_in3.read());
+            val1 = (XF_TNAME(SRC_T, NPC))(_in1.read(i * cols + j));
+            val2 = (XF_TNAME(SRC_T, NPC))(_in2.read(i * cols + j));
+            val3 = (XF_TNAME(SRC_T, NPC))(_in3.read(i * cols + j));
 
         ProcLoop:
             for (int k = 0; k < (noofbits << XF_BITSHIFT(NPC)); k += noofbits) {
@@ -127,20 +129,21 @@ RowLoop:
 
                 res.range(y + (XF_PIXELWIDTH(DST_T, NPC) - 1), y) = result;
             }
-            _out.write((XF_TNAME(DST_T, NPC))res);
+            _out.write((i * cols + j), (XF_TNAME(DST_T, NPC))res);
         }
     }
 }
 
 template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC, int TC>
-void xfChannelCombineKernel(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
-                            hls::stream<XF_TNAME(SRC_T, NPC)>& _in2,
-                            hls::stream<XF_TNAME(DST_T, NPC)>& _out,
+void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in1,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in2,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out,
                             uint16_t height,
                             uint16_t width) {
     XF_TNAME(SRC_T, NPC) val1, val2;
     uchar_t channel1, channel2;
     const int noofbits = XF_DTPIXELDEPTH(SRC_T, NPC);
+    width = width >> (XF_BITSHIFT(NPC));
     int rows = height, cols = width;
 
 RowLoop:
@@ -156,8 +159,8 @@ RowLoop:
             // clang-format on
             XF_TNAME(DST_T, NPC) res;
 
-            val1 = (XF_TNAME(SRC_T, NPC))(_in1.read());
-            val2 = (XF_TNAME(SRC_T, NPC))(_in2.read());
+            val1 = (XF_TNAME(SRC_T, NPC))(_in1.read(i * cols + j));
+            val2 = (XF_TNAME(SRC_T, NPC))(_in2.read(i * cols + j));
 
         ProcLoop:
             for (int k = 0; k < (noofbits << XF_BITSHIFT(NPC)); k += noofbits) {
@@ -171,49 +174,16 @@ RowLoop:
                 uint32_t result = ((uint32_t)channel1 << 0) | ((uint32_t)channel2 << noofbits);
                 res.range(y + (XF_PIXELWIDTH(DST_T, NPC) - 1), y) = result;
             }
-            _out.write((XF_TNAME(DST_T, NPC))res);
+            _out.write((i * cols + j), (XF_TNAME(DST_T, NPC))res);
         }
     }
 }
 
-template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC>
-void xfChannelCombine(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
-                      hls::stream<XF_TNAME(SRC_T, NPC)>& _in2,
-                      hls::stream<XF_TNAME(SRC_T, NPC)>& _in3,
-                      hls::stream<XF_TNAME(SRC_T, NPC)>& _in4,
-                      hls::stream<XF_TNAME(DST_T, NPC)>& _out,
-                      uint16_t height,
-                      uint16_t width) {
-    width = width >> (XF_BITSHIFT(NPC));
+/*******************************
 
-    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_in1, _in2, _in3, _in4, _out,
-                                                                                        height, width);
-}
+Kernel for 2 input configuration
 
-template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC>
-void xfChannelCombine(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
-                      hls::stream<XF_TNAME(SRC_T, NPC)>& _in2,
-                      hls::stream<XF_TNAME(SRC_T, NPC)>& _in3,
-                      hls::stream<XF_TNAME(DST_T, NPC)>& _out,
-                      uint16_t height,
-                      uint16_t width) {
-    width = width >> (XF_BITSHIFT(NPC));
-
-    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_in1, _in2, _in3, _out, height,
-                                                                                        width);
-}
-
-template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC>
-void xfChannelCombine(hls::stream<XF_TNAME(SRC_T, NPC)>& _in1,
-                      hls::stream<XF_TNAME(SRC_T, NPC)>& _in2,
-                      hls::stream<XF_TNAME(DST_T, NPC)>& _out,
-                      uint16_t height,
-                      uint16_t width) {
-    width = width >> (XF_BITSHIFT(NPC));
-
-    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_in1, _in2, _out, height,
-                                                                                        width);
-}
+*******************************/
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
@@ -225,49 +195,21 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC2) &&
            "Source image should be of 1 channel and destination image of 2 channels");
-//	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
-    hls::stream<XF_TNAME(DST_T, NPC)> _out;
 
 // clang-format off
     #pragma HLS inline off
-    #pragma HLS DATAFLOW
-// clang-format on
+    // clang-format on
 
-Read_Mat_Loop:
-    for (int i = 0; i < _src1.rows; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int j = 0; j<(_src1.cols)>> (XF_BITSHIFT(NPC)); j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
-            #pragma HLS PIPELINE
-            // clang-format on
-            _in1.write((_src1.read(i * (_src1.cols >> (XF_BITSHIFT(NPC))) + j)));
-            _in2.write((_src2.read(i * (_src2.cols >> (XF_BITSHIFT(NPC))) + j)));
-        }
-    }
-
-    xfChannelCombine<ROWS, COLS, SRC_T, DST_T, NPC>(_in1, _in2, _out, _src1.rows, _src1.cols);
-
-Write_Mat_Loop:
-    for (int i = 0; i < _dst.rows; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int j = 0; j<(_dst.cols)>> (XF_BITSHIFT(NPC)); j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
-            #pragma HLS PIPELINE
-            // clang-format on
-            XF_TNAME(DST_T, NPC) outpix = _out.read();
-            _dst.write(i * (_dst.cols >> (XF_BITSHIFT(NPC))) + j, outpix);
-        }
-    }
+    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC>(_src1, _src2, _dst, _src1.rows, _src1.cols);
 }
+
+/*******************************
+
+Kernel for 3 input configuration
+
+*******************************/
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
@@ -281,51 +223,21 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC3) &&
            "Source image should be of 1 channel and destination image of 3 channels");
-//	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in3;
-    hls::stream<XF_TNAME(DST_T, NPC)> _out;
 
 // clang-format off
     #pragma HLS inline off
-    #pragma HLS DATAFLOW
-// clang-format on
+    // clang-format on
 
-Read_Mat_Loop:
-    for (int i = 0; i < _src1.rows; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int j = 0; j<(_src1.cols)>> (XF_BITSHIFT(NPC)); j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
-            #pragma HLS PIPELINE
-            // clang-format on
-            _in1.write((_src1.read(i * (_src1.cols >> (XF_BITSHIFT(NPC))) + j)));
-            _in2.write((_src2.read(i * (_src2.cols >> (XF_BITSHIFT(NPC))) + j)));
-            _in3.write((_src3.read(i * (_src3.cols >> (XF_BITSHIFT(NPC))) + j)));
-        }
-    }
-
-    xfChannelCombine<ROWS, COLS, SRC_T, DST_T, NPC>(_in1, _in2, _in3, _out, _src1.rows, _src1.cols);
-
-Write_Mat_Loop:
-    for (int i = 0; i < _dst.rows; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int j = 0; j<(_dst.cols)>> (XF_BITSHIFT(NPC)); j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
-            #pragma HLS PIPELINE
-            // clang-format on
-            XF_TNAME(DST_T, NPC) outpix = _out.read();
-            _dst.write(i * (_dst.cols >> (XF_BITSHIFT(NPC))) + j, outpix);
-        }
-    }
+    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC>(_src1, _src2, _src3, _dst, _src1.rows, _src1.cols);
 }
+
+/*******************************
+
+Kernel for 4 input configuration
+
+*******************************/
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
@@ -341,52 +253,15 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC4) &&
            "Source image should be of 1 channel and destination image of 4 channels");
-//	assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in1;
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in2;
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in3;
-    hls::stream<XF_TNAME(SRC_T, NPC)> _in4;
-    hls::stream<XF_TNAME(DST_T, NPC)> _out;
 
 // clang-format off
     #pragma HLS inline off
-    #pragma HLS DATAFLOW
-// clang-format on
+    // clang-format on
 
-Read_Mat_Loop:
-    for (int i = 0; i < _src1.rows; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int j = 0; j<(_src1.cols)>> (XF_BITSHIFT(NPC)); j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
-            #pragma HLS PIPELINE
-            // clang-format on
-            _in1.write((_src1.read(i * (_src1.cols >> (XF_BITSHIFT(NPC))) + j)));
-            _in2.write((_src2.read(i * (_src2.cols >> (XF_BITSHIFT(NPC))) + j)));
-            _in3.write((_src3.read(i * (_src3.cols >> (XF_BITSHIFT(NPC))) + j)));
-            _in4.write((_src4.read(i * (_src4.cols >> (XF_BITSHIFT(NPC))) + j)));
-        }
-    }
-
-    xfChannelCombine<ROWS, COLS, SRC_T, DST_T, NPC>(_in1, _in2, _in3, _in4, _out, _src1.rows, _src1.cols);
-
-Write_Mat_Loop:
-    for (int i = 0; i < _dst.rows; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
-        // clang-format on
-        for (int j = 0; j<(_dst.cols)>> (XF_BITSHIFT(NPC)); j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
-            #pragma HLS PIPELINE
-            // clang-format on
-            XF_TNAME(DST_T, NPC) outpix = _out.read();
-            _dst.write(i * (_dst.cols >> (XF_BITSHIFT(NPC))) + j, outpix);
-        }
-    }
+    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _src3, _src4,
+                                                                                        _dst, _src1.rows, _src1.cols);
 }
 
 } // namespace cv

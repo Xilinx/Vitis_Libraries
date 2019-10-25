@@ -37,7 +37,7 @@ properties hold true for all the functions.
    -  Other compile-time arguments relevent to the functionality.
 
 The Vitis vision library contains enumerated datatypes which enables you to
-configure ``xf::Mat``. For more details on ``xf::cv::Mat``, see the `xf::Mat
+configure ``xf::cv::Mat``. For more details on ``xf::cv::Mat``, see the `xf::cv::Mat
 Image Container Class <api-reference.html>`__.
 
 .. _xfopencv-kernel:
