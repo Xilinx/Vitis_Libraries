@@ -1,6 +1,10 @@
-# XF FFT Library
+# Vitis DSP Library
 
-XF FFT Library is a Vitis library based on Fast Fourier Transform algorithm for accelerating different types of Discrete Fourier Transform.
+Vitis DSP library provides implementation of different L1/L2/L3 primitives for digital signal processing. Current version only provides implementation of Discrete Fourier Transform using Fast Fourier Transform algorithm for acceleration on Xilinx FPGAs. 
+
+Note: For FFT only L1 level primitives are provided. L2 and L3 kernels and applications APIs are planned to be provided in next releases.
+
+[Comprehensive documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_fft/index.html)
 
 Copyright 2019 Xilinx, Inc.
 
