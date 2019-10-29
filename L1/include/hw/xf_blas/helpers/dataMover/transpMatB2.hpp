@@ -40,21 +40,21 @@ void transpSymUpMatBlocks(unsigned int p_blocks,
 #pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 0
     for (unsigned int l_block = 0; l_block < p_blocks; l_block++) {
         // shuffle and store
-        int i=0;
+        int i = 0;
         do {
-#pragma HLS PIPELINE 
+#pragma HLS PIPELINE
             WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
             WideType<t_DataType, t_ParEntries> l_valOut;
 #pragma HLS ARRAY_PARTITION variable = l_valOut complete
             l_val = p_in.read();
-            for (int j=0; j<t_ParEntries; j++) {
-                l_valOut[j] = (i>j)? l_buf[i][j]: l_val[j];
+            for (int j = 0; j < t_ParEntries; j++) {
+                l_valOut[j] = (i > j) ? l_buf[i][j] : l_val[j];
                 l_buf[j][i] = l_val[j];
             }
             p_out.write(l_valOut);
             i++;
-        }while (i < t_ParEntries);
+        } while (i < t_ParEntries);
     }
 }
 
@@ -92,30 +92,54 @@ template <typename t_DataType, unsigned int t_ParEntries>
 void transpMatBlocks(unsigned int p_blocks,
                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_in,
                      hls::stream<WideType<t_DataType, t_ParEntries> >& p_out) {
-    t_DataType l_buf[t_ParEntries][t_ParEntries];
+    t_DataType l_buf[2][t_ParEntries][t_ParEntries];
 #pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 0
-    for (unsigned int l_block = 0; l_block < p_blocks; ++l_block) {
-        // shuffle and store
-        for (unsigned int i = 0; i < t_ParEntries; ++i) {
-#pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val;
-#pragma HLS ARRAY_PARTITION variable = l_val complete
-            l_val = p_in.read();
-            for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_buf[i][j] = l_val[j];
-            }
-        }
 
-        for (unsigned int i = 0; i < t_ParEntries; ++i) {
+    for (int i = 0; i < t_ParEntries; ++i) {
 #pragma HLS PIPELINE
-            WideType<t_DataType, t_ParEntries> l_val;
+        WideType<t_DataType, t_ParEntries> l_val;
 #pragma HLS ARRAY_PARTITION variable = l_val complete
-            for (unsigned int j = 0; j < t_ParEntries; ++j) {
-                l_val[j] = l_buf[j][i];
-            }
-            p_out.write(l_val);
+        l_val = p_in.read();
+        for (int j = 0; j < t_ParEntries; ++j) {
+            l_buf[0][i][j] = l_val[j];
         }
     }
+
+    for (unsigned int l_block = 1; l_block < p_blocks; ++l_block) {
+        int jIn = 0, jOut = 0;
+        do {
+#pragma HLS PIPELINE
+            WideType<t_DataType, t_ParEntries> l_valIn;
+#pragma HLS ARRAY_PARTITION variable = l_valIn complete
+            WideType<t_DataType, t_ParEntries> l_valOut;
+#pragma HLS ARRAY_PARTITION variable = l_valOut complete
+            if (p_in.read_nb(l_valIn)) {
+                for (int k = 0; k < t_ParEntries; ++k) {
+                    l_buf[l_block % 2][jIn][k] = l_valIn[k];
+                }
+                jIn++;
+            }
+            for (int k = 0; k < t_ParEntries; ++k) {
+                l_valOut[k] = l_buf[(l_block - 1) % 2][k][jOut];
+            }
+            if (jOut < t_ParEntries) {
+                p_out.write(l_valOut);
+                jOut++;
+            }
+        } while ((jIn < t_ParEntries) || (jOut < t_ParEntries));
+    }
+
+    int i = 0;
+    do {
+#pragma HLS PIPELINE
+        WideType<t_DataType, t_ParEntries> l_valOut;
+#pragma HLS ARRAY_PARTITION variable = l_valOut complete
+        for (int j = 0; j < t_ParEntries; ++j) {
+            l_valOut[j] = l_buf[(p_blocks - 1) % 2][j][i];
+        }
+        p_out.write(l_valOut);
+        i++;
+    } while (i < t_ParEntries);
 }
 
 template <typename t_DataType, unsigned int t_ParEntries>
