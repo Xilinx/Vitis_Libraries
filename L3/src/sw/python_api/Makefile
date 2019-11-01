@@ -114,6 +114,9 @@ EXE_FILE =
 API_OUT = xfblas.so
 
 .PHONY: host
+
+host: api
+
 api: check_xrt $(API_OUT)
 
 $(OBJ_FILES):  $(SRCS)
@@ -139,11 +142,10 @@ endif
 	rm -rf lib
 
 cleanall: clean 
-	rm -rf *.log plist $(DATA_STAMP)
 
 .PHONY: run 
 
-run: host 
+run: api 
 
 check: run
 
