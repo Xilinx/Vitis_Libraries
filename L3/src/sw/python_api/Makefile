@@ -100,10 +100,10 @@ RUN_ENV =
 OBJ_FILES = $(CUR_DIR)/$(OBJ_DIR_BASE)/api.o
 EXTRA_OBJS = 
 
-CXX := xcpp
-CC := gcc
+CXX := /usr/bin/gcc
+CC := /urs/bin/gcc
 
-CXXFLAGS += -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-unused-parameter -Wno-unused-variable
+CXXFLAGS += -O3 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-unused-parameter -Wno-unused-variable
 CFLAGS +=
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -lxilinxopencl
 LDFLAGS += -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
@@ -121,7 +121,7 @@ api: check_xrt $(API_OUT)
 
 $(OBJ_FILES):  $(SRCS)
 	mkdir -p $(OBJ_DIR_BASE)
-	$(CC) -shared -c -o $@ $< $(CXXFLAGS)
+	$(CXX) -shared -c -o $@ $< $(CXXFLAGS)
 	
 $(API_OUT): $(OBJ_FILES)
 	mkdir -p lib

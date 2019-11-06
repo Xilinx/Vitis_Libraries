@@ -18,7 +18,7 @@ from test import Test
 
 if __name__ == '__main__':
   args, xclbin_opts = xfblas.processCommandLine()
-  xfblas.createGemm(args,xclbin_opts,1,0) # number of CUs, ith of device
+  xfblas.createFcn(args,xclbin_opts,1,0) # number of CUs, ith of device
   test = Test()
-  test.test_basic_gemm(128,128,128,xclbin_opts,0,0) # ith of CU, ith of device
+  test.test_basic_fcn(128,128,128,xclbin_opts,[1,0],[1,0],0,0) # ith of CU, ith of device
   

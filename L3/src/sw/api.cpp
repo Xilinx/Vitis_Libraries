@@ -17,6 +17,7 @@
 #include "handle.hpp"
 #include "gemm_host.hpp"
 #include "gemv_host.hpp"
+#include "helpers/funcs/fcn_host.hpp"
 #include "api.hpp"
 
 using namespace xf::blas;
@@ -44,7 +45,13 @@ bool xfblasCreate(char* xclbin, char* engineName ,char* logFile,
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
                 shared_ptr<BLASHost>(new GEMVHost(xclbin, logFile, &l_status, i, deviceIndex)));
         }
-        return true;
+        return true;    
+    } else if (strcmp(engineName,"Fcn")==0) { 
+        for (unsigned int i = 0; i < kernelNumber; i++) {
+            BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
+                shared_ptr<BLASHost>(new FCNHost(xclbin, logFile, &l_status, i, deviceIndex)));
+        }
+        return true;   
     } else {
         return false;
     }
@@ -116,6 +123,33 @@ bool xfblasGemv(int m,int n,
             return false;
         }
     
+}
+
+
+bool xfblasFcn(int m,int n,int k,
+                int alpha,
+                void* A,int lda,
+                void* B,int ldb,
+                int beta,
+                void* C,int ldc,
+                void* X, int ldx,
+                int p_postScale,
+                int p_postShift,
+                short p_preluScale, 
+                short p_preluAlpha,
+                unsigned int kernelIndex,
+                unsigned int deviceIndex) {
+        if (alpha == 1 && beta == 1) {
+            FCNHost* l_fcnPtr = static_cast<FCNHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
+            xfblasStatus_t l_status = l_fcnPtr->addFCNOp(A, B, C, X, m, n, k, lda, ldb, ldc, ldx, p_postScale, p_postShift,p_preluScale,p_preluAlpha);
+            if (l_status != XFBLAS_STATUS_SUCCESS){
+                return false;
+            }
+            return true;
+        } else {
+            return false;
+        }
+
 }
 
 

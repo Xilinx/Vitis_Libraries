@@ -41,6 +41,16 @@ class XFBLASManager:
                                      np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"), c_uint,
                                      c_uint,c_uint]
     self._lib.xfblasGemv.restype = c_bool
+    self._lib.xfblasFcn.argtypes = [c_uint,c_uint,c_uint,c_uint,
+                                     np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"), c_uint,
+                                     np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"), c_uint,
+                                     c_uint,
+                                     np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"), c_uint,
+                                     np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"), c_uint,
+                                     c_int,c_int,
+                                     c_short,c_short,
+                                     c_uint,c_uint]
+    self._lib.xfblasGemm.restype = c_bool
     
   def createGemm(self,xclbin,numKernel,idxDevice):
     open('xrt_log.txt', 'a').close()
@@ -53,6 +63,12 @@ class XFBLASManager:
     b_xclbin = xclbin.encode('utf-8')
     b_log = xclbin.encode('utf-8')
     return self._lib.xfblasCreate(b_xclbin,b'Gemv',b'xrt_log.txt',numKernel,idxDevice)
+  
+  def createFcn(self,xclbin,numKernel,idxDevice):
+    open('xrt_log.txt', 'a').close()
+    b_xclbin = xclbin.encode('utf-8')
+    b_log = xclbin.encode('utf-8')
+    return self._lib.xfblasCreate(b_xclbin,b'Fcn',b'xrt_log.txt',numKernel,idxDevice)
     
   def sendMat(self,A,idxKernel,idxDevice):
     return self._lib.xfblasSend(A,c_ulonglong(A.size),c_uint(A.itemsize),idxKernel,idxDevice)
@@ -66,6 +82,9 @@ class XFBLASManager:
   def gemvOp(self,A,x,y,idxKernel,idxDevice):
     return self._lib.xfblasGemv(c_uint(A.shape[0]), c_uint(A.shape[1]),1, A, c_uint(A.shape[1]), x, 1, y, 1, idxKernel,idxDevice)
   
+  def fcnOp(self,A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice):
+    return self._lib.xfblasFcn(c_uint(A.shape[0]), c_uint(A.shape[1]), c_uint(B.shape[1]), 1, A, c_uint(A.shape[1]), B, c_uint(B.shape[1]), 1, C, c_uint(C.shape[1]),X,c_uint(X.shape[1]),postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
+  
   
 _xfblasManager = None
   
@@ -77,9 +96,15 @@ def createGemm(args,xclbin_opts,numKernel=1,idxDevice=0):
   
 def createGemv(args,xclbin_opts,numKernel=1,idxDevice=0):
     if int(xclbin_opts['GEMX_runGemv'])!= 1:
-        raise Exception('The xclbin does not include gemm engine.')
+        raise Exception('The xclbin does not include gemv engine.')
     createManager(args.lib)
     return _xfblasManager.createGemv(args.xclbin,numKernel,idxDevice)
+  
+def createFcn(args,xclbin_opts,numKernel=1,idxDevice=0):
+    if int(xclbin_opts['GEMX_runFcn'])!= 1:
+        raise Exception('The xclbin does not include fcn engine.')
+    createManager(args.lib)
+    return _xfblasManager.createFcn(args.xclbin,numKernel,idxDevice)
   
 def sendMat(A,idxKernel=0,idxDevice=0):
     return _xfblasManager.sendMat(A,idxKernel,idxDevice)
@@ -92,6 +117,9 @@ def gemmOp(A,B,C,idxKernel=0,idxDevice=0):
   
 def gemvOp(A,x,y,idxKernel=0,idxDevice=0):
     return _xfblasManager.gemvOp(A,x,y,idxKernel,idxDevice)
+  
+def fcnOp(A,B,C,X,postScale=1,postShift=0,preluScale=1,preluAlpha=0,idxKernel=0,idxDevice=0):
+    return _xfblasManager.fcnOp(A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
   
 def createManager ( libFile ):
   global _xfblasManager
