@@ -18,7 +18,7 @@
  * @file vecMoverB1.hpp
  * @brief common data movers for vectors used in BLAS L1 routines.
  *
- * This file is part of XF BLAS Library.
+ * This file is part of Vitis BLAS Library.
  */
 
 #ifndef XF_BLAS_VECMOVERB1_HPP
@@ -73,7 +73,7 @@ void combineStream(unsigned int p_n,
 }
 
 template <typename t_DataType, typename t_DesDataType = t_DataType>
-void mem2stream(unsigned int p_n, t_DataType* p_in, hls::stream<t_DesDataType>& p_out) {
+void mem2stream(unsigned int p_n, const t_DataType* p_in, hls::stream<t_DesDataType>& p_out) {
     for (unsigned int i = 0; i < p_n; ++i) {
 #pragma HLS PIPELINE
         t_DesDataType l_val = p_in[i];
