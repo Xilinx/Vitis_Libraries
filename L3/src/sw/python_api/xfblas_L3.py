@@ -21,7 +21,7 @@ import os
 class XFBLASManager:
   def __init__(self,libFile):
     self._lib = cdll.LoadLibrary(libFile)
-    self._lib.xfblasCreate.argtypes = [c_char_p,c_char_p,c_char_p,c_uint,c_uint]
+    self._lib.xfblasCreate.argtypes = [c_char_p,c_char_p,c_uint,c_uint]
     self._lib.xfblasCreate.restype = c_bool
     self._lib.xfblasSend.argtypes = [np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"),c_ulonglong,c_uint,c_uint,c_uint]
     self._lib.xfblasSend.restype = c_bool
@@ -53,22 +53,19 @@ class XFBLASManager:
     self._lib.xfblasGemm.restype = c_bool
     
   def createGemm(self,xclbin,numKernel,idxDevice):
-    open('xrt_log.txt', 'a').close()
     b_xclbin = xclbin.encode('utf-8')
     b_log = xclbin.encode('utf-8')
-    return self._lib.xfblasCreate(b_xclbin,b'Gemm',b'xrt_log.txt',numKernel,idxDevice)
+    return self._lib.xfblasCreate(b_xclbin,b'Gemm',numKernel,idxDevice)
     
   def createGemv(self,xclbin,numKernel,idxDevice):
-    open('xrt_log.txt', 'a').close()
     b_xclbin = xclbin.encode('utf-8')
     b_log = xclbin.encode('utf-8')
-    return self._lib.xfblasCreate(b_xclbin,b'Gemv',b'xrt_log.txt',numKernel,idxDevice)
+    return self._lib.xfblasCreate(b_xclbin,b'Gemv',numKernel,idxDevice)
   
   def createFcn(self,xclbin,numKernel,idxDevice):
-    open('xrt_log.txt', 'a').close()
     b_xclbin = xclbin.encode('utf-8')
     b_log = xclbin.encode('utf-8')
-    return self._lib.xfblasCreate(b_xclbin,b'Fcn',b'xrt_log.txt',numKernel,idxDevice)
+    return self._lib.xfblasCreate(b_xclbin,b'Fcn',numKernel,idxDevice)
     
   def sendMat(self,A,idxKernel,idxDevice):
     return self._lib.xfblasSend(A,c_ulonglong(A.size),c_uint(A.itemsize),idxKernel,idxDevice)

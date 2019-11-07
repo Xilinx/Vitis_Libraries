@@ -50,12 +50,12 @@ class XFpga {
     bool m_init = false;
 
     XFpga() = delete;
-    XFpga(const char* p_xclbin, const char* p_logFile, int* p_err, unsigned int deviceIndex = 0) {
+    XFpga(const char* p_xclbin, int* p_err, unsigned int deviceIndex = 0) {
         if (deviceIndex >= xclProbe()) {
             *p_err = 1;
             return;
         }
-        m_handle = xclOpen(deviceIndex, p_logFile, XCL_INFO);
+        m_handle = xclOpen(deviceIndex, NULL, XCL_INFO);
         if (xclLockDevice(m_handle)) {
             *p_err = 1;
             return;
@@ -181,7 +181,6 @@ class XHost {
    public:
     XHost() = delete;
     XHost(const char* p_xclbin,
-          const char* p_logFile,
           xfblasStatus_t* p_status,
           unsigned int p_kernelIndex,
           unsigned int p_deviceIndex) {
@@ -394,11 +393,10 @@ class BLASHost : public XHost {
     BLASHost(const BLASHost&) = delete;
 
     BLASHost(const char* p_xclbin,
-             const char* p_logFile,
              xfblasStatus_t* p_status,
              unsigned int p_kernelIndex,
              unsigned int p_deviceIndex)
-        : XHost(p_xclbin, p_logFile, p_status, p_kernelIndex, p_deviceIndex) {}
+        : XHost(p_xclbin, p_status, p_kernelIndex, p_deviceIndex) {}
 
     xfblasStatus_t execute() {
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;

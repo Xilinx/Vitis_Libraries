@@ -32,10 +32,6 @@ int main(int argc, char** argv) {
     string l_configFile(argv[l_argIdx++]);
     int iterIndex = atoi(argv[l_argIdx++]);
     string l_dataDir(argv[l_argIdx++]);
-    string l_logFile;
-    ofstream logFile("out_test/xrt_report.txt");
-    logFile.close();
-    l_logFile = "out_test/xrt_report.txt";
 
     int i, j;
     XFBLAS_dataType *a, *b, *c, *goldenC;
@@ -78,7 +74,7 @@ int main(int argc, char** argv) {
 
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
     xfblasStatus_t status =
-        xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
+        xfblasCreate(l_xclbinFile.c_str(), l_configFile, engineName, l_numKernel);
     if (status != XFBLAS_STATUS_SUCCESS) {
         cout << "Create Handle failed with error code: " << status << "\n";
         return EXIT_FAILURE;

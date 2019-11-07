@@ -19,7 +19,7 @@
 
 extern "C" {
 
-bool xfblasCreate(char* xclbin, char* engineName ,char* logFile, unsigned int kernelNumber, unsigned int deviceIndex);
+bool xfblasCreate(char* xclbin, char* engineName, unsigned int kernelNumber, unsigned int deviceIndex);
 bool xfblasSend(void* A, unsigned long long numElem, int elemSize, unsigned int kernelIndex, unsigned int deviceIndex);
 bool xfblasGet(void* A, unsigned int kernelIndex, unsigned int deviceIndex);
 bool xfblasGemm(int m,int n,int k,int alpha,void* A,int lda,void* B,int ldb,int beta,

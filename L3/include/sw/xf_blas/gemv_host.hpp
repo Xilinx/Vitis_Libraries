@@ -52,11 +52,10 @@ class GEMVHost : public BLASHost {
     virtual ~GEMVHost() {}
     GEMVHost(const GEMVHost&) = delete;
     GEMVHost(const char* p_xclbin,
-             const char* p_logFile,
              xfblasStatus_t* p_status,
              unsigned int p_kernelIndex,
              unsigned int p_deviceIndex)
-        : BLASHost(p_xclbin, p_logFile, p_status, p_kernelIndex, p_deviceIndex) {}
+        : BLASHost(p_xclbin, p_status, p_kernelIndex, p_deviceIndex) {}
 
     virtual xfblasStatus_t addGEMVOp(
         void* p_a, void* p_b, void* p_c, unsigned int p_m, unsigned int p_n, unsigned int p_lda) {

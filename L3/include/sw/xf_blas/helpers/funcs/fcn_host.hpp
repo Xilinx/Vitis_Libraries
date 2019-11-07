@@ -72,11 +72,10 @@ class FCNHost : public BLASHost {
         virtual ~FCNHost(){}
         FCNHost ( const FCNHost&) = delete;
         FCNHost(const char* p_xclbin,
-             const char* p_logFile,
              xfblasStatus_t* p_status,
              unsigned int p_kernelIndex,
              unsigned int p_deviceIndex)
-        : BLASHost(p_xclbin, p_logFile, p_status, p_kernelIndex, p_deviceIndex)  {}
+        : BLASHost(p_xclbin, p_status, p_kernelIndex, p_deviceIndex)  {}
 
         virtual xfblasStatus_t addFCNOp ( void* p_a,
                                      void* p_b,

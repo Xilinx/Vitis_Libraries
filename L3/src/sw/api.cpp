@@ -22,11 +22,10 @@
 
 using namespace xf::blas;
 
-bool xfblasCreate(char* xclbin, char* engineName ,char* logFile,
-                 unsigned int kernelNumber, unsigned int deviceIndex) {
+bool xfblasCreate(char* xclbin, char* engineName, unsigned int kernelNumber, unsigned int deviceIndex) {
 
     int l_err = 0;
-    shared_ptr<XFpga> l_xFpga(new XFpga(xclbin, logFile, &l_err, deviceIndex));
+    shared_ptr<XFpga> l_xFpga(new XFpga(xclbin, &l_err, deviceIndex));
     XFpgaHold::instance().m_xFpgaPtr[deviceIndex] = l_xFpga;
 
     if (l_err != 0) {
@@ -37,19 +36,19 @@ bool xfblasCreate(char* xclbin, char* engineName ,char* logFile,
     if (strcmp(engineName,"Gemm")==0) {
         for (unsigned int i = 0; i < kernelNumber; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
-                shared_ptr<BLASHost>(new GEMMHost(xclbin, logFile, &l_status, i, deviceIndex)));
+                shared_ptr<BLASHost>(new GEMMHost(xclbin, &l_status, i, deviceIndex)));
         }
         return true;
     } else if (strcmp(engineName,"Gemv")==0) { 
         for (unsigned int i = 0; i < kernelNumber; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
-                shared_ptr<BLASHost>(new GEMVHost(xclbin, logFile, &l_status, i, deviceIndex)));
+                shared_ptr<BLASHost>(new GEMVHost(xclbin, &l_status, i, deviceIndex)));
         }
         return true;    
     } else if (strcmp(engineName,"Fcn")==0) { 
         for (unsigned int i = 0; i < kernelNumber; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
-                shared_ptr<BLASHost>(new FCNHost(xclbin, logFile, &l_status, i, deviceIndex)));
+                shared_ptr<BLASHost>(new FCNHost(xclbin, &l_status, i, deviceIndex)));
         }
         return true;   
     } else {
