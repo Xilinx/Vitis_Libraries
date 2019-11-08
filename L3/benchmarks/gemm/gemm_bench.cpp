@@ -106,8 +106,7 @@ int main(int argc, char** argv) {
     TimePointType l_tp_create_time;
     l_tp_start_time = chrono::high_resolution_clock::now();
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
-    xfblasStatus_t status =
-        xfblasCreate(l_xclbinFile.c_str(), l_configFile, engineName, l_numKernel);
+    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, engineName, l_numKernel);
 
     showTimeData("xfblasCreate", l_tp_start_time, l_tp_create_time);
 

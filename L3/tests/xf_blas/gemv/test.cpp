@@ -72,8 +72,7 @@ int main(int argc, char** argv) {
     XFBLAS_dataType* d_y = NULL;
 
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMV;
-    xfblasStatus_t status =
-        xfblasCreate(l_xclbinFile.c_str(), l_configFile, engineName, l_numKernel);
+    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, engineName, l_numKernel);
     if (status != XFBLAS_STATUS_SUCCESS) {
         cout << "Create Handle failed with error code: " << status << "\n";
         return EXIT_FAILURE;

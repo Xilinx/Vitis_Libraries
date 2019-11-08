@@ -180,10 +180,7 @@ class XHost {
 
    public:
     XHost() = delete;
-    XHost(const char* p_xclbin,
-          xfblasStatus_t* p_status,
-          unsigned int p_kernelIndex,
-          unsigned int p_deviceIndex) {
+    XHost(const char* p_xclbin, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex) {
         m_fpga = XFpgaHold::instance().m_xFpgaPtr[p_deviceIndex];
         m_cuIndex = p_kernelIndex;
         if (!m_fpga->openContext(m_cuIndex)) {
@@ -392,10 +389,7 @@ class BLASHost : public XHost {
     virtual ~BLASHost() {}
     BLASHost(const BLASHost&) = delete;
 
-    BLASHost(const char* p_xclbin,
-             xfblasStatus_t* p_status,
-             unsigned int p_kernelIndex,
-             unsigned int p_deviceIndex)
+    BLASHost(const char* p_xclbin, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex)
         : XHost(p_xclbin, p_status, p_kernelIndex, p_deviceIndex) {}
 
     xfblasStatus_t execute() {

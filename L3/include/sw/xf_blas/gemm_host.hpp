@@ -62,10 +62,7 @@ class GEMMHost : public BLASHost {
     GEMMHost() = delete;
     virtual ~GEMMHost() {}
     GEMMHost(const GEMMHost&) = delete;
-    GEMMHost(const char* p_xclbin,
-             xfblasStatus_t* p_status,
-             unsigned int p_kernelIndex,
-             unsigned int p_deviceIndex)
+    GEMMHost(const char* p_xclbin, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex)
         : BLASHost(p_xclbin, p_status, p_kernelIndex, p_deviceIndex) {}
 
     virtual xfblasStatus_t addGEMMOp(void* p_a,

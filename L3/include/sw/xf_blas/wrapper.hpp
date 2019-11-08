@@ -71,7 +71,7 @@ xfblasStatus_t xfblasCreate(const char* xclbin,
         if (ConfigDict::instance().m_dict["GEMX_runGemv"] != "1") {
             return XFBLAS_STATUS_INVALID_VALUE;
         }
-        
+
         for (unsigned int i = 0; i < kernelNumber; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
                 shared_ptr<BLASHost>(new GEMVHost(xclbin, &l_status, i, deviceIndex)));
