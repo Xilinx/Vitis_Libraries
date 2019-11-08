@@ -12,9 +12,6 @@ if [ -f $STAT ]; then
   rm $STAT -rf
 fi
 
-source /group/xsjfarm/lsf/conf/profile.lsf
-source set_env.sh
-
 PYTHON=python3
 PYTEST=./sw/python/run_test.py
 PYCHECK=./sw/python/check_process.py
@@ -30,7 +27,7 @@ OPLIST=("amax amin asum axpy copy dot nrm2 scal swap" \
     "symvLo symvUp spmvUp spmvLo tpmvLo tpmvUp")
 
 for val in "${OPLIST[@]}"; do
-  eval "$SUBMIT $PYTHON $PYTEST --operator $val --parallel $PAR --id $id"
+  eval "$SUBMIT $PYTHON $PYTEST --operator $val --parallel $PAR --id $id" 2>&1 | tee job_$id
   ((id++))
 done
 
@@ -39,3 +36,6 @@ $PYTHON $PYCHECK --number $id
 if [ -f $STAT ]; then
   cat $STAT
 fi
+
+rm job_*
+rm statistics_*.rpt
