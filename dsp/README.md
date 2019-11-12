@@ -4,7 +4,7 @@ Vitis DSP library provides implementation of different L1/L2/L3 primitives for d
 
 Note: For FFT only L1 level primitives are provided. L2 and L3 kernels and applications APIs are planned to be provided in next releases.
 
-[Comprehensive documentation](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_fft/index.html)
+[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/)
 
 Copyright 2019 Xilinx, Inc.
 
