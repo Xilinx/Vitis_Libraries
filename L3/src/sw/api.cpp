@@ -71,11 +71,33 @@ bool xfblasSend(void* A, unsigned long long numElem, int elemSize, unsigned int 
 
 bool xfblasGet(void* A, unsigned int kernelIndex, unsigned int deviceIndex) {
     xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
+    if (l_status != XFBLAS_STATUS_SUCCESS) {
+        return false;
+    }
     l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatRestricted(A, A);
     if (l_status != XFBLAS_STATUS_SUCCESS) {
         return false;
     }
     return true;
+}
+
+void xfblasFreeInstr(unsigned int kernelIndex, unsigned int deviceIndex) {
+    BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->clearInstrBuf();
+}
+
+void xfblasFree(void* A, unsigned int kernelIndex, unsigned int deviceIndex) {
+    BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->freeMat(A);
+}
+
+
+void xfblasDestroy(unsigned int kernelNumber, unsigned int deviceIndex) {
+    for (unsigned int i = 0; i < kernelNumber; i++) {
+        BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->clearInstrBuf();
+        BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->closeContext(i);
+    }
+    BLASHostHandle::instance().m_handlePtr[deviceIndex][0]->closeDevice();
+    XFpgaHold::instance().m_xFpgaPtr.clear();
+    BLASHostHandle::instance().m_handlePtr.clear();
 }
 
 bool xfblasGemm(int m,

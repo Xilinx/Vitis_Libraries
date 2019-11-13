@@ -27,6 +27,9 @@ class XFBLASManager:
     self._lib.xfblasSend.restype = c_bool
     self._lib.xfblasGet.argtypes = [np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"),c_uint,c_uint]
     self._lib.xfblasGet.restype = c_bool
+    self._lib.xfblasFreeInstr.argtypes = [c_uint,c_uint]
+    self._lib.xfblasDestroy.argtypes = [c_uint,c_uint]
+    self._lib.xfblasFree.argtypes = [np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"),c_uint,c_uint]
     self._lib.xfblasGemm.argtypes = [c_uint,c_uint,c_uint,c_uint,
                                      np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"), c_uint,
                                      np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"), c_uint,
@@ -72,15 +75,24 @@ class XFBLASManager:
     
   def getMat(self,A,idxKernel,idxDevice):
     return self._lib.xfblasGet(A,idxKernel,idxDevice)
+  
+  def freeInstr(self,idxKernel,idxDevice):
+    return self._lib.xfblasFreeInstr(idxKernel,idxDevice)
+  
+  def freeMat(self,A,idxKernel,idxDevice):
+    return self._lib.xfblasFree(A,idxKernel,idxDevice)
+  
+  def destroy(self,numKernel,idxDevice):
+    return self._lib.xfblasDestroy(numKernel,idxDevice)
     
   def gemmOp(self,A,B,C,idxKernel,idxDevice):
-    return self._lib.xfblasGemm(c_uint(A.shape[0]), c_uint(A.shape[1]), c_uint(B.shape[1]), 1, A, c_uint(A.shape[1]), B, c_uint(B.shape[1]), 1, C, c_uint(B.shape[1]),idxKernel,idxDevice)
+    return self._lib.xfblasGemm(c_uint(A.shape[0]), c_uint(B.shape[1]), c_uint(A.shape[1]), 1, A, c_uint(A.shape[1]), B, c_uint(B.shape[1]), 1, C, c_uint(B.shape[1]),idxKernel,idxDevice)
   
   def gemvOp(self,A,x,y,idxKernel,idxDevice):
     return self._lib.xfblasGemv(c_uint(A.shape[0]), c_uint(A.shape[1]),1, A, c_uint(A.shape[1]), x, 1, y, 1, idxKernel,idxDevice)
   
   def fcnOp(self,A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice):
-    return self._lib.xfblasFcn(c_uint(A.shape[0]), c_uint(A.shape[1]), c_uint(B.shape[1]), 1, A, c_uint(A.shape[1]), B, c_uint(B.shape[1]), 1, C, c_uint(C.shape[1]),X,c_uint(X.shape[1]),postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
+    return self._lib.xfblasFcn(c_uint(A.shape[0]), c_uint(B.shape[1]), c_uint(A.shape[1]), 1, A, c_uint(A.shape[1]), B, c_uint(B.shape[1]), 1, C, c_uint(C.shape[1]),X,c_uint(X.shape[1]),postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
   
   
 _xfblasManager = None
@@ -108,6 +120,15 @@ def sendMat(A,idxKernel=0,idxDevice=0):
   
 def getMat(A,idxKernel=0,idxDevice=0):
     return _xfblasManager.getMat(A,idxKernel,idxDevice)
+  
+def freeInstr(idxKernel=0,idxDevice=0):
+    return _xfblasManager.freeInstr(idxKernel,idxDevice)
+
+def freeMat(A,idxKernel=0,idxDevice=0):
+    return _xfblasManager.freeMat(A,idxKernel,idxDevice)
+  
+def destroy(numKernel=1,idxDevice=0):
+    return _xfblasManager.destroy(numKernel,idxDevice)
   
 def gemmOp(A,B,C,idxKernel=0,idxDevice=0):
     return _xfblasManager.gemmOp(A,B,C,idxKernel,idxDevice)
