@@ -50,12 +50,12 @@ class XFpga {
     bool m_init = false;
 
     XFpga() = delete;
-    XFpga(const char* p_xclbin, const char* p_logFile, int* p_err, unsigned int deviceIndex = 0) {
+    XFpga(const char* p_xclbin, int* p_err, unsigned int deviceIndex = 0) {
         if (deviceIndex >= xclProbe()) {
             *p_err = 1;
             return;
         }
-        m_handle = xclOpen(deviceIndex, p_logFile, XCL_INFO);
+        m_handle = xclOpen(deviceIndex, NULL, XCL_INFO);
         if (xclLockDevice(m_handle)) {
             *p_err = 1;
             return;
@@ -180,11 +180,7 @@ class XHost {
 
    public:
     XHost() = delete;
-    XHost(const char* p_xclbin,
-          const char* p_logFile,
-          xfblasStatus_t* p_status,
-          unsigned int p_kernelIndex,
-          unsigned int p_deviceIndex) {
+    XHost(const char* p_xclbin, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex) {
         m_fpga = XFpgaHold::instance().m_xFpgaPtr[p_deviceIndex];
         m_cuIndex = p_kernelIndex;
         if (!m_fpga->openContext(m_cuIndex)) {
@@ -214,11 +210,21 @@ class XHost {
                 l_hostPtr[p_hostHandle] = l_matPtr;
                 l_hostSzPtr[p_hostHandle] = p_bufSize;
                 return true;
+            } else if (m_hostMatSz[p_hostHandle] != p_bufSize) {
+                l_hostPtr[p_hostHandle] = l_matPtr;
+                l_hostSzPtr[p_hostHandle] = p_bufSize;
+                this->m_bufHandle.erase(p_hostHandle);
+                return true;
             }
         } else {
             if (l_hostPtr.find(p_hostHandle) == l_hostPtr.end()) {
                 l_hostPtr[p_hostHandle] = p_matPtr;
                 l_hostSzPtr[p_hostHandle] = p_bufSize;
+                return true;
+            } else if (m_hostMatSz[p_hostHandle] != p_bufSize) {
+                l_hostPtr[p_hostHandle] = p_matPtr;
+                l_hostSzPtr[p_hostHandle] = p_bufSize;
+                this->m_bufHandle.erase(p_hostHandle);
                 return true;
             }
         }
@@ -226,18 +232,25 @@ class XHost {
     }
 
     xfblasStatus_t allocMatRestricted(void* p_hostHandle, void* p_matPtr, unsigned long long p_bufSize) {
-        if (!addMatRestricted(p_hostHandle, p_matPtr, p_bufSize)) {
-            return XFBLAS_STATUS_ALLOC_FAILED;
-        }
+        addMatRestricted(p_hostHandle, p_matPtr, p_bufSize);
         auto& l_hostPtr = m_hostMat;
         auto& l_devPtr = m_bufHandle;
         auto& l_hostSzPtr = m_hostMatSz;
         if (l_devPtr.find(p_hostHandle) != l_devPtr.end()) {
-            return XFBLAS_STATUS_ALLOC_FAILED;
+            if (((unsigned long)p_matPtr & (PAGE_SIZE - 1)) != 0) {
+                void* l_matPtr;
+                posix_memalign((void**)&l_matPtr, 4096, p_bufSize);
+                memcpy(l_matPtr, p_matPtr, p_bufSize);
+                l_hostPtr[p_hostHandle] = l_matPtr;
+                xclWriteBO(m_fpga->m_handle,l_devPtr[p_hostHandle],l_matPtr,p_bufSize,0);
+            } else {
+                l_hostPtr[p_hostHandle] = p_matPtr;
+                xclWriteBO(m_fpga->m_handle,l_devPtr[p_hostHandle],p_matPtr,p_bufSize,0);
+            }
         } else {
-            l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
-            return XFBLAS_STATUS_SUCCESS;
+            l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);   
         }
+        return XFBLAS_STATUS_SUCCESS;
     }
 
     template <typename t_dataType>
@@ -280,13 +293,10 @@ class XHost {
     xfblasStatus_t setMatToFPGARestricted(void* p_hostHandle) {
         auto& l_devPtr = m_bufHandle;
         auto& l_hostSzPtr = m_hostMatSz;
-        if (l_devPtr.find(p_hostHandle) != l_devPtr.end()) {
-            if (!m_fpga->copyToFpga(l_devPtr[p_hostHandle], l_hostSzPtr[p_hostHandle])) {
+        if (!m_fpga->copyToFpga(l_devPtr[p_hostHandle], l_hostSzPtr[p_hostHandle])) {
                 return XFBLAS_STATUS_ALLOC_FAILED;
-            }
-        } else {
-            return XFBLAS_STATUS_ALLOC_FAILED;
         }
+
         return XFBLAS_STATUS_SUCCESS;
     }
 
@@ -393,12 +403,8 @@ class BLASHost : public XHost {
     virtual ~BLASHost() {}
     BLASHost(const BLASHost&) = delete;
 
-    BLASHost(const char* p_xclbin,
-             const char* p_logFile,
-             xfblasStatus_t* p_status,
-             unsigned int p_kernelIndex,
-             unsigned int p_deviceIndex)
-        : XHost(p_xclbin, p_logFile, p_status, p_kernelIndex, p_deviceIndex) {}
+    BLASHost(const char* p_xclbin, xfblasStatus_t* p_status, unsigned int p_kernelIndex, unsigned int p_deviceIndex)
+        : XHost(p_xclbin, p_status, p_kernelIndex, p_deviceIndex) {}
 
     xfblasStatus_t execute() {
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
