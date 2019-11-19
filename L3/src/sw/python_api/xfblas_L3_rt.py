@@ -35,10 +35,10 @@ class XfblasRT():
           
       if xclbin_opts["GEMX_dataType"] == "float":
           self._qw = wgt
-          self._qb = bias
+          self.bias = bias
       else:
           self._qw = [np.int16(np.around(a*b)) for a,b in zip(wgt, wgt_scale)]
-          self._qb = [np.int32(np.around(a*b)) for a,b in zip(bias, bias_scale)]
+          self.bias = [np.int32(np.around(a*b)) for a,b in zip(bias, bias_scale)]
           
       for i,b in enumerate(self._qw):
           b = np.transpose(b)
@@ -46,6 +46,7 @@ class XfblasRT():
           xfblas.sendMat(self._qw[i],idxKernel,idxDevice)
           
       self.fpga_buf = []
+      self._qb = []
       self.out_dim = None
       self.post_scale = post_scale
       self.relu_scale = relu_scale
@@ -89,7 +90,7 @@ class XfblasRT():
       self.fpga_buf = fpga_buf
       
       formatted_bias = []
-      for dim,b  in zip (buf_dim[1:], self._qb):
+      for dim,b  in zip (buf_dim[1:], self.bias):
           b = self.format_bias (b, dim, self.min_m, self.min_n)
           formatted_bias.append(b)   
       
