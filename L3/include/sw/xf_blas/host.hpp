@@ -237,15 +237,16 @@ class XHost {
         auto& l_devPtr = m_bufHandle;
         auto& l_hostSzPtr = m_hostMatSz;
         if (l_devPtr.find(p_hostHandle) != l_devPtr.end()) {
+            xclFreeBO(m_fpga->m_handle, l_devPtr[p_hostHandle]);
             if (((unsigned long)p_matPtr & (PAGE_SIZE - 1)) != 0) {
                 void* l_matPtr;
                 posix_memalign((void**)&l_matPtr, 4096, p_bufSize);
                 memcpy(l_matPtr, p_matPtr, p_bufSize);
                 l_hostPtr[p_hostHandle] = l_matPtr;
-                xclWriteBO(m_fpga->m_handle,l_devPtr[p_hostHandle],l_matPtr,p_bufSize,0);
+                l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
             } else {
                 l_hostPtr[p_hostHandle] = p_matPtr;
-                xclWriteBO(m_fpga->m_handle,l_devPtr[p_hostHandle],p_matPtr,p_bufSize,0);
+                l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
             }
         } else {
             l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);   
