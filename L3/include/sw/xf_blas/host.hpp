@@ -135,13 +135,14 @@ class XFpga {
             m_baseAddress[p_kernelIndex] >> 32;
         ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA / 4 + 1] =
             m_baseAddress[p_kernelIndex] >> 32;
-
+        
         if (xclExecBuf(m_handle, m_execHandle)) {
             return false;
         }
+        while (ecmd->state == 1){
+            while (xclExecWait(m_handle, 1) == 0);
 
-        while (xclExecWait(m_handle, 1) == 0)
-            ;
+        }
 
         m_execHandles.push_back(m_execHandle);
 
