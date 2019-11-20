@@ -53,7 +53,9 @@ class WideType {
     T& getVal(unsigned int i) { return (m_Val[i]); }
     T& operator[](unsigned int p_Idx) { return (m_Val[p_Idx]); }
     T* getValAddr() { return (&m_Val[0]); }
-    WideType() {}
+    WideType() {
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+    }
     WideType(T p_initScalar) {
 #pragma HLS inline self
         for (int i = 0; i < t_Width; ++i) {
