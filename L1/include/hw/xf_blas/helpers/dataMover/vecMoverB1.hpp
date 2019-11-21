@@ -73,7 +73,7 @@ void combineStream(unsigned int p_n,
 }
 
 template <typename t_DataType, typename t_DesDataType = t_DataType>
-void mem2stream(unsigned int p_n, t_DataType* p_in, hls::stream<t_DesDataType>& p_out) {
+void mem2stream(unsigned int p_n, const t_DataType* p_in, hls::stream<t_DesDataType>& p_out) {
     for (unsigned int i = 0; i < p_n; ++i) {
 #pragma HLS PIPELINE
         t_DesDataType l_val = p_in[i];
@@ -110,6 +110,7 @@ void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_D
 #pragma HLS PIPELINE
         BitConv<t_DataType> l_bitConv;
         WideType<t_DataType, t_ParEntries> l_val;
+#pragma HLS ARRAY_PARTITION variable = l_val complete
         for (unsigned int j = 0; j < t_ParEntries; ++j) {
             l_val[j] = p_in[i * t_ParEntries + j];
         }
