@@ -210,7 +210,7 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 | 16384       | 98.057       | 141292.933 |      0.062  |
 +-------------+--------------+------------+-------------+
 
-2.4 Performance Result on Nimbix Cloud (float32, asynchronous)
+2.4 Performance Result on Nimbix Cloud (float, asynchronous)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. rubric:: Configuration:
@@ -229,7 +229,9 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 		- 114 Mhz
 	*
 		- data_type
-		- float32
+		- float
+
+.. NOTE:: In this configuration, the FPGA configuration image contains two GEMM engines,as indicated by "**kernel#**". These two GEMM engines run simultaneously, and we use "**asynchronous**" control in the host library to achieve this parallelism. The **TimeApiMs** in the performance results table below are the time (unit is ms) for computing **two** pairs of square matrices with the given sizes.
 		
 .. rubric:: Performance Result:
 
