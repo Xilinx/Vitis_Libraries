@@ -363,6 +363,12 @@ class XHost {
         }
         return XFBLAS_STATUS_SUCCESS;
     }
+    
+    xfblasStatus_t getMatByAddress(void* p_matPtr, unsigned long long p_bufSize, unsigned int offset) {
+        uint64_t l_address = offset*PAGE_SIZE+m_fpga->m_baseAddress[m_cuIndex];
+        xclUnmgdPread(m_fpga->m_handle,0,p_matPtr,p_bufSize,l_address);
+        return XFBLAS_STATUS_SUCCESS;
+    }
 
     void clearInstrBuf() {
         memset(this->m_progBuf, 0, PAGE_SIZE);
