@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
     status = xfblasGetVectorRestricted(y, l_numKernel - 1);
 
     if (status != XFBLAS_STATUS_SUCCESS) {
-        cout << "Get Matirx failed with error code: " << status << "\n";
+        cout << "Get Matrix failed with error code: " << status << "\n";
         xfblasDestroy();
         return EXIT_FAILURE;
     }

@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
     status = xfblasGetVector(m, sizeof(*y), d_y, y, 1, l_numKernel - 1);
 
     if (status != XFBLAS_STATUS_SUCCESS) {
-        cout << "Get Matirx failed with error code: " << status << "\n";
+        cout << "Get Matrix failed with error code: " << status << "\n";
         return EXIT_FAILURE;
     }
 
