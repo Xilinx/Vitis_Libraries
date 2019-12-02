@@ -28,7 +28,7 @@
 #include "ap_int.h"
 #include "ap_shift_reg.h"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 /**
@@ -224,5 +224,5 @@ void vec2TrmLoStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_D
 
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 #endif

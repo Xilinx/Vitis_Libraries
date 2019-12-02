@@ -20,7 +20,7 @@
 #include "handle.hpp"
 #include "host.hpp"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -125,6 +125,6 @@ class GEMMHost : public BLASHost {
 
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 
 #endif

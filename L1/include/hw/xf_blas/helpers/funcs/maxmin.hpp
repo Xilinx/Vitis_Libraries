@@ -31,7 +31,7 @@
 #include "hls_math.h"
 #include "hls_stream.h"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -201,6 +201,6 @@ void min(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries
 
 } // end namespace blas
 
-} // end namespace xf
+} // end namespace vitis
 
 #endif

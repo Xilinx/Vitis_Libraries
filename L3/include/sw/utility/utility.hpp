@@ -19,7 +19,7 @@
 
 using namespace std;
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -42,6 +42,6 @@ typedef enum { XFBLAS_OP_N, XFBLAS_OP_T, XFBLAS_OP_C } xfblasOperation_t;
 
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 
 #endif

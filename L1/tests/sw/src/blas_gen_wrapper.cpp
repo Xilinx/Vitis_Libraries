@@ -22,7 +22,7 @@
 #include "blas_def.hpp"
 
 using namespace std;
-using namespace xf::blas;
+using namespace vitis::blas;
 
 extern "C" {
 GenBinType* genBinNew() {

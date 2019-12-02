@@ -17,7 +17,7 @@
 #include "hls_stream.h"
 #include "xf_blas.hpp"
 
-using namespace xf::blas;
+using namespace vitis::blas;
 
 void uut_top(uint32_t p_m,
              uint32_t p_n,

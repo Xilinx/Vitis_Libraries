@@ -32,7 +32,7 @@
 #include "hls_stream.h"
 #include "xf_blas/helpers.hpp"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -152,6 +152,6 @@ class DotHelper<double, t_LogParEntries, t_IndexType, double> {
 
 } // end namespace blas
 
-} // end namespace xf
+} // end namespace vitis
 
 #endif

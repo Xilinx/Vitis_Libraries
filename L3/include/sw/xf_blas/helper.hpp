@@ -23,7 +23,7 @@
 
 using namespace std;
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -111,6 +111,6 @@ int getTypeSize(string p_typeName) {
 
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 
 #endif
