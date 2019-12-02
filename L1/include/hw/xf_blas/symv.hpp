@@ -27,7 +27,7 @@
 #include "scal.hpp"
 #include "axpy.hpp"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -99,6 +99,6 @@ void symv(const unsigned int p_n,
 
 } // end namespace blas
 
-} // end namespace xf
+} // end namespace vitis
 
 #endif

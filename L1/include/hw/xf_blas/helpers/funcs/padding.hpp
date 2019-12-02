@@ -31,7 +31,7 @@
 #include "hls_math.h"
 #include "hls_stream.h"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -66,6 +66,6 @@ void padding(unsigned int p_n,
 
 } // end namespace blas
 
-} // end namespace xf
+} // end namespace vitis
 
 #endif

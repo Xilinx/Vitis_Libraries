@@ -21,7 +21,7 @@
 #include "gemm_host.hpp"
 #include "gemv_host.hpp"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -956,6 +956,6 @@ xfblasStatus_t xfblasGemv(xfblasOperation_t trans,
 
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 
 #endif

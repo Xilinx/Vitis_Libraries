@@ -33,7 +33,7 @@
 #include "hls_stream.h"
 #include "xf_blas/helpers.hpp"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 /**
@@ -71,6 +71,6 @@ void scal(unsigned int p_n,
 }
 } // end namespace blas
 
-} // end namespace xf
+} // end namespace vitis
 
 #endif

@@ -32,7 +32,7 @@
 #include "hls_stream.h"
 #include "xf_blas/helpers.hpp"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -64,6 +64,6 @@ void asum(unsigned int p_n, hls::stream<WideType<t_DataType, (1 << t_LogParEntri
 
 } // end namespace blas
 
-} // end namespace xf
+} // end namespace vitis
 
 #endif

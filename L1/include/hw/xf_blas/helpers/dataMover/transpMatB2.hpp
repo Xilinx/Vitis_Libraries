@@ -28,7 +28,7 @@
 #include "ap_int.h"
 #include "ap_shift_reg.h"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -209,5 +209,5 @@ void transpMemBlocks(unsigned int p_blocks,
 }
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 #endif
