@@ -46,7 +46,7 @@ class XFpga {
     uuid_t m_xclbinId;
     vector<int> m_mem;
     vector<unsigned long long> m_baseAddress;
-    vector<unsigned int> m_execHandles;
+    
     bool m_init = false;
 
     XFpga() = delete;
@@ -118,7 +118,7 @@ class XFpga {
         return true;
     }
 
-    bool execKernel(unsigned int p_kernelIndex) {
+    unsigned int execKernel(unsigned int p_kernelIndex) {
         unsigned int m_execHandle = xclAllocBO(m_handle, 4096 + 4096, xclBOKind(0), (1 << 31));
         void* execData = xclMapBO(m_handle, m_execHandle, true);
         auto ecmd = reinterpret_cast<ert_start_kernel_cmd*>(execData);
@@ -137,16 +137,13 @@ class XFpga {
             m_baseAddress[p_kernelIndex] >> 32;
         
         if (xclExecBuf(m_handle, m_execHandle)) {
-            return false;
+            return 0;
         }
         while (ecmd->state == 1){
             while (xclExecWait(m_handle, 1) == 0);
 
         }
-
-        m_execHandles.push_back(m_execHandle);
-
-        return true;
+        return m_execHandle;
     }
 };
 
@@ -170,9 +167,9 @@ class XHost {
     unordered_map<void*, void*> m_hostMat;
     unordered_map<void*, unsigned int> m_bufHandle;
     unordered_map<void*, unsigned long long> m_hostMatSz;
-    // shared_ptr<XFpga> m_fpga = XFpgaHold::instance().m_xFpgaPtr;
     shared_ptr<XFpga> m_fpga;
     vector<unsigned long long> m_ddrDeviceBaseAddr;
+    vector<unsigned int> m_execHandles;
     char* m_progBuf;
     char* m_instrBuf;
     unsigned int m_instrOffset;
@@ -393,8 +390,8 @@ class XHost {
     xfblasStatus_t closeContext(unsigned int p_kernelIndex) {
         free(m_progBuf);
         xclFreeBO(m_fpga->m_handle, m_instrBufHandle);
-        if (p_kernelIndex < (unsigned int)m_fpga->m_execHandles.size()) {
-            xclFreeBO(m_fpga->m_handle, m_fpga->m_execHandles[p_kernelIndex]);
+        for (unsigned int i=0;i<m_execHandles.size();i++){
+            xclFreeBO(m_fpga->m_handle, m_execHandles[i]);
         }
         xclCloseContext(m_fpga->m_handle, m_fpga->m_xclbinId, this->m_cuIndex);
         return XFBLAS_STATUS_SUCCESS;
@@ -420,8 +417,11 @@ class BLASHost : public XHost {
             if (!this->m_fpga->copyToFpga(this->m_instrBufHandle, this->INSTR_BUF_SIZE + this->KERN_DBG_BUF_SIZE)) {
                 l_status = XFBLAS_STATUS_ALLOC_FAILED;
             }
-            if (!this->m_fpga->execKernel(this->m_cuIndex)) {
+            unsigned int m_execHandle = this->m_fpga->execKernel(this->m_cuIndex);
+            if (!m_execHandle) {
                 l_status = XFBLAS_STATUS_ALLOC_FAILED;
+            } else {
+                this-> m_execHandles.push_back(m_execHandle);
             }
             m_execControl = false;
         }
