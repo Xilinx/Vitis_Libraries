@@ -45,6 +45,7 @@ class WideType {
     static const unsigned int FLOAT_WIDTH = 7;
 
    public:
+    typedef ap_uint<t_Width * t_DataWidth> t_Interface;
     typedef T DataType;
     static const unsigned int t_WidthS = t_Width;
     static const unsigned int t_per4k = t_4k / t_DataWidth / t_Width * 8;
@@ -52,17 +53,51 @@ class WideType {
    public:
     T& getVal(unsigned int i) { return (m_Val[i]); }
     T& operator[](unsigned int p_Idx) { return (m_Val[p_Idx]); }
+    const T& operator[](unsigned int p_Idx) const { return (m_Val[p_Idx]); }
     T* getValAddr() { return (&m_Val[0]); }
     WideType() {
 #pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
     }
+
+    WideType(const WideType& wt) {
+#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+        for (int i = 0; i < t_Width; i++)
+#pragma HLS UNROLL
+            m_Val[i] = wt[i];
+    }
+
+    WideType(const t_Interface p_val) {
+#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+        for (int i = 0; i < t_Width; ++i) {
+#pragma HLS UNROLL
+            ap_uint<t_DataWidth> l_val = p_val.range(t_DataWidth * (1 + i) - 1, t_DataWidth * i);
+            m_Val[i] = *reinterpret_cast<T*>(&l_val);
+        }
+    }
+
     WideType(T p_initScalar) {
-#pragma HLS inline self
+#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
         for (int i = 0; i < t_Width; ++i) {
 #pragma HLS UNROLL
             getVal(i) = p_initScalar;
         }
     }
+
+    operator const t_Interface() {
+#pragma HLS inline self
+        t_Interface l_fVal;
+        for (int i = 0; i < t_Width; ++i) {
+#pragma HLS UNROLL
+            T l_v = m_Val[i];
+            ap_uint<t_DataWidth> l_val = *reinterpret_cast<ap_uint<t_DataWidth>*>(&l_v);
+            l_fVal.range(t_DataWidth * (1 + i) - 1, t_DataWidth * i) = l_val;
+        }
+        return l_fVal;
+    }
+
     T shift(T p_ValIn) {
 #pragma HLS inline self
         T l_valOut = m_Val[t_Width - 1];
