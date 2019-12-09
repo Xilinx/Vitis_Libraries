@@ -21,7 +21,7 @@
 #include "utils.hpp"
 #include "uut_top.hpp"
 
-using namespace xf::blas;
+using namespace vitis::blas;
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cout << "ERROR: passed %d arguments instead of %d, exiting" << argc << 2 << std::endl;

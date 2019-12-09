@@ -31,7 +31,7 @@
 #include "hls_math.h"
 #include "hls_stream.h"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -72,6 +72,6 @@ void abs(unsigned int p_n,
 }
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 
 #endif

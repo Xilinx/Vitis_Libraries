@@ -62,7 +62,7 @@ float getBoardFreqMHz(string xclbin) {
         }
     }
     if (l_freq == -1) {
-        // if xbutil does not work, user could put the XOCC achieved kernel frequcy here
+        // if xbutil does not work, user could put the vitis achieved kernel frequcy here
         l_freq = 250;
         std::cout << "INFO: Failed to get board frequency by xclbinutil. This is normal for cpu and hw emulation, "
                      "using 250 MHz for reporting.\n";

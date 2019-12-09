@@ -20,7 +20,7 @@
 #include "handle.hpp"
 #include "host.hpp"
 
-namespace xf {
+namespace vitis {
 
 namespace blas {
 
@@ -129,10 +129,34 @@ class FCNHost : public BLASHost {
 
         return XFBLAS_STATUS_SUCCESS;
     }
+    
+    virtual xfblasStatus_t addFCNOpByAddress(unsigned int l_aOff,
+                                             unsigned int l_bOff,
+                                             unsigned int l_cOff,
+                                             unsigned int l_xOff,
+                                             unsigned int p_m,
+                                             unsigned int p_n,
+                                             unsigned int p_k,
+                                             unsigned int p_lda,
+                                             unsigned int p_ldb,
+                                             unsigned int p_ldc,
+                                             unsigned int p_ldx,
+                                             int p_postScale,
+                                             int p_postShift,
+                                             short p_preluScale,
+                                             short p_preluAlpha) {
+
+        FcnArgs args(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_k, p_n, p_lda, p_ldb, p_ldc, p_ldx, p_postScale,
+                     p_postShift, p_preluScale, p_preluAlpha);
+        this->addInstr(&args);
+        this->enableRun();
+
+        return XFBLAS_STATUS_SUCCESS;
+    }
 };
 
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 
 #endif

@@ -42,6 +42,18 @@ bool xfblasGemv(int m,
 bool xfblasFcn(int m,int n,int k,int alpha,void* A,int lda,void* B,int ldb,
                int beta,void* C,int ldc,void* X,int ldx,int p_postScale,int p_postShift,
                short p_preluScale,short p_preluAlpha,unsigned int kernelIndex,unsigned int deviceIndex);
+bool xfblasFcnByAddress(unsigned int l_aOff,unsigned int l_bOff,unsigned int l_cOff,unsigned int l_xOff,unsigned int p_m,
+                                    unsigned int p_n,
+                                    unsigned int p_k,
+                                    unsigned int p_lda,
+                                    unsigned int p_ldb,
+                                    unsigned int p_ldc,
+                                    unsigned int p_ldx,
+                                    int p_postScale,
+                                    int p_postShift,
+                                    short p_preluScale,
+                                    short p_preluAlpha,unsigned int kernelIndex,unsigned int deviceIndex);
+bool xfblasGetByAddress(void* A, unsigned long long p_bufSize, unsigned int offset,unsigned int kernelIndex, unsigned int deviceIndex);
 }
 
 #endif

@@ -20,7 +20,7 @@
 #include "helpers/funcs/fcn_host.hpp"
 #include "api.hpp"
 
-using namespace xf::blas;
+using namespace vitis::blas;
 
 bool xfblasCreate(char* xclbin, char* engineName, unsigned int kernelNumber, unsigned int deviceIndex) {
     int l_err = 0;
@@ -75,6 +75,18 @@ bool xfblasGet(void* A, unsigned int kernelIndex, unsigned int deviceIndex) {
         return false;
     }
     l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatRestricted(A, A);
+    if (l_status != XFBLAS_STATUS_SUCCESS) {
+        return false;
+    }
+    return true;
+}
+
+bool xfblasGetByAddress(void* A, unsigned long long p_bufSize, unsigned int offset,unsigned int kernelIndex, unsigned int deviceIndex) {
+    xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
+    if (l_status != XFBLAS_STATUS_SUCCESS) {
+        return false;
+    }
+    l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatByAddress(A, p_bufSize,offset);
     if (l_status != XFBLAS_STATUS_SUCCESS) {
         return false;
     }
@@ -182,4 +194,29 @@ bool xfblasFcn(int m,
     } else {
         return false;
     }
+}
+
+bool xfblasFcnByAddress(unsigned int l_aOff,
+                        unsigned int l_bOff,
+                        unsigned int l_cOff,
+                        unsigned int l_xOff,
+                        unsigned int p_m,
+                        unsigned int p_n,
+                        unsigned int p_k,
+                        unsigned int p_lda,
+                        unsigned int p_ldb,
+                        unsigned int p_ldc,
+                        unsigned int p_ldx,
+                        int p_postScale,
+                        int p_postShift,
+                        short p_preluScale,
+                        short p_preluAlpha,
+                        unsigned int kernelIndex,
+                        unsigned int deviceIndex){
+         FCNHost* l_fcnPtr =
+         static_cast<FCNHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
+         xfblasStatus_t l_status = l_fcnPtr->addFCNOpByAddress(l_aOff, l_bOff, l_cOff, l_xOff, 
+                                                               p_m, p_n, p_k, p_lda, p_ldb, p_ldc, p_ldx, 
+                                                               p_postScale, p_postShift,p_preluScale, p_preluAlpha);
+  return true;
 }
