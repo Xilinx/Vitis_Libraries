@@ -54,6 +54,9 @@ bool xfblasFcnByAddress(unsigned int l_aOff,unsigned int l_bOff,unsigned int l_c
                                     short p_preluScale,
                                     short p_preluAlpha,unsigned int kernelIndex,unsigned int deviceIndex);
 bool xfblasGetByAddress(void* A, unsigned long long p_bufSize, unsigned int offset,unsigned int kernelIndex, unsigned int deviceIndex);
+void xfblasExecuteAsync(unsigned int numkernels, unsigned int deviceIndex);
+void xfblasExecute(unsigned int kernelIndex, unsigned int deviceIndex);
+
 }
 
 #endif

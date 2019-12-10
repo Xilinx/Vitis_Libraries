@@ -53,7 +53,17 @@ class XFBLASManager:
                                      c_int,c_int,
                                      c_short,c_short,
                                      c_uint,c_uint]
+    self._lib.xfblasFcnByAddress.argtypes = [c_uint,c_uint,c_uint,c_uint,
+                                             c_uint,c_uint,c_uint,c_uint,
+                                             c_uint,c_uint,c_uint,
+                                             c_int,c_int,
+                                             c_short,c_short,
+                                             c_uint,c_uint]
     self._lib.xfblasGemm.restype = c_bool
+    self._lib.xfblasGetByAddress.argtypes = [np.ctypeslib.ndpointer(flags="C_CONTIGUOUS"),c_ulonglong,c_uint,c_uint,c_uint]
+    self._lib.xfblasGetByAddress.restype = c_bool
+    self._lib.xfblasExecuteAsync.argtypes = [c_uint,c_uint]
+    self._lib.xfblasExecute.argtypes = [c_uint,c_uint]
     
   def createGemm(self,xclbin,numKernel,idxDevice):
     b_xclbin = xclbin.encode('utf-8')
@@ -94,6 +104,17 @@ class XFBLASManager:
   def fcnOp(self,A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice):
     return self._lib.xfblasFcn(c_uint(A.shape[0]), c_uint(B.shape[1]), c_uint(A.shape[1]), 1, A, c_uint(A.shape[1]), B, c_uint(B.shape[1]), 1, C, c_uint(C.shape[1]),X,c_uint(X.shape[1]),postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
   
+  def fcnOpByAddress(self,a,b,c,x,A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice):
+    return self._lib.xfblasFcnByAddress(c_uint(a),c_uint(b),c_uint(c),c_uint(x),c_uint(A.shape[0]), c_uint(B.shape[1]), c_uint(A.shape[1]), c_uint(A.shape[1]),c_uint(B.shape[1]),c_uint(C.shape[1]),c_uint(X.shape[1]),postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
+  
+  def getMatByAddress(self,A,offset,idxKernel,idxDevice):
+    return self._lib.xfblasGetByAddress(A,c_ulonglong(A.size*A.itemsize),offset,idxKernel,idxDevice)
+  
+  def executeAsync(self,numKernel,idxDevice):
+    return self._lib.xfblasExecuteAsync(numKernel,idxDevice)
+  
+  def execute(self,idxKernel,idxDevice):
+    return self._lib.xfblasExecute(idxKernel,idxDevice)
   
 _xfblasManager = None
   
@@ -138,6 +159,18 @@ def gemvOp(A,x,y,idxKernel=0,idxDevice=0):
   
 def fcnOp(A,B,C,X,postScale=1,postShift=0,preluScale=1,preluAlpha=0,idxKernel=0,idxDevice=0):
     return _xfblasManager.fcnOp(A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
+  
+def fcnOpByAddress(a,b,c,x,A,B,C,X,postScale=1,postShift=0,preluScale=1,preluAlpha=0,idxKernel=0,idxDevice=0):
+    return _xfblasManager.fcnOpByAddress(a,b,c,x,A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
+  
+def getMatByAddress(A,offset,idxKernel=0,idxDevice=0):
+    return _xfblasManager.getMatByAddress(A,offset,idxKernel,idxDevice)
+  
+def executeAsync(numKernel=1,idxDevice=0):
+    return _xfblasManager.executeAsync(numKernel,idxDevice)
+  
+def execute(idxKernel=0,idxDevice=0):
+    return _xfblasManager.execute(idxKernel,idxDevice)
   
 def createManager ( libFile ):
   global _xfblasManager

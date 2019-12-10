@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <omp.h>
 #include "handle.hpp"
 #include "gemm_host.hpp"
 #include "gemv_host.hpp"
@@ -21,6 +22,8 @@
 #include "api.hpp"
 
 using namespace vitis::blas;
+
+
 
 bool xfblasCreate(char* xclbin, char* engineName, unsigned int kernelNumber, unsigned int deviceIndex) {
     int l_err = 0;
@@ -82,15 +85,30 @@ bool xfblasGet(void* A, unsigned int kernelIndex, unsigned int deviceIndex) {
 }
 
 bool xfblasGetByAddress(void* A, unsigned long long p_bufSize, unsigned int offset,unsigned int kernelIndex, unsigned int deviceIndex) {
-    xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
-    if (l_status != XFBLAS_STATUS_SUCCESS) {
-        return false;
-    }
-    l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatByAddress(A, p_bufSize,offset);
+    xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatByAddress(A, p_bufSize,offset);
     if (l_status != XFBLAS_STATUS_SUCCESS) {
         return false;
     }
     return true;
+}
+
+void xfblasExecute(unsigned int kernelIndex, unsigned int deviceIndex) {
+    xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
+    if (l_status != XFBLAS_STATUS_SUCCESS) {
+        return false;
+    }
+}
+
+void xfblasExecuteAsync(unsigned int numkernels, unsigned int deviceIndex) {
+#pragma omp parallel
+  {
+            omp_set_dynamic(0);
+            omp_set_num_threads(numkernels);
+#pragma omp for
+            for (int i =0;i<numkernels;i++){
+                xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->execute();
+            }
+  }
 }
 
 void xfblasFreeInstr(unsigned int kernelIndex, unsigned int deviceIndex) {

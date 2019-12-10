@@ -103,7 +103,7 @@ EXTRA_OBJS =
 CXX := /usr/bin/gcc
 CC := /urs/bin/gcc
 
-CXXFLAGS += -O3 -std=c++11 -fPIC -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-unused-result
+CXXFLAGS += -O3 -std=c++11 -fPIC -fopenmp -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-unused-result
 CFLAGS +=
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -lxilinxopencl
 LDFLAGS += -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
