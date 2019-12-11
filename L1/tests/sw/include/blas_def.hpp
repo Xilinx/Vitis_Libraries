@@ -30,7 +30,7 @@
 #define BLAS_dataPageIdx 3
 #define BLAS_maxNumInstr 64
 #define BLAS_dataType int*/
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -49,6 +49,6 @@ typedef GenBin<BLAS_dataType,
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 
 #endif

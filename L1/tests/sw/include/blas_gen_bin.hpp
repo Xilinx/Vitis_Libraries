@@ -33,7 +33,7 @@
 #define TPMV 26
 
 using namespace std;
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -329,5 +329,5 @@ class GenBin {
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 #endif

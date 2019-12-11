@@ -22,7 +22,7 @@
 #include "gemv_host.hpp"
 #include <future>
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -216,6 +216,6 @@ void xfblasKernelSynchronize(unsigned int kernelIndex) {
 
 } // namespace blas
 
-} // namespace vitis
+} // namespace xf
 
 #endif

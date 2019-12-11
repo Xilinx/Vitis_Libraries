@@ -30,7 +30,7 @@
 
 #include "hls_stream.h"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -67,5 +67,5 @@ void mul(unsigned int p_n,
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 #endif

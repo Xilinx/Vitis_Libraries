@@ -41,7 +41,7 @@ using namespace std;
 #define OUTPUT_WIDTH 7
 #define ENTRIES_PER_LINE 16
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 namespace {
@@ -386,6 +386,6 @@ ostream& operator<<(ostream& os, Instr& p_instr) {
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 
 #endif

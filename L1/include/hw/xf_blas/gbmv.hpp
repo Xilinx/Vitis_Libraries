@@ -25,7 +25,7 @@
 #include "hls_stream.h"
 #include "xf_blas/helpers.hpp"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -110,6 +110,6 @@ void gbmv(const unsigned int p_m,
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 
 #endif
