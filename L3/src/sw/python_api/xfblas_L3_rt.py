@@ -56,7 +56,6 @@ class XfblasRT():
       self.idxDevice = idxDevice
       
   def get_offset(self,w):
-      
       return int(w.shape[0]*w.shape[1]*w.itemsize/4096+self.offset_list[-1])
   
   def get_padded_shape ( self, shape, min_row, min_col):
@@ -107,7 +106,7 @@ class XfblasRT():
       for i,(w_i,b_i) in enumerate( zip( self._qw, self._qb) ):
           xfblas.fcnOp( w_i , self.fpga_buf[i], self.fpga_buf[i+1], b_i, self.post_scale[i][0], self.post_scale[i][1],1,0,self.idxKernel,self.idxDevice)
             
-  def predict ( self, inp, in_scale):
+  def predict_old ( self, inp, in_scale): #keep this for debug
       self.init_fpgabuf(inp.shape)
       if self.xclbin_opts["GEMX_dataType"] == "float":
         padded_arr = self.format_for_fpga(inp, self.min_k, self.min_n)
@@ -123,6 +122,26 @@ class XfblasRT():
         xfblas.freeMat(i,self.idxKernel,self.idxDevice)
       for i in self._qb:
         xfblas.freeMat(i,self.idxKernel,self.idxDevice)
+      return self.fpga_buf[-1][:self.out_dim[0],:self.out_dim[1]]
+      
+  def predict ( self, inp, in_scale):
+      self.init_fpgabuf(inp.shape)
+      if self.xclbin_opts["GEMX_dataType"] == "float":
+        padded_arr = self.format_for_fpga(inp, self.min_k, self.min_n)
+        np.copyto(self.fpga_buf[0],  padded_arr, casting='same_kind', where=True)
+      else:
+        padded_arr = self.format_for_fpga(inp * in_scale, self.min_k, self.min_n)
+        np.copyto(self.fpga_buf[0],  np.int16(np.around(padded_arr)), casting='same_kind', where=True)
+      for i in self.fpga_buf:
+        self.offset_list.append(self.get_offset(i))
+      xfblas.sendMat(self.fpga_buf[0],self.idxKernel,self.idxDevice)
+      self.loadInstrByAddress()
+      xfblas.execute(self.idxKernel,self.idxDevice)
+      xfblas.getMatByAddress (self.fpga_buf[-1],self.offset_list[-2],self.idxKernel,self.idxDevice)
+      xfblas.freeMat(self.fpga_buf[0],self.idxKernel,self.idxDevice)
+      for i in self._qb:
+        xfblas.freeMat(i,self.idxKernel,self.idxDevice)
+      self.offset_list=self.offset_list[:len(self._qw)+1] # only keep the offset for weights
       return self.fpga_buf[-1][:self.out_dim[0],:self.out_dim[1]]
 
   def send_matrices(self, inp, in_scale):
@@ -143,4 +162,8 @@ class XfblasRT():
      
   def get_result(self):
       xfblas.getMatByAddress (self.fpga_buf[-1],self.offset_list[-2],self.idxKernel,self.idxDevice)
+      xfblas.freeMat(self.fpga_buf[0],self.idxKernel,self.idxDevice)
+      for i in self._qb:
+        xfblas.freeMat(i,self.idxKernel,self.idxDevice)
+      self.offset_list=self.offset_list[:len(self._qw)+1] # only keep the offset for weights
       return self.fpga_buf[-1][:self.out_dim[0],:self.out_dim[1]]

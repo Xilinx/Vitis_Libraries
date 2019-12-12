@@ -134,7 +134,6 @@ def create_keras_model(in_dims, num_classes):
     model.add(Dense(num_classes, activation='softmax', name='d3'))
     model.summary()
     return model
-
 if  __name__ == '__main__':
     np.random.seed(27)
     
@@ -142,11 +141,16 @@ if  __name__ == '__main__':
     parser.add_argument('--data', required = True, help='inference data file')
     parser.add_argument('--model', required = True, help='model')
     parser.add_argument('--train', default = False, help='set to True if retrain the model')
+    parser.add_argument('--run_async', default = False, help='run async for multi-kernel')
+    
+    
     args = parser.parse_args()
     xclbin_opts = xfblas.parse_cfg(args.cfg)
+    
+    numKernels = int(xclbin_opts["GEMX_numKernels"])
 
     #load xclbin 
-    xfblas.createFcn(args,xclbin_opts,1,0)
+    xfblas.createFcn(args,xclbin_opts,numKernels,0)
    
     train_fd = pd.read_csv(args.data) # Load training data.
     IDcol = 'Run' # A column used to identified the run for data collection; not an independent variable.
@@ -166,10 +170,34 @@ if  __name__ == '__main__':
     
     if args.train:
         train(train_fd, predictors, train_y, len(train_fd[target].unique()))
+      
+    fpga_rt = []  
+    fpga_out = []
+    for i in range(numKernels):
+      fpga_rt.append(mlp_common.init_fpga(model,xclbin_opts, g_wgt_scale, g_wgt_scale, g_post_scale,None,i,0))
         
-    fpga_rt = mlp_common.init_fpga(model,xclbin_opts, g_wgt_scale, g_wgt_scale, g_post_scale,None,0,0)    
-    fpga_out = mlp_common.predict_fpga(fpga_rt, train_fd[predictors].values, g_in_scale)
+    inp = train_fd[predictors].values
+    
+    if not args.run_async: # for larger batch size, run multi-kernels in parallel will bring up to 4x better performance
+        for i in range(numKernels):
+            fpga_out.append(mlp_common.predict_fpga(fpga_rt[i], inp, g_in_scale))
+    else:
+        for i in range(numKernels):
+            fpga_rt[i].send_matrices(inp, None)
+    
+        xfblas.executeAsync(numKernels,0)
+
+        for i in range(numKernels):
+            fpga_out.append(fpga_rt[i].get_result())
+   
+            fpga_out[i] = fpga_out[i].astype(np.float32) 
+            for j in range(fpga_out[i].shape[0]):
+                fpga_out[i][j,:] = mlp_common.softmax(fpga_out[i][j,:])
     
     cpu_out = mlp_common.predict_cpu( model, train_fd[predictors].values)
-    compare_results ( cpu_out, fpga_out)
-    xfblas.destroy(1,0)
+    
+    for i in range(numKernels):
+        compare_results ( cpu_out, fpga_out[i])
+
+    xfblas.destroy(numKernels,0)
+    
