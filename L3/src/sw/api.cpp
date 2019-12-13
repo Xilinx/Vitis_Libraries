@@ -23,8 +23,6 @@
 
 using namespace vitis::blas;
 
-
-
 bool xfblasCreate(char* xclbin, char* engineName, unsigned int kernelNumber, unsigned int deviceIndex) {
     int l_err = 0;
     shared_ptr<XFpga> l_xFpga(new XFpga(xclbin, &l_err, deviceIndex));
@@ -84,31 +82,34 @@ bool xfblasGet(void* A, unsigned int kernelIndex, unsigned int deviceIndex) {
     return true;
 }
 
-bool xfblasGetByAddress(void* A, unsigned long long p_bufSize, unsigned int offset,unsigned int kernelIndex, unsigned int deviceIndex) {
-    xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatByAddress(A, p_bufSize,offset);
+bool xfblasGetByAddress(
+    void* A, unsigned long long p_bufSize, unsigned int offset, unsigned int kernelIndex, unsigned int deviceIndex) {
+    xfblasStatus_t l_status =
+        BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatByAddress(A, p_bufSize, offset);
     if (l_status != XFBLAS_STATUS_SUCCESS) {
         return false;
     }
     return true;
 }
 
-void xfblasExecute(unsigned int kernelIndex, unsigned int deviceIndex) {
+bool xfblasExecute(unsigned int kernelIndex, unsigned int deviceIndex) {
     xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
     if (l_status != XFBLAS_STATUS_SUCCESS) {
         return false;
     }
+    return true;
 }
 
 void xfblasExecuteAsync(unsigned int numkernels, unsigned int deviceIndex) {
 #pragma omp parallel
-  {
-            omp_set_dynamic(0);
-            omp_set_num_threads(numkernels);
+    {
+        omp_set_dynamic(0);
+        omp_set_num_threads(numkernels);
 #pragma omp for
-            for (int i =0;i<numkernels;i++){
-                xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->execute();
-            }
-  }
+        for (int i = 0; i < numkernels; i++) {
+            BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->execute();
+        }
+    }
 }
 
 void xfblasFreeInstr(unsigned int kernelIndex, unsigned int deviceIndex) {
@@ -118,7 +119,6 @@ void xfblasFreeInstr(unsigned int kernelIndex, unsigned int deviceIndex) {
 void xfblasFree(void* A, unsigned int kernelIndex, unsigned int deviceIndex) {
     BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->freeMat(A);
 }
-
 
 void xfblasDestroy(unsigned int kernelNumber, unsigned int deviceIndex) {
     for (unsigned int i = 0; i < kernelNumber; i++) {
@@ -230,11 +230,10 @@ bool xfblasFcnByAddress(unsigned int l_aOff,
                         short p_preluScale,
                         short p_preluAlpha,
                         unsigned int kernelIndex,
-                        unsigned int deviceIndex){
-         FCNHost* l_fcnPtr =
-         static_cast<FCNHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
-         xfblasStatus_t l_status = l_fcnPtr->addFCNOpByAddress(l_aOff, l_bOff, l_cOff, l_xOff, 
-                                                               p_m, p_n, p_k, p_lda, p_ldb, p_ldc, p_ldx, 
-                                                               p_postScale, p_postShift,p_preluScale, p_preluAlpha);
-  return true;
+                        unsigned int deviceIndex) {
+    FCNHost* l_fcnPtr = static_cast<FCNHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
+    xfblasStatus_t l_status =
+        l_fcnPtr->addFCNOpByAddress(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_n, p_k, p_lda, p_ldb, p_ldc, p_ldx,
+                                    p_postScale, p_postShift, p_preluScale, p_preluAlpha);
+    return true;
 }

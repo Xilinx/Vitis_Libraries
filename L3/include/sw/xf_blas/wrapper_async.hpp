@@ -112,7 +112,6 @@ void xfblasKernelSynchronize() {
     fuStatus.clear();
 }
 
-
 } // namespace blas
 
 } // namespace vitis

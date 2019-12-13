@@ -66,54 +66,271 @@ class XFBLASManager:
     self._lib.xfblasExecute.argtypes = [c_uint,c_uint]
     
   def createGemm(self,xclbin,numKernel,idxDevice):
+    '''
+    create Gemm Handle
+    
+    Parameters
+    ----------
+    xclbin
+                file path for FPGA bitstream
+    numKernel
+                number of CUs in the xclbin
+    idxDeivce
+                index of local device to be used
+    '''
     b_xclbin = xclbin.encode('utf-8')
     b_log = xclbin.encode('utf-8')
     return self._lib.xfblasCreate(b_xclbin,b'Gemm',numKernel,idxDevice)
     
   def createGemv(self,xclbin,numKernel,idxDevice):
+    '''
+    create Gemv Handle
+    
+    Parameters
+    ----------
+    xclbin
+                file path for FPGA bitstream
+    numKernel
+                number of CUs in the xclbin
+    idxDeivce
+                index of local device to be used
+    '''
     b_xclbin = xclbin.encode('utf-8')
     b_log = xclbin.encode('utf-8')
     return self._lib.xfblasCreate(b_xclbin,b'Gemv',numKernel,idxDevice)
   
   def createFcn(self,xclbin,numKernel,idxDevice):
+    '''
+    create Fcn Handle
+    
+    Parameters
+    ----------
+    xclbin
+                file path for FPGA bitstream
+    numKernel
+                number of CUs in the xclbin
+    idxDeivce
+                index of local device to be used
+    '''
     b_xclbin = xclbin.encode('utf-8')
     b_log = xclbin.encode('utf-8')
     return self._lib.xfblasCreate(b_xclbin,b'Fcn',numKernel,idxDevice)
     
   def sendMat(self,A,idxKernel,idxDevice):
+    '''
+    send mat from host to device
+    
+    Parameters
+    ----------
+    A:          ndarray
+                matrix in host memory
+    idxKernel:  int
+                index of kernel to be used
+    idxDeivce:  int
+                index of local device to be used
+    '''
     return self._lib.xfblasSend(A,c_ulonglong(A.size),c_uint(A.itemsize),idxKernel,idxDevice)
     
   def getMat(self,A,idxKernel,idxDevice):
+    '''
+    get mat from device to host
+    
+    Parameters
+    ----------
+    A:          ndarray
+                matrix in host memory
+    idxKernel:  int
+                index of kernel to be used
+    idxDeivce:  int
+                index of local device to be used
+    '''
     return self._lib.xfblasGet(A,idxKernel,idxDevice)
   
   def freeInstr(self,idxKernel,idxDevice):
+    '''
+    free memory for instructions
+    
+    Parameters
+    ----------
+    idxKernel
+                index of kernel to be used
+    idxDeivce
+                index of local device to be used
+    '''
     return self._lib.xfblasFreeInstr(idxKernel,idxDevice)
   
   def freeMat(self,A,idxKernel,idxDevice):
+    '''
+    free device memory for mat A
+    
+    Parameters
+    ----------
+    A:          ndarray
+                matrix in host memory
+    idxKernel:  int
+                index of kernel to be used
+    idxDeivce:  int
+                index of local device to be used
+    '''
     return self._lib.xfblasFree(A,idxKernel,idxDevice)
   
   def destroy(self,numKernel,idxDevice):
+    '''
+    release handle used by the XFBLAS library
+    
+    Parameters
+    ----------
+    numKernel
+                number of CUs in the xclbin
+    idxDeivce
+                index of local device to be used
+    '''    
     return self._lib.xfblasDestroy(numKernel,idxDevice)
     
   def gemmOp(self,A,B,C,idxKernel,idxDevice):
+    '''
+    perform matrix-matrix multiplication of C=A*B
+    
+    Parameters
+    ----------
+    A:              ndarray
+                    matrix in host memory
+    B:              ndarray
+                    matrix in host memory
+    C:              ndarray
+                    matrix in host memory
+    idxKernel:      int
+                    index of kernel to be used
+    idxDeivce:      int
+                    index of local device to be used
+    '''      
     return self._lib.xfblasGemm(c_uint(A.shape[0]), c_uint(B.shape[1]), c_uint(A.shape[1]), 1, A, c_uint(A.shape[1]), B, c_uint(B.shape[1]), 1, C, c_uint(B.shape[1]),idxKernel,idxDevice)
   
   def gemvOp(self,A,x,y,idxKernel,idxDevice):
+    '''
+    perform matrix-vector multiplication of y=A*x
+    
+    Parameters
+    ----------
+    A:              ndarray
+                    matrix in host memory
+    x:              ndarray
+                    vector in host memory
+    y:              ndarray
+                    vector in host memory
+    idxKernel:      int
+                    index of kernel to be used
+    idxDeivce:      int
+                    index of local device to be used
+    '''      
     return self._lib.xfblasGemv(c_uint(A.shape[0]), c_uint(A.shape[1]),1, A, c_uint(A.shape[1]), x, 1, y, 1, idxKernel,idxDevice)
   
   def fcnOp(self,A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice):
+    '''
+    perform matrix-matrix multiplication with p_relu, and quantization support of C = relu ((A * B + X) * postScale >> postShift) 
+    
+    Parameters
+    ----------
+    A:              ndarray
+                    matrix in host memory
+    B:              ndarray
+                    matrix in host memory
+    C:              ndarray
+                    matrix in host memory
+    X:              ndarray
+                    matrix in host memory   
+    postScale:      int
+                    multiply the output values with specific scalar
+    postShift:      int
+                    shift the output values with specific scalar
+    PReLUScale:     int
+                    multiply the output values with specific scalar when output values < 0 
+    PReLUAlpha:     int
+                    shift the output values with specific scalar when output values < 0              
+    idxKernel:      int
+                    index of kernel to be used
+    idxDeivce:      int
+                    index of local device to be used
+    '''      
     return self._lib.xfblasFcn(c_uint(A.shape[0]), c_uint(B.shape[1]), c_uint(A.shape[1]), 1, A, c_uint(A.shape[1]), B, c_uint(B.shape[1]), 1, C, c_uint(C.shape[1]),X,c_uint(X.shape[1]),postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
   
   def fcnOpByAddress(self,a,b,c,x,A,B,C,X,postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice):
+    '''
+    send intructions for matrix-matrix multiplication with p_relu, and quantization support of C = relu ((A * B + X) * postScale >> postShift) 
+    Using this function, could avoid sending matrices that will be over-written in device, but users need to provide offsets
+    
+    Parameters
+    ----------
+    a:              int
+                    offset of memory for A on device
+    b:              int
+                    offset of memory for B on device
+    c:              int
+                    offset of memory for C on device  
+    A:              ndarray
+                    matrix in host memory
+    B:              ndarray
+                    matrix in host memory
+    C:              ndarray
+                    matrix in host memory
+    X:              ndarray
+                    matrix in host memory   
+    postScale:      int
+                    multiply the output values with specific scalar
+    postShift:      int
+                    shift the output values with specific scalar
+    PReLUScale:     int
+                    multiply the output values with specific scalar when output values < 0 
+    PReLUAlpha:     int
+                    shift the output values with specific scalar when output values < 0              
+    idxKernel:      int
+                    index of kernel to be used
+    idxDeivce:      int
+                    index of local device to be used
+    '''
     return self._lib.xfblasFcnByAddress(c_uint(a),c_uint(b),c_uint(c),c_uint(x),c_uint(A.shape[0]), c_uint(B.shape[1]), c_uint(A.shape[1]), c_uint(A.shape[1]),c_uint(B.shape[1]),c_uint(C.shape[1]),c_uint(X.shape[1]),postScale,postShift,preluScale,preluAlpha,idxKernel,idxDevice)
   
   def getMatByAddress(self,A,offset,idxKernel,idxDevice):
+    '''
+    get mat from device by offset
+    
+    Parameters
+    ----------
+    A:              ndarray
+                    matrix in host memory
+    offset:         int
+                    offset of memory for A on device
+    idxKernel:      int
+                    index of kernel to be used
+    idxDeivce:      int
+                    index of local device to be used
+    '''
     return self._lib.xfblasGetByAddress(A,c_ulonglong(A.size*A.itemsize),offset,idxKernel,idxDevice)
   
   def executeAsync(self,numKernel,idxDevice):
+    '''
+    run number of kernels async
+    
+    Parameters
+    ----------
+    numKernel
+                number of CUs in the xclbin
+    idxDeivce
+                index of local device to be used
+    '''
     return self._lib.xfblasExecuteAsync(numKernel,idxDevice)
   
   def execute(self,idxKernel,idxDevice):
+    '''
+    run ith kernel
+    
+    Parameters
+    ----------
+    idxKernel:      int
+                    index of kernel to be used
+    idxDeivce:      int
+                    index of local device to be used
+    '''
     return self._lib.xfblasExecute(idxKernel,idxDevice)
   
 _xfblasManager = None
