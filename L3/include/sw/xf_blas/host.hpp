@@ -363,7 +363,9 @@ class XHost {
     
     xfblasStatus_t getMatByAddress(void* p_matPtr, unsigned long long p_bufSize, unsigned int offset) {
         uint64_t l_address = offset*PAGE_SIZE+m_fpga->m_baseAddress[m_cuIndex];
-        xclUnmgdPread(m_fpga->m_handle,0,p_matPtr,p_bufSize,l_address);
+        if (xclUnmgdPread(m_fpga->m_handle,0,p_matPtr,p_bufSize,l_address) < 0){
+          return XFBLAS_STATUS_ALLOC_FAILED;
+        }
         return XFBLAS_STATUS_SUCCESS;
     }
 

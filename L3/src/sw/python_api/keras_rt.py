@@ -29,11 +29,27 @@ class KerasRT(XfblasRT):
           act = l.get_config()['activation']
           if self._qw[0].dtype == np.float32:
             if act == 'relu':
-              xfblas.fcnOp( self._qw[i], self.fpga_buf[i], self.fpga_buf[i+1], self._qb[i], 1, 0, 0, 0, self.idxKernel,self.idxDevice)
+              xfblas.fcnOp( self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], 1, 0, 0, 0, self.idxKernel,self.idxDevice)
             else:
-              xfblas.fcnOp( self._qw[i], self.fpga_buf[i], self.fpga_buf[i+1], self._qb[i], 1, 0, 1, 0, self.idxKernel,self.idxDevice)       
+              xfblas.fcnOp( self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], 1, 0, 1, 0, self.idxKernel,self.idxDevice)      
           else:
             if act == 'relu':
-              xfblas.fcnOp( self._qw[i], self.fpga_buf[i], self.fpga_buf[i+1], self._qb[i], self.post_scale[i][0], self.post_scale[i][1], 0, 0, self.idxKernel,self.idxDevice)
+              xfblas.fcnOp( self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], self.post_scale[i][0], self.post_scale[i][1], 0, 0, self.idxKernel,self.idxDevice)
             else:
-              xfblas.fcnOp( self._qw[i], self.fpga_buf[i], self.fpga_buf[i+1], self._qb[i], self.post_scale[i][0], self.post_scale[i][1], 1, 0, self.idxKernel,self.idxDevice)
+              xfblas.fcnOp( self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], self.post_scale[i][0], self.post_scale[i][1], 1, 0, self.idxKernel,self.idxDevice)
+              
+    def loadInstrByAddress(self):
+      xfblas.freeInstr(self.idxKernel,self.idxDevice)
+      numLayers= len(self.kmodel.layers)
+      for i,l in enumerate(self.kmodel.layers):
+          act = l.get_config()['activation']
+          if self._qw[0].dtype == np.float32:
+            if act == 'relu':
+              xfblas.fcnOpByAddress(self.offset_list[2*numLayers+i],self.offset_list[i],self.offset_list[2*numLayers+i+1],self.offset_list[numLayers+i], self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], 1, 0, 0, 0, self.idxKernel,self.idxDevice)
+            else:
+              xfblas.fcnOpByAddress(self.offset_list[2*numLayers+i],self.offset_list[i],self.offset_list[2*numLayers+i+1],self.offset_list[numLayers+i],self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], 1, 0, 1, 0, self.idxKernel,self.idxDevice)      
+          else:
+            if act == 'relu':
+              xfblas.fcnOpByAddress(self.offset_list[2*numLayers+i],self.offset_list[i],self.offset_list[2*numLayers+i+1],self.offset_list[numLayers+i],self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], self.post_scale[i][0], self.post_scale[i][1], 0, 0, self.idxKernel,self.idxDevice)
+            else:
+              xfblas.fcnOpByAddress(self.offset_list[2*numLayers+i],self.offset_list[i],self.offset_list[2*numLayers+i+1],self.offset_list[numLayers+i],self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], self.post_scale[i][0], self.post_scale[i][1], 1, 0, self.idxKernel,self.idxDevice)
