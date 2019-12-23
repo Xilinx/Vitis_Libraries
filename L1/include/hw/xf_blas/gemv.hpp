@@ -27,7 +27,7 @@
 #include "scal.hpp"
 #include "axpy.hpp"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -111,6 +111,6 @@ void gemv(const unsigned int p_m,
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 
 #endif

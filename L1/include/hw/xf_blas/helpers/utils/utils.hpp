@@ -24,7 +24,7 @@
 #ifndef XF_BLAS_UTILS_HPP
 #define XF_BLAS_UTILS_HPP
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 // Helper macros for renaming kernel
@@ -75,5 +75,5 @@ class AdderDelay<float> {
 };
 } // namespace blas
 
-} // namespace vitis
+} // namespace xf
 #endif

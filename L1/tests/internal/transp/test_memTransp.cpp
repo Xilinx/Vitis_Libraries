@@ -21,7 +21,7 @@
 #include "hls_stream.h"
 #include "xf_blas.hpp"
 
-using namespace vitis::blas;
+using namespace xf::blas;
 
 void uut_transpMat(unsigned int p_blocks,
                    hls::stream<WideType<BLAS_dataType, BLAS_memWidth> >& p_in,

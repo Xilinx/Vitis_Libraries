@@ -25,7 +25,7 @@
 
 using namespace std;
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -55,6 +55,6 @@ class ConfigDict {
 
 } // namespace blas
 
-} // namespace vitis
+} // namespace xf
 
 #endif
