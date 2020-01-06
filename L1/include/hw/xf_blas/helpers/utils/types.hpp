@@ -33,7 +33,7 @@
 #include "ap_int.h"
 #include "ap_shift_reg.h"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -382,6 +382,52 @@ inline double BitConv<double>::toType(BitConv<double>::BitsType p_Val) {
     return (u.f);
 }
 
+template <
+    unsigned int t_Bits,
+    unsigned int t_Width,
+    typename t_DataType>
+ap_uint<t_Bits> convWideVal2Bits (
+    WideType<t_DataType, t_Width> p_val){
+#pragma HLS inline
+    #ifndef __SYNTHESIS__
+        assert ((t_Bits>t_Width) && (t_Bits%t_Width == 0));
+    #endif
+    const unsigned int t_DataBits = sizeof(t_DataType)*8;
+    const unsigned int t_ResEntryBits = t_Bits / t_Width;
+    ap_uint<t_Bits> l_res;
+    for (unsigned int i=0; i<t_Width; ++i) {
+#pragma HLS UNROLL
+        BitConv<t_DataType> l_bitConv;
+        ap_uint<t_DataBits> l_datBits = l_bitConv.toBits(p_val[i]);
+        ap_uint<t_ResEntryBits> l_resEntry = l_datBits;
+        l_res.range((i+1)*t_ResEntryBits-1, i*t_ResEntryBits) = l_resEntry;     
+    }
+    return l_res;
+}
+
+template <
+    unsigned int t_Bits,
+    unsigned int t_Width,
+    typename t_DataType>
+WideType<t_DataType, t_Width> convBits2WideType (
+    ap_uint<t_Bits> p_bits){
+#pragma HLS inline
+    #ifndef __SYNTHESIS__
+        assert ((t_Bits>t_Width) && (t_Bits%t_Width == 0));
+    #endif
+    const unsigned int t_DataBits = sizeof(t_DataType) * 8;
+    const unsigned int t_InEntryBits = t_Bits / t_Width;
+    WideType<t_DataType, t_Width> l_res;
+    for (unsigned int i=0; i<t_Width; ++i) {
+#pragma HLS UNROLL
+        BitConv<t_DataType> l_bitConv;
+        ap_uint<t_InEntryBits> l_inDatBits = p_bits.range((i+1)*t_InEntryBits-1, i*t_InEntryBits);
+        ap_uint<t_DataBits> l_datBits = l_inDatBits;
+        t_DataType l_val = l_bitConv.toType(l_datBits);
+        l_res[i] = l_val;
+    }
+    return l_res;
+}
 // Type converter - for vectors of different lengths and types
 template <typename TS, typename TD>
 class WideConv {
@@ -416,5 +462,5 @@ class WideConv {
 
 } // namespace blas
 
-} // namespace vitis
+} // namespace xf
 #endif

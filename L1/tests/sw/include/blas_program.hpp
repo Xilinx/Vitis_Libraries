@@ -35,7 +35,7 @@
 
 using namespace std;
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -499,5 +499,5 @@ ostream& operator<<(ostream& os, Program<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 #endif

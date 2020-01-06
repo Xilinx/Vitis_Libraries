@@ -36,7 +36,7 @@
 
 using namespace std;
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -437,6 +437,6 @@ class BLASHost : public XHost {
 
 } // namespace blas
 
-} // namespace vitis
+} // namespace xf
 
 #endif

@@ -27,7 +27,7 @@
 #include "scal.hpp"
 #include "axpy.hpp"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -91,6 +91,6 @@ void trmv(const bool uplo,
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 
 #endif

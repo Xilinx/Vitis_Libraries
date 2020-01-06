@@ -28,7 +28,7 @@
 #include "ap_int.h"
 #include "ap_shift_reg.h"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -556,5 +556,5 @@ void vec2TbLoMatStream(unsigned int p_n,
 
 } // namespace blas
 
-} // namespace vitis
+} // namespace xf
 #endif

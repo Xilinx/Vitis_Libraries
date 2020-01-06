@@ -20,7 +20,7 @@
 #include "handle.hpp"
 #include "host.hpp"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -157,6 +157,6 @@ class FCNHost : public BLASHost {
 
 } // namespace blas
 
-} // namespace vitis
+} // namespace xf
 
 #endif

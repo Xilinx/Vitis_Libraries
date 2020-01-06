@@ -21,7 +21,7 @@
 #include "helpers/funcs/fcn_host.hpp"
 #include "api.hpp"
 
-using namespace vitis::blas;
+using namespace xf::blas;
 
 bool xfblasCreate(char* xclbin, char* engineName, unsigned int kernelNumber, unsigned int deviceIndex) {
     int l_err = 0;

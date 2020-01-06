@@ -18,7 +18,7 @@
 #include "xf_blas.hpp"
 #include "uut_top.hpp"
 
-using namespace vitis::blas;
+using namespace xf::blas;
 
 void uut_top(uint32_t p_m,
              uint32_t p_n,

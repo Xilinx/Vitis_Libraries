@@ -33,7 +33,7 @@
 #include "hls_stream.h"
 #include "xf_blas/helpers.hpp"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -77,5 +77,5 @@ void axpy(unsigned int p_n,
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 #endif

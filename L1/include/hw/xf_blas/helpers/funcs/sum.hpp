@@ -31,7 +31,7 @@
 #include "hls_math.h"
 #include "hls_stream.h"
 
-namespace vitis {
+namespace xf {
 
 namespace blas {
 
@@ -147,6 +147,6 @@ void sum(unsigned int p_n, hls::stream<WideType<t_DataType, 1 << t_LogParEntries
 
 } // end namespace blas
 
-} // end namespace vitis
+} // end namespace xf
 
 #endif

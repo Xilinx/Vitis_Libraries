@@ -25,6 +25,6 @@
 #include "xf_blas/wrapper.hpp"
 #include "xf_blas/wrapper_async.hpp"
 
-using namespace vitis::blas;
+using namespace xf::blas;
 
 #endif
