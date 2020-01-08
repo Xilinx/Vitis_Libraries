@@ -77,10 +77,6 @@ int main(int argc, char** argv) {
     unsigned int l_argIdx = 1;
     string l_xclbinFile(argv[l_argIdx++]);
     string l_configFile(argv[l_argIdx++]);
-    string l_logFile;
-    ofstream logFile("xrt_report.txt");
-    logFile.close();
-    l_logFile = "xrt_report.txt";
     int l_numKernel = 1;
 
     if (argc == 4) {
@@ -89,8 +85,7 @@ int main(int argc, char** argv) {
     }
 
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
-    xfblasStatus_t status =
-        xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName, l_numKernel);
+    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, engineName, l_numKernel);
     if (status != XFBLAS_STATUS_SUCCESS) {
         cout << "Create Handle failed with error code: " << status << "\n";
         return EXIT_FAILURE;
@@ -165,7 +160,7 @@ int main(int argc, char** argv) {
     status = xfblasGetMatrixRestricted(c, l_numKernel - 1);
 
     if (status != XFBLAS_STATUS_SUCCESS) {
-        cout << "Get Matirx failed with error code: " << status << "\n";
+        cout << "Get Matrix failed with error code: " << status << "\n";
         xfblasDestroy();
         return EXIT_FAILURE;
     }

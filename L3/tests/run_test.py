@@ -1,1 +1,1 @@
-python/run_test.py
+sw/python/run_test.py
