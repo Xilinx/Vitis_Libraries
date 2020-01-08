@@ -129,7 +129,7 @@ class FCNHost : public BLASHost {
 
         return XFBLAS_STATUS_SUCCESS;
     }
-    
+
     virtual xfblasStatus_t addFCNOpByAddress(unsigned int l_aOff,
                                              unsigned int l_bOff,
                                              unsigned int l_cOff,
@@ -145,7 +145,6 @@ class FCNHost : public BLASHost {
                                              int p_postShift,
                                              short p_preluScale,
                                              short p_preluAlpha) {
-
         FcnArgs args(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_k, p_n, p_lda, p_ldb, p_ldc, p_ldx, p_postScale,
                      p_postShift, p_preluScale, p_preluAlpha);
         this->addInstr(&args);
