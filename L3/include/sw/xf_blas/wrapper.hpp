@@ -30,7 +30,6 @@ namespace blas {
  * prior to any other XFBLAS library calls.
  * @param xclbin file path to FPGA bitstream
  * @param configFile file path to config_info.dat file
- * @param logFile file path to log file
  * @param engineName XFBLAS engine to run
  * @param kernelNumber number of kernels that is being used, default is 1
  * @param deviceIndex index of device that is being used, default is 0
@@ -41,7 +40,6 @@ namespace blas {
  */
 xfblasStatus_t xfblasCreate(const char* xclbin,
                             string configFile,
-                            const char* logFile,
                             xfblasEngine_t engineName,
                             unsigned int kernelNumber = 1,
                             unsigned int deviceIndex = 0) {
@@ -52,9 +50,7 @@ xfblasStatus_t xfblasCreate(const char* xclbin,
 
     int l_err = 0;
 
-    // XFpgaHold::instance().m_xFpgaPtr = shared_ptr<XFpga>(new XFpga(xclbin, logFile, &l_err));
-
-    shared_ptr<XFpga> l_xFpga(new XFpga(xclbin, logFile, &l_err, deviceIndex));
+    shared_ptr<XFpga> l_xFpga(new XFpga(xclbin, &l_err, deviceIndex));
     XFpgaHold::instance().m_xFpgaPtr[deviceIndex] = l_xFpga;
 
     if (l_err != 0) {
@@ -68,22 +64,17 @@ xfblasStatus_t xfblasCreate(const char* xclbin,
 
         for (unsigned int i = 0; i < kernelNumber; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
-                shared_ptr<BLASHost>(new GEMMHost(xclbin, logFile, &l_status, i, deviceIndex)));
+                shared_ptr<BLASHost>(new GEMMHost(xclbin, &l_status, i, deviceIndex)));
         }
         return l_status;
     } else if (engineName == XFBLAS_ENGINE_GEMV) {
         if (ConfigDict::instance().m_dict["GEMX_runGemv"] != "1") {
             return XFBLAS_STATUS_INVALID_VALUE;
         }
-        // int l_err = 0;
 
-        // XFpgaHold::instance().m_xFpgaPtr = shared_ptr<XFpga>(new XFpga(xclbin, logFile, &l_err));
-        // if (l_err != 0) {
-        //    return XFBLAS_STATUS_NOT_INITIALIZED;
-        //}
         for (unsigned int i = 0; i < kernelNumber; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
-                shared_ptr<BLASHost>(new GEMVHost(xclbin, logFile, &l_status, i, deviceIndex)));
+                shared_ptr<BLASHost>(new GEMVHost(xclbin, &l_status, i, deviceIndex)));
         }
         return l_status;
 

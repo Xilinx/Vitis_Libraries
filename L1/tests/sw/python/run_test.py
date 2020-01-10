@@ -97,6 +97,11 @@ def main(profileList, args):
     else:
       statPath = os.path.join(os.getcwd(),"statistics_%d.rpt"%args.id) 
     list2File(statList, statPath) 
+    failures = [k for k in statList if k['Status'] == 'Failed']
+    if len(failures) !=0 :
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 if __name__== "__main__":
   parser = argparse.ArgumentParser(description='Generate random vectors and run test.')
