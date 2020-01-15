@@ -16,9 +16,9 @@
 .. _benchmark_gemm_l3:
 
 L3 API GEMM benchmark
+=======================
 
-
-1. Benchmarking Intel® Math Kernel Librry (MKL)
+1. Benchmarking Intel® Math Kernel Libray (MKL)
 ------------------------------------------------
 
 1.1 Introduction
