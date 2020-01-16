@@ -26,3 +26,4 @@ L3 API User Guide
    L3_example.rst
    L3_benchmark.rst
    L3_test.rst
+   L3_python_bindings.rst
