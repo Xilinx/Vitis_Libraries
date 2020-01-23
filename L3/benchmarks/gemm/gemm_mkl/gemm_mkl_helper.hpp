@@ -17,6 +17,8 @@
 #ifndef GEMM_MKL_HELPER_HPP
 #define GEMM_MKL_HELPER_HPP
 
+#define IDX2R(i, j, ld) (((i) * (ld)) + (j))
+
 #include <iostream>
 #include <mkl.h>
 #include <chrono>
@@ -63,10 +65,12 @@ XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_zero = false) {
     return mat;
 }
 
-// TODO, implement random input
 void initMat(XFBLAS_dataType* mat, int p_rows, int p_cols, bool is_zero) {
     srand(time(NULL));
-    for (int j = 0; j < p_rows; j++)
-        for (int i = 0; i < p_cols; i++) mat[i + (size_t)j * (size_t)p_cols] = (!is_zero & (i == j)) ? 1 : 0;
+    for (int j = 0; j < p_rows; j++) {
+        for (int i = 0; i < p_cols; i++) {
+            mat[IDX2R(j, i, p_cols)] = 1;
+        }
+    }
 }
 #endif

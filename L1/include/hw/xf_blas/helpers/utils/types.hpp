@@ -45,66 +45,197 @@ class WideType {
     static const unsigned int FLOAT_WIDTH = 7;
 
    public:
+    static const unsigned int t_TypeWidth = t_Width * t_DataWidth;
+    typedef ap_uint<t_TypeWidth> t_TypeInt;
     typedef T DataType;
     static const unsigned int t_WidthS = t_Width;
     static const unsigned int t_per4k = t_4k / t_DataWidth / t_Width * 8;
 
    public:
-    T& getVal(unsigned int i) { return (m_Val[i]); }
-    T& operator[](unsigned int p_Idx) { return (m_Val[p_Idx]); }
+    T& getVal(unsigned int i) {
+#ifndef __SYNTHESIS__
+        assert(i < t_Width);
+#endif
+        return (m_Val[i]);
+    }
+    T& operator[](unsigned int p_Idx) {
+#ifndef __SYNTHESIS__
+        assert(p_Idx < t_Width);
+#endif
+        return (m_Val[p_Idx]);
+    }
+    const T& operator[](unsigned int p_Idx) const {
+#ifndef __SYNTHESIS__
+        assert(p_Idx < t_Width);
+#endif
+        return (m_Val[p_Idx]);
+    }
     T* getValAddr() { return (&m_Val[0]); }
-    WideType() {}
-    WideType(T p_initScalar) {
-#pragma HLS inline self
+
+    WideType() {
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+    }
+
+    WideType(const WideType& wt) {
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+        for (int i = 0; i < t_Width; i++)
+#pragma HLS UNROLL
+            m_Val[i] = wt[i];
+    }
+
+    WideType(const t_TypeInt& p_val) {
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
         for (int i = 0; i < t_Width; ++i) {
 #pragma HLS UNROLL
-            getVal(i) = p_initScalar;
+            ap_uint<t_DataWidth> l_val = p_val.range(t_DataWidth * (1 + i) - 1, t_DataWidth * i);
+            m_Val[i] = *reinterpret_cast<T*>(&l_val);
         }
     }
+
+    WideType(const T p_initScalar) {
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+        for (int i = 0; i < t_Width; ++i) {
+#pragma HLS UNROLL
+            m_Val[i] = p_initScalar;
+        }
+    }
+
+    operator const t_TypeInt() {
+#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+        t_TypeInt l_fVal;
+        for (int i = 0; i < t_Width; ++i) {
+#pragma HLS UNROLL
+            T l_v = m_Val[i];
+            ap_uint<t_DataWidth> l_val = *reinterpret_cast<ap_uint<t_DataWidth>*>(&l_v);
+            l_fVal.range(t_DataWidth * (1 + i) - 1, t_DataWidth * i) = l_val;
+        }
+        return l_fVal;
+    }
+
     T shift(T p_ValIn) {
-#pragma HLS inline self
         T l_valOut = m_Val[t_Width - 1];
     WIDE_TYPE_SHIFT:
         for (int i = t_Width - 1; i > 0; --i) {
+#pragma HLS UNROLL
             T l_val = m_Val[i - 1];
             m_Val[i] = l_val;
         }
         m_Val[0] = p_ValIn;
         return (l_valOut);
     }
+
     T shift() {
-#pragma HLS inline self
         T l_valOut = m_Val[t_Width - 1];
-    WIDE_TYPE_SHIFT:
         for (int i = t_Width - 1; i > 0; --i) {
+#pragma HLS UNROLL
             T l_val = m_Val[i - 1];
             m_Val[i] = l_val;
         }
         return (l_valOut);
     }
+
     T unshift() {
-#pragma HLS inline self
         T l_valOut = m_Val[0];
-    WIDE_TYPE_SHIFT:
         for (int i = 0; i < t_Width - 1; ++i) {
+#pragma HLS UNROLL
             T l_val = m_Val[i + 1];
             m_Val[i] = l_val;
         }
         return (l_valOut);
     }
+
+    T unshift(const T p_val) {
+        T l_valOut = m_Val[0];
+        for (int i = 0; i < t_Width - 1; ++i) {
+#pragma HLS UNROLL
+            T l_val = m_Val[i + 1];
+            m_Val[i] = l_val;
+        }
+        m_Val[t_Width - 1] = p_val;
+        return (l_valOut);
+    }
+
     static const WideType zero() {
         WideType l_zero;
         for (int i = 0; i < t_Width; ++i) {
+#pragma HLS UNROLL
             l_zero[i] = 0;
         }
         return (l_zero);
     }
+
     static unsigned int per4k() { return (t_per4k); }
     void print(std::ostream& os) {
         for (int i = 0; i < t_Width; ++i) {
-            os << std::setw(FLOAT_WIDTH) << getVal(i) << " ";
+            os << std::setw(FLOAT_WIDTH) << m_Val[i] << " ";
         }
     }
+
+    friend std::ostream& operator<<(std::ostream& os, WideType& p_Val) {
+        p_Val.print(os);
+        return (os);
+    }
+};
+
+template <typename T, unsigned int t_DataWidth>
+class WideType<T, 1, t_DataWidth> {
+   private:
+    T m_Val;
+    static const unsigned int t_4k = 4096;
+    static const unsigned int FLOAT_WIDTH = 7;
+
+   public:
+    static const unsigned int t_TypeWidth = t_DataWidth;
+    typedef T t_TypeInt;
+    typedef T DataType;
+    static const unsigned int t_WidthS = 1;
+    static const unsigned int t_per4k = t_4k / t_DataWidth * 8;
+
+   public:
+    T& operator[](unsigned int p_Idx) {
+#ifndef __SYNTHESIS__
+        assert(p_Idx == 0);
+#endif
+        return m_Val;
+    }
+
+    const T& operator[](unsigned int p_Idx) const {
+#ifndef __SYNTHESIS__
+        assert(p_Idx == 0);
+#endif
+        return m_Val;
+    }
+
+    T* getValAddr() { return (&m_Val); }
+
+    WideType() {}
+
+    WideType(const WideType& wt) { m_Val = wt[0]; }
+
+    WideType(const T p_initScalar) { m_Val = p_initScalar; }
+
+    operator const t_TypeInt() { return m_Val; }
+
+    T shift(T p_ValIn) {
+        T l_valOut = m_Val;
+        m_Val = p_ValIn;
+        return l_valOut;
+    }
+    T shift() { return m_Val; }
+
+    T unshift() { return m_Val; }
+
+    T unshift(T p_ValIn) {
+        T l_valOut = m_Val;
+        m_Val = p_ValIn;
+        return l_valOut;
+    }
+
+    static const WideType zero() { return WideType(0); }
+
+    static unsigned int per4k() { return (t_per4k); }
+    void print(std::ostream& os) { os << std::setw(FLOAT_WIDTH) << m_Val << " "; }
+
     friend std::ostream& operator<<(std::ostream& os, WideType& p_Val) {
         p_Val.print(os);
         return (os);
@@ -251,6 +382,44 @@ inline double BitConv<double>::toType(BitConv<double>::BitsType p_Val) {
     return (u.f);
 }
 
+template <unsigned int t_Bits, unsigned int t_Width, typename t_DataType>
+ap_uint<t_Bits> convWideVal2Bits(WideType<t_DataType, t_Width> p_val) {
+#pragma HLS inline
+#ifndef __SYNTHESIS__
+    assert((t_Bits > t_Width) && (t_Bits % t_Width == 0));
+#endif
+    const unsigned int t_DataBits = sizeof(t_DataType) * 8;
+    const unsigned int t_ResEntryBits = t_Bits / t_Width;
+    ap_uint<t_Bits> l_res;
+    for (unsigned int i = 0; i < t_Width; ++i) {
+#pragma HLS UNROLL
+        BitConv<t_DataType> l_bitConv;
+        ap_uint<t_DataBits> l_datBits = l_bitConv.toBits(p_val[i]);
+        ap_uint<t_ResEntryBits> l_resEntry = l_datBits;
+        l_res.range((i + 1) * t_ResEntryBits - 1, i * t_ResEntryBits) = l_resEntry;
+    }
+    return l_res;
+}
+
+template <unsigned int t_Bits, unsigned int t_Width, typename t_DataType>
+WideType<t_DataType, t_Width> convBits2WideType(ap_uint<t_Bits> p_bits) {
+#pragma HLS inline
+#ifndef __SYNTHESIS__
+    assert((t_Bits > t_Width) && (t_Bits % t_Width == 0));
+#endif
+    const unsigned int t_DataBits = sizeof(t_DataType) * 8;
+    const unsigned int t_InEntryBits = t_Bits / t_Width;
+    WideType<t_DataType, t_Width> l_res;
+    for (unsigned int i = 0; i < t_Width; ++i) {
+#pragma HLS UNROLL
+        BitConv<t_DataType> l_bitConv;
+        ap_uint<t_InEntryBits> l_inDatBits = p_bits.range((i + 1) * t_InEntryBits - 1, i * t_InEntryBits);
+        ap_uint<t_DataBits> l_datBits = l_inDatBits;
+        t_DataType l_val = l_bitConv.toType(l_datBits);
+        l_res[i] = l_val;
+    }
+    return l_res;
+}
 // Type converter - for vectors of different lengths and types
 template <typename TS, typename TD>
 class WideConv {
