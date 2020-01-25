@@ -13,18 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _user_guide_l3:
+.. _application_l3: 
 
-=====================
-L3 API User Guide
-=====================
+===================
+L3 API application
+===================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    
-   L3_overview.rst
-   L3_example.rst
-   L3_benchmark.rst
-   L3_test.rst
-   L3_python_bindings.rst
-   L3_application.rst
+   L3_application_keras.rst

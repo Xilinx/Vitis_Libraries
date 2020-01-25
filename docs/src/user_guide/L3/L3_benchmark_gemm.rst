@@ -56,7 +56,7 @@ To install MKL on Nimbix, please download the full installation package for MKL2
 
 .. _Intel® MKL Webste: https://software.intel.com/en-us/mkl/choose-download/linux
 
-1.2.3 Set up MKL encironment variables
+1.2.3 Set up MKL environment variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Intel® MKL**: Assume you have installed Intel® MKL, run the appropriate script to set up the environment variables (such as $MKLROOT).

@@ -18,6 +18,30 @@ import xfblas_L3 as xfblas
 import time
 
 class XfblasRT():
+  '''
+  base class for using the XFBLAS in Keras
+  
+  Parameters
+  
+  xclbin_opts: dictionary 
+             information read from config_info.dat used to build the xclbin  
+  wgt:         list
+             weights of the model
+  bias:        list
+             bias of the model
+  wgt_scale:   list
+             Quantization parameters multiple with weight matrices
+  bias_scale:  list
+             Quantization parameters multiple with bias matrices
+  post_scale:  list
+             Quantization parameters multiple with output matrices on FPGA side
+  relu_scale: list
+             Relu parameters multiple with BIAS matrices on FPGA side
+  idxKernel
+             index of CU
+  idxDevice 
+             index of device
+  '''
   
   def __init__(self, xclbin_opts, wgt, bias, wgt_scale, bias_scale, post_scale,relu_scale,idxKernel,idxDevice):
       ddrwidth = int(xclbin_opts["GEMX_ddrWidth"])
@@ -125,6 +149,16 @@ class XfblasRT():
       return self.fpga_buf[-1][:self.out_dim[0],:self.out_dim[1]]
       
   def predict ( self, inp, in_scale):
+      '''
+      Return output prediction for the input sample
+      
+      Parameters
+      
+      inp
+            input sample
+      in_scale
+            scale of input sample
+      '''
       self.init_fpgabuf(inp.shape)
       if self.xclbin_opts["GEMX_dataType"] == "float":
         padded_arr = self.format_for_fpga(inp, self.min_k, self.min_n)
@@ -145,6 +179,16 @@ class XfblasRT():
       return self.fpga_buf[-1][:self.out_dim[0],:self.out_dim[1]]
 
   def send_matrices(self, inp, in_scale):
+      '''
+      send input matrix and bias matrices to FPGA
+      
+      Parameters
+      
+      inp
+            input sample
+      in_scale
+            scale of input sample
+      '''
       self.init_fpgabuf(inp.shape)
       if self.xclbin_opts["GEMX_dataType"] == "float":
         padded_arr = self.format_for_fpga(inp, self.min_k, self.min_n)
@@ -161,6 +205,9 @@ class XfblasRT():
       xfblas.execute(self.idxKernel,self.idxDevice)
      
   def get_result(self):
+      '''
+      Return output prediction for the input sample
+      '''
       xfblas.getMatByAddress (self.fpga_buf[-1],self.offset_list[-2],self.idxKernel,self.idxDevice)
       xfblas.freeMat(self.fpga_buf[0],self.idxKernel,self.idxDevice)
       for i in self._qb:
