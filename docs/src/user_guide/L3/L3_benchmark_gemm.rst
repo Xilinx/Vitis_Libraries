@@ -15,24 +15,25 @@
 
 .. _benchmark_gemm_l3:
 
+***********************
 L3 API GEMM benchmark
-======================
+***********************
 
-1. Benchmarking Intel® Math Kernel Librry (MKL)
-------------------------------------------------
+1. Benchmarking Intel® Math Kernel Libray (MKL)
+=================================================
 
 1.1 Introduction
-----------------
+-----------------
 
 Intel® Math Kernel Library provides performance improvement of math functions, e.g. GEMM, when running with Intel processors. To compare with Xilinx's XFBLAS library, you can use our run-script (run_gemm_mkl.sh) to generate the data and performance benchmark.
 
 .. _MKL_benchmark:
 
 1.2 Benchmarking Steps
-----------------------
+-----------------------
 
 1.2.1 Access Nimbix cloud
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Follow the user guide `Vitis On Nimbix`_ to login to your Nimbix account
 - Launch application "Xilinx SDAccel Development 2019.1" and select "Desktop Mode with FPGA"
@@ -45,7 +46,7 @@ Intel® Math Kernel Library provides performance improvement of math functions, 
 .. NOTE:: FPGA is not required in Intel® Math Kernel Library but will be used in Xilinx's XFBLAS library.
 
 1.2.2 Install Intel® MK library
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To install MKL on Nimbix, please download the full installation package for MKL2020 from `Intel® MKL Webste`_. You need to register for downloading the package. After you have downloaded the package, please unzip it and navigate to the directory includeing "install.sh". Please enter the following command to install the MKL package.
 
@@ -55,8 +56,8 @@ To install MKL on Nimbix, please download the full installation package for MKL2
 
 .. _Intel® MKL Webste: https://software.intel.com/en-us/mkl/choose-download/linux
 
-1.2.3 Set up MKL encironment variables
---------------------------------------
+1.2.3 Set up MKL environment variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Intel® MKL**: Assume you have installed Intel® MKL, run the appropriate script to set up the environment variables (such as $MKLROOT).
 
@@ -65,7 +66,7 @@ To install MKL on Nimbix, please download the full installation package for MKL2
   source <INTEL_MKL_INSTALL_DIR>/bin/mklvars.sh intel64
 
 1.2.4 Install numactl
----------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 **NUMACTL**: The linux operating system provides a function, called numactl, that allows the control of scheduling or memory placement policy, which is essential to run parallel programs.
 
@@ -76,7 +77,7 @@ For Ubuntu (you only need to do it once),
   sudo apt-get install numactl
 
 1.2.5 Run MKL benchmarking script 
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The run-script runs the GEMM benchmark with a number of threads, data type, and work mode. Then, it will explore the GEMM's matrix size from 256 to 16384.
 
@@ -93,7 +94,7 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 - mode: **g** for generating the data, **b** for benchmarking the performance, and **a** for both workloads. 
 
 1.3 Performance Result on Nimbix Cloud
---------------------------------------
+---------------------------------------
 
 .. rubric:: Configuration:
 
@@ -155,7 +156,7 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 
 
 1.4 Reference
--------------
+--------------
 
 [1] `Improving Performance of Math Functions with Intel® Math Kernel Library`_
 
@@ -167,17 +168,17 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 
 
 2. Benchmarking xfblasGemm - Xilinx's XFBLAS library
-------------------------------------------------------
+=====================================================
 
 Before benchmarking xfblashGemm, please download `xf blas xclbin files`_, unzip the file with "tar -xvzf" command, and copy the folder u250_xdma_201830_2 to directory L3/overlay.
 
 .. _xf blas xclbin files: https://www.xilinx.com/bin/public/openDownload?filename=vitis_BLAS_library_r1.0_xclbin.tar
 
 2.1 Benchmarking Steps 
-----------------------
+------------------------
 
 2.1.1 Generate test inputs and golden reference
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Follow the MKL_benchmark_ steps to run MKL benchmarks, for float and short data type to generate test inputs and golden reference. To generate test inputs and golden reference for float data type, please run the following command.
 
@@ -192,7 +193,7 @@ To generate test inputs and golden reference for short data type, please run the
   ./run_gemm_mkl.sh 16 short a
 
 2.1.2 Build benchmark application
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before benchmark the xfblasGemm, please build the host executable for the corresponding .xclbin files via following script
 
@@ -201,7 +202,7 @@ Before benchmark the xfblasGemm, please build the host executable for the corres
   ./build_gemm_bench.sh confi_info_file
 
 2.1.3 Run benchmark
--------------------
+^^^^^^^^^^^^^^^^^^^^
 
 The run-script runs the GEMM benchmark with xclbin and cfg files. It will explore the GEMM's matrix size from 256 to 8192.
 
@@ -215,7 +216,7 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. It will explor
 - **config_info_file** refers to config_info.dat file, including the path.
   
 2.2 Performance Results on Nimbix Cloud
------------------------------------------
+------------------------------------------
 
 .. rubric:: Configuration:
 

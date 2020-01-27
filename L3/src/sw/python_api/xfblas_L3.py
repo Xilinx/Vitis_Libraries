@@ -69,8 +69,9 @@ class XFBLASManager:
     '''
     create Gemm Handle
     
+    
     Parameters
-    ----------
+    
     xclbin
                 file path for FPGA bitstream
     numKernel
@@ -87,7 +88,7 @@ class XFBLASManager:
     create Gemv Handle
     
     Parameters
-    ----------
+    
     xclbin
                 file path for FPGA bitstream
     numKernel
@@ -104,7 +105,7 @@ class XFBLASManager:
     create Fcn Handle
     
     Parameters
-    ----------
+    
     xclbin
                 file path for FPGA bitstream
     numKernel
@@ -121,7 +122,7 @@ class XFBLASManager:
     send mat from host to device
     
     Parameters
-    ----------
+    
     A:          ndarray
                 matrix in host memory
     idxKernel:  int
@@ -136,7 +137,7 @@ class XFBLASManager:
     get mat from device to host
     
     Parameters
-    ----------
+    
     A:          ndarray
                 matrix in host memory
     idxKernel:  int
@@ -151,7 +152,7 @@ class XFBLASManager:
     free memory for instructions
     
     Parameters
-    ----------
+    
     idxKernel
                 index of kernel to be used
     idxDeivce
@@ -164,7 +165,7 @@ class XFBLASManager:
     free device memory for mat A
     
     Parameters
-    ----------
+    
     A:          ndarray
                 matrix in host memory
     idxKernel:  int
@@ -179,7 +180,7 @@ class XFBLASManager:
     release handle used by the XFBLAS library
     
     Parameters
-    ----------
+    
     numKernel
                 number of CUs in the xclbin
     idxDeivce
@@ -192,7 +193,7 @@ class XFBLASManager:
     perform matrix-matrix multiplication of C=A*B
     
     Parameters
-    ----------
+    
     A:              ndarray
                     matrix in host memory
     B:              ndarray
@@ -211,7 +212,7 @@ class XFBLASManager:
     perform matrix-vector multiplication of y=A*x
     
     Parameters
-    ----------
+    
     A:              ndarray
                     matrix in host memory
     x:              ndarray
@@ -230,7 +231,7 @@ class XFBLASManager:
     perform matrix-matrix multiplication with p_relu, and quantization support of C = relu ((A * B + X) * postScale >> postShift) 
     
     Parameters
-    ----------
+    
     A:              ndarray
                     matrix in host memory
     B:              ndarray
@@ -260,7 +261,7 @@ class XFBLASManager:
     Using this function, could avoid sending matrices that will be over-written in device, but users need to provide offsets
     
     Parameters
-    ----------
+    
     a:              int
                     offset of memory for A on device
     b:              int
@@ -295,7 +296,7 @@ class XFBLASManager:
     get mat from device by offset
     
     Parameters
-    ----------
+    
     A:              ndarray
                     matrix in host memory
     offset:         int
@@ -312,7 +313,7 @@ class XFBLASManager:
     run number of kernels async
     
     Parameters
-    ----------
+    
     numKernel
                 number of CUs in the xclbin
     idxDeivce
@@ -325,7 +326,7 @@ class XFBLASManager:
     run ith kernel
     
     Parameters
-    ----------
+    
     idxKernel:      int
                     index of kernel to be used
     idxDeivce:      int

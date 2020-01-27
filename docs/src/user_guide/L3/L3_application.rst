@@ -13,13 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. _benchmark_l3:
+.. _application_l3: 
 
-=====================
-L3 API benchmark
-=====================
+===================
+L3 API application
+===================
 
 .. toctree::
    :maxdepth: 3
    
-   L3_benchmark_gemm.rst
+   L3_application_keras.rst
