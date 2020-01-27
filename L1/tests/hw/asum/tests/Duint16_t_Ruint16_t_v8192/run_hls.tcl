@@ -18,7 +18,7 @@ if {![info exists CLKP]} {
   set CLKP 3.333
 }
 open_project -reset $PROJ
-add_files ${XF_PROJ_ROOT}/L1/tests/hw/asum/uut_top.cpp                    -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11                     -BLAS_L1=true -DBLAS_opName=asum -DBLAS_vectorSize=8192 -DBLAS_dataType=uint16_t -DBLAS_resDataType=uint16_t -DBLAS_logParEntries=2     -DBLAS_parEntries=4"
+add_files ${XF_PROJ_ROOT}/L1/tests/hw/asum/uut_top.cpp                    -cflags "-I${XF_PROJ_ROOT}/L1/include/hw                    -I${XF_PROJ_ROOT}/L1/include/hw/xf_blas                    -I${XF_PROJ_ROOT}/L1/tests/hw -g -O0                    -std=c++11                     -BLAS_L1=true -DBLAS_opName=asum -DBLAS_vectorSize=8192 -DBLAS_dataType=uint16_t -DBLAS_resDataType=uint16_t -DBLAS_logParEntries=2     -DBLAS_parEntries=4"
 add_files -tb "${XF_PROJ_ROOT}/L1/tests/sw/src/test.cpp"                    -cflags "-I${XF_PROJ_ROOT}/L1/tests/hw/ -I${XF_PROJ_ROOT}/L1/tests/sw/include                    -I${XF_PROJ_ROOT}        -DBLAS_pageSizeBytes=4096       -DBLAS_memWidthBytes=64       -DBLAS_instrSizeBytes=8       -DBLAS_maxNumInstrs=16       -DBLAS_instrPageIdx=0       -DBLAS_paramPageIdx=1       -DBLAS_statsPageIdx=2  -BLAS_L1=true -DBLAS_opName=asum -DBLAS_vectorSize=8192 -DBLAS_dataType=uint16_t -DBLAS_resDataType=uint16_t -DBLAS_logParEntries=2     -DBLAS_parEntries=4"
 set_top uut_top 
 open_solution -reset $SOLN
