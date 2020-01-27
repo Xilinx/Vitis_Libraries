@@ -85,7 +85,6 @@ int main(int argc, char** argv) {
 #endif
     }
 
-
     int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
 
     vector<XFBLAS_dataType*> goldenC;
@@ -147,7 +146,6 @@ int main(int argc, char** argv) {
                             c[kernelIndex], n, kernelIndex);
     }
 
-    
 #ifdef XFBLAS_LAUNCH_ASYNC
     for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
         xfblasGetMatrixRestrictedAsync(c[kernelIndex], kernelIndex);
@@ -159,7 +157,6 @@ int main(int argc, char** argv) {
         status = xfblasGetMatrixRestricted(c[kernelIndex], kernelIndex);
     }
 #endif
-    
 
     showTimeData("copyFromFpga", l_tp_loop[l_tpIdx], l_tp_loop[l_tpIdx + 1]);
     l_tpIdx++;
@@ -170,7 +167,6 @@ int main(int argc, char** argv) {
         memcpy(tmp_c, c[kernelIndex], m * n * sizeof(XFBLAS_dataType));
         resultC.push_back(tmp_c);
     }
-    
 
     for (int kernelIndex = 0; kernelIndex < l_numKernel; kernelIndex++) {
         xfblasFree(a[kernelIndex], kernelIndex);
@@ -188,7 +184,7 @@ int main(int argc, char** argv) {
     a.clear();
     b.clear();
     c.clear();
-    
+
     chrono::duration<double> l_timeApi = l_timeApiSum;
     double l_timeMs = l_timeApi.count() * 1e3;
 

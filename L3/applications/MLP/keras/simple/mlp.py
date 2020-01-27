@@ -29,6 +29,7 @@ import mlp_common
 #This parameters won't be used if using fp32 xclbin
 g_in_scale = 31.130533916017484
 g_wgt_scale = [159879.54672570297, 135942.35558298964, 72420.85217502648]
+g_bias_scale = [159879.54672570297, 135942.35558298964, 72420.85217502648]
 g_post_scale = [[1, 17], [1, 17], [5, 24]]
 
 def train(train_fd, predictors, train_data, num_classes):
@@ -174,7 +175,7 @@ if  __name__ == '__main__':
     fpga_rt = []  
     fpga_out = []
     for i in range(numKernels):
-      fpga_rt.append(mlp_common.init_fpga(model,xclbin_opts, g_wgt_scale, g_wgt_scale, g_post_scale,None,i,0))
+      fpga_rt.append(mlp_common.init_fpga(model,xclbin_opts, g_wgt_scale, g_bias_scale, g_post_scale,None,i,0))
         
     inp = train_fd[predictors].values
     

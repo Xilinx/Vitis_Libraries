@@ -17,6 +17,28 @@ import xfblas_L3 as xfblas
 from xfblas_L3_rt import XfblasRT
 
 class KerasRT(XfblasRT):
+    '''
+    base class for using the XFBLAS in Keras
+    
+    Parameters
+    
+    keras_model: model 
+               pre-trained model
+    xclbin_opts: dictionary 
+               information read from config_info.dat used to build the xclbin  
+    wgt_scale:   list
+               Quantization parameters multiple with weight matrices
+    bias_scale:  list
+               Quantization parameters multiple with bias matrices
+    post_scale:  list
+               Quantization parameters multiple with output matrices on FPGA side
+    relu_scale: list
+               Relu parameters multiple with BIAS matrices on FPGA side
+    idxKernel
+               index of CU
+    idxDevice 
+               index of device
+    '''
     def __init__(self, keras_model, xclbin_opts, wgt_scale, bias_scale, post_scale, relu_scale,idxKernel,idxDevice):
       keras_w = keras_model.get_weights()[0::2]
       keras_b = keras_model.get_weights()[1::2]
@@ -39,6 +61,9 @@ class KerasRT(XfblasRT):
               xfblas.fcnOp( self.fpga_buf[i], self._qw[i], self.fpga_buf[i+1], self._qb[i], self.post_scale[i][0], self.post_scale[i][1], 1, 0, self.idxKernel,self.idxDevice)
               
     def loadInstrByAddress(self):
+      '''
+      send instructions to FPGA
+      '''
       xfblas.freeInstr(self.idxKernel,self.idxDevice)
       numLayers= len(self.kmodel.layers)
       for i,l in enumerate(self.kmodel.layers):

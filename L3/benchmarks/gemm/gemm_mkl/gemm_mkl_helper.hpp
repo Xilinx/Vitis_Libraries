@@ -67,10 +67,9 @@ XFBLAS_dataType* createMat(int p_rows, int p_cols, bool is_zero = false) {
 
 void initMat(XFBLAS_dataType* mat, int p_rows, int p_cols, bool is_zero) {
     srand(time(NULL));
-    for (int j = 0; j < p_rows; j++){
-        for (int i = 0; i < p_cols; i++){   
-          mat[IDX2R(j, i, p_cols)] = 1;
-
+    for (int j = 0; j < p_rows; j++) {
+        for (int i = 0; i < p_cols; i++) {
+            mat[IDX2R(j, i, p_cols)] = 1;
         }
     }
 }

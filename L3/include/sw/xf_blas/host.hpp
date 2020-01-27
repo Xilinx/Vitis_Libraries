@@ -46,7 +46,7 @@ class XFpga {
     uuid_t m_xclbinId;
     vector<int> m_mem;
     vector<unsigned long long> m_baseAddress;
-
+    
     bool m_init = false;
 
     XFpga() = delete;
@@ -135,14 +135,14 @@ class XFpga {
             m_baseAddress[p_kernelIndex] >> 32;
         ecmd->data[XGEMXKERNEL_0_GEMXKERNEL_0_CONTROL_ADDR_P_DDRWR_M_VAL_DATA / 4 + 1] =
             m_baseAddress[p_kernelIndex] >> 32;
-
+        
         if (xclExecBuf(m_handle, m_execHandle)) {
             return 0;
         }
-        while (ecmd->state == 1) {
-            while (xclExecWait(m_handle, 1) == 0)
-                ;
-        }
+        //while (ecmd->state == 1){
+            while (xclExecWait(m_handle, 1) == 0);
+
+        //}
         return m_execHandle;
     }
 };
@@ -241,15 +241,13 @@ class XHost {
                 posix_memalign((void**)&l_matPtr, 4096, p_bufSize);
                 memcpy(l_matPtr, p_matPtr, p_bufSize);
                 l_hostPtr[p_hostHandle] = l_matPtr;
-                l_devPtr[p_hostHandle] =
-                    m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
+                l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
             } else {
                 l_hostPtr[p_hostHandle] = p_matPtr;
-                l_devPtr[p_hostHandle] =
-                    m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
+                l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
             }
         } else {
-            l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);
+            l_devPtr[p_hostHandle] = m_fpga->createBuf(l_hostPtr[p_hostHandle], l_hostSzPtr[p_hostHandle], m_cuIndex);   
         }
         return XFBLAS_STATUS_SUCCESS;
     }
@@ -295,7 +293,7 @@ class XHost {
         auto& l_devPtr = m_bufHandle;
         auto& l_hostSzPtr = m_hostMatSz;
         if (!m_fpga->copyToFpga(l_devPtr[p_hostHandle], l_hostSzPtr[p_hostHandle])) {
-            return XFBLAS_STATUS_ALLOC_FAILED;
+                return XFBLAS_STATUS_ALLOC_FAILED;
         }
 
         return XFBLAS_STATUS_SUCCESS;
@@ -362,11 +360,11 @@ class XHost {
         }
         return XFBLAS_STATUS_SUCCESS;
     }
-
+    
     xfblasStatus_t getMatByAddress(void* p_matPtr, unsigned long long p_bufSize, unsigned int offset) {
-        uint64_t l_address = offset * PAGE_SIZE + m_fpga->m_baseAddress[m_cuIndex];
-        if (xclUnmgdPread(m_fpga->m_handle, 0, p_matPtr, p_bufSize, l_address) < 0) {
-            return XFBLAS_STATUS_ALLOC_FAILED;
+        uint64_t l_address = offset*PAGE_SIZE+m_fpga->m_baseAddress[m_cuIndex];
+        if (xclUnmgdPread(m_fpga->m_handle,0,p_matPtr,p_bufSize,l_address) < 0){
+          return XFBLAS_STATUS_ALLOC_FAILED;
         }
         return XFBLAS_STATUS_SUCCESS;
     }
@@ -394,7 +392,7 @@ class XHost {
     xfblasStatus_t closeContext(unsigned int p_kernelIndex) {
         free(m_progBuf);
         xclFreeBO(m_fpga->m_handle, m_instrBufHandle);
-        for (unsigned int i = 0; i < m_execHandles.size(); i++) {
+        for (unsigned int i=0;i<m_execHandles.size();i++){
             xclFreeBO(m_fpga->m_handle, m_execHandles[i]);
         }
         xclCloseContext(m_fpga->m_handle, m_fpga->m_xclbinId, this->m_cuIndex);
@@ -425,7 +423,7 @@ class BLASHost : public XHost {
             if (!m_execHandle) {
                 l_status = XFBLAS_STATUS_ALLOC_FAILED;
             } else {
-                this->m_execHandles.push_back(m_execHandle);
+                this-> m_execHandles.push_back(m_execHandle);
             }
             m_execControl = false;
         }
@@ -437,6 +435,6 @@ class BLASHost : public XHost {
 
 } // namespace blas
 
-} // namespace xf
+} // namespace vitis
 
 #endif
