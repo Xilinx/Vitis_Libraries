@@ -229,7 +229,7 @@ setup: | check_part
 	@cat ./settings.tcl
 	@echo "----"
 
-HLS ?= vitis_hls
+HLS ?= vivado_hls
 runhls: setup | check_vivado check_vpp
 	$(HLS) -f run_hls.tcl;
 
