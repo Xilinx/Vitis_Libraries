@@ -20,7 +20,7 @@ XFBLAS L3 based Keras MLP Acceleration
 
 1. Introduction
 ------------------
-Keras is Python based machine learning framework. It provides high level neural network APIs. It is written in Python and can run on top of other low level neural network frameworks for numerical computations. XFBLAS L3 Python APIs could be used for full connected Keras model. 
+Keras is Python based machine learning framework. It provides high level neural network APIs. It can run on top of other low level neural network frameworks for numerical computations. XFBLAS L3 Python APIs could be used for full connected Keras model and could provide better performance compared to CPU result. 
 
 In L3/applications/MLP/keras/simple, an example of using Keras to do classification on a simple model showed that how to use XFBLAS L3 Python APIs in Keras applications.
 
@@ -102,4 +102,4 @@ For async case,
     for i in range(numKernels):
         fpga_out.append(fpga_rt[i].get_result())
 
-In the given example, the activation function of the last layer is softmax, so CPU softmax function is called after getting the results from FPGA. 
+In the given example, the activation function of the last layer is softmax, so CPU softmax function is called after getting the results from FPGA. Users could apply different activation function after getting results from FPGA.
