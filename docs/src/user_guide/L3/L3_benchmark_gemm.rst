@@ -36,8 +36,8 @@ Intel® Math Kernel Library provides performance improvement of math functions, 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Follow the user guide `Vitis On Nimbix`_ to login to your Nimbix account
-- Launch application "Xilinx SDAccel Development 2019.1" and select "Desktop Mode with FPGA"
-- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U250 FPGA (nx5u_xdma_201830_2)"
+- Launch application "Xilinx Vitis Unified Software Platform 2019.2" and select "Desktop Mode with FPGA"
+- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)"
 - Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm/gemm_mkl directory
 - Follow the steps below to run Intel® MKL GEMM APIsbenchmarks.
 
@@ -225,7 +225,7 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. It will explor
 
 	*
 		- fpga_model
-		- Xilinx Alveo U250 FPGA (nx5u_xdma_201830_2)
+		- Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)
 	*
 		- Frequency
 		- 150 Mhz
