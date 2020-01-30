@@ -264,7 +264,7 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. It will explor
 	
 	*
 		- fpga_model
-		- Xilinx Alveo U250 FPGA (nx5u_xdma_201830_2)
+		- Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)
 	*
 		- Frequency
 		- 231 Mhz
