@@ -255,33 +255,19 @@ ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
     VPP_CFLAGS += --slr scanTreeKernel1:SLR0
     VPP_CFLAGS += --slr scanTreeKernel2:SLR1
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-    KERNEL_IDS = 1 2 3
+    KERNEL_IDS = 1 2
     KERNELS := scanTreeKernel1:scan_tree_kernel1.cpp \
-               scanTreeKernel2:scan_tree_kernel2.cpp \
-    	       scanTreeKernel3:scan_tree_kernel3.cpp
+               scanTreeKernel2:scan_tree_kernel2.cpp
 
-    scanTreeKernel3_EXTRA_HDRS += $(KSRC_DIR)/tree_engine_kernel.hpp $(wildcard $(HLS_DIR)/*.hpp) $(wildcard $(HLS_DIR2)/*.hpp)
-    
-    scanTreeKernel3_EXTRA_SRCS += $(KSRC_DIR)/scan_tree_kernel.cpp
-    
-    scanTreeKernel3_VPP_CFLAGS += -I$(KSRC_DIR)
-
-    scanTreeKernel2_VPP_CFLAGS += -D U200
-    scanTreeKernel3_VPP_CFLAGS += -D KERNEL_NAME=scanTreeKernel3
-    
     VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem0:bank0
     VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem1:bank0
     VPP_CFLAGS += --sp scanTreeKernel1.m_axi_gmem2:bank0
-    VPP_CFLAGS += --sp scanTreeKernel2.m_axi_gmem0:bank1
-    VPP_CFLAGS += --sp scanTreeKernel2.m_axi_gmem1:bank1
-    VPP_CFLAGS += --sp scanTreeKernel2.m_axi_gmem2:bank1
-    VPP_CFLAGS += --sp scanTreeKernel3.m_axi_gmem0:bank2
-    VPP_CFLAGS += --sp scanTreeKernel3.m_axi_gmem1:bank2
-    VPP_CFLAGS += --sp scanTreeKernel3.m_axi_gmem2:bank2
+    VPP_CFLAGS += --sp scanTreeKernel2.m_axi_gmem0:bank2
+    VPP_CFLAGS += --sp scanTreeKernel2.m_axi_gmem1:bank2
+    VPP_CFLAGS += --sp scanTreeKernel2.m_axi_gmem2:bank2
 
     VPP_CFLAGS += --slr scanTreeKernel1:SLR0
-    VPP_CFLAGS += --slr scanTreeKernel2:SLR1
-    VPP_CFLAGS += --slr scanTreeKernel3:SLR2
+    VPP_CFLAGS += --slr scanTreeKernel2:SLR2
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
     KERNEL_IDS = 1 2 3 4
     KERNELS := scanTreeKernel1:scan_tree_kernel1.cpp \
@@ -359,7 +345,7 @@ endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
     CXXFLAGS += -DKN=2
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-    CXXFLAGS += -DKN=3
+    CXXFLAGS += -DKN=2
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
     CXXFLAGS += -DKN=4
 endif

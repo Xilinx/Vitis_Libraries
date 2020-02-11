@@ -1,0 +1,79 @@
+{
+    "name": "jks.L2.binomialTreeEngine", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/binomialtree.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "binomialtreehost.exe", 
+        "compiler": {
+            "sources": [
+                "REPO_DIR/L2/tests/BinomialTreeEngine/src/binomialtreehost.cpp", 
+                "REPO_DIR/L2/tests/BinomialTreeEngine/src/binomialtreecpu.cpp", 
+                "REPO_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/BinomialTreeEngine/src", 
+                "REPO_DIR/ext/xcl2"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/BinomialTreeEngine/src"
+            ]
+        }, 
+        "linker": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/BinomialTreeEngine/src"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "REPO_DIR/L2/tests/BinomialTreeEngine/src/binomialtreekernel.cpp", 
+                    "frequency": 200.0, 
+                    "name": "BinomialTreeKernel"
+                }
+            ], 
+            "frequency": 200.0, 
+            "name": "binomialtree"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

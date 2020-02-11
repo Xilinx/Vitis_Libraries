@@ -18,6 +18,7 @@
 #define BT_TESTCASES_H
 
 static const std::string TestCasesFileName = "bt_testcases.csv";
+static const std::string TestCasesFileEmulationName = "bt_testcases_emulation.csv";
 static const std::string SVGridFileName = "bt_testcases_sv_grid.csv";
 static const std::string BinomialTreeEuropeanPutName = "european_put";
 static const std::string BinomialTreeEuropeanCallName = "european_call";

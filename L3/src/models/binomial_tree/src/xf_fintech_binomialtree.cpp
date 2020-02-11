@@ -41,61 +41,9 @@ BinomialTree::~BinomialTree() {
     }
 }
 
-std::string BinomialTree::getKernelTypeSubString(void) {
-    std::string kernelTypeSubString;
-
-    switch (BinomialTree::kernelInUse) {
-        case (bt_kernel_double_pe1): {
-            kernelTypeSubString = "double_pe1";
-            break;
-        }
-
-        case (bt_kernel_double_pe4): {
-            kernelTypeSubString = "double_pe4";
-            break;
-        }
-
-        default: {
-            kernelTypeSubString = "unknown_kernel_type";
-            break;
-        }
-    }
-
-    switch (BinomialTree::kernelInUse) {
-        case (bt_kernel_double_pe1): {
-            kernelTypeSubString = "double_pe1";
-            break;
-        }
-
-        case (bt_kernel_double_pe4): {
-            kernelTypeSubString = "double_pe4";
-            break;
-        }
-
-        case (bt_kernel_double_pe8): {
-            kernelTypeSubString = "double_pe8";
-            break;
-        }
-
-        default: {
-            kernelTypeSubString = "unknown_kernel_type";
-            break;
-        }
-    }
-
-    return kernelTypeSubString;
-}
-
 std::string BinomialTree::getXCLBINName(Device* device) {
     std::string xclbinName;
-    std::string deviceTypeString;
-    std::string kernelTypeSubString;
-
-    deviceTypeString = device->getDeviceTypeString();
-    kernelTypeSubString = getKernelTypeSubString();
-
-    xclbinName = "BinomialTree_hw_" + deviceTypeString + "_" + kernelTypeSubString + ".xclbin";
-
+    xclbinName = "binomialtree.xclbin";
     return xclbinName;
 }
 

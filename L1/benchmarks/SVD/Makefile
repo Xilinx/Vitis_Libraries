@@ -216,10 +216,6 @@ ifeq ($(TARGET),hw_emu)
     VPP_CFLAGS += -D VIVADO_HLS_SIM
 endif
 
-ifneq ($(XILINX_VIVADO_HLS),)
-    VPP_CFLAGS += --include $(XILINX_VIVADO_HLS)/include
-endif
-
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 # U50
     VPP_CFLAGS+= --sp $(KERNEL)_0.m_axi_gmem0:HBM[0]

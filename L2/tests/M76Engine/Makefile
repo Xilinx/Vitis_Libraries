@@ -216,7 +216,7 @@ endif
 XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/src
 
-XCLBIN_NAME := m76_$(TARGET)_$(DEVICE_PART)_$(TEST_DT)
+XCLBIN_NAME := m76
 KERNELS = m76_kernel:m76_kernel.cpp
 
 HLS_L1_DIR = $(XF_PROJ_ROOT)/L1/include

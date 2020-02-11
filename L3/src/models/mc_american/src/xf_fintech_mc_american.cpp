@@ -55,18 +55,24 @@ MCAmerican::MCAmerican() {
     m_hostOutputMatrixBuffer = nullptr;
     m_hostCoeffBuffer = nullptr;
     m_hostOutputBuffer1 = nullptr;
+#if KN2 == 2
     m_hostOutputBuffer2 = nullptr;
+#endif
 
     m_pPreSampleKernel = nullptr;
     m_pCalibrationKernel = nullptr;
     m_pPricingKernel1 = nullptr;
+#if KN2 == 2
     m_pPricingKernel2 = nullptr;
+#endif
 
     m_pHWOutputPriceBuffer = nullptr;
     m_pHWOutputMatrixBuffer = nullptr;
     m_pHWCoeffBuffer = nullptr;
     m_pHWOutputBuffer1 = nullptr;
+#if KN2 == 2
     m_pHWOutputBuffer2 = nullptr;
+#endif
 }
 
 MCAmerican::~MCAmerican() {
@@ -161,9 +167,11 @@ int MCAmerican::createOCLObjects(Device* device) {
         m_pPricingKernel1 = new cl::Kernel(*m_pProgram, "MCAE_k2", &cl_retval);
     }
 
+#if KN2 == 2
     if (cl_retval == CL_SUCCESS) {
         m_pPricingKernel2 = new cl::Kernel(*m_pProgram, "MCAE_k3", &cl_retval);
     }
+#endif
 
     //////////////////////////
     // Allocate HOST BUFFERS
@@ -196,12 +204,14 @@ int MCAmerican::createOCLObjects(Device* device) {
         }
     }
 
+#if KN2 == 2
     if (cl_retval == CL_SUCCESS) {
         m_hostOutputBuffer2 = kdatatype_allocator.allocate(1);
         if (m_hostOutputBuffer2 == nullptr) {
             cl_retval = CL_OUT_OF_HOST_MEMORY;
         }
     }
+#endif
 
     ////////////////////////////
     // Setup HW BUFFER OPTIONS
@@ -211,7 +221,9 @@ int MCAmerican::createOCLObjects(Device* device) {
         m_outputMatrixBufferOptions = {XCL_MEM_DDR_BANK1, m_hostOutputMatrixBuffer, 0};
         m_coeffBufferOptions = {XCL_MEM_DDR_BANK2, m_hostCoeffBuffer, 0};
         m_outputBufferOptions1 = {XCL_MEM_DDR_BANK3, m_hostOutputBuffer1, 0};
+#if KN2 == 2
         m_outputBufferOptions2 = {XCL_MEM_DDR_BANK3, m_hostOutputBuffer2, 0};
+#endif
     }
 
     ////////////////////////////////
@@ -241,11 +253,13 @@ int MCAmerican::createOCLObjects(Device* device) {
                            sizeof(KDataType), &m_outputBufferOptions1, &cl_retval);
     }
 
+#if KN2 == 2
     if (cl_retval == CL_SUCCESS) {
         m_pHWOutputBuffer2 =
             new cl::Buffer(*m_pContext, (CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE),
                            sizeof(KDataType), &m_outputBufferOptions2, &cl_retval);
     }
+#endif
 
     if (cl_retval != CL_SUCCESS) {
         setCLError(cl_retval);
@@ -281,10 +295,12 @@ int MCAmerican::releaseOCLObjects(void) {
         m_pHWOutputBuffer1 = nullptr;
     }
 
+#if KN2 == 2
     if (m_pHWOutputBuffer2 != nullptr) {
         delete (m_pHWOutputBuffer2);
         m_pHWOutputBuffer2 = nullptr;
     }
+#endif
 
     if (m_hostOutputPricesBuffer != nullptr) {
         u8_allocator.deallocate(m_hostOutputPricesBuffer, PRICE_ELEMENT_SIZE * PRICE_NUM_ELEMENTS);
@@ -306,10 +322,12 @@ int MCAmerican::releaseOCLObjects(void) {
         m_hostOutputBuffer1 = nullptr;
     }
 
+#if KN2 == 2
     if (m_hostOutputBuffer2 != nullptr) {
         kdatatype_allocator.deallocate((KDataType*)m_hostOutputBuffer2, 1);
         m_hostOutputBuffer2 = nullptr;
     }
+#endif
 
     if (m_pPreSampleKernel != nullptr) {
         delete (m_pPreSampleKernel);
@@ -326,10 +344,12 @@ int MCAmerican::releaseOCLObjects(void) {
         m_pPricingKernel1 = nullptr;
     }
 
+#if KN2 == 2
     if (m_pPricingKernel2 != nullptr) {
         delete (m_pPricingKernel2);
         m_pPricingKernel2 = nullptr;
     }
+#endif
 
     if (m_pProgram != nullptr) {
         delete (m_pProgram);
@@ -487,6 +507,7 @@ int MCAmerican::runInternal(OptionType optionType,
 
         m_pCommandQueue->enqueueTask(*m_pPricingKernel1, nullptr, nullptr);
 
+#if KN2 == 2
         m_pPricingKernel2->setArg(0, (KDataType)stockPrice);
         m_pPricingKernel2->setArg(1, (KDataType)volatility);
         m_pPricingKernel2->setArg(2, (KDataType)dividendYield);
@@ -504,13 +525,16 @@ int MCAmerican::runInternal(OptionType optionType,
 
         m_pCommandQueue->flush();
         m_pCommandQueue->finish();
+#endif
 
         // ----------------------------
         // Migrate results back to host
         // ----------------------------
         outputObjects.clear();
         outputObjects.push_back(*m_pHWOutputBuffer1);
+#if KN2 == 2
         outputObjects.push_back(*m_pHWOutputBuffer2);
+#endif
         m_pCommandQueue->enqueueMigrateMemObjects(outputObjects, CL_MIGRATE_MEM_OBJECT_HOST, nullptr, nullptr);
 
         m_pCommandQueue->flush();
@@ -520,7 +544,11 @@ int MCAmerican::runInternal(OptionType optionType,
         // Average the outputs from the two pricing kernels, and give the result
         // back to the caller
         // ----------------------------------------------------------------------------------------
+#if KN2 == 2
         *pOptionPrice = (((KDataType*)m_hostOutputBuffer1)[0] + ((KDataType*)m_hostOutputBuffer2)[0]) / 2.0;
+#else
+        *pOptionPrice = ((KDataType*)m_hostOutputBuffer1)[0];
+#endif
     } else {
         retval = XLNX_ERROR_DEVICE_NOT_OWNED_BY_SPECIFIED_OCL_CONTROLLER;
     }

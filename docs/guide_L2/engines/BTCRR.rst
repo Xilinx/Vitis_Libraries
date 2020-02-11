@@ -61,21 +61,21 @@ The implementation is broken into a number of steps:
 
 There are some optimizations to the algorithm for the FPGA to allow for parallelization, i.e to obtain an II value of 1 for each loop; the generated report shows:
 
-| INFO: [XOCC 204-61] Pipelining function 'pow_generic<double>'.
-| INFO: [XOCC 204-61] Pipelining result : Target II = 1, Final II = 1, Depth = 89.
-| INFO: [XOCC 204-61] Pipelining loop 'Loop 1'.
-| INFO: [XOCC 204-61] Pipelining result : Target II = 1, Final II = 1, Depth = 112.
-| INFO: [XOCC 204-61] Pipelining loop 'Loop 2'.
-| INFO: [XOCC 204-61] Pipelining result : Target II = 1, Final II = 1, Depth = 5.
-| INFO: [XOCC 204-61] Pipelining loop 'Loop 3.1'.
-| INFO: [XOCC 204-61] Pipelining result : Target II = 1, Final II = 1, Depth = 19.
-| INFO: [XOCC 204-61] Pipelining loop 'Loop 3.2'.
-| INFO: [XOCC 204-61] Pipelining result : Target II = 1, Final II = 1, Depth = 117.
-| INFO: [XOCC 204-61] Pipelining loop 'Loop 1'.
-| INFO: [XOCC 204-61] Pipelining result : Target II = 1, Final II = 1, Depth = 3.
-| INFO: [XOCC 204-61] Pipelining loop 'Loop 3'.
-| INFO: [XOCC 204-61] Pipelining result : Target II = 1, Final II = 1, Depth = 3.
-| INFO: [XOCC 60-594] Finished kernel compilation
+Pipelining function 'pow_generic<double>'.
+Pipelining result : Target II = 1, Final II = 1, Depth = 89.
+Pipelining loop 'Loop 1'.
+Pipelining result : Target II = 1, Final II = 1, Depth = 112.
+Pipelining loop 'Loop 2'.
+Pipelining result : Target II = 1, Final II = 1, Depth = 5.
+Pipelining loop 'Loop 3.1'.
+Pipelining result : Target II = 1, Final II = 1, Depth = 19.
+Pipelining loop 'Loop 3.2'.
+Pipelining result : Target II = 1, Final II = 1, Depth = 117.
+Pipelining loop 'Loop 1'.
+Pipelining result : Target II = 1, Final II = 1, Depth = 3.
+Pipelining loop 'Loop 3'.
+Pipelining result : Target II = 1, Final II = 1, Depth = 3.
+Finished kernel compilation
 
 
 

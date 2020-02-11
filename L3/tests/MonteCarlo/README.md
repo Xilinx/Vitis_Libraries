@@ -1,40 +1,44 @@
 
-# Monte Carlo Example
+## Monte Carlo Example
 
-This example show how to utilize BOTH the MC-European and MC-American models within the same executable
-
-
-# Setup Environment
-
-source /opt/xilinx/xrt/setup.csh
-
-source /*path to xf_fintech*/L3/src/env.csh
+This example shows how to utilize both the MC-European and MC-American models within the same executable
 
 
-# Build Xilinx Fintech Library
+### Step 1 :
+Setup the build environment using the Vitis and XRT scripts:
 
-cd  /*path to xf_fintech*/L3/src
+    source <install path>/Vitis/2019.2/settings64.sh
 
-**make all**
-
-
-# Build Instuctions
-
-To build the command line executable (mc_example) from this directory
-
-**make all**
-
-> Note this requires the xilinx fintech library to already to built
+    source /opt/xilinx/xrt/setup.sh
 
 
-# Run Instuctions
+### Step 2 :
+Build the L3 Library
 
-Copy the prebuilt kernel files from /*path to xf_fintech*/L2/tests/MCEuropeanEngine/ & /*path to xf_fintech*/L2/tests/MCAmericanEngine/ to this directory
+    cd L3/src
 
-**mc_euro_k.xclbin**
-**MCAE_k.xclbin**
+    source env.sh or source env.csh
+
+    make
 
 
-To run the command line exe and generate the results
+### Step 3 :
+Build the matching MC European Engine Kernel
 
-**make run**
+    cd L2/tests/MCEuropeanEngine
+
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+    cd L2/tests/MCAmericanEngineMultiKernel
+
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+
+### Step 4 :
+Build host code & run exeutable
+
+    cd L3/tests/MonteCarlo
+
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to step 3 to build*

@@ -74,6 +74,7 @@ class BinomialTree : public OCLController {
     // set the kernel in use
     // static const BinomialKernelType kernelInUse = bt_kernel_double_pe1;
     // static const BinomialKernelType kernelInUse = bt_kernel_double_pe4;
+    // default built with PE=8
     static const BinomialKernelType kernelInUse = bt_kernel_double_pe8;
 
     // OCLController interface

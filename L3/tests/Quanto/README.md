@@ -1,40 +1,33 @@
-
 # Quanto Test
 
 This test shows how to utilize the Quanto Model.
 
-
 # Setup Environment
 
-source /opt/xilinx/xrt/setup.csh
+    source <install path>/Vitis/2019.2/settings64.sh
 
-source /*path to xf_fintech*/L3/src/env.csh
+    source /opt/xilinx/xrt/setup.sh
 
+# Build the Xilinx Fintech L3 Library
 
-# Build Xilinx Fintech Library
+    cd L3/src
 
-cd  /*path to xf_fintech*/L3/src
+    source env.sh or source env.csh
 
-**make all**
+    make
 
+# Build the matching quanto kernel
 
-# Build Instuctions
+    cd L2/tests/Quanto
 
-To build the command line executable from this directory
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
 
-**make all**
+# Build the Host code and run the executable
 
-> Note this requires the xilinx fintech library to already to built
+    cd L3/tests/Quanto
 
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
 
-# Run Instuctions
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to 'Build the matching HCF kernel' to build*
 
-Copy the prebuilt kernel files to this directory
-
-**quanto_kernel.xclbin**
-
-
-To run the command line exe and generate the interpolated NPV
-
-**make run**
 

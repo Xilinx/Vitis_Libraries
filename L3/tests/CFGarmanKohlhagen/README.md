@@ -1,4 +1,3 @@
-
 # Closed Form Garman Kohlhagen Test
 
 This test shows how to utilize the Garman Kohlhagen Model.
@@ -8,35 +7,30 @@ This model is the Black Scholes model with the risk free rate replaced by the do
 
 # Setup Environment
 
-source /opt/xilinx/xrt/setup.csh
+    source <install path>/Vitis/2019.2/settings64.sh
 
-source /*path to xf_fintech*/L3/src/env.csh
-
-
-# Build Xilinx Fintech Library
-
-cd  /*path to xf_fintech*/L3/src
-
-**make all**
+    source /opt/xilinx/xrt/setup.sh
 
 
-# Build Instuctions
+# Build the Xilinx Fintech L3 Library
 
-To build the command line executable from this directory
+    cd L3/src
 
-**make all**
+    source env.sh or source env.csh
 
-> Note this requires the xilinx fintech library to already to built
+    make
+
+# Build the matching GK kernel
+
+    cd L2/tests/GarmanKohlhagenEngine
+
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+# Build the Host code and run the executable
+    cd L3/tests/hcf
+
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
 
 
-# Run Instuctions
-
-Copy the prebuilt kernel files to this directory
-
-**gk_kernel.xclbin**
-
-
-To run the command line exe and generate the interpolated NPV
-
-**make run**
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to 'Build the matching HCF kernel' to build*
 

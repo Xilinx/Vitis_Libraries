@@ -5,36 +5,32 @@ This test shows how to utilize the Merton Jump Diffusion Solution Model
 
 # Setup Environment
 
-source /opt/xilinx/xrt/setup.csh
+    source <install path>/Vitis/2019.2/settings64.sh
 
-source /*path to xf_fintech*/L3/src/env.csh
-
-
-## Build the Xilinx Fintech Library
-
-cd /*path to xf_fintech*/L3/src
-
-**make all**
-
-## Build Instructions
-
-To build the command line executable from this directory
-
-**make all**
-
-> Note this requires the xilinx fintech library to already to built
+    source /opt/xilinx/xrt/setup.sh
 
 
-# Run Instuctions
+## Build the Xilinx Fintech L3 Library
 
-Copy the prebuilt kernel files to this directory
+    cd L3/src
 
-**m76_hw_u250_float.xclbin**
+    source env.sh or source env.csh
+
+    make
+
+## Build the matching M76 kernel
+
+    cd L2/tests/M76Engine
+
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+# Build the Host code and run the executable
+
+    cd L3/tests/m76
+
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
 
 
-To run the command line exe and generate the interpolated NPV
-
-**make run**
-
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to 'Build the matching M76 kernel' to build*
 
 

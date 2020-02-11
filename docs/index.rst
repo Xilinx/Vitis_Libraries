@@ -167,23 +167,23 @@ Library Contents
 | :ref:`trsvCore <cid-xf::fintech::trsvcore>`                                                    | systems of equations      |       |
 |                                                                                                | using PCR                 |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`binomialTreeEngine <cid-xf::fintech::binomialtreeengine>`                                | Binomial tree engine      | L2    |
+| :ref:`binomialTreeEngine <cid-xf::fintech::binomialtreeengine>`                                | Binomial tree engine      | L2&L3 |
 |                                                                                                | using CRR                 |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`cfBSMEngine <cid-xf::fintech::cfbsmengine>`                                              | Single option price plus  | L2    |
+| :ref:`cfBSMEngine <cid-xf::fintech::cfbsmengine>`                                              | Single option price plus  | L2&L3 |
 |                                                                                                | associated Greeks         |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 | :ref:`FdDouglas <cid-xf::fintech::fddouglas>`                                                  | Top level callable        | L2    |
 |                                                                                                | function to perform the   |       |
 |                                                                                                | Douglas ADI method        |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`hcfEngine <cid-xf::fintech::hcfengine>`                                                  | Engine for Hestion        | L2    |
+| :ref:`hcfEngine <cid-xf::fintech::hcfengine>`                                                  | Engine for Hestion        | L2&L3 |
 |                                                                                                | Closed Form Solution      |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`M76Engine <cid-xf::fintech::m76engine>`                                                  | Engine for the Merton     | L2    |
+| :ref:`M76Engine <cid-xf::fintech::m76engine>`                                                  | Engine for the Merton     | L2&L3 |
 |                                                                                                | Jump Diffusion Model      |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-|                                                                                                | Monte-Carlo simulation of | L2    |
+|                                                                                                | Monte-Carlo simulation of | L2&L3 |
 |                                                                                                | European-style options    |       | 
 | :ref:`MCEuropeanEngine <cid-xf::fintech::mceuropeanengine>`                                    |                           |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
@@ -211,7 +211,7 @@ Library Contents
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 | :ref:`MCAmericanEnginePricing <cid-xf::fintech::mcamericanenginepricing>`                      | Pricing kernel            | L2    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`MCAmericanEngine <cid-xf::fintech::mcamericanengine>`                                    | Calibration process and   | L2    |
+| :ref:`MCAmericanEngine <cid-xf::fintech::mcamericanengine>`                                    | Calibration process and   | L2&L3 |
 |                                                                                                | pricing process all in    |       |
 |                                                                                                | one kernel                |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
@@ -254,7 +254,7 @@ Library Contents
 |                                                                                                | using Monte Carlo         |       |
 |                                                                                                | Simulation                |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`McmcCore <cid-xf::fintech::mcmccore>`                                                    | Uses multiple Markov      | L2    |
+| :ref:`McmcCore <cid-xf::fintech::mcmccore>`                                                    | Uses multiple Markov      | L2&L3 |
 |                                                                                                | Chains to allow drawing   |       |
 |                                                                                                | samples from multi mode   |       |
 |                                                                                                | target distribution       |       |
