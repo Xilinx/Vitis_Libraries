@@ -39,11 +39,10 @@ typedef struct _XCLBINLookupElement {
 
 } XCLBINLookupElement;
 
-static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {
-    {Device::DeviceType::U50, "fd_heston_kernel_u50_hw_m8192_double.xclbin"},
-    {Device::DeviceType::U200, "fd_heston_kernel_u200_hw_m8192_double.xclbin"},
-    {Device::DeviceType::U250, "fd_heston_kernel_u250_hw_m8192_double.xclbin"},
-    {Device::DeviceType::U280, "fd_heston_kernel_u280_hw_m8192_double.xclbin"}};
+static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "fd_heston_kernel.xclbin"},
+                                                    {Device::DeviceType::U200, "fd_heston_kernel.xclbin"},
+                                                    {Device::DeviceType::U250, "fd_heston_kernel.xclbin"},
+                                                    {Device::DeviceType::U280, "fd_heston_kernel.xclbin"}};
 
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);

@@ -1,0 +1,81 @@
+{
+    "name": "jks.L2.McBarrierBiasedEngine", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/McBarrierBiasedEngine_k.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "REPO_DIR/L2/tests/MCBarrierBiasedEngine/host/main.cpp", 
+                "REPO_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/MCBarrierBiasedEngine/host", 
+                "REPO_DIR/L2/tests/MCBarrierBiasedEngine/kernel", 
+                "REPO_DIR/ext/xcl2"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/MCBarrierBiasedEngine/kernel"
+            ]
+        }, 
+        "linker": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/MCBarrierBiasedEngine/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "REPO_DIR/L2/tests/MCBarrierBiasedEngine/kernel/McBarrierBiasedEngine_k.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D KERNEL_NAME=McBarrierBiasedEngine_k", 
+                    "name": "McBarrierBiasedEngine_k"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "McBarrierBiasedEngine_k"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 360
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

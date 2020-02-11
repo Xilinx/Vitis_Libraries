@@ -1,0 +1,80 @@
+{
+    "name": "jks.L2.SVD", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/kernel_svd.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "REPO_DIR/L1/benchmarks/SVD/src/main.cpp", 
+                "REPO_DIR/L1/benchmarks/SVD/src/svd.cpp", 
+                "REPO_DIR/L1/benchmarks/SVD/src/util.cpp", 
+                "REPO_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "REPO_DIR/ext/xcl2", 
+                "REPO_DIR/L1/benchmarks/SVD/kernel", 
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L1/benchmarks/SVD/src"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L1/benchmarks/SVD/kernel"
+            ]
+        }, 
+        "linker": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L1/benchmarks/SVD/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "REPO_DIR/L1/benchmarks/SVD/kernel/kernel_svd.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D VIVADO_HLS_SIM -D KERNEL_0 -D KERNEL_NAME=kernel_svd_0", 
+                    "name": "kernel_svd_0"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "kernel_svd"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32784, 
+                "max_time_min": 360
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

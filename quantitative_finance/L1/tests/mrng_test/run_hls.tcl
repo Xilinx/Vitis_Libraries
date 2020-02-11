@@ -18,31 +18,32 @@ source settings.tcl
 
 set PROJ "mrng_test.prj"
 set SOLN "sol"
-set CLKP 300MHz
+
+if {![info exists CLKP]} {
+  set CLKP 300MHz
+}
 
 open_project -reset $PROJ
 
-
 add_files "dut.cpp" -cflags "-DDPRAGMA -I${XF_PROJ_ROOT}/L1/include"
 add_files -tb "tb.cpp" -cflags "-DDPRAGMA -I${XF_PROJ_ROOT}/L1/include"
-
 set_top dut
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -stdmath -argv 1
+  csim_design -argv "1"
 }
 
 if {$CSYNTH == 1} {
-  csynth_design 
+  csynth_design
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv 0
+  cosim_design -argv "0"
 }
 
 if {$VIVADO_SYN == 1} {
@@ -51,10 +52,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

@@ -218,10 +218,6 @@ ifeq ($(TARGET),hw_emu)
     VPP_CFLAGS += -D VIVADO_HLS_SIM
 endif
 
-ifneq ($(XILINX_VIVADO_HLS),)
-    VPP_CFLAGS += --include $(XILINX_VIVADO_HLS)/include
-endif
-
 ifeq ($(DATATYPE),double)
     VPP_CFLAGS += -D DPRAGMA
 endif

@@ -1,0 +1,81 @@
+{
+    "name": "jks.L2.McEuropeanEngineEngine", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/mc_euro_k.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "test.exe", 
+        "compiler": {
+            "sources": [
+                "REPO_DIR/L2/tests/MCEuropeanEngine/host/test.cpp", 
+                "REPO_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/MCEuropeanEngine/host", 
+                "REPO_DIR/ext/xcl2", 
+                "REPO_DIR/L2/tests/MCEuropeanEngine/kernel"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/MCEuropeanEngine/kernel"
+            ]
+        }, 
+        "linker": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/tests/MCEuropeanEngine/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "REPO_DIR/L2/tests/MCEuropeanEngine/kernel/mc_euro_k.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D DPRAGMA", 
+                    "name": "mc_euro_k"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "mc_euro_k"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 360
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

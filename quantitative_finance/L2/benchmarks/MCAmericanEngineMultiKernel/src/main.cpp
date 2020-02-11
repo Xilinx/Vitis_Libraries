@@ -153,7 +153,7 @@ int main(int argc, const char* argv[]) {
     int data_size = depthP;            // 20480;//= depthP = 1024(calibrate
                                        // samples)*10(steps) *2(iter), width: 64*UN
     int matdata_size = depthM;         ////180;//=depthM = 9*10(steps)*2(iter), width: 64
-    int coefdata_size = TIMESTEPS - 1; // 9;//=(steps-1), width: 4*64
+    int coefdata_size = COEF_DEPTH; //TIMESTEPS - 1; // 9;//=(steps-1), width: 4*64
     std::cout << "data_size is " << data_size << std::endl;
 
     ap_uint<64 * UN_K1>* output_price = aligned_alloc<ap_uint<64 * UN_K1> >(data_size); // 64*UN

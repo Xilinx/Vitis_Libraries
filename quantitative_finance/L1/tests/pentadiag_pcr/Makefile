@@ -69,6 +69,7 @@ export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 # MK_INC_END vivado.mk
 
 DEVICE ?= u200
+
 # MK_INC_BEGIN vitis_set_part.mk
 
 .PHONY: check_part
@@ -178,7 +179,10 @@ endif # XPART
 # MK_INC_BEGIN hls_test_rules.mk
 
 
-.PHONY: run setup runhls clean
+.PHONY: run setup runhls clean cleanall check
+
+# Alias to run, for legacy test script
+check: run
 
 CSIM ?= 0
 CSYNTH ?= 0
@@ -186,7 +190,6 @@ COSIM ?= 0
 VIVADO_SYN ?= 0
 VIVADO_IMPL ?= 0
 QOR_CHECK ?= 0
-
 
 # at least RTL synthesis before check QoR
 ifeq (1,$(QOR_CHECK))
@@ -208,7 +211,11 @@ ifeq (1,$(COSIM))
 override CSYNTH := 1
 endif
 
-run: setup runhls
+# From testbench.data_recipe of description.json
+data:
+	@true
+
+run: data setup runhls
 
 setup: | check_part
 	@rm -f ./settings.tcl
@@ -219,21 +226,21 @@ setup: | check_part
 	@echo 'set COSIM $(COSIM)' >> ./settings.tcl
 	@echo 'set VIVADO_SYN $(VIVADO_SYN)' >> ./settings.tcl
 	@echo 'set VIVADO_IMPL $(VIVADO_IMPL)' >> ./settings.tcl
-	@echo 'set QOR_CHECK $(QOR_CHECK)' >> ./settings.tcl
 	@echo 'set XF_PROJ_ROOT "$(XF_PROJ_ROOT)"' >> ./settings.tcl
+	@echo 'set CUR_DIR "$(CUR_DIR)"' >> ./settings.tcl
 	@echo "Configured: settings.tcl"
 	@echo "----"
 	@cat ./settings.tcl
 	@echo "----"
 
 HLS ?= vivado_hls
-runhls: setup | check_vivado
+runhls: data setup | check_vivado
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf *.prj *_hls.log settings.tcl
+	rm -rf settings.tcl *_hls.log pentadiag_pcr.prj
 
-.PHONY: check
-check: run
+# Used by Jenkins test
+cleanall: clean
 
 # MK_INC_END hls_test_rules.mk

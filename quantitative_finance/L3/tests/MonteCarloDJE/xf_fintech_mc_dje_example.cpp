@@ -76,7 +76,7 @@ double riskFreeRates[NUM_ASSETS];
 double volatility[NUM_ASSETS];
 double dividendYields[NUM_ASSETS];
 double timeToMaturity[NUM_ASSETS];
-double requiredTolerance[NUM_ASSETS];
+double requiredSamples[NUM_ASSETS];
 
 double DJIA;
 
@@ -90,7 +90,7 @@ void InitialiseAssetArrays(void) {
         volatility[i] = 0.20;
         dividendYields[i] = 0.0;
         timeToMaturity[i] = 1.0;
-        requiredTolerance[i] = 0.02;
+        requiredSamples[i] = 1024;
     }
 }
 
@@ -100,9 +100,8 @@ int main() {
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    // Get a list of U250s available on the system (just because our current
-    // bitstreams are built for U250s)
-    deviceList = DeviceManager::getDeviceList("u250");
+    // device based on DSA
+    deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
 
     if (deviceList.size() == 0) {
         printf("[XLNX] No matching devices found\n");
@@ -147,7 +146,7 @@ int main() {
     if (retval == XLNX_OK) {
         printf("[XLNX] Running MCEuropeanDJE...\n");
         retval = mcEuropeanDJE.run(optionTypes, STOCK_PRICES, strikePrices, riskFreeRates, dividendYields, volatility,
-                                   timeToMaturity, requiredTolerance, NUM_ASSETS, DOW_DIVISOR, &DJIA);
+                                   timeToMaturity, requiredSamples, NUM_ASSETS, DOW_DIVISOR, &DJIA);
     }
 
     if (retval == XLNX_OK) {

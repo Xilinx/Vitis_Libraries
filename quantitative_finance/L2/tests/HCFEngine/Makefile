@@ -216,7 +216,7 @@ endif
 XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/src
 
-XCLBIN_NAME := hcf_$(TARGET)_$(DEVICE_PART)_$(TEST_DT)
+XCLBIN_NAME := hcf
 KERNELS = hcf_kernel:hcf_kernel.cpp
 
 HLS_L1_DIR = $(XF_PROJ_ROOT)/L1/include

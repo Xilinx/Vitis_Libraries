@@ -125,8 +125,8 @@ class HWModel {
 
         DT values16[48];
         DT rate_last = 1.0;
-#pragma HLS array_partition variable = values3x16 block factor = 3 dim = 1
-#pragma HLS resource variable = values3x16 core = RAM_2P_LUTRAM
+#pragma HLS array_partition variable = values16 block factor = 3 dim = 1
+#pragma HLS resource variable = values16 core = RAM_2P_LUTRAM
     loop_init_values16:
         for (int j = 0; j < 16; j++) {
 #pragma HLS pipeline

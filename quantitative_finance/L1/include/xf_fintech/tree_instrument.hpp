@@ -115,8 +115,7 @@ class TreeInstrument<DT, 0, LEN2> { // swaption
     int type;
     DT nominal, accruedSpread, fixedCoupon;
     int floating_cnt, fixed_cnt, exercise_cnt;
-    int *floating_data, *fixed_data, *exercise_data;
-    // int floating_data[10],fixed_data[10],exercise_data[10];
+    int floating_data[20], fixed_data[20], exercise_data[20];
     DT m[3][3];
 
    public:
@@ -140,20 +139,17 @@ class TreeInstrument<DT, 0, LEN2> { // swaption
         fixed_cnt = fixedEndCnt;
         exercise_cnt = exerciseEndCnt;
 
-        /*    for(int i=0; i<=floatingEndCnt; i++)
-        #pragma HLS loop_tripcount min=10 max=10
-              floating_data[i] = floatingCnt[i];
+        for (int i = 0; i <= floatingEndCnt; i++)
+#pragma HLS loop_tripcount min = 10 max = 10
+            floating_data[i] = floatingCnt[i];
 
-            for(int i=0; i<=fixedEndCnt; i++)
-        #pragma HLS loop_tripcount min=10 max=10
-              fixed_data[i] = fixedCnt[i];
+        for (int i = 0; i <= fixedEndCnt; i++)
+#pragma HLS loop_tripcount min = 10 max = 10
+            fixed_data[i] = fixedCnt[i];
 
-            for(int i=0; i<=exerciseEndCnt; i++)
-        #pragma HLS loop_tripcount min=10 max=10
-              exercise_data[i] = exerciseCnt[i];*/
-        floating_data = floatingCnt;
-        fixed_data = fixedCnt;
-        exercise_data = exerciseCnt;
+        for (int i = 0; i <= exerciseEndCnt; i++)
+#pragma HLS loop_tripcount min = 10 max = 10
+            exercise_data[i] = exerciseCnt[i];
     }
 
     void initialize(int typeIn,
@@ -177,20 +173,17 @@ class TreeInstrument<DT, 0, LEN2> { // swaption
         fixed_cnt = fixedEndCnt;
         exercise_cnt = exerciseEndCnt;
 
-        /*    for(int i=0; i<=floatingEndCnt; i++)
-        #pragma HLS loop_tripcount min=10 max=10
-              floating_data[i] = floatingCnt[i];
+        for (int i = 0; i <= floatingEndCnt; i++)
+#pragma HLS loop_tripcount min = 10 max = 10
+            floating_data[i] = floatingCnt[i];
 
-            for(int i=0; i<=fixedEndCnt; i++)
-        #pragma HLS loop_tripcount min=10 max=10
-              fixed_data[i] = fixedCnt[i];
+        for (int i = 0; i <= fixedEndCnt; i++)
+#pragma HLS loop_tripcount min = 10 max = 10
+            fixed_data[i] = fixedCnt[i];
 
-            for(int i=0; i<=exerciseEndCnt; i++)
-        #pragma HLS loop_tripcount min=10 max=10
-              exercise_data[i] = exerciseCnt[i];*/
-        floating_data = floatingCnt;
-        fixed_data = fixedCnt;
-        exercise_data = exerciseCnt;
+        for (int i = 0; i <= exerciseEndCnt; i++)
+#pragma HLS loop_tripcount min = 10 max = 10
+            exercise_data[i] = exerciseCnt[i];
 
         m[0][0] = -1.0 / 36.0 * rho;
         m[0][1] = -4.0 / 36.0 * rho;
@@ -381,7 +374,7 @@ class TreeInstrument<DT, 1, LEN2> { // swap
     int type;
     DT nominal, accruedSpread, fixedCoupon;
     int floating_cnt, fixed_cnt;
-    int *floating_data, *fixed_data;
+    int floating_data[20], fixed_data[20];
     DT m[3][3];
 
    public:
@@ -402,8 +395,9 @@ class TreeInstrument<DT, 1, LEN2> { // swap
         floating_cnt = floatingEndCnt;
         fixed_cnt = fixedEndCnt;
 
-        floating_data = floatingCnt;
-        fixed_data = fixedCnt;
+        for (int i = 0; i <= floatingEndCnt; i++) floating_data[i] = floatingCnt[i];
+
+        for (int i = 0; i <= fixedEndCnt; i++) fixed_data[i] = fixedCnt[i];
     }
 
     void initialize(int typeIn,
@@ -424,8 +418,9 @@ class TreeInstrument<DT, 1, LEN2> { // swap
         floating_cnt = floatingEndCnt;
         fixed_cnt = fixedEndCnt;
 
-        floating_data = floatingCnt;
-        fixed_data = fixedCnt;
+        for (int i = 0; i <= floatingEndCnt; i++) floating_data[i] = floatingCnt[i];
+
+        for (int i = 0; i <= fixedEndCnt; i++) fixed_data[i] = fixedCnt[i];
 
         m[0][0] = -1.0 / 36.0 * rho;
         m[0][1] = -4.0 / 36.0 * rho;
@@ -586,10 +581,10 @@ class TreeInstrument<DT, 2, LEN2> { // capfloor
     static const int L = 2;
     int type;
     DT nominal;
-    DT* cfRate;
+    DT cfRate[2];
     int floating_cnt;
     DT lastTime;
-    int* floating_data;
+    int floating_data[20];
     DT m[3][3];
 
    public:
@@ -598,11 +593,12 @@ class TreeInstrument<DT, 2, LEN2> { // capfloor
         type = typeIn;
         lastTime = lastTimeIn;
         nominal = nominalIn;
-        cfRate = cfRateIn;
+        cfRate[0] = cfRateIn[0];
+        cfRate[1] = cfRateIn[1];
 
         floating_cnt = floatingEndCnt;
 
-        floating_data = floatingCnt;
+        for (int i = 0; i <= floatingEndCnt; i++) floating_data[i] = floatingCnt[i];
     }
 
     void initialize(
@@ -611,11 +607,12 @@ class TreeInstrument<DT, 2, LEN2> { // capfloor
         type = typeIn;
         lastTime = lastTimeIn;
         nominal = nominalIn;
-        cfRateIn = cfRateIn;
+        cfRate[0] = cfRateIn[0];
+        cfRate[1] = cfRateIn[1];
 
         floating_cnt = floatingEndCnt;
 
-        floating_data = floatingCnt;
+        for (int i = 0; i <= floatingEndCnt; i++) floating_data[i] = floatingCnt[i];
 
         m[0][0] = -1.0 / 36.0 * rho;
         m[0][1] = -4.0 / 36.0 * rho;
@@ -799,7 +796,7 @@ class TreeInstrument<DT, 3, LEN2> { // callable
     int type;
     DT nominal, fixedCoupon;
     int floating_cnt, fixed_cnt;
-    int *floating_data, *fixed_data;
+    int floating_data[20], fixed_data[20];
     DT m[3][3];
 
    public:
@@ -818,8 +815,9 @@ class TreeInstrument<DT, 3, LEN2> { // callable
         floating_cnt = floatingEndCnt;
         fixed_cnt = fixedEndCnt;
 
-        floating_data = floatingCnt;
-        fixed_data = fixedCnt;
+        for (int i = 0; i <= floatingEndCnt; i++) floating_data[i] = floatingCnt[i];
+
+        for (int i = 0; i <= fixedEndCnt; i++) fixed_data[i] = fixedCnt[i];
     }
 
     void initialize(int typeIn,
@@ -838,8 +836,9 @@ class TreeInstrument<DT, 3, LEN2> { // callable
         floating_cnt = floatingEndCnt;
         fixed_cnt = fixedEndCnt;
 
-        floating_data = floatingCnt;
-        fixed_data = fixedCnt;
+        for (int i = 0; i <= floatingEndCnt; i++) floating_data[i] = floatingCnt[i];
+
+        for (int i = 0; i <= fixedEndCnt; i++) fixed_data[i] = fixedCnt[i];
 
         m[0][0] = -1.0 / 36.0 * rho;
         m[0][1] = -4.0 / 36.0 * rho;

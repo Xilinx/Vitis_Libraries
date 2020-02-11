@@ -35,7 +35,7 @@ int main() {
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    deviceList = DeviceManager::getDeviceList("u250");
+    deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
 
     if (deviceList.size() == 0) {
         printf("No matching devices found\n");

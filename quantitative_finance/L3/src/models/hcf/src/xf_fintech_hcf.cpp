@@ -47,19 +47,6 @@ hcf::~hcf() {
     }
 }
 
-std::string hcf::getXCLBINName(Device* device) {
-    std::string xclbinName;
-    std::string deviceTypeString;
-    std::string dataTypeString;
-
-    deviceTypeString = device->getDeviceTypeString();
-    dataTypeString = XSTR(TEST_DT);
-
-    xclbinName = "hcf_hw_" + deviceTypeString + "_" + dataTypeString + ".xclbin";
-
-    return xclbinName;
-}
-
 int hcf::createOCLObjects(Device* device) {
     int retval = XLNX_OK;
     cl_int cl_retval = CL_SUCCESS;
@@ -78,7 +65,7 @@ int hcf::createOCLObjects(Device* device) {
     }
 
     if (cl_retval == CL_SUCCESS) {
-        xclbinName = getXCLBINName(device);
+        xclbinName = "hcf.xclbin";
 
         start = std::chrono::high_resolution_clock::now();
         m_binaries.clear();
