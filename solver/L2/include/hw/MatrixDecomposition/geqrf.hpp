@@ -144,7 +144,6 @@ loop_columns:
 template <typename DataType, int M, int N, int K>
 void qrf(int m, int n, DataType matrix[K][M][(N + K - 1) / K], int lda, DataType tau[N]) {
     DataType v[K][M];
-#pragma HLS array_partition variable = matrix dim = 1 cyclic factor = K
 #pragma HLS array_partition variable = v dim = 1 cyclic factor = K
     DataType epsilon = 0.00001;
     if (Trait<DataType>::eps == 0) {
@@ -274,7 +273,7 @@ int geqrf(int m, int n, T A[NRMAX * NCMAX], int lda, T tau[NCMAX]) {
 
     static T data[NCU][NRMAX][(NCMAX + NCU - 1) / NCU];
 #pragma HLS resource variable = data core = XPM_MEMORY uram
-#pragma HLS array_partition variable = data dim = 1 complete
+#pragma HLS array_partition variable = data dim = 1 cyclic factor = NCU
 
     // read
     for (int i = 0; i < m; ++i) {
