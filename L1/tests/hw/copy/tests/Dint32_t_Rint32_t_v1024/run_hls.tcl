@@ -18,8 +18,8 @@ if {![info exists CLKP]} {
   set CLKP 3.333
 }
 open_project -reset $PROJ
-add_files ${XF_PROJ_ROOT}/L1/tests/hw/copy/uut_top.cpp                    -cflags "-I${XF_PROJ_ROOT}/L1/include/hw                    -I${XF_PROJ_ROOT}/L1/include/hw/xf_blas                    -I${XF_PROJ_ROOT}/L1/tests/hw -std=c++11  -DBLAS_L1=true -DBLAS_opName=copy -DBLAS_vectorSize=1024 -DBLAS_dataType=int32_t -DBLAS_resDataType=int32_t -DBLAS_logParEntries=3     -DBLAS_parEntries=8"
-add_files -tb "${XF_PROJ_ROOT}/L1/tests/sw/src/test.cpp"                    -cflags "-I${XF_PROJ_ROOT}/L1/tests/hw/ -I${XF_PROJ_ROOT}/L1/tests/sw/include                    -I${XF_PROJ_ROOT}        -DBLAS_pageSizeBytes=4096       -DBLAS_memWidthBytes=64       -DBLAS_instrSizeBytes=8       -DBLAS_maxNumInstrs=16       -DBLAS_instrPageIdx=0       -DBLAS_paramPageIdx=1       -DBLAS_statsPageIdx=2  -DBLAS_L1=true -DBLAS_opName=copy -DBLAS_vectorSize=1024 -DBLAS_dataType=int32_t -DBLAS_resDataType=int32_t -DBLAS_logParEntries=3     -DBLAS_parEntries=8 -std=c++11"
+add_files ${XF_PROJ_ROOT}/L1/tests/hw/copy/uut_top.cpp                    -cflags "-I${XF_PROJ_ROOT}/L1/include/hw                    -I${XF_PROJ_ROOT}/L1/include/hw/xf_blas                    -I${XF_PROJ_ROOT}/L1/tests/hw -std=c++11  -DBLAS_L1=true -DBLAS_opName=copy -DBLAS_vectorSize=1024    -DBLAS_dataType=int32_t -DBLAS_resDataType=int32_t -DBLAS_logParEntries=3     -DBLAS_parEntries=8"
+add_files -tb "${XF_PROJ_ROOT}/L1/tests/sw/src/test.cpp"                    -cflags "-I${XF_PROJ_ROOT}/L1/tests/hw/ -I${XF_PROJ_ROOT}/L1/tests/sw/include                    -I${XF_PROJ_ROOT}        -DBLAS_pageSizeBytes=4096       -DBLAS_memWidthBytes=64       -DBLAS_instrSizeBytes=8       -DBLAS_maxNumInstrs=16       -DBLAS_instrPageIdx=0       -DBLAS_paramPageIdx=1       -DBLAS_statsPageIdx=2  -DBLAS_L1=true -DBLAS_opName=copy -DBLAS_vectorSize=1024    -DBLAS_dataType=int32_t -DBLAS_resDataType=int32_t -DBLAS_logParEntries=3     -DBLAS_parEntries=8 -std=c++11"
 set_top uut_top 
 open_solution -reset $SOLN
 set_part $XPART

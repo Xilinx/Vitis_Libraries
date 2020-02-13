@@ -2,14 +2,14 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "",
+    "name": "jks.L1_sbmv_Dint32_t_m1024_k2_lower",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],
     "platform_whitelist": [
         "u200"
     ],
-    "project": "",
+    "project": "sbmv_Dint32_t_m1024_k2_lower_test",
     "solution": "sol",
     "testbench": {
         "argv": {
