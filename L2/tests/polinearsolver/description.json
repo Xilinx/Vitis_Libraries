@@ -1,0 +1,78 @@
+{
+    "name": "jks.L2_polinearsolver_opencl", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/kernel_polinearsolver.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "test_polinearsolver.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/polinearsolver/test_polinearsolver.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L2/tests/polinearsolver", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/ext/MatrixGen"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/tests/polinearsolver", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/ext"
+            ]
+        }, 
+        "linker": {
+            "includepaths": [
+                "LIB_DIR/L2/tests/polinearsolver", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/ext"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/polinearsolver/kernel_polinearsolver.cpp", 
+                    "frequency": 300.0, 
+                    "name": "kernel_polinearsolver_0"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "kernel_polinearsolver"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 120
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

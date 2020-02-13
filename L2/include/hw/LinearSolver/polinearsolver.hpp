@@ -124,8 +124,6 @@ Loop_row:
 template <typename T, int N, int NCU>
 void trisolver_L(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU - 1) / NCU], T dataX[N]) {
 #pragma HLS inline off
-#pragma HLS array_partition variable = dataA cyclic factor = NCU dim = 1
-#pragma HLS array_partition variable = dataB cyclic factor = NCU dim = 1
 
     dataX[0] = dataB[0][0] / dataA[0][0][0];
 Loop_row:
@@ -147,8 +145,6 @@ Loop_row:
 template <typename T, int N, int NCU>
 void trisolver_U(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU - 1) / NCU], T dataX[N]) {
 #pragma HLS inline off
-#pragma HLS array_partition variable = dataA cyclic factor = NCU dim = 1
-#pragma HLS array_partition variable = dataB cyclic factor = NCU dim = 1
 
     dataX[n - 1] = dataB[(n - 1) % NCU][(n - 1) / NCU] / dataA[(n - 1) % NCU][(n - 1) / NCU][n - 1];
 Loop_row:
@@ -170,6 +166,7 @@ Loop_row:
 template <typename T, int N, int NCU>
 void solver(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU - 1) / NCU], T dataX[N]) {
     T buf[N], buf_i[NCU][(N + NCU - 1) / NCU], buf_o[N];
+#pragma HLS array_partition variable = buf_i cyclic factor = NCU dim = 1
 
     trisolver_L<T, N, NCU>(n, dataA, dataB, buf);
 
@@ -194,7 +191,6 @@ void solver(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU -
 template <typename T, int N, int NCU>
 void solver_core(int n, int b, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataB[NCU][(N + NCU - 1) / NCU], T dataX[N]) {
     T tmp1, dataj[NCU][N];
-#pragma HLS array_partition variable = dataA cyclic factor = NCU dim = 1
 #pragma HLS array_partition variable = dataj cyclic factor = NCU dim = 1
     if (b == 0) {
     Loop_col:
@@ -247,8 +243,8 @@ void polinearsolver(int n, T* A, int b, T* B, int lda, int ldb, int& info) {
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
         static T matB[NCU][(NMAX + NCU - 1) / NCU];
-#pragma HLS array_partition variable = matA dim = 1
-#pragma HLS array_partition variable = matB dim = 1
+#pragma HLS array_partition variable = matA cyclic factor = NCU dim = 1
+#pragma HLS array_partition variable = matB cyclic factor = NCU dim = 1
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
 
     Loop_read:
