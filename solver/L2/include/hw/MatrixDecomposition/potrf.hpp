@@ -126,7 +126,6 @@ Loop_row:
 template <typename T, int N, int NCU>
 void cholesky_core(int n, T dataA[NCU][(N + NCU - 1) / NCU][N]) {
     T tmp1, dataj[NCU][N];
-#pragma HLS array_partition variable = dataA cyclic factor = NCU dim = 1
 #pragma HLS array_partition variable = dataj cyclic factor = NCU dim = 1
 
 Loop_col:
@@ -159,7 +158,7 @@ void potrf(int m, T* A, int lda, int& info) {
         A[0] = hls::sqrt(A[0]);
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
-#pragma HLS array_partition variable = matA dim = 1
+#pragma HLS array_partition variable = matA cyclic factor = NCU dim = 1
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
 
     Loop_read:

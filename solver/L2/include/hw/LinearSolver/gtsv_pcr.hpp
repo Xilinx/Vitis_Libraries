@@ -855,19 +855,10 @@ int gtsv_core(unsigned int n, T matDiagLow[N], T matDiag[N], T matDiagUp[N], T r
     T outdiag[N];
     T outup[N];
     T outrhs[N];
-#pragma HLS RESOURCE variable = matDiagLow core = RAM_2P_BRAM
-#pragma HLS RESOURCE variable = matDiag core = RAM_2P_BRAM
-#pragma HLS RESOURCE variable = matDiagUp core = RAM_2P_BRAM
-#pragma HLS RESOURCE variable = rhs core = RAM_2P_BRAM
 #pragma HLS RESOURCE variable = outlow core = RAM_2P_BRAM
 #pragma HLS RESOURCE variable = outdiag core = RAM_2P_BRAM
 #pragma HLS RESOURCE variable = outup core = RAM_2P_BRAM
 #pragma HLS RESOURCE variable = outrhs core = RAM_2P_BRAM
-
-#pragma HLS array_partition variable = matDiagLow cyclic factor = NCU
-#pragma HLS array_partition variable = matDiag cyclic factor = NCU
-#pragma HLS array_partition variable = matDiagUp cyclic factor = NCU
-#pragma HLS array_partition variable = rhs cyclic factor = NCU
 #pragma HLS array_partition variable = outlow cyclic factor = NCU
 #pragma HLS array_partition variable = outdiag cyclic factor = NCU
 #pragma HLS array_partition variable = outup cyclic factor = NCU
@@ -926,6 +917,14 @@ LoopWrite:
 template <typename T, unsigned int NMAX, unsigned int NCU>
 int gtsv(unsigned int n, T* matDiagLow, T* matDiag, T* matDiagUp, T* rhs) {
     T DiagLow[NMAX], Diag[NMAX], DiagUp[NMAX], RHS[NMAX];
+#pragma HLS RESOURCE variable = DiagLow core = RAM_2P_BRAM
+#pragma HLS RESOURCE variable = Diag core = RAM_2P_BRAM
+#pragma HLS RESOURCE variable = DiagUp core = RAM_2P_BRAM
+#pragma HLS RESOURCE variable = RHS core = RAM_2P_BRAM
+#pragma HLS array_partition variable = DiagLow cyclic factor = NCU
+#pragma HLS array_partition variable = Diag cyclic factor = NCU
+#pragma HLS array_partition variable = DiagUp cyclic factor = NCU
+#pragma HLS array_partition variable = RHS cyclic factor = NCU
 
 LoopRead:
     for (int i = 0; i < n; i++) {

@@ -1,0 +1,78 @@
+{
+    "name": "jks.L2_geqrf_opencl", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/kernel_geqrf.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "test_geqrf.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/geqrf/test_geqrf.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L2/tests/geqrf", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/ext/MatrixGen"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/tests/geqrf", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/ext"
+            ]
+        }, 
+        "linker": {
+            "includepaths": [
+                "LIB_DIR/L2/tests/geqrf", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/ext"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/geqrf/kernel_geqrf.cpp", 
+                    "frequency": 300.0, 
+                    "name": "kernel_geqrf_0"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "kernel_geqrf"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 120
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}
