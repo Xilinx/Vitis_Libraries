@@ -120,20 +120,10 @@ $(EXE_FILE): $(SRCS) | check_xrt
 .PHONY: host
 host: check_xrt $(EXE_FILE)
 
-short: gemm_example.exe
-
-float: gemm_example_float.exe
-
 common: gemm_common_example.exe
 
 pre_allocated: gemm_pre_allocated_example.exe
 
-gemm_example.exe: gemm_example.cpp
-	$(CC) -D XFBLAS_dataType=short -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-gemm_example_float.exe: gemm_example.cpp
-	$(CC) -D XFBLAS_dataType=float -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-	
 gemm_common_example.exe: gemm_common_example.cpp
 	$(CC) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 

@@ -28,7 +28,7 @@ else
   while [  $n -le 8192 ]; do
     date
     echo "#############  $n ################"
-    nice ./bin/gemm_bench.exe $1 $2 $n $n $n ./data/$dataType/ $numKernels 1 | tee log-$n.txt
+    nice ./bin/gemm_bench.exe $1 $2 $n $n $n ./data/$dataType/ $numKernels | tee log-$n.txt
     logs="$logs log-$n.txt"
     n=`expr $n \* 2`
   done

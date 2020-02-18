@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 #endif
 
     // Generating Golden Output
-    GEMM_MKL(m, k, n, alpha, beta, a, b, c);
+    GEMM_MKL(m, n, k, alpha, beta, a, b, c);
 
 #ifdef USE_SHORT
     for (int i = 0; i < m * n; i++) c_short[i] = (short)c[i];

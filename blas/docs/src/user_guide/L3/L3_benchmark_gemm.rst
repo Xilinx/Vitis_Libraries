@@ -15,26 +15,59 @@
 
 .. _benchmark_gemm_l3:
 
-======================
+***********************
 L3 API GEMM benchmark
-======================
+***********************
 
-1. Intel® Math Kernel Library (MKL)
-------------------------------------
+1. Benchmarking Intel® Math Kernel Libray (MKL)
+=================================================
 
 1.1 Introduction
-^^^^^^^^^^^^^^^^^
+-----------------
+
 Intel® Math Kernel Library provides performance improvement of math functions, e.g. GEMM, when running with Intel processors. To compare with Xilinx's XFBLAS library, you can use our run-script (run_gemm_mkl.sh) to generate the data and performance benchmark.
 
-1.2 Prerequisites
-^^^^^^^^^^^^^^^^^^
+.. _MKL_benchmark:
+
+1.2 Benchmarking Steps
+-----------------------
+
+1.2.1 Access Nimbix cloud
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Follow the user guide `Vitis On Nimbix`_ to login to your Nimbix account
+- Launch application "Xilinx Vitis Unified Software Platform 2019.2" and select "Desktop Mode with FPGA"
+- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)"
+- Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm/gemm_mkl directory
+- Follow the steps below to run Intel® MKL GEMM APIsbenchmarks.
+
+.. _Vitis On Nimbix: https://www.xilinx.com/xilinxtraining/assessments/portal/alveo/intro_nimbix_cloud/story_html5.html 
+
+.. NOTE:: FPGA is not required in Intel® Math Kernel Library but will be used in Xilinx's XFBLAS library.
+
+1.2.2 Install Intel® MK library
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To install MKL on Nimbix, please download the full installation package for MKL2020 from `Intel® MKL Webste`_. You need to register for downloading the package. After you have downloaded the package, please unzip it and navigate to the directory includeing "install.sh". Please enter the following command to install the MKL package.
+
+.. code-block:: bash 
+  
+  sudo ./install.sh
+
+.. _Intel® MKL Webste: https://software.intel.com/en-us/mkl/choose-download/linux
+
+1.2.3 Set up MKL environment variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Intel® MKL**: Assume you have installed Intel® MKL, run the appropriate script to set up the environment variables (such as $MKLROOT).
 
 .. code-block:: bash
  
   source <INTEL_MKL_INSTALL_DIR>/bin/mklvars.sh intel64
-  
+
+1.2.4 Install numactl
+^^^^^^^^^^^^^^^^^^^^^^^
+
 **NUMACTL**: The linux operating system provides a function, called numactl, that allows the control of scheduling or memory placement policy, which is essential to run parallel programs.
 
 For Ubuntu (you only need to do it once),
@@ -43,8 +76,8 @@ For Ubuntu (you only need to do it once),
  
   sudo apt-get install numactl
 
-1.3 Benchmarking Procedures
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.2.5 Run MKL benchmarking script 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The run-script runs the GEMM benchmark with a number of threads, data type, and work mode. Then, it will explore the GEMM's matrix size from 256 to 16384.
 
@@ -60,21 +93,8 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 
 - mode: **g** for generating the data, **b** for benchmarking the performance, and **a** for both workloads. 
 
-1.4 Running on Nimbix Cloud
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- Follow the user guide `Vitis On Nimbix`_ to login to your Nimbix account
-- Launch application "Xilinx SDAccel Development & Alveo FPGA 2018.3" and select "Desktop Mode with FPGA"
-- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U200 FPGA (nx5u_xdma_201830_1)"
-- Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm/gemm_mkl directory
-- Run Intel® MKL GEMM APIs according to the above benchmark procedures.
-
-.. _Vitis On Nimbix: https://www.xilinx.com/support/documentation/sw_manuals/xilinx2018_3/ug1240-sdaccel-nimbix-getting-started.pdf
-
-.. NOTE:: FPGA is not required in Intel® Math Kernel Library but will be used in Xilinx's XFBLAS library.
-
-1.5 Performance Result on Nimbix Cloud
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.3 Performance Result on Nimbix Cloud
+---------------------------------------
 
 .. rubric:: Configuration:
 
@@ -90,50 +110,53 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 	*
 		- data_type
 		- float
-		
+	*
+		- benchmark command 
+		- ./run_gemm_mkl.sh 16 float a
+
 .. rubric:: Performance Result (nonCaching):
 
-+-------------+--------------+------------+-------------+
-| Matrix Size | Cache (Y/N)  | TimeApiMS  | PerfApiTops |
-+=============+==============+============+=============+
-| 256         | N            |   29.700   | 0.001       |
-+-------------+--------------+------------+-------------+
-| 512         | N            |   11.799   | 0.023       |
-+-------------+--------------+------------+-------------+
-| 1024        | N            |   16.591   | 0.129       |
-+-------------+--------------+------------+-------------+
-| 2048        | N            |   41.319   | 0.416       |
-+-------------+--------------+------------+-------------+
-| 4096        | N            |  172.369   | 0.797       |
-+-------------+--------------+------------+-------------+
-| 8192        | N            | 1073.250   | 1.024       |
-+-------------+--------------+------------+-------------+
-| 16384       | N            | 9060.830   | 0.971       |
-+-------------+--------------+------------+-------------+
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| Square Matrix Size | matrix paris running simultaneously | Cache (Y/N) | API time(ms)  | TFlops/sec  |
++====================+=====================================+=============+===============+=============+
+| 256                | 1                                   | N           |   29.700      | 0.001       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 512                | 1                                   | N           |   11.799      | 0.023       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 1024               | 1                                   | N           |   16.591      | 0.129       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 2048               | 1                                   | N           |   41.319      | 0.416       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 4096               | 1                                   | N           |  172.369      | 0.797       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 8192               | 1                                   | N           | 1073.250      | 1.024       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 16384              | 1                                   | N           | 9060.830      | 0.971       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
 
 .. rubric:: Performance Result (Caching):
 
-+-------------+--------------+------------+-------------+
-| Matrix Size | Cache (Y/N)  | TimeApiMS  | PerfApiTops |
-+=============+==============+============+=============+
-| 256         | Y            |    1.380   | 0.024       |
-+-------------+--------------+------------+-------------+
-| 512         | Y            |    4.038   | 0.066       |
-+-------------+--------------+------------+-------------+
-| 1024        | Y            |    4.383   | 0.490       |
-+-------------+--------------+------------+-------------+
-| 2048        | Y            |   21.282   | 0.807       |
-+-------------+--------------+------------+-------------+
-| 4096        | Y            |  149.755   | 0.918       |
-+-------------+--------------+------------+-------------+
-| 8192        | Y            | 1042.860   | 1.054       |
-+-------------+--------------+------------+-------------+
-| 16384       | Y            | 9045.700   | 0.972       |
-+-------------+--------------+------------+-------------+
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| Square Matrix Size | matrix paris running simultaneously | Cache (Y/N) | API time(ms)  | TFlops/sec  |
++====================+=====================================+=============+===============+=============+
+| 256                | 1                                   | Y           |    1.380      | 0.024       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 512                | 1                                   | Y           |    4.038      | 0.066       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 1024               | 1                                   | Y           |    4.383      | 0.490       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 2048               | 1                                   | Y           |   21.282      | 0.807       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 4096               | 1                                   | Y           |  149.755      | 0.918       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 8192               | 1                                   | Y           | 1042.860      | 1.054       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
+| 16384              | 1                                   | Y           | 9045.700      | 0.972       |
++--------------------+-------------------------------------+-------------+---------------+-------------+
 
 
-1.6 Reference
-^^^^^^^^^^^^^^
+1.4 Reference
+--------------
 
 [1] `Improving Performance of Math Functions with Intel® Math Kernel Library`_
 
@@ -144,74 +167,95 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 .. _Benchmarking GEMM on Intel® Architecture Processors: https://software.intel.com/en-us/articles/benchmarking-gemm-with-intel-mkl-and-blis-on-intel-processors
 
 
-2. xfblasGemm - Xilinx's XFBLAS library
-----------------------------------------
+2. Benchmarking xfblasGemm - Xilinx's XFBLAS library
+=====================================================
 
-You can use the run-script to benchmark our Xilinx's XFBLAS library for the GEMM routine and verify with the golden result generated by Intel® Math Kernel Library.
+Before benchmarking xfblashGemm, please download `xf blas xclbin files`_, unzip the file with "tar -xvzf" command, and copy the folder u250_xdma_201830_2 to directory L3/overlay.
 
-2.1 Benchmarking Procedures
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _xf blas xclbin files: https://www.xilinx.com/bin/public/openDownload?filename=vitis_BLAS_library_r1.0_xclbin.tar
 
-The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will explore the GEMM's matrix size from 256 to 8192.
+2.1 Benchmarking Steps 
+------------------------
+
+2.1.1 Generate test inputs and golden reference
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Follow the MKL_benchmark_ steps to run MKL benchmarks, for float and short data type to generate test inputs and golden reference. To generate test inputs and golden reference for float data type, please run the following command.
+
+.. code-block:: bash
+
+  ./run_gemm_mkl.sh 16 float a
+
+To generate test inputs and golden reference for short data type, please run the following command.
+
+.. code-block:: bash
+
+  ./run_gemm_mkl.sh 16 short a
+
+2.1.2 Build benchmark application
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Before benchmark the xfblasGemm, please build the host executable for the corresponding .xclbin files via following script
+
+.. code-block:: bash
+
+  ./build_gemm_bench.sh confi_info_file
+
+2.1.3 Run benchmark
+^^^^^^^^^^^^^^^^^^^^
+
+The run-script runs the GEMM benchmark with xclbin and cfg files. It will explore the GEMM's matrix size from 256 to 8192.
 
 .. code-block:: bash
  
-  ./run_gemm_benchmark.sh path_to_xclbin path_to_config_info
+  ./run_gemm_benchmark.sh xclbin_file config_info_file
   
 .. rubric:: where:
 
-- **path_to_xclbin** refers to the location of xclbin 
-- **path_to_config_info** refers to the location of cfg file.
+- **xclbin_fuke** refers to the gemx.xclbin file, including the path.
+- **config_info_file** refers to config_info.dat file, including the path.
   
-2.2 Running on Nimbix Cloud
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- Follow the user guide "Vitis On Nimbix" to login to your Nimbix account
-- Launch application "Xilinx SDAccel Development & Alveo FPGA 2018.3" and select "Desktop Mode with FPGA"
-- Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U200 FPGA (nx5u_xdma_201830_1)"
-- Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm directory
-- Run Xilinx's XFBLAS APIs according to the above benchmark procedures.
-
-2.3 Performance Result on Nimbix Cloud
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.2 Performance Results on Nimbix Cloud
+------------------------------------------
 
 .. rubric:: Configuration:
 
 .. list-table::
 	:widths: 20 80
-	
+
 	*
 		- fpga_model
-		- Xilinx Alveo U200 FPGA (nx5u_xdma_201830_1)
+		- Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)
 	*
 		- Frequency
-		- 124 Mhz
+		- 150 Mhz
 	*
 		- data_type
 		- float
+	*
+		- build command 
+		- ./build_gemm_bench.sh ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/config_info.dat
+	*
+		- benchmark command
+		- ./run_gemm_bench.sh ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/gemx.xclbin ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/confi_info.dat
 		
 .. rubric:: Performance Result:
 
-+-------------+--------------+------------+-------------+
-| Matrix Size | EffApiPct    | TimeApiMS  | PerfApiTops |
-+=============+==============+============+=============+
-| 256         | 34.859       |  1.516     |      0.022  |
-+-------------+--------------+------------+-------------+
-| 512         | 70.170       |  6.026     |      0.045  |
-+-------------+--------------+------------+-------------+
-| 1024        | 89.511       |  37.788    |      0.057  |
-+-------------+--------------+------------+-------------+
-| 2048        | 93.373       |  289.805   |      0.059  |
-+-------------+--------------+------------+-------------+
-| 4096        | 96.731       |  2237.969  |      0.061  |
-+-------------+--------------+------------+-------------+
-| 8192        | 97.281       |  17802.523 |      0.062  |
-+-------------+--------------+------------+-------------+
-| 16384       | 98.057       | 141292.933 |      0.062  |
-+-------------+--------------+------------+-------------+
-
-2.4 Performance Result on Nimbix Cloud (float32, asynchronous)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++--------------------+-------------------------------------+--------------+-------------+
+| Square Matrix Size | matrix paris running simultaneously | API time(ms) | TFlops/sec  |
++====================+=====================================+==============+=============+
+| 256                | 4                                   |  2.715       |      0.049  |
++--------------------+-------------------------------------+--------------+-------------+
+| 512                | 4                                   |  7.223       |      0.149  |
++--------------------+-------------------------------------+--------------+-------------+
+| 1024               | 4                                   |  40.020      |      0.214  |
++--------------------+-------------------------------------+--------------+-------------+
+| 2048               | 4                                   |  292.971     |      0.234  |
++--------------------+-------------------------------------+--------------+-------------+
+| 4096               | 4                                   |  1990.240    |      0.276  |
++--------------------+-------------------------------------+--------------+-------------+
+| 8192               | 4                                   |  15317.589   |      0.287  |
++--------------------+-------------------------------------+--------------+-------------+
 
 .. rubric:: Configuration:
 
@@ -220,116 +264,35 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. Then, it will 
 	
 	*
 		- fpga_model
-		- Xilinx Alveo U200 FPGA (nx5u_xdma_201830_2)
-	*
-		- kernel#
-		- 2
+		- Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)
 	*
 		- Frequency
-		- 114 Mhz
+		- 231 Mhz
 	*
 		- data_type
-		- float32
+		- short
+	*
+		- build command 
+		- ./build_gemm_bench.sh ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/config_info.dat
+	*
+		- benchmark command
+		- ./run_gemm_bench.sh ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/gemx.xclbin ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/confi_info.dat
 		
 .. rubric:: Performance Result:
 
-+-------------+--------------+------------+-------------+
-| Matrix Size | EffApiPct (%)| TimeApiMS  | PerfApiTops |
-+=============+==============+============+=============+
-| 256         | 28.778       |  1.998     |      0.034  |
-+-------------+--------------+------------+-------------+
-| 512         | 61.213       |  7.513     |      0.072  |
-+-------------+--------------+------------+-------------+
-| 1024        | 81.209       |  45.306    |      0.095  |
-+-------------+--------------+------------+-------------+
-| 2048        | 88.514       |  332.532   |      0.103  |
-+-------------+--------------+------------+-------------+
-| 4096        | 93.797       |  2510.409  |      0.110  |
-+-------------+--------------+------------+-------------+
-| 8192        | 95.073       |  19813.749 |      0.111  |
-+-------------+--------------+------------+-------------+
-| 16384       | 95.801       | 157306.027 |      0.112  |
-+-------------+--------------+------------+-------------+
-
-2.5 Performance Result on Nimbix Cloud (int16, asynchronous)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. rubric:: Configuration:
-
-.. list-table::
-	:widths: 20 80
-	
-	*
-		- fpga_model
-		- Xilinx Alveo U200 FPGA (nx5u_xdma_201830_2)
-	*
-		- kernel#
-		- 2
-	*
-		- Frequency
-		- 240 Mhz
-	*
-		- data_type
-		- int16
-		
-.. rubric:: Performance Result:
-
-+-------------+--------------+------------+-------------+
-| Matrix Size | EffApiPct (%)| TimeApiMS  | PerfApiTops |
-+=============+==============+============+=============+
-| 256         | 5.383        |  1.268     |      0.053  |
-+-------------+--------------+------------+-------------+
-| 512         | 21.094       |  2.589     |      0.208  |
-+-------------+--------------+------------+-------------+
-| 1024        | 39.554       |  11.046    |      0.389  |
-+-------------+--------------+------------+-------------+
-| 2048        | 62.193       |  56.200    |      0.612  |
-+-------------+--------------+------------+-------------+
-| 4096        | 73.463       |  380.626   |      0.722  |
-+-------------+--------------+------------+-------------+
-| 8192        | 76.867       |  2910.186  |      0.756  |
-+-------------+--------------+------------+-------------+
-| 16384       | 77.626       |  23053.77  |      0.763  |
-+-------------+--------------+------------+-------------+
-
-2.6 Performance Result on xbxcloud5 (int16, asynchronous)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. rubric:: Configuration:
-
-.. list-table::
-	:widths: 20 80
-	
-	*
-		- fpga_model
-		- Xilinx Alveo VCU1525 FPGA
-	*
-		- kernel#
-		- 2
-	*
-		- Frequency
-		- 240 Mhz
-	*
-		- data_type
-		- int16
-		
-.. rubric:: Performance Result:
-
-+-------------+--------------+------------+-------------+
-| Matrix Size | EffApiPct (%)| TimeApiMS  | PerfApiTops |
-+=============+==============+============+=============+
-| 256         | 6.544        |  1.043     |      0.065  |
-+-------------+--------------+------------+-------------+
-| 512         | 30.082       |  1.816     |      0.297  |
-+-------------+--------------+------------+-------------+
-| 1024        | 60.016       |  7.280     |      0.591  |
-+-------------+--------------+------------+-------------+
-| 2048        | 79.433       |  44.003    |      0.781  |
-+-------------+--------------+------------+-------------+
-| 4096        | 89.734       |  311.611   |      0.882  |
-+-------------+--------------+------------+-------------+
-| 8192        | 95.224       |  2349.166  |      0.936  |
-+-------------+--------------+------------+-------------+
-| 16384       | 97.416       |  18370.401 |      0.958  |
-+-------------+--------------+------------+-------------+
++--------------------+-------------------------------------+--------------+-------------+
+| Square Matrix Size | matrix paris running simultaneously | API time(ms) | Tops/sec    |
++====================+=====================================+==============+=============+
+| 256                | 4                                   |  1.436       |      0.093  |
++--------------------+-------------------------------------+--------------+-------------+
+| 512                | 4                                   |  2.589       |      0.415  |
++--------------------+-------------------------------------+--------------+-------------+
+| 1024               | 4                                   |  13.885      |      0.619  |
++--------------------+-------------------------------------+--------------+-------------+
+| 2048               | 4                                   |  61.879      |      1.111  |
++--------------------+-------------------------------------+--------------+-------------+
+| 4096               | 4                                   |  416.086     |      1.321  |
++--------------------+-------------------------------------+--------------+-------------+
+| 8192               | 4                                   |  3443.76     |      1.277  |
++--------------------+-------------------------------------+--------------+-------------+
 
