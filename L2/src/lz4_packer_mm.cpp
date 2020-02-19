@@ -67,15 +67,18 @@ void lz4(const uint512_t* in,
 #pragma HLS RESOURCE variable = upStreamSize core = FIFO_SRL
 
 #pragma HLS dataflow
-    xf::compression::mm2s<GMEM_DWIDTH, GMEM_BURST_SIZE>(in, head_prev_blk, orig_input_data, inStream512, mm2sStreamSize,
-                                                        compressd_size, in_block_size, no_blocks, block_size_in_kb,
-                                                        head_res_size, offset);
-    xf::compression::streamDownSizerP2PComp<GMEM_DWIDTH, PACK_WIDTH>(inStream512, inStreamV, mm2sStreamSize,
-                                                                     downStreamSize, no_blocks);
+    xf::compression::details::mm2s<GMEM_DWIDTH, GMEM_BURST_SIZE>(in, head_prev_blk, orig_input_data, inStream512,
+                                                                 mm2sStreamSize, compressd_size, in_block_size,
+                                                                 no_blocks, block_size_in_kb, head_res_size, offset);
+    xf::compression::details::streamDownSizerP2PComp<GMEM_DWIDTH, PACK_WIDTH>(inStream512, inStreamV, mm2sStreamSize,
+                                                                              downStreamSize, no_blocks);
+
     encoded_size[0] = xf::compression::lz4Packer<PACK_WIDTH, PARLLEL_BYTE>(
         inStreamV, packStreamV, downStreamSize, packStreamSize, block_size_in_kb, no_blocks, head_res_size, tail_bytes);
-    xf::compression::streamUpsizerP2P<GMEM_DWIDTH, PACK_WIDTH>(packStreamV, outStream512, packStreamSize, upStreamSize);
-    xf::compression::s2mm<GMEM_DWIDTH>(outStream512, out, upStreamSize);
+
+    xf::compression::details::streamUpsizerP2P<GMEM_DWIDTH, PACK_WIDTH>(packStreamV, outStream512, packStreamSize,
+                                                                        upStreamSize);
+    xf::compression::details::s2mm<GMEM_DWIDTH>(outStream512, out, upStreamSize);
 }
 
 extern "C" {

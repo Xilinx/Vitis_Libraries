@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_LZ4_PACKER_KERNEL_HPP_
-#define _XFCOMPRESSION_LZ4_PACKER_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_LZ4_PACKER_MM_HPP_
+#define _XFCOMPRESSION_LZ4_PACKER_MM_HPP_
 
 /**
  * @file lz4_packer_mm.hpp
@@ -71,7 +71,7 @@ extern "C" {
  * @param out output compressed data
  * @param compressd_size compressed output size of each block
  * @param in_block_size input block size of each block
- * @param encode_size encoded size of each block
+ * @param encoded_size encoded size of each block
  * @param orig_input_data raw input data
  * @param head_res_size size of the header
  * @param offset offset
@@ -92,4 +92,4 @@ void xilLz4Packer(const uint512_t* in,
                   uint32_t no_blocks,
                   uint32_t tail_bytes);
 }
-#endif
+#endif // _XFCOMPRESSION_LZ4_PACKER_MM_HPP_

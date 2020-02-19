@@ -19,9 +19,16 @@
 #include <vector>
 #include "cmdlineparser.h"
 
+static uint64_t getFileSize(std::ifstream& file) {
+    file.seekg(0, file.end);
+    uint64_t file_size = file.tellg();
+    file.seekg(0, file.beg);
+    return file_size;
+}
+
 void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string& compress_bin) {
     // Xilinx SNAPPY object
-    xfSnappyStreaming* xlz = new xfSnappyStreaming(compress_bin, 1);
+    xfSnappyStreaming* xlz = new xfSnappyStreaming(compress_bin, 1, block_size);
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -43,17 +50,11 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
     std::string lz_compress_out = compress_mod;
     lz_compress_out = lz_compress_out + ".snappy";
 
-    // Update class membery with block_size
-    xlz->m_block_size_in_kb = block_size;
-
-    // 0 means Xilinx flow
-    xlz->m_switch_flow = 0;
-
 #ifdef EVENT_PROFILE
     auto total_start = std::chrono::high_resolution_clock::now();
 #endif
     // Call SNAPPY compression
-    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size);
+    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size, 0);
 #ifdef EVENT_PROFILE
     auto total_end = std::chrono::high_resolution_clock::now();
     auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
@@ -108,12 +109,8 @@ void xilCompressDecompressList(std::string& file_list,
                                std::string& compress_bin,
                                std::string& decompress_bin) {
     // Compression
-    xfSnappyStreaming* xlz = new xfSnappyStreaming(compress_bin, 1);
+    xfSnappyStreaming* xlz = new xfSnappyStreaming(compress_bin, 1, block_size);
 
-    if (c_flow == 0) {
-        std::cout << "\n";
-        xlz->m_bin_flow = 1;
-    }
     std::cout << "\n";
 
     std::cout << "--------------------------------------------------------------" << std::endl;
@@ -164,11 +161,8 @@ void xilCompressDecompressList(std::string& file_list,
         std::string lz_compress_out = line;
         lz_compress_out = lz_compress_out + ext1;
 
-        xlz->m_block_size_in_kb = block_size;
-        xlz->m_switch_flow = c_flow;
-
         // Call SNAPPY compression
-        uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size);
+        uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size, c_flow);
         if (c_flow == 0) {
             std::cout << "\t\t" << (double)input_size / enbytes << "\t\t\t" << (double)input_size / 1000000 << "\t\t\t"
                       << lz_compress_in << std::endl;
@@ -183,14 +177,7 @@ void xilCompressDecompressList(std::string& file_list,
     }
 
     // De-Compression
-    xlz = new xfSnappyStreaming(decompress_bin, 0);
-
-    // Xilinx SNAPPY object
-    if (d_flow == 0) {
-        // Create xilSnappy object
-        std::cout << "\n";
-        xlz->m_bin_flow = 0;
-    }
+    xlz = new xfSnappyStreaming(decompress_bin, 0, block_size);
 
     std::ifstream infilelist_dec(file_list.c_str());
     std::string line_dec;
@@ -245,8 +232,7 @@ void xilCompressDecompressList(std::string& file_list,
         lz_decompress_out = lz_decompress_out + ".orig";
 
         // Call SNAPPY decompression
-        xlz->m_switch_flow = d_flow;
-        xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size);
+        xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size, d_flow);
 
         if (d_flow == 0) {
             std::cout << "\t\t" << (double)input_size / 1000000 << "\t\t\t" << lz_decompress_in << std::endl;
@@ -401,9 +387,9 @@ void xilBatchVerify(
     }
 }
 
-void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) {
+void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::string& decompress_bin) {
     // Create xilSnappyStreaming object
-    xfSnappyStreaming* xlz = new xfSnappyStreaming(decompress_bin, 0);
+    xfSnappyStreaming* xlz = new xfSnappyStreaming(decompress_bin, 0, block_size);
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -426,10 +412,8 @@ void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) 
     string lz_decompress_out = decompress_mod;
     lz_decompress_out = lz_decompress_out + ".orig";
 
-    xlz->m_switch_flow = 0;
-
     // Call SNAPPY decompression
-    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size);
+    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size, 0);
 #ifdef VERBOSE
     std::cout << std::fixed << std::setprecision(2) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
@@ -445,7 +429,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
                               std::string& decompress_bin) {
     // Compression
     // Create xilSnappy object
-    xfSnappyStreaming* xlz = new xfSnappyStreaming(compress_bin, 1);
+    xfSnappyStreaming* xlz = new xfSnappyStreaming(compress_bin, 1, block_size);
 
     std::cout << "\n";
 
@@ -476,11 +460,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     std::string lz_compress_out = compress_decompress_mod;
     lz_compress_out = lz_compress_out + ".snappy";
 
-    xlz->m_block_size_in_kb = block_size;
-    xlz->m_switch_flow = 0;
-
-    // Call LZ4 compression
-    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size);
+    // Call snappy compression
+    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size, 0);
     std::cout << std::fixed << std::setprecision(2) << "SNAPPY_CR\t\t:" << (double)input_size / enbytes << std::endl
               << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
@@ -488,8 +469,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     delete (xlz);
     // De-Compression
 
-    // Xilinx LZ4 object
-    xlz = new xfSnappyStreaming(decompress_bin, 0);
+    // Xilinx snappy object
+    xlz = new xfSnappyStreaming(decompress_bin, 0, block_size);
 
     std::cout << "\n";
     std::cout << "--------------------------------------------------------------" << std::endl;
@@ -498,7 +479,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     std::cout << "\n";
 
     // Decompress list of files
-    // This loop does LZ4 decompress on list
+    // This loop does snappy decompress on list
     // of files.
 
     std::string lz_decompress_in = compress_decompress_mod + ".snappy";
@@ -514,9 +495,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     uint64_t input_size1 = getFileSize(inFile_dec);
     inFile_dec.close();
 
-    // Call LZ4 decompression
-    xlz->m_switch_flow = 0;
-    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size1);
+    // Call snappy decompression
+    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size1, 0);
 
     std::cout << std::fixed << std::setprecision(2) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
@@ -593,7 +573,7 @@ int main(int argc, char* argv[]) {
     if (!compress_mod.empty()) xilCompressTop(compress_mod, bSize, compress_bin);
 
     // "-d" Decompress Mode
-    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, decompress_bin);
+    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, bSize, decompress_bin);
 
     if (!compress_decompress_mod.empty())
         xilCompressDecompressTop(compress_decompress_mod, bSize, compress_bin, decompress_bin);

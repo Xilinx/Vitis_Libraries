@@ -3,6 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. meta::
+   :keywords: Vitis, Library, Data Compression, Xilinx, OpenCL Kernel API, LZ4 OpenCL, ZLIB OpenCL, GZip OpenCL, Snappy OpenCL
+   :description: APIs provided in this section are OpenCL kernels of various Vitis Data Compression applications
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *********************
 Kernel APIs Reference
 *********************

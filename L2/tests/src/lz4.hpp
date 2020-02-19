@@ -15,23 +15,26 @@
  *
  */
 /**
- * @file xil_lz4.hpp
+ * @file lz4.hpp
  * @brief Header for LZ4 host functionality
  *
  * This file is part of Vitis Data Compression Library host code for lz4 compression.
  */
 
-#ifndef _XFCOMPRESSION_XIL_LZ4_HPP_
-#define _XFCOMPRESSION_XIL_LZ4_HPP_
+#ifndef _XFCOMPRESSION_LZ4_HPP_
+#define _XFCOMPRESSION_LZ4_HPP_
 
 #include <cassert>
 #include "xcl2.hpp"
 #include <iomanip>
 
+#ifndef HOST_BUFFER_SIZE_IN_MB
+#define HOST_BUFFER_SIZE_IN_MB 2
+#endif
 /**
  * Maximum host buffer used to operate per kernel invocation
  */
-#define HOST_BUFFER_SIZE (2 * 1024 * 1024)
+#define HOST_BUFFER_SIZE (HOST_BUFFER_SIZE_IN_MB * 1024 * 1024)
 
 /**
  * Default block size
@@ -88,13 +91,6 @@
  */
 int validate(std::string& inFile_name, std::string& outFile_name);
 
-static uint64_t getFileSize(std::ifstream& file) {
-    file.seekg(0, file.end);
-    uint64_t file_size = file.tellg();
-    file.seekg(0, file.beg);
-    return file_size;
-}
-
 /**
  *  xfLz4 class. Class containing methods for LZ4
  * compression and decompression to be executed on host side.
@@ -131,7 +127,7 @@ class xfLz4 {
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
      * @brief Decompress the input file.
@@ -140,7 +136,7 @@ class xfLz4 {
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
      * @brief Decompress sequential.
@@ -154,40 +150,35 @@ class xfLz4 {
     uint64_t decompressSequential(
         uint8_t* in, uint8_t* out, uint64_t actual_size, uint64_t original_size, uint32_t host_buffer_size);
 
-    /**
-     * @brief Get the duration of input event
-     *
-     * @param event event to get duration for
-     */
     uint64_t getEventDurationNs(const cl::Event& event);
 
     /**
-     * Binary flow compress/decompress
-     */
-    bool m_bin_flow;
-
-    /**
-     * Block Size
-     */
-    uint32_t m_block_size_in_kb;
-
-    /**
-     * Switch between FPGA/Standard flows
-     */
-    bool m_switch_flow;
-
-    /**
-     * @brief Class constructor
+     * @brief Initialize host/device and OpenCL Setup
      *
      */
-    xfLz4(const std::string& binaryFileName, uint8_t flow);
+    xfLz4(const std::string& binaryFileName, uint8_t flow, uint32_t block_size_kb);
 
     /**
-     * @brief Class destructor.
+     * @brief Release host/device and OpenCL setup
      */
     ~xfLz4();
 
    private:
+    /**
+     * Binary flow compress/decompress
+     */
+    uint8_t m_BinFlow;
+
+    /**
+     * Block Size
+     */
+    uint32_t m_BlockSizeInKb;
+
+    /**
+     * Switch between FPGA/Standard flows
+     */
+    bool m_SwitchFlow;
+
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q;
@@ -215,4 +206,4 @@ class xfLz4 {
     std::vector<std::string> decompress_kernel_names = {"xilLz4Decompress"};
 };
 
-#endif // _XFCOMPRESSION_XIL_LZ4_HPP_
+#endif // _XFCOMPRESSION_LZ4_HPP_

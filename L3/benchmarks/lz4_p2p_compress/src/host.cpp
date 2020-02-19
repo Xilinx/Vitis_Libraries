@@ -32,7 +32,9 @@ void compress_multiple_files(const std::vector<std::string>& inFileVec,
     uint64_t total_size = 0;
     uint64_t total_in_size = 0;
 
-    printf("NumFiles:%d\n", inFileVec.size());
+    printf("NumFiles:%d\n\n", inFileVec.size());
+
+    std::cout << "\x1B[31m[Disk Operation]\033[0m Reading Input Files Started ..." << std::endl;
     for (uint32_t fid = 0; fid < inFileVec.size(); fid++) {
         uint64_t original_size = 0;
         std::string inFile_name = inFileVec[fid];
@@ -51,9 +53,16 @@ void compress_multiple_files(const std::vector<std::string>& inFileVec,
         inVec.push_back(in);
         inSizeVec.push_back(input_size);
     }
-    xflz4 xlz(compress_bin, 0);
-    xlz.m_block_size_in_kb = block_size;
+    std::cout << "\x1B[31m[Disk Operation]\033[0m Reading Input Files Done ..." << std::endl;
+    std::cout << "\n\n";
+    std::cout << "\x1B[32m[OpenCL Setup]\033[0m OpenCL/Host/Device Buffer Setup Started ..." << std::endl;
+    xflz4 xlz(compress_bin, 0, block_size);
+    std::cout << "\x1B[32m[OpenCL Setup]\033[0m OpenCL/Host/Device Buffer Setup Done ..." << std::endl;
+    std::cout << "\n";
+    std::cout << "\x1B[36m[FPGA LZ4]\033[0m LZ4 P2P Compression Started ..." << std::endl;
     xlz.compress_in_line_multiple_files(inVec, outFileVec, inSizeVec, enable_p2p);
+    std::cout << "\n\n";
+    std::cout << "\x1B[36m[FPGA LZ4]\033[0m LZ4 P2P Compression Done ..." << std::endl;
 }
 
 int validateFile(std::string& inFile_name, std::string& origFile_name) {

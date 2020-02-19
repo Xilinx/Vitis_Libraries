@@ -24,20 +24,20 @@ ifeq ($(DEBUG), yes)
 CLFLAGS += --dk protocol:all:all:all
 endif
 
-#Checks for XILINX_SDX
-#ifndef XILINX_SDX
-#$(error XILINX_SDX variable is not set, please set correctly and rerun)
+#Checks for XILINX_VITIS
+#ifndef XILINX_VITIS
+#$(error XILINX_VITIS variable is not set, please set correctly and rerun)
 #endif
 
-#   sanitize_dsa - create a filesystem friendly name from dsa name
-#   $(1) - name of dsa
+#   sanitize_xsa - create a filesystem friendly name from xsa name
+#   $(1) - name of xsa
 COLON=:
 PERIOD=.
 UNDERSCORE=_
-sanitize_dsa = $(strip $(subst $(PERIOD),$(UNDERSCORE),$(subst $(COLON),$(UNDERSCORE),$(1))))
+sanitize_xsa = $(strip $(subst $(PERIOD),$(UNDERSCORE),$(subst $(COLON),$(UNDERSCORE),$(1))))
 
-device2dsa = $(if $(filter $(suffix $(1)),.xpfm),$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) dsa 2>/dev/null),$(1))
-device2sandsa = $(call sanitize_dsa,$(call device2dsa,$(1)))
+device2xsa = $(if $(filter $(suffix $(1)),.xpfm),$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) xsa 2>/dev/null),$(1))
+device2sanxsa = $(call sanitize_xsa,$(call device2xsa,$(1)))
 device2dep = $(if $(filter $(suffix $(1)),.xpfm),$(dir $(1))/$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) hw 2>/dev/null) $(1),)
 
 # Cleaning stuff

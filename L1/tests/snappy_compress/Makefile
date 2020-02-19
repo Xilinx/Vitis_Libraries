@@ -160,7 +160,7 @@ check_part:
 	@echo "XPART is directly set to $(XPART)"
 endif # XPART
 
-.PHONY: run setup clean
+.PHONY: run setup runhls clean
 
 CSIM ?= 0
 CSYNTH ?= 0
@@ -190,6 +190,8 @@ ifeq (1,$(COSIM))
 override CSYNTH := 1
 endif
 
+run: setup runhls
+
 setup: | check_part
 	@rm -f ./settings.tcl
 	@if [ -n "$$CLKP" ]; then echo 'set CLKP $(CLKP)' >> ./settings.tcl ; fi
@@ -206,19 +208,9 @@ setup: | check_part
 	@cat ./settings.tcl
 	@echo "----"
 
-COMPRESS_OUT_DIR:=./build_compress_ip
-
-compress_srcs+=../../include/hw/snappy_compress_core.hpp
-
-compress_script=./run_compress_hls.tcl 
-
-compress_ip_out=$(COMPRESS_OUT_DIR)/snappy_compress_test/snappy_compress_stream/impl/ip/component.xml
-
-run: setup compress
-compress:$(compress_ip_out)
-
-$(compress_ip_out):$(compress_srcs)	
-	vivado_hls $(compress_script)
+runhls: setup | check_vivado
+	vivado_hls -f run_hls.tcl;
+	
 
 clean:
 	rm -rf *.prj *_hls.log settings.tcl 

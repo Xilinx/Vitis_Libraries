@@ -29,6 +29,8 @@ namespace compression {
 
 typedef ap_uint<8> streamDt;
 
+namespace details {
+
 void axis2hlsStreamFixedSize(hls::stream<qdma_axis<8, 0, 0, 0> >& inputAxiStream,
                              hls::stream<streamDt>& inputStream,
                              uint32_t inputSize) {
@@ -210,6 +212,7 @@ void streamDataK2dmFixedSize(hls::stream<ap_uint<8> >& out,
     }
 }
 
+} // end details
 } // end compression
 } // end xf
 

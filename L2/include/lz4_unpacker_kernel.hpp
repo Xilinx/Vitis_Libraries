@@ -1,5 +1,3 @@
-#ifndef _XFCOMPRESSION_UNPACKER_KERNEL_HPP_
-#define _XFCOMPRESSION_UNPACKER_KERNEL_HPP_
 /*
  * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
  *
@@ -16,11 +14,14 @@
  * limitations under the License.
  *
  */
+#ifndef _XFCOMPRESSION_LZ4_UNPACKER_KERNEL_HPP_
+#define _XFCOMPRESSION_LZ4_UNPACKER_KERNEL_HPP_
+
 /**
- * @file unpacker_kernel.hpp
+ * @file lz4_unpacker_kernel.hpp
  * @brief Header for Unapcker kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include <stdio.h>
@@ -40,7 +41,8 @@
 extern "C" {
 
 /**
- * @brief Unapcker kernel.
+ * @brief LZ4 unpacker kernel is responsible in unpacking LZ4 compressed block
+ * information.
  *
  * @param in input stream width
  * @param in_block_size input block size
@@ -64,4 +66,4 @@ void xilLz4Unpacker(const xf::compression::uintMemWidth_t* in,
                     uint32_t num_blocks);
 }
 
-#endif
+#endif // _XFCOMPRESSION_LZ4_UNPACKER_KERNEL_HPP_

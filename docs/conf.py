@@ -72,7 +72,7 @@ extensions = ['sphinx.ext.imgmath',
             'sphinx.ext.viewcode',
             'sphinx.ext.githubpages',
 	        'recommonmark',
-	        'edit_on_github',
+	        #'edit_on_github',
             # Auto-generate section labels.
             'sphinx.ext.autosectionlabel'
             ]

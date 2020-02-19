@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_AXI_STREAM_UTILS_HPP_
-#define _XFCOMPRESSION_AXI_STREAM_UTILS_HPP_
+#ifndef _XFCOMPRESSION_KERNEL_STREAM_UTILS_HPP_
+#define _XFCOMPRESSION_KERNEL_STREAM_UTILS_HPP_
 
 #include "hls_stream.h"
 
@@ -27,6 +27,7 @@
 
 namespace xf {
 namespace compression {
+namespace details {
 
 template <uint32_t DATAWIDTH>
 void kStreamRead(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& inKStream,
@@ -121,7 +122,8 @@ void kStreamWriteFixedSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKStream
     t1.last = true;
     outKStream.write(t1);
 }
+} // end details
 } // end compression
 } // end xf
 
-#endif // _XFCOMPRESSION_AXI_STREAM_UTILS_HPP_
+#endif // _XFCOMPRESSION_KERNEL_STREAM_UTILS_HPP_

@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_LZ4_DECOMPRESS_STREAM_KERNEL_HPP_
-#define _XFCOMPRESSION_LZ4_DECOMPRESS_STREAM_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_LZ4_DECOMPRESS_STREAM_HPP_
+#define _XFCOMPRESSION_LZ4_DECOMPRESS_STREAM_HPP_
 
 /**
  * @file lz4_decompress_stream.hpp
@@ -36,12 +36,8 @@
 #include "lz_optional.hpp"
 #include "lz4_decompress.hpp"
 
-#define LZ_MAX_OFFSET 65536
-#define LZ_HISTORY_SIZE LZ_MAX_OFFSET
-#define LZ_READ_STATE 0
-#define LZ_MATCH_STATE 1
-#define LZ_LOW_OFFSET_STATE 2
-#define LZ_LOW_OFFSET 8 // This should be bigger than Pipeline Depth to handle inter dependency false case
+#define MAX_OFFSET 65536
+#define HISTORY_SIZE MAX_OFFSET
 
 // Kernel top functions
 extern "C" {
@@ -61,6 +57,4 @@ void xilLz4DecompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
                             uint32_t outputSize);
 }
 
-#undef BIT
-
-#endif // _XFCOMPRESSION_LZ4_DECOMPRESS_KERNEL_HPP_
+#endif // _XFCOMPRESSION_LZ4_DECOMPRESS_STREAM_HPP_

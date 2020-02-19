@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_SNAPPY_DECOMPRESS_KERNEL_HPP_
-#define _XFCOMPRESSION_SNAPPY_DECOMPRESS_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_SNAPPY_DECOMPRESS_STREAM_HPP_
+#define _XFCOMPRESSION_SNAPPY_DECOMPRESS_STREAM_HPP_
 
 /**
- * @file snappy_decompress_kernel.hpp
+ * @file snappy_decompress_stream.hpp
  * @brief C++ Header for snappy decompression kernel.
  *
  * This file is part of XF Compression Library.
@@ -33,21 +33,14 @@
 #include "kernel_stream_utils.hpp"
 #include "lz_decompress.hpp"
 #include "lz_optional.hpp"
-
 #include "snappy_decompress.hpp"
 
 #define MAX_OFFSET 65536
 #define HISTORY_SIZE MAX_OFFSET
 
-#define BIT 8
-#define READ_STATE 0
-#define MATCH_STATE 1
-#define LOW_OFFSET_STATE 2
-#define LOW_OFFSET 8 // This should be bigger than Pipeline Depth to handle inter dependency false case
-
 extern "C" {
 /**
- * @brief Snappy decompression kernel takes compressed data as input from kernel axi stream
+ * @brief Snappy decompression streaming kernel takes compressed data as input from kernel axi stream
  * and process in block based fashion and writes the raw data to global memory.
  *
  * @param inaxistream input kernel axi stream for compressed data
@@ -59,4 +52,4 @@ void xilSnappyDecompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
                                uint32_t inputSize,
                                uint32_t outputSize);
 }
-#endif
+#endif // _XFCOMPRESSION_SNAPPY_DECOMPRESS_STREAM_HPP_

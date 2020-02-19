@@ -31,20 +31,12 @@
  * These descriptors used in P2P case only
  */
 
-uint64_t xflz4::get_event_duration_ns(const cl::Event& event) {
-    uint64_t start_time = 0, end_time = 0;
-
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &start_time);
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &end_time);
-    return (end_time - start_time);
-}
-
 // Constructor
-xflz4::xflz4(const std::string& binaryFileName, uint8_t device_id) {
+xflz4::xflz4(const std::string& binaryFileName, uint8_t device_id, uint32_t m_block_kb) {
     // Index calculation
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
-
+    m_BlockSizeInKb = m_block_kb;
     /* Multi board support: selecting the right device based on the device_id,
      * provided through command line args (-id <device_id>).
      */
@@ -66,7 +58,7 @@ xflz4::xflz4(const std::string& binaryFileName, uint8_t device_id) {
     std::cout << "Found Device=" << device_name.c_str() << ", device id = " << unsigned(device_id) << std::endl;
 
     // import_binary() command will find the OpenCL binary file created using the
-    // xocc compiler load into OpenCL Binary and return as Binaries
+    // v++ compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
 
@@ -79,7 +71,7 @@ xflz4::xflz4(const std::string& binaryFileName, uint8_t device_id) {
 
 size_t xflz4::create_header(uint8_t* h_header, uint32_t inSize) {
     uint8_t block_size_header = 0;
-    switch (m_block_size_in_kb) {
+    switch (m_BlockSizeInKb) {
         case 64:
             block_size_header = BSIZE_STD_64KB;
             break;
@@ -105,7 +97,7 @@ size_t xflz4::create_header(uint8_t* h_header, uint32_t inSize) {
     // This value is sent to Kernel 2
     uint32_t xxhash_val = (xxh >> 8);
 
-    uint32_t block_size_in_bytes = m_block_size_in_kb * 1024;
+    uint32_t block_size_in_bytes = m_BlockSizeInKb * 1024;
 
     // Header information
     uint32_t head_size = 0;
@@ -118,7 +110,7 @@ size_t xflz4::create_header(uint8_t* h_header, uint32_t inSize) {
     h_header[head_size++] = FLG_BYTE;
 
     // Value
-    switch (m_block_size_in_kb) {
+    switch (m_BlockSizeInKb) {
         case 64:
             h_header[head_size++] = BSIZE_STD_64KB;
             break;
@@ -145,15 +137,11 @@ size_t xflz4::create_header(uint8_t* h_header, uint32_t inSize) {
 
     // XXHASH value
     h_header[head_size++] = xxhash_val;
-    return (head_size);
+    return head_size;
 }
 
 // Destructor
 xflz4::~xflz4() {
-    for (uint8_t i = 0; i < MAX_COMPUTE_UNITS; i++) {
-        delete (compress_kernel_lz4[i]);
-        delete (packer_kernel_lz4[i]);
-    }
     delete (m_program);
     delete (m_q);
     delete (m_context);
@@ -183,8 +171,12 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
     std::vector<uint32_t> headerSizeVec;
     std::vector<uint32_t> compressSizeVec;
 
+    std::vector<cl::Kernel*> packerKernelVec;
+    std::vector<cl::Kernel*> compressKernelVec;
+
     // only for Non-P2P
     std::vector<uint8_t*> compressDataInHostVec;
+    uint32_t outputSize = 0;
 
     int ret = 0;
 
@@ -192,17 +184,19 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
     uint64_t total_packer_kernel_time = 0;
     std::chrono::duration<double, std::nano> total_ssd_time_ns(0);
 
-    for (uint8_t i = 0; i < MAX_COMPUTE_UNITS; i++) {
-        compress_kernel_lz4[i] = NULL;
-        packer_kernel_lz4[i] = NULL;
-    }
-
     // Pre Processing
     for (uint32_t i = 0; i < inVec.size(); i++) {
+        // To handle files size less than 4K
+        if (inSizeVec[i] < RESIDUE_4K) {
+            outputSize = RESIDUE_4K;
+        } else {
+            outputSize = inSizeVec[i];
+        }
+
         uint8_t* h_header = (uint8_t*)aligned_alloc(4096, 4096);
         uint32_t* h_blksize = (uint32_t*)aligned_alloc(4096, 4096);
         uint32_t* h_lz4outSize = (uint32_t*)aligned_alloc(4096, 4096);
-        uint32_t block_size_in_bytes = m_block_size_in_kb * 1024;
+        uint32_t block_size_in_bytes = m_BlockSizeInKb * 1024;
         uint32_t head_size = create_header(h_header, inSizeVec[i]);
         headerSizeVec.push_back(head_size);
         h_headerVec.push_back(h_header);
@@ -214,7 +208,7 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
 
         if (!enable_p2p) {
             // Creating Host memory to read the compressed data back to host for non-p2p flow case
-            uint8_t* compressData = new uint8_t[inSizeVec[i]];
+            uint8_t* compressData = new uint8_t[outputSize];
             compressDataInHostVec.push_back(compressData);
         }
 
@@ -245,10 +239,6 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
             pack_kname += ":{xilLz4Packer_2}";
         }
 
-        if (!compress_kernel_lz4[cu_num]) compress_kernel_lz4[cu_num] = new cl::Kernel(*m_program, comp_kname.c_str());
-
-        if (!packer_kernel_lz4[cu_num]) packer_kernel_lz4[cu_num] = new cl::Kernel(*m_program, pack_kname.c_str());
-
         // Device buffer allocation
         // K1 Input:- This buffer contains input chunk data
         cl::Buffer* buffer_input =
@@ -256,10 +246,9 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         bufInputVec.push_back(buffer_input);
         // K2 Output:- This buffer contains compressed data written by device
         cl::Buffer* buffer_lz4out =
-            new cl::Buffer(*m_context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX, inSizeVec[i], &(lz4Ext));
+            new cl::Buffer(*m_context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX, outputSize, &(lz4Ext));
         buflz4OutVec.push_back(buffer_lz4out);
-        uint8_t* h_buf_out_p2p =
-            (uint8_t*)m_q->enqueueMapBuffer(*(buffer_lz4out), CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 0, inSizeVec[i]);
+        uint8_t* h_buf_out_p2p = (uint8_t*)m_q->enqueueMapBuffer(*(buffer_lz4out), CL_TRUE, CL_MAP_READ, 0, outputSize);
         bufp2pOutVec.push_back(h_buf_out_p2p);
         // K1 Output:- This buffer contains compressed data written by device
         // K2 Input:- This is a input to data packer kernel
@@ -310,58 +299,65 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
             }
             fd_p2p_vec.push_back(fd_p2p_c_out);
         }
+
+        // Set kernel arguments
+        cl::Kernel* compress_kernel_lz4 = new cl::Kernel(*m_program, comp_kname.c_str());
+        int narg = 0;
+        compress_kernel_lz4->setArg(narg++, *(bufInputVec[i]));
+        compress_kernel_lz4->setArg(narg++, *(bufOutputVec[i]));
+        compress_kernel_lz4->setArg(narg++, *(bufCompSizeVec[i]));
+        compress_kernel_lz4->setArg(narg++, *(bufblockSizeVec[i]));
+        compress_kernel_lz4->setArg(narg++, m_BlockSizeInKb);
+        compress_kernel_lz4->setArg(narg++, inSizeVec[i]);
+        compressKernelVec.push_back(compress_kernel_lz4);
+
+        uint32_t offset = 0;
+        uint32_t tail_bytes = 0;
+        tail_bytes = 1;
+        uint32_t no_blocks_calc = (inSizeVec[i] - 1) / (m_BlockSizeInKb * 1024) + 1;
+
+        // K2 Set Kernel arguments
+        cl::Kernel* packer_kernel_lz4 = new cl::Kernel(*m_program, pack_kname.c_str());
+        narg = 0;
+        packer_kernel_lz4->setArg(narg++, *(bufOutputVec[i]));
+        packer_kernel_lz4->setArg(narg++, *(buflz4OutVec[i]));
+        packer_kernel_lz4->setArg(narg++, *(bufheadVec[i]));
+        packer_kernel_lz4->setArg(narg++, *(bufCompSizeVec[i]));
+        packer_kernel_lz4->setArg(narg++, *(bufblockSizeVec[i]));
+        packer_kernel_lz4->setArg(narg++, *(buflz4OutSizeVec[i]));
+        packer_kernel_lz4->setArg(narg++, *(bufInputVec[i]));
+        packer_kernel_lz4->setArg(narg++, headerSizeVec[i]);
+        packer_kernel_lz4->setArg(narg++, offset);
+        packer_kernel_lz4->setArg(narg++, m_BlockSizeInKb);
+        packer_kernel_lz4->setArg(narg++, no_blocks_calc);
+        packer_kernel_lz4->setArg(narg++, tail_bytes);
+        packerKernelVec.push_back(packer_kernel_lz4);
     }
 
+    m_q->finish();
     auto total_start = std::chrono::high_resolution_clock::now();
     for (uint32_t i = 0; i < inVec.size(); i++) {
         /* Transfer data from host to device
         * In p2p case, no need to transfer buffer input to device from host.
         */
-        cl::Event write_event, comp_event, pack_event;
-        std::vector<cl::Event> writeWait;
         std::vector<cl::Event> compWait;
         std::vector<cl::Event> packWait;
+        std::vector<cl::Event> writeWait;
+
+        cl::Event comp_event, pack_event;
+        cl::Event write_event;
 
         // Migrate memory - Map host to device buffers
-        m_q->enqueueMigrateMemObjects({*(bufInputVec[i]), *(bufblockSizeVec[i])}, 0 /* 0 means from host*/, NULL,
-                                      &write_event);
-
+        m_q->enqueueMigrateMemObjects({*(bufInputVec[i]), *(bufblockSizeVec[i]), *(bufheadVec[i])},
+                                      0 /* 0 means from host*/, NULL, &write_event);
         writeWait.push_back(write_event);
-        // Set kernel arguments
-        int narg = 0;
-        int cu_num = i % 2;
-        compress_kernel_lz4[cu_num]->setArg(narg++, *(bufInputVec[i]));
-        compress_kernel_lz4[cu_num]->setArg(narg++, *(bufOutputVec[i]));
-        compress_kernel_lz4[cu_num]->setArg(narg++, *(bufCompSizeVec[i]));
-        compress_kernel_lz4[cu_num]->setArg(narg++, *(bufblockSizeVec[i]));
-        compress_kernel_lz4[cu_num]->setArg(narg++, m_block_size_in_kb);
-        compress_kernel_lz4[cu_num]->setArg(narg++, inSizeVec[i]);
 
-        uint32_t offset = 0;
-        uint32_t tail_bytes = 0;
-        tail_bytes = 1;
-        uint32_t no_blocks_calc = (inSizeVec[i] - 1) / (m_block_size_in_kb * 1024) + 1;
-
-        // K2 Set Kernel arguments
-        narg = 0;
-        packer_kernel_lz4[cu_num]->setArg(narg++, *(bufOutputVec[i]));
-        packer_kernel_lz4[cu_num]->setArg(narg++, *(buflz4OutVec[i]));
-        packer_kernel_lz4[cu_num]->setArg(narg++, *(bufheadVec[i]));
-        packer_kernel_lz4[cu_num]->setArg(narg++, *(bufCompSizeVec[i]));
-        packer_kernel_lz4[cu_num]->setArg(narg++, *(bufblockSizeVec[i]));
-        packer_kernel_lz4[cu_num]->setArg(narg++, *(buflz4OutSizeVec[i]));
-        packer_kernel_lz4[cu_num]->setArg(narg++, *(bufInputVec[i]));
-        packer_kernel_lz4[cu_num]->setArg(narg++, headerSizeVec[i]);
-        packer_kernel_lz4[cu_num]->setArg(narg++, offset);
-        packer_kernel_lz4[cu_num]->setArg(narg++, m_block_size_in_kb);
-        packer_kernel_lz4[cu_num]->setArg(narg++, no_blocks_calc);
-        packer_kernel_lz4[cu_num]->setArg(narg++, tail_bytes);
         // Fire compress kernel
-        m_q->enqueueTask(*compress_kernel_lz4[cu_num], &writeWait, &comp_event);
+        m_q->enqueueTask(*compressKernelVec[i], &writeWait, &comp_event);
 
         compWait.push_back(comp_event);
         // Fire packer kernel
-        m_q->enqueueTask(*packer_kernel_lz4[cu_num], &compWait, &pack_event);
+        m_q->enqueueTask(*packerKernelVec[i], &compWait, &pack_event);
 
         packWait.push_back(pack_event);
         // Read back data
@@ -398,6 +394,9 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
             auto ssd_end = std::chrono::high_resolution_clock::now();
             auto ssd_time_ns = std::chrono::duration<double, std::nano>(ssd_end - ssd_start);
             total_ssd_time_ns += ssd_time_ns;
+            float ssd_throughput_in_mbps_1 = (float)comp_file_size * 1000 / total_ssd_time_ns.count();
+            std::cout << "\nSSD Throughput: " << std::fixed << std::setprecision(2) << ssd_throughput_in_mbps_1;
+            std::cout << " MB/s";
             close(fd_p2p_vec[i]);
         } else {
             m_q->enqueueReadBuffer(*(buflz4OutVec[i]), 0, 0, compressed_size, compressDataInHostVec[i]);
@@ -409,10 +408,10 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
 
     auto time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
     float throughput_in_mbps_1 = (float)total_file_size * 1000 / time_ns.count();
-    float ssd_throughput_in_mbps_1 = (float)comp_file_size * 1000 / total_ssd_time_ns.count();
 
-    std::cout << "\nThroughput (MBps):" << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
-    std::cout << "\nSSD Throughput (MBps):" << std::fixed << std::setprecision(2) << ssd_throughput_in_mbps_1;
+    std::cout << "\nOverall Throughput [Including SSD Operation]: " << std::fixed << std::setprecision(2)
+              << throughput_in_mbps_1;
+    std::cout << " MB/s";
 
     // Post Processing and cleanup
     for (uint32_t i = 0; i < inVec.size(); i++) {
@@ -428,5 +427,7 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         delete (bufCompSizeVec[i]);
         delete (bufblockSizeVec[i]);
         delete (buflz4OutSizeVec[i]);
+        delete (compressKernelVec[i]);
+        delete (packerKernelVec[i]);
     }
 }

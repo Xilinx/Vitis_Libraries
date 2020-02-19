@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+#ifndef _XFCOMPRESSION_LZ4_P2P_COMP_HPP_
+#define _XFCOMPRESSION_LZ4_P2P_COMP_HPP_
+
 #pragma once
 #include "defns.h"
 
@@ -78,24 +81,16 @@ class xflz4 {
         file.seekg(0, file.beg);
         return file_size;
     }
-    // Binary flow compress/decompress
-    bool m_bin_flow;
 
-    // Block Size
-    uint32_t m_block_size_in_kb;
-
-    // Switch between FPGA/Standard flows
-    bool m_switch_flow;
-
-    xflz4(const std::string& binaryFile, uint8_t);
+    xflz4(const std::string& binaryFile, uint8_t device_id, uint32_t m_block_kb);
     ~xflz4();
 
    private:
+    // Block Size
+    uint32_t m_BlockSizeInKb;
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q;
-    cl::Kernel* compress_kernel_lz4[MAX_COMPUTE_UNITS];
-    cl::Kernel* packer_kernel_lz4[MAX_COMPUTE_UNITS];
     uint64_t get_event_duration_ns(const cl::Event& event);
     size_t create_header(uint8_t* h_header, uint32_t inSize);
 
@@ -104,3 +99,4 @@ class xflz4 {
 
     std::vector<std::string> packer_kernel_names = {"xilLz4Packer"};
 };
+#endif // _XFCOMPRESSION_LZ4_P2P_COMP_HPP_

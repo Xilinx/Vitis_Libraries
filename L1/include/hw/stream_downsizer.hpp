@@ -32,6 +32,8 @@
 
 namespace xf {
 namespace compression {
+namespace details {
+
 template <class SIZE_DT, int IN_WIDTH, int OUT_WIDTH>
 void streamDownsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
                      hls::stream<ap_uint<OUT_WIDTH> >& outStream,
@@ -135,7 +137,8 @@ void streamDownSizerP2PComp(hls::stream<ap_uint<IN_WIDTH> >& inStream,
     }
 }
 
+} // namespace details
 } // namespace compression
 } // namespace xf
 
-#endif
+#endif // _XFCOMPRESSION_STREAM_DOWNSIZER_HPP_

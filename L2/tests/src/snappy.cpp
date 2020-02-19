@@ -24,16 +24,12 @@
 #define MAGIC_BYTE_4 24
 #define FLG_BYTE 104
 
-uint64_t xilSnappy::getEventDurationNs(const cl::Event& event) {
-    uint64_t start_time = 0, end_time = 0;
-
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &start_time);
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &end_time);
-    return (end_time - start_time);
-}
-
-uint64_t xilSnappy::compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
-    if (m_switch_flow == 0) { // Xilinx FPGA compression flow
+uint64_t xilSnappy::compressFile(std::string& inFile_name,
+                                 std::string& outFile_name,
+                                 uint64_t input_size,
+                                 bool m_flow) {
+    m_SwitchFlow = m_flow;
+    if (m_SwitchFlow == 0) { // Xilinx FPGA compression flow
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
 
@@ -60,7 +56,7 @@ uint64_t xilSnappy::compressFile(std::string& inFile_name, std::string& outFile_
         outFile.put(0x59);
 
         uint32_t host_buffer_size = HOST_BUFFER_SIZE;
-        uint32_t acc_buff_size = m_block_size_in_kb * 1024 * PARALLEL_BLOCK;
+        uint32_t acc_buff_size = m_BlockSizeInKb * 1024 * PARALLEL_BLOCK;
         if (acc_buff_size > host_buffer_size) {
             host_buffer_size = acc_buff_size;
         }
@@ -96,8 +92,12 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
     return ret;
 }
 
-uint64_t xilSnappy::decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
-    if (m_switch_flow == 0) {
+uint64_t xilSnappy::decompressFile(std::string& inFile_name,
+                                   std::string& outFile_name,
+                                   uint64_t input_size,
+                                   bool m_flow) {
+    m_SwitchFlow = m_flow;
+    if (m_SwitchFlow == 0) {
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
 
@@ -107,7 +107,7 @@ uint64_t xilSnappy::decompressFile(std::string& inFile_name, std::string& outFil
         }
 
         std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size);
-        std::vector<uint8_t, aligned_allocator<uint8_t> > out(6 * input_size);
+        std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size * m_max_cr);
 
         char c = 0;
 
@@ -132,7 +132,6 @@ uint64_t xilSnappy::decompressFile(std::string& inFile_name, std::string& outFil
         // Close file
         inFile.close();
         outFile.close();
-
         return debytes;
     } else {
         // Use standard snappy compress/decompress below
@@ -145,7 +144,6 @@ uint64_t xilSnappy::decompressFile(std::string& inFile_name, std::string& outFil
 
 uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t input_size) {
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
-    uint32_t compute_cu = 1;
     uint32_t buf_size = BLOCK_SIZE_IN_KB * 1024;
     uint32_t blocksPerChunk = HOST_BUFFER_SIZE / buf_size;
     uint32_t host_buffer_size = ((HOST_BUFFER_SIZE - 1) / BLOCK_SIZE_IN_KB + 1) * BLOCK_SIZE_IN_KB;
@@ -170,7 +168,7 @@ uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t inp
     decompress_kernel_snappy->setArg(narg++, *(buffer_output));
     decompress_kernel_snappy->setArg(narg++, *(buffer_block_size));
     decompress_kernel_snappy->setArg(narg++, *(buffer_compressed_size));
-    decompress_kernel_snappy->setArg(narg++, m_block_size_in_kb);
+    decompress_kernel_snappy->setArg(narg++, m_BlockSizeInKb);
     decompress_kernel_snappy->setArg(narg++, blocksPerChunk);
 
     uint32_t chunk_size = 0;
@@ -183,10 +181,12 @@ uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t inp
     uint32_t bufIdx = 0;
     uint32_t over_block_cntr = 0;
     uint32_t brick = 0;
-    uint32_t completed_bricks = 0;
     uint16_t stride_cidsize = 4;
     bool blkDecomExist = false;
     uint32_t blkUnComp = 0;
+
+    // Maximum allowed outbuffer size, if it exceeds then exit
+    uint32_t c_max_outbuf = input_size * m_max_cr;
 
     // Go over overall input size
     for (uint32_t idxSize = 0; idxSize < input_size; idxSize += stride_cidsize, chunk_cntr++) {
@@ -305,6 +305,18 @@ uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t inp
             for (uint32_t bIdx = 0; bIdx < over_block_cntr; bIdx++) {
                 uint32_t block_size = m_blkSize.data()[bIdx];
                 uint32_t compressed_size = m_compressSize.data()[bIdx];
+
+                if ((output_idx + block_size) > c_max_outbuf) {
+                    std::cout << "\n" << std::endl;
+                    std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
+                              << std::endl;
+                    std::cout
+                        << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
+                        << std::endl;
+                    std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
+                    exit(1);
+                }
+
                 if (compressed_size < block_size) {
                     std::memcpy(&out[output_idx], &h_buf_out.data()[bufIdx], block_size);
                     output_idx += block_size;
@@ -314,6 +326,7 @@ uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t inp
                     blkUnComp -= block_size;
                 }
             }
+
             block_cntr = 0;
             bufblocks = 0;
             over_block_cntr = 0;
@@ -362,6 +375,18 @@ uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t inp
         for (uint32_t bIdx = 0; bIdx < over_block_cntr; bIdx++) {
             uint32_t block_size = m_blkSize.data()[bIdx];
             uint32_t compressed_size = m_compressSize.data()[bIdx];
+
+            if ((output_idx + block_size) > c_max_outbuf) {
+                std::cout << "\n" << std::endl;
+                std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
+                          << std::endl;
+                std::cout
+                    << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
+                    << std::endl;
+                std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
+                exit(1);
+            }
+
             if (compressed_size < block_size) {
                 std::memcpy(&out[output_idx], &h_buf_out.data()[bufIdx], block_size);
                 output_idx += block_size;
@@ -391,7 +416,7 @@ uint64_t xilSnappy::decompressSequential(uint8_t* in, uint8_t* out, uint64_t inp
 }
 
 // Constructor
-xilSnappy::xilSnappy(const std::string& binaryFile, uint8_t flow) {
+xilSnappy::xilSnappy(const std::string& binaryFile, uint8_t flow, uint32_t block_size, uint8_t max_cr) {
     // Index calculation
     h_buf_in.resize(HOST_BUFFER_SIZE);
     h_buf_out.resize(HOST_BUFFER_SIZE);
@@ -400,8 +425,7 @@ xilSnappy::xilSnappy(const std::string& binaryFile, uint8_t flow) {
 
     m_compressSize.reserve(MAX_NUMBER_BLOCKS);
     m_blkSize.reserve(MAX_NUMBER_BLOCKS);
-
-    unsigned fileBufSize;
+    m_max_cr = max_cr;
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -413,14 +437,15 @@ xilSnappy::xilSnappy(const std::string& binaryFile, uint8_t flow) {
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // import_binary() command will find the OpenCL binary file created using the
-    // xocc compiler load into OpenCL Binary and return as Binaries
+    // v++ compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
     auto fileBuf = xcl::read_binary_file(binaryFile);
     cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
     m_program = new cl::Program(*m_context, devices, bins);
-
+    m_BinFlow = flow;
+    m_BlockSizeInKb = block_size;
     // Create Compress kernels
     if (flow == 1 || flow == 2) compress_kernel_snappy = new cl::Kernel(*m_program, compress_kernel_names[0].c_str());
 
@@ -431,9 +456,10 @@ xilSnappy::xilSnappy(const std::string& binaryFile, uint8_t flow) {
 
 // Destructor
 xilSnappy::~xilSnappy() {
-    if (m_bin_flow) {
+    if (m_BinFlow) {
         delete (compress_kernel_snappy);
-    } else {
+    }
+    if (m_BinFlow == 0 || m_BinFlow == 2) {
         delete (decompress_kernel_snappy);
     }
     delete (m_program);
@@ -446,8 +472,6 @@ xilSnappy::~xilSnappy() {
 uint64_t xilSnappy::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_size) {
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
     uint32_t block_size_in_bytes = block_size_in_kb * 1024;
-
-    uint32_t no_compress_case = 0;
 
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
 

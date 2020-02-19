@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_SNAPPY_COMPRESS_STREAM_KERNEL_HPP_
-#define _XFCOMPRESSION_SNAPPY_COMPRESS_STREAM_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_SNAPPY_COMPRESS_STREAM_HPP_
+#define _XFCOMPRESSION_SNAPPY_COMPRESS_STREAM_HPP_
 
 /**
  * @file snappy_compress_kernel.hpp
@@ -37,19 +37,11 @@
 #include "snappy_compress.hpp"
 
 #define PARALLEL_BLOCK 8
-#define GMEM_DWIDTH 512
-#define GMEM_BURST_SIZE 16
-#define MIN_BLOCK_SIZE 16
-#define BIT 8
-#define MIN_OFFSET 1
-#define MIN_MATCH 4
-#define LZ_MAX_OFFSET_LIMIT 65536
-#define LZ_HASH_BIT 12
-#define LZ_DICT_SIZE (1 << LZ_HASH_BIT)
 #define MAX_MATCH_LEN 64
 #define OFFSET_WINDOW 65536
+#define MIN_MATCH 4
+#define LZ_MAX_OFFSET_LIMIT 65536
 #define MATCH_LEN 6
-#define MATCH_LEVEL 6
 
 #ifdef LARGE_LIT_RANGE
 #define MAX_LIT_COUNT 4090
@@ -61,7 +53,7 @@
 
 extern "C" {
 /**
- * @brief Snappy compression kernel takes the raw data as input from kernel axi stream
+ * @brief Snappy compression streaming kernel takes the raw data as input from kernel axi stream
  * and compresses the data in block based fashion and writes the output to kernel axi stream.
  *
  * @param inaxistream input kernel axi stream for raw data
@@ -73,4 +65,4 @@ void xilSnappyCompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
                              uint32_t inputSize);
 }
 
-#endif
+#endif // _XFCOMPRESSION_SNAPPY_COMPRESS_STREAM_HPP_

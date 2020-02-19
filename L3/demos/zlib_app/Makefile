@@ -150,6 +150,7 @@ XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
 BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
 SRC_DIR := $(XFLIB_DIR)/L3/demos/zlib_app/src
+TB_DIR := $(XFLIB_DIR)/L2/tests/src/
 
 # ------------------------------------------------------------
 #                      kernel setup
@@ -167,7 +168,8 @@ VPP_FLAGS = -I$(HLS_SRC_DIR) \
 			-I$(XFLIB_DIR)/L2/include/
 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
-VPP_FLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
+VPP_FLAGS +=  --config $(CUR_DIR)/advanced.ini \
+			  -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
 
 
 VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
@@ -175,6 +177,7 @@ VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
 
 # Linking flags
 VPP_LINK_FLAGS = --optimize 2 --jobs 8 
+VPP_LINK_FLAGS += --config $(CUR_DIR)/opts.ini
 
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				 --report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
@@ -185,20 +188,27 @@ XO_FILES_C = $(TEMP_DIR)/xf_compress_lz77.xo \
 		   	 $(TEMP_DIR)/xf_huffman.xo \
 		  	 $(TEMP_DIR)/xf_treegen.xo
 		  	 
-XO_FILES_D = $(TEMP_DIR)/xf_zlib_decompress.xo
+XO_FILES_D = $(TEMP_DIR)/xf_zlib_datareader.xo \
+		     $(TEMP_DIR)/xf_zlib_datawriter.xo \
+		     $(TEMP_DIR)/xf_zlib_decompress.xo
 
 COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
 HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/zlib_huffman_enc_mm.cpp
 TREEGEN_KERNEL_SRCS = $(KSRC_DIR)/zlib_treegen_mm.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_mm.cpp
+DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_rd.cpp
+DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_wr.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_stream.cpp
 
 COMPRESS_KERNEL_NAME = xilLz77Compress
 HUFFMAN_KERNEL_NAME = xilHuffmanKernel
 TREEGEN_KERNEL_NAME = xilTreegenKernel
-DECOMPRESS_KERNEL_NAME = xilDecompressZlib
+DATAREADER_KERNEL_NAME = xilZlibDmReader
+DATAWRITER_KERNEL_NAME = xilZlibDmWriter
+DECOMPRESS_KERNEL_NAME = xilDecompressStream
 
-KERNELS += $(COMPRESS_KERNEL_NAME) $(HUFFMAN_KERNEL_NAME) $(TREEGEN_KERNEL_NAME) $(DECOMPRESS_KERNEL_NAME)
 
+KERNELS += $(COMPRESS_KERNEL_NAME) $(HUFFMAN_KERNEL_NAME) $(TREEGEN_KERNEL_NAME)
+KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERNEL_NAME)
 
 # ------------------------------------------------------------
 #                      kernel rules
@@ -222,17 +232,29 @@ $(TEMP_DIR)/xf_treegen.xo: $(TREEGEN_KERNEL_SRCS) $(HLS_SRC_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(TREEGEN_KERNEL_NAME) \
 		-I'$(<D)' -o'$@' '$<'
 
+$(TEMP_DIR)/xf_zlib_datareader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
+	@echo -e "----\nCompiling data reader kernel $*..."
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAREADER_KERNEL_NAME) \
+	    -I'$(<D)' -o'$@' '$<'
+
+$(TEMP_DIR)/xf_zlib_datawriter.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
+	@echo -e "----\nCompiling data writer kernel $*..."
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAWRITER_KERNEL_NAME) \
+	    -I'$(<D)' -o'$@' '$<'
+
 $(TEMP_DIR)/xf_zlib_decompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling decompression kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMPRESS_KERNEL_NAME) \
 	    -I'$(<D)' -o'$@' '$<'
 
-
 # xclbin Binary creation
 $(XCLBIN_FILE): $(XO_FILES_C) $(XO_FILES_D)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l --config $(CUR_DIR)/compress.ini --config $(CUR_DIR)/decompress.ini -o'$@' $(+)
+	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l \
+	-o'$@' $(+)
 
 
 # ------------------------------------------------------------
@@ -277,13 +299,14 @@ inflate_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/inflate.c
 inftrees_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/inftrees.c
 inffast_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/inffast.c
 
-CXXFLAGS += -fmessage-length=0
+CXXFLAGS += -std=c++0x -fmessage-length=0 \
 		-DXDEVICE=$(XDEVICE) \
-	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread
+	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread \
+		-Wno-unused-function
 
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
-LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -std=c++0x -DVERBOSE
-
+LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
+LDFLAGS += -Wno-unused-function
 EXE_FILE = $(BUILD_DIR)/$(EXE_NAME)
 LIBZLIB = $(BUILD_DIR)/$(LIBZLIB_NAME)
 
@@ -339,12 +362,13 @@ cleanh:
 	rm -rf $(EXE_FILE)
 	-$(RMDIR) $(EXE_FILE)
 	-$(RMDIR) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	-$(RMDIR) src/*.ll _vxx_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
-	-$(RMDIR) _x_temp* $(CUR_DIR)/reports $(CUR_DIR)/obj_*
+	-$(RMDIR) _x_temp* $(CUR_DIR)/reports *.csv *.run_summary *.txt.* *.list $(CUR_DIR)/obj_*
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig* 
+	rm -rf ./sample_run.txt
 
 clean: cleanh
 
@@ -355,7 +379,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -sx $(XCLBIN_FILE) -v $(XFLIB_DIR)/common/data/sample.txt
+HOST_ARGS = -sx $(XCLBIN_FILE) -v ./sample.txt
 
 
 ifeq ($(TARGET),sw_emu)
@@ -373,6 +397,9 @@ endif
 run: host xclbin $(EMU_CONFIG)
 	$(RUN_ENV); \
 	$(EXE_FILE) $(HOST_ARGS)
+	$(RUN_ENV); \
+	./run.sh $@ $(EXE_FILE) $(XF_PROJ_ROOT) $(XCLBIN_FILE)
+
 
 check: run
 

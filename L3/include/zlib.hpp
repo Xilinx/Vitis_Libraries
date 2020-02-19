@@ -20,52 +20,18 @@
 #include <iomanip>
 #include <iostream>
 #include <stdint.h>
+#include <stdlib.h>
 #include <vector>
 #include <math.h>
 #include <time.h>
+#include <unistd.h>
+
 #include <string>
 #include <fstream>
+#include <thread>
 #include "xcl2.hpp"
 
 const int gz_max_literal_count = 4096;
-
-// Dynamic Huffman Related Content
-
-// Literals
-#define LITERALS 256
-
-// Length codes
-#define LENGTH_CODES 29
-
-// Literal Codes
-#define LITERAL_CODES (LITERALS + 1 + LENGTH_CODES)
-
-// Distance Codes
-#define DISTANCE_CODES 30
-
-// bit length codes
-#define BL_CODES 19
-
-// Literal Tree size - 573
-#define HEAP_SIZE (2 * LITERAL_CODES + 1)
-
-// Bit length codes must not exceed MAX_BL_BITS bits
-#define MAX_BL_BITS 7
-
-#define REUSE_PREV_BLEN 16
-
-#define REUSE_ZERO_BLEN 17
-
-#define REUSE_ZERO_BLEN_7 18
-
-// LTREE, DTREE and BLTREE sizes
-#define LTREE_SIZE 1024
-#define DTREE_SIZE 64
-#define BLTREE_SIZE 64
-#define EXTRA_LCODES 32
-#define EXTRA_DCODES 32
-#define EXTRA_BLCODES 32
-#define MAXCODE_SIZE 16
 
 #define PARALLEL_ENGINES 8
 #define MAX_CCOMP_UNITS C_COMPUTE_UNIT
@@ -73,6 +39,17 @@ const int gz_max_literal_count = 4096;
 
 // Default block size
 #define BLOCK_SIZE_IN_KB 1024
+
+// Input and output buffer size
+#define INPUT_BUFFER_SIZE (2 * 1024 * 1024)
+#define OUTPUT_BUFFER_SIZE (32 * 1024 * 1024)
+
+// zlib max cr limit
+#define MAX_CR 10
+
+// buffer count for data in in decompression data movers
+#define DIN_BUFFERCOUNT 8
+#define DOUT_BUFFERCOUNT 2 // mandatorily 2
 
 // Maximum host buffer used to operate
 // per kernel invocation
@@ -86,9 +63,48 @@ const int gz_max_literal_count = 4096;
 // Maximum number of blocks based on host buffer size
 #define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
 
+#define DECOMP_OUT_SIZE 170
+
+constexpr auto page_aligned_mem = (1 << 21);
+
 int validate(std::string& inFile_name, std::string& outFile_name);
 
 uint32_t get_file_size(std::ifstream& file);
+enum comp_decom_flows { BOTH, COMP_ONLY, DECOMP_ONLY };
+enum list_mode { ONLY_COMPRESS, ONLY_DECOMPRESS, COMP_DECOMP };
+
+// Aligned allocator for ZLIB
+template <typename T>
+struct zlib_aligned_allocator {
+    using value_type = T;
+    T* allocate(std::size_t num) {
+        void* ptr = nullptr;
+        if (posix_memalign(&ptr, page_aligned_mem, num * sizeof(T))) throw std::bad_alloc();
+
+        // madvise is a system call to allocate
+        // huge pages. By allocating huge pages
+        // for memory allocation improves overall
+        // time by reduction in page initialization
+        // in next step.
+        madvise(ptr, num, MADV_HUGEPAGE);
+
+        T* array = reinterpret_cast<T*>(ptr);
+
+        // Write a value in each virtual memory page to force the
+        // materialization in physical memory to avoid paying this price later
+        // during the first use of the memory
+        for (std::size_t i = 0; i < num; i += (page_aligned_mem)) array[i] = 0;
+        return array;
+    }
+
+    // Dummy construct which doesnt initialize
+    template <typename U>
+    void construct(U* ptr) noexcept {
+        // Skip the default construction
+    }
+
+    void deallocate(T* p, std::size_t num) { free(p); }
+};
 
 namespace xf {
 namespace compression {
@@ -100,31 +116,7 @@ namespace compression {
 class xfZlib {
    public:
     /**
-     * @brief Initialize the class object.
-     *
-     * @param binaryFile file to be read
-     */
-    int init(const std::string& binaryFile);
-    /**
-     * @brief release
-     *
-     */
-    int release();
-
-    /**
-     * @brief This module does the overlapped execution of compression
-     * where data transfers and kernel computation are overlapped
-     *
-     * @param in input byte sequence
-     * @param out output byte sequence
-     * @param actual_size input size
-     * @param host_buffer_size host buffer size
-     * @param file_list_flag flag for list of files
-     */
-    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size, bool file_list_flag);
-
-    /**
-     * @brief This module does the overlapped execution of compression
+     * @brief This method does the overlapped execution of compression
      * where data transfers and kernel computation are overlapped
      *
      * @param in input byte sequence
@@ -136,7 +128,7 @@ class xfZlib {
     uint32_t compress(uint8_t* in, uint8_t* out, uint32_t actual_size, uint32_t host_buffer_size);
 
     /**
-     * @brief This module does serial execution of decompression
+     * @brief This method does serial execution of decompression
      * where data transfers and kernel execution in serial manner
      *
      * @param in input byte sequence
@@ -172,7 +164,7 @@ class xfZlib {
     int decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
 
     /**
-     * @brief This module does file operations and invokes compress API which
+     * @brief This method does file operations and invokes compress API which
      * internally does zlib compression on FPGA in overlapped manner
      *
      * @param inFile_name input file name
@@ -183,7 +175,7 @@ class xfZlib {
     uint32_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
 
     /**
-     * @brief This module does file operations and invokes decompress API which
+     * @brief This method  does file operations and invokes decompress API which
      * internally does zlib decompression on FPGA in overlapped manner
      *
      * @param inFile_name input file name
@@ -194,72 +186,77 @@ class xfZlib {
 
     uint32_t decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run);
 
-    /**
-     * @brief This module is used for profiling by using kernel events
-     *
-     * @param inFile_name kernel events
-     */
-
     uint64_t get_event_duration_ns(const cl::Event& event);
 
     /**
-     * @brief Class constructor
+     * @brief Constructor responsible for creating various host/device buffers.
      *
      */
-    xfZlib(const std::string& binaryFile);
+    xfZlib(const std::string& binaryFile,
+           uint8_t c_max_cr = MAX_CR,
+           uint8_t cd_flow = BOTH,
+           uint8_t device_id = 0,
+           uint8_t profile = 0);
 
     /**
-     * @brief Class destructor.
+     * @brief OpenCL setup initialization
+     * @param binaryFile
+     *
+     */
+    void init(const std::string& binaryFile);
+
+    /**
+     * @brief OpenCL setup release
+     *
+     */
+    void release();
+
+    /**
+     * @brief Release host/device memory
      */
     ~xfZlib();
 
    private:
+    void _enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, int cu);
+    void _enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, int cu, uint32_t max_outbuf);
+
+    uint8_t m_cdflow;
+    bool m_isProfile;
+    uint8_t m_deviceid;
+    uint8_t m_max_cr;
+
+    cl::Device m_device;
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q[C_COMPUTE_UNIT * OVERLAP_BUF_COUNT];
     cl::CommandQueue* m_q_dec[D_COMPUTE_UNIT];
+    cl::CommandQueue* m_q_rd[D_COMPUTE_UNIT];
+    cl::CommandQueue* m_q_rdd[D_COMPUTE_UNIT];
+    cl::CommandQueue* m_q_wr[D_COMPUTE_UNIT];
+    cl::CommandQueue* m_q_wrd[D_COMPUTE_UNIT];
 
     // Kernel declaration
     cl::Kernel* compress_kernel[C_COMPUTE_UNIT];
     cl::Kernel* huffman_kernel[H_COMPUTE_UNIT];
     cl::Kernel* treegen_kernel[T_COMPUTE_UNIT];
     cl::Kernel* decompress_kernel[D_COMPUTE_UNIT];
+    cl::Kernel* data_writer_kernel[D_COMPUTE_UNIT];
+    cl::Kernel* data_reader_kernel[D_COMPUTE_UNIT];
 
     // Compression related
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_out[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_zlibout[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_blksize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_compressSize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_buf_in[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_buf_out[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_buf_zlibout[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
+    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_blksize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
+    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_compressSize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
     // Decompression Related
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_in[MAX_DDCOMP_UNITS];
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_zlibout[MAX_DDCOMP_UNITS];
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressSize[MAX_DDCOMP_UNITS];
-
-
-    // Literal & length frequency tree
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_ltree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    // Distance frequency tree
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_dtree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    // Bit Length frequency
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_bltree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-
-    // Literal Codes
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_ltree_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    // Distance Codes
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_dtree_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    // Bit Length Codes
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_bltree_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-
-    // Literal Bitlength
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_ltree_blen[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    // Distance Bitlength
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_dtree_blen[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    // Bit Length Bitlength
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dyn_bltree_blen[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_buff_max_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbuf_in[MAX_DDCOMP_UNITS];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbuf_zlibout[MAX_DDCOMP_UNITS];
+    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize[MAX_DDCOMP_UNITS];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_in[MAX_DDCOMP_UNITS][DIN_BUFFERCOUNT];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[MAX_DDCOMP_UNITS][DOUT_BUFFERCOUNT];
+    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize_stream[MAX_DDCOMP_UNITS][DOUT_BUFFERCOUNT];
 
     // Device buffers
     cl::Buffer* buffer_input[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
@@ -291,8 +288,10 @@ class xfZlib {
     std::vector<std::string> compress_kernel_names = {"xilLz77Compress"};
     std::vector<std::string> huffman_kernel_names = {"xilHuffmanKernel"};
     std::vector<std::string> treegen_kernel_names = {"xilTreegenKernel"};
-    std::vector<std::string> decompress_kernel_names = {"xilDecompressZlib"};
+    std::string stream_decompress_kernel_name = "xilDecompressStream";
+    std::string data_writer_kernel_name = "xilZlibDmWriter";
+    std::string data_reader_kernel_name = "xilZlibDmReader";
 };
 }
 }
-#endif
+#endif // _XFCOMPRESSION_ZLIB_HPP_

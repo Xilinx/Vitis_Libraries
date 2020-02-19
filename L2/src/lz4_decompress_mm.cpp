@@ -15,7 +15,7 @@
  *
  */
 /**
- * @file xil_lz4_decompress_kernel.cpp
+ * @file lz4_decompress_mm.cpp
  * @brief Source for LZ4 decompression kernel.
  *
  * This file is part of Vitis Data Compression Library.
@@ -26,7 +26,7 @@
 const int c_gmemBurstSize = (2 * GMEM_BURST_SIZE);
 const int c_sizeStreamDepth = 8;
 
-typedef ap_uint<BIT> uintV_t;
+typedef ap_uint<8> uintV_t;
 
 // namespace hw_decompress {
 
@@ -49,11 +49,11 @@ void lz4CoreDec(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
 #pragma HLS RESOURCE variable = decompressed_stream core = FIFO_SRL
 
 #pragma HLS dataflow
-    xf::compression::streamDownsizer<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, instreamV, input_size);
+    xf::compression::details::streamDownsizer<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, instreamV, input_size);
     xf::compression::lz4Decompress(instreamV, decompressd_stream, input_size1);
-    xf::compression::lzDecompress<HISTORY_SIZE, READ_STATE, MATCH_STATE, LOW_OFFSET_STATE, LOW_OFFSET>(
-        decompressd_stream, decompressed_stream, output_size);
-    xf::compression::streamUpsizer<uint32_t, 8, GMEM_DWIDTH>(decompressed_stream, outStreamMemWidth, output_size1);
+    xf::compression::lzDecompress<HISTORY_SIZE>(decompressd_stream, decompressed_stream, output_size);
+    xf::compression::details::streamUpsizer<uint32_t, 8, GMEM_DWIDTH>(decompressed_stream, outStreamMemWidth,
+                                                                      output_size1);
 }
 
 void lz4Dec(const xf::compression::uintMemWidth_t* in,
@@ -72,7 +72,8 @@ void lz4Dec(const xf::compression::uintMemWidth_t* in,
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel
-    xf::compression::mm2sNb<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth, input_size);
+    xf::compression::details::mm2sNb<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth,
+                                                                                   input_size);
     for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
 #pragma HLS UNROLL
         // lz4CoreDec is instantiated based on the PARALLEL_BLOCK
@@ -80,8 +81,8 @@ void lz4Dec(const xf::compression::uintMemWidth_t* in,
     }
 
     // Transfer data from kernel to global memory
-    xf::compression::s2mmNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(out, input_idx, outStreamMemWidth,
-                                                                                    output_size);
+    xf::compression::details::s2mmNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(
+        out, input_idx, outStreamMemWidth, output_size);
 }
 //} // namespace end
 
@@ -105,8 +106,6 @@ void xilLz4Decompress(const xf::compression::uintMemWidth_t* in,
 #pragma HLS INTERFACE s_axilite port = no_blocks bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#pragma HLS data_pack variable = in
-#pragma HLS data_pack variable = out
     uint32_t max_block_size = block_size_in_kb * 1024;
     uint32_t compress_size[PARALLEL_BLOCK];
     uint32_t compress_size1[PARALLEL_BLOCK];

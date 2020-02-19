@@ -19,7 +19,7 @@
 #define _XFCOMPRESSION_ZLIB_HUFFMAN_ENC_MM_HPP_
 
 /**
- * @file huffman_kernel.hpp
+ * @file zlib_huffman_enc_mm.hpp
  * @brief Header for huffman kernel used in zlib compression.
  *
  * This file is part of Vitis Data Compression Library.
@@ -39,24 +39,10 @@
 #include <ap_int.h>
 #include "zlib_config.hpp"
 #include "huffman_encoder.hpp"
-#define MIN_BLOCK_SIZE 116
 
+#define MIN_BLOCK_SIZE 116
 #define GMEM_DWIDTH 512
 #define GMEM_BURST_SIZE 16
-
-// DYNAMIC HUFFMAN Compress STATES
-#define WRITE_TOKEN 0
-#define ML_DIST_REP 1
-#define LIT_REP 2
-#define SEND_OUTPUT 3
-#define ML_EXTRA 4
-#define DIST_REP 5
-#define DIST_EXTRA 6
-
-// LZ specific Defines
-#define BIT 8
-
-#define d_code(dist, dist_code) ((dist) < 256 ? dist_code[dist] : dist_code[256 + ((dist) >> 7)])
 
 extern "C" {
 /**
@@ -99,4 +85,4 @@ void xilHuffmanKernel(xf::compression::uintMemWidth_t* in,
                       uint32_t input_size);
 }
 
-#endif // _XFCOMPRESSION_HUFFMAN_KERNEL_HPP_
+#endif // _XFCOMPRESSION_ZLIB_HUFFMAN_ENC_MM_HPP_

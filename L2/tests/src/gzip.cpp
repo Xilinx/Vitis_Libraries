@@ -15,12 +15,6 @@
  *
  */
 #include "gzip.hpp"
-#define FORMAT_0 31
-#define FORMAT_1 139
-#define VARIANT 8
-#define REAL_CODE 8
-#define OPCODE 3
-#define CHUNK_16K 16384
 
 uint32_t get_file_size(std::ifstream& file) {
     file.seekg(0, file.end);
@@ -30,16 +24,22 @@ uint32_t get_file_size(std::ifstream& file) {
 }
 
 void zip(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
+    const uint16_t c_format_0 = 31;
+    const uint16_t c_format_1 = 139;
+    const uint16_t c_variant = 8;
+    const uint16_t c_real_code = 8;
+    const uint16_t c_opcode = 3;
+
     // 2 bytes of magic header
-    outFile.put(FORMAT_0);
-    outFile.put(FORMAT_1);
+    outFile.put(c_format_0);
+    outFile.put(c_format_1);
 
     // 1 byte Compression method
-    outFile.put(VARIANT);
+    outFile.put(c_variant);
 
     // 1 byte flags
     uint8_t flags = 0;
-    flags |= REAL_CODE;
+    flags |= c_real_code;
     outFile.put(flags);
 
     // 4 bytes file modification time in unit format
@@ -63,7 +63,7 @@ void zip(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uin
     outFile.put(deflate_flags);
 
     // 1 byte OPCODE - 0x03 for Unix
-    outFile.put(OPCODE);
+    outFile.put(c_opcode);
 
     // Dump file name
     for (int i = 0; inFile_name[i] != '\0'; i++) {
@@ -119,15 +119,8 @@ uint32_t xil_gzip::compress_file(std::string& inFile_name, std::string& outFile_
 
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
-    auto compress_API_start = std::chrono::high_resolution_clock::now();
     // gzip Compress
     uint32_t enbytes = compress(gzip_in.data(), gzip_out.data(), input_size, host_buffer_size);
-    auto compress_API_end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration<double, std::nano>(compress_API_end - compress_API_start);
-    compress_API_time_ns_1 += duration;
-
-    float throughput_in_mbps_1 = (float)input_size * 1000 / compress_API_time_ns_1.count();
-    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     // Pack gzip encoded stream .gz file
     zip(inFile_name, outFile, gzip_out.data(), enbytes);
@@ -145,9 +138,11 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 }
 
 // Constructor
-xil_gzip::xil_gzip(const std::string& binaryFileName) {
+xil_gzip::xil_gzip(const std::string& binaryFileName, uint8_t max_cr) {
     // GZip Compression Binary Name
     init(binaryFileName);
+
+    m_max_cr = max_cr;
 
     // printf("C_COMPUTE_UNIT \n");
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
@@ -157,6 +152,11 @@ xil_gzip::xil_gzip(const std::string& binaryFileName) {
     uint32_t temp_nblocks = (host_buffer_size - 1) / block_size_in_bytes + 1;
     host_buffer_size = ((host_buffer_size - 1) / block_size_in_kb + 1) * block_size_in_kb;
 
+    const uint16_t c_ltree_size = 1024;
+    const uint16_t c_dtree_size = 64;
+    const uint16_t c_bltree_size = 64;
+    const uint16_t c_maxcode_size = 16;
+
     for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
         for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
             // Index calculation
@@ -165,17 +165,17 @@ xil_gzip::xil_gzip(const std::string& binaryFileName) {
             h_buf_gzipout[i][j].resize(PARALLEL_ENGINES * HOST_BUFFER_SIZE * 2);
             h_blksize[i][j].resize(MAX_NUMBER_BLOCKS);
             h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS);
-            h_dyn_ltree_freq[i][j].resize(PARALLEL_ENGINES * LTREE_SIZE);
-            h_dyn_dtree_freq[i][j].resize(PARALLEL_ENGINES * DTREE_SIZE);
-            h_dyn_bltree_freq[i][j].resize(PARALLEL_ENGINES * BLTREE_SIZE);
-            h_dyn_ltree_codes[i][j].resize(PARALLEL_ENGINES * LTREE_SIZE);
-            h_dyn_dtree_codes[i][j].resize(PARALLEL_ENGINES * DTREE_SIZE);
-            h_dyn_bltree_codes[i][j].resize(PARALLEL_ENGINES * BLTREE_SIZE);
-            h_dyn_ltree_blen[i][j].resize(PARALLEL_ENGINES * LTREE_SIZE);
-            h_dyn_dtree_blen[i][j].resize(PARALLEL_ENGINES * DTREE_SIZE);
-            h_dyn_bltree_blen[i][j].resize(PARALLEL_ENGINES * BLTREE_SIZE);
+            h_dyn_ltree_freq[i][j].resize(PARALLEL_ENGINES * c_ltree_size);
+            h_dyn_dtree_freq[i][j].resize(PARALLEL_ENGINES * c_dtree_size);
+            h_dyn_bltree_freq[i][j].resize(PARALLEL_ENGINES * c_bltree_size);
+            h_dyn_ltree_codes[i][j].resize(PARALLEL_ENGINES * c_ltree_size);
+            h_dyn_dtree_codes[i][j].resize(PARALLEL_ENGINES * c_dtree_size);
+            h_dyn_bltree_codes[i][j].resize(PARALLEL_ENGINES * c_bltree_size);
+            h_dyn_ltree_blen[i][j].resize(PARALLEL_ENGINES * c_ltree_size);
+            h_dyn_dtree_blen[i][j].resize(PARALLEL_ENGINES * c_dtree_size);
+            h_dyn_bltree_blen[i][j].resize(PARALLEL_ENGINES * c_bltree_size);
 
-            h_buff_max_codes[i][j].resize(PARALLEL_ENGINES * MAXCODE_SIZE);
+            h_buff_max_codes[i][j].resize(PARALLEL_ENGINES * c_maxcode_size);
         }
     }
     // Device buffer allocation
@@ -199,50 +199,52 @@ xil_gzip::xil_gzip(const std::string& binaryFileName) {
 
             buffer_dyn_ltree_freq[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * LTREE_SIZE, h_dyn_ltree_freq[cu][flag].data());
+                               PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, h_dyn_ltree_freq[cu][flag].data());
 
             buffer_dyn_dtree_freq[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * DTREE_SIZE, h_dyn_dtree_freq[cu][flag].data());
+                               PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, h_dyn_dtree_freq[cu][flag].data());
 
             buffer_dyn_bltree_freq[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * BLTREE_SIZE, h_dyn_bltree_freq[cu][flag].data());
+                               PARALLEL_ENGINES * sizeof(uint32_t) * c_bltree_size, h_dyn_bltree_freq[cu][flag].data());
 
             buffer_dyn_ltree_codes[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * LTREE_SIZE, h_dyn_ltree_codes[cu][flag].data());
+                               PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, h_dyn_ltree_codes[cu][flag].data());
 
             buffer_dyn_dtree_codes[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * DTREE_SIZE, h_dyn_dtree_codes[cu][flag].data());
+                               PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, h_dyn_dtree_codes[cu][flag].data());
 
-            buffer_dyn_bltree_codes[cu][flag] =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * BLTREE_SIZE, h_dyn_bltree_codes[cu][flag].data());
+            buffer_dyn_bltree_codes[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                                               PARALLEL_ENGINES * sizeof(uint32_t) * c_bltree_size,
+                                                               h_dyn_bltree_codes[cu][flag].data());
 
             buffer_dyn_ltree_blen[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * LTREE_SIZE, h_dyn_ltree_blen[cu][flag].data());
+                               PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, h_dyn_ltree_blen[cu][flag].data());
 
             buffer_dyn_dtree_blen[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * DTREE_SIZE, h_dyn_dtree_blen[cu][flag].data());
+                               PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, h_dyn_dtree_blen[cu][flag].data());
 
             buffer_dyn_bltree_blen[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * BLTREE_SIZE, h_dyn_bltree_blen[cu][flag].data());
+                               PARALLEL_ENGINES * sizeof(uint32_t) * c_bltree_size, h_dyn_bltree_blen[cu][flag].data());
 
-            buffer_max_codes[cu][flag] =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               (PARALLEL_ENGINES * MAXCODE_SIZE) * sizeof(uint32_t), h_buff_max_codes[cu][flag].data());
+            buffer_max_codes[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                                        (PARALLEL_ENGINES * c_maxcode_size) * sizeof(uint32_t),
+                                                        h_buff_max_codes[cu][flag].data());
         }
     }
 
-    for (int i = 0; i < MAX_DDCOMP_UNITS; i++) {
-        h_dbuf_in[i].resize(PARALLEL_ENGINES * HOST_BUFFER_SIZE);
-        h_dbuf_gzipout[i].resize(PARALLEL_ENGINES * HOST_BUFFER_SIZE * 10);
-        h_dcompressSize[i].resize(MAX_NUMBER_BLOCKS);
+    // initialize the buffers
+    for (int j = 0; j < DIN_BUFFERCOUNT; ++j) h_dbuf_in[j].resize(INPUT_BUFFER_SIZE);
+
+    for (int j = 0; j < DOUT_BUFFERCOUNT; ++j) {
+        h_dbuf_gzipout[j].resize(OUTPUT_BUFFER_SIZE);
+        h_dcompressSize[j].resize(sizeof(uint32_t));
     }
 }
 
@@ -286,14 +288,17 @@ int xil_gzip::init(const std::string& binaryFileName) {
         m_q[i] = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
     }
 
-    for (uint8_t flag = 0; flag < D_COMPUTE_UNIT; flag++) {
-        m_q_dec[flag] = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
-    }
+    m_q_dec = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
+    m_q_rd = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
+    m_q_rdd = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
+    m_q_wr = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
+    m_q_wrd = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE);
+
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // import_binary() command will find the OpenCL binary file created using the
-    // xocc compiler load into OpenCL Binary and return as Binaries
+    // v++ compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
     // std::string binaryFile = xcl::find_binary_file(device_name,binaryFileName.c_str());
@@ -319,7 +324,9 @@ int xil_gzip::init(const std::string& binaryFileName) {
 
     // Create Decompress kernel
     for (int i = 0; i < D_COMPUTE_UNIT; i++) {
-        decompress_kernel[i] = new cl::Kernel(*m_program, decompress_kernel_names[i].c_str());
+        decompress_kernel = new cl::Kernel(*m_program, decompress_kernel_names[0].c_str());
+        data_writer_kernel = new cl::Kernel(*m_program, data_writer_kernel_names[0].c_str());
+        data_reader_kernel = new cl::Kernel(*m_program, data_reader_kernel_names[0].c_str());
     }
 
     return 0;
@@ -331,9 +338,6 @@ int xil_gzip::release() {
         delete (m_q[i]);
     }
 
-    for (uint8_t flag = 0; flag < D_COMPUTE_UNIT; flag++) {
-        delete (m_q_dec[flag]);
-    }
     delete (m_context);
 
     for (int i = 0; i < C_COMPUTE_UNIT; i++) delete (compress_kernel[i]);
@@ -342,7 +346,16 @@ int xil_gzip::release() {
 
     for (int i = 0; i < T_COMPUTE_UNIT; i++) delete (treegen_kernel[i]);
 
-    for (int i = 0; i < D_COMPUTE_UNIT; i++) delete (decompress_kernel[i]);
+    for (int i = 0; i < D_COMPUTE_UNIT; i++) {
+        delete decompress_kernel;
+        delete data_writer_kernel;
+        delete data_reader_kernel;
+        delete m_q_dec;
+        delete m_q_rd;
+        delete m_q_rdd;
+        delete m_q_wr;
+        delete m_q_wrd;
+    }
 
     return 0;
 }
@@ -363,7 +376,7 @@ uint32_t xil_gzip::decompress_file(std::string& inFile_name, std::string& outFil
     // Allocat output size
     // 8 - Max CR per file expected, if this size is big
     // Decompression crashes
-    std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size * 10);
+    std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size * m_max_cr);
     uint32_t debytes = 0;
     int infile_cntr = 0;
 
@@ -419,86 +432,215 @@ uint32_t xil_gzip::decompress_file(std::string& inFile_name, std::string& outFil
     return debytes;
 }
 
-uint32_t xil_gzip::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
-    bool flag = false;
-    if (input_size > 128 * 1024 * 1024) flag = true;
-    // printme("Entered gzip decop \n");
+// method to enqueue reads in parallel with writes to decompression kernel
+void xil_gzip::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, uint32_t max_outbuf_size) {
+    const int BUFCNT = DOUT_BUFFERCOUNT; // mandatorily 2
+    cl::Event hostReadEvent;
+    cl::Event kernelReadEvent;
+    cl::Event sizeReadEvent;
 
-    std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
-
-    uint8_t* inP = nullptr;
     uint8_t* outP = nullptr;
     uint32_t* outSize = nullptr;
-    cl::Buffer* buffer_in;
-    cl::Buffer* buffer_out;
-    cl::Buffer* buffer_size;
-    if (flag) {
-        // printme("before buffer creation \n");
-        buffer_in = new cl::Buffer(*m_context, CL_MEM_READ_ONLY, input_size);
-        buffer_out = new cl::Buffer(*m_context, CL_MEM_READ_WRITE, input_size * 10);
-        buffer_size = new cl::Buffer(*m_context, CL_MEM_READ_WRITE, 10 * sizeof(uint32_t));
-        inP = (uint8_t*)m_q_dec[cu]->enqueueMapBuffer(*(buffer_in), CL_TRUE, CL_MAP_READ, 0, input_size);
-        outP = (uint8_t*)m_q_dec[cu]->enqueueMapBuffer(*(buffer_out), CL_TRUE, CL_MAP_WRITE, 0, input_size * 10);
-        outSize =
-            (uint32_t*)m_q_dec[cu]->enqueueMapBuffer(*(buffer_size), CL_TRUE, CL_MAP_WRITE, 0, 10 * sizeof(uint32_t));
-    } else {
-        // printme("before buffer creation \n");
-        buffer_in =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, input_size, h_dbuf_in[cu].data());
+    uint32_t dcmpSize = 0;
+    cl::Buffer* buffer_out[BUFCNT];
+    cl::Buffer* buffer_size[BUFCNT];
+    for (int i = 0; i < BUFCNT; i++) {
+        buffer_out[i] =
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize, h_dbuf_gzipout[i].data());
 
-        buffer_out = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, input_size * 10,
-                                    h_dbuf_gzipout[cu].data());
-
-        buffer_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 10 * sizeof(uint32_t),
-                                     h_dcompressSize[cu].data());
-
-        inP = h_dbuf_in[cu].data();
-        outP = h_dbuf_gzipout[cu].data();
-        outSize = h_dcompressSize[cu].data();
+        buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 2 * sizeof(uint32_t),
+                                        h_dcompressSize[i].data());
     }
-    // printme("Entered incopy \n");
-    // Copy compressed input to h_buf_in
-    std::memcpy(inP, &in[0], input_size);
 
-    int narg = 0;
+    // enqueue first set of buffers
+    uint8_t cbf_idx = 0;
+    uint32_t keq_idx = 0;
+    uint32_t raw_size = 0;
+    // set consistent buffer size to be read
+    data_reader_kernel->setArg(2, bufSize);
+    do {
+        // set reader kernel arguments
+        data_reader_kernel->setArg(0, *(buffer_out[cbf_idx]));
+        data_reader_kernel->setArg(1, *(buffer_size[cbf_idx]));
+
+        // enqueue reader kernel
+        m_q_rd->enqueueTask(*data_reader_kernel, NULL, &kernelReadEvent);
+
+        // copy previous data
+        if (keq_idx > 0) {
+            outP = h_dbuf_gzipout[abs(cbf_idx - 1)].data();
+            uint32_t sz2read = raw_size;
+            if (sz2read > bufSize) {
+                sz2read--;
+            }
+            hostReadEvent.wait(); // wait for previous data migration to complete
+            std::memcpy(out + dcmpSize, outP, sz2read);
+            dcmpSize += sz2read;
+            if (dcmpSize > max_outbuf_size) {
+                std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
+                          << std::endl;
+                std::cout
+                    << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
+                    << std::endl;
+                std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
+                exit(1);
+            }
+        }
+        // wait for kernel read to complete after copying previous data
+        kernelReadEvent.wait();
+
+        m_q_rdd->enqueueMigrateMemObjects({*(buffer_size[cbf_idx])}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &sizeReadEvent);
+        sizeReadEvent.wait();
+
+        outSize = h_dcompressSize[cbf_idx].data();
+        raw_size = *outSize;
+        if (raw_size > 0) {
+            m_q_rdd->enqueueMigrateMemObjects({*(buffer_out[cbf_idx])}, CL_MIGRATE_MEM_OBJECT_HOST, NULL,
+                                              &hostReadEvent);
+        }
+        ++keq_idx;
+        cbf_idx = ((cbf_idx == 0) ? 1 : 0); // since only two buffers
+    } while (raw_size == bufSize);
+
+    // read the last block of data
+    outP = h_dbuf_gzipout[abs(cbf_idx - 1)].data();
+    if (raw_size > bufSize) {
+        raw_size--;
+    }
+    hostReadEvent.wait();
+    if (raw_size > max_outbuf_size) {
+        std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n" << std::endl;
+        std::cout << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
+                  << std::endl;
+        std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
+        exit(1);
+    }
+    std::memcpy(out + dcmpSize, outP, raw_size);
+    dcmpSize += raw_size;
+
+    *decompSize = dcmpSize;
+
+    // free the buffers
+    for (int i = 0; i < BUFCNT; i++) {
+        delete (buffer_out[i]);
+        delete (buffer_size[i]);
+    }
+}
+
+// method to enqueue writes in parallel with reads from decompression kernel
+void xil_gzip::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize) {
+    const int BUFCNT = DIN_BUFFERCOUNT;
+
+    uint32_t bufferCount = 1 + (inputSize - 1) / bufSize;
+
+    uint8_t* inP = nullptr;
+    cl::Buffer* buffer_in[BUFCNT];
+    cl::Event hostWriteEvent[bufferCount];
+    cl::Event kernelWriteEvent[bufferCount];
+
+    for (int i = 0; i < BUFCNT; i++) {
+        buffer_in[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize, h_dbuf_in[i].data());
+    }
+
+    uint32_t cBufSize = bufSize;
+    uint8_t cbf_idx = 0;  // index indicating current buffer(0-4) being used in loop
+    uint32_t keq_idx = 0; // index indicating the number of writer kernel enqueues
+
+    // enqueue first set of buffers
+    for (uint32_t bnum = 0; bnum < BUFCNT && bnum < bufferCount; ++bnum) {
+        std::vector<cl::Event> hostWriteWait;
+        inP = h_dbuf_in[bnum].data();
+        // set for last and other buffers
+        if (bnum == bufferCount - 1) {
+            if (bufferCount > 1) {
+                cBufSize = inputSize - (bufSize * bnum);
+            }
+        }
+        std::memcpy(inP, in + (bnum * bufSize), cBufSize);
+
+        // set kernel arguments
+        data_writer_kernel->setArg(0, *(buffer_in[bnum]));
+        data_writer_kernel->setArg(1, cBufSize);
+
+        m_q_wrd->enqueueMigrateMemObjects({*(buffer_in[bnum])}, 0, NULL, &(hostWriteEvent[bnum]));
+
+        hostWriteWait.push_back(hostWriteEvent[bnum]);
+        m_q_wr->enqueueTask(*data_writer_kernel, &hostWriteWait, &(kernelWriteEvent[bnum]));
+    }
+
+    if (bufferCount >= BUFCNT) {
+        // sequencially enqueue data transfers as the write kernels finish in order
+        for (keq_idx = BUFCNT; keq_idx < bufferCount; ++keq_idx) {
+            cbf_idx = keq_idx % BUFCNT;
+            inP = h_dbuf_in[cbf_idx].data();
+            // set for last and other buffers
+            if (keq_idx == bufferCount - 1) {
+                if (bufferCount > 1) {
+                    cBufSize = inputSize - (bufSize * keq_idx);
+                }
+            }
+            std::vector<cl::Event> hostWriteWait;
+            std::vector<cl::Event> kernelWriteWait;
+
+            // copy the data
+            std::memcpy(inP, in + (keq_idx * bufSize), cBufSize);
+
+            // wait for (current - BUFCNT) kernel to finish
+            // cl::Event::waitForEvents(kernelWriteWait);
+            (kernelWriteEvent[keq_idx - BUFCNT]).wait();
+
+            // set kernel arguments
+            data_writer_kernel->setArg(0, *(buffer_in[cbf_idx]));
+            data_writer_kernel->setArg(1, cBufSize);
+
+            m_q_wrd->enqueueMigrateMemObjects({*(buffer_in[cbf_idx])}, 0, NULL, &(hostWriteEvent[keq_idx]));
+
+            hostWriteWait.push_back(hostWriteEvent[keq_idx]); // data tranfer to wait for
+            m_q_wr->enqueueTask(*data_writer_kernel, &hostWriteWait, &(kernelWriteEvent[keq_idx]));
+        }
+    }
+    // std::cout << "Writer Enqueued" << std::endl;
+    m_q_wr->finish();
+    // std::cout << "Data Write successfull" << std::endl;
+    for (int i = 0; i < BUFCNT; i++) delete (buffer_in[i]);
+}
+
+uint32_t xil_gzip::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
+    std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
+    uint32_t inBufferSize = INPUT_BUFFER_SIZE;
+    uint32_t outBufferSize = OUTPUT_BUFFER_SIZE;
+    const uint32_t max_outbuf_size = input_size * m_max_cr;
+    // if input_size if greater than 2 MB, then buffer size must be 2MB
+    if (input_size < inBufferSize) inBufferSize = input_size;
+
     // Set Kernel Args
-    // printme("Setargs \n");
-    (decompress_kernel[cu])->setArg(narg++, *(buffer_in));
-    (decompress_kernel[cu])->setArg(narg++, *(buffer_out));
-    (decompress_kernel[cu])->setArg(narg++, *(buffer_size));
-    (decompress_kernel[cu])->setArg(narg++, input_size);
+    decompress_kernel->setArg(0, input_size);
 
-    // Migrate Memory - Map host to device buffers
-    m_q_dec[cu]->enqueueMigrateMemObjects({*(buffer_in)}, 0);
-    m_q_dec[cu]->finish();
+    // start parallel reader kernel enqueue thread
+    uint32_t decmpSizeIdx = 0;
+    std::thread decompWriter(&xil_gzip::_enqueue_writes, this, inBufferSize, in, input_size);
+    std::thread decompReader(&xil_gzip::_enqueue_reads, this, outBufferSize, out, &decmpSizeIdx, max_outbuf_size);
 
-    // Kernel invocation
-    m_q_dec[cu]->enqueueTask(*decompress_kernel[cu]);
-    m_q_dec[cu]->finish();
+    // enqueue decompression kernel
+    m_q_dec->finish();
 
-    // Migrate memory - Map device to host buffers
-    m_q_dec[cu]->enqueueMigrateMemObjects({*(buffer_size)}, CL_MIGRATE_MEM_OBJECT_HOST);
-    m_q_dec[cu]->finish();
+    auto decompress_API_start = std::chrono::high_resolution_clock::now();
 
-    uint32_t raw_size = *outSize;
+    m_q_dec->enqueueTask(*decompress_kernel);
+    m_q_dec->finish();
 
-    // If raw size is greater than 3GB
-    // Limit it to 3GB
-    if (raw_size > 3U << (3 * 10)) raw_size = 3U << (3 * 10);
+    auto decompress_API_end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
+    decompress_API_time_ns_1 += duration;
 
-    m_q_dec[cu]->enqueueReadBuffer(*(buffer_out), CL_TRUE, 0, raw_size * sizeof(uint8_t), &out[0]);
+    decompReader.join();
+    decompWriter.join();
 
-    if (flag) {
-        m_q_dec[cu]->enqueueUnmapMemObject(*buffer_in, inP, nullptr, nullptr);
-        m_q_dec[cu]->enqueueUnmapMemObject(*buffer_out, outP, nullptr, nullptr);
-        m_q_dec[cu]->enqueueUnmapMemObject(*buffer_size, outSize, nullptr, nullptr);
-    }
-    delete (buffer_in);
-    delete (buffer_out);
-    delete (buffer_size);
+    float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 / decompress_API_time_ns_1.count();
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     // printme("Done with decompress \n");
-    return raw_size;
+    return decmpSizeIdx;
 }
 // This version of compression does overlapped execution between
 // Kernel and Host. I/O operations between Host and Device are
@@ -508,6 +650,10 @@ uint32_t xil_gzip::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
     uint32_t block_size_in_bytes = block_size_in_kb * 1024;
     uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
+
+    std::chrono::duration<double, std::nano> lz77_kernel_time_ns_1(0);
+    std::chrono::duration<double, std::nano> treegen_kernel_time_ns_1(0);
+    std::chrono::duration<double, std::nano> huffman_kernel_time_ns_1(0);
 
     // For example: Input file size is 12MB and Host buffer size is 2MB
     // Then we have 12/2 = 6 chunks exists
@@ -659,19 +805,37 @@ overlap:
             // Migrate memory - Map host to device buffers
             m_q[queue_idx + cu]->enqueueMigrateMemObjects({*(buffer_input[cu][flag]), *(buffer_inblk_size[cu][flag])},
                                                           0 /* 0 means from host*/);
+            m_q[queue_idx + cu]->finish();
 
+            auto lz77_kernel_start = std::chrono::high_resolution_clock::now();
             // kernel write events update
             // LZ77 Compress Fire Kernel invocation
             m_q[queue_idx + cu]->enqueueTask(*compress_kernel[cu]);
+            m_q[queue_idx + cu]->finish();
+
+            auto lz77_kernel_end = std::chrono::high_resolution_clock::now();
+            auto lz77_duration = std::chrono::duration<double, std::nano>(lz77_kernel_end - lz77_kernel_start);
+            lz77_kernel_time_ns_1 += lz77_duration;
+
+            auto treegen_kernel_start = std::chrono::high_resolution_clock::now();
 
             // TreeGen Fire Kernel invocation
             m_q[queue_idx + cu]->enqueueTask(*treegen_kernel[cu]);
+            m_q[queue_idx + cu]->finish();
+            auto treegen_kernel_end = std::chrono::high_resolution_clock::now();
+            auto treegen_duration = std::chrono::duration<double, std::nano>(treegen_kernel_end - treegen_kernel_start);
 
+            auto huffman_kernel_start = std::chrono::high_resolution_clock::now();
             // Huffman Fire Kernel invocation
             m_q[queue_idx + cu]->enqueueTask(*huffman_kernel[cu]);
+            m_q[queue_idx + cu]->finish();
+
+            auto huffman_kernel_end = std::chrono::high_resolution_clock::now();
+            auto huffman_duration = std::chrono::duration<double, std::nano>(huffman_kernel_end - huffman_kernel_start);
 
             m_q[queue_idx + cu]->enqueueMigrateMemObjects(
                 {*(buffer_gzip_output[cu][flag]), *(buffer_compress_size[cu][flag])}, CL_MIGRATE_MEM_OBJECT_HOST);
+            m_q[queue_idx + cu]->finish();
         } // Internal loop runs on compute units
 
         if (total_chunks > 2)
@@ -723,6 +887,15 @@ overlap:
             }
         }
     }
+
+    std::chrono::duration<double, std::nano> temp_kernel_time_ns_1(0);
+    if (lz77_kernel_time_ns_1.count() > huffman_kernel_time_ns_1.count())
+        temp_kernel_time_ns_1 = lz77_kernel_time_ns_1;
+    else
+        temp_kernel_time_ns_1 = huffman_kernel_time_ns_1;
+
+    float throughput_in_mbps_1 = (float)input_size * 1000 / temp_kernel_time_ns_1.count();
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
     // gzip special block based on Z_SYNC_FLUSH
     int xarg = 0;
     out[outIdx + xarg++] = 0x01;

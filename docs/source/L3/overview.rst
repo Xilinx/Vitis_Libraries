@@ -1,7 +1,13 @@
-.. CompressionLib_Docs documentation master file, created by
-   sphinx-quickstart on Thu Jun 20 14:04:09 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+
+.. meta::
+   :keywords: Vitis, Library, Data Compression, Xilinx, LZ4 Demo, ZLIB Demo
+   :description: This section provides various Vitis Data Compression applications which are complete (Includes Host/Device management)
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+===============
+L3 Overlay APIs
+===============
 
 ========
 Overview
@@ -12,10 +18,6 @@ level. Applications provided in this section can be used in two ways.
 
 .. code-block:: bash
 
-    a.  Use the L3/demos applications as-is 
-    b.  Create shared library out of L3/demos applications
-
-
-  
-
-
+    a.  Use the L3/demos applications as-is.
+    b.  Create shared library out of L3/demos applications.
+    c.  to generate configuration bits for run-time-configurable primitives.
