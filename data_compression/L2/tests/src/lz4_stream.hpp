@@ -21,8 +21,8 @@
  * This file is part of Vitis Data Compression Library host code for lz4 compression.
  */
 
-#ifndef _XFCOMPRESSION_XIL_LZ4_HPP_
-#define _XFCOMPRESSION_XIL_LZ4_HPP_
+#ifndef _XFCOMPRESSION_LZ4_STREAM_HPP_
+#define _XFCOMPRESSION_LZ4_STREAM_HPP_
 
 #include <assert.h>
 #include <iomanip>
@@ -113,13 +113,6 @@
  */
 int validate(std::string& inFile_name, std::string& outFile_name);
 
-static uint64_t getFileSize(std::ifstream& file) {
-    file.seekg(0, file.end);
-    uint64_t file_size = file.tellg();
-    file.seekg(0, file.beg);
-    return file_size;
-}
-
 /**
  *  xfLz4Streaming class. Class containing methods for LZ4
  * compression and decompression to be executed on host side.
@@ -143,7 +136,7 @@ class xfLz4Streaming {
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
      * @brief Decompress the input file.
@@ -152,7 +145,7 @@ class xfLz4Streaming {
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
      * @brief Decompress streaming.
@@ -173,27 +166,12 @@ class xfLz4Streaming {
     uint64_t getEventDurationNs(const cl::Event& event);
 
     /**
-     * Binary flow compress/decompress
-     */
-    bool m_bin_flow;
-
-    /**
-     * Block Size
-     */
-    uint32_t m_block_size_in_kb;
-
-    /**
-     * Switch between FPGA/Standard flows
-     */
-    bool m_switch_flow;
-
-    /**
      * @brief Class constructor
      *
      * @param binaryFile file to be read
      * @param flow 0 for compression, 1 for decompression
      */
-    xfLz4Streaming(const std::string& binaryFile, uint8_t flow);
+    xfLz4Streaming(const std::string& binaryFile, uint8_t flow, uint32_t m_block_kb);
 
     /**
      * @brief Class destructor.
@@ -201,6 +179,19 @@ class xfLz4Streaming {
     ~xfLz4Streaming();
 
    private:
+    /**
+     * Binary flow compress/decompress
+     */
+    bool m_BinFlow;
+    /**
+     * Block Size
+     */
+    uint32_t m_BlockSizeInKb;
+    /**
+      * Switch between FPGA/Standard flows
+      */
+    bool m_SwitchFlow;
+
     cl::Device m_device;
     cl::Program* m_program;
     cl::Context* m_context;
@@ -234,4 +225,4 @@ class xfLz4Streaming {
     std::string decompress_dm_kernel_name = "xilDecompDatamover";
 };
 
-#endif // _XFCOMPRESSION_XIL_LZ4_HPP_
+#endif // _XFCOMPRESSION_LZ4_STREAM_HPP_

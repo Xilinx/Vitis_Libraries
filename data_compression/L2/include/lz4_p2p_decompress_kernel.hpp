@@ -1,5 +1,3 @@
-#ifndef _XFCOMPRESSION_LZ4_P2P_DECOMPRESS_KERNEL_HPP_
-#define _XFCOMPRESSION_LZ4_P2P_DECOMPRESS_KERNEL_HPP_
 /*
  * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
  *
@@ -16,11 +14,14 @@
  * limitations under the License.
  *
  */
+#ifndef _XFCOMPRESSION_LZ4_P2P_DECOMPRESS_KERNEL_HPP_
+#define _XFCOMPRESSION_LZ4_P2P_DECOMPRESS_KERNEL_HPP_
+
 /**
  * @file lz4_p2p_decompress_kernel.hpp
  * @brief Header for LZ4 P2P decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include <stdio.h>
@@ -43,11 +44,12 @@
 extern "C" {
 
 /**
- * @brief LZ4 P2P decompression kernel.
+ * @brief LZ4 P2P decompression kernel is responsible for decompressing data
+ * which is in LZ4 encoded form.
  *
  * @param in input stream width
  * @param out output stream width
- * @param in_block_size intput size
+ * @param in_block_size input size
  * @param in_compress_size output size
  * @param block_start_idx start index of block
  * @param no_blocks number of blocks for each compute unit
@@ -66,4 +68,4 @@ void xilLz4P2PDecompress(const xf::compression::uintMemWidth_t* in,
                          uint32_t num_blocks);
 }
 
-#endif
+#endif // _XFCOMPRESSION_LZ4_P2P_DECOMPRESS_KERNEL_HPP_

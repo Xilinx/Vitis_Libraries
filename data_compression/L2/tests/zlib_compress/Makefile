@@ -177,8 +177,7 @@ VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
 			--report_dir $(CUR_DIR)/reports/_x.$(TARGET)
 
 # Linking flags
-VPP_LINK_FLAGS = --optimize 2 --jobs 8 \
-				  --config $(CUR_DIR)/opts.ini
+VPP_LINK_FLAGS = --optimize 2 --jobs 8 
 
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				 --report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
@@ -225,7 +224,7 @@ $(TEMP_DIR)/xf_treegen.xo: $(TREEGEN_KERNEL_SRCS) $(HLS_SRC_DIR)
 # xclbin Binary creation
 $(XCLBIN_FILE): $(XO_FILES_C)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l -o'$@' $(+)
+	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l --profile_kernel data:all:all:all -o'$@' $(+)
 
 
 # ------------------------------------------------------------
@@ -293,11 +292,11 @@ cleanh:
 	rm -rf $(EXE_FILE)
 	-$(RMDIR) $(EXE_FILE)
 	-$(RMDIR) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	-$(RMDIR) src/*.ll _vxx_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
-	-$(RMDIR) $(TEMP_DIR) $(CUR_DIR)/reports *.csv $(CUR_DIR)/*.raw
+	-$(RMDIR) $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary *.txt.* $(CUR_DIR)/*.raw 
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
 
 clean: cleanh
@@ -309,7 +308,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -cx $(XCLBIN_FILE) -c $(XFLIB_DIR)/common/data/sample.txt
+HOST_ARGS = -cx $(XCLBIN_FILE) -c ./sample.txt
 
 ifeq ($(TARGET),sw_emu)
   RUN_ENV = export XCL_EMULATION_MODE=sw_emu

@@ -233,13 +233,13 @@ $(TEMP_DIR)/xf_decompress_datamover.xo: $(DECOMP_DATAMOVER_KERNEL_SRCS) $(HLS_SR
 # xclbin Binary creation
 $(XCLBIN_FILE_C): $(TEMP_DIR)/xf_compress_streaming.xo $(TEMP_DIR)/xf_compress_datamover.xo
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS)/Compress/ -l \
+	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS)/Compress/ -l --profile_kernel data:all:all:all \
 	--config $(CUR_DIR)/compress.ini \
 	-o'$@' $(+)
 
 $(XCLBIN_FILE_D): $(TEMP_DIR)/xf_decompress_streaming.xo $(TEMP_DIR)/xf_decompress_datamover.xo
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS)/Decompress/ -l \
+	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS)/Decompress/ -l --profile_kernel data:all:all:all \
 	--config $(CUR_DIR)/decompress.ini \
 	-o'$@' $(+)
 
@@ -266,12 +266,12 @@ SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
-CXXFLAGS += -fmessage-length=0
+CXXFLAGS += -std=c++0x -fmessage-length=0 \
 		-DXDEVICE=$(XDEVICE) \
 	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread
 
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
-LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -std=c++0x -DVERBOSE
+LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 
 EXE_FILE = $(BUILD_DIR)/$(HOST_EXE)
 
@@ -306,12 +306,12 @@ cleanh:
 	rm -rf $(EXE_FILE)
 	-$(RMDIR) $(EXE_FILE)
 	-$(RMDIR) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	-$(RMDIR) src/*.ll _vxx_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
-	-$(RMDIR) _x_temp* $(CUR_DIR)/reports
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* 
+	-$(RMDIR) _x_temp* *.csv *.run_summary *.txt.* *.list $(CUR_DIR)/reports
+	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd*
 
 clean: cleanh
 
@@ -322,7 +322,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -cx $(XCLBIN_FILE_C) -dx $(XCLBIN_FILE_D) -v $(XFLIB_DIR)/common/data/sample.txt 
+HOST_ARGS = -cx $(XCLBIN_FILE_C) -dx $(XCLBIN_FILE_D) -v ./sample.txt 
 
 
 ifeq ($(TARGET),sw_emu)
@@ -340,6 +340,8 @@ endif
 run: host xclbin $(EMU_CONFIG)
 	$(RUN_ENV); \
 	$(EXE_FILE) $(HOST_ARGS)
+	$(RUN_ENV); \
+	./run.sh $@ $(EXE_FILE) $(XF_PROJ_ROOT) $(XCLBIN_FILE_C) $(XCLBIN_FILE_D)
 
 check: run
 

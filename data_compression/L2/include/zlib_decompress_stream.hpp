@@ -33,13 +33,16 @@
 #include "huffman_decoder.hpp"
 #include "zlib_config.hpp"
 #include "lz_decompress.hpp"
+#include "stream_upsizer.hpp"
+#include "stream_downsizer.hpp"
 #include "ap_axi_sdata.h"
 
-#define MIN_OFFSET 1
-#define MIN_MATCH 4
 #define LZ_MAX_OFFSET_LIMIT 32768
 #define HISTORY_SIZE LZ_MAX_OFFSET_LIMIT
 #define LOW_OFFSET 10
+
+const int kGMemDWidth = 32;
+typedef ap_uint<kGMemDWidth> uintMemWidth_t;
 
 extern "C" {
 /**
@@ -51,7 +54,8 @@ extern "C" {
  *
  */
 void xilDecompressStream(uint32_t input_size,
-                         hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistreamd,
-                         hls::stream<ap_axiu<8, 0, 0, 0> >& outaxistreamd);
+                         hls::stream<ap_axiu<kGMemDWidth, 0, 0, 0> >& inaxistreamd,
+                         hls::stream<ap_axiu<kGMemDWidth, 0, 0, 0> >& outaxistreamd,
+                         hls::stream<ap_axiu<32, 0, 0, 0> >& sizestreamd);
 }
-#endif // _XFCOMPRESSION_ZLIB_DECOMPRESS_STREAM_KERNEL_HPP_
+#endif // _XFCOMPRESSION_ZLIB_DECOMPRESS_STREAM_HPP_

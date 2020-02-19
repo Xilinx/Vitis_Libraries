@@ -19,13 +19,12 @@
 #include <vector>
 #include "cmdlineparser.h"
 
-void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single_bin) {
+void xil_decompress_top(
+    std::string& decompress_mod, int cu, std::string& single_bin, uint8_t deviceId, uint8_t max_cr) {
     // Xilinx ZLIB object
-    xil_zlib* xlz;
-    xlz = new xil_zlib(single_bin, 1);
-    // For Decompression m_bin_flow = 0
-    xlz->m_bin_flow = 1;
-    std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
+    xil_zlib xlz(single_bin, 0, max_cr, deviceId);
+
+    std::cout << std::fixed << std::setprecision(2) << "KT(Mbps)\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -33,31 +32,71 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
         exit(1);
     }
     uint32_t input_size = get_file_size(inFile);
+    if (input_size == 0) {
+        std::cout << "\n";
+        std::cout << "Invalid File Size: " << input_size << " Bytes" << std::endl;
+        return;
+    }
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
+    double len = input_size;
+    int order = 0;
+    while (len >= 1000) {
+        order++;
+        len = len / 1000;
+    }
 
     std::string lz_decompress_in = decompress_mod;
     std::string lz_decompress_out = decompress_mod;
     lz_decompress_out = lz_decompress_out + ".raw";
 
-    // uint32_t enbytes =
-    xlz->decompress_file(lz_decompress_in, lz_decompress_out, input_size, cu);
+    xlz.decompress_file(lz_decompress_in, lz_decompress_out, input_size, cu);
     std::cout << std::fixed << std::setprecision(3) << std::endl
-              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 }
 
 int main(int argc, char* argv[]) {
     int cu_run;
     sda::utils::CmdLineParser parser;
-    parser.addSwitch("--xclbin", "-dx", "XCLBIN", "compress");
+    parser.addSwitch("--xclbin", "-dx", "XCLBIN", "");
     parser.addSwitch("--decompress", "-d", "DeCompress", "");
+    parser.addSwitch("--device", "-dev", "FPGA Card # to be used", "");
 
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.addSwitch("--cu", "-k", "CU", "0");
+    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
     parser.parse(argc, argv);
 
     std::string decompress_bin = parser.value("xclbin");
     std::string decompress_mod = parser.value("decompress");
     std::string cu = parser.value("cu");
+    std::string dev_id_str = parser.value("device");
+    std::string mcr = parser.value("max_cr");
+
+    uint8_t max_cr_val = 0;
+    if (!(mcr.empty())) {
+        max_cr_val = atoi(mcr.c_str());
+    } else {
+        // Default block size
+        max_cr_val = MAX_CR;
+    }
+
+    if (decompress_bin.empty()) {
+        std::string opt = "input XCLBIN file by using (-dx)";
+        error_message(opt);
+        exit(1);
+    }
+
+    if (decompress_mod.empty()) {
+        std::string opt = "input file to compress by using (-d)";
+        error_message(opt);
+        exit(1);
+    }
+
+    int deviceId = 0;
+    if (!dev_id_str.empty()) { // check device Id to run on
+        deviceId = atoi(dev_id_str.c_str());
+    }
 
     if (cu.empty()) {
         printf("please give -k option for cu\n");
@@ -68,6 +107,6 @@ int main(int argc, char* argv[]) {
 
     if (!decompress_mod.empty()) {
         // "-d" - DeCompress Mode
-        xil_decompress_top(decompress_mod, cu_run, decompress_bin);
+        xil_decompress_top(decompress_mod, cu_run, decompress_bin, deviceId, max_cr_val);
     }
 }

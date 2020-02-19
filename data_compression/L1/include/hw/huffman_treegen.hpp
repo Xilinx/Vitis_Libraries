@@ -18,11 +18,21 @@
 #define _XFCOMPRESSION_HUFFMAN_TREEGEN_HPP_
 
 /**
- * @file deflate_trees.hpp
+ * @file huffman_treegen.hpp
  * @brief Header for modules used in Tree Generation kernel.
  *
  * This file is part of XF Compression Library.
  */
+
+namespace xf {
+namespace compression {
+namespace details {
+
+const uint8_t c_maxBits = 15;
+const uint8_t c_leastVal = 1;
+const uint16_t c_ltree_size = 1024;
+const uint16_t c_dtree_size = 64;
+const uint16_t c_bltree_size = 64;
 
 bool findmin(uint32_t* tree_freq, uint32_t val1, uint32_t val2, uint8_t* tree_dist) {
 #pragma HLS INLINE
@@ -30,13 +40,6 @@ bool findmin(uint32_t* tree_freq, uint32_t val1, uint32_t val2, uint8_t* tree_di
                    (tree_freq[val1] == tree_freq[val2] && tree_dist[val1] <= tree_dist[val2]));
     return result;
 }
-
-#define MAX_BITS 15
-
-#define LEAST_VAL 1
-
-namespace xf {
-namespace compression {
 
 inline uint16_t reverseBits(uint16_t code, int len) {
 #pragma HLS INLINE
@@ -73,28 +76,28 @@ reduceHeap:
 
     heap[startIdx] = curr_val;
 }
-
+} // end details
 
 template <uint32_t ELEMS, uint32_t MAX_LENGTH>
 inline uint32_t huffConstructTree(uint32_t* tree_freq, uint32_t* tree_codes, uint32_t* tree_blen, uint32_t* tree_root) {
 #pragma HLS INLINE
-/**
- * @brief This module generates huffman codes for either literal, distance or
- * bitlength data.
- *
- * @param tree_freq input frequency data of literals, distances or bit lengths
- * @param tree_codes output huffman codes data
- * @param tree_blen output huffan codes bit lengths
- * @param tree_root input buffer to construct codes and bit length information
- */
+    /**
+     * @brief This module generates huffman codes for either literal, distance or
+     * bitlength data.
+     *
+     * @param tree_freq input frequency data of literals, distances or bit lengths
+     * @param tree_codes output huffman codes data
+     * @param tree_blen output huffan codes bit lengths
+     * @param tree_root input buffer to construct codes and bit length information
+     */
     const uint32_t elems = ELEMS;
     const uint32_t max_length = MAX_LENGTH;
 
     int lcl_max_code = -1;
 
     uint32_t node = elems;
-    uint8_t depth[LTREE_SIZE];
-    uint32_t heap[LTREE_SIZE];
+    uint8_t depth[details::c_ltree_size];
+    uint32_t heap[details::c_ltree_size];
 
     uint32_t heapLength = 0;
     uint32_t max_heap = HEAP_SIZE;
@@ -117,17 +120,18 @@ subheap:
     for (uint32_t node_lcl = heapLength / 2; node_lcl >= 1; node_lcl--) {
 #pragma HLS LOOP_TRIPCOUNT min = s_trip max = s_trip
 #pragma HLS PIPELINE II = 1
-        xf::compression::reduceHeap(tree_freq, heap, depth, heapLength, heap[node_lcl], node_lcl);
+        xf::compression::details::reduceHeap(tree_freq, heap, depth, heapLength, heap[node_lcl], node_lcl);
     }
 
 huffman_tree:
     for (; heapLength >= 2;) {
 #pragma HLS LOOP_TRIPCOUNT min = elems max = elems
 #pragma HLS PIPELINE II = 1
-        uint32_t node_trav = heap[LEAST_VAL];
-        heap[LEAST_VAL] = heap[heapLength--];
-        xf::compression::reduceHeap(tree_freq, heap, depth, heapLength, heap[LEAST_VAL], LEAST_VAL);
-        uint32_t h_val = heap[LEAST_VAL];
+        uint32_t node_trav = heap[details::c_leastVal];
+        heap[details::c_leastVal] = heap[heapLength--];
+        xf::compression::details::reduceHeap(tree_freq, heap, depth, heapLength, heap[details::c_leastVal],
+                                             details::c_leastVal);
+        uint32_t h_val = heap[details::c_leastVal];
 
         heap[--max_heap] = node_trav;
         heap[--max_heap] = h_val;
@@ -136,17 +140,18 @@ huffman_tree:
         depth[node] = (uint8_t)((depth[node_trav] >= (depth[h_val] + 1)) ? depth[node_trav] : (depth[h_val] + 1));
         tree_root[node_trav] = tree_root[h_val] = (uint16_t)node;
 
-        heap[LEAST_VAL] = node++;
-        xf::compression::reduceHeap(tree_freq, heap, depth, heapLength, heap[LEAST_VAL], LEAST_VAL);
+        heap[details::c_leastVal] = node++;
+        xf::compression::details::reduceHeap(tree_freq, heap, depth, heapLength, heap[details::c_leastVal],
+                                             details::c_leastVal);
     }
 
-    heap[--max_heap] = heap[LEAST_VAL];
+    heap[--max_heap] = heap[details::c_leastVal];
 
     int overflow = 0;
-    uint16_t bitlength_cntr[MAX_BITS + 1];
+    uint16_t bitlength_cntr[details::c_maxBits + 1];
 
 genbitlen:
-    for (uint32_t bits = 0; bits <= MAX_BITS; bits++) {
+    for (uint32_t bits = 0; bits <= details::c_maxBits; bits++) {
 #pragma HLS LOOP_TRIPCOUNT min = 15 max = 15
 #pragma HLS PIPELINE II = 1
         bitlength_cntr[bits] = 0;
@@ -209,11 +214,11 @@ blen_update:
         }
     }
 
-    uint16_t next_code[MAX_BITS + 1];
+    uint16_t next_code[details::c_maxBits + 1];
     uint16_t code = 0;
 
 gencode:
-    for (uint32_t bits = 1; bits <= MAX_BITS; bits++) {
+    for (uint32_t bits = 1; bits <= details::c_maxBits; bits++) {
 #pragma HLS LOOP_TRIPCOUNT min = 15 max = 15
 #pragma HLS PIPELINE II = 1
         code = (code + bitlength_cntr[bits - 1]) << 1;
@@ -226,7 +231,7 @@ code_update:
 #pragma HLS PIPELINE II = 1
         uint32_t len = tree_blen[n_cgen];
         if (len == 0) continue;
-        tree_codes[n_cgen] = reverseBits(next_code[len]++, len);
+        tree_codes[n_cgen] = details::reverseBits(next_code[len]++, len);
     }
 
     return lcl_max_code;
@@ -235,4 +240,4 @@ code_update:
 } // Compression
 } // End of xf
 
-#endif // _XFCOMPRESSION_DEFLATE_TREES_HPP_
+#endif

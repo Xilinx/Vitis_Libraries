@@ -55,15 +55,15 @@ void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
     hls::stream<uint32_t> compSizeVal;
 
 #pragma HLS dataflow
-    xf::compression::mm2sSimple<kGMemDWidth, kGMemBurstSize>(in, instream512, input_size);
-    xf::compression::streamDownsizer<uint32_t, kGMemDWidth, 8>(instream512, outdownstream, input_size);
+    xf::compression::details::mm2sSimple<kGMemDWidth>(in, instream512, input_size);
+    xf::compression::details::streamDownsizer<uint32_t, kGMemDWidth, 8>(instream512, outdownstream, input_size);
 
-    xf::compression::streamDataDm2k<8>(outdownstream, instream_orig, input_size);
-    xf::compression::streamDataK2dm(compoutstream, lz4OutEos, compSizeVal, outstream_dest);
+    xf::compression::details::streamDataDm2k<8>(outdownstream, instream_orig, input_size);
+    xf::compression::details::streamDataK2dm(compoutstream, lz4OutEos, compSizeVal, outstream_dest);
 
-    xf::compression::upsizerEos<uint16_t, 8, kGMemDWidth>(compoutstream, lz4OutEos, outstream512, outstream512_eos);
-    xf::compression::s2mmEosSimple<uint32_t, kGMemBurstSize, kGMemDWidth, 1>(out, outstream512, outstream512_eos,
-                                                                             compSizeVal, compressed_size);
+    xf::compression::details::upsizerEos<8, kGMemDWidth>(compoutstream, lz4OutEos, outstream512, outstream512_eos);
+    xf::compression::details::s2mmEosSimple<kGMemDWidth, 1>(out, outstream512, outstream512_eos, compSizeVal,
+                                                            compressed_size);
 }
 
 extern "C" {
@@ -96,8 +96,6 @@ void xilCompDatamover(xf::compression::uintMemWidth_t* in,
 #pragma HLS INTERFACE s_axilite port = input_size bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#pragma HLS data_pack variable = in
-#pragma HLS data_pack variable = out
     // Transfer Data to and from compression kernels
     __xf_comp_datamover(in, out, compressed_size, input_size, instream_orig, outstream_dest);
 }

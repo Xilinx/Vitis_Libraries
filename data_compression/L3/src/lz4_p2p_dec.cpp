@@ -55,6 +55,7 @@ xfLz4::xfLz4(const std::string& binaryFile) {
     cl_platform_id* platform_ids = (cl_platform_id*)malloc(sizeof(cl_platform_id) * num_platforms);
     err = clGetPlatformIDs(num_platforms, platform_ids, NULL);
     size_t i;
+
     for (i = 0; i < num_platforms; i++) {
         size_t platform_name_size;
         err = clGetPlatformInfo(platform_ids[i], CL_PLATFORM_NAME, 0, NULL, &platform_name_size);
@@ -111,7 +112,8 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
                                               std::vector<int>& fd_p2p_vec,
                                               std::vector<char*>& outVec,
                                               std::vector<uint64_t>& orgSizeVec,
-                                              std::vector<uint64_t>& inSizeVec) {
+                                              std::vector<uint64_t>& inSizeVec,
+                                              bool enable_p2p) {
     std::vector<cl_kernel> unpackerKernelVec;
     std::vector<cl_kernel> decompressKernelVec;
     std::vector<cl_mem> bufInputVec;
@@ -120,6 +122,8 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
     std::vector<cl_mem> bufChunkInfoVec;
     std::vector<uint64_t> inSizeVec4k;
     std::vector<char*> p2pPtrVec;
+    std::vector<std::vector<uint8_t, aligned_allocator<uint8_t> > > inVec;
+
     uint64_t total_size = 0;
     uint64_t total_in_size = 0;
     std::chrono::duration<double, std::nano> total_ssd_time_ns(0);
@@ -127,12 +131,13 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
     int ret = 0, err;
     cl_int error;
 
+    cl_mem buffer_input, buffer_chunk_info;
     uint32_t fid = 0;
     for (uint32_t fid = 0; fid < inFileVec.size(); fid++) {
         uint64_t debytes;
         uint64_t original_size = 0;
         uint32_t block_size_in_bytes = BLOCK_SIZE_IN_KB * 1024;
-        uint32_t m_block_size_in_kb = BLOCK_SIZE_IN_KB;
+        uint32_t m_BlockSizeInKb = BLOCK_SIZE_IN_KB;
         original_size = orgSizeVec[fid];
         total_size += original_size;
 
@@ -146,6 +151,7 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
         cl_mem_ext_ptr_t p2pBoExt = {XCL_MEM_EXT_P2P_BUFFER, NULL, 0};
         cl_mem_ext_ptr_t hostBoExt = {0};
         cl_mem_ext_ptr_t hostOutBoExt = {0};
+
         if ((fid % 2) == 0) {
             p2pBoExt.flags |= XCL_MEM_DDR_BANK0;
             hostBoExt.flags |= XCL_MEM_DDR_BANK0;
@@ -164,20 +170,32 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
         inSizeVec4k.push_back(input_size_4k_multiple);
         total_in_size += input_size;
 
+        if (!enable_p2p) {
+            std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size_4k_multiple);
+            inVec.push_back(in);
+            read(fd_p2p_vec[fid], inVec[fid].data(), inSizeVec4k[fid]);
+        }
         // Allocate BOs.
-        cl_mem buffer_input = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,
-                                             input_size_4k_multiple, &p2pBoExt, &error);
+        if (enable_p2p) {
+            buffer_input = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX, input_size_4k_multiple,
+                                          &p2pBoExt, &error);
+        } else {
+            buffer_input = clCreateBuffer(m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, input_size_4k_multiple,
+                                          inVec[fid].data(), &error);
+        }
         if (error)
             std::cout << "P2P: buffer_input creation failed, error: " << error << ", line: " << __LINE__ << std::endl;
 
         bufInputVec.push_back(buffer_input);
-        char* p2pPtr = (char*)clEnqueueMapBuffer(ooo_q, buffer_input, CL_TRUE, CL_MAP_READ, 0, input_size_4k_multiple,
-                                                 0, NULL, NULL, NULL);
-        p2pPtrVec.push_back(p2pPtr);
+        if (enable_p2p) {
+            char* p2pPtr = (char*)clEnqueueMapBuffer(ooo_q, buffer_input, CL_TRUE, CL_MAP_READ, 0,
+                                                     input_size_4k_multiple, 0, NULL, NULL, NULL);
+            p2pPtrVec.push_back(p2pPtr);
+        }
 
         assert(sizeof(dt_chunkInfo) == (GMEM_DATAWIDTH / 8));
-        cl_mem buffer_chunk_info = clCreateBuffer(m_context, CL_MEM_EXT_PTR_XILINX | CL_MEM_WRITE_ONLY,
-                                                  sizeof(dt_chunkInfo), &hostBoExt, &error);
+        buffer_chunk_info = clCreateBuffer(m_context, CL_MEM_EXT_PTR_XILINX | CL_MEM_WRITE_ONLY, sizeof(dt_chunkInfo),
+                                           &hostBoExt, &error);
 
         assert(sizeof(dt_blockInfo) == (GMEM_DATAWIDTH / 8));
         cl_mem buffer_block_info = clCreateBuffer(m_context, CL_MEM_EXT_PTR_XILINX | CL_MEM_WRITE_ONLY,
@@ -188,7 +206,6 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
             clCreateBuffer(m_context, CL_MEM_EXT_PTR_XILINX | CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, original_size,
                            &hostOutBoExt, &error);
 
-        clEnqueueMigrateMemObjects(ooo_q, 1, &buffer_chunk_info, 0, 0, nullptr, nullptr);
         bufOutVec.push_back(buffer_output);
 
         bufChunkInfoVec.push_back(buffer_chunk_info);
@@ -199,7 +216,7 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
         clSetKernelArg(unpacker_kernel_lz4, narg++, sizeof(cl_mem), &bufInputVec[fid]);
         clSetKernelArg(unpacker_kernel_lz4, narg++, sizeof(cl_mem), &bufBlockInfoVec[fid]);
         clSetKernelArg(unpacker_kernel_lz4, narg++, sizeof(cl_mem), &bufChunkInfoVec[fid]);
-        clSetKernelArg(unpacker_kernel_lz4, narg++, sizeof(uint32_t), &m_block_size_in_kb);
+        clSetKernelArg(unpacker_kernel_lz4, narg++, sizeof(uint32_t), &m_BlockSizeInKb);
         clSetKernelArg(unpacker_kernel_lz4, narg++, sizeof(uint8_t), &first_chunk);
         clSetKernelArg(unpacker_kernel_lz4, narg++, sizeof(uint8_t), &total_no_cu);
         clSetKernelArg(unpacker_kernel_lz4, narg++, sizeof(uint32_t), &num_blocks);
@@ -213,7 +230,7 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
         clSetKernelArg(decompress_kernel_lz4, narg++, sizeof(cl_mem), &bufOutVec[fid]);
         clSetKernelArg(decompress_kernel_lz4, narg++, sizeof(cl_mem), &bufBlockInfoVec[fid]);
         clSetKernelArg(decompress_kernel_lz4, narg++, sizeof(cl_mem), &bufChunkInfoVec[fid]);
-        clSetKernelArg(decompress_kernel_lz4, narg++, sizeof(uint32_t), &m_block_size_in_kb);
+        clSetKernelArg(decompress_kernel_lz4, narg++, sizeof(uint32_t), &m_BlockSizeInKb);
         clSetKernelArg(decompress_kernel_lz4, narg++, sizeof(uint32_t), &tmp);
         clSetKernelArg(decompress_kernel_lz4, narg++, sizeof(uint8_t), &total_no_cu);
         clSetKernelArg(decompress_kernel_lz4, narg++, sizeof(uint32_t), &num_blocks);
@@ -223,10 +240,15 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
 
     auto total_start = std::chrono::high_resolution_clock::now();
     for (uint32_t fid = 0; fid < inFileVec.size(); fid++) {
+        if (!enable_p2p) clEnqueueMigrateMemObjects(ooo_q, 1, &buffer_input, 0, 0, nullptr, nullptr);
+        clEnqueueMigrateMemObjects(ooo_q, 1, &buffer_chunk_info, 0, 0, nullptr, nullptr);
+
         auto ssd_start = std::chrono::high_resolution_clock::now();
-        ret = read(fd_p2p_vec[fid], p2pPtrVec[fid], inSizeVec4k[fid]);
-        if (ret == -1)
-            std::cout << "P2P: compress(): read() failed, err: " << ret << ", line: " << __LINE__ << std::endl;
+        if (enable_p2p) {
+            ret = read(fd_p2p_vec[fid], p2pPtrVec[fid], inSizeVec4k[fid]);
+            if (ret == -1)
+                std::cout << "P2P: compress(): read() failed, err: " << ret << ", line: " << __LINE__ << std::endl;
+        }
         auto ssd_end = std::chrono::high_resolution_clock::now();
         auto ssd_time_ns = std::chrono::duration<double, std::nano>(ssd_end - ssd_start);
         total_ssd_time_ns += ssd_time_ns;
@@ -243,7 +265,7 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
     auto total_end = std::chrono::high_resolution_clock::now();
 
     for (uint32_t fid = 0; fid < inFileVec.size(); fid++) {
-        clEnqueueUnmapMemObject(ooo_q, bufInputVec[fid], p2pPtrVec[fid], 0, NULL, NULL);
+        if (enable_p2p) clEnqueueUnmapMemObject(ooo_q, bufInputVec[fid], p2pPtrVec[fid], 0, NULL, NULL);
         clReleaseKernel(unpackerKernelVec[fid]);
         clReleaseKernel(decompressKernelVec[fid]);
         clReleaseMemObject(bufChunkInfoVec[fid]);
@@ -253,9 +275,9 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
     auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
     float throughput_in_mbps_1 = (float)total_size * 1000 / total_time_ns.count();
     float ssd_throughput_in_mbps_1 = (float)total_in_size * 1000 / total_ssd_time_ns.count();
-    std::cout << std::fixed << std::setprecision(2) << "Throughput\t\t:" << throughput_in_mbps_1 << std::endl
-              << "SSD Throughput\t\t:" << ssd_throughput_in_mbps_1 << std::endl
-              << "InputSize(inMB)\t\t:" << ((float)total_in_size / 1000000) << std::endl
+    std::cout << std::fixed << std::setprecision(2) << "Throughput\t\t:" << throughput_in_mbps_1 << std::endl;
+    if (enable_p2p) std::cout << "SSD Throughput\t\t:" << ssd_throughput_in_mbps_1 << std::endl;
+    std::cout << "InputSize(inMB)\t\t:" << ((float)total_in_size / 1000000) << std::endl
               << "outputSize(inMB)\t:" << (float)total_size / 1000000 << std::endl
               << "CR\t\t\t:" << ((float)total_size / total_in_size) << std::endl;
 }

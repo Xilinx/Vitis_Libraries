@@ -796,9 +796,11 @@ local void flush_pending(z_streamp strm)
 
 extern "C" {
 int xil_compress_top_buffer(uint8_t* in, uint8_t* out, int input_size) {
-    // printf("In top buffer \n");
+    
+    const uint8_t c_max_cr = 20;
+    // Arg 1: xclbin
     // Xilinx ZLIB object
-    xfZlib xlz("compress_decompress.xclbin");
+    xfZlib xlz("compress_decompress.xclbin", c_max_cr, COMP_ONLY);
 
     // Zlib compression
     int enbytes = xlz.compress_buffer((uint8_t*)in, (uint8_t*)out, input_size);
@@ -824,7 +826,7 @@ int ZEXPORT deflate(z_streamp strm, int flush)
     uint32_t input_size = strm->avail_in;
 
     int enbytes = xil_compress_top_buffer(input, output, input_size);
-    printf("enbytes %d \n", enbytes);
+
     strm->total_out = enbytes;
     strm->next_out = output;
     return 1;

@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _XFCOMPRESSION_BLOCK_DECOMP_DATAMOVER_KERNEL_HPP_
-#define _XFCOMPRESSION_BLOCK_DECOMP_DATAMOVER_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_BLOCK_DECOMP_DM_HPP_
+#define _XFCOMPRESSION_BLOCK_DECOMP_DM_HPP_
 
 /**
  * @file block_decomp_datamover_kernel.hpp
@@ -58,4 +58,4 @@ void xilDecompDatamover(xf::compression::uintMemWidth_t* in,
                         hls::stream<ap_axiu<8, 0, 0, 0> >& instream_orig,
                         hls::stream<ap_axiu<8, 0, 0, 0> >& outstream_dest);
 }
-#endif // _XFCOMPRESSION_BLOCK_DECOMP_DATAMOVER_KERNEL_HPP_
+#endif // _XFCOMPRESSION_BLOCK_DECOMP_DM_HPP_

@@ -35,7 +35,10 @@ namespace xf {
 namespace compression {
 
 /**
- * @brief Lz4 packer modules that packs the compressed data.
+ * @brief Lz4 packer module packs the compressed data.
+ *
+ * @tparam PACK_WIDTH packed data width
+ * @tparam PARLLEL_BYTE parallel byte count
  *
  * @param inStream input data
  * @param outStream output data
@@ -180,4 +183,4 @@ packer:
 
 } // namespace compression
 } // namespace xf
-#endif // _XFCOMPRESSION_LZ4_COMPRESS_HPP_
+#endif // _XFCOMPRESSION_LZ4_PACKER_HPP_

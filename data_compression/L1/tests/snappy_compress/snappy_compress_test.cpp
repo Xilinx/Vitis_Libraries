@@ -13,26 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "snappy_compress_core.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
-int const c_minOffset = 1;
+#include "hls_stream.h"
+#include "lz_compress.hpp"
+#include "lz_optional.hpp"
+#include "snappy_compress.hpp"
+
+#define PARALLEL_BLOCK 1
+#ifdef LARGE_LIT_RANGE
+#define MAX_LIT_COUNT 4090
+#define MAX_LIT_STREAM_SIZE 4096
+#else
+#define MAX_LIT_COUNT 60
+#define MAX_LIT_STREAM_SIZE 64
+#endif
 int const c_minMatch = 4;
-
 #define LZ_MAX_OFFSET_LIMIT 65536
 #define OFFSET_WINDOW (64 * 1024)
-#define BOOSTER_OFFSET_WINDOW (16 * 1024)
-#define LZ_HASH_BIT 12
-#define LZ_DICT_SIZE (1 << LZ_HASH_BIT)
 #define MAX_MATCH_LEN 255
 #define MATCH_LEN 6
-#define MATCH_LEVEL 2
-#define LOP                                                                                                          \
-    c_minOffset, c_minMatch, LZ_MAX_OFFSET_LIMIT, OFFSET_WINDOW, BOOSTER_OFFSET_WINDOW, LZ_DICT_SIZE, MAX_MATCH_LEN, \
-        MATCH_LEN, MATCH_LEVEL
+
+const int c_snappyMaxLiteralStream = MAX_LIT_STREAM_SIZE;
+
+typedef ap_uint<8> uintV_t;
 
 void snappyCompressEngineRun(hls::stream<uintV_t>& inStream,
                              hls::stream<uintV_t>& snappyOut,
@@ -41,7 +53,24 @@ void snappyCompressEngineRun(hls::stream<uintV_t>& inStream,
                              uint32_t max_lit_limit[PARALLEL_BLOCK],
                              uint32_t input_size,
                              uint32_t core_idx) {
-    snappy_compress_engine<LOP>(inStream, snappyOut, snappyOut_eos, snappyOutSize, max_lit_limit, input_size, 0);
+    hls::stream<xf::compression::compressd_dt> compressdStream("compressdStream");
+    hls::stream<xf::compression::compressd_dt> bestMatchStream("bestMatchStream");
+    hls::stream<xf::compression::compressd_dt> boosterStream("boosterStream");
+
+#pragma HLS STREAM variable = compressdStream depth = 8
+#pragma HLS STREAM variable = bestMatchStream depth = 8
+#pragma HLS STREAM variable = boosterStream depth = 8
+
+#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
+
+#pragma HLS dataflow
+
+    xf::compression::lzCompress<MATCH_LEN, c_minMatch, LZ_MAX_OFFSET_LIMIT>(inStream, compressdStream, input_size);
+    xf::compression::lzBestMatchFilter<MATCH_LEN, OFFSET_WINDOW>(compressdStream, bestMatchStream, input_size);
+    xf::compression::lzBooster<MAX_MATCH_LEN>(bestMatchStream, boosterStream, input_size);
+    xf::compression::snappyCompress<MAX_LIT_COUNT, MAX_LIT_STREAM_SIZE, PARALLEL_BLOCK>(
+        boosterStream, snappyOut, max_lit_limit, input_size, snappyOut_eos, snappyOutSize, core_idx);
 }
 
 int main(int argc, char* argv[]) {
@@ -59,7 +88,7 @@ int main(int argc, char* argv[]) {
 
     inputFile.open(argv[1], std::ofstream::binary | std::ofstream::in);
     if (!inputFile.is_open()) {
-        printf("Cannot open the input file!!\n");
+        std::cout << "Cannot open the input file!!" << std::endl;
         exit(0);
     }
     inputFile.seekg(0, std::ios::end);
@@ -80,11 +109,11 @@ int main(int argc, char* argv[]) {
 
     uint32_t outsize;
     outsize = snappyOutSize.read();
-    printf("\n------- Compression Ratio: %f-------\n\n", (float)fileSize / outsize);
+    std::cout << "------- Compression Ratio: " << (float)fileSize / outsize << " -------" << std::endl;
 
     outputFile.open(argv[2], std::fstream::binary | std::fstream::out);
     if (!outputFile.is_open()) {
-        printf("Cannot open the output file!!\n");
+        std::cout << "Cannot open the output file!!" << std::endl;
         exit(0);
     }
 

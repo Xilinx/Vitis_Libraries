@@ -36,7 +36,7 @@ int const c_factor = outWidth / inWidth;
 void hls_streamUpsizer(hls::stream<ap_uint<inWidth> >& inStream,
                        hls::stream<ap_uint<outWidth> >& outStream,
                        uint32_t original_size) {
-    xf::compression::streamUpsizer<AOP>(inStream, outStream, original_size);
+    xf::compression::details::streamUpsizer<AOP>(inStream, outStream, original_size);
 }
 
 int main(int argc, char* argv[]) {
@@ -72,11 +72,11 @@ int main(int argc, char* argv[]) {
                 s_idx++;
                 match = true;
             } else {
-                printf("The input file and the output file are not same.\n");
-                printf("Test Failed\n");
+                std::cout << "The input file and the output file are not same." << std::endl;
+                std::cout << "Test Failed" << std::endl;
                 exit(0);
             }
         }
     }
-    if (match) printf("TEST PASSED\n");
+    if (match) std::cout << "TEST PASSED" << std::endl;
 }

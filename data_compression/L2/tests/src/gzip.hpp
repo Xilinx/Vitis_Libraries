@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+#ifndef _XFCOMPRESSION_GZIP_HPP_
+#define _XFCOMPRESSION_GZIP_HPP_
+
 #pragma once
 
 #include <iomanip>
@@ -27,6 +30,7 @@
 #include <sys/stat.h>
 #include "xcl2.hpp"
 #include "zlib_config.hpp"
+#include <thread>
 
 #define PARALLEL_ENGINES 8
 #define C_COMPUTE_UNIT 1
@@ -38,6 +42,17 @@
 
 // Default block size
 #define BLOCK_SIZE_IN_KB 1024
+
+// Input and output buffer size
+#define INPUT_BUFFER_SIZE (2 * 1024 * 1024)
+#define OUTPUT_BUFFER_SIZE (32 * 1024 * 1024)
+
+// GZip default maximum CR
+#define MAX_CR 20
+
+// buffer count for data in
+#define DIN_BUFFERCOUNT 8
+#define DOUT_BUFFERCOUNT 2 // mandatorily 2
 
 // Maximum host buffer used to operate
 // per kernel invocation
@@ -65,20 +80,33 @@ class xil_gzip {
     uint32_t decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run);
     uint64_t get_event_duration_ns(const cl::Event& event);
 
-    xil_gzip(const std::string& binaryFile);
+    xil_gzip(const std::string& binaryFile, uint8_t max_cr = MAX_CR);
     ~xil_gzip();
 
    private:
+    void _enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize);
+    void _enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, uint32_t max_outbuf);
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q[C_COMPUTE_UNIT * OVERLAP_BUF_COUNT];
-    cl::CommandQueue* m_q_dec[D_COMPUTE_UNIT];
+    cl::CommandQueue* m_q_dec;
+    cl::CommandQueue* m_q_rd;
+    cl::CommandQueue* m_q_rdd;
+    cl::CommandQueue* m_q_wr;
+    cl::CommandQueue* m_q_wrd;
+
+    // Max CR
+    uint8_t m_max_cr;
 
     // Kernel declaration
     cl::Kernel* compress_kernel[C_COMPUTE_UNIT];
     cl::Kernel* huffman_kernel[H_COMPUTE_UNIT];
     cl::Kernel* treegen_kernel[T_COMPUTE_UNIT];
-    cl::Kernel* decompress_kernel[D_COMPUTE_UNIT];
+
+    // Decompress Kernel Declaration
+    cl::Kernel* decompress_kernel;
+    cl::Kernel* data_writer_kernel;
+    cl::Kernel* data_reader_kernel;
 
     // Compression related
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
@@ -147,5 +175,8 @@ class xil_gzip {
     std::vector<std::string> compress_kernel_names = {"xilLz77Compress"};
     std::vector<std::string> huffman_kernel_names = {"xilHuffmanKernel"};
     std::vector<std::string> treegen_kernel_names = {"xilTreegenKernel"};
-    std::vector<std::string> decompress_kernel_names = {"xilDecompressZlib"};
+    std::vector<std::string> decompress_kernel_names = {"xilDecompressStream"};
+    std::vector<std::string> data_writer_kernel_names = {"xilZlibDmWriter"};
+    std::vector<std::string> data_reader_kernel_names = {"xilZlibDmReader"};
 };
+#endif // _XFCOMPRESSION_GZIP_HPP_

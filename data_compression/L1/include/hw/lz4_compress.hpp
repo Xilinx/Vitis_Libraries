@@ -31,29 +31,81 @@
 #include <stdint.h>
 #include <stdio.h>
 
-namespace xf {
-namespace compression {
-
 typedef ap_uint<64> lz4_compressd_dt;
 typedef ap_uint<32> compressd_dt;
 
-/**
- * @brief This module does the lz4 encoding by starting from WRITE_TOKEN state
- * and based on the input read from stream the processing state changes.
- *
- * @param in_lit_inStream Read Literals
- * @param in_lenOffset_Stream Read Offset-length
- * @param outStream Output data stream
- * @param endOfStream Stream indicating that all data is processed or not
- * @param compressdSizeStream Gives the compressed size for each 64K block
- * @param input_size Size of input
- */
-static void lz4Compress(hls::stream<uint8_t>& in_lit_inStream,
-                        hls::stream<lz4_compressd_dt>& in_lenOffset_Stream,
-                        hls::stream<ap_uint<8> >& outStream,
-                        hls::stream<bool>& endOfStream,
-                        hls::stream<uint32_t>& compressdSizeStream,
-                        uint32_t input_size) {
+const int c_gmemBurstSize = 32;
+
+namespace xf {
+namespace compression {
+namespace details {
+
+template <int MAX_LIT_COUNT, int PARALLEL_UNITS>
+static void lz4CompressPart1(hls::stream<compressd_dt>& inStream,
+                             hls::stream<uint8_t>& lit_outStream,
+                             hls::stream<lz4_compressd_dt>& lenOffset_Stream,
+                             uint32_t input_size,
+                             uint32_t max_lit_limit[PARALLEL_UNITS],
+                             uint32_t index) {
+    if (input_size == 0) return;
+
+    uint8_t match_len = 0;
+    uint32_t lit_count = 0;
+    uint32_t lit_count_flag = 0;
+
+    compressd_dt nextEncodedValue = inStream.read();
+lz4_divide:
+    for (uint32_t i = 0; i < input_size;) {
+#pragma HLS PIPELINE II = 1
+        compressd_dt tmpEncodedValue = nextEncodedValue;
+        if (i < (input_size - 1)) nextEncodedValue = inStream.read();
+        uint8_t tCh = tmpEncodedValue.range(7, 0);
+        uint8_t tLen = tmpEncodedValue.range(15, 8);
+        uint16_t tOffset = tmpEncodedValue.range(31, 16);
+        uint32_t match_offset = tOffset;
+
+        if (lit_count >= MAX_LIT_COUNT) {
+            lit_count_flag = 1;
+        } else if (tLen) {
+            uint8_t match_len = tLen - 4; // LZ4 standard
+            lz4_compressd_dt tmpValue;
+            tmpValue.range(63, 32) = lit_count;
+            tmpValue.range(15, 0) = match_len;
+            tmpValue.range(31, 16) = match_offset;
+            lenOffset_Stream << tmpValue;
+            match_len = tLen - 1;
+            lit_count = 0;
+        } else {
+            lit_outStream << tCh;
+            lit_count++;
+        }
+        if (tLen)
+            i += tLen;
+        else
+            i += 1;
+    }
+    if (lit_count) {
+        lz4_compressd_dt tmpValue;
+        tmpValue.range(63, 32) = lit_count;
+        if (lit_count == MAX_LIT_COUNT) {
+            lit_count_flag = 1;
+            tmpValue.range(15, 0) = 777;
+            tmpValue.range(31, 16) = 777;
+        } else {
+            tmpValue.range(15, 0) = 0;
+            tmpValue.range(31, 16) = 0;
+        }
+        lenOffset_Stream << tmpValue;
+    }
+    max_lit_limit[index] = lit_count_flag;
+}
+
+static void lz4CompressPart2(hls::stream<uint8_t>& in_lit_inStream,
+                             hls::stream<lz4_compressd_dt>& in_lenOffset_Stream,
+                             hls::stream<ap_uint<8> >& outStream,
+                             hls::stream<bool>& endOfStream,
+                             hls::stream<uint32_t>& compressdSizeStream,
+                             uint32_t input_size) {
     // LZ4 Compress STATES
     enum lz4CompressStates { WRITE_TOKEN, WRITE_LIT_LEN, WRITE_MATCH_LEN, WRITE_LITERAL, WRITE_OFFSET0, WRITE_OFFSET1 };
     uint32_t lit_len = 0;
@@ -161,79 +213,46 @@ lz4_compress:
     endOfStream << 1;
 }
 
+} // namespace compression
+} // namespace xf
+} // namespace details
+
+namespace xf {
+namespace compression {
+
 /**
- * @brief This is an intermediate module that seperates the input stream
- * into two output streams, one literal stream and the other matchlen and
- * offset stream.
+ * @brief This is the core compression module which seperates the input stream into two
+ * output streams, one literal stream and other offset stream, then lz4 encoding is done.
  *
- * @tparam MAX_LIT_COUNT maximum literal count
- * @tparam PARALLEL_UNITS determined based on number of parallel engines
- *
- * @param inStream reference of input literals stream
- * @param lit_outStream Offset-length stream for literals in input stream
- * @param lenOffset_Stream output data stream
- * @param input_size end flag for stream
+ * @param inStream Input data stream
+ * @param outStream Output data stream
  * @param max_lit_limit Size for compressed stream
- * @param index size of input
+ * @param input_size Size of input data
+ * @param endOfStream Stream indicating that all data is processed or not
+ * @param compressdSizeStream Gives the compressed size for each 64K block
+ *
  */
 template <int MAX_LIT_COUNT, int PARALLEL_UNITS>
-static void lz4Divide(hls::stream<compressd_dt>& inStream,
-                      hls::stream<uint8_t>& lit_outStream,
-                      hls::stream<lz4_compressd_dt>& lenOffset_Stream,
-                      uint32_t input_size,
-                      uint32_t max_lit_limit[PARALLEL_UNITS],
-                      uint32_t index) {
-    if (input_size == 0) return;
+static void lz4Compress(hls::stream<compressd_dt>& inStream,
+                        hls::stream<ap_uint<8> >& outStream,
+                        uint32_t max_lit_limit[PARALLEL_UNITS],
+                        uint32_t input_size,
+                        hls::stream<bool>& endOfStream,
+                        hls::stream<uint32_t>& compressdSizeStream,
+                        uint32_t index) {
+    hls::stream<uint8_t> lit_outStream("lit_outStream");
+    hls::stream<lz4_compressd_dt> lenOffset_Stream("lenOffset_Stream");
 
-    uint8_t match_len = 0;
-    uint32_t lit_count = 0;
-    uint32_t lit_count_flag = 0;
+#pragma HLS STREAM variable = lit_outStream depth = MAX_LIT_COUNT
+#pragma HLS STREAM variable = lenOffset_Stream depth = c_gmemBurstSize
 
-    compressd_dt nextEncodedValue = inStream.read();
-lz4_divide:
-    for (uint32_t i = 0; i < input_size;) {
-#pragma HLS PIPELINE II = 1
-        compressd_dt tmpEncodedValue = nextEncodedValue;
-        if (i < (input_size - 1)) nextEncodedValue = inStream.read();
-        uint8_t tCh = tmpEncodedValue.range(7, 0);
-        uint8_t tLen = tmpEncodedValue.range(15, 8);
-        uint16_t tOffset = tmpEncodedValue.range(31, 16);
-        uint32_t match_offset = tOffset;
+#pragma HLS RESOURCE variable = lit_outStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = lenOffset_Stream core = FIFO_SRL
 
-        if (lit_count >= MAX_LIT_COUNT) {
-            lit_count_flag = 1;
-        } else if (tLen) {
-            uint8_t match_len = tLen - 4; // LZ4 standard
-            lz4_compressd_dt tmpValue;
-            tmpValue.range(63, 32) = lit_count;
-            tmpValue.range(15, 0) = match_len;
-            tmpValue.range(31, 16) = match_offset;
-            lenOffset_Stream << tmpValue;
-            match_len = tLen - 1;
-            lit_count = 0;
-        } else {
-            lit_outStream << tCh;
-            lit_count++;
-        }
-        if (tLen)
-            i += tLen;
-        else
-            i += 1;
-    }
-    if (lit_count) {
-        lz4_compressd_dt tmpValue;
-        tmpValue.range(63, 32) = lit_count;
-        if (lit_count == MAX_LIT_COUNT) {
-            lit_count_flag = 1;
-            tmpValue.range(15, 0) = 777;
-            tmpValue.range(31, 16) = 777;
-        } else {
-            tmpValue.range(15, 0) = 0;
-            tmpValue.range(31, 16) = 0;
-        }
-        lenOffset_Stream << tmpValue;
-    }
-    max_lit_limit[index] = lit_count_flag;
+#pragma HLS dataflow
+    details::lz4CompressPart1<MAX_LIT_COUNT, PARALLEL_UNITS>(inStream, lit_outStream, lenOffset_Stream, input_size,
+                                                             max_lit_limit, index);
+    details::lz4CompressPart2(lit_outStream, lenOffset_Stream, outStream, endOfStream, compressdSizeStream, input_size);
 }
 
 } // namespace compression

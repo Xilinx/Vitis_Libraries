@@ -1,0 +1,81 @@
+{
+    "name": "Xilinx ZLIB Compression",
+    "description": [
+        "Xilinx ZLIB Compression"
+    ],
+    "flow": "vitis",
+    "launch": [
+        {
+            "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "host": {
+        "host_exe": "xil_zlib",
+        "compiler": {
+            "sources": [
+                "./src/host.cpp",
+                "LIB_DIR/L2/tests/src/zlib.cpp",
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
+                "LIB_DIR/common/libs/logger/logger.cpp",
+                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
+            ],
+            "includepaths": [
+                "LIB_DIR/L2/include"
+            ],
+            "symbols": [
+                "PARALLEL_BLOCK=8"
+            ]
+        }
+    },
+    "v++": {
+        "compiler": {
+            "symbols": [
+                "PARALLEL_BLOCK=8"
+            ],
+            "clflags": [
+                "--config PROJECT/advanced.ini"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "name": "compress",
+            "ldclflags": "--profile_kernel data:all:all:all",
+            "accelerators": [
+                {
+                    "name": "xilLz77Compress",
+                    "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp"
+                },
+                {
+                    "name": "xilHuffmanKernel",
+                    "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp"
+                },
+                {
+                    "name": "xilTreegenKernel",
+                    "location": "LIB_DIR/L2/src/zlib_treegen_mm.cpp"
+                }
+            ]
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+}

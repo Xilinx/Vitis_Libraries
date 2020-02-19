@@ -19,9 +19,16 @@
 #include <vector>
 #include "cmdlineparser.h"
 
-void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) {
+static uint64_t getFileSize(std::ifstream& file) {
+    file.seekg(0, file.end);
+    uint64_t file_size = file.tellg();
+    file.seekg(0, file.beg);
+    return file_size;
+}
+
+void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::string& decompress_bin) {
     // Create xfLz4Streaming object
-    xfLz4Streaming* xlz = new xfLz4Streaming(decompress_bin, 0);
+    xfLz4Streaming* xlz = new xfLz4Streaming(decompress_bin, 0, block_size);
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -32,16 +39,23 @@ void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) 
     uint64_t input_size = getFileSize(inFile);
     inFile.close();
 
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
+    double len = input_size;
+    int order = 0;
+    while (len >= 1000) {
+        order++;
+        len = len / 1000;
+    }
+
     string lz_decompress_in = decompress_mod;
     string lz_decompress_out = decompress_mod;
     lz_decompress_out = lz_decompress_out + ".orig";
 
-    xlz->m_switch_flow = 0;
-
     // Call LZ4 decompression
-    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size);
+    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size, 0);
 #ifdef VERBOSE
-    std::cout << std::fixed << std::setprecision(2) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(3) << std::endl
+              << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_decompress_out.c_str() << std::endl;
@@ -89,5 +103,5 @@ int main(int argc, char* argv[]) {
     }
 
     // "-d" Decompress Mode
-    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, decompress_bin);
+    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, bSize, decompress_bin);
 }

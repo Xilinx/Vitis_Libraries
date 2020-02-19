@@ -37,28 +37,92 @@
 #define INSIZE_RANGE_14BIT (1 << 14) // 16384
 #define INSIZE_RANGE_21BIT (1 << 21) // 2097152
 
-namespace xf {
-namespace compression {
-
 typedef ap_uint<64> snappy_compressd_dt;
 typedef ap_uint<32> compressd_dt;
 
-/**
- * @brief This module encodes the input data based on the snappy algorithm
- *
- * @param in_lit_inStream reference of input literals stream
- * @param in_lenOffset_Stream Offset-length stream for literals in input stream
- * @param outStream output data stream
- * @param endOfStream end flag for stream
- * @param compressdSizeStream Size for compressed stream
- * @param input_size size of input
- */
-static void snappyCompress(hls::stream<uint8_t>& in_lit_inStream,
-                           hls::stream<snappy_compressd_dt>& in_lenOffset_Stream,
-                           hls::stream<ap_uint<8> >& outStream,
-                           hls::stream<bool>& endOfStream,
-                           hls::stream<uint32_t>& compressdSizeStream,
-                           uint32_t input_size) {
+const int c_gmemBurstSize = 32;
+
+namespace xf {
+namespace compression {
+namespace details {
+
+// Seperates the input stream into two output streams
+template <int MAX_LIT_COUNT, int MAX_LIT_STREAM_SIZE, int PARALLEL_UNITS>
+inline void snappyCompressPart1(hls::stream<compressd_dt>& inStream,
+                                hls::stream<uint8_t>& lit_outStream,
+                                hls::stream<snappy_compressd_dt>& lenOffset_Stream,
+                                uint32_t input_size,
+                                uint32_t max_lit_limit[PARALLEL_UNITS],
+                                uint32_t index) {
+    if (input_size == 0) return;
+    assert(MAX_LIT_COUNT < MAX_LIT_STREAM_SIZE);
+    uint8_t marker = MARKER;
+    uint32_t out_idx = 0;
+    uint8_t match_len = 0;
+    uint32_t loc_idx = 0;
+    uint32_t lit_count = 0;
+    uint32_t lit_count_flag = 0;
+
+    compressd_dt nextEncodedValue = inStream.read();
+snappy_divide:
+    for (uint32_t i = 0; i < input_size; i++) {
+#pragma HLS PIPELINE II = 1
+        compressd_dt tmpEncodedValue = nextEncodedValue;
+        if (i < (input_size - 1)) nextEncodedValue = inStream.read();
+        uint8_t tCh = tmpEncodedValue.range(7, 0);
+        uint8_t tLen = tmpEncodedValue.range(15, 8);
+        uint16_t tOffset = tmpEncodedValue.range(31, 16);
+        uint32_t match_offset = tOffset + 1;
+
+        if (tLen > 0) {
+            uint8_t match_len = tLen; // Snappy standard
+            snappy_compressd_dt tmpValue;
+            tmpValue.range(63, 32) = lit_count;
+            tmpValue.range(15, 0) = match_len;
+            tmpValue.range(31, 16) = match_offset;
+            lenOffset_Stream << tmpValue;
+            match_len = tLen - 1;
+            i += match_len;
+            lit_count = 0;
+        } else {
+            lit_outStream << tCh;
+            lit_count++;
+            if (lit_count == MAX_LIT_COUNT) {
+                snappy_compressd_dt tmpValue;
+                tmpValue.range(63, 32) = lit_count;
+                tmpValue.range(15, 0) = 0;
+                tmpValue.range(31, 16) = 0;
+                lenOffset_Stream << tmpValue;
+                lit_count = 0;
+            }
+        }
+    }
+
+    if (lit_count) {
+        snappy_compressd_dt tmpValue;
+        tmpValue.range(63, 32) = lit_count;
+
+        if (lit_count == MAX_LIT_COUNT) {
+            lit_count_flag = 1;
+            tmpValue.range(15, 0) = 0;
+            tmpValue.range(31, 16) = 0;
+        } else {
+            tmpValue.range(15, 0) = 0;
+            tmpValue.range(31, 16) = 0;
+        }
+        lenOffset_Stream << tmpValue;
+    }
+
+    max_lit_limit[index] = lit_count_flag;
+}
+
+// Snappy encoding algorithm
+static void snappyCompressPart2(hls::stream<uint8_t>& in_lit_inStream,
+                                hls::stream<snappy_compressd_dt>& in_lenOffset_Stream,
+                                hls::stream<ap_uint<8> >& outStream,
+                                hls::stream<bool>& endOfStream,
+                                hls::stream<uint32_t>& compressdSizeStream,
+                                uint32_t input_size) {
     // SNAPPY Compress STATES
     enum snappyCstates {
         WRITE_TOKEN,
@@ -303,90 +367,48 @@ snappy_compress:
     endOfStream << 1;
 }
 
+} // namespace details
+} // namespace compression
+} // namespace xf
+
+namespace xf {
+namespace compression {
+
 /**
- * @brief This is an intermediate module that seperates the input stream
- * into two output streams, one literal stream and the other matchlen and
- * offset stream.
+ * @brief This is the core compression module which seperates the input stream into two
+ * output streams, one literal stream and other offset stream, then encoding is done
+ * based on the snappy algorithm.
  *
- * @tparam MAX_LIT_COUNT maximum literal count
- * @tparam MAX_LIT_STREAM_SIZE max literal size
- * @tparam PARALLEL_UNITS determined based on number of parallel engines
- * @param inStream reference of input literals stream
- * @param lit_outStream Offset-length stream for literals in input stream
- * @param lenOffset_Stream output data stream
- * @param input_size end flag for stream
+* @param inStream Input data stream
+ * @param outStream Output data stream
  * @param max_lit_limit Size for compressed stream
- * @param index size of input
+ * @param input_size Size of input data
+ * @param endOfStream Stream indicating that all data is processed or not
+ * @param compressdSizeStream Gives the compressed size for each 64K block
  */
 template <int MAX_LIT_COUNT, int MAX_LIT_STREAM_SIZE, int PARALLEL_UNITS>
-inline void snappyDivide(hls::stream<compressd_dt>& inStream,
-                         hls::stream<uint8_t>& lit_outStream,
-                         hls::stream<snappy_compressd_dt>& lenOffset_Stream,
-                         uint32_t input_size,
-                         uint32_t max_lit_limit[PARALLEL_UNITS],
-                         uint32_t index) {
-    if (input_size == 0) return;
-    assert(MAX_LIT_COUNT < MAX_LIT_STREAM_SIZE);
-    uint8_t marker = MARKER;
-    uint32_t out_idx = 0;
-    uint8_t match_len = 0;
-    uint32_t loc_idx = 0;
-    uint32_t lit_count = 0;
-    uint32_t lit_count_flag = 0;
+static void snappyCompress(hls::stream<compressd_dt>& inStream,
+                           hls::stream<ap_uint<8> >& outStream,
+                           uint32_t max_lit_limit[PARALLEL_UNITS],
+                           uint32_t input_size,
+                           hls::stream<bool>& endOfStream,
+                           hls::stream<uint32_t>& compressdSizeStream,
+                           uint32_t index) {
+    hls::stream<uint8_t> lit_outStream("lit_outStream");
+    hls::stream<snappy_compressd_dt> lenOffset_Stream("lenOffset_Stream");
 
-    compressd_dt nextEncodedValue = inStream.read();
-snappy_divide:
-    for (uint32_t i = 0; i < input_size; i++) {
-#pragma HLS PIPELINE II = 1
-        compressd_dt tmpEncodedValue = nextEncodedValue;
-        if (i < (input_size - 1)) nextEncodedValue = inStream.read();
-        uint8_t tCh = tmpEncodedValue.range(7, 0);
-        uint8_t tLen = tmpEncodedValue.range(15, 8);
-        uint16_t tOffset = tmpEncodedValue.range(31, 16);
-        uint32_t match_offset = tOffset + 1;
+#pragma HLS STREAM variable = lit_outStream depth = MAX_LIT_COUNT
+#pragma HLS STREAM variable = lenOffset_Stream depth = c_gmemBurstSize
 
-        if (tLen > 0) {
-            uint8_t match_len = tLen; // Snappy standard
-            snappy_compressd_dt tmpValue;
-            tmpValue.range(63, 32) = lit_count;
-            tmpValue.range(15, 0) = match_len;
-            tmpValue.range(31, 16) = match_offset;
-            lenOffset_Stream << tmpValue;
-            match_len = tLen - 1;
-            i += match_len;
-            lit_count = 0;
-        } else {
-            lit_outStream << tCh;
-            lit_count++;
-            if (lit_count == MAX_LIT_COUNT) {
-                snappy_compressd_dt tmpValue;
-                tmpValue.range(63, 32) = lit_count;
-                tmpValue.range(15, 0) = 0;
-                tmpValue.range(31, 16) = 0;
-                lenOffset_Stream << tmpValue;
-                lit_count = 0;
-            }
-        }
-    }
+#pragma HLS RESOURCE variable = lit_outStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = lenOffset_Stream core = FIFO_SRL
 
-    if (lit_count) {
-        snappy_compressd_dt tmpValue;
-        tmpValue.range(63, 32) = lit_count;
-
-        if (lit_count == MAX_LIT_COUNT) {
-            lit_count_flag = 1;
-            tmpValue.range(15, 0) = 0;
-            tmpValue.range(31, 16) = 0;
-        } else {
-            tmpValue.range(15, 0) = 0;
-            tmpValue.range(31, 16) = 0;
-        }
-        lenOffset_Stream << tmpValue;
-    }
-
-    max_lit_limit[index] = lit_count_flag;
+#pragma HLS dataflow
+    details::snappyCompressPart1<MAX_LIT_COUNT, MAX_LIT_STREAM_SIZE, PARALLEL_UNITS>(
+        inStream, lit_outStream, lenOffset_Stream, input_size, max_lit_limit, index);
+    details::snappyCompressPart2(lit_outStream, lenOffset_Stream, outStream, endOfStream, compressdSizeStream,
+                                 input_size);
 }
-
 } // namespace compression
 } // namespace xf
 

@@ -26,16 +26,9 @@
 #define MAGIC_BYTE_4 24
 #define FLG_BYTE 104
 
-uint64_t xfLz4::getEventDurationNs(const cl::Event& event) {
-    uint64_t start_time = 0, end_time = 0;
-
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &start_time);
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &end_time);
-    return (end_time - start_time);
-}
-
-uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
-    if (m_switch_flow == 0) { // Xilinx FPGA compression flow
+uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, bool m_flow) {
+    m_SwitchFlow = m_flow;
+    if (m_SwitchFlow == 0) { // Xilinx FPGA compression flow
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
 
@@ -62,7 +55,7 @@ uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name
 
         // Default value 64K
         uint8_t block_size_header = 0;
-        switch (m_block_size_in_kb) {
+        switch (m_BlockSizeInKb) {
             case 64:
                 outFile.put(BSIZE_STD_64KB);
                 block_size_header = BSIZE_STD_64KB;
@@ -84,9 +77,9 @@ uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name
                 break;
         }
 
-        uint32_t host_buffer_size = (m_block_size_in_kb * 1024) * 32;
+        uint32_t host_buffer_size = (m_BlockSizeInKb * 1024) * 32;
 
-        if ((m_block_size_in_kb * 1024) > input_size) host_buffer_size = m_block_size_in_kb * 1024;
+        if ((m_BlockSizeInKb * 1024) > input_size) host_buffer_size = m_BlockSizeInKb * 1024;
 
         uint8_t temp_buff[10] = {FLG_BYTE,         block_size_header, input_size,       input_size >> 8,
                                  input_size >> 16, input_size >> 24,  input_size >> 32, input_size >> 40,
@@ -114,7 +107,7 @@ uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name
         outFile.close();
         return enbytes;
     } else { // Standard LZ4 flow
-        std::string command = "../../../common/lz4/lz4 --content-size -f -q " + inFile_name;
+        std::string command = "lz4 --content-size -f -q " + inFile_name;
         system(command.c_str());
         std::string output = inFile_name + ".lz4";
         std::string rout = inFile_name + ".std.lz4";
@@ -131,7 +124,7 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 }
 
 // Constructor
-xfLz4::xfLz4(const std::string& binaryFile, uint8_t flow) {
+xfLz4::xfLz4(const std::string& binaryFile, uint8_t flow, uint32_t block_size_kb) {
     h_buf_in.resize(HOST_BUFFER_SIZE);
     h_buf_out.resize(HOST_BUFFER_SIZE);
     h_blksize.resize(MAX_NUMBER_BLOCKS);
@@ -152,7 +145,7 @@ xfLz4::xfLz4(const std::string& binaryFile, uint8_t flow) {
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // import_binary() command will find the OpenCL binary file created using the
-    // xocc compiler load into OpenCL Binary and return as Binaries
+    // v++ compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
     auto fileBuf = xcl::read_binary_file(binaryFile);
@@ -160,7 +153,8 @@ xfLz4::xfLz4(const std::string& binaryFile, uint8_t flow) {
     devices.resize(1);
 
     m_program = new cl::Program(*m_context, devices, bins);
-
+    m_BinFlow = flow;
+    m_BlockSizeInKb = block_size_kb;
     // Create Compress kernels
     if (flow == 1 || flow == 2) compress_kernel_lz4 = new cl::Kernel(*m_program, compress_kernel_names[0].c_str());
 
@@ -170,9 +164,10 @@ xfLz4::xfLz4(const std::string& binaryFile, uint8_t flow) {
 
 // Destructor
 xfLz4::~xfLz4() {
-    if (m_bin_flow) {
+    if (m_BinFlow) {
         delete (compress_kernel_lz4);
-    } else {
+    }
+    if (m_BinFlow == 0 || m_BinFlow == 2) {
         delete (decompress_kernel_lz4);
     }
     delete (m_program);
@@ -180,8 +175,9 @@ xfLz4::~xfLz4() {
     delete (m_context);
 }
 
-uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
-    if (m_switch_flow == 0) {
+uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, bool m_flow) {
+    m_SwitchFlow = m_flow;
+    if (m_SwitchFlow == 0) {
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
 
@@ -197,7 +193,7 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
         char magic_hdr[] = {MAGIC_BYTE_1, MAGIC_BYTE_2, MAGIC_BYTE_3, MAGIC_BYTE_4};
         for (uint32_t i = 0; i < MAGIC_HEADER_SIZE; i++) {
             inFile.get(c);
-            if (c == magic_hdr[i])
+            if (int(c) == magic_hdr[i])
                 continue;
             else {
                 std::cout << "Problem with magic header " << c << " " << i << std::endl;
@@ -214,22 +210,21 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
 
         switch (c) {
             case BSIZE_STD_64KB:
-                m_block_size_in_kb = 64;
+                m_BlockSizeInKb = 64;
                 break;
             case BSIZE_STD_256KB:
-                m_block_size_in_kb = 256;
+                m_BlockSizeInKb = 256;
                 break;
             case BSIZE_STD_1024KB:
-                m_block_size_in_kb = 1024;
+                m_BlockSizeInKb = 1024;
                 break;
             case BSIZE_STD_4096KB:
-                m_block_size_in_kb = 4096;
+                m_BlockSizeInKb = 4096;
                 break;
             default:
                 std::cout << "Invalid Block Size" << std::endl;
                 break;
         }
-        // printf("m_block_size_in_kb %d \n", m_block_size_in_kb);
 
         // Original size
         uint64_t original_size = 0;
@@ -243,9 +238,9 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
         // Read block data from compressed stream .lz4
         inFile.read((char*)in.data(), (input_size - 15));
 
-        uint32_t host_buffer_size = (m_block_size_in_kb * 1024) * 32;
+        uint32_t host_buffer_size = (m_BlockSizeInKb * 1024) * MAX_NUMBER_BLOCKS;
 
-        if ((m_block_size_in_kb * 1024) > original_size) host_buffer_size = m_block_size_in_kb * 1024;
+        if ((m_BlockSizeInKb * 1024) > original_size) host_buffer_size = m_BlockSizeInKb * 1024;
 
         uint64_t debytes;
         // Decompression Sequential multiple cus.
@@ -256,7 +251,7 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
         outFile.close();
         return debytes;
     } else {
-        std::string command = "../../../common/lz4/lz4 --content-size -f -q -d " + inFile_name;
+        std::string command = "lz4 --content-size -f -q -d " + inFile_name;
         system(command.c_str());
         return 0;
     }
@@ -266,7 +261,7 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
 // this function. It just supports Block Size 64KB
 uint64_t xfLz4::decompressSequential(
     uint8_t* in, uint8_t* out, uint64_t input_size, uint64_t original_size, uint32_t host_buffer_size) {
-    uint32_t max_num_blks = (host_buffer_size) / (m_block_size_in_kb * 1024);
+    uint32_t max_num_blks = (host_buffer_size) / (m_BlockSizeInKb * 1024);
 
     h_buf_in.resize(host_buffer_size);
     h_buf_out.resize(host_buffer_size);
@@ -276,7 +271,7 @@ uint64_t xfLz4::decompressSequential(
     m_compressSize.reserve(max_num_blks);
     m_blkSize.reserve(max_num_blks);
 
-    uint32_t block_size_in_bytes = m_block_size_in_kb * 1024;
+    uint32_t block_size_in_bytes = m_BlockSizeInKb * 1024;
 
     // Total number of blocks exists for this file
     uint32_t total_block_cnt = (original_size - 1) / block_size_in_bytes + 1;
@@ -392,7 +387,7 @@ uint64_t xfLz4::decompressSequential(
         decompress_kernel_lz4->setArg(narg++, *(buffer_output));
         decompress_kernel_lz4->setArg(narg++, *(buffer_block_size));
         decompress_kernel_lz4->setArg(narg++, *(buffer_compressed_size));
-        decompress_kernel_lz4->setArg(narg++, m_block_size_in_kb);
+        decompress_kernel_lz4->setArg(narg++, m_BlockSizeInKb);
         decompress_kernel_lz4->setArg(narg++, bufblocks);
 
         std::vector<cl::Memory> inBufVec;
@@ -450,7 +445,7 @@ uint64_t xfLz4::decompressSequential(
 // Note: Various block sizes supported by LZ4 standard are not applicable to
 // this function. It just supports Block Size 64KB
 uint64_t xfLz4::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size) {
-    uint32_t max_num_blks = (host_buffer_size) / (m_block_size_in_kb * 1024);
+    uint32_t max_num_blks = (host_buffer_size) / (m_BlockSizeInKb * 1024);
 
     h_buf_in.resize(host_buffer_size);
     h_buf_out.resize(host_buffer_size);
@@ -460,7 +455,7 @@ uint64_t xfLz4::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_siz
     m_compressSize.reserve(max_num_blks);
     m_blkSize.reserve(max_num_blks);
 
-    uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
+    uint32_t block_size_in_kb = m_BlockSizeInKb;
     uint32_t block_size_in_bytes = block_size_in_kb * 1024;
 
     uint32_t no_compress_case = 0;
@@ -478,8 +473,8 @@ uint64_t xfLz4::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_siz
     // Each compute unit processes 2MB data per kernel invocation
     uint32_t hostChunk_cu;
 
-    // This buffer contains total number of BLOCK_SIZE_IN_KB blocks per CU
-    // For Example: HOST_BUFFER_SIZE = 2MB/BLOCK_SIZE_IN_KB = 32block (Block
+    // This buffer contains total number of m_BlockSizeInKb blocks per CU
+    // For Example: HOST_BUFFER_SIZE = 2MB/m_BlockSizeInKb = 32block (Block
     // size 64 by default)
     uint32_t total_blocks_cu;
 
@@ -533,7 +528,7 @@ uint64_t xfLz4::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_siz
         }
 
         // Calculate chunks size in bytes for device buffer creation
-        bufSize_in_bytes_cu = ((hostChunk_cu - 1) / BLOCK_SIZE_IN_KB + 1) * BLOCK_SIZE_IN_KB;
+        bufSize_in_bytes_cu = ((hostChunk_cu - 1) / m_BlockSizeInKb + 1) * m_BlockSizeInKb;
 
         // Device buffer allocation
         buffer_input =

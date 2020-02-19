@@ -17,6 +17,13 @@
 #ifndef _XFCOMPRESSION_HUFFMAN_ENCODER_HPP_
 #define _XFCOMPRESSION_HUFFMAN_ENCODER_HPP_
 
+/**
+ * @file huffman_encoder.hpp
+ * @brief Header for module used in ZLIB huffman kernel.
+ *
+ * This file is part of Vitis Data Compression Library.
+ */
+
 #include <ap_int.h>
 #include "zlib_tables.hpp"
 // 64bits/8bit = 8 Bytes
@@ -28,21 +35,95 @@ typedef ap_uint<32> encoded_dt;
 // 8 * 4 = 32 Bytes containing LL (1), ML (1), OFset (2)
 typedef ap_uint<32> encodedV_dt;
 
-#define WRITE_TOKEN 0
-#define ML_DIST_REP 1
-#define LIT_REP 2
-#define SEND_OUTPUT 3
-#define ML_EXTRA 4
-#define DIST_REP 5
-#define DIST_EXTRA 6
-
 // LZ specific Defines
-#define BIT 8
-
 #define d_code(dist, dist_code) ((dist) < 256 ? dist_code[dist] : dist_code[256 + ((dist) >> 7)])
 
 namespace xf {
 namespace compression {
+namespace details {
+
+void bitPackingSize(hls::stream<uint16_t>& inStream,
+                    hls::stream<uint8_t>& inStreamSize,
+                    hls::stream<uintOutV_t>& outStream,
+                    hls::stream<uint16_t>& outStreamSize) {
+    ap_uint<64> localBits = 0;
+    uint32_t localBits_idx = 0;
+    bool flag_run = false;
+
+bitpack:
+    for (uint8_t size = inStreamSize.read(); size != 0; size = inStreamSize.read()) {
+#pragma HLS PIPELINE II = 1
+        localBits.range(size + localBits_idx - 1, localBits_idx) = inStream.read();
+        localBits_idx += size;
+
+        if (localBits_idx >= 16) {
+            ap_uint<16> pack_byte = 0;
+            pack_byte = localBits.range(15, 0);
+            localBits >>= 16;
+            localBits_idx -= 16;
+            outStreamSize << 2;
+            outStream << pack_byte;
+        }
+        flag_run = true;
+    }
+
+    if (flag_run == false) {
+        outStreamSize << 0;
+        return;
+    }
+
+    int leftBits = localBits_idx % 8;
+    int val = 0;
+
+    if (leftBits) {
+        // 3 bit header
+        localBits.range(localBits_idx + 3 - 1, localBits_idx) = 0;
+        localBits_idx += 3;
+
+        leftBits = localBits_idx % 8;
+
+        if (leftBits != 0) {
+            val = 8 - leftBits;
+            localBits.range(localBits_idx + val - 1, localBits_idx) = 0;
+            localBits_idx += val;
+        }
+
+        if (localBits_idx >= 16) {
+            ap_uint<16> pack_byte = 0;
+            pack_byte = localBits.range(15, 0);
+            localBits >>= 16;
+            localBits_idx -= 16;
+            outStreamSize << 2;
+            outStream << pack_byte;
+        }
+
+        // Zero bytes and complement as per type0 z_sync_flush
+        localBits.range(localBits_idx + 8 - 1, localBits_idx) = 0x00;
+        localBits.range(localBits_idx + 16 - 1, localBits_idx + 8) = 0x00;
+        localBits.range(localBits_idx + 24 - 1, localBits_idx + 16) = 0xff;
+        localBits.range(localBits_idx + 32 - 1, localBits_idx + 24) = 0xff;
+        localBits_idx += 32;
+
+    } else {
+        // Zero bytes and complement as per type0 z_sync_flush
+        localBits.range(localBits_idx + 8 - 1, localBits_idx) = 0x00;
+        localBits.range(localBits_idx + 16 - 1, localBits_idx + 8) = 0x00;
+        localBits.range(localBits_idx + 24 - 1, localBits_idx + 16) = 0x00;
+        localBits.range(localBits_idx + 32 - 1, localBits_idx + 24) = 0xff;
+        localBits.range(localBits_idx + 40 - 1, localBits_idx + 32) = 0xff;
+        localBits_idx += 40;
+    }
+
+    for (uint32_t i = 0; i < localBits_idx; i += 8) {
+        uint16_t pack_byte = 0;
+        pack_byte = localBits.range(7, 0);
+        localBits >>= 8;
+        outStreamSize << 1;
+        outStream << pack_byte;
+    }
+
+    outStreamSize << 0;
+}
 
 void bitPacking(hls::stream<uint16_t>& inStream,
                 hls::stream<uint8_t>& inStreamSize,
@@ -89,7 +170,7 @@ bitpack:
         leftBits = localBits_idx % 8;
 
         if (leftBits != 0) {
-            val = BIT - leftBits;
+            val = 8 - leftBits;
             localBits.range(localBits_idx + val - 1, localBits_idx) = 0;
             localBits_idx += val;
         }
@@ -136,6 +217,7 @@ bitpack:
     outStream << 0;
     outStreamEos << 1;
 }
+} // end details
 
 /**
  * @brief This module does zlib/gzip dynamic huffman encoding
@@ -164,37 +246,45 @@ void huffmanEncoder(hls::stream<encodedV_dt>& inStream,
                     hls::stream<uint32_t>& inStreamBLCodes,
                     hls::stream<uint32_t>& inStreamBLBlen,
                     hls::stream<uint32_t>& inStreamMaxCode) {
+    enum huffmanEncoderState { WRITE_TOKEN, ML_DIST_REP, LIT_REP, SEND_OUTPUT, ML_EXTRA, DIST_REP, DIST_EXTRA };
+
     if (input_size == 0) {
         outStreamSize << 0;
         return;
     }
+    const uint16_t c_length_codes = 29;
+    const uint16_t c_distance_codes = 30;
+    const uint16_t c_ltree_size = 1024;
+    const uint16_t c_dtree_size = 64;
+    const uint16_t c_bltree_size = 64;
+    const uint16_t c_bl_codes = 19;
 
-    uint8_t extra_lbits[LENGTH_CODES] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2,
-                                         2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
+    uint8_t extra_lbits[c_length_codes] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2,
+                                           2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
 
-    uint8_t extra_dbits[DISTANCE_CODES] = {0, 0, 0, 0, 1, 1, 2, 2,  3,  3,  4,  4,  5,  5,  6,
-                                           6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
+    uint8_t extra_dbits[c_distance_codes] = {0, 0, 0, 0, 1, 1, 2, 2,  3,  3,  4,  4,  5,  5,  6,
+                                             6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
 
-    uint16_t litmtree_codes[LTREE_SIZE];
-    uint8_t litmtree_blen[LTREE_SIZE];
+    uint16_t litmtree_codes[c_ltree_size];
+    uint8_t litmtree_blen[c_ltree_size];
 
-    uint16_t distree_codes[DTREE_SIZE];
-    uint8_t dtree_blen[DTREE_SIZE];
+    uint16_t distree_codes[c_dtree_size];
+    uint8_t dtree_blen[c_dtree_size];
 
-    uint16_t bitlentree_codes[BLTREE_SIZE];
-    uint8_t bitlentree_blen[BLTREE_SIZE];
+    uint16_t bitlentree_codes[c_bltree_size];
+    uint8_t bitlentree_blen[c_bltree_size];
 
-    for (uint16_t i = 0; i < LTREE_SIZE; i++) {
+    for (uint16_t i = 0; i < c_ltree_size; i++) {
         litmtree_codes[i] = inStreamLCodes.read();
         litmtree_blen[i] = inStreamLBlen.read();
     }
 
-    for (uint16_t i = 0; i < DTREE_SIZE; i++) {
+    for (uint16_t i = 0; i < c_dtree_size; i++) {
         distree_codes[i] = inStreamDCodes.read();
         dtree_blen[i] = inStreamDBlen.read();
     }
 
-    for (uint16_t i = 0; i < BLTREE_SIZE; i++) {
+    for (uint16_t i = 0; i < c_bltree_size; i++) {
         bitlentree_codes[i] = inStreamBLCodes.read();
         bitlentree_blen[i] = inStreamBLBlen.read();
     }
@@ -203,7 +293,7 @@ void huffmanEncoder(hls::stream<encodedV_dt>& inStream,
     uint16_t dst_max_code = inStreamMaxCode.read();
     uint16_t bl_max_code = inStreamMaxCode.read();
 
-    uint8_t bitlen_vals[BL_CODES] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
+    uint8_t bitlen_vals[c_bl_codes] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
 
     // This holds output stream data
     uintOutV_t tmpOut;
@@ -403,7 +493,7 @@ send_dtree:
         }
     } // send_dtree for-loop ends here
 
-    uint8_t next_state = WRITE_TOKEN;
+    enum huffmanEncoderState next_state = WRITE_TOKEN;
     uint8_t tCh = 0;
     uint8_t tLen = 0;
     uint16_t tOffset = 0;
@@ -503,4 +593,4 @@ huffman_loop:
 } // Dynamic Huffman Funciton Ends here
 }
 }
-#endif
+#endif // _XFCOMPRESSION_HUFFMAN_ENCODER_HPP_

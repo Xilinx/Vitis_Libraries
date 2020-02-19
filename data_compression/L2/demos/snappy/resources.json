@@ -1,5 +1,5 @@
 {
-    "sdx" : "2019.2",
+    "vitis" : "2019.2",
     "device_name" : "xilinx_u200_xdma_201830_2",    
     "FMax" : [{
             "compress" : "269 MHz",

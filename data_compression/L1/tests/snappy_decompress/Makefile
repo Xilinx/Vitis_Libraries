@@ -170,7 +170,7 @@ check_part:
 	@echo "XPART is directly set to $(XPART)"
 endif # XPART
 
-.PHONY: run setup clean
+.PHONY: run setup runhls clean
 
 CSIM ?= 0
 CSYNTH ?= 0
@@ -200,6 +200,8 @@ ifeq (1,$(COSIM))
 override CSYNTH := 1
 endif
 
+run: setup runhls
+
 setup: | check_part
 	@rm -f ./settings.tcl
 	@if [ -n "$$CLKP" ]; then echo 'set CLKP $(CLKP)' >> ./settings.tcl ; fi
@@ -216,19 +218,8 @@ setup: | check_part
 	@cat ./settings.tcl
 	@echo "----"
 
-DECOMPRESS_OUT_DIR:=./build_decompress_ip
-
-decompress_srcs+=../../include/hw/snappy_decompress_core.hpp
-
-decompress_script=./run_decompress_hls.tcl 
-
-decompress_ip_out=$(DECOMPRESS_OUT_DIR)/snappy_decompress_test/snappy_decompress_stream/impl/ip/component.xml
-
-run: setup decompress
-decompress:$(decompress_ip_out)
-
-$(decompress_ip_out):$(decompress_srcs)	
-	vivado_hls $(decompress_script)
+runhls: setup | check_vivado
+	vivado_hls -f run_hls.tcl;
 
 clean:
 	rm -rf *.prj *_hls.log settings.tcl
