@@ -202,6 +202,16 @@ int main(int argc, const char* argv[]) {
     mext_out[0] = {XCL_BANK0, output[0], 0};
     mext_out[1] = {XCL_BANK1, output[1], 0};
 #else
+#if KN < 3
+    mext_in0[0] = {XCL_MEM_DDR_BANK0, inputParam0_alloc, 0};
+    mext_in0[1] = {XCL_MEM_DDR_BANK2, inputParam0_alloc, 0};
+
+    mext_in1[0] = {XCL_MEM_DDR_BANK0, inputParam1_alloc, 0};
+    mext_in1[1] = {XCL_MEM_DDR_BANK2, inputParam1_alloc, 0};
+
+    mext_out[0] = {XCL_MEM_DDR_BANK0, output[0], 0};
+    mext_out[1] = {XCL_MEM_DDR_BANK2, output[1], 0};
+#else
     mext_in0[0] = {XCL_MEM_DDR_BANK0, inputParam0_alloc, 0};
     mext_in0[1] = {XCL_MEM_DDR_BANK1, inputParam0_alloc, 0};
     mext_in0[2] = {XCL_MEM_DDR_BANK2, inputParam0_alloc, 0};
@@ -213,7 +223,7 @@ int main(int argc, const char* argv[]) {
     mext_out[0] = {XCL_MEM_DDR_BANK0, output[0], 0};
     mext_out[1] = {XCL_MEM_DDR_BANK1, output[1], 0};
     mext_out[2] = {XCL_MEM_DDR_BANK2, output[2], 0};
-#if KN == 4
+
     mext_in0[3] = {XCL_MEM_DDR_BANK3, inputParam0_alloc, 0};
     mext_in1[3] = {XCL_MEM_DDR_BANK3, inputParam1_alloc, 0};
     mext_out[3] = {XCL_MEM_DDR_BANK3, output[3], 0};

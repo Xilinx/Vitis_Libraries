@@ -63,8 +63,8 @@ The basic algorithm is composed of two parts. First part is an iterative formula
    :width: 80%
    :align: center
 
-Where :math:`X_{k + n}` denotes the :math:`k`th vector it produced, given :math:`X_0`, :math:`X_1`,..., :math:`X_{n - 1}` as initial vectors.
-:math:`X_{k}^u` means the upper :math:`w - r` bits of :math:`X_{k}`, :math:`X_{k + 1}^u` means the lower :math:`r` bits of :math:`X_{k + 1}`.
+Where :math:`X_{k + n}` denotes the :math:`k` th vector it produced, given :math:`X_0`, :math:`X_1`,..., :math:`X_{n - 1}` as initial vectors.
+:math:`X_{k}^u` means the upper :math:`w - r` bits of :math:`X_{k}`, :math:`X_{k + 1}^l` means the lower :math:`r` bits of :math:`X_{k + 1}`.
 :math:`(X_{k}^u|X_{k+1}^l)` is just combination of upper :math:`w - r` bits of :math:`X_{k}` and lower :math:`r` bits of :math:`X_{k + 1}`.
 :math:`\bigoplus` is bitwise addition. The multiplication of :math:`A` could be done by bits operations:
 

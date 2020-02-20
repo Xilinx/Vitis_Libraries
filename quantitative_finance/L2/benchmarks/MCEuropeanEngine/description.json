@@ -1,0 +1,99 @@
+{
+    "name": "jks.L2.MCEuropeanEngine", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/kernel_mc.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "test.exe", 
+        "compiler": {
+            "sources": [
+                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/src/test.cpp", 
+                "REPO_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/src", 
+                "REPO_DIR/ext/xcl2", 
+                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
+            ]
+        }, 
+        "linker": {
+            "includepath": [
+                "REPO_DIR/L1/include", 
+                "REPO_DIR/L2/include", 
+                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel/kernel_mc_0.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0", 
+                    "name": "kernel_mc_0"
+                }, 
+                {
+                    "location": "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel/kernel_mc_1.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D DPRAGMA -D KN_1 -D KERNEL_NMAE=kernel_mc_1", 
+                    "name": "kernel_mc_1"
+                }, 
+                {
+                    "location": "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel/kernel_mc_2.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D DPRAGMA -D KN_2 -D KERNEL_NMAE=kernel_mc_2", 
+                    "name": "kernel_mc_2"
+                }, 
+                {
+                    "location": "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel/kernel_mc_3.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D DPRAGMA -D KN_3 -D KERNEL_NMAE=kernel_mc_3", 
+                    "name": "kernel_mc_3"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "kernel_mc"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

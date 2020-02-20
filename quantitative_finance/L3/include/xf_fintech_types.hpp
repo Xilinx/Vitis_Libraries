@@ -33,6 +33,12 @@ typedef enum {
 
 } OptionType;
 
+/*
+ * Macro conversion
+ */
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 } // end namespace fintech
 } // end namespace xf
 

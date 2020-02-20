@@ -112,7 +112,8 @@ int HestonFDTestCase::Run(string testcase, string testscheme, std::vector<double
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    deviceList = DeviceManager::getDeviceList();
+    // device based on DSA
+    deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
 
     if (deviceList.size() == 0) {
         printf("No matching devices found\n");

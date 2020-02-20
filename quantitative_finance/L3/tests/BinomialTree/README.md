@@ -1,37 +1,42 @@
 
-# Binomial Tree Example
+## Binomial Tree Example
 
-This example show how to utilize the BinomialTree Model
-
-# Setup Environment
-
-source /opt/xilinx/xrt/setup.csh
-
-source /*path to xf_fintech*/L3/src/env.csh
-
-# Build Xilinx Fintech Library
-
-cd  /*path to xf_fintech*/L3/src
-
-**make all**
-
-# Build Instuctions
-
-To build the command line executable (binomial tree example) from this directory
-
-**make all**
-
-> Note this requires the xilinx fintech library to have already been built
+This example shows how to utilize the BinomialTree Model Engine
 
 
-# Run Instuctions
+### Step 1 :
+Setup the build environment using the Vitis and XRT scripts:
 
-Copy the prebuilt kernel files from /*path to xf_fintech*/L2/tests/BinomialTreeEngine/ to this directory
+    source <install path>/Vitis/2019.2/settings64.sh
 
-BinomialTree_hw_u250_float_pe8.xclbin
+    source /opt/xilinx/xrt/setup.sh
 
 
-To run the command line exe and generate the NPV
+### Step 2 :
+Build the L3 Library
 
-**make run**
+    cd L3/src
+
+    source env.sh or source env.csh
+
+    make
+
+
+### Step 3 :
+Build the matching BinomialTree Kernel
+
+    cd L2/tests/BinomialTreeEngine
+
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+
+### Step 4 :
+Build host code & run exeutable
+
+    cd L3/tests/BinomialTree
+
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to step 3 to build*
 

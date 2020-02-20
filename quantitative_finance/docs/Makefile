@@ -45,14 +45,7 @@ install: .stamp/sphinx
 	mkdir -p .stamp
 	touch .stamp/doxygen
 
-
-ifneq (,$(wildcard $(dir $(shell which doxyrest))/../doxyrest_frame/.))
-# doxyrest built from sources
 DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
-else ifneq (,$(wildcard $(dir $(shell which doxyrest))/../share/doxyrest/frame/.))
-# doxyrest installed from binary distribution
-DOXYREST_FRAME = $(dir $(shell which doxyrest))/../share/doxyrest/frame
-endif
 
 .stamp/doxyrest: .stamp/doxygen
 	rm -rf rst_L1

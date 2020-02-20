@@ -242,10 +242,11 @@ class InflationCapFloorEngine {
                       hls::stream<DT>& rate_stream,
                       hls::stream<DT>& v_stream,
                       hls::stream<DT>& disc_stream,
-                      // stream out
-                      hls::stream<DT>& stream_price) {
+                      // out
+                      DT& price) {
         int option = type;
         DT strike = cfRate[type];
+        price = 0.0;
     loop_black:
         for (int i = 0; i < tLen; i++) {
 #pragma HLS pipeline ii = 50 // reduce resource and total latency no increase
@@ -280,14 +281,15 @@ class InflationCapFloorEngine {
             cout << "blackFormula i = " << i << setprecision(16) << ", forward= " << forward << ", stdDev=" << stdDev
                  << ", discount=" << discount << ", result=" << result << endl;
 #endif
-            stream_price.write(result);
+            // stream_price.write(result);
+            price += result;
         }
         // return result;
     }
 
     void streamWrapper(int& tLen,
                        // stream out
-                       hls::stream<DT>& price_stream) {
+                       DT& price) {
 #pragma HLS dataflow
         hls::stream<DT> rate_stream("rate_stream");
         hls::stream<DT> v_stream("v_stream");
@@ -295,15 +297,13 @@ class InflationCapFloorEngine {
 #pragma HLS stream variable = rate_stream depth = LEN
 #pragma HLS stream variable = v_stream depth = LEN
 #pragma HLS stream variable = disc_stream depth = LEN
-#pragma HLS stream variable = price_stream depth = LEN
 #pragma HLS resource variable = rate_stream core = FIFO_LUTRAM
 #pragma HLS resource variable = v_stream core = FIFO_LUTRAM
 #pragma HLS resource variable = disc_stream core = FIFO_LUTRAM
-#pragma HLS resource variable = price_stream core = FIFO_LUTRAM
         discountFactor(tLen, disc_stream);
         totalVariance(tLen, v_stream);
         yoyRateImpl(tLen, rate_stream);
-        blackFormula(tLen, rate_stream, v_stream, disc_stream, price_stream);
+        blackFormula(tLen, rate_stream, v_stream, disc_stream, price);
     }
 
    public:
@@ -359,15 +359,9 @@ class InflationCapFloorEngine {
      */
     DT calcuNPV(int len) {
         DT value = 0.0;
-        hls::stream<DT> price_stream("price_stream");
-        streamWrapper(len, price_stream);
-    loop_calcu:
-        for (int i = 0; i < len; i++) {
-#pragma HLS loop_tripcount max = 10 min = 10
-#pragma HLS pipeline
-            value += price_stream.read();
-        }
-        return value;
+        DT price;
+        streamWrapper(len, price);
+        return price;
     }
 };
 

@@ -44,19 +44,6 @@ m76::~m76() {
     }
 }
 
-std::string m76::getXCLBINName(Device* device) {
-    std::string xclbinName;
-    std::string deviceTypeString;
-    std::string dataTypeString;
-
-    deviceTypeString = device->getDeviceTypeString();
-    dataTypeString = XSTR(TEST_DT);
-
-    xclbinName = "m76_hw_" + deviceTypeString + "_" + dataTypeString + ".xclbin";
-
-    return xclbinName;
-}
-
 int m76::createOCLObjects(Device* device) {
     int retval = XLNX_OK;
     cl_int cl_retval = CL_SUCCESS;
@@ -75,7 +62,7 @@ int m76::createOCLObjects(Device* device) {
     }
 
     if (cl_retval == CL_SUCCESS) {
-        xclbinName = getXCLBINName(device);
+        xclbinName = "m76.xclbin";
 
         start = std::chrono::high_resolution_clock::now();
         m_binaries.clear();

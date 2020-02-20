@@ -40,9 +40,8 @@ int main() {
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    // Get a list of U250s available on the system (just because our current
-    // bitstreams are built for U250s)
-    deviceList = DeviceManager::getDeviceList("u250");
+    // device based on DSA
+    deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
 
     if (deviceList.size() == 0) {
         printf("[XLNX] No matching devices found\n");
