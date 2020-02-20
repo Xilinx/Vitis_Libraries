@@ -41,9 +41,9 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
     // LZ4 Compression Binary Name
     std::string binaryFileName;
     binaryFileName = compress_bin;
-    xlz.m_bin_flow = 1;
+
     // Create xfLz4 object
-    xlz.init(binaryFileName);
+    xlz.init(binaryFileName, 1, block_size);
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -53,7 +53,6 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
     uint64_t input_size = getFileSize(inFile);
     inFile.close();
 
-    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     double len = input_size;
     int order = 0;
     while (len >= 1000) {
@@ -66,24 +65,19 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
     lz_compress_out = lz_compress_out + ".lz4";
 
     bool file_list_flag = false;
-
-    // Update class membery with block_size
-    xlz.m_block_size_in_kb = block_size;
-
-    // 0 means Xilinx flow
-    xlz.m_switch_flow = 0;
+    uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size, file_list_flag, 0);
 
 #ifdef EVENT_PROFILE
     auto total_start = std::chrono::high_resolution_clock::now();
 #endif
-    // Call LZ4 compression
-    uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size, file_list_flag);
+// Call LZ4 compression
 #ifdef EVENT_PROFILE
     auto total_end = std::chrono::high_resolution_clock::now();
     auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
 #endif
 
 #ifdef VERBOSE
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     std::cout.precision(3);
     std::cout << std::setprecision(2) << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
               << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
@@ -142,8 +136,7 @@ void xilCompressDecompressList(std::string& file_list,
 
     if (c_flow == 0) {
         std::cout << "\n";
-        xlz.m_bin_flow = 1;
-        xlz.init(binaryFileName);
+        xlz.init(binaryFileName, 1, block_size);
     }
     std::cout << "\n";
 
@@ -186,11 +179,8 @@ void xilCompressDecompressList(std::string& file_list,
         std::string lz_compress_out = line;
         lz_compress_out = lz_compress_out + ext1;
 
-        xlz.m_block_size_in_kb = block_size;
-        xlz.m_switch_flow = c_flow;
-
         // Call LZ4 compression
-        uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size, file_list_flag);
+        uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size, file_list_flag, c_flow);
         if (c_flow == 0) {
             std::cout << "\t\t" << (double)input_size / enbytes << "\t\t" << std::fixed << std::setprecision(3)
                       << (double)input_size / 1000000 << "\t\t\t" << lz_compress_in << std::endl;
@@ -213,10 +203,9 @@ void xilCompressDecompressList(std::string& file_list,
     if (d_flow == 0) {
         // Create xfLz4 object
         std::cout << "\n";
-        xlz.m_bin_flow = 0;
-        xlz.init(binaryFileName_decompress);
+        xlz.init(binaryFileName_decompress, 0, block_size);
         if (c_flow == 1) {
-            xlz.init(binaryFileName);
+            xlz.init(binaryFileName, 1, block_size);
         }
     }
 
@@ -262,8 +251,7 @@ void xilCompressDecompressList(std::string& file_list,
         lz_decompress_out = lz_decompress_out + ".orig";
 
         // Call LZ4 decompression
-        xlz.m_switch_flow = d_flow;
-        xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size, file_list_flag);
+        xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size, file_list_flag, d_flow);
 
         if (d_flow == 0) {
             std::cout << std::fixed << std::setprecision(3) << "\t\t" << (double)input_size / 1000000 << "\t\t"
@@ -419,15 +407,14 @@ void xilBatchVerify(
     }
 }
 
-void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) {
+void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::string& decompress_bin) {
     // Create xfLz4 object
     xfLz4 xlz;
 
     // LZ4 Decompression Binary Name
     std::string binaryFileName;
     binaryFileName = decompress_bin;
-    xlz.m_bin_flow = 0;
-    xlz.init(binaryFileName);
+    xlz.init(binaryFileName, 0, block_size);
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -438,7 +425,6 @@ void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) 
     uint64_t input_size = getFileSize(inFile);
     inFile.close();
 
-    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     double len = input_size;
     int order = 0;
     while (len >= 1000) {
@@ -450,14 +436,13 @@ void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) 
     string lz_decompress_out = decompress_mod;
     lz_decompress_out = lz_decompress_out + ".orig";
 
-    xlz.m_switch_flow = 0;
-
     bool file_list_flag = false;
 
     // Call LZ4 decompression
-    xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size, file_list_flag);
+    xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size, file_list_flag, 0);
 
 #ifdef VERBOSE
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     std::cout << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
     std::cout << "\n";
@@ -478,8 +463,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     // Create xfLz4 object
     xfLz4 xlz;
 
-    xlz.m_bin_flow = 1;
-    xlz.init(binaryFileName);
+    xlz.init(binaryFileName, 1, block_size);
 
     std::cout << "\n";
 
@@ -512,11 +496,8 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     std::string lz_compress_out = compress_decompress_mod;
     lz_compress_out = lz_compress_out + ".lz4";
 
-    xlz.m_block_size_in_kb = block_size;
-    xlz.m_switch_flow = 0;
-
     // Call LZ4 compression
-    uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size, file_list_flag);
+    uint64_t enbytes = xlz.compressFile(lz_compress_in, lz_compress_out, input_size, file_list_flag, 0);
     std::cout << std::setprecision(2) << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
               << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
@@ -529,8 +510,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     // Create xfLz4 object
     xfLz4 d_xlz;
 
-    d_xlz.m_bin_flow = 0;
-    d_xlz.init(binaryFileName);
+    d_xlz.init(binaryFileName, 0, block_size);
 
     std::cout << "\n";
     std::cout << "--------------------------------------------------------------" << std::endl;
@@ -556,8 +536,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     inFile_dec.close();
 
     // Call LZ4 decompression
-    d_xlz.m_switch_flow = 0;
-    d_xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size1, file_list_flag);
+    d_xlz.decompressFile(lz_decompress_in, lz_decompress_out, input_size1, file_list_flag, 0);
 
     std::cout << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
@@ -635,7 +614,7 @@ int main(int argc, char* argv[]) {
     if (!compress_mod.empty()) xilCompressTop(compress_mod, bSize, compress_bin);
 
     // "-d" Decompress Mode
-    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, decompress_bin);
+    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, bSize, decompress_bin);
 
     // "-v" Compress Decompress Mode
     if (!compress_decompress_mod.empty())

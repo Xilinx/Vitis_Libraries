@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_ZLIB_CONFIG_H_
-#define _XFCOMPRESSION_ZLIB_CONFIG_H_
+#ifndef _XFCOMPRESSION_ZLIB_CONFIG_HPP_
+#define _XFCOMPRESSION_ZLIB_CONFIG_HPP_
 
 /**
  * @file zlib_config.h
@@ -24,12 +24,10 @@
  * This file is part of Vitis Data Compression Library.
  */
 
-//#define MAX_LIT_COUNT 4096
-
 const int gz_max_literal_count = 4096;
 
 // Dynamic Huffman Related Content
-
+#define MAX_BITS 15
 // Literals
 #define LITERALS 256
 
@@ -57,13 +55,4 @@ const int gz_max_literal_count = 4096;
 
 #define REUSE_ZERO_BLEN_7 18
 
-// LTREE, DTREE and BLTREE sizes
-#define LTREE_SIZE 1024
-#define DTREE_SIZE 64
-#define BLTREE_SIZE 64
-#define EXTRA_LCODES 32
-#define EXTRA_DCODES 32
-#define EXTRA_BLCODES 32
-#define MAXCODE_SIZE 16
-
-#endif // _XFCOMPRESSION_ZLIB_CONFIG_H_
+#endif // _XFCOMPRESSION_ZLIB_CONFIG_HPP_

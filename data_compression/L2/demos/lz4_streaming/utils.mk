@@ -26,18 +26,18 @@ DEBUG := no
 #'estimate' for estimate report generation
 #'system' for system report generation
 ifneq ($(REPORT), no)
-XOCC_FLAGS += --report estimate
-XOCC_FLAGS += --report system
+VXX_FLAGS += --report estimate
+VXX_FLAGS += --report system
 endif
 
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
-XOCC_FLAGS += --profile_kernel data:all:all:all
+VXX_FLAGS += --profile_kernel data:all:all:all
 endif
 
 #Generates debug summary report
 ifeq ($(DEBUG), yes)
-XOCC_FLAGS += --dk protocol:all:all:all
+VXX_FLAGS += --dk protocol:all:all:all
 endif
 
 #Checks for XILINX_VITIS

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _XFP2PDECOMPRESSION_XIL_LZ4_HPP_
-#define _XFP2PDECOMPRESSION_XIL_LZ4_HPP_
+#ifndef _XFCOMPRESSION_LZ4_P2P_DEC_HPP_
+#define _XFCOMPRESSION_LZ4_P2P_DEC_HPP_
 
 #include <iomanip>
 #include "xcl2.hpp"
@@ -47,7 +47,8 @@ class xfLz4 {
                                            std::vector<int>& fd_p2p_vec,
                                            std::vector<char*>& outVec,
                                            std::vector<uint64_t>& orgSizeVec,
-                                           std::vector<uint64_t>& inSizeVec4k);
+                                           std::vector<uint64_t>& inSizeVec4k,
+                                           bool enable_p2p);
     ~xfLz4();
     static uint64_t get_file_size(std::ifstream& file) {
         file.seekg(0, file.end);
@@ -67,4 +68,4 @@ class xfLz4 {
     std::vector<std::string> decompress_kernel_names = {"xilLz4P2PDecompress"};
 };
 
-#endif
+#endif // _XFCOMPRESSION_LZ4_P2P_DEC_HPP_

@@ -177,21 +177,28 @@ VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
 			--report_dir $(CUR_DIR)/reports/_x.$(TARGET)
 
 # Linking flags
-VPP_LINK_FLAGS = --optimize 2 --jobs 8 \
-				  --config $(CUR_DIR)/opts.ini
+VPP_LINK_FLAGS = --optimize 2 --jobs 8 --config $(CUR_DIR)/opts.ini
 
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				 --report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
 
-XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_decompress.xclbin
+XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/decompress.xclbin
 
-XO_FILES_D = $(TEMP_DIR)/xf_zlib_decompress.xo
+XO_FILES_D = $(TEMP_DIR)/xf_zlib_decompress.xo \
+			 $(TEMP_DIR)/xf_zlib_datawriter.xo \
+			 $(TEMP_DIR)/xf_zlib_datareader.xo
 
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_mm.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_stream.cpp
+DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_rd.cpp
+DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_wr.cpp
 
-DECOMPRESS_KERNEL_NAME = xilDecompressZlib
+DECOMPRESS_KERNEL_NAME = xilDecompressStream
+DATAREADER_KERNEL_NAME = xilZlibDmReader
+DATAWRITER_KERNEL_NAME = xilZlibDmWriter
 
 KERNELS += $(DECOMPRESS_KERNEL_NAME)
+KERNELS += $(DATAREADER_KERNEL_NAME)
+KERNELS += $(DATAWRITER_KERNEL_NAME)
 
 # ------------------------------------------------------------
 #                      kernel rules
@@ -203,11 +210,21 @@ $(TEMP_DIR)/xf_zlib_decompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMPRESS_KERNEL_NAME) \
 	    -I'$(<D)' -o'$@' '$<'
 
+$(TEMP_DIR)/xf_zlib_datareader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
+	@echo -e "----\nCompiling compression kernel $*..."
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAREADER_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
+
+$(TEMP_DIR)/xf_zlib_datawriter.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
+	@echo -e "----\nCompiling compression kernel $*..."
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAWRITER_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
+
 
 # xclbin Binary creation
 $(XCLBIN_FILE): $(XO_FILES_D)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l -o'$@' $(+)
+	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l --profile_kernel data:all:all:all -o'$@' $(+)
 
 
 # ------------------------------------------------------------
@@ -276,11 +293,11 @@ cleanh:
 	rm -rf $(EXE_FILE)
 	-$(RMDIR) $(EXE_FILE)
 	-$(RMDIR) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	-$(RMDIR) src/*.ll _vxx_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
-	-$(RMDIR) $(TEMP_DIR) $(CUR_DIR)/reports *.csv $(CUR_DIR)/*.raw
+	-$(RMDIR) $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary *.txt.zlib.* $(CUR_DIR)/*.raw
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
 
 clean: cleanh
@@ -292,7 +309,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -dx $(XCLBIN_FILE) -d $(XFLIB_DIR)/common/data/sample.txt.zlib
+HOST_ARGS = -dx $(XCLBIN_FILE) -d ./sample.txt.zlib
 
 ifeq ($(TARGET),sw_emu)
   RUN_ENV = export XCL_EMULATION_MODE=sw_emu

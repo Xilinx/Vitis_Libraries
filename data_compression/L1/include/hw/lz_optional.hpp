@@ -31,28 +31,103 @@
 #include <stdint.h>
 #include <stdio.h>
 
+// Dynamic Huffman Frequency counts
+// Based on GZIP/ZLIB spec
+#include "zlib_tables.hpp"
+
+#define d_code(dist, dist_code) ((dist) < 256 ? dist_code[dist] : dist_code[256 + ((dist) >> 7)])
+
 namespace xf {
 namespace compression {
 
 typedef ap_uint<32> compressd_dt;
 
+static void lz77Divide(hls::stream<compressd_dt>& inStream,
+                       hls::stream<ap_uint<32> >& outStream,
+                       hls::stream<bool>& endOfStream,
+                       hls::stream<uint32_t>& outStreamTree,
+                       hls::stream<uint32_t>& compressedSize,
+                       uint32_t input_size) {
+    if (input_size == 0) {
+        compressedSize << 0;
+        outStream << 0;
+        endOfStream << 1;
+        outStreamTree << 9999;
+        return;
+    }
+
+    const uint16_t c_ltree_size = 1024;
+    const uint16_t c_dtree_size = 64;
+
+    uint32_t lcl_dyn_ltree[c_ltree_size];
+    uint32_t lcl_dyn_dtree[c_dtree_size];
+
+ltree_init:
+    for (uint32_t i = 0; i < c_ltree_size; i++) lcl_dyn_ltree[i] = 0;
+
+dtree_init:
+    for (uint32_t i = 0; i < c_dtree_size; i++) lcl_dyn_dtree[i] = 0;
+
+    int length = 0;
+    int code = 0;
+    int n = 0;
+
+    uint32_t out_cntr = 0;
+    uint8_t match_len = 0;
+    uint32_t loc_idx = 0;
+
+    compressd_dt nextEncodedValue = inStream.read();
+    uint32_t cSizeCntr = 0;
+lz77_divide:
+    for (uint32_t i = 0; i < input_size; i++) {
+#pragma HLS LOOP_TRIPCOUNT min = 1048576 max = 1048576
+#pragma HLS PIPELINE II = 1
+#pragma HLS dependence variable = lcl_dyn_ltree inter false
+#pragma HLS dependence variable = lcl_dyn_dtree inter false
+        compressd_dt tmpEncodedValue = nextEncodedValue;
+        if (i < (input_size - 1)) nextEncodedValue = inStream.read();
+
+        uint8_t tCh = tmpEncodedValue.range(7, 0);
+        uint8_t tLen = tmpEncodedValue.range(15, 8);
+        uint16_t tOffset = tmpEncodedValue.range(31, 16);
+        uint32_t ltreeIdx, dtreeIdx;
+        if (tLen > 0) {
+            ltreeIdx = length_code[tLen - 3] + 256 + 1;
+            dtreeIdx = d_code(tOffset, dist_code);
+
+            i += (tLen - 1);
+            tmpEncodedValue.range(15, 8) = tLen - 3;
+        } else {
+            ltreeIdx = tCh;
+            dtreeIdx = 63;
+        }
+        lcl_dyn_ltree[ltreeIdx]++;
+        lcl_dyn_dtree[dtreeIdx]++;
+
+        outStream << tmpEncodedValue;
+        endOfStream << 0;
+        cSizeCntr++;
+    }
+
+    compressedSize << (cSizeCntr * 4);
+    outStream << 0;
+    endOfStream << 1;
+
+    for (uint32_t i = 0; i < c_ltree_size; i++) outStreamTree << lcl_dyn_ltree[i];
+
+    for (uint32_t j = 0; j < c_dtree_size; j++) outStreamTree << lcl_dyn_dtree[j];
+}
+
 /**
  * @brief Objective of this module is to pick character with
  * higher match length in the offset window range.
  *
- * @tparam MATCH_LEN length of matched segment
- * @tparam OFFSET_WINDOW output window
- *
- * @param inStream intput stream
+ * @param inStream input stream
  * @param outStream output stream
- * @param input_size intput stream size
- * @param left_bytes bytes left in block
+ * @param input_size input stream size
  */
 template <int MATCH_LEN, int OFFSET_WINDOW>
-void lzBestMatchFilter(hls::stream<compressd_dt>& inStream,
-                       hls::stream<compressd_dt>& outStream,
-                       uint32_t input_size,
-                       uint32_t left_bytes) {
+void lzBestMatchFilter(hls::stream<compressd_dt>& inStream, hls::stream<compressd_dt>& outStream, uint32_t input_size) {
     const int c_max_match_length = MATCH_LEN;
     if (input_size == 0) return;
 
@@ -103,21 +178,22 @@ lz_bestMatchFilter_left_over:
  * @brief This module helps in improving the compression ratio.
  * Finds a better match length by performing more character matches
  * with supported max match, while maintaining an offset window.
+ * Booster offset Window template argument (default value is 16K)
+ * internally consume BRAM memory to implement history window.
+ * Higher the booster value can give better compression ratio but
+ * will consume more BRAM resources.
  *
  * @tparam MAX_MATCH_LEN maximum length allowed for character match
  * @tparam BOOSTER_OFFSET_WINDOW offset window to store/match the character
  *
  * @param inStream input stream 32bit per read
  * @param outStream output stream 32bit per write
- * @param input_size intput size
+ * @param input_size input size
  * @param left_bytes last 64 left over bytes
  *
 */
-template <int MAX_MATCH_LEN, int BOOSTER_OFFSET_WINDOW>
-void lzBooster(hls::stream<compressd_dt>& inStream,
-               hls::stream<compressd_dt>& outStream,
-               uint32_t input_size,
-               uint32_t left_bytes) {
+template <int MAX_MATCH_LEN, int BOOSTER_OFFSET_WINDOW = 16 * 1024, int LEFT_BYTES = 64>
+void lzBooster(hls::stream<compressd_dt>& inStream, hls::stream<compressd_dt>& outStream, uint32_t input_size) {
     if (input_size == 0) return;
     uint8_t local_mem[BOOSTER_OFFSET_WINDOW];
     uint32_t match_loc = 0;
@@ -129,7 +205,7 @@ void lzBooster(hls::stream<compressd_dt>& inStream,
     bool boostFlag = false;
     uint16_t skip_len = 0;
 lz_booster:
-    for (uint32_t i = 0; i < (input_size - left_bytes); i++) {
+    for (uint32_t i = 0; i < (input_size - LEFT_BYTES); i++) {
 #pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = local_mem inter false
         compressd_dt inValue = inStream.read();
@@ -173,7 +249,7 @@ lz_booster:
     }
     outStream << outValue;
 lz_booster_left_bytes:
-    for (uint32_t i = 0; i < left_bytes; i++) {
+    for (uint32_t i = 0; i < LEFT_BYTES; i++) {
         outStream << inStream.read();
     }
 }
@@ -186,19 +262,17 @@ lz_booster_left_bytes:
  * @tparam MATCH_LEN length of matched segment
  * @tparam OFFSET_WINDOW output window
  *
- * @param inStream intput stream
+ * @param inStream input stream
  * @param outStream output stream
- * @param input_size intput stream size
+ * @param input_size input stream size
  * @param left_bytes bytes left in block
  */
-static void lzFilter(hls::stream<compressd_dt>& inStream,
-                     hls::stream<compressd_dt>& outStream,
-                     uint32_t input_size,
-                     uint32_t left_bytes) {
+template <int LEFT_BYTES = 64>
+static void lzFilter(hls::stream<compressd_dt>& inStream, hls::stream<compressd_dt>& outStream, uint32_t input_size) {
     if (input_size == 0) return;
     uint32_t skip_len = 0;
 lz_filter:
-    for (uint32_t i = 0; i < input_size - left_bytes; i++) {
+    for (uint32_t i = 0; i < input_size - LEFT_BYTES; i++) {
 #pragma HLS PIPELINE II = 1
         compressd_dt inValue = inStream.read();
         uint8_t tLen = inValue.range(15, 8);
@@ -210,11 +284,11 @@ lz_filter:
         }
     }
 lz_filter_left_bytes:
-    for (uint32_t i = 0; i < left_bytes; i++) {
+    for (uint32_t i = 0; i < LEFT_BYTES; i++) {
         outStream << inStream.read();
     }
 }
 
 } // namespace compression
 } // namespace xf
-#endif
+#endif // _XFCOMPRESSION_LZ_OPTIONAL_HPP_

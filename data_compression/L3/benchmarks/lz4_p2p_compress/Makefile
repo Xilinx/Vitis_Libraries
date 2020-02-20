@@ -205,7 +205,7 @@ $(TEMP_DIR)/xf_packer.xo: $(PACKER_KERNEL_SRCS) $(HLS_SRC_DIR)
 # xclbin Binary creation
 $(XCLBIN_FILE): $(TEMP_DIR)/xf_compress.xo $(TEMP_DIR)/xf_packer.xo
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l \
+	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l --profile_kernel data:all:all:all \
 	--config $(CUR_DIR)/compress.ini \
 	-o'$@' $(+)
 
@@ -243,12 +243,12 @@ xxhash_SRCS = $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 cmdlineparser_SRCS = $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 logger_SRCS = $(XFLIB_DIR)//common/libs/logger/logger.cpp
 
-CXXFLAGS += -fmessage-length=0
+CXXFLAGS += -std=c++0x -fmessage-length=0
 		-DXDEVICE=$(XDEVICE) \
 	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread
 
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
-LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -std=c++0x -DVERBOSE
+LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 
 EXE_FILE = $(BUILD_DIR)/$(EXE_NAME)
 
@@ -297,11 +297,11 @@ cleanh:
 	rm -rf $(EXE_FILE)
 	-$(RMDIR) $(EXE_FILE)
 	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	-$(RMDIR) src/*.ll _vxx_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
-	rm -rf _x_temp* $(CUR_DIR)/reports $(CUR_DIR)/obj_*
+	rm -rf _x_temp* $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/obj_*
 	-$(RMDIR) $(XFLIB_DIR)/common/benchmark/cantrbry/*.xe2xd* $(XFLIB_DIR)/common/benchmark/silesia/*.xe2xd*
 
 clean: cleanh

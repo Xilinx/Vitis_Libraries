@@ -3,6 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. meta::
+   :keywords: Vitis, Library, Data Compression, Xilinx, L1 Modules, Data Compression HLS, ZLIB HLS, LZ4 HLS, Google Snappy HLS , HLS Streams, HLS Dataflow, HLS Pipeline, HLS Unroll, HLS Array Partition
+   :description: User Guide of L1 modules under Vitis Data Compression Library
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ==================
 Primitive Overview
 ==================

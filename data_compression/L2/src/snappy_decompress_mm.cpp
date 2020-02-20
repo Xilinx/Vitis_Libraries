@@ -15,7 +15,7 @@
  *
  */
 /**
- * @file xil_snappy_decompress_kernel.cpp
+ * @file snappy_decompress_mm.cpp
  * @brief Source for snappy decompression kernel.
  *
  * This file is part of Vitis Data Compression Library.
@@ -28,7 +28,7 @@
 
 #include "snappy_decompress_mm.hpp"
 
-typedef ap_uint<BIT> uintV_t;
+typedef ap_uint<8> uintV_t;
 const int c_gmemBurstSize = (2 * GMEM_BURST_SIZE);
 
 // namespace  hw_decompress {
@@ -52,11 +52,11 @@ void snappyCoreDec(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidt
 #pragma HLS RESOURCE variable = decompressed_stream core = FIFO_SRL
 
 #pragma HLS dataflow
-    xf::compression::streamDownsizer<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, instreamV, input_size);
+    xf::compression::details::streamDownsizer<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, instreamV, input_size);
     xf::compression::snappyDecompress(instreamV, decompressd_stream, input_size1);
-    xf::compression::lzDecompress<HISTORY_SIZE, READ_STATE, MATCH_STATE, LOW_OFFSET_STATE, LOW_OFFSET>(
-        decompressd_stream, decompressed_stream, output_size);
-    xf::compression::streamUpsizer<uint32_t, 8, GMEM_DWIDTH>(decompressed_stream, outStreamMemWidth, output_size1);
+    xf::compression::lzDecompress<HISTORY_SIZE>(decompressd_stream, decompressed_stream, output_size);
+    xf::compression::details::streamUpsizer<uint32_t, 8, GMEM_DWIDTH>(decompressed_stream, outStreamMemWidth,
+                                                                      output_size1);
 }
 
 void snappyDec(const xf::compression::uintMemWidth_t* in,
@@ -76,14 +76,15 @@ void snappyDec(const xf::compression::uintMemWidth_t* in,
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel
-    xf::compression::mm2sNb<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth, input_size);
+    xf::compression::details::mm2sNb<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth,
+                                                                                   input_size);
     for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
 #pragma HLS UNROLL
         snappyCoreDec(inStreamMemWidth[i], outStreamMemWidth[i], input_size1[i], output_size1[i]);
     }
     // Transfer data from kernel to global memory
-    xf::compression::s2mmNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(out, input_idx, outStreamMemWidth,
-                                                                                    output_size);
+    xf::compression::details::s2mmNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(
+        out, input_idx, outStreamMemWidth, output_size);
 }
 
 //}//end of namepsace
@@ -108,8 +109,6 @@ void xilSnappyDecompress(const xf::compression::uintMemWidth_t* in,
 #pragma HLS INTERFACE s_axilite port = no_blocks bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#pragma HLS data_pack variable = in
-#pragma HLS data_pack variable = out
     uint32_t max_block_size = block_size_in_kb * 1024;
     uint32_t compress_size[PARALLEL_BLOCK];
     uint32_t compress_size1[PARALLEL_BLOCK];

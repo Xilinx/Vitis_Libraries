@@ -14,29 +14,45 @@
  * limitations under the License.
  *
  */
+#ifndef _XFCOMPRESSION_ZLIB_STREAM_HPP_
+#define _XFCOMPRESSION_ZLIB_STREAM_HPP_
+
 #pragma once
 
 #include <iomanip>
 #include <iostream>
 #include <stdint.h>
+#include <stdlib.h>
 #include <vector>
 #include <math.h>
 #include <time.h>
+#include <unistd.h>
+
 #include <string>
 #include <fstream>
+#include <thread>
 #include "xcl2.hpp"
-#include "zlib_config.hpp"
 
 // This extension file is required for stream APIs
 #include <CL/cl_ext_xilinx.h>
 
 #define PARALLEL_ENGINES 8
 
-#define MAX_CCOMP_UNITS C_COMPUTE_UNIT
-#define MAX_DDCOMP_UNITS D_COMPUTE_UNIT
-
 // Default block size
 #define BLOCK_SIZE_IN_KB 1024
+
+// Input and output buffer size
+#ifndef INPUT_BUFFER_SIZE
+#define INPUT_BUFFER_SIZE (2 * 1024 * 1024)
+#endif
+
+#ifndef OUTPUT_BUFFER_SIZE
+#define OUTPUT_BUFFER_SIZE (32 * 1024 * 1024)
+#endif
+
+// buffer count for data in
+#define DIN_BUFFERCOUNT 8
+#define DOUT_BUFFERCOUNT 2 // mandatorily 2
 
 // Maximum host buffer used to operate
 // per kernel invocation
@@ -62,26 +78,35 @@ class xfZlibStream {
     uint32_t decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
     uint64_t get_event_duration_ns(const cl::Event& event);
 
-    xfZlibStream();
+    xfZlibStream(const std::string& binaryFile);
     ~xfZlibStream();
 
    private:
+    void _enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize);
+    void _enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize);
+
     cl::Device m_device;
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q_dec;
-    cl::CommandQueue* m_q_dm;
+    cl::CommandQueue* m_q_rd;
+    cl::CommandQueue* m_q_rdd;
+    cl::CommandQueue* m_q_wr;
+    cl::CommandQueue* m_q_wrd;
 
     // Kernel declaration
     cl::Kernel* decompress_kernel;
-    cl::Kernel* data_mover_kernel;
+    cl::Kernel* data_writer_kernel;
+    cl::Kernel* data_reader_kernel;
 
     // Decompression Related
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_in;
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_gzipout;
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressSize;
+    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_in[DIN_BUFFERCOUNT];
+    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_zlibout[DOUT_BUFFERCOUNT];
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressSize[DOUT_BUFFERCOUNT];
 
     // Kernel names
     std::string decompress_kernel_name = "xilDecompressStream";
-    std::string data_mover_kernel_name = "xilZlibDm";
+    std::string data_writer_kernel_name = "xilZlibDmWriter";
+    std::string data_reader_kernel_name = "xilZlibDmReader";
 };
+#endif // _XFCOMPRESSION_ZLIB_STREAM_HPP_

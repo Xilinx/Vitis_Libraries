@@ -15,14 +15,14 @@
  *
  */
 /**
- * @file xil_snappy.hpp
+ * @file snappy.hpp
  * @brief Header for snappy host functionality
  *
  * This file is part of Vitis Data Compression Library host code for snappy compression.
  */
 
-#ifndef _XFCOMPRESSION_XIL_SNAPPY_HPP_
-#define _XFCOMPRESSION_XIL_SNAPPY_HPP_
+#ifndef _XFCOMPRESSION_SNAPPY_HPP_
+#define _XFCOMPRESSION_SNAPPY_HPP_
 
 #include "defns.hpp"
 
@@ -52,6 +52,9 @@
  */
 #define BLOCK_SIZE_IN_KB 64
 
+// snappy default max cr
+#define MAX_CR 10
+
 /**
  * Maximum number of blocks based on host buffer size
  */
@@ -64,13 +67,6 @@
  * @param outFile_name output file name
  */
 int validate(std::string& inFile_name, std::string& outFile_name);
-
-static uint64_t getFileSize(std::ifstream& file) {
-    file.seekg(0, file.end);
-    uint64_t file_size = file.tellg();
-    file.seekg(0, file.beg);
-    return file_size;
-}
 
 /**
  *  xilSnappy class. Class containing methods for snappy
@@ -94,7 +90,7 @@ class xilSnappy {
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
      * @brief Decompress the input file.
@@ -103,7 +99,7 @@ class xilSnappy {
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
      * @brief Decompress sequential.
@@ -122,25 +118,10 @@ class xilSnappy {
     uint64_t getEventDurationNs(const cl::Event& event);
 
     /**
-     * Binary flow compress/decompress
-     */
-    bool m_bin_flow;
-
-    /**
-     * Block Size
-     */
-    uint32_t m_block_size_in_kb;
-
-    /**
-     * Switch between FPGA/Standard flows
-     */
-    bool m_switch_flow;
-
-    /**
      * @brief Class constructor
      *
      */
-    xilSnappy(const std::string& binaryFileName, uint8_t flow);
+    xilSnappy(const std::string& binaryFileName, uint8_t flow, uint32_t m_block_kb, uint8_t max_cr = MAX_CR);
 
     /**
      * @brief Class destructor.
@@ -148,6 +129,23 @@ class xilSnappy {
     ~xilSnappy();
 
    private:
+    // Max CR
+    uint8_t m_max_cr;
+
+    /**
+      * Binary flow compress/decompress
+      */
+    uint8_t m_BinFlow;
+
+    /**
+     * Block Size
+     */
+    uint32_t m_BlockSizeInKb;
+    /**
+     * Switch between FPGA/Standard flows
+     */
+    bool m_SwitchFlow;
+
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q;
@@ -175,4 +173,4 @@ class xilSnappy {
     std::vector<std::string> decompress_kernel_names = {"xilSnappyDecompress"};
 };
 
-#endif // _XFCOMPRESSION_XIL_SNAPPY_HPP_
+#endif // _XFCOMPRESSION_SNAPPY_HPP_

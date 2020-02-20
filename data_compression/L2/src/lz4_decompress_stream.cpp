@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file lz4_decompress_stream.cpp
+ * @brief Source for LZ4 decompression Streaming kernel.
+ *
+ * This file is part of Vitis Compression Library.
+ */
+
 #include "lz4_decompress_stream.hpp"
 
 typedef ap_uint<8> streamDt;
@@ -39,12 +46,11 @@ void xilLz4DecompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
 
 #pragma HLS dataflow
 
-    xf::compression::kStreamRead<8>(inaxistream, inStream, inputSize);
+    xf::compression::details::kStreamRead<8>(inaxistream, inStream, inputSize);
 
     xf::compression::lz4Decompress(inStream, decompressedStream, inputSize);
-    xf::compression::lzDecompress<LZ_HISTORY_SIZE, LZ_READ_STATE, LZ_MATCH_STATE, LZ_LOW_OFFSET_STATE, LZ_LOW_OFFSET>(
-        decompressedStream, outStream, outputSize);
+    xf::compression::lzDecompress<HISTORY_SIZE>(decompressedStream, outStream, outputSize);
 
-    xf::compression::kStreamWriteFixedSize<8>(outaxistream, outStream, outputSize);
+    xf::compression::details::kStreamWriteFixedSize<8>(outaxistream, outStream, outputSize);
 }
 }

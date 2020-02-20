@@ -15,7 +15,7 @@
  *
  */
 /**
- * @file xil_lz4_compress_kernel.cpp
+ * @file lz4_compress_mm.cpp
  * @brief Source for LZ4 compression kernel.
  *
  * This file is part of Vitis Data Compression Library.
@@ -23,7 +23,6 @@
 
 #include "lz4_compress_mm.hpp"
 
-const int c_gmemBurstSize = (2 * GMEM_BURST_SIZE);
 const int c_sizeStreamDepth = 8;
 const int c_lz4MaxLiteralCount = MAX_LIT_COUNT;
 
@@ -36,44 +35,33 @@ void lz4Core(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
              uint32_t max_lit_limit[PARALLEL_BLOCK],
              uint32_t input_size,
              uint32_t core_idx) {
-    uint32_t left_bytes = 64;
-    hls::stream<ap_uint<BIT> > inStream("inStream");
+    hls::stream<ap_uint<8> > inStream("inStream");
     hls::stream<xf::compression::compressd_dt> compressdStream("compressdStream");
     hls::stream<xf::compression::compressd_dt> bestMatchStream("bestMatchStream");
     hls::stream<xf::compression::compressd_dt> boosterStream("boosterStream");
-    hls::stream<uint8_t> litOut("litOut");
-    hls::stream<xf::compression::lz4_compressd_dt> lenOffsetOut("lenOffsetOut");
     hls::stream<ap_uint<8> > lz4Out("lz4Out");
     hls::stream<bool> lz4Out_eos("lz4Out_eos");
 #pragma HLS STREAM variable = inStream depth = 8
 #pragma HLS STREAM variable = compressdStream depth = 8
 #pragma HLS STREAM variable = bestMatchStream depth = 8
 #pragma HLS STREAM variable = boosterStream depth = 8
-#pragma HLS STREAM variable = litOut depth = c_lz4MaxLiteralCount
-#pragma HLS STREAM variable = lenOffsetOut depth = c_gmemBurstSize
 #pragma HLS STREAM variable = lz4Out depth = 8
 #pragma HLS STREAM variable = lz4Out_eos depth = 8
 
 #pragma HLS RESOURCE variable = inStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = lenOffsetOut core = FIFO_SRL
 #pragma HLS RESOURCE variable = lz4Out core = FIFO_SRL
 #pragma HLS RESOURCE variable = lz4Out_eos core = FIFO_SRL
 
 #pragma HLS dataflow
-    xf::compression::streamDownsizer<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, inStream, input_size);
-    xf::compression::lzCompress<MATCH_LEN, MATCH_LEVEL, LZ_DICT_SIZE, BIT, MIN_OFFSET, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(
-        inStream, compressdStream, input_size, left_bytes);
-    xf::compression::lzBestMatchFilter<MATCH_LEN, OFFSET_WINDOW>(compressdStream, bestMatchStream, input_size,
-                                                                 left_bytes);
-    xf::compression::lzBooster<MAX_MATCH_LEN, BOOSTER_OFFSET_WINDOW>(bestMatchStream, boosterStream, input_size,
-                                                                     left_bytes);
-    xf::compression::lz4Divide<MAX_LIT_COUNT, PARALLEL_BLOCK>(boosterStream, litOut, lenOffsetOut, input_size,
-                                                              max_lit_limit, core_idx);
-    xf::compression::lz4Compress(litOut, lenOffsetOut, lz4Out, lz4Out_eos, compressedSize, input_size);
-    xf::compression::upsizerEos<uint16_t, BIT, GMEM_DWIDTH>(lz4Out, lz4Out_eos, outStreamMemWidth,
-                                                            outStreamMemWidthEos);
+    xf::compression::details::streamDownsizer<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, inStream, input_size);
+    xf::compression::lzCompress<MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(inStream, compressdStream, input_size);
+    xf::compression::lzBestMatchFilter<MATCH_LEN, OFFSET_WINDOW>(compressdStream, bestMatchStream, input_size);
+    xf::compression::lzBooster<MAX_MATCH_LEN>(bestMatchStream, boosterStream, input_size);
+    xf::compression::lz4Compress<MAX_LIT_COUNT, PARALLEL_BLOCK>(boosterStream, lz4Out, max_lit_limit, input_size,
+                                                                lz4Out_eos, compressedSize, core_idx);
+    xf::compression::details::upsizerEos<8, GMEM_DWIDTH>(lz4Out, lz4Out_eos, outStreamMemWidth, outStreamMemWidthEos);
 }
 
 /**
@@ -82,9 +70,9 @@ void lz4Core(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
  * @param in input stream width
  * @param out output stream width
  * @param input_idx output size
- * @param output_idx intput size
+ * @param output_idx input size
  * @param input_size input size
- * @param max_lit_limit intput size
+ * @param max_lit_limit input size
  */
 void lz4(const xf::compression::uintMemWidth_t* in,
          xf::compression::uintMemWidth_t* out,
@@ -105,10 +93,11 @@ void lz4(const xf::compression::uintMemWidth_t* in,
 #pragma HLS RESOURCE variable = outStreamMemWidth core = FIFO_SRL
 
     hls::stream<uint32_t> compressedSize[PARALLEL_BLOCK];
-    uint32_t left_bytes = 64;
 
 #pragma HLS dataflow
-    xf::compression::mm2sNb<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth, input_size);
+    xf::compression::details::mm2sNb<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth,
+                                                                                   input_size);
+
     for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
 #pragma HLS UNROLL
         // lz4Core is instantiated based on the PARALLEL_BLOCK
@@ -116,7 +105,7 @@ void lz4(const xf::compression::uintMemWidth_t* in,
                 input_size[i], i);
     }
 
-    xf::compression::s2mmEosNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(
+    xf::compression::details::s2mmEosNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(
         out, output_idx, outStreamMemWidth, outStreamMemWidthEos, compressedSize, output_size);
 }
 //} // namespace end
@@ -128,8 +117,8 @@ extern "C" {
  * @param in input stream width
  * @param out output stream width
  * @param compressd_size output size
- * @param in_block_size intput size
- * @param block_size_in_kb intput size
+ * @param in_block_size input size
+ * @param block_size_in_kb input size
  * @param input_size input size
  */
 void xilLz4Compress
@@ -151,9 +140,6 @@ void xilLz4Compress
 #pragma HLS INTERFACE s_axilite port = block_size_in_kb bundle = control
 #pragma HLS INTERFACE s_axilite port = input_size bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
-
-#pragma HLS data_pack variable = in
-#pragma HLS data_pack variable = out
 
     uint32_t block_idx = 0;
     uint32_t block_length = block_size_in_kb * 1024;

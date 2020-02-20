@@ -45,37 +45,44 @@ uint32_t get_file_size(std::ifstream& file) {
 }
 
 // Constructor
-xfZlibStream::xfZlibStream() {
-    h_dbuf_in.resize(PARALLEL_ENGINES * HOST_BUFFER_SIZE);
-    h_dbuf_gzipout.resize(PARALLEL_ENGINES * HOST_BUFFER_SIZE * 10);
-    h_dcompressSize.resize(MAX_NUMBER_BLOCKS);
+xfZlibStream::xfZlibStream(const std::string& binaryFile) {
+    // initialize the device
+    init(binaryFile);
+    // initialize the buffers
+    for (int j = 0; j < DIN_BUFFERCOUNT; ++j) h_dbuf_in[j].resize(INPUT_BUFFER_SIZE);
+
+    for (int j = 0; j < DOUT_BUFFERCOUNT; ++j) {
+        h_dbuf_zlibout[j].resize(OUTPUT_BUFFER_SIZE);
+        h_dcompressSize[j].resize(sizeof(uint32_t));
+    }
 }
 
 // Destructor
-xfZlibStream::~xfZlibStream() {}
+xfZlibStream::~xfZlibStream() {
+    release();
+}
 
 int xfZlibStream::init(const std::string& binaryFileName) {
-    // cl_int err;
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     m_device = devices[0];
 
     // Creating Context and Command Queue for selected Device
     m_context = new cl::Context(m_device);
-    m_q_dec =
-        new cl::CommandQueue(*m_context, m_device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE);
 
-    m_q_dm =
-        new cl::CommandQueue(*m_context, m_device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE);
+    m_q_dec = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_PROFILING_ENABLE);
+    m_q_rd = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_PROFILING_ENABLE);
+    m_q_rdd = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_PROFILING_ENABLE);
+    m_q_wr = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_PROFILING_ENABLE);
+    m_q_wrd = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_PROFILING_ENABLE);
+
     std::string device_name = m_device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // import_binary() command will find the OpenCL binary file created using the
-    // xocc compiler load into OpenCL Binary and return as Binaries
+    // v++ compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
-    // std::string binaryFile = xcl::find_binary_file(device_name,binaryFileName.c_str());
-    // cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     auto fileBuf = xcl::read_binary_file(binaryFileName);
     cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
 
@@ -83,7 +90,8 @@ int xfZlibStream::init(const std::string& binaryFileName) {
     m_program = new cl::Program(*m_context, devices, bins);
 
     // Create Decompress kernel
-    data_mover_kernel = new cl::Kernel(*m_program, data_mover_kernel_name.c_str());
+    data_writer_kernel = new cl::Kernel(*m_program, data_writer_kernel_name.c_str());
+    data_reader_kernel = new cl::Kernel(*m_program, data_reader_kernel_name.c_str());
     decompress_kernel = new cl::Kernel(*m_program, decompress_kernel_name.c_str());
 
     return 0;
@@ -91,18 +99,23 @@ int xfZlibStream::init(const std::string& binaryFileName) {
 
 int xfZlibStream::release() {
     delete (m_program);
+
     delete (m_q_dec);
+    delete (m_q_rd);
+    delete (m_q_rdd);
+    delete (m_q_wr);
+    delete (m_q_wrd);
+
     delete (m_context);
 
     delete (decompress_kernel);
-    delete (data_mover_kernel);
+    delete (data_writer_kernel);
+    delete (data_reader_kernel);
 
     return 0;
 }
 
 uint32_t xfZlibStream::decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
-    // printme("In decompress_file \n");
-    std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
     std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
     std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
 
@@ -118,74 +131,11 @@ uint32_t xfZlibStream::decompress_file(std::string& inFile_name, std::string& ou
     // Decompression crashes
     std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size * 10);
     uint32_t debytes = 0;
-#ifdef GZIP_FLOW
-    ////printme("In GZIP_flow");
-    char c = 0;
-    uint8_t d_cntr = 0;
 
-    // Magic header
-    inFile.get(c);
-    d_cntr++;
-    inFile.get(c);
-    d_cntr++;
-
-    // 1 Byte compress method
-    inFile.get(c);
-    d_cntr++;
-
-    // 1 Byte flags
-    inFile.get(c);
-    d_cntr++;
-
-    // 4bytes file modification
-    inFile.get(c);
-    d_cntr++;
-    inFile.get(c);
-    d_cntr++;
-    inFile.get(c);
-    d_cntr++;
-    inFile.get(c);
-    d_cntr++;
-
-    // 1 Byte extra flag
-    inFile.get(c);
-    d_cntr++;
-
-    // 1 Byte opcode
-    inFile.get(c);
-    d_cntr++;
-
-    // Read file name
-    do {
-        inFile.get(c);
-        d_cntr++;
-    } while (c != '\0');
-
-    inFile.get(c);
-    d_cntr++;
-    //////printme("%d \n", c);
-
-    // READ ZLIB header 2 bytes
-    inFile.read((char*)in.data(), (input_size - d_cntr));
-
-    // Call decompress
-    debytes = decompress(in.data(), out.data(), (input_size - d_cntr));
-
-#else
     // READ ZLIB header 2 bytes
     inFile.read((char*)in.data(), input_size);
-    // printme("Call to zlib_decompress \n");
     // Call decompress
-    auto decompress_API_start = std::chrono::high_resolution_clock::now();
     debytes = decompress(in.data(), out.data(), input_size);
-    auto decompress_API_end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
-    decompress_API_time_ns_1 += duration;
-
-    float throughput_in_mbps_1 = (float)debytes * 1000 / decompress_API_time_ns_1.count();
-    std::cout << std::fixed << std::setprecision(2) << "Throughput E2E:" << throughput_in_mbps_1 << "MBps" << std::endl;
-
-#endif
 
     outFile.write((char*)out.data(), debytes);
 
@@ -196,84 +146,196 @@ uint32_t xfZlibStream::decompress_file(std::string& inFile_name, std::string& ou
     return debytes;
 }
 
+// method to enqueue reads in parallel with writes to decompression kernel
+void xfZlibStream::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize) {
+    const int BUFCNT = DOUT_BUFFERCOUNT; // mandatorily 2
+    cl::Event hostReadEvent;
+    cl::Event kernelReadEvent;
+    cl::Event sizeReadEvent;
+
+    uint8_t* outP = nullptr;
+    uint32_t* outSize = nullptr;
+    uint32_t dcmpSize = 0;
+    cl::Buffer* buffer_out[BUFCNT];
+    cl::Buffer* buffer_size[BUFCNT];
+    for (int i = 0; i < BUFCNT; i++) {
+        buffer_out[i] =
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize, h_dbuf_zlibout[i].data());
+
+        buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 2 * sizeof(uint32_t),
+                                        h_dcompressSize[i].data());
+    }
+
+    // enqueue first set of buffers
+    uint8_t cbf_idx = 0;
+    uint32_t keq_idx = 0;
+    uint32_t raw_size = 0;
+    // set consistent buffer size to be read
+    data_reader_kernel->setArg(2, bufSize);
+    do {
+        // set reader kernel arguments
+        data_reader_kernel->setArg(0, *(buffer_out[cbf_idx]));
+        data_reader_kernel->setArg(1, *(buffer_size[cbf_idx]));
+
+        // enqueue reader kernel
+        m_q_rd->enqueueTask(*data_reader_kernel, NULL, &kernelReadEvent);
+
+        // copy previous data
+        if (keq_idx > 0) {
+            outP = h_dbuf_zlibout[abs(cbf_idx - 1)].data();
+            uint32_t sz2read = raw_size;
+            if (sz2read > bufSize) {
+                sz2read--;
+            }
+            hostReadEvent.wait(); // wait for previous data migration to complete
+            std::memcpy(out + dcmpSize, outP, sz2read);
+            dcmpSize += sz2read;
+        }
+        // wait for kernel read to complete after copying previous data
+        kernelReadEvent.wait();
+
+        m_q_rdd->enqueueMigrateMemObjects({*(buffer_size[cbf_idx])}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &sizeReadEvent);
+        sizeReadEvent.wait();
+
+        outSize = h_dcompressSize[cbf_idx].data();
+        raw_size = *outSize;
+        if (raw_size > 0) {
+            m_q_rdd->enqueueMigrateMemObjects({*(buffer_out[cbf_idx])}, CL_MIGRATE_MEM_OBJECT_HOST, NULL,
+                                              &hostReadEvent);
+        }
+        ++keq_idx;
+        cbf_idx = ((cbf_idx == 0) ? 1 : 0); // since only two buffers
+    } while (raw_size == bufSize);
+
+    // read the last block of data
+    outP = h_dbuf_zlibout[abs(cbf_idx - 1)].data();
+    if (raw_size > bufSize) {
+        raw_size--;
+    }
+    hostReadEvent.wait();
+    std::memcpy(out + dcmpSize, outP, raw_size);
+    dcmpSize += raw_size;
+
+    *decompSize = dcmpSize;
+
+    // free the buffers
+    for (int i = 0; i < BUFCNT; i++) {
+        delete (buffer_out[i]);
+        delete (buffer_size[i]);
+    }
+}
+
+// method to enqueue writes in parallel with reads from decompression kernel
+void xfZlibStream::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize) {
+    const int BUFCNT = DIN_BUFFERCOUNT;
+
+    uint32_t bufferCount = 1 + (inputSize - 1) / bufSize;
+
+    uint8_t* inP = nullptr;
+    cl::Buffer* buffer_in[BUFCNT];
+    cl::Event hostWriteEvent[bufferCount];
+    cl::Event kernelWriteEvent[bufferCount];
+
+    for (int i = 0; i < BUFCNT; i++) {
+        buffer_in[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize, h_dbuf_in[i].data());
+    }
+
+    uint32_t cBufSize = bufSize;
+    uint8_t cbf_idx = 0;  // index indicating current buffer(0-4) being used in loop
+    uint32_t keq_idx = 0; // index indicating the number of writer kernel enqueues
+
+    // enqueue first set of buffers
+    for (uint32_t bnum = 0; bnum < BUFCNT && bnum < bufferCount; ++bnum) {
+        std::vector<cl::Event> hostWriteWait;
+        inP = h_dbuf_in[bnum].data();
+        // set for last and other buffers
+        if (bnum == bufferCount - 1) {
+            if (bufferCount > 1) {
+                cBufSize = inputSize - (bufSize * bnum);
+            }
+        }
+        std::memcpy(inP, in + (bnum * bufSize), cBufSize);
+
+        // set kernel arguments
+        data_writer_kernel->setArg(0, *(buffer_in[bnum]));
+        data_writer_kernel->setArg(1, cBufSize);
+
+        m_q_wrd->enqueueMigrateMemObjects({*(buffer_in[bnum])}, 0, NULL, &(hostWriteEvent[bnum]));
+
+        hostWriteWait.push_back(hostWriteEvent[bnum]);
+        m_q_wr->enqueueTask(*data_writer_kernel, &hostWriteWait, &(kernelWriteEvent[bnum]));
+    }
+
+    if (bufferCount >= BUFCNT) {
+        // sequencially enqueue data transfers as the write kernels finish in order
+        for (keq_idx = BUFCNT; keq_idx < bufferCount; ++keq_idx) {
+            cbf_idx = keq_idx % BUFCNT;
+            inP = h_dbuf_in[cbf_idx].data();
+            // set for last and other buffers
+            if (keq_idx == bufferCount - 1) {
+                if (bufferCount > 1) {
+                    cBufSize = inputSize - (bufSize * keq_idx);
+                }
+            }
+            std::vector<cl::Event> hostWriteWait;
+            std::vector<cl::Event> kernelWriteWait;
+
+            // copy the data
+            std::memcpy(inP, in + (keq_idx * bufSize), cBufSize);
+
+            // wait for (current - BUFCNT) kernel to finish
+            // cl::Event::waitForEvents(kernelWriteWait);
+            (kernelWriteEvent[keq_idx - BUFCNT]).wait();
+
+            // set kernel arguments
+            data_writer_kernel->setArg(0, *(buffer_in[cbf_idx]));
+            data_writer_kernel->setArg(1, cBufSize);
+
+            m_q_wrd->enqueueMigrateMemObjects({*(buffer_in[cbf_idx])}, 0, NULL, &(hostWriteEvent[keq_idx]));
+
+            hostWriteWait.push_back(hostWriteEvent[keq_idx]); // data tranfer to wait for
+            m_q_wr->enqueueTask(*data_writer_kernel, &hostWriteWait, &(kernelWriteEvent[keq_idx]));
+        }
+    }
+    // std::cout << "Writer Enqueued" << std::endl;
+    m_q_wr->finish();
+    // std::cout << "Data Write successfull" << std::endl;
+    for (int i = 0; i < BUFCNT; i++) delete (buffer_in[i]);
+}
+
 uint32_t xfZlibStream::decompress(uint8_t* in, uint8_t* out, uint32_t input_size) {
-    // cl_int err;
-    uint32_t inBufferSize = 2 * 1024 * 1024;
-    uint32_t bufferCount = 1 + (input_size - 1) / inBufferSize;
+    std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
+    uint32_t inBufferSize = INPUT_BUFFER_SIZE;
+    uint32_t outBufferSize = OUTPUT_BUFFER_SIZE;
 
     // if input_size if greater than 2 MB, then buffer size must be 2MB
     if (input_size < inBufferSize) inBufferSize = input_size;
 
-    h_dbuf_in.resize(inBufferSize);
-    h_dbuf_gzipout.resize(inBufferSize * 10);
-    h_dcompressSize.resize(10);
-
-    uint8_t* inP = nullptr;
-    uint8_t* outP = nullptr;
-    uint32_t* outSize = nullptr;
-    cl::Buffer* buffer_in;
-    cl::Buffer* buffer_out;
-    cl::Buffer* buffer_size;
-
-    buffer_in = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, inBufferSize, h_dbuf_in.data());
-
-    buffer_out =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, inBufferSize * 10, h_dbuf_gzipout.data());
-
-    buffer_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 10 * sizeof(uint32_t),
-                                 h_dcompressSize.data());
-
-    inP = h_dbuf_in.data();
-    outP = h_dbuf_gzipout.data();
-    outSize = h_dcompressSize.data();
-
     // Set Kernel Args
-    int narg = 0;
-    data_mover_kernel->setArg(narg++, *(buffer_in));
-    data_mover_kernel->setArg(narg++, *(buffer_out));
-    data_mover_kernel->setArg(narg++, *(buffer_size));
-
     decompress_kernel->setArg(0, input_size);
 
-    // enqueue decompression kernel
-    m_q_dec->enqueueTask(*decompress_kernel);
-
-    uint32_t cBufSize = inBufferSize;
+    // start parallel reader kernel enqueue thread
     uint32_t decmpSizeIdx = 0;
-    for (uint32_t bufIdx = 0; bufIdx < bufferCount; bufIdx++) {
-        if (bufferCount > 1 && bufIdx == bufferCount - 1) {
-            cBufSize = input_size - (inBufferSize * bufIdx);
-            std::memset(inP, '\0', inBufferSize);
-        }
-        // Copy compressed input to h_buf_in
-        std::memcpy(inP, in + (bufIdx * inBufferSize), cBufSize);
+    std::thread decompWriter(&xfZlibStream::_enqueue_writes, this, inBufferSize, in, input_size);
+    std::thread decompReader(&xfZlibStream::_enqueue_reads, this, outBufferSize, out, &decmpSizeIdx);
 
-        // set input_size as current block size for data mover, so that it can read/write from host in chunks
-        data_mover_kernel->setArg(narg, cBufSize);
+    // enqueue decompression kernel
+    m_q_dec->finish();
+    sleep(2);
+    auto decompress_API_start = std::chrono::high_resolution_clock::now();
 
-        // Migrate Memory - Map host to device buffers
-        m_q_dm->enqueueMigrateMemObjects({*(buffer_in)}, 0);
-        m_q_dm->finish();
-
-        // Kernel invocation
-        m_q_dm->enqueueTask(*data_mover_kernel);
-        m_q_dm->finish();
-        // printme("kernel done \n");
-
-        // Migrate memory - Map device to host buffers
-        m_q_dm->enqueueMigrateMemObjects({*(buffer_out), *(buffer_size)}, CL_MIGRATE_MEM_OBJECT_HOST);
-        m_q_dm->finish();
-
-        uint32_t raw_size = *outSize;
-        std::memcpy(out, outP + decmpSizeIdx, raw_size);
-        decmpSizeIdx += raw_size;
-    }
-    // wait for decompression kernel
+    m_q_dec->enqueueTask(*decompress_kernel);
     m_q_dec->finish();
 
-    delete (buffer_in);
-    delete (buffer_out);
-    delete (buffer_size);
+    auto decompress_API_end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
+    decompress_API_time_ns_1 += duration;
+
+    decompReader.join();
+    decompWriter.join();
+
+    float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 / decompress_API_time_ns_1.count();
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     // printme("Done with decompress \n");
     return decmpSizeIdx;

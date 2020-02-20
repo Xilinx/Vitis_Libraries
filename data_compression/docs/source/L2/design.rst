@@ -1,7 +1,9 @@
-.. CompressionLib_Docs documentation master file, created by
-   sphinx-quickstart on Thu Jun 20 14:04:09 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+
+.. meta::
+   :keywords: Vitis, Library, Data Compression, Xilinx, Kernel Architecture, OpenCL Kernel, Compression Kernels
+   :description: This section provides information related to OpenCL kernel architecture of Vitis data compression library.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
 
 =============
 Kernel Design
@@ -26,7 +28,7 @@ Compression Kernel Design
 
 The design for LZ compression kernel is shown in figure below.
 
-.. image:: /_static/lzx_comp.png
+.. image:: ../../docs/_static/lzx_comp.png
    :alt: LZ based Compression Kernel
    :width: 100%
    :align: center
@@ -47,7 +49,7 @@ Decompression Kernel Design
 
 The design for LZ decompression kernel is shown in figure below.
 
-.. image:: /_static/lzx_decomp.png
+.. image:: ../../docs/_static/lzx_decomp.png
    :alt: LZ based Decompression Kernel
    :width: 100%
    :align: center
@@ -57,3 +59,14 @@ The overall design remains similar to the compression kernel design. Input data 
 Each decompression engine module contains multiple sub-modules processing 1 byte per clock cycle. Since the modules work in pipelined fashion, therefore, the throughput of each decompression engine is 1 byte per clock cycle.
 
 The decompression engine desing also remains same for all LZ based algorithms. Only difference will be the **Decoding**	 sub-module in decompression engine module, which will be unique for each algorithm.
+
+Implemented Algorithms
+----------------------
+
+Based on the presented architecture above we have implemented following
+compression algorithm.
+
+-  `LZ4 Compress/Decompress <./lz4>`__
+-  `Snappy Compress/Decompress <./snappy>`__
+-  `GZip Compress/Decompress <./gzip>`__
+-  `Zlib Compress Decompress <./zlib>`__

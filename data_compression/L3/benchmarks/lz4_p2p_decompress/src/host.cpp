@@ -28,7 +28,8 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 
 void decompress_multiple_files(const std::vector<std::string>& inFileVec,
                                const std::vector<std::string>& outFileVec,
-                               const std::string& decompress_bin) {
+                               const std::string& decompress_bin,
+                               bool enable_p2p) {
     std::vector<char*> outVec;
     std::vector<uint64_t> orgSizeVec;
     std::vector<uint64_t> inSizeVec;
@@ -37,6 +38,8 @@ void decompress_multiple_files(const std::vector<std::string>& inFileVec,
     uint64_t total_size = 0;
     uint64_t total_in_size = 0;
 
+    std::cout << "\n";
+    std::cout << "\x1B[31m[Disk Operation]\033[0m Reading Input Files Started ..." << std::endl;
     for (uint32_t fid = 0; fid < inFileVec.size(); fid++) {
         uint64_t original_size = 0;
         std::string inFile_name = inFileVec[fid];
@@ -61,8 +64,19 @@ void decompress_multiple_files(const std::vector<std::string>& inFileVec,
         outVec.push_back(out);
         inSizeVec.push_back(input_size);
     }
+    std::cout << "\x1B[31m[Disk Operation]\033[0m Reading Input Files Done ..." << std::endl;
+    std::cout << "\n\n";
+    std::cout << "\x1B[32m[OpenCL Setup]\033[0m OpenCL/Host/Device Buffer Setup Started ..." << std::endl;
     xfLz4 xlz(decompress_bin);
-    xlz.decompress_in_line_multiple_files(inFileVec, fd_p2p_vec, outVec, orgSizeVec, inSizeVec);
+    std::cout << "\x1B[32m[OpenCL Setup]\033[0m OpenCL/Host/Device Buffer Setup Done ..." << std::endl;
+    std::cout << "\n";
+    std::cout << "\x1B[36m[FPGA LZ4]\033[0m LZ4 P2P DeCompression Started ..." << std::endl;
+    std::cout << "\n";
+    xlz.decompress_in_line_multiple_files(inFileVec, fd_p2p_vec, outVec, orgSizeVec, inSizeVec, enable_p2p);
+    std::cout << "\n";
+    std::cout << "\x1B[36m[FPGA LZ4]\033[0m LZ4 P2P DeCompression Done ..." << std::endl;
+    std::cout << "\n";
+    std::cout << "\x1B[31m[Disk Operation]\033[0m Writing Output Files Started ..." << std::endl;
     for (uint32_t fid = 0; fid < inFileVec.size(); fid++) {
         std::string outFile_name = outFileVec[fid];
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
@@ -70,9 +84,10 @@ void decompress_multiple_files(const std::vector<std::string>& inFileVec,
         close(fd_p2p_vec[fid]);
         outFile.close();
     }
+    std::cout << "\x1B[31m[Disk Operation]\033[0m Writing Output Files Done ..." << std::endl;
 }
 
-void xil_decompress_file_list(std::string& file_list, std::string& decompress_bin) {
+void xil_decompress_file_list(std::string& file_list, std::string& decompress_bin, bool enable_p2p) {
     std::ifstream infilelist_dec(file_list.c_str());
     std::string line_dec;
     std::string ext1 = ".lz4";
@@ -86,7 +101,7 @@ void xil_decompress_file_list(std::string& file_list, std::string& decompress_bi
         orgFileList.push_back(line_dec);
         outFileList.push_back(out_file);
     }
-    decompress_multiple_files(inFileList, outFileList, decompress_bin);
+    decompress_multiple_files(inFileList, outFileList, decompress_bin, enable_p2p);
     std::cout << std::endl;
     for (size_t i = 0; i < inFileList.size(); i++) {
         int ret = validate(orgFileList[i], outFileList[i]);
@@ -103,18 +118,23 @@ int main(int argc, char* argv[]) {
     parser.addSwitch("--decompress_xclbin", "-dx", "Decompress XCLBIN", "decompress");
     parser.addSwitch("--decompress_mode", "-d", "Decompress Mode", "");
     parser.addSwitch("--single_xclbin", "-sx", "Single XCLBIN", "p2p_decompress");
+    parser.addSwitch("--p2p_flow", "-p2p", "P2P Flow", "p2p_decompress");
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.parse(argc, argv);
 
     std::string decompress_xclbin = parser.value("decompress_xclbin");
     std::string decompress_mod = parser.value("decompress_mode");
     std::string single_bin = parser.value("single_xclbin");
+    std::string p2p_flow = parser.value("p2p_flow");
     std::string filelist = parser.value("file_list");
+
+    bool enable_p2p = 1;
+    if (!(p2p_flow.empty())) enable_p2p = atoi(p2p_flow.c_str());
 
     int fopt = 1;
 
     // "-l" List of Files
     if (!filelist.empty()) {
-        xil_decompress_file_list(filelist, decompress_xclbin);
+        xil_decompress_file_list(filelist, decompress_xclbin, enable_p2p);
     }
 }

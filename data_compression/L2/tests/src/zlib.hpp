@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+#ifndef _XFCOMPRESSION_ZLIB_HPP_
+#define _XFCOMPRESSION_ZLIB_HPP_
+
 #pragma once
 
 #include <iomanip>
@@ -26,6 +29,7 @@
 #include <fstream>
 #include "xcl2.hpp"
 #include "zlib_config.hpp"
+#include <thread>
 
 #define PARALLEL_ENGINES 8
 #define C_COMPUTE_UNIT 1
@@ -37,6 +41,17 @@
 
 // Default block size
 #define BLOCK_SIZE_IN_KB 1024
+
+// zlib maximum cr
+#define MAX_CR 20
+
+// Input and output buffer size
+#define INPUT_BUFFER_SIZE (2 * 1024 * 1024)
+#define OUTPUT_BUFFER_SIZE (32 * 1024 * 1024)
+
+// buffer count for data in
+#define DIN_BUFFERCOUNT 8
+#define DOUT_BUFFERCOUNT 2 // mandatorily 2
 
 // Maximum host buffer used to operate
 // per kernel invocation
@@ -50,13 +65,17 @@
 // Maximum number of blocks based on host buffer size
 #define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
 
+enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };
+
+void error_message(const std::string& val);
+
 int validate(std::string& inFile_name, std::string& outFile_name);
 
 uint32_t get_file_size(std::ifstream& file);
 
 class xil_zlib {
    public:
-    int init(const std::string& binaryFile, uint8_t flow);
+    int init(const std::string& binaryFile, uint8_t flow, uint8_t d_type);
     int release();
     uint32_t compress(uint8_t* in, uint8_t* out, uint32_t actual_size, uint32_t host_buffer_size);
     uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run);
@@ -64,21 +83,42 @@ class xil_zlib {
     uint32_t decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run);
     uint64_t get_event_duration_ns(const cl::Event& event);
     // Binary flow compress/decompress
-    bool m_bin_flow;
-    xil_zlib(const std::string& binaryFile, uint8_t flow);
+    xil_zlib(const std::string& binaryFile,
+             uint8_t flow,
+             uint8_t max_cr = MAX_CR,
+             uint8_t device_id = 0,
+             uint8_t d_type = DYNAMIC);
     ~xil_zlib();
 
    private:
+    void _enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize);
+    void _enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, uint32_t max_outbuf);
+
+    uint8_t m_BinFlow;
+    uint8_t m_deviceid;
+    const uint32_t m_minfilesize = 200;
+
+    // Max cr
+    uint8_t m_max_cr;
+
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q[C_COMPUTE_UNIT * OVERLAP_BUF_COUNT];
-    cl::CommandQueue* m_q_dec[D_COMPUTE_UNIT];
+    cl::CommandQueue* m_q_dec;
+    cl::CommandQueue* m_q_rd;
+    cl::CommandQueue* m_q_rdd;
+    cl::CommandQueue* m_q_wr;
+    cl::CommandQueue* m_q_wrd;
 
-    // Kernel declaration
-    cl::Kernel* compress_kernel[C_COMPUTE_UNIT];
-    cl::Kernel* huffman_kernel[H_COMPUTE_UNIT];
-    cl::Kernel* treegen_kernel[T_COMPUTE_UNIT];
-    cl::Kernel* decompress_kernel[D_COMPUTE_UNIT];
+    // Compress Kernel Declaration
+    cl::Kernel* compress_kernel;
+    cl::Kernel* huffman_kernel;
+    cl::Kernel* treegen_kernel;
+
+    // Decompress Kernel Declaration
+    cl::Kernel* decompress_kernel;
+    cl::Kernel* data_writer_kernel;
+    cl::Kernel* data_reader_kernel;
 
     // Compression related
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
@@ -88,9 +128,9 @@ class xil_zlib {
     std::vector<uint32_t, aligned_allocator<uint32_t> > h_compressSize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
     // Decompression Related
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_in[MAX_DDCOMP_UNITS];
-    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_zlibout[MAX_DDCOMP_UNITS];
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressSize[MAX_DDCOMP_UNITS];
+    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_in[DIN_BUFFERCOUNT];
+    std::vector<uint8_t, aligned_allocator<uint8_t> > h_dbuf_zlibout[DOUT_BUFFERCOUNT];
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressSize[DOUT_BUFFERCOUNT];
 
     // Buffers related to Dynamic Huffman
 
@@ -147,5 +187,9 @@ class xil_zlib {
     std::vector<std::string> compress_kernel_names = {"xilLz77Compress"};
     std::vector<std::string> huffman_kernel_names = {"xilHuffmanKernel"};
     std::vector<std::string> treegen_kernel_names = {"xilTreegenKernel"};
-    std::vector<std::string> decompress_kernel_names = {"xilDecompressZlib"};
+    std::vector<std::string> decompress_kernel_names = {"xilDecompressStream", "xilDecompressFixed",
+                                                        "xilDecompressFull"};
+    std::vector<std::string> data_writer_kernel_names = {"xilZlibDmWriter"};
+    std::vector<std::string> data_reader_kernel_names = {"xilZlibDmReader"};
 };
+#endif // _XFCOMPRESSION_ZLIB_HPP_

@@ -19,9 +19,20 @@
 #include <vector>
 #include "cmdlineparser.h"
 
+static uint64_t getFileSize(std::ifstream& file) {
+    file.seekg(0, file.end);
+    uint64_t file_size = file.tellg();
+    file.seekg(0, file.beg);
+    return file_size;
+}
+
 void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string& compress_bin) {
     // Xilinx LZ4 object
-    xfLz4Streaming* xlz = new xfLz4Streaming(compress_bin, 1);
+    xfLz4Streaming* xlz = new xfLz4Streaming(compress_bin, 1, block_size);
+
+#ifdef VERBOSE
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
+#endif
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -43,17 +54,11 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
     std::string lz_compress_out = compress_mod;
     lz_compress_out = lz_compress_out + ".lz4";
 
-    // Update class membery with block_size
-    xlz->m_block_size_in_kb = block_size;
-
-    // 0 means Xilinx flow
-    xlz->m_switch_flow = 0;
-
 #ifdef EVENT_PROFILE
     auto total_start = std::chrono::high_resolution_clock::now();
 #endif
     // Call LZ4 compression
-    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size);
+    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size, 0);
 #ifdef EVENT_PROFILE
     auto total_end = std::chrono::high_resolution_clock::now();
     auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
@@ -61,8 +66,9 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
 
 #ifdef VERBOSE
     std::cout.precision(3);
-    std::cout << std::fixed << std::setprecision(2) << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
-              << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
+    std::cout << std::fixed << std::setprecision(2) << std::endl
+              << "LZ4_CR\t\t:" << (double)input_size / enbytes << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_compress_out.c_str() << std::endl;
@@ -111,12 +117,8 @@ void xilCompressDecompressList(std::string& file_list,
     // Compression
 
     // Create xfLz4Streaming object
-    xfLz4Streaming* xlz = new xfLz4Streaming(compress_bin, 1);
+    xfLz4Streaming* xlz = new xfLz4Streaming(compress_bin, 1, block_size);
 
-    if (c_flow == 0) {
-        std::cout << "\n";
-        xlz->m_bin_flow = 1;
-    }
     std::cout << "\n";
 
     std::cout << "--------------------------------------------------------------" << std::endl;
@@ -167,11 +169,8 @@ void xilCompressDecompressList(std::string& file_list,
         std::string lz_compress_out = line;
         lz_compress_out = lz_compress_out + ext1;
 
-        xlz->m_block_size_in_kb = block_size;
-        xlz->m_switch_flow = c_flow;
-
         // Call LZ4 compression
-        uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size);
+        uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size, c_flow);
         if (c_flow == 0) {
             std::cout << "\t\t" << (double)input_size / enbytes << "\t\t" << (double)input_size / 1000000 << "\t\t\t"
                       << lz_compress_in << std::endl;
@@ -186,14 +185,7 @@ void xilCompressDecompressList(std::string& file_list,
     }
 
     // De-Compression
-    xlz = new xfLz4Streaming(decompress_bin, 0);
-
-    // Xilinx LZ4 object
-    if (d_flow == 0) {
-        // Create xfLz4Streaming object
-        std::cout << "\n";
-        xlz->m_bin_flow = 0;
-    }
+    xlz = new xfLz4Streaming(decompress_bin, 0, block_size);
 
     std::ifstream infilelist_dec(file_list.c_str());
     std::string line_dec;
@@ -247,9 +239,7 @@ void xilCompressDecompressList(std::string& file_list,
         std::string lz_decompress_out = file_line;
         lz_decompress_out = lz_decompress_out + ".orig";
 
-        // Call LZ4 decompression
-        xlz->m_switch_flow = d_flow;
-        xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size);
+        xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size, d_flow);
 
         if (d_flow == 0) {
             std::cout << "\t\t" << (double)input_size / 1000000 << "\t\t\t" << lz_decompress_in << std::endl;
@@ -404,9 +394,13 @@ void xilBatchVerify(
     }
 }
 
-void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) {
+void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::string& decompress_bin) {
     // Create xfLz4Streaming object
-    xfLz4Streaming* xlz = new xfLz4Streaming(decompress_bin, 0);
+    xfLz4Streaming* xlz = new xfLz4Streaming(decompress_bin, 0, block_size);
+
+#ifdef VERBOSE
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
+#endif
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -429,12 +423,11 @@ void xilDecompressTop(std::string& decompress_mod, std::string& decompress_bin) 
     string lz_decompress_out = decompress_mod;
     lz_decompress_out = lz_decompress_out + ".orig";
 
-    xlz->m_switch_flow = 0;
-
     // Call LZ4 decompression
-    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size);
+    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size, 0);
 #ifdef VERBOSE
-    std::cout << std::fixed << std::setprecision(2) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
+    std::cout << std::fixed << std::setprecision(3) << std::endl
+              << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_decompress_out.c_str() << std::endl;
@@ -448,7 +441,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
                               std::string& decompress_bin) {
     // Compression
     // Create xfLz4 object
-    xfLz4Streaming* xlz = new xfLz4Streaming(compress_bin, 1);
+    xfLz4Streaming* xlz = new xfLz4Streaming(compress_bin, 1, block_size);
 
     std::cout << "\n";
 
@@ -457,6 +450,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     std::cout << "--------------------------------------------------------------" << std::endl;
 
     std::cout << "\n";
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
 
     std::ifstream inFile(compress_decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -479,12 +473,10 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     std::string lz_compress_out = compress_decompress_mod;
     lz_compress_out = lz_compress_out + ".xe2xd.lz4";
 
-    xlz->m_block_size_in_kb = block_size;
-    xlz->m_switch_flow = 0;
-
     // Call LZ4 compression
-    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size);
-    std::cout << std::fixed << std::setprecision(2) << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
+    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size, 0);
+    std::cout << std::fixed << std::setprecision(2) << std::endl
+              << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
               << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
 
@@ -492,13 +484,15 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
 
     // De-Compression
     // Create xfLz4Streaming object
-    xlz = new xfLz4Streaming(decompress_bin, 0);
+    xlz = new xfLz4Streaming(decompress_bin, 0, block_size);
 
     std::cout << "\n";
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "                     Xilinx De-Compress                       " << std::endl;
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "\n";
+
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
 
     // Decompress list of files
     // This loop does LZ4 decompress on list
@@ -517,11 +511,10 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     uint64_t input_size1 = getFileSize(inFile_dec);
     inFile_dec.close();
 
-    // Call LZ4 decompression
-    xlz->m_switch_flow = 0;
-    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size1);
+    xlz->decompressFile(lz_decompress_in, lz_decompress_out, input_size1, 0);
 
-    std::cout << std::fixed << std::setprecision(2) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
+    std::cout << std::fixed << std::setprecision(3) << std::endl
+              << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 
     delete (xlz);
@@ -597,7 +590,7 @@ int main(int argc, char* argv[]) {
     if (!compress_mod.empty()) xilCompressTop(compress_mod, bSize, compress_bin);
 
     // "-d" Decompress Mode
-    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, decompress_bin);
+    if (!decompress_mod.empty()) xilDecompressTop(decompress_mod, bSize, decompress_bin);
 
     // "-v" Decompress Mode
     if (!compress_decompress_mod.empty())

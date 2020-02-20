@@ -14,8 +14,9 @@
  * limitations under the License.
  *
  */
-#ifndef DEFNS_H_
-#define DEFNS_H_
+#ifndef _XFCOMPRESSION_DEFNS_H_
+#define _XFCOMPRESSION_DEFNS_H_
+
 #include <iostream>
 #include <cstring>
 #include <string>
@@ -34,4 +35,4 @@
 #include <fcntl.h>  /* For O_RDWR */
 #include <unistd.h> /* For open(), creat() */
 
-#endif
+#endif // __XFCOMPRESSION_DEFNS_H_

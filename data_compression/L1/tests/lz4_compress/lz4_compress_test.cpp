@@ -14,26 +14,35 @@
  * limitations under the License.
  */
 
-#include "lz4_compress_core.hpp"
+#include "hls_stream.h"
+#include <ap_int.h>
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 
-int const c_minOffset = 1;
-int const c_minMatch = 4;
+#include "lz4_compress.hpp"
+#include "lz_compress.hpp"
+#include "lz_optional.hpp"
 
+#define MAX_LIT_COUNT 4096
+#define PARALLEL_BLOCK 1
 #define LZ_MAX_OFFSET_LIMIT 65536
 #define OFFSET_WINDOW (64 * 1024)
-#define BOOSTER_OFFSET_WINDOW (16 * 1024)
-#define LZ_HASH_BIT 12
-#define LZ_DICT_SIZE (1 << LZ_HASH_BIT)
 #define MAX_MATCH_LEN 255
 #define MATCH_LEN 6
-#define MATCH_LEVEL 2
-#define LOP                                                                                                          \
-    c_minOffset, c_minMatch, LZ_MAX_OFFSET_LIMIT, OFFSET_WINDOW, BOOSTER_OFFSET_WINDOW, LZ_DICT_SIZE, MAX_MATCH_LEN, \
-        MATCH_LEN, MATCH_LEVEL
+
+typedef ap_uint<32> compressd_dt;
+typedef ap_uint<64> lz4_compressd_dt;
+typedef ap_uint<8> uintV_t;
+
+int const c_minMatch = 4;
+int const c_matchLevel = 6;
+int const c_minOffset = 1;
+int const c_lz4MaxLiteralCount = MAX_LIT_COUNT;
 
 void lz4CompressEngineRun(hls::stream<uintV_t>& inStream,
                           hls::stream<uintV_t>& lz4Out,
@@ -42,7 +51,24 @@ void lz4CompressEngineRun(hls::stream<uintV_t>& inStream,
                           uint32_t max_lit_limit[PARALLEL_BLOCK],
                           uint32_t input_size,
                           uint32_t core_idx) {
-    lz4_compress_engine<LOP>(inStream, lz4Out, lz4Out_eos, lz4OutSize, max_lit_limit, input_size, 0);
+    hls::stream<compressd_dt> compressdStream("compressdStream");
+    hls::stream<xf::compression::compressd_dt> bestMatchStream("bestMatchStream");
+    hls::stream<compressd_dt> boosterStream("boosterStream");
+
+#pragma HLS STREAM variable = compressdStream depth = 8
+#pragma HLS STREAM variable = bestMatchStream depth = 8
+#pragma HLS STREAM variable = boosterStream depth = 8
+
+#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
+
+#pragma HLS dataflow
+    xf::compression::lzCompress<MATCH_LEN, c_minMatch, LZ_MAX_OFFSET_LIMIT, c_matchLevel, c_minOffset>(
+        inStream, compressdStream, input_size);
+    xf::compression::lzBestMatchFilter<MATCH_LEN, OFFSET_WINDOW>(compressdStream, bestMatchStream, input_size);
+    xf::compression::lzBooster<MAX_MATCH_LEN>(bestMatchStream, boosterStream, input_size);
+    xf::compression::lz4Compress<MAX_LIT_COUNT, PARALLEL_BLOCK>(boosterStream, lz4Out, max_lit_limit, input_size,
+                                                                lz4Out_eos, lz4OutSize, core_idx);
 }
 
 int main(int argc, char* argv[]) {
@@ -61,7 +87,7 @@ int main(int argc, char* argv[]) {
     // Input file open for input_size
     inputFile.open(argv[1], std::ofstream::binary | std::ofstream::in);
     if (!inputFile.is_open()) {
-        printf("Cannot open the input file!!\n");
+        std::cout << "Cannot open the input file!!" << std::endl;
         exit(0);
     }
     inputFile.seekg(0, std::ios::end);
@@ -83,15 +109,15 @@ int main(int argc, char* argv[]) {
 
     uint32_t outsize;
     outsize = lz4OutSize.read();
-    printf("\n------- Compression Ratio: %f-------\n\n", (float)fileSize / outsize);
+    std::cout << "------- Compression Ratio: " << (float)fileSize / outsize << " -------" << std::endl;
 
     outputFile.open(argv[2], std::fstream::binary | std::fstream::out);
     if (!outputFile.is_open()) {
-        printf("Cannot open the output file!!\n");
+        std::cout << "Cannot open the output file!!" << std::endl;
         exit(0);
     }
 
-    outputFile << input_size;
+    outputFile.write((char*)&input_size, 4);
 
     bool eos_flag = lz4Out_eos.read();
     while (outsize > 0) {

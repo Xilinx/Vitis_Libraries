@@ -76,13 +76,6 @@
  */
 int validate(std::string& inFile_name, std::string& outFile_name);
 
-static uint64_t getFileSize(std::ifstream& file) {
-    file.seekg(0, file.end);
-    uint64_t file_size = file.tellg();
-    file.seekg(0, file.beg);
-    return file_size;
-}
-
 /**
  *  xilSnappy class. Class containing methods for snappy
  * compression and decompression to be executed on host side.
@@ -106,7 +99,7 @@ class xfSnappyStreaming {
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
      * @brief Decompress the input file.
@@ -115,7 +108,7 @@ class xfSnappyStreaming {
      * @param outFile_name output file name
      * @param actual_size input size
      */
-    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+    uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
      * @brief Decompress sequential.
@@ -134,25 +127,10 @@ class xfSnappyStreaming {
     uint64_t getEventDurationNs(const cl::Event& event);
 
     /**
-     * Binary flow compress/decompress
-     */
-    bool m_bin_flow;
-
-    /**
-     * Block Size
-     */
-    uint32_t m_block_size_in_kb;
-
-    /**
-     * Switch between FPGA/Standard flows
-     */
-    bool m_switch_flow;
-
-    /**
      * @brief Class constructor
      *
      */
-    xfSnappyStreaming(const std::string& binaryFileName, uint8_t flow);
+    xfSnappyStreaming(const std::string& binaryFileName, uint8_t flow, uint32_t m_block_size);
 
     /**
      * @brief Class destructor.
@@ -160,6 +138,21 @@ class xfSnappyStreaming {
     ~xfSnappyStreaming();
 
    private:
+    /**
+         * Binary flow compress/decompress
+         */
+    bool m_BinFlow;
+
+    /**
+     * Block Size
+     */
+    uint32_t m_BlockSizeInKb;
+
+    /**
+     * Switch between FPGA/Standard flows
+     */
+    bool m_SwitchFlow;
+
     cl::Device m_device;
     cl::Program* m_program;
     cl::Context* m_context;
@@ -192,4 +185,4 @@ class xfSnappyStreaming {
     std::string decompress_dm_kernel_name = "xilDecompDatamover";
 };
 
-#endif // _XFCOMPRESSION_XIL_SNAPPY_HPP_
+#endif // _XFCOMPRESSION_XIL_SNAPPY_STREAMING_HPP_

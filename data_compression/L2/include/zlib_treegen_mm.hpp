@@ -19,7 +19,7 @@
 #define _XFCOMPRESSION_ZLIB_TREEGEN_MM_HPP_
 
 /**
- * @file treegen_kernel.hpp
+ * @file zlib_treegen_mm.hpp
  * @brief Header for tree generator kernel used in zlib compression.
  *
  * This file is part of Vitis Data Compression Library.
@@ -75,4 +75,4 @@ void xilTreegenKernel(uint32_t* dyn_ltree_freq,
                       uint32_t blocks_per_chunk);
 }
 
-#endif // _XFCOMPRESSION_TREEGEN_KERNEL_HPP_
+#endif // _XFCOMPRESSION_ZLIB_TREEGEN_MM_HPP_

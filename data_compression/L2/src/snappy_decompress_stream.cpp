@@ -15,10 +15,10 @@
  *
  */
 /**
- * @file xil_snappy_decompress_kernel.cpp
+ * @file snappy_decompress_stream.cpp
  * @brief Source for snappy decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Compression Library.
  */
 #include <stdio.h>
 #include <stdint.h>
@@ -52,12 +52,11 @@ void xilSnappyDecompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
 
 #pragma HLS dataflow
 
-    xf::compression::kStreamRead<8>(inaxistream, inStream, inputSize);
+    xf::compression::details::kStreamRead<8>(inaxistream, inStream, inputSize);
 
     xf::compression::snappyDecompress(inStream, decompressedStream, inputSize);
-    xf::compression::lzDecompress<HISTORY_SIZE, READ_STATE, MATCH_STATE, LOW_OFFSET_STATE, LOW_OFFSET>(
-        decompressedStream, outStream, outputSize);
+    xf::compression::lzDecompress<HISTORY_SIZE>(decompressedStream, outStream, outputSize);
 
-    xf::compression::kStreamWriteFixedSize<8>(outaxistream, outStream, outputSize);
+    xf::compression::details::kStreamWriteFixedSize<8>(outaxistream, outStream, outputSize);
 }
 }

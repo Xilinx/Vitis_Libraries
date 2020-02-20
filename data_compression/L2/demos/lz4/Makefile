@@ -210,7 +210,7 @@ $(TEMP_DIR)/xf_decompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 # xclbin Binary creation
 $(XCLBIN_FILE): $(TEMP_DIR)/xf_compress.xo $(TEMP_DIR)/xf_decompress.xo
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l \
+	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l --profile_kernel data:all:all:all \
 	-o'$@' $(+)
 
 # ------------------------------------------------------------
@@ -237,12 +237,12 @@ SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
-CXXFLAGS += -fmessage-length=0
+CXXFLAGS += -std=c++0x -fmessage-length=0 \
 		-DXDEVICE=$(XDEVICE) \
 	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread
 
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
-LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -std=c++0x -DVERBOSE
+LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 
 EXE_FILE = $(BUILD_DIR)/$(HOST_EXE)
 
@@ -277,12 +277,13 @@ cleanh:
 	rm -rf $(EXE_FILE)
 	-$(RMDIR) $(EXE_FILE)
 	-$(RMDIR) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	-$(RMDIR) src/*.ll _vxx_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 cleanall: cleanh cleank
 	rm -rf $(BUILD_DIR)
-	-$(RMDIR) _x_temp* $(CUR_DIR)/reports
+	-$(RMDIR) _x_temp* *.csv *.run_summary *.txt.* *.list $(CUR_DIR)/reports
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig* 
+	rm -rf ./sample_run.txt
 
 clean: cleanh
 
@@ -293,7 +294,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -sx $(XCLBIN_FILE) -v $(XFLIB_DIR)/common/data/sample.txt 
+HOST_ARGS = -sx $(XCLBIN_FILE) -v ./sample.txt 
 
 
 ifeq ($(TARGET),sw_emu)
@@ -311,6 +312,8 @@ endif
 run: host xclbin $(EMU_CONFIG)
 	$(RUN_ENV); \
 	$(EXE_FILE) $(HOST_ARGS)
+	$(RUN_ENV); \
+	./run.sh $@ $(EXE_FILE) $(XF_PROJ_ROOT) $(XCLBIN_FILE)
 
 check: run
 

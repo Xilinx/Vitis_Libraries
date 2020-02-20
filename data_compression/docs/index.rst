@@ -3,9 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. meta::
+   :keywords: Vitis, Library, Data Compression, Xilinx
+   :description: Vitis Data Compression Library top level overview
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 Vitis Data Compression Library
-=========================
+==============================
 
 Vitis Data Compression Library is an open-sourced data compression library written in C++ for accelerating data compression applications in a variety of use cases. It now covers two levels of acceleration: the module level and the pre-defined kernel level, and will evolve to offer the third level as pure software APIs working with pre-defined hardware overlays.
 
@@ -13,7 +19,7 @@ Vitis Data Compression Library is an open-sourced data compression library writt
 | **L2:** In kernel level, a demo on couple of data compression algorithms are shown via kernel which internally uses the optimized hardware modules.
 | **L3:** The software API level will wrap the details of offloading acceleration with prebuilt binary (overlay) and allow users to accelerate data compression tasks on Alveo cards without hardware development.
 
-Since all the kernel code is developed in HLS C++ with the permissive Apache 2.0 license, advanced users can easily tailor, optimize or combine with property logic at any levels. Demos of different accelerated data compression algorithms are also provided with the library for easy on-boarding.
+Since all the kernel code is developed in HLS C++ with the permissive Apache 2.0 license, advanced users can easily tailor, optimize or combine with proprietary logic at any levels. Demos of different accelerated data compression algorithms are also provided with the library for easy on-boarding.
 
 
 .. toctree::
@@ -36,4 +42,3 @@ Since all the kernel code is developed in HLS C++ with the permissive Apache 2.0
 	:maxdepth: 1
 	
 	source/results.rst
-

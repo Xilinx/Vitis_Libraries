@@ -33,6 +33,8 @@
 
 namespace xf {
 namespace compression {
+namespace details {
+
 template <class SIZE_DT, int IN_WIDTH, int OUT_WIDTH>
 void streamUpsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
                    hls::stream<ap_uint<OUT_WIDTH> >& outStream,
@@ -52,8 +54,11 @@ void streamUpsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
      */
 
     if (original_size == 0) return;
+
+    uint8_t paralle_byte = IN_WIDTH / 8;
     ap_uint<OUT_WIDTH> shift_register;
     uint8_t factor = OUT_WIDTH / IN_WIDTH;
+    original_size = (original_size - 1) / paralle_byte + 1;
     uint32_t withAppendedDataSize = (((original_size - 1) / factor) + 1) * factor;
 
     for (uint32_t i = 0; i < withAppendedDataSize; i++) {
@@ -73,7 +78,7 @@ void streamUpsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
     outStream << shift_register;
 }
 
-template <class SIZE_DT, int IN_WIDTH, int OUT_WIDTH>
+template <int IN_WIDTH, int OUT_WIDTH>
 void upsizerEos(hls::stream<ap_uint<IN_WIDTH> >& inStream,
                 hls::stream<bool>& inStream_eos,
                 hls::stream<ap_uint<OUT_WIDTH> >& outStream,
@@ -83,7 +88,6 @@ void upsizerEos(hls::stream<ap_uint<IN_WIDTH> >& inStream,
      * on end of stream and accumulate the consecutive reads until
      * OUT_WIDTH and then writes OUT_WIDTH data to output stream.
      *
-     * @tparam SIZE_DT stream size class instance
      * @tparam IN_WIDTH input data width
      * @tparam OUT_WIDTH output data width
      *
@@ -132,6 +136,53 @@ stream_upsizer:
     // printme("%s:Ended \n",__FUNCTION__);
 }
 
+template <class SIZE_DT, int IN_WIDTH, int OUT_WIDTH>
+void upsizer_sizestream(hls::stream<ap_uint<IN_WIDTH> >& inStream,
+                        hls::stream<SIZE_DT>& inStreamSize,
+                        hls::stream<ap_uint<OUT_WIDTH> >& outStream,
+                        hls::stream<SIZE_DT>& outStreamSize) {
+    // Constants
+    const int c_byte_width = 8; // 8bit is each BYTE
+    const int c_upsize_factor = OUT_WIDTH / c_byte_width;
+    const int c_in_size = IN_WIDTH / c_byte_width;
+
+    ap_uint<2 * OUT_WIDTH> outBuffer = 0; // Declaring double buffers
+    uint32_t byteIdx = 0;
+    // printme("%s: factor=%d\n",__FUNCTION__,c_upsize_factor);
+    for (SIZE_DT size = inStreamSize.read(); size != 0; size = inStreamSize.read()) {
+        // rounding off the output size
+        uint16_t outSize = ((size + byteIdx) / c_upsize_factor) * c_upsize_factor;
+        if (outSize) {
+            outStreamSize << outSize;
+        }
+    ////printme("%s: reading next data=%d outSize=%d c_in_size=%d\n ",__FUNCTION__, size,outSize,c_in_size);
+    stream_upsizer:
+        for (int i = 0; i < size; i += c_in_size) {
+#pragma HLS PIPELINE II = 1
+            int chunk_size = c_in_size;
+            if (chunk_size + i > size) chunk_size = size - i;
+            ap_uint<IN_WIDTH> tmpValue = inStream.read();
+            outBuffer.range((byteIdx + c_in_size) * c_byte_width - 1, byteIdx * c_byte_width) = tmpValue;
+            byteIdx += chunk_size;
+            ////printme("%s: value=%c, chunk_size = %d and byteIdx=%d\n",__FUNCTION__,(char)tmpValue,
+            /// chunk_size,byteIdx);
+            if (byteIdx >= c_upsize_factor) {
+                outStream << outBuffer.range(OUT_WIDTH - 1, 0);
+                outBuffer >>= OUT_WIDTH;
+                byteIdx -= c_upsize_factor;
+            }
+        }
+    }
+    if (byteIdx) {
+        outStreamSize << byteIdx;
+        ////printme("sent outSize %d \n", byteIdx);
+        outStream << outBuffer.range(OUT_WIDTH - 1, 0);
+    }
+    // end of block
+    outStreamSize << 0;
+    // printme("%s:Ended \n",__FUNCTION__);
+}
+
 template <int OUT_WIDTH, int PACK_WIDTH>
 void streamUpsizerP2P(hls::stream<ap_uint<PACK_WIDTH> >& inStream,
                       hls::stream<ap_uint<OUT_WIDTH> >& outStream,
@@ -176,7 +227,8 @@ void streamUpsizerP2P(hls::stream<ap_uint<PACK_WIDTH> >& inStream,
     outStreamSize << 0;
 }
 
+} // namespace details
 } // namespace compression
 } // namespace xf
 
-#endif
+#endif // _XFCOMPRESSION_STREAM_UPSIZER_HPP_
