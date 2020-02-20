@@ -391,8 +391,8 @@ endif
 cleanall: clean cleanx
 	rm -rf *.log plist $(DATA_STAMP)
 
-# -----------------------------------------------------------------------------
-#                                simulation run
+#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
+#simulation run
 
 $(BIN_DIR)/emconfig.json :
 	emconfigutil --platform $(XPLATFORM) --od $(BIN_DIR)
@@ -416,7 +416,7 @@ run: host xclbin $(EMU_CONFIG) $(DATA_STAMP)
 
 check: run
 
-# MK_INC_END vitis_test_rules.mk
+#MK_INC_END vitis_test_rules.mk
 
 .PHONY: build
 build: xclbin host
