@@ -24,14 +24,6 @@
 #define MAGIC_BYTE_4 24
 #define FLG_BYTE 104
 
-uint64_t xfSnappyStreaming::getEventDurationNs(const cl::Event& event) {
-    uint64_t start_time = 0, end_time = 0;
-
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &start_time);
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &end_time);
-    return (end_time - start_time);
-}
-
 int validate(std::string& inFile_name, std::string& outFile_name) {
     std::string command = "cmp " + inFile_name + " " + outFile_name;
     int ret = system(command.c_str());
@@ -39,8 +31,9 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 }
 
 // Constructor
-xfSnappyStreaming::xfSnappyStreaming(const std::string& binaryFile, uint8_t flow) {
-    m_bin_flow = flow;
+xfSnappyStreaming::xfSnappyStreaming(const std::string& binaryFile, uint8_t flow, uint32_t block_size) {
+    m_BinFlow = flow;
+    m_BlockSizeInKb = block_size;
     // Index calculation
     h_buf_in.resize(HOST_BUFFER_SIZE);
     h_buf_out.resize(HOST_BUFFER_SIZE);
@@ -50,7 +43,6 @@ xfSnappyStreaming::xfSnappyStreaming(const std::string& binaryFile, uint8_t flow
     m_compressSize.reserve(MAX_NUMBER_BLOCKS);
     m_blkSize.reserve(MAX_NUMBER_BLOCKS);
 
-    unsigned fileBufSize;
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     m_device = devices[0];
@@ -63,7 +55,7 @@ xfSnappyStreaming::xfSnappyStreaming(const std::string& binaryFile, uint8_t flow
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // import_binary() command will find the OpenCL binary file created using the
-    // xocc compiler load into OpenCL Binary and return as Binaries
+    // v++ compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
     auto fileBuf = xcl::read_binary_file(binaryFile);
@@ -71,7 +63,7 @@ xfSnappyStreaming::xfSnappyStreaming(const std::string& binaryFile, uint8_t flow
     devices.resize(1);
     m_program = new cl::Program(*m_context, devices, bins);
 
-    if (m_bin_flow) {
+    if (m_BinFlow) {
         // Create Compress kernels
         compress_kernel_snappy = new cl::Kernel(*m_program, compress_kernel_name.c_str());
         // Create Compress datamover kernels
@@ -86,7 +78,7 @@ xfSnappyStreaming::xfSnappyStreaming(const std::string& binaryFile, uint8_t flow
 
 // Destructor
 xfSnappyStreaming::~xfSnappyStreaming() {
-    if (m_bin_flow) {
+    if (m_BinFlow) {
         delete (compress_kernel_snappy);
         delete (compress_data_mover_kernel);
     } else {
@@ -98,8 +90,12 @@ xfSnappyStreaming::~xfSnappyStreaming() {
     delete (m_context);
 }
 
-uint64_t xfSnappyStreaming::compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
-    if (m_switch_flow == 0) { // Xilinx FPGA compression flow
+uint64_t xfSnappyStreaming::compressFile(std::string& inFile_name,
+                                         std::string& outFile_name,
+                                         uint64_t input_size,
+                                         bool m_flow) {
+    m_SwitchFlow = m_flow;
+    if (m_SwitchFlow == 0) { // Xilinx FPGA compression flow
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
 
@@ -109,7 +105,7 @@ uint64_t xfSnappyStreaming::compressFile(std::string& inFile_name, std::string& 
         }
 
         std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size);
-        std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size + ((input_size / 65536) * 10));
+        std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size * 10); //+ ((input_size / 65536) * 10));
 
         inFile.read((char*)in.data(), input_size);
 
@@ -126,7 +122,7 @@ uint64_t xfSnappyStreaming::compressFile(std::string& inFile_name, std::string& 
         outFile.put(0x59);
 
         /*uint32_t host_buffer_size = HOST_BUFFER_SIZE;
-        uint32_t acc_buff_size = m_block_size_in_kb * 1024 * PARALLEL_BLOCK;
+        uint32_t acc_buff_size = m_BlockSizeInKb * 1024 * PARALLEL_BLOCK;
         if (acc_buff_size > host_buffer_size) {
             host_buffer_size = acc_buff_size;
         }
@@ -160,36 +156,39 @@ uint64_t xfSnappyStreaming::compressFile(std::string& inFile_name, std::string& 
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
 uint64_t xfSnappyStreaming::compress(uint8_t* in, uint8_t* out, uint64_t input_size) {
-    uint32_t host_buffer_size = m_block_size_in_kb * 1024;
+    uint32_t host_buffer_size = m_BlockSizeInKb * 1024;
     uint32_t total_block_count = (input_size - 1) / host_buffer_size + 1;
 
+    // output buffer index
+    uint64_t outIdx = 0;
     // Index calculation
-    h_buf_in.resize(host_buffer_size * total_block_count);
-    h_buf_out.resize(host_buffer_size * total_block_count);
-    h_compressSize.resize(total_block_count);
+    h_buf_in.resize(host_buffer_size);  // * total_block_count);
+    h_buf_out.resize(host_buffer_size); // * total_block_count);
+    h_compressSize.resize(1);
 
-    uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
-    uint32_t block_size_in_bytes = block_size_in_kb * 1024;
+    // device buffer allocation
+    buffer_input =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, host_buffer_size, h_buf_in.data());
+
+    buffer_output =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, host_buffer_size, h_buf_out.data());
+
+    buffer_compressed_size =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t), h_compressSize.data());
 
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
 
     // copy input to input buffer
-    std::memcpy(h_buf_in.data(), in, input_size);
+    // std::memcpy(h_buf_in.data(), in, input_size);
     // sequentially copy block sized buffers to kernel and wait for them to finish before enqueueing
     for (uint32_t blkIndx = 0, bufIndx = 0; blkIndx < total_block_count; blkIndx++, bufIndx += host_buffer_size) {
         // current block input size
         uint32_t c_input_size = host_buffer_size;
         if (blkIndx == total_block_count - 1) c_input_size = input_size - bufIndx;
 
-        // device buffer allocation
-        buffer_input =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, c_input_size, h_buf_in.data() + bufIndx);
+        // copy input to input buffer
+        std::memcpy(h_buf_in.data(), in + bufIndx, c_input_size);
 
-        buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, c_input_size,
-                                       h_buf_out.data() + bufIndx);
-
-        buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t),
-                                                h_compressSize.data() + blkIndx);
         // set kernel args
         uint32_t narg = 0;
         compress_data_mover_kernel->setArg(narg++, *buffer_input);
@@ -223,20 +222,8 @@ uint64_t xfSnappyStreaming::compress(uint8_t* in, uint8_t* out, uint64_t input_s
         m_q->enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
         m_q->finish();
 
-        // Free CL buffers
-        delete (buffer_input);
-        delete (buffer_output);
-        delete (buffer_compressed_size);
-    }
-    // read the data to output buffer
-    uint64_t outIdx = 0;
-    for (uint64_t i = 0; i < total_block_count; ++i) {
         // copy the compressed data to out pointer
-        uint32_t compressedSize = h_compressSize.data()[i];
-        // std::cout << "Compressed size: " << compressedSize << std::endl;
-        // current block input size
-        uint32_t c_input_size = host_buffer_size;
-        if (i == total_block_count - 1) c_input_size = input_size - (host_buffer_size * i);
+        uint32_t compressedSize = h_compressSize.data()[0];
 
         if (c_input_size > compressedSize) {
             out[outIdx++] = 0x00;
@@ -251,7 +238,7 @@ uint64_t xfSnappyStreaming::compress(uint8_t* in, uint8_t* out, uint64_t input_s
             std::memcpy(out + outIdx, &crc_value, 4);
             outIdx += 4;
 
-            std::memcpy(out + outIdx, h_buf_out.data() + i * host_buffer_size, compressedSize);
+            std::memcpy(out + outIdx, h_buf_out.data(), compressedSize);
             outIdx += compressedSize;
         } else {
             // Chunk Type Identifier
@@ -265,18 +252,27 @@ uint64_t xfSnappyStreaming::compress(uint8_t* in, uint8_t* out, uint64_t input_s
             std::memcpy(out + outIdx, &crc_value, 4);
             outIdx += 4;
 
-            std::memcpy(out + outIdx, in + (host_buffer_size * i), c_input_size);
+            std::memcpy(out + outIdx, in + (host_buffer_size * blkIndx), c_input_size);
             outIdx += c_input_size;
         }
     }
     float throughput_in_mbps_1 = (float)input_size * 1000 / kernel_time_ns_1.count();
-    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:" << throughput_in_mbps_1 << std::endl;
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+
+    // Free CL buffers
+    delete (buffer_input);
+    delete (buffer_output);
+    delete (buffer_compressed_size);
 
     return outIdx;
 }
 
-uint64_t xfSnappyStreaming::decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
-    if (m_switch_flow == 0) {
+uint64_t xfSnappyStreaming::decompressFile(std::string& inFile_name,
+                                           std::string& outFile_name,
+                                           uint64_t input_size,
+                                           bool m_flow) {
+    m_SwitchFlow = m_flow;
+    if (m_SwitchFlow == 0) {
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
 
@@ -323,7 +319,7 @@ uint64_t xfSnappyStreaming::decompressFile(std::string& inFile_name, std::string
 }
 
 uint64_t xfSnappyStreaming::decompress(uint8_t* in, uint8_t* out, uint64_t input_size) {
-    uint32_t host_buffer_size = m_block_size_in_kb * 1024;
+    uint32_t host_buffer_size = m_BlockSizeInKb * 1024;
 
     // Index calculation
     h_buf_in.resize(host_buffer_size);
@@ -444,7 +440,7 @@ uint64_t xfSnappyStreaming::decompress(uint8_t* in, uint8_t* out, uint64_t input
         total_decompressed_size += decompSize;
     }
     float throughput_in_mbps_1 = (float)total_decompressed_size * 1000 / kernel_time_ns_1.count();
-    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:" << throughput_in_mbps_1 << std::endl;
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     return total_decompressed_size;
 }

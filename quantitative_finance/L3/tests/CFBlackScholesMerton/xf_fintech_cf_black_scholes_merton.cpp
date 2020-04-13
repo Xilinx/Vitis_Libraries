@@ -34,14 +34,14 @@ int check_result(float calculated, float expected, float tolerance) {
 
 int main() {
     int retval = XLNX_OK;
-    float tolerance = 0.0001;
+    float tolerance = 0.1;
 
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
     // Get a list of U250s available on the system (just because our current
     // bitstreams are built for U250s)
-    deviceList = DeviceManager::getDeviceList("u250");
+    deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
 
     if (deviceList.size() == 0) {
         printf("[XLNX] No matching devices found\n");

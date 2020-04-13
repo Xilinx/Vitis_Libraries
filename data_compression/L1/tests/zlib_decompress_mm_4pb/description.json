@@ -1,0 +1,46 @@
+{
+    "name": "L1_zlibDecompress", 
+    "description": "Test Design to validate Zlib multibyte decompress memory mapped module", 
+    "flow": "hls", 
+    "project": "zlibMultibyteDecompress_mm_test", 
+    "solution": "sol1", 
+    "clock": "3.3", 
+    "topfunction": "hls_zlibMultibyteDecompress", 
+    "top": {
+        "source": [
+            "zlibMultibyteDecompress_test.cpp"
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw"
+    }, 
+    "testbench": {
+        "source": [
+            "zlibMultibyteDecompress_test.cpp"
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw", 
+        "ldflags": "", 
+        "argv": [
+		"${DESIGN_PATH}/sample.txt.zlib",
+		"${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt"
+		]
+    },
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    },
+	"match_makefile": "false"
+}

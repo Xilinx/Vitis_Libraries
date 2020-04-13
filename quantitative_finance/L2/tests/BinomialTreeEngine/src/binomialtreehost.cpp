@@ -63,6 +63,7 @@ class ArgParser {
 };
 
 static const std::string inputTestCasesFileName = "data/" + TestCasesFileName;
+static const std::string inputTestCasesFileEmulationName = "data/" + TestCasesFileEmulationName;
 static const std::string inputSVGridFileName = "data/" + SVGridFileName;
 
 std::map<int, std::string> optionTypeFilePath = {
@@ -125,9 +126,22 @@ int main(int argc, const char* argv[]) {
         BinomialTestCase<TEST_DT> tempTestCaseItem;
         std::string tmpStr;
 
+        std::string mode = "hw";
+        if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
+            mode = std::getenv("XCL_EMULATION_MODE");
+        }
+        std::cout << "Running in " << mode << " mode" << std::endl;
+
         // testcase and sv grid input files
         ifstream inputFileTestCases;
-        inputFileTestCases.open(inputTestCasesFileName);
+        if (mode == "sw_emu" || mode == "hw_emu")
+        {
+            inputFileTestCases.open(inputTestCasesFileEmulationName);
+        }
+        else
+        {
+            inputFileTestCases.open(inputTestCasesFileName);
+        }
         ifstream inputFileSVGrid;
         inputFileSVGrid.open(inputSVGridFileName);
 

@@ -1,42 +1,41 @@
 
-# Binomial Tree Example
+# Population Monte Carlo Markov Chain Example
 
 This example show how to utilize the Population Monte Carlo Markov Chain Model
 
+### Step 1 :
+Setup the build environment using the Vitis and XRT scripts:
 
-# Setup Environment
+    source <install path>/Vitis/2019.2/settings64.sh
 
-source /opt/xilinx/xrt/setup.csh
+    source /opt/xilinx/xrt/setup.sh
 
-source /*path to xf_fintech*/L3/src/env.csh
+### Step 2 :
+Build the L3 Library
 
+    cd  L3/src
 
-# Build Xilinx Fintech Library
+    source env.sh or source env.csh
 
-cd  /*path to xf_fintech*/L3/src
-
-**make all**
-
-
-# Build Instuctions
-
-To build the command line executable (markov chain example) from this directory
-
-**make clean all**
-
-> Note this requires the xilinx fintech library to have already been built
+    make
 
 
-# Run Instuctions
+### Step 3 :
+Build the matching PopMCMC Kernel
 
-Copy the prebuilt kernel files from /*path to xf_fintech*/L2/tests/PopMCMC/ to this directory
+    cd L2/tests/PopMCMC
 
-mcmc_kernel.xclbin
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
 
 
-To run the command line exe and generate the result
+### Step 4 :
+Build host code & run executable
 
-**make run**
+    cd L3/tests/PopMCMC
 
-The output will populated into the file pop_mcmc_output.csv
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+Note : The output will populated into the file pop_mcmc_output.csv
+
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to step 3 to build*
 

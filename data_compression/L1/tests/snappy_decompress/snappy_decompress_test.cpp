@@ -13,25 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "snappy_decompress_core.hpp"
+
+#include "hls_stream.h"
+#include <ap_int.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
 #include <string>
 
-#define READ_STATE 0
-#define MATCH_STATE 1
-#define LOW_OFFSET_STATE 2
+#include "lz4_decompress.hpp"
+#include "snappy_decompress.hpp"
+#include "lz_decompress.hpp"
+#include "lz_optional.hpp"
+
 #define MAX_OFFSET 65536
 #define HISTORY_SIZE MAX_OFFSET
-#define LOW_OFFSET 8
-#define SOP READ_STATE, MATCH_STATE, LOW_OFFSET_STATE, LOW_OFFSET, HISTORY_SIZE
+
+typedef ap_uint<32> compressd_dt;
+typedef ap_uint<8> uintV_t;
 
 void snappyDecompressEngineRun(hls::stream<uintV_t>& inStream,
                                hls::stream<uintV_t>& snappyOut,
-                               const uint32_t input_size,
-                               const uint32_t output_size) {
-    snappy_decompress_engine<SOP>(inStream, snappyOut, input_size, output_size);
+                               const uint32_t _input_size,
+                               const uint32_t _output_size) {
+    uint32_t input_size = _input_size;
+    uint32_t output_size = _output_size;
+    hls::stream<compressd_dt> decompressd_stream("decompressd_stream");
+#pragma HLS STREAM variable = decompressd_stream depth = 8
+#pragma HLS RESOURCE variable = decompressd_stream core = FIFO_SRL
+
+#pragma HLS dataflow
+    xf::compression::snappyDecompress(inStream, decompressd_stream, input_size);
+    xf::compression::lzDecompress<HISTORY_SIZE>(decompressd_stream, snappyOut, output_size);
 }
 
 int main(int argc, char* argv[]) {
@@ -43,7 +59,7 @@ int main(int argc, char* argv[]) {
 
     outputFile.open(argv[1], std::fstream::binary | std::fstream::in);
     if (!outputFile.is_open()) {
-        printf("Cannot open the compressed file!!\n");
+        std::cout << "Cannot open the compressed file!!" << std::endl;
         exit(0);
     }
     uint32_t output_size;
@@ -66,7 +82,7 @@ int main(int argc, char* argv[]) {
 
     originalFile.open(argv[2], std::ofstream::binary | std::ofstream::in);
     if (!originalFile.is_open()) {
-        printf("Cannot open the original file!!\n");
+        std::cout << "Cannot open the original file!!" << std::endl;
         exit(0);
     }
     uint8_t s, t;
@@ -78,16 +94,16 @@ int main(int argc, char* argv[]) {
             continue;
         else {
             pass = false;
-            printf("\n-----TEST FAILED: The input file and the file after decompression are not similar!-----\n");
+            std::cout << "-----TEST FAILED: The input file and the file after decompression are not similar!-----"
+                      << std::endl;
             exit(0);
         }
     }
     if (pass) {
-        printf(
-            "\n-----TEST PASSED: Original file and the file after decompression "
-            "are same.-------\n");
+        std::cout << "-----TEST PASSED: Original file and the file after decompression "
+                     "are same.-------"
+                  << std::endl;
     }
-    printf("\n");
     originalFile.close();
     outputFile.close();
 }

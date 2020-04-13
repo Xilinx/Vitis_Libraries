@@ -3,6 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. meta::
+   :keywords: Vitis, Library, Data Compression, Xilinx, L1, L2, L3, Overlay, OpenCL Kernel, FPGA Kernel, HLS Kernel
+   :description: Typlical usecases of Vitis Data Compression Library
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _use_case:
 
 Typical Use Cases
@@ -27,3 +33,4 @@ L2 module contains pre-designed compress/decompress kernels for various data com
 Note
 
 L3 Overlay is still under active development now. Stay tuned!
+

@@ -37,6 +37,7 @@ Core Utility
    StochasticProcess/stochastic_process1d.rst
    StochasticProcess/ornsteinuhlenbeck_process.rst
    fdmmesher/fdmmesher.rst
+   NumericalIntegration/NumericalIntegration.rst
    
 
 L1 Module APIs

@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_SNAPPY_COMPRESS_KERNEL_HPP_
-#define _XFCOMPRESSION_SNAPPY_COMPRESS_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_SNAPPY_COMPRESS_MM_HPP_
+#define _XFCOMPRESSION_SNAPPY_COMPRESS_MM_HPP_
 
 /**
- * @file snappy_compress_kernel.hpp
+ * @file snappy_compress_mm.hpp
  * @brief C++ Header for snappy compression kernel.
  *
  * This file is part of Vitis Data Compression Library.
@@ -37,23 +37,14 @@
 #include "stream_upsizer.hpp"
 #include "snappy_compress.hpp"
 
-//#define LARGE_LIT_RANGE 1
-#define PARALLEL_BLOCK 8
 #define GMEM_DWIDTH 512
 #define GMEM_BURST_SIZE 16
-
 #define MIN_BLOCK_SIZE 16
-#define BIT 8
-#define MIN_OFFSET 1
 #define MIN_MATCH 4
 #define LZ_MAX_OFFSET_LIMIT 65536
-#define LZ_HASH_BIT 12
-#define LZ_DICT_SIZE (1 << LZ_HASH_BIT)
 #define MAX_MATCH_LEN 64
 #define OFFSET_WINDOW 65536
-#define BOOSTER_OFFSET_WINDOW 16384
 #define MATCH_LEN 6
-#define MATCH_LEVEL 6
 
 #ifdef LARGE_LIT_RANGE
 #define MAX_LIT_COUNT 4090
@@ -83,4 +74,4 @@ void xilSnappyCompress(const xf::compression::uintMemWidth_t* in,
                        uint32_t input_size);
 }
 
-#endif
+#endif // _XFCOMPRESSION_SNAPPY_COMPRESS_MM_HPP_

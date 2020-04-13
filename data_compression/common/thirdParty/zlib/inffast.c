@@ -103,9 +103,6 @@ void ZLIB_INTERNAL inflate_fast(z_streamp strm, unsigned start)
     lmask = (1U << state->lenbits) - 1;
     dmask = (1U << state->distbits) - 1;
 
-    printf("lmask %d \n", lmask);
-    printf("dmask %d \n", dmask);
-
     /* decode literals and length/distances until end-of-block or not enough
        input data or output space */
     do {
@@ -117,8 +114,6 @@ void ZLIB_INTERNAL inflate_fast(z_streamp strm, unsigned start)
         }
         here = lcode[hold & lmask];
 
-        printf("here_op %d here_bits %d here_val %d index %d hold %d bits %d\n", here.op, here.bits, here.val,
-               hold & lmask, hold, bits);
     dolen:
         op = (unsigned)(here.bits);
         hold >>= op;

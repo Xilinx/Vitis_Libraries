@@ -240,7 +240,7 @@ endif
 XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/src/kernel
 
-XCLBIN_NAME = fd_heston_kernel_${DEVICE_PART}_${TARGET}_m${FD_M_SIZE}_${FD_DATA_TYPE}
+XCLBIN_NAME = fd_heston_kernel
 KERNELS = fd_kernel:fd_kernel.cpp
 
 HLS_L1_DIR = $(XF_PROJ_ROOT)/L1/include

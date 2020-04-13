@@ -40,12 +40,11 @@ typedef ap_uint<32> compressd_dt;
  * match length and offset of each literal.
  *
  * @tparam MATCH_LEN match length
- * @tparam MATCH_LEVEL match level
- * @tparam LZ_DICT_SIZE dictionary size
- * @tparam BIT bit
- * @tparam MIN_OFFSET minimum offset
  * @tparam MIN_MATCH minimum match
  * @tparam LZ_MAX_OFFSET_LIMIT maximum offset limit
+ * @tparam MATCH_LEVEL match level
+ * @tparam MIN_OFFSET minimum offset
+ * @tparam LZ_DICT_SIZE dictionary size
  *
  * @param inStream input stream
  * @param outStream output stream
@@ -53,17 +52,14 @@ typedef ap_uint<32> compressd_dt;
  * @param left_bytes left bytes in block
  */
 template <int MATCH_LEN,
-          int MATCH_LEVEL,
-          int LZ_DICT_SIZE,
-          int BIT,
-          int MIN_OFFSET,
           int MIN_MATCH,
-          int LZ_MAX_OFFSET_LIMIT>
-void lzCompress(hls::stream<ap_uint<BIT> >& inStream,
-                hls::stream<compressd_dt>& outStream,
-                uint32_t input_size,
-                uint32_t left_bytes) {
-    const int c_dictEleWidth = (MATCH_LEN * BIT + 24);
+          int LZ_MAX_OFFSET_LIMIT,
+          int MATCH_LEVEL = 6,
+          int MIN_OFFSET = 1,
+          int LZ_DICT_SIZE = 1 << 12,
+          int LEFT_BYTES = 64>
+void lzCompress(hls::stream<ap_uint<8> >& inStream, hls::stream<compressd_dt>& outStream, uint32_t input_size) {
+    const int c_dictEleWidth = (MATCH_LEN * 8 + 24);
     typedef ap_uint<MATCH_LEVEL * c_dictEleWidth> uintDictV_t;
     typedef ap_uint<c_dictEleWidth> uintDict_t;
 
@@ -75,7 +71,7 @@ void lzCompress(hls::stream<ap_uint<BIT> >& inStream,
     uintDictV_t resetValue = 0;
     for (int i = 0; i < MATCH_LEVEL; i++) {
 #pragma HLS UNROLL
-        resetValue.range((i + 1) * c_dictEleWidth - 1, i * c_dictEleWidth + MATCH_LEN * BIT) = -1;
+        resetValue.range((i + 1) * c_dictEleWidth - 1, i * c_dictEleWidth + MATCH_LEN * 8) = -1;
     }
 // Initialization of Dictionary
 dict_flush:
@@ -91,7 +87,7 @@ dict_flush:
         present_window[i] = inStream.read();
     }
 lz_compress:
-    for (uint32_t i = MATCH_LEN - 1; i < input_size - left_bytes; i++) {
+    for (uint32_t i = MATCH_LEN - 1; i < input_size - LEFT_BYTES; i++) {
 #pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = dict inter false
         uint32_t currIdx = i - MATCH_LEN + 1;
@@ -111,9 +107,9 @@ lz_compress:
         uintDictV_t dictWriteValue = dictReadValue << c_dictEleWidth;
         for (int m = 0; m < MATCH_LEN; m++) {
 #pragma HLS UNROLL
-            dictWriteValue.range((m + 1) * BIT - 1, m * BIT) = present_window[m];
+            dictWriteValue.range((m + 1) * 8 - 1, m * 8) = present_window[m];
         }
-        dictWriteValue.range(c_dictEleWidth - 1, MATCH_LEN * BIT) = currIdx;
+        dictWriteValue.range(c_dictEleWidth - 1, MATCH_LEN * 8) = currIdx;
         // Dictionary Update
         dict[hash] = dictWriteValue;
 
@@ -125,9 +121,9 @@ lz_compress:
             uint8_t len = 0;
             bool done = 0;
             uintDict_t compareWith = dictReadValue.range((l + 1) * c_dictEleWidth - 1, l * c_dictEleWidth);
-            uint32_t compareIdx = compareWith.range(c_dictEleWidth - 1, MATCH_LEN * BIT);
+            uint32_t compareIdx = compareWith.range(c_dictEleWidth - 1, MATCH_LEN * 8);
             for (int m = 0; m < MATCH_LEN; m++) {
-                if (present_window[m] == compareWith.range((m + 1) * BIT - 1, m * BIT) && !done) {
+                if (present_window[m] == compareWith.range((m + 1) * 8 - 1, m * 8) && !done) {
                     len++;
                 } else {
                     done = 1;
@@ -158,7 +154,7 @@ lz_compress_leftover:
         outStream << outValue;
     }
 lz_left_bytes:
-    for (int l = 0; l < left_bytes; l++) {
+    for (int l = 0; l < LEFT_BYTES; l++) {
 #pragma HLS PIPELINE
         compressd_dt outValue = 0;
         outValue.range(7, 0) = inStream.read();
@@ -168,4 +164,4 @@ lz_left_bytes:
 
 } // namespace compression
 } // namespace xf
-#endif
+#endif // _XFCOMPRESSION_LZ_COMPRESS_HPP_

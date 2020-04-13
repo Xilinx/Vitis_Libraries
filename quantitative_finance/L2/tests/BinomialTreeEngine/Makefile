@@ -235,7 +235,7 @@ VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/ -I$(XFLIB_DIR)/L2/include/
 
 VPP_CFLAGS += -DTEST_DT=$(TEST_DT) -DTEST_PARALLEL_ENGINES=$(TEST_PE)
 
-XCLBIN_NAME := BinomialTree_$(TARGET)_$(DEVICE_PART)_$(TEST_DT)_pe$(TEST_PE)
+XCLBIN_NAME := binomialtree
 
 # -----------------------------------------------------------------------------
 # TODO:                           host setup

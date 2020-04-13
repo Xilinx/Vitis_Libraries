@@ -14,9 +14,8 @@
  * limitations under the License.
  *
  */
-
-#ifndef _XFCOMPRESSION_BLOCK_COMP_DATAMOVER_KERNEL_HPP_
-#define _XFCOMPRESSION_BLOCK_COMP_DATAMOVER_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_BLOCK_COMP_DM_HPP_
+#define _XFCOMPRESSION_BLOCK_COMP_DM_HPP_
 
 /**
  * @file block_comp_datamover_kernel.hpp
@@ -55,4 +54,4 @@ void xilCompDatamover(xf::compression::uintMemWidth_t* in,
                       hls::stream<ap_axiu<8, 0, 0, 0> >& instream_orig,
                       hls::stream<ap_axiu<8, 0, 0, 0> >& outstream_dest);
 }
-#endif // _XFCOMPRESSION_BLOCK_COMP_DATAMOVER_KERNEL_HPP_
+#endif // _XFCOMPRESSION_BLOCK_COMP_DM_HPP_

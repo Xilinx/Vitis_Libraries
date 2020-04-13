@@ -60,8 +60,6 @@ void scal(unsigned int p_n,
 #pragma HLS PIPELINE
         WideType<t_DataType, t_ParEntries> l_valX;
         WideType<t_DataType, t_ParEntries> l_valY;
-#pragma HLS ARRAY_PARTITION variable = l_valX complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = l_valY complete dim = 1
         l_valX = p_x.read();
         for (unsigned int j = 0; j < t_ParEntries; ++j) {
             l_valY[j] = p_alpha * l_valX[j];

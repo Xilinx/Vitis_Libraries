@@ -1,37 +1,43 @@
 
-# Setup Environment
+## Heston Finite Difference Example
 
-source /opt/xilinx/xrt/setup.csh
-
-source /*path to xf_fintech*/L3/src/env.csh
-
-# Build Xilinx Fintech Library
-
-cd  /*path to xf_fintech*/L3/src
-
-**make clean all**
+This example shows how to utilize Heston Finite Difference engine
 
 
-# Build Instuctions
+### Step 1 :
+Setup the build environment using the Vitis and XRT scripts:
 
-To build the command line executable (heston_cl) from this directory
+    source <install path>/Vitis/2019.2/settings64.sh
 
-**make clean all**
-
-> Note this requires the xilinx fintech library to already to built
-
-
-# Run Instuctions
-
-Copy the prebuilt kernel files from /*path to xf_fintech*/L2/tests/FdEuropeanHestonEngine/ to this directory
-
-**fd_heston_kernel_u250_m8192_double.xclbin**
+    source /opt/xilinx/xrt/setup.sh
 
 
-To run the command line exe and generate the interpolated NPV
+### Step 2 :
+Build the L3 Library
 
->output/hestonfd_cl.exe kappa eta sigma rho rd T K S V N m1 m2
+    cd L3/src
 
-or with default arguments
+    source env.sh or source env.csh
 
-**make run**
+    make
+
+
+### Step 3 :
+Build the matching Heston Finite Difference Kernel
+
+    cd L2/tests/FdEuropeanHestonEngine
+
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+
+
+### Step 4 :
+Build host code & run exeutable
+
+#### The default host arguements are [kappa eta sigma rho rd T K S V N m1 m2] - 1.5 0.04 0.3 -0.9 0.025 1 100 200 1 200 128 64
+
+    cd L3/examples/HestonFD
+
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to step 3 to build*

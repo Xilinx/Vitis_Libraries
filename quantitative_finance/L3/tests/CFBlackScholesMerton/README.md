@@ -3,40 +3,38 @@
 
 This test shows how to utilize the Closed Form Black Scholes Merton Model.
 
-This model is the Black Scholes model with the addition of Dividend Yield.
+### Step 1 :
+Setup the build environment using the Vitis and XRT scripts:
+
+    source <install path>/Vitis/2019.2/settings64.sh
+
+    source /opt/xilinx/xrt/setup.sh
+
+### Step 2 :
+Build the L3 Library
+
+    cd  L3/src
+
+    source env.sh or source env.csh
+
+    make
 
 
-# Setup Environment
+### Step 3 :
+Build the matching CFBlackScholesMerton Kernel
 
-source /opt/xilinx/xrt/setup.csh
+    cd L2/tests/CFBlackScholesMerton
 
-source /*path to xf_fintech*/L3/src/env.csh
-
-
-# Build Xilinx Fintech Library
-
-cd  /*path to xf_fintech*/L3/src
-
-**make all**
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
 
 
-# Build Instuctions
+### Step 4 :
+Build host code & run exeutable
 
-To build the command line executable from this directory
+    cd L3/tests/CFBlackScholesMerton
 
-**make all**
-
-> Note this requires the xilinx fintech library to already to built
-
-
-# Run Instuctions
-
-Copy the prebuilt kernel files to this directory
-
-**bsm_kernel.xclbin**
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
 
 
-To run the command line exe and generate the interpolated NPV
-
-**make run**
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to step 3 to build*
 

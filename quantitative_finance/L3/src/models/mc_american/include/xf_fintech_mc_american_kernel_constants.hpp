@@ -30,5 +30,6 @@ typedef double KDataType;
 #define DEPTH_M (9 * TIMESTEPS)
 #define SZ (8 * sizeof(KDataType))
 #define COEF_DEPTH (1024)
+#define KN2 (1)
 
 #endif //_XF_FINTECH_MC_AMERICAN_KERNEL_CONSTANTS_H_

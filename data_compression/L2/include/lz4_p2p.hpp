@@ -1,5 +1,3 @@
-#ifndef _XFP2P_XFP2P_HPP_
-#define _XFP2P_XFP2P_HPP_
 /**********
  * Copyright (c) 2019, Xilinx, Inc.
  * All rights reserved.
@@ -31,6 +29,8 @@
  * OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * **********/
+#ifndef _XFCOMPRESSION_LZ4_P2P_HPP_
+#define _XFCOMPRESSION_LZ4_P2P_HPP_
 
 /**
  * @file lz4_p2p.hpp
@@ -61,4 +61,4 @@ typedef struct unpackerChunkInfo {
     uint32_t padding[(GMEM_DATAWIDTH / 32) - 5];
 } dt_chunkInfo;
 
-#endif
+#endif // _XFCOMPRESSION_LZ4_P2P_HPP_

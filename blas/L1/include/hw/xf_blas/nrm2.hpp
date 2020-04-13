@@ -50,9 +50,6 @@ void square(unsigned int p_n,
 #pragma HLS PIPELINE
         WideType<t_DataType, t_ParEntries> l_valX;
         WideType<t_DataType, t_ParEntries> l_valRes;
-#pragma HLS ARRAY_PARTITION variable = l_valX complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = l_valY complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = l_valRes complete dim = 1
         l_valX = p_x.read();
         for (unsigned int j = 0; j < t_ParEntries; ++j) {
             l_valRes[j] = l_valX[j] * l_valX[j];

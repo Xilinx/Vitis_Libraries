@@ -19,9 +19,16 @@
 #include <vector>
 #include "cmdlineparser.h"
 
+static uint64_t getFileSize(std::ifstream& file) {
+    file.seekg(0, file.end);
+    uint64_t file_size = file.tellg();
+    file.seekg(0, file.beg);
+    return file_size;
+}
+
 void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string& compress_bin) {
     // Xilinx LZ4 object
-    xfLz4Streaming* xlz = new xfLz4Streaming(compress_bin, 1);
+    xfLz4Streaming* xlz = new xfLz4Streaming(compress_bin, 1, block_size);
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -31,21 +38,23 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
     uint64_t input_size = getFileSize(inFile);
     inFile.close();
 
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
+    double len = input_size;
+    int order = 0;
+    while (len >= 1000) {
+        order++;
+        len = len / 1000;
+    }
+
     std::string lz_compress_in = compress_mod;
     std::string lz_compress_out = compress_mod;
     lz_compress_out = lz_compress_out + ".lz4";
-
-    // Update class membery with block_size
-    xlz->m_block_size_in_kb = block_size;
-
-    // 0 means Xilinx flow
-    xlz->m_switch_flow = 0;
 
 #ifdef EVENT_PROFILE
     auto total_start = std::chrono::high_resolution_clock::now();
 #endif
     // Call LZ4 compression
-    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size);
+    uint64_t enbytes = xlz->compressFile(lz_compress_in, lz_compress_out, input_size, 0);
 #ifdef EVENT_PROFILE
     auto total_end = std::chrono::high_resolution_clock::now();
     auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
@@ -53,12 +62,19 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
 
 #ifdef VERBOSE
     std::cout.precision(3);
-    std::cout << std::fixed << std::setprecision(2) << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
-              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+    std::cout << std::fixed << std::setprecision(2) << std::endl
+              << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_compress_out.c_str() << std::endl;
-    std::cout << "Compressed file size: " << enbytes << std::endl;
+    len = enbytes;
+    order = 0;
+    while (len >= 1000) {
+        order++;
+        len = len / 1000;
+    }
+    std::cout << "Compressed file size(" << sizes[order] << ")\t\t:" << enbytes << std::endl;
 #endif
 
 #ifdef EVENT_PROFILE

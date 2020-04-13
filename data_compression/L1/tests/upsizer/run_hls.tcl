@@ -18,7 +18,7 @@ source settings.tcl
 
 set PROJ "upSizer_test.prj"
 set SOLN "sol1"
-set CLKP 2.5
+set CLKP 3.3
 
 open_project -reset $PROJ
 

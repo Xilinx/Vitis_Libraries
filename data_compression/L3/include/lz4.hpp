@@ -21,8 +21,8 @@
  * This file is part of Vitis Data Compression Library host code for lz4 compression.
  */
 
-#ifndef _XFCOMPRESSION_XIL_LZ4_HPP_
-#define _XFCOMPRESSION_XIL_LZ4_HPP_
+#ifndef _XFCOMPRESSION_LZ4_HPP_
+#define _XFCOMPRESSION_LZ4_HPP_
 
 #include <iomanip>
 #include "xcl2.hpp"
@@ -67,7 +67,7 @@ class xfLz4 {
      *
      * @param binaryFile file to be read
      */
-    int init(const std::string& binaryFile);
+    int init(const std::string& binaryFile, uint8_t flow, uint32_t block_size_kb);
 
     /**
      * @brief release
@@ -115,10 +115,8 @@ class xfLz4 {
      * @param host_buffer_size host buffer size
      */
 
-    uint64_t decompressFile(std::string& inFile_name,
-                            std::string& outFile_name,
-                            uint64_t actual_size,
-                            bool file_list_flag);
+    uint64_t decompressFile(
+        std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool file_list_flag, bool m_flow);
 
     /**
      * @brief This module is provided to support compress API and
@@ -129,25 +127,8 @@ class xfLz4 {
      * @param actual_size input size
      */
 
-    uint64_t compressFile(std::string& inFile_name,
-                          std::string& outFile_name,
-                          uint64_t actual_size,
-                          bool file_list_flag);
-
-    /**
-     * Binary flow compress/decompress
-     */
-    bool m_bin_flow;
-
-    /**
-     * Block Size
-     */
-    uint32_t m_block_size_in_kb;
-
-    /**
-     * Switch between FPGA/Standard flows
-     */
-    bool m_switch_flow;
+    uint64_t compressFile(
+        std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool file_list_flag, bool m_flow);
 
     /**
      * @brief Class constructor
@@ -161,6 +142,21 @@ class xfLz4 {
     ~xfLz4();
 
    private:
+    /**
+     * Block Size
+     */
+    uint32_t m_BlockSizeInKb;
+
+    /**
+     * Binary flow compress/decompress
+     */
+    bool m_BinFlow;
+
+    /**
+     * Switch between FPGA/Standard flows
+     */
+    bool m_SwitchFlow;
+
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q;
@@ -191,4 +187,4 @@ class xfLz4 {
 
 } // end namespace compression
 } // end namespace xf
-#endif // _XFCOMPRESSION_XIL_LZ4_HPP_
+#endif // _XFCOMPRESSION_LZ4_HPP_

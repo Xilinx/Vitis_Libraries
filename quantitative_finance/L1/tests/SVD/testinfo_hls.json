@@ -8,7 +8,7 @@
             "files": [], 
             "index": 0, 
             "max_memory_MB": 16384, 
-            "max_time_min": 30, 
+            "max_time_min": 180, 
             "server": "lsf"
         }
     ], 

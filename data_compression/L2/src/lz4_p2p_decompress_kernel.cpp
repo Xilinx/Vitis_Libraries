@@ -15,10 +15,10 @@
  *
  */
 /**
- * @file xil_lz4_decompress_kernel.cpp
+ * @file lz4_p2p_decompress_kernel.cpp
  * @brief Source for LZ4 decompression kernel.
  *
- * This file is part of XF Compression Library.
+ * This file is part of Vitis Data Compression Library.
  */
 
 #include "lz4_p2p_decompress_kernel.hpp"
@@ -27,13 +27,11 @@
 #define HISTORY_SIZE MAX_OFFSET
 const int c_gmemBurstSize = (2 * GMEM_BURST_SIZE);
 
-#define BIT 8
 #define READ_STATE 0
 #define MATCH_STATE 1
 #define LOW_OFFSET_STATE 2
-#define LOW_OFFSET 8 // This should be bigger than Pipeline Depth to handle inter dependency false case
 
-typedef ap_uint<BIT> uintV_t;
+typedef ap_uint<8> uintV_t;
 
 void lz4CoreDec(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
                 hls::stream<xf::compression::uintMemWidth_t>& outStreamMemWidth,
@@ -59,12 +57,12 @@ void lz4CoreDec(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
     if (input_size == output_size) uncomp_flag = 1;
 
 #pragma HLS dataflow
-    xf::compression::streamDownsizerP2P<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, instreamV, input_size,
-                                                                  input_start_idx);
+    xf::compression::details::streamDownsizerP2P<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, instreamV, input_size,
+                                                                           input_start_idx);
     xf::compression::lz4DecompressSimple(instreamV, decompressd_stream, input_size1, uncomp_flag);
-    xf::compression::lzDecompress<HISTORY_SIZE, READ_STATE, MATCH_STATE, LOW_OFFSET_STATE, LOW_OFFSET>(
-        decompressd_stream, decompressed_stream, output_size);
-    xf::compression::streamUpsizer<uint32_t, 8, GMEM_DWIDTH>(decompressed_stream, outStreamMemWidth, output_size1);
+    xf::compression::lzDecompress<HISTORY_SIZE>(decompressd_stream, decompressed_stream, output_size);
+    xf::compression::details::streamUpsizer<uint32_t, 8, GMEM_DWIDTH>(decompressed_stream, outStreamMemWidth,
+                                                                      output_size1);
 }
 
 void lz4Dec(const xf::compression::uintMemWidth_t* in,
@@ -84,8 +82,8 @@ void lz4Dec(const xf::compression::uintMemWidth_t* in,
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel
-    xf::compression::mm2sNbRoundOff<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth,
-                                                                                  input_size);
+    xf::compression::details::mm2sNbRoundOff<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(
+        in, input_idx, inStreamMemWidth, input_size);
     for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
 #pragma HLS UNROLL
         // lz4CoreDec is instantiated based on the PARALLEL_BLOCK
@@ -93,8 +91,8 @@ void lz4Dec(const xf::compression::uintMemWidth_t* in,
     }
 
     // Transfer data from kernel to global memory
-    xf::compression::s2mmNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(out, output_idx, outStreamMemWidth,
-                                                                                    output_size);
+    xf::compression::details::s2mmNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(
+        out, output_idx, outStreamMemWidth, output_size);
 }
 //} // namespace end
 
@@ -121,11 +119,6 @@ void xilLz4P2PDecompress(const xf::compression::uintMemWidth_t* in,
 #pragma HLS INTERFACE s_axilite port = total_no_cu bundle = control
 #pragma HLS INTERFACE s_axilite port = num_blocks bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
-
-#pragma HLS data_pack variable = in
-#pragma HLS data_pack variable = out
-#pragma HLS data_pack variable = decompress_block_info
-#pragma HLS data_pack variable = decompress_chunk_info
 
     uint32_t max_block_size = block_size_in_kb * 1024;
     uint32_t compress_size[PARALLEL_BLOCK];

@@ -74,7 +74,6 @@ int main(int argc, const char* argv[]) {
     }
     // Allocate Memory in Host Memory
     ap_uint<32>* seed = aligned_alloc<ap_uint<32> >(8 * 2);
-    TEST_DT* output = aligned_alloc<TEST_DT>(1);
 
     // -------------setup k0 params---------------
     int timeSteps = 100;
@@ -90,7 +89,7 @@ int main(int argc, const char* argv[]) {
     TEST_DT strike = 1;
     unsigned int optionType = 0;
     TEST_DT timeLength = 1;
-    TEST_DT outputs[8];
+    TEST_DT *outputs = aligned_alloc<TEST_DT>(8);
 
     ap_uint<32> seed_2d[8][2];
     for (int i = 0; i < 8; i++) {
@@ -160,7 +159,7 @@ int main(int argc, const char* argv[]) {
     cl::Buffer output_buf;
     cl::Buffer seed_buf;
     output_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                            sizeof(TEST_DT) * 1, &mext_o[0]);
+                            sizeof(TEST_DT) * 8, &mext_o[0]);
     seed_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                           sizeof(ap_uint<32>) * (8 * 2), &mext_o[1]);
 

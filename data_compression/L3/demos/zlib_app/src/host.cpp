@@ -21,8 +21,6 @@
 
 using namespace xf::compression;
 
-enum list_mode { ONLY_COMPRESS, ONLY_DECOMPRESS, BOTH };
-
 void xil_validate(std::string& file_list, std::string& ext);
 
 void xil_compress_decompress_list(std::string& file_list,
@@ -30,10 +28,10 @@ void xil_compress_decompress_list(std::string& file_list,
                                   std::string& ext2,
                                   int cu,
                                   std::string& single_bin,
-                                  enum list_mode mode = BOTH) {
+                                  uint8_t max_cr,
+                                  enum list_mode mode = COMP_DECOMP) {
     // Create xfZlib object
-    xfZlib* xlz;
-    xlz = new xfZlib(single_bin);
+    xfZlib xlz(single_bin, max_cr, BOTH);
 
     if (mode != ONLY_DECOMPRESS) {
         std::cout << "--------------------------------------------------------------" << std::endl;
@@ -65,7 +63,7 @@ void xil_compress_decompress_list(std::string& file_list,
             compress_out = compress_out + ext1;
 
             // Call Zlib compression
-            uint64_t enbytes = xlz->compress_file(compress_in, compress_out, input_size);
+            uint64_t enbytes = xlz.compress_file(compress_in, compress_out, input_size);
 
             std::cout << "\t\t" << (double)input_size / enbytes << "\t\t" << std::fixed << std::setprecision(3)
                       << (double)input_size / 1000000 << "\t\t\t" << compress_in << std::endl;
@@ -104,7 +102,7 @@ void xil_compress_decompress_list(std::string& file_list,
             decompress_out = decompress_out + ".orig";
 
             // Call Zlib decompression
-            xlz->decompress_file(decompress_in, decompress_out, input_size, cu);
+            xlz.decompress_file(decompress_in, decompress_out, input_size, cu);
 
             std::cout << std::fixed << std::setprecision(3) << "\t\t" << (double)input_size / 1000000 << "\t\t"
                       << decompress_in << std::endl;
@@ -112,7 +110,7 @@ void xil_compress_decompress_list(std::string& file_list,
     }
 }
 
-void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::string& single_bin) {
+void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::string& single_bin, uint8_t max_cr) {
     std::string ext1;
     std::string ext2;
 
@@ -120,7 +118,7 @@ void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::
     ext1 = ".xe2xd.zlib";
     ext2 = ".xe2xd.zlib";
 
-    xil_compress_decompress_list(file_list, ext1, ext2, cu, single_bin, mode);
+    xil_compress_decompress_list(file_list, ext1, ext2, cu, single_bin, max_cr, mode);
 
     // Validate
     std::cout << "\n";
@@ -134,12 +132,11 @@ void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::
     xil_validate(file_list, ext3);
 }
 
-void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single_bin) {
+void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single_bin, uint8_t max_cr) {
     // Xilinx ZLIB object
-    xfZlib* xlz;
-    xlz = new xfZlib(single_bin);
+    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY);
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -152,20 +149,27 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
     std::string lz_decompress_out = decompress_mod;
     lz_decompress_out = lz_decompress_out + ".raw";
 
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
+    double len = input_size;
+    int order = 0;
+    while (len >= 1000) {
+        order++;
+        len = len / 1000;
+    }
+
     // Call ZLIB compression
     // uint32_t enbytes =
-    xlz->decompress_file(lz_decompress_in, lz_decompress_out, input_size, cu);
+    xlz.decompress_file(lz_decompress_in, lz_decompress_out, input_size, cu);
     std::cout << std::fixed << std::setprecision(3) << std::endl
-              << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 }
 
-void xil_compress_top(std::string& compress_mod, std::string& single_bin) {
+void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_t max_cr) {
     // Xilinx ZLIB object
-    xfZlib* xlz;
-    xlz = new xfZlib(single_bin);
+    xfZlib xlz(single_bin, max_cr, COMP_ONLY);
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -178,13 +182,21 @@ void xil_compress_top(std::string& compress_mod, std::string& single_bin) {
     std::string lz_compress_out = compress_mod;
     lz_compress_out = lz_compress_out + ".zlib";
 
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
+    double len = input_size;
+    int order = 0;
+    while (len >= 1000) {
+        order++;
+        len = len / 1000;
+    }
+
     // Call ZLIB compression
-    uint32_t enbytes = xlz->compress_file(lz_compress_in, lz_compress_out, input_size);
+    uint32_t enbytes = xlz.compress_file(lz_compress_in, lz_compress_out, input_size);
 
     std::cout.precision(3);
     std::cout << std::fixed << std::setprecision(2) << std::endl
               << "ZLIB_CR\t\t\t:" << (double)input_size / enbytes << std::endl
-              << std::fixed << std::setprecision(3) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_compress_in << std::endl;
     std::cout << "\n";
     std::cout << "Output Location: " << lz_compress_out.c_str() << std::endl;
@@ -214,10 +226,9 @@ void xil_validate(std::string& file_list, std::string& ext) {
     }
 }
 
-void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string& single_bin) {
+void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string& single_bin, uint8_t max_cr_val) {
     // Create xfZlib object
-    xfZlib* xlz;
-    xlz = new xfZlib(single_bin);
+    xfZlib xlz(single_bin, max_cr_val, BOTH);
 
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "                     Xilinx Zlib Compress                          " << std::endl;
@@ -240,11 +251,19 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string&
     std::string compress_out = compress_decompress_mod;
     compress_out = compress_out + ".zlib";
 
+    const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
+    double len = input_size;
+    int order = 0;
+    while (len >= 1000) {
+        order++;
+        len = len / 1000;
+    }
+
     // Call Zlib compression
-    uint64_t enbytes = xlz->compress_file(compress_in, compress_out, input_size);
+    uint64_t enbytes = xlz.compress_file(compress_in, compress_out, input_size);
     std::cout << std::fixed << std::setprecision(2) << std::endl
               << "CR\t\t\t:" << (double)input_size / enbytes << std::endl
-              << std::fixed << std::setprecision(3) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << compress_in << std::endl;
 
     // Decompress
@@ -255,7 +274,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string&
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "\n";
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E\t\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     // Decompress list of files
 
@@ -273,13 +292,18 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string&
     inFile_dec.close();
 
     // Call Zlib decompression
-    xlz->decompress_file(lz_decompress_in, lz_decompress_out, input_size, 0);
+    xlz.decompress_file(lz_decompress_in, lz_decompress_out, input_size, 0);
+
+    len = input_size;
+    order = 0;
+    while (len >= 1000) {
+        order++;
+        len = len / 1000;
+    }
 
     std::cout << std::fixed << std::setprecision(2) << std::endl
-              << std::fixed << std::setprecision(3) << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
+              << std::fixed << std::setprecision(3) << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
-
-    // xlz.release();
 
     // Validate
     std::cout << "\n";
@@ -304,6 +328,7 @@ int main(int argc, char* argv[]) {
 
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.addSwitch("--cu", "-k", "CU", "0");
+    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
     parser.parse(argc, argv);
 
     std::string compress_mod = parser.value("compress");
@@ -312,6 +337,15 @@ int main(int argc, char* argv[]) {
     std::string single_bin = parser.value("single_xclbin");
     std::string compress_decompress_mod = parser.value("compress_decompress");
     std::string cu = parser.value("cu");
+    std::string mcr = parser.value("max_cr");
+
+    uint8_t max_cr_val = 0;
+    if (!(mcr.empty())) {
+        max_cr_val = atoi(mcr.c_str());
+    } else {
+        // Default block size
+        max_cr_val = MAX_CR;
+    }
 
     if (cu.empty()) {
         printf("please give -k option for cu\n");
@@ -320,7 +354,7 @@ int main(int argc, char* argv[]) {
         cu_run = atoi(cu.c_str());
     }
 
-    if (!compress_decompress_mod.empty()) xilCompressDecompressTop(compress_decompress_mod, single_bin);
+    if (!compress_decompress_mod.empty()) xilCompressDecompressTop(compress_decompress_mod, single_bin, max_cr_val);
 
     if (!filelist.empty()) {
         list_mode lMode;
@@ -330,13 +364,13 @@ int main(int argc, char* argv[]) {
         } else if (!decompress_mod.empty()) {
             lMode = ONLY_DECOMPRESS;
         } else {
-            lMode = BOTH;
+            lMode = COMP_DECOMP;
         }
-        xil_batch_verify(filelist, cu_run, lMode, single_bin);
+        xil_batch_verify(filelist, cu_run, lMode, single_bin, max_cr_val);
     } else if (!compress_mod.empty()) {
         // "-c" - Compress Mode
-        xil_compress_top(compress_mod, single_bin);
+        xil_compress_top(compress_mod, single_bin, max_cr_val);
     } else if (!decompress_mod.empty())
         // "-d" - DeCompress Mode
-        xil_decompress_top(decompress_mod, cu_run, single_bin);
+        xil_decompress_top(decompress_mod, cu_run, single_bin, max_cr_val);
 }

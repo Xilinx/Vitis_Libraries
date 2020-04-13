@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Library, Data Compression, Xilinx, Overview
+   :description: Vitis Data Compression Library top level overview
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _overview:
 
 .. toctree::
@@ -61,3 +67,4 @@ Trademark Notice
     other designated brands included herein are trademarks of Xilinx in the
     United States and other countries.  All other trademarks are the property
     of their respective owners.
+

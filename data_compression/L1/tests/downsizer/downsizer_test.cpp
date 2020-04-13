@@ -33,7 +33,7 @@
 void streamDownsizerRun(hls::stream<ap_uint<inWidth> >& inStream,
                         hls::stream<ap_uint<outWidth> >& outStream,
                         uint32_t input_size) {
-    xf::compression::streamDownsizer<AOP>(inStream, outStream, input_size);
+    xf::compression::details::streamDownsizer<AOP>(inStream, outStream, input_size);
 }
 
 int main(int argc, char* argv[]) {
@@ -66,10 +66,10 @@ int main(int argc, char* argv[]) {
             match = true;
             continue;
         } else {
-            printf("\n\n***TEST FAILED: The input file and the output file are not same.***\n\n\n");
+            std::cout << "***TEST FAILED: The input file and the output file are not same.***" << std::endl;
             exit(0);
         }
         i++;
     }
-    if (match) printf("\n\n***TEST PASSED: The input file and the output file are same.***\n\n\n");
+    if (match) std::cout << "***TEST PASSED: The input file and the output file are same.***" << std::endl;
 }

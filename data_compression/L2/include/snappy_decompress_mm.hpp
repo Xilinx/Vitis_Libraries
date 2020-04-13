@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_SNAPPY_DECOMPRESS_KERNEL_HPP_
-#define _XFCOMPRESSION_SNAPPY_DECOMPRESS_KERNEL_HPP_
+#ifndef _XFCOMPRESSION_SNAPPY_DECOMPRESS_MM_HPP_
+#define _XFCOMPRESSION_SNAPPY_DECOMPRESS_MM_HPP_
 
 /**
- * @file snappy_decompress_kernel.hpp
+ * @file snappy_decompress_mm.hpp
  * @brief C++ Header for snappy decompression kernel.
  *
  * This file is part of Vitis Data Compression Library.
@@ -40,15 +40,8 @@
 
 #define GMEM_DWIDTH 512
 #define GMEM_BURST_SIZE 16
-
 #define MAX_OFFSET 65536
 #define HISTORY_SIZE MAX_OFFSET
-
-#define BIT 8
-#define READ_STATE 0
-#define MATCH_STATE 1
-#define LOW_OFFSET_STATE 2
-#define LOW_OFFSET 8 // This should be bigger than Pipeline Depth to handle inter dependency false case
 
 extern "C" {
 /**
@@ -69,4 +62,4 @@ void xilSnappyDecompress(const xf::compression::uintMemWidth_t* in,
                          uint32_t block_size_in_kb,
                          uint32_t no_blocks);
 }
-#endif
+#endif // _XFCOMPRESSION_SNAPPY_DECOMPRESS_MM_HPP_

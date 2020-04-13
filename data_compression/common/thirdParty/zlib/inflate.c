@@ -630,9 +630,9 @@ local int updatewindow(z_streamp strm, const Bytef* end, unsigned copy)
 
 extern "C" {
 int xil_decompress_top_buffer(uint8_t* in, uint8_t* out, int input_size) {
-    // printf("In top buffer \n");
+    uint8_t c_max_cr = 20;
     // Xilinx ZLIB object
-    xfZlib xlz("compress_decompress.xclbin");
+    xfZlib xlz("compress_decompress.xclbin", c_max_cr, DECOMP_ONLY);
 
     // Zlib compression
     int debytes = xlz.decompress_buffer((uint8_t*)in, (uint8_t*)out, input_size);
@@ -654,9 +654,8 @@ int ZEXPORT inflate(z_streamp strm, int flush)
     uint8_t* output = strm->next_out;
     uint32_t input_size = strm->avail_in;
 
-    printf("input_size %d star of decompress_buffer\n", input_size);
     int debytes = xil_decompress_top_buffer(input, output, input_size);
-    printf("debytes %d \n", debytes);
+    
     strm->total_out = debytes;
     strm->next_out = output;
 

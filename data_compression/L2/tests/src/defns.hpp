@@ -14,14 +14,15 @@
  * limitations under the License.
  *
  */
+#ifndef _XFCOMPRESSION_DEFNS_HPP_
+#define _XFCOMPRESSION_DEFNS_HPP_
+
 /**
  * @file defns.hpp
  * @brief Header for including common header files
  *
  * This file is part of Vitis Data Compression Library host code for snappy compression.
  */
-#ifndef _XFCOMPRESSION_DEFNS_HPP_
-#define _XFCOMPRESSION_DEFNS_HPP_
 
 #include <iostream>
 #include <cstring>

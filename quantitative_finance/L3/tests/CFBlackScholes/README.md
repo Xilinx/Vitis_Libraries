@@ -4,35 +4,38 @@
 This example show how to utilize the Closed Form Black Scholes Model.
 
 
-# Setup Environment
+### Step 1 :
+Setup the build environment using the Vitis and XRT scripts:
 
-source /opt/xilinx/xrt/setup.csh
+    source <install path>/Vitis/2019.2/settings64.sh
+ 
+    source /opt/xilinx/xrt/setup.sh
 
-source /*path to xf_fintech*/L3/src/env.csh
+### Step 2 :
+Build the L3 Library
 
+    cd  L3/src
 
-# Build Xilinx Fintech Library
+    source env.sh or source env.csh
 
-cd  /*path to xf_fintech*/L3/src
-
-**make all**
-
-
-# Build Instuctions
-
-To build the command line executable (mc_example) from this directory
-
-**make all**
-
-> Note this requires the xilinx fintech library to already to built
+    make
 
 
-# Run Instuctions
+### Step 3 :
+Build the matching CFBlackScholes Kernel
 
-Copy the prebuilt kernel files from /*path to xf_fintech*/L2/tests/CFBlackScholes/ to this directory
+    cd L2/tests/CFBlackScholes
 
-**bs_kernel.xclbin**
+    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
 
-To run the command line exe and generate the interpolated NPV
 
-**make run**
+### Step 4 :
+Build host code & run executable
+
+    cd L3/tests/CFBlackScholes
+
+    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
+
+
+*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to step 3 to build*
+
