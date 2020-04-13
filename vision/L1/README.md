@@ -17,7 +17,7 @@ This level of API is mainly provide for hardware-savvy HLS developers.The API de
 
 source < path-to-Vitis-installation-directory >/settings64.sh
 
-source < part-to-XRT-installation-directory >/setenv.sh
+source < part-to-XRT-installation-directory >/setup.sh
 
 export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
