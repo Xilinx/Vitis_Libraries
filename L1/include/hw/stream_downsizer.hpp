@@ -64,7 +64,8 @@ convInWidthtoV:
 #pragma HLS PIPELINE II = 1
         int idx = i % factor;
         if (idx == 0) inBuffer = inStream.read();
-        ap_uint<OUT_WIDTH> tmpValue = inBuffer.range((idx + 1) * OUT_WIDTH - 1, idx * OUT_WIDTH);
+        ap_uint<OUT_WIDTH> tmpValue = inBuffer;
+        inBuffer >>= OUT_WIDTH;
         outStream << tmpValue;
     }
 }

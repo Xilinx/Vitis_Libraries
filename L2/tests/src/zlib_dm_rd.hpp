@@ -45,6 +45,7 @@ extern "C" {
  *
  * @param out output memory pointer
  * @param encoded_size decompressed size output
+ * @param enq_idx enqueued index number (starts with 0)
  * @param read_block_size Block size to be read
  * @param outstreamk output axi kernel stream (512-bit wide data stream read by this kernel)
  * @param sizestreamk output data size axi kernel stream (size valid in 512-bits read by this kernel)
@@ -53,8 +54,9 @@ extern "C" {
 
 void xilZlibDmReader(uintMemWidth_t* out,
                      uint32_t* encoded_size,
+                     uint32_t* status_flag,
                      uint32_t read_block_size,
                      hls::stream<ap_axiu<kGMemDWidth, 0, 0, 0> >& outstreamk,
-                     hls::stream<ap_axiu<kGMemDWidth, 0, 0, 0> >& sizestreamk);
+                     hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamk);
 }
 #endif // _XFCOMPRESSION_ZLIB_DM_RD_HPP_

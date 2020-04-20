@@ -33,6 +33,7 @@
 #include <ap_int.h>
 #include "hls_stream.h"
 #include "mm2s.hpp"
+#include "stream_downsizer.hpp"
 #include "zlib_config.hpp"
 
 typedef ap_uint<MULTIPLE_BYTES * 8> uintMemWidth_t;
@@ -48,8 +49,6 @@ extern "C" {
  *
  */
 
-void xilZlibDmWriter(uintMemWidth_t* in,
-                     uint32_t inputSize,
-                     hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& instreamk);
+void xilZlibDmWriter(uintMemWidth_t* in, uint32_t inputSize, hls::stream<ap_axiu<16, 0, 0, 0> >& instreamk);
 }
 #endif // _XFCOMPRESSION_ZLIB_DM_WR_HPP_

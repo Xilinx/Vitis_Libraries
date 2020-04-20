@@ -18,18 +18,23 @@ source settings.tcl
 
 set PROJ "upSizer_test.prj"
 set SOLN "sol1"
-set CLKP 3.3
+
+if {![info exists CLKP]} {
+  set CLKP 3.3
+}
 
 open_project -reset $PROJ
 
-add_files upSizer_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb upSizer_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "upSizer_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "upSizer_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top hls_streamUpsizer
 
 open_solution -reset $SOLN
-create_clock -period $CLKP
+
+
 
 set_part $XPART
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design
@@ -49,10 +54,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

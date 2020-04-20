@@ -84,7 +84,6 @@ void xilLz4Unpacker(const xf::compression::uintMemWidth_t* in,
 #pragma HLS INTERFACE s_axilite port = num_blocks bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#pragma HLS data_pack variable = in
 #pragma HLS data_pack variable = unpacker_block_info
 #pragma HLS data_pack variable = unpacker_chunk_info
 

@@ -4,6 +4,9 @@
         "LZ4 Application resides in `L3/demos/lz4_app` directory."
     ],
     "flow": "vitis",
+    "platform_blacklist": [
+        "u50"
+    ],
     "launch": [
         {
             "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt",
@@ -12,8 +15,7 @@
     ],
     "post_launch": [
         {
-            "script_name": "run.sh",
-            "script_args": "HOST_EXE LIB_DIR BUILD/compress.xclbin BUILD/decompress.xclbin"
+            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin BUILD/decompress.xclbin"
         }
     ],
     "config_make": "config.mk",
@@ -37,13 +39,6 @@
             ]
         }
     },
-    "v++": {
-        "compiler": {
-            "symbols": [
-                "PARALLEL_BLOCK=8"
-            ]
-        }
-    },
     "containers": [
         {
             "name": "compress",
@@ -52,6 +47,7 @@
                 {
                     "name": "xilLz4Compress",
                     "location": "LIB_DIR/L2/src/lz4_compress_mm.cpp",
+                    "clflags": "-DPARALLEL_BLOCK=8",
                     "num_compute_units": "2",
                     "compute_units": [
                         {
@@ -88,7 +84,8 @@
             "accelerators": [
                 {
                     "name": "xilLz4Decompress",
-                    "location": "LIB_DIR/L2/src/lz4_decompress_mm.cpp",
+                    "clflags": "-DPARALLEL_BLOCK=1 -DPARALLEL_BYTE=8 -DHOST_BUFFER_SIZE_IN_MB=128",
+                    "location": "LIB_DIR/L2/src/lz4_multibyte_decompress_mm.cpp",
                     "num_compute_units": "2",
                     "compute_units": [
                         {
@@ -120,6 +117,7 @@
             ]
         }
     ],
+    "output_files" : "sample.txt.* sample_run.* test.list",
     "testinfo": {
         "disable": false,
         "jobs": [

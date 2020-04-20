@@ -39,19 +39,19 @@ void lz4(const uint512_t* in,
          uint32_t offset,
          uint32_t block_size_in_kb,
          uint32_t tail_bytes) {
-    hls::stream<uint512_t> inStream512("inStream512_mm2s");
+    hls::stream<uint512_t> inStreamVec("inStreamVec_mm2s");
     hls::stream<uintV_t> inStreamV("inStreamV_dsizer");
     hls::stream<uintV_t> packStreamV("packerStreamOut");
-    hls::stream<uint512_t> outStream512("UpsizeStreamOut");
-#pragma HLS STREAM variable = inStream512 depth = c_gmem_burst_size
+    hls::stream<uint512_t> outStreamVec("UpsizeStreamOut");
+#pragma HLS STREAM variable = inStreamVec depth = c_gmem_burst_size
 #pragma HLS STREAM variable = inStreamV depth = c_gmem_burst_size
 #pragma HLS STREAM variable = packStreamV depth = c_gmem_burst_size
-#pragma HLS STREAM variable = outStream512 depth = c_gmem_burst_size
+#pragma HLS STREAM variable = outStreamVec depth = c_gmem_burst_size
 
-#pragma HLS RESOURCE variable = inStream512 core = FIFO_SRL
+#pragma HLS RESOURCE variable = inStreamVec core = FIFO_SRL
 #pragma HLS RESOURCE variable = inStreamV core = FIFO_SRL
 #pragma HLS RESOURCE variable = packStreamV core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream512 core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStreamVec core = FIFO_SRL
 
     hls::stream<uint32_t> mm2sStreamSize("mm2sOutSize");
     hls::stream<uint32_t> downStreamSize("dstreamOutSize");
@@ -67,18 +67,18 @@ void lz4(const uint512_t* in,
 #pragma HLS RESOURCE variable = upStreamSize core = FIFO_SRL
 
 #pragma HLS dataflow
-    xf::compression::details::mm2s<GMEM_DWIDTH, GMEM_BURST_SIZE>(in, head_prev_blk, orig_input_data, inStream512,
+    xf::compression::details::mm2s<GMEM_DWIDTH, GMEM_BURST_SIZE>(in, head_prev_blk, orig_input_data, inStreamVec,
                                                                  mm2sStreamSize, compressd_size, in_block_size,
                                                                  no_blocks, block_size_in_kb, head_res_size, offset);
-    xf::compression::details::streamDownSizerP2PComp<GMEM_DWIDTH, PACK_WIDTH>(inStream512, inStreamV, mm2sStreamSize,
+    xf::compression::details::streamDownSizerP2PComp<GMEM_DWIDTH, PACK_WIDTH>(inStreamVec, inStreamV, mm2sStreamSize,
                                                                               downStreamSize, no_blocks);
 
     encoded_size[0] = xf::compression::lz4Packer<PACK_WIDTH, PARLLEL_BYTE>(
         inStreamV, packStreamV, downStreamSize, packStreamSize, block_size_in_kb, no_blocks, head_res_size, tail_bytes);
 
-    xf::compression::details::streamUpsizerP2P<GMEM_DWIDTH, PACK_WIDTH>(packStreamV, outStream512, packStreamSize,
+    xf::compression::details::streamUpsizerP2P<GMEM_DWIDTH, PACK_WIDTH>(packStreamV, outStreamVec, packStreamSize,
                                                                         upStreamSize);
-    xf::compression::details::s2mm<GMEM_DWIDTH>(outStream512, out, upStreamSize);
+    xf::compression::details::s2mm<GMEM_DWIDTH>(outStreamVec, out, upStreamSize);
 }
 
 extern "C" {

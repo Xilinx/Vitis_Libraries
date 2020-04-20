@@ -18,6 +18,8 @@ MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/tests/*}')
 
+# MK_INC_BEGIN hls_common.mk
+
 .PHONY: help
 
 help::
@@ -45,6 +47,10 @@ help::
 	@echo "      Command to remove the generated files."
 	@echo ""
 
+# MK_INC_END hls_common.mk
+
+# MK_INC_BEGIN vivado.mk
+
 TOOL_VERSION ?= 2019.2
 
 ifeq (,$(XILINX_VIVADO))
@@ -60,7 +66,11 @@ endif
 
 export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 
+# MK_INC_END vivado.mk
+
 DEVICE ?= u200
+
+# MK_INC_BEGIN vitis_set_part.mk
 
 .PHONY: check_part
 
@@ -100,30 +110,50 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
+# MK_INC_END vitis.mk
+# MK_INC_BEGIN vitis_set_platform.mk
+
 ifneq (,$(wildcard $(DEVICE)))
 # Use DEVICE as a file path
 XPLATFORM := $(DEVICE)
 else
 # Use DEVICE as a file name pattern
 DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
+# 1. search paths specified by variable
 ifneq (,$(PLATFORM_REPO_PATHS))
+# 1.1 as exact name
+XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(DEVICE_L)/$(DEVICE_L).xpfm)))
+# 1.2 as a pattern
+ifeq (,$(XPLATFORM))
 XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 1.2
+endif # 1
+# 2. search Vitis installation
+ifeq (,$(XPLATFORM))
+# 2.1 as exact name
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 2.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 2.2
+endif # 2
+# 3. search default locations
+ifeq (,$(XPLATFORM))
+# 3.1 as exact name
+XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 3.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 3.2
+endif # 3
 endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
+Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -145,13 +175,14 @@ endif
 
 XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
 
+# MK_INC_END vitis_set_platform.mk
 ifeq (1, $(words $(XPLATFORM)))
-
+# Query the part name of device
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
 override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.board.part" --platform $(firstword $(XPLATFORM)))
 endif
 endif
-check_part: | check_platform
+check_part: check_platform check_vpp
 ifeq (,$(XPART))
 	@echo "XPART is not set and cannot be inferred. Please run \`make help\` for usage info." && false
 endif
@@ -160,7 +191,15 @@ check_part:
 	@echo "XPART is directly set to $(XPART)"
 endif # XPART
 
-.PHONY: run setup runhls clean
+# MK_INC_END vitis_set_part.mk
+
+# MK_INC_BEGIN hls_test_rules.mk
+
+
+.PHONY: run setup runhls clean cleanall check
+
+# Alias to run, for legacy test script
+check: run
 
 CSIM ?= 0
 CSYNTH ?= 0
@@ -168,7 +207,6 @@ COSIM ?= 0
 VIVADO_SYN ?= 0
 VIVADO_IMPL ?= 0
 QOR_CHECK ?= 0
-
 
 # at least RTL synthesis before check QoR
 ifeq (1,$(QOR_CHECK))
@@ -190,7 +228,11 @@ ifeq (1,$(COSIM))
 override CSYNTH := 1
 endif
 
-run: setup runhls
+# From testbench.data_recipe of description.json
+data:
+	@true
+
+run: data setup runhls
 
 setup: | check_part
 	@rm -f ./settings.tcl
@@ -201,16 +243,21 @@ setup: | check_part
 	@echo 'set COSIM $(COSIM)' >> ./settings.tcl
 	@echo 'set VIVADO_SYN $(VIVADO_SYN)' >> ./settings.tcl
 	@echo 'set VIVADO_IMPL $(VIVADO_IMPL)' >> ./settings.tcl
-	@echo 'set QOR_CHECK $(QOR_CHECK)' >> ./settings.tcl
 	@echo 'set XF_PROJ_ROOT "$(XF_PROJ_ROOT)"' >> ./settings.tcl
+	@echo 'set CUR_DIR "$(CUR_DIR)"' >> ./settings.tcl
 	@echo "Configured: settings.tcl"
 	@echo "----"
 	@cat ./settings.tcl
 	@echo "----"
 
-runhls: setup | check_vivado
-	vivado_hls -f run_hls.tcl;
-	
+HLS ?= vivado_hls
+runhls: data setup | check_vivado
+	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf *.prj *_hls.log settings.tcl
+	rm -rf settings.tcl *_hls.log lz4_decompress_test.prj
+
+# Used by Jenkins test
+cleanall: clean
+
+# MK_INC_END hls_test_rules.mk

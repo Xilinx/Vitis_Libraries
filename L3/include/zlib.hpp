@@ -30,6 +30,8 @@
 #include <fstream>
 #include <thread>
 #include "xcl2.hpp"
+#include <sys/stat.h>
+#include <random>
 
 const int gz_max_literal_count = 4096;
 
@@ -41,15 +43,15 @@ const int gz_max_literal_count = 4096;
 #define BLOCK_SIZE_IN_KB 1024
 
 // Input and output buffer size
-#define INPUT_BUFFER_SIZE (2 * 1024 * 1024)
-#define OUTPUT_BUFFER_SIZE (32 * 1024 * 1024)
+#define INPUT_BUFFER_SIZE (8 * 1024 * 1024)
+#define OUTPUT_BUFFER_SIZE (16 * 1024 * 1024)
 
 // zlib max cr limit
 #define MAX_CR 10
 
 // buffer count for data in in decompression data movers
-#define DIN_BUFFERCOUNT 8
-#define DOUT_BUFFERCOUNT 2 // mandatorily 2
+#define DIN_BUFFERCOUNT 2
+#define DOUT_BUFFERCOUNT 4
 
 // Maximum host buffer used to operate
 // per kernel invocation
@@ -72,6 +74,7 @@ int validate(std::string& inFile_name, std::string& outFile_name);
 uint32_t get_file_size(std::ifstream& file);
 enum comp_decom_flows { BOTH, COMP_ONLY, DECOMP_ONLY };
 enum list_mode { ONLY_COMPRESS, ONLY_DECOMPRESS, COMP_DECOMP };
+enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };
 
 // Aligned allocator for ZLIB
 template <typename T>
@@ -161,7 +164,7 @@ class xfZlib {
      * @param input_size input size
      */
 
-    int decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
+    int decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size, uint8_t cu_id);
 
     /**
      * @brief This method does file operations and invokes compress API which
@@ -196,14 +199,15 @@ class xfZlib {
            uint8_t c_max_cr = MAX_CR,
            uint8_t cd_flow = BOTH,
            uint8_t device_id = 0,
-           uint8_t profile = 0);
+           uint8_t profile = 0,
+           uint8_t d_type = DYNAMIC);
 
     /**
      * @brief OpenCL setup initialization
      * @param binaryFile
      *
      */
-    void init(const std::string& binaryFile);
+    void init(const std::string& binaryFile, uint8_t dtype);
 
     /**
      * @brief OpenCL setup release
@@ -238,7 +242,6 @@ class xfZlib {
     // Kernel declaration
     cl::Kernel* compress_kernel[C_COMPUTE_UNIT];
     cl::Kernel* huffman_kernel[H_COMPUTE_UNIT];
-    cl::Kernel* treegen_kernel[T_COMPUTE_UNIT];
     cl::Kernel* decompress_kernel[D_COMPUTE_UNIT];
     cl::Kernel* data_writer_kernel[D_COMPUTE_UNIT];
     cl::Kernel* data_reader_kernel[D_COMPUTE_UNIT];
@@ -257,6 +260,7 @@ class xfZlib {
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_in[MAX_DDCOMP_UNITS][DIN_BUFFERCOUNT];
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[MAX_DDCOMP_UNITS][DOUT_BUFFERCOUNT];
     std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize_stream[MAX_DDCOMP_UNITS][DOUT_BUFFERCOUNT];
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressStatus[MAX_DDCOMP_UNITS];
 
     // Device buffers
     cl::Buffer* buffer_input[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
@@ -267,17 +271,6 @@ class xfZlib {
 
     cl::Buffer* buffer_dyn_ltree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
     cl::Buffer* buffer_dyn_dtree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_dyn_bltree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-
-    cl::Buffer* buffer_dyn_ltree_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_dyn_dtree_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_dyn_bltree_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-
-    cl::Buffer* buffer_dyn_ltree_blen[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_dyn_dtree_blen[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_dyn_bltree_blen[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-
-    cl::Buffer* buffer_max_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
     // Decompress Device Buffers
     cl::Buffer* buffer_dec_input[MAX_DDCOMP_UNITS];
@@ -287,8 +280,8 @@ class xfZlib {
     // Kernel names
     std::vector<std::string> compress_kernel_names = {"xilLz77Compress"};
     std::vector<std::string> huffman_kernel_names = {"xilHuffmanKernel"};
-    std::vector<std::string> treegen_kernel_names = {"xilTreegenKernel"};
-    std::string stream_decompress_kernel_name = "xilDecompressStream";
+    std::vector<std::string> stream_decompress_kernel_name = {"xilDecompressStream", "xilDecompressFixed",
+                                                              "xilDecompressFull"};
     std::string data_writer_kernel_name = "xilZlibDmWriter";
     std::string data_reader_kernel_name = "xilZlibDmReader";
 };

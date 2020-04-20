@@ -631,12 +631,15 @@ local int updatewindow(z_streamp strm, const Bytef* end, unsigned copy)
 extern "C" {
 int xil_decompress_top_buffer(uint8_t* in, uint8_t* out, int input_size) {
     uint8_t c_max_cr = 20;
+    
+    char *xclbin = getenv("XILINX_LIBZ_XCLBIN");
+    char *cu_id = getenv("XILINX_CU_ID");
+    
     // Xilinx ZLIB object
-    xfZlib xlz("compress_decompress.xclbin", c_max_cr, DECOMP_ONLY);
+    xfZlib xlz(xclbin, c_max_cr, DECOMP_ONLY);
 
-    // Zlib compression
-    int debytes = xlz.decompress_buffer((uint8_t*)in, (uint8_t*)out, input_size);
-
+    // Zlib decompression
+    int debytes = xlz.decompress_buffer((uint8_t*)in, (uint8_t*)out, input_size, atoi(cu_id));
     return debytes;
 }
 }
@@ -655,13 +658,12 @@ int ZEXPORT inflate(z_streamp strm, int flush)
     uint32_t input_size = strm->avail_in;
 
     int debytes = xil_decompress_top_buffer(input, output, input_size);
-    
+
     strm->total_out = debytes;
     strm->next_out = output;
 
     return 1;
 #else
-    printf("In Inflate Started\n");
     // printf("In inflate integrated \n");
     struct inflate_state FAR* state;
     z_const unsigned char FAR* next;        /* next input */
@@ -689,7 +691,6 @@ int ZEXPORT inflate(z_streamp strm, int flush)
     ret = Z_OK;
 
     for (;;) {
-        printf("Top mode %d \n", state->mode);
         switch (state->mode) {
             case HEAD:
                 if (state->wrap == 0) {
@@ -735,11 +736,9 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                 break;
             case TYPE:
                 if (flush == Z_BLOCK || flush == Z_TREES) {
-                    printf("TYPE \n");
                     goto inf_leave;
                 }
             case TYPEDO:
-                printf("In TYPEDO stage \n");
                 if (state->last) {
                     // printf("TYPEDO \n");
                     BYTEBITS();
@@ -753,12 +752,10 @@ int ZEXPORT inflate(z_streamp strm, int flush)
 
                 switch (BITS(2)) {
                     case 0: /* stored block */
-                        printf("stored block \n");
                         Tracev((stderr, "inflate:     stored block%s\n", state->last ? " (last)" : ""));
                         state->mode = STORED;
                         break;
                     case 1: /* fixed block */
-                        printf("fixed block \n");
                         fixedtables(state);
                         Tracev((stderr, "inflate:     fixed codes block%s\n", state->last ? " (last)" : ""));
                         state->mode = LEN_; /* decode codes */
@@ -768,7 +765,6 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                         }
                         break;
                     case 2: /* dynamic block */
-                        printf("dynamic block \n");
                         Tracev((stderr, "inflate:     dynamic codes block%s\n", state->last ? " (last)" : ""));
                         state->mode = TABLE;
                         break;
@@ -782,7 +778,6 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                 break;
 
             case STORED:
-                printf("STORED \n");
                 BYTEBITS(); /* go to byte boundary */
                 NEEDBITS(32);
                 if ((hold & 0xffff) != ((hold >> 16) ^ 0xffff)) {
@@ -798,10 +793,8 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                 if (flush == Z_TREES) goto inf_leave;
 
             case COPY_:
-                printf("COPY_ \n");
                 state->mode = COPY;
             case COPY:
-                printf("COPY \n");
                 copy = state->length;
                 // printf("left %d \n", left);
                 if (copy) {
@@ -820,7 +813,6 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                 state->mode = TYPE;
                 break;
             case TABLE:
-                printf("TABLE\n");
                 NEEDBITS(14);
                 state->nlen = BITS(5) + 257;
                 DROPBITS(5);
@@ -832,7 +824,6 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                 state->have = 0;
                 state->mode = LENLENS;
             case LENLENS:
-                printf("LENLENS \n");
                 while (state->have < state->ncode) {
                     // printf("In LENLENS \n");
                     NEEDBITS(3);
@@ -855,7 +846,6 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                 state->have = 0;
                 state->mode = CODELENS;
             case CODELENS:
-                printf("CODELENS \n");
                 while (state->have < state->nlen + state->ndist) {
                     for (;;) {
                         here = state->lencode[BITS(state->lenbits)];
@@ -944,14 +934,11 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                 state->mode = LEN_;
                 if (flush == Z_TREES) goto inf_leave;
             case LEN_:
-                printf("LEN_ \n");
                 state->mode = LEN;
             case LEN:
                 // printf("In LEN - have %d left %d\n", have, left);
                 // printf("LEN before if state->mode %d \n", state->mode);
-                printf("LEN \n");
                 if (have >= 6 && left >= 258) {
-                    printf("LEN inside if state->mode %d \n", state->mode);
                     RESTORE();
                     inflate_fast(strm, out);
                     LOAD();
@@ -959,7 +946,6 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                     break;
                 }
             case CHECK:
-                printf("CHECK \n");
                 // printf("CHECK stage \n");
                 state->mode = DONE;
             case DONE:
@@ -1005,7 +991,6 @@ inf_leave:
         ret = 1;
         // printf("ret %d \n", ret);
     }
-    printf("End of Inflate \n");
     return ret;
 #endif
 }

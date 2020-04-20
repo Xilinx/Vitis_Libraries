@@ -12,8 +12,7 @@
     ],
     "post_launch": [
         {
-            "script_name": "run.sh",
-            "script_args": "HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
         }
     ],
     "host": {
@@ -58,6 +57,7 @@
             ]
         }
     ],
+    "output_files" : "sample.txt.* sample_run.* test.list",
     "testinfo": {
         "disable": false,
         "jobs": [

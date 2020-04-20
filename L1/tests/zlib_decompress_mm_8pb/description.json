@@ -1,7 +1,13 @@
 {
-    "name": "L1_zlibDecompress", 
+    "name": "jks.L1.zlib_decompress_mm_8pb", 
     "description": "Test Design to validate Zlib multibyte decompress memory mapped module", 
     "flow": "hls", 
+    "platform_whitelist": [
+        "u200"
+    ], 
+    "platform_blacklist": [], 
+    "part_whitelist": [], 
+    "part_blacklist": [], 
     "project": "zlibMultibyteDecompress_mm_test", 
     "solution": "sol1", 
     "clock": "3.3", 
@@ -18,11 +24,12 @@
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw", 
         "ldflags": "", 
-        "argv": [
-		"${DESIGN_PATH}/sample.txt.zlib",
-		"${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt"
-		]
-    },
+        "argv": {
+	    "hls_csim": "${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt", 
+            "hls_cosim": "${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt"
+        }
+                 
+    }, 
     "testinfo": {
         "disable": false, 
         "jobs": [
@@ -36,11 +43,12 @@
             }
         ], 
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
-            "vitis_hw"
+            "hls_csim", 
+            "hls_csynth", 
+            "hls_cosim", 
+            "hls_vivado_syn", 
+            "hls_vivado_impl"
         ], 
         "category": "canary"
-    },
-	"match_makefile": "false"
+    }
 }

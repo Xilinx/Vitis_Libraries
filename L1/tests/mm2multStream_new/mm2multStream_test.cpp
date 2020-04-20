@@ -44,18 +44,17 @@ const uint32_t c_noElements = c_inSizeV / IN_DATAWIDTH;
 void hls_mm2multStream(const ap_uint<IN_DATAWIDTH>* in,
                        const uint32_t input_idx[PARALLEL_BLOCK],
                        hls::stream<ap_uint<OUT_DATAWIDTH> > outStream[PARALLEL_BLOCK],
-                       hls::stream<bool> outStreamEos[PARALLEL_BLOCK],
                        const uint32_t input_size[PARALLEL_BLOCK]) {
 #pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem depth = c_inSizeV
 #pragma HLS INTERFACE m_axi port = input_idx bundle = gmem1 offset = slave
-#pragma HLS INTERFACE m_axi port = input_size offset = slave bundle = gmem2
+#pragma HLS INTERFACE m_axi port = input_size offset = slave bundle = gmem1
 #pragma HLS INTERFACE s_axilite port = in bundle = control
 #pragma HLS INTERFACE s_axilite port = input_idx bundle = control
 #pragma HLS INTERFACE s_axilite port = input_size bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-    xf::compression::details::mm2multStreamNew<PARALLEL_BLOCK, IN_DATAWIDTH, OUT_DATAWIDTH, BURST_SIZE>(
-        in, input_idx, outStream, outStreamEos, input_size);
+    xf::compression::details::mm2multStreamSize<OUT_DATAWIDTH, PARALLEL_BLOCK, IN_DATAWIDTH, BURST_SIZE>(
+        in, input_idx, outStream, input_size);
 }
 // Testbench
 int main() {
@@ -67,27 +66,25 @@ int main() {
     uint32_t input_idx[PARALLEL_BLOCK];
     uint32_t input_size[PARALLEL_BLOCK];
     hls::stream<ap_uint<OUT_DATAWIDTH> > outStream[PARALLEL_BLOCK];
-    hls::stream<bool> outStreamEos[PARALLEL_BLOCK];
     std::cout << "DATA_SIZE: " << c_inSizeV << " PARALLEL_BLOCK: " << PARALLEL_BLOCK << std::endl;
+
+    uint32_t no_blocks = (INPUT_SIZE - 1) / BLOCK_LENGTH + 1;
 
     bool match = true;
     uint32_t index = 0;
-    for (uint32_t i = 0; i < c_no_blocks; i += PARALLEL_BLOCK) {
+    for (uint32_t i = 0; i < no_blocks; i += PARALLEL_BLOCK) {
         for (uint32_t j = 0; j < PARALLEL_BLOCK; j++) {
             input_idx[j] = (i + j) * BLOCK_LENGTH;
             input_size[j] = BLOCK_LENGTH;
         }
 
-        // Calling the HLS module
-        hls_mm2multStream(source_in, input_idx, outStream, outStreamEos, input_size);
+        hls_mm2multStream(source_in, input_idx, outStream, input_size);
 
-        // Testing For Results
         for (uint32_t bIdx = 0; bIdx < PARALLEL_BLOCK; bIdx++) {
             for (uint32_t k = 0; k < BURST_SIZE; k++) {
                 for (uint32_t l = 0; l < c_noElements; l++) {
                     for (uint32_t m = 0; m < IN_DATAWIDTH / OUT_DATAWIDTH; m++) {
                         ap_uint<OUT_DATAWIDTH> value = outStream[bIdx].read();
-                        assert(outStreamEos[bIdx].read() == 0);
                         if (value != source_in[index].range(OUT_DATAWIDTH * (m + 1) - 1, m * OUT_DATAWIDTH)) {
                             match = false;
 #ifndef __SYNTHESIS__
@@ -101,7 +98,6 @@ int main() {
                     index++;
                 }
             }
-            assert(outStreamEos[bIdx].read() == 1);
         }
     }
 

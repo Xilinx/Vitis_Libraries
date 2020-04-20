@@ -15,21 +15,27 @@
 #
 
 source settings.tcl
-
+set DIR_NAME "mm2multStream"
+set DESIGN_PATH "${XF_PROJ_ROOT}/L1/tests/${DIR_NAME}"
 set PROJ "mm2multStream_test.prj"
 set SOLN "sol1"
-set CLKP 3.3
+
+if {![info exists CLKP]} {
+  set CLKP 3.3
+}
 
 open_project -reset $PROJ
 
-add_files mm2multStream_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DPARALLEL_BLOCK=8" 
-add_files -tb mm2multStream_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DPARALLEL_BLOCK=8"
+add_files "mm2multStream_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DPARALLEL_BLOCK=8"
+add_files -tb "mm2multStream_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -DPARALLEL_BLOCK=8"
 set_top hls_mm2multStream
 
 open_solution -reset $SOLN
-create_clock -period $CLKP
+
+
 
 set_part $XPART
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design
@@ -49,10 +55,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

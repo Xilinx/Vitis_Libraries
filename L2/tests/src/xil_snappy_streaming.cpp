@@ -318,6 +318,42 @@ uint64_t xfSnappyStreaming::decompressFile(std::string& inFile_name,
     }
 }
 
+uint32_t xfSnappyStreaming::decompressFileFull(
+    std::string& inFile_name, std::string& outFile_name, uint32_t input_size, uint32_t output_size, bool m_flow) {
+    m_SwitchFlow = m_flow;
+    if (m_SwitchFlow == 0) {
+        std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
+        std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
+
+        if (!inFile) {
+            std::cout << "Unable to open file";
+            exit(1);
+        }
+
+        std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size);
+        std::vector<uint8_t, aligned_allocator<uint8_t> > out(6 * input_size);
+
+        // Read block data from compressed stream .snappy
+        inFile.read((char*)in.data(), input_size);
+
+        // Decompression Sequential multiple cus.
+        uint32_t debytes = decompressFull(in.data(), out.data(), input_size, output_size);
+        outFile.write((char*)out.data(), debytes);
+
+        // Close file
+        inFile.close();
+        outFile.close();
+
+        return debytes;
+    } else {
+        // Use standard snappy compress/decompress below
+        std::string command =
+            "java -cp \".:snappy-0.5-SNAPSHOT-bin.jar:commons-io-2.6.jar\" MainClass -d " + inFile_name;
+        system(command.c_str());
+        return 0;
+    }
+}
+
 uint64_t xfSnappyStreaming::decompress(uint8_t* in, uint8_t* out, uint64_t input_size) {
     uint32_t host_buffer_size = m_BlockSizeInKb * 1024;
 
@@ -443,4 +479,54 @@ uint64_t xfSnappyStreaming::decompress(uint8_t* in, uint8_t* out, uint64_t input
     std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     return total_decompressed_size;
+}
+
+uint32_t xfSnappyStreaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t originalSize) {
+    uint32_t host_buffer_size = 128 * 1024 * 1024;
+
+    // Index calculation
+    h_buf_in.resize(host_buffer_size);
+    h_buf_out.resize(host_buffer_size);
+
+    std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
+
+    std::memcpy(h_buf_in.data(), in, input_size);
+    // Device buffer allocation
+    buffer_input = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, input_size, h_buf_in.data());
+
+    buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, originalSize, h_buf_out.data());
+
+    // set kernel arguments
+    int narg = 0;
+    decompress_data_mover_kernel->setArg(narg++, *(buffer_input));
+    decompress_data_mover_kernel->setArg(narg++, *(buffer_output));
+    decompress_data_mover_kernel->setArg(narg, input_size);
+
+    decompress_kernel_snappy->setArg(3, input_size);
+
+    // Migrate Memory - Map host to device buffers
+    m_q->enqueueMigrateMemObjects({*(buffer_input)}, 0);
+    m_q->finish();
+
+    auto kernel_start = std::chrono::high_resolution_clock::now();
+
+    // enqueue the kernels and wait for them to finish
+    m_q->enqueueTask(*decompress_data_mover_kernel);
+    m_q->enqueueTask(*decompress_kernel_snappy);
+    m_q->finish();
+
+    auto kernel_end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double, std::nano>(kernel_end - kernel_start);
+    kernel_time_ns_1 += duration;
+
+    // Migrate memory - Map device to host buffers
+    m_q->enqueueMigrateMemObjects({*(buffer_output)}, CL_MIGRATE_MEM_OBJECT_HOST);
+    m_q->finish();
+
+    std::memcpy(out, h_buf_out.data(), originalSize);
+
+    float throughput_in_mbps_1 = (float)originalSize * 1000 / kernel_time_ns_1.count();
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+
+    return originalSize;
 }

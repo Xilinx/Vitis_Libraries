@@ -1,48 +1,52 @@
 {
-    "name": "L1_lzx_Multibyte_Decompress",
-    "description": "Test Design to valid LZX Multi byte Decompress",
-    "flow": "hls",
-    "project": "lzx_decompress_test",
-    "solution": "sol1",
-    "clock": "3.3",
-    "topfunction": "lzxDecompressEngineRun",
+    "name": "jks.L1.lzx_multbyte_decompress", 
+    "description": "Test Design to valid LZX Multi byte Decompress", 
+    "flow": "hls", 
+    "platform_whitelist": [
+        "u200"
+    ], 
+    "platform_blacklist": [], 
+    "part_whitelist": [], 
+    "part_blacklist": [], 
+    "project": "lzx_decompress_test", 
+    "solution": "sol1", 
+    "clock": "3.3", 
+    "topfunction": "lzxDecompressEngineRun", 
     "top": {
         "source": [
             "lzx_decompress_test.cpp"
-        ],
+        ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw"
-    },
+    }, 
     "testbench": {
         "source": [
             "lzx_decompress_test.cpp"
-        ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw",
-        "argv": [
-            "${DESIGN_PATH}/sample.txt.encoded",
-            "${DESIGN_PATH}/sample.txt.encoded.out",
-            "${DESIGN_PATH}/sample.txt"
-        ]
-    },
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw", 
+        "argv": {
+            "hls_csim": "${DESIGN_PATH}/sample.txt.encoded ${DESIGN_PATH}/sample.txt.encoded.out ${DESIGN_PATH}/sample.txt", 
+            "hls_cosim": "${DESIGN_PATH}/sample.txt.encoded ${DESIGN_PATH}/sample.txt.encoded.out ${DESIGN_PATH}/sample.txt"
+        }
+    }, 
     "testinfo": {
-        "disable": false,
+        "disable": false, 
         "jobs": [
             {
-                "index": 0,
-                "dependency": [],
-                "env": "",
-                "cmd": "",
-                "max_memory_MB": 16384,
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
                 "max_time_min": 300
             }
-        ],
+        ], 
         "targets": [
-            "hls_csim",
-            "hls_csynth",
-            "hls_cosim",
-            "hls_vivado_syn",
+            "hls_csim", 
+            "hls_csynth", 
+            "hls_cosim", 
+            "hls_vivado_syn", 
             "hls_vivado_impl"
-        ],
+        ], 
         "category": "canary"
-    },
-    "match_makefile": "false"
+    }
 }

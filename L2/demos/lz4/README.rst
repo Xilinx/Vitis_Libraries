@@ -2,7 +2,7 @@
 Xilinx LZ4 Compression and Decompression
 =========================================
 
-LZ4 example resides in ``L2/demos/lz4`` directory. 
+LZ4 demo resides in ``L2/demos/lz4`` directory.
 
 Xilinx LZ4 compression/decompression is FPGA based implementation of
 standard LZ4. Xilinx implementation of LZ4 application is aimed at
@@ -23,17 +23,16 @@ Results
 Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx LZ4
-compress/decompress kernels with 8 engines for single compute unit. It
-is possible to extend number of engines to achieve higher throughput.
+Table below presents resource utilization of Xilinx LZ4 Compress/Decompress
+kernels. The final Fmax achieved is 263MHz 
 
-========== ===== ====== ===== ===== ===== ======
-Flow       LUT   LUTMem REG   BRAM  URAM  Fmax
-========== ===== ====== ===== ===== ===== ======
-Compress   51.5K 14.1K  63.8K 58    48    300MHz
----------- ----- ------ ----- ----- ----- ------
-DeCompress 30.6K 13.7K  39.5K 146    0    300MHz
-========== ===== ====== ===== ===== ===== ======
+========== ===== ====== ===== ===== ===== 
+Flow       LUT   LUTMem REG   BRAM  URAM 
+========== ===== ====== ===== ===== ===== 
+Compress   62.5K 22.7K  65.3K 50    48    
+---------- ----- ------ ----- ----- ----- 
+DeCompress 12.5K 2.3K   15.4K 16    4     
+========== ===== ====== ===== ===== ===== 
 
 Performance Data
 ~~~~~~~~~~~~~~~~
@@ -45,7 +44,7 @@ unit.
 Topic                         Results
 ============================= =========================
 Best Compression Throughput   1.8 GB/s
-Best Decompression Throughput 1.8 GB/s
+Best Decompression Throughput 1.4 GB/s
 Average Compression Ratio     2.13x (Silesia Benchmark)
 ============================= =========================
 

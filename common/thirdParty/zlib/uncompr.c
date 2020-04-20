@@ -73,7 +73,6 @@ int ZEXPORT uncompress2(Bytef* dest, uLongf* destLen, const Bytef* source, uLong
         len -= stream.avail_in;
     }
 
-    printf("inflate called \n");
     err = inflate(&stream, Z_NO_FLUSH);
 
     *sourceLen -= len + stream.avail_in;

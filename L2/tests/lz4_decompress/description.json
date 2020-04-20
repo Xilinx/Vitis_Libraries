@@ -48,6 +48,7 @@
             ]
         }
     ],
+    "output_files" : "sample.txt.lz4.*",
     "testinfo": {
         "disable": false,
         "jobs": [

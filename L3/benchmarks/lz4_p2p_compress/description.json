@@ -4,9 +4,16 @@
         "LZ4_P2P application for Compression resides in `L3/benchmarks/lz4_p2p_compress` directory."
     ],
     "flow": "vitis",
+    "platform_blacklist": [
+        "u50"
+    ],
+    "platform_whitelist": [
+        "samsung_u2",
+        "samsung_U2"
+    ],
     "launch": [
         {
-            "cmd_args": "-cx BUILD/compress_decompress.xclbin -p2p 1 -l PROJECT/test.list", 
+            "cmd_args": "-cx BUILD/compress.xclbin -p2p 1 -l PROJECT/test.list", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -25,7 +32,7 @@
             "includepaths": [
                 "LIB_DIR/L3/include"
             ], 
-            "symbols": [ "PARALLEL_BLOCK=8" ] 
+            "symbols": [ "PARALLEL_BLOCK=8" , "ENABLE_P2P=1"] 
         }
     },
     "v++":{
@@ -49,11 +56,11 @@
                             "arguments" : [
                                 {
                                     "name":"m_axi_gmem0",
-                                    "memory":"DDR[0]"
+                                    "memory":"bank0"
                                 },
                                 {
                                     "name":"m_axi_gmem1",
-                                    "memory":"DDR[0]"
+                                    "memory":"bank0"
                                 }
                             ]
                         },
@@ -61,11 +68,11 @@
                             "arguments" : [
 				{
                                     "name":"m_axi_gmem0",
-                                    "memory":"DDR[0]"
+                                    "memory":"bank0"
                                 },
                                 {
                                     "name":"m_axi_gmem1",
-                                    "memory":"DDR[0]"
+                                    "memory":"bank0"
                                 }
                             ]
                         }
@@ -80,11 +87,11 @@
                             "arguments" : [
                                 {
                                     "name":"m_axi_gmem0",
-                                    "memory":"DDR[0]"
+                                    "memory":"bank0"
                                 },
                                 {
                                     "name":"m_axi_gmem1",
-                                    "memory":"DDR[0]"
+                                    "memory":"bank0"
                                 }
                             ]
                         },
@@ -92,11 +99,11 @@
                             "arguments" : [
 				{
                                     "name":"m_axi_gmem0",
-                                    "memory":"DDR[0]"
+                                    "memory":"bank0"
                                 },
                                 {
                                     "name":"m_axi_gmem1",
-                                    "memory":"DDR[0]"
+                                    "memory":"bank0"
                                 }
                             ]
                         }
@@ -105,6 +112,7 @@
             ] 
         }
     ],
+    "output_files" : "sample.txt.*",
     "testinfo": {
         "disable": false,
         "jobs": [

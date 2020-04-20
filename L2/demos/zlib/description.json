@@ -12,8 +12,7 @@
     ],
     "post_launch": [
         {
-            "script_name": "run.sh",
-            "script_args": "HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
         }
     ],
     "host": {
@@ -36,9 +35,16 @@
         }
     },
     "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini",
+            "PROJECT/hls_directives.tcl"
+        ],
         "compiler": {
             "symbols": [
-                "PARALLEL_BLOCK=8"
+                "PARALLEL_BLOCK=8",
+                "MULTIPLE_BYTES=4",
+                "HIGH_FMAX_II=2",
+                "DECODER_TYPE=2"
             ],
             "clflags": [
                 "--config PROJECT/advanced.ini"
@@ -59,24 +65,21 @@
                     "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp"
                 },
                 {
-                    "name": "xilTreegenKernel",
-                    "location": "LIB_DIR/L2/src/zlib_treegen_mm.cpp"
-                },
-                {
                     "name": "xilZlibDmReader", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_rd.cpp"
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp"
                 },
                 {
                     "name": "xilZlibDmWriter", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_wr.cpp"
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp"
                 },
                 {
-                    "name": "xilDecompressStream",
-                    "location": "LIB_DIR/L2/src/zlib_decompress_stream.cpp"
+                    "name": "xilDecompressFull",
+                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_full.cpp"
                 }
             ]
         }
     ],
+    "output_files" : "sample.txt.* sample_run.* test.list",
     "testinfo": {
         "disable": false,
         "jobs": [

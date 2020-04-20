@@ -32,43 +32,34 @@ const int c_snappyMaxLiteralStream = MAX_LIT_STREAM_SIZE;
 
 // namespace hw_compress {
 
-void snappyCore(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
-                hls::stream<xf::compression::uintMemWidth_t>& outStreamMemWidth,
-                hls::stream<bool>& outStreamMemWidthEos,
+typedef ap_uint<8> uintInV_t;
+typedef ap_uint<8> uintOutV_t;
+
+void snappyCore(hls::stream<uintInV_t>& inStream,
+                hls::stream<uintOutV_t>& outStream,
+                hls::stream<bool>& outStreamEos,
                 hls::stream<uint32_t>& compressedSize,
                 uint32_t max_lit_limit[PARALLEL_BLOCK],
                 uint32_t input_size,
                 uint32_t core_idx) {
-    hls::stream<ap_uint<8> > inStream("inStream");
     hls::stream<xf::compression::compressd_dt> compressdStream("compressdStream");
     hls::stream<xf::compression::compressd_dt> bestMatchStream("bestMatchStream");
     hls::stream<xf::compression::compressd_dt> boosterStream("boosterStream");
     hls::stream<uint8_t> litOut("litOut");
-    hls::stream<ap_uint<8> > snappyOut("snappyOut");
-    hls::stream<bool> snappyOut_eos("snappyOut_eos");
-#pragma HLS STREAM variable = inStream depth = 8
 #pragma HLS STREAM variable = compressdStream depth = 8
 #pragma HLS STREAM variable = bestMatchStream depth = 8
 #pragma HLS STREAM variable = boosterStream depth = 8
 #pragma HLS STREAM variable = litOut depth = c_snappyMaxLiteralStream
-#pragma HLS STREAM variable = snappyOut depth = 8
-#pragma HLS STREAM variable = snappyOut_eos depth = 8
 
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = snappyOut core = FIFO_SRL
-#pragma HLS RESOURCE variable = snappyOut_eos core = FIFO_SRL
 
 #pragma HLS dataflow
-    xf::compression::details::streamDownsizer<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, inStream, input_size);
     xf::compression::lzCompress<MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(inStream, compressdStream, input_size);
     xf::compression::lzBestMatchFilter<MATCH_LEN, OFFSET_WINDOW>(compressdStream, bestMatchStream, input_size);
     xf::compression::lzBooster<MAX_MATCH_LEN>(bestMatchStream, boosterStream, input_size);
     xf::compression::snappyCompress<MAX_LIT_COUNT, MAX_LIT_STREAM_SIZE, PARALLEL_BLOCK>(
-        boosterStream, snappyOut, max_lit_limit, input_size, snappyOut_eos, compressedSize, core_idx);
-    xf::compression::details::upsizerEos<8, GMEM_DWIDTH>(snappyOut, snappyOut_eos, outStreamMemWidth,
-                                                         outStreamMemWidthEos);
+        boosterStream, outStream, max_lit_limit, input_size, outStreamEos, compressedSize, core_idx);
 }
 
 void snappy(const xf::compression::uintMemWidth_t* in,
@@ -78,30 +69,30 @@ void snappy(const xf::compression::uintMemWidth_t* in,
             const uint32_t input_size[PARALLEL_BLOCK],
             uint32_t output_size[PARALLEL_BLOCK],
             uint32_t max_lit_limit[PARALLEL_BLOCK]) {
-    hls::stream<xf::compression::uintMemWidth_t> inStreamMemWidth[PARALLEL_BLOCK];
-    hls::stream<bool> outStreamMemWidthEos[PARALLEL_BLOCK];
-    hls::stream<xf::compression::uintMemWidth_t> outStreamMemWidth[PARALLEL_BLOCK];
-#pragma HLS STREAM variable = outStreamMemWidthEos depth = 2
-#pragma HLS STREAM variable = inStreamMemWidth depth = c_gmemBurstSize
-#pragma HLS STREAM variable = outStreamMemWidth depth = c_gmemBurstSize
+    hls::stream<uintInV_t> inStream[PARALLEL_BLOCK];
+    hls::stream<bool> outStreamEos[PARALLEL_BLOCK];
+    hls::stream<uintOutV_t> outStream[PARALLEL_BLOCK];
+#pragma HLS STREAM variable = outStreamEos depth = 2
+#pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
+#pragma HLS STREAM variable = outStream depth = c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = outStreamMemWidthEos core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStreamMemWidth core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamMemWidth core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStreamEos core = FIFO_SRL
+#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
 
     hls::stream<uint32_t> compressedSize[PARALLEL_BLOCK];
 
 #pragma HLS dataflow
-    xf::compression::details::mm2sNb<GMEM_DWIDTH, GMEM_BURST_SIZE, PARALLEL_BLOCK>(in, input_idx, inStreamMemWidth,
-                                                                                   input_size);
+    xf::compression::details::mm2multStreamSize<8, PARALLEL_BLOCK, GMEM_DWIDTH, GMEM_BURST_SIZE>(in, input_idx,
+                                                                                                 inStream, input_size);
+
     for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
 #pragma HLS UNROLL
-        snappyCore(inStreamMemWidth[i], outStreamMemWidth[i], outStreamMemWidthEos[i], compressedSize[i], max_lit_limit,
-                   input_size[i], i);
+        snappyCore(inStream[i], outStream[i], outStreamEos[i], compressedSize[i], max_lit_limit, input_size[i], i);
     }
 
-    xf::compression::details::s2mmEosNb<uint32_t, GMEM_BURST_SIZE, GMEM_DWIDTH, PARALLEL_BLOCK>(
-        out, output_idx, outStreamMemWidth, outStreamMemWidthEos, compressedSize, output_size);
+    xf::compression::details::multStream2MM<8, PARALLEL_BLOCK, GMEM_DWIDTH, GMEM_BURST_SIZE>(
+        outStream, outStreamEos, compressedSize, output_idx, out, output_size);
 }
 //} // namespace end
 

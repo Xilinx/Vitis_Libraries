@@ -68,6 +68,7 @@ void lz4CoreDec(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
 void lz4Dec(const xf::compression::uintMemWidth_t* in,
             xf::compression::uintMemWidth_t* out,
             const uint32_t input_idx[PARALLEL_BLOCK],
+            const uint32_t input_idx1[PARALLEL_BLOCK],
             const uint32_t input_size[PARALLEL_BLOCK],
             const uint32_t output_size[PARALLEL_BLOCK],
             const uint32_t input_size1[PARALLEL_BLOCK],
@@ -75,10 +76,10 @@ void lz4Dec(const xf::compression::uintMemWidth_t* in,
             const uint32_t output_idx[PARALLEL_BLOCK]) {
     hls::stream<xf::compression::uintMemWidth_t> inStreamMemWidth[PARALLEL_BLOCK];
     hls::stream<xf::compression::uintMemWidth_t> outStreamMemWidth[PARALLEL_BLOCK];
-#pragma HLS STREAM variable = inStreamMemWidth_0 depth = c_gmemBurstSize
-#pragma HLS STREAM variable = outStreamMemWidth_0 depth = c_gmemBurstSize
-#pragma HLS RESOURCE variable = inStreamMemWidth_0 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamMemWidth_0 core = FIFO_SRL
+#pragma HLS STREAM variable = inStreamMemWidth depth = c_gmemBurstSize
+#pragma HLS STREAM variable = outStreamMemWidth depth = c_gmemBurstSize
+#pragma HLS RESOURCE variable = inStreamMemWidth core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStreamMemWidth core = FIFO_SRL
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel
@@ -87,7 +88,7 @@ void lz4Dec(const xf::compression::uintMemWidth_t* in,
     for (uint8_t i = 0; i < PARALLEL_BLOCK; i++) {
 #pragma HLS UNROLL
         // lz4CoreDec is instantiated based on the PARALLEL_BLOCK
-        lz4CoreDec(inStreamMemWidth[i], outStreamMemWidth[i], input_size1[i], output_size1[i], input_idx[i]);
+        lz4CoreDec(inStreamMemWidth[i], outStreamMemWidth[i], input_size1[i], output_size1[i], input_idx1[i]);
     }
 
     // Transfer data from kernel to global memory
@@ -126,8 +127,10 @@ void xilLz4P2PDecompress(const xf::compression::uintMemWidth_t* in,
     uint32_t block_size[PARALLEL_BLOCK];
     uint32_t block_size1[PARALLEL_BLOCK];
     uint32_t input_idx[PARALLEL_BLOCK];
+    uint32_t input_idx1[PARALLEL_BLOCK];
     uint32_t output_idx[PARALLEL_BLOCK];
 #pragma HLS ARRAY_PARTITION variable = input_idx dim = 0 complete
+#pragma HLS ARRAY_PARTITION variable = input_idx1 dim = 0 complete
 #pragma HLS ARRAY_PARTITION variable = output_idx dim = 0 complete
 #pragma HLS ARRAY_PARTITION variable = compress_size dim = 0 complete
 #pragma HLS ARRAY_PARTITION variable = compress_size1 dim = 0 complete
@@ -149,11 +152,13 @@ void xilLz4P2PDecompress(const xf::compression::uintMemWidth_t* in,
             if (j < nblocks) {
                 uint32_t iSize = bInfo.compressedSize;
                 uint32_t oSize = bInfo.blockSize;
+                uint32_t startIdx = bInfo.blockStartIdx;
                 compress_size[j] = iSize;
                 block_size[j] = oSize;
                 compress_size1[j] = iSize;
                 block_size1[j] = oSize;
-                input_idx[j] = bInfo.blockStartIdx;
+                input_idx[j] = startIdx;
+                input_idx1[j] = startIdx;
                 // printf("iSize:%d\toSize:%d\tblockIdx:%d\n", iSize, oSize, input_idx[j]);
                 output_idx[j] = (i + j) * max_block_size;
             } else {
@@ -162,11 +167,12 @@ void xilLz4P2PDecompress(const xf::compression::uintMemWidth_t* in,
                 compress_size1[j] = 0;
                 block_size1[j] = 0;
                 input_idx[j] = 0;
+                input_idx1[j] = 0;
                 output_idx[j] = 0;
             }
         }
 
-        lz4Dec(in, out, input_idx, compress_size, block_size, compress_size1, block_size1, output_idx);
+        lz4Dec(in, out, input_idx, input_idx1, compress_size, block_size, compress_size1, block_size1, output_idx);
     }
 }
 }

@@ -30,13 +30,14 @@
 #include <ap_int.h>
 
 #include "lz4_decompress.hpp"
+#include "lz_decompress.hpp"
 #include "mm2s.hpp"
 #include "s2mm.hpp"
 #include "stream_downsizer.hpp"
 #include "stream_upsizer.hpp"
 
-#define GMEM_DWIDTH 512
-#define GMEM_BURST_SIZE 16
+#define GMEM_DWIDTH 64
+#define GMEM_BURST_SIZE 512
 
 #ifndef PARALLEL_BYTE
 #define PARALLEL_BYTE 8
@@ -58,8 +59,8 @@ extern "C" {
  * @param block_size_in_kb block size in bytes
  * @param no_blocks number of blocks
  */
-void xilLz4Decompress(const xf::compression::uintMemWidth_t* in,
-                      xf::compression::uintMemWidth_t* out,
+void xilLz4Decompress(const ap_uint<PARALLEL_BYTE * 8>* in,
+                      ap_uint<PARALLEL_BYTE * 8>* out,
                       uint32_t* in_block_size,
                       uint32_t* in_compress_size,
                       uint32_t block_size_in_kb,

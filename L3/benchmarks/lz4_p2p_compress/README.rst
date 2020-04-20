@@ -1,5 +1,16 @@
 This LZ4 P2P Compress application runs with Xilinx compression and
-standard decompression flow and currently supported with non P2P flow.
+standard decompression flow. This application gives best kernel 
+throughput when multiple files run concurrently on both compute units.
+
+- Tested tool/xrt/xsa information 
+
+:: 
+
+    Tool: 2019.2
+    XRT : 2019.2
+    XSA : xilinx_samsung_U2x4_201920_1
+
+
 
 -  Source codes (data_compression): In this folder all the source files
    are available.
@@ -49,12 +60,13 @@ standard decompression flow and currently supported with non P2P flow.
             $ mount /dev/nvme0n1 /mnt
             $ cp -rf <./data/> /mnt/ (copy the input files to /mnt path)
 
-   -  Run the design
+   -  To run the design. Please give minumum of 20 files in test.list file to 
+      see the best kernel throughput.
 
    ::
 
-            To enable P2P flow give 1 else 0
-            $ ./build/xil_lz4_8b -cx ./build/compress.xclbin -p2p <0/1> -l <./test.list> 
+            To enable P2P flow give 1
+            $ ./build/<host_exe> -cx ./build/compress.xclbin -p2p 1 -l <./test.list> 
 
 Results
 -------
@@ -66,39 +78,13 @@ Table below presents resource utilization of Xilinx LZ4 P2P compress
 kernel with 8 engines for single compute unit. It is possible to extend
 number of engines to achieve higher throughput.
 
-+-----------------------+---+--------+---+-----+---+-------+-------+
-| Design                | L | LUTMEM | R | BRA | U | DSP   | Fmax  |
-|                       | U |        | E | M   | R |       | (MHz) |
-|                       | T |        | G |     | A |       |       |
-|                       |   |        |   |     | M |       |       |
-+=======================+===+========+===+=====+===+=======+=======+
-| Compression           | 5 | 14163  | 6 | 58  | 4 | 1     | 200   |
-|                       | 1 | (9.47% | 4 | (11 | 8 | (0.05 |       |
-|                       | 7 | )      | 2 | .58 | ( | %)    |       |
-|                       | 7 |        | 0 | %)  | 3 |       |       |
-|                       | 2 |        | 9 |     | 7 |       |       |
-|                       | ( |        | ( |     | . |       |       |
-|                       | 1 |        | 7 |     | 5 |       |       |
-|                       | 3 |        | . |     | 0 |       |       |
-|                       | . |        | 6 |     | % |       |       |
-|                       | 7 |        | 9 |     | ) |       |       |
-|                       | 7 |        | % |     |   |       |       |
-|                       | % |        | ) |     |   |       |       |
-|                       | ) |        |   |     |   |       |       |
-+-----------------------+---+--------+---+-----+---+-------+-------+
-| Packer                | 1 | 1828   | 1 | 16  | 0 | 2(0.1 | 200   |
-|                       | 0 | (1.22% | 6 | (3. |   | 0%)   |       |
-|                       | 9 | )      | 7 | 19% |   |       |       |
-|                       | 2 |        | 0 | )   |   |       |       |
-|                       | 2 |        | 8 |     |   |       |       |
-|                       | ( |        | ( |     |   |       |       |
-|                       | 2 |        | 2 |     |   |       |       |
-|                       | . |        | . |     |   |       |       |
-|                       | 9 |        | 0 |     |   |       |       |
-|                       | 0 |        | 0 |     |   |       |       |
-|                       | % |        | % |     |   |       |       |
-|                       | ) |        | ) |     |   |       |       |
-+-----------------------+---+--------+---+-----+---+-------+-------+
+========== ===== ====== ===== ===== ===== 
+Flow       LUT   LUTMem REG   BRAM  URAM 
+========== ===== ====== ===== ===== ===== 
+Compress   51.7K 14.2K  64.2K 58    48    
+---------- ----- ------ ----- ----- ----- 
+Packer     10.9K 1.8K   16.7K 16     0    
+========== ===== ====== ===== ===== ===== 
 
 Throughput & Compression Ratio
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
