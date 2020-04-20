@@ -118,18 +118,15 @@ int main(int argc, char* argv[]) {
     parser.addSwitch("--decompress_xclbin", "-dx", "Decompress XCLBIN", "decompress");
     parser.addSwitch("--decompress_mode", "-d", "Decompress Mode", "");
     parser.addSwitch("--single_xclbin", "-sx", "Single XCLBIN", "p2p_decompress");
-    parser.addSwitch("--p2p_flow", "-p2p", "P2P Flow", "p2p_decompress");
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.parse(argc, argv);
 
     std::string decompress_xclbin = parser.value("decompress_xclbin");
     std::string decompress_mod = parser.value("decompress_mode");
     std::string single_bin = parser.value("single_xclbin");
-    std::string p2p_flow = parser.value("p2p_flow");
     std::string filelist = parser.value("file_list");
 
-    bool enable_p2p = 1;
-    if (!(p2p_flow.empty())) enable_p2p = atoi(p2p_flow.c_str());
+    bool enable_p2p = ENABLE_P2P;
 
     int fopt = 1;
 

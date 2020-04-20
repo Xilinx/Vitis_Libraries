@@ -51,6 +51,7 @@
 
 #include "zlib.hpp"
 #include "deflate.h"
+#include <stdlib.h>
 #define XILZLIB
 using namespace xf::compression;
 const char deflate_copyright[] = " deflate 1.2.11 Copyright 1995-2017 Jean-loup Gailly and Mark Adler ";
@@ -796,11 +797,13 @@ local void flush_pending(z_streamp strm)
 
 extern "C" {
 int xil_compress_top_buffer(uint8_t* in, uint8_t* out, int input_size) {
-    
     const uint8_t c_max_cr = 20;
+    
+    char *xclbin = getenv("XILINX_LIBZ_XCLBIN");
+
     // Arg 1: xclbin
     // Xilinx ZLIB object
-    xfZlib xlz("compress_decompress.xclbin", c_max_cr, COMP_ONLY);
+    xfZlib xlz(xclbin, c_max_cr, COMP_ONLY);
 
     // Zlib compression
     int enbytes = xlz.compress_buffer((uint8_t*)in, (uint8_t*)out, input_size);

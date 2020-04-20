@@ -94,14 +94,12 @@ void xil_compress_file_list(std::string& file_list, uint32_t block_size, std::st
 int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--compress_xclbin", "-cx", "Compress XCLBIN", "compress");
-    parser.addSwitch("--p2p_flow", "-p2p", "P2P Flow", "0");
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.addSwitch("--block_size", "-B", "Compress Block Size [0-64: 1-256: 2-1024: 3-4096]", "0");
     parser.addSwitch("--id", "-id", "Device ID", "0");
     parser.parse(argc, argv);
 
     std::string compress_bin = parser.value("compress_xclbin");
-    std::string p2p = parser.value("p2p_flow");
     std::string filelist = parser.value("file_list");
     std::string block_size = parser.value("block_size");
     std::string device_ids = parser.value("id");
@@ -112,8 +110,7 @@ int main(int argc, char* argv[]) {
     }
     uint32_t bSize = 0;
 
-    bool enable_p2p = 0;
-    if (!(p2p.empty())) enable_p2p = atoi(p2p.c_str());
+    bool enable_p2p = ENABLE_P2P;
 
     // Block Size
     if (!(block_size.empty())) {

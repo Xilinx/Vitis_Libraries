@@ -30,9 +30,15 @@
         }
     },
     "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini",
+            "PROJECT/hls_directives.tcl"
+        ],
         "compiler": {
             "symbols": [
-                "PARALLEL_BLOCK=8"
+                "PARALLEL_BLOCK=8",
+                "HIGH_FMAX=2",
+                "MULTIPLE_BYTES=4"
             ],
             "clflags": [
                 "--config PROJECT/advanced.ini"
@@ -46,19 +52,20 @@
             "accelerators": [
                 {
                     "name": "xilZlibDmReader", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_rd.cpp"
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp"
                 },
                 {
                     "name": "xilZlibDmWriter", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_wr.cpp"
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp"
                 },
                 {
                     "name": "xilDecompressStream",
-                    "location": "LIB_DIR/L2/src/zlib_decompress_stream.cpp"
+                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_stream.cpp"
                 }
             ]
         }
     ],
+    "output_files" : "sample.txt.zlib.*",
     "testinfo": {
         "disable": false,
         "jobs": [

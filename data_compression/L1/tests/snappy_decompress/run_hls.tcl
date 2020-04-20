@@ -37,7 +37,7 @@ set_part {xcu200}
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -O -argv "${XF_PROJ_ROOT}/L1/tests/snappy_compress/sample.txt.encoded ${XF_PROJ_ROOT}/L1/tests/snappy_compress/sample.txt"
+  csim_design -O -argv "${XF_PROJ_ROOT}/L1/tests/snappy_decompress/sample.txt.snappy ${XF_PROJ_ROOT}/L1/tests/snappy_decompress/sample.txt"
 }
 
 if {$CSYNTH == 1} {
@@ -45,7 +45,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -O -argv "${XF_PROJ_ROOT}/L1/tests/snappy_compress/sample.txt.encoded ${XF_PROJ_ROOT}/L1/tests/snappy_compress/sample.txt"
+  cosim_design -O -argv "${XF_PROJ_ROOT}/L1/tests/snappy_decompress/sample.txt.snappy ${XF_PROJ_ROOT}/L1/tests/snappy_decompress/sample.txt"
 }
 
 if {$VIVADO_SYN == 1} {

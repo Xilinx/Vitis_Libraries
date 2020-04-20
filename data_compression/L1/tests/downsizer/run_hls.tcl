@@ -18,23 +18,22 @@ source settings.tcl
 
 set PROJ "downSizer_test.prj"
 set SOLN "sol1"
-set CLKP 3.3
 
-# Create a project
+if {![info exists CLKP]} {
+  set CLKP 3.3
+}
+
 open_project -reset $PROJ
 
-# Add design and testbench files
-add_files downsizer_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb downsizer_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-
-# Set the top-level function
+add_files "downsizer_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "downsizer_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top streamDownsizerRun
 
-# Create a solution
 open_solution -reset $SOLN
 
-# Define technology and clock rate
-set_part {xcu200}
+
+
+set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
@@ -55,10 +54,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

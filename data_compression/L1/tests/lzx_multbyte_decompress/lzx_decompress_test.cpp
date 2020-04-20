@@ -34,7 +34,7 @@ typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
 void lzxDecompressEngineRun(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
                             hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
                             hls::stream<bool>& outStreamEoS,
-                            hls::stream<uint32_t>& outSizeStream,
+                            hls::stream<uint64_t>& outSizeStream,
                             const uint32_t input_size)
 
 {
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     hls::stream<uintV_t> inStream("inStream");
     hls::stream<uintV_t> outStream("decompressOut");
     hls::stream<bool> outStreamEoS("decompressOut");
-    hls::stream<uint32_t> outStreamSize("decompressOut");
+    hls::stream<uint64_t> outStreamSize("decompressOut");
     uint32_t input_size;
 
     std::fstream outputFile;
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
     bool pass = true;
-    uint32_t outSize = outStreamSize.read();
+    uint64_t outSize = outStreamSize.read();
     std::cout << "Uncompressed size =" << outSize << std::endl;
     if (outSize != output_size) {
         std::cout << "Incorrect size. Expected value = " << output_size << std::endl;

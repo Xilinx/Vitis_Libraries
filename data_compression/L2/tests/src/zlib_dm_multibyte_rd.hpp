@@ -52,8 +52,9 @@ extern "C" {
 
 void xilZlibDmReader(uintMemWidth_t* out,
                      uint32_t* encoded_size,
+                     uint32_t* status_flag,
                      uint32_t read_block_size,
                      hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& outstreamk,
-                     hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& sizestreamk);
+                     hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamk);
 }
 #endif // _XFCOMPRESSION_ZLIB_DM_RD_HPP_

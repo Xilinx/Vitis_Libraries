@@ -122,6 +122,52 @@ void kStreamWriteFixedSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKStream
     t1.last = true;
     outKStream.write(t1);
 }
+
+template <uint32_t DATAWIDTH>
+void kStreamWriteMultiByteSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKStream,
+                               hls::stream<ap_axiu<8, 0, 0, 0> >& outStreamEoS,
+                               hls::stream<ap_uint<DATAWIDTH> >& inDataStream,
+                               hls::stream<bool>& inDataStreamEoS) {
+    /**
+     * @brief Read N-bit wide data from internal hls streams and write to axi
+     *        kernel stream for the given size. N is the template parameter DATAWIDTH.
+     *
+     * @tparam DATAWIDTH    data width of the kernel stream
+     *
+     * @param outKStream    output kernel stream
+     * @param outDataStream output data stream from internal modules
+     * @param dataSize      size of data in streams
+     *
+     */
+    // read the original size
+    ap_uint<DATAWIDTH> tmp;
+    ap_axiu<DATAWIDTH, 0, 0, 0> t1;
+
+    bool eosFlag = inDataStreamEoS.read();
+    ap_axiu<8, 0, 0, 0> t2;
+
+    for (; eosFlag == false; eosFlag = inDataStreamEoS.read()) {
+#pragma HLS PIPELINE II = 1
+        tmp = inDataStream.read();
+        t1.data = tmp;
+        t1.last = false;
+        outKStream.write(t1);
+
+        t2.data = 0;
+        t2.last = false;
+        outStreamEoS.write(t2);
+    }
+    // last data packet
+    t2.data = 1;
+    t2.last = true;
+    outStreamEoS.write(t2);
+
+    tmp = inDataStream.read();
+    t1.data = tmp;
+    t1.last = true;
+    outKStream.write(t1);
+}
+
 } // end details
 } // end compression
 } // end xf

@@ -1,8 +1,8 @@
 #!/bin/bash
-EXE_FILE=$2
-LIB_PROJ_ROOT=$3
-XCLBIN_FILE_C=$4
-XCLBIN_FILE_D=$5
+EXE_FILE=$1
+LIB_PROJ_ROOT=$2
+XCLBIN_FILE_C=$3
+XCLBIN_FILE_D=$4
 echo "XCL_MODE=${XCL_EMULATION_MODE}"
 if [ "${XCL_EMULATION_MODE}" != "hw_emu" ] 
 then
@@ -28,8 +28,4 @@ echo -e "\n\n-----------Block Size: 1024Kb-----------\n"
     echo $cmd1
     $cmd1
 
-echo -e "\n\n-----------Block Size: 4096Kb-----------\n"
-    cmd1="$EXE_FILE -l ./test.list -cx $XCLBIN_FILE_C -dx $XCLBIN_FILE_D -B 3"
-    echo $cmd1
-    $cmd1
 fi

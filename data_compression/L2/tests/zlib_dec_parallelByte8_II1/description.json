@@ -4,6 +4,9 @@
         "Xilinx ZLIB Decompression Parallel Byte 8_II1"
     ],
     "flow": "vitis",
+    "platform_blacklist": [
+        "u50"
+    ],
     "launch": [
         {
             "cmd_args": "-dx BUILD/decompress_stream.xclbin -d PROJECT/sample.txt.zlib",
@@ -11,11 +14,11 @@
         }
     ],
     "host": {
-        "host_exe": "zlib_streaming",
+        "host_exe": "xil_zlib",
         "compiler": {
             "sources": [
                 "./src/host.cpp",
-                "LIB_DIR/L2/tests/src/zlib_stream.cpp",
+                "LIB_DIR/L2/tests/src/zlib.cpp",
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp",
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
                 "LIB_DIR/common/libs/logger/logger.cpp",
@@ -33,6 +36,10 @@
         }
     },
     "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini",
+            "PROJECT/hls_directives.tcl"
+        ],
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=1",
@@ -50,19 +57,51 @@
             "accelerators": [
                 {
                     "name": "xilZlibDmReader",
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp"
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "name": "xilZlibDmWriter",
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp"
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "name": "xilDecompressStream",
-                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_stream.cpp"
+                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_stream.cpp",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0"
+                        }
+                    ]
                 }
             ]
         }
     ],
+    "output_files" : "sample.txt.zlib.*",
     "testinfo": {
         "disable": false,
         "jobs": [

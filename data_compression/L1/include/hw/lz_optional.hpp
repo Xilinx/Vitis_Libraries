@@ -56,15 +56,14 @@ static void lz77Divide(hls::stream<compressd_dt>& inStream,
         return;
     }
 
-    const uint16_t c_ltree_size = 1024;
-    const uint16_t c_dtree_size = 64;
+    const uint16_t c_ltree_size = 286;
+    const uint16_t c_dtree_size = 30;
 
     uint32_t lcl_dyn_ltree[c_ltree_size];
     uint32_t lcl_dyn_dtree[c_dtree_size];
 
 ltree_init:
     for (uint32_t i = 0; i < c_ltree_size; i++) lcl_dyn_ltree[i] = 0;
-
 dtree_init:
     for (uint32_t i = 0; i < c_dtree_size; i++) lcl_dyn_dtree[i] = 0;
 
@@ -97,12 +96,12 @@ lz77_divide:
 
             i += (tLen - 1);
             tmpEncodedValue.range(15, 8) = tLen - 3;
+            lcl_dyn_ltree[ltreeIdx]++;
+            lcl_dyn_dtree[dtreeIdx]++;
         } else {
             ltreeIdx = tCh;
-            dtreeIdx = 63;
+            lcl_dyn_ltree[ltreeIdx]++;
         }
-        lcl_dyn_ltree[ltreeIdx]++;
-        lcl_dyn_dtree[dtreeIdx]++;
 
         outStream << tmpEncodedValue;
         endOfStream << 0;
@@ -114,8 +113,7 @@ lz77_divide:
     endOfStream << 1;
 
     for (uint32_t i = 0; i < c_ltree_size; i++) outStreamTree << lcl_dyn_ltree[i];
-
-    for (uint32_t j = 0; j < c_dtree_size; j++) outStreamTree << lcl_dyn_dtree[j];
+    for (uint32_t i = 0; i < c_dtree_size; i++) outStreamTree << lcl_dyn_dtree[i];
 }
 
 /**

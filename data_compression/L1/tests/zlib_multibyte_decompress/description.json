@@ -1,48 +1,53 @@
 {
-    "name": "L1_zlibDecompress",
-    "description": "Test Design to validate Zlib multibyte decompress module",
-    "flow": "hls",
-    "project": "zlib_decompress_test",
-    "solution": "sol1",
-    "clock": "3.3",
-    "topfunction": "zlibMultiByteDecompressEngineRun",
+    "name": "jks.L1.zlib_multibyte_decompress", 
+    "description": "Test Design to validate Zlib multibyte decompress module", 
+    "flow": "hls", 
+    "platform_whitelist": [
+        "u200"
+    ], 
+    "platform_blacklist": [], 
+    "part_whitelist": [], 
+    "part_blacklist": [], 
+    "project": "zlib_decompress_test", 
+    "solution": "sol1", 
+    "clock": "3.3", 
+    "topfunction": "zlibMultiByteDecompressEngineRun", 
     "top": {
         "source": [
             "zlib_decompress_test.cpp"
-        ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw"
-    },
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8"
+    }, 
     "testbench": {
         "source": [
             "zlib_decompress_test.cpp"
-        ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw",
-        "ldflags": "",
-        "argv": [
-            "${DESIGN_PATH}/sample.txt.zlib",
-            "${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt"
-        ]
-    },
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8", 
+        "ldflags": "", 
+        "argv": {
+            "hls_csim": "${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt", 
+            "hls_cosim": "${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt"
+        }
+    }, 
     "testinfo": {
-        "disable": false,
+        "disable": false, 
         "jobs": [
             {
-                "index": 0,
-                "dependency": [],
-                "env": "",
-                "cmd": "",
-                "max_memory_MB": 16384,
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
                 "max_time_min": 300
             }
-        ],
+        ], 
         "targets": [
-            "hls_csim",
-            "hls_csynth",
-            "hls_cosim",
-            "hls_vivado_syn",
+            "hls_csim", 
+            "hls_csynth", 
+            "hls_cosim", 
+            "hls_vivado_syn", 
             "hls_vivado_impl"
-        ],
+        ], 
         "category": "canary"
-    },
-    "match_makefile": "false"
+    }
 }

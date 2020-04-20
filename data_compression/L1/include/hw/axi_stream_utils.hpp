@@ -212,6 +212,42 @@ void streamDataK2dmFixedSize(hls::stream<ap_uint<8> >& out,
     }
 }
 
+template <int PARALLEL_BYTES>
+void streamDataK2dmMultiByteSize(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
+                                 hls::stream<bool>& outEoS,
+                                 hls::stream<ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> >& dmInStream,
+                                 hls::stream<ap_axiu<8, 0, 0, 0> >& dmInStreamEoS) {
+    /**
+     * @brief Read data from kernel axi stream byte by byte and write to hls stream for given output size.
+     *
+     * @param out           output hls stream
+     * @param dmOutStream   input kernel axi stream to be read
+     * @param dataSize      size of data in streams
+     *
+     */
+    // read data from decompression kernel output to global memory output
+    const int c_parallelBit = PARALLEL_BYTES * 8;
+    // uint32_t itrLim = 1 + (dataSize - 1) / (c_parallelBit / 8);
+    ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> dataOut;
+    ap_axiu<8, 0, 0, 0> dataOutEoS = dmInStreamEoS.read();
+
+    bool eosFlag = dataOutEoS.data;
+
+    for (; eosFlag == false; eosFlag = dataOutEoS.data) {
+#pragma HLS PIPELINE II = 1
+        outEoS << 0;
+
+        dataOut = dmInStream.read();
+        out << dataOut.data;
+
+        dataOutEoS = dmInStreamEoS.read();
+    }
+
+    outEoS << 1;
+    dataOut = dmInStream.read();
+    out << dataOut.data;
+}
+
 } // end details
 } // end compression
 } // end xf

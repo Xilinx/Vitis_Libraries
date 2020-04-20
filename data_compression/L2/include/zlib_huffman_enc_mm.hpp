@@ -40,7 +40,6 @@
 #include "zlib_config.hpp"
 #include "huffman_encoder.hpp"
 
-#define MIN_BLOCK_SIZE 116
 #define GMEM_DWIDTH 512
 #define GMEM_BURST_SIZE 16
 
@@ -71,16 +70,11 @@ extern "C" {
  *
  */
 void xilHuffmanKernel(xf::compression::uintMemWidth_t* in,
+                      uint32_t* lit_freq,
+                      uint32_t* dist_freq,
                       xf::compression::uintMemWidth_t* out,
                       uint32_t* in_block_size,
                       uint32_t* compressd_size,
-                      uint32_t* dyn_litmtree_codes,
-                      uint32_t* dyn_distree_codes,
-                      uint32_t* dyn_bitlentree_codes,
-                      uint32_t* dyn_litmtree_blen,
-                      uint32_t* dyn_dtree_blen,
-                      uint32_t* dyn_bitlentree_blen,
-                      uint32_t* dyn_max_codes,
                       uint32_t block_size_in_kb,
                       uint32_t input_size);
 }

@@ -15,7 +15,6 @@
  */
 
 #include "hls_stream.h"
-#include "inflate.hpp"
 #include <ap_int.h>
 #include <assert.h>
 #include <fstream>
@@ -24,6 +23,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+
+#include "inflate.hpp"
+
+#define HUFFMAN_TYPE xf::compression::DYNAMIC
 
 #define MULTIPLE_BYTES 4
 #define GMEM_DATAWIDTH 512
@@ -46,7 +49,9 @@ void hls_zlibMultibyteDecompress(const data_t* in, data_t* out, data_t* outSize,
 #pragma HLS INTERFACE s_axilite port = outSize bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-    xf::compression::inflateMultiByteMM<MULTIPLE_BYTES>(in, out, outSize, inputSize);
+    const int c_decoderType = (int)HUFFMAN_TYPE;
+
+    xf::compression::inflateMultiByteMM<c_decoderType, MULTIPLE_BYTES>(in, out, outSize, inputSize);
 }
 
 int main(int argc, char* argv[]) {

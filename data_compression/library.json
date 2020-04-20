@@ -2,6 +2,12 @@
     "id": "xf_compression",
     "name": "Vitis Data Compression Library",
     "description": "Vitis Data Compression Library is an open-sourced Vitis library written in C++ for accelerating data compression applications in a variety of use cases. It now covers two levels of acceleration: the module level and the pre-defined kernel level, and will evolve to offer the third level as pure software APIs working with pre-defined hardware overlays",
+    "platform_type": "pcie",
+    "platform_whitelist": [
+        "u200",
+        "u250",
+        "u280"
+    ],
     "v++": {
         "includepaths": [
             "LIB_DIR/L1/include/hw",

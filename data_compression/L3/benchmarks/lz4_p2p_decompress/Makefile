@@ -280,6 +280,21 @@ $(EXE_FILE): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platfor
 .PHONY: all help host xclbin cleanh cleank cleanall clean
 
 all: host xclbin
+ifeq ($(findstring u50, $(DEVICE)), u50)
+$(error This example is not supported for $(DEVICE))
+endif
+
+ifneq ($(findstring u200, $(DEVICE)), u200)
+ifneq ($(findstring u250, $(DEVICE)), u250)
+ifneq ($(findstring u280, $(DEVICE)), u280)
+ifneq ($(findstring samsung_u2, $(DEVICE)), samsung_u2)
+ifneq ($(findstring samsung_U2, $(DEVICE)), samsung_U2)
+$(warning [WARNING]: This example has not been tested for $(DEVICE). It may or may not work.)
+endif
+endif
+endif
+endif
+endif
 
 host: $(EXE_FILE) | check_vpp check_xrt check_platform
 
@@ -311,7 +326,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -dx $(XCLBIN_FILE_D) -p2p 0 -l test.list
+HOST_ARGS = -dx $(XCLBIN_FILE_D) -l test.list
 $(info HOST_ARGS=$(HOST_ARGS))
 
 ifeq ($(TARGET),sw_emu)
