@@ -24,6 +24,8 @@
  * This file is part of Vitis Data Compression Library.
  */
 
+#include <stdint.h>
+
 const int gz_max_literal_count = 4096;
 
 // Dynamic Huffman Related Content
@@ -54,5 +56,17 @@ const int gz_max_literal_count = 4096;
 #define REUSE_ZERO_BLEN 17
 
 #define REUSE_ZERO_BLEN_7 18
+
+#define FIXED_DECODER 0
+#define DYNAMIC_DECODER 1
+#define FULL_DECODER 2
+
+const uint16_t c_frequency_bits = 24;
+const uint16_t c_codeword_bits = 20;
+const uint16_t c_litCodeCount = 286;
+const uint16_t c_dstCodeCount = 30;
+const uint16_t c_blnCodeCount = 19;
+const uint16_t c_maxCodeBits = 15;
+const uint16_t c_maxBLCodeBits = 7;
 
 #endif // _XFCOMPRESSION_ZLIB_CONFIG_HPP_

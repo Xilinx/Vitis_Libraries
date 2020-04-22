@@ -13,17 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-# ------------------------------------------------------------
-#						Help
+############################## Help Section ##############################
+.PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to generate the design for specified Target and Device."
-	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to generate the design for specified Target and Shell."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -31,339 +28,225 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
+	$(ECHO) "  make sd_card TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to prepare sd_card files."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to build xclbin application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make host DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to build host application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
+	$(ECHO) ""
 
-# ------------------------------------------------------------
-#						Build Environment Setup
+############################## Setting up Project Variables ##############################
+MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/demos/gzip/*}')
+CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+XFLIB_DIR = $(XF_PROJ_ROOT)
 
-include ./utils.mk
-include ./config.mk
-
-TOOL_VERSION ?= 2019.2
-
-#check environment setup
-ifndef XILINX_VITIS
-  XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
-  export XILINX_VITIS
-endif
-ifndef XILINX_VIVADO
-  XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
-  export XILINX_VIVADO
-endif
-ifndef XILINX_XRT
-  XILINX_XRT = /opt/xilinx/xrt
-  export XILINX_XRT
-endif
-
-.PHONY: check_vivado
-check_vivado:
-ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
-	@echo "Cannot locate Vivado installation. Please set XILINX_VIVADO variable." && false
-endif
-
-.PHONY: check_vpp
-check_vpp:
-ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
-	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
-endif
-
-.PHONY: check_xrt
-check_xrt:
-ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
-	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
-endif
-
-export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
-
-ifeq (,$(LD_LIBRARY_PATH))
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib
-else
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
-endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-# sw_emu, hw_emu, hw
 TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
-endif
-
-# Target device
+HOST_ARCH := x86
+SYSROOT := ${SYSROOT}
 DEVICE ?= xilinx_u200_xdma_201830_2
 
-ifneq (,$(wildcard $(DEVICE)))
-# Use DEVICE as a file path
-XPLATFORM := $(DEVICE)
-else
-# Use DEVICE as a file name pattern
-DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
-ifneq (,$(PLATFORM_REPO_PATHS))
-XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+ifneq ($(findstring u200, $(DEVICE)), u200)
+ifneq ($(findstring u250, $(DEVICE)), u250)
+ifneq ($(findstring u280, $(DEVICE)), u280)
+$(warning [WARNING]: This example has not been tested for $(DEVICE). It may or may not work.)
 endif
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
 endif
 endif
 
-define MSG_PLATFORM
-No platform matched pattern '$(DEVICE)'.
-Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
-endef
-export MSG_PLATFORM
+include ./utils.mk
 
-define MSG_DEVICE
-More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
-endef
-export MSG_DEVICE
+XDEVICE := $(call device2xsa, $(DEVICE))
+TEMP_DIR := _x_temp.$(TARGET).$(XDEVICE)
+TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XDEVICE)
+BUILD_DIR := build_dir.$(TARGET).$(XDEVICE)
+BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
+EMCONFIG_DIR := $(BUILD_DIR)
 
-.PHONY: check_platform
-check_platform:
-ifeq (,$(XPLATFORM))
-	@echo "$${MSG_PLATFORM}" && false
+# Setting tools
+VPP := v++
+SDCARD := sd_card
+EMU_DIR := $(SDCARD)/data/emulation
+
+############################## Setting up Host Variables ##############################
+#Include Required Host Source Files
+HOST_SRCS += ./src/host.cpp
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/src/zlib.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
+
+
+CXXFLAGS += -DPARALLEL_BLOCK=8 -DGZIP_MODE=1
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include
+
+
+
+CXXFLAGS += -I$(XFLIB_DIR)/common/libs/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/common/libs/cmdparser
+CXXFLAGS += -I$(XFLIB_DIR)/common/libs/logger
+CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
+CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
+
+# Host compiler global settings
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE 
+CXXFLAGS += -fmessage-length=0 
+CXXFLAGS +=-I$(CUR_DIR)/src/ 
+
+
+EXE_NAME := xil_gzip
+EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
+SOC_HOST_ARGS := -sx $(BUILD_DIR)/compress_decompress.xclbin -v ./data/sample.txt
+
+HOST_ARGS := -sx $(BUILD_DIR)/compress_decompress.xclbin -v $(CUR_DIR)/sample.txt
+
+ifneq ($(HOST_ARCH), x86)
+	LDFLAGS += --sysroot=$(SYSROOT)
 endif
-ifneq (,$(word 2,$(XPLATFORM)))
-	@echo "$${MSG_DEVICE}" && false
-endif
 
-XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
-
-# ------------------------------------------------------------
-#						Directory Setup
-
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
-MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-
-XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
-
-BUILD_DIR := $(CUR_DIR)/build
-TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
-SRC_DIR := $(XFLIB_DIR)/L2/demos/gzip/
-TB_DIR := $(XFLIB_DIR)/L2/tests/src/
-
-# ------------------------------------------------------------
-#                      kernel setup
-
-PARALLEL_BLOCK:=8
-
-KSRC_DIR = $(XFLIB_DIR)/L2/src/
-
-VPP = $(XILINX_VITIS)/bin/v++
-
-# HLS src files
-HLS_SRC_DIR = $(XFLIB_DIR)/L1/include/hw
-
-# Compilation flags
-VPP_FLAGS = -I$(HLS_SRC_DIR) \
-			-I$(KSRC_DIR) \
-			-I$(XFLIB_DIR)/L2/include/
-
+############################## Setting up Kernel Variables ##############################
+# Kernel compiler global settings
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
-VPP_FLAGS += --config $(CUR_DIR)/advanced.ini \
-			 -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
+LDCLFLAGS += --optimize 2 --jobs 8
+VPP_FLAGS +=-I$(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS +=-I$(XFLIB_DIR)/L2/include
+VPP_FLAGS +=-I$(XFLIB_DIR)/L2/src
 
 
-VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
-			--report_dir $(CUR_DIR)/reports/_x.$(TARGET)
+VPP_FLAGS += --config $(CUR_DIR)/advanced.ini 
+VPP_FLAGS += -DPARALLEL_BLOCK=8 -DMULTIPLE_BYTES=4 -DHIGH_FMAX_II=2 -DGZIP_MODE=1 
 
-# Linking flags
-VPP_LINK_FLAGS = --optimize 2 --jobs 8 
-VPP_LINK_FLAGS += --config $(CUR_DIR)/opts.ini
+# Kernel linker flags
+LDCLFLAGS_compress_decompress += --profile_kernel data:all:all:all --config $(CUR_DIR)/opts.ini
 
-VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
-				 --report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
+############################## Declaring Binary Containers ##############################
+BINARY_CONTAINERS += $(BUILD_DIR)/compress_decompress.xclbin
+BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilLz77Compress.xo
+BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilHuffmanKernel.xo
+BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilZlibDmReader.xo
+BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilZlibDmWriter.xo
+BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilDecompressFull.xo
 
-XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_decompress.xclbin
+############################## Setting Targets ##############################
+CP = cp -rf
 
-XO_FILES_C = $(TEMP_DIR)/xf_compress_lz77.xo \
-		   	 $(TEMP_DIR)/xf_huffman.xo \
-		  	 $(TEMP_DIR)/xf_treegen.xo
-		  	 
-XO_FILES_D = $(TEMP_DIR)/xf_gzip_decompress.xo \
-			 $(TEMP_DIR)/xf_zlib_datawriter.xo \
-			 $(TEMP_DIR)/xf_zlib_datareader.xo
-
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
-HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/zlib_huffman_enc_mm.cpp
-TREEGEN_KERNEL_SRCS = $(KSRC_DIR)/zlib_treegen_mm.cpp
-
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_stream.cpp
-DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_rd.cpp
-DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_wr.cpp
-
-COMPRESS_KERNEL_NAME = xilLz77Compress
-HUFFMAN_KERNEL_NAME = xilHuffmanKernel
-TREEGEN_KERNEL_NAME = xilTreegenKernel
-
-DECOMPRESS_KERNEL_NAME = xilDecompressStream
-DATAREADER_KERNEL_NAME = xilZlibDmReader
-DATAWRITER_KERNEL_NAME = xilZlibDmWriter
-
-KERNELS += $(COMPRESS_KERNEL_NAME) $(HUFFMAN_KERNEL_NAME) $(TREEGEN_KERNEL_NAME)
-
-KERNELS += $(DATAREADER_KERNEL_NAME)
-KERNELS += $(DATAWRITER_KERNEL_NAME)
-KERNELS += $(DECOMPRESS_KERNEL_NAME)
-
-# ------------------------------------------------------------
-#                      kernel rules
-
-# Building kernel
-$(TEMP_DIR)/xf_compress_lz77.xo: $(COMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
-	@echo -e "----\nCompiling compression kernel..."
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(COMPRESS_KERNEL_NAME) \
-		-I'$(<D)' -o'$@' '$<'
-
-$(TEMP_DIR)/xf_huffman.xo: $(HUFFMAN_KERNEL_SRCS) $(HLS_SRC_DIR)
-	@echo -e "----\nCompiling huffman kernel $*..."
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(HUFFMAN_KERNEL_NAME) \
-		-I'$(<D)' -o'$@' '$<'
-
-$(TEMP_DIR)/xf_treegen.xo: $(TREEGEN_KERNEL_SRCS) $(HLS_SRC_DIR)
-	@echo -e "----\nCompiling treegen kernel $*..."
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(TREEGEN_KERNEL_NAME) \
-		-I'$(<D)' -o'$@' '$<'
-
-$(TEMP_DIR)/xf_gzip_decompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
-	@echo -e "----\nCompiling decompression kernel $*..."
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMPRESS_KERNEL_NAME) \
-	    -I'$(<D)' -o'$@' '$<'
-
-$(TEMP_DIR)/xf_zlib_datareader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
-	@echo -e "----\nCompiling compression kernel $*..."
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAREADER_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
-
-$(TEMP_DIR)/xf_zlib_datawriter.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
-	@echo -e "----\nCompiling compression kernel $*..."
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAWRITER_KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
-
-# xclbin Binary creation
-$(XCLBIN_FILE): $(XO_FILES_C) $(XO_FILES_D)
-	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_LINK_FLAGS) $(VPP_LINK_DIRS) -l --profile_kernel data:all:all:all -o'$@' $(+)
+.PHONY: all clean cleanall docs emconfig
+all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
 
 
-# ------------------------------------------------------------
-#                       host setup
+.PHONY: host
+host: $(EXE_FILE) | check_xrt
 
-CXX := xcpp
-HOST_EXE := xil_gzip
-#EXE_EXT = exe
-
-CXXFLAGS +=-I$(CUR_DIR)/src/
-CXXFLAGS +=-I$(XFLIB_DIR)/L2/include/
-CXXFLAGS +=-I$(TB_DIR)/
-CXXFLAGS +=-I$(XILINX_XRT)/include/
-CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/xcl2/
-CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/cmdparser/
-CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/logger/
-CXXFLAGS +=-I$(XFLIB_DIR)/common/thirdParty/xxhash/
-
-#Host and Common sources
-SRCS += $(SRC_DIR)/src/host.cpp
-SRCS += $(TB_DIR)/gzip.cpp
-SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
-SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
-SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
-SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
-
-CXXFLAGS += -fmessage-length=0 -std=c++14 -O0 \
-		-DXDEVICE=$(XDEVICE) \
-	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread
-
-LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
-LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -std=c++14 -DVERBOSE -lstdc++
-#LDFLAGS +=  -std=c++0x
-
-EXE_FILE = $(BUILD_DIR)/$(HOST_EXE)
-
-
-# ------------------------------------------------------------
-#                       host rules
-
-$(EXE_FILE): $(SRCS) | check_vpp check_xrt check_platform
-	@echo -e "----\nCompiling host $(notdir $@)..."
-	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) -g
-
-
-# ------------------------------------------------------------
-#                      build rules
-
-.PHONY: all help host xclbin cleanh cleank cleanall clean
-
-all: host xclbin
-
-host: $(EXE_FILE) | check_vpp check_xrt check_platform
-
-xclbin: $(XCLBIN_FILE)
-
-cleank:
-	rm -f _x_temp.*/*.xo
-	rm -f $(BUILD_DIR)/*.xclbin
-	rm -rf _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* sample_*
-	rm -rf _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	rm -rf _x_temp.*
-	
-cleanh:
-	rm -rf $(EXE_FILE)
-	-$(RMDIR) $(EXE_FILE)
-	-$(RMDIR) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _vxx_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
-
-cleanall: cleanh cleank
-	rm -rf $(BUILD_DIR)
-	-$(RMDIR) $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary *.txt.* *.list $(CUR_DIR)/*.raw
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	rm -rf ./sample_run.txt
-
-clean: cleanh
-
-
-# ------------------------------------------------------------
-#                      simulation run
-
-$(BUILD_DIR)/emconfig.json :
-		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
-
-HOST_ARGS = -sx $(XCLBIN_FILE) -v ./sample.txt
-
-ifeq ($(TARGET),sw_emu)
-  RUN_ENV = export XCL_EMULATION_MODE=sw_emu
-  EMU_CONFIG = $(BUILD_DIR)/emconfig.json
-else ifeq ($(TARGET),hw_emu)
-  RUN_ENV = export XCL_EMULATION_MODE=hw_emu
-  EMU_CONFIG = $(BUILD_DIR)/emconfig.json
-else ifeq ($(TARGET),hw)
-  RUN_ENV = echo "TARGET=hw"
-  EMU_CONFIG =
-endif
-
-
-run: host xclbin $(EMU_CONFIG) $(DAT_STAMP)
-	$(RUN_ENV); \
-	$(EXE_FILE) $(HOST_ARGS)
-	$(RUN_ENV); \
-	./run.sh $@ $(EXE_FILE) $(XF_PROJ_ROOT) $(XCLBIN_FILE)
-
-
-check: run
+.PHONY: xclbin
+xclbin: check_vpp | $(BINARY_CONTAINERS)
 
 .PHONY: build
-build: xclbin host
+build: xclbin
+
+############################## Setting Rules for Binary Containers (Building Kernels) ##############################
+$(TEMP_DIR)/xilLz77Compress.xo: $(XFLIB_DIR)/L2/src/zlib_lz77_compress_mm.cpp
+	$(ECHO) "Compiling Kernel: xilLz77Compress"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(xilLz77Compress_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilLz77Compress -I'$(<D)' -o'$@' '$<'
+$(TEMP_DIR)/xilHuffmanKernel.xo: $(XFLIB_DIR)/L2/src/zlib_huffman_enc_mm.cpp
+	$(ECHO) "Compiling Kernel: xilHuffmanKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(xilHuffmanKernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilHuffmanKernel -I'$(<D)' -o'$@' '$<'
+$(TEMP_DIR)/xilZlibDmReader.xo: $(XFLIB_DIR)/L2/tests/src/zlib_dm_multibyte_rd.cpp
+	$(ECHO) "Compiling Kernel: xilZlibDmReader"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(xilZlibDmReader_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilZlibDmReader -I'$(<D)' -o'$@' '$<'
+$(TEMP_DIR)/xilZlibDmWriter.xo: $(XFLIB_DIR)/L2/tests/src/zlib_dm_multibyte_wr.cpp
+	$(ECHO) "Compiling Kernel: xilZlibDmWriter"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(xilZlibDmWriter_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilZlibDmWriter -I'$(<D)' -o'$@' '$<'
+$(TEMP_DIR)/xilDecompressFull.xo: $(XFLIB_DIR)/L2/src/zlib_parallelbyte_decompress_full.cpp
+	$(ECHO) "Compiling Kernel: xilDecompressFull"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(xilDecompressFull_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilDecompressFull -I'$(<D)' -o'$@' '$<'
+
+$(BUILD_DIR)/compress_decompress.xclbin: $(BINARY_CONTAINER_compress_decompress_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/compress_decompress -l $(LDCLFLAGS) $(LDCLFLAGS_compress_decompress) -o'$@' $(+)
+
+############################## Setting Rules for Host (Building Host Executable) ##############################
+$(EXE_FILE): $(HOST_SRCS) | check_xrt
+	mkdir -p $(BUILD_DIR)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(XPLATFORM) --od $(EMCONFIG_DIR)
+
+############################## Setting Essential Checks and Running Rules ##############################
+run: all
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+ifeq ($(HOST_ARCH), x86)
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress_decompress.xclbin
+else
+	mkdir -p $(EMU_DIR)
+	$(CP) $(XILINX_VITIS)/data/emulation/unified $(EMU_DIR)
+	mkfatimg $(SDCARD) $(SDCARD).img 500000
+	launch_emulator -no-reboot -runtime ocl -t $(TARGET) -sd-card-image $(SDCARD).img -device-family $(DEV_FAM)
+endif
+else
+ifeq ($(HOST_ARCH), x86)
+	$(EXE_FILE) $(HOST_ARGS)
+else
+	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
+endif
+endif
+
+############################## Preparing sdcard folder ##############################
+sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+ifneq ($(HOST_ARCH), x86)
+	mkdir -p $(SDCARD)/$(BUILD_DIR)
+	mkdir -p $(SDCARD)/data
+	$(CP) $(B_NAME)/sw/$(XDEVICE)/boot/generic.readme $(B_NAME)/sw/$(XDEVICE)/xrt/image/* xrt.ini $(EXE_FILE) $(SDCARD)
+	$(CP) $(BUILD_DIR)/*.xclbin $(SDCARD)/$(BUILD_DIR)/
+	$(CP) $(CUR_DIR)/sample.txt $(SDCARD)/data/
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	$(ECHO) 'cd /mnt/' >> $(SDCARD)/init.sh
+	$(ECHO) 'export XILINX_VITIS=$$PWD' >> $(SDCARD)/init.sh
+	$(ECHO) 'export XCL_EMULATION_MODE=$(TARGET)' >> $(SDCARD)/init.sh
+	$(ECHO) '$(EXE_FILE) $(SOC_HOST_ARGS)' >> $(SDCARD)/init.sh
+	$(ECHO) 'reboot' >> $(SDCARD)/init.sh
+else
+	[ -f $(SDCARD)/BOOT.BIN ] && echo "INFO: BOOT.BIN already exists" || $(CP) $(BUILD_DIR)/sd_card/BOOT.BIN $(SDCARD)/
+	$(ECHO) '$(EXE_FILE) $(SOC_HOST_ARGS)' >> $(SDCARD)/init.sh
+endif
+endif
+
+############################## Cleaning Rules ##############################
+cleanh:
+	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+
+cleank:
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* 
+	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
+	-$(RMDIR) _x_temp.* 
+
+cleanall: cleanh cleank
+	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw
+	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) ./sample.txt.* ./sample_run.* ./test.list 
+
+clean: cleanh

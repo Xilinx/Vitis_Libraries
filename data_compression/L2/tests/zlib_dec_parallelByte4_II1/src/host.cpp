@@ -14,14 +14,14 @@
  * limitations under the License.
  *
  */
-#include "zlib_stream.hpp"
+#include "zlib.hpp"
 #include <fstream>
 #include <vector>
 #include "cmdlineparser.h"
 
-void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin) {
+void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin, uint8_t deviceId) {
     // Xilinx ZLIB object
-    xfZlibStream xlz(decompress_bin);
+    xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId);
 
     std::cout << std::fixed << std::setprecision(2) << "KT(Mbps)\t\t:";
 
@@ -37,7 +37,7 @@ void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin
     lz_decompress_out = lz_decompress_out + ".raw";
 
     // Call ZLIB compression
-    xlz.decompress_file(lz_decompress_in, lz_decompress_out, input_size);
+    xlz.decompress_file(lz_decompress_in, lz_decompress_out, input_size, 0);
     std::cout << std::fixed << std::setprecision(3) << std::endl
               << "File Size(MB)\t\t:" << (double)input_size / 1000000 << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
@@ -47,12 +47,19 @@ int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--decompress_xclbin", "-dx", "Decompress XCLBIN", "decompress");
     parser.addSwitch("--decompress", "-d", "decompress", "");
+    parser.addSwitch("--device", "-dev", "FPGA Card # to be used", "");
     parser.parse(argc, argv);
 
     std::string decompress_mod = parser.value("decompress");
     std::string decompress_bin = parser.value("decompress_xclbin");
+    std::string dev_id_str = parser.value("device");
+
+    int deviceId = 0;
+    if (!dev_id_str.empty()) { // check device Id to run on
+        deviceId = atoi(dev_id_str.c_str());
+    }
 
     if (!decompress_mod.empty())
         // "-d" - DeCompress Mode
-        xil_decompress_top(decompress_mod, decompress_bin);
+        xil_decompress_top(decompress_mod, decompress_bin, deviceId);
 }

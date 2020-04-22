@@ -39,7 +39,6 @@
 #include <assert.h>
 #include <ap_int.h>
 
-#define MIN_BLOCK_SIZE 128
 #define GMEM_DWIDTH 512
 #define GMEM_BURST_SIZE 16
 

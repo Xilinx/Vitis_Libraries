@@ -49,6 +49,9 @@
 #define MATCH_LEN 6
 #define MAX_LIT_COUNT 4096
 
+typedef ap_uint<8> uintInV_t;
+typedef ap_uint<8> uintOutV_t;
+
 // Kernel top functions
 extern "C" {
 /**

@@ -14,6 +14,8 @@
             "name": "generic launch for all flows"
         }
     ],
+    "match_makefile": "false",
+    "match_ini": "false",
     "config_make": "config.mk",
     "host": {
         "host_exe": "xil_zlib",
@@ -34,6 +36,10 @@
         }
     },
     "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini",
+            "PROJECT/hls_directives.tcl"
+        ],
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=8"
@@ -539,6 +545,7 @@
             ]
         }
     ],
+    "output_files" : "sample.txt.*",
     "testinfo": {
         "disable": false,
         "jobs": [

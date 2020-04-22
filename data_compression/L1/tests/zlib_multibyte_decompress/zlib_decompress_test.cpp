@@ -30,6 +30,8 @@
 #define MAX_OFFSET (32 * 1024)
 #define HISTORY_SIZE MAX_OFFSET
 
+#define HUFFMAN_TYPE xf::compression::DYNAMIC
+
 #define IN_BITWIDTH 16
 #define OUT_BITWIDTH (MULTIPLE_BYTES * 8)
 const uint32_t sizeof_in = (IN_BITWIDTH / 8);
@@ -41,18 +43,21 @@ typedef ap_uint<OUT_BITWIDTH> out_t;
 void zlibMultiByteDecompressEngineRun(hls::stream<in_t>& inStream,
                                       hls::stream<out_t>& outStream,
                                       hls::stream<bool>& outStreamEoS,
-                                      hls::stream<uint32_t>& outSizeStream,
+                                      hls::stream<uint64_t>& outSizeStream,
                                       const uint32_t input_size)
 
 {
-    xf::compression::inflateMultiByte<MULTIPLE_BYTES>(inStream, outStream, outStreamEoS, outSizeStream, input_size);
+    const int c_decoderType = (int)HUFFMAN_TYPE;
+
+    xf::compression::details::inflateMultiByteCore<c_decoderType, MULTIPLE_BYTES>(inStream, outStream, outStreamEoS,
+                                                                                  outSizeStream, input_size);
 }
 
 int main(int argc, char* argv[]) {
     hls::stream<in_t> inStream("inStream");
     hls::stream<out_t> outStream("decompressOut");
     hls::stream<bool> outStreamEoS("decompressOut");
-    hls::stream<uint32_t> outStreamSize("decompressOut");
+    hls::stream<uint64_t> outStreamSize("decompressOut");
     uint32_t input_size;
     std::string inputFileName = argv[1];
     std::string outputFileName = argv[2];
@@ -85,9 +90,9 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
     bool pass = true;
-    uint32_t outSize = outStreamSize.read();
+    uint64_t outSize = outStreamSize.read();
     std::cout << "Uncompressed size =" << outSize << std::endl;
-    uint32_t outCnt = 0;
+    uint64_t outCnt = 0;
     out_t g;
     for (bool outEoS = outStreamEoS.read(); outEoS == 0; outEoS = outStreamEoS.read()) {
         // reading value from output stream

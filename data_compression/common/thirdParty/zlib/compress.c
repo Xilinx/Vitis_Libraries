@@ -50,7 +50,7 @@ int ZEXPORT compress2(Bytef* dest, uLongf* destLen, const Bytef* source, uLong s
     stream.avail_out = 0;
     stream.next_in = (z_const Bytef*)source;
     stream.avail_in = 0;
-    printf("In compress2\n");
+    //printf("In compress2\n");
     do {
         if (stream.avail_out == 0) {
             stream.avail_out = left > (uLong)max ? max : (uInt)left;
@@ -60,9 +60,9 @@ int ZEXPORT compress2(Bytef* dest, uLongf* destLen, const Bytef* source, uLong s
             stream.avail_in = sourceLen > (uLong)max ? max : (uInt)sourceLen;
             sourceLen -= stream.avail_in;
         }
-        printf("before deflate \n");
+        //printf("before deflate \n");
         err = deflate(&stream, sourceLen ? Z_NO_FLUSH : Z_FINISH);
-        printf("err %d \n", err);
+        //printf("err %d \n", err);
     } while (err == Z_OK);
 
     *destLen = stream.total_out;

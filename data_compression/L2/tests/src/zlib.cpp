@@ -15,6 +15,11 @@
  *
  */
 #include "zlib.hpp"
+#include <fcntl.h>  /* For O_RDWR */
+#include <unistd.h> /* For open(), creat() */
+#include <sys/stat.h>
+
+int fd_p2p_c_in = 0;
 
 uint32_t get_file_size(std::ifstream& file) {
     file.seekg(0, file.end);
@@ -23,7 +28,86 @@ uint32_t get_file_size(std::ifstream& file) {
     return file_size;
 }
 
-void zip(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
+void gzip_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
+    const uint16_t c_format_0 = 31;
+    const uint16_t c_format_1 = 139;
+    const uint16_t c_variant = 8;
+    const uint16_t c_real_code = 8;
+    const uint16_t c_opcode = 3;
+
+    // 2 bytes of magic header
+    outFile.put(c_format_0);
+    outFile.put(c_format_1);
+
+    // 1 byte Compression method
+    outFile.put(c_variant);
+
+    // 1 byte flags
+    uint8_t flags = 0;
+    flags |= c_real_code;
+    outFile.put(flags);
+
+    // 4 bytes file modification time in unit format
+    unsigned long time_stamp = 0;
+    struct stat istat;
+    stat(inFile_name.c_str(), &istat);
+    time_stamp = istat.st_mtime;
+    // put_long(time_stamp, outFile);
+    uint8_t time_byte = 0;
+    time_byte = time_stamp;
+    outFile.put(time_byte);
+    time_byte = time_stamp >> 8;
+    outFile.put(time_byte);
+    time_byte = time_stamp >> 16;
+    outFile.put(time_byte);
+    time_byte = time_stamp >> 24;
+    outFile.put(time_byte);
+
+    // 1 byte extra flag (depend on compression method)
+    uint8_t deflate_flags = 0;
+    outFile.put(deflate_flags);
+
+    // 1 byte OPCODE - 0x03 for Unix
+    outFile.put(c_opcode);
+
+    // Dump file name
+    for (int i = 0; inFile_name[i] != '\0'; i++) {
+        outFile.put(inFile_name[i]);
+    }
+
+    outFile.put(0);
+    outFile.write((char*)zip_out, enbytes);
+
+    unsigned long ifile_size = istat.st_size;
+    uint8_t crc_byte = 0;
+    long crc_val = 0;
+    crc_byte = crc_val;
+    outFile.put(crc_byte);
+    crc_byte = crc_val >> 8;
+    outFile.put(crc_byte);
+    crc_byte = crc_val >> 16;
+    outFile.put(crc_byte);
+    crc_byte = crc_val >> 24;
+    outFile.put(crc_byte);
+
+    uint8_t len_byte = 0;
+    len_byte = ifile_size;
+    outFile.put(len_byte);
+    len_byte = ifile_size >> 8;
+    outFile.put(len_byte);
+    len_byte = ifile_size >> 16;
+    outFile.put(len_byte);
+    len_byte = ifile_size >> 24;
+    outFile.put(len_byte);
+
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+}
+
+void zlib_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
     outFile.put(120);
     outFile.put(1);
     outFile.write((char*)zip_out, enbytes);
@@ -55,8 +139,13 @@ uint32_t xil_zlib::compress_file(std::string& inFile_name, std::string& outFile_
     uint32_t enbytes = compress(zlib_in.data(), zlib_out.data(), input_size, host_buffer_size);
 
     if (enbytes > 0) {
-        // Pack zlib encoded stream .gz file
-        zip(inFile_name, outFile, zlib_out.data(), enbytes);
+#ifdef GZIP_MODE
+        // Pack gzip encoded stream .gz file
+        gzip_headers(inFile_name, outFile, zlib_out.data(), enbytes);
+#else
+        // Pack zlib encoded stream .zlib file
+        zlib_headers(inFile_name, outFile, zlib_out.data(), enbytes);
+#endif
     }
 
     // Close file
@@ -96,8 +185,6 @@ xil_zlib::xil_zlib(const std::string& binaryFileName, uint8_t flow, uint8_t max_
 
     const uint16_t c_ltree_size = 1024;
     const uint16_t c_dtree_size = 64;
-    const uint16_t c_bltree_size = 64;
-    const uint16_t c_maxcode_size = 16;
 
     for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
         for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
@@ -109,15 +196,6 @@ xil_zlib::xil_zlib(const std::string& binaryFileName, uint8_t flow, uint8_t max_
             h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS);
             h_dyn_ltree_freq[i][j].resize(PARALLEL_ENGINES * c_ltree_size);
             h_dyn_dtree_freq[i][j].resize(PARALLEL_ENGINES * c_dtree_size);
-            h_dyn_bltree_freq[i][j].resize(PARALLEL_ENGINES * c_bltree_size);
-            h_dyn_ltree_codes[i][j].resize(PARALLEL_ENGINES * c_ltree_size);
-            h_dyn_dtree_codes[i][j].resize(PARALLEL_ENGINES * c_dtree_size);
-            h_dyn_bltree_codes[i][j].resize(PARALLEL_ENGINES * c_bltree_size);
-            h_dyn_ltree_blen[i][j].resize(PARALLEL_ENGINES * c_ltree_size);
-            h_dyn_dtree_blen[i][j].resize(PARALLEL_ENGINES * c_dtree_size);
-            h_dyn_bltree_blen[i][j].resize(PARALLEL_ENGINES * c_bltree_size);
-
-            h_buff_max_codes[i][j].resize(PARALLEL_ENGINES * c_maxcode_size);
         }
     }
     // Device buffer allocation
@@ -146,38 +224,6 @@ xil_zlib::xil_zlib(const std::string& binaryFileName, uint8_t flow, uint8_t max_
             buffer_dyn_dtree_freq[cu][flag] =
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, h_dyn_dtree_freq[cu][flag].data());
-
-            buffer_dyn_bltree_freq[cu][flag] =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * c_bltree_size, h_dyn_bltree_freq[cu][flag].data());
-
-            buffer_dyn_ltree_codes[cu][flag] =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, h_dyn_ltree_codes[cu][flag].data());
-
-            buffer_dyn_dtree_codes[cu][flag] =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, h_dyn_dtree_codes[cu][flag].data());
-
-            buffer_dyn_bltree_codes[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                                                               PARALLEL_ENGINES * sizeof(uint32_t) * c_bltree_size,
-                                                               h_dyn_bltree_codes[cu][flag].data());
-
-            buffer_dyn_ltree_blen[cu][flag] =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, h_dyn_ltree_blen[cu][flag].data());
-
-            buffer_dyn_dtree_blen[cu][flag] =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, h_dyn_dtree_blen[cu][flag].data());
-
-            buffer_dyn_bltree_blen[cu][flag] =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                               PARALLEL_ENGINES * sizeof(uint32_t) * c_bltree_size, h_dyn_bltree_blen[cu][flag].data());
-
-            buffer_max_codes[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                                                        (PARALLEL_ENGINES * c_maxcode_size) * sizeof(uint32_t),
-                                                        h_buff_max_codes[cu][flag].data());
         }
     }
 
@@ -188,6 +234,7 @@ xil_zlib::xil_zlib(const std::string& binaryFileName, uint8_t flow, uint8_t max_
         h_dbuf_zlibout[j].resize(OUTPUT_BUFFER_SIZE);
         h_dcompressSize[j].resize(sizeof(uint32_t));
     }
+    h_dcompressStatus.resize(sizeof(uint32_t));
 }
 
 // Destructor
@@ -204,15 +251,6 @@ xil_zlib::~xil_zlib() {
 
             delete (buffer_dyn_ltree_freq[cu][flag]);
             delete (buffer_dyn_dtree_freq[cu][flag]);
-            delete (buffer_dyn_bltree_freq[cu][flag]);
-
-            delete (buffer_dyn_ltree_codes[cu][flag]);
-            delete (buffer_dyn_dtree_codes[cu][flag]);
-            delete (buffer_dyn_bltree_codes[cu][flag]);
-
-            delete (buffer_dyn_ltree_blen[cu][flag]);
-            delete (buffer_dyn_dtree_blen[cu][flag]);
-            delete (buffer_dyn_bltree_blen[cu][flag]);
         }
     }
 }
@@ -254,8 +292,6 @@ int xil_zlib::init(const std::string& binaryFileName, uint8_t flow, uint8_t d_ty
         compress_kernel = new cl::Kernel(*m_program, compress_kernel_names[0].c_str());
         // Create Compress & Huffman kernels
         huffman_kernel = new cl::Kernel(*m_program, huffman_kernel_names[0].c_str());
-        // Create Tree generation kernel
-        treegen_kernel = new cl::Kernel(*m_program, treegen_kernel_names[0].c_str());
     }
     if (flow == 0 || flow == 2) {
         // Create Decompress kernel
@@ -271,7 +307,6 @@ int xil_zlib::release() {
     if (m_BinFlow) {
         delete compress_kernel;
         delete huffman_kernel;
-        delete treegen_kernel;
     }
     if (m_BinFlow == 0 || m_BinFlow == 2) {
         delete decompress_kernel;
@@ -295,35 +330,54 @@ int xil_zlib::release() {
     return 0;
 }
 
-uint32_t xil_zlib::decompress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu) {
-    // printme("In decompress_file \n");
-    std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
+uint32_t xil_zlib::decompress_file(
+    std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu, bool enable_p2p) {
     std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
-
-    if (!inFile) {
-        std::cout << "Unable to open file";
-        exit(1);
-    }
-
     uint8_t c_max_cr = m_max_cr;
 
-    std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size);
-
+    std::vector<uint8_t, aligned_allocator<uint8_t> > in;
     // Allocat output size
     // 8 - Max CR per file expected, if this size is big
     // Decompression crashes
     std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size * c_max_cr);
     uint32_t debytes = 0;
-    // READ ZLIB header 2 bytes
-    inFile.read((char*)in.data(), input_size);
-    // printme("Call to zlib_decompress \n");
-    // Call decompress
-    debytes = decompress(in.data(), out.data(), input_size, cu);
 
+    if (enable_p2p) {
+        fd_p2p_c_in = open(inFile_name.c_str(), O_RDONLY | O_DIRECT);
+        if (fd_p2p_c_in <= 0) {
+            std::cout << "P2P: Unable to open input file, fd: %d\n" << fd_p2p_c_in << std::endl;
+            exit(1);
+        }
+
+        // printme("Call to zlib_decompress \n");
+        // Call decompress
+        debytes = decompress(in.data(), out.data(), input_size, cu, enable_p2p);
+
+    } else {
+        // printme("In decompress_file \n");
+        std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
+        if (!inFile) {
+            std::cout << "Unable to open file";
+            exit(1);
+        }
+
+        in.resize(input_size);
+        // READ ZLIB header 2 bytes
+        inFile.read((char*)in.data(), input_size);
+#if 0
+        if (in[0] != 120 && in[1] != 1) {
+            std::cout << "\n\x1B[35mProblem with Magic Headers\033[0m \n" << std::endl;
+            exit(1);
+        }
+#endif
+        // printme("Call to zlib_decompress \n");
+        // Call decompress
+        debytes = decompress(in.data(), out.data(), input_size, cu, enable_p2p);
+
+        // Close file
+        inFile.close();
+    }
     outFile.write((char*)out.data(), debytes);
-
-    // Close file
-    inFile.close();
     outFile.close();
 
     return debytes;
@@ -331,92 +385,92 @@ uint32_t xil_zlib::decompress_file(std::string& inFile_name, std::string& outFil
 
 // method to enqueue reads in parallel with writes to decompression kernel
 void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, uint32_t max_outbuf_size) {
-    const int BUFCNT = DOUT_BUFFERCOUNT; // mandatorily 2
-    cl::Event hostReadEvent;
-    cl::Event kernelReadEvent;
-    cl::Event sizeReadEvent;
+    const int BUFCNT = DOUT_BUFFERCOUNT;
+    cl::Event hostReadEvent[BUFCNT];
+    cl::Event kernelReadEvent[BUFCNT];
+    // cl::Event sizeReadEvent;
+    std::vector<cl::Event> kernelReadWait[BUFCNT];
 
     uint8_t* outP = nullptr;
     uint32_t* outSize = nullptr;
     uint32_t dcmpSize = 0;
     cl::Buffer* buffer_out[BUFCNT];
     cl::Buffer* buffer_size[BUFCNT];
+    cl::Buffer* buffer_status; // single common buffer to capture the decompression status by kernel
     for (int i = 0; i < BUFCNT; i++) {
         buffer_out[i] =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize, h_dbuf_zlibout[i].data());
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, bufSize, h_dbuf_zlibout[i].data());
 
-        buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 2 * sizeof(uint32_t),
+        buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 2 * sizeof(uint32_t),
                                         h_dcompressSize[i].data());
     }
+    buffer_status =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(uint32_t), h_dcompressStatus.data());
+    h_dcompressStatus[0] = 0;
+    m_q_rdd->enqueueMigrateMemObjects({*(buffer_status)}, 0, NULL, NULL);
+    m_q_rdd->finish();
 
     // enqueue first set of buffers
     uint8_t cbf_idx = 0;
     uint32_t keq_idx = 0;
     uint32_t raw_size = 0;
+    uint32_t cpy_cnt = 0;
+    bool done = false;
+
     // set consistent buffer size to be read
-    data_reader_kernel->setArg(2, bufSize);
+    data_reader_kernel->setArg(2, *(buffer_status));
+    data_reader_kernel->setArg(3, bufSize);
     do {
-        // set reader kernel arguments
-        data_reader_kernel->setArg(0, *(buffer_out[cbf_idx]));
-        data_reader_kernel->setArg(1, *(buffer_size[cbf_idx]));
+        cbf_idx = keq_idx % BUFCNT;
+        if (((kernelReadWait[cbf_idx]).size() > 0) || (done)) {
+            (hostReadEvent[cbf_idx]).wait(); // wait for previous data migration to complete
+            if (!done) {
+                outSize = h_dcompressSize[cbf_idx].data();
+                raw_size = *outSize;
+                outP = h_dbuf_zlibout[cbf_idx].data();
+                // if output data size is multiple of buffer size, then (buffer_size + 1) is sent by reader kernel
+                if (raw_size > bufSize) {
+                    --raw_size;
+                }
+                if (raw_size != 0) {
+                    std::memcpy(out + dcmpSize, outP, raw_size);
+                    dcmpSize += raw_size;
+                }
+                if (raw_size != bufSize) done = true;
 
-        // enqueue reader kernel
-        m_q_rd->enqueueTask(*data_reader_kernel, NULL, &kernelReadEvent);
-
-        // copy previous data
-        if (keq_idx > 0) {
-            outP = h_dbuf_zlibout[abs(cbf_idx - 1)].data();
-            uint32_t sz2read = raw_size;
-            if (sz2read > bufSize) {
-                sz2read--;
+                if (dcmpSize > max_outbuf_size) {
+                    std::cout << "\n" << std::endl;
+                    std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
+                              << std::endl;
+                    std::cout
+                        << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
+                        << std::endl;
+                    std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
+                    exit(1);
+                }
+                if ((kernelReadWait[cbf_idx]).size() > 0)
+                    kernelReadWait[cbf_idx].pop_back(); // must always have single element
             }
-            hostReadEvent.wait(); // wait for previous data migration to complete
-            std::memcpy(out + dcmpSize, outP, sz2read);
-            dcmpSize += sz2read;
-            if (dcmpSize > max_outbuf_size) {
-                std::cout << "\n" << std::endl;
-                std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
-                          << std::endl;
-                std::cout
-                    << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
-                    << std::endl;
-                std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
-                exit(1);
-            }
+            ++cpy_cnt;
         }
-        // wait for kernel read to complete after copying previous data
-        kernelReadEvent.wait();
+        if (!done) {
+            // set reader kernel arguments
+            data_reader_kernel->setArg(0, *(buffer_out[cbf_idx]));
+            data_reader_kernel->setArg(1, *(buffer_size[cbf_idx]));
 
-        m_q_rdd->enqueueMigrateMemObjects({*(buffer_size[cbf_idx])}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &sizeReadEvent);
-        sizeReadEvent.wait();
+            // enqueue reader kernel
+            m_q_rd->enqueueTask(*data_reader_kernel, NULL, &(kernelReadEvent[cbf_idx]));
+            kernelReadWait[cbf_idx].push_back(kernelReadEvent[cbf_idx]); // event to wait for
 
-        outSize = h_dcompressSize[cbf_idx].data();
-        raw_size = *outSize;
-        if (raw_size > 0) {
-            m_q_rdd->enqueueMigrateMemObjects({*(buffer_out[cbf_idx])}, CL_MIGRATE_MEM_OBJECT_HOST, NULL,
-                                              &hostReadEvent);
+            // need to avoid full buffer copies for 0 bytes size data
+            m_q_rdd->enqueueMigrateMemObjects({*(buffer_size[cbf_idx]), *(buffer_out[cbf_idx])},
+                                              CL_MIGRATE_MEM_OBJECT_HOST, &(kernelReadWait[cbf_idx]),
+                                              &(hostReadEvent[cbf_idx]));
+            ++keq_idx;
         }
-        ++keq_idx;
-        cbf_idx = ((cbf_idx == 0) ? 1 : 0); // since only two buffers
-    } while (raw_size == bufSize);
-
-    // read the last block of data
-    outP = h_dbuf_zlibout[abs(cbf_idx - 1)].data();
-    if (raw_size > bufSize) {
-        raw_size--;
-    }
-    hostReadEvent.wait();
-    if (raw_size > max_outbuf_size) {
-        std::cout << "\n" << std::endl;
-        std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n" << std::endl;
-        std::cout << "\x1B[35mUse -mcr option to increase the maximum compression ratio (Default: 10) \033[0m \n"
-                  << std::endl;
-        std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
-        exit(1);
-    }
-    std::memcpy(out + dcmpSize, outP, raw_size);
-    dcmpSize += raw_size;
-
+    } while (!(done && keq_idx == cpy_cnt));
+    // wait for data transfer queue to finish
+    m_q_rdd->finish();
     *decompSize = dcmpSize;
 
     // free the buffers
@@ -427,84 +481,106 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
 }
 
 // method to enqueue writes in parallel with reads from decompression kernel
-void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize) {
+void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, bool enable_p2p) {
     const int BUFCNT = DIN_BUFFERCOUNT;
 
     uint32_t bufferCount = 1 + (inputSize - 1) / bufSize;
 
+    cl_mem_ext_ptr_t p2pInExt;
+    uint32_t inputSize4kMultiple = 0;
+    std::chrono::duration<double, std::nano> total_ssd_time_ns(0);
+    std::vector<char*> p2pPtrVec;
+
     uint8_t* inP = nullptr;
+
+    if (enable_p2p) {
+        // DDR buffer exyensions
+        p2pInExt.flags = XCL_MEM_EXT_P2P_BUFFER;
+        p2pInExt.obj = nullptr;
+        p2pInExt.param = NULL;
+        // inputSize to 4k multiple due to p2p flow
+        inputSize4kMultiple = ((inputSize - 1) / (4096) + 1) * 4096;
+    }
+
     cl::Buffer* buffer_in[BUFCNT];
-    cl::Event hostWriteEvent[bufferCount];
-    cl::Event kernelWriteEvent[bufferCount];
+    cl::Event hostWriteEvent[BUFCNT];
+    cl::Event kernelWriteEvent[BUFCNT];
+
+    std::vector<cl::Event> hostWriteWait[BUFCNT];
 
     for (int i = 0; i < BUFCNT; i++) {
-        buffer_in[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize, h_dbuf_in[i].data());
+        if (enable_p2p) {
+            buffer_in[i] = new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, bufSize, &p2pInExt);
+            char* p2pPtr = (char*)m_q_wr->enqueueMapBuffer(*(buffer_in[i]), CL_TRUE, CL_MAP_READ, 0, bufSize);
+            p2pPtrVec.push_back(p2pPtr);
+
+        } else {
+            buffer_in[i] =
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize, h_dbuf_in[i].data());
+        }
     }
 
     uint32_t cBufSize = bufSize;
     uint8_t cbf_idx = 0;  // index indicating current buffer(0-4) being used in loop
     uint32_t keq_idx = 0; // index indicating the number of writer kernel enqueues
 
-    // enqueue first set of buffers
-    for (uint32_t bnum = 0; bnum < BUFCNT && bnum < bufferCount; ++bnum) {
-        std::vector<cl::Event> hostWriteWait;
-        inP = h_dbuf_in[bnum].data();
-        // set for last and other buffers
-        if (bnum == bufferCount - 1) {
-            if (bufferCount > 1) {
-                cBufSize = inputSize - (bufSize * bnum);
-            }
-        }
-        std::memcpy(inP, in + (bnum * bufSize), cBufSize);
+    for (keq_idx = 0; keq_idx < bufferCount; ++keq_idx) {
+        cbf_idx = keq_idx % BUFCNT;
 
-        // set kernel arguments
-        data_writer_kernel->setArg(0, *(buffer_in[bnum]));
-        data_writer_kernel->setArg(1, cBufSize);
-
-        m_q_wrd->enqueueMigrateMemObjects({*(buffer_in[bnum])}, 0, NULL, &(hostWriteEvent[bnum]));
-
-        hostWriteWait.push_back(hostWriteEvent[bnum]);
-        m_q_wr->enqueueTask(*data_writer_kernel, &hostWriteWait, &(kernelWriteEvent[bnum]));
-    }
-
-    if (bufferCount >= BUFCNT) {
-        // sequencially enqueue data transfers as the write kernels finish in order
-        for (keq_idx = BUFCNT; keq_idx < bufferCount; ++keq_idx) {
-            cbf_idx = keq_idx % BUFCNT;
+        if (keq_idx > BUFCNT - 1) {
             // wait for (current - BUFCNT) kernel to finish
-            // cl::Event::waitForEvents(kernelWriteWait);
             (kernelWriteEvent[cbf_idx]).wait();
-
-            inP = h_dbuf_in[cbf_idx].data();
-            // set for last and other buffers
-            if (keq_idx == bufferCount - 1) {
-                if (bufferCount > 1) {
+        }
+        inP = h_dbuf_in[cbf_idx].data();
+        // set for last and other buffers
+        if (keq_idx == bufferCount - 1) {
+            if (bufferCount > 1) {
+                if (enable_p2p) {
+                    cBufSize = inputSize4kMultiple - (bufSize * keq_idx);
+                } else {
                     cBufSize = inputSize - (bufSize * keq_idx);
                 }
             }
-            std::vector<cl::Event> hostWriteWait;
-            std::vector<cl::Event> kernelWriteWait;
+        }
 
-            // copy the data
+        auto ssd_start = std::chrono::high_resolution_clock::now();
+        // copy the data
+        if (enable_p2p) {
+            int ret = read(fd_p2p_c_in, p2pPtrVec[keq_idx], cBufSize);
+            if (ret == -1)
+                std::cout << "P2P: compress(): read() failed, err: " << ret << ", line: " << __LINE__ << std::endl;
+        } else {
             std::memcpy(inP, in + (keq_idx * bufSize), cBufSize);
+        }
+        auto ssd_end = std::chrono::high_resolution_clock::now();
+        auto ssd_time_ns = std::chrono::duration<double, std::nano>(ssd_end - ssd_start);
+        total_ssd_time_ns += ssd_time_ns;
 
-            // set kernel arguments
-            data_writer_kernel->setArg(0, *(buffer_in[cbf_idx]));
-            data_writer_kernel->setArg(1, cBufSize);
+        // set kernel arguments
+        data_writer_kernel->setArg(0, *(buffer_in[cbf_idx]));
+        data_writer_kernel->setArg(1, cBufSize);
 
-            m_q_wrd->enqueueMigrateMemObjects({*(buffer_in[cbf_idx])}, 0, NULL, &(hostWriteEvent[keq_idx]));
-
-            hostWriteWait.push_back(hostWriteEvent[keq_idx]); // data tranfer to wait for
-            m_q_wr->enqueueTask(*data_writer_kernel, &hostWriteWait, &(kernelWriteEvent[cbf_idx]));
+        if (enable_p2p) {
+            m_q_wr->enqueueTask(*data_writer_kernel, NULL, &(kernelWriteEvent[cbf_idx]));
+        } else {
+            // enqueue data migration to kernel
+            m_q_wr->enqueueMigrateMemObjects({*(buffer_in[cbf_idx])}, 0, NULL, NULL);
+            // enqueue the writer kernel dependent on corresponding bufffer migration
+            m_q_wr->enqueueTask(*data_writer_kernel, NULL, &(kernelWriteEvent[cbf_idx]));
         }
     }
-    // std::cout << "Writer Enqueued" << std::endl;
+    // wait for enqueued writer kernels to finish
     m_q_wr->finish();
-    // std::cout << "Data Write successfull" << std::endl;
+    // delete the allocated buffers
     for (int i = 0; i < BUFCNT; i++) delete (buffer_in[i]);
+
+    float ssd_throughput_in_mbps_1 = (float)inputSize * 1000 / total_ssd_time_ns.count();
+    if (enable_p2p)
+        std::cout << std::fixed << std::setprecision(2) << "SSD Throughput(Mbps)\t:" << ssd_throughput_in_mbps_1
+                  << std::endl;
 }
 
-uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
+uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu, bool enable_p2p) {
     std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
     uint32_t inBufferSize = INPUT_BUFFER_SIZE;
     uint32_t outBufferSize = OUTPUT_BUFFER_SIZE;
@@ -517,7 +593,7 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
 
     // start parallel reader kernel enqueue thread
     uint32_t decmpSizeIdx = 0;
-    std::thread decompWriter(&xil_zlib::_enqueue_writes, this, inBufferSize, in, input_size);
+    std::thread decompWriter(&xil_zlib::_enqueue_writes, this, inBufferSize, in, input_size, enable_p2p);
     std::thread decompReader(&xil_zlib::_enqueue_reads, this, outBufferSize, out, &decmpSizeIdx, max_outbuf_size);
 
     // enqueue decompression kernel
@@ -536,7 +612,10 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
     decompWriter.join();
 
     float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 / decompress_API_time_ns_1.count();
-    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+    if (enable_p2p)
+        std::cout << "E2E\t\t\t:" << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+    else
+        std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
 
     // printme("Done with decompress \n");
     return decmpSizeIdx;
@@ -559,7 +638,6 @@ uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint
     uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
 
     std::chrono::duration<double, std::nano> lz77_kernel_time_ns_1(0);
-    std::chrono::duration<double, std::nano> treegen_kernel_time_ns_1(0);
     std::chrono::duration<double, std::nano> huffman_kernel_time_ns_1(0);
 
     // For example: Input file size is 12MB and Host buffer size is 2MB
@@ -603,10 +681,11 @@ uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint
 
     // Finished bricks
     int completed_bricks = 0;
-
+    uint32_t input_index = 0;
+    uint16_t tail_block_size = 0;
     int flag = 0;
     uint32_t lcl_cu = 0;
-
+    bool flag_smallblk = false;
     uint8_t cunits = (uint8_t)C_COMPUTE_UNIT;
     uint8_t queue_idx = 0;
 overlap:
@@ -661,8 +740,16 @@ overlap:
                 if (i + block_size > sizeOfChunk[brick + cu]) {
                     block_size = sizeOfChunk[brick + cu] - i;
                 }
-                //////printme("sizeofChunk %d block_size %d cu %d \n", sizeOfChunk[brick+cu], block_size, cu);
-                (h_blksize[cu][flag]).data()[idxblk++] = block_size;
+
+                if (block_size < MIN_BLOCK_SIZE) {
+                    input_index = idxblk * block_size_in_bytes;
+                    flag_smallblk = true;
+                    tail_block_size = block_size;
+                    sizeOfChunk[brick + cu] -= block_size;
+                } else {
+                    //////printme("sizeofChunk %d block_size %d cu %d \n", sizeOfChunk[brick+cu], block_size, cu);
+                    (h_blksize[cu][flag]).data()[idxblk++] = block_size;
+                }
             }
 
             std::memcpy(h_buf_in[cu][flag].data(), &in[(brick + cu) * host_buffer_size], sizeOfChunk[brick + cu]);
@@ -680,32 +767,12 @@ overlap:
             (compress_kernel)->setArg(narg++, sizeOfChunk[brick + cu]);
 
             narg = 0;
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_bltree_freq[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_ltree_codes[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_dtree_codes[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_bltree_codes[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_ltree_blen[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_dtree_blen[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_dyn_bltree_blen[cu][flag]));
-            (treegen_kernel)->setArg(narg++, *(buffer_max_codes[cu][flag]));
-            (treegen_kernel)->setArg(narg++, block_size_in_kb);
-            (treegen_kernel)->setArg(narg++, sizeOfChunk[brick + cu]);
-            (treegen_kernel)->setArg(narg++, blocksPerChunk[brick]);
-
-            narg = 0;
             (huffman_kernel)->setArg(narg++, *(buffer_lz77_output[cu][flag]));
+            (huffman_kernel)->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag]));
+            (huffman_kernel)->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag]));
             (huffman_kernel)->setArg(narg++, *(buffer_zlib_output[cu][flag]));
             (huffman_kernel)->setArg(narg++, *(buffer_compress_size[cu][flag]));
             (huffman_kernel)->setArg(narg++, *(buffer_inblk_size[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_dyn_ltree_codes[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_dyn_dtree_codes[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_dyn_bltree_codes[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_dyn_ltree_blen[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_dyn_dtree_blen[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_dyn_bltree_blen[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_max_codes[cu][flag]));
             (huffman_kernel)->setArg(narg++, block_size_in_kb);
             (huffman_kernel)->setArg(narg++, sizeOfChunk[brick + cu]);
 
@@ -723,16 +790,6 @@ overlap:
             auto lz77_kernel_end = std::chrono::high_resolution_clock::now();
             auto lz77_duration = std::chrono::duration<double, std::nano>(lz77_kernel_end - lz77_kernel_start);
             lz77_kernel_time_ns_1 += lz77_duration;
-
-            auto treegen_kernel_start = std::chrono::high_resolution_clock::now();
-
-            // TreeGen Fire Kernel invocation
-            m_q[queue_idx + cu]->enqueueTask(*treegen_kernel);
-            m_q[queue_idx + cu]->finish();
-
-            auto treegen_kernel_end = std::chrono::high_resolution_clock::now();
-            auto treegen_duration = std::chrono::duration<double, std::nano>(treegen_kernel_end - treegen_kernel_start);
-            treegen_kernel_time_ns_1 += treegen_duration;
 
             auto huffman_kernel_start = std::chrono::high_resolution_clock::now();
 
@@ -798,6 +855,18 @@ overlap:
             }
         }
     }
+    if (flag_smallblk) {
+        uint8_t len_low = (uint8_t)tail_block_size;
+        uint8_t len_high = (uint8_t)(tail_block_size >> 8);
+        out[outIdx++] = 0x00;
+        out[outIdx++] = len_low;
+        out[outIdx++] = len_high;
+        out[outIdx++] = ~len_high;
+        out[outIdx++] = ~len_low;
+        for (int i = 0; i < tail_block_size; i++) {
+            out[outIdx++] = in[input_index + i];
+        }
+    }
 
     std::chrono::duration<double, std::nano> temp_kernel_time_ns_1(0);
     if (lz77_kernel_time_ns_1.count() > huffman_kernel_time_ns_1.count())
@@ -807,14 +876,11 @@ overlap:
 
     float throughput_in_mbps_1 = (float)input_size * 1000 / temp_kernel_time_ns_1.count();
     std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
-
     // zlib special block based on Z_SYNC_FLUSH
-    int xarg = 0;
-    out[outIdx + xarg++] = 0x01;
-    out[outIdx + xarg++] = 0x00;
-    out[outIdx + xarg++] = 0x00;
-    out[outIdx + xarg++] = 0xff;
-    out[outIdx + xarg++] = 0xff;
-    outIdx += xarg;
+    out[outIdx++] = 0x01;
+    out[outIdx++] = 0x00;
+    out[outIdx++] = 0x00;
+    out[outIdx++] = 0xff;
+    out[outIdx++] = 0xff;
     return outIdx;
 } // Overlap end

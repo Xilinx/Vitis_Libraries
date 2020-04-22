@@ -6,7 +6,9 @@ GZip example resides in ``L2/demos/gzip`` directory.
 
 Follow build instructions to generate host executable and binary.
 
-The binary host file generated is named as "**xil_gzip**" and present in ``./build`` directory.
+The binary host file generated is named as "**xil_gzip**" and it is present in ``./build`` directory.
+
+
 
 Results
 -------
@@ -14,15 +16,15 @@ Results
 Overall Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx GZip compress/decompress kernels 
+Table below presents resource utilization of Xilinx Zlib compress/decompress kernels. The final Fmax achieved is 289MHz 
 
-========== ===== ====== ==== ===== ===== ======
-Flow       LUT   LUTMem REG  BRAM  URAM  Fmax
-========== ===== ====== ==== ===== ===== ======
-Compress   134K  30K    134K 140   48    287MHz
----------- ----- ------ ---- ----- ----- ------
-DeCompress 12.9K 626    19K  42    0     300MHz
-========== ===== ====== ==== ===== ===== ======
+========== ===== ====== ===== ===== ===== 
+Flow       LUT   LUTMem REG   BRAM  URAM  
+========== ===== ====== ===== ===== ===== 
+Compress   110K  26K    117K  132   48    
+---------- ----- ------ ----- ----- ----- 
+DeCompress 13.9K 506    13.9K  8     4     
+========== ===== ====== ===== ===== ===== 
 
 Compress Kernel Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,25 +32,26 @@ Compress Kernel Resource Utilization
 ======== ===== ======= ===== ===== ===== 
 Kernel   LUT   LUTMem  REG   BRAM  URAM 
 ======== ===== ======= ===== ===== =====
-LZ77     49.3K 14.8K   61.3K 74    48   
+LZ77     49.8K 12.7K   56.8K 74    48   
 -------- ----- ------- ----- ----- -----
-TreeGen  8.4K  544     9.5K  15    0   
+TreeGen  4.4K  140     6.4K  13    0   
 -------- ----- ------- ----- ----- -----
-Huffman  76.6K 15.2K   63.5K 53    0
+Huffman  56.5K 13.5K   54.2K 45    0
 ======== ===== ======= ===== ===== =====
 
 Decompress Kernel Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-=========== ===== ======= ===== ===== 
-Kernel      LUT   LUTMem  REG   BRAM  
-=========== ===== ======= ===== =====
-Decompress  8.8K  99      7.1K  12     
------------ ----- ------- ----- -----
-DmReader    1.3K  159     2.3K  1
------------ ----- ------- ----- ----- 
-DmWriter    908   34      1.6K  1
-=========== ===== ======= ===== =====
+=========== ===== ======= ===== ===== =====
+Kernel      LUT   LUTMem  REG   BRAM  URAM
+=========== ===== ======= ===== ===== =====
+Decompress  10.6K 162     6.4K  4     4
+----------- ----- ------- ----- ----- -----
+DmReader    2.1K  294     3.8K  3     0
+----------- ----- ------- ----- ----- -----
+DmWriter    1K    50      1.8K  1     0
+=========== ===== ======= ===== ===== =====
+
 
 Performance Data
 ~~~~~~~~~~~~~~~~
@@ -56,9 +59,9 @@ Performance Data
 +----------------------------+------------------------+
 | Topic                      | Best Kernel Throughput |
 +============================+========================+
-| Compression                | 1.4 GB/s               |
+| Compression                | 1.9 GB/s               |
 +----------------------------+------------------------+
-| Decompression              | 286 MB/s               |
+| Decompression              | 626 MB/s               |
 +----------------------------+------------------------+
 | Average Compression Ratio  | 2.74 (Silesia Corpus)  |
 +----------------------------+------------------------+
@@ -72,16 +75,6 @@ Executable Usage:
 
 	- ``<files.list>``: Contains various file names with current path
 
-Standard Compliance:
-
-.. code-block:: bash
-
-    1. Vitis Library GZip Compressed data can be decoded using standard with
-       this command "gzip -dc <compressed_input.gz> > out". Generated output is
-       original raw file.
-    2. Vitis Library GZip decompression supports standard file format 
-       when file is compressed using dynamic Huffman.
-
 The usage of the generated executable is as follows:
 
 .. code-block:: bash
@@ -94,3 +87,4 @@ The usage of the generated executable is as follows:
         --file_list,            -l      List of Input Files
         --compress_decompress,  -v      Compress Decompress
         --cu,                   -k      CU                   Default: [0]
+

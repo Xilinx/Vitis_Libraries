@@ -111,6 +111,16 @@ class xfSnappyStreaming {
     uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
+     * @brief Decompress the input file full.
+     *
+     * @param inFile_name input file name
+     * @param outFile_name output file name
+     * @param actual_size input size
+     */
+    uint32_t decompressFileFull(
+        std::string& inFile_name, std::string& outFile_name, uint32_t inputSize, uint32_t outputSize, bool m_flow);
+
+    /**
      * @brief Decompress sequential.
      *
      * @param in input byte sequence
@@ -118,6 +128,15 @@ class xfSnappyStreaming {
      * @param actual_size input size
      */
     uint64_t decompress(uint8_t* in, uint8_t* out, uint64_t actual_size);
+
+    /**
+     * @brief Decompress sequential migrate full inputSize.
+     *
+     * @param in input byte sequence
+     * @param out output byte sequence
+     * @param actual_size input size
+     */
+    uint32_t decompressFull(uint8_t* in, uint8_t* out, uint32_t inputSize, uint32_t outputSize);
 
     /**
      * @brief Get the duration of input event

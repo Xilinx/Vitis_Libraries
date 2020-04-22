@@ -52,6 +52,7 @@
             ]
         }
     ],
+    "output_files" : "sample.txt.*",
     "testinfo": {
         "disable": false,
         "jobs": [

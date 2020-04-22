@@ -206,19 +206,19 @@ void mm2multStreamSimple(const ap_uint<DATAWIDTH>* in,
                          const uint32_t input_idx[NUM_BLOCKS],
                          const uint32_t _input_size[NUM_BLOCKS]) {
     /**
-         * @brief This module reads 512-bit data from memory interface and
-         * writes to the output streams and output size streams
-         *
-         * @tparam DATAWIDTH input width of data bus
-         * @tparam BURST_SIZE burst size of the data transfers
-         * @tparam NUM_BLOCKS number of parallel blocks
-         *
-         * @param in input memory address
-         * @param input_idx input index
-         * @param outStream output stream
-         * @param outSizeStream output size stream
-         * @param _input_size input stream size
-         */
+     * @brief This module reads 512-bit data from memory interface and
+     * writes to the output streams and output size streams
+     *
+     * @tparam DATAWIDTH input width of data bus
+     * @tparam BURST_SIZE burst size of the data transfers
+     * @tparam NUM_BLOCKS number of parallel blocks
+     *
+     * @param in input memory address
+     * @param input_idx input index
+     * @param outStream output stream
+     * @param outSizeStream output size stream
+     * @param _input_size input stream size
+     */
 
     const int c_byteSize = 8;
     const int c_wordSize = DATAWIDTH / c_byteSize;
@@ -244,24 +244,29 @@ void mm2multStreamSimple(const ap_uint<DATAWIDTH>* in,
         for (uint32_t vid = 0; vid < NUM_BLOCKS; vid++) {
             bool isFull = (outSizeStream[vid]).full();
             uint32_t pendingBytes = (input_size[vid] > read_size[vid]) ? (input_size[vid] - read_size[vid]) : 0;
+            is_pending.range(vid, vid) = (pendingBytes > 0) ? 1 : 0;
             uint32_t sizeWrite = 0;
             if (pendingBytes && !isFull) {
                 uint32_t pendingWords = (pendingBytes - 1) / c_wordSize + 1;
                 uint32_t burstSize = (pendingWords > BURST_SIZE) ? BURST_SIZE : pendingWords;
                 sizeWrite = burstSize * c_wordSize;
-                outSizeStream[vid] << sizeWrite;
+                uint32_t rIdx = read_idx[vid];
             gmem_read:
                 for (uint32_t midx = 0; midx < burstSize; midx++) {
-#pragma HLS PIPELINE II = 1
-                    outStream[vid] << in[read_idx[vid] + midx];
+                    outStream[vid] << in[rIdx + midx];
                 }
                 read_idx[vid] += burstSize;
-                read_size[vid] += sizeWrite;
-            } else {
-                is_pending.range(vid, vid) = 0;
+                if (read_size[vid] + sizeWrite < input_size[vid]) {
+                    outSizeStream[vid] << sizeWrite;
+                    read_size[vid] += sizeWrite;
+                } else {
+                    outSizeStream[vid] << (input_size[vid] - read_size[vid]);
+                    read_size[vid] = input_size[vid];
+                }
             }
         }
     }
+
 size_init:
     for (uint8_t vid = 0; vid < NUM_BLOCKS; vid++) {
 #pragma HLS UNROLL
@@ -272,20 +277,18 @@ size_init:
 template <int IN_DATAWIDTH, int OUT_DATAWIDTH>
 void mm2multStreamDownSizer(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
                             hls::stream<uint16_t>& inSizeStream,
-                            hls::stream<ap_uint<OUT_DATAWIDTH> >& outStream,
-                            hls::stream<bool>& outStreamEoS) {
+                            hls::stream<ap_uint<OUT_DATAWIDTH> >& outStream) {
     /**
-         * @brief This module reads 512-bit data from stream interface and
-         * writes to the output stream in 8-bit chunks using the size stream.
-         *
-         * @tparam IN_DATAWIDTH input width of data bus
-         * @tparam OUT_DATAWIDTH output width of the data bus
-         *
-         * @param inStream input stream
-         * @param inSizeStream input size stream
-         * @param outStream output stream
-         * @param outStreamEos output end of stream
-         */
+     * @brief This module reads 512-bit data from stream interface and
+     * writes to the output stream in 8-bit chunks using the size stream.
+     *
+     * @tparam IN_DATAWIDTH input width of data bus
+     * @tparam OUT_DATAWIDTH output width of the data bus
+     *
+     * @param inStream input stream
+     * @param inSizeStream input size stream
+     * @param outStream output stream
+     */
 
     const int c_byteWidth = 8;
     const int c_inputWord = IN_DATAWIDTH / c_byteWidth;
@@ -303,44 +306,39 @@ downsizer_top:
             if (idx == 0) inBuffer = inStream.read();
             ap_uint<OUT_DATAWIDTH> tmpValue = inBuffer.range((idx + 1) * OUT_DATAWIDTH - 1, idx * OUT_DATAWIDTH);
             outStream << tmpValue;
-            outStreamEoS << 0;
         }
     }
-    outStreamEoS << 1;
 }
 
-template <int NUM_BLOCKS, int IN_DATAWIDTH, int OUT_DATAWIDTH, int BURST_SIZE>
-void mm2multStreamNew(const ap_uint<IN_DATAWIDTH>* in,
-                      const uint32_t input_idx[NUM_BLOCKS],
-                      hls::stream<ap_uint<OUT_DATAWIDTH> > outStream[NUM_BLOCKS],
-                      hls::stream<bool> outStreamEoS[NUM_BLOCKS],
-                      const uint32_t _input_size[NUM_BLOCKS]) {
+template <int OUT_DATAWIDTH = 8, int NUM_BLOCKS = 8, int IN_DATAWIDTH = 512, int BURST_SIZE = 16>
+void mm2multStreamSize(const ap_uint<IN_DATAWIDTH>* in,
+                       const uint32_t input_idx[NUM_BLOCKS],
+                       hls::stream<ap_uint<OUT_DATAWIDTH> > outStream[NUM_BLOCKS],
+                       const uint32_t _input_size[NUM_BLOCKS]) {
     /**
-         * @brief This module reads 512-bit data from memory interface and
-         * writes to the output streams in 8-bit chunks. Writing to the multiple data streams is
-         * non-blocking call which is done using is_full() API
-         *
-         * @tparam NUM_BLOCKS number of parallel blocks
-         * @tparam IN_DATAWIDTH input width of data bus
-     * @tparam OUT_DATAWIDTH output width of the data bus
-         * @tparam BURST_SIZE burst size of the data transfers
+     * @brief This module reads 512-bit data from memory interface and
+     * writes to the output streams in 8-bit chunks. Writing to the multiple data streams is
+     * non-blocking call which is done using full() API
      *
-         *
-         * @param in input memory address
-         * @param input_idx input index
-         * @param outStream output stream
-         * @param outStreamEos output end of stream
-         * @param _input_size input stream size
-         */
+     * @tparam NUM_BLOCKS number of parallel blocks
+     * @tparam IN_DATAWIDTH input width of data bus
+     * @tparam OUT_DATAWIDTH output width of the data bus
+     * @tparam BURST_SIZE burst size of the data transfers
+     *
+     *
+     * @param in input memory address
+     * @param input_idx input index
+     * @param outStream output stream
+     * @param _input_size input size
+     */
 
     const uint32_t c_depthOutStreamV = 2 * BURST_SIZE;
     // Array of Streams used as internal buffer.
     hls::stream<ap_uint<IN_DATAWIDTH> > outStreamV[NUM_BLOCKS];
     hls::stream<uint16_t> outStreamVSize[NUM_BLOCKS];
 #pragma HLS STREAM variable = outStreamV depth = c_depthOutStreamV
-#pragma HLS STREAM variable = outStreamVSize depth = 2
+#pragma HLS STREAM variable = outStreamVSize depth = 3
 #pragma HLS RESOURCE variable = outStreamV core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamVSize core = FIFO_SRL
 
 #pragma HLS DATAFLOW
     xf::compression::details::mm2multStreamSimple<NUM_BLOCKS, IN_DATAWIDTH, BURST_SIZE>(in, outStreamV, outStreamVSize,
@@ -349,7 +347,7 @@ downsizer:
     for (uint8_t vid = 0; vid < NUM_BLOCKS; vid++) {
 #pragma HLS UNROLL
         xf::compression::details::mm2multStreamDownSizer<IN_DATAWIDTH, OUT_DATAWIDTH>(
-            outStreamV[vid], outStreamVSize[vid], outStream[vid], outStreamEoS[vid]);
+            outStreamV[vid], outStreamVSize[vid], outStream[vid]);
     }
 }
 
@@ -472,607 +470,6 @@ void mm2Stream(const ap_uint<GMEM_DATAWIDTH>* in,
 #pragma HLS DATAFLOW
     xf::compression::details::mm2SingleStream<GMEM_DATAWIDTH, BURST_SIZE>(in, outStreamV, outStreamVSize, _input_size);
     xf::compression::details::mm2StreamDownSizer<GMEM_DATAWIDTH, OUT_DATAWIDTH>(outStreamV, outStreamVSize, outStream);
-}
-
-#ifndef PARALLEL_BLOCK
-#define PARALLEL_BLOCK 8
-#endif
-
-template <int DATAWIDTH, int BURST_SIZE>
-void mm2s_freq(const ap_uint<DATAWIDTH>* in,
-               uint32_t* dyn_ltree_codes,
-               uint32_t* dyn_ltree_blen,
-               uint32_t* dyn_dtree_codes,
-               uint32_t* dyn_dtree_blen,
-               uint32_t* dyn_bltree_codes,
-               uint32_t* dyn_bltree_blen,
-               uint32_t* dyn_maxcodes,
-               const uint32_t _input_idx[PARALLEL_BLOCK],
-               hls::stream<ap_uint<DATAWIDTH> >& outStream_0,
-#if PARALLEL_BLOCK > 1
-               hls::stream<ap_uint<DATAWIDTH> >& outStream_1,
-#endif
-#if PARALLEL_BLOCK > 2
-               hls::stream<ap_uint<DATAWIDTH> >& outStream_2,
-               hls::stream<ap_uint<DATAWIDTH> >& outStream_3,
-#endif
-#if PARALLEL_BLOCK > 4
-               hls::stream<ap_uint<DATAWIDTH> >& outStream_4,
-               hls::stream<ap_uint<DATAWIDTH> >& outStream_5,
-               hls::stream<ap_uint<DATAWIDTH> >& outStream_6,
-               hls::stream<ap_uint<DATAWIDTH> >& outStream_7,
-#endif
-               hls::stream<uint32_t>& stream_ltree_codes_0,
-#if PARALLEL_BLOCK > 1
-               hls::stream<uint32_t>& stream_ltree_codes_1,
-#endif
-
-#if PARALLEL_BLOCK > 2
-               hls::stream<uint32_t>& stream_ltree_codes_2,
-               hls::stream<uint32_t>& stream_ltree_codes_3,
-#endif
-#if PARALLEL_BLOCK > 4
-               hls::stream<uint32_t>& stream_ltree_codes_4,
-               hls::stream<uint32_t>& stream_ltree_codes_5,
-               hls::stream<uint32_t>& stream_ltree_codes_6,
-               hls::stream<uint32_t>& stream_ltree_codes_7,
-#endif
-               hls::stream<uint32_t>& stream_ltree_blen_0,
-#if PARALLEL_BLOCK > 1
-               hls::stream<uint32_t>& stream_ltree_blen_1,
-#endif
-#if PARALLEL_BLOCK > 2
-               hls::stream<uint32_t>& stream_ltree_blen_2,
-               hls::stream<uint32_t>& stream_ltree_blen_3,
-#endif
-#if PARALLEL_BLOCK > 4
-               hls::stream<uint32_t>& stream_ltree_blen_4,
-               hls::stream<uint32_t>& stream_ltree_blen_5,
-               hls::stream<uint32_t>& stream_ltree_blen_6,
-               hls::stream<uint32_t>& stream_ltree_blen_7,
-#endif
-               hls::stream<uint32_t>& stream_dtree_codes_0,
-#if PARALLEL_BLOCK > 1
-               hls::stream<uint32_t>& stream_dtree_codes_1,
-#endif
-#if PARALLEL_BLOCK > 2
-               hls::stream<uint32_t>& stream_dtree_codes_2,
-               hls::stream<uint32_t>& stream_dtree_codes_3,
-#endif
-#if PARALLEL_BLOCK > 4
-               hls::stream<uint32_t>& stream_dtree_codes_4,
-               hls::stream<uint32_t>& stream_dtree_codes_5,
-               hls::stream<uint32_t>& stream_dtree_codes_6,
-               hls::stream<uint32_t>& stream_dtree_codes_7,
-#endif
-               hls::stream<uint32_t>& stream_dtree_blen_0,
-#if PARALLEL_BLOCK > 1
-               hls::stream<uint32_t>& stream_dtree_blen_1,
-#endif
-#if PARALLEL_BLOCK > 2
-               hls::stream<uint32_t>& stream_dtree_blen_2,
-               hls::stream<uint32_t>& stream_dtree_blen_3,
-#endif
-#if PARALLEL_BLOCK > 4
-               hls::stream<uint32_t>& stream_dtree_blen_4,
-               hls::stream<uint32_t>& stream_dtree_blen_5,
-               hls::stream<uint32_t>& stream_dtree_blen_6,
-               hls::stream<uint32_t>& stream_dtree_blen_7,
-#endif
-               hls::stream<uint32_t>& stream_bltree_codes_0,
-#if PARALLEL_BLOCK > 1
-               hls::stream<uint32_t>& stream_bltree_codes_1,
-#endif
-#if PARALLEL_BLOCK > 2
-               hls::stream<uint32_t>& stream_bltree_codes_2,
-               hls::stream<uint32_t>& stream_bltree_codes_3,
-#endif
-#if PARALLEL_BLOCK > 4
-               hls::stream<uint32_t>& stream_bltree_codes_4,
-               hls::stream<uint32_t>& stream_bltree_codes_5,
-               hls::stream<uint32_t>& stream_bltree_codes_6,
-               hls::stream<uint32_t>& stream_bltree_codes_7,
-#endif
-               hls::stream<uint32_t>& stream_bltree_blen_0,
-
-#if PARALLEL_BLOCK > 1
-               hls::stream<uint32_t>& stream_bltree_blen_1,
-#endif
-#if PARALLEL_BLOCK > 2
-               hls::stream<uint32_t>& stream_bltree_blen_2,
-               hls::stream<uint32_t>& stream_bltree_blen_3,
-#endif
-#if PARALLEL_BLOCK > 4
-               hls::stream<uint32_t>& stream_bltree_blen_4,
-               hls::stream<uint32_t>& stream_bltree_blen_5,
-               hls::stream<uint32_t>& stream_bltree_blen_6,
-               hls::stream<uint32_t>& stream_bltree_blen_7,
-#endif
-               hls::stream<uint32_t>& stream_maxcode_0,
-#if PARALLEL_BLOCK > 1
-               hls::stream<uint32_t>& stream_maxcode_1,
-#endif
-#if PARALLEL_BLOCK > 2
-               hls::stream<uint32_t>& stream_maxcode_2,
-               hls::stream<uint32_t>& stream_maxcode_3,
-#endif
-#if PARALLEL_BLOCK > 4
-               hls::stream<uint32_t>& stream_maxcode_4,
-               hls::stream<uint32_t>& stream_maxcode_5,
-               hls::stream<uint32_t>& stream_maxcode_6,
-               hls::stream<uint32_t>& stream_maxcode_7,
-#endif
-               uint32_t n_blocks,
-               const uint32_t _input_size[PARALLEL_BLOCK]) {
-    uint32_t lcl_ltree_codes[PARALLEL_BLOCK][c_lTreeSize];
-    uint32_t lcl_ltree_blen[PARALLEL_BLOCK][c_lTreeSize];
-
-    uint32_t lcl_dtree_codes[PARALLEL_BLOCK][c_dTreeSize];
-    uint32_t lcl_dtree_blen[PARALLEL_BLOCK][c_dTreeSize];
-
-    uint32_t lcl_bltree_codes[PARALLEL_BLOCK][c_bLTreeSize];
-    uint32_t lcl_bltree_blen[PARALLEL_BLOCK][c_bLTreeSize];
-
-    uint32_t lcl_maxcode[PARALLEL_BLOCK * c_maxCodeSize];
-
-    ////printme("In mm2s start\n");
-
-    for (uint32_t blk = 0; blk < n_blocks; blk++) {
-        memcpy(lcl_ltree_codes[blk], &dyn_ltree_codes[blk * c_lTreeSize], c_lTreeSize * sizeof(uint32_t));
-        memcpy(lcl_ltree_blen[blk], &dyn_ltree_blen[blk * c_lTreeSize], c_lTreeSize * sizeof(uint32_t));
-        memcpy(lcl_dtree_codes[blk], &dyn_dtree_codes[blk * c_dTreeSize], c_dTreeSize * sizeof(uint32_t));
-        memcpy(lcl_dtree_blen[blk], &dyn_dtree_blen[blk * c_dTreeSize], c_dTreeSize * sizeof(uint32_t));
-        memcpy(lcl_bltree_codes[blk], &dyn_bltree_codes[blk * c_bLTreeSize], c_bLTreeSize * sizeof(uint32_t));
-        memcpy(lcl_bltree_blen[blk], &dyn_bltree_blen[blk * c_bLTreeSize], c_bLTreeSize * sizeof(uint32_t));
-    }
-
-    memcpy(lcl_maxcode, &dyn_maxcodes[0], PARALLEL_BLOCK * c_maxCodeSize * sizeof(uint32_t));
-
-    for (uint32_t blk = 0; blk < n_blocks; blk++) {
-        if (blk == 0) {
-            stream_maxcode_0 << lcl_maxcode[blk * 3];
-            stream_maxcode_0 << lcl_maxcode[blk * 3 + 1];
-            stream_maxcode_0 << lcl_maxcode[blk * 3 + 2];
-        }
-#if PARALLEL_BLOCK > 1
-        if (blk == 1) {
-            stream_maxcode_1 << lcl_maxcode[blk * 3];
-            stream_maxcode_1 << lcl_maxcode[blk * 3 + 1];
-            stream_maxcode_1 << lcl_maxcode[blk * 3 + 2];
-        }
-#endif
-#if PARALLEL_BLOCK > 2
-        if (blk == 2) {
-            stream_maxcode_2 << lcl_maxcode[blk * 3];
-            stream_maxcode_2 << lcl_maxcode[blk * 3 + 1];
-            stream_maxcode_2 << lcl_maxcode[blk * 3 + 2];
-        }
-        if (blk == 3) {
-            stream_maxcode_3 << lcl_maxcode[blk * 3];
-            stream_maxcode_3 << lcl_maxcode[blk * 3 + 1];
-            stream_maxcode_3 << lcl_maxcode[blk * 3 + 2];
-        }
-#endif
-
-#if PARALLEL_BLOCK > 4
-        if (blk == 4) {
-            stream_maxcode_4 << lcl_maxcode[blk * 3];
-            stream_maxcode_4 << lcl_maxcode[blk * 3 + 1];
-            stream_maxcode_4 << lcl_maxcode[blk * 3 + 2];
-        }
-        if (blk == 5) {
-            stream_maxcode_5 << lcl_maxcode[blk * 3];
-            stream_maxcode_5 << lcl_maxcode[blk * 3 + 1];
-            stream_maxcode_5 << lcl_maxcode[blk * 3 + 2];
-        }
-        if (blk == 6) {
-            stream_maxcode_6 << lcl_maxcode[blk * 3];
-            stream_maxcode_6 << lcl_maxcode[blk * 3 + 1];
-            stream_maxcode_6 << lcl_maxcode[blk * 3 + 2];
-        }
-        if (blk == 7) {
-            stream_maxcode_7 << lcl_maxcode[blk * 3];
-            stream_maxcode_7 << lcl_maxcode[blk * 3 + 1];
-            stream_maxcode_7 << lcl_maxcode[blk * 3 + 2];
-        }
-#endif
-        // Literal Tree
-        for (uint32_t i = 0; i < c_lTreeSize; i++) {
-            if (blk == 0) {
-                stream_ltree_codes_0 << lcl_ltree_codes[blk][i];
-                stream_ltree_blen_0 << lcl_ltree_blen[blk][i];
-            }
-#if PARALLEL_BLOCK > 1
-            if (blk == 1) {
-                stream_ltree_codes_1 << lcl_ltree_codes[blk][i];
-                stream_ltree_blen_1 << lcl_ltree_blen[blk][i];
-            }
-#endif
-#if PARALLEL_BLOCK > 2
-            if (blk == 2) {
-                stream_ltree_codes_2 << lcl_ltree_codes[blk][i];
-                stream_ltree_blen_2 << lcl_ltree_blen[blk][i];
-            }
-            if (blk == 3) {
-                stream_ltree_codes_3 << lcl_ltree_codes[blk][i];
-                stream_ltree_blen_3 << lcl_ltree_blen[blk][i];
-            }
-#endif
-
-#if PARALLEL_BLOCK > 4
-            if (blk == 4) {
-                stream_ltree_codes_4 << lcl_ltree_codes[blk][i];
-                stream_ltree_blen_4 << lcl_ltree_blen[blk][i];
-            }
-            if (blk == 5) {
-                stream_ltree_codes_5 << lcl_ltree_codes[blk][i];
-                stream_ltree_blen_5 << lcl_ltree_blen[blk][i];
-            }
-            if (blk == 6) {
-                stream_ltree_codes_6 << lcl_ltree_codes[blk][i];
-                stream_ltree_blen_6 << lcl_ltree_blen[blk][i];
-            }
-            if (blk == 7) {
-                stream_ltree_codes_7 << lcl_ltree_codes[blk][i];
-                stream_ltree_blen_7 << lcl_ltree_blen[blk][i];
-            }
-#endif
-        }
-
-        // Distance Tree
-        for (uint32_t i = 0; i < c_dTreeSize; i++) {
-            if (blk == 0) {
-                stream_dtree_codes_0 << lcl_dtree_codes[blk][i];
-                stream_dtree_blen_0 << lcl_dtree_blen[blk][i];
-            }
-#if PARALLEL_BLOCK > 1
-            if (blk == 1) {
-                stream_dtree_codes_1 << lcl_dtree_codes[blk][i];
-                stream_dtree_blen_1 << lcl_dtree_blen[blk][i];
-            }
-#endif
-#if PARALLEL_BLOCK > 2
-            if (blk == 2) {
-                stream_dtree_codes_2 << lcl_dtree_codes[blk][i];
-                stream_dtree_blen_2 << lcl_dtree_blen[blk][i];
-            }
-            if (blk == 3) {
-                stream_dtree_codes_3 << lcl_dtree_codes[blk][i];
-                stream_dtree_blen_3 << lcl_dtree_blen[blk][i];
-            }
-#endif
-
-#if PARALLEL_BLOCK > 4
-            if (blk == 4) {
-                stream_dtree_codes_4 << lcl_dtree_codes[blk][i];
-                stream_dtree_blen_4 << lcl_dtree_blen[blk][i];
-            }
-            if (blk == 5) {
-                stream_dtree_codes_5 << lcl_dtree_codes[blk][i];
-                stream_dtree_blen_5 << lcl_dtree_blen[blk][i];
-            }
-            if (blk == 6) {
-                stream_dtree_codes_6 << lcl_dtree_codes[blk][i];
-                stream_dtree_blen_6 << lcl_dtree_blen[blk][i];
-            }
-            if (blk == 7) {
-                stream_dtree_codes_7 << lcl_dtree_codes[blk][i];
-                stream_dtree_blen_7 << lcl_dtree_blen[blk][i];
-            }
-#endif
-        }
-
-        // Bitlength  Tree
-        for (uint32_t i = 0; i < c_bLTreeSize; i++) {
-            if (blk == 0) {
-                stream_bltree_codes_0 << lcl_bltree_codes[blk][i];
-                stream_bltree_blen_0 << lcl_bltree_blen[blk][i];
-            }
-#if PARALLEL_BLOCK > 1
-            if (blk == 1) {
-                stream_bltree_codes_1 << lcl_bltree_codes[blk][i];
-                stream_bltree_blen_1 << lcl_bltree_blen[blk][i];
-            }
-#endif
-
-#if PARALLEL_BLOCK > 2
-            if (blk == 2) {
-                stream_bltree_codes_2 << lcl_bltree_codes[blk][i];
-                stream_bltree_blen_2 << lcl_bltree_blen[blk][i];
-            }
-            if (blk == 3) {
-                stream_bltree_codes_3 << lcl_bltree_codes[blk][i];
-                stream_bltree_blen_3 << lcl_bltree_blen[blk][i];
-            }
-#endif
-
-#if PARALLEL_BLOCK > 4
-            if (blk == 4) {
-                stream_bltree_codes_4 << lcl_bltree_codes[blk][i];
-                stream_bltree_blen_4 << lcl_bltree_blen[blk][i];
-            }
-            if (blk == 5) {
-                stream_bltree_codes_5 << lcl_bltree_codes[blk][i];
-                stream_bltree_blen_5 << lcl_bltree_blen[blk][i];
-            }
-            if (blk == 6) {
-                stream_bltree_codes_6 << lcl_bltree_codes[blk][i];
-                stream_bltree_blen_6 << lcl_bltree_blen[blk][i];
-            }
-            if (blk == 7) {
-                stream_bltree_codes_7 << lcl_bltree_codes[blk][i];
-                stream_bltree_blen_7 << lcl_bltree_blen[blk][i];
-            }
-#endif
-        }
-    }
-
-    ////printme("In mm2s end\n");
-
-    const int c_byte_size = 8;
-    const int c_word_size = DATAWIDTH / c_byte_size;
-    ap_uint<DATAWIDTH> local_buffer[PARALLEL_BLOCK][BURST_SIZE];
-#pragma HLS ARRAY_PARTITION variable = local_buffer dim = 1 complete
-#pragma HLS RESOURCE variable = local_buffer core = RAM_2P_LUTRAM
-    uint32_t read_idx[PARALLEL_BLOCK];
-    uint32_t write_idx[PARALLEL_BLOCK];
-    uint32_t read_size[PARALLEL_BLOCK];
-    uint32_t input_idx[PARALLEL_BLOCK];
-    uint32_t input_size[PARALLEL_BLOCK];
-#pragma HLS ARRAY_PARTITION variable = read_idx dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = write_idx dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = read_size dim = 0 complete
-    ap_uint<PARALLEL_BLOCK> pending;
-    ap_uint<PARALLEL_BLOCK> is_full;
-    for (uint32_t bIdx = 0; bIdx < PARALLEL_BLOCK; bIdx++) {
-#pragma HLS UNROLL
-        read_idx[bIdx] = 0;
-        write_idx[bIdx] = 0;
-        read_size[bIdx] = 0;
-        input_idx[bIdx] = _input_idx[bIdx];
-        input_size[bIdx] = _input_size[bIdx];
-        pending.range(bIdx, bIdx) = 1;
-    }
-    while (pending) {
-        pending = 0;
-        for (uint32_t bIdx = 0; bIdx < PARALLEL_BLOCK; bIdx++) {
-            uint32_t pending_bytes = GET_DIFF_IF_BIG(input_size[bIdx], read_size[bIdx]);
-            if ((pending_bytes) && (read_idx[bIdx] == write_idx[bIdx])) {
-                uint32_t pending_words = (pending_bytes - 1) / c_word_size + 1;
-                uint32_t burst_size = (pending_words > BURST_SIZE) ? BURST_SIZE : pending_words;
-                uint32_t mem_read_byte_idx = read_size[bIdx] + input_idx[bIdx];
-                uint32_t mem_read_word_idx = (mem_read_byte_idx) ? ((mem_read_byte_idx - 1) / c_word_size + 1) : 0;
-            gmem_rd:
-                for (uint32_t i = 0; i < burst_size; i++) {
-#pragma HLS PIPELINE II = 1
-                    local_buffer[bIdx][i] = in[mem_read_word_idx + i];
-                }
-                pending.range(bIdx, bIdx) = 1;
-                read_idx[bIdx] = 0;
-                write_idx[bIdx] = burst_size;
-                read_size[bIdx] += burst_size * c_word_size;
-            }
-        }
-        ap_uint<PARALLEL_BLOCK> terminate_all;
-        terminate_all = 1;
-        bool terminate = 0;
-    mm2s:
-        for (int i = 0; (terminate == 0) && (terminate_all != 0); i++) {
-#pragma HLS PIPELINE II = 1
-            STREAM_UTILS_MM2S_IF_NOT_FULL(0, outStream_0, is_full, read_idx, write_idx, local_buffer);
-#if PARALLEL_BLOCK > 1
-            STREAM_UTILS_MM2S_IF_NOT_FULL(1, outStream_1, is_full, read_idx, write_idx, local_buffer);
-#endif
-#if PARALLEL_BLOCK > 2
-            STREAM_UTILS_MM2S_IF_NOT_FULL(2, outStream_2, is_full, read_idx, write_idx, local_buffer);
-            STREAM_UTILS_MM2S_IF_NOT_FULL(3, outStream_3, is_full, read_idx, write_idx, local_buffer);
-#endif
-#if PARALLEL_BLOCK > 4
-            STREAM_UTILS_MM2S_IF_NOT_FULL(4, outStream_4, is_full, read_idx, write_idx, local_buffer);
-            STREAM_UTILS_MM2S_IF_NOT_FULL(5, outStream_5, is_full, read_idx, write_idx, local_buffer);
-            STREAM_UTILS_MM2S_IF_NOT_FULL(6, outStream_6, is_full, read_idx, write_idx, local_buffer);
-            STREAM_UTILS_MM2S_IF_NOT_FULL(7, outStream_7, is_full, read_idx, write_idx, local_buffer);
-#endif
-
-            terminate = 0;
-            for (uint32_t bIdx = 0; bIdx < PARALLEL_BLOCK; bIdx++) {
-#pragma HLS UNROLL
-                if (read_idx[bIdx] == write_idx[bIdx]) {
-                    terminate_all.range(bIdx, bIdx) = 0;
-                    if (read_size[bIdx] < input_size[bIdx]) {
-                        terminate = 1;
-                    }
-                } else {
-                    terminate_all.range(bIdx, bIdx) = 1;
-                    pending.range(bIdx, bIdx) = 1;
-                }
-            }
-        }
-    }
-}
-
-template <int DATAWIDTH, int BURST_SIZE, int NUM_BLOCKS>
-void mm2sNbFreq(const ap_uint<DATAWIDTH>* in,
-                uint32_t* dyn_ltree_codes,
-                uint32_t* dyn_ltree_blen,
-                uint32_t* dyn_dtree_codes,
-                uint32_t* dyn_dtree_blen,
-                uint32_t* dyn_bltree_codes,
-                uint32_t* dyn_bltree_blen,
-                uint32_t* dyn_maxcodes,
-                const uint32_t _input_idx[NUM_BLOCKS],
-                hls::stream<ap_uint<DATAWIDTH> > outStream[NUM_BLOCKS],
-                hls::stream<uint32_t> stream_ltree_codes[NUM_BLOCKS],
-                hls::stream<uint32_t> stream_ltree_blen[NUM_BLOCKS],
-                hls::stream<uint32_t> stream_dtree_codes[NUM_BLOCKS],
-                hls::stream<uint32_t> stream_dtree_blen[NUM_BLOCKS],
-                hls::stream<uint32_t> stream_bltree_codes[NUM_BLOCKS],
-                hls::stream<uint32_t> stream_bltree_blen[NUM_BLOCKS],
-                hls::stream<uint32_t> stream_maxcode[NUM_BLOCKS],
-                uint32_t n_blocks,
-                const uint32_t _input_size[NUM_BLOCKS]) {
-    /**
-     * @brief This module reads 512bit data from memory interface and
-     * writes to the stream. Writing to the multiple data streams is
-     * non-blocking call which is done using is_full() API
-     *
-     * @tparam DATAWIDTH width of data bus
-     * @tparam BURST_SIZE burst size of the data transfers
-     * @tparam NUM_BLOCKS number of blocks
-     *
-     * @param in input memory address
-     * @param _input_idx input index
-     * @param outStream output stream
-     * @param _input_size input stream size
-     */
-
-    uint32_t lcl_ltree_codes[NUM_BLOCKS][c_lTreeSize];
-    uint32_t lcl_ltree_blen[NUM_BLOCKS][c_lTreeSize];
-
-    uint32_t lcl_dtree_codes[NUM_BLOCKS][c_dTreeSize];
-    uint32_t lcl_dtree_blen[NUM_BLOCKS][c_dTreeSize];
-
-    uint32_t lcl_bltree_codes[NUM_BLOCKS][c_bLTreeSize];
-    uint32_t lcl_bltree_blen[NUM_BLOCKS][c_bLTreeSize];
-
-    uint32_t lcl_maxcode[NUM_BLOCKS * c_maxCodeSize];
-
-    for (uint32_t blk = 0; blk < n_blocks; blk++) {
-    cpy_ltree_codes:
-        for (uint32_t ci = 0; ci < c_lTreeSize; ++ci) {
-#pragma HLS PIPELINE II = 1
-            lcl_ltree_codes[blk][ci] = dyn_ltree_codes[blk * c_lTreeSize + ci];
-        }
-    cpy_ltree_blen:
-        for (uint32_t ci = 0; ci < c_lTreeSize; ++ci) {
-#pragma HLS PIPELINE II = 1
-            lcl_ltree_blen[blk][ci] = dyn_ltree_blen[blk * c_lTreeSize + ci];
-        }
-    cpy_dtree_codes:
-        for (uint32_t ci = 0; ci < c_dTreeSize; ++ci) {
-#pragma HLS PIPELINE II = 1
-            lcl_dtree_codes[blk][ci] = dyn_dtree_codes[blk * c_dTreeSize + ci];
-        }
-    cpy_dtree_blen:
-        for (uint32_t ci = 0; ci < c_dTreeSize; ++ci) {
-#pragma HLS PIPELINE II = 1
-            lcl_dtree_blen[blk][ci] = dyn_dtree_blen[blk * c_dTreeSize + ci];
-        }
-    cpy_bltree_codes:
-        for (uint32_t ci = 0; ci < c_bLTreeSize; ++ci) {
-#pragma HLS PIPELINE II = 1
-            lcl_bltree_codes[blk][ci] = dyn_bltree_codes[blk * c_bLTreeSize + ci];
-        }
-    cpy_bltree_blen:
-        for (uint32_t ci = 0; ci < c_bLTreeSize; ++ci) {
-#pragma HLS PIPELINE II = 1
-            lcl_bltree_blen[blk][ci] = dyn_bltree_blen[blk * c_bLTreeSize + ci];
-        }
-    }
-
-cpy_maxcodes:
-    for (uint32_t ci = 0; ci < NUM_BLOCKS * c_maxCodeSize; ++ci) {
-#pragma HLS PIPELINE II = 1
-        lcl_maxcode[ci] = dyn_maxcodes[ci];
-    }
-
-    for (uint32_t blk = 0; blk < n_blocks; blk++) {
-        stream_maxcode[blk] << lcl_maxcode[blk * 3];
-        stream_maxcode[blk] << lcl_maxcode[blk * 3 + 1];
-        stream_maxcode[blk] << lcl_maxcode[blk * 3 + 2];
-
-        // Literal Tree
-        for (uint32_t i = 0; i < c_lTreeSize; i++) {
-            stream_ltree_codes[blk] << lcl_ltree_codes[blk][i];
-            stream_ltree_blen[blk] << lcl_ltree_blen[blk][i];
-        }
-
-        // Distance Tree
-        for (uint32_t i = 0; i < c_dTreeSize; i++) {
-            stream_dtree_codes[blk] << lcl_dtree_codes[blk][i];
-            stream_dtree_blen[blk] << lcl_dtree_blen[blk][i];
-        }
-
-        // Bitlength  Tree
-        for (uint32_t i = 0; i < c_bLTreeSize; i++) {
-            stream_bltree_codes[blk] << lcl_bltree_codes[blk][i];
-            stream_bltree_blen[blk] << lcl_bltree_blen[blk][i];
-        }
-    }
-
-    const int c_byteSize = 8;
-    const int c_wordSize = DATAWIDTH / c_byteSize;
-    ap_uint<DATAWIDTH> local_buffer[NUM_BLOCKS][BURST_SIZE];
-#pragma HLS ARRAY_PARTITION variable = local_buffer dim = 1 complete
-#pragma HLS RESOURCE variable = local_buffer core = RAM_2P_LUTRAM
-    uint32_t read_idx[NUM_BLOCKS];
-    uint32_t write_idx[NUM_BLOCKS];
-    uint32_t read_size[NUM_BLOCKS];
-    uint32_t input_idx[NUM_BLOCKS];
-    uint32_t input_size[NUM_BLOCKS];
-#pragma HLS ARRAY_PARTITION variable = read_idx dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = write_idx dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = read_size dim = 0 complete
-    ap_uint<NUM_BLOCKS> pending;
-    ap_uint<NUM_BLOCKS> is_full;
-    for (uint32_t bIdx = 0; bIdx < NUM_BLOCKS; bIdx++) {
-#pragma HLS UNROLL
-        read_idx[bIdx] = 0;
-        write_idx[bIdx] = 0;
-        read_size[bIdx] = 0;
-        input_idx[bIdx] = _input_idx[bIdx];
-        input_size[bIdx] = _input_size[bIdx];
-        pending.range(bIdx, bIdx) = 1;
-    }
-    while (pending) {
-        pending = 0;
-        for (uint32_t bIdx = 0; bIdx < NUM_BLOCKS; bIdx++) {
-            uint32_t pending_bytes = (input_size[bIdx] > read_size[bIdx]) ? (input_size[bIdx] - read_size[bIdx]) : 0;
-            if ((pending_bytes) && (read_idx[bIdx] == write_idx[bIdx])) {
-                uint32_t pending_words = (pending_bytes - 1) / c_wordSize + 1;
-                uint32_t burst_size = (pending_words > BURST_SIZE) ? BURST_SIZE : pending_words;
-                uint32_t mem_read_byte_idx = read_size[bIdx] + input_idx[bIdx];
-                uint32_t mem_read_word_idx = (mem_read_byte_idx) ? ((mem_read_byte_idx - 1) / c_wordSize + 1) : 0;
-            gmem_rd:
-                for (uint32_t i = 0; i < burst_size; i++) {
-#pragma HLS PIPELINE II = 1
-                    local_buffer[bIdx][i] = in[mem_read_word_idx + i];
-                }
-                pending.range(bIdx, bIdx) = 1;
-                read_idx[bIdx] = 0;
-                write_idx[bIdx] = burst_size;
-                read_size[bIdx] += burst_size * c_wordSize;
-            }
-        }
-        ap_uint<NUM_BLOCKS> terminate_all;
-        terminate_all = 1;
-        bool terminate = 0;
-    mm2s:
-        for (int i = 0; (terminate == 0) && (terminate_all != 0); i++) {
-#pragma HLS PIPELINE II = 1
-            for (uint8_t pb = 0; pb < NUM_BLOCKS; pb++) {
-#pragma HLS UNROLL
-                is_full.range(pb, pb) = outStream[pb].full();
-                if (!is_full.range(pb, pb) && (read_idx[pb] != write_idx[pb])) {
-                    outStream[pb] << local_buffer[pb][read_idx[pb]];
-                    read_idx[pb] += 1;
-                }
-            }
-            terminate = 0;
-            for (uint32_t bIdx = 0; bIdx < NUM_BLOCKS; bIdx++) {
-#pragma HLS UNROLL
-                if (read_idx[bIdx] == write_idx[bIdx]) {
-                    terminate_all.range(bIdx, bIdx) = 0;
-                    if (read_size[bIdx] < input_size[bIdx]) {
-                        terminate = 1;
-                    }
-                } else {
-                    terminate_all.range(bIdx, bIdx) = 1;
-                    pending.range(bIdx, bIdx) = 1;
-                }
-            }
-        }
-    }
 }
 
 template <int DATAWIDTH, int BURST_SIZE, int NUM_BLOCKS>
@@ -1275,7 +672,8 @@ void mm2s(const uintMemWidth_t* in,
         // Send size in bytes
         outStreamSize << byteSize;
 
-        // printf("[ %s ]blkCompSize %d origSize %d sizeInWord_512 %d offset %d head_res_size %d\n", __FUNCTION__,
+        // printf("[ %s ]blkCompSize %d origSize %d sizeInWord_512 %d offset %d head_res_size %d\n",
+        // __FUNCTION__,
         // blkCompSize, origSize, sizeInWord, offset, head_res_size);
 
         // Copy data from global memory to local

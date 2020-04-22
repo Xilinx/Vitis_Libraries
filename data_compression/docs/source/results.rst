@@ -50,6 +50,8 @@ kernel clock frequency met and resource utilization when executed on Alveo U200.
 +======================================================================+==============+==========+=========+=======+======+
 | LZ4 Streaming (Single Engine and Datawidth: 32bit)                   |   797.5 MB/s |  258MHz  |  3.3K   |  0    |  8   |
 +----------------------------------------------------------------------+--------------+----------+---------+-------+------+
+| LZ4 Streaming (Single Engine and Datawidth: 64bit)                   |   1420 MB/s  |  253MHz  |  6.2K   |  0    |  4   |
++----------------------------------------------------------------------+--------------+----------+---------+-------+------+
 | Snappy Streaming (Single Engine)                                     |   290 MB/s   |  300MHz  |  878    |  16   |  0   |
 +----------------------------------------------------------------------+--------------+----------+---------+-------+------+
 | Zlib Streaming (High Throughput, Datawidth: 64bit)                   |   1183 MB/s  |  240MHz  |  11.7K  |  3    |  2   |
@@ -62,5 +64,4 @@ kernel clock frequency met and resource utilization when executed on Alveo U200.
 +----------------------------------------------------------------------+--------------+----------+---------+-------+------+
 
 .. [*] The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
-.. [*] Zlib Decompress: Dynamic Huffman and Single Engine performance is provided   
-
+.. [*] Zlib Streaming: Dynamic Huffman and Single Engine performance is provided   

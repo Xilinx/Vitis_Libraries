@@ -191,8 +191,7 @@ VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_decompress.xclbin
 
 XO_FILES_C = $(TEMP_DIR)/xf_compress_lz77.xo \
-		   	 $(TEMP_DIR)/xf_huffman.xo \
-		  	 $(TEMP_DIR)/xf_treegen.xo
+		   	 $(TEMP_DIR)/xf_huffman.xo
 		  	 
 XO_FILES_D = $(TEMP_DIR)/xf_zlib_datareader.xo \
 		     $(TEMP_DIR)/xf_zlib_datawriter.xo \
@@ -200,19 +199,17 @@ XO_FILES_D = $(TEMP_DIR)/xf_zlib_datareader.xo \
 
 COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
 HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/zlib_huffman_enc_mm.cpp
-TREEGEN_KERNEL_SRCS = $(KSRC_DIR)/zlib_treegen_mm.cpp
 DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_rd.cpp
 DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_wr.cpp
 DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_stream.cpp
 
 COMPRESS_KERNEL_NAME = xilLz77Compress
 HUFFMAN_KERNEL_NAME = xilHuffmanKernel
-TREEGEN_KERNEL_NAME = xilTreegenKernel
 DATAREADER_KERNEL_NAME = xilZlibDmReader
 DATAWRITER_KERNEL_NAME = xilZlibDmWriter
 DECOMPRESS_KERNEL_NAME = xilDecompressStream
 
-KERNELS += $(COMPRESS_KERNEL_NAME) $(HUFFMAN_KERNEL_NAME) $(TREEGEN_KERNEL_NAME)
+KERNELS += $(COMPRESS_KERNEL_NAME) $(HUFFMAN_KERNEL_NAME)
 KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERNEL_NAME)
 
 
@@ -230,12 +227,6 @@ $(TEMP_DIR)/xf_huffman.xo: $(HUFFMAN_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling huffman kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(HUFFMAN_KERNEL_NAME) \
-		-I'$(<D)' -o'$@' '$<'
-
-$(TEMP_DIR)/xf_treegen.xo: $(TREEGEN_KERNEL_SRCS) $(HLS_SRC_DIR)
-	@echo -e "----\nCompiling treegen kernel $*..."
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(TREEGEN_KERNEL_NAME) \
 		-I'$(<D)' -o'$@' '$<'
 
 $(TEMP_DIR)/xf_zlib_datareader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)

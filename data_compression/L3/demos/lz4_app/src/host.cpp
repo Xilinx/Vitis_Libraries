@@ -76,7 +76,6 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
     auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
 #endif
 
-#ifdef VERBOSE
     const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     std::cout.precision(3);
     std::cout << std::setprecision(2) << "LZ4_CR\t\t\t:" << (double)input_size / enbytes << std::endl
@@ -85,7 +84,6 @@ void xilCompressTop(std::string& compress_mod, uint32_t block_size, std::string&
     std::cout << "\n";
     std::cout << "Output Location: " << lz_compress_out.c_str() << std::endl;
     std::cout << "Compressed file size: " << enbytes << std::endl;
-#endif
 
 #ifdef EVENT_PROFILE
     std::cout << "Total Time (milli sec): " << total_time_ns.count() / 1000000 << std::endl;

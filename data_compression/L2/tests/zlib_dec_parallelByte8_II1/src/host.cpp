@@ -14,16 +14,16 @@
  * limitations under the License.
  *
  */
-#include "zlib_stream.hpp"
+#include "zlib.hpp"
 #include <fstream>
 #include <vector>
 #include "cmdlineparser.h"
 
 void xil_validate(std::string& file_list, std::string& ext);
 
-void xil_decompress_list(std::string& file_list, std::string& ext, std::string& decompress_bin) {
-    // Create xfZlibStream object
-    xfZlibStream xlz(decompress_bin);
+void xil_decompress_list(std::string& file_list, std::string& ext, std::string& decompress_bin, uint8_t deviceId) {
+    // Xilinx ZLIB object
+    xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId);
 
     // Decompress
     std::ifstream infilelist_dec(file_list.c_str());
@@ -56,20 +56,20 @@ void xil_decompress_list(std::string& file_list, std::string& ext, std::string& 
         decompress_out = decompress_out + ".orig";
 
         // Call Zlib decompression
-        xlz.decompress_file(decompress_in, decompress_out, input_size);
+        xlz.decompress_file(decompress_in, decompress_out, input_size, 0);
 
         std::cout << std::fixed << std::setprecision(3) << "\t\t" << (double)input_size / 1000000 << "\t\t"
                   << decompress_in << std::endl;
     } // While loop ends
 }
 
-void xil_batch_verify(std::string& file_list, std::string& decompress_bin) {
+void xil_batch_verify(std::string& file_list, std::string& decompress_bin, uint8_t deviceId) {
     std::string ext;
 
     // Xilinx ZLIB De-compression
     ext = ".xe2xd.zlib";
 
-    xil_decompress_list(file_list, ext, decompress_bin);
+    xil_decompress_list(file_list, ext, decompress_bin, deviceId);
 
     // Validate
     std::cout << "\n";
@@ -83,9 +83,9 @@ void xil_batch_verify(std::string& file_list, std::string& decompress_bin) {
     xil_validate(file_list, origExt);
 }
 
-void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin) {
+void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin, uint8_t deviceId) {
     // Xilinx ZLIB object
-    xfZlibStream xlz(decompress_bin);
+    xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId);
 
     std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
 
@@ -110,7 +110,7 @@ void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin
 
     // Call ZLIB compression
     // uint32_t enbytes =
-    xlz.decompress_file(lz_decompress_in, lz_decompress_out, input_size);
+    xlz.decompress_file(lz_decompress_in, lz_decompress_out, input_size, 0);
     std::cout << std::fixed << std::setprecision(3) << std::endl
               << "File Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;
@@ -144,6 +144,7 @@ int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--decompress", "-d", "DeCompress", "");
     parser.addSwitch("--decompress_xclbin", "-dx", "decompress XCLBIN", "single");
+    parser.addSwitch("--device", "-dev", "FPGA Card # to be used", "");
 
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.parse(argc, argv);
@@ -151,11 +152,17 @@ int main(int argc, char* argv[]) {
     std::string filelist = parser.value("file_list");
     std::string decompress_mod = parser.value("decompress");
     std::string decompress_bin = parser.value("decompress_xclbin");
+    std::string dev_id_str = parser.value("device");
+
+    int deviceId = 0;
+    if (!dev_id_str.empty()) { // check device Id to run on
+        deviceId = atoi(dev_id_str.c_str());
+    }
 
     if (!filelist.empty()) {
         // "-l" - List of files
-        xil_batch_verify(filelist, decompress_bin);
+        xil_batch_verify(filelist, decompress_bin, deviceId);
     } else if (!decompress_mod.empty())
         // "-d" - DeCompress Mode
-        xil_decompress_top(decompress_mod, decompress_bin);
+        xil_decompress_top(decompress_mod, decompress_bin, deviceId);
 }

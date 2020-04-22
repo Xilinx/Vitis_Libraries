@@ -12,8 +12,7 @@
     ],
     "post_launch": [
         {
-            "script_name": "run.sh",
-            "script_args": "HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
         }
     ],
     "host": {
@@ -31,14 +30,8 @@
                 "LIB_DIR/L2/include"
             ],
             "symbols": [
-                "PARALLEL_BLOCK=8"
-            ]
-        }
-    },
-    "v++": {
-        "compiler": {
-            "symbols": [
-                "PARALLEL_BLOCK=8"
+                "PARALLEL_BLOCK=8",
+                "HOST_BUFFER_SIZE_IN_MB=128"
             ]
         }
     },
@@ -49,15 +42,18 @@
             "accelerators": [
                 {
                     "name": "xilLz4Compress",
+                    "clflags": "-DPARALLEL_BLOCK=8",
                     "location": "LIB_DIR/L2/src/lz4_compress_mm.cpp"
                 },
                 {
                     "name": "xilLz4Decompress",
-                    "location": "LIB_DIR/L2/src/lz4_decompress_mm.cpp"
+                    "clflags": "-DPARALLEL_BLOCK=1 -DPARALLEL_BYTE=8",
+                    "location": "LIB_DIR/L2/src/lz4_multibyte_decompress_mm.cpp"
                 }
             ]
         }
     ],
+    "output_files" : "sample.txt.* sample_run.* test.list",
     "testinfo": {
         "disable": false,
         "jobs": [

@@ -17,9 +17,11 @@
 #ifndef _XFCOMPRESSION_INFLATE_HPP_
 #define _XFCOMPRESSION_INFLATE_HPP_
 
+#include "ap_axi_sdata.h"
 #include "hls_stream.h"
 #include "huffman_decoder.hpp"
 #include "lz_decompress.hpp"
+#include "stream_upsizer.hpp"
 #include "stream_downsizer.hpp"
 #include "mm2s.hpp"
 #include "s2mm.hpp"
@@ -72,11 +74,12 @@ lzLiteralUpsizer:
     }
 }
 
+template <class SIZE_DT = uint8_t>
 void lzProcessingUnit(hls::stream<xf::compression::compressd_dt>& inStream,
                       hls::stream<bool>& inEndOfStream,
-                      hls::stream<uint8_t>& litLenStream,
+                      hls::stream<SIZE_DT>& litLenStream,
                       hls::stream<uint8_t>& lenStream,
-                      hls::stream<uint8_t>& matchLenStream,
+                      hls::stream<SIZE_DT>& matchLenStream,
                       hls::stream<ap_uint<16> >& offsetStream,
                       hls::stream<ap_uint<8> >& outStream) {
     xf::compression::compressd_dt inValue, nextValue;
@@ -139,14 +142,84 @@ void lzProcessingUnit(hls::stream<xf::compression::compressd_dt>& inStream,
     matchLenStream << 0;
 }
 
-} // namespace details
+template <int STREAM_WIDTH>
+void kStreamReadZlibDecomp(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& inKStream,
+                           hls::stream<ap_uint<STREAM_WIDTH> >& readStream,
+                           uint32_t input_size) {
+    /**
+     * @brief kStreamReadZlibDecomp Read 16-bit wide data from internal streams output by compression modules
+     *                              and write to output axi stream.
+     *
+     * @param inKStream     input kernel stream
+     * @param readStream    internal stream to be read for processing
+     * @param input_size    input data size
+     *
+     */
+    int itrLim = 1 + (input_size - 1) / (STREAM_WIDTH / 8);
+    for (int i = 0; i < itrLim; i++) {
+#pragma HLS PIPELINE II = 1
+        ap_axiu<STREAM_WIDTH, 0, 0, 0> tmp = inKStream.read();
+        readStream << tmp.data;
+    }
+}
 
-template <int HISTORY_SIZE = (32 * 1024)>
-void inflate(hls::stream<ap_uint<16> >& inStream,
-             hls::stream<ap_uint<8> >& outStream,
-             hls::stream<bool>& outStreamEoS,
-             hls::stream<uint32_t>& outStreamSize,
-             uint32_t input_size) {
+template <int STREAM_WIDTH>
+void kStreamWriteZlibDecomp(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& outKStream,
+                            hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamd,
+                            hls::stream<ap_uint<STREAM_WIDTH> >& outDataStream,
+                            hls::stream<bool>& byteEos,
+                            hls::stream<uint64_t>& dataSize) {
+    /**
+     * @brief kStreamWriteZlibDecomp Read 16-bit wide data from internal streams output by compression modules
+     *                                and write to output axi stream.
+     *
+     * @param outKStream    output kernel stream
+     * @param sizestreamd   stream to indicate readable bytes in 512-bit wide stream
+     * @param outDataStream output data stream from internal modules
+     * @param byteEos       internal stream which indicates end of data stream
+     * @param dataSize      size of data in streams
+     *
+     */
+    bool lastByte = false;
+    ap_uint<STREAM_WIDTH> tmp;
+    ap_axiu<STREAM_WIDTH, 0, 0, 0> t1;
+
+    ap_axiu<64, 0, 0, 0> pcksize;
+
+    bool flag = 0;
+    for (lastByte = byteEos.read(); !lastByte; lastByte = byteEos.read()) {
+#pragma HLS PIPELINE II = 1
+        if (flag) {
+            outKStream << t1;
+        } else {
+            flag = true;
+        }
+        tmp = outDataStream.read();
+        t1.data = tmp;
+        t1.last = 0;
+    }
+    // read extra packet
+    outDataStream.read();
+    // send the previously read packet
+    t1.data = tmp;
+    t1.last = 1;
+    outKStream << t1;
+    // write the total size of decompressed output
+    pcksize.data = dataSize.read();
+    // write total output size
+    pcksize.last = 1;
+    sizestreamd << pcksize;
+}
+
+template <int DECODER, int HISTORY_SIZE = (32 * 1024), int LOW_OFFSET = 8, bool USE_GZIP = 0>
+void inflateCore(hls::stream<ap_uint<16> >& inStream,
+                 hls::stream<ap_uint<8> >& outStream,
+                 hls::stream<bool>& outStreamEoS,
+                 hls::stream<uint64_t>& outStreamSize,
+                 uint32_t input_size) {
+    const int c_byteGenLoopII = 1;
+    const eHuffmanType c_decoderType = (eHuffmanType)DECODER;
+
     hls::stream<xf::compression::compressd_dt> bitunpackstream("bitUnPackStream");
     hls::stream<bool> bitendofstream("bitEndOfStream");
 
@@ -154,27 +227,31 @@ void inflate(hls::stream<ap_uint<16> >& inStream,
 #pragma HLS STREAM variable = bitendofstream depth = 32
 
 #pragma HLS dataflow
-    xf::compression::huffmanDecoderDynamic(inStream, bitunpackstream, bitendofstream, input_size);
+
+    xf::compression::huffmanDecoder<c_decoderType, c_byteGenLoopII, USE_GZIP>(inStream, bitunpackstream, bitendofstream,
+                                                                              input_size);
+
     xf::compression::lzDecompressZlibEos<HISTORY_SIZE>(bitunpackstream, bitendofstream, outStream, outStreamEoS,
                                                        outStreamSize);
 }
 
-template <int PARALLEL_BYTES, int HUFF_LOOP_II = 1, int HISTORY_SIZE = (32 * 1024)>
-void inflateMultiByte(hls::stream<ap_uint<16> >& inStream,
-                      hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
-                      hls::stream<bool>& outStreamEoS,
-                      hls::stream<uint32_t>& outStreamSize,
-                      uint32_t inputSize) {
+template <int DECODER, int PARALLEL_BYTES, int HUFF_LOOP_II = 1, int HISTORY_SIZE = (32 * 1024), bool USE_GZIP = 0>
+void inflateMultiByteCore(hls::stream<ap_uint<16> >& inStream,
+                          hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
+                          hls::stream<bool>& outStreamEoS,
+                          hls::stream<uint64_t>& outStreamSize,
+                          uint32_t inputSize) {
     const int c_parallelBit = PARALLEL_BYTES * 8;
     // HUFF_LOOP_II=1 gives better latency but FMax may drop
     // HUFF_LOOP_II=2 gives High FMax but latency will increase
     const int c_byteGenLoopII = HUFF_LOOP_II;
+    const eHuffmanType c_decoderType = (eHuffmanType)DECODER;
 
     hls::stream<xf::compression::compressd_dt> bitunpackstream("bitUnPackStream");
     hls::stream<bool> bitendofstream("bitEndOfStream");
     hls::stream<ap_uint<c_parallelBit> > litStream("litStream");
-    hls::stream<uint8_t> litLenStream("litLenStream");
-    hls::stream<uint8_t> matchLenStream("matchLenStream");
+    hls::stream<ap_uint<9> > litLenStream("litLenStream");
+    hls::stream<ap_uint<9> > matchLenStream("matchLenStream");
     hls::stream<ap_uint<16> > offsetStream("offsetStream");
     hls::stream<ap_uint<8> > lzProcOutStream("lzProcOutStream");
     hls::stream<uint8_t> interLenStream("lenStream");
@@ -198,36 +275,92 @@ void inflateMultiByte(hls::stream<ap_uint<16> >& inStream,
 #pragma HLS RESOURCE variable = lzProcOutStream core = RAM_2P_BRAM
 
 #pragma HLS dataflow
-    xf::compression::huffmanDecoderDynamic<c_byteGenLoopII>(inStream, bitunpackstream, bitendofstream, inputSize);
-    xf::compression::details::lzProcessingUnit(bitunpackstream, bitendofstream, litLenStream, interLenStream,
-                                               matchLenStream, offsetStream, lzProcOutStream);
+
+    xf::compression::huffmanDecoder<c_decoderType, c_byteGenLoopII, USE_GZIP>(inStream, bitunpackstream, bitendofstream,
+                                                                              inputSize);
+
+    xf::compression::details::lzProcessingUnit<ap_uint<9> >(
+        bitunpackstream, bitendofstream, litLenStream, interLenStream, matchLenStream, offsetStream, lzProcOutStream);
+
     xf::compression::details::lzLiteralUpsizer<PARALLEL_BYTES>(lzProcOutStream, interLenStream, litStream);
 
-    xf::compression::lzMultiByteDecompress<PARALLEL_BYTES, HISTORY_SIZE, uint8_t>(
+    xf::compression::lzMultiByteDecompress<PARALLEL_BYTES, HISTORY_SIZE, ap_uint<9> >(
         litLenStream, litStream, offsetStream, matchLenStream, outStream, outStreamEoS, outStreamSize);
 }
 
-template <int PARALLEL_BYTES, int HUFF_LOOP_II = 1, int HISTORY_SIZE = (32 * 1024)>
-void zlibMultiByteDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                                   hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
-                                   hls::stream<bool>& outStreamEoS,
-                                   hls::stream<uint32_t>& outStreamSize,
-                                   uint32_t inputSize) {
-    const int c_parallelBit = PARALLEL_BYTES * 8;
+} // namespace details
+
+template <int DECODER, int STREAM_WIDTH, int HISTORY_SIZE, int LOW_OFFSET>
+void inflate(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& inaxistream,
+             hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& outaxistream,
+             hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamd,
+             uint32_t input_size) {
+    hls::stream<ap_uint<STREAM_WIDTH> > inhlsstream("inputStream");
+    hls::stream<ap_uint<16> > outdownstream("outDownStream");
+    hls::stream<ap_uint<8> > uncompoutstream("unCompOutStream");
+    hls::stream<bool> byte_eos("byteEndOfStream");
+
+    hls::stream<ap_uint<STREAM_WIDTH> > outhlsstream("outputStream");
+    hls::stream<bool> outhlsstream_eos("outputStreamSize");
+
+#pragma HLS STREAM variable = inhlsstream depth = 32
+#pragma HLS STREAM variable = outdownstream depth = 256
+
+#pragma HLS STREAM variable = uncompoutstream depth = 256
+#pragma HLS STREAM variable = byte_eos depth = 32
+#pragma HLS STREAM variable = outhlsstream depth = 32
+#pragma HLS STREAM variable = outhlsstream_eos depth = 32
+    hls::stream<uint64_t> outsize_val("outsize_val");
+
+#pragma HLS dataflow
+
+    details::kStreamReadZlibDecomp<STREAM_WIDTH>(inaxistream, inhlsstream, input_size);
+    details::streamDownsizer<uint32_t, STREAM_WIDTH, 16>(inhlsstream, outdownstream, input_size);
+
+    details::inflateCore<DECODER, HISTORY_SIZE, LOW_OFFSET>(outdownstream, uncompoutstream, byte_eos, outsize_val,
+                                                            input_size);
+
+    details::upsizerEos<8, STREAM_WIDTH>(uncompoutstream, byte_eos, outhlsstream, outhlsstream_eos);
+    details::kStreamWriteZlibDecomp<STREAM_WIDTH>(outaxistream, sizestreamd, outhlsstream, outhlsstream_eos,
+                                                  outsize_val);
+}
+
+template <int DECODER, int PARALLEL_BYTES, int HUFF_LOOP_II = 1, int HISTORY_SIZE = (32 * 1024), bool USE_GZIP = 0>
+void inflateMultiByte(hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistream,
+                      hls::stream<ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> >& outaxistream,
+                      hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamd,
+                      uint32_t inputSize) {
     // HUFF_LOOP_II=1 gives better latency but FMax may drop
     // HUFF_LOOP_II=2 gives High FMax but latency will increase
     const int c_byteGenLoopII = HUFF_LOOP_II;
-    hls::stream<ap_uint<16> > outdownstream("outDownStream");
-#pragma HLS STREAM variable = outdownstream depth = 16
-#pragma HLS RESOURCE variable = outdownstream core = FIFO_SRL
+    const int c_parallelBit = PARALLEL_BYTES * 8;
+
+    hls::stream<ap_uint<16> > inStream("inStream");
+    hls::stream<ap_uint<c_parallelBit> > outStream("outStream");
+    hls::stream<bool> outStreamEos("outStreamEos");
+    hls::stream<uint64_t> outSizeStream("outSizeStream");
+
+#pragma HLS STREAM variable = inStream depth = 32
+#pragma HLS STREAM variable = outStream depth = 32
+#pragma HLS STREAM variable = outStreamEos depth = 32
+#pragma HLS STREAM variable = outSizeStream depth = 3
+
+#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStreamEos core = FIFO_SRL
+#pragma HLS RESOURCE variable = outSizeStream core = FIFO_SRL
 
 #pragma HLS dataflow
-    xf::compression::details::streamDownsizer<uint32_t, c_parallelBit, 16>(inStream, outdownstream, inputSize);
-    xf::compression::inflateMultiByte<PARALLEL_BYTES, c_byteGenLoopII>(outdownstream, outStream, outStreamEoS,
-                                                                       outStreamSize, inputSize);
+    details::kStreamReadZlibDecomp<16>(inaxistream, inStream, inputSize);
+
+    details::inflateMultiByteCore<DECODER, PARALLEL_BYTES, c_byteGenLoopII, HISTORY_SIZE, USE_GZIP>(
+        inStream, outStream, outStreamEos, outSizeStream, inputSize);
+
+    details::kStreamWriteZlibDecomp<c_parallelBit>(outaxistream, sizestreamd, outStream, outStreamEos, outSizeStream);
 }
 
-template <int PARALLEL_BYTES,
+template <int DECODER,
+          int PARALLEL_BYTES,
           int IN_GMEM_DATAWIDTH = 512,
           int OUT_GMEM_DATAWIDTH = 512,
           int IN_BURST_SIZE = 16,
@@ -242,15 +375,15 @@ void inflateMultiByteMM(const ap_uint<IN_GMEM_DATAWIDTH>* in,
     hls::stream<ap_uint<c_krnlInWidth> > inStream("inStream");
     hls::stream<ap_uint<c_krnlOutWidth> > outStream("outStream");
     hls::stream<bool> outStreamEos("outStreamEos");
-    hls::stream<uint32_t> outSizeStream("outSizeStream");
+    hls::stream<uint64_t> outSizeStream("outSizeStream");
 
 #pragma HLS STREAM variable = inStream
 #pragma HLS STREAM variable = outStream
 #pragma HLS STREAM variable = outStreamEos
 #pragma HLS DATAFLOW
-    xf::compression::details::mm2Stream<c_krnlInWidth>(in, inStream, inputSize);
-    xf::compression::inflateMultiByte<PARALLEL_BYTES>(inStream, outStream, outStreamEos, outSizeStream, inputSize);
-    xf::compression::details::stream2MM<c_krnlOutWidth>(outStream, outStreamEos, outSizeStream, out, outSize);
+    details::mm2Stream<c_krnlInWidth>(in, inStream, inputSize);
+    details::inflateMultiByteCore<DECODER, PARALLEL_BYTES>(inStream, outStream, outStreamEos, outSizeStream, inputSize);
+    details::stream2MM<c_krnlOutWidth>(outStream, outStreamEos, outSizeStream, out, outSize);
 }
 
 } // namespace compression

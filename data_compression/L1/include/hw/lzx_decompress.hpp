@@ -39,7 +39,7 @@ template <int PARALLEL_BYTES, int HISTORY_SIZE>
 void lzxDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
                          hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
                          hls::stream<bool>& outStreamEoS,
-                         hls::stream<uint32_t>& outSizeStream,
+                         hls::stream<uint64_t>& outSizeStream,
                          const uint32_t _input_size) {
     typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
     typedef ap_uint<16> offset_dt;

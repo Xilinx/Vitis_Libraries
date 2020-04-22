@@ -4,12 +4,21 @@
         "LZ4_P2P application for decompression resides in `L3/benchmarks/lz4_p2p_decompress` directory."
     ],
     "flow": "vitis",
+    "platform_blacklist": [
+        "u50"
+    ],
+    "platform_whitelist": [
+        "samsung_u2",
+        "samsung_U2"
+    ],
     "launch": [
         {
             "cmd_args": "-dx BUILD/compress_decompress.xclbin -p2p 0 -l PROJECT/test.list", 
             "name": "generic launch for all flows"
         }
     ], 
+    "match_makefile": "false",
+    "match_ini": "false",
     "config_make": "config.mk",
     "host": {
         "host_exe": "xil_lz4", 
@@ -26,7 +35,7 @@
                 "LIB_DIR/L3/include",
 		"LIB_DIR/L2/include"
             ], 
-            "symbols": [ "PARALLEL_BLOCK=8" ] 
+            "symbols": [ "PARALLEL_BLOCK=8", "ENABLE_P2P=1" ] 
         }
     },
     "v++":{
@@ -90,6 +99,7 @@
             ] 
         }
     ],
+    "output_files" : "sample.txt.lz4.*",
     "testinfo": {
         "disable": false,
         "jobs": [

@@ -30,6 +30,10 @@
         }
     },
     "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini",
+            "PROJECT/hls_directives.tcl"
+        ],
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=8"
@@ -51,14 +55,11 @@
                 {
                     "name": "xilHuffmanKernel",
                     "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp"
-                },
-                {
-                    "name": "xilTreegenKernel",
-                    "location": "LIB_DIR/L2/src/zlib_treegen_mm.cpp"
                 }
             ]
         }
     ],
+    "output_files" : "sample.txt.*",
     "testinfo": {
         "disable": false,
         "jobs": [

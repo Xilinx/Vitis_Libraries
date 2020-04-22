@@ -287,6 +287,9 @@ uint64_t xfLz4::decompressSequential(
     uint32_t compute_cu;
     uint64_t output_idx = 0;
 
+    // To handle uncompressed blocks
+    bool compressBlk = false;
+
     for (uint64_t outIdx = 0; outIdx < original_size; outIdx += host_buffer_size) {
         compute_cu = 0;
         uint32_t chunk_size = host_buffer_size;
@@ -355,6 +358,7 @@ uint64_t xfLz4::decompressSequential(
                 inIdx += compressed_size;
                 buf_size += block_size_in_bytes;
                 bufblocks++;
+                compressBlk = true;
             } else if (compressed_size == block_size) {
                 no_compress_case++;
                 // No compression block
@@ -370,51 +374,54 @@ uint64_t xfLz4::decompressSequential(
 
         if (nblocks == 1 && compressed_size == block_size) break;
 
-        // Device buffer allocation
-        buffer_input = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, buf_size, h_buf_in.data());
+        if (compressBlk) {
+            // Device buffer allocation
+            buffer_input =
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, buf_size, h_buf_in.data());
 
-        buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, buf_size, h_buf_out.data());
+            buffer_output =
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, buf_size, h_buf_out.data());
 
-        buffer_block_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                           sizeof(uint32_t) * bufblocks, h_blksize.data());
+            buffer_block_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                               sizeof(uint32_t) * bufblocks, h_blksize.data());
 
-        buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                sizeof(uint32_t) * bufblocks, h_compressSize.data());
+            buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                    sizeof(uint32_t) * bufblocks, h_compressSize.data());
 
-        // Set kernel arguments
-        uint32_t narg = 0;
-        decompress_kernel_lz4->setArg(narg++, *(buffer_input));
-        decompress_kernel_lz4->setArg(narg++, *(buffer_output));
-        decompress_kernel_lz4->setArg(narg++, *(buffer_block_size));
-        decompress_kernel_lz4->setArg(narg++, *(buffer_compressed_size));
-        decompress_kernel_lz4->setArg(narg++, m_BlockSizeInKb);
-        decompress_kernel_lz4->setArg(narg++, bufblocks);
+            // Set kernel arguments
+            uint32_t narg = 0;
+            decompress_kernel_lz4->setArg(narg++, *(buffer_input));
+            decompress_kernel_lz4->setArg(narg++, *(buffer_output));
+            decompress_kernel_lz4->setArg(narg++, *(buffer_block_size));
+            decompress_kernel_lz4->setArg(narg++, *(buffer_compressed_size));
+            decompress_kernel_lz4->setArg(narg++, m_BlockSizeInKb);
+            decompress_kernel_lz4->setArg(narg++, bufblocks);
 
-        std::vector<cl::Memory> inBufVec;
-        inBufVec.push_back(*(buffer_input));
-        inBufVec.push_back(*(buffer_block_size));
-        inBufVec.push_back(*(buffer_compressed_size));
+            std::vector<cl::Memory> inBufVec;
+            inBufVec.push_back(*(buffer_input));
+            inBufVec.push_back(*(buffer_block_size));
+            inBufVec.push_back(*(buffer_compressed_size));
 
-        // Migrate memory - Map host to device buffers
-        m_q->enqueueMigrateMemObjects(inBufVec, 0 /* 0 means from host*/);
-        m_q->finish();
+            // Migrate memory - Map host to device buffers
+            m_q->enqueueMigrateMemObjects(inBufVec, 0 /* 0 means from host*/);
+            m_q->finish();
 
-        auto kernel_start = std::chrono::high_resolution_clock::now();
-        // Kernel invocation
-        m_q->enqueueTask(*decompress_kernel_lz4);
-        m_q->finish();
+            auto kernel_start = std::chrono::high_resolution_clock::now();
+            // Kernel invocation
+            m_q->enqueueTask(*decompress_kernel_lz4);
+            m_q->finish();
 
-        auto kernel_end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration<double, std::nano>(kernel_end - kernel_start);
-        kernel_time_ns_1 += duration;
+            auto kernel_end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration<double, std::nano>(kernel_end - kernel_start);
+            kernel_time_ns_1 += duration;
 
-        std::vector<cl::Memory> outBufVec;
-        outBufVec.push_back(*(buffer_output));
+            std::vector<cl::Memory> outBufVec;
+            outBufVec.push_back(*(buffer_output));
 
-        // Migrate memory - Map device to host buffers
-        m_q->enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
-        m_q->finish();
-
+            // Migrate memory - Map device to host buffers
+            m_q->enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
+            m_q->finish();
+        }
         uint32_t bufIdx = 0;
         for (uint32_t bIdx = 0, idx = 0; bIdx < nblocks; bIdx++, idx += block_size_in_bytes) {
             uint32_t block_size = m_blkSize.data()[bIdx];
@@ -429,14 +436,18 @@ uint64_t xfLz4::decompressSequential(
             }
         }
 
-        // Delete device buffers
-        delete (buffer_input);
-        delete (buffer_output);
-        delete (buffer_block_size);
-        delete (buffer_compressed_size);
+        if (compressBlk) {
+            // Delete device buffers
+            delete (buffer_input);
+            delete (buffer_output);
+            delete (buffer_block_size);
+            delete (buffer_compressed_size);
+        }
     } // Top - Main loop ends here
 
-    float throughput_in_mbps_1 = (float)total_decomression_size * 1000 / kernel_time_ns_1.count();
+    float throughput_in_mbps_1 = 0;
+    if (kernel_time_ns_1.count())
+        throughput_in_mbps_1 = (float)total_decomression_size * 1000 / kernel_time_ns_1.count();
     std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
     return original_size;
 

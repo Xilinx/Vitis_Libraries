@@ -25,14 +25,24 @@
  */
 
 #include "hls_stream.h"
-
 #include <ap_int.h>
+#include <fstream>
+#include <iostream>
+#include <stdlib.h>
+#include <string>
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "lz_compress.hpp"
+#include "lz_optional.hpp"
+#include "mm2s.hpp"
+#include "s2mm.hpp"
+#include "stream_downsizer.hpp"
+#include "stream_upsizer.hpp"
 
 typedef ap_uint<64> lz4_compressd_dt;
 typedef ap_uint<32> compressd_dt;
+typedef ap_uint<8> encodedData_t;
 
 const int c_gmemBurstSize = 32;
 
@@ -253,6 +263,169 @@ static void lz4Compress(hls::stream<compressd_dt>& inStream,
     details::lz4CompressPart1<MAX_LIT_COUNT, PARALLEL_UNITS>(inStream, lit_outStream, lenOffset_Stream, input_size,
                                                              max_lit_limit, index);
     details::lz4CompressPart2(lit_outStream, lenOffset_Stream, outStream, endOfStream, compressdSizeStream, input_size);
+}
+
+template <class data_t,
+          int DATAWIDTH = 512,
+          int BURST_SIZE = 16,
+          int NUM_BLOCK = 8,
+          int M_LEN = 6,
+          int MIN_MAT = 4,
+          int LZ_MAX_OFFSET_LIM = 65536,
+          int OFFSET_WIN = 65536,
+          int MAX_M_LEN = 255,
+          int MAX_LIT_CNT = 4096,
+          int MIN_B_SIZE = 128>
+void hlsLz4Core(hls::stream<data_t>& inStream,
+                hls::stream<data_t>& outStream,
+                hls::stream<bool>& outStreamEos,
+                hls::stream<uint32_t>& compressedSize,
+                uint32_t max_lit_limit[NUM_BLOCK],
+                uint32_t input_size,
+                uint32_t core_idx) {
+    hls::stream<xf::compression::compressd_dt> compressdStream("compressdStream");
+    hls::stream<xf::compression::compressd_dt> bestMatchStream("bestMatchStream");
+    hls::stream<xf::compression::compressd_dt> boosterStream("boosterStream");
+#pragma HLS STREAM variable = compressdStream depth = 8
+#pragma HLS STREAM variable = bestMatchStream depth = 8
+#pragma HLS STREAM variable = boosterStream depth = 8
+
+#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
+
+#pragma HLS dataflow
+    xf::compression::lzCompress<M_LEN, MIN_MAT, LZ_MAX_OFFSET_LIM>(inStream, compressdStream, input_size);
+    xf::compression::lzBestMatchFilter<M_LEN, OFFSET_WIN>(compressdStream, bestMatchStream, input_size);
+    xf::compression::lzBooster<MAX_M_LEN>(bestMatchStream, boosterStream, input_size);
+    xf::compression::lz4Compress<MAX_LIT_CNT, NUM_BLOCK>(boosterStream, outStream, max_lit_limit, input_size,
+                                                         outStreamEos, compressedSize, core_idx);
+}
+
+template <class data_t,
+          int DATAWIDTH = 512,
+          int BURST_SIZE = 16,
+          int NUM_BLOCK = 8,
+          int M_LEN = 6,
+          int MIN_MAT = 4,
+          int LZ_MAX_OFFSET_LIM = 65536,
+          int OFFSET_WIN = 65536,
+          int MAX_M_LEN = 255,
+          int MAX_LIT_CNT = 4096,
+          int MIN_B_SIZE = 128>
+void hlsLz4(const data_t* in,
+            data_t* out,
+            const uint32_t input_idx[NUM_BLOCK],
+            const uint32_t output_idx[NUM_BLOCK],
+            const uint32_t input_size[NUM_BLOCK],
+            uint32_t output_size[NUM_BLOCK],
+            uint32_t max_lit_limit[NUM_BLOCK]) {
+    hls::stream<encodedData_t> inStream[NUM_BLOCK];
+    hls::stream<bool> outStreamEos[NUM_BLOCK];
+    hls::stream<encodedData_t> outStream[NUM_BLOCK];
+#pragma HLS STREAM variable = outStreamEos depth = 2
+#pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
+#pragma HLS STREAM variable = outStream depth = c_gmemBurstSize
+
+#pragma HLS RESOURCE variable = outStreamEos core = FIFO_SRL
+#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
+
+    hls::stream<uint32_t> compressedSize[NUM_BLOCK];
+
+#pragma HLS dataflow
+    xf::compression::details::mm2multStreamSize<8, NUM_BLOCK, DATAWIDTH, BURST_SIZE>(in, input_idx, inStream,
+                                                                                     input_size);
+
+    for (uint8_t i = 0; i < NUM_BLOCK; i++) {
+#pragma HLS UNROLL
+        // lz4Core is instantiated based on the NUM_BLOCK
+        hlsLz4Core<encodedData_t, DATAWIDTH, BURST_SIZE, NUM_BLOCK>(inStream[i], outStream[i], outStreamEos[i],
+                                                                    compressedSize[i], max_lit_limit, input_size[i], i);
+    }
+
+    xf::compression::details::multStream2MM<8, NUM_BLOCK, DATAWIDTH, BURST_SIZE>(
+        outStream, outStreamEos, compressedSize, output_idx, out, output_size);
+}
+
+template <class data_t,
+          int DATAWIDTH = 512,
+          int BURST_SIZE = 16,
+          int NUM_BLOCK = 8,
+          int M_LEN = 6,
+          int MIN_MAT = 4,
+          int LZ_MAX_OFFSET_LIM = 65536,
+          int OFFSET_WIN = 65536,
+          int MAX_M_LEN = 255,
+          int MAX_LIT_CNT = 4096,
+          int MIN_B_SIZE = 128>
+void lz4CompressMM(const data_t* in, data_t* out, uint32_t* compressd_size, const uint32_t input_size) {
+    uint32_t block_idx = 0;
+    uint32_t block_length = 64 * 1024;
+    uint32_t no_blocks = (input_size - 1) / block_length + 1;
+    uint32_t max_block_size = 64 * 1024;
+    uint32_t readBlockSize = 0;
+
+    bool small_block[NUM_BLOCK];
+    uint32_t input_block_size[NUM_BLOCK];
+    uint32_t input_idx[NUM_BLOCK];
+    uint32_t output_idx[NUM_BLOCK];
+    uint32_t output_block_size[NUM_BLOCK];
+    uint32_t max_lit_limit[NUM_BLOCK];
+    uint32_t small_block_inSize[NUM_BLOCK];
+#pragma HLS ARRAY_PARTITION variable = input_block_size dim = 0 complete
+#pragma HLS ARRAY_PARTITION variable = input_idx dim = 0 complete
+#pragma HLS ARRAY_PARTITION variable = output_idx dim = 0 complete
+#pragma HLS ARRAY_PARTITION variable = output_block_size dim = 0 complete
+#pragma HLS ARRAY_PARTITION variable = max_lit_limit dim = 0 complete
+
+    // Figure out total blocks & block sizes
+    for (uint32_t i = 0; i < no_blocks; i += NUM_BLOCK) {
+        uint32_t nblocks = NUM_BLOCK;
+        if ((i + NUM_BLOCK) > no_blocks) {
+            nblocks = no_blocks - i;
+        }
+
+        for (uint32_t j = 0; j < NUM_BLOCK; j++) {
+            if (j < nblocks) {
+                uint32_t inBlockSize = block_length;
+                if (readBlockSize + block_length > input_size) inBlockSize = input_size - readBlockSize;
+                if (inBlockSize < MIN_B_SIZE) {
+                    small_block[j] = 1;
+                    small_block_inSize[j] = inBlockSize;
+                    input_block_size[j] = 0;
+                    input_idx[j] = 0;
+                } else {
+                    small_block[j] = 0;
+                    input_block_size[j] = inBlockSize;
+                    readBlockSize += inBlockSize;
+                    input_idx[j] = (i + j) * max_block_size;
+                    output_idx[j] = (i + j) * max_block_size;
+                }
+            } else {
+                input_block_size[j] = 0;
+                input_idx[j] = 0;
+            }
+            output_block_size[j] = 0;
+            max_lit_limit[j] = 0;
+        }
+
+        // Call for parallel compression
+        hlsLz4<data_t, DATAWIDTH, BURST_SIZE, NUM_BLOCK>(in, out, input_idx, output_idx, input_block_size,
+                                                         output_block_size, max_lit_limit);
+
+        for (uint32_t k = 0; k < nblocks; k++) {
+            if (max_lit_limit[k]) {
+                compressd_size[block_idx] = input_block_size[k];
+            } else {
+                compressd_size[block_idx] = output_block_size[k];
+            }
+
+            if (small_block[k] == 1) {
+                compressd_size[block_idx] = small_block_inSize[k];
+            }
+            block_idx++;
+        }
+    }
 }
 
 } // namespace compression

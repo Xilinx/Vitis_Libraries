@@ -36,10 +36,16 @@
 #include "stream_upsizer.hpp"
 #include "stream_downsizer.hpp"
 #include "ap_axi_sdata.h"
+#include "inflate.hpp"
 
 #define LZ_MAX_OFFSET_LIMIT 32768
 #define HISTORY_SIZE LZ_MAX_OFFSET_LIMIT
 #define LOW_OFFSET 10
+
+// use dynamic decoder by default
+#ifndef DECODER_TYPE
+#define DECODER_TYPE DYNAMIC_DECODER
+#endif
 
 const int kGMemDWidth = 32;
 typedef ap_uint<kGMemDWidth> uintMemWidth_t;
@@ -56,6 +62,6 @@ extern "C" {
 void xilDecompressStream(uint32_t input_size,
                          hls::stream<ap_axiu<kGMemDWidth, 0, 0, 0> >& inaxistreamd,
                          hls::stream<ap_axiu<kGMemDWidth, 0, 0, 0> >& outaxistreamd,
-                         hls::stream<ap_axiu<32, 0, 0, 0> >& sizestreamd);
+                         hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamd);
 }
 #endif // _XFCOMPRESSION_ZLIB_DECOMPRESS_STREAM_HPP_
