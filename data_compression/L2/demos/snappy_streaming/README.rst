@@ -15,15 +15,15 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx Snappy Streaming 
-compress/decompress kernels. 
+compress/decompress kernels (excluding data movers). It achieves Fmax of 300MHz 
 
-========== ===== ====== ==== ===== ===== ======
-Flow       LUT   LUTMem REG  BRAM  URAM  Fmax
-========== ===== ====== ==== ===== ===== ======
-Compress   2.9K  112    3.2K 4     6     300MHz
----------- ----- ------ ---- ----- ----- ------
-DeCompress 878   31     983  16    0     300MHz
-========== ===== ====== ==== ===== ===== ======
+========== ===== ====== ==== ===== ===== 
+Flow       LUT   LUTMem REG  BRAM  URAM 
+========== ===== ====== ==== ===== ===== 
+Compress   2.9K  112    3.2K 4     6     
+---------- ----- ------ ---- ----- ----- 
+DeCompress 878   31     983  16    0     
+========== ===== ====== ==== ===== ===== 
 
 Performance Data
 ~~~~~~~~~~~~~~~~

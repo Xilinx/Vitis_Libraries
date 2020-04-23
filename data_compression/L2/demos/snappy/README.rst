@@ -24,16 +24,16 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx Snappy
-compress/decompress kernels with 8 engines for single compute unit. It
-is possible to extend number of engines to achieve higher throughput.
+compress/decompress kernels with 8 engines for single compute unit.
+The final Fmax achieved for this design is 299MHz 
 
-========== ===== ====== ===== ===== ===== ======
-Flow       LUT   LUTMem REG   BRAM  URAM  Fmax
-========== ===== ====== ===== ===== ===== ======
-Compress   52.7K 13.8K  64.8K 50    48    300MHz
----------- ----- ------ ----- ----- ----- ------
-DeCompress 30.7K 13.4K  39.4K 146    0    300MHz
-========== ===== ====== ===== ===== ===== ======
+========== ===== ====== ===== ===== ===== 
+Flow       LUT   LUTMem REG   BRAM  URAM  
+========== ===== ====== ===== ===== ===== 
+Compress   47K   10.1K  49.6K 48    48    
+---------- ----- ------ ----- ----- ----- 
+DeCompress 33.7K 14K    43.8K 146   0    
+========== ===== ====== ===== ===== ===== 
 
 Performance Data
 ~~~~~~~~~~~~~~~~

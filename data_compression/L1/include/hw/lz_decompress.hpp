@@ -41,8 +41,8 @@ typedef ap_uint<32> compressd_dt;
  * and when match length and offset are read, the literals will be read from
  * the local dictionary based on offset until match length.
  *
- * @tparam LOW_OFFSET low offset
  * @tparam HISTORY_SIZE history size
+ * @tparam LOW_OFFSET low offset
  *
  * @param inStream input stream
  * @param outStream output stream
@@ -108,6 +108,25 @@ lz_decompress:
     }
 }
 
+
+/**
+ * @brief This module writes the literals to the output stream as it is
+ * and when match length and offset are read, the literals will be read from
+ * the local dictionary based on offset until match length. This module can
+ * process data in parallel defined by PARALLEL_BYTES template argument
+ *
+ * @tparam PARALLEL_BYTES number of bytes processed in parallel (4, 8)
+ * @tparam HISTORY_SIZE history size
+ * @tparam SIZE_DT input data type
+ *
+ * @param litlenStream literal length stream
+ * @param litStream literals only stream
+ * @param offsetStream offset only stream
+ * @param matchlenStream match length only stream
+ * @param outStream output stream
+ * @param endOfStream end of stream
+ * @param sizeOutStream output size stream
+ */
 template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = uint8_t>
 void lzMultiByteDecompress(hls::stream<SIZE_DT>& litlenStream,
                            hls::stream<ap_uint<PARALLEL_BYTES * 8> >& litStream,

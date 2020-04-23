@@ -24,14 +24,14 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx LZ4 Compress/Decompress
-kernels. The final Fmax achieved is 263MHz 
+kernels. The final Fmax achieved is 262MHz 
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   62.5K 22.7K  65.3K 50    48    
+Compress   56.5K 18.1K  50.9K 48    48    
 ---------- ----- ------ ----- ----- ----- 
-DeCompress 12.5K 2.3K   15.4K 16    4     
+DeCompress 8.8K  692    6.7K  2     4     
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data
@@ -43,8 +43,8 @@ unit.
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Best Compression Throughput   1.8 GB/s
-Best Decompression Throughput 1.4 GB/s
+Best Compression Throughput   1.4 GB/s
+Best Decompression Throughput 1.1 GB/s
 Average Compression Ratio     2.13x (Silesia Benchmark)
 ============================= =========================
 
