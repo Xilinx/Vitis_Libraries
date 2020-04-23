@@ -330,6 +330,11 @@ code_gen:
  * decoder. It takes ZLIB/GZIP Huffman encoded data as input and generates
  * decoded data in LZ77 format (Literal, Length, Offset).
  *
+ * @tparam DECODER Fixed, Full, Dynamic huffman block support
+ * @tparam ByteGenLoopII core bytegenerator loop initiation interval
+ * @tparam USE_GZIP switch that controls GZIP/ZLIB header processing
+ *
+ *
  * @param inStream input bit packed data
  * @param outStream output lz77 compressed output in the form of 32bit packets
  * (Literals, Match Length, Distances)

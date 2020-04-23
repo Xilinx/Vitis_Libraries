@@ -16,14 +16,14 @@ Results
 Overall Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx Zlib compress/decompress kernels. The final Fmax achieved is 291MHz 
+Table below presents resource utilization of Xilinx Zlib compress/decompress kernels. The final Fmax achieved is 284MHz 
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM  
 ========== ===== ====== ===== ===== ===== 
-Compress   110K  26K    117K  132   48    
+Compress   82.6K 26K    84.7K  105   48    
 ---------- ----- ------ ----- ----- ----- 
-DeCompress 13.8K 506    13.8K  8     4     
+DeCompress 13.8K 506    13.7K  8     4     
 ========== ===== ====== ===== ===== ===== 
 
 Compress Kernel Resource Utilization
@@ -32,11 +32,9 @@ Compress Kernel Resource Utilization
 ======== ===== ======= ===== ===== ===== 
 Kernel   LUT   LUTMem  REG   BRAM  URAM 
 ======== ===== ======= ===== ===== =====
-LZ77     49.8K 12.7K   56.8K 74    48   
+LZ77     43.8K 10.4K   46.9K 69    48   
 -------- ----- ------- ----- ----- -----
-TreeGen  4.4K  140     6.4K  13    0   
--------- ----- ------- ----- ----- -----
-Huffman  56.5K 13.5K   54.2K 45    0
+Huffman  38.8K 10.2K   37.8K 36    0
 ======== ===== ======= ===== ===== =====
 
 Decompress Kernel Resource Utilization
@@ -45,7 +43,7 @@ Decompress Kernel Resource Utilization
 =========== ===== ======= ===== ===== =====
 Kernel      LUT   LUTMem  REG   BRAM  URAM
 =========== ===== ======= ===== ===== =====
-Decompress  10.6K 162     6.4K  4     4
+Decompress  10.7K 162     8.1K  4     4
 ----------- ----- ------- ----- ----- -----
 DmReader    2.1K  294     3.8K  3     0
 ----------- ----- ------- ----- ----- -----
@@ -59,12 +57,14 @@ Performance Data
 +----------------------------+------------------------+
 | Topic                      | Best Kernel Throughput |
 +============================+========================+
-| Compression                | 1.9 GB/s               |
+| Compression                | 2 GB/s                 |
 +----------------------------+------------------------+
-| Decompression              | 631 MB/s               |
+| Decompression              | 733 MB/s               |
 +----------------------------+------------------------+
 | Average Compression Ratio  | 2.74 (Silesia Corpus)  |
 +----------------------------+------------------------+
+
+.. [*] Decompression uses high fmax options (Bitwidth: 32bit, ByteGen Loop: 2) 
 
 Executable Usage:
 

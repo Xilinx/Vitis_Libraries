@@ -45,7 +45,7 @@ void snappyCoreDec(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidt
     hls::stream<uintpV_t> decompressed_stream("decompressed_stream");
     hls::stream<bool> lzxendOfStream("lzxendOfStream");
     hls::stream<uint32_t> decStreamSize;
-    hls::stream<uint16_t> blockCompSize;
+    hls::stream<uint32_t> blockCompSize;
 #pragma HLS STREAM variable = instreamV depth = 32
 #pragma HLS STREAM variable = decompressed_stream depth = 32
 #pragma HLS STREAM variable = lzxendOfStream depth = 32

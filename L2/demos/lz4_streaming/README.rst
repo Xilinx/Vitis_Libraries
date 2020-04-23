@@ -15,15 +15,15 @@ Resource Utilization
 ~~~~~~~~~~~~~~~~~~~~~
 
 Table below presents resource utilization of Xilinx LZ4 Streaming 
-compress/decompress kernels. 
+compress/decompress kernels (excluding data movers). It achieves Fmax of 300MHz.
 
-========== ===== ====== ==== ===== ===== ======
-Flow       LUT   LUTMem REG  BRAM  URAM  Fmax
-========== ===== ====== ==== ===== ===== ======
-Compress   4.1K  1.1K   3.4K 4     6     300MHz
----------- ----- ------ ---- ----- ----- ------
-DeCompress 813   32     1K   16    0     300MHz
-========== ===== ====== ==== ===== ===== ======
+========== ===== ====== ==== ===== ===== 
+Flow       LUT   LUTMem REG  BRAM  URAM  
+========== ===== ====== ==== ===== ===== 
+Compress   4.1K  1.1K   3.4K 4     6     
+---------- ----- ------ ---- ----- ----- 
+DeCompress 802   32     1K   16    0     
+========== ===== ====== ==== ===== ===== 
 
 Performance Data
 ~~~~~~~~~~~~~~~~

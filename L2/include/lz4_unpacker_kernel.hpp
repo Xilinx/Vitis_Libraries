@@ -19,7 +19,7 @@
 
 /**
  * @file lz4_unpacker_kernel.hpp
- * @brief Header for Unapcker kernel.
+ * @brief Header for Unpacker kernel.
  *
  * This file is part of Vitis Data Compression Library.
  */
