@@ -485,28 +485,32 @@ void snappyDecompressCoreEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStr
                                 hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
                                 hls::stream<bool>& outStreamEoS,
                                 hls::stream<uint32_t>& outSizeStream,
-                                hls::stream<uint16_t>& blockSizeStream) {
+                                hls::stream<uint32_t>& blockSizeStream) {
     typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
     typedef ap_uint<16> offset_dt;
 
-    hls::stream<uint16_t> litlenStream("litlenStream");
+    hls::stream<uint32_t> litlenStream("litlenStream");
     hls::stream<uintV_t> litStream("litStream");
     hls::stream<offset_dt> offsetStream("offsetStream");
-    hls::stream<uint16_t> matchlenStream("matchlenStream");
+    hls::stream<uint32_t> matchlenStream("matchlenStream");
+    hls::stream<bool> storedBlockStream("storedBlockStream");
 #pragma HLS STREAM variable = litlenStream depth = 32
 #pragma HLS STREAM variable = litStream depth = 32
 #pragma HLS STREAM variable = offsetStream depth = 32
 #pragma HLS STREAM variable = matchlenStream depth = 32
+#pragma HLS STREAM variable = storedBlockStream depth = 32
 
 #pragma HLS RESOURCE variable = litlenStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = litStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = offsetStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = matchlenStream core = FIFO_SRL
+#pragma HLS RESOURCE variable = storedBlockStream core = FIFO_SRL
 
+    storedBlockStream << 0;
 #pragma HLS dataflow
     snappyMultiByteDecompress<PARALLEL_BYTES>(inStream, litlenStream, litStream, offsetStream, matchlenStream,
-                                              blockSizeStream);
-    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, uint16_t>(litlenStream, litStream, offsetStream, matchlenStream,
+                                              storedBlockStream, blockSizeStream);
+    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, uint32_t>(litlenStream, litStream, offsetStream, matchlenStream,
                                                                outStream, outStreamEoS, outSizeStream);
 }
 

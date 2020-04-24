@@ -179,6 +179,21 @@ lz4_decompressr:
     }
 }
 
+/**
+ * @brief This module reads the compressed data from input stream
+ * and decodes the offset, match length and literals by processing
+ * in various decompress states. It can process the data in parallel
+ * defined by PARALLEL BYTES template parameter. 
+ *
+ * @tparam PARALLEL_BYTES number of bytes processed in parallel (4,8)
+ *
+ * @param inStream input stream
+ * @param litlenStream literal length stream
+ * @param litStream literal stream
+ * @param offsetStream offset stream
+ * @param matchlenStream match length only stream
+ * @param input_size input size of the block
+ */
 template <int PARALLEL_BYTES>
 inline void lz4MultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
                                    hls::stream<uint16_t>& litlenStream,
