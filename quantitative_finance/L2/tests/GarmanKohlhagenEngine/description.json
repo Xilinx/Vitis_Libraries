@@ -1,0 +1,61 @@
+{
+    "name": "L2 Garman Kohlhagen", 
+    "description": [
+        "L2 Garman Kohlhagen"
+        ], 
+    "flow": "vitis", 
+    "platform_type": "pcie",
+    "platform_whitelist": [
+        "u250", 
+        "u200"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    },
+    "host": {
+        "compiler": {
+            "sources": [
+                "LIB_DIR/ext/xcl2/xcl2.cpp",
+                "./src/host/gk_test.cpp",
+                "./src/host/gk_parser.cpp",
+                "./src/host/gk_host.cpp"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "name": "gk_kernel",
+            "accelerators": [
+                {
+                    "name": "gk_kernel",
+                    "location": "src/kernel/gk_kernel.cpp"
+                }
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "name": "generic launch for all flows",
+            "cmd_args": "BUILD/gk_kernel.xclbin PROJECT/one.txt"
+        }
+    ]
+}

@@ -1,0 +1,77 @@
+{
+    "name": "L2 LMMEngineRatchetFloater", 
+    "description": "L2 LMMEngineRatchetFloater", 
+    "flow": "vitis", 
+    "platform_type": "pcie", 
+    "platform_whitelist": [
+        "u250", 
+        "u200"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "launch": [
+        {
+            "cmd_args": " -b BUILD/lmm_ratchetfloater.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "lmmRatchetFloaterTest.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/LMMEngineRatchetFloater/host/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/LMMEngineRatchetFloater/host", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/L2/tests/LMMEngineRatchetFloater/kernel"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/../Vitis_Libraries/solver/L2/include", 
+                "LIB_DIR/L2/tests/LMMEngineRatchetFloater/kernel"
+            ]
+        } 
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/LMMEngineRatchetFloater/kernel/lmmRatchetFloaterKernel.cpp", 
+                    "frequency": 300.0, 
+                    "name": "lmmRatchetFloaterKernel"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "lmm_ratchetfloater"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}
