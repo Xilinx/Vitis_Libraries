@@ -1,0 +1,106 @@
+{#
+    sphinxdoc/layout.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    Sphinx layout template for the sphinxdoc theme.
+
+    :copyright: Copyright 2007-2019 by the Sphinx team, see AUTHORS.
+    :license: BSD, see LICENSE for details.
+#}
+{%- extends "basic/layout.html" %}
+
+{# put the sidebar before the body #}
+{% block sidebar1 %}{{ sidebar() }}{% endblock %}
+{% block sidebar2 %}{% endblock %}
+
+{% block linktags %}
+{{ super() }}
+    <link rel="canonical" href="http://www.sphinx-doc.org/en/master/{{ pagename }}{{ file_suffix }}" />
+{% endblock %}
+
+{% block extrahead %}
+ 
+<meta name="keywords" content="Test GitHub Repository"/>
+<meta name="Document ID" content="Test123"/>
+<meta name="description" content="This is a test GitHub Repository HTML output. "/>
+<meta name="Archived" content="false"/>
+<meta name="hasMultipleVersions" content="true"/>
+
+<meta name="="Last Modified Date"" content=Weds Aug 07 2019">
+
+<meta name="Document Type" content="Help"/>
+<meta name="Product Type" content="Design Tools"/>
+<meta name="Document Class" content="Document"/>
+<meta name="FileSize" content="NA"/>
+<meta name="Design Tools" content="Test"/>
+<meta name="FileVersion" content="2019.1"/>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,700'
+          rel='stylesheet' type='text/css' />
+{{ super() }}
+{%- if not embedded %}
+    <style type="text/css">
+      table.right { float: right; margin-left: 20px; }
+      table.right td { border: 1px solid #ccc; }
+      {% if pagename == 'index' %}
+      .related { display: none; }
+      {% endif %}
+	  {% if pagename == 'search' %}
+      .sphinxsidebar { display: none; }
+      {% endif %}
+    </style>
+    <script type="text/javascript">
+      // intelligent scrolling of the sidebar content
+      $(window).scroll(function() {
+        var sb = $('.sphinxsidebarwrapper');
+        var win = $(window);
+        var sbh = sb.height();
+        var offset = $('.sphinxsidebar').position()['top'];
+        var wintop = win.scrollTop();
+        var winbot = wintop + win.innerHeight();
+        var curtop = sb.position()['top'];
+        var curbot = curtop + sbh;
+        // does sidebar fit in window?
+        if (sbh < win.innerHeight()) {
+          // yes: easy case -- always keep at the top
+          sb.css('top', $u.min([$u.max([0, wintop - offset - 10]),
+                                $(document).height() - sbh - 200]));
+        } else {
+          // no: only scroll if top/bottom edge of sidebar is at
+          // top/bottom edge of window
+          if (curtop > wintop && curbot > winbot) {
+            sb.css('top', $u.max([wintop - offset - 10, 0]));
+          } else if (curtop < wintop && curbot < winbot) {
+            sb.css('top', $u.min([winbot - sbh - offset - 20,
+                                  $(document).height() - sbh - 200]));
+          }
+        }
+      });
+    </script>
+{%- endif %}
+{% endblock %}
+
+{% block rootrellink %}
+        <li><a href="{{ pathto('index') }}">Home</a>&#160;|</li>
+        <li><a href="{{ pathto('contents') }}">Documentation</a> &#187;</li>
+{% endblock %}
+
+{% block header %}
+<div class="pageheader">
+  <ul>
+    <li><a href="{{ pathto('index') }}">Home</a></li>
+    {%- if show_source and has_source and sourcename %}
+    <li><a href="{{ pathto('_sources/' + sourcename, true)|e }}"
+           rel="nofollow">{{ _('Show Source') }}</a></li>
+  {%- if show_on_github_url %}
+    <li><a href="{{ show_on_github_url }}"
+           rel="nofollow">{{ _('View on GitHub') }}</a></li>
+  {%- endif %}
+  </ul>
+{%- endif %}
+  <div>
+    <a href="{{ pathto('index') }}">
+      <img src="{{ pathto('_static/xilinxlogo.png', 1) }}" alt="XILINX" />
+    </a>
+  </div>
+</div>
+{% endblock %}
