@@ -1,0 +1,108 @@
+{
+    "gui": false,
+    "name": "jks.L1_hash_group_aggregate", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_type": "pcie", 
+    "platform_whitelist": [
+        "u280"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u280": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_HBM"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u280.ini"
+                    ]
+                }
+            }
+        }
+    }, 
+    "launch": [
+        {
+            "name": "generic launch for all flows", 
+            "cmd_args": " -mode fpga -xclbin BUILD/hash_aggr_kernel.xclbin -in PROJECT/db_data/dat -rep 1 -key_column 1 -pld_column 1 -scale 100"
+        }, 
+        {
+            "name": "generic launch for all flows", 
+            "target": "hw_emu", 
+            "cmd_args": " -mode fpga -xclbin BUILD/hash_aggr_kernel.xclbin -in PROJECT/db_data/dat -rep 1 -key_column 1 -pld_column 1 -scale 10000"
+        }
+    ], 
+    "pre_launch": [
+        {
+            "launch_cmd": "make -C PROJECT/db_data"
+        }
+    ], 
+    "host": {
+        "host_exe": "test_aggr.exe", 
+        "compiler": {
+            "sources": [
+                "host/test_aggr.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "host",
+                "LIB_DIR/ext/xcl2", 
+                "kernel",
+                "LIB_DIR/L1/include/hw"
+            ], 
+            "options": "-O3 ", 
+            "symbols": [
+                "USE_HBM"
+            ]
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/hw", 
+                "kernel",
+                "host",
+                "LIB_DIR/../utils/L1/include"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/hash_aggr_kernel.cpp", 
+                    "frequency": 250.0, 
+                    "name": "hash_aggr_kernel"
+                }
+            ], 
+            "frequency": 250.0, 
+            "name": "hash_aggr_kernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 520
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}
