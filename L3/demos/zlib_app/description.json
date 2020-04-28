@@ -1,0 +1,99 @@
+{
+    "name": "ZLIB Application",
+    "description": [
+        "ZLIB application resides in `L3/demos/zlib_app` directory."
+    ],
+    "flow": "vitis",
+    "launch": [
+        {
+            "cmd_args": "-sx BUILD/compress_decompress.xclbin -v PROJECT/sample.txt",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "post_launch": [
+        {
+            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+        }
+    ],
+    "config_make": "config.mk",
+    "host": {
+        "host_exe": "xil_zlib",
+        "compiler": {
+            "sources": [
+                "./src/host.cpp",
+                "LIB_DIR/L3/src/zlib.cpp",
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
+                "LIB_DIR/common/libs/logger/logger.cpp",
+                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
+            ],
+            "includepaths": [
+                "LIB_DIR/L3/include"
+            ],
+            "symbols": [ "PARALLEL_BLOCK=8" ] 
+        }
+    },
+    "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini"
+        ],
+        "compiler": {
+            "symbols": [
+                "PARALLEL_BLOCK=8",
+                "HIGH_FMAX_II=2",
+                "MULTIPLE_BYTES=4"
+            ],
+            "clflags": [
+                "--config PROJECT/advanced.ini"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "name": "compress_decompress",
+            "ldclflags": "--config PROJECT/opts.ini",
+            "accelerators": [
+                {
+                    "name": "xilLz77Compress", 
+                    "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp"
+                },
+                {
+                    "name": "xilHuffmanKernel", 
+                    "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp"
+                },
+                {
+                    "name": "xilZlibDmReader", 
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp"
+                },
+                {
+                    "name": "xilZlibDmWriter", 
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp"
+                },
+                {
+                    "name": "xilDecompressStream", 
+                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_stream.cpp"
+                }
+            ]
+        }
+    ],
+    "output_files" : "sample.txt.* sample_run.* test.list",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+}
