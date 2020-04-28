@@ -1,0 +1,5 @@
+{
+    "id": "xf_BLAS",
+    "name": "Vitis BLAS Library",
+    "description": "Vitis BLAS Library is an Vitis library for accelerating linear algebra functions."
+}
