@@ -1,0 +1,73 @@
+{
+    "name": "L2 Portfolio Optimisation", 
+    "description": [
+        "L2 Portfolio Optimisation"
+        ], 
+    "flow": "vitis", 
+    "platform_type": "pcie",
+    "platform_whitelist": [
+        "u250", 
+        "u200"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "host": {
+        "host_exe": "po_test.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/ext/xcl2/xcl2.cpp",
+                "src/host/po_test.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/ext/xcl2"
+            ],
+            "options": "-O3 "
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "src/kernel/po_kernel.cpp", 
+                    "frequency": 300.0, 
+                    "name": "po_kernel"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "po_kernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    },
+    "v++": { 
+        "compiler": { 
+            "includepaths": [ 
+                "LIB_DIR/L1/include"
+            ]
+        }
+    },
+    "launch": [
+        {
+            "name": "generic launch for all flows",
+            "cmd_args": "BUILD/po_kernel.xclbin"
+        }
+    ]
+}

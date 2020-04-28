@@ -1,0 +1,84 @@
+{
+    "name": "L3 Binomial model", 
+    "description": [
+        "L3 Binomial model"
+        ], 
+    "flow": "vitis", 
+    "platform_type": "pcie",
+    "platform_whitelist": [
+        "u250", 
+        "u200"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "host": {
+        "host_exe": "binomial_test.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/ext/xcl2/xcl2.cpp",
+                "LIB_DIR/L3/tests/m76/xf_fintech_binomialtree_exe.cpp",
+                "LIB_DIR/L3/src/models/binomial_tree/src/xf_fintech_binomialtree.cpp",
+                "LIB_DIR/L3/src/xf_fintech_device.cpp",
+                "LIB_DIR/L3/src/xf_fintech_device_manager.cpp",
+                "LIB_DIR/L3/src/xf_fintech_internal.cpp",
+                "LIB_DIR/L3/src/xf_fintech_ocl_controller.cpp",
+                "LIB_DIR/L3/src/xf_fintech_timestamp.cpp",
+                "LIB_DIR/L3/src/xf_fintech_trace.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/L3/src/models/binomial_tree/include",
+                "LIB_DIR/L3/include",
+                "LIB_DIR/L3/include/models",
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/tests/BinomialTreeEngine/src/kernel"
+            ],
+            "options": "-O3 ",
+            "symbols": [
+                "TEST_DT=float",
+                "TEST_PARALLEL_ENGINES=8"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/BinomialTreeEngine/src/kernel/binomialtreekernel.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D TEST_DT=float -D TEST_PARALLEL_ENGINES=8", 
+                    "name": "BinomialTreeKernel"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "binomialtree"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    },
+    "launch": [
+        {
+            "name": "generic launch for all flows",
+            "cmd_args": "BUILD/binomialtree.xclbin u250"
+        }
+    ]
+}

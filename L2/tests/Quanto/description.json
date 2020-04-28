@@ -1,0 +1,62 @@
+{
+    "name": "L2 Quanto", 
+    "description": [
+        "L2 Quanto"
+        ], 
+    "flow": "vitis", 
+    "platform_type": "pcie",
+    "platform_whitelist": [
+        "u250", 
+        "u200"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    },
+    "host": {
+        "compiler": {
+            "sources": [
+                "LIB_DIR/ext/xcl2/xcl2.cpp",
+                "./src/host/quanto_cpu.cpp",
+                "./src/host/quanto_parser.cpp",
+                "./src/host/quanto_test.cpp",
+                "./src/host/quanto_host.cpp"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "name": "quanto_kernel",
+            "accelerators": [
+                {
+                    "name": "quanto_kernel",
+                    "location": "src/kernel/quanto_kernel.cpp"
+                }
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "name": "generic launch for all flows",
+            "cmd_args": "BUILD/quanto_kernel.xclbin PROJECT/one.txt exp"
+        }
+    ]
+}
