@@ -1,0 +1,24 @@
+{
+    "case_name": "jks.L1.benchmark_hmacSha1", 
+    "disable": 0, 
+    "jobs": [
+        {
+            "dependency": [], 
+            "env": null, 
+            "files": [], 
+            "index": 0, 
+            "max_memory_MB": 16384, 
+            "max_time_min": 300, 
+            "server": "lsf"
+        }
+    ], 
+    "machine": {
+        "shell": "u250"
+    }, 
+    "test_type": [
+        "vitis_sw_emu",
+        "vitis_hw_emu",
+        "vitis_hw"
+    ], 
+    "category": "canary"
+}
