@@ -1,0 +1,88 @@
+{
+    "name": "Xilinx ZLIB Decompression Fixed",
+    "description": [
+        "Xilinx ZLIB Decompression Fixed"
+    ],
+    "flow": "vitis",
+    "launch": [
+        {
+            "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt.fixed.zlib",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "host": {
+        "host_exe": "xil_zlib",
+        "compiler": {
+            "sources": [
+                "./src/host.cpp",
+                "LIB_DIR/L2/tests/src/zlib.cpp",
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
+                "LIB_DIR/common/libs/logger/logger.cpp",
+                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
+            ],
+            "includepaths": [
+                "LIB_DIR/L2/include"
+            ],
+            "symbols": [
+                "PARALLEL_BLOCK=8"
+            ]
+        }
+    },
+    "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini",
+            "PROJECT/hls_directives.tcl"
+        ],
+        "compiler": {
+            "symbols": [
+                "PARALLEL_BLOCK=8",
+                "HIGH_FMAX=2",
+                "MULTIPLE_BYTES=4"
+            ],
+            "clflags": [
+                "--config PROJECT/advanced.ini"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "name": "decompress",
+            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/opts.ini",
+            "accelerators": [
+                {
+                    "name": "xilZlibDmReader",
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp"
+                },
+                {
+                    "name": "xilZlibDmWriter",
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp"
+                },
+                {
+                    "name": "xilDecompressFixed",
+                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_fixed.cpp"
+                }
+            ]
+        }
+    ],
+    "output_files" : "sample.txt.fixed.zlib.*",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+}

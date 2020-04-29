@@ -1,0 +1,112 @@
+{
+    "name": "L2 MCEuropeanDowJonesEngine", 
+    "description": "L2 MCEuropeanDowJonesEngine", 
+    "flow": "vitis", 
+    "platform_type": "pcie", 
+    "platform_whitelist": [
+        "u250", 
+        "u200"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/mc_european_dowjones.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "test.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/src/test.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/src", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/kernel"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/kernel"
+            ]
+        } 
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/kernel/kernel_mceuropeanengine.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0", 
+                    "name": "kernel_mc_0"
+                }
+            ], 
+            "ldclflags": " --nk kernel_mc_0:1:kernel_mc_0", 
+            "frequency": 300.0, 
+            "name": "mc_european_dowjones"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

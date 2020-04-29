@@ -1,0 +1,46 @@
+{
+    "name": "L1_snappyMultiByteDecompress",
+    "description": "Test Design to validate Snappy MultiByte Decompress module",
+    "flow": "hls",
+    "project": "snappy_decompress_test",
+    "solution": "sol1",
+    "clock": "3.3",
+    "topfunction": "snappyDecompressEngineRun",
+    "top": {
+        "source": [
+            "snappy_decompress_test.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw"
+    },
+    "testbench": {
+        "source": [
+            "snappy_decompress_test.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw",
+	 "argv": {
+            "hls_csim": "${XF_PROJ_ROOT}L1/tests/snappy_multibyte_decompress/sample.txt.snappy ${XF_PROJ_ROOT}L1/tests/snappy_multibyte_decompress/sample.txt", 
+            "hls_cosim": "${XF_PROJ_ROOT}L1/tests/snappy_multibyte_decompress/sample.txt.snappy ${XF_PROJ_ROOT}L1/tests/snappy_multibyte_decompress/sample.txt"
+        }
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 16384,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "hls_vivado_syn",
+            "hls_vivado_impl"
+        ],
+        "category": "canary"
+    }
+}

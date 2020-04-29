@@ -1,0 +1,8 @@
+[connectivity]
+sp=mergedebevec_accel_4_1.src1:HP0
+sp=mergedebevec_accel_4_1.src2:HP0
+sp=mergedebevec_accel_4_1.src3:HP1
+sp=mergedebevec_accel_4_1.src4:HP1
+sp=mergedebevec_accel_4_1.dst:HP2
+sp=mergedebevec_accel_4_1.times:HP3
+sp=mergedebevec_accel_4_1.input_response:HP3

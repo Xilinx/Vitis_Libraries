@@ -1,0 +1,123 @@
+{
+    "name": "Xilinx ZLIB Decompression Parallel Byte 4_II2",
+    "description": [
+        "Xilinx ZLIB Decompression Parallel Byte 4_II2"
+    ],
+    "flow": "vitis",
+    "platform_blacklist": [
+        "u50"
+    ],
+    "launch": [
+        {
+            "cmd_args": "-dx BUILD/decompress_stream.xclbin -d PROJECT/sample.txt.zlib",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "host": {
+        "host_exe": "xil_zlib",
+        "compiler": {
+            "sources": [
+                "./src/host.cpp",
+                "LIB_DIR/L2/tests/src/zlib.cpp",
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
+                "LIB_DIR/common/libs/logger/logger.cpp",
+                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
+            ],
+            "includepaths": [
+                "LIB_DIR/L2/include"
+            ],
+            "symbols": [
+                "PARALLEL_BLOCK=1",
+                "D_COMPUTE_UNIT=1"
+            ]
+        }
+    },
+    "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini",
+            "PROJECT/hls_directives.tcl"
+        ],
+        "compiler": {
+            "symbols": [
+                "PARALLEL_BLOCK=1",
+                "MULTIPLE_BYTES=4"
+            ],
+            "clflags": [
+                "--config PROJECT/advanced.ini"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "name": "decompress_stream",
+            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/opts.ini --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=PROJECT/post_route.tcl",
+            "accelerators": [
+                {
+                    "name": "xilZlibDmReader",
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp",
+                    "compute_units": [
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "xilZlibDmWriter",
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp",
+                    "compute_units": [
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "xilDecompressStream",
+                    "clflags": "-DHIGH_FMAX_II=2", 
+                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_stream.cpp",
+                    "compute_units": [
+                        {
+                            "slr": "SLR1"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "output_files" : "sample.txt.zlib.*",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+}

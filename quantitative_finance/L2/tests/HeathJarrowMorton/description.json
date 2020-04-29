@@ -1,0 +1,77 @@
+{
+    "name": "L2 HeathJarrowMorton", 
+    "description": "Heath Jarrow Morton Engine", 
+    "flow": "vitis", 
+    "platform_type": "pcie", 
+    "platform_whitelist": [
+        "u250", 
+        "u200"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "launch": [
+        {
+            "cmd_args": " -x BUILD/hjm_kernel.xclbin -d PROJECT/hist_data.csv -p 100", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "hjm_test.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/HeathJarrowMorton/src/host/hjm_test.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/HeathJarrowMorton/src/host", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/L2/tests/HeathJarrowMorton/src/kernel"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/../Vitis_Libraries/solver/L2/include", 
+                "LIB_DIR/L2/tests/HeathJarrowMorton/kernel"
+            ]
+        } 
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/HeathJarrowMorton/src/kernel/hjm_kernel.cpp", 
+                    "frequency": 300.0, 
+                    "name": "hjm_kernel"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "hjm_kernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

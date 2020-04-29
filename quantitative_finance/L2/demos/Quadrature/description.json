@@ -1,0 +1,73 @@
+{
+    "name": "L2 Quadrature demo", 
+    "description": [
+        "L2 Quadrature and HCF engine"
+        ], 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250", 
+        "u200"
+    ], 
+    "platform_blacklist": [], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    },
+    "host": {
+        "compiler": {
+            "sources": [
+                "LIB_DIR/ext/xcl2/xcl2.cpp",
+                "./src/host/quad_hcf_test.cpp"
+            ],
+            "includepaths" : [
+                "LIB_DIR/L2/demos/Quadrature/src/kernel",
+                "LIB_DIR/L2/include/",
+                "LIB_DIR/L1/include/"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "name": "quad_hcf_kernel",
+            "accelerators": [
+                {
+                    "name": "quad_hcf_kernel",
+                    "location": "src/kernel/quad_hcf_kernel_wrapper.cpp",
+                    "files": [
+                        "src/kernel/quad_hcf_engine.cpp",
+                        "src/kernel/quad_integrate_pi1.cpp",
+                        "src/kernel/quad_integrate_pi2.cpp"
+                    ]
+                }
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "name": "generic launch for all flows",
+            "cmd_args": "BUILD/po_kernel.xclbin"
+        }
+    ],
+    "v++" : {
+        "compiler" : {
+            "includepaths" : [
+                "LIB_DIR/L2/include/"
+             ]
+        }
+    }
+}

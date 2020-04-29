@@ -1,0 +1,108 @@
+{
+    "gui": false,
+    "name": "jks.L1.benchmark_aes256CbcEncrypt", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_type": "pcie", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
+    "launch": [
+        {
+            "cmd_args": " -mode fpga -xclbin BUILD/aes256CbcEncryptKernel.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "aes256CbcEncryptBenchmark.exe", 
+        "compiler": {
+            "sources": [
+                "host/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L1/benchmarks/aes256CbcEncrypt/host", 
+                "LIB_DIR/L1/benchmarks/aes256CbcEncrypt/kernel", 
+                "LIB_DIR/ext/xcl2"
+            ], 
+            "options": "-O3 -lssl -lcrypto"
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L1/benchmarks/aes256CbcEncrypt/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/aes256CbcEncryptKernel1.cpp", 
+                    "frequency": 300.0, 
+                    "name": "aes256CbcEncryptKernel_1"
+                }, 
+                {
+                    "location": "kernel/aes256CbcEncryptKernel2.cpp", 
+                    "frequency": 300.0, 
+                    "name": "aes256CbcEncryptKernel_2"
+                }, 
+                {
+                    "location": "kernel/aes256CbcEncryptKernel3.cpp", 
+                    "frequency": 300.0, 
+                    "name": "aes256CbcEncryptKernel_3"
+                }, 
+                {
+                    "location": "kernel/aes256CbcEncryptKernel4.cpp", 
+                    "frequency": 300.0, 
+                    "name": "aes256CbcEncryptKernel_4"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "aes256CbcEncryptKernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 420
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

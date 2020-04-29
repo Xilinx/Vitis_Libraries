@@ -1,0 +1,127 @@
+{
+    "name": "jks.L1_compound_sort", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_type": "pcie", 
+    "platform_whitelist": [
+        "u280", "u250", "u200"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u280": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u280.ini"
+                    ]
+
+                }
+            }
+        },
+        "u250": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+
+                }
+            }
+        },
+        "u200": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+
+                }
+            }
+        }
+    }, 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/SortKernel.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "host/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include/hw", 
+                "host",
+                "kernel",
+                "LIB_DIR/ext/xcl2"
+            ], 
+            "options": "-O3 ", 
+            "symbols": [
+                "PRAGMA"
+            ]
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/hw", 
+                "kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/kernel_sort_top.cpp",
+                    "frequency": 300.0, 
+                    "clflags": " -D KERNEL_NAME=SortKernel", 
+                    "name": "SortKernel",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "SortKernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "inKey",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "outKey",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "SortKernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 520
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}
