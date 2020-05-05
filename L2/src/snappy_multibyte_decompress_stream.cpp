@@ -35,11 +35,11 @@ extern "C" {
 
 void xilSnappyDecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& inaxistream,
                                hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& outaxistream,
-                               hls::stream<ap_axiu<8, 0, 0, 0> >& outaxistreameos,
+                               hls::stream<ap_axiu<32, 0, 0, 0> >& outaxistreamsize,
                                uint32_t inputSize) {
 #pragma HLS interface axis port = inaxistream
 #pragma HLS interface axis port = outaxistream
-#pragma HLS interface axis port = outaxistreameos
+#pragma HLS interface axis port = outaxistreamsize
 #pragma HLS interface s_axilite port = inputSize bundle = control
 #pragma HLS interface s_axilite port = return bundle = control
 
@@ -62,8 +62,7 @@ void xilSnappyDecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& in
     xf::compression::snappyDecompressEngine<MULTIPLE_BYTES, historySize>(inStream, decompressedStream, lzxendOfStream,
                                                                          decStreamSize, inputSize);
 
-    xf::compression::details::kStreamWriteMultiByteSize<c_parallelBit>(outaxistream, outaxistreameos,
-                                                                       decompressedStream, lzxendOfStream);
-    { uint32_t outSize = decStreamSize.read(); }
+    xf::compression::details::kStreamWriteMultiByteSize<c_parallelBit>(
+        outaxistream, outaxistreamsize, decompressedStream, lzxendOfStream, decStreamSize);
 }
 }

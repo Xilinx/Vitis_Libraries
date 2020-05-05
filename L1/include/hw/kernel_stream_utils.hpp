@@ -125,9 +125,10 @@ void kStreamWriteFixedSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKStream
 
 template <uint32_t DATAWIDTH>
 void kStreamWriteMultiByteSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKStream,
-                               hls::stream<ap_axiu<8, 0, 0, 0> >& outStreamEoS,
+                               hls::stream<ap_axiu<32, 0, 0, 0> >& outKSizeStream,
                                hls::stream<ap_uint<DATAWIDTH> >& inDataStream,
-                               hls::stream<bool>& inDataStreamEoS) {
+                               hls::stream<bool>& inDataStreamEoS,
+                               hls::stream<uint32_t>& inSizeStream) {
     /**
      * @brief Read N-bit wide data from internal hls streams and write to axi
      *        kernel stream for the given size. N is the template parameter DATAWIDTH.
@@ -140,32 +141,28 @@ void kStreamWriteMultiByteSize(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& outKSt
      *
      */
     // read the original size
-    ap_uint<DATAWIDTH> tmp;
-    ap_axiu<DATAWIDTH, 0, 0, 0> t1;
+    ap_uint<DATAWIDTH> inValue;
+    ap_axiu<DATAWIDTH, 0, 0, 0> outValue;
+    ap_axiu<32, 0, 0, 0> decompressSize;
 
     bool eosFlag = inDataStreamEoS.read();
-    ap_axiu<8, 0, 0, 0> t2;
 
     for (; eosFlag == false; eosFlag = inDataStreamEoS.read()) {
 #pragma HLS PIPELINE II = 1
-        tmp = inDataStream.read();
-        t1.data = tmp;
-        t1.last = false;
-        outKStream.write(t1);
-
-        t2.data = 0;
-        t2.last = false;
-        outStreamEoS.write(t2);
+        inValue = inDataStream.read();
+        outValue.data = inValue;
+        outValue.last = false;
+        outKStream.write(outValue);
     }
-    // last data packet
-    t2.data = 1;
-    t2.last = true;
-    outStreamEoS.write(t2);
 
-    tmp = inDataStream.read();
-    t1.data = tmp;
-    t1.last = true;
-    outKStream.write(t1);
+    inValue = inDataStream.read();
+    outValue.data = inValue;
+    outValue.last = true;
+    outKStream.write(outValue);
+
+    decompressSize.data = inSizeStream.read();
+    decompressSize.last = true;
+    outKSizeStream.write(decompressSize);
 }
 
 } // end details

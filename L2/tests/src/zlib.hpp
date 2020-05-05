@@ -28,7 +28,7 @@
 #include <string>
 #include <fstream>
 #include "xcl2.hpp"
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 #include <thread>
 
 #pragma once
@@ -75,13 +75,13 @@ void error_message(const std::string& val);
 
 int validate(std::string& inFile_name, std::string& outFile_name);
 
-uint32_t get_file_size(std::ifstream& file);
+uint64_t get_file_size(std::ifstream& file);
 
 class xil_zlib {
    public:
     int init(const std::string& binaryFile, uint8_t flow, uint8_t d_type);
     int release();
-    uint32_t compress(uint8_t* in, uint8_t* out, uint32_t actual_size, uint32_t host_buffer_size);
+    uint32_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
     uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run, bool enable_p2p = 0);
     uint32_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
     uint32_t decompress_file(

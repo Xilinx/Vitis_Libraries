@@ -59,20 +59,19 @@ SYSROOT := ${SYSROOT}
 DEVICE ?= xilinx_u200_xdma_201830_2
 
 ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error This design is not supported for $(DEVICE))
+$(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 ifeq ($(findstring vck, $(DEVICE)), vck)
-$(error This design is not supported for $(DEVICE))
+$(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
-
 ifeq ($(findstring u50, $(DEVICE)), u50)
-$(error This design is not supported for $(DEVICE))
+$(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
 ifneq ($(findstring u280, $(DEVICE)), u280)
-$(warning [WARNING]: This design has not been tested for $(DEVICE). It may or may not work.)
+$(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
 endif
 endif
 endif
@@ -93,7 +92,7 @@ include config.mk
 
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
-HOST_SRCS += ./src/host.cpp
+HOST_SRCS += $(CUR_DIR)/src/host.cpp
 HOST_SRCS += $(XFLIB_DIR)/L3/src/lz4.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
@@ -114,8 +113,8 @@ CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
 
 # Host compiler global settings
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE 
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
 
@@ -132,9 +131,9 @@ endif
 # Kernel compiler global settings
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 LDCLFLAGS += --optimize 2 --jobs 8
-VPP_FLAGS +=-I$(XFLIB_DIR)/L1/include/hw
-VPP_FLAGS +=-I$(XFLIB_DIR)/L2/include
-VPP_FLAGS +=-I$(XFLIB_DIR)/L2/src
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 
 xilLz4Compress_VPP_FLAGS += -DPARALLEL_BLOCK=8
@@ -160,7 +159,7 @@ BINARY_CONTAINER_decompress_OBJS += $(TEMP_DIR)/xilLz4Decompress.xo
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig 
+all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: host
 host: $(EXE_FILE) | check_xrt

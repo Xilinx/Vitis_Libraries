@@ -38,35 +38,6 @@
 // Maximum number of blocks based on host buffer size
 #define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
 
-// Below are the codes as per LZ4 standard for
-// various maximum block sizes supported.
-#define BSIZE_STD_64KB 64
-#define BSIZE_STD_256KB 80
-#define BSIZE_STD_1024KB 96
-#define BSIZE_STD_4096KB 112
-
-// Maximum block sizes supported by LZ4
-#define MAX_BSIZE_64KB 65536
-#define MAX_BSIZE_256KB 262144
-#define MAX_BSIZE_1024KB 1048576
-#define MAX_BSIZE_4096KB 4194304
-
-// This value is used to set
-// uncompressed block size value
-// 4th byte is always set to below
-// and placed as uncompressed byte
-#define NO_COMPRESS_BIT 128
-
-// In case of uncompressed block
-// Values below are used to set
-// 3rd byte to following values
-// w.r.t various maximum block sizes
-// supported by standard
-#define BSIZE_NCOMP_64 1
-#define BSIZE_NCOMP_256 4
-#define BSIZE_NCOMP_1024 16
-#define BSIZE_NCOMP_4096 64
-
 int validate(std::string& inFile_name, std::string& outFile_name);
 
 class xflz4 {

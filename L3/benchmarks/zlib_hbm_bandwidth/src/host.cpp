@@ -21,18 +21,18 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-constexpr auto M_COMP_UNITS = 1;
-constexpr auto M_DECOMP_UNITS = 1;
-constexpr auto NUM_ITER = 1;
+// Default values
+constexpr auto M_PROC = 1;
+constexpr auto NUM_ITER = 10;
 
 using namespace xf::compression;
 
 // Bandwidth measurement API
-uint32_t xil_compress_bandwidth(
-    const std::string& single_bin, uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t cu, uint8_t max_cr) {
+void xil_compress_bandwidth(
+    const std::string& single_bin, uint8_t* in, uint8_t* out, uint32_t input_size, uint8_t device_id, uint8_t max_cr) {
     uint32_t enbytes = 0;
     uint32_t num_iter = NUM_ITER;
-    xfZlib xlz(single_bin, max_cr, COMP_ONLY);
+    xfZlib xlz(single_bin, max_cr, COMP_ONLY, device_id);
     std::chrono::duration<double, std::nano> compress_API_time_ns_1(0);
     std::chrono::duration<double, std::milli> compress_API_time_ms_1(0);
     auto compress_API_start = std::chrono::high_resolution_clock::now();
@@ -49,23 +49,23 @@ uint32_t xil_compress_bandwidth(
     float throughput_in_mbps_1 = (float)input_size * 1000 / compress_API_time_ns_1.count();
     std::cout << "Input Size: " << input_size / 1024 << "KB ";
     std::cout << "Compressed Size: " << enbytes / 1024 << "KB ";
-    std::cout << "CU: " << cu;
+    std::cout << "PID: " << getpid();
+    std::cout << " PPID: " << getppid();
     std::cout << " API: " << std::fixed << std::setprecision(2) << throughput_in_mbps_1 << "MB/s";
     std::cout << " Time: " << std::fixed << std::setprecision(2) << compress_API_time_ms_1.count() << std::endl;
-    return enbytes;
 }
 
 // Bandwidth measurement API
-uint32_t xil_decompress_bandwidth(
-    const std::string& single_bin, uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t cu, uint8_t max_cr) {
+void xil_decompress_bandwidth(
+    const std::string& single_bin, uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t cu, uint8_t device_id, uint8_t max_cr) {
     uint32_t debytes = 0;
     uint32_t num_iter = NUM_ITER;
-    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY);
+    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id);
     std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
     std::chrono::duration<double, std::milli> decompress_API_time_ms_1(0);
     auto decompress_API_start = std::chrono::high_resolution_clock::now();
-
-    for (uint32_t i = 0; i < num_iter; i++) debytes = xlz.decompress(in, out, input_size, cu);
+	
+    for (uint32_t i = 0; i < num_iter; i++) debytes = xlz.decompress(in, out, input_size, cu);	
 
     auto decompress_API_end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
@@ -77,9 +77,10 @@ uint32_t xil_decompress_bandwidth(
     std::cout << "Input Size: " << input_size / 1024 << "KB ";
     std::cout << "Compressed Size: " << debytes / 1024 << "KB ";
     std::cout << "CU: " << cu;
+    std::cout << " PID: " << getpid();
+    std::cout << " PPID: " << getppid(); 
     std::cout << " API: " << std::fixed << std::setprecision(2) << throughput_in_mbps_1 << "MB/s";
     std::cout << " Time: " << std::fixed << std::setprecision(2) << decompress_API_time_ms_1.count() << std::endl;
-    return debytes;
 }
 
 int main(int argc, char* argv[]) {
@@ -87,7 +88,9 @@ int main(int argc, char* argv[]) {
     parser.addSwitch("--compress", "-c", "Compress", "");
     parser.addSwitch("--decompress", "-d", "DeCompress", "");
     parser.addSwitch("--single_xclbin", "-sx", "Single XCLBIN", "single");
-    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
+    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
+    parser.addSwitch("--multi_process", "-p", "Multiple Process", "1");
+    parser.addSwitch("--id", "-id", "Device ID", "0");
 
     parser.parse(argc, argv);
 
@@ -95,76 +98,106 @@ int main(int argc, char* argv[]) {
     std::string decompress_mod = parser.value("decompress");
     std::string single_bin = parser.value("single_xclbin");
     std::string mcr = parser.value("max_cr");
+    std::string mproc = parser.value("multi_process");
+    std::string device_ids = parser.value("id");
+    
+    uint8_t device_id = 0;
+    if (!(device_ids.empty())) 
+        device_id = atoi(device_ids.c_str());
 
-    uint8_t max_cr_val = 0;
+    uint8_t max_cr_val = MAX_CR;
     if (!(mcr.empty())) {
         max_cr_val = atoi(mcr.c_str());
+    } 
+    
+    uint8_t multi_proc = M_PROC;
+    if (!(mproc.empty())) 
+	    multi_proc = atoi(mproc.c_str());
+    
+    std::string mprocess_ent = "XCL_MULTIPROCESS_MODE=1";
+    if (putenv((char*)mprocess_ent.c_str()) != 0) {
+	    std::cerr << "putenv failed" << std::endl;
     } else {
-        // Default block size
-        max_cr_val = MAX_CR;
+        std::cout << "Environmnet Variable: XCL_MULTIPROCESS_MODE: " << getenv("XCL_MULTIPROCESS_MODE") << std::endl;
     }
 
     if (!compress_mod.empty()) {
+
+        if (multi_proc > 2) {
+            multi_proc = 2;
+            std::cout << "More than two processes may crash, resetting to 2" << std::endl;
+        }
         // "-c" - Compress Mode
         std::string inFile_name = compress_mod;
-        std::string outFile_name = inFile_name + ".zlib";
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
-        std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
-        inFile.seekg(0, inFile.end);
-        uint32_t input_size = inFile.tellg();
-        inFile.seekg(0, inFile.beg);
-
-        std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in(input_size);
-        std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > out(input_size * 2);
-        uint32_t ret_debytes[M_COMP_UNITS];
-
-        std::cout << "\n";
-        // Read input file
-        inFile.read((char*)in.data(), input_size);
-
-        for (int i = 0; i < M_COMP_UNITS; i++)
-            ret_debytes[i] = xil_compress_bandwidth(single_bin, in.data(), out.data(), input_size, i, max_cr_val);
-
-        outFile.write((char*)out.data(), ret_debytes[0]);
-
-        inFile.close();
-        outFile.close();
-    } else if (!decompress_mod.empty()) {
-        // "-d" - DeCompress Mode
-        std::string inFile_name = decompress_mod;
-        std::string outFile_name = inFile_name + ".raw";
-        std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
-        std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
-        inFile.seekg(0, inFile.end);
-        uint32_t input_size = inFile.tellg();
-        inFile.seekg(0, inFile.beg);
-
-        std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in[M_DECOMP_UNITS];
-        std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > out[M_DECOMP_UNITS];
-        uint32_t ret_debytes[M_DECOMP_UNITS];
+        uint64_t input_size = get_file_size(inFile);
+        
+	    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in[multi_proc];
+        std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > out[multi_proc];
 
         std::cout << "\n";
         // Allocate buffers for input and output
-        for (int i = 0; i < M_DECOMP_UNITS; i++) {
+        for (int i = 0; i < multi_proc; i++) {
             in[i].resize(input_size);
-            out[i].resize(input_size * 10);
+            out[i].resize(input_size * 2);
         }
 
         // Read input file
         inFile.read((char*)in[0].data(), input_size);
+        inFile.close();
 
         // Copy input data into multiple buffers
-        for (int i = 1; i < M_DECOMP_UNITS; i++) {
+        for (int i = 1; i < multi_proc; i++) {
+            std::memcpy(in[i].data(), in[0].data(), input_size);
+        }
+        
+        std::cout << "\n";
+
+	    std::cout << "No of Process " << (int)multi_proc << std::endl;
+        for (int i = 0; i < multi_proc; i++) {
+	        if (fork() == 0) {
+                xil_compress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, device_id, max_cr_val);	
+		        exit(0);
+	        }
+        }
+
+	    for (int i = 0; i < multi_proc; i++) 
+	        wait(NULL);
+
+    } else if (!decompress_mod.empty()) {
+        // "-d" - DeCompress Mode
+        std::string inFile_name = decompress_mod;
+        std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
+        uint64_t input_size = get_file_size(inFile);
+
+        std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in[multi_proc];
+        std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > out[multi_proc];
+	
+        std::cout << "\n";
+        // Allocate buffers for input and output
+        for (int i = 0; i < multi_proc; i++) {
+            in[i].resize(input_size);
+            out[i].resize(input_size * max_cr_val);
+        }
+
+        // Read input file
+        inFile.read((char*)in[0].data(), input_size);
+        inFile.close();
+
+        // Copy input data into multiple buffers
+        for (int i = 1; i < multi_proc; i++) {
             std::memcpy(in[i].data(), in[0].data(), input_size);
         }
 
-        for (int i = 0; i < M_DECOMP_UNITS; i++)
-            ret_debytes[i] =
-                xil_decompress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, i, max_cr_val);
+	    std::cout << "No of Process " << (int)multi_proc << std::endl;
+        for (int i = 0; i < multi_proc; i++)  {
+	        if (fork() == 0) {
+                xil_decompress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, i, device_id, max_cr_val);
+		        exit(0);
+	        }
+	    }
 
-        outFile.write((char*)out[0].data(), ret_debytes[0]);
-
-        inFile.close();
-        outFile.close();
+	    for (int i = 0; i < multi_proc; i++) 
+            wait(NULL);
     }
 }

@@ -95,7 +95,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
 
-CXXFLAGS += -DPARALLEL_BLOCK=8 -DHOST_BUFFER_SIZE_IN_MB=128
+CXXFLAGS += -DPARALLEL_BLOCK=8
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 
 

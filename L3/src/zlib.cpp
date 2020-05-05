@@ -18,9 +18,9 @@
 
 using namespace xf::compression;
 
-uint32_t get_file_size(std::ifstream& file) {
+uint64_t get_file_size(std::ifstream& file) {
     file.seekg(0, file.end);
-    uint32_t file_size = file.tellg();
+    uint64_t file_size = file.tellg();
     file.seekg(0, file.beg);
     return file_size;
 }
@@ -127,7 +127,7 @@ void zlib_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip
     outFile.put(0);
 }
 
-uint32_t xfZlib::compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
+uint64_t xfZlib::compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
     std::chrono::duration<double, std::nano> compress_API_time_ns_1(0);
     std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
     std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
@@ -145,7 +145,7 @@ uint32_t xfZlib::compress_file(std::string& inFile_name, std::string& outFile_na
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
     auto compress_API_start = std::chrono::high_resolution_clock::now();
-    uint32_t enbytes = 0;
+    uint64_t enbytes = 0;
 
     // zlib Compress
     enbytes = compress(zlib_in.data(), zlib_out.data(), input_size, host_buffer_size);
@@ -215,7 +215,6 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
         }
     }
     if (i == platforms.size()) {
-
 #ifdef VERBOSE
         std::cout << "Error: Failed to find Xilinx platform" << std::endl;
 #endif
@@ -398,26 +397,23 @@ xfZlib::xfZlib(const std::string& binaryFileName,
             for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
                 // Device Buffer Allocation
                 buffer_input[i][j] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                                    host_buffer_size, h_buf_in[i][j].data());
+                                                    host_buffer_size, h_buf_in[i][j].data());
 
-                buffer_lz77_output[i][j] = new cl::Buffer(
-                             *m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS, host_buffer_size * 4, NULL);
+                buffer_lz77_output[i][j] =
+                    new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS, host_buffer_size * 4, NULL);
 
                 buffer_compress_size[i][j] =
-                                    new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                                                   temp_nblocks * sizeof(uint32_t), h_compressSize[i][j].data());
+                    new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, temp_nblocks * sizeof(uint32_t),
+                                   h_compressSize[i][j].data());
 
-                buffer_zlib_output[i][j] =
-                                    new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                                   host_buffer_size * 2, h_buf_zlibout[i][j].data());
+                buffer_zlib_output[i][j] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                                          host_buffer_size * 2, h_buf_zlibout[i][j].data());
 
-                buffer_inblk_size[i][j] =
-                                    new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                   temp_nblocks * sizeof(uint32_t), h_blksize[i][j].data());
+                buffer_inblk_size[i][j] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                         temp_nblocks * sizeof(uint32_t), h_blksize[i][j].data());
 
-                buffer_dyn_ltree_freq[i][j] =
-                                    new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
-                                                   PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, NULL);
+                buffer_dyn_ltree_freq[i][j] = new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
+                                                             PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, NULL);
 
                 buffer_dyn_dtree_freq[i][j] = new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
                                                              PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, NULL);
@@ -524,7 +520,7 @@ int xfZlib::decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size, ui
     return debytes;
 }
 
-int xfZlib::compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) {
+uint64_t xfZlib::compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) {
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
     out[0] = 120;
@@ -532,7 +528,7 @@ int xfZlib::compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size) {
 
     // Call to compress
     // Zlib Compress
-    uint32_t enbytes = compress(in, out + 2, input_size, host_buffer_size);
+    uint64_t enbytes = compress(in, out + 2, input_size, host_buffer_size);
 
     out[enbytes + 1] = 0;
     out[enbytes + 2] = 0;
@@ -576,6 +572,11 @@ uint32_t xfZlib::decompress_file(std::string& inFile_name, std::string& outFile_
     auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
     decompress_API_time_ns_1 = duration;
 
+    if (debytes == 0) {
+        std::cerr << "Decompression Failed" << std::endl;
+        return 0;
+    }
+
     float throughput_in_mbps_1 = (float)debytes * 1000 / decompress_API_time_ns_1.count();
     std::cout << std::fixed << std::setprecision(3) << throughput_in_mbps_1;
 
@@ -604,10 +605,10 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
     cl::Buffer* buffer_status; // single common buffer to capture the decompression status by kernel
     for (int i = 0; i < BUFCNT; i++) {
         buffer_out[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, bufSize,
-                                                       h_dbufstream_zlibout[cu][i].data());
+                                       h_dbufstream_zlibout[cu][i].data());
 
-        buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                                   2 * sizeof(uint32_t), h_dcompressSize_stream[cu][i].data());
+        buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 2 * sizeof(uint32_t),
+                                        h_dcompressSize_stream[cu][i].data());
     }
     buffer_status = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(uint32_t),
                                    h_dcompressStatus[cu].data());
@@ -696,8 +697,8 @@ void xfZlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, 
 
     std::vector<cl::Event> hostWriteWait[BUFCNT];
     for (int i = 0; i < BUFCNT; i++) {
-        buffer_in[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize,
-                                                      h_dbufstream_in[cu][i].data());
+        buffer_in[i] =
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize, h_dbufstream_in[cu][i].data());
     }
 
     uint32_t cBufSize = bufSize;
@@ -738,6 +739,90 @@ void xfZlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, 
 }
 
 uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
+#ifdef GZIP_MODE
+    uint8_t hidx = 0;
+
+    // Check for magic header
+    if (in[hidx++] != 0x1F || in[hidx++] != 0x8B) {
+        std::cerr << "\n";
+        std::cerr << "Magic Header Fails" << std::endl;
+        // We must set error_flag true and return it helps
+        // for CISCO use case
+        return 0;
+    }
+
+    // Check if method is deflate or not
+    if (in[hidx++] != 0x08) {
+        std::cerr << "\n";
+        std::cerr << "Deflate Header Check Fails" << std::endl;
+        // We must set error_flag true and return it helps
+        // for CISCO use case
+        return 0;
+    }
+
+    // Check if the FLAG has correct value
+    // Supported file name or no file name
+    // 0x00: No File Name
+    // 0x08: File Name
+    if (in[hidx] != 0 && in[hidx] != 0x08) {
+        std::cerr << "\n";
+        std::cerr << "Deflate -n option check failed" << std::endl;
+        // We must set error_flag true and return it helps
+        // for CISCO use case
+        return 0;
+    }
+
+    hidx++;
+
+    // Skip time stamp bytes
+    // time stamp contains 4 bytes
+    hidx += 4;
+
+    // One extra 0  ending byte
+    hidx += 1;
+
+    // Check the operating system code
+    // for Unix its 3
+    uint8_t oscode_in = in[hidx];
+    std::vector<uint8_t> oscodes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    bool ochck = std::find(oscodes.cbegin(), oscodes.cend(), oscode_in) == oscodes.cend();
+    if (ochck) {
+        std::cerr << "\n";
+        std::cerr << "GZip header mismatch: OS code is unknown" << std::endl;
+        return 0;
+    }
+
+#else
+    uint8_t hidx = 0;
+    // ZLIB Header Checks
+    // CMF
+    // FLG
+    uint8_t cmf = 0x78;
+    // 0x01: Fast Mode
+    // 0x5E: 1 to 5 levels
+    // 0x9C: Default compression: level 6
+    // 0xDA: High compression
+    std::vector<uint8_t> zlib_flags{0x01, 0x5E, 0x9C, 0xDA};
+    if (in[hidx++] == cmf) {
+        uint8_t flg = in[hidx];
+        bool hchck = std::find(zlib_flags.cbegin(), zlib_flags.cend(), flg) == zlib_flags.cend();
+        if (hchck) {
+            std::cerr << "\n";
+            std::cerr << "Header check fails" << std::endl;
+            // Set error_flag to true here for cisco usecase
+            return 0;
+        }
+
+    } else {
+        // Set the error flag to true for Cisco Usecase
+        // and return
+        std::cerr << "\n";
+        std::cerr << "Zlib Header mismatch" << std::endl;
+        return 0;
+    }
+
+#endif
+
     // Streaming based solution
     uint32_t inBufferSize = INPUT_BUFFER_SIZE;
     uint32_t outBufferSize = OUTPUT_BUFFER_SIZE;
@@ -766,7 +851,7 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
 // This version of compression does overlapped execution between
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
-uint32_t xfZlib::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t host_buffer_size) {
+uint64_t xfZlib::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size) {
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
     uint32_t block_size_in_bytes = block_size_in_kb * 1024;
     uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
@@ -788,7 +873,7 @@ uint32_t xfZlib::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint32
     uint32_t blocksPerChunk[total_chunks];
     uint32_t idx = 0;
 
-    for (uint32_t i = 0; i < input_size; i += host_buffer_size, idx++) {
+    for (uint64_t i = 0; i < input_size; i += host_buffer_size, idx++) {
         uint32_t chunk_size = host_buffer_size;
         if (chunk_size + i > input_size) {
             chunk_size = input_size - i;

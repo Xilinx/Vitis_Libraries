@@ -15,15 +15,8 @@
  *
  */
 #include "lz4_p2p_comp.hpp"
+#include "lz4_specs.hpp"
 #include "xxhash.h"
-#define BLOCK_SIZE 64
-#define KB 1024
-#define MAGIC_HEADER_SIZE 4
-#define MAGIC_BYTE_1 4
-#define MAGIC_BYTE_2 34
-#define MAGIC_BYTE_3 77
-#define MAGIC_BYTE_4 24
-#define FLG_BYTE 104
 
 #define RESIDUE_4K 4096
 
@@ -73,24 +66,25 @@ size_t xflz4::create_header(uint8_t* h_header, uint32_t inSize) {
     uint8_t block_size_header = 0;
     switch (m_BlockSizeInKb) {
         case 64:
-            block_size_header = BSIZE_STD_64KB;
+            block_size_header = xf::compression::BSIZE_STD_64KB;
             break;
         case 256:
-            block_size_header = BSIZE_STD_256KB;
+            block_size_header = xf::compression::BSIZE_STD_256KB;
             break;
         case 1024:
-            block_size_header = BSIZE_STD_1024KB;
+            block_size_header = xf::compression::BSIZE_STD_1024KB;
             break;
         case 4096:
-            block_size_header = BSIZE_STD_4096KB;
+            block_size_header = xf::compression::BSIZE_STD_4096KB;
             break;
         default:
-            block_size_header = BSIZE_STD_64KB;
+            block_size_header = xf::compression::BSIZE_STD_64KB;
             std::cout << "Valid block size not given, setting to 64K" << std::endl;
             break;
     }
 
-    uint8_t temp_buff[10] = {FLG_BYTE, block_size_header, inSize, inSize >> 8, inSize >> 16, inSize >> 24, 0, 0, 0, 0};
+    uint8_t temp_buff[10] = {
+        xf::compression::FLG_BYTE, block_size_header, inSize, inSize >> 8, inSize >> 16, inSize >> 24, 0, 0, 0, 0};
 
     // xxhash is used to calculate hash value
     uint32_t xxh = XXH32(temp_buff, 10, 0);
@@ -102,26 +96,26 @@ size_t xflz4::create_header(uint8_t* h_header, uint32_t inSize) {
     // Header information
     uint32_t head_size = 0;
 
-    h_header[head_size++] = MAGIC_BYTE_1;
-    h_header[head_size++] = MAGIC_BYTE_2;
-    h_header[head_size++] = MAGIC_BYTE_3;
-    h_header[head_size++] = MAGIC_BYTE_4;
+    h_header[head_size++] = xf::compression::MAGIC_BYTE_1;
+    h_header[head_size++] = xf::compression::MAGIC_BYTE_2;
+    h_header[head_size++] = xf::compression::MAGIC_BYTE_3;
+    h_header[head_size++] = xf::compression::MAGIC_BYTE_4;
 
-    h_header[head_size++] = FLG_BYTE;
+    h_header[head_size++] = xf::compression::FLG_BYTE;
 
     // Value
     switch (m_BlockSizeInKb) {
         case 64:
-            h_header[head_size++] = BSIZE_STD_64KB;
+            h_header[head_size++] = xf::compression::BSIZE_STD_64KB;
             break;
         case 256:
-            h_header[head_size++] = BSIZE_STD_256KB;
+            h_header[head_size++] = xf::compression::BSIZE_STD_256KB;
             break;
         case 1024:
-            h_header[head_size++] = BSIZE_STD_1024KB;
+            h_header[head_size++] = xf::compression::BSIZE_STD_1024KB;
             break;
         case 4096:
-            h_header[head_size++] = BSIZE_STD_4096KB;
+            h_header[head_size++] = xf::compression::BSIZE_STD_4096KB;
             break;
     }
 

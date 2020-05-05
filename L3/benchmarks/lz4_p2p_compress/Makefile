@@ -69,6 +69,10 @@ ifeq ($(findstring u50, $(DEVICE)), u50)
 $(error This design is not supported for $(DEVICE))
 endif
 
+ifeq ($(findstring u280, $(DEVICE)), u280)
+$(error This design is not supported for $(DEVICE))
+endif
+
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
 ifneq ($(findstring u280, $(DEVICE)), u280)
@@ -106,7 +110,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
 
 CXXFLAGS += -DPARALLEL_BLOCK=8
-CXXFLAGS += -I$(XFLIB_DIR)/L3/include
+CXXFLAGS += -I$(XFLIB_DIR)/L3/include -I$(XFLIB_DIR)/L1/include/hw
 
 
 

@@ -10,6 +10,7 @@
             "name": "generic launch for all flows"
         }
     ],
+    "match_makefile": "false",
     "post_launch": [
         {
             "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"

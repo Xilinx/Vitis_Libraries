@@ -21,9 +21,9 @@
 
 int fd_p2p_c_in = 0;
 
-uint32_t get_file_size(std::ifstream& file) {
+uint64_t get_file_size(std::ifstream& file) {
     file.seekg(0, file.end);
-    uint32_t file_size = file.tellg();
+    uint64_t file_size = file.tellg();
     file.seekg(0, file.beg);
     return file_size;
 }
@@ -504,8 +504,10 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
 
     for (int i = 0; i < BUFCNT; i++) {
         if (enable_p2p) {
-            buffer_in[i] = new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, inputSize4kMultiple, &p2pInExt);
-            char* p2pPtr = (char*)m_q_wr->enqueueMapBuffer(*(buffer_in[i]), CL_TRUE, CL_MAP_READ, 0, inputSize4kMultiple);
+            buffer_in[i] =
+                new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, inputSize4kMultiple, &p2pInExt);
+            char* p2pPtr =
+                (char*)m_q_wr->enqueueMapBuffer(*(buffer_in[i]), CL_TRUE, CL_MAP_READ, 0, inputSize4kMultiple);
             p2pPtrVec.push_back(p2pPtr);
             bufferCount = 1;
 
@@ -517,7 +519,7 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
 
     uint32_t cBufSize = 0;
     if (enable_p2p) {
-        cBufSize = inputSize4kMultiple;
+        cBufSize = inputSize;
     } else {
         cBufSize = bufSize;
     }
@@ -536,7 +538,7 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
         // set for last and other buffers
         if (keq_idx == bufferCount - 1) {
             if (bufferCount > 1) {
-                    cBufSize = inputSize - (bufSize * keq_idx);
+                cBufSize = inputSize - (bufSize * keq_idx);
             }
         }
 
@@ -573,7 +575,7 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
 
     float ssd_throughput_in_mbps_1 = (float)inputSize * 1000 / total_ssd_time_ns.count();
     if (enable_p2p)
-        std::cout << std::fixed << std::setprecision(2) << "SSD Throughput(Mbps)\t:" << ssd_throughput_in_mbps_1
+        std::cout << std::fixed << std::setprecision(2) << "SSD Throughput(MBps)\t:" << ssd_throughput_in_mbps_1
                   << std::endl;
 }
 
@@ -621,7 +623,7 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
 // This version of compression does overlapped execution between
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
-uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t host_buffer_size) {
+uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size) {
     if (input_size < m_minfilesize) {
         std::cout << "\n";
         std::cout << "File Size must be greater than " << (uint32_t)m_minfilesize << " Bytes" << std::endl;
@@ -654,7 +656,7 @@ uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint32_t input_size, uint
     uint32_t blocksPerChunk[total_chunks];
     uint32_t idx = 0;
 
-    for (uint32_t i = 0; i < input_size; i += host_buffer_size, idx++) {
+    for (uint64_t i = 0; i < input_size; i += host_buffer_size, idx++) {
         uint32_t chunk_size = host_buffer_size;
         if (chunk_size + i > input_size) {
             chunk_size = input_size - i;
