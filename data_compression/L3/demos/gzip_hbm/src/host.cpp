@@ -139,14 +139,14 @@ void xil_decompress_top(
     // Xilinx ZLIB object
     xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id, 0, FULL);
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
         std::cout << "Unable to open file";
         exit(1);
     }
-    uint32_t input_size = get_file_size(inFile);
+    uint64_t input_size = get_file_size(inFile);
 
     std::string lz_decompress_in = decompress_mod;
     std::string lz_decompress_out = decompress_mod;
@@ -164,21 +164,21 @@ void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_
     // Xilinx ZLIB object
     xfZlib xlz(single_bin, max_cr, COMP_ONLY, device_id, 0, FULL);
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
         std::cout << "Unable to open file";
         exit(1);
     }
-    uint32_t input_size = get_file_size(inFile);
+    uint64_t input_size = get_file_size(inFile);
 
     std::string lz_compress_in = compress_mod;
     std::string lz_compress_out = compress_mod;
     lz_compress_out = lz_compress_out + ".gz";
 
     // Call ZLIB compression
-    uint32_t enbytes = xlz.compress_file(lz_compress_in, lz_compress_out, input_size);
+    uint64_t enbytes = xlz.compress_file(lz_compress_in, lz_compress_out, input_size);
 
     std::cout.precision(3);
     std::cout << std::fixed << std::setprecision(2) << std::endl
@@ -256,7 +256,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "\n";
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     // Decompress list of files
 

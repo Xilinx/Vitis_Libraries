@@ -17,6 +17,7 @@
             "name": "generic launch for all flows"
         }
     ],
+    "match_makefile": "false",
     "host": {
         "host_exe": "xil_gzip",
         "compiler": {

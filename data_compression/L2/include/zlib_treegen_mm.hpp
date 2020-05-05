@@ -25,7 +25,7 @@
  * This file is part of Vitis Data Compression Library.
  */
 
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 
 #include <stdio.h>
 #include <stdint.h>

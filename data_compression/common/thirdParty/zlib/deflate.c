@@ -830,14 +830,16 @@ int ZEXPORT deflate(z_streamp strm, int flush)
     
     // Check input size if its less than
     // MIN_INPUT_SIZE use SW flow
-    uint32_t input_size = strm->avail_in;
+    uint64_t input_size = strm->avail_in;
     if (input_size < MIN_INPUT_SIZE) {
         use_cpu_sol = true;
         use_fpga_sol = false;
     }
    
     if (use_fpga_sol) {
+#ifdef VERBOSE
         printf("FPGA Solution \n");
+#endif
         // Arg 1: xclbin
         // Xilinx ZLIB object
         xfZlib xlz(u50_xclbin.c_str(), c_max_cr, COMP_ONLY);
@@ -846,9 +848,8 @@ int ZEXPORT deflate(z_streamp strm, int flush)
         } else {
             uint8_t* input = strm->next_in;
             uint8_t* output = strm->next_out;
-            uint32_t input_size = strm->avail_in;
             // Zlib compression
-            int enbytes = xlz.compress_buffer((uint8_t*)input, (uint8_t*)output, input_size);
+            uint64_t enbytes = xlz.compress_buffer((uint8_t*)input, (uint8_t*)output, input_size);
             strm->total_out = enbytes;
             strm->next_out = output;
             return 1;
@@ -856,7 +857,9 @@ int ZEXPORT deflate(z_streamp strm, int flush)
     } 
 
     if (use_cpu_sol) {
+#ifdef VERBOSE
         printf("CPU Solution \n");
+#endif
         // printf("Not in CPU deflate \n");
         int old_flush; /* value of flush param for previous deflate call */
         deflate_state* s;

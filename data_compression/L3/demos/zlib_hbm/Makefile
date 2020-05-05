@@ -358,6 +358,9 @@ $(LIBZLIB): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platform
 #.PHONY: all help host xclbin cleanh cleank cleanall clean
 
 all: host xclbin
+ifeq ($(findstring vck, $(DEVICE)), vck)
+$(error This design is not supported for $(DEVICE))
+endif
 
 host: $(EXE_FILE) | check_vpp check_xrt check_platform
 

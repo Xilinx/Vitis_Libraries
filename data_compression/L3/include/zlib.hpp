@@ -25,7 +25,7 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
-
+#include <algorithm>
 #include <string>
 #include <fstream>
 #include <thread>
@@ -71,7 +71,7 @@ constexpr auto page_aligned_mem = (1 << 21);
 
 int validate(std::string& inFile_name, std::string& outFile_name);
 
-uint32_t get_file_size(std::ifstream& file);
+uint64_t get_file_size(std::ifstream& file);
 enum comp_decom_flows { BOTH, COMP_ONLY, DECOMP_ONLY };
 enum list_mode { ONLY_COMPRESS, ONLY_DECOMPRESS, COMP_DECOMP };
 enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };
@@ -135,7 +135,7 @@ class xfZlib {
      * @param host_buffer_size host buffer size
      */
 
-    uint32_t compress(uint8_t* in, uint8_t* out, uint32_t actual_size, uint32_t host_buffer_size);
+    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
 
     /**
      * @brief This method does serial execution of decompression
@@ -159,7 +159,7 @@ class xfZlib {
      * @param input_size input size
      */
 
-    int compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
+    uint64_t compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
 
     /**
      * @brief In shared library flow this call can be used for decompress buffer
@@ -182,7 +182,7 @@ class xfZlib {
      * @param actual_size input size
      */
 
-    uint32_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
+    uint64_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
 
     /**
      * @brief This method  does file operations and invokes decompress API which

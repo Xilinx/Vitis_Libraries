@@ -41,8 +41,8 @@ typedef ap_uint<32> compressd_dt;
  * and when match length and offset are read, the literals will be read from
  * the local dictionary based on offset until match length.
  *
- * @tparam HISTORY_SIZE history size
  * @tparam LOW_OFFSET low offset
+ * @tparam HISTORY_SIZE history size
  *
  * @param inStream input stream
  * @param outStream output stream
@@ -107,7 +107,6 @@ lz_decompress:
         prevValue[0] = outValue;
     }
 }
-
 
 /**
  * @brief This module writes the literals to the output stream as it is
@@ -368,7 +367,7 @@ void lzMultiByteDecoder(hls::stream<SIZE_DT>& litlenStream,
     uint16_t output_index = 0;
     uint32_t outSize = 0;
 
-    uint8_t incr_output_index = 0;
+    // uint8_t incr_output_index = 0;
     bool outStreamFlag = false;
 
     ap_uint<16> offset = 0;
@@ -386,6 +385,8 @@ lz4_decoder:
 #pragma HLS PIPELINE II = 1
         uint16_t read_idx = match_loc / PARALLEL_BYTES;
         uint16_t byte_loc = (match_loc % PARALLEL_BYTES) % PARALLEL_BYTES;
+        ap_uint<2 * c_parallelBit> localValue;
+        ap_uint<c_parallelBit> lowValue, highValue;
 
         // always reading to make better timing
         ap_uint<c_parallelBit> lowValueReg = regHistory[0][(read_idx + 0) % c_regHistSize];
@@ -393,15 +394,25 @@ lz4_decoder:
         ap_uint<c_parallelBit> lowValueRam = ramHistory[0][(read_idx + 0) % c_ramHistSize];
         ap_uint<c_parallelBit> highValueRam = ramHistory[1][(read_idx + 1) % c_ramHistSize];
 
+        if (offset < c_lowOffset) {
+            lowValue = lowValueReg;
+            highValue = highValueReg;
+        } else {
+            lowValue = lowValueRam;
+            highValue = highValueRam;
+        }
+
+        localValue.range(c_parallelBit - 1, 0) = lowValue;
+        localValue.range(2 * c_parallelBit - 1, c_parallelBit) = highValue;
+
         if (next_state == WRITE_LITERAL) {
             // printf("WRITE_LITERAL\n");
-            ap_uint<c_parallelBit> input = litStream.read();
-            output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) = input;
+            output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) = litStream.read();
             if (lit_len >= PARALLEL_BYTES) {
-                incr_output_index = PARALLEL_BYTES;
+                output_index += PARALLEL_BYTES;
                 lit_len -= PARALLEL_BYTES;
             } else {
-                incr_output_index = lit_len;
+                output_index += lit_len;
                 lit_len = 0;
             }
             if (lit_len) {
@@ -427,29 +438,16 @@ lz4_decoder:
             }
         } else if (next_state == READ_MATCH) {
             // printf("READ_MATCH\n");
-            ap_uint<2 * c_parallelBit> localValue;
-            ap_uint<c_parallelBit> lowValue, highValue;
-
-            if (offset < c_lowOffset) {
-                lowValue = lowValueReg;
-                highValue = highValueReg;
-            } else {
-                lowValue = lowValueRam;
-                highValue = highValueRam;
-            }
-
-            localValue.range(c_parallelBit - 1, 0) = lowValue;
-            localValue.range(2 * c_parallelBit - 1, c_parallelBit) = highValue;
 
             output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) =
-                localValue.range((byte_loc + PARALLEL_BYTES) * 8 - 1, byte_loc * 8);
+                localValue >> (byte_loc * 8);
 
             if (match_len >= parallelBits) {
-                incr_output_index = parallelBits;
+                output_index += parallelBits;
                 match_loc += parallelBits;
                 match_len -= parallelBits;
             } else {
-                incr_output_index = match_len;
+                output_index += match_len;
                 match_loc += match_len;
                 match_len = 0;
             }
@@ -483,7 +481,6 @@ lz4_decoder:
             }
         } else if (next_state == NO_OP) {
             // printf("NO_OP\n");
-            incr_output_index = 0;
             // Adding NO_OP as workaround for low offset case as
             // for very low offset case, results are not matching
             next_state = READ_MATCH;
@@ -494,21 +491,14 @@ lz4_decoder:
 
         regHistory[0][write_idx % c_regHistSize] = outStreamValue;
         regHistory[1][write_idx % c_regHistSize] = outStreamValue;
+        ramHistory[0][write_idx % c_ramHistSize] = outStreamValue;
+        ramHistory[1][write_idx % c_ramHistSize] = outStreamValue;
 
-        if ((output_index + incr_output_index) >= PARALLEL_BYTES) {
-            outStreamFlag = true;
-            ramHistory[0][write_idx % c_ramHistSize] = outStreamValue;
-            ramHistory[1][write_idx % c_ramHistSize] = outStreamValue;
-
+        if (output_index >= PARALLEL_BYTES) {
             write_idx++;
             output_window >>= PARALLEL_BYTES * 8;
-            output_index += incr_output_index - PARALLEL_BYTES;
-        } else {
-            outStreamFlag = false;
-            output_index += incr_output_index;
-        }
+            output_index -= PARALLEL_BYTES;
 
-        if (outStreamFlag) {
             outStream << outStreamValue;
             endOfStream << 0;
             outSize += PARALLEL_BYTES;
@@ -524,7 +514,6 @@ lz4_decoder:
         endOfStream << 0;
         outSize += output_index;
     }
-
     outStream << 0;
     endOfStream << 1;
     sizeOutStream << outSize;

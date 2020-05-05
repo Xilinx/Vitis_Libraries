@@ -5,7 +5,9 @@
     ],
     "flow": "vitis",
     "platform_blacklist": [
-        "u50"
+        "u50",
+        "vck",
+        "u280"
     ],
     "platform_whitelist": [
         "samsung_u2",

@@ -25,7 +25,7 @@
  * This file is part of Vitis Data Compression Library.
  */
 
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 #include "lz_optional.hpp"
 #include "lz_compress.hpp"
 #include "stream_downsizer.hpp"

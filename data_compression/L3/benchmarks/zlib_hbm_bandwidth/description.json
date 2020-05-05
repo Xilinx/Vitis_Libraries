@@ -7,7 +7,10 @@
     "platform_blacklist": [
         "u200",
         "u250",
-        "zc"
+        "vck"
+    ],
+    "platform_whitelist": [
+        "u50_gen3x16"
     ],
     "launch": [
         {
