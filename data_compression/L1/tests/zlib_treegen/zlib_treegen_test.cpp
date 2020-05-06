@@ -25,7 +25,7 @@
 #include <string>
 #include "cmdlineparser.h"
 
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 #include "lz_optional.hpp"
 #include "lz_compress.hpp"
 #include "huffman_treegen.hpp"

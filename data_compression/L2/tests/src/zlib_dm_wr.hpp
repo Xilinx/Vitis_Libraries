@@ -33,7 +33,7 @@
 #include <ap_int.h>
 #include "hls_stream.h"
 #include "mm2s.hpp"
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 
 const int kGMemDWidth = 32;
 typedef ap_uint<kGMemDWidth> uintMemWidth_t;

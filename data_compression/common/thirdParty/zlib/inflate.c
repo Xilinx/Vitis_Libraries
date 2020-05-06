@@ -663,14 +663,16 @@ int ZEXPORT inflate(z_streamp strm, int flush)
     
     // Check input size if its less than
     // MIN_INPUT_SIZE use SW flow
-    uint32_t input_size = strm->avail_in;
+    uint64_t input_size = strm->avail_in;
     if (input_size < MIN_INPUT_SIZE) {
         use_cpu_sol = true;
         use_fpga_sol = false;
     }
 
     if (use_fpga_sol) {
+#ifdef VERBOSE
         printf("FPGA Solution \n");
+#endif
         // Xilinx ZLIB object
         xfZlib xlz(u50_xclbin.c_str(), c_max_cr, DECOMP_ONLY);
         if (xlz.err_flag) {
@@ -687,7 +689,9 @@ int ZEXPORT inflate(z_streamp strm, int flush)
     }
 
     if (use_cpu_sol) {
+#ifdef VERBOSE
         printf("CPU Solution \n");
+#endif
         // printf("In inflate integrated \n");
         struct inflate_state FAR* state;
         z_const unsigned char FAR* next;        /* next input */

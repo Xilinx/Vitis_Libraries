@@ -33,7 +33,7 @@
 #include <ap_int.h>
 #include "hls_stream.h"
 #include "s2mm.hpp"
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 
 typedef ap_uint<MULTIPLE_BYTES * 8> uintMemWidth_t;
 

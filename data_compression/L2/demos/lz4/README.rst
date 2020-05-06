@@ -43,7 +43,7 @@ unit.
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Best Compression Throughput   1.4 GB/s
+Best Compression Throughput   2.1 GB/s
 Best Decompression Throughput 1.1 GB/s
 Average Compression Ratio     2.13x (Silesia Benchmark)
 ============================= =========================

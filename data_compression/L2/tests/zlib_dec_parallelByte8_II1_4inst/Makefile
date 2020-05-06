@@ -101,7 +101,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
 CXXFLAGS += -DPARALLEL_BLOCK=1 -DD_COMPUTE_UNIT=1
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
-
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 
 
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/xcl2

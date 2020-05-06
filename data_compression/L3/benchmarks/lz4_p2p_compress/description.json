@@ -5,7 +5,8 @@
     ],
     "flow": "vitis",
     "platform_blacklist": [
-        "u50"
+        "u50",
+        "u280"
     ],
     "platform_whitelist": [
         "samsung_u2",
@@ -17,6 +18,7 @@
             "name": "generic launch for all flows"
         }
     ], 
+    "match_makefile": "false",
     "config_make": "config.mk",
     "host": {
         "host_exe": "xil_lz4", 
@@ -30,7 +32,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/include"
+                "LIB_DIR/L3/include",
+                "LIB_DIR/L1/include/hw"
             ], 
             "symbols": [ "PARALLEL_BLOCK=8" , "ENABLE_P2P=1"] 
         }

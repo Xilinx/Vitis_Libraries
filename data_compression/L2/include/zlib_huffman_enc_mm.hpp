@@ -37,7 +37,7 @@
 #include <assert.h>
 #include "hls_stream.h"
 #include <ap_int.h>
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 #include "huffman_encoder.hpp"
 
 #define GMEM_DWIDTH 512

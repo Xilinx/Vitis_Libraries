@@ -256,7 +256,6 @@ static void lz4Compress(hls::stream<compressd_dt>& inStream,
 #pragma HLS STREAM variable = lit_outStream depth = MAX_LIT_COUNT
 #pragma HLS STREAM variable = lenOffset_Stream depth = c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = lit_outStream core = FIFO_SRL
 #pragma HLS RESOURCE variable = lenOffset_Stream core = FIFO_SRL
 
 #pragma HLS dataflow

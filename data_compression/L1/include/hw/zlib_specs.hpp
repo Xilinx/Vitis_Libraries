@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
-#ifndef _XFCOMPRESSION_ZLIB_CONFIG_HPP_
-#define _XFCOMPRESSION_ZLIB_CONFIG_HPP_
+#ifndef _XFCOMPRESSION_ZLIB_SPECS_HPP_
+#define _XFCOMPRESSION_ZLIB_SPECS_HPP_
 
 /**
- * @file zlib_config.h
+ * @file zlib_specs.h
  * @brief Header for configuration for zlib compression and decompression kernels.
  *
  * This file is part of Vitis Data Compression Library.
@@ -29,37 +29,37 @@
 const int gz_max_literal_count = 4096;
 
 // Dynamic Huffman Related Content
-#define MAX_BITS 15
+const auto c_maxBits = 15;
 // Literals
-#define LITERALS 256
+const auto c_literals = 256;
 
 // Length codes
-#define LENGTH_CODES 29
+const auto c_lengthCodes = 29;
 
 // Literal Codes
-#define LITERAL_CODES (LITERALS + 1 + LENGTH_CODES)
+const auto c_literalCodes = (c_literals + 1 + c_lengthCodes);
 
 // Distance Codes
-#define DISTANCE_CODES 30
+const auto c_distanceCodes = 30;
 
 // bit length codes
-#define BL_CODES 19
+const auto c_blCodes = 19;
 
 // Literal Tree size - 573
-#define HEAP_SIZE (2 * LITERAL_CODES + 1)
+const auto c_heapSize = (2 * c_literalCodes + 1);
 
-// Bit length codes must not exceed MAX_BL_BITS bits
-#define MAX_BL_BITS 7
+// Bit length codes must not exceed c_maxBlBits bits
+const auto c_maxBlBits = 7;
 
-#define REUSE_PREV_BLEN 16
+const auto c_reusePrevBlen = 16;
 
-#define REUSE_ZERO_BLEN 17
+const auto c_reuseZeroBlen = 17;
 
-#define REUSE_ZERO_BLEN_7 18
+const auto c_reuseZeroBlen7 = 18;
 
-#define FIXED_DECODER 0
-#define DYNAMIC_DECODER 1
-#define FULL_DECODER 2
+const auto c_fixedDecoder = 0;
+const auto c_dynamicDecoder = 1;
+const auto c_fullDecoder = 2;
 
 const uint16_t c_frequency_bits = 24;
 const uint16_t c_codeword_bits = 20;
@@ -69,4 +69,4 @@ const uint16_t c_blnCodeCount = 19;
 const uint16_t c_maxCodeBits = 15;
 const uint16_t c_maxBLCodeBits = 7;
 
-#endif // _XFCOMPRESSION_ZLIB_CONFIG_HPP_
+#endif // _XFCOMPRESSION_ZLIB_SPECS_HPP_

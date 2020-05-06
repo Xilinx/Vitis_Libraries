@@ -136,7 +136,7 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
     // Xilinx ZLIB object
     xfZlib xlz(single_bin, max_cr, DECOMP_ONLY);
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -169,7 +169,7 @@ void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_
     // Xilinx ZLIB object
     xfZlib xlz(single_bin, max_cr, COMP_ONLY);
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
