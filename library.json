@@ -1,0 +1,25 @@
+{
+    "id": "xf_DataAnalytics",
+    "name": "Vitis Data Analytics Library",
+    "description": "Vitis Data Analytics Library is an open-sourced Vitis library written in C++ for accelerating data analytics applications in a variety of use cases.",
+    "v++": {
+        "includepaths": [
+            "LIB_DIR/L1/include",
+            "LIB_DIR/L2/include"
+        ]
+    },
+    "host": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/ext/xcl2"
+            ]
+        },
+        "linker": {
+            "librarypaths": [
+            ],
+
+            "libraries": [
+            ]
+        }
+    }
+}
