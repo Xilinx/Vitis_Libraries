@@ -1,0 +1,72 @@
+{
+    "gui": false,
+    "name": "Xilinx Kmeans Training", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": "-xclbin $(XCLBIN_FILE) -in ml_datasets/ -trn 10000 -ten 1000 -fn 26 -cn 2", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "kmeans_host.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/kmeans/vitisPrj/host/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/ext/xcl2"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/src", 
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/kmeans/vitisPrj/host/main.cpp", 
+                    "frequency": 300.0, 
+                    "name": "kmeans_train"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "kmeans_train"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 520
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}
