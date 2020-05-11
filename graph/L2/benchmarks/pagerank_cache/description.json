@@ -1,0 +1,102 @@
+{
+    "gui": false,
+    "name": "Xilinx Page Rank Cache Benchmark", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u200",
+        "u250"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ],
+    "platform_properties": {
+        "u200": {
+	    "v++": {
+	        "compiler": {
+		    "cflags": [
+		        "--config PROJECT/conn_u200_u250.ini"
+		    ]
+		}
+	    }
+	},
+        "u250": {
+	    "v++": {
+	        "compiler": {
+		    "cflags": [
+		        "--config PROJECT/conn_u200_u250.ini"
+		    ]
+		}
+	    }
+	}
+    },
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/kernel_pagerank_0.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/benchmarks/pagerank_cache/host/test_pagerank.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/benchmarks/pagerank_cache/host", 
+                "LIB_DIR/L2/benchmarks/pagerank_cache/kernel", 
+                "LIB_DIR/../database/L1/include/hw",
+                "LIB_DIR/../quantitative_finance/L1/include",
+		        "LIB_DIR/../utils/L1/include",
+                "LIB_DIR/ext/xcl2"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/../database/L1/include/hw",
+                "LIB_DIR/../quantitative_finance/L1/include",
+		        "LIB_DIR/../utils/L1/include",
+                "LIB_DIR/L2/benchmarks/pagerank_cache/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/benchmarks/pagerank_cache/kernel/kernel_pagerank_0.cpp", 
+                    "frequency": 300.0, 
+                    "clflags": " -D KERNEL0", 
+                    "name": "kernel_pagerank_0"
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "kernel_pagerank_0"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

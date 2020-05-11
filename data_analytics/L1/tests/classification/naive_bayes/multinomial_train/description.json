@@ -1,0 +1,50 @@
+{
+    "name": "Xilinx Naive Bayes Training", 
+    "description": "", 
+    "flow": "hls", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "part_whitelist": [], 
+    "part_blacklist": [], 
+    "project": "naive_bayes_test", 
+    "solution": "solution1", 
+    "clock": "3.33", 
+    "topfunction": "multinomialNB", 
+    "top": {
+        "source": [
+            "dut.cpp"
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I./"
+    }, 
+    "testbench": {
+        "source": [
+            "test.cpp"
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include", 
+        "ldflags": "", 
+        "argv": {}
+    }, 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 24576,
+                "max_time_min": 420
+            }
+        ], 
+        "targets": [
+            "hls_csim", 
+            "hls_csynth", 
+            "hls_cosim", 
+            "hls_vivado_syn", 
+            "hls_vivado_impl"
+        ], 
+        "category": "canary"
+    }
+}

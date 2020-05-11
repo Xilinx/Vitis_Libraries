@@ -1,0 +1,151 @@
+{
+    "gui": false,
+    "name": "jks.L2_cscmv", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_type": "pcie", 
+    "platform_whitelist": [
+        "u280"
+    ], 
+    "platform_blacklist": [],
+    "platform_properties": {
+        "u280": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/compile_opts.ini"
+                    ]
+                }
+            }
+        } 
+    },  
+    "launch": [
+        {
+        "name": "generic launch for all flows",
+            "cmd_args": " BUILD/cscmv.xclbin 32 16 64"
+        }
+    ], 
+    "pre_launch": [
+        {
+            "launch_cmd": ""
+        }
+    ], 
+    "host": {
+        "host_exe": "cscmv.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/src/sw/cscmv.cpp", 
+                "LIB_DIR/L2/src/sw/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L2/include/sw", 
+                "LIB_DIR/L1/include/sw"
+            ],
+            "symbols": [
+                "SPARSE_maxColMemBlocks=64",
+                "SPARSE_maxRowBlocks=128",
+                "SPARSE_dataType=float",
+                "SPARSE_indexType=uint32_t",
+                "SPARSE_logParEntries=2",
+                "SPARSE_parEntries=4",
+                "SPARSE_logParGroups=1", 
+                "SPARSE_parGroups=2",
+                "SPARSE_dataBits=32",
+                "SPARSE_indexBits=32",
+                "SPARSE_hbmMemBits=256",
+                "SPARSE_hbmChannels=4",
+                "SPARSE_hbmChannelMegaBytes=256",
+                "SPARSE_ddrMemBits=512",
+                "SPARSE_printWidth=6",
+                "SPARSE_pageSize=4096"
+            ],
+            "options": "-O0 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L2/include/hw", 
+                "LIB_DIR/../blas/L1/include/hw"
+            ],
+            "symbols": [
+                "SPARSE_maxColMemBlocks=64",
+                "SPARSE_maxRowBlocks=128",
+                "SPARSE_dataType=float",
+                "SPARSE_indexType=uint32_t",
+                "SPARSE_logParEntries=2",
+                "SPARSE_parEntries=4",
+                "SPARSE_logParGroups=1", 
+                "SPARSE_parGroups=2",
+                "SPARSE_dataBits=32",
+                "SPARSE_indexBits=32",
+                "SPARSE_hbmMemBits=256",
+                "SPARSE_hbmChannels=4",
+                "SPARSE_hbmChannelMegaBytes=256",
+                "SPARSE_ddrMemBits=512",
+                "SPARSE_printWidth=6",
+                "SPARSE_pageSize=4096"
+            ]
+        }, 
+        "linker": {
+            "ldclflags": [
+                "--config PROJECT/conn_u280.ini"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/hw/loadColPtrValKernel.cpp", 
+                    "frequency": 300, 
+                    "name": "loadColPtrValKernel"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/hw/xBarColKernel.cpp", 
+                    "frequency": 300, 
+                    "name": "xBarColKernel"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/hw/cscRowPktKernel.cpp", 
+                    "frequency": 300, 
+                    "name": "cscRowPktKernel"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/hw/storeDatPktKernel.cpp", 
+                    "frequency": 300, 
+                    "name": "storeDatPktKernel"
+                }
+                
+            ], 
+            "frequency": 300, 
+            "name": "cscmv"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 520
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+} 
