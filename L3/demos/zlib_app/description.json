@@ -1,5 +1,5 @@
 {
-    "name": "ZLIB Application",
+    "name": "Xilinx ZLIB Application",
     "description": [
         "ZLIB application resides in `L3/demos/zlib_app` directory."
     ],
@@ -17,6 +17,7 @@
     ],
     "match_makefile": "false",
     "config_make": "config.mk",
+    "gui": false, 
     "host": {
         "host_exe": "xil_zlib",
         "compiler": {

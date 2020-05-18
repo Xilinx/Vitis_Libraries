@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx LZ4-Streaming Decompression",
+    "name": "Xilinx LZ4 Streaming Decompression",
     "description": [
         "Xilinx LZ4-Streaming Decompression"
     ],
@@ -9,6 +9,9 @@
             "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt.lz4",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "host": {
         "host_exe": "xil_lz4_streaming",

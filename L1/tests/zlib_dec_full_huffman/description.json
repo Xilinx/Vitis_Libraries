@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.zlib_dec_full_huffman", 
+    "name": "Xilinx ZLib Full Huffman Decoder HLS Test", 
     "description": "Test Design to validate core Zlib decompress module using full huffman decoder", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ sys.setrecursionlimit(1500)
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Data Compression Library'
-copyright = '2019, Xilinx'
+copyright = '2020, Xilinx'
 author = 'Xilinx'
 
 # The full version, including alpha/beta/rc tags
-version = '2019.2'
-release = 'v2019.2'
+version = '2020.1'
+release = 'v2020.1'
 
 
 # -- General configuration ---------------------------------------------------

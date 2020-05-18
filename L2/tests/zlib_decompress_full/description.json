@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ZLIB Decompression Full",
+    "name": "Xilinx ZLIB Full Decompression",
     "description": [
         "Xilinx ZLIB Decompression Full"
     ],
@@ -9,6 +9,9 @@
             "cmd_args": "-dx BUILD/compress_decompress.xclbin -d PROJECT/sample.txt.full.zlib",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "match_makefile": "false",
     "host": {

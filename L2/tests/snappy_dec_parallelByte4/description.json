@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx Snappy MultiByte Decompress",
+    "name": "Xilinx Snappy MultiByte-4 Decompress",
     "description": [
-        "Xilinx Snappy MultiByte Decompress"
+        "Xilinx Snappy MultiByte Decompress:4 parallel bytes processed at a time"
     ],
     "flow": "vitis",
     "launch": [
@@ -10,7 +10,9 @@
             "name": "generic launch for all flows"
         }
     ],
-    "match_makefile": "false",
+    "platform_blacklist": [
+        "u280"
+    ],
     "host": {
         "host_exe": "xil_snappy",
         "compiler": {
@@ -45,7 +47,7 @@
             "accelerators": [
                 {
                     "name": "xilSnappyDecompress",
-                    "location": "LIB_DIR/L2/src/snappy_multiByte_decompress_mm.cpp"
+                    "location": "LIB_DIR/L2/src/snappy_multibyte_decompress_mm.cpp"
                 }
             ]
         }

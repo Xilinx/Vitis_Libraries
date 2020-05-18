@@ -1,5 +1,5 @@
 {
-    "name": "ZLIB Compression and Decompression",
+    "name": "Xilinx ZLIB Compression and Decompression",
     "description": [
         "ZLIB Compression and Decompression"
     ],
@@ -10,11 +10,13 @@
             "name": "generic launch for all flows"
         }
     ],
-    "match_makefile": "false",
     "post_launch": [
         {
             "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "host": {
         "host_exe": "xil_zlib",
@@ -28,7 +30,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include/hw"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=8"

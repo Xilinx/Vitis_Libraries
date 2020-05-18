@@ -46,11 +46,8 @@ void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
 #pragma HLS STREAM variable = outstream512_eos depth = 8
 #pragma HLS STREAM variable = lz4OutEos depth = 8
 
-    // experimental pragmas
-    //#pragma HLS RESOURCE variable = instream512 core = FIFO_SRL
-    //#pragma HLS RESOURCE variable = outstream512 core = FIFO_SRL
-    //#pragma HLS RESOURCE variable = outstream512_eos core = FIFO_SRL
-    //#pragma HLS RESOURCE variable = lz4OutEos core = FIFO_SRL
+#pragma HLS RESOURCE variable = instream512 core = FIFO_SRL
+#pragma HLS RESOURCE variable = outstream512 core = FIFO_SRL
 
     hls::stream<uint32_t> compSizeVal;
 #pragma HLS STREAM variable = compSizeVal depth = 2

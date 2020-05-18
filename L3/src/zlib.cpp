@@ -140,6 +140,9 @@ uint64_t xfZlib::compress_file(std::string& inFile_name, std::string& outFile_na
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > zlib_in(input_size);
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > zlib_out(input_size * 2);
 
+    MEM_ALLOC_CHECK(zlib_in.resize(input_size), input_size, "Input Buffer");
+    MEM_ALLOC_CHECK(zlib_out.resize(input_size * 2), input_size * 2, "Output Buffer");
+
     inFile.read((char*)zlib_in.data(), input_size);
 
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
@@ -265,7 +268,7 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
     bin_file.seekg(0, bin_file.beg);
 
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > buf;
-    buf.resize(nb);
+    MEM_ALLOC_CHECK(buf.resize(nb), nb, "XCLBIN Buffer");
     bin_file.read(reinterpret_cast<char*>(buf.data()), nb);
 
     cl::Program::Binaries bins{{buf.data(), buf.size()}};
@@ -378,10 +381,12 @@ xfZlib::xfZlib(const std::string& binaryFileName,
         for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
             for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
                 // Host Buffer Allocation
-                h_buf_in[i][j].resize(HOST_BUFFER_SIZE);
-                h_buf_zlibout[i][j].resize(HOST_BUFFER_SIZE * 2);
-                h_blksize[i][j].resize(MAX_NUMBER_BLOCKS);
-                h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS);
+                MEM_ALLOC_CHECK(h_buf_in[i][j].resize(HOST_BUFFER_SIZE), HOST_BUFFER_SIZE, "Input Host Buffer");
+                MEM_ALLOC_CHECK(h_buf_zlibout[i][j].resize(HOST_BUFFER_SIZE * 2), HOST_BUFFER_SIZE * 2,
+                                "Output Host Buffer");
+                MEM_ALLOC_CHECK(h_blksize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS, "BlockSize Host Buffer");
+                MEM_ALLOC_CHECK(h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS,
+                                "CompressSize Host Buffer");
             }
         }
 
@@ -428,13 +433,17 @@ xfZlib::xfZlib(const std::string& binaryFileName,
 #endif
         // Decompression host buffer allocation
         for (int i = 0; i < MAX_DDCOMP_UNITS; i++) {
-            for (int j = 0; j < DIN_BUFFERCOUNT; ++j) h_dbufstream_in[i][j].resize(INPUT_BUFFER_SIZE);
+            for (int j = 0; j < DIN_BUFFERCOUNT; ++j)
+                MEM_ALLOC_CHECK(h_dbufstream_in[i][j].resize(INPUT_BUFFER_SIZE), INPUT_BUFFER_SIZE, "Input Buffer");
 
             for (int j = 0; j < DOUT_BUFFERCOUNT; ++j) {
-                h_dbufstream_zlibout[i][j].resize(OUTPUT_BUFFER_SIZE);
-                h_dcompressSize_stream[i][j].resize(sizeof(uint32_t));
+                MEM_ALLOC_CHECK(h_dbufstream_zlibout[i][j].resize(OUTPUT_BUFFER_SIZE), OUTPUT_BUFFER_SIZE,
+                                "Output Host Buffer");
+                MEM_ALLOC_CHECK(h_dcompressSize_stream[i][j].resize(sizeof(uint32_t)), sizeof(uint32_t),
+                                "DecompressSize Host Buffer");
             }
-            h_dcompressStatus[i].resize(sizeof(uint32_t));
+            MEM_ALLOC_CHECK(h_dcompressStatus[i].resize(sizeof(uint32_t)), sizeof(uint32_t),
+                            "DecompressStatus Host Buffer");
         }
 #ifdef VERBOSE
         auto cons_API_end = std::chrono::high_resolution_clock::now();
@@ -552,14 +561,16 @@ uint32_t xfZlib::decompress_file(std::string& inFile_name, std::string& outFile_
         exit(1);
     }
 
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in(input_size);
-
     uint32_t output_buf_size = input_size * m_max_cr;
 
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in;
     // Allocat output size
     // 8 - Max CR per file expected, if this size is big
     // Decompression crashes
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > out(output_buf_size);
+
+    MEM_ALLOC_CHECK(in.resize(input_size), input_size, "Input Buffer");
+    MEM_ALLOC_CHECK(in.resize(output_buf_size), output_buf_size, "Output Buffer");
 
     uint32_t debytes = 0;
     inFile.read((char*)in.data(), input_size);
@@ -831,6 +842,7 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
 
     // if input_size if greater than 2 MB, then buffer size must be 2MB
     if (input_size < inBufferSize) inBufferSize = input_size;
+    if (max_outbuf_size < outBufferSize) outBufferSize = max_outbuf_size;
 
     // Set Kernel Args
     (decompress_kernel[cu])->setArg(0, input_size);

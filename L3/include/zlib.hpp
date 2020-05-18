@@ -32,7 +32,7 @@
 #include "xcl2.hpp"
 #include <sys/stat.h>
 #include <random>
-
+#include <new>
 const int gz_max_literal_count = 4096;
 
 #define PARALLEL_ENGINES 8
@@ -43,8 +43,8 @@ const int gz_max_literal_count = 4096;
 #define BLOCK_SIZE_IN_KB 1024
 
 // Input and output buffer size
-#define INPUT_BUFFER_SIZE (8 * 1024 * 1024)
-#define OUTPUT_BUFFER_SIZE (16 * 1024 * 1024)
+#define INPUT_BUFFER_SIZE (8 * MEGA_BYTE)
+#define OUTPUT_BUFFER_SIZE (16 * MEGA_BYTE)
 
 // zlib max cr limit
 #define MAX_CR 10

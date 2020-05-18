@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.mm2multStream", 
+    "name": "Xilinx Memory Mapped To Multistream HLS Test", 
     "description": "Test Design to valid mm2multStream", 
     "flow": "hls", 
     "platform_whitelist": [
