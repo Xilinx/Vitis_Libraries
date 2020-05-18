@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.upsizer", 
+    "name": "Xilinx Upsizer HLS Test", 
     "description": "Test Design to validate Upsizer module", 
     "flow": "hls", 
     "platform_whitelist": [

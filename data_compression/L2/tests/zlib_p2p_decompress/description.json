@@ -1,11 +1,12 @@
 {
-    "name": "Xilinx ZLIB P2P Decompression Parallel Byte 8_II1",
+    "name": "Xilinx ZLIB P2P 8 Parallel Bytes Decompress with Loop II=1",
     "description": [
         "Xilinx ZLIB P2P Decompression Parallel Byte 8_II1"
     ],
     "flow": "vitis",
     "platform_blacklist": [
-        "u50"
+        "u50",
+        "u280"
     ],
     "platform_whitelist": [
         "samsung_u2",

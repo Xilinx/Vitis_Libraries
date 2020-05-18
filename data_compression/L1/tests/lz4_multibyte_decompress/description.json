@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.lz4_multibyte_decompress", 
+    "name": "Xilinx Lz4 Multibyte Decompress HLS Test", 
     "description": "Test design to validate LZ4 Multi Byte Decompress Module", 
     "flow": "hls", 
     "platform_whitelist": [

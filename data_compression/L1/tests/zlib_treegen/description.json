@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.zlib_treegen", 
+    "name": "Xilinx Zlib Treegen HLS Test",
     "description": "Test Design to validate huffman treegen module in Zlib compression", 
     "flow": "hls", 
     "platform_whitelist": [

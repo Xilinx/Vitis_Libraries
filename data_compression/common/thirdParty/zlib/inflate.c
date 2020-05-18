@@ -647,7 +647,7 @@ int ZEXPORT inflate(z_streamp strm, int flush)
     std::string u50_xclbin = xclbin;
  
     if (u50_xclbin.c_str() == NULL) {
-        u50_xclbin = "/opt/Xilinx/zlib/compress_decompress.xclbin";
+        u50_xclbin = "/opt/Xilinx/zlib/u50_gen3x16_xdma_201920_3.xclbin";
         std::ifstream bin_file(u50_xclbin.c_str(), std::ifstream::binary);
         if (bin_file.fail()) {
 #ifdef VERBOSE

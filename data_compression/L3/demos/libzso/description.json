@@ -1,5 +1,5 @@
 {
-    "name": "ZLIB_libzso Shared Object demo",
+    "name": "Xilinx ZLIB Libzso Shared Object Demo",
     "description": [
         "ZLIB Shared Object demo present in `L3/demo/libzso` directory."
     ],
@@ -12,6 +12,7 @@
     ],
     "match_makefile": "false",
     "match_ini": "false",
+    "gui": false, 
     "host": {
         "host_exe": "zlib_so.exe",
         "compiler": {

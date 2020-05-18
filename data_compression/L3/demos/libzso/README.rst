@@ -3,7 +3,7 @@ Zlib (SO) Demo
 ====================
 
 This demo presents usage and generation of libz.so (FPGA port).
-This demo support Alveo U200, Alveo U280, Alveo U50 (2019.2 Vitis)
+This demo support Alveo U200, Alveo U280, Alveo U50 (2020.1 Vitis)
 
 Build Instructions
 -------------------
@@ -36,7 +36,7 @@ Environment Setup:
 
 ``export XILINX_LIBZ_XCLBIN=<path to xclbin>``
 
-``source /opt/Xilinx/Vitis/2019.2/settings64.sh``
+``source /opt/Xilinx/Vitis/2020.1/settings64.sh``
 
 ``source /opt/Xilinx/xbb/xrt/packages/setenv.sh``
 

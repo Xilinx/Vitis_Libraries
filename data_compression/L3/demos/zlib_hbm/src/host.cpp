@@ -32,7 +32,7 @@ void xil_compress_decompress_list(std::string& file_list,
                                   enum list_mode mode = COMP_DECOMP,
                                   uint8_t device_id = 0) {
     // Create xfZlib object
-    xfZlib xlz(single_bin, max_cr, BOTH, device_id);
+    xfZlib xlz(single_bin, max_cr, BOTH, device_id, 0, FULL);
 
     if (mode != ONLY_DECOMPRESS) {
         std::cout << "--------------------------------------------------------------" << std::endl;
@@ -137,7 +137,7 @@ void xil_batch_verify(
 void xil_decompress_top(
     std::string& decompress_mod, int cu, std::string& single_bin, uint8_t device_id, uint8_t max_cr) {
     // Xilinx ZLIB object
-    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id);
+    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id, 0, FULL);
 
     std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
@@ -218,7 +218,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
                               uint8_t device_id,
                               uint8_t max_cr_val) {
     // Create xfZlib object
-    xfZlib xlz(single_bin, max_cr_val, BOTH, device_id);
+    xfZlib xlz(single_bin, max_cr_val, BOTH, device_id, 0, FULL);
 
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "                     Xilinx Zlib Compress                          " << std::endl;

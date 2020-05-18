@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.lz4_decompress", 
+    "name": "Xilinx Lz4 Decompress HLS Test", 
     "description": "Test Design to validate LZ4 core decompress module", 
     "flow": "hls", 
     "platform_whitelist": [
