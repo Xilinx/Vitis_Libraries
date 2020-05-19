@@ -23,6 +23,17 @@
 #define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
+#include <CL/cl2.hpp>
+#include <iostream>
+#include <fstream>
+#include <CL/cl_ext_xilinx.h>
+#include <sys/mman.h>
+
+// Data Size definitions
+const size_t KILO_BYTE = 1024;
+const size_t MEGA_BYTE = KILO_BYTE * 1024;
+const size_t GIGA_BYTE = MEGA_BYTE * 1024;
+
 // OCL_CHECK doesn't work if call has templatized function call
 #define OCL_CHECK(error, call)                                                                   \
     call;                                                                                        \
@@ -31,11 +42,18 @@
         exit(EXIT_FAILURE);                                                                      \
     }
 
-#include <CL/cl2.hpp>
-#include <iostream>
-#include <fstream>
-#include <CL/cl_ext_xilinx.h>
-#include <sys/mman.h>
+#define MEM_ALLOC_CHECK(call, size, mesg) \
+    try {                                \
+        call;                            \
+    }catch (const std::bad_alloc& e) {   \
+        std::cerr << "\n";               \
+        std::cerr << mesg << " Allocation Failed \n"; \
+        std::cerr << "Failed to Allocate: " << size/GIGA_BYTE << "GB" << std::endl; \
+        std::cerr << "\n"; \
+        release(); \
+        exit(0); \
+    } \
+
 // When creating a buffer with user pointer (CL_MEM_USE_HOST_PTR), under the hood
 // User ptr is used if and only if it is properly aligned (page aligned). When not
 // aligned, runtime has no choice but to create its own host side buffer that backs

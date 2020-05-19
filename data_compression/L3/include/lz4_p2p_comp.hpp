@@ -17,8 +17,23 @@
 #ifndef _XFCOMPRESSION_LZ4_P2P_COMP_HPP_
 #define _XFCOMPRESSION_LZ4_P2P_COMP_HPP_
 
-#pragma once
-#include "defns.h"
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <iomanip>
+#include <fstream>
+#include <cassert>
+#include <cstdlib>
+#include <cstdio>
+#include <stdint.h>
+#include <stdbool.h>
+#include <time.h>
+#include <math.h>
+#include <sys/stat.h>
+#include <fcntl.h>  /* For O_RDWR */
+#include <unistd.h> /* For open(), creat() */
+#include "xcl2.hpp"
 
 // Maximum compute units supported
 #define MAX_COMPUTE_UNITS 2

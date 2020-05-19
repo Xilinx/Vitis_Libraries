@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ZLIB Decompression Fixed",
+    "name": "Xilinx ZLIB Fixed Decompression",
     "description": [
         "Xilinx ZLIB Decompression Fixed"
     ],
@@ -9,6 +9,9 @@
             "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt.fixed.zlib",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "match_makefile": "false",
     "host": {

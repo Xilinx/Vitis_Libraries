@@ -1,5 +1,5 @@
 {
-    "name": "LZ4 Application",
+    "name": "Xilinx LZ4 Application",
     "description": [
         "LZ4 Application resides in `L3/demos/lz4_app` directory."
     ],
@@ -19,6 +19,7 @@
         }
     ],
     "config_make": "config.mk",
+    "gui": false, 
     "host": {
         "host_exe": "xil_lz4",
         "compiler": {

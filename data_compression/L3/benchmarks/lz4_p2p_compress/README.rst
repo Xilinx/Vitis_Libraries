@@ -6,8 +6,8 @@ throughput when multiple files run concurrently on both compute units.
 
 :: 
 
-    Tool: 2019.2
-    XRT : 2019.2
+    Tool: 2020.1
+    XRT : 2020.1
     XSA : xilinx_samsung_U2x4_201920_1
 
 
@@ -26,7 +26,7 @@ throughput when multiple files run concurrently on both compute units.
 
 ::
 
-       $ Setup Xilinx vitis 2019.2 along with XRT 
+       $ Setup Xilinx vitis 2020.1 along with XRT 
        $ cd ./data_compression/L3/benchmarks/lz4_p2p_comp/
        $ make run TARGET=sw_emu DEVICE=<path to u.2 xpfm file>
 
@@ -34,7 +34,7 @@ throughput when multiple files run concurrently on both compute units.
 
 ::
 
-       $ Setup Xilinx vitis 2019.2 along with XRT 
+       $ Setup Xilinx vitis 2020.1 along with XRT 
        $ cd ./data_compression/L3/benchmarks/lz4_p2p_comp/
        $ make all TARGET=hw DEVICE=<path to u.2 xpfm file> 
 

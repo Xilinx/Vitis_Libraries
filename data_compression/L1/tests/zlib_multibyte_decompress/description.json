@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.zlib_multibyte_decompress", 
+    "name": "Xilinx Zlib Multibyte Decompress HLS Test", 
     "description": "Test Design to validate Zlib multibyte decompress module", 
     "flow": "hls", 
     "platform_whitelist": [

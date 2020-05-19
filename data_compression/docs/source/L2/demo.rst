@@ -27,7 +27,7 @@ Before building any of the examples, following commands need to be executed:
 
 .. code-block:: bash
    
-   $ source <Vitis_Installed_Path>/installs/lin64/Vitis/2019.2/settings64.sh
+   $ source <Vitis_Installed_Path>/installs/lin64/Vitis/2020.1/settings64.sh
    $ source <Vitis_Installed_Path>/xbb/xrt/packages/setenv.sh
 
 Build Instructions

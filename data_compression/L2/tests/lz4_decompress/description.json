@@ -10,6 +10,9 @@
             "name": "generic launch for all flows"
         }
     ],
+    "platform_blacklist": [
+        "u280"
+    ],
     "host": {
         "host_exe": "xil_lz4",
         "compiler": {

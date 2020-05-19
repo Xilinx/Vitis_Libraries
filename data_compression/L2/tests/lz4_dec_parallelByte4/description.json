@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx LZ4 Decompress Parallel Byte 4",
+    "name": "Xilinx LZ4 Decompress 4 Parallel Bytes",
     "description": [
         "Xilinx LZ4 Decompress Parallel Byte 4"
     ],
@@ -9,6 +9,9 @@
             "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt.lz4",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "host": {
         "host_exe": "xil_lz4",

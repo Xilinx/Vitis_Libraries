@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.downsizer", 
+    "name": "Xilinx Downsizer HLS Test", 
     "description": "Test Design to validate Downsizer module.", 
     "flow": "hls", 
     "platform_whitelist": [

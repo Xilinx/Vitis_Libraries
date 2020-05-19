@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.lz4_compress_mm32bit_single_engine", 
+    "name": "Xilinx LZ4 32 Bit Memory Mapped Single Engine Compress HLS Test", 
     "description": "This is a L1 test design to validate LZ4 compression module. It processes the data to and from the DDR into multiple parallel streams that helps in processing 8x data and achieve higher performance.", 
     "flow": "hls", 
     "platform_whitelist": [

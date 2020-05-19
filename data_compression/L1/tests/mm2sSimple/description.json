@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.mm2sSimple", 
+    "name": "Xilinx Memory Mapped To Stream HLS Test", 
     "description": "Test Design to validate mm2sSimple", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "Snappy-Streaming Decompression ParalleByte8",
+    "name": "Xilinx Snappy Streaming 8 Multibytes Decompress",
     "description": [
         "Snappy-Streaming Decompression ParallelByte8"
     ],
@@ -9,6 +9,9 @@
             "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "match_makefile": "false",
     "host": {
