@@ -33,6 +33,7 @@ void xil_compress_bandwidth(
     uint32_t enbytes = 0;
     uint32_t num_iter = NUM_ITER;
     xfZlib xlz(single_bin, max_cr, COMP_ONLY, device_id);
+    ERROR_STATUS(xlz.error_code());
     std::chrono::duration<double, std::nano> compress_API_time_ns_1(0);
     std::chrono::duration<double, std::milli> compress_API_time_ms_1(0);
     auto compress_API_start = std::chrono::high_resolution_clock::now();
@@ -56,16 +57,22 @@ void xil_compress_bandwidth(
 }
 
 // Bandwidth measurement API
-void xil_decompress_bandwidth(
-    const std::string& single_bin, uint8_t* in, uint8_t* out, uint32_t input_size, uint32_t cu, uint8_t device_id, uint8_t max_cr) {
+void xil_decompress_bandwidth(const std::string& single_bin,
+                              uint8_t* in,
+                              uint8_t* out,
+                              uint32_t input_size,
+                              uint32_t cu,
+                              uint8_t device_id,
+                              uint8_t max_cr) {
     uint32_t debytes = 0;
     uint32_t num_iter = NUM_ITER;
     xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id);
+    ERROR_STATUS(xlz.error_code());
     std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
     std::chrono::duration<double, std::milli> decompress_API_time_ms_1(0);
     auto decompress_API_start = std::chrono::high_resolution_clock::now();
-	
-    for (uint32_t i = 0; i < num_iter; i++) debytes = xlz.decompress(in, out, input_size, cu);	
+
+    for (uint32_t i = 0; i < num_iter; i++) debytes = xlz.decompress(in, out, input_size, cu);
 
     auto decompress_API_end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
@@ -78,7 +85,7 @@ void xil_decompress_bandwidth(
     std::cout << "Compressed Size: " << debytes / 1024 << "KB ";
     std::cout << "CU: " << cu;
     std::cout << " PID: " << getpid();
-    std::cout << " PPID: " << getppid(); 
+    std::cout << " PPID: " << getppid();
     std::cout << " API: " << std::fixed << std::setprecision(2) << throughput_in_mbps_1 << "MB/s";
     std::cout << " Time: " << std::fixed << std::setprecision(2) << decompress_API_time_ms_1.count() << std::endl;
 }
@@ -100,29 +107,26 @@ int main(int argc, char* argv[]) {
     std::string mcr = parser.value("max_cr");
     std::string mproc = parser.value("multi_process");
     std::string device_ids = parser.value("id");
-    
+
     uint8_t device_id = 0;
-    if (!(device_ids.empty())) 
-        device_id = atoi(device_ids.c_str());
+    if (!(device_ids.empty())) device_id = atoi(device_ids.c_str());
 
     uint8_t max_cr_val = MAX_CR;
     if (!(mcr.empty())) {
         max_cr_val = atoi(mcr.c_str());
-    } 
-    
+    }
+
     uint8_t multi_proc = M_PROC;
-    if (!(mproc.empty())) 
-	    multi_proc = atoi(mproc.c_str());
-    
+    if (!(mproc.empty())) multi_proc = atoi(mproc.c_str());
+
     std::string mprocess_ent = "XCL_MULTIPROCESS_MODE=1";
     if (putenv((char*)mprocess_ent.c_str()) != 0) {
-	    std::cerr << "putenv failed" << std::endl;
+        std::cerr << "putenv failed" << std::endl;
     } else {
         std::cout << "Environmnet Variable: XCL_MULTIPROCESS_MODE: " << getenv("XCL_MULTIPROCESS_MODE") << std::endl;
     }
 
     if (!compress_mod.empty()) {
-
         if (multi_proc > 2) {
             multi_proc = 2;
             std::cout << "More than two processes may crash, resetting to 2" << std::endl;
@@ -131,8 +135,8 @@ int main(int argc, char* argv[]) {
         std::string inFile_name = compress_mod;
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         uint64_t input_size = get_file_size(inFile);
-        
-	    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in[multi_proc];
+
+        std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in[multi_proc];
         std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > out[multi_proc];
 
         std::cout << "\n";
@@ -150,19 +154,18 @@ int main(int argc, char* argv[]) {
         for (int i = 1; i < multi_proc; i++) {
             std::memcpy(in[i].data(), in[0].data(), input_size);
         }
-        
+
         std::cout << "\n";
 
-	    std::cout << "No of Process " << (int)multi_proc << std::endl;
+        std::cout << "No of Process " << (int)multi_proc << std::endl;
         for (int i = 0; i < multi_proc; i++) {
-	        if (fork() == 0) {
-                xil_compress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, device_id, max_cr_val);	
-		        exit(0);
-	        }
+            if (fork() == 0) {
+                xil_compress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, device_id, max_cr_val);
+                exit(0);
+            }
         }
 
-	    for (int i = 0; i < multi_proc; i++) 
-	        wait(NULL);
+        for (int i = 0; i < multi_proc; i++) wait(NULL);
 
     } else if (!decompress_mod.empty()) {
         // "-d" - DeCompress Mode
@@ -172,7 +175,7 @@ int main(int argc, char* argv[]) {
 
         std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in[multi_proc];
         std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > out[multi_proc];
-	
+
         std::cout << "\n";
         // Allocate buffers for input and output
         for (int i = 0; i < multi_proc; i++) {
@@ -189,15 +192,14 @@ int main(int argc, char* argv[]) {
             std::memcpy(in[i].data(), in[0].data(), input_size);
         }
 
-	    std::cout << "No of Process " << (int)multi_proc << std::endl;
-        for (int i = 0; i < multi_proc; i++)  {
-	        if (fork() == 0) {
+        std::cout << "No of Process " << (int)multi_proc << std::endl;
+        for (int i = 0; i < multi_proc; i++) {
+            if (fork() == 0) {
                 xil_decompress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, i, device_id, max_cr_val);
-		        exit(0);
-	        }
-	    }
+                exit(0);
+            }
+        }
 
-	    for (int i = 0; i < multi_proc; i++) 
-            wait(NULL);
+        for (int i = 0; i < multi_proc; i++) wait(NULL);
     }
 }

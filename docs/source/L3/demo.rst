@@ -2,20 +2,17 @@
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, FPGA OpenCL Kernels, LZ4 Demo, ZLIB Demo
    :description: This section provides various application demos
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
 
 =====
 Demos
 =====
 
-This section presents integration of various modules from L1, L2 levels in
+This page describes the integration of various modules from L1, L2 levels in
 combination with software APIs to derive end application that can be directly
 deployed or creation of shared library that can be integrated with external
 applications.
 
-Demo examples for Zlib and Lz4 applications are present in **L3/demos/**
-directory.
+Demo examples for **Zlib** and **Lz4** applications are available in the ``L3/demos/`` directory.
 
 .. toctree::
    :maxdepth: 1
@@ -27,7 +24,7 @@ directory.
 Environment Setup
 =================
 
-Instructions below setup Vitis environment for builid the application. These
+Execute the following commands to setup the Vitis environment for building the application. These
 instructions are applicable for all the demos under this category.
 
 
@@ -39,7 +36,7 @@ instructions are applicable for all the demos under this category.
 Build Instructions
 ------------------
 
-To compile and test run this application execute the following commands:
+Execute the following command to compile and test run this application:
 
 .. code-block:: bash
    
@@ -54,7 +51,7 @@ Variable ``TARGET`` can take the following values:
 	- **hw**	: run on actual hardware
 
 
-Build instructions are common for all the application but generated executable
-differ.
+Build instructions are common for all the applications. The generated executable
+may differ.
 
 
