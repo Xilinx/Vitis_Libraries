@@ -74,6 +74,7 @@ class xflz4 {
    private:
     // Block Size
     uint32_t m_BlockSizeInKb;
+    uint32_t m_xxhashVal;
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q;

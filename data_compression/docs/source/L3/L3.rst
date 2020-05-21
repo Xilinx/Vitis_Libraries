@@ -6,8 +6,6 @@
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, L3 Overlay, User Guide
    :description: This section provides overview of L3 APIs
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
 
 .. _l3_user_guide:
 

@@ -302,7 +302,7 @@ CXXFLAGS += -std=c++0x -fmessage-length=0 \
 	    
 CXXFLAGS += -O3
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
-LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
+LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing
 LDFLAGS += -Wno-unused-function
 LDFLAGS += -O3
 EXE_FILE = $(BUILD_DIR)/$(EXE_NAME)
@@ -317,7 +317,7 @@ $(OBJ_DIR)/%.o: CXXFLAGS += $($(*)_CXXFLAGS)
 $(OBJ_FILES): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | check_vpp check_xrt check_platform
 	@echo -e "----\nCompiling object $*..."
 	mkdir -p $(@D) 
-	$(CXX) -fPIC -o $@ -c $< $(CXXFLAGS)
+	$(CXX) -fPIC -o $@ -c $< $(CXXFLAGS) $(LDFLAGS)
 
 EXTRA_OBJ_FILES = $(foreach f,$(EXTRA_OBJS),$(OBJ_DIR)/$(f).o)
 
@@ -333,8 +333,7 @@ $(LIBZLIB): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platform
 $(EXE_FILE): $(OBJ_FILES) | check_vpp check_xrt check_platform
 	@echo -e "----\nCompiling libz.so $(notdir $@)..."
 	mkdir -p $(BUILD_DIR)
-	cp ./build/libz.so .
-	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ -L. libz.so
+	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ -L. $(BUILD_DIR)/libz.so
 	
 # ------------------------------------------------------------
 #                      build rules
@@ -390,7 +389,7 @@ else ifeq ($(TARGET),hw)
   EMU_CONFIG =
 endif
 
-RUN_ENV += export LD_LIBRARY_PATH=$(PWD):$(LD_LIBRARY_PATH)
+RUN_ENV += export LD_LIBRARY_PATH=$(PWD)/$(BUILD_DIR):$(LD_LIBRARY_PATH)
 RUN_ENV += export XILINX_LIBZ_XCLBIN=$(XCLBIN_FILE)
 
 run: xclbin lib host $(EMU_CONFIG)

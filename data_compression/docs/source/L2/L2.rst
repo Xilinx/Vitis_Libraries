@@ -6,8 +6,6 @@
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, L2 User Guide    
    :description: This section provides L2 kernel user guide
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
 
 .. _l2_user_guide:
 

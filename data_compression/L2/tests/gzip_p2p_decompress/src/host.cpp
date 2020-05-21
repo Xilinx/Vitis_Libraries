@@ -19,6 +19,12 @@
 #include <vector>
 #include "cmdlineparser.h"
 
+// The default value set as non-P2P, so that design can work for all platforms.
+// For P2P enabled platform, user need to manually change this macro value to true.
+#ifndef ENABLE_P2P
+#define ENABLE_P2P false
+#endif
+
 void xil_validate(std::string& file_list);
 
 void xil_decompress_list(std::string& file_list, std::string& decompress_bin, uint8_t deviceId, bool enable_p2p) {

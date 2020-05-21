@@ -15,9 +15,7 @@
 
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, Overview
-   :description: Vitis Data Compression Library top level overview
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
+   :description: Vitis Data Compression library software and hardware requirements.
 
 .. _overview:
 

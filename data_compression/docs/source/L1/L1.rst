@@ -6,8 +6,6 @@
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, L1 Modules, Data Compression HLS, ZLIB HLS, Zlib OpenCL, LZ4 HLS, Google Snappy OpenCL
    :description: User Guide of L1 modules under Vitis Data Compression Library
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
    
 .. _l1_user_guide: 
 

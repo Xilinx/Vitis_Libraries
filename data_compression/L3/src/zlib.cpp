@@ -168,6 +168,8 @@ uint64_t xfZlib::compress_file(std::string& inFile_name, std::string& outFile_na
         // Pack zlib encoded stream .zlib file
         zlib_headers(inFile_name, outFile, zlib_out.data(), enbytes);
 #endif
+    } else {
+        exit(EXIT_FAILURE);
     }
 
     // Close file
@@ -183,7 +185,7 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 }
 
 // OpenCL setup initialization
-void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
+int xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
     // Error handling in OpenCL is performed using the cl_int specifier. OpenCL
     // functions either return or accept pointers to cl_int types to indicate if
     // an error occurred.
@@ -191,25 +193,24 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
 
     // Look for platform
     std::vector<cl::Platform> platforms;
-    ZOCL_CHECK(err, err = cl::Platform::get(&platforms));
+    OCL_CHECK(err, err = cl::Platform::get(&platforms));
     auto num_platforms = platforms.size();
     if (num_platforms == 0) {
-#ifdef VERBOSE
-        std::cout << "No Platforms were found this could be cased because of the OpenCL \
+        std::cerr << "No Platforms were found this could be cased because of the OpenCL \
                       ICD not installed at /etc/OpenCL/vendors directory"
                   << std::endl;
-#endif
-        err_flag = true;
-        return;
+        m_err_code = -32;
+        return -32;
     }
 
     std::string platformName;
     cl::Platform platform;
-    size_t i = 0;
-    for (i = 0; i < platforms.size(); i++) {
+    bool foundFlag = false;
+    for (size_t i = 0; i < platforms.size(); i++) {
         platform = platforms[i];
-        ZOCL_CHECK(err, platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
+        OCL_CHECK(err, platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
         if (platformName == "Xilinx") {
+            foundFlag = true;
 #ifdef VERBOSE
             std::cout << "Found Platform" << std::endl;
             std::cout << "Platform Name: " << platformName.c_str() << std::endl;
@@ -217,23 +218,25 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
             break;
         }
     }
-    if (i == platforms.size()) {
-#ifdef VERBOSE
-        std::cout << "Error: Failed to find Xilinx platform" << std::endl;
-#endif
-        err_flag = true;
-        return;
+    if (foundFlag == false) {
+        std::cerr << "Error: Failed to find Xilinx platform" << std::endl;
+        m_err_code = 1;
+        return 1;
     }
     // Getting ACCELERATOR Devices and selecting 1st such device
     std::vector<cl::Device> devices;
-    ZOCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
+    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
     m_device = devices[m_deviceid];
 
     // OpenCL Setup Start
     // Creating Context and Command Queue for selected Device
     cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
-    ZOCL_CHECK(err, m_context = new cl::Context(m_device, props, NULL, NULL, &err));
-
+    OCL_CHECK(err, m_context = new cl::Context(m_device, props, NULL, NULL, &err));
+    if (err) {
+        std::cerr << "Context creation Failed " << std::endl;
+        m_err_code = 1;
+        return 1;
+    }
 // Import_binary() command will find the OpenCL binary file created using the
 // v++ compiler load into OpenCL Binary and return as Binaries
 // OpenCL and it can contain many functions which can be executed on the
@@ -243,11 +246,9 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
     std::cout << "INFO: Reading " << binaryFileName << std::endl;
 #endif
     if (access(binaryFileName.c_str(), R_OK) != 0) {
-#ifdef VERBOSE
-        std::cout << "ERROR: " << binaryFileName.c_str() << " xclbin not available please build " << std::endl;
-#endif
-        err_flag = true;
-        return;
+        std::cerr << "ERROR: " << binaryFileName.c_str() << " xclbin not available please build " << std::endl;
+        m_err_code = 1;
+        return 1;
     }
 
 #ifdef VERBOSE
@@ -256,11 +257,9 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
 #endif
     std::ifstream bin_file(binaryFileName.c_str(), std::ifstream::binary);
     if (bin_file.fail()) {
-#ifdef VERBOSE
-        std::cout << "Unable to open binary file" << std::endl;
-#endif
-        err_flag = true;
-        return;
+        std::cerr << "Unable to open binary file" << std::endl;
+        m_err_code = 1;
+        return 1;
     }
 
     bin_file.seekg(0, bin_file.end);
@@ -272,14 +271,18 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
     bin_file.read(reinterpret_cast<char*>(buf.data()), nb);
 
     cl::Program::Binaries bins{{buf.data(), buf.size()}};
-
-    ZOCL_CHECK(err, m_program = new cl::Program(*m_context, {m_device}, bins, NULL, &err));
+    ZOCL_CHECK_2(err, m_program = new cl::Program(*m_context, {m_device}, bins, NULL, &err), m_err_code, c_clinvalidbin,
+                 c_clinvalidvalue);
+    if (error_code()) {
+        std::cerr << "Failed to program the device " << std::endl;
+        return m_err_code;
+    }
 
     // Create Command Queue
     // Compress Command Queue & Kernel Setup
     if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
         for (uint8_t i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
-            ZOCL_CHECK(err, m_q[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
+            OCL_CHECK(err, m_q[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
         }
 
         std::string cu_id;
@@ -290,28 +293,28 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
         for (uint32_t i = 0; i < C_COMPUTE_UNIT; i++) {
             cu_id = std::to_string(i + 1);
             std::string krnl_name_full = comp_krnl_name + ":{" + comp_krnl_name + "_" + cu_id + "}";
-            ZOCL_CHECK(err, compress_kernel[i] = new cl::Kernel(*m_program, krnl_name_full.c_str(), &err));
+            OCL_CHECK(err, compress_kernel[i] = new cl::Kernel(*m_program, krnl_name_full.c_str(), &err));
         }
 
         // Create Huffman Kernel
         for (uint32_t i = 0; i < H_COMPUTE_UNIT; i++) {
             cu_id = std::to_string(i + 1);
             std::string krnl_name_full = huffman_krnl_name + ":{" + huffman_krnl_name + "_" + cu_id + "}";
-            ZOCL_CHECK(err, huffman_kernel[i] = new cl::Kernel(*m_program, krnl_name_full.c_str(), &err));
+            OCL_CHECK(err, huffman_kernel[i] = new cl::Kernel(*m_program, krnl_name_full.c_str(), &err));
         }
     }
 
     // DeCompress Command Queue & Kernel Setup
     if ((m_cdflow == BOTH) || (m_cdflow == DECOMP_ONLY)) {
         for (uint8_t i = 0; i < D_COMPUTE_UNIT; i++) {
-            ZOCL_CHECK(err, m_q_dec[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
+            OCL_CHECK(err, m_q_dec[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
         }
 
         for (uint8_t i = 0; i < D_COMPUTE_UNIT; i++) {
-            ZOCL_CHECK(err, m_q_rd[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
-            ZOCL_CHECK(err, m_q_rdd[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
-            ZOCL_CHECK(err, m_q_wr[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
-            ZOCL_CHECK(err, m_q_wrd[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
+            OCL_CHECK(err, m_q_rd[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
+            OCL_CHECK(err, m_q_rdd[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
+            OCL_CHECK(err, m_q_wr[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
+            OCL_CHECK(err, m_q_wrd[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
         }
 
         std::string cu_id;
@@ -325,12 +328,13 @@ void xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
             std::string decompress_kname =
                 stream_decompress_kernel_name[kidx] + ":{" + stream_decompress_kernel_name[kidx] + "_" + cu_id + "}";
 
-            ZOCL_CHECK(err, data_writer_kernel[i] = new cl::Kernel(*m_program, data_writer_kname.c_str(), &err));
-            ZOCL_CHECK(err, data_reader_kernel[i] = new cl::Kernel(*m_program, data_reader_kname.c_str(), &err));
-            ZOCL_CHECK(err, decompress_kernel[i] = new cl::Kernel(*m_program, decompress_kname.c_str(), &err));
+            OCL_CHECK(err, data_writer_kernel[i] = new cl::Kernel(*m_program, data_writer_kname.c_str(), &err));
+            OCL_CHECK(err, data_reader_kernel[i] = new cl::Kernel(*m_program, data_reader_kname.c_str(), &err));
+            OCL_CHECK(err, decompress_kernel[i] = new cl::Kernel(*m_program, decompress_kname.c_str(), &err));
         }
     }
     // OpenCL Host / Device Buffer Setup Start
+    return 0;
 }
 
 // Constructor
@@ -340,11 +344,23 @@ xfZlib::xfZlib(const std::string& binaryFileName,
                uint8_t device_id,
                uint8_t profile,
                uint8_t d_type) {
+    for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
+        for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
+            buffer_input[i][j] = nullptr;
+            buffer_lz77_output[i][j] = nullptr;
+            buffer_zlib_output[i][j] = nullptr;
+            buffer_compress_size[i][j] = nullptr;
+            buffer_inblk_size[i][j] = nullptr;
+            buffer_dyn_ltree_freq[i][j] = nullptr;
+            buffer_dyn_dtree_freq[i][j] = nullptr;
+        }
+    }
     // Zlib Compression Binary Name
     m_cdflow = cd_flow;
     m_isProfile = profile;
     m_deviceid = device_id;
     m_max_cr = max_cr;
+
 #ifdef VERBOSE
     std::chrono::duration<double, std::milli> device_API_time_ns_1(0);
     auto device_API_start = std::chrono::high_resolution_clock::now();
@@ -352,7 +368,12 @@ xfZlib::xfZlib(const std::string& binaryFileName,
     uint8_t kidx = d_type;
 
     // OpenCL setup
-    init(binaryFileName, kidx);
+    int err = init(binaryFileName, kidx);
+    if (err) {
+        std::cerr << "\nOpenCL Setup Failed" << std::endl;
+        release();
+        return;
+    }
 
 #ifdef VERBOSE
     auto device_API_end = std::chrono::high_resolution_clock::now();
@@ -398,30 +419,36 @@ xfZlib::xfZlib(const std::string& binaryFileName,
         std::cout << "Compress Host Buffer Allocation Time = " << std::fixed << std::setprecision(2) << cons_time
                   << std::endl;
 #endif
+        cl_int err;
         for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
             for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
                 // Device Buffer Allocation
-                buffer_input[i][j] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                    host_buffer_size, h_buf_in[i][j].data());
+                OCL_CHECK(err, buffer_input[i][j] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                                   host_buffer_size, h_buf_in[i][j].data(), &err));
 
-                buffer_lz77_output[i][j] =
-                    new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS, host_buffer_size * 4, NULL);
+                OCL_CHECK(err,
+                          buffer_lz77_output[i][j] = new cl::Buffer(
+                              *m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS, host_buffer_size * 4, NULL, &err));
 
-                buffer_compress_size[i][j] =
-                    new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, temp_nblocks * sizeof(uint32_t),
-                                   h_compressSize[i][j].data());
+                OCL_CHECK(err, buffer_compress_size[i][j] =
+                                   new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                                  temp_nblocks * sizeof(uint32_t), h_compressSize[i][j].data(), &err));
 
-                buffer_zlib_output[i][j] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                                          host_buffer_size * 2, h_buf_zlibout[i][j].data());
+                OCL_CHECK(err, buffer_zlib_output[i][j] =
+                                   new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                                  host_buffer_size * 2, h_buf_zlibout[i][j].data(), &err));
 
-                buffer_inblk_size[i][j] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                         temp_nblocks * sizeof(uint32_t), h_blksize[i][j].data());
+                OCL_CHECK(err, buffer_inblk_size[i][j] =
+                                   new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                  temp_nblocks * sizeof(uint32_t), h_blksize[i][j].data(), &err));
 
-                buffer_dyn_ltree_freq[i][j] = new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
-                                                             PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, NULL);
+                OCL_CHECK(err, buffer_dyn_ltree_freq[i][j] =
+                                   new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
+                                                  PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, NULL, &err));
 
-                buffer_dyn_dtree_freq[i][j] = new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
-                                                             PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, NULL);
+                OCL_CHECK(err, buffer_dyn_dtree_freq[i][j] =
+                                   new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
+                                                  PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, NULL, &err));
             }
         }
     }
@@ -445,6 +472,7 @@ xfZlib::xfZlib(const std::string& binaryFileName,
             MEM_ALLOC_CHECK(h_dcompressStatus[i].resize(sizeof(uint32_t)), sizeof(uint32_t),
                             "DecompressStatus Host Buffer");
         }
+
 #ifdef VERBOSE
         auto cons_API_end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration<double, std::milli>(cons_API_end - cons_API_start);
@@ -457,70 +485,79 @@ xfZlib::xfZlib(const std::string& binaryFileName,
     // OpenCL Host / Device Buffer Setup End
 }
 
+int xfZlib::error_code(void) {
+    return m_err_code;
+}
+
 void xfZlib::release() {
-    delete (m_program);
-    delete (m_context);
+    DELETE_OBJ(m_program);
+    DELETE_OBJ(m_context);
 
     if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
         for (uint8_t i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
-            delete (m_q[i]);
+            DELETE_OBJ(m_q[i]);
         }
-        for (int i = 0; i < C_COMPUTE_UNIT; i++) delete (compress_kernel[i]);
 
-        for (int i = 0; i < H_COMPUTE_UNIT; i++) delete (huffman_kernel[i]);
+        for (int i = 0; i < C_COMPUTE_UNIT; i++) {
+            DELETE_OBJ(compress_kernel[i]);
+        }
+
+        for (int i = 0; i < H_COMPUTE_UNIT; i++) {
+            DELETE_OBJ(huffman_kernel[i]);
+        }
+
+        uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
+        for (uint32_t cu = 0; cu < C_COMPUTE_UNIT; cu++) {
+            for (uint32_t flag = 0; flag < overlap_buf_count; flag++) {
+                DELETE_OBJ(buffer_input[cu][flag]);
+                DELETE_OBJ(buffer_lz77_output[cu][flag]);
+                DELETE_OBJ(buffer_zlib_output[cu][flag]);
+                DELETE_OBJ(buffer_compress_size[cu][flag]);
+                DELETE_OBJ(buffer_inblk_size[cu][flag]);
+                DELETE_OBJ(buffer_dyn_ltree_freq[cu][flag]);
+                DELETE_OBJ(buffer_dyn_dtree_freq[cu][flag]);
+            }
+        }
     }
 
     // Decompress release
     if ((m_cdflow == BOTH) || (m_cdflow == DECOMP_ONLY)) {
-        for (uint8_t flag = 0; flag < D_COMPUTE_UNIT; flag++) delete (m_q_dec[flag]);
-
         for (uint8_t i = 0; i < D_COMPUTE_UNIT; i++) {
-            delete (m_q_rd[i]);
-            delete (m_q_rdd[i]);
-            delete (m_q_wr[i]);
-            delete (m_q_wrd[i]);
+            // Destroy command queues
+            DELETE_OBJ(m_q_dec[i]);
+            DELETE_OBJ(m_q_rd[i]);
+            DELETE_OBJ(m_q_rdd[i]);
+            DELETE_OBJ(m_q_wr[i]);
+            DELETE_OBJ(m_q_wrd[i]);
+            // Destroy kernels
+            DELETE_OBJ(decompress_kernel[i]);
+            DELETE_OBJ(data_writer_kernel[i]);
+            DELETE_OBJ(data_reader_kernel[i]);
+        }
+        // delete the allocated buffers
+        for (int i = 0; i < DIN_BUFFERCOUNT; i++) {
+            DELETE_OBJ(buffer_dec_input[i]);
         }
 
-        for (int i = 0; i < D_COMPUTE_UNIT; i++) delete (decompress_kernel[i]);
-
-        for (uint8_t i = 0; i < D_COMPUTE_UNIT; i++) {
-            delete (data_writer_kernel[i]);
-            delete (data_reader_kernel[i]);
+        for (int i = 0; i < DOUT_BUFFERCOUNT; i++) {
+            DELETE_OBJ(buffer_dec_zlib_output[i]);
         }
     }
 }
 
 // Destructor
 xfZlib::~xfZlib() {
-    if (!err_flag) {
-        release();
-        // Release Compress buffers
-        if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
-            uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
-            for (uint32_t cu = 0; cu < C_COMPUTE_UNIT; cu++) {
-                for (uint32_t flag = 0; flag < overlap_buf_count; flag++) {
-                    delete (buffer_input[cu][flag]);
-                    delete (buffer_lz77_output[cu][flag]);
-                    delete (buffer_zlib_output[cu][flag]);
-                    delete (buffer_compress_size[cu][flag]);
-                    delete (buffer_inblk_size[cu][flag]);
-
-                    delete (buffer_dyn_ltree_freq[cu][flag]);
-                    delete (buffer_dyn_dtree_freq[cu][flag]);
-                }
-            }
-        }
-    }
+    release();
 }
 
 int xfZlib::decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size, uint8_t dcu_id = 0) {
+    // Zlib deCompress
+    uint32_t debytes = 0;
+
     std::random_device rand_hw;
     std::uniform_int_distribution<> range(0, (D_COMPUTE_UNIT - 1));
-
     uint8_t cu_id = range(rand_hw);
 
-    // Zlib deCompress
-    uint32_t debytes;
     if (dcu_id != 0)
         debytes = decompress(in, out, input_size, dcu_id);
     else
@@ -538,15 +575,15 @@ uint64_t xfZlib::compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size)
     // Call to compress
     // Zlib Compress
     uint64_t enbytes = compress(in, out + 2, input_size, host_buffer_size);
+    if (enbytes != 0) {
+        out[enbytes + 1] = 0;
+        out[enbytes + 2] = 0;
+        out[enbytes + 3] = 0;
+        out[enbytes + 4] = 0;
+        out[enbytes + 5] = 0;
 
-    out[enbytes + 1] = 0;
-    out[enbytes + 2] = 0;
-    out[enbytes + 3] = 0;
-    out[enbytes + 4] = 0;
-    out[enbytes + 5] = 0;
-
-    enbytes += 5;
-
+        enbytes += 5;
+    }
     return enbytes;
 }
 
@@ -611,22 +648,21 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
     uint8_t* outP = nullptr;
     uint32_t* outSize = nullptr;
     uint32_t dcmpSize = 0;
-    cl::Buffer* buffer_out[BUFCNT];
     cl::Buffer* buffer_size[BUFCNT];
     cl::Buffer* buffer_status; // single common buffer to capture the decompression status by kernel
+    cl_int err;
     for (int i = 0; i < BUFCNT; i++) {
-        buffer_out[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, bufSize,
-                                       h_dbufstream_zlibout[cu][i].data());
-
-        buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 2 * sizeof(uint32_t),
-                                        h_dcompressSize_stream[cu][i].data());
+        OCL_CHECK(err,
+                  buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                                  2 * sizeof(uint32_t), h_dcompressSize_stream[cu][i].data(), &err));
     }
-    buffer_status = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(uint32_t),
-                                   h_dcompressStatus[cu].data());
+
+    OCL_CHECK(err, buffer_status = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(uint32_t),
+                                                  h_dcompressStatus[cu].data(), &err));
 
     // set consistent buffer size to be read
-    data_reader_kernel[cu]->setArg(2, *buffer_status);
-    data_reader_kernel[cu]->setArg(3, bufSize);
+    OCL_CHECK(err, err = data_reader_kernel[cu]->setArg(2, *buffer_status));
+    OCL_CHECK(err, err = data_reader_kernel[cu]->setArg(3, bufSize));
 
     // enqueue first set of buffers
     uint8_t cbf_idx = 0;
@@ -653,7 +689,7 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
                 }
                 if (raw_size != bufSize) done = true;
 
-                if (dcmpSize > max_outbuf_size) {
+                if ((dcmpSize > max_outbuf_size) && (max_outbuf_size != 0)) {
                     std::cout << "\n" << std::endl;
                     std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during decompression \033[0m \n"
                               << std::endl;
@@ -671,46 +707,37 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
         // need to avoid full buffer copies for 0 bytes size data
         if (!done) {
             // set reader kernel arguments
-            data_reader_kernel[cu]->setArg(0, *(buffer_out[cbf_idx]));
-            data_reader_kernel[cu]->setArg(1, *(buffer_size[cbf_idx]));
+            OCL_CHECK(err, err = data_reader_kernel[cu]->setArg(0, *(buffer_dec_zlib_output[cbf_idx])));
+            OCL_CHECK(err, err = data_reader_kernel[cu]->setArg(1, *(buffer_size[cbf_idx])));
 
             // enqueue reader kernel
-            m_q_rd[cu]->enqueueTask(*data_reader_kernel[cu], NULL, &(kernelReadEvent[cbf_idx]));
+            OCL_CHECK(err, err = m_q_rd[cu]->enqueueTask(*data_reader_kernel[cu], NULL, &(kernelReadEvent[cbf_idx])));
             kernelReadWait[cbf_idx].push_back(kernelReadEvent[cbf_idx]); // event to wait for
 
-            m_q_rdd[cu]->enqueueMigrateMemObjects({*(buffer_size[cbf_idx]), *(buffer_out[cbf_idx])},
-                                                  CL_MIGRATE_MEM_OBJECT_HOST, &(kernelReadWait[cbf_idx]),
-                                                  &(hostReadEvent[cbf_idx]));
+            OCL_CHECK(err, err = m_q_rdd[cu]->enqueueMigrateMemObjects(
+                               {*(buffer_size[cbf_idx]), *(buffer_dec_zlib_output[cbf_idx])},
+                               CL_MIGRATE_MEM_OBJECT_HOST, &(kernelReadWait[cbf_idx]), &(hostReadEvent[cbf_idx])));
             ++keq_idx;
         }
     } while (!(done && keq_idx == cpy_cnt));
     // wait for data transfer queue to finish
-    m_q_rdd[cu]->finish();
+    OCL_CHECK(err, err = m_q_rdd[cu]->finish());
     *decompSize = dcmpSize;
 
     // free the buffers
-    for (int i = 0; i < BUFCNT; i++) {
-        delete (buffer_out[i]);
-        delete (buffer_size[i]);
-    }
+    for (int i = 0; i < BUFCNT; i++) delete (buffer_size[i]);
 }
 
 // method to enqueue writes in parallel with reads from decompression kernel
 void xfZlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, int cu) {
     const int BUFCNT = DIN_BUFFERCOUNT;
-
+    cl_int err;
     uint32_t bufferCount = 1 + (inputSize - 1) / bufSize;
 
     uint8_t* inP = nullptr;
-    cl::Buffer* buffer_in[BUFCNT];
     cl::Event hostWriteEvent[BUFCNT];
     cl::Event kernelWriteEvent[BUFCNT];
-
     std::vector<cl::Event> hostWriteWait[BUFCNT];
-    for (int i = 0; i < BUFCNT; i++) {
-        buffer_in[i] =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize, h_dbufstream_in[cu][i].data());
-    }
 
     uint32_t cBufSize = bufSize;
     uint8_t cbf_idx = 0;  // index indicating current buffer(0-4) being used in loop
@@ -735,22 +762,22 @@ void xfZlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, 
         std::memcpy(inP, in + (keq_idx * bufSize), cBufSize);
 
         // set kernel arguments
-        data_writer_kernel[cu]->setArg(0, *(buffer_in[cbf_idx]));
-        data_writer_kernel[cu]->setArg(1, cBufSize);
+        OCL_CHECK(err, err = data_writer_kernel[cu]->setArg(0, *(buffer_dec_input[cbf_idx])));
+        OCL_CHECK(err, err = data_writer_kernel[cu]->setArg(1, cBufSize));
 
         // enqueue data migration to kernel
-        m_q_wr[cu]->enqueueMigrateMemObjects({*(buffer_in[cbf_idx])}, 0, NULL, NULL);
+        OCL_CHECK(err, err = m_q_wr[cu]->enqueueMigrateMemObjects({*(buffer_dec_input[cbf_idx])}, 0, NULL, NULL));
         // enqueue the writer kernel dependent on corresponding bufffer migration
-        m_q_wr[cu]->enqueueTask(*data_writer_kernel[cu], NULL, &(kernelWriteEvent[cbf_idx]));
+        OCL_CHECK(err, err = m_q_wr[cu]->enqueueTask(*data_writer_kernel[cu], NULL, &(kernelWriteEvent[cbf_idx])));
     }
     // wait for enqueued writer kernels to finish
-    m_q_wr[cu]->finish();
-    // delete the allocated buffers
-    for (int i = 0; i < BUFCNT; i++) delete (buffer_in[i]);
+    OCL_CHECK(err, err = m_q_wr[cu]->finish());
 }
 
 uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
+    cl_int err;
 #ifdef GZIP_MODE
+
     uint8_t hidx = 0;
 
     // Check for magic header
@@ -804,6 +831,7 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
     }
 
 #else
+
     uint8_t hidx = 0;
     // ZLIB Header Checks
     // CMF
@@ -823,7 +851,6 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
             // Set error_flag to true here for cisco usecase
             return 0;
         }
-
     } else {
         // Set the error flag to true for Cisco Usecase
         // and return
@@ -833,30 +860,62 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
     }
 
 #endif
-
     // Streaming based solution
     uint32_t inBufferSize = INPUT_BUFFER_SIZE;
     uint32_t outBufferSize = OUTPUT_BUFFER_SIZE;
-
     uint32_t max_outbuf_size = input_size * m_max_cr;
+    const int c_bufcnt = DIN_BUFFERCOUNT;
+    const int c_outBufCnt = DOUT_BUFFERCOUNT;
+    const uint32_t c_bufferCount = 1 + (input_size - 1) / inBufferSize;
+    // Input Device Buffer allocation (__enqueue_writes)
+    for (int i = 0; i < c_bufcnt; i++) {
+        OCL_CHECK(err, buffer_dec_input[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                            inBufferSize, h_dbufstream_in[cu][i].data(), &err));
+    }
+    for (int i = 0; i < c_bufcnt; i++) {
+        ZOCL_CHECK(err, err = data_writer_kernel[cu]->setArg(0, *(buffer_dec_input[i])), m_err_code, c_clOutOfResource);
+        if (error_code()) return 0;
+    }
+
+    // Output Device Buffer allocation (__enqueue_reads)
+    for (int i = 0; i < c_outBufCnt; i++) {
+        OCL_CHECK(err,
+                  buffer_dec_zlib_output[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                                             outBufferSize, h_dbufstream_zlibout[cu][i].data(), &err));
+    }
+
+    for (int i = 0; i < c_outBufCnt; i++) {
+        ZOCL_CHECK(err, err = data_reader_kernel[cu]->setArg(0, *(buffer_dec_zlib_output[i])), m_err_code,
+                   c_clOutOfResource);
+        if (error_code()) return 0;
+    }
 
     // if input_size if greater than 2 MB, then buffer size must be 2MB
     if (input_size < inBufferSize) inBufferSize = input_size;
-    if (max_outbuf_size < outBufferSize) outBufferSize = max_outbuf_size;
+    if ((max_outbuf_size < outBufferSize) && (max_outbuf_size != 0)) outBufferSize = max_outbuf_size;
 
     // Set Kernel Args
-    (decompress_kernel[cu])->setArg(0, input_size);
+    OCL_CHECK(err, err = decompress_kernel[cu]->setArg(0, input_size));
 
     // start parallel reader kernel enqueue thread
     uint32_t decmpSizeIdx = 0;
     std::thread decompWriter(&xfZlib::_enqueue_writes, this, inBufferSize, in, input_size, cu);
     std::thread decompReader(&xfZlib::_enqueue_reads, this, outBufferSize, out, &decmpSizeIdx, cu, max_outbuf_size);
 
-    m_q_dec[cu]->enqueueTask(*decompress_kernel[cu]);
-    m_q_dec[cu]->finish();
+    OCL_CHECK(err, err = m_q_dec[cu]->enqueueTask(*decompress_kernel[cu]));
+    OCL_CHECK(err, err = m_q_dec[cu]->finish());
 
     decompReader.join();
     decompWriter.join();
+
+    // delete the allocated buffers
+    for (int i = 0; i < DIN_BUFFERCOUNT; i++) {
+        DELETE_OBJ(buffer_dec_input[i]);
+    }
+
+    for (int i = 0; i < DOUT_BUFFERCOUNT; i++) {
+        DELETE_OBJ(buffer_dec_zlib_output[i]);
+    }
 
     return decmpSizeIdx;
 }
@@ -864,6 +923,7 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
 uint64_t xfZlib::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size) {
+    cl_int err;
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
     uint32_t block_size_in_bytes = block_size_in_kb * 1024;
     uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
@@ -937,7 +997,7 @@ overlap:
             // Wait for read events
             if (itr >= 2) {
                 // Wait on current flag previous operation to finish
-                m_q[queue_idx + cu]->finish();
+                OCL_CHECK(err, err = m_q[queue_idx + cu]->finish());
 
                 // Completed bricks counter
                 completed_bricks++;
@@ -954,8 +1014,9 @@ overlap:
                     }
 
                     uint32_t compressed_size = (h_compressSize[cu][flag].data())[bIdx];
-                    m_q[queue_idx + cu]->enqueueReadBuffer(*(buffer_zlib_output[cu][flag]), CL_TRUE, index,
-                                                           compressed_size * sizeof(uint8_t), &out[outIdx]);
+                    OCL_CHECK(err, err = m_q[queue_idx + cu]->enqueueReadBuffer(
+                                       *(buffer_zlib_output[cu][flag]), CL_TRUE, index,
+                                       compressed_size * sizeof(uint8_t), &out[outIdx]));
                     outIdx += compressed_size;
                 }
             } // If condition which reads huffman output for 0 or 1 location
@@ -977,38 +1038,75 @@ overlap:
             // Set kernel arguments
             int narg = 0;
 
-            (compress_kernel[cu])->setArg(narg++, *(buffer_input[cu][flag]));
-            (compress_kernel[cu])->setArg(narg++, *(buffer_lz77_output[cu][flag]));
-            (compress_kernel[cu])->setArg(narg++, *(buffer_compress_size[cu][flag]));
-            (compress_kernel[cu])->setArg(narg++, *(buffer_inblk_size[cu][flag]));
-            (compress_kernel[cu])->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag]));
-            (compress_kernel[cu])->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag]));
-            (compress_kernel[cu])->setArg(narg++, block_size_in_kb);
-            (compress_kernel[cu])->setArg(narg++, sizeOfChunk[brick + cu]);
+            ZOCL_CHECK(err, err = compress_kernel[cu]->setArg(narg++, *(buffer_input[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = compress_kernel[cu]->setArg(narg++, *(buffer_lz77_output[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = compress_kernel[cu]->setArg(narg++, *(buffer_compress_size[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = compress_kernel[cu]->setArg(narg++, *(buffer_inblk_size[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = compress_kernel[cu]->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = compress_kernel[cu]->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            OCL_CHECK(err, err = compress_kernel[cu]->setArg(narg++, block_size_in_kb));
+
+            OCL_CHECK(err, err = compress_kernel[cu]->setArg(narg++, sizeOfChunk[brick + cu]));
 
             narg = 0;
-            (huffman_kernel[cu])->setArg(narg++, *(buffer_lz77_output[cu][flag]));
-            (huffman_kernel[cu])->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag]));
-            (huffman_kernel[cu])->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag]));
-            (huffman_kernel[cu])->setArg(narg++, *(buffer_zlib_output[cu][flag]));
-            (huffman_kernel[cu])->setArg(narg++, *(buffer_compress_size[cu][flag]));
-            (huffman_kernel[cu])->setArg(narg++, *(buffer_inblk_size[cu][flag]));
-            (huffman_kernel[cu])->setArg(narg++, block_size_in_kb);
-            (huffman_kernel[cu])->setArg(narg++, sizeOfChunk[brick + cu]);
+            ZOCL_CHECK(err, err = huffman_kernel[cu]->setArg(narg++, *(buffer_lz77_output[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = huffman_kernel[cu]->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = huffman_kernel[cu]->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = huffman_kernel[cu]->setArg(narg++, *(buffer_zlib_output[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = huffman_kernel[cu]->setArg(narg++, *(buffer_compress_size[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            ZOCL_CHECK(err, err = huffman_kernel[cu]->setArg(narg++, *(buffer_inblk_size[cu][flag])), m_err_code,
+                       c_clOutOfResource);
+            if (error_code()) return 0;
+
+            OCL_CHECK(err, err = huffman_kernel[cu]->setArg(narg++, block_size_in_kb));
+            OCL_CHECK(err, err = huffman_kernel[cu]->setArg(narg++, sizeOfChunk[brick + cu]));
 
             // Migrate memory - Map host to device buffers
-            m_q[queue_idx + cu]->enqueueMigrateMemObjects({*(buffer_input[cu][flag]), *(buffer_inblk_size[cu][flag])},
-                                                          0 /* 0 means from host*/);
+            OCL_CHECK(err, err = m_q[queue_idx + cu]->enqueueMigrateMemObjects(
+                               {*(buffer_input[cu][flag]), *(buffer_inblk_size[cu][flag])}, 0 /* 0 means from host*/));
 
             // kernel write events update
             // LZ77 Compress Fire Kernel invocation
-            m_q[queue_idx + cu]->enqueueTask(*compress_kernel[cu]);
+            OCL_CHECK(err, err = m_q[queue_idx + cu]->enqueueTask(*compress_kernel[cu]));
 
             // Huffman Fire Kernel invocation
-            m_q[queue_idx + cu]->enqueueTask(*huffman_kernel[cu]);
+            OCL_CHECK(err, err = m_q[queue_idx + cu]->enqueueTask(*huffman_kernel[cu]));
 
-            m_q[queue_idx + cu]->enqueueMigrateMemObjects({*(buffer_compress_size[cu][flag])},
-                                                          CL_MIGRATE_MEM_OBJECT_HOST);
+            OCL_CHECK(err, err = m_q[queue_idx + cu]->enqueueMigrateMemObjects({*(buffer_compress_size[cu][flag])},
+                                                                               CL_MIGRATE_MEM_OBJECT_HOST));
         } // Internal loop runs on compute units
 
         if (total_chunks > 2)
@@ -1019,8 +1117,8 @@ overlap:
     } // Main overlap loop
 
     for (uint8_t i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
-        m_q[i]->flush();
-        m_q[i]->finish();
+        OCL_CHECK(err, err = m_q[i]->flush());
+        OCL_CHECK(err, err = m_q[i]->finish());
     }
 
     uint32_t leftover = total_chunks - completed_bricks;

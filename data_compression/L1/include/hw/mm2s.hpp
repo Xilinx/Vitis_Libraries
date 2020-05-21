@@ -713,6 +713,7 @@ void mm2s(const uintMemWidth_t* in,
     // printf("%s Done \n", __FUNCTION__);
     outStreamSize << 0;
 }
+
 } // namespace details
 } // namespace compression
 } // namespace xf

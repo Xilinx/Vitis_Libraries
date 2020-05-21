@@ -6,8 +6,6 @@
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, Zlib, LZ4, Snappy, ZLIB, FPGA Benchmark, Compression Benchmark
    :description: This page provides benchmarking results of various Vitis Data Compression Applications. Results include throughput and FPGA resources.
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
 
 =================
 Benchmark Results
@@ -16,7 +14,7 @@ Benchmark Results
 Compression Performance
 ```````````````````````
 
-Table below presents compression Ratio (CR), compression kernel throughput achieved with single and 8 engines, 
+The following table presents compression ratio (CR), compression kernel throughput achieved with single and 8 engines, 
 kernel clock frequency met and resource utilization when executed on Alveo U200.
 
 Reported compression ratio is measured on Silesia Corpus compression benchmark.
@@ -44,7 +42,7 @@ Reported compression ratio is measured on Silesia Corpus compression benchmark.
 De-Compression Performance
 ``````````````````````````
 
-Table below presents decompression kernel throughput achieved with single and 8 engines, 
+The following table presents decompression kernel throughput achieved with single and 8 engines, 
 kernel clock frequency met and resource utilization when executed on Alveo U200.
 
 +----------------------------------------------------------------------+--------------+----------+---------+-------+------+
