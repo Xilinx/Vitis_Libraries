@@ -29,10 +29,9 @@ uint64_t get_file_size(std::ifstream& file) {
     return file_size;
 }
 
-constexpr uint32_t roundoff(uint32_t x, uint32_t y) 
-{ 
-    return ((x-1)/ (y) + 1);
-} 
+constexpr uint32_t roundoff(uint32_t x, uint32_t y) {
+    return ((x - 1) / (y) + 1);
+}
 
 void gzip_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
     const uint16_t c_format_0 = 31;
@@ -136,9 +135,9 @@ uint32_t xil_zlib::compress_file(std::string& inFile_name, std::string& outFile_
 
     std::vector<uint8_t, aligned_allocator<uint8_t> > zlib_in(input_size);
     std::vector<uint8_t, aligned_allocator<uint8_t> > zlib_out(input_size * 2);
-    
-    MEM_ALLOC_CHECK(zlib_in.resize(input_size), input_size, "Input Buffer");    
-    MEM_ALLOC_CHECK(zlib_out.resize(input_size * 2), input_size*2, "Output Buffer");    
+
+    MEM_ALLOC_CHECK(zlib_in.resize(input_size), input_size, "Input Buffer");
+    MEM_ALLOC_CHECK(zlib_out.resize(input_size * 2), input_size * 2, "Output Buffer");
 
     inFile.read((char*)zlib_in.data(), input_size);
 
@@ -198,13 +197,18 @@ xil_zlib::xil_zlib(const std::string& binaryFileName, uint8_t flow, uint8_t max_
     for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
         for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
             // Index calculation
-           MEM_ALLOC_CHECK(h_buf_in[i][j].resize(HOST_BUFFER_SIZE), HOST_BUFFER_SIZE, "Input Host Buffer");
-           MEM_ALLOC_CHECK(h_buf_out[i][j].resize(HOST_BUFFER_SIZE * 4), HOST_BUFFER_SIZE * 4, "LZ77Output Host Buffer");
-           MEM_ALLOC_CHECK(h_buf_zlibout[i][j].resize(HOST_BUFFER_SIZE * 2), HOST_BUFFER_SIZE * 2, "ZlibOutput Host Buffer");
-           MEM_ALLOC_CHECK(h_blksize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS, "BlockSize Host Buffer");
-           MEM_ALLOC_CHECK(h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS, "CompressSize Host Buffer");
-           MEM_ALLOC_CHECK(h_dyn_ltree_freq[i][j].resize(PARALLEL_ENGINES * c_ltree_size), PARALLEL_ENGINES * c_ltree_size, "LTree Host Buffer");
-           MEM_ALLOC_CHECK(h_dyn_dtree_freq[i][j].resize(PARALLEL_ENGINES * c_dtree_size), PARALLEL_ENGINES * c_dtree_size, "DTree Host Buffer");
+            MEM_ALLOC_CHECK(h_buf_in[i][j].resize(HOST_BUFFER_SIZE), HOST_BUFFER_SIZE, "Input Host Buffer");
+            MEM_ALLOC_CHECK(h_buf_out[i][j].resize(HOST_BUFFER_SIZE * 4), HOST_BUFFER_SIZE * 4,
+                            "LZ77Output Host Buffer");
+            MEM_ALLOC_CHECK(h_buf_zlibout[i][j].resize(HOST_BUFFER_SIZE * 2), HOST_BUFFER_SIZE * 2,
+                            "ZlibOutput Host Buffer");
+            MEM_ALLOC_CHECK(h_blksize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS, "BlockSize Host Buffer");
+            MEM_ALLOC_CHECK(h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS,
+                            "CompressSize Host Buffer");
+            MEM_ALLOC_CHECK(h_dyn_ltree_freq[i][j].resize(PARALLEL_ENGINES * c_ltree_size),
+                            PARALLEL_ENGINES * c_ltree_size, "LTree Host Buffer");
+            MEM_ALLOC_CHECK(h_dyn_dtree_freq[i][j].resize(PARALLEL_ENGINES * c_dtree_size),
+                            PARALLEL_ENGINES * c_dtree_size, "DTree Host Buffer");
         }
     }
     // Device buffer allocation
@@ -237,7 +241,8 @@ xil_zlib::xil_zlib(const std::string& binaryFileName, uint8_t flow, uint8_t max_
     }
 
     // initialize the buffers
-    for (int j = 0; j < DIN_BUFFERCOUNT; ++j) MEM_ALLOC_CHECK(h_dbuf_in[j].resize(INPUT_BUFFER_SIZE), INPUT_BUFFER_SIZE, "Input Buffer");
+    for (int j = 0; j < DIN_BUFFERCOUNT; ++j)
+        MEM_ALLOC_CHECK(h_dbuf_in[j].resize(INPUT_BUFFER_SIZE), INPUT_BUFFER_SIZE, "Input Buffer");
 
     for (int j = 0; j < DOUT_BUFFERCOUNT; ++j) {
         MEM_ALLOC_CHECK(h_dbuf_zlibout[j].resize(OUTPUT_BUFFER_SIZE), OUTPUT_BUFFER_SIZE, "Output Buffer");
@@ -350,9 +355,9 @@ uint32_t xil_zlib::decompress_file(
     // Decompression crashes
     std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size * c_max_cr);
     uint32_t debytes = 0;
-    
-    MEM_ALLOC_CHECK(out.resize(input_size * c_max_cr), input_size * c_max_cr, "Output Buffer");   
- 
+
+    MEM_ALLOC_CHECK(out.resize(input_size * c_max_cr), input_size * c_max_cr, "Output Buffer");
+
     if (enable_p2p) {
         fd_p2p_c_in = open(inFile_name.c_str(), O_RDONLY | O_DIRECT);
         if (fd_p2p_c_in <= 0) {
@@ -490,12 +495,12 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
     const int BUFCNT = DIN_BUFFERCOUNT;
 
     // inputSize to 4k multiple due to p2p flow
-    uint32_t inputSize4kMultiple = roundoff(inputSize,RESIDUE_4K) * RESIDUE_4K;
+    uint32_t inputSize4kMultiple = roundoff(inputSize, RESIDUE_4K) * RESIDUE_4K;
     uint32_t bufferCount = 0;
     if (enable_p2p) {
-        bufferCount = bufSize == inputSize ? 1 : roundoff(inputSize4kMultiple,bufSize);
+        bufferCount = bufSize == inputSize ? 1 : roundoff(inputSize4kMultiple, bufSize);
     } else {
-        bufferCount = roundoff(inputSize,bufSize);
+        bufferCount = roundoff(inputSize, bufSize);
     }
 
     cl_mem_ext_ptr_t p2pInExt;
@@ -519,10 +524,8 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
 
     for (int i = 0; i < BUFCNT; i++) {
         if (enable_p2p) {
-            buffer_in[i] =
-                new cl::Buffer(*m_context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX, bufSize, &p2pInExt);
-            char* p2pPtr =
-                (char*)m_q_wr->enqueueMapBuffer(*(buffer_in[i]), CL_TRUE, CL_MAP_READ, 0, bufSize);
+            buffer_in[i] = new cl::Buffer(*m_context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX, bufSize, &p2pInExt);
+            char* p2pPtr = (char*)m_q_wr->enqueueMapBuffer(*(buffer_in[i]), CL_TRUE, CL_MAP_READ, 0, bufSize);
             p2pPtrVec.push_back(p2pPtr);
         } else {
             buffer_in[i] =
@@ -532,7 +535,7 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
 
     uint32_t cBufSize = bufSize;
     uint32_t cBufSize4kMultiple = 0;
-    cBufSize4kMultiple = bufSize == inputSize ? (roundoff(bufSize,RESIDUE_4K) * RESIDUE_4K): bufSize;
+    cBufSize4kMultiple = bufSize == inputSize ? (roundoff(bufSize, RESIDUE_4K) * RESIDUE_4K) : bufSize;
 
     uint8_t cbf_idx = 0;  // index indicating current buffer(0-4) being used in loop
     uint32_t keq_idx = 0; // index indicating the number of writer kernel enqueues
@@ -549,7 +552,7 @@ void xil_zlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize
         if (keq_idx == bufferCount - 1) {
             if (bufferCount > 1) {
                 cBufSize = inputSize - (bufSize * keq_idx);
-                if (enable_p2p) cBufSize4kMultiple = roundoff(cBufSize,RESIDUE_4K) * RESIDUE_4K;
+                if (enable_p2p) cBufSize4kMultiple = roundoff(cBufSize, RESIDUE_4K) * RESIDUE_4K;
             }
         }
 

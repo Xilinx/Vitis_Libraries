@@ -3,6 +3,8 @@
     "description": [
         "Xilinx GZip P2P Decompression Parallel Byte 8_II1"
     ],
+    "gui": "false",
+    "config_make": "./config.mk",
     "flow": "vitis",
     "platform_blacklist": [
         "u50",
@@ -18,7 +20,6 @@
             "name": "generic launch for all flows"
         }
     ],
-    "match_makefile": "false",
     "host": {
         "host_exe": "xil_gzip",
         "compiler": {
@@ -31,12 +32,12 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include/hw/"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=1",
                 "D_COMPUTE_UNIT=1",
-                "ENABLE_P2P=1",
                 "GZIP_MODE=1",
                 "INPUT_BUFFER_SIZE=128*1024*1024",
                 "OUTPUT_BUFFER_SIZE=128*1024*1024"

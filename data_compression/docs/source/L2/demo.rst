@@ -3,13 +3,13 @@
    :keywords: Vitis, Library, Data Compression, Xilinx, FPGA OpenCL Kernels, LZ4 Demo, Snappy Demo, ZLIB Demo, GZip Demo
    :description: This section provides various application demos
    :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
+   :xlnxdocumenttypes: Tutorials
 
 =====
 Demos
 =====
 
-Demo examples for lz4, snappy, lz4_streaming, zlib and gzip kernels are present in **L2/demos/** directory.
+Demo examples for **lz4**, **snappy**, **lz4_streaming**, **zlib** and **gzip** kernels are available in the ``L2/demos/`` directory.
 
 .. toctree::
    :maxdepth: 1
@@ -23,7 +23,8 @@ Demo examples for lz4, snappy, lz4_streaming, zlib and gzip kernels are present 
    zlib.rst
    zlib_streaming.rst
 
-Before building any of the examples, following commands need to be executed:
+.. note::
+Execute the following commands before building any of the examples:
 
 .. code-block:: bash
    
@@ -33,7 +34,7 @@ Before building any of the examples, following commands need to be executed:
 Build Instructions
 ------------------
 
-To compile and test run this example execute the following commands:
+Execute the following commands to compile and test run this example:
 
 .. code-block:: bash
    
@@ -47,13 +48,14 @@ Variable ``TARGET`` can take the following values:
 	
 	- **hw**	: run on actual hardware
 
-By default the target device is set as Alveo U200. In order to target a different
-device use "DEVICE" argument. Example below explains the same.
+By default, the target device is set as Alveo U200. In order to target a different
+device, use the  ``DEVICE`` argument. For example:
 
 .. code-block:: bash
 
     make run TARGET=sw_emu DEVICE=<new_device.xpfm>
 
+.. note::
 Build instructions explained in this section are common for all the
-applications but the generated executable names differ.
+applications. The generated executable names may differ.
 

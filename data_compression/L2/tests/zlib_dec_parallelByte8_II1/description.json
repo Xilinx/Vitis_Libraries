@@ -27,7 +27,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include/hw"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=1",

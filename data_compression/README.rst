@@ -1,9 +1,9 @@
 Vitis Data Compression Library
 ==============================
 
-Vitis Data Compression Library is an open-sourced Vitis library written
+Vitis Data Compression library is an open-sourced Vitis library written
 in C++ for accelerating data compression applications in a variety of
-use cases. It now covers two levels of acceleration: the module level
+use cases. The library covers two levels of acceleration: the module level
 and the pre-defined kernel level, and will evolve to offer the third
 level as pure software APIs working with pre-defined hardware overlays.
 
@@ -18,15 +18,14 @@ level as pure software APIs working with pre-defined hardware overlays.
    accelerate data compression tasks on Alveo cards without hardware
    development.
 
-Since all the kernel code is developed in HLS C++ with the permissive
-Apache 2.0 license, advanced users can easily tailor, optimize or
-combine with property logic at any levels. Demos of different data
+Advanced users can easily tailor, optimize or
+combine with property logic at any levels as all the kernel code is developed in HLS C++ with the permissive
+Apache 2.0 license. Demos of different data
 compression acceleration are also provided with the library for easy
 on-boarding.
 
-Check the `comprehensive HTML
-document <https://xilinx.github.io/Vitis_Libraries/data_compression/>`__
-for more details.
+For more information, see the `comprehensive HTML
+document <https://xilinx.github.io/Vitis_Libraries/data_compression/>`__.
 
 Requirements
 ------------

@@ -90,6 +90,7 @@ size_t xflz4::create_header(uint8_t* h_header, uint32_t inSize) {
     uint32_t xxh = XXH32(temp_buff, 10, 0);
     // This value is sent to Kernel 2
     uint32_t xxhash_val = (xxh >> 8);
+    m_xxhashVal = xxhash_val;
 
     uint32_t block_size_in_bytes = m_BlockSizeInKb * 1024;
 
@@ -202,7 +203,7 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
 
         if (!enable_p2p) {
             // Creating Host memory to read the compressed data back to host for non-p2p flow case
-            uint8_t* compressData = new uint8_t[outputSize];
+            uint8_t* compressData = (uint8_t*)aligned_alloc(outputSize, outputSize);
             compressDataInHostVec.push_back(compressData);
         }
 
@@ -216,12 +217,7 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         uint32_t num_blocks = (inSizeVec[i] - 1) / block_size_in_bytes + 1;
         // DDR buffer extensions
         cl_mem_ext_ptr_t lz4Ext;
-        if (enable_p2p)
-            lz4Ext.flags = XCL_MEM_DDR_BANK0 | XCL_MEM_EXT_P2P_BUFFER;
-        else
-            lz4Ext.flags = XCL_MEM_DDR_BANK0;
-        lz4Ext.param = NULL;
-        lz4Ext.obj = nullptr;
+        if (enable_p2p) lz4Ext = {XCL_MEM_EXT_P2P_BUFFER, NULL, 0};
 
         int cu_num = i % 2;
 
@@ -238,12 +234,20 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         cl::Buffer* buffer_input =
             new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, inSizeVec[i], inVec[i]);
         bufInputVec.push_back(buffer_input);
-        // K2 Output:- This buffer contains compressed data written by device
-        cl::Buffer* buffer_lz4out =
-            new cl::Buffer(*m_context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX, outputSize, &(lz4Ext));
-        buflz4OutVec.push_back(buffer_lz4out);
-        uint8_t* h_buf_out_p2p = (uint8_t*)m_q->enqueueMapBuffer(*(buffer_lz4out), CL_TRUE, CL_MAP_READ, 0, outputSize);
-        bufp2pOutVec.push_back(h_buf_out_p2p);
+        if (enable_p2p) {
+            // K2 Output:- This buffer contains compressed data written by device
+            cl::Buffer* buffer_lz4out =
+                new cl::Buffer(*m_context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX, outputSize, &(lz4Ext));
+            buflz4OutVec.push_back(buffer_lz4out);
+            uint8_t* h_buf_out_p2p =
+                (uint8_t*)m_q->enqueueMapBuffer(*(buffer_lz4out), CL_TRUE, CL_MAP_READ, 0, outputSize);
+            bufp2pOutVec.push_back(h_buf_out_p2p);
+        } else {
+            // K2 Output:- This buffer contains compressed data written by device
+            cl::Buffer* buffer_lz4out = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, outputSize,
+                                                       compressDataInHostVec[i]);
+            buflz4OutVec.push_back(buffer_lz4out);
+        }
         // K1 Output:- This buffer contains compressed data written by device
         // K2 Input:- This is a input to data packer kernel
         cl::Buffer* buffer_output = new cl::Buffer(*m_context, CL_MEM_WRITE_ONLY, inSizeVec[i]);
@@ -315,16 +319,14 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         narg = 0;
         packer_kernel_lz4->setArg(narg++, *(bufOutputVec[i]));
         packer_kernel_lz4->setArg(narg++, *(buflz4OutVec[i]));
-        packer_kernel_lz4->setArg(narg++, *(bufheadVec[i]));
         packer_kernel_lz4->setArg(narg++, *(bufCompSizeVec[i]));
         packer_kernel_lz4->setArg(narg++, *(bufblockSizeVec[i]));
         packer_kernel_lz4->setArg(narg++, *(buflz4OutSizeVec[i]));
         packer_kernel_lz4->setArg(narg++, *(bufInputVec[i]));
-        packer_kernel_lz4->setArg(narg++, headerSizeVec[i]);
-        packer_kernel_lz4->setArg(narg++, offset);
         packer_kernel_lz4->setArg(narg++, m_BlockSizeInKb);
         packer_kernel_lz4->setArg(narg++, no_blocks_calc);
-        packer_kernel_lz4->setArg(narg++, tail_bytes);
+        packer_kernel_lz4->setArg(narg++, m_xxhashVal);
+        packer_kernel_lz4->setArg(narg++, inSizeVec[i]);
         packerKernelVec.push_back(packer_kernel_lz4);
     }
 
@@ -342,7 +344,7 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         cl::Event write_event;
 
         // Migrate memory - Map host to device buffers
-        m_q->enqueueMigrateMemObjects({*(bufInputVec[i]), *(bufblockSizeVec[i]), *(bufheadVec[i])},
+        m_q->enqueueMigrateMemObjects({*(bufInputVec[i]), *(bufblockSizeVec[i])},
                                       0 /* 0 means from host*/, NULL, &write_event);
         writeWait.push_back(write_event);
 
@@ -372,11 +374,13 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         // Output buffer index
         uint8_t* temp;
 
-        temp = (uint8_t*)bufp2pOutVec[i];
+        if (enable_p2p) {
+            temp = (uint8_t*)bufp2pOutVec[i];
 
-        /* Make last packer output block divisible by 4K by appending 0's */
-        temp = temp + compressed_size;
-        memcpy(temp, empty_buffer, RESIDUE_4K - residue_size);
+            /* Make last packer output block divisible by 4K by appending 0's */
+            temp = temp + compressed_size;
+            memcpy(temp, empty_buffer, RESIDUE_4K - residue_size);
+        }
         compressed_size = outIdx_align + RESIDUE_4K;
         compressSizeVec.push_back(compressed_size);
 

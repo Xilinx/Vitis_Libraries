@@ -37,12 +37,7 @@ help::
 #						Build Environment Setup
 
 include ./utils.mk
-C_COMPUTE_UNITS := 2
-T_COMPUTE_UNITS := 2
-H_COMPUTE_UNITS := 2
-D_COMPUTE_UNITS := 9 
-PARALLEL_BLOCK  := 8
-MULTIPLE_BYTES  := 8
+include ./config.mk
 
 TOOL_VERSION ?= 2019.2
 
@@ -311,13 +306,9 @@ CXXFLAGS += -std=c++0x -fmessage-length=0 \
 	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread \
 		-Wno-unused-function
 	    
-CXXFLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) -DC_COMPUTE_UNIT=$(C_COMPUTE_UNITS) \
-            -DT_COMPUTE_UNIT=$(T_COMPUTE_UNITS) -DH_COMPUTE_UNIT=$(H_COMPUTE_UNITS) \
-            -DD_COMPUTE_UNIT=$(D_COMPUTE_UNITS) -DOVERLAP_HOST_DEVICE
-
 CXXFLAGS += -O3
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
-LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
+LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing
 LDFLAGS += -Wno-unused-function
 LDFLAGS += -O3
 EXE_FILE = $(BUILD_DIR)/$(EXE_NAME)

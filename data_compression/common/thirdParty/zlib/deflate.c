@@ -807,7 +807,7 @@ int ZEXPORT deflate (strm, flush)
 int ZEXPORT deflate(z_streamp strm, int flush)
 #endif
 {
-    const uint8_t c_max_cr = 20;
+    const uint8_t c_max_cr = 0;
     bool use_cpu_sol = false;
     bool use_fpga_sol = false;
     char *xclbin = getenv("XILINX_LIBZ_XCLBIN");
@@ -832,30 +832,47 @@ int ZEXPORT deflate(z_streamp strm, int flush)
     // MIN_INPUT_SIZE use SW flow
     uint64_t input_size = strm->avail_in;
     if (input_size < MIN_INPUT_SIZE) {
+#ifdef VERBOSE
+        std::cout << "Input Size is less than MIN_INPUT_SIZE";
+        std::cout << " Falling back to SW Solution " << std::endl;
+#endif
         use_cpu_sol = true;
         use_fpga_sol = false;
     }
-   
+
     if (use_fpga_sol) {
-#ifdef VERBOSE
-        printf("FPGA Solution \n");
-#endif
         // Arg 1: xclbin
         // Xilinx ZLIB object
-        xfZlib xlz(u50_xclbin.c_str(), c_max_cr, COMP_ONLY);
-        if (xlz.err_flag) {
-            use_cpu_sol = true;
-        } else {
-            uint8_t* input = strm->next_in;
-            uint8_t* output = strm->next_out;
-            // Zlib compression
-            uint64_t enbytes = xlz.compress_buffer((uint8_t*)input, (uint8_t*)output, input_size);
-            strm->total_out = enbytes;
-            strm->next_out = output;
-            return 1;
-        }
+        xfZlib *xlz = nullptr;
+        bool flag = false;
+        do {
+            xlz = new xfZlib(u50_xclbin.c_str(), c_max_cr, COMP_ONLY);
+            int err_code = xlz->error_code();
+            if (err_code && (err_code != c_clOutOfResource)) {
+#ifdef VERBOSE
+                std::cout << "Failed to use FPGA for compression, "; 
+                std::cout << " switching to SW solution \n" << std::endl;
+#endif
+                use_cpu_sol = true;
+            } else {
+                uint8_t* input = strm->next_in;
+                uint8_t* output = strm->next_out;
+                // Zlib compression
+                uint64_t enbytes = xlz->compress_buffer((uint8_t*)input, (uint8_t*)output, input_size);
+                delete xlz;
+                if (enbytes == 0) {
+#ifdef VERBOSE
+                    std::cout << "Failed to create device buffer, Retrying . . ." << std::endl;
+#endif
+                    flag = true;
+                } else {
+                    strm->total_out = enbytes;
+                    strm->next_out = output;
+                    return 1;
+                }
+            }
+       } while(flag);
     } 
-
     if (use_cpu_sol) {
 #ifdef VERBOSE
         printf("CPU Solution \n");

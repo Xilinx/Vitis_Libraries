@@ -148,20 +148,16 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
         std::string up_kname = unpacker_kernel_names[0];
         std::string dec_kname = decompress_kernel_names[0];
 
-        cl_mem_ext_ptr_t p2pBoExt = {XCL_MEM_EXT_P2P_BUFFER, NULL, 0};
+        cl_mem_ext_ptr_t p2pBoExt = {0};
         cl_mem_ext_ptr_t hostBoExt = {0};
         cl_mem_ext_ptr_t hostOutBoExt = {0};
 
+        if (enable_p2p) p2pBoExt = {XCL_MEM_EXT_P2P_BUFFER, NULL, 0};
+
         if ((fid % 2) == 0) {
-            p2pBoExt.flags |= XCL_MEM_DDR_BANK0;
-            hostBoExt.flags |= XCL_MEM_DDR_BANK0;
-            hostOutBoExt.flags |= XCL_MEM_DDR_BANK0;
             up_kname += ":{xilLz4Unpacker_1}";
             dec_kname += ":{xilLz4P2PDecompress_1}";
         } else {
-            p2pBoExt.flags |= XCL_MEM_DDR_BANK0;
-            hostBoExt.flags |= XCL_MEM_DDR_BANK0;
-            hostOutBoExt.flags |= XCL_MEM_DDR_BANK0;
             up_kname += ":{xilLz4Unpacker_2}";
             dec_kname += ":{xilLz4P2PDecompress_2}";
         }
