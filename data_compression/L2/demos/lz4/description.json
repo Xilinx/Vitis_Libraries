@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx LZ4",
+    "name": "Xilinx LZ4 Compression and Decompression",
     "description": [
-        "Xilinx LZ4"
+        "Xilinx LZ4 Compression and Decompression memory-mapped solution"
     ],
     "flow": "vitis",
     "launch": [
@@ -15,6 +15,9 @@
             "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
         }
     ],
+    "platform_blacklist": [
+        "u280"
+    ],
     "host": {
         "host_exe": "xil_lz4",
         "compiler": {
@@ -27,11 +30,10 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/tests/src/"
             ],
             "symbols": [
-                "PARALLEL_BLOCK=8",
-                "HOST_BUFFER_SIZE_IN_MB=128"
+                "PARALLEL_BLOCK=8"
             ]
         }
     },

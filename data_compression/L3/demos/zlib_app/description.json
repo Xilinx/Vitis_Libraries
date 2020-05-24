@@ -1,5 +1,5 @@
 {
-    "name": "ZLIB Application",
+    "name": "Xilinx ZLIB Application",
     "description": [
         "ZLIB application resides in `L3/demos/zlib_app` directory."
     ],
@@ -15,7 +15,9 @@
             "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
         }
     ],
+    "match_makefile": "false",
     "config_make": "config.mk",
+    "gui": false, 
     "host": {
         "host_exe": "xil_zlib",
         "compiler": {

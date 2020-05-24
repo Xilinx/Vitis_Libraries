@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.gzip_dec_full_huffman", 
+    "name": "Xilinx Gzip Full Huffman Decoder HLS Test", 
     "description": "Test Design to validate core GZip compressed data using full huffman decoder", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,12 +1,16 @@
 {
-    "name": "ZLIB Application for HBM Bandwidth",
+    "name": "Xilinx ZLIB Application For HBM Bandwidth",
     "description": [
         "ZLIB application for HBM Bandwidth resides in `L3/benchmarks/zlib_hbm_bandwidth` directory."
     ],
     "flow": "vitis",
     "platform_blacklist": [
         "u200",
-        "u250"
+        "u250",
+        "vck"
+    ],
+    "platform_whitelist": [
+        "u50_gen3x16"
     ],
     "launch": [
         {
@@ -14,6 +18,7 @@
             "name": "generic launch for all flows"
         }
     ],
+    "gui": false, 
     "match_makefile": "false",
     "match_ini": "false",
     "config_make": "config.mk",

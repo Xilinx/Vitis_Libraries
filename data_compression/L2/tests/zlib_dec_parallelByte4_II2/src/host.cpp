@@ -23,7 +23,7 @@ void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin
     // Xilinx ZLIB object
     xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId);
 
-    std::cout << std::fixed << std::setprecision(2) << "KT(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {

@@ -34,7 +34,7 @@
 #include "hls_stream.h"
 #include "mm2s.hpp"
 #include "stream_downsizer.hpp"
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 
 typedef ap_uint<MULTIPLE_BYTES * 8> uintMemWidth_t;
 

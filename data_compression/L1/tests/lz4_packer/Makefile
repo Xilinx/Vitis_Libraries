@@ -255,7 +255,7 @@ runhls: data setup | check_vivado
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf settings.tcl *_hls.log lzx_decompress_test.prj
+	rm -rf settings.tcl *_hls.log lz4_packer_test.prj *.lz4
 
 # Used by Jenkins test
 cleanall: clean

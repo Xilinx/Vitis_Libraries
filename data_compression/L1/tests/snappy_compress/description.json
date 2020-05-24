@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.snappy_compress", 
+    "name": "Xilinx Snappy Compress HLS Test", 
     "description": "Test Design to validate core Snappy compress module", 
     "flow": "hls", 
     "platform_whitelist": [

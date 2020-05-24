@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ZLIB Compression",
+    "name": "Xilinx ZLIB Compress",
     "description": [
         "Xilinx ZLIB Compression"
     ],
@@ -9,6 +9,9 @@
             "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "host": {
         "host_exe": "xil_zlib",
@@ -22,7 +25,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/L1/include/hw"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=8"

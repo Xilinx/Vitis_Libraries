@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.gzip_multibyte_decompress", 
+    "name": "Xilinx Gzip Multibyte Decompress HLS Test", 
     "description": "Test Design to validate core Gzip decompress module using dynamic huffman decoder", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -23,7 +23,7 @@
  *
  * This file is part of XF Compression Library.
  */
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 
 namespace xf {
 namespace compression {
@@ -44,7 +44,7 @@ struct Symbol {
 };
 
 struct Codeword {
-    ap_uint<MAX_BITS> codeword;
+    ap_uint<c_maxBits> codeword;
     ap_uint<c_tgnBitlengthBits> bitlength;
 };
 
@@ -425,11 +425,11 @@ parse_tdata:
             if (curlen != prevlen) {
                 blFreq[curlen]++;
             }
-            blFreq[REUSE_PREV_BLEN]++;
+            blFreq[c_reusePrevBlen]++;
         } else if (count <= 10) {
-            blFreq[REUSE_ZERO_BLEN]++;
+            blFreq[c_reuseZeroBlen]++;
         } else {
-            blFreq[REUSE_ZERO_BLEN_7]++;
+            blFreq[c_reuseZeroBlen7]++;
         }
 
         count = 0;
@@ -601,13 +601,13 @@ send_bltree:
 
         uint16_t max_code = (tree == 0) ? maxCodes[0] : maxCodes[1];
 
-        Codeword temp = outCodes[bitIndex + REUSE_PREV_BLEN];
+        Codeword temp = outCodes[bitIndex + c_reusePrevBlen];
         uint16_t reuse_prev_code = temp.codeword;
         uint8_t reuse_prev_len = temp.bitlength;
-        temp = outCodes[bitIndex + REUSE_ZERO_BLEN];
+        temp = outCodes[bitIndex + c_reuseZeroBlen];
         uint16_t reuse_zero_code = temp.codeword;
         uint8_t reuse_zero_len = temp.bitlength;
-        temp = outCodes[bitIndex + REUSE_ZERO_BLEN_7];
+        temp = outCodes[bitIndex + c_reuseZeroBlen7];
         uint16_t reuse_zero7_code = temp.codeword;
         uint8_t reuse_zero7_len = temp.bitlength;
 

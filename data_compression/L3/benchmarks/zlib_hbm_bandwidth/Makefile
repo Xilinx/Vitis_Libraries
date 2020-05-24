@@ -37,11 +37,7 @@ help::
 #						Build Environment Setup
 
 include ./utils.mk
-C_COMPUTE_UNITS := 2
-T_COMPUTE_UNITS := 2
-H_COMPUTE_UNITS := 2
-D_COMPUTE_UNITS := 8 
-PARALLEL_BLOCK  := 8
+include ./config.mk
 
 TOOL_VERSION ?= 2019.2
 
@@ -176,7 +172,8 @@ VPP_FLAGS = -I$(HLS_SRC_DIR) \
 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_FLAGS += --config $(CUR_DIR)/advanced.ini \
-			 -DPARALLEL_BLOCK=$(PARALLEL_BLOCK)
+			 -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) \
+			 -DMULTIPLE_BYTES=$(MULTIPLE_BYTES)
 
 
 VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
@@ -199,9 +196,9 @@ XO_FILES_D = $(TEMP_DIR)/xf_zlib_datareader.xo \
 
 COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
 HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/zlib_huffman_enc_mm.cpp
-DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_rd.cpp
-DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_wr.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress_stream.cpp
+DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_rd.cpp
+DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_wr.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_parallelbyte_decompress_stream.cpp
 
 COMPRESS_KERNEL_NAME = xilLz77Compress
 HUFFMAN_KERNEL_NAME = xilHuffmanKernel
@@ -301,9 +298,6 @@ CXXFLAGS += -std=c++0x -fmessage-length=0 \
 	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread \
 		-Wno-unused-function
 CXXFLAGS += -O3	    
-CXXFLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) -DC_COMPUTE_UNIT=$(C_COMPUTE_UNITS) \
-            -DT_COMPUTE_UNIT=$(T_COMPUTE_UNITS) -DH_COMPUTE_UNIT=$(H_COMPUTE_UNITS) \
-            -DD_COMPUTE_UNIT=$(D_COMPUTE_UNITS) -DOVERLAP_HOST_DEVICE
 
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread -fopenmp
 LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing -Wno-unused-function
@@ -349,6 +343,9 @@ $(LIBZLIB): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platform
 #.PHONY: all help host xclbin cleanh cleank cleanall clean
 
 all: host xclbin
+ifeq ($(findstring vck, $(DEVICE)), vck)
+$(error This design is not supported for $(DEVICE))
+endif
 
 host: $(EXE_FILE) | check_vpp check_xrt check_platform
 

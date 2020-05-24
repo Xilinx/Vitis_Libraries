@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.zlib_lz77", 
+    "name": "Xilinx Zlib LZ77 Compress HLS Test", 
     "description": "Test Design to validate lz77 compress module in Zlib compression", 
     "flow": "hls", 
     "platform_whitelist": [

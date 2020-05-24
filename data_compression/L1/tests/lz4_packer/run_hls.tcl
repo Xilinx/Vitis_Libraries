@@ -15,9 +15,9 @@
 #
 
 source settings.tcl
-set DIR_NAME "lzx_multbyte_decompress"
+set DIR_NAME "lz4_packer"
 set DESIGN_PATH "${XF_PROJ_ROOT}/L1/tests/${DIR_NAME}"
-set PROJ "lzx_decompress_test.prj"
+set PROJ "lz4_packer_test.prj"
 set SOLN "sol1"
 
 if {![info exists CLKP]} {
@@ -26,19 +26,19 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "lzx_decompress_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb "lzx_decompress_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-set_top lzxDecompressEngineRun
+
+add_files "lz4_packer_test.cpp $XF_PROJ_ROOT/common/thirdParty/xxhash/xxhash.c" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/thirdParty/xxhash"
+add_files -tb "lz4_packer_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/thirdParty/xxhash -DPARALLEL_BLOCK=8"
+
+set_top hls_lz4CompressPacker
 
 open_solution -reset $SOLN
-
-
 
 set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -argv "${DESIGN_PATH}/sample.txt.encoded ${DESIGN_PATH}/sample.txt.encoded.out ${DESIGN_PATH}/sample.txt"
+  csim_design -argv "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.lz4"
 }
 
 if {$CSYNTH == 1} {
@@ -46,7 +46,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -disable_depchk -O -argv "${DESIGN_PATH}/sample.txt.encoded ${DESIGN_PATH}/sample.txt.encoded.out ${DESIGN_PATH}/sample.txt"
+  cosim_design -disable_depchk -O -argv "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.lz4"
 }
 
 if {$VIVADO_SYN == 1} {

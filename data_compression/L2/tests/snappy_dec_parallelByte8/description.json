@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx Snappy MultiByte Decompress",
+    "name": "Xilinx Snappy MultiByte-8 Decompress",
     "description": [
-        "Xilinx Snappy MultiByte Decompress"
+        "Xilinx Snappy MultiByte Decompress: 8 parallel bytes processed at a time"
     ],
     "flow": "vitis",
     "launch": [
@@ -9,6 +9,9 @@
             "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt.snappy",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "host": {
         "host_exe": "xil_snappy",
@@ -22,7 +25,7 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/tests/src/"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=1"
@@ -44,7 +47,7 @@
             "accelerators": [
                 {
                     "name": "xilSnappyDecompress",
-                    "location": "LIB_DIR/L2/src/snappy_multiByte_decompress_mm.cpp"
+                    "location": "LIB_DIR/L2/src/snappy_multibyte_decompress_mm.cpp"
                 }
             ]
         }

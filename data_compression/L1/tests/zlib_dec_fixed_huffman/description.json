@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.zlib_dec_fixed_huffman", 
+    "name": "Xilinx Zlib Fixed Huffman Decoder HLS Test", 
     "description": "Test Design to validate core Zlib decompress module using fixed huffman decoder", 
     "flow": "hls", 
     "platform_whitelist": [

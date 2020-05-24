@@ -28,13 +28,10 @@
 #include "xcl2.hpp"
 #include <iomanip>
 
-#ifndef HOST_BUFFER_SIZE_IN_MB
-#define HOST_BUFFER_SIZE_IN_MB 2
-#endif
 /**
  * Maximum host buffer used to operate per kernel invocation
  */
-#define HOST_BUFFER_SIZE (HOST_BUFFER_SIZE_IN_MB * 1024 * 1024)
+#define HOST_BUFFER_SIZE (128 * 1024 * 1024)
 
 /**
  * Default block size

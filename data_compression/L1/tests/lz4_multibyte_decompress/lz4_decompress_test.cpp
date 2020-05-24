@@ -55,11 +55,9 @@ int main(int argc, char* argv[]) {
         std::cout << "Cannot open the compressed file!!" << std::endl;
         exit(0);
     }
-    uint32_t output_size;
-    outputFile.read((char*)&output_size, 4);
     outputFile.seekg(0, std::ios::end); // reaching to end of file
-    uint32_t comp_length = (uint32_t)outputFile.tellg() - 4;
-    outputFile.seekg(4, std::ios::beg);
+    uint32_t comp_length = (uint32_t)outputFile.tellg();
+    outputFile.seekg(0, std::ios::beg);
     for (int i = 0; i < comp_length; i += PARALLEL_BYTES) {
         uintV_t x;
         outputFile.read((char*)&x, PARALLEL_BYTES);
@@ -68,9 +66,6 @@ int main(int argc, char* argv[]) {
 
     // DECOMPRESSION CALL
     lz4DecompressEngineRun(inStream, outStream, outStreamEoS, outStreamSize, comp_length);
-
-    uint32_t outputsize;
-    outputsize = output_size;
 
     std::ofstream outFile;
     outFile.open(argv[2], std::fstream::binary | std::fstream::out);
@@ -82,11 +77,6 @@ int main(int argc, char* argv[]) {
     }
     bool pass = true;
     uint32_t outSize = outStreamSize.read();
-    std::cout << "Uncompressed size =" << outSize << std::endl;
-    if (outSize != output_size) {
-        std::cout << "Incorrect size. Expected value = " << output_size << std::endl;
-        pass = false;
-    }
     uint32_t outCnt = 0;
     uintV_t g;
     for (bool outEoS = outStreamEoS.read(); outEoS == 0; outEoS = outStreamEoS.read()) {
@@ -94,7 +84,7 @@ int main(int argc, char* argv[]) {
         uintV_t o = outStream.read();
 
         // writing output file
-        if (outCnt + 8 < outSize) {
+        if ((outCnt + PARALLEL_BYTES) < outSize) {
             outFile.write((char*)&o, PARALLEL_BYTES);
             outCnt += PARALLEL_BYTES;
         } else {
@@ -115,6 +105,7 @@ int main(int argc, char* argv[]) {
                     std::cout << "Expected=" << std::hex << e << " got=" << r << std::endl;
                     std::cout << "-----TEST FAILED: The input file and the file after "
                               << "decompression are not similar!-----" << std::endl;
+                    exit(0);
                 }
             }
         }

@@ -45,7 +45,7 @@
 /**
  * Maximum host buffer used to operate per kernel invocation
  */
-#define HOST_BUFFER_SIZE (2 * 1024 * 1024)
+#define HOST_BUFFER_SIZE (128 * 1024 * 1024)
 
 /**
  * Default block size

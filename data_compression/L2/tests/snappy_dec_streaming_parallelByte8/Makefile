@@ -64,6 +64,10 @@ endif
 ifeq ($(findstring vck, $(DEVICE)), vck)
 $(error This design is not supported for $(DEVICE))
 endif
+ifeq ($(findstring u280, $(DEVICE)), u280)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+
 
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
@@ -134,7 +138,7 @@ VPP_FLAGS +=-I$(XFLIB_DIR)/L2/src
 VPP_FLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) -DMULTIPLE_BYTES=$(MULTIPLE_BYTES)
 
 # Kernel linker flags
-LDCLFLAGS_decompress_streaming += --profile_kernel data:all:all:all --config $(CUR_DIR)/decompress.ini
+LDCLFLAGS_decompress_streaming += --config $(CUR_DIR)/decompress.ini
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/decompress_streaming.xclbin
