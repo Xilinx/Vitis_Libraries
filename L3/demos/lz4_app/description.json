@@ -1,5 +1,5 @@
 {
-    "name": "LZ4 Application",
+    "name": "Xilinx LZ4 Application",
     "description": [
         "LZ4 Application resides in `L3/demos/lz4_app` directory."
     ],
@@ -18,7 +18,6 @@
             "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin BUILD/decompress.xclbin"
         }
     ],
-    "config_make": "config.mk",
     "host": {
         "host_exe": "xil_lz4",
         "compiler": {
@@ -35,7 +34,10 @@
                 "LIB_DIR/L1/include/hw"
             ],
             "symbols": [
-                "PARALLEL_BLOCK=8"
+                "PARALLEL_BLOCK=8",
+                "C_COMPUTE_UNIT=2",
+                "D_COMPUTE_UNIT=2",
+                "OVERLAP_HOST_DEVICE"
             ]
         }
     },
@@ -48,16 +50,23 @@
                     "name": "xilLz4Compress",
                     "location": "LIB_DIR/L2/src/lz4_compress_mm.cpp",
                     "clflags": "-DPARALLEL_BLOCK=8",
-                    "num_compute_units": "2",
-                    "compute_units": [
+                    "num_compute_units": "2","compute_units": [
                         {
                             "arguments": [
                                 {
-                                    "name": "m_axi_gmem0",
+                                    "name": "in",
                                     "memory": "DDR[0]"
                                 },
                                 {
-                                    "name": "m_axi_gmem1",
+                                    "name": "out",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "compressd_size",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "in_block_size",
                                     "memory": "DDR[0]"
                                 }
                             ]
@@ -65,13 +74,22 @@
                         {
                             "arguments": [
                                 {
-                                    "name": "m_axi_gmem0",
+                                    "name": "in",
                                     "memory": "DDR[1]"
                                 },
                                 {
-                                    "name": "m_axi_gmem1",
+                                    "name": "out",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "compressd_size",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "in_block_size",
                                     "memory": "DDR[1]"
                                 }
+                                
                             ]
                         }
                     ]
@@ -91,11 +109,19 @@
                         {
                             "arguments": [
                                 {
-                                    "name": "m_axi_gmem0",
+                                    "name": "in",
                                     "memory": "DDR[0]"
                                 },
                                 {
-                                    "name": "m_axi_gmem1",
+                                    "name": "out",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "in_compress_size",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "in_block_size",
                                     "memory": "DDR[0]"
                                 }
                             ]
@@ -103,13 +129,22 @@
                         {
                             "arguments": [
                                 {
-                                    "name": "m_axi_gmem0",
+                                    "name": "in",
                                     "memory": "DDR[1]"
                                 },
                                 {
-                                    "name": "m_axi_gmem1",
+                                    "name": "out",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "in_compress_size",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "in_block_size",
                                     "memory": "DDR[1]"
                                 }
+                                
                             ]
                         }
                     ]

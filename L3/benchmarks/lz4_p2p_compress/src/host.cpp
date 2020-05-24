@@ -19,6 +19,12 @@
 #include <vector>
 #include "cmdlineparser.h"
 
+// The default value set as non-P2P, so that design can work for all platforms.
+// For P2P enabled platform, user need to manually change this macro value to true.
+#ifndef ENABLE_P2P
+#define ENABLE_P2P false
+#endif
+
 void compress_multiple_files(const std::vector<std::string>& inFileVec,
                              const std::vector<std::string>& outFileVec,
                              uint32_t block_size,

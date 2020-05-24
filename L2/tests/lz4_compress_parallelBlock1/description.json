@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx LZ4 Compress Parallel Block 1",
+    "name": "Xilinx LZ4 Compress 1 Parallel Block",
     "description": [
         "Xilinx LZ4 Compress Parallel Block 1"
     ],
@@ -9,6 +9,9 @@
             "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "host": {
         "host_exe": "xil_lz4",
@@ -22,7 +25,7 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/tests/src/"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=1"

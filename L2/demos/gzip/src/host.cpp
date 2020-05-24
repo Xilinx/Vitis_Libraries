@@ -179,7 +179,7 @@ void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_
         std::cout << "Unable to open file";
         exit(1);
     }
-    uint32_t input_size = get_file_size(inFile);
+    uint64_t input_size = get_file_size(inFile);
 
     const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     double len = input_size;

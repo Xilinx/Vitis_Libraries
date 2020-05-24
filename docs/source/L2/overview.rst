@@ -2,8 +2,6 @@
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, L2 Kernels, Overview    
    :description: This section provides various application demos
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
 
 ===============
 L2 Kernel Demos

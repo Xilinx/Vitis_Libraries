@@ -19,10 +19,15 @@
 #include <vector>
 #include "cmdlineparser.h"
 
-void xil_validate(std::string& file_list, std::string& ext);
+// The default value set as non-P2P, so that design can work for all platforms.
+// For P2P enabled platform, user need to manually change this macro value to true.
+#ifndef ENABLE_P2P
+#define ENABLE_P2P false
+#endif
 
-void xil_decompress_list(
-    std::string& file_list, std::string& ext, std::string& decompress_bin, uint8_t deviceId, bool enable_p2p) {
+void xil_validate(std::string& file_list);
+
+void xil_decompress_list(std::string& file_list, std::string& decompress_bin, uint8_t deviceId, bool enable_p2p) {
     // Xilinx ZLIB object
     xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId, FULL);
 
@@ -32,7 +37,7 @@ void xil_decompress_list(
 
     std::cout << "\n";
     std::cout << "--------------------------------------------------------------" << std::endl;
-    std::cout << "                     Xilinx Zlib DeCompress                       " << std::endl;
+    std::cout << "                     Xilinx GZiP DeCompress                       " << std::endl;
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "\n";
     std::cout << "E2E(MBps)\tFile Size(MB)\t\tFile Name" << std::endl;
@@ -41,7 +46,6 @@ void xil_decompress_list(
     // Decompress list of files
     while (std::getline(infilelist_dec, line_dec)) {
         std::string file_line = line_dec;
-        file_line = file_line + ext;
 
         std::ifstream inFile_dec(file_line.c_str(), std::ifstream::binary);
         if (!inFile_dec) {
@@ -65,30 +69,23 @@ void xil_decompress_list(
 }
 
 void xil_batch_verify(std::string& file_list, std::string& decompress_bin, uint8_t deviceId, bool enable_p2p) {
-    std::string ext;
-
-    // Xilinx ZLIB De-compression
-    ext = ".xe2xd.zlib";
-
-    xil_decompress_list(file_list, ext, decompress_bin, deviceId, enable_p2p);
+    xil_decompress_list(file_list, decompress_bin, deviceId, enable_p2p);
 
     // Validate
     std::cout << "\n";
     std::cout << "----------------------------------------------------------------------------------------"
               << std::endl;
-    std::cout << "                       Validate: Xilinx Zlib Compress vs Xilinx Zlib Decompress           "
-              << std::endl;
+    std::cout << "                       Validate: Xilinx GZiP Decompress           " << std::endl;
     std::cout << "----------------------------------------------------------------------------------------"
               << std::endl;
-    std::string origExt = ".xe2xd.zlib.orig";
-    xil_validate(file_list, origExt);
+    xil_validate(file_list);
 }
 
 void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin, uint8_t deviceId, bool enable_p2p) {
     // Xilinx ZLIB object
     xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId, FULL);
 
-    // std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    // std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -117,7 +114,7 @@ void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 }
 
-void xil_validate(std::string& file_list, std::string& ext) {
+void xil_validate(std::string& file_list) {
     std::cout << "\n";
     std::cout << "Status\t\tFile Name" << std::endl;
     std::cout << "\n";
@@ -127,15 +124,19 @@ void xil_validate(std::string& file_list, std::string& ext) {
 
     while (std::getline(infilelist_val, line_val)) {
         std::string line_in = line_val;
-        std::string line_out = line_in + ext;
+        std::string line_orig = line_in + ".orig";
+        std::string delimiter = ".gz";
+        std::string token = line_in.substr(0, line_in.find(delimiter));
+        token = token.substr(0, token.find(".xe2xd"));
+        std::string line_raw = token;
 
         int ret = 0;
         // Validate input and output files
-        ret = validate(line_in, line_out);
+        ret = validate(line_raw, line_orig);
         if (ret == 0) {
             std::cout << (ret ? "FAILED\t" : "PASSED\t") << "\t" << line_in << std::endl;
         } else {
-            std::cout << "Validation Failed" << line_out.c_str() << std::endl;
+            std::cout << "Validation Failed" << line_raw.c_str() << std::endl;
             exit(1);
         }
     }

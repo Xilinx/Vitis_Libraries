@@ -40,7 +40,7 @@ typedef ap_uint<512> data_t;
 #define MAX_LIT_COUNT 4096*/
 #define BLOCK_SIZE 64
 #define BLOCK_LENGTH (BLOCK_SIZE * 1024)
-#define PARALLEL_BLOCK 8
+#define PARALLEL_BLOCK 1
 #define CONST_SIZE 2 * 1024
 #define MAGIC_HEADER_SIZE 4
 #define MAGIC_BYTE_1 4
@@ -140,7 +140,8 @@ int main(int argc, char* argv[]) {
             uint32_t outCnt = 0;
             uint32_t sizeVBytes = compressedSize[bIdx++];
             outFile.write((char*)&sizeVBytes, 4);
-            uint32_t sizeV = (sizeVBytes - 1) / c_size + 1;
+            uint32_t sizeV = 0;
+            if (sizeVBytes > 0) sizeV = (sizeVBytes - 1) / c_size + 1;
             uint32_t kIdx = oIdx / c_size;
             for (uint32_t k = 0; k < sizeV; k++) {
                 data_t o = source_out[kIdx + k];
@@ -162,4 +163,5 @@ int main(int argc, char* argv[]) {
     outFile.put(0);
     outFile.close();
     inFile.close();
+    return 0;
 }

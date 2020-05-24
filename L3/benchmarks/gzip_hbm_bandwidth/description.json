@@ -1,0 +1,573 @@
+{
+    "name": "Xilinx GZIP Application For HBM Bandwidth",
+    "description": [
+        "GZip application for HBM Bandwidth resides in `L3/benchmarks/gzip_hbm_bandwidth` directory."
+    ],
+    "flow": "vitis",
+    "platform_blacklist": [
+        "u200",
+        "u250",
+        "vck"
+    ],
+    "platform_whitelist": [
+        "u50_gen3x16"
+    ],
+    "launch": [
+        {
+            "cmd_args": "-sx BUILD/compress_decompress.xclbin -c PROJECT/sample.txt",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "gui": false, 
+    "match_makefile": "false",
+    "match_ini": "false",
+    "config_make": "config.mk",
+    "host": {
+        "host_exe": "xil_gzip_8b",
+        "compiler": {
+            "sources": [
+                "./src/host.cpp",
+                "LIB_DIR/L3/src/zlib.cpp",
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
+                "LIB_DIR/common/libs/logger/logger.cpp",
+                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
+            ],
+            "includepaths": [
+                "LIB_DIR/L3/include"
+            ],
+            "options": "-O3 ",
+            "symbols": [ "PARALLEL_BLOCK=8" ] 
+        }
+    },
+    "v++": {
+        "build_datafiles" : [
+            "PROJECT/advanced.ini",
+            "PROJECT/hls_directives.tcl"
+        ],
+        "compiler": {
+            "symbols": [
+                "PARALLEL_BLOCK=8"
+            ],
+            "clflags": [
+                "--config PROJECT/advanced.ini"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "name": "compress_decompress",
+            "ldclflags": "--config PROJECT/opts.ini",
+            "accelerators": [
+                {
+                    "name": "xilLz77Compress",
+                    "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp",
+                    "num_compute_units": "2",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "compressd_size",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "in_block_size",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_ltree_freq",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_ltree_freq",
+                                    "memory": "HBM[0]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "compressd_size",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "in_block_size",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_ltree_freq",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_ltree_freq",
+                                    "memory": "HBM[1]"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "xilHuffmanKernel",
+                    "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp",
+                    "num_compute_units": "2",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "in_block_size",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "compressd_size",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_litmtree_codes",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_distree_codes",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_bitlentree_codes",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_litmtree_blen",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_dtree_blen",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_bitlentree_blen",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_max_codes",
+                                    "memory": "HBM[0]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "in_block_size",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "compressd_size",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_litmtree_codes",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_distree_codes",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_bitlentree_codes",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_litmtree_blen",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_dtree_blen",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_bitlentree_blen",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_max_codes",
+                                    "memory": "HBM[1]"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "xilTreegenKernel",
+                    "location": "LIB_DIR/L2/src/zlib_treegen_mm.cpp",
+                    "num_compute_units": "2",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "dyn_ltree_freq",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_dtree_freq",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_bltree_freq",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_ltree_codes",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_dtree_codes",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_bltree_codes",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_ltree_blen",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_dtree_blen",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "dyn_bltree_blen",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "max_codes",
+                                    "memory": "HBM[0]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "dyn_ltree_freq",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_dtree_freq",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_bltree_freq",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_ltree_codes",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_dtree_codes",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_bltree_codes",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_ltree_blen",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_dtree_blen",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "dyn_bltree_blen",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "max_codes",
+                                    "memory": "HBM[1]"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "xilZlibDmReader",
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_rd.cpp",
+                    "num_compute_units": "8",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[2]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "HBM[2]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[3]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "HBM[3]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[4]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "HBM[4]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[5]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "HBM[5]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[6]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "HBM[6]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[7]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "HBM[7]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[8]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "HBM[8]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "out",
+                                    "memory": "HBM[9]"
+                                },
+                                {
+                                    "name": "encoded_size",
+                                    "memory": "HBM[9]"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "xilZlibDmWriter",
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_wr.cpp",
+                    "num_compute_units": "8",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[2]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[3]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[4]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[5]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[6]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[7]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[8]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "in",
+                                    "memory": "HBM[9]"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "xilDecompressStream",
+                    "location": "LIB_DIR/L2/src/zlib_decompress_stream.cpp",
+                    "num_compute_units": "8",
+                    "compute_units": [
+                        {
+                            "slr": "SLR0"
+                        },
+                        {
+                            "slr": "SLR0"
+                        },
+                        {
+                            "slr": "SLR0"
+                        },
+                        {
+                            "slr": "SLR1"
+                        },
+                        {
+                            "slr": "SLR1"
+                        },
+                        {
+                            "slr": "SLR1"
+                        },
+                        {
+                            "slr": "SLR1"
+                        },
+                        {
+                            "slr": "SLR1"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "output_files" : "sample.txt.*",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+}

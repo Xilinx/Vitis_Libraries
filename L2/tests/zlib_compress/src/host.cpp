@@ -23,7 +23,7 @@ void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_
     // Xilinx ZLIB object
     xil_zlib xlz(single_bin, 1, max_cr, deviceId);
 
-    std::cout << std::fixed << std::setprecision(2) << "KT(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "KT(MBps)\t\t:";
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -31,7 +31,7 @@ void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_
         exit(1);
     }
 
-    uint32_t input_size = get_file_size(inFile);
+    uint64_t input_size = get_file_size(inFile);
 
     const char* sizes[] = {"B", "kB", "MB", "GB", "TB"};
     double len = input_size;

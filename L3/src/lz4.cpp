@@ -56,8 +56,11 @@ uint64_t xfLz4::compressFile(
             exit(1);
         }
 
-        std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size);
-        std::vector<uint8_t, aligned_allocator<uint8_t> > out(input_size);
+        std::vector<uint8_t, aligned_allocator<uint8_t> > in;
+        std::vector<uint8_t, aligned_allocator<uint8_t> > out;
+
+        MEM_ALLOC_CHECK(in.resize(input_size), input_size, "Input Buffer");
+        MEM_ALLOC_CHECK(out.resize(input_size), input_size, "Output Buffer");
 
         inFile.read((char*)in.data(), input_size);
 
@@ -141,13 +144,15 @@ xfLz4::xfLz4() {
     for (uint32_t i = 0; i < MAX_COMPUTE_UNITS; i++) {
         for (uint32_t j = 0; j < OVERLAP_BUF_COUNT; j++) {
             // Index calculation
-            h_buf_in[i][j].resize(HOST_BUFFER_SIZE);
-            h_buf_out[i][j].resize(HOST_BUFFER_SIZE);
-            h_blksize[i][j].resize(MAX_NUMBER_BLOCKS);
-            h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS);
+            MEM_ALLOC_CHECK(h_buf_in[i][j].resize(HOST_BUFFER_SIZE), HOST_BUFFER_SIZE, "Input Host Buffer");
+            MEM_ALLOC_CHECK(h_buf_out[i][j].resize(HOST_BUFFER_SIZE), HOST_BUFFER_SIZE, "Output Host Buffer");
+            MEM_ALLOC_CHECK(h_blksize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS, "BlockSize Host Buffer");
+            MEM_ALLOC_CHECK(h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS,
+                            "CompressSize Host Buffer");
 
-            m_compressSize[i][j].reserve(MAX_NUMBER_BLOCKS);
-            m_blkSize[i][j].reserve(MAX_NUMBER_BLOCKS);
+            MEM_ALLOC_CHECK(m_compressSize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS,
+                            "CompressSize(m) Host Buffer");
+            MEM_ALLOC_CHECK(m_blkSize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS, "BlockSize(m) Host Buffer");
         }
     }
 }
@@ -228,7 +233,7 @@ uint64_t xfLz4::decompressFile(
         }
 
         std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size);
-
+        MEM_ALLOC_CHECK(in.resize(input_size), input_size, "Input Buffer");
         // Read magic header 4 bytes
         char c = 0;
         char magic_hdr[] = {MAGIC_BYTE_1, MAGIC_BYTE_2, MAGIC_BYTE_3, MAGIC_BYTE_4};
@@ -276,6 +281,7 @@ uint64_t xfLz4::decompressFile(
 
         // Allocat output size
         std::vector<uint8_t, aligned_allocator<uint8_t> > out(original_size);
+        MEM_ALLOC_CHECK(out.resize(original_size), original_size, "Output Buffer");
 
         // Read block data from compressed stream .lz4
         inFile.read((char*)in.data(), (input_size - 15));
@@ -310,13 +316,13 @@ uint64_t xfLz4::decompress(uint8_t* in,
     for (uint32_t i = 0; i < MAX_COMPUTE_UNITS; i++) {
         for (uint32_t j = 0; j < OVERLAP_BUF_COUNT; j++) {
             // Index calculation
-            h_buf_in[i][j].resize(host_buffer_size);
-            h_buf_out[i][j].resize(host_buffer_size);
-            h_blksize[i][j].resize(max_num_blks);
-            h_compressSize[i][j].resize(max_num_blks);
+            MEM_ALLOC_CHECK(h_buf_in[i][j].resize(host_buffer_size), host_buffer_size, "Input Host Buffer");
+            MEM_ALLOC_CHECK(h_buf_out[i][j].resize(host_buffer_size), host_buffer_size, "Output Host Buffer");
+            MEM_ALLOC_CHECK(h_blksize[i][j].resize(max_num_blks), max_num_blks, "MaxBlockSize Host Buffer");
+            MEM_ALLOC_CHECK(h_compressSize[i][j].resize(max_num_blks), max_num_blks, "MaxNumBlocks Host Buffer");
 
-            m_compressSize[i][j].reserve(max_num_blks);
-            m_blkSize[i][j].reserve(max_num_blks);
+            MEM_ALLOC_CHECK(m_compressSize[i][j].resize(max_num_blks), max_num_blks, "MaxNumBlocks (m) Host Buffer");
+            MEM_ALLOC_CHECK(m_blkSize[i][j].resize(max_num_blks), max_num_blks, "MaxBlockSize (m) Host Buffer");
         }
     }
 
@@ -723,13 +729,13 @@ uint64_t xfLz4::compress(
     for (uint32_t i = 0; i < MAX_COMPUTE_UNITS; i++) {
         for (uint32_t j = 0; j < OVERLAP_BUF_COUNT; j++) {
             // Index calculation
-            h_buf_in[i][j].resize(host_buffer_size);
-            h_buf_out[i][j].resize(host_buffer_size);
-            h_blksize[i][j].resize(max_num_blks);
-            h_compressSize[i][j].resize(max_num_blks);
+            MEM_ALLOC_CHECK(h_buf_in[i][j].resize(host_buffer_size), host_buffer_size, "Input Host Buffer");
+            MEM_ALLOC_CHECK(h_buf_out[i][j].resize(host_buffer_size), host_buffer_size, "Output Host Buffer");
+            MEM_ALLOC_CHECK(h_blksize[i][j].resize(max_num_blks), max_num_blks, "MaxNumBlocks Host Buffer");
+            MEM_ALLOC_CHECK(h_compressSize[i][j].resize(max_num_blks), max_num_blks, "CompressSize Host Buffer");
 
-            m_compressSize[i][j].reserve(max_num_blks);
-            m_blkSize[i][j].reserve(max_num_blks);
+            MEM_ALLOC_CHECK(m_compressSize[i][j].resize(max_num_blks), max_num_blks, "CompressSize(m) Host Buffer");
+            MEM_ALLOC_CHECK(m_blkSize[i][j].resize(max_num_blks), max_num_blks, "BlockSize(m) Host Buffer");
         }
     }
 

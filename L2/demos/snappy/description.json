@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx Snappy",
+    "name": "Xilinx Snappy Compression and Decompression",
     "description": [
-        "Xilinx Snappy"
+        "Xilinx Snappy compression and decompression memory-map solution"
     ],
     "flow": "vitis",
     "launch": [
@@ -15,6 +15,9 @@
             "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
         }
     ],
+    "platform_blacklist": [
+        "u280"
+    ],
     "host": {
         "host_exe": "xil_snappy",
         "compiler": {
@@ -27,7 +30,7 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/tests/src/"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=8"

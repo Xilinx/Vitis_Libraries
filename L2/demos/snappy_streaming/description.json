@@ -1,5 +1,5 @@
 {
-    "name": "Snappy-Streaming Compression and Decompression",
+    "name": "Xilinx Snappy Streaming Compression and Decompression",
     "description": [
         "Snappy-Streaming Compression and Decompression"
     ],
@@ -9,6 +9,9 @@
             "cmd_args": "-cx BUILD/compress_streaming.xclbin -dx BUILD/decompress_streaming.xclbin -v PROJECT/sample.txt",
             "name": "generic launch for all flows"
         }
+    ],
+    "platform_blacklist": [
+        "u280"
     ],
     "host": {
         "host_exe": "xil_snappy_streaming",
@@ -22,7 +25,7 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/tests/src/"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=8"

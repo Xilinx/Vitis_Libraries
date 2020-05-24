@@ -1,12 +1,13 @@
 {
-    "name": "ZLIB Application for HBM",
+    "name": "Xilinx ZLIB Application For HBM Platforms",
     "description": [
         "ZLIB application for HBM resides in `L3/tests/zlib_hbm` directory."
     ],
     "flow": "vitis",
     "platform_blacklist": [
         "u200",
-        "u250"
+        "u250",
+        "vck"
     ],
     "platform_whitelist": [
         "u50_gen3x16"
@@ -20,6 +21,7 @@
     "match_makefile": "false",
     "match_ini": "false",
     "config_make": "config.mk",
+    "gui": false, 
     "host": {
         "host_exe": "xil_zlib",
         "compiler": {

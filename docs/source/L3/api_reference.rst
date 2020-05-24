@@ -6,8 +6,6 @@
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, Overlay API, L3 Overview
    :description: This section provides L3 overlay API reference
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
 
 *********************
 Overlay API Reference

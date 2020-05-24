@@ -53,7 +53,7 @@ extern "C" {
  */
 void xilSnappyDecompressStream(hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& inaxistream,
                                hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& outaxistream,
-                               hls::stream<ap_axiu<8, 0, 0, 0> >& outaxistreameos,
+                               hls::stream<ap_axiu<32, 0, 0, 0> >& outaxistreamsize,
                                uint32_t inputSize);
 }
 #endif // _XFCOMPRESSION_SNAPPY_DECOMPRESS_STREAM_HPP_

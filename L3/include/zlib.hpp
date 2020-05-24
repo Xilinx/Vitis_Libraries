@@ -25,14 +25,14 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
-
+#include <algorithm>
 #include <string>
 #include <fstream>
 #include <thread>
 #include "xcl2.hpp"
 #include <sys/stat.h>
 #include <random>
-
+#include <new>
 const int gz_max_literal_count = 4096;
 
 #define PARALLEL_ENGINES 8
@@ -43,8 +43,8 @@ const int gz_max_literal_count = 4096;
 #define BLOCK_SIZE_IN_KB 1024
 
 // Input and output buffer size
-#define INPUT_BUFFER_SIZE (8 * 1024 * 1024)
-#define OUTPUT_BUFFER_SIZE (16 * 1024 * 1024)
+#define INPUT_BUFFER_SIZE (8 * MEGA_BYTE)
+#define OUTPUT_BUFFER_SIZE (16 * MEGA_BYTE)
 
 // zlib max cr limit
 #define MAX_CR 10
@@ -66,15 +66,96 @@ const int gz_max_literal_count = 4096;
 #define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
 
 #define DECOMP_OUT_SIZE 170
-
 constexpr auto page_aligned_mem = (1 << 21);
 
 int validate(std::string& inFile_name, std::string& outFile_name);
 
-uint32_t get_file_size(std::ifstream& file);
+uint64_t get_file_size(std::ifstream& file);
 enum comp_decom_flows { BOTH, COMP_ONLY, DECOMP_ONLY };
 enum list_mode { ONLY_COMPRESS, ONLY_DECOMPRESS, COMP_DECOMP };
 enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };
+
+constexpr auto c_clOutOfResource = -5;
+constexpr auto c_clinvalidbin = -42;
+constexpr auto c_clinvalidvalue = -30;
+
+#ifdef VERBOSE
+#define ZOCL_CHECK(error, call, eflag, expected)                                    \
+    call;                                                                           \
+    if (error != CL_SUCCESS) {                                                      \
+        if (error == expected) {                                                    \
+            std::cout << __FILE__ << ":" << __LINE__ << " OPENCL API --> ";         \
+            std::cout << #call;                                                     \
+            std::cout << ", RESULT: -->  ";                                         \
+            std::cout << error_string(error);                                       \
+            std::cout << ", EXPECTED: --> ";                                        \
+            std::cout << error_string(expected) << std::endl;                       \
+            eflag = error;                                                          \
+        } else {                                                                    \
+            std::cout << "Unexpected Error \n" << error_string(error) << std::endl; \
+            exit(EXIT_FAILURE);                                                     \
+        }                                                                           \
+    }
+#else
+#define ZOCL_CHECK(error, call, eflag, expected)                                    \
+    call;                                                                           \
+    if (error != CL_SUCCESS) {                                                      \
+        if (error == expected)                                                      \
+            eflag = error;                                                          \
+        else {                                                                      \
+            std::cout << "Unexpected Error \n" << error_string(error) << std::endl; \
+            exit(EXIT_FAILURE);                                                     \
+        }                                                                           \
+    }
+#endif
+
+#ifdef VERBOSE
+#define ZOCL_CHECK_2(error, call, eflag, expected_1, expected_2)                    \
+    call;                                                                           \
+    if (error != CL_SUCCESS) {                                                      \
+        if ((error == expected_1)) {                                                \
+            std::cout << __FILE__ << ":" << __LINE__ << " OPENCL API --> ";         \
+            std::cout << #call;                                                     \
+            std::cout << ", RESULT: -->  ";                                         \
+            std::cout << error_string(error);                                       \
+            std::cout << ", EXPECTED: --> ";                                        \
+            std::cout << error_string(expected_1) << std::endl;                     \
+            eflag = error;                                                          \
+        } else if (error == expected_2) {                                           \
+            std::cout << __FILE__ << ":" << __LINE__ << " OPENCL API --> ";         \
+            std::cout << #call;                                                     \
+            std::cout << ", RESULT: -->  ";                                         \
+            std::cout << error_string(error);                                       \
+            std::cout << ", EXPECTED: --> ";                                        \
+            std::cout << error_string(expected_2) << std::endl;                     \
+            eflag = error;                                                          \
+        } else {                                                                    \
+            std::cout << "Unexpected Error \n" << error_string(error) << std::endl; \
+            exit(EXIT_FAILURE);                                                     \
+        }                                                                           \
+    }
+#else
+#define ZOCL_CHECK_2(error, call, eflag, expected_1, expected_2)                    \
+    call;                                                                           \
+    if (error != CL_SUCCESS) {                                                      \
+        if ((error == expected_1) || (error == expected_2))                         \
+            eflag = error;                                                          \
+        else {                                                                      \
+            std::cout << "Unexpected Error \n" << error_string(error) << std::endl; \
+            exit(EXIT_FAILURE);                                                     \
+        }                                                                           \
+    }
+#endif
+
+#define ERROR_STATUS(call)                                      \
+    if (call) {                                                 \
+        std::cerr << "\nFailed to create object " << std::endl; \
+        exit(EXIT_FAILURE);                                     \
+    }
+
+#define DELETE_OBJ(buffer)     \
+    if (buffer) delete buffer; \
+    buffer = nullptr;
 
 // Aligned allocator for ZLIB
 template <typename T>
@@ -128,7 +209,7 @@ class xfZlib {
      * @param host_buffer_size host buffer size
      */
 
-    uint32_t compress(uint8_t* in, uint8_t* out, uint32_t actual_size, uint32_t host_buffer_size);
+    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
 
     /**
      * @brief This method does serial execution of decompression
@@ -152,7 +233,7 @@ class xfZlib {
      * @param input_size input size
      */
 
-    int compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
+    uint64_t compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
 
     /**
      * @brief In shared library flow this call can be used for decompress buffer
@@ -175,7 +256,7 @@ class xfZlib {
      * @param actual_size input size
      */
 
-    uint32_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
+    uint64_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
 
     /**
      * @brief This method  does file operations and invokes decompress API which
@@ -207,7 +288,7 @@ class xfZlib {
      * @param binaryFile
      *
      */
-    void init(const std::string& binaryFile, uint8_t dtype);
+    int init(const std::string& binaryFile, uint8_t dtype);
 
     /**
      * @brief OpenCL setup release
@@ -220,31 +301,37 @@ class xfZlib {
      */
     ~xfZlib();
 
+    /**
+     * @brief error_code of a OpenCL call
+     */
+    int error_code(void);
+
    private:
     void _enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, int cu);
     void _enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, int cu, uint32_t max_outbuf);
 
     uint8_t m_cdflow;
     bool m_isProfile;
-    uint8_t m_deviceid;
-    uint8_t m_max_cr;
+    uint8_t m_deviceid = 0;
+    uint8_t m_max_cr = MAX_CR;
+    int m_err_code = 0;
 
     cl::Device m_device;
-    cl::Program* m_program;
-    cl::Context* m_context;
-    cl::CommandQueue* m_q[C_COMPUTE_UNIT * OVERLAP_BUF_COUNT];
-    cl::CommandQueue* m_q_dec[D_COMPUTE_UNIT];
-    cl::CommandQueue* m_q_rd[D_COMPUTE_UNIT];
-    cl::CommandQueue* m_q_rdd[D_COMPUTE_UNIT];
-    cl::CommandQueue* m_q_wr[D_COMPUTE_UNIT];
-    cl::CommandQueue* m_q_wrd[D_COMPUTE_UNIT];
+    cl::Context* m_context = nullptr;
+    cl::Program* m_program = nullptr;
+    cl::CommandQueue* m_q[C_COMPUTE_UNIT * OVERLAP_BUF_COUNT] = {nullptr};
+    cl::CommandQueue* m_q_dec[D_COMPUTE_UNIT] = {nullptr};
+    cl::CommandQueue* m_q_rd[D_COMPUTE_UNIT] = {nullptr};
+    cl::CommandQueue* m_q_rdd[D_COMPUTE_UNIT] = {nullptr};
+    cl::CommandQueue* m_q_wr[D_COMPUTE_UNIT] = {nullptr};
+    cl::CommandQueue* m_q_wrd[D_COMPUTE_UNIT] = {nullptr};
 
     // Kernel declaration
-    cl::Kernel* compress_kernel[C_COMPUTE_UNIT];
-    cl::Kernel* huffman_kernel[H_COMPUTE_UNIT];
-    cl::Kernel* decompress_kernel[D_COMPUTE_UNIT];
-    cl::Kernel* data_writer_kernel[D_COMPUTE_UNIT];
-    cl::Kernel* data_reader_kernel[D_COMPUTE_UNIT];
+    cl::Kernel* compress_kernel[C_COMPUTE_UNIT] = {nullptr};
+    cl::Kernel* huffman_kernel[H_COMPUTE_UNIT] = {nullptr};
+    cl::Kernel* decompress_kernel[D_COMPUTE_UNIT] = {nullptr};
+    cl::Kernel* data_writer_kernel[D_COMPUTE_UNIT] = {nullptr};
+    cl::Kernel* data_reader_kernel[D_COMPUTE_UNIT] = {nullptr};
 
     // Compression related
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_buf_in[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
@@ -257,10 +344,10 @@ class xfZlib {
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbuf_in[MAX_DDCOMP_UNITS];
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbuf_zlibout[MAX_DDCOMP_UNITS];
     std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize[MAX_DDCOMP_UNITS];
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_in[MAX_DDCOMP_UNITS][DIN_BUFFERCOUNT];
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[MAX_DDCOMP_UNITS][DOUT_BUFFERCOUNT];
-    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize_stream[MAX_DDCOMP_UNITS][DOUT_BUFFERCOUNT];
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressStatus[MAX_DDCOMP_UNITS];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_in[DIN_BUFFERCOUNT];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[DOUT_BUFFERCOUNT];
+    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize_stream[DOUT_BUFFERCOUNT];
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressStatus;
 
     // Device buffers
     cl::Buffer* buffer_input[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
@@ -273,8 +360,8 @@ class xfZlib {
     cl::Buffer* buffer_dyn_dtree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
     // Decompress Device Buffers
-    cl::Buffer* buffer_dec_input[MAX_DDCOMP_UNITS];
-    cl::Buffer* buffer_dec_zlib_output[MAX_DDCOMP_UNITS];
+    cl::Buffer* buffer_dec_input[DIN_BUFFERCOUNT] = {nullptr};
+    cl::Buffer* buffer_dec_zlib_output[DOUT_BUFFERCOUNT] = {nullptr};
     cl::Buffer* buffer_dec_compress_size[MAX_DDCOMP_UNITS];
 
     // Kernel names

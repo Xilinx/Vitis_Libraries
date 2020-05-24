@@ -77,7 +77,7 @@ uint64_t xfLz4::compressFile(std::string& inFile_name, std::string& outFile_name
                 break;
         }
 
-        uint32_t host_buffer_size = (m_BlockSizeInKb * 1024) * 32;
+        uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
         if ((m_BlockSizeInKb * 1024) > input_size) host_buffer_size = m_BlockSizeInKb * 1024;
 

@@ -1,5 +1,5 @@
 {
-    "name": "GZip Application for HBM",
+    "name": "Xilinx GZIP Application For HBM Platforms",
     "description": [
         "GZip application for HBM resides in `L3/demos/gzip_hbm` directory."
     ],
@@ -20,6 +20,7 @@
     "match_makefile": "false",
     "match_ini": "false",
     "config_make": "config.mk",
+    "gui": false, 
     "host": {
         "host_exe": "xil_zlib",
         "compiler": {
