@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2019-2020 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,11 +22,24 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-1.0
-----
+2020.1
+------
 
-The 1.0 release provides a range of HLS primitives for:
+This release adds the following API to this library:
 
- * Work distribution and result collection in different algorithms.
- * Stream manipulation, including combination, duplication, synchronization, shuffle, etc.
- * Updating URAM array in higher frequency.
+* Read-only cache (cache):
+  This API stores history data recently loaded from DDR/HBM in the on-chip memory(URAM).
+  It aims to reduce DDR/HBM access when the memory is accessed randomly.
+* AXI master read without e signal (an overload of axiToStream):
+  This API provides buffered read from AXI master into stream.
+  It is assumed that the receiver of the stream knows the number of element to process.
+
+
+2019.2
+------
+
+The 2019.2 release provides a range of HLS primitives for:
+
+* Work distribution and result collection in different algorithms.
+* Stream manipulation, including combination, duplication, synchronization, shuffle, etc.
+* Updating URAM array in higher frequency.
