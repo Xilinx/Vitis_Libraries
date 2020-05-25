@@ -92,29 +92,23 @@ void CL_CALLBACK print_buf_result(cl_event event, cl_int cmd_exec_status, void* 
     printf("  %d\n", nm);
 }
 
-template <typename T>
-int load_dat(void* data, const std::string& name, const std::string& dir, size_t n) {
-    if (!data) {
-        return -1;
-    }
-    std::string fn = dir + "/" + name + ".dat";
-    FILE* f = fopen(fn.c_str(), "rb");
-    if (!f) {
-        std::cerr << "ERROR: " << fn << " cannot be opened for binary read." << std::endl;
-    }
-    size_t cnt = fread(data, sizeof(T), n, f);
-    fclose(f);
-    if (cnt != n) {
-        std::cerr << "ERROR: " << cnt << " entries read from " << fn << ", " << n << " entries required." << std::endl;
-        return -1;
-    }
-    return 0;
-}
-
 void compload(int* a, int* b, int n) {
     for (int i = 0; i < n; i++) {
         if (a[i] != b[i]) std::cout << i << " :  " << a[i] << " " << b[i] << std::endl;
     }
+}
+
+template <typename T>
+int generate_data(T* data, int range, size_t n) {
+    if (!data) {
+        return -1;
+    }
+
+    for (size_t i = 0; i < n; i++) {
+        data[i] = (T)(rand() % range + 1);
+    }
+
+    return 0;
 }
 
 ap_uint<512> get_table_header(int n512b, int nrow) {
@@ -146,12 +140,6 @@ int main(int argc, const char* argv[]) {
         return 0;
     }
 #endif
-
-    std::string in_dir;
-    if (!parser.getCmdOption("-in", in_dir) || !is_dir(in_dir)) {
-        std::cout << "ERROR: input dir is not specified or not valid.\n";
-        return 1;
-    }
 
     int num_rep = 1;
 #ifndef HLS_TEST
@@ -199,7 +187,7 @@ int main(int argc, const char* argv[]) {
 
         for (int c = 0; c < COL_NUM; c++) {
             table_l[table_l_int_depth * c] = get_table_header(table_l_int_depth, l_nrow);
-            err = load_dat<TPCH_INT>(table_l + table_l_int_depth * c + 1, column_names[c], in_dir, l_nrow);
+            err = generate_data<TPCH_INT>((int*)(table_l + table_l_int_depth * c + 1), 1000000, l_nrow);
             if (err) return err;
         }
         std::cout << "Lineitem table has been read from disk\n\n";

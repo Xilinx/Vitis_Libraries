@@ -56,7 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
+DEVICE ?= xilinx_u280_xdma_201920_1
 
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
@@ -108,9 +108,9 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := test_aggr.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/hash_aggr_kernel.xclbin -in $(CUR_DIR)/db_data/dat -rep 1 -key_column 1 -pld_column 1 -scale 100
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_aggr_kernel.xclbin -rep 1 -key_column 1 -pld_column 1 -scale 10000
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/hash_aggr_kernel.xclbin -in $(CUR_DIR)/db_data/dat -rep 1 -key_column 1 -pld_column 1 -scale 10000
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_aggr_kernel.xclbin -rep 1 -key_column 1 -pld_column 1 -scale 10000
 endif
 
 ifneq ($(HOST_ARCH), x86)
@@ -173,7 +173,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 ############################## Setting Essential Checks and Running Rules ##############################
 run: all
-	XCL_EMULATION_MODE=$(TARGET) make -C $(CUR_DIR)/db_data
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)

@@ -121,21 +121,23 @@ void get_q1_cfg(ap_uint<32>* buf) {
 
     // alu0: a * (1 - b)
     ap_uint<289> op;
-    xf::database::dynamicALUOPCompiler<uint32_t, uint32_t, uint32_t, uint32_t>("strm1*(-strm2+c2)", 0, 1, 0, 0, op);
-
+    xf::database::dynamicALUOPCompiler<uint32_t, uint32_t, uint32_t, uint32_t>("strm1*(-strm2+c2)", 0, 100, 0, 0, op);
+    std::cout << std::hex << "eval0_op=" << op << std::endl;
     for (int i = 0; i < 9; i++) {
         config[i + 2] = op(32 * (i + 1) - 1, 32 * i);
     }
-    config[11] = op[288];
+    config[11][0] = op[288];
+    config[11](3, 1) = 0;
 
     // alu1: a * (1 - b) * (1 + c)
-    xf::database::dynamicALUOPCompiler<uint32_t, uint32_t, uint32_t, uint32_t>("strm1*(-strm2+c2)*(strm3+c3)", 0, 1, 1,
-                                                                               0, op);
-
+    xf::database::dynamicALUOPCompiler<uint32_t, uint32_t, uint32_t, uint32_t>("strm1*(-strm2+c2)*(strm3+c3)", 0, 100,
+                                                                               100, 0, op);
+    std::cout << std::hex << "eval1_op=" << op << std::endl;
     for (int i = 0; i < 9; i++) {
         config[i + 12] = op(32 * (i + 1) - 1, 32 * i);
     }
-    config[21] = op[288];
+    config[21][0] = op[288];
+    config[21](3, 1) = 7;
 
     // filter
     uint32_t fcfg[45];
@@ -224,7 +226,7 @@ void get_q1_cfg(ap_uint<32>* buf) {
     config[81] = 0;
 
     // write out
-    config[82] = 0xffef;
+    config[82] = 0xffff;
 
     /*
         config[80][0]=1;//avg1_l

@@ -2,8 +2,8 @@
 
 ## Overview
 
-This project shows FPGA performance of the following query over TPC-H scale factor 1 data.
-Primitive in use is `hashSemiJoin` from `hash_semi_join.hpp`.
+This project shows FPGA performance of the following query with random-generated data,
+implemented with `hashSemiJoin` primitive.
 
 ```
 
@@ -24,12 +24,6 @@ where
      )
 ;
 ```
-
-## Dataset
-
-Due to unknown license, the source code of dataset generator is not directly included.
-When the project runs, script in `db_data` folder will automatically grep the dataset generator
-and compile it from source.
 
 ## Running the Benchmark
 

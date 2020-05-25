@@ -34,8 +34,74 @@ using namespace std;
 #include <xcl2.hpp>
 #define XCL_BANK(n) (XCL_MEM_TOPOLOGY | unsigned(n))
 
+int check_result(ap_uint<1024>* data,
+                 int num,
+                 ap_uint<4> op,
+                 ap_uint<32> key_col,
+                 ap_uint<32> pld_col,
+                 std::unordered_map<TPCH_INT, TPCH_INT>& ref_map) {
+    int nerror = 0;
+    int ncorrect = 0;
+    ap_uint<8 * KEY_SZ * KEY_COL + 3 * 8 * MONEY_SZ * PLD_COL> result;
+
+    for (int i = 0; i < num; i++) {
+        result = data[i](8 * KEY_SZ * KEY_COL + 3 * 8 * MONEY_SZ * PLD_COL - 1, 0);
+        ap_uint<3 * 8 * MONEY_SZ> p = result(3 * 8 * MONEY_SZ - 1, 0);
+
+        TPCH_INT key = result(8 * KEY_SZ + 3 * 8 * MONEY_SZ * PLD_COL - 1, 3 * 8 * MONEY_SZ * PLD_COL);
+        TPCH_INT pld;
+
+        if (op == xf::database::enums::AOP_MIN || op == xf::database::enums::AOP_COUNT) {
+            pld = p(8 * MONEY_SZ - 1, 0);
+        } else if (op == xf::database::enums::AOP_COUNTNONZEROS) {
+            pld = p(3 * 8 * MONEY_SZ - 1, 2 * 8 * MONEY_SZ);
+        } else if (op == xf::database::enums::AOP_SUM || op == xf::database::enums::AOP_MEAN) {
+            pld = p(3 * 8 * MONEY_SZ - 1, 8 * MONEY_SZ);
+        } else {
+            // not supported yet
+        }
+
+        std::cout << std::hex << "Checking: idx=" << i << " key:" << key << " pld:" << pld << std::endl;
+
+        auto it = ref_map.find(key);
+        if (it != ref_map.end()) {
+            TPCH_INT golden_pld = it->second;
+            if (pld != golden_pld) {
+                std::cout << "ERROR! key:" << key << ", pld:" << pld << ", refpld:" << golden_pld << std::endl;
+                ++nerror;
+            } else {
+                ++ncorrect;
+            }
+        } else {
+            std::cout << "ERROR! k:" << key << " does not exist in ref" << std::endl;
+        }
+    }
+
+    if (nerror == 0) {
+        std::cout << "No error found!" << std::endl;
+    } else {
+        std::cout << "Found " << nerror << " errors!" << std::endl;
+    }
+    return nerror;
+}
+
+typedef struct print_buf_result_data_ {
+    int i;
+    ap_uint<1024>* aggr_result_buf;
+    ap_uint<32>* pu_end_status;
+    ap_uint<4> op;
+    ap_uint<32> key_column;
+    ap_uint<32> pld_column;
+    std::unordered_map<TPCH_INT, TPCH_INT>* map0;
+    int* r;
+} print_buf_result_data_t;
+
 void CL_CALLBACK aggr_kernel_finish(cl_event event, cl_int cmd_exec_status, void* ptr) {
+    print_buf_result_data_t* d = (print_buf_result_data_t*)ptr;
+    (*(d->r)) += check_result((d->aggr_result_buf), (d->pu_end_status)[3], (d->op), (d->key_column), (d->pld_column),
+                              (*(d->map0)));
     std::cout << "kernel done!" << std::endl;
+    std::cout << "kernel_result_num=" << (d->pu_end_status)[3] << std::endl;
 }
 
 #endif // HLS_TEST
@@ -194,73 +260,16 @@ TPCH_INT group_cnt_nz(
     return (TPCH_INT)ref_map.size();
 }
 
-void check_result(ap_uint<1024>* data,
-                  int num,
-                  ap_uint<4> op,
-                  ap_uint<32> key_col,
-                  ap_uint<32> pld_col,
-                  std::unordered_map<TPCH_INT, TPCH_INT>& ref_map) {
-    int nerror = 0;
-    int ncorrect = 0;
-    ap_uint<8 * KEY_SZ * KEY_COL + 3 * 8 * MONEY_SZ * PLD_COL> result;
-
-    for (int i = 0; i < num; i++) {
-        result = data[i](8 * KEY_SZ * KEY_COL + 3 * 8 * MONEY_SZ * PLD_COL - 1, 0);
-        ap_uint<3 * 8 * MONEY_SZ> p = result(3 * 8 * MONEY_SZ - 1, 0);
-
-        TPCH_INT key = result(8 * KEY_SZ + 3 * 8 * MONEY_SZ * PLD_COL - 1, 3 * 8 * MONEY_SZ * PLD_COL);
-        TPCH_INT pld;
-
-        if (op == xf::database::enums::AOP_MIN || op == xf::database::enums::AOP_COUNT) {
-            pld = p(8 * MONEY_SZ - 1, 0);
-        } else if (op == xf::database::enums::AOP_COUNTNONZEROS) {
-            pld = p(3 * 8 * MONEY_SZ - 1, 2 * 8 * MONEY_SZ);
-        } else if (op == xf::database::enums::AOP_SUM || op == xf::database::enums::AOP_MEAN) {
-            pld = p(3 * 8 * MONEY_SZ - 1, 8 * MONEY_SZ);
-        } else {
-            // not supported yet
-        }
-
-        std::cout << std::hex << "Checking: idx=" << i << " key:" << key << " pld:" << pld << std::endl;
-
-        auto it = ref_map.find(key);
-        if (it != ref_map.end()) {
-            TPCH_INT golden_pld = it->second;
-            if (pld != golden_pld) {
-                std::cout << "ERROR! key:" << key << ", pld:" << pld << ", refpld:" << golden_pld << std::endl;
-                ++nerror;
-            } else {
-                ++ncorrect;
-            }
-        } else {
-            std::cout << "ERROR! k:" << key << " does not exist in ref" << std::endl;
-        }
-    }
-
-    if (nerror == 0) {
-        std::cout << "No error found!" << std::endl;
-    } else {
-        std::cout << "Found " << nerror << " errors!" << std::endl;
-    }
-}
-
 template <typename T>
-int load_dat(void* data, const std::string& name, const std::string& dir, size_t n) {
+int generate_data(T* data, int range, size_t n) {
     if (!data) {
         return -1;
     }
-    std::string fn = dir + "/" + name + ".dat";
-    FILE* f = fopen(fn.c_str(), "rb");
-    std::cout << "INFO: " << fn << " will be opened for binary read." << std::endl;
-    if (!f) {
-        std::cerr << "ERROR: " << fn << " cannot be opened for binary read." << std::endl;
+
+    for (size_t i = 0; i < n; i++) {
+        data[i] = (T)(rand() % range + 1);
     }
-    size_t cnt = fread(data, sizeof(T), n, f);
-    fclose(f);
-    if (cnt != n) {
-        std::cerr << "ERROR: " << cnt << " entries read from " << fn << ", " << n << " entries required." << std::endl;
-        return -1;
-    }
+
     return 0;
 }
 
@@ -274,12 +283,6 @@ int main(int argc, const char* argv[]) {
 
     // cmd arg parser.
     ArgParser parser(argc, argv);
-
-    std::string in_dir;
-    if (!parser.getCmdOption("-in", in_dir) || !is_dir(in_dir)) {
-        std::cout << "ERROR: input dir is not specified or not valid.\n";
-        return 1;
-    }
 
     std::string xclbin_path; // eg. kernel.xclbin
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
@@ -344,10 +347,10 @@ int main(int argc, const char* argv[]) {
     std::cout << "Lineitem " << l_nrow << " rows\n";
 
     int err;
-    err = load_dat<TPCH_INT>(col_l_orderkey, "l_orderkey", in_dir, l_nrow);
+    err = generate_data<TPCH_INT>(col_l_orderkey, 100000, l_nrow);
     if (err) return err;
 
-    err = load_dat<TPCH_INT>(col_l_extendedprice, "l_extendedprice", in_dir, l_nrow);
+    err = generate_data<TPCH_INT>(col_l_extendedprice, 10000000, l_nrow);
     if (err) return err;
 
     std::cout << "Lineitem table has been read from disk\n";
@@ -554,6 +557,11 @@ int main(int argc, const char* argv[]) {
      *          '---R0-  '---R1-  '---R2   '--R3
      */
 
+    std::vector<print_buf_result_data_t> cbd(num_rep);
+    std::vector<print_buf_result_data_t>::iterator it = cbd.begin();
+    print_buf_result_data_t* cbd_ptr = &(*it);
+
+    int ret = 0;
     for (int i = 0; i < num_rep; ++i) {
         int use_a = i & 1;
 
@@ -621,9 +629,25 @@ int main(int argc, const char* argv[]) {
         }
         q.enqueueMigrateMemObjects(ob, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[i], &read_events[i][0]);
         if (use_a) {
-            read_events[i][0].setCallback(CL_COMPLETE, aggr_kernel_finish, NULL);
+            cbd_ptr[i].i = i;
+            cbd_ptr[i].aggr_result_buf = aggr_result_buf_a;
+            cbd_ptr[i].pu_end_status = pu_end_status_a;
+            cbd_ptr[i].op = op;
+            cbd_ptr[i].key_column = key_column;
+            cbd_ptr[i].pld_column = pld_column;
+            cbd_ptr[i].map0 = &map0;
+            cbd_ptr[i].r = &ret;
+            read_events[i][0].setCallback(CL_COMPLETE, aggr_kernel_finish, cbd_ptr + i);
         } else {
-            read_events[i][0].setCallback(CL_COMPLETE, aggr_kernel_finish, NULL);
+            cbd_ptr[i].i = i;
+            cbd_ptr[i].aggr_result_buf = aggr_result_buf_b;
+            cbd_ptr[i].pu_end_status = pu_end_status_b;
+            cbd_ptr[i].op = op;
+            cbd_ptr[i].key_column = key_column;
+            cbd_ptr[i].pld_column = pld_column;
+            cbd_ptr[i].map0 = &map0;
+            cbd_ptr[i].r = &ret;
+            read_events[i][0].setCallback(CL_COMPLETE, aggr_kernel_finish, cbd_ptr + i);
         }
     }
 
@@ -651,14 +675,13 @@ int main(int argc, const char* argv[]) {
         std::cout << std::hex << "read_config: pu_end_status_b[" << i << "]=" << pu_end_status_b[i] << std::endl;
     }
 
-    // check_result(aggr_result_buf_a, agg_result_num, op, key_column, pld_column, map0);
     std::cout << "ref_result_num=" << result_cnt << std::endl;
 
     free(aggr_result_buf_a);
     free(aggr_result_buf_b);
 
     std::cout << "---------------------------------------------\n\n";
-    return 0;
+    return ret;
 
 #endif
 }

@@ -1,24 +1,22 @@
 {
-    "gui": false,
-    "name": "jks.L2_gqeJoin", 
-    "description": "", 
-    "flow": "vitis", 
-    "platform_type": "pcie", 
+    "name": "Xilinx GqeJoin Test",
+    "description": "Xilinx GqeJoin Test",
+    "flow": "vitis",
+    "gui": true,
+    "platform_type": "pcie",
     "platform_whitelist": [
         "u280"
-    ], 
+    ],
     "platform_blacklist": [
         "other"
-    ], 
+    ],
     "platform_properties": {
         "u280": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
+                    "symbols": []
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -27,79 +25,168 @@
                 }
             }
         }
-    }, 
+    },
     "launch": [
         {
-            "name": "generic launch for all flows", 
-            "cmd_args": " -xclbin BUILD/gqe_join.xclbin -in PROJECT/db_data/dat -scale 10"
-        }, 
+            "name": "generic launch for sw_emu flows",
+            "target": "sw_emu",
+            "cmd_args": " -xclbin BUILD/gqe_join.xclbin -scale 10"
+        },
         {
-            "name": "generic launch for all flows", 
-            "target": "hw_emu", 
-            "cmd_args": " -xclbin BUILD/gqe_join.xclbin -in PROJECT/db_data/dat -scale 10000"
-        }
-    ], 
-    "pre_launch": [
+            "name": "generic launch for hw_emu flows",
+            "target": "hw_emu",
+            "cmd_args": " -xclbin BUILD/gqe_join.xclbin -scale 10000"
+        },
         {
-            "launch_cmd": "make -C PROJECT/db_data"
+            "name": "generic launch for hw flows",
+            "target": "hw",
+            "cmd_args": " -xclbin BUILD/gqe_join.xclbin"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "test_gqeJoin.exe", 
+        "host_exe": "test_gqeJoin.exe",
         "compiler": {
             "sources": [
-                "host/test_q5simple.cpp", 
+                "host/test_q5simple.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "LIB_DIR/L1/include/hw", 
-                "LIB_DIR/L3/include/sw", 
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L3/include/sw",
                 "host",
                 "LIB_DIR/ext/xcl2"
-            ], 
+            ],
             "options": "-O3 "
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/src", 
-                "LIB_DIR/L1/include/hw", 
-                "LIB_DIR/L2/include", 
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L2/include",
                 "LIB_DIR/../utils/L1/include"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/src/gqe_join.cpp", 
-                    "frequency": 200.0, 
-                    "name": "gqeJoin"
+                    "location": "LIB_DIR/L2/src/gqe_join.cpp",
+                    "frequency": 200,
+                    "name": "gqeJoin",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "join_kernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "buf_A",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "buf_B",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "buf_C",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "buf_D",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "htb_buf0",
+                                    "memory": "HBM[2]"
+                                },
+                                {
+                                    "name": "htb_buf1",
+                                    "memory": "HBM[3]"
+                                },
+                                {
+                                    "name": "htb_buf2",
+                                    "memory": "HBM[10]"
+                                },
+                                {
+                                    "name": "htb_buf3",
+                                    "memory": "HBM[11]"
+                                },
+                                {
+                                    "name": "htb_buf4",
+                                    "memory": "HBM[18]"
+                                },
+                                {
+                                    "name": "htb_buf5",
+                                    "memory": "HBM[19]"
+                                },
+                                {
+                                    "name": "htb_buf6",
+                                    "memory": "HBM[26]"
+                                },
+                                {
+                                    "name": "htb_buf7",
+                                    "memory": "HBM[27]"
+                                },
+                                {
+                                    "name": "stb_buf0",
+                                    "memory": "HBM[6]"
+                                },
+                                {
+                                    "name": "stb_buf1",
+                                    "memory": "HBM[7]"
+                                },
+                                {
+                                    "name": "stb_buf2",
+                                    "memory": "HBM[14]"
+                                },
+                                {
+                                    "name": "stb_buf3",
+                                    "memory": "HBM[15]"
+                                },
+                                {
+                                    "name": "stb_buf4",
+                                    "memory": "HBM[22]"
+                                },
+                                {
+                                    "name": "stb_buf5",
+                                    "memory": "HBM[23]"
+                                },
+                                {
+                                    "name": "stb_buf6",
+                                    "memory": "HBM[30]"
+                                },
+                                {
+                                    "name": "stb_buf7",
+                                    "memory": "HBM[31]"
+                                }
+                            ]
+                        }
+                    ]
                 }
-            ], 
-            "frequency": 200.0, 
+            ],
+            "frequency": 200,
             "name": "gqe_join"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 32768, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
                 "max_time_min": 520
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }
