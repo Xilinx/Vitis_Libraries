@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Database Library, design, internals
+   :description: Vitis Database Library primitive design internals.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 **************************************
 Primitive Design Internals
 **************************************

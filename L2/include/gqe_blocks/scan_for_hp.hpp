@@ -51,10 +51,6 @@ void _read_to_colvec(const int bit_num,
 
     bit_num_strm.write(bit_num);
     bit_num_strm_copy.write(bit_num);
-#ifndef __SYNTHESIS__
-// std::cout << "PARTITION THRESHOLD SIZE: " << threshold_row_num << std::endl
-// << "nrow:" << nrow << ", partition_num:" << partition_num << ", bit_num:" << bit_num << std::endl;
-#endif
 
     // offset of col data
     int col_offset[col_num];
@@ -74,14 +70,6 @@ void _read_to_colvec(const int bit_num,
     // AXI read for each col
     int nread = (nrow + vec_len - 1) / vec_len;
 
-#ifndef __SYNTHESIS__
-// printf("nrow=%d, col_naxi=%d\n", nrow, col_naxi);
-// for (int i = 0; i < col_num; ++i) {
-//     printf("col_offset[%d]=%d\n", i, col_offset[i]);
-// }
-// printf("nread=%d, burst_len=%d\n", nread, burst_len);
-#endif
-
     ap_uint<512> cnt;
     //#pragma HLS array_partition variable=cnt complete
 
@@ -95,9 +83,6 @@ void _read_to_colvec(const int bit_num,
         // do a burst read for one col
         for (int c = 0; c < col_num; ++c) {
             int offset = col_offset[c];
-#ifndef __SYNTHESIS__
-// printf("burst:%d, col:%d, offset=%d, len=%d\n", i, c, offset, len);
-#endif
             if (offset < 0) {
                 ap_uint<512> cnt_tmp = cnt;
                 for (int j = 0; j < len; ++j) {
@@ -135,12 +120,6 @@ void _split_colvec_to_channel(hls::stream<ap_uint<8 * size0 * vec_len> > colvec_
                               hls::stream<int>& nrow_strm,
                               hls::stream<ap_uint<8 * size0> > col_strm[ch_num][col_num],
                               hls::stream<bool> e_strm[ch_num]) {
-#ifndef __SYNTHESIS__
-// for (int c = 0; c < col_num; ++c) {
-// printf("colvec[%d].size()=%ld\n", c, colvec_strm[c].size());
-// }
-#endif
-
     enum { per_ch = vec_len / ch_num };
     int nrow = nrow_strm.read();
 SPLIT_COL_VEC:

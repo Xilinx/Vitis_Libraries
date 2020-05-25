@@ -18,22 +18,21 @@ source settings.tcl
 
 set PROJ "antijoin.prj"
 set SOLN "solution_OCL_REGION_0"
-set CLKP 300MHz
+
+if {![info exists CLKP]} {
+  set CLKP 300MHz
+}
 
 open_project -reset $PROJ
-config_debug
-add_files ajkernel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb ajtest.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+
+add_files "ajkernel.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "ajtest.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top ajkernel
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
-config_rtl -register_reset
-config_rtl -stall_sig_gen
-config_interface -m_axi_addr64
-config_compile -name_max_length 256
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design

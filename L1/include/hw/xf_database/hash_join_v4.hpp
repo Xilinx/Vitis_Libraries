@@ -1428,19 +1428,19 @@ void build_probe_wrapper(
 
     ap_uint<72> htb_vector0[HASH_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = htb_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = htb_vector0 core = XPM_MEMORY uram
+#pragma HLS resource variable = htb_vector0 core = RAM_2P_URAM
 
     ap_uint<72> bf_vector0[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector0 core = XPM_MEMORY uram
+#pragma HLS resource variable = bf_vector0 core = RAM_2P_URAM
 
     ap_uint<72> bf_vector1[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector1 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector1 core = XPM_MEMORY uram
+#pragma HLS resource variable = bf_vector1 core = RAM_2P_URAM
 
     ap_uint<72> bf_vector2[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector2 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector2 core = XPM_MEMORY uram
+#pragma HLS resource variable = bf_vector2 core = RAM_2P_URAM
 
 #endif
 
@@ -3850,22 +3850,22 @@ void build_merge_probe_wrapper(
 
     ap_uint<72> htb_vector0[HASH_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = htb_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = htb_vector0 core = XPM_MEMORY uram
+#pragma HLS resource variable = htb_vector0 core = RAM_2P_URAM
 
     ap_uint<72> htb_vector1[HASH_OVERFLOW_DEPTH];
-#pragma HLS resource variable = htb_vector1 core = XPM_MEMORY uram
+#pragma HLS resource variable = htb_vector1 core = RAM_2P_URAM
 
     ap_uint<72> bf_vector0[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector0 core = XPM_MEMORY uram
+#pragma HLS resource variable = bf_vector0 core = RAM_2P_URAM
 
     ap_uint<72> bf_vector1[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector1 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector1 core = XPM_MEMORY uram
+#pragma HLS resource variable = bf_vector1 core = RAM_2P_URAM
 
     ap_uint<72> bf_vector2[BLOOM_FILTER_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bf_vector2 block factor = 4 dim = 1
-#pragma HLS resource variable = bf_vector2 core = XPM_MEMORY uram
+#pragma HLS resource variable = bf_vector2 core = RAM_2P_URAM
 
 #endif
 

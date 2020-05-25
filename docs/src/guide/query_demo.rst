@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Database Library, acceleration, demo
+   :description: Vitis Database Library application acceleration demos.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _demo_app:
 
 Query-Specific Acceleration Demo

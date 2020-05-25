@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Group-Aggregate, groupAggregate
+   :description: Describes the structure and execution of the group aggregate module.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-group_aggregate:
 
 ********************************************************

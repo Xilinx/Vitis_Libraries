@@ -13,12 +13,17 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Database, Vitis Database Library, Alveo
+   :description: Vitis Database Library is an open-sourced Vitis library written in C++ for accelerating database applications in a variety of use cases.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ======================
 Vitis Database Library
 ======================
 
-Vitis Database Library is an open-sourced Vitis library written in C++ for
-accelerating database applications in a variety of use cases.
+Vitis Database Library is an open-sourced Vitis library written in C++ for accelerating database applications in a variety of use cases.
 It now covers two levels of acceleration: the module level and the pre-defined kernel level,
 and will evolve to offer the third level as pure software APIs working with pre-defined hardware overlays.
 

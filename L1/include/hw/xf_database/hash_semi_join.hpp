@@ -311,13 +311,13 @@ static void hashSemiJoin(hls::stream<ap_uint<WKey> > key_istrms[NChannels],
     ap_uint<72> bit_vector2[PU][(HDP_J >> 2)];
     ap_uint<72> bit_vector3[PU][(HDP_J >> 2)];
 #pragma HLS array_partition variable = bit_vector0 dim = 1
-#pragma HLS resource variable = bit_vector0 core = XPM_MEMORY uram
+#pragma HLS resource variable = bit_vector0 core = RAM_2P_URAM
 #pragma HLS array_partition variable = bit_vector1 dim = 1
-#pragma HLS resource variable = bit_vector1 core = XPM_MEMORY uram
+#pragma HLS resource variable = bit_vector1 core = RAM_2P_URAM
 #pragma HLS array_partition variable = bit_vector2 dim = 1
-#pragma HLS resource variable = bit_vector2 core = XPM_MEMORY uram
+#pragma HLS resource variable = bit_vector2 core = RAM_2P_URAM
 #pragma HLS array_partition variable = bit_vector3 dim = 1
-#pragma HLS resource variable = bit_vector3 core = XPM_MEMORY uram
+#pragma HLS resource variable = bit_vector3 core = RAM_2P_URAM
 #endif
 
     // clang-format off

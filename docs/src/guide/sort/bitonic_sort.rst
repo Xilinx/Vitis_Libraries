@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Bitonic, sort, bitonicSort
+   :description: Describes the structure and execution of the Bitonic sort.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-bitonic_sort:
 
 ********************************************************

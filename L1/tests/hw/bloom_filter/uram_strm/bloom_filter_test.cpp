@@ -112,13 +112,13 @@ void syn_bloom_filter_uram(hls::stream<ap_uint<INPUT_WIDTH> >& gen_msg_strm,
                            hls::stream<bool>& res_msg_strm,
                            hls::stream<bool>& res_in_e_strm) {
     ap_uint<72> bit_vector_ptr0[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr0 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector_ptr0 core = RAM_2P_URAM
 
     ap_uint<72> bit_vector_ptr1[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr1 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector_ptr1 core = RAM_2P_URAM
 
     ap_uint<72> bit_vector_ptr2[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr2 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector_ptr2 core = RAM_2P_URAM
 
     for (int i = 0; i < URAM_MEM_SPACE; i++) {
 #pragma HLS pipeline II = 1
@@ -141,13 +141,13 @@ void load_uram_and_check(hls::stream<ap_uint<64> >& bit_vet_strm,
                          hls::stream<bool>& res_in_e_strm) {
     // init
     ap_uint<72> bit_vector_ptr0[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr0 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector_ptr0 core = RAM_2P_URAM
 
     ap_uint<72> bit_vector_ptr1[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr1 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector_ptr1 core = RAM_2P_URAM
 
     ap_uint<72> bit_vector_ptr2[URAM_MEM_SPACE];
-#pragma HLS RESOURCE variable = bit_vector_ptr2 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector_ptr2 core = RAM_2P_URAM
 
     for (int i = 0; i < URAM_MEM_SPACE; i++) {
 #pragma HLS pipeline II = 1

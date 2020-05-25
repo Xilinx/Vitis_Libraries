@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Database Library, GQE, overview, database
+   :description: The GQE Generic Query Engine (GQE) is for general acceleration in database. The GQE consists of a hardware overlay of post-bitstream programmable kernel(s) and corresponding software stack.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _gqe_overview:
 
 ******************************************

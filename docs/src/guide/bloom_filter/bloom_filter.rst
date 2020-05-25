@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: bloom-filter, bloomFilter, bv-update, bv-check
+   :description: Describes the structure and execution of the bloom filter module.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _guide-bloom_filter:
 
 ********************************************************

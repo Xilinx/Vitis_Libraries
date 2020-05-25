@@ -65,7 +65,7 @@ void hash_join_channel_adapter(bool mk_on,
                                hls::stream<ap_uint<8 * TPCH_INT_SZ * 2> >& key_strm,
                                hls::stream<ap_uint<8 * TPCH_INT_SZ * PLD_NM> >& pld_strm,
                                hls::stream<bool>& e_join_pld_strm) {
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     for (int i = 0; i < COL_NM; ++i) {
         printf("Hash join input %d data %d\n", i, in_strm[i].size());
     }
@@ -170,7 +170,7 @@ void hash_join_plus_adapter(bool jn_on,
         htb_buf6, htb_buf7, stb_buf0, stb_buf1, stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7,
         pu_b_status_strm, pu_e_status_strm, joined_strm, e_joined_strm);
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     printf("Hash joined row %d\n", joined_strm.size());
 #endif
 
@@ -217,7 +217,7 @@ void hash_join_wrapper(hls::stream<ap_uint<3> >& join_flag_strm,
             stb_buf0, stb_buf1, stb_buf2, stb_buf3, stb_buf4, stb_buf5, stb_buf6, stb_buf7);
         int pu1 = pu_end_status_strm.read();
         int pu2 = pu_end_status_strm.read();
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         printf("Hash join finished pu1 = %d, pu2 = %d", pu1, pu2);
 #endif
     }
@@ -237,7 +237,7 @@ void hash_join_bypass(hls::stream<bool>& jn_on_strm,
     ap_uint<CH_NM> last = 0;
     ap_uint<CH_NM> rd_e = 0;
     ;
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     unsigned int cnt = 0;
     std::cout << "CH_NM=" << CH_NM << std::endl;
 #endif
@@ -275,12 +275,12 @@ void hash_join_bypass(hls::stream<bool>& jn_on_strm,
                     o_jrow_strm[c].write(j[c]);
                 }
                 o_e_strm.write(false);
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
                 cnt++;
 #endif
             }
         } while (last != MAX);
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         std::cout << "Collect " << cnt << " rows" << std::endl;
 #endif
         o_e_strm.write(true);

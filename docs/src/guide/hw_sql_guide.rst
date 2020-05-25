@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Database Library, primitive, stream-based, scan, hash, filter, join, Hash-Join, Hash-Semi-Join, Hash-Anti-Join, Hash-Multi-Join, Merge-Join, Merge-Left-Join, Nested-Loop-Join, Group-Aggregate, Off-chip, Bitonic-Sort, Insert-Sort, Merge-Sort, Glue Logic
+   :description: The algorithm library provides a range of primitives for implementing SQL queries in C++ for Vitis.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _hw_sql_guide:
 
 ***************************************************

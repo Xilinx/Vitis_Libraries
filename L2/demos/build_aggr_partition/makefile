@@ -186,7 +186,7 @@ define MAKE_GEN_INI
 [advanced]
 prop=solution.hls_pre_tcl=$(CUR_DIR)/hls_pre.tcl
 [vivado]
-prop=run.impl_1.STEPS.ROUTE_DESIGN.TCL.PRE=$(CUR_DIR)/vpreroute.tcl
+prop=run.impl_1.STEPS.OPT_DESIGN.TCL.POST=$(CUR_DIR)/post_opt.tcl
 endef
 
 VPP_LFLAGS += --config opts.ini

@@ -23,15 +23,17 @@ endif
 ifeq (, $(shell which sphinx-build 2>/dev/null))
 $(error "No sphinx-build in PATH.")
 endif
+
+.PHONY: all install xml rst html clean cleanhtml cleanall check_html_dir
+
+all: html
+
+check_html_dir:
 ifeq (, $(HTML_DEST_DIR))
-$(error "HTML_DEST_DIR is not set.")
+	@echo "HTML_DEST_DIR is not set." && false
 endif
 
-.PHONY: all install xml rst html clean cleanhtml cleanall
-
-all: install
-
-install: .stamp/sphinx
+install: .stamp/sphinx check_html_dir
 	rsync -av --delete --exclude .git --exclude .nojekyll --exclude .buildinfo \
 		 _build/html/ $(HTML_DEST_DIR) 1>/dev/null
 

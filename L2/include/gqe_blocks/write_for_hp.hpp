@@ -82,10 +82,6 @@ void countForBurst(hls::stream<ap_uint<elem_size> > i_post_Agg[col_num],
                 for (int c = 0; c < col_num; ++c) {
 #pragma HLS unroll
                     if (write_out_cfg[c]) o_post_Agg[c].write(vecs[c]);
-                    // if (c == 1) {
-                    // std::cout << "write:" << std::dec << ",i:" << i << ",v:" << std::hex << vecs[c] << std::dec
-                    //           << std::endl;
-                    // }
                 }
                 if (b == burst_len - 1) {
                     o_nm_strm.write(burst_len);
@@ -142,7 +138,7 @@ void burstWrite(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
     ap_uint<elem_size* vec_len> first_r = ptr[0];
     int BLOCK_SIZE = first_r(elem_size * 2 - 1, elem_size).to_int();
     int PARTITION_SIZE = first_r(elem_size * 3 - 1, elem_size * 2).to_int();
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     std::cout << "Partition size:" << PARTITION_SIZE << std::endl;
     std::cout << "In one partition, block size for every col is: " << BLOCK_SIZE << std::endl;
     long long cnt = 0;
@@ -170,7 +166,7 @@ void burstWrite(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
             col_offset[wcol++] = BLOCK_SIZE * i + 1;
         }
     }
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     for (int k = 0; k < wcol; ++k) {
         std::cout << "col_id=" << col_id[k] << ", col_offset=" << col_offset[k] << std::endl;
     }
@@ -182,11 +178,6 @@ void burstWrite(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
         ap_uint<16> loc_t = i_loc_strm.read();
         const int p_base_addr = PARTITION_SIZE * loc_t;
         ap_uint<32> burst_step_cnt_reg = burst_step_cnt[loc_t];
-// if (loc_t == 1)
-#ifndef __SYNTHESIS__
-// std::cout << "Part:" << loc_t << ", Base write address of partition is " << p_base_addr
-//          << ", burst offset: " << burst_step_cnt_reg << ",burst_len:" << nm << std::endl;
-#endif
         for (int k = 0; k < wcol; ++k) {
             const int id = col_id[k];
             const int offset = col_offset[k];
@@ -195,11 +186,6 @@ void burstWrite(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
 #pragma HLS pipeline II = 1
                 ap_uint<elem_size* vec_len> out = i_strm[id].read();
                 ptr[p_base_addr + offset + burst_step_cnt_reg + n] = out;
-#ifndef __SYNTHESIS__
-// if ((n < 20) && (loc_t == 0))
-// std::cout << "col-" << k << ", v: " << std::hex << out << std::dec
-// << ",addr:" << p_base_addr + offset + burst_step_cnt_reg + n << std::endl;
-#endif
             }
         }
 
@@ -212,14 +198,14 @@ FINAL_WRITE_HEAD_LOOP:
     for (int i = 0; i < BK; i++) {
         const int base_addr = PARTITION_SIZE * i;
         int rnm = rnm_strm.read();
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
         std::cout << "P" << i << "\twrite out row number = " << rnm << std::endl;
         cnt += rnm;
 #endif
         first_r(elem_size - 1, 0) = rnm;
         ptr[base_addr] = first_r;
     }
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     std::cout << "Total number of write-out row: " << cnt << std::endl;
 #endif
 }

@@ -239,9 +239,9 @@ void load_config(ap_uint<8 * TPCH_INT_SZ>* ptr,
     for (int i = 0; i < 128; i++) {
         config[i] = ptr[i];
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         std::cout << std::dec << "config: id=" << i << std::hex << " value=" << config[i] << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
     }
 
     // scan
@@ -306,9 +306,9 @@ void load_config(ap_uint<8 * TPCH_INT_SZ>* ptr,
     // write out
     write_out_cfg = config[82];
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     std::cout << std::hex << "write out config" << write_out_cfg << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
     // output
     for (int i = 0; i < 8; i++) {

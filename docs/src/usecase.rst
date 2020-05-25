@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Database, Vitis Database Library, acceleration
+   :description: Typical use cases supported by the Vitis Database library. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _use_case:
 
 Typical Use Cases

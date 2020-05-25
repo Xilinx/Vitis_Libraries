@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "lookup3.prj"
 set SOLN "sol1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files test_lookup3.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb test_lookup3.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "test_lookup3.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "test_lookup3.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top lookup3_dut
 
 open_solution -reset $SOLN

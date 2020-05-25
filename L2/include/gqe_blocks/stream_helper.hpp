@@ -218,9 +218,7 @@ void stream1D_mux2To1(hls::stream<bool>& select_cfg,
                 in = istrms_1[i].read();
             }
             ostrms[i].write(in);
-            //            if(cnt<10) std::cout<<in<<" ";
         }
-        //        if(cnt<10) std::cout<<"------------"<<std::endl;
         cnt++;
         e_ostrm.write(false);
     }

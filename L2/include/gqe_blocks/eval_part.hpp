@@ -37,38 +37,27 @@ void scaling(hls::stream<ap_uint<2 * WStrm> >& in_strm,
              hls::stream<bool>& o_e_strm) {
 #pragma HLS inline off
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     int cnt = 0;
 #endif
 
     ap_uint<2> scale = scaling_cfg(1, 0);
     ap_uint<1> enable = scaling_cfg[2];
 
-    ap_uint<65> scale_factor;
+    ap_uint<64> scale_factor;
 
-    const ap_uint<65> sf10 = 1844674407370955161; // 2<<65/10=3689348814741910322 2<<64/10=1844674407370955161
-    const ap_uint<65> sf100 = 184467440737095516; // 2<<64/100
-    const ap_uint<65> sf1000 = 18446744073709552; // 2<<64/1000
-    const ap_uint<65> sf10000 = 1844674407370955; // 2<<64/10000
-
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     std::cout << std::hex << "scaling: cfg=" << scaling_cfg << std::endl;
-#ifdef XDEBUG
-    std::cout << std::hex << "scaling: sf10=" << sf10 << std::endl;
-    std::cout << std::hex << "scaling: sf100=" << sf100 << std::endl;
-    std::cout << std::hex << "scaling: sf1000=" << sf1000 << std::endl;
-    std::cout << std::hex << "scaling: sf10000=" << sf10000 << std::endl;
-#endif
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
     if (scale == 0) {
-        scale_factor = sf10;
+        scale_factor = 10;
     } else if (scale == 1) {
-        scale_factor = sf100;
+        scale_factor = 100;
     } else if (scale == 2) {
-        scale_factor = sf1000;
+        scale_factor = 1000;
     } else if (scale == 3) {
-        scale_factor = sf10000;
+        scale_factor = 10000;
     }
 
     bool last = i_e_strm.read();
@@ -78,23 +67,12 @@ void scaling(hls::stream<ap_uint<2 * WStrm> >& in_strm,
         ap_uint<2 * WStrm> in = in_strm.read();
         last = i_e_strm.read();
 
-        ap_uint<64> unsigned_input;
-        ap_uint<129> signed_output;
-        if (in < 0)
-            unsigned_input = -in;
-        else
-            unsigned_input = in;
-
-        ap_uint<129> temp = unsigned_input * scale_factor;
-
-        if (in < 0)
-            signed_output = -temp;
-        else
-            signed_output = temp;
-
         ap_uint<WStrm> out;
         if (enable == 1) {
-            out = signed_output(64 + WStrm - 1, 64);
+            if (scale == 1)
+                out = (in / 100)(WStrm - 1, 0);
+            else if (scale == 3)
+                out = (in / 10000)(WStrm - 1, 0);
         } else {
             out = in(WStrm - 1, 0);
         }
@@ -103,7 +81,6 @@ void scaling(hls::stream<ap_uint<2 * WStrm> >& in_strm,
         if (cnt < 10) {
             std::cout << std::dec << "scaling: in=" << in << " scale_factor=" << scale_factor << std::endl;
             std::cout << std::dec << "scaling: out=" << out << " temp=" << temp << std::endl;
-
             cnt++;
         }
 #endif
@@ -122,9 +99,9 @@ void combine(hls::stream<ap_uint<WStrm> > in_strm0[ColNM0],
              hls::stream<bool>& e_in_strm,
              hls::stream<ap_uint<WStrm> > out_strm[ColNM0 + ColNM1 + ColNM2],
              hls::stream<bool>& e_out_strm) {
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     int cnt = 0;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
     bool e = e_in_strm.read();
     while (!e) {
@@ -254,9 +231,8 @@ void dynamic_eval_wrapper(ap_uint<289> alu_cfg,
                               ap_uint<WConst>, ap_uint<WConst>, ap_uint<WConst>,
                               ap_uint<2 * WStrm> >(alu_cfg, // cfg
                                                    dup1_strm[0][0], dup1_strm[0][1], dup1_strm[0][2], dup1_strm[0][3],
-                                                   e1_strm,           // in
-                                                   eval_strm, e2_strm // out
-                                                   );
+                                                   e1_strm,             // in
+                                                   eval_strm, e2_strm); // out
 
     // scaling
     scaling<WStrm>(eval_strm, e2_strm, scaling_cfg, scaling_strm[0], e3_strm);
@@ -290,9 +266,9 @@ void multi_dynamic_eval_wrapper(hls::stream<ap_uint<32> >& alu_cfg_strm,
     }
     scaling_cfg = alu_cfg(291, 289);
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     std::cout << std::hex << "alu_cfg:" << alu_cfg << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
     for (int i = 0; i < CHNM; i++) {
 #pragma HLS unroll

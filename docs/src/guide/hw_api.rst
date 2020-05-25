@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Database Library, primitive, apis, database
+   :description: Vitis Database Library primitive application programming interface reference.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ***********************************
 Primitive APIs in ``xf::database``
 ***********************************

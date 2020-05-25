@@ -951,7 +951,7 @@ void update_key_elem(
     } else if (max_col > 2 && max_col <= 4) {
         o_write_success = write_success(3, 0) == 15 || write_success(7, 4) == 15;
     } else {
-        o_write_success = write_success != 0;
+        o_write_success = write_success == 255;
     }
 
     o_uram = uram;
@@ -1963,16 +1963,16 @@ void hash_aggr_pu_wrapper(
 #else
 
     ap_uint<_WKey * _KeyNM + _Wcnt> key_uram[depth];
-#pragma HLS resource variable = key_uram core = XPM_MEMORY uram
+#pragma HLS resource variable = key_uram core = RAM_2P_URAM
 #pragma HLS ARRAY_PARTITION variable = key_uram block factor = 4
     ap_uint<_WPay * _PayNM> pld_uram0[depth];
-#pragma HLS resource variable = pld_uram0 core = XPM_MEMORY uram
+#pragma HLS resource variable = pld_uram0 core = RAM_2P_URAM
 #pragma HLS ARRAY_PARTITION variable = pld_uram0 block factor = 4
     ap_uint<_WPay * _PayNM> pld_uram1[depth];
-#pragma HLS resource variable = pld_uram1 core = XPM_MEMORY uram
+#pragma HLS resource variable = pld_uram1 core = RAM_2P_URAM
 #pragma HLS ARRAY_PARTITION variable = pld_uram1 block factor = 4
     ap_uint<_WPay * _PayNM> pld_uram2[depth];
-#pragma HLS resource variable = pld_uram2 core = XPM_MEMORY uram
+#pragma HLS resource variable = pld_uram2 core = RAM_2P_URAM
 #pragma HLS ARRAY_PARTITION variable = pld_uram2 block factor = 4
 
 #endif

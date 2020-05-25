@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Hash-Group-Aggregate, hashGroupAggregate
+   :description: Describes the structure and execution of the Hash-Group-Aggregate (Generic Version).
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-hash_aggr_general:
 
 ********************************************************

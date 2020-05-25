@@ -82,8 +82,8 @@ void q1GroupBy(Table& tin, Table& tout) {
         int32_t l_discount = tin.getInt32(i, 4);
         int32_t l_tax = tin.getInt32(i, 5);
 
-        int32_t eval0 = l_extendedprice * (100 - l_discount);
-        int64_t eval1 = eval0 / 100 * (100 + l_tax);
+        int32_t eval0 = l_extendedprice * (100 - l_discount) / 100;
+        int64_t eval1 = (int64_t)l_extendedprice * (100 - l_discount) * (100 + l_tax) / 10000;
         Q1GroupKey k{l_returnflag, l_linestatus};
         auto it = m.find(k);
         if (it != m.end()) {
