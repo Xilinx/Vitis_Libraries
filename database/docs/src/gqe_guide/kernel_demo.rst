@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Database Library, GQE, kernel, acceleration, demo
+   :description: The GQE kernel has a demo suite using TPC-H benchmark queries and data. It shows performance of the 21 out 22 TPC-H queries, on scale factor 1 and 30.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _gqe_kernel_demo:
 
 ****************************
@@ -22,8 +29,7 @@ GQE Kernel Acceleration Demo
 Introduction
 ============
 
-The GQE kernel has a demo suite using TPC-H benchmark queries and data.
-It shows performance of the 21 out 22 TPC-H queries, on scale factor 1 and 30.
+The GQE kernel has a demo suite using TPC-H benchmark queries and data. It shows performance of the 21 out 22 TPC-H queries, on scale factor 1 and 30.
 
 Two xclbin files containing ``gqeJoin``, ``gqeAggr`` and ``gqePart`` kernels are used
 across all the tested queries,

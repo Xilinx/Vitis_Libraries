@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "eval_test.prj"
 set SOLN "solution1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files eval_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb eval_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "eval_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "eval_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top dut
 
 open_solution -reset $SOLN

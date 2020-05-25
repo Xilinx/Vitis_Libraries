@@ -17,6 +17,7 @@
 #define GQE_SCAN_TO_CHANNEL_HPP
 
 #ifndef __SYNTHESIS__
+#include <iostream>
 #include <stdio.h>
 #endif
 
@@ -49,7 +50,11 @@ void _read_to_colvec(ap_uint<8 * size0 * vec_len>* ptr,
     // offset of col data
     int col_offset[col_num];
 #pragma HLS array_partition variable = col_offset complete
+
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     std::cout << "+++++++++++ IN SCAN :" << std::endl;
+#endif
+
     for (int i = 0; i < col_num; ++i) {
         int cid = col_id_strm.read();
         if (cid == -1) {
@@ -60,10 +65,14 @@ void _read_to_colvec(ap_uint<8 * size0 * vec_len>* ptr,
             // +1 to skip col header to data offset
             col_offset[i] = col_naxi * cid + 1;
         }
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         std::cout << std::dec << "nrow: " << nrow << " col_offset_" << i << ": " << col_offset[i]
                   << " col_naxi: " << col_naxi << " cid: " << cid << std::endl;
+#endif
     }
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     std::cout << "+++++++++++++++" << std::endl;
+#endif
 
     // AXI read for each col
     int nread = (nrow + vec_len - 1) / vec_len;
@@ -77,7 +86,6 @@ void _read_to_colvec(ap_uint<8 * size0 * vec_len>* ptr,
 #endif
 
     ap_uint<512> cnt;
-    //#pragma HLS array_partition variable=cnt complete
 
     for (int i = 0; i < vec_len; i++) {
 #pragma HLS UNROLL
@@ -135,9 +143,9 @@ void _split_colvec_to_channel(hls::stream<ap_uint<8 * size0 * vec_len> > colvec_
     }
 #endif
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     int cnt = 0;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
     enum { per_ch = vec_len / ch_num };
     int nrow = nrow_strm.read();
@@ -166,7 +174,7 @@ SPLIT_COL_VEC:
 #pragma HLS unroll
                         col_strm[ch][c].write(ct[c]);
                     }
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
                     if (cnt < 10) {
                         if (ch == 0) {
                             std::cout << "scan:" << std::endl;
@@ -183,7 +191,7 @@ SPLIT_COL_VEC:
                         }
                         std::cout << std::endl;
                     }
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
                     e_strm[ch].write(false);
                 }
             }
@@ -230,40 +238,30 @@ void scan_wrapper(ap_uint<8 * TPCH_INT_SZ * VEC_LEN>* ptr_A,
     bool join_on = join_on_strm.read();
     if (join_on) {
         scan_to_channel<COL_NM, CH_NM>(ptr_A, cid_A_strm, out_strm, e_out_strm);
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         int s_a = 0;
         for (int ch = 0; ch < CH_NM; ++ch) {
             s_a += out_strm[ch][0].size();
         }
         printf("***** scanned %d rows from A.\n", s_a);
-#endif
-        /*
-            scan_to_channel<COL_NM, CH_NM>(ptr_A, cid_A_strm, out_strm, e_out_strm);
-        #ifndef __SYNTHESIS__
-            int s_a2 = 0;
-            for (int ch = 0; ch < CH_NM; ++ch) {
-              s_a2 += out_strm[ch][0].size();
-            }
-            printf("***** scanned %d rows from A.\n", s_a2 - s_a);
-        #endif
-        */
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
         scan_to_channel<COL_NM, CH_NM>(ptr_B, cid_B_strm, out_strm, e_out_strm);
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         int s_b = 0;
         for (int ch = 0; ch < CH_NM; ++ch) {
             s_b += out_strm[ch][0].size();
         }
         printf("***** scanned %d rows from B.\n", s_b - s_a);
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
     } else {
         scan_to_channel<COL_NM, CH_NM>(ptr_A, cid_A_strm, out_strm, e_out_strm);
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         int s_a = 0;
         for (int ch = 0; ch < CH_NM; ++ch) {
             s_a += out_strm[ch][0].size();
         }
         printf("***** scanned %d rows from A.\n", s_a);
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
     }
 }
 

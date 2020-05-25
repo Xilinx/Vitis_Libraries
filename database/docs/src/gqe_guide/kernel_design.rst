@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Database Library, GQE, join kernel, aggregate kernel, partition kernel
+   :description: GQE kernel design.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _gqe_kernel_design:
 
 ********************************
@@ -191,7 +197,7 @@ composed of 128 32-bit slot. And the details of configuration buffers are listed
 +-------------+----------------------+------------------------+
 | Scan        |        64 bit        |  config[0]~config[1]   |
 +-------------+----------------------+------------------------+
-| Eval0       |       289 bit        |  config[1]~config[11]  |
+| Eval0       |       289 bit        |  config[2]~config[11]  |
 +-------------+----------------------+------------------------+
 | Eval1       |       289 bit        |  config[12]~config[21] |
 +-------------+----------------------+------------------------+

@@ -215,9 +215,9 @@ void filter_wrapper(hls::stream<ap_uint<32> >& fcfg_strm,
                     hls::stream<bool> e_ch_ostrm[CH_NM]) {
     bool join_on = join_on_strm.read();
     if (join_on) {
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         printf("***** filter A table once and B table once...\n");
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
         filter_ongoing<COL_IN_NM, COL_OUT_NM, CH_NM>(join_on, fcfg_strm, ch_istrm, e_ch_istrm, ch_ostrm, e_ch_ostrm);
         /*
         filter_ongoing<COL_IN_NM, COL_OUT_NM, 4>(join_on, fcfg_strm, ch_istrm, e_ch_istrm,
@@ -225,9 +225,9 @@ void filter_wrapper(hls::stream<ap_uint<32> >& fcfg_strm,
         */
         filter_ongoing<COL_IN_NM, COL_OUT_NM, CH_NM>(join_on, fcfg_strm, ch_istrm, e_ch_istrm, ch_ostrm, e_ch_ostrm);
     } else {
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         printf("***** filter A table once...\n");
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
         filter_ongoing<COL_IN_NM, COL_OUT_NM, CH_NM>(join_on, fcfg_strm, ch_istrm, e_ch_istrm, ch_ostrm, e_ch_ostrm);
     }
 }

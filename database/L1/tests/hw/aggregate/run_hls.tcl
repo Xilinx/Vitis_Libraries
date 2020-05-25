@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "aggregate_test.prj"
 set SOLN "sol1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files aggregate_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb aggregate_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "aggregate_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "aggregate_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top hls_db_aggregate_function
 
 open_solution -reset $SOLN

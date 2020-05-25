@@ -21,7 +21,7 @@ void q5Join_r_n(Table& tin1, Table& tin2, Table& tout) {
     std::unordered_multimap<int32_t, int32_t> ht1;
     for (int i = 0; i < nrow1; i++) {
         std::array<char, TPCH_READ_REGION_LEN + 1> r_name = tin1.getcharN<char, TPCH_READ_REGION_LEN + 1>(i, 1);
-        if (!strcmp("MIDDLE EAST", r_name.data())) {
+        if (!strcmp("ASIA", r_name.data())) {
             // if(!strcmp("ASIA",r_name.data())){
             int32_t r_regionkey = tin1.getInt32(i, 0);
             ht1.insert(std::make_pair(r_regionkey, 0));

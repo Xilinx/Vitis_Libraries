@@ -1128,9 +1128,9 @@ void directGroupAggregate(ap_uint<32> op,
 #pragma HLS inline off
 
     ap_int<DATOUTW> sum[(1 << DIRECTW)];
-#pragma HLS resource variable = sum core = XPM_MEMORY uram
+#pragma HLS resource variable = sum core = RAM_2P_URAM
     ap_int<DATOUTW + 1> cnt[(1 << DIRECTW)];
-#pragma HLS resource variable = cnt core = XPM_MEMORY uram
+#pragma HLS resource variable = cnt core = RAM_2P_URAM
 
     // initialize ram
     details::initialize_ram<DATINW, DATOUTW, DIRECTW>(op, sum, cnt);

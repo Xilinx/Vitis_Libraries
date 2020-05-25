@@ -47,13 +47,13 @@ int main(int argc, const char* argv[]) {
         std::cout << "ERROR: input dir is not specified or not valid.\n";
         return 1;
     }
-    int board = 1;
+    int board = 0;
     std::string board_s;
     if (parser.getCmdOption("-b", board_s)) {
         try {
             board = std::stoi(board_s);
         } catch (...) {
-            board = 1;
+            board = 0;
         }
     }
 

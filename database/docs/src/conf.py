@@ -33,7 +33,9 @@ import sys
 import recommonmark
 from recommonmark.transform import AutoStructify
 import shutil
-sys.path.insert(1, os.path.abspath(os.path.dirname(shutil.which('doxyrest')) + '/../share/doxyrest_b/sphinx'))
+
+tools_dir = os.path.abspath(os.path.join(os.path.dirname(shutil.which('doxyrest')), '..'))
+sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 
 # -- Project information -----------------------------------------------------
 
@@ -123,8 +125,8 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'xilinx'
-html_theme_path = ["./_themes"]
+html_theme = 'xilinx_2019_2'
+html_theme_path = [os.path.join(tools_dir, 'share/themes')]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

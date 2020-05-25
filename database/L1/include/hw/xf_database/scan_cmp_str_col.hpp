@@ -79,7 +79,7 @@ input_stream_loop:
         // then compare char sequence
         char_compare_loop:
             for (int i = 503; i > 0; i = i - 8) {
-#pragma HLS loop unroll
+#pragma HLS unroll
                 if (!mask[(i - 7) / 8] && (str_a.range(i, i - 7) != str_b.range(i, i - 7))) tmp_result &= false;
             }
         } else {
@@ -137,7 +137,7 @@ input_stream_loop:
         // then compare char sequence
         char_compare_loop:
             for (int i = 503; i > 0; i = i - 8) {
-#pragma HLS loop unroll
+#pragma HLS unroll
                 if (str_a.range(i, i - 7) != str_b.range(i, i - 7)) tmp_result &= false;
             }
         } else {

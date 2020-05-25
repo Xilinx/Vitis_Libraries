@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "merge_left_join.prj"
 set SOLN "solution1"
-set CLKP 4.0
+
+if {![info exists CLKP]} {
+  set CLKP 4.0
+}
 
 open_project -reset $PROJ
 
-add_files merge_left_join_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb merge_left_join_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "merge_left_join_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "merge_left_join_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top syn_merge_left_join
 
 open_solution -reset $SOLN

@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Nested-Loop-Join, nestedLoopJoin
+   :description: Describes the structure and execution of Nested-Loop-Join.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-nested_loop_join:
 
 **********************************

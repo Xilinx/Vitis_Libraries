@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "nested_loop_join.prj"
 set SOLN "solution1"
-set CLKP 3.3
+
+if {![info exists CLKP]} {
+  set CLKP 3.3
+}
 
 open_project -reset $PROJ
 
-add_files nested_loop_join_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb nested_loop_join_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "nested_loop_join_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "nested_loop_join_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top syn_nested_loop_join
 
 open_solution -reset $SOLN
@@ -32,7 +35,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -compiler clang 
+  csim_design
 }
 
 if {$CSYNTH == 1} {

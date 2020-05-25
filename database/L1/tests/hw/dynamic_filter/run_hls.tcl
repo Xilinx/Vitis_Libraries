@@ -18,24 +18,21 @@ source settings.tcl
 
 set PROJ "filter_dut.prj"
 set SOLN "sol"
-set CLKP 300MHz
+
+if {![info exists CLKP]} {
+  set CLKP 300MHz
+}
 
 open_project -reset $PROJ
-config_debug
 
-add_files filter_dut.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb filter_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "filter_dut.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "filter_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top filter_dut
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
-
-config_rtl -register_reset
-config_rtl -stall_sig_gen
-config_interface -m_axi_addr64
-config_compile -name_max_length 256
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design

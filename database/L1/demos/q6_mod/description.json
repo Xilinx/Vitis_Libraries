@@ -1,0 +1,133 @@
+{
+    "name": "Xilinx Q6 Mod Demo",
+    "description": "Xilinx Q6 Mod Demo",
+    "flow": "vitis",
+    "platform_type": "pcie",
+    "platform_whitelist": [
+        "u280",
+        "u250",
+        "u200"
+    ],
+    "platform_blacklist": [
+        "zc"
+    ],
+    "platform_properties": {
+        "u280": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_HBM"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u280.ini"
+                    ]
+                }
+            }
+        },
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        },
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }
+    },
+    "launch": [
+        {
+            "name": "generic launch for all flows",
+            "cmd_args": " -xclbin BUILD/filter_kernel.xclbin -in PROJECT/db_data/dat"
+        }
+    ],
+    "pre_launch": [
+        {
+            "launch_cmd": "make -C PROJECT/db_data"
+        }
+    ],
+    "host": {
+        "host_exe": "filter_test.exe",
+        "compiler": {
+            "sources": [
+                "host/filter_test.cpp",
+                "host/xclhost.cpp"
+            ],
+            "includepaths": [
+                "kernel",
+                "host",
+                "LIB_DIR/L1/include/hw"
+            ],
+            "options": "-O3 ",
+            "symbols": [
+                "XDEVICE=${XDEVICE}"
+            ]
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "kernel",
+                "host",
+                "LIB_DIR/L1/include/hw"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/filter_kernel.cpp",
+                    "frequency": 300,
+                    "name": "filter_kernel"
+                }
+            ],
+            "frequency": 300,
+            "name": "filter_kernel"
+        }
+    ],
+    "testinfo": {
+        "disable": true,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 520
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+}

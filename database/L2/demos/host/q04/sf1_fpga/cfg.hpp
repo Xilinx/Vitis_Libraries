@@ -267,10 +267,9 @@ void get_cfg_dat_1(ap_uint<512>* hbuf) {
     memset(b, 0, sizeof(ap_uint<512>) * 9);
 
     // 512b word
-    ap_uint<512> t = 1; // join on
-    t.set_bit(1, 0);    // aggr off
-    t.range(5, 3) = 1;  // hash join flag = 0 for normal, 1 for semi, 2 for anti
-    t.range(39, 8) = 32;
+    ap_uint<512> t = 1;                                 // join on
+    t.set_bit(1, 0);                                    // aggr off
+    t.range(5, 3) = 1;                                  // hash join flag = 0 for normal, 1 for semi, 2 for anti
     signed char id_a[] = {0, 1, 2, -1, -1, -1, -1, -1}; // dup key to payload
     for (int c = 0; c < 8; ++c) {
         t.range(56 + 8 * c + 7, 56 + 8 * c) = id_a[c];

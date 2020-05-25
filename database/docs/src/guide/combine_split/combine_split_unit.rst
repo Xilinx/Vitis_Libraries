@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: combine-split-unit, combineCol, splitCol
+   :description: Describes the structure and execution of the Combine-Split-Unit.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-combine_split_unit:
 
 ********************************************************

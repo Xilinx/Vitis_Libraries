@@ -1084,11 +1084,11 @@ void bf_gen_uram_and_stream(hls::stream<ap_uint<STR_IN_W> >& msg_strm,
     // bit_vector
     // store the bit-vector in URAM and width of each data is 72-bit
     ap_uint<72> bit_vector0[(1 << (BV_W - 6))];
-#pragma HLS RESOURCE variable = bit_vector0 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector0 core = RAM_2P_URAM
     ap_uint<72> bit_vector1[(1 << (BV_W - 6))];
-#pragma HLS RESOURCE variable = bit_vector1 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector1 core = RAM_2P_URAM
     ap_uint<72> bit_vector2[(1 << (BV_W - 6))];
-#pragma HLS RESOURCE variable = bit_vector2 core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = bit_vector2 core = RAM_2P_URAM
 
 INIT_LOOP: // initialize bit_vector to zero
     for (int i = 0; i < (1 << (BV_W - 6)); i++) {

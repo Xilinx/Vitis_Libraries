@@ -22,6 +22,9 @@
 #include "xf_database/scan_col.hpp"
 #include "xf_database/aggregate.hpp"
 #include "xf_database/hash_group_aggregate.hpp"
+#include "xf_utils_hw/stream_to_axi.hpp"
+
+#define DEBUG
 
 // ------------------------------------------------------------
 void read_config(hls::stream<ap_uint<32> >& config_strm, ap_uint<32> config[PU_STATUS_DEPTH]) {
@@ -102,13 +105,15 @@ void stream_converter_wrapper(hls::stream<ap_uint<_WKey> > i_key_strm[CH_NM],
 // ------------------------------------------------------------
 
 template <int _WKey, int _KeyNM, int _WPay, int _PayNM, int _WBuffer>
-void write_out(hls::stream<ap_uint<_WKey> > i_key_strm[_KeyNM],
-               hls::stream<ap_uint<_WPay> > i_pld_strm[3][_PayNM],
-               hls::stream<bool>& i_e_strm,
-               ap_uint<_WBuffer>* vec_buf) {
+void mergeColumn(hls::stream<ap_uint<_WKey> > i_key_strm[_KeyNM],
+                 hls::stream<ap_uint<_WPay> > i_pld_strm[3][_PayNM],
+                 hls::stream<bool>& i_e_strm,
+
+                 hls::stream<ap_uint<_WBuffer> >& o_merge_strm,
+                 hls::stream<bool>& o_e_strm) {
 #pragma HLS inline off
 
-    ap_uint<64> addr = 0;
+    // ap_uint<64> addr = 0;
     bool e = i_e_strm.read();
     while (!e) {
 #pragma HLS pipeline II = 1
@@ -133,17 +138,39 @@ void write_out(hls::stream<ap_uint<_WKey> > i_key_strm[_KeyNM],
             aggr_out(3 * _WPay + 3 * i * _WPay - 1, 2 * _WPay + 3 * i * _WPay) = pld[2][i];
         }
 
-        vec_buf[addr++] = aggr_out;
+        // vec_buf[addr++] = aggr_out;
+        o_merge_strm.write(aggr_out);
+        o_e_strm.write(false);
         e = i_e_strm.read();
     }
 
+    o_e_strm.write(true);
+
 #ifndef __SYNTHESIS__
 #ifdef DEBUG
-    std::cout << std::dec << "write out " << addr << " rows" << std::endl;
+// std::cout << std::dec << "write out " << addr << " rows" << std::endl;
 #endif
 #endif
 }
 
+template <int _WKey, int _KeyNM, int _WPay, int _PayNM, int _WBuffer>
+void write_out(hls::stream<ap_uint<_WKey> > i_key_strm[_KeyNM],
+               hls::stream<ap_uint<_WPay> > i_pld_strm[3][_PayNM],
+               hls::stream<bool>& i_e_strm,
+               ap_uint<_WBuffer>* vec_buf) {
+#pragma HLS inline off
+#pragma HLS dataflow
+
+    hls::stream<ap_uint<_WBuffer> > merge_data_strm;
+#pragma HLS stream variable = merge_data_strm depth = 8
+    hls::stream<bool> merge_e_strm;
+#pragma HLS stream variable = merge_e_strm depth = 8
+
+    mergeColumn<_WKey, _KeyNM, _WPay, _PayNM, _WBuffer>(i_key_strm, i_pld_strm, i_e_strm, merge_data_strm,
+                                                        merge_e_strm);
+
+    xf::common::utils_hw::streamToAxi<8, _WBuffer, _WBuffer>(vec_buf, merge_data_strm, merge_e_strm);
+}
 // ------------------------------------------------------------
 
 /// @brief top function of aggr kernel

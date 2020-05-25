@@ -21,7 +21,9 @@
 #endif
 
 #include <ap_int.h>
-#include "hls_stream.h"
+#include <hls_stream.h>
+
+#include "xf_database/utils.hpp"
 
 namespace xf {
 namespace database {
@@ -39,7 +41,9 @@ void countForBurst(hls::stream<ap_uint<elem_size> > i_post_Agg[col_num],
     bool e = i_e_strm.read();
     ap_uint<32> write_out_cfg = wr_cfg_istrm.read();
     wr_cfg_ostrm.write(write_out_cfg);
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     std::cout << std::hex << "write out config" << write_out_cfg << std::endl;
+#endif
 
     ap_uint<sz * vec_len> vecs[col_num];
     int n = 0; // nrow count
@@ -95,9 +99,7 @@ void countForBurst(hls::stream<ap_uint<elem_size> > i_post_Agg[col_num],
         ++b;
     }
     if (b != 0) {
-#ifndef __SYNTHESIS__
-        assert(b <= burst_len);
-#endif
+        XF_DATABASE_ASSERT(b <= burst_len);
         o_nm_strm.write(b);
         o_nm_strm.write(0);
     } else {
@@ -123,7 +125,7 @@ void burstWrite(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
     // read out the block size
     ap_uint<elem_size* vec_len> first_r = ptr[0];
     int BLOCK_SIZE = first_r(elem_size * 2 - 1, elem_size).to_int();
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     std::cout << "block size for every col=" << BLOCK_SIZE << std::endl;
 #endif
     // write_out_cfg, write out of bypass
@@ -138,7 +140,7 @@ void burstWrite(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
             col_offset[wcol++] = BLOCK_SIZE * i + 1;
         }
     }
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     for (int k = 0; k < wcol; ++k) {
         std::cout << "col_id=" << col_id[k] << ", col_offset=" << col_offset[k] << std::endl;
     }
@@ -161,7 +163,7 @@ void burstWrite(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
         nm = nm_strm.read();
     }
     ap_uint<32> rnm = rnm_strm.read();
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     std::cout << std::hex << "write out config" << write_out_cfg << std::endl;
     std::cout << std::dec << "write out row=" << rnm.to_int() << " col_nm=" << wcol << std::endl;
 #endif
@@ -245,7 +247,9 @@ void countForBurstV2(hls::stream<ap_uint<elem_size> > i_post_Agg[col_num],
     wr_cfg_ostrm.write(write_out_cfg);
     wr_cfg_ostrm.write(wr_cfg_istrm.read());
     wr_cfg_ostrm.write(wr_cfg_istrm.read());
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     std::cout << std::hex << "write out config" << write_out_cfg << std::endl;
+#endif
 
     ap_uint<sz * vec_len> vecs[col_num];
     int n = 0; // nrow count
@@ -301,9 +305,7 @@ void countForBurstV2(hls::stream<ap_uint<elem_size> > i_post_Agg[col_num],
         ++b;
     }
     if (b != 0) {
-#ifndef __SYNTHESIS__
-        assert(b <= burst_len);
-#endif
+        XF_DATABASE_ASSERT(b <= burst_len);
         o_nm_strm.write(b);
         o_nm_strm.write(0);
     } else {
@@ -334,7 +336,7 @@ void burstWriteV2(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
     ap_uint<32> write_out_cfg = write_out_cfg_strm.read();
     ap_uint<32> nrow = write_out_cfg_strm.read();
     int BLOCK_SIZE = write_out_cfg_strm.read();
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     std::cout << "block size for every col=" << BLOCK_SIZE << std::endl;
 #endif
     int nrow_h;
@@ -353,7 +355,7 @@ void burstWriteV2(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
             col_offset[wcol++] = nrow_h + BLOCK_SIZE * i + 1;
         }
     }
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     for (int k = 0; k < wcol; ++k) {
         std::cout << "col_id=" << col_id[k] << ", col_offset=" << col_offset[k] << std::endl;
     }
@@ -376,7 +378,7 @@ void burstWriteV2(hls::stream<ap_uint<elem_size * vec_len> > i_strm[col_num],
         nm = nm_strm.read();
     }
     ap_uint<32> rnm = rnm_strm.read();
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && XDEBUG == 1
     std::cout << std::hex << "write out config" << write_out_cfg << std::endl;
     std::cout << std::dec << "write out rnm=" << rnm.to_int() << " nrow_h*16= " << nrow_h * 16 << " col_nm=" << wcol
               << std::endl;
@@ -458,10 +460,6 @@ void writePrepare(ap_uint<elem_size * vec_len>* ptr,
 #pragma HLS UNROLL
                 lft[j][i] = tmp.range(32 * (j + 1) - 1, 32 * j);
             }
-            //    	for(int j=0;j<16;j++){
-            //    		std::cout<<ptr[nrow_h+BLOCK_SIZE*i+1].range(32*(j+1)-1,32*j)<<" ";
-            //    	}
-            //    	std::cout<<std::endl;
         }
 
         for (int j = 0; j < nrow_l; j++) {

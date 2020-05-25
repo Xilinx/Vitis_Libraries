@@ -18,18 +18,21 @@ source settings.tcl
 
 set PROJ "bitonic_sort.prj"
 set SOLN "sol1"
-set CLKP 5
+
+if {![info exists CLKP]} {
+  set CLKP 5
+}
 
 open_project -reset $PROJ
 
-add_files bitonic_sort_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb bitonic_sort_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "bitonic_sort_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "bitonic_sort_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top hls_db_bitonic_sort_function
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design

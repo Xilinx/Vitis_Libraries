@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Hash, hashLookup3, hashMurmur3, Lookup3, Murmur3, 
+   :description: Describes the structure and execution of hash functions, implemented as hashLookup3 and hashMurmur3.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _guide-hash:
 
 ********************************************************

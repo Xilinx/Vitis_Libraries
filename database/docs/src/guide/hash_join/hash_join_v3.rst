@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Hash-Join-V3, Hash-Build-Probe-v3, hashJoinV3, hashBuildProbeV3
+   :description: Describes the structure and execution of Hash-Join-V3 and Hash-Build-Probe-v3.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-hash_join_v3:
 
 ********************************************************

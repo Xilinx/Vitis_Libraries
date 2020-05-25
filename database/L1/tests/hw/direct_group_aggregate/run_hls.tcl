@@ -18,19 +18,21 @@ source settings.tcl
 
 set PROJ "direct_aggr_test.prj"
 set SOLN "solution1"
-set CLKP 4
+
+if {![info exists CLKP]} {
+  set CLKP 4
+}
 
 open_project -reset $PROJ
 
-add_files direct_aggr_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb direct_aggr_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "direct_aggr_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "direct_aggr_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top hls_db_direct_aggr
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
-set_clock_uncertainty 1.27
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design
