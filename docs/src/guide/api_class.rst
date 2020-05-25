@@ -24,3 +24,5 @@ API Class of ``xf::common::utils_hw``
 
 .. include:: ../rst/class_xf_common_utils_hw_UramArray.rst
 
+.. include:: ../rst/class_xf_common_utils_hw_cache.rst
+

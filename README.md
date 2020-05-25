@@ -10,7 +10,7 @@ Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries
 
 ### Software Platform
 
-This library is designed to work with Vitis 2019.2 and later, and therefore inherits the system requirements of Vitis and XRT.
+This library is designed to work with Vitis 2020.1 and later, and therefore inherits the system requirements of Vitis and XRT.
 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
 With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
@@ -28,7 +28,7 @@ Modules in this library are designed to work with all Alveo cards.
 Setup the build environment using the Vitis script, and set the installation folder of platform files via `PLATFORM_REPO_PATHS` variable.
 
 ```console
-source /opt/xilinx/Vitis/2019.2/settings64.sh
+source /opt/xilinx/Vitis/2020.1/settings64.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
 
@@ -98,13 +98,14 @@ As well as verifying functional correctness, the reports generated from this flo
 | Library Class    | Description | Layer |
 |------------------|-------------|-------|
 | UramArray        | Helper class to create URAM array that can be updated every cycle with forwarding regs | L1 |
+| Cache            | Read-only cache to save memory reads from AXI | L1 |
 
 
 ## License
 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
-    Copyright 2019 Xilinx, Inc.
+    Copyright 2019-2020 Xilinx, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
