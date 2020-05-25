@@ -20,10 +20,6 @@ Here `orders1994` is a self-made table, of all `orders` rows with `o_orderdate` 
 
 ## Dataset
 
-Due to unknown license, the source code of dataset generator is not directly included.
-When the project runs, script in `db_data` folder will automatically grep the dataset generator
-and compile it from source.
-
 _This project uses 32-bit data for numeric fields._
 To benchmark 64-bit performance, edit `host/table_dt.h` and make `TPCH_INT` an `int64_t`.
 

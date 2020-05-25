@@ -1,24 +1,22 @@
 {
-    "gui": false,
-    "name": "jks.L2_gqeAggr", 
-    "description": "", 
-    "flow": "vitis", 
-    "platform_type": "pcie", 
+    "name": "Xilinx GqeAggr Test",
+    "description": "Xilinx GqeAggr Test",
+    "flow": "vitis",
+    "gui": true,
+    "platform_type": "pcie",
     "platform_whitelist": [
         "u280"
-    ], 
+    ],
     "platform_blacklist": [
         "other"
-    ], 
+    ],
     "platform_properties": {
         "u280": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
+                    "symbols": []
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -27,79 +25,136 @@
                 }
             }
         }
-    }, 
+    },
     "launch": [
         {
-            "name": "generic launch for all flows", 
-            "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin -in PROJECT/db_data/dat -scale 10"
-        }, 
+            "name": "generic launch for sw_emu flows",
+            "target": "sw_emu",
+            "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin -scale 10000"
+        },
         {
-            "name": "generic launch for all flows", 
-            "target": "hw_emu", 
-            "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin -in PROJECT/db_data/dat -scale 10000"
-        }
-    ], 
-    "pre_launch": [
+            "name": "generic launch for hw_emu flows",
+            "target": "hw_emu",
+            "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin -scale 10000"
+        },
         {
-            "launch_cmd": "make -C PROJECT/db_data"
+            "name": "generic launch for hw flows",
+            "target": "hw",
+            "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "test_gqeJoin.exe", 
+        "host_exe": "test_gqeJoin.exe",
         "compiler": {
             "sources": [
-                "host/test_q1.cpp", 
+                "host/test_q1.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "LIB_DIR/L1/include/hw", 
-                "LIB_DIR/L3/include/sw", 
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L3/include/sw",
                 "host",
                 "LIB_DIR/ext/xcl2"
-            ], 
+            ],
             "options": "-O3 "
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/src", 
-                "LIB_DIR/L1/include/hw", 
-                "LIB_DIR/L2/include", 
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L2/include",
                 "LIB_DIR/../utils/L1/include"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/src/gqe_aggr.cpp", 
-                    "frequency": 200.0, 
-                    "name": "gqeAggr"
+                    "location": "LIB_DIR/L2/src/gqe_aggr.cpp",
+                    "frequency": 200,
+                    "name": "gqeAggr",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "gqe_aggr",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "buf_in",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "buf_out",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "buf_cfg",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "buf_result_info",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "ping_buf0",
+                                    "memory": "HBM[8]"
+                                },
+                                {
+                                    "name": "ping_buf1",
+                                    "memory": "HBM[12]"
+                                },
+                                {
+                                    "name": "ping_buf2",
+                                    "memory": "HBM[16]"
+                                },
+                                {
+                                    "name": "ping_buf3",
+                                    "memory": "HBM[20]"
+                                },
+                                {
+                                    "name": "pong_buf0",
+                                    "memory": "HBM[10]"
+                                },
+                                {
+                                    "name": "pong_buf1",
+                                    "memory": "HBM[14]"
+                                },
+                                {
+                                    "name": "pong_buf2",
+                                    "memory": "HBM[18]"
+                                },
+                                {
+                                    "name": "pong_buf3",
+                                    "memory": "HBM[22]"
+                                }
+                            ]
+                        }
+                    ]
                 }
-            ], 
-            "frequency": 200.0, 
+            ],
+            "frequency": 200,
             "name": "gqe_aggr"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 32768, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
                 "max_time_min": 520
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }

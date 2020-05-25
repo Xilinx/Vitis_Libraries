@@ -17,6 +17,7 @@
 #include "utils.hpp"
 #include "q5simple_cfg.hpp"
 
+#include <unordered_map>
 #include <sys/time.h>
 #include <algorithm>
 #include <cstring>
@@ -57,21 +58,15 @@ const int PU_NM = 8;
 #endif // HLS_TEST
 
 template <typename T>
-int load_dat(void* data, const std::string& name, const std::string& dir, size_t n) {
+int generate_data(T* data, int range, size_t n) {
     if (!data) {
         return -1;
     }
-    std::string fn = dir + "/" + name + ".dat";
-    FILE* f = fopen(fn.c_str(), "rb");
-    if (!f) {
-        std::cerr << "ERROR: " << fn << " cannot be opened for binary read." << std::endl;
+
+    for (size_t i = 0; i < n; i++) {
+        data[i] = (T)(rand() % range + 1);
     }
-    size_t cnt = fread(data, sizeof(T), n, f);
-    fclose(f);
-    if (cnt != n) {
-        std::cerr << "ERROR: " << cnt << " entries read from " << fn << ", " << n << " entries required." << std::endl;
-        return -1;
-    }
+
     return 0;
 }
 
@@ -82,6 +77,43 @@ ap_uint<512> get_table_header(int n512b, int nrow) {
     return th;
 }
 
+ap_uint<64> get_golden_sum(int l_row,
+                           ap_uint<32>* col_l_orderkey,
+                           ap_uint<32>* col_l_extendedprice,
+                           ap_uint<32>* col_l_discount,
+                           int o_row,
+                           ap_uint<32>* col_o_orderkey,
+                           ap_uint<32>* col_o_orderdate) {
+    ap_uint<64> sum = 0;
+    int cnt = 0;
+
+    std::unordered_multimap<uint32_t, uint32_t> ht1;
+
+    {
+        for (int i = 0; i < o_row; ++i) {
+            uint32_t k = col_o_orderkey[i];
+            uint32_t date = col_o_orderdate[i];
+            uint32_t p = 0;
+            // insert into hash table
+            ht1.insert(std::make_pair(k, p));
+        }
+    }
+    // read t once
+    for (int i = 0; i < l_row; ++i) {
+        uint32_t k = col_l_orderkey[i];
+        uint32_t p = col_l_extendedprice[i];
+        uint32_t d = col_l_discount[i];
+        // check hash table
+        auto its = ht1.equal_range(k);
+        for (auto it = its.first; it != its.second; ++it) {
+            sum += (p * (100 - d));
+            ++cnt;
+        }
+    }
+
+    std::cout << "INFO: CPU ref matched " << cnt << " rows, sum = " << sum << std::endl;
+    return sum;
+}
 int main(int argc, const char* argv[]) {
     std::cout << "\n--------- TPC-H Query 5 Simplified (1G) ---------\n";
 
@@ -91,12 +123,6 @@ int main(int argc, const char* argv[]) {
     std::string xclbin_path; // eg. q5kernel_VCU1525_hw.xclbin
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "ERROR: xclbin path is not set!\n";
-        return 1;
-    }
-
-    std::string in_dir;
-    if (!parser.getCmdOption("-in", in_dir) || !is_dir(in_dir)) {
-        std::cout << "ERROR: input dir is not specified or not valid.\n";
         return 1;
     }
 
@@ -183,28 +209,32 @@ int main(int argc, const char* argv[]) {
     int err;
 
     memcpy(table_l, &l_nrow, sizeof(TPCH_INT));
-    err = load_dat<TPCH_INT>(table_l + 1, "l_orderkey", in_dir, l_nrow);
+    err = generate_data<TPCH_INT>((int*)(table_l + 1), 100000, l_nrow);
     if (err) return err;
 
     memcpy(table_l + table_l_depth * 1, &l_nrow, sizeof(TPCH_INT));
-    err = load_dat<TPCH_INT>(table_l + 1 + table_l_depth * 1, "l_extendedprice", in_dir, l_nrow);
+    err = generate_data<TPCH_INT>((int*)(table_l + 1 + table_l_depth * 1), 10000000, l_nrow);
     if (err) return err;
 
     memcpy(table_l + table_l_depth * 2, &l_nrow, sizeof(TPCH_INT));
-    err = load_dat<TPCH_INT>(table_l + 1 + table_l_depth * 2, "l_discount", in_dir, l_nrow);
+    err = generate_data<TPCH_INT>((int*)(table_l + 1 + table_l_depth * 2), 10, l_nrow);
     if (err) return err;
 
     std::cout << "Lineitem table has been read from disk\n";
 
     memcpy(table_o, &o_nrow, sizeof(TPCH_INT));
-    err = load_dat<TPCH_INT>(table_o + 1, "o_orderkey", in_dir, o_nrow);
+    err = generate_data<TPCH_INT>((int*)(table_o + 1), 100000, o_nrow);
     if (err) return err;
 
     memcpy(table_o + table_o_depth, &o_nrow, sizeof(TPCH_INT));
-    err = load_dat<TPCH_INT>(table_o + 1 + table_o_depth, "o_orderdate", in_dir, o_nrow);
+    err = generate_data<TPCH_INT>((int*)(table_o + 1 + table_o_depth), 20000000, o_nrow);
     if (err) return err;
 
     std::cout << "Orders table has been read from disk\n";
+
+    long long golden = get_golden_sum(l_nrow, (ap_uint<32>*)(table_l + 1), (ap_uint<32>*)(table_l + 1 + table_l_depth),
+                                      (ap_uint<32>*)(table_l + 1 + table_l_depth * 2), o_nrow,
+                                      (ap_uint<32>*)(table_o + 1), (ap_uint<32>*)(table_o + 1 + table_o_depth));
 
 #if 0
     int t_nrow = 100;
@@ -415,10 +445,12 @@ if (use_a) {
     struct timeval tv3;
     gettimeofday(&tv3, 0);
     exec_us = tvdiff(&tv0, &tv3);
+    long long v = table_out_a[1].range(TPCH_INT_SZ * 8 * 4 - 1, TPCH_INT_SZ * 8 * 2).to_int64();
     std::cout << "FPGA execution time of " << num_rep << " runs: " << exec_us / 1000 << " ms\n"
-              << "Average execution per run: " << exec_us / num_rep / 1000 << " ms\n";
+              << "Average execution per run: " << exec_us / num_rep / 1000 << " ms\n"
+              << "FPGA result: " << v / 10000 << "." << v % 10000 << " \n";
 
 #endif // HLS_TEST
 
-    return 0;
+    return golden - v;
 }

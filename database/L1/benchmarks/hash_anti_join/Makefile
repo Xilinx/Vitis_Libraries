@@ -61,13 +61,6 @@ DEVICE ?= xilinx_u200_xdma_201830_2
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
-ifeq ($(findstring vck, $(DEVICE)), vck)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 
 ifneq ($(findstring u280, $(DEVICE)), u280)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
@@ -98,6 +91,10 @@ CXXFLAGS += -I$(CUR_DIR)/kernel
 
 
 
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
+CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
+CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+
 # Host compiler global settings
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
@@ -107,9 +104,14 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := test_join.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_anti_join.xclbin -in $(CUR_DIR)/db_data/dat
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_anti_join.xclbin
+endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_anti_join.xclbin -in $(CUR_DIR)/db_data/dat -scale 10000
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_anti_join.xclbin -scale 10000
+endif
+ifeq ($(TARGET),$(filter $(TARGET),hw))
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_anti_join.xclbin
 endif
 
 ifneq ($(HOST_ARCH), x86)
@@ -127,10 +129,13 @@ VPP_FLAGS += --config $(CUR_DIR)/conn_u280.ini
 endif
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
+
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(CUR_DIR)/kernel
 VPP_FLAGS += -I$(CUR_DIR)/host
 
-
+join_kernel_VPP_FLAGS +=  -D KERNEL_NAME=join_kernel
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/hash_anti_join.xclbin
 BINARY_CONTAINER_hash_anti_join_OBJS += $(TEMP_DIR)/join_kernel.xo
@@ -171,7 +176,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 ############################## Setting Essential Checks and Running Rules ##############################
 run: all
-	XCL_EMULATION_MODE=$(TARGET) make -C $(CUR_DIR)/db_data
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)

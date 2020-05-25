@@ -1,14 +1,17 @@
 {
-    "name": "jks.L1_compound_sort", 
-    "description": "", 
-    "flow": "vitis", 
-    "platform_type": "pcie", 
+    "name": "Xilinx Compound Sort Benchmark",
+    "description": "Xilinx Compound Sort Benchmark",
+    "flow": "vitis",
+    "gui": true,
+    "platform_type": "pcie",
     "platform_whitelist": [
-        "u280", "u250", "u200"
-    ], 
+        "u280",
+        "u250",
+        "u200"
+    ],
     "platform_blacklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u280": {
             "v++": {
@@ -16,7 +19,6 @@
                     "cflags": [
                         "--config PROJECT/conn_u280.ini"
                     ]
-
                 }
             }
         },
@@ -26,7 +28,6 @@
                     "cflags": [
                         "--config PROJECT/conn_u250.ini"
                     ]
-
                 }
             }
         },
@@ -36,54 +37,53 @@
                     "cflags": [
                         "--config PROJECT/conn_u200.ini"
                     ]
-
                 }
             }
         }
-    }, 
+    },
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/SortKernel.xclbin", 
+            "cmd_args": " -xclbin BUILD/SortKernel.xclbin",
             "name": "generic launch for all flows"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "host.exe", 
+        "host_exe": "host.exe",
         "compiler": {
             "sources": [
-                "host/main.cpp", 
+                "host/main.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L1/include/hw",
                 "host",
                 "kernel",
                 "LIB_DIR/ext/xcl2"
-            ], 
-            "options": "-O3 ", 
+            ],
+            "options": "-O3 ",
             "symbols": [
                 "PRAGMA"
             ]
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L1/include/hw",
                 "kernel"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
                     "location": "kernel/kernel_sort_top.cpp",
-                    "frequency": 300.0, 
-                    "clflags": " -D KERNEL_NAME=SortKernel", 
+                    "frequency": 300,
+                    "clflags": " -D KERNEL_NAME=SortKernel",
                     "name": "SortKernel",
                     "num_compute_units": 1,
-                    "compute_units" : [
+                    "compute_units": [
                         {
                             "name": "SortKernel",
                             "slr": "SLR0",
@@ -100,28 +100,28 @@
                         }
                     ]
                 }
-            ], 
-            "frequency": 300.0, 
+            ],
+            "frequency": 300,
             "name": "SortKernel"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 32768, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
                 "max_time_min": 520
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }

@@ -1,15 +1,17 @@
 {
     "gui": false,
-    "name": "jks.L1_q5", 
-    "description": "", 
-    "flow": "vitis", 
-    "platform_type": "pcie", 
+    "name": "Xilinx Q5 Demo",
+    "description": "Xilinx Q5 Demo",
+    "flow": "vitis",
+    "platform_type": "pcie",
     "platform_whitelist": [
-        "u280", "u250", "u200"
-    ], 
+        "u280",
+        "u250",
+        "u200"
+    ],
     "platform_blacklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u280": {
             "host": {
@@ -50,7 +52,7 @@
                         "USE_DDR"
                     ]
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -59,71 +61,71 @@
                 }
             }
         }
-    }, 
+    },
     "launch": [
         {
-	    "name": "generic launch for all flows",
+            "name": "generic launch for all flows",
             "cmd_args": " -xclbin BUILD/q5_hash_join.xclbin -in PROJECT/db_data/dat"
         }
-    ], 
+    ],
     "pre_launch": [
         {
             "launch_cmd": "make -C PROJECT/db_data"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "test_q5.exe", 
+        "host_exe": "test_q5.exe",
         "compiler": {
             "sources": [
                 "host/test_q5.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
                 "host",
-                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/ext/xcl2",
                 "kernel"
-            ], 
+            ],
             "options": "-O3 "
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L1/include/hw",
                 "kernel",
                 "host"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
                     "location": "kernel/q5kernel.cpp",
-                    "frequency": 300.0, 
+                    "frequency": 300,
                     "name": "q5_hash_join"
                 }
-            ], 
-            "frequency": 300.0, 
+            ],
+            "frequency": 300,
             "name": "q5_hash_join"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": true, 
+        "disable": true,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 32768, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
                 "max_time_min": 520
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
+            "vitis_sw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }

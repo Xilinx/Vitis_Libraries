@@ -1,15 +1,15 @@
 {
-    "gui": false,
-    "name": "jks.L1_hash_anti_join", 
-    "description": "", 
-    "flow": "vitis", 
-    "platform_type": "pcie", 
+    "name": "Xilinx Hash Anti Join Benchmark",
+    "description": "Xilinx Hash Anti Join Benchmark",
+    "flow": "vitis",
+    "gui": true,
+    "platform_type": "pcie",
     "platform_whitelist": [
         "u280"
-    ], 
+    ],
     "platform_blacklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u280": {
             "host": {
@@ -18,7 +18,7 @@
                         "USE_HBM"
                     ]
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -27,80 +27,175 @@
                 }
             }
         }
-    }, 
+    },
     "launch": [
         {
-            "name": "generic launch for all flows", 
-            "cmd_args": " -xclbin BUILD/hash_anti_join.xclbin -in PROJECT/db_data/dat"
-        }, 
+            "name": "generic launch for sw_emu flows",
+            "target": "sw_emu",
+            "cmd_args": " -xclbin BUILD/hash_anti_join.xclbin"
+        },
         {
-            "name": "generic launch for all flows", 
-            "target": "hw_emu", 
-            "cmd_args": " -xclbin BUILD/hash_anti_join.xclbin -in PROJECT/db_data/dat -scale 10000"
-        }
-    ], 
-    "pre_launch": [
+            "name": "generic launch for hw_emu flows",
+            "target": "hw_emu",
+            "cmd_args": " -xclbin BUILD/hash_anti_join.xclbin -scale 10000"
+        },
         {
-            "launch_cmd": "make -C PROJECT/db_data"
+            "name": "generic launch for hw flows",
+            "target": "hw",
+            "cmd_args": " -xclbin BUILD/hash_anti_join.xclbin"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "test_join.exe", 
+        "host_exe": "test_join.exe",
         "compiler": {
             "sources": [
-                "host/test_join.cpp", 
+                "host/test_join.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
                 "host",
-                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/ext/xcl2",
                 "kernel"
-            ], 
-            "options": "-O3 ", 
+            ],
+            "options": "-O3 ",
             "symbols": [
                 "USE_HBM"
             ]
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L1/include/hw",
                 "kernel",
                 "host"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "kernel/join_kernel.cpp", 
-                    "frequency": 300.0, 
-                    "name": "join_kernel"
+                    "location": "kernel/join_kernel.cpp",
+                    "frequency": 300,
+                    "clflags": " -D KERNEL_NAME=join_kernel",
+                    "name": "join_kernel",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "join_kernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "buf_o_orderkey",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "buf_l_orderkey",
+                                    "memory": "HBM[1]"
+                                },
+                                {
+                                    "name": "buf_l_extendedprice",
+                                    "memory": "HBM[2]"
+                                },
+                                {
+                                    "name": "buf_l_discount",
+                                    "memory": "HBM[3]"
+                                },
+                                {
+                                    "name": "buf_result",
+                                    "memory": "HBM[4]"
+                                },
+                                {
+                                    "name": "pu0_ht",
+                                    "memory": "HBM[8]"
+                                },
+                                {
+                                    "name": "pu1_ht",
+                                    "memory": "HBM[10]"
+                                },
+                                {
+                                    "name": "pu2_ht",
+                                    "memory": "HBM[12]"
+                                },
+                                {
+                                    "name": "pu3_ht",
+                                    "memory": "HBM[14]"
+                                },
+                                {
+                                    "name": "pu4_ht",
+                                    "memory": "HBM[16]"
+                                },
+                                {
+                                    "name": "pu5_ht",
+                                    "memory": "HBM[18]"
+                                },
+                                {
+                                    "name": "pu6_ht",
+                                    "memory": "HBM[20]"
+                                },
+                                {
+                                    "name": "pu7_ht",
+                                    "memory": "HBM[22]"
+                                },
+                                {
+                                    "name": "pu0_s",
+                                    "memory": "HBM[9]"
+                                },
+                                {
+                                    "name": "pu1_s",
+                                    "memory": "HBM[11]"
+                                },
+                                {
+                                    "name": "pu2_s",
+                                    "memory": "HBM[13]"
+                                },
+                                {
+                                    "name": "pu3_s",
+                                    "memory": "HBM[15]"
+                                },
+                                {
+                                    "name": "pu4_s",
+                                    "memory": "HBM[17]"
+                                },
+                                {
+                                    "name": "pu5_s",
+                                    "memory": "HBM[19]"
+                                },
+                                {
+                                    "name": "pu6_s",
+                                    "memory": "HBM[21]"
+                                },
+                                {
+                                    "name": "pu7_s",
+                                    "memory": "HBM[23]"
+                                }
+                            ]
+                        }
+                    ]
                 }
-            ], 
-            "frequency": 300.0, 
+            ],
+            "frequency": 300,
             "name": "hash_anti_join"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 32768, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
                 "max_time_min": 520
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }

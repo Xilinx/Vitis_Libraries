@@ -25,12 +25,12 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files -tb tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files dut.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-
+add_files "dut.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "tb.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top dut
 
 open_solution -reset $SOLN
+
 
 
 

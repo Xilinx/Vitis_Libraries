@@ -1,54 +1,56 @@
 {
-    "name": "jks.L1_bloom_filter_uram", 
-    "description": "", 
-    "flow": "hls", 
+    "name": "Xilinx Bloom Filter Uram HLS Test",
+    "description": "Xilinx Bloom Filter Uram HLS Test",
+    "flow": "hls",
     "platform_whitelist": [
-        "u280", "u250", "u200"
-    ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [], 
-    "project": "bloom_filter", 
-    "solution": "sol1", 
-    "clock": "3.0", 
-    "topfunction": "syn_bloom_filter_uram", 
+        "u280",
+        "u250",
+        "u200"
+    ],
+    "platform_blacklist": [],
+    "part_whitelist": [],
+    "part_blacklist": [],
+    "project": "bloom_filter",
+    "solution": "sol1",
+    "clock": "3.0",
+    "topfunction": "syn_bloom_filter_uram",
     "top": {
         "source": [
             "bloom_filter_test.cpp"
-        ], 
+        ],
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw"
-    }, 
+    },
     "testbench": {
         "source": [
             "bloom_filter_test.cpp"
-        ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw", 
-        "ldflags": "", 
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw",
+        "ldflags": "",
         "argv": {
-            "hls_csim": "1", 
+            "hls_csim": "1",
             "hls_cosim": "1"
-        }, 
+        },
         "stdmath": false
-    }, 
+    },
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 16384, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 16384,
                 "max_time_min": 300
             }
-        ], 
+        ],
         "targets": [
-            "hls_csim", 
-            "hls_csynth", 
-            "hls_cosim", 
-            "hls_vivado_syn", 
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "hls_vivado_syn",
             "hls_vivado_impl"
-        ], 
+        ],
         "category": "canary"
     }
 }

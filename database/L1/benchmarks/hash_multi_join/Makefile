@@ -56,7 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
+DEVICE ?= xilinx_u280_xdma_201920_1
 
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
@@ -107,9 +107,9 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := test_join.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_multi_join.xclbin -in $(CUR_DIR)/db_data/dat
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_multi_join.xclbin -scale 5000
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_multi_join.xclbin -in $(CUR_DIR)/db_data/dat -scale 10000
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_multi_join.xclbin -scale 5000
 endif
 
 ifneq ($(HOST_ARCH), x86)
@@ -171,7 +171,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 ############################## Setting Essential Checks and Running Rules ##############################
 run: all
-	XCL_EMULATION_MODE=$(TARGET) make -C $(CUR_DIR)/db_data
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)

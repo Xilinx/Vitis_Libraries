@@ -78,8 +78,8 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[3];
-    mext_o[0] = {XCL_MEM_DDR_BANK0, inKey_alloc, 0};
-    mext_o[1] = {XCL_MEM_DDR_BANK0, outKey_alloc, 0};
+    mext_o[0] = {2, inKey_alloc, kernel_SortKernel()};  // arg 2 of kernel
+    mext_o[1] = {3, outKey_alloc, kernel_SortKernel()}; // arg 3 of kernel
     cl::Buffer inKey_buf, outKey_buf, outIndex_buf;
     inKey_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                            sizeof(KEY_TYPE) * LEN, &mext_o[0]);
