@@ -231,7 +231,6 @@ SPLIT_FEW_VEC:
     for (int j = 0; j < scal_vec; ++j) {
 #pragma HLS loop_tripcount min = 1 max = 1
 #pragma HLS PIPELINE II = 1
-        // ap_uint<WStrm> fst_r0 = fst_vec.range(WStrm * (j + 1) - 1, WStrm * j);
         ap_uint<WStrm> fst_r0 = fst_vec.range(_WAxi - 1, WStrm * j);
         if (j < fst_n && j >= offset_AL) {
             r_strm.write((_TStrm)fst_r0);
@@ -246,9 +245,6 @@ SPLIT_VEC:
         int n = (i + scal_vec) > nrow ? (nrow - i) : scal_vec;
 
         for (int j = 0; j < scal_vec; ++j) {
-#pragma HLS PIPELINE II = 1
-            //      const int maxRange = min(WStrm)
-            // ap_uint<WStrm> r0 = vec.range(WStrm * (j + 1) - 1, WStrm * j);
             ap_uint<WStrm> r0 = vec.range(_WAxi - 1, WStrm * j);
             if (j < n) {
                 r_strm.write((_TStrm)r0);
@@ -301,7 +297,7 @@ void split_vec_to_aligned(hls::stream<ap_uint<_WAxi> >& vec_strm,
         for (int i = 0; i < nwrite; i += scal_vec) {
 #pragma HLS loop_tripcount min = 1 max = 1
 #pragma HLS PIPELINE II = scal_vec
-            vec_aligned((scal_char - offset << 3) - 1, 0) = vec_reg((scal_char << 3) - 1, offset << 3);
+            vec_aligned(((scal_char - offset) << 3) - 1, 0) = vec_reg((scal_char << 3) - 1, offset << 3);
             if ((scal_char - offset) < len && (cnt_r != 0)) { // always need read
                                                               // again
                 ap_uint<_WAxi> vec = vec_strm.read();
@@ -373,7 +369,7 @@ void split_vec_to_aligned(hls::stream<ap_uint<_WAxi> >& vec_strm,
         for (int i = 0; i < nwrite; i += scal_vec) {
 #pragma HLS loop_tripcount min = 1 max = 1
 #pragma HLS PIPELINE II = scal_vec
-            vec_aligned((scal_char - offset << 3) - 1, 0) = vec_reg((scal_char << 3) - 1, offset << 3);
+            vec_aligned(((scal_char - offset) << 3) - 1, 0) = vec_reg((scal_char << 3) - 1, offset << 3);
             if ((scal_char - offset) < len && (cnt_r != 0)) { // always need read
                                                               // again
                 ap_uint<_WAxi> vec = vec_strm.read();

@@ -14,28 +14,29 @@
 # limitations under the License.
 #
 
+.PHONY: all install xml rst html clean cleanhtml cleanall check_tools
+
+all: html
+
+check_tools:
 ifeq (, $(shell which doxygen 2>/dev/null))
-$(error "No doxygen in PATH.")
+	@echo "ERROR: No doxygen in PATH" && false
 endif
 ifeq (, $(shell which doxyrest 2>/dev/null))
-$(error "No doxyrest in PATH.")
+	@echo "ERROR: No doxyrest in PATH" && false
 endif
 ifeq (, $(shell which sphinx-build 2>/dev/null))
-$(error "No sphinx-build in PATH.")
+	@echo "ERROR: No sphinx-build in PATH" && false
 endif
-ifeq (, $(HTML_DEST_DIR))
-$(error "HTML_DEST_DIR is not set.")
-endif
-
-.PHONY: all install xml rst html clean cleanhtml cleanall
-
-all: install
 
 install: .stamp/sphinx
+ifeq (, $(HTML_DEST_DIR))
+	@echo "ERROR: HTML_DEST_DIR is not set." && false
+endif
 	rsync -av --delete --exclude .git --exclude .nojekyll --exclude .buildinfo \
 		 _build/html/ $(HTML_DEST_DIR) 1>/dev/null
 
-.stamp/doxygen:
+.stamp/doxygen: | check_tools
 	rm -rf xml
 	doxygen Doxyfile
 	mkdir -p .stamp
@@ -43,15 +44,14 @@ install: .stamp/sphinx
 
 DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 
-.stamp/doxyrest: .stamp/doxygen
+.stamp/doxyrest: .stamp/doxygen | check_tools
 	rm -rf rst
 	mkdir rst
 	doxyrest xml/index.xml -o rst/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	rm -f rst/index.rst rst/global.rst
 	touch .stamp/doxyrest
 
-.stamp/sphinx: .stamp/doxyrest Makefile.sphinx
+.stamp/sphinx: .stamp/doxyrest Makefile.sphinx | check_tools
 	make -f Makefile.sphinx html
 	touch .stamp/sphinx
 
@@ -64,7 +64,7 @@ rst:
 	make .stamp/doxyrest
 
 html:
-	rm -rf .stamp/sphinx _build/doctrees
+	rm -rf .stamp/sphinx _build/doctrees _build/html
 	make .stamp/sphinx
 
 clean:
