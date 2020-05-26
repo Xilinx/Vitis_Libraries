@@ -38,7 +38,7 @@ Environment Setup:
 
 ``source /opt/Xilinx/Vitis/2019.2/settings64.sh``
 
-``source /opt/Xilinx/xbb/xrt/packages/setenv.sh``
+``source /opt/Xilinx/xbb/xrt/packages/setup.sh``
 
 
 *It is must to set the LD_LIBRARY_PATH to environment variable
