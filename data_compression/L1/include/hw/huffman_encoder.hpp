@@ -298,8 +298,8 @@ huffman_loop:
                 next_state = WRITE_TOKEN;
             }
         } else if (next_state == ML_DIST_REP) {
-            uint16_t code_s = litmtree_code[lcode + LITERALS + 1];
-            uint8_t bitlen = litmtree_blen[lcode + LITERALS + 1];
+            uint16_t code_s = litmtree_code[lcode + c_literals + 1];
+            uint8_t bitlen = litmtree_blen[lcode + c_literals + 1];
             lextra = extra_lbits[lcode];
 
             outStream << code_s;

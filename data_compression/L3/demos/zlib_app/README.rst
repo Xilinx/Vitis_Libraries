@@ -8,12 +8,12 @@ guidelines to build and deployment.
 Overview
 --------
 
-ZLIB is an Open Source data compression library [Reference] which provides
+ZLIB is an Open Source data compression library which provides
 high compression ratio compared to Limpel Ziev based data compression algorithms
 (Byte Compression). It applies two levels of compression,
 
-*  Byte Level (Limpel Ziev â€“ LZ Based Compression Scheme)
-*  Bit Level (Huffman â€“ Entropy)
+*  Byte Level (Limpel Ziev  LZ Based Compression Scheme)
+*  Bit Level (Huffman Entropy)
 
 Due to its high compression ratio it takes higher precedence over LZ based
 compression schemes. Traditionally the CPU based solutions are limited to MB/s

@@ -1,5 +1,5 @@
 {
-    "name": "Snappy-Streaming Decompression ParalleByte8",
+    "name": "Xilinx Snappy Streaming 8 Multibytes Decompress",
     "description": [
         "Snappy-Streaming Decompression ParallelByte8"
     ],
@@ -10,6 +10,10 @@
             "name": "generic launch for all flows"
         }
     ],
+    "platform_blacklist": [
+        "u280"
+    ],
+    "match_makefile": "false",
     "host": {
         "host_exe": "xil_snappy_streaming",
         "compiler": {
@@ -41,7 +45,7 @@
     "containers": [
         {
             "name": "decompress_streaming",
-            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/decompress.ini",
+            "ldclflags": "--config PROJECT/decompress.ini",
             "accelerators": [
                 {
                     "name": "xilSnappyDecompressStream",

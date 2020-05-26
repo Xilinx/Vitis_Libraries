@@ -1,11 +1,12 @@
 {
-    "name": "LZ4_P2P Application for Compression", 
+    "name": "Xilinx LZ4 P2P Application For Compression", 
     "description": [
         "LZ4_P2P application for Compression resides in `L3/benchmarks/lz4_p2p_compress` directory."
     ],
     "flow": "vitis",
     "platform_blacklist": [
-        "u50"
+        "u50",
+        "u280"
     ],
     "platform_whitelist": [
         "samsung_u2",
@@ -13,11 +14,12 @@
     ],
     "launch": [
         {
-            "cmd_args": "-cx BUILD/compress.xclbin -p2p 1 -l PROJECT/test.list", 
+            "cmd_args": "-cx BUILD/compress.xclbin -l PROJECT/test.list", 
             "name": "generic launch for all flows"
         }
     ], 
-    "config_make": "config.mk",
+    "config_make": "./config.mk",
+    "gui": "false", 
     "host": {
         "host_exe": "xil_lz4", 
         "compiler": {
@@ -30,15 +32,19 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/include"
+                "LIB_DIR/L3/include",
+                "LIB_DIR/L1/include/hw"
             ], 
-            "symbols": [ "PARALLEL_BLOCK=8" , "ENABLE_P2P=1"] 
+            "symbols": [ "PARALLEL_BLOCK=8",
+                         "SINGLE_XCLBIN=false"
+                       ] 
         }
     },
     "v++":{
         "compiler": {
             "symbols": [
-                "PARALLEL_BLOCK=8"
+                "PARALLEL_BLOCK=8",
+                "C_COMPUTE_UNITS=2"
             ]
         }
     }, 
@@ -50,64 +56,12 @@
                 {
                     "name": "xilLz4Compress", 
                     "location": "LIB_DIR/L2/src/lz4_compress_mm.cpp",
-                    "num_compute_units": "2",
-                    "compute_units" : [
-                        {
-                            "arguments" : [
-                                {
-                                    "name":"m_axi_gmem0",
-                                    "memory":"bank0"
-                                },
-                                {
-                                    "name":"m_axi_gmem1",
-                                    "memory":"bank0"
-                                }
-                            ]
-                        },
-                        {
-                            "arguments" : [
-				{
-                                    "name":"m_axi_gmem0",
-                                    "memory":"bank0"
-                                },
-                                {
-                                    "name":"m_axi_gmem1",
-                                    "memory":"bank0"
-                                }
-                            ]
-                        }
-                    ]
+                    "num_compute_units": "2"
                 },
 		{
                     "name": "xilLz4Packer", 
                     "location": "LIB_DIR/L2/src/lz4_packer_mm.cpp",
-                    "num_compute_units": "2",
-                    "compute_units" : [
-                        {
-                            "arguments" : [
-                                {
-                                    "name":"m_axi_gmem0",
-                                    "memory":"bank0"
-                                },
-                                {
-                                    "name":"m_axi_gmem1",
-                                    "memory":"bank0"
-                                }
-                            ]
-                        },
-                        {
-                            "arguments" : [
-				{
-                                    "name":"m_axi_gmem0",
-                                    "memory":"bank0"
-                                },
-                                {
-                                    "name":"m_axi_gmem1",
-                                    "memory":"bank0"
-                                }
-                            ]
-                        }
-                    ]
+                    "num_compute_units": "2"
                 }
             ] 
         }

@@ -24,7 +24,7 @@
 #include <ap_int.h>
 #include "hls_stream.h"
 #include "huffman_decoder.hpp"
-#include "zlib_config.hpp"
+#include "zlib_specs.hpp"
 #include "lz_decompress.hpp"
 #include "inflate.hpp"
 #include "stream_downsizer.hpp"
@@ -36,7 +36,7 @@
 
 // use fixed decoder by default
 #ifndef DECODER_TYPE
-#define DECODER_TYPE FIXED_DECODER
+#define DECODER_TYPE c_fixedDecoder
 #endif
 
 #define LZ_MAX_OFFSET_LIMIT 32768

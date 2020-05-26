@@ -19,6 +19,13 @@
 #include <vector>
 #include "cmdlineparser.h"
 
+// The default value set as non-P2P, so that design can work for all platforms.
+// For P2P enabled platform, user need to manually change this macro value to
+// true.
+#ifndef ENABLE_P2P
+#define ENABLE_P2P false
+#endif
+
 void xil_validate(std::string& file_list, std::string& ext);
 
 void xil_decompress_list(
@@ -88,7 +95,7 @@ void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin
     // Xilinx ZLIB object
     xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId);
 
-    // std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    // std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {

@@ -29,8 +29,9 @@ const int c_parallelBit = MULTIPLE_BYTES * 8;
 void __xf_decomp_datamover(xf::compression::uintMemWidth_t* in,
                            xf::compression::uintMemWidth_t* out,
                            uint32_t input_size,
+                           uint32_t* outputSize,
                            hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& instream_orig,
-                           hls::stream<ap_axiu<8, 0, 0, 0> >& outstream_eos,
+                           hls::stream<ap_axiu<32, 0, 0, 0> >& outstream_size,
                            hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& outstream_dest) {
     hls::stream<xf::compression::uintMemWidth_t> instream512("inputStream");
     hls::stream<ap_uint<c_parallelBit> > outdownstream("outDownStream");
@@ -38,6 +39,7 @@ void __xf_decomp_datamover(xf::compression::uintMemWidth_t* in,
     hls::stream<bool> decompressedStreamEoS("decompressedStreamEoS");
     hls::stream<xf::compression::uintMemWidth_t> outstream512("outputStream");
     hls::stream<bool> outStreamEoS("outStreamEoS");
+    hls::stream<uint32_t> decompressSizeStream("decompressSizeStream");
 
 #pragma HLS STREAM variable = outdownstream depth = 32
 #pragma HLS STREAM variable = decompoutstream depth = 32
@@ -52,32 +54,36 @@ void __xf_decomp_datamover(xf::compression::uintMemWidth_t* in,
                                                                                     input_size);
 
     xf::compression::details::streamDataDm2k<c_parallelBit>(outdownstream, instream_orig, input_size);
-    xf::compression::details::streamDataK2dmMultiByteSize<MULTIPLE_BYTES>(decompoutstream, decompressedStreamEoS,
-                                                                          outstream_dest, outstream_eos);
+    xf::compression::details::streamDataK2dmMultiByteSize<MULTIPLE_BYTES>(
+        decompoutstream, decompressedStreamEoS, decompressSizeStream, outstream_dest, outstream_size);
 
     xf::compression::details::upsizerEos<c_parallelBit, kGMemDWidth>(decompoutstream, decompressedStreamEoS,
                                                                      outstream512, outStreamEoS);
-    xf::compression::details::s2mmStreamSimple<kGMemDWidth>(out, outstream512, outStreamEoS);
+    xf::compression::details::s2mmEosSimple<kGMemDWidth, 16>(out, outstream512, outStreamEoS, decompressSizeStream,
+                                                             outputSize);
 }
 
 extern "C" {
 void xilDecompDatamover(xf::compression::uintMemWidth_t* in,
                         xf::compression::uintMemWidth_t* out,
                         uint32_t input_size,
+                        uint32_t* outputSize,
                         hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& instream_orig,
-                        hls::stream<ap_axiu<8, 0, 0, 0> >& outstream_eos,
+                        hls::stream<ap_axiu<32, 0, 0, 0> >& outstream_size,
                         hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& outstream_dest) {
 #pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = outputSize offset = slave bundle = gmem
 #pragma HLS interface axis port = instream_orig
 #pragma HLS interface axis port = outstream_dest
-#pragma HLS interface axis port = outstream_eos
+#pragma HLS interface axis port = outstream_size
 #pragma HLS INTERFACE s_axilite port = in bundle = control
 #pragma HLS INTERFACE s_axilite port = out bundle = control
 #pragma HLS INTERFACE s_axilite port = input_size bundle = control
+#pragma HLS INTERFACE s_axilite port = outputSize bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     // Transfer Data to and from compression kernels
-    __xf_decomp_datamover(in, out, input_size, instream_orig, outstream_eos, outstream_dest);
+    __xf_decomp_datamover(in, out, input_size, outputSize, instream_orig, outstream_size, outstream_dest);
 }
 }

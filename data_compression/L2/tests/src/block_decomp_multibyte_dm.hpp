@@ -58,8 +58,9 @@ extern "C" {
 void xilDecompDatamover(xf::compression::uintMemWidth_t* in,
                         xf::compression::uintMemWidth_t* out,
                         uint32_t input_size,
+                        uint32_t* outputSize,
                         hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& instream_orig,
-                        hls::stream<ap_axiu<8, 0, 0, 0> >& outstream_eos,
+                        hls::stream<ap_axiu<32, 0, 0, 0> >& outstream_size,
                         hls::stream<ap_axiu<MULTIPLE_BYTES * 8, 0, 0, 0> >& outstream_dest);
 }
 #endif // _XFCOMPRESSION_BLOCK_DECOMP_DM_HPP_

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.zlib_huffman_encoder", 
+    "name": "Xilinx Zlib Huffman Encoder HLS Test", 
     "description": "Test Design to validate huffman encoder module in Zlib compression", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "LZ4-Streaming Compression and Decompression",
+    "name": "Xilinx LZ4 Streaming Compression and Decompression",
     "description": [
         "LZ4-Streaming Compression and Decompression"
     ],
@@ -15,6 +15,9 @@
             "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_streaming.xclbin BUILD/decompress_streaming.xclbin"
         }
     ],
+    "platform_blacklist": [
+        "u280"
+    ],
     "host": {
         "host_exe": "xil_lz4_streaming",
         "compiler": {
@@ -27,7 +30,7 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/tests/src/"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=8"

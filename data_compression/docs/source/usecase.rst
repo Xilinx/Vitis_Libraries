@@ -6,15 +6,13 @@
 .. meta::
    :keywords: Vitis, Library, Data Compression, Xilinx, L1, L2, L3, Overlay, OpenCL Kernel, FPGA Kernel, HLS Kernel
    :description: Typlical usecases of Vitis Data Compression Library
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
 
 .. _use_case:
 
 Typical Use Cases
 =================
 
-This library, in its current state, can be used for acceleration of data compression applications in two ways:
+The Vitis Compression library, in its current state, can be used for acceleration of data compression applications in two ways:
 
 +-----------------------------+--------------------------------------------------------------------------------+
 | Acceleration Scope          | Developer's Usage of Compression Library                                       |
@@ -25,12 +23,11 @@ This library, in its current state, can be used for acceleration of data compres
 +-----------------------------+--------------------------------------------------------------------------------+
 
 
-L1 module contains several primitive components which can be used in different algorithm kernels. Developers who only need these primitives to build their own kernels may refer :ref:`l1_user_guide`.
+L1 module contains several primitive components which can be used in different algorithm kernels. For information on primitives to build your own kernels, see :ref:`l1_user_guide`.
 
-L2 module contains pre-designed compress/decompress kernels for various data compression algorithms. Developers can directly use these kernels in their design and may refer :ref:`l2_user_guide`.
+L2 module contains pre-designed compress/decompress kernels for various data compression algorithms. You can directly use these kernels in your design. For more information, see :ref:`l2_user_guide`.
 
 
-Note
-
-L3 Overlay is still under active development now. Stay tuned!
+.. note::
+L3 Overlay is currently under active development.
 

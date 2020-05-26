@@ -1,5 +1,5 @@
 {
-    "name": "L1_snappyMultiByteDecompress",
+    "name": "Xilinx Snappy Multibyte Decompress HLS Test",
     "description": "Test Design to validate Snappy MultiByte Decompress module",
     "flow": "hls",
     "project": "snappy_decompress_test",

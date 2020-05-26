@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.zlib_decompress_mm_8pb", 
+    "name": "Xilinx ZLIB Memory Mapped 8 Parallel Bytes Decompress HLS Test", 
     "description": "Test Design to validate Zlib multibyte decompress memory mapped module", 
     "flow": "hls", 
     "platform_whitelist": [

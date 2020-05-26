@@ -32,6 +32,7 @@ void xil_compress_decompress_list(std::string& file_list,
                                   enum list_mode mode = COMP_DECOMP) {
     // Create xfZlib object
     xfZlib xlz(single_bin, max_cr, BOTH);
+    ERROR_STATUS(xlz.error_code());
 
     if (mode != ONLY_DECOMPRESS) {
         std::cout << "--------------------------------------------------------------" << std::endl;
@@ -135,8 +136,9 @@ void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::
 void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single_bin, uint8_t max_cr) {
     // Xilinx ZLIB object
     xfZlib xlz(single_bin, max_cr, DECOMP_ONLY);
+    ERROR_STATUS(xlz.error_code());
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -168,8 +170,9 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
 void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_t max_cr) {
     // Xilinx ZLIB object
     xfZlib xlz(single_bin, max_cr, COMP_ONLY);
+    ERROR_STATUS(xlz.error_code());
 
-    std::cout << std::fixed << std::setprecision(2) << "E2E(Mbps)\t\t:";
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
     if (!inFile) {
@@ -229,6 +232,7 @@ void xil_validate(std::string& file_list, std::string& ext) {
 void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string& single_bin, uint8_t max_cr_val) {
     // Create xfZlib object
     xfZlib xlz(single_bin, max_cr_val, BOTH);
+    ERROR_STATUS(xlz.error_code());
 
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "                     Xilinx Zlib Compress                          " << std::endl;

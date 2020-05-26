@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.zlib_dec_dynamic_huffman", 
+    "name": "Xilinx Zlib Dynamic Huffman Decoder HLS Test", 
     "description": "Test Design to validate core Zlib decompress module using dynamic huffman decoder", 
     "flow": "hls", 
     "platform_whitelist": [

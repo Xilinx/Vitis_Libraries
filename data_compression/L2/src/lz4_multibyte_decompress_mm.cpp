@@ -37,10 +37,14 @@ void lz4CoreDec(hls::stream<ap_uint<PARALLEL_BYTE * 8> >& inStream,
                 const uint32_t _input_size) {
     uint32_t input_size = _input_size;
     hls::stream<uint32_t> decStreamSize;
+    hls::stream<uint16_t> blockCompSize;
 
+    // send each block compressed size and 0 to indicate end of data
+    blockCompSize << input_size;
+    blockCompSize << 0;
 #pragma HLS DATAFLOW
-    xf::compression::lz4DecompressEngine<PARALLEL_BYTE, historySize>(inStream, outStream, endOfStream, decStreamSize,
-                                                                     input_size);
+    xf::compression::lz4CoreDecompressEngine<PARALLEL_BYTE, historySize>(inStream, outStream, endOfStream,
+                                                                         decStreamSize, blockCompSize);
     {
         uint32_t outsize = decStreamSize.read(); // Dummy module to empty SizeStream
     }

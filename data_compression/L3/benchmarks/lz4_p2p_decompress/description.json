@@ -1,11 +1,13 @@
 {
-    "name": "LZ4_P2P Application for Decompression", 
+    "name": "Xilinx LZ4 P2P Application For Decompression", 
     "description": [
         "LZ4_P2P application for decompression resides in `L3/benchmarks/lz4_p2p_decompress` directory."
     ],
     "flow": "vitis",
     "platform_blacklist": [
-        "u50"
+        "u50",
+        "vck",
+        "u280"
     ],
     "platform_whitelist": [
         "samsung_u2",
@@ -13,13 +15,14 @@
     ],
     "launch": [
         {
-            "cmd_args": "-dx BUILD/compress_decompress.xclbin -p2p 0 -l PROJECT/test.list", 
+            "cmd_args": "-dx BUILD/compress_decompress.xclbin -l PROJECT/test.list", 
             "name": "generic launch for all flows"
         }
     ], 
     "match_makefile": "false",
     "match_ini": "false",
     "config_make": "config.mk",
+    "gui": "false", 
     "host": {
         "host_exe": "xil_lz4", 
         "compiler": {
@@ -53,48 +56,12 @@
                 {
                     "name": "xilLz4P2PDecompress", 
                     "location": "LIB_DIR/L2/src/lz4_p2p_decompress_kernel.cpp",
-                    "num_compute_units": "2",
-                    "compute_units" : [
-                        {
-                            "arguments" : [
-                                {
-                                    "name":"m_axi_gmem",
-                                    "memory":"DDR[0]"
-                                }
-                            ]
-                        },
-                        {
-                            "arguments" : [
-				{
-                                    "name":"m_axi_gmem",
-                                    "memory":"DDR[0]"
-                                }
-                            ]
-                        }
-                    ]
+                    "num_compute_units": "2"
                 },
 		{
                     "name": "xilLz4Unpacker", 
                     "location": "LIB_DIR/L2/src/lz4_unpacker_kernel.cpp",
-                    "num_compute_units": "2",
-                    "compute_units" : [
-                        {
-                            "arguments" : [
-                                {
-                                    "name":"m_axi_gmem",
-                                    "memory":"DDR[0]"
-                                }
-                            ]
-                        },
-                        {
-                            "arguments" : [
-				{
-                                    "name":"m_axi_gmem",
-                                    "memory":"DDR[0]"
-                                }
-                            ]
-                        }
-                    ]
+                    "num_compute_units": "2"
                 }
             ] 
         }

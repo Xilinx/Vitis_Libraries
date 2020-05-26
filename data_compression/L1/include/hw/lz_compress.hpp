@@ -50,7 +50,13 @@ typedef ap_uint<32> compressd_dt;
  * @param outStream output stream
  * @param input_size input size
  */
-template <int MATCH_LEN, int MIN_MATCH, int LZ_MAX_OFFSET_LIMIT, int MATCH_LEVEL = 6, int MIN_OFFSET = 1, int LZ_DICT_SIZE = 1 << 12, int LEFT_BYTES = 64>
+template <int MATCH_LEN,
+          int MIN_MATCH,
+          int LZ_MAX_OFFSET_LIMIT,
+          int MATCH_LEVEL = 6,
+          int MIN_OFFSET = 1,
+          int LZ_DICT_SIZE = 1 << 12,
+          int LEFT_BYTES = 64>
 void lzCompress(hls::stream<ap_uint<8> >& inStream, hls::stream<compressd_dt>& outStream, uint32_t input_size) {
     const int c_dictEleWidth = (MATCH_LEN * 8 + 24);
     typedef ap_uint<MATCH_LEVEL * c_dictEleWidth> uintDictV_t;

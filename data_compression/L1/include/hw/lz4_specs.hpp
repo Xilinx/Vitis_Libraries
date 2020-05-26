@@ -44,6 +44,13 @@ const auto MAX_BSIZE_256KB = (256 * 1024);
 const auto MAX_BSIZE_1024KB = (1024 * 1024);
 const auto MAX_BSIZE_4096KB = (4096 * 1024);
 
+const auto MAGIC_HEADER_SIZE = 4;
+const auto MAGIC_BYTE_1 = 4;
+const auto MAGIC_BYTE_2 = 34;
+const auto MAGIC_BYTE_3 = 77;
+const auto MAGIC_BYTE_4 = 24;
+const auto FLG_BYTE = 104;
+
 /**
  * This value is used to set
  * uncompressed block size value.

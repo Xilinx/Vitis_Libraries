@@ -20,104 +20,47 @@
  *
  * This file is part of Vitis Data Compression Library.
  */
-
-#include <stdio.h>
-#include <stdint.h>
-#include <assert.h>
-
 #include "lz4_packer_mm.hpp"
 
-void lz4(const uint512_t* in,
-         uint512_t* out,
-         uint512_t* head_prev_blk,
-         uint32_t* compressd_size,
-         uint32_t* in_block_size,
-         uint32_t* encoded_size,
-         uint512_t* orig_input_data,
-         uint32_t no_blocks,
-         uint32_t head_res_size,
-         uint32_t offset,
-         uint32_t block_size_in_kb,
-         uint32_t tail_bytes) {
-    hls::stream<uint512_t> inStreamVec("inStreamVec_mm2s");
-    hls::stream<uintV_t> inStreamV("inStreamV_dsizer");
-    hls::stream<uintV_t> packStreamV("packerStreamOut");
-    hls::stream<uint512_t> outStreamVec("UpsizeStreamOut");
-#pragma HLS STREAM variable = inStreamVec depth = c_gmem_burst_size
-#pragma HLS STREAM variable = inStreamV depth = c_gmem_burst_size
-#pragma HLS STREAM variable = packStreamV depth = c_gmem_burst_size
-#pragma HLS STREAM variable = outStreamVec depth = c_gmem_burst_size
-
-#pragma HLS RESOURCE variable = inStreamVec core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStreamV core = FIFO_SRL
-#pragma HLS RESOURCE variable = packStreamV core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamVec core = FIFO_SRL
-
-    hls::stream<uint32_t> mm2sStreamSize("mm2sOutSize");
-    hls::stream<uint32_t> downStreamSize("dstreamOutSize");
-    hls::stream<uint32_t> packStreamSize("packOutSize");
-    hls::stream<uint32_t> upStreamSize("upStreamSize");
-#pragma HLS STREAM variable = mm2sStreamSize depth = c_gmem_burst_size
-#pragma HLS STREAM variable = downStreamSize depth = c_gmem_burst_size
-#pragma HLS STREAM variable = packStreamSize depth = c_gmem_burst_size
-
-#pragma HLS RESOURCE variable = mm2sStreamSize core = FIFO_SRL
-#pragma HLS RESOURCE variable = downStreamSize core = FIFO_SRL
-#pragma HLS RESOURCE variable = packStreamSize core = FIFO_SRL
-#pragma HLS RESOURCE variable = upStreamSize core = FIFO_SRL
-
-#pragma HLS dataflow
-    xf::compression::details::mm2s<GMEM_DWIDTH, GMEM_BURST_SIZE>(in, head_prev_blk, orig_input_data, inStreamVec,
-                                                                 mm2sStreamSize, compressd_size, in_block_size,
-                                                                 no_blocks, block_size_in_kb, head_res_size, offset);
-    xf::compression::details::streamDownSizerP2PComp<GMEM_DWIDTH, PACK_WIDTH>(inStreamVec, inStreamV, mm2sStreamSize,
-                                                                              downStreamSize, no_blocks);
-
-    encoded_size[0] = xf::compression::lz4Packer<PACK_WIDTH, PARLLEL_BYTE>(
-        inStreamV, packStreamV, downStreamSize, packStreamSize, block_size_in_kb, no_blocks, head_res_size, tail_bytes);
-
-    xf::compression::details::streamUpsizerP2P<GMEM_DWIDTH, PACK_WIDTH>(packStreamV, outStreamVec, packStreamSize,
-                                                                        upStreamSize);
-    xf::compression::details::s2mm<GMEM_DWIDTH>(outStreamVec, out, upStreamSize);
-}
-
 extern "C" {
-void xilLz4Packer(const uint512_t* in,
+void xilLz4Packer(uint512_t* in,
                   uint512_t* out,
-                  uint512_t* head_prev_blk,
                   uint32_t* compressd_size,
                   uint32_t* in_block_size,
                   uint32_t* encoded_size,
                   uint512_t* orig_input_data,
-                  uint32_t head_res_size,
-                  uint32_t offset,
                   uint32_t block_size_in_kb,
                   uint32_t no_blocks,
-                  uint32_t tail_bytes) {
-#pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = head_prev_blk offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = compressd_size offset = slave bundle = gmem1
-#pragma HLS INTERFACE m_axi port = in_block_size offset = slave bundle = gmem1
-#pragma HLS INTERFACE m_axi port = encoded_size offset = slave bundle = gmem1
-#pragma HLS INTERFACE m_axi port = orig_input_data offset = slave bundle = gmem0
+                  uint32_t xxhashVal,
+                  uint32_t input_size) {
+#pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = compressd_size offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = in_block_size offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = encoded_size offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = orig_input_data offset = slave bundle = gmem
 #pragma HLS INTERFACE s_axilite port = in bundle = control
 #pragma HLS INTERFACE s_axilite port = out bundle = control
-#pragma HLS INTERFACE s_axilite port = head_prev_blk bundle = control
 #pragma HLS INTERFACE s_axilite port = compressd_size bundle = control
 #pragma HLS INTERFACE s_axilite port = in_block_size bundle = control
 #pragma HLS INTERFACE s_axilite port = encoded_size bundle = control
 #pragma HLS INTERFACE s_axilite port = orig_input_data bundle = control
-#pragma HLS INTERFACE s_axilite port = head_res_size bundle = control
-#pragma HLS INTERFACE s_axilite port = offset bundle = control
 #pragma HLS INTERFACE s_axilite port = block_size_in_kb bundle = control
 #pragma HLS INTERFACE s_axilite port = no_blocks bundle = control
-#pragma HLS INTERFACE s_axilite port = tail_bytes bundle = control
+#pragma HLS INTERFACE s_axilite port = xxhashVal bundle = control
+#pragma HLS INTERFACE s_axilite port = input_size bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-    lz4(in, out, head_prev_blk, compressd_size, in_block_size, encoded_size, orig_input_data, no_blocks, head_res_size,
-        offset, block_size_in_kb, tail_bytes);
-
+    xf::compression::lz4PackerMM<GMEM_DWIDTH, GMEM_BURST_SIZE>(orig_input_data,
+                                                                in,
+                                                                out,
+                                                                in_block_size,
+                                                                compressd_size,
+                                                                encoded_size,
+                                                                xxhashVal,
+                                                                block_size_in_kb,
+                                                                no_blocks,
+                                                                input_size);
     return;
 }
 }

@@ -50,13 +50,10 @@ void xilValidate(std::string& file_list, std::string& ext) {
     }
 }
 
-void xilCompressDecompressList(std::string& file_list,
-                               std::string& ext,
-                               bool d_flow,
-                               uint32_t block_size,
-                               std::string& decompress_bin) {
+void xilCompressDecompressList(
+    std::string& file_list, std::string& ext, bool d_flow, uint32_t block_size, std::string& decompress_bin) {
     // De-Compression
-     xfSnappyStreaming* xlz = new xfSnappyStreaming(decompress_bin, 0, block_size);
+    xfSnappyStreaming* xlz = new xfSnappyStreaming(decompress_bin, 0, block_size);
 
     std::ifstream infilelist_dec(file_list.c_str());
     std::string line_dec;
@@ -121,25 +118,23 @@ void xilCompressDecompressList(std::string& file_list,
 
     delete (xlz);
 }
-void xilBatchVerify(
-    std::string& file_list, uint32_t block_size, std::string& decompress_bin) {
-        { // Start of Flow : Standard SNAPPY Compress vs Xilinx SNAPPY Decompress
+void xilBatchVerify(std::string& file_list, uint32_t block_size, std::string& decompress_bin) {
+    { // Start of Flow : Standard SNAPPY Compress vs Xilinx SNAPPY Decompress
 
-            std::string ext1 = ".snappy";
-            xilCompressDecompressList(file_list, ext1, 0, block_size, decompress_bin);
+        std::string ext1 = ".snappy";
+        xilCompressDecompressList(file_list, ext1, 0, block_size, decompress_bin);
 
-            // Validate
-            std::cout << "\n";
-            std::cout << "----------------------------------------------------------------------------------------"
-                      << std::endl;
-            std::cout << "                       Validate: Xilinx SNAPPY Decompress             "
-                      << std::endl;
-            std::cout << "----------------------------------------------------------------------------------------"
-                      << std::endl;
-            std::string ext2 = ".snappy.orig";
-            xilValidate(file_list, ext2);
+        // Validate
+        std::cout << "\n";
+        std::cout << "----------------------------------------------------------------------------------------"
+                  << std::endl;
+        std::cout << "                       Validate: Xilinx SNAPPY Decompress             " << std::endl;
+        std::cout << "----------------------------------------------------------------------------------------"
+                  << std::endl;
+        std::string ext2 = ".snappy.orig";
+        xilValidate(file_list, ext2);
 
-        } // End of Flow : Standard SNAPPY Compress vs Xilinx SNAPPY Decompress
+    } // End of Flow : Standard SNAPPY Compress vs Xilinx SNAPPY Decompress
 }
 
 void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::string& decompress_bin) {

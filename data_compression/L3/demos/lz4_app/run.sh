@@ -25,13 +25,13 @@ then
     cmd2="$EXE_FILE -l ./test.list -cx $XCLBIN_FILE_C -dx $XCLBIN_FILE_D"
     echo $cmd2
     $cmd2
-    echo -e "\n\n-----------Block Size: 256Kb-----------\n"
-    cmd1="$EXE_FILE -l ./test.list -cx $XCLBIN_FILE_C -dx $XCLBIN_FILE_D -B 1"
-    echo $cmd1
-    $cmd1
-    echo -e "\n\n-----------Block Size: 1024Kb-----------\n"
-    cmd1="$EXE_FILE -l ./test.list -cx $XCLBIN_FILE_C -dx $XCLBIN_FILE_D -B 2"
-    echo $cmd1
-    $cmd1
+#    echo -e "\n\n-----------Block Size: 256Kb-----------\n"
+#    cmd1="$EXE_FILE -l ./test.list -cx $XCLBIN_FILE_C -dx $XCLBIN_FILE_D -B 1"
+#    echo $cmd1
+#    $cmd1
+#    echo -e "\n\n-----------Block Size: 1024Kb-----------\n"
+#    cmd1="$EXE_FILE -l ./test.list -cx $XCLBIN_FILE_C -dx $XCLBIN_FILE_D -B 2"
+#    echo $cmd1
+#    $cmd1
     
 fi
