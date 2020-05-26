@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Insert, sort, insertSort
+   :description: Describes the structure and execution of the Insert sort.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-insert_sort:
 
 ********************************************************

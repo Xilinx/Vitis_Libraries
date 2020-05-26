@@ -1,0 +1,129 @@
+{
+    "name": "Xilinx Q5 Simplified 100g Demo",
+    "description": "Xilinx Q5 Simplified 100g Demo",
+    "flow": "vitis",
+    "platform_type": "pcie",
+    "platform_whitelist": [
+        "u280",
+        "u250",
+        "u200"
+    ],
+    "platform_blacklist": [
+        "zc"
+    ],
+    "platform_properties": {
+        "u280": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_HBM"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u280.ini"
+                    ]
+                }
+            }
+        },
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        },
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }
+    },
+    "launch": [
+        {
+            "name": "generic launch for all flows",
+            "cmd_args": " -xclbin BUILD/q5simplified.xclbin -in PROJECT/db_data/dat"
+        }
+    ],
+    "pre_launch": [
+        {
+            "launch_cmd": "make -C PROJECT/db_data"
+        }
+    ],
+    "host": {
+        "host_exe": "test_q5s.exe",
+        "compiler": {
+            "sources": [
+                "host/test_q5s.cpp",
+                "host/xclhost.cpp"
+            ],
+            "includepaths": [
+                "host",
+                "kernel"
+            ],
+            "options": "-O3 "
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/hw",
+                "kernel",
+                "host"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/q5simplified.cpp",
+                    "frequency": 300,
+                    "name": "q5simplified"
+                }
+            ],
+            "frequency": 300,
+            "name": "q5simplified"
+        }
+    ],
+    "testinfo": {
+        "disable": true,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 520
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+}

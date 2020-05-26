@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Merge-Join, Merge-Left-Join, mergeJoin, mergeLeftJoin, combineCol, mergeJoin, mergeLeftJoin
+   :description: Describes the structure and execution of Merge-Join and Merge-Left-Join.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-merge_join:
 
 ************************************************

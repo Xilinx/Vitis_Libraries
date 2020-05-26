@@ -1,0 +1,51 @@
+{
+    "name": "Xilinx Hash Partition Test HLS Test",
+    "description": "Xilinx Hash Partition Test HLS Test",
+    "flow": "hls",
+    "platform_whitelist": [
+        "u200"
+    ],
+    "platform_blacklist": [],
+    "part_whitelist": [],
+    "part_blacklist": [],
+    "project": "part_dut",
+    "solution": "sol",
+    "clock": "300MHz",
+    "topfunction": "part_dut",
+    "top": {
+        "source": [
+            "part_dut.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../utils/L1/include"
+    },
+    "testbench": {
+        "source": [
+            "part_test.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -std=c++14",
+        "ldflags": "",
+        "argv": {},
+        "stdmath": false
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 420
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "hls_vivado_syn",
+            "hls_vivado_impl"
+        ],
+        "category": "canary"
+    }
+}

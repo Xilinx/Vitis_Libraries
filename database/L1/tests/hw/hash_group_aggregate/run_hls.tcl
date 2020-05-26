@@ -18,19 +18,21 @@ source settings.tcl
 
 set PROJ "hash_group_aggregate.prj"
 set SOLN "solution1"
-set CLKP 4
+
+if {![info exists CLKP]} {
+  set CLKP 4
+}
 
 open_project -reset $PROJ
 
-add_files hash_aggr_kernel.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../utils/L1/include"
-add_files -tb test_aggr.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-set_top hash_aggr_kernel 
+add_files "hash_aggr_kernel.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../utils/L1/include"
+add_files -tb "test_aggr.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+set_top hash_aggr_kernel
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
-set_clock_uncertainty 1.27
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design

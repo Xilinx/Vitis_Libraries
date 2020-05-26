@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "group_aggr_test.prj"
 set SOLN "solution1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files group_aggr_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb group_aggr_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "group_aggr_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "group_aggr_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top hls_db_group_aggr_cnt
 
 open_solution -reset $SOLN

@@ -287,6 +287,8 @@ int main(int argc, const char* argv[]) {
     transEngine h_transout[NumSweep_h];
     for (int i = 0; i < NumSweep_h + 1; i++) {
         h_transin[i].setq(q_h);
+    }
+    for (int i = 0; i < NumSweep_h; i++) {
         h_transout[i].setq(q_h);
     }
 

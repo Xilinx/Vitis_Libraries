@@ -1,0 +1,104 @@
+{
+    "name": "Xilinx GqePart Test",
+    "description": "Xilinx GqePart Test",
+    "flow": "vitis",
+    "platform_type": "pcie",
+    "platform_whitelist": [
+        "u280"
+    ],
+    "platform_blacklist": [
+        "other"
+    ],
+    "platform_properties": {
+        "u280": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_HBM"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u280.ini"
+                    ]
+                }
+            }
+        }
+    },
+    "launch": [
+        {
+            "name": "generic launch for all flows",
+            "cmd_args": " -xclbin BUILD/gqe_part.xclbin -in PROJECT/db_data/dat"
+        },
+        {
+            "name": "generic launch for all flows",
+            "target": "hw_emu",
+            "cmd_args": " -xclbin BUILD/gqe_part.xclbin -in PROJECT/db_data/dat"
+        }
+    ],
+    "pre_launch": [
+        {
+            "launch_cmd": "make -C PROJECT/db_data"
+        }
+    ],
+    "host": {
+        "host_exe": "test_hash_partition.exe",
+        "compiler": {
+            "sources": [
+                "host/test_hash_partition.cpp",
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L3/include/sw",
+                "host",
+                "LIB_DIR/ext/xcl2"
+            ],
+            "options": "-O3 "
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/src",
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/../utils/L1/include"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/gqe_part.cpp",
+                    "frequency": 200,
+                    "name": "gqePart"
+                }
+            ],
+            "frequency": 200,
+            "name": "gqe_part"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 520
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+}

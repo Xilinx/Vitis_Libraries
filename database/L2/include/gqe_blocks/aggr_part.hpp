@@ -209,7 +209,7 @@ void agg_wrapper(hls::stream<bool>& agg_on_strm,
         // bypass
         bool e = e_in_strm.read();
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         int cnt = 0;
         std::cout << "Column number:" << N << std::endl;
 #endif
@@ -221,7 +221,7 @@ void agg_wrapper(hls::stream<bool>& agg_on_strm,
                 out_strm[i].write(temp[i]);
             }
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
             if (cnt < 10) {
                 for (int i = 0; i < 8; i++) {
                     std::cout << "col" << i << ": " << temp[i] << " ";

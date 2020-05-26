@@ -18,19 +18,21 @@ source settings.tcl
 
 set PROJ "scan_cmp_str_col_test.prj"
 set SOLN "solution1"
-set CLKP 300MHz
+
+if {![info exists CLKP]} {
+  set CLKP 300MHz
+}
 
 open_project -reset $PROJ
 
-add_files scan_cmp_str_col_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb dictionary.dat
-add_files -tb scan_cmp_str_col_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "scan_cmp_str_col_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "dictionary.dat scan_cmp_str_col_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top dut
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design

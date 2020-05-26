@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Hash-Join, hashJoinMPU, combineCol, splitCol
+   :description: Describes the structure and execution of Hash-Join Multi-Process-Unit version.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-hash_join_mpu:
 
 ********************************************************

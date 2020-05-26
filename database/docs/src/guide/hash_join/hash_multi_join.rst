@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Hash-Multi-Join, Hash-Join, hashMultiJoin
+   :description: Describes the structure and execution of Hash-Multi-Join.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-hash_multi_join:
 
 ********************************************************

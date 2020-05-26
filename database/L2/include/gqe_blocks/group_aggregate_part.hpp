@@ -93,10 +93,10 @@ void merge_column(hls::stream<ap_uint<32> >& merge_column_cfg_strm,
     ap_uint<WStrm> merge2[ColNM];
     ap_uint<WStrm> out[2 * ColNM];
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     int cnt = 0;
     std::cout << std::hex << "merge_cfg0:" << merge_column_cfg1 << "   merge_cfg1:" << merge_column_cfg2 << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
     bool e = e_in_strm.read();
     while (!e) {
@@ -111,7 +111,7 @@ void merge_column(hls::stream<ap_uint<32> >& merge_column_cfg_strm,
         }
         e = e_in_strm.read();
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         if (cnt < 10) {
             std::cout << std::dec << "cnt=" << cnt << std::endl;
             std::cout << "key: ";
@@ -138,7 +138,7 @@ void merge_column(hls::stream<ap_uint<32> >& merge_column_cfg_strm,
             }
             std::cout << std::endl;
         }
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
         // merge_level1
         for (int i = 0; i < ColNM; i++) {
@@ -175,7 +175,7 @@ void merge_column(hls::stream<ap_uint<32> >& merge_column_cfg_strm,
             }
             std::cout << std::endl;
         }
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
         // merge_level2 inverse direction
         for (int i = 0; i < ColNM; i++) {
@@ -195,9 +195,9 @@ void merge_column(hls::stream<ap_uint<32> >& merge_column_cfg_strm,
         }
         e_out_strm.write(false);
 
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         cnt++;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
     }
     e_out_strm.write(true);
 }

@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Hash-Semi-Join, Hash-Join, hashSemiJoin, Hash-Join-MPU
+   :description: Describes the structure and execution of Hash-Semi-Join.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-hash_semi_join:
 
 *************************************************************

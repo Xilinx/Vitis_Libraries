@@ -47,13 +47,13 @@ int main(int argc, const char* argv[]) {
         std::cout << "ERROR: input dir is not specified or not valid.\n";
         return 1;
     }
-    int board = 1;
+    int board = 0;
     std::string board_s;
     if (parser.getCmdOption("-b", board_s)) {
         try {
             board = std::stoi(board_s);
         } catch (...) {
-            board = 1;
+            board = 0;
         }
     }
 
@@ -245,9 +245,9 @@ int main(int argc, const char* argv[]) {
     // events
     std::vector<cl::Event> eventsh2d_write[NumSweep];
     std::vector<cl::Event> eventsd2h_read[NumSweep];
-    std::vector<cl::Event> events[NumSweep];
+    std::vector<cl::Event> events[NumSweep + 1];
     std::vector<cl::Event> events_grp[NumSweep];
-    for (int i = 0; i < NumSweep; i++) {
+    for (int i = 0; i < NumSweep + 1; i++) {
         events[i].resize(1);
     };
     for (int i = 0; i < NumSweep; i++) {

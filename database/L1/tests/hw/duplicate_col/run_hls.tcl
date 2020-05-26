@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "test.prj"
 set SOLN "solution1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files duplicate_col_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb duplicate_col_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "duplicate_col_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "duplicate_col_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top xf_database_duplicate_col
 
 open_solution -reset $SOLN

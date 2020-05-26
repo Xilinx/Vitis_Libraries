@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: dynamic-filter
+   :description: Describes the structure and execution of the dynamic filter module.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-dynamic_filter:
 
 *********************************

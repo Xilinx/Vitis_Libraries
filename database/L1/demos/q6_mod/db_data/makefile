@@ -19,25 +19,27 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/demos/*}')
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
-SSBDIR = $(XFLIB_DIR)/ext/ssb_dbgen
-DATDIR = dat
+SSB_DIR = $(XFLIB_DIR)/ext/ssb_dbgen
+DAT_DIR = dat
+
+DEST_DIR := $(CUR_DIR)
 
 .PHONY: all exe run clean
 
-all: $(DATDIR)/.stamp
+all: $(DAT_DIR)/.stamp
 
 exe: columngen/columnize.exe
 
 %.exe: %.cpp
 	$(CXX) $< -o $@ -I../host -std=c++11 -g -O3 -pthread
 
-$(SSBDIR)/sf1/%.tbl:
-	make -C $(SSBDIR)
+$(DEST_DIR)/sf1/%.tbl:
+	make -f $(SSB_DIR)/Makefile DEST_DIR=$(DEST_DIR)
 
-$(DATDIR)/.stamp: columngen/columnize.exe | $(foreach f,lineitem, $(SSBDIR)/sf1/$(f).tbl)
-	mkdir -p $(DATDIR)
-	./$< -l $(SSBDIR)/sf1/lineitem.tbl  -d $(DATDIR)
-	touch $(DATDIR)/.stamp
+$(DAT_DIR)/.stamp: columngen/columnize.exe | $(foreach f,lineitem, $(DEST_DIR)/sf1/$(f).tbl)
+	mkdir -p $(DAT_DIR)
+	./$< -l $(DEST_DIR)/sf1/lineitem.tbl  -d $(DAT_DIR)
+	touch $(DAT_DIR)/.stamp
 
 clean:
-	rm -f columngen/*.exe $(DATDIR)/*.dat $(DATDIR)/.stamp
+	rm -rf columngen/*.exe $(DAT_DIR)/*.dat $(DAT_DIR)/.stamp sf1 dbgen

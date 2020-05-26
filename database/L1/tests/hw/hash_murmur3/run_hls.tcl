@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "murmur3.prj"
 set SOLN "sol1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files test_murmur3.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb test_murmur3.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "test_murmur3.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "test_murmur3.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top hashmurmur3_W512_H32_strm
 
 open_solution -reset $SOLN

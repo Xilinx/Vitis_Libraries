@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Database, Vitis Database Library, Alveo
+   :description: Vitis Database library licensing, software and hardware requirements.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _overview:
 
 .. toctree::

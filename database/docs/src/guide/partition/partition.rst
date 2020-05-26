@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Hash-Partition, hashPartition
+   :description: Describes the structure and execution of Hash-Partition.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _guide-hash_partition:
 
 ********************************************************

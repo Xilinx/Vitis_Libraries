@@ -453,7 +453,7 @@ void get_cfg_dat_2(ap_uint<512>* hbuf) {
         t.range(56 + 8 * c + 7, 56 + 8 * c) = id_a[c];
     }
 
-    signed char id_b[] = {0, 1, 2, 3, -1, -1, -1}; // not used.
+    signed char id_b[] = {0, 1, 2, 3, -1, -1, -1, -1}; // not used.
     for (int c = 0; c < 8; ++c) {
         t.range(120 + 8 * c + 7, 120 + 8 * c) = id_b[c];
     }

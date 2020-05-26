@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "bloom_filter.prj"
 set SOLN "sol1"
-set CLKP 3.0
+
+if {![info exists CLKP]} {
+  set CLKP 3.0
+}
 
 open_project -reset $PROJ
 
-add_files bloom_filter_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
-add_files -tb bloom_filter_test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files "bloom_filter_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "bloom_filter_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top syn_bloom_filter_bram_and_strm
 
 open_solution -reset $SOLN
@@ -34,12 +37,15 @@ create_clock -period $CLKP
 if {$CSIM == 1} {
   csim_design -argv "4"
 }
+
 if {$CSYNTH == 1} {
   csynth_design
 }
+
 if {$COSIM == 1} {
   cosim_design -argv "4"
 }
+
 if {$VIVADO_SYN == 1} {
   export_design -flow syn -rtl verilog
 }

@@ -140,9 +140,9 @@ config_parser_main_loop:
             }
         } else
             mask_t = 0;
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         std::cout << "Mask-" << i << ":" << std::hex << mask_t << std::dec << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
         mask_cnst_strm[cnst_cfg_item[7]] << mask_t;
         inv_ctr_strm[cnst_cfg_item[7]] << cnst_cfg_item[6];
@@ -167,15 +167,15 @@ config_parser_main_loop:
     int str_col_nread = bw.range(63, 32).to_int();
     for (int i = 1; i < _NCol; i++) {
         c_idx += nrd_t[i - 1] + 1;
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         std::cout << "c_idx:" << c_idx << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
         // incontinuous single read
         ap_uint<512> buf_t = buf_in[c_idx];
         nrd_t[i] = buf_t.range(63, 32);
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         std::cout << "nrd_t[" << i << "]:" << nrd_t[i] << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
         col_t[i] = c_idx + 1;
         ap_int<8> cid_t = ccol_id(8 * i + 7, 8 * i);
         if (cid_t >= 0) {
@@ -192,10 +192,10 @@ config_parser_main_loop:
     // column
     const int burst_ratio = (str_col_nread + common_nread - 1) / common_nread; // the ratio of burst times, ceiling
     const int str_col_inc = burst_ratio * burst_len;
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     std::cout << "str_col_nread/common_nread:" << str_col_nread << "/" << common_nread << " = " << burst_ratio
               << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
     // re-order, ensure that read string column firstly if exists
     ap_uint<8> _cid_0 = ccol_id.range(7, 0);
@@ -237,7 +237,7 @@ config_parser_main_loop:
         }
     }
 
-#if !defined __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
     std::cout << "nrow:" << nrow << std::endl;
     for (int i = 0; i < _NCol; i++) {
         std::cout << "col_offset[" << i << "]=" << col_offset[i] << std::endl;
@@ -245,7 +245,7 @@ config_parser_main_loop:
     }
     std::cout << "rburst_len:" << burst_len << ", common_nread:" << common_nread << ", str_col0:" << scol0_int
               << ", str_col1:" << scol1_int << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
 
     // begin DDR read process
     int str_row_cnt0 = 0, str_row_cnt1 = 0;
@@ -284,10 +284,10 @@ config_parser_main_loop:
                     } else {
                         base_addr = i;
                     }
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
                     std::cout << "c:" << c << ", len:" << len << ", w:" << w << ", len_wrapper:" << len_wrapper
                               << ", base_addr:" << base_addr << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
                     // one burst read for col
                     for (int j = 0; j < len; ++j) {
 #pragma HLS PIPELINE II = 1
@@ -305,22 +305,10 @@ config_parser_main_loop:
                         }
                     } // end one burst read
                 }     // end multiple burst
-                      /*
-                              if (is_str_col0 && (str_row_cnt0 == nread[0]) && pact_end[0]) {
-                                e_pact_strm[0].write(true);
-                                pact_end[0] = false;
-                              }
-                              if (is_str_col1 && (str_row_cnt1 == nread[1]) && pact_end[1]) {
-                                e_pact_strm[1].write(true);
-                                pact_end[1] = false;
-                              }
-                      */
             }         // end valid column read
         }             // end all column read loop
     }                 // end read
 
-    // if (!is_str0) e_pact_strm[0].write(true);
-    // if (!is_str1) e_pact_strm[1].write(true);
     for (int c = 0; c < 2; c++) e_pact_strm[c].write(true);
 }
 
@@ -371,9 +359,9 @@ gather_main_loop:
             }
         }
         bo[bo_idx] = (res > 0); // OR Rule for SQL 'IN'
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
         std::cout << std::dec << "counter:" << counter << ",Equal:" << res << ",bo_idx:" << bo_idx << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
         bo_idx++;
         counter++;
 
@@ -655,9 +643,9 @@ SPLIT_COL_VEC:
                     for (int c = 0; c < _NCol; ++c) {
 #pragma HLS unroll
                         col_strm[ch][c].write(ct[c]);
-#ifndef __SYNTHESIS__
+#if !defined __SYNTHESIS__ && XDEBUG == 1
                         std::cout << std::dec << "ch:" << ch << ",c:" << c << ",ctc:" << ct[c] << std::endl;
-#endif
+#endif // !defined __SYNTHESIS__ && XDEBUG == 1
                     }
                     e_col_strm[ch].write(false);
                 }

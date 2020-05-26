@@ -1999,10 +1999,10 @@ void build_merge_probe_wrapper(
 
     ap_uint<72> bit_vector0[HASH_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bit_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = bit_vector0 core = XPM_MEMORY uram
+#pragma HLS resource variable = bit_vector0 core = RAM_2P_URAM
     ap_uint<72> bit_vector1[HASH_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bit_vector1 block factor = 4 dim = 1
-#pragma HLS resource variable = bit_vector1 core = XPM_MEMORY uram
+#pragma HLS resource variable = bit_vector1 core = RAM_2P_URAM
 
 #endif
 
@@ -3363,10 +3363,10 @@ void build_merge_probe_wrapper(
 
     ap_uint<72> bit_vector0[HASH_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bit_vector0 block factor = 4 dim = 1
-#pragma HLS resource variable = bit_vector0 core = XPM_MEMORY uram
+#pragma HLS resource variable = bit_vector0 core = RAM_2P_URAM
     ap_uint<72> bit_vector1[HASH_DEPTH];
 #pragma HLS ARRAY_PARTITION variable = bit_vector1 block factor = 4 dim = 1
-#pragma HLS resource variable = bit_vector1 core = XPM_MEMORY uram
+#pragma HLS resource variable = bit_vector1 core = RAM_2P_URAM
 
 #endif
 
