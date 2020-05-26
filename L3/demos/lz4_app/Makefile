@@ -88,8 +88,6 @@ EMCONFIG_DIR := $(BUILD_DIR)
 # Setting tools
 VPP := v++
 
-include config.mk
-
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/src/host.cpp
@@ -100,7 +98,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
 
-CXXFLAGS += -DPARALLEL_BLOCK=8
+CXXFLAGS += -DPARALLEL_BLOCK=8 -DC_COMPUTE_UNIT=2 -DD_COMPUTE_UNIT=2 -DOVERLAP_HOST_DEVICE
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 
@@ -109,7 +107,6 @@ CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/cmdparser
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/logger
-CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
 
 # Host compiler global settings

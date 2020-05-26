@@ -108,15 +108,14 @@ HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
 
 CXXFLAGS += -DPARALLEL_BLOCK=1 -DD_COMPUTE_UNIT=1 -DGZIP_MODE=1 -DINPUT_BUFFER_SIZE=128*1024*1024 -DOUTPUT_BUFFER_SIZE=128*1024*1024
-CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw/
+CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 
 
 
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/cmdparser
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/logger
-CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
 
 # Host compiler global settings
