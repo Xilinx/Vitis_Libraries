@@ -335,12 +335,12 @@ template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = uint16_t>
 void lzMultiByteDecoder(hls::stream<SIZE_DT>& litlenStream,
                         hls::stream<ap_uint<PARALLEL_BYTES * 8> >& litStream,
                         hls::stream<ap_uint<16> >& offsetStream,
-                        hls::stream<SIZE_DT>& matchlenStream,
+                        hls::stream<SIZE_DT>& matchLenStream,
                         hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
                         hls::stream<bool>& endOfStream,
                         hls::stream<uint32_t>& sizeOutStream) {
     const uint8_t c_parallelBit = PARALLEL_BYTES * 8;
-    const uint8_t c_lowOffset = 4 * PARALLEL_BYTES;
+    const uint8_t c_lowOffset = 8 * PARALLEL_BYTES;
     const uint8_t c_veryLowOffset = 2 * PARALLEL_BYTES;
 
     const uint16_t c_ramHistSize = HISTORY_SIZE / PARALLEL_BYTES;
@@ -364,7 +364,7 @@ void lzMultiByteDecoder(hls::stream<SIZE_DT>& litlenStream,
     uint16_t match_loc = 0;
     SIZE_DT match_len = 0;
     uint16_t write_idx = 0;
-    uint16_t output_index = 0;
+    uint8_t output_index = 0;
     uint32_t outSize = 0;
 
     // uint8_t incr_output_index = 0;
@@ -372,14 +372,18 @@ void lzMultiByteDecoder(hls::stream<SIZE_DT>& litlenStream,
 
     ap_uint<16> offset = 0;
     ap_uint<c_parallelBit> outStreamValue = 0;
-    ap_uint<2 * PARALLEL_BYTES * 8> output_window;
+    ap_uint<2 * c_parallelBit> output_window;
     uint8_t parallelBits = 0;
 
+    ap_uint<c_parallelBit> outValue = 0;
     bool matchDone = false;
     orig_lit_len = litlenStream.read();
     lit_len = orig_lit_len;
     output_cnt += lit_len;
 
+    bool outFlag = false;
+    uint8_t incr_output_index = 0;
+    uint8_t incr_match_loc = 0;
 lz4_decoder:
     for (; matchDone == false;) {
 #pragma HLS PIPELINE II = 1
@@ -387,6 +391,7 @@ lz4_decoder:
         uint16_t byte_loc = (match_loc % PARALLEL_BYTES) % PARALLEL_BYTES;
         ap_uint<2 * c_parallelBit> localValue;
         ap_uint<c_parallelBit> lowValue, highValue;
+        bool matchFlag = false, matchLocFlag = false;
 
         // always reading to make better timing
         ap_uint<c_parallelBit> lowValueReg = regHistory[0][(read_idx + 0) % c_regHistSize];
@@ -406,24 +411,16 @@ lz4_decoder:
         localValue.range(2 * c_parallelBit - 1, c_parallelBit) = highValue;
 
         if (next_state == WRITE_LITERAL) {
+            outFlag = true;
             // printf("WRITE_LITERAL\n");
-            output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) = litStream.read();
-            if (lit_len >= PARALLEL_BYTES) {
-                output_index += PARALLEL_BYTES;
-                lit_len -= PARALLEL_BYTES;
-            } else {
-                output_index += lit_len;
+            outValue = litStream.read();
+            SIZE_DT localLitLen = lit_len;
+            if (localLitLen <= PARALLEL_BYTES) {
+                incr_output_index = lit_len;
                 lit_len = 0;
-            }
-            if (lit_len) {
-                next_state = WRITE_LITERAL;
-            } else {
                 offset = offsetStream.read();
-                match_len = matchlenStream.read();
-                match_loc = output_cnt - offset;
-                if (orig_lit_len == 0 && match_len == 0) {
-                    matchDone = true;
-                } else if ((offset > 0) & (offset < c_veryLowOffset)) {
+                match_len = matchLenStream.read();
+                if (offset < c_veryLowOffset) {
                     parallelBits = 1;
                     if (offset < PARALLEL_BYTES) {
                         next_state = NO_OP;
@@ -434,26 +431,23 @@ lz4_decoder:
                     parallelBits = PARALLEL_BYTES;
                     next_state = READ_MATCH;
                 }
-                output_cnt += match_len;
+                matchFlag = true;
+            } else {
+                incr_output_index = PARALLEL_BYTES;
+                lit_len -= PARALLEL_BYTES;
+                next_state = WRITE_LITERAL;
             }
         } else if (next_state == READ_MATCH) {
             // printf("READ_MATCH\n");
+            outFlag = true;
+            matchLocFlag = true;
+            outValue = localValue >> (byte_loc * 8);
 
-            output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) =
-                localValue >> (byte_loc * 8);
-
-            if (match_len >= parallelBits) {
-                output_index += parallelBits;
-                match_loc += parallelBits;
-                match_len -= parallelBits;
-            } else {
-                output_index += match_len;
-                match_loc += match_len;
+            SIZE_DT localMatchLen = match_len;
+            if (localMatchLen <= parallelBits) {
+                incr_output_index = match_len;
+                incr_match_loc = match_len;
                 match_len = 0;
-            }
-            if (match_len) {
-                next_state = READ_MATCH;
-            } else {
                 orig_lit_len = litlenStream.read();
                 lit_len = orig_lit_len;
                 output_cnt += lit_len;
@@ -461,11 +455,8 @@ lz4_decoder:
                     next_state = WRITE_LITERAL;
                 } else {
                     offset = offsetStream.read();
-                    match_len = matchlenStream.read();
-                    match_loc = output_cnt - offset;
-                    if (orig_lit_len == 0 && match_len == 0) {
-                        matchDone = true;
-                    } else if ((offset > 0) & (offset < c_veryLowOffset)) {
+                    match_len = matchLenStream.read();
+                    if (offset < c_veryLowOffset) {
                         parallelBits = 1;
                         if (offset < PARALLEL_BYTES) {
                             next_state = NO_OP;
@@ -476,16 +467,40 @@ lz4_decoder:
                         parallelBits = PARALLEL_BYTES;
                         next_state = READ_MATCH;
                     }
-                    output_cnt += match_len;
+                    matchFlag = true;
                 }
+            } else {
+                incr_output_index = parallelBits;
+                incr_match_loc = parallelBits;
+                match_len -= parallelBits;
+                next_state = READ_MATCH;
             }
         } else if (next_state == NO_OP) {
+            outFlag = false;
             // printf("NO_OP\n");
             // Adding NO_OP as workaround for low offset case as
             // for very low offset case, results are not matching
             next_state = READ_MATCH;
         } else {
             assert(0);
+        }
+
+        if (orig_lit_len == 0 && match_len == 0) {
+            matchDone = true;
+        }
+
+        if (matchLocFlag) {
+            match_loc += incr_match_loc;
+        }
+
+        if (matchFlag) {
+            match_loc = output_cnt - offset;
+            output_cnt += match_len;
+        }
+
+        if (outFlag) {
+            output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) = outValue;
+            output_index += incr_output_index;
         }
         outStreamValue = output_window.range(c_parallelBit - 1, 0);
 
@@ -494,11 +509,14 @@ lz4_decoder:
         ramHistory[0][write_idx % c_ramHistSize] = outStreamValue;
         ramHistory[1][write_idx % c_ramHistSize] = outStreamValue;
 
+        bool outStreamFlag = false;
         if (output_index >= PARALLEL_BYTES) {
             write_idx++;
             output_window >>= PARALLEL_BYTES * 8;
             output_index -= PARALLEL_BYTES;
-
+            outStreamFlag = true;
+        }
+        if (outStreamFlag) {
             outStream << outStreamValue;
             endOfStream << 0;
             outSize += PARALLEL_BYTES;

@@ -76,7 +76,6 @@ endif
 endif
 endif
 
-
 include ./utils.mk
 
 XDEVICE := $(call device2xsa, $(DEVICE))
@@ -100,7 +99,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
 
 CXXFLAGS += -DPARALLEL_BLOCK=8 -DGZIP_MODE=1
-CXXFLAGS += -I$(XFLIB_DIR)/L2/include
+CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 
 
@@ -108,7 +107,6 @@ CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/cmdparser
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/logger
-CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
 
 # Host compiler global settings
