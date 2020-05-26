@@ -344,10 +344,10 @@ class xfZlib {
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbuf_in[MAX_DDCOMP_UNITS];
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbuf_zlibout[MAX_DDCOMP_UNITS];
     std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize[MAX_DDCOMP_UNITS];
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_in[MAX_DDCOMP_UNITS][DIN_BUFFERCOUNT];
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[MAX_DDCOMP_UNITS][DOUT_BUFFERCOUNT];
-    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize_stream[MAX_DDCOMP_UNITS][DOUT_BUFFERCOUNT];
-    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressStatus[MAX_DDCOMP_UNITS];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_in[DIN_BUFFERCOUNT];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[DOUT_BUFFERCOUNT];
+    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize_stream[DOUT_BUFFERCOUNT];
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressStatus;
 
     // Device buffers
     cl::Buffer* buffer_input[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];

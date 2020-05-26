@@ -459,18 +459,30 @@ xfZlib::xfZlib(const std::string& binaryFileName,
         auto cons_API_start = std::chrono::high_resolution_clock::now();
 #endif
         // Decompression host buffer allocation
-        for (int i = 0; i < MAX_DDCOMP_UNITS; i++) {
-            for (int j = 0; j < DIN_BUFFERCOUNT; ++j)
-                MEM_ALLOC_CHECK(h_dbufstream_in[i][j].resize(INPUT_BUFFER_SIZE), INPUT_BUFFER_SIZE, "Input Buffer");
+        for (int j = 0; j < DIN_BUFFERCOUNT; ++j)
+            MEM_ALLOC_CHECK(h_dbufstream_in[j].resize(INPUT_BUFFER_SIZE), INPUT_BUFFER_SIZE, "Input Buffer");
 
-            for (int j = 0; j < DOUT_BUFFERCOUNT; ++j) {
-                MEM_ALLOC_CHECK(h_dbufstream_zlibout[i][j].resize(OUTPUT_BUFFER_SIZE), OUTPUT_BUFFER_SIZE,
-                                "Output Host Buffer");
-                MEM_ALLOC_CHECK(h_dcompressSize_stream[i][j].resize(sizeof(uint32_t)), sizeof(uint32_t),
-                                "DecompressSize Host Buffer");
-            }
-            MEM_ALLOC_CHECK(h_dcompressStatus[i].resize(sizeof(uint32_t)), sizeof(uint32_t),
-                            "DecompressStatus Host Buffer");
+        for (int j = 0; j < DOUT_BUFFERCOUNT; ++j) {
+            MEM_ALLOC_CHECK(h_dbufstream_zlibout[j].resize(OUTPUT_BUFFER_SIZE), OUTPUT_BUFFER_SIZE,
+                            "Output Host Buffer");
+            MEM_ALLOC_CHECK(h_dcompressSize_stream[j].resize(sizeof(uint32_t)), sizeof(uint32_t),
+                            "DecompressSize Host Buffer");
+        }
+        MEM_ALLOC_CHECK(h_dcompressStatus.resize(sizeof(uint32_t)), sizeof(uint32_t), "DecompressStatus Host Buffer");
+
+        uint32_t inBufferSize = INPUT_BUFFER_SIZE;
+        uint32_t outBufferSize = OUTPUT_BUFFER_SIZE;
+        // Input Device Buffer allocation (__enqueue_writes)
+        for (int i = 0; i < DIN_BUFFERCOUNT; i++) {
+            OCL_CHECK(err, buffer_dec_input[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                                inBufferSize, h_dbufstream_in[i].data(), &err));
+        }
+
+        // Output Device Buffer allocation (__enqueue_reads)
+        for (int i = 0; i < DOUT_BUFFERCOUNT; i++) {
+            OCL_CHECK(err,
+                      buffer_dec_zlib_output[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                                                 outBufferSize, h_dbufstream_zlibout[i].data(), &err));
         }
 
 #ifdef VERBOSE
@@ -652,13 +664,12 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
     cl::Buffer* buffer_status; // single common buffer to capture the decompression status by kernel
     cl_int err;
     for (int i = 0; i < BUFCNT; i++) {
-        OCL_CHECK(err,
-                  buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                                  2 * sizeof(uint32_t), h_dcompressSize_stream[cu][i].data(), &err));
+        OCL_CHECK(err, buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                                       2 * sizeof(uint32_t), h_dcompressSize_stream[i].data(), &err));
     }
 
     OCL_CHECK(err, buffer_status = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(uint32_t),
-                                                  h_dcompressStatus[cu].data(), &err));
+                                                  h_dcompressStatus.data(), &err));
 
     // set consistent buffer size to be read
     OCL_CHECK(err, err = data_reader_kernel[cu]->setArg(2, *buffer_status));
@@ -676,9 +687,9 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
         if (((kernelReadWait[cbf_idx]).size() > 0) || (done)) {
             (hostReadEvent[cbf_idx]).wait(); // wait for previous data migration to complete
             if (!done) {
-                outSize = h_dcompressSize_stream[cu][cbf_idx].data();
+                outSize = h_dcompressSize_stream[cbf_idx].data();
                 raw_size = *outSize;
-                outP = h_dbufstream_zlibout[cu][cbf_idx].data();
+                outP = h_dbufstream_zlibout[cbf_idx].data();
                 // if output data size is multiple of buffer size, then (buffer_size + 1) is sent by reader kernel
                 if (raw_size > bufSize) {
                     --raw_size;
@@ -750,7 +761,7 @@ void xfZlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, 
             // wait for (current - BUFCNT) kernel to finish
             (kernelWriteEvent[cbf_idx]).wait();
         }
-        inP = h_dbufstream_in[cu][cbf_idx].data();
+        inP = h_dbufstream_in[cbf_idx].data();
         // set for last and other buffers
         if (keq_idx == bufferCount - 1) {
             if (bufferCount > 1) {
@@ -866,24 +877,14 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
     uint32_t max_outbuf_size = input_size * m_max_cr;
     const int c_bufcnt = DIN_BUFFERCOUNT;
     const int c_outBufCnt = DOUT_BUFFERCOUNT;
-    const uint32_t c_bufferCount = 1 + (input_size - 1) / inBufferSize;
-    // Input Device Buffer allocation (__enqueue_writes)
-    for (int i = 0; i < c_bufcnt; i++) {
-        OCL_CHECK(err, buffer_dec_input[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                            inBufferSize, h_dbufstream_in[cu][i].data(), &err));
-    }
+
+    // Set kernel args for input buffer
     for (int i = 0; i < c_bufcnt; i++) {
         ZOCL_CHECK(err, err = data_writer_kernel[cu]->setArg(0, *(buffer_dec_input[i])), m_err_code, c_clOutOfResource);
         if (error_code()) return 0;
     }
 
-    // Output Device Buffer allocation (__enqueue_reads)
-    for (int i = 0; i < c_outBufCnt; i++) {
-        OCL_CHECK(err,
-                  buffer_dec_zlib_output[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                                             outBufferSize, h_dbufstream_zlibout[cu][i].data(), &err));
-    }
-
+    // Set kernel args for output buffer
     for (int i = 0; i < c_outBufCnt; i++) {
         ZOCL_CHECK(err, err = data_reader_kernel[cu]->setArg(0, *(buffer_dec_zlib_output[i])), m_err_code,
                    c_clOutOfResource);
@@ -907,16 +908,6 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
 
     decompReader.join();
     decompWriter.join();
-
-    // delete the allocated buffers
-    for (int i = 0; i < DIN_BUFFERCOUNT; i++) {
-        DELETE_OBJ(buffer_dec_input[i]);
-    }
-
-    for (int i = 0; i < DOUT_BUFFERCOUNT; i++) {
-        DELETE_OBJ(buffer_dec_zlib_output[i]);
-    }
-
     return decmpSizeIdx;
 }
 // This version of compression does overlapped execution between
