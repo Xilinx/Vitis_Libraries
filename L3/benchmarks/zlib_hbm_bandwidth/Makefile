@@ -180,7 +180,7 @@ VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
 		--report_dir $(CUR_DIR)/reports/_x.$(TARGET)
 
 # Linking flags
-VPP_LINK_FLAGS = --kernel_frequency 250 --optimize 2 --config $(CUR_DIR)/opts.ini
+VPP_LINK_FLAGS = --kernel_frequency 250 --optimize 2 --config $(CUR_DIR)/opts.ini --config $(CUR_DIR)/auto_compress_decompress.ini
 
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				--report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
