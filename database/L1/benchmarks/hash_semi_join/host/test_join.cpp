@@ -18,6 +18,7 @@
 #include "hashjoinkernel.hpp"
 #include "utils.hpp"
 
+#include <unordered_map>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -33,31 +34,69 @@
 typedef struct print_buf_result_data_ {
     int i;
     long long* v;
+    long long* g;
+    int* r;
 } print_buf_result_data_t;
 
 void CL_CALLBACK print_buf_result(cl_event event, cl_int cmd_exec_status, void* user_data) {
     print_buf_result_data_t* d = (print_buf_result_data_t*)user_data;
+    if ((*(d->g)) != (*(d->v))) (*(d->r))++;
     printf("FPGA result %d: %lld.%lld\n", d->i, *(d->v) / 10000, *(d->v) % 10000);
+    printf("Golden result %d: %lld.%lld\n", d->i, *(d->g) / 10000, *(d->g) % 10000);
 }
 #endif
 
 template <typename T>
-int load_dat(void* data, const std::string& name, const std::string& dir, size_t n) {
+int generate_data(T* data, int range, size_t n) {
     if (!data) {
         return -1;
     }
-    std::string fn = dir + "/" + name + ".dat";
-    FILE* f = fopen(fn.c_str(), "rb");
-    if (!f) {
-        std::cerr << "ERROR: " << fn << " cannot be opened for binary read." << std::endl;
+
+    for (size_t i = 0; i < n; i++) {
+        data[i] = (T)(rand() % range + 1);
     }
-    size_t cnt = fread(data, sizeof(T), n, f);
-    fclose(f);
-    if (cnt != n) {
-        std::cerr << "ERROR: " << cnt << " entries read from " << fn << ", " << n << " entries required." << std::endl;
-        return -1;
-    }
+
     return 0;
+}
+
+ap_uint<64> get_golden_sum(int l_row,
+                           KEY_T* col_l_orderkey,
+                           MONEY_T* col_l_extendedprice,
+                           MONEY_T* col_l_discount,
+                           int o_row,
+                           KEY_T* col_o_orderkey,
+                           KEY_T* col_o_orderdate) {
+    ap_uint<64> sum = 0;
+    int cnt = 0;
+
+    std::unordered_multimap<uint32_t, uint32_t> ht1;
+
+    {
+        for (int i = 0; i < o_row; ++i) {
+            uint32_t k = col_o_orderkey[i];
+            uint32_t date = col_o_orderdate[i];
+            uint32_t p = 0;
+            // insert into hash table
+            if (date >= 19940101L && date < 19950101L) {
+                ht1.insert(std::make_pair(k, p));
+            }
+        }
+    }
+    // read t once
+    for (int i = 0; i < l_row; ++i) {
+        uint32_t k = col_l_orderkey[i];
+        uint32_t p = col_l_extendedprice[i];
+        uint32_t d = col_l_discount[i];
+        // check hash table
+        auto its = ht1.equal_range(k);
+        for (auto it = its.first; it != its.second; ++it) {
+            sum += (p * (100 - d));
+            ++cnt;
+        }
+    }
+
+    std::cout << "INFO: CPU ref matched " << cnt << " rows, sum = " << sum << std::endl;
+    return sum;
 }
 
 int main(int argc, const char* argv[]) {
@@ -69,24 +108,13 @@ int main(int argc, const char* argv[]) {
     std::string mode;
     std::string xclbin_path; // eg. kernel.xclbin
 
-    bool run_fpga = false;
-    if (parser.getCmdOption("-mode", mode) && mode == "fpga") {
-        run_fpga = true;
-
-        if (!parser.getCmdOption("-xclbin", xclbin_path)) {
-            std::cout << "ERROR: xclbin path is not set!\n";
-            return 1;
-        }
-    }
-
-    if (!run_fpga) {
+    if (parser.getCmdOption("-mode", mode) && mode != "fpga") {
         std::cout << "ERROR: CPU mode is not available yet.\n";
         return 1;
     }
 
-    std::string in_dir;
-    if (!parser.getCmdOption("-in", in_dir) || !is_dir(in_dir)) {
-        std::cout << "ERROR: input dir is not specified or not valid.\n";
+    if (!parser.getCmdOption("-xclbin", xclbin_path)) {
+        std::cout << "ERROR: xclbin path is not set!\n";
         return 1;
     }
 
@@ -135,21 +163,24 @@ int main(int argc, const char* argv[]) {
     std::cout << "Lineitem " << l_nrow << " rows\nOrders " << o_nrow << "rows" << std::endl;
 
     int err;
-    err = load_dat<TPCH_INT>(col_l_orderkey, "l_orderkey", in_dir, l_nrow);
+    err = generate_data<TPCH_INT>(col_l_orderkey, 100000, l_nrow);
     if (err) return err;
-    err = load_dat<TPCH_INT>(col_l_extendedprice, "l_extendedprice", in_dir, l_nrow);
+    err = generate_data<TPCH_INT>(col_l_extendedprice, 10000000, l_nrow);
     if (err) return err;
-    err = load_dat<TPCH_INT>(col_l_discount, "l_discount", in_dir, l_nrow);
+    err = generate_data<TPCH_INT>(col_l_discount, 10, l_nrow);
     if (err) return err;
 
     std::cout << "Lineitem table has been read from disk\n";
 
-    err = load_dat<TPCH_INT>(col_o_orderkey, "o_orderkey", in_dir, o_nrow);
+    err = generate_data<TPCH_INT>(col_o_orderkey, 100000, o_nrow);
     if (err) return err;
-    err = load_dat<TPCH_INT>(col_o_orderdate, "o_orderdate", in_dir, o_nrow);
+    err = generate_data<TPCH_INT>(col_o_orderdate, 20000000, o_nrow);
     if (err) return err;
 
     std::cout << "Orders table has been read from disk\n";
+
+    long long golden = get_golden_sum(l_nrow, col_l_orderkey, col_l_extendedprice, col_l_discount, o_nrow,
+                                      col_o_orderkey, col_o_orderdate);
 
     const int PU_NM = 8;
     ap_uint<8 * KEY_SZ>* stb_buf[PU_NM];
@@ -302,6 +333,7 @@ int main(int argc, const char* argv[]) {
     std::vector<print_buf_result_data_t>::iterator it = cbd.begin();
     print_buf_result_data_t* cbd_ptr = &(*it);
 
+    int ret = 0;
     for (int i = 0; i < num_rep; ++i) {
         int use_a = i & 1;
 
@@ -377,10 +409,14 @@ int main(int argc, const char* argv[]) {
         if (use_a) {
             cbd_ptr[i].i = i;
             cbd_ptr[i].v = (long long*)row_result_a;
+            cbd_ptr[i].g = &golden;
+            cbd_ptr[i].r = &ret;
             read_events[i][0].setCallback(CL_COMPLETE, print_buf_result, cbd_ptr + i);
         } else {
             cbd_ptr[i].i = i;
             cbd_ptr[i].v = (long long*)row_result_b;
+            cbd_ptr[i].g = &golden;
+            cbd_ptr[i].r = &ret;
             read_events[i][0].setCallback(CL_COMPLETE, print_buf_result, cbd_ptr + i);
         }
     }
@@ -397,5 +433,5 @@ int main(int argc, const char* argv[]) {
 #endif
 
     std::cout << "---------------------------------------------\n\n";
-    return 0;
+    return ret;
 }

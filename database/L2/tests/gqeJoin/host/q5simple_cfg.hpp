@@ -28,10 +28,10 @@ static void gen_q5simple_orders_fcfg(uint32_t cfg[]) {
     cfg[n++] = (uint32_t)0UL;
     cfg[n++] = 0UL | (FOP_DC << FilterOpWidth) | (FOP_DC);
 
-    // 19940101 <= cond_1 < 19950101
-    cfg[n++] = (uint32_t)19940101UL;
-    cfg[n++] = (uint32_t)19950101UL;
-    cfg[n++] = 0UL | (FOP_GEU << FilterOpWidth) | (FOP_LTU);
+    // cond_2
+    cfg[n++] = (uint32_t)0UL;
+    cfg[n++] = (uint32_t)0UL;
+    cfg[n++] = 0UL | (FOP_DC << FilterOpWidth) | (FOP_DC);
     // cond_3
     cfg[n++] = (uint32_t)0L;
     cfg[n++] = (uint32_t)0L;
@@ -231,11 +231,11 @@ void get_q5simple_cfg(ap_uint<512>* hbuf) {
     shuffle3_cfg(63, 56) = 7;
 
     ap_int<64> shuffle4_cfg;
-    shuffle4_cfg(7, 0) = 0;
+    shuffle4_cfg(7, 0) = 8;
     shuffle4_cfg(15, 8) = 1;
     shuffle4_cfg(23, 16) = 2;
     shuffle4_cfg(31, 24) = 3;
-    shuffle4_cfg(39, 32) = 8;
+    shuffle4_cfg(39, 32) = 4;
     shuffle4_cfg(47, 40) = 5;
     shuffle4_cfg(55, 48) = 6;
     shuffle4_cfg(63, 56) = 7;

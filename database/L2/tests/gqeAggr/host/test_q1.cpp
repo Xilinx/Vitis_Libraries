@@ -43,12 +43,6 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    std::string in_dir;
-    if (!parser.getCmdOption("-in", in_dir) || !is_dir(in_dir)) {
-        std::cout << "ERROR: input dir is not specified or not valid.\n";
-        return 1;
-    }
-
     std::string scale;
     int sim_scale = 1;
     if (parser.getCmdOption("-scale", scale)) {
@@ -57,21 +51,6 @@ int main(int argc, const char* argv[]) {
         } catch (...) {
             sim_scale = 10000;
         }
-    }
-
-    int num_rep = 1;
-
-    std::string num_str;
-    if (parser.getCmdOption("-rep", num_str)) {
-        try {
-            num_rep = std::stoi(num_str);
-        } catch (...) {
-            num_rep = 1;
-        }
-    }
-    if (num_rep > 20) {
-        num_rep = 20;
-        std::cout << "WARNING: limited repeat to " << num_rep << " times\n.";
     }
 
     // ********************************************************** //
@@ -100,7 +79,7 @@ int main(int argc, const char* argv[]) {
     const int NumSweep = 1;
     const int lnrow = 6001215 / sim_scale;
     Table tbs[NumTable];
-    tbs[0] = Table("lineitem", lnrow, 7, in_dir);
+    tbs[0] = Table("lineitem", lnrow, 7);
     tbs[0].addCol("l_returnflag", 4);
     tbs[0].addCol("l_linestatus", 4);
     tbs[0].addCol("l_quantity", 4);
@@ -112,8 +91,8 @@ int main(int argc, const char* argv[]) {
     std::cout << "DEBUG0" << std::endl;
     // tbx is for the empty bufferB in kernel
     Table tbx(512);
-    Table tk0("tk0", 1000, 20, "");
-    Table tk1("tk1", 1000, 20, "");
+    Table tk0("tk0", 2000, 20, "");
+    Table tk1("tk1", 2000, 20, "");
     std::cout << "Table Creation done." << std::endl;
     /**
      * 2.allocate CPU
@@ -221,6 +200,16 @@ int main(int argc, const char* argv[]) {
     gettimeofday(&tv_r_e, 0);
     std::cout << std::dec << "CPU execution time of Host " << tvdiff(&tv_r_s, &tv_r_e) / 1000 << " ms" << std::endl;
 
-    q1Print(tk1);
-    return 0;
+    std::cout << "Golden result: -------------------------------------" << std::endl;
+    Table tbf("tbf", 6000000 / sim_scale, 20, "");
+    Table tbg("tbg", 2000, 20, "");
+    Table tbso("tbso", 2000, 20, "");
+    tbf.allocateHost();
+    tbg.allocateHost();
+    tbso.allocateHost();
+
+    q1FilterL(tbs[0], tbf);
+    q1GroupBy(tbf, tbg);
+    q1SortSW(tbg, tbso);
+    return check_result(tk1, tbso);
 }

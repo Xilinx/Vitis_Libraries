@@ -56,7 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
+DEVICE ?= xilinx_u280_xdma_201920_1
 
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
@@ -70,11 +70,7 @@ $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
 ifneq ($(findstring u280, $(DEVICE)), u280)
-ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u200, $(DEVICE)), u200)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
-endif
-endif
 endif
 
 include ./utils.mk
@@ -111,9 +107,9 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := test_join.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -in $(CUR_DIR)/db_data/dat
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -scale 10  
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -in $(CUR_DIR)/db_data/dat -scale 10000
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -scale 5000
 endif
 
 ifneq ($(HOST_ARCH), x86)
@@ -128,12 +124,6 @@ LDCLFLAGS += --optimize 2 --jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 CXXFLAGS += -D USE_HBM
 VPP_FLAGS += --config $(CUR_DIR)/conn_u280.ini
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-CXXFLAGS += -D USE_DDR
-VPP_FLAGS += --config $(CUR_DIR)/conn_u250.ini
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-CXXFLAGS += -D USE_DDR
-VPP_FLAGS += --config $(CUR_DIR)/conn_u200.ini
 endif
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
@@ -181,7 +171,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 ############################## Setting Essential Checks and Running Rules ##############################
 run: all
-	XCL_EMULATION_MODE=$(TARGET) make -C $(CUR_DIR)/db_data
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)

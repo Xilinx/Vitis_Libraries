@@ -1,51 +1,53 @@
 {
-    "name": "jks.L1_eval_1col", 
-    "description": "", 
-    "flow": "hls", 
+    "name": "Xilinx Eval 1col HLS Test",
+    "description": "Xilinx Eval 1col HLS Test",
+    "flow": "hls",
     "platform_whitelist": [
-        "u280", "u250", "u200"
-    ], 
-    "platform_blacklist": [], 
-    "part_whitelist": [], 
-    "part_blacklist": [], 
-    "project": "eval_test", 
-    "solution": "solution1", 
-    "clock": "2.5", 
-    "topfunction": "dut", 
+        "u280",
+        "u250",
+        "u200"
+    ],
+    "platform_blacklist": [],
+    "part_whitelist": [],
+    "part_blacklist": [],
+    "project": "eval_test",
+    "solution": "solution1",
+    "clock": "2.5",
+    "topfunction": "dut",
     "top": {
         "source": [
             "eval_test.cpp"
-        ], 
+        ],
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw"
-    }, 
+    },
     "testbench": {
         "source": [
             "eval_test.cpp"
-        ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw", 
-        "ldflags": "", 
-        "argv": {}, 
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw",
+        "ldflags": "",
+        "argv": {},
         "stdmath": false
-    }, 
+    },
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 16384, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 16384,
                 "max_time_min": 300
             }
-        ], 
+        ],
         "targets": [
-            "hls_csim", 
-            "hls_csynth", 
-            "hls_cosim", 
-            "hls_vivado_syn", 
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "hls_vivado_syn",
             "hls_vivado_impl"
-        ], 
+        ],
         "category": "canary"
     }
 }

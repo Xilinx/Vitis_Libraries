@@ -4,7 +4,7 @@ For details on each version of the hash-join, please refer to the HTML doc.
 
 ## Overview
 
-This bencmark tests the performance of `hashJoinMPU` from `hash_join_v2.hpp`
+This benchmark tests the performance of `hashJoinMPU` from `hash_join_v2.hpp`
 with the following query.
 
 ```
@@ -21,11 +21,6 @@ where
 
 Here `orders1994` is a self-made table, of all `orders` rows with `o_orderdate` between 1994-01-01 (inclusive) and 1995-01-01 (exclusive).
 
-## Dataset
-
-Due to unknown license, the source code of dataset generator is not directly included.
-When the project runs, script in `db_data` folder will automatically grep the dataset generator
-and compile it from source.
 
 ## Running the Benchmark
 

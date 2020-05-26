@@ -125,7 +125,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'xilinx'
+html_theme = 'xilinx_2020_1'
 html_theme_path = [os.path.join(tools_dir, 'share/themes')]
 
 html_last_updated_fmt = '%B %d, %Y'

@@ -1,15 +1,15 @@
 {
-    "gui": false,
-    "name": "jks.L1_hash_group_aggregate", 
-    "description": "", 
-    "flow": "vitis", 
-    "platform_type": "pcie", 
+    "name": "Xilinx Hash Group Aggregate Benchmark",
+    "description": "Xilinx Hash Group Aggregate Benchmark",
+    "flow": "vitis",
+    "gui": true,
+    "platform_type": "pcie",
     "platform_whitelist": [
         "u280"
-    ], 
+    ],
     "platform_blacklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u280": {
             "host": {
@@ -18,7 +18,7 @@
                         "USE_HBM"
                     ]
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -27,82 +27,144 @@
                 }
             }
         }
-    }, 
+    },
     "launch": [
         {
-            "name": "generic launch for all flows", 
-            "cmd_args": " -mode fpga -xclbin BUILD/hash_aggr_kernel.xclbin -in PROJECT/db_data/dat -rep 1 -key_column 1 -pld_column 1 -scale 100"
-        }, 
+            "name": "generic launch for sw_emu flows",
+            "target": "sw_emu",
+            "cmd_args": " -xclbin BUILD/hash_aggr_kernel.xclbin -rep 1 -key_column 1 -pld_column 1 -scale 100"
+        },
         {
-            "name": "generic launch for all flows", 
-            "target": "hw_emu", 
-            "cmd_args": " -mode fpga -xclbin BUILD/hash_aggr_kernel.xclbin -in PROJECT/db_data/dat -rep 1 -key_column 1 -pld_column 1 -scale 10000"
-        }
-    ], 
-    "pre_launch": [
+            "name": "generic launch for hw_emu flows",
+            "target": "hw_emu",
+            "cmd_args": " -xclbin BUILD/hash_aggr_kernel.xclbin -rep 1 -key_column 1 -pld_column 1 -scale 10000"
+        },
         {
-            "launch_cmd": "make -C PROJECT/db_data"
+            "name": "generic launch for hw flows",
+            "target": "hw",
+            "cmd_args": " -xclbin BUILD/hash_aggr_kernel.xclbin"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "test_aggr.exe", 
+        "host_exe": "test_aggr.exe",
         "compiler": {
             "sources": [
-                "host/test_aggr.cpp", 
+                "host/test_aggr.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
                 "host",
-                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/ext/xcl2",
                 "kernel",
                 "LIB_DIR/L1/include/hw"
-            ], 
-            "options": "-O3 ", 
+            ],
+            "options": "-O3 ",
             "symbols": [
                 "USE_HBM"
             ]
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L1/include/hw",
                 "kernel",
                 "host",
                 "LIB_DIR/../utils/L1/include"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "kernel/hash_aggr_kernel.cpp", 
-                    "frequency": 250.0, 
-                    "name": "hash_aggr_kernel"
+                    "location": "kernel/hash_aggr_kernel.cpp",
+                    "frequency": 250,
+                    "name": "hash_aggr_kernel",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "join_kernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "buf_l_orderkey",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "buf_l_extendedprice",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "config",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "result_info",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "ping_buf0",
+                                    "memory": "HBM[0]"
+                                },
+                                {
+                                    "name": "ping_buf1",
+                                    "memory": "HBM[4]"
+                                },
+                                {
+                                    "name": "ping_buf2",
+                                    "memory": "HBM[8]"
+                                },
+                                {
+                                    "name": "ping_buf3",
+                                    "memory": "HBM[12]"
+                                },
+                                {
+                                    "name": "pong_buf0",
+                                    "memory": "HBM[2]"
+                                },
+                                {
+                                    "name": "pong_buf1",
+                                    "memory": "HBM[6]"
+                                },
+                                {
+                                    "name": "pong_buf2",
+                                    "memory": "HBM[10]"
+                                },
+                                {
+                                    "name": "pong_buf3",
+                                    "memory": "HBM[14]"
+                                },
+                                {
+                                    "name": "result",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
                 }
-            ], 
-            "frequency": 250.0, 
+            ],
+            "frequency": 250,
             "name": "hash_aggr_kernel"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 32768, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
                 "max_time_min": 520
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }

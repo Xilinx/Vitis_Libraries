@@ -140,6 +140,19 @@ void load_dat(T* data, const std::string& name, const std::string& dir, size_t n
     load_dat(data, name, dir, n, sizeof(T));
 };
 
+template <typename T>
+int generate_data(T* data, int range, size_t n) {
+    if (!data) {
+        return -1;
+    }
+
+    for (size_t i = 0; i < n; i++) {
+        data[i] = (T)(rand() % range + 1);
+    }
+
+    return 0;
+}
+
 class Table {
    public:
     std::string name;
@@ -172,6 +185,15 @@ class Table {
         mode = 2;
     };
 
+    Table(std::string name_, size_t nrow_, size_t ncol_) {
+        name = name_;
+        nrow = nrow_;
+        ncol = ncol_;
+        npart = 1;
+        size512.push_back(0);
+        mode = 2;
+    };
+
     Table(size_t size) {
         size512.push_back(size / 64);
         mode = 3;
@@ -196,7 +218,7 @@ class Table {
             // std::cout<<isrowid[i]<<std::endl;
             if (isrowid[i] == 0) {
                 // std::cout<<colsname[i]<<dir<<nrow<<colswidth[i]<<std::endl;
-                int err = load_dat(data + size512[i] + 1, colsname[i], dir, nrow, colswidth[i]);
+                int err = generate_data((int*)(data + size512[i] + 1), 50, nrow);
                 if (err) {
                     std::cout << "ERROR loading table from disk" << std::endl;
                 };
