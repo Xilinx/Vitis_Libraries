@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.impulse_test", 
+    "name": "Xilinx Impulse Test 1D Float", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.2d.float.2d.float.real_impulse", 
+    "name": "Xilinx 2D Float Real Impulse", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

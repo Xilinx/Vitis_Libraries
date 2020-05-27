@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.ssr_fft_dro_r8_l64", 
+    "name": "Xilinx SSR FFT Digital Reversed Order Float Rate8_Length64", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
