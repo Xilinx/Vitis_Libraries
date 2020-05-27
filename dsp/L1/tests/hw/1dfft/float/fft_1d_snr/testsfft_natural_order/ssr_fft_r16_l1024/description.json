@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.ssr_fft_r16_l1024", 
+    "name": "Xilinx SSR FFT Float Rate16_Length1024", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.test_16x16", 
+    "name": "Xilinx Test 16x16", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

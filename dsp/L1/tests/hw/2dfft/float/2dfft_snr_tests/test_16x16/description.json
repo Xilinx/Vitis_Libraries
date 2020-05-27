@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.2d.float.snr.test_16x16", 
+    "name": "Xilinx 2D Float Signal Noise Ratio Test 16x16", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

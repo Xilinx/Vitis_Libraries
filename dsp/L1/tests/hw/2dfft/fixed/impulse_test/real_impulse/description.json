@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.real_impulse", 
+    "name": "Xilinx Real Impulse", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

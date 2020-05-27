@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.2Dfix_impulse", 
+    "name": "Xilinx 2D Fixed Impulse", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
