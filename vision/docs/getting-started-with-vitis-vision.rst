@@ -1,10 +1,14 @@
 
+.. meta::
+   :keywords: Vision, Library, Vitis Vision Library, design, methodology, OpenCL, OpenCV, libOpenCL
+   :description: Describes the methodology to create a kernel, corresponding host code and a suitable makefile to compile an Vitis Vision kernel for any of the supported platforms in Vitis.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 Getting Started with Vitis Vision
 #################################
 
-This chapter provides details on using Vitis Vision in the Vitis™
-environment. The following sections would provide a description of the
-methodology to create a kernel, corresponding host code and a suitable
+Describes the methodology to create a kernel, corresponding host code and a suitable
 makefile to compile an Vitis Vision kernel for any of the supported
 platforms in Vitis. The subsequent section also explains the
 methodology to verify the kernel in various emulation modes and on the
@@ -21,8 +25,12 @@ Prerequisites
    compiled differently than what is provided in Vitis.
 #. Install the card for which the platform is supported in Vitis 2019.2 or
    later versions.
+#. If targeting an embedded platform, set up the evaluation board.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software
    interface to Xilinx FPGAs.
+#. Install/compile OpenCV libraries(with compatible libjpeg.so). 
+   Appropriate version (X86/aarch32/aarch64) of compiler must be used based 
+   on the available processor on the target board.
 #. libOpenCL.so must be installed if not present along with the
    platform.
 
@@ -71,14 +79,14 @@ Wrappers around HLS Kernel(s)
 -----------------------------
 
 All Vitis Vision kernels are provided with C++ function templates (located
-at <Github repo>/include) with image containers as objects of xf::Mat
+at <Github repo>/include) with image containers as objects of xf::cv::Mat
 class. In addition, these kernels will work either in stream based
 (where complete image is read continuously) or memory mapped (where
 image data access is in blocks).
 
 Vitis flow (OpenCL) requires kernel interfaces to be memory pointers
 with width in power(s) of 2. So glue logic is required for converting
-memory pointers to xf::Mat class data type and vice-versa when
+memory pointers to xf::cv::Mat class data type and vice-versa when
 interacting with Vitis Vision kernel(s). Wrapper(s) are build over the
 kernel(s) with this glue logic. Below examples will provide a
 methodology to handle different kernel (Vitis Vision kernels located at
@@ -104,7 +112,7 @@ top-level (or wrapper) function for the kernel as shown below:
    #pragma HLS stream variable=out_mat.data depth=2
    #pragma HLS dataflow 
    xf::cv::Array2xfMat<…> (gmem_in, in_mat); 
-   xf::Vitis Vision-func<…> (in_mat, out_mat…); 
+   xf::cv::Vitis Vision-func<…> (in_mat, out_mat…); 
    xf::cv::xfMat2Array<…> (gmem_out, out_mat); 
    }
    }
@@ -127,11 +135,11 @@ multiple instances of the adapter functions are necessary. For this,
    #pragma HLS stream variable=in_mat3.data depth=2
    #pragma HLS stream variable=out_mat.data depth=2
    #pragma HLS dataflow 
-   xf::accel_utils obj_a, obj_b;
+   xf::cv::accel_utils obj_a, obj_b;
    obj_a.Array2xfMat<…,HEIGHT,WIDTH,…> (gmem_in1, in_mat1);
    obj_b.Array2xfMat<…,HEIGHT/4,WIDTH,…> (gmem_in2, in_mat2); 
    obj_b.Array2xfMat<…,HEIGHT/4,WIDTH,…> (gmem_in3, in_mat3); 
-   xf::Vitis-Vision-func(in_mat1, in_mat2, int_mat3, out_mat…); 
+   xf::cv::Vitis-Vision-func(in_mat1, in_mat2, int_mat3, out_mat…); 
    xf::cv::xfMat2Array<…> (gmem_out, out_mat); 
    }
    }
@@ -342,7 +350,7 @@ case is as follows:
    { 
    void func_top (ap_uint *gmem_in, ap_uint *gmem_out, ...) { 
    xf::cv::Mat<…> in_mat(…,gmem_in), out_mat(…,gmem_out);
-   xf::kernel<…> (in_mat, out_mat…); 
+   xf::cv::kernel<…> (in_mat, out_mat…); 
    }
    }
 
@@ -496,7 +504,7 @@ Below is the top-level/wrapper function with all necessary glue logic.
        #pragma HLS DATAFLOW 
 
        xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC1,HEIGHT,WIDTH,INTYPE>(img_inp,in_mat);
-       xf::Canny<FILTER_WIDTH,NORM_TYPE,XF_8UC1,XF_2UC1,HEIGHT, WIDTH,INTYPE,XF_NPPC32,XF_USE_URAM>(in_mat,dst_mat,low_threshold,high_threshold);
+       xf::cv::Canny<FILTER_WIDTH,NORM_TYPE,XF_8UC1,XF_2UC1,HEIGHT, WIDTH,INTYPE,XF_NPPC32,XF_USE_URAM>(in_mat,dst_mat,low_threshold,high_threshold);
        xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH,XF_2UC1,HEIGHT,WIDTH,XF_NPPC32>(dst_mat,img_out);
        
        
@@ -519,7 +527,7 @@ Below is the top-level/wrapper function with all necessary glue logic.
 
        xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> _dst1(rows,cols,img_inp);
        xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC8> _dst2(rows,cols,img_out);
-       xf::EdgeTracing<XF_2UC1,XF_8UC1,HEIGHT, WIDTH, XF_NPPC32,XF_NPPC8,XF_USE_URAM>(_dst1,_dst2);
+       xf::cv::EdgeTracing<XF_2UC1,XF_8UC1,HEIGHT, WIDTH, XF_NPPC32,XF_NPPC8,XF_USE_URAM>(_dst1,_dst2);
        
    }
    }
@@ -537,8 +545,8 @@ commands to setup the environment:
 
    $ cd <path to the folder where makefile is present>
    $ source <path to the Vitis installation folder>/Vitis/<version number>/settings64.sh
-   $ source <path to Xilinx_xrt>/packages/setenv.sh
-   $ export DEVICE=<path to the platform folder>
+   $ source <path to Xilinx_XRT installation folder>/setup.sh
+   $ export DEVICE=<path-to-platform-directory>/<platform>.xpfm
 
 
 Software Emulation
@@ -603,7 +611,7 @@ To test on the hardware, the kernel must be compiled into a bitstream
 (building for hardware). This would consume some time since the C/C++ code must be converted to
 RTL, run through synthesis and implementation process before a bitstream
 is created. As a prerequisite the drivers has to be installed for
-corresponding DSA, for which the example was built for. Following are
+corresponding XSA, for which the example was built for. Following are
 the steps to build the kernel and run on a hardware:
 
 *For PCIe devices:*

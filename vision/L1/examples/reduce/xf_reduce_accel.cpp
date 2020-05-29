@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 #include "xf_reduce_config.h"
 
 void reduce_accel(xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPIX>& _src,

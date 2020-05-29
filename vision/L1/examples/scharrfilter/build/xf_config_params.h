@@ -17,5 +17,8 @@
 #define RO 0 // Resource Optimized (8-pixel implementation)
 #define NO 1 // Normal Operation (1-pixel implementation)
 
-#define GRAY 1
-#define RGBA 0
+#define T_8U 1
+#define T_16S 0
+
+#define GRAY	1
+#define RGBA	0

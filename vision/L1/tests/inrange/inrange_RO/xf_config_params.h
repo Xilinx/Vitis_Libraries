@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define NO 1 // Normal Operation
-#define RO 0 // Resource Optimized
+#define NO 0 // Normal Operation
+#define RO 1 // Resource Optimized
 
 #define GRAY 1

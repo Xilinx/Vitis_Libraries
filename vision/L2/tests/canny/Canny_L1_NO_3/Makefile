@@ -19,14 +19,14 @@
 
 MK_PATH       := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR       := $(patsubst %/,%,$(dir $(MK_PATH)))
-CASE_ROOT     ?= $(CUR_DIR)
+XF_CASE_ROOT     ?= $(CUR_DIR)
 
 
 #MK_COMMON_DIR := mk
 
 # Below should point to library repo
-XF_LIB_DIR    ?= $(abspath $(CASE_ROOT)/../../../..)
-MK_COMMON_DIR := $(XF_LIB_DIR)/ext/makefile_templates
+XF_PROJ_ROOT    ?= $(abspath $(XF_CASE_ROOT)/../../../..)
+MK_COMMON_DIR := $(XF_PROJ_ROOT)/ext/makefile_templates
 
 .SECONDEXPANSION:
 
@@ -182,7 +182,7 @@ data: $(DATA_STAMP)
 # -----------------------------------------------------------------------------
 #                          kernel setup
 
-KSRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/canny
+KSRC_DIR 		:= $(XF_PROJ_ROOT)/L2/examples/canny
 XFREQUENCY 		:= 300
 VIVADO_FREQUENCY        =$(shell echo $$(( $(XFREQUENCY) * 1000000 )))
 
@@ -192,7 +192,7 @@ KERNELS += $(KER_NAME):xf_canny_accel.cpp
 KER_NAME1    	:= edgetracing_accel
 KERNELS += $(KER_NAME1):xf_edgetracing_accel.cpp
 
-VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
+VPP_CFLAGS  	+=  -I. -I$(XF_PROJ_ROOT)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 VPP_CFLAGS 	+= --xp vivado_prop:run.impl_1.strategy=Performance_Explore 
 
@@ -206,16 +206,16 @@ $(KER_NAME1)_VPP_CFLAGS := -D__SDA_MEM_MAP__
 # -----------------------------------------------------------------------------
 #                           host setup
 
-SRC_DIR 		:= $(XF_LIB_DIR)/L2/examples/canny
+SRC_DIR 		:= $(XF_PROJ_ROOT)/L2/examples/canny
 
 EXE_NAME  		:= canny
-HOST_ARGS 		= $(XF_LIB_DIR)/data/4k.jpg #$(XCLBIN_FILE)
+HOST_ARGS 		= $(XF_PROJ_ROOT)/data/4k.jpg #$(XCLBIN_FILE)
 SRCS      		:= xf_canny_tb 
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 # Search paths:
-CXXFLAGS 		+=  -I. -I$(XF_LIB_DIR)/L1/include -I$(XF_LIB_DIR)/ext/xcl2
+CXXFLAGS 		+=  -I. -I$(XF_PROJ_ROOT)/L1/include -I$(XF_PROJ_ROOT)/ext/xcl2
 # Options
 CXXFLAGS 		+= -g
 
@@ -229,7 +229,7 @@ endif
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule
 EXTRA_OBJS 		+= xcl2
 
-EXT_DIR   		= $(XF_LIB_DIR)/ext
+EXT_DIR   		= $(XF_PROJ_ROOT)/ext
 xcl2_SRCS 		= $(EXT_DIR)/xcl2/xcl2.cpp
 xcl2_HDRS 		= $(EXT_DIR)/xcl2/xcl2.hpp
 xcl2_CXXFLAGS 	= -I $(EXT_DIR)/xcl2

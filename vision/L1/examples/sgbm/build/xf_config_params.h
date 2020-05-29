@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define HEIGHT 1080
-#define WIDTH 1920
+#define HEIGHT 720
+#define WIDTH 1280
 
 /* set penalties for SGM */
 #define SMALL_PENALTY 20

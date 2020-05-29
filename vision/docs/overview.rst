@@ -1,22 +1,24 @@
+.. meta::
+   :keywords: Vision, Library, Vitis Vision Library, overview, features, kernel
+   :description: Using the Vitis vision library.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _overview:
 
 Overview
 ########
 
-This document describes the FPGA device optimized Vitis vision library,
-called the Xilinx® Vitis vision library and is intended for application
-developers using Zynq®-7000 SoC and Zynq® UltraScale+™ MPSoC and PCIE
-based (Virtex and U200 ...) devices. Vitis vision library has been designed
-to work in the Vistis development environment, and provides a software
+The Vitis vision library has been designed to work in the Vitis development environment, and provides a software
 interface for computer vision functions accelerated on an FPGA device.
 Vitis vision library functions are mostly similar in functionality to their
 OpenCV equivalent. Any deviations, if present, are documented.
 
-Note: For more information on the Vitis vision library prerequisites, see
-prerequisites_. To
-familiarize yourself with the steps required to use the Vitis vision library
-functions, see the Using the `Vitis vision
-Library <getting-started-with-sdsoc.html>`__.
+
+.. seealso:: For more information on the Vitis vision library prerequisites, see Prerequisites_. 
+To familiarize yourself with the steps required to use the Vitis vision library
+functions, see the `Using the Vitis vision
+Library <using-the-vitis-vision-library.html>`__.
 
 .. _basic-features:
 
@@ -179,6 +181,7 @@ The following table lists the contents of the Vitis vision library.
 
 
 .. include:: getting-started-with-vitis-vision.rst 
+.. include:: using-the-vitis-vision-library.rst
 .. include:: getting-started-with-hls.rst
 .. include:: migrating-hls-video-library-to-vitis-vision.rst 
 .. include:: design-examples.rst 

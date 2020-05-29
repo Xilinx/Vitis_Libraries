@@ -86,7 +86,7 @@ Compute_Grad_Loop:
 template <int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int TC, int WIN_SZ, int WIN_SZ_SQ, int PLANES>
 void xFPyrUpProcessWindow(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
                           hls::stream<XF_TNAME(DEPTH, NPC)>& _out_mat,
-                          XF_TNAME(DEPTH, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))],
+                          XF_TNAME(DEPTH, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC)) + (WIN_SZ >> 1)],
                           XF_PTUNAME(DEPTH) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
                           XF_PTUNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)],
                           XF_PTUNAME(DEPTH) & P0,
@@ -194,7 +194,7 @@ void xf_pyrup_gaussian_nxn(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
     // src_buf1 et al merged
     XF_TNAME(DEPTH, NPC) P0;
 
-    XF_TNAME(DEPTH, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))];
+    XF_TNAME(DEPTH, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC)) + (WIN_SZ >> 1)];
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM

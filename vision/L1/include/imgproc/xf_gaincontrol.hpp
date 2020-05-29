@@ -67,15 +67,64 @@ RowLoop:
             pxl_pack1 = (XF_SNAME(WORDWIDTH_SRC))(src1.read(i * width + j)); // reading from 1st input stream
 
         ProcLoop:
-            for (k = 0, l = 0; k < ((8 << XF_BITSHIFT(NPC)) * PLANES); k += XF_IN_STEP, l += XF_OUT_STEP) {
+            for (k = 0, l = 0; k < ((8 << XF_BITSHIFT(NPC)) * PLANES); k += XF_IN_STEP, l++) {
                 XF_PTNAME(DEPTH_SRC) pxl1 = pxl_pack1.range(k + 7, k); // extracting each pixel in case of 8-pixel mode
                 XF_PTNAME(DEPTH_SRC) t;
-                if ((BFORMAT == XF_BAYER_RG) && (NPC == XF_NPPC2)) {
-                    if (i % 2 != 0 && k == 8) {
+                bool cond1 = 0, cond2 = 0;
+
+                if (NPC == XF_NPPC1) {
+                    cond1 = (j % 2 == 0);
+                    cond2 = (j % 2 != 0);
+                } else {
+                    cond1 = ((l % 2) == 0);
+                    cond2 = ((l % 2) != 0);
+                }
+
+                if (BFORMAT == XF_BAYER_RG) {
+                    if (i % 2 == 0 && cond1) {
+                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
+                        short v2 = (short)((v1 * R_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
+                    } else if (i % 2 != 0 && cond2) {
                         XF_PTNAME(DEPTH_SRC) v1 = pxl1;
                         short v2 = (short)((v1 * B_GAIN) >> 15);
                         t = (v2 > 255) ? 255 : v2;
-                    } else if (i % 2 == 0 && k == 0) {
+                    } else {
+                        t = pxl1;
+                    }
+                }
+                if (BFORMAT == XF_BAYER_GR) {
+                    if (i % 2 == 0 && cond2) {
+                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
+                        short v2 = (short)((v1 * R_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
+                    } else if (i % 2 != 0 && cond1) {
+                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
+                        short v2 = (short)((v1 * B_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
+                    } else {
+                        t = pxl1;
+                    }
+                }
+                if (BFORMAT == XF_BAYER_BG) {
+                    if (i % 2 == 0 && cond1) {
+                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
+                        short v2 = (short)((v1 * B_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
+                    } else if (i % 2 == 0 && cond2) {
+                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
+                        short v2 = (short)((v1 * R_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
+                    } else {
+                        t = pxl1;
+                    }
+                }
+                if (BFORMAT == XF_BAYER_GB) {
+                    if (i % 2 == 0 && cond2) {
+                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
+                        short v2 = (short)((v1 * B_GAIN) >> 15);
+                        t = (v2 > 255) ? 255 : v2;
+                    } else if (i % 2 != 0 && cond1) {
                         XF_PTNAME(DEPTH_SRC) v1 = pxl1;
                         short v2 = (short)((v1 * R_GAIN) >> 15);
                         t = (v2 > 255) ? 255 : v2;
@@ -84,21 +133,7 @@ RowLoop:
                     }
                 }
 
-                if ((BFORMAT == XF_BAYER_RG) && (NPC == XF_NPPC1)) {
-                    if (i % 2 == 0 && j == 0) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * R_GAIN) >> 15); //(v1*1.34375);
-                        t = (v2 > 255) ? 255 : v2;
-                    } else if (i % 2 != 0 && j != 0) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * B_GAIN) >> 15);
-                        t = (v2 > 255) ? 255 : v2;
-                    } else {
-                        t = pxl1;
-                    }
-                }
-
-                pxl_pack_out.range(l + XF_OUT_STEP - 1, l) = t;
+                pxl_pack_out.range(k + XF_OUT_STEP - 1, k) = t;
             }
 
             dst.write(i * width + j, (XF_SNAME(WORDWIDTH_DST))pxl_pack_out); // writing into ouput stream

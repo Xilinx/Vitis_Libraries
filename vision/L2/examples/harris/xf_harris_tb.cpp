@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 #include "common/xf_headers.hpp"
 #include "xf_harris_config.h"
 #include "xf_ocv_ref.hpp"
@@ -59,53 +60,60 @@ int main(int argc, char** argv) {
     uint32_t nCorners = 0;
     uint16_t imgwidth = in_img.cols;
     uint16_t imgheight = in_img.rows;
-
-    // OpenCL section:
+	
+	// OpenCL section:
     size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
-
-    cl_int err;
+	
+	cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
 
-    // Initialize the buffers:
+// Initialize the buffers:
     cl::Event event;
 
-    static xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> imgInput(in_img.rows, in_img.cols);
-    static xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> imgOutput(in_img.rows, in_img.cols);
+    static xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPIX> imgInput(in_img.rows, in_img.cols);
+    static xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPIX> imgOutput(in_img.rows, in_img.cols);
 
     imgInput.copyTo(in_img.data);
 
     /////////////////////////////////////// CL ////////////////////////
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-
+   
+   
     // Context, command queue and device name:
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
+	
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_harris");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
 
-    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+
+	OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     // Create a kernel:
     OCL_CHECK(err, cl::Kernel krnl(program, "cornerHarris_accel", &err));
-
+	
+  
+	
     fprintf(stderr, "\nKernel Created\n");
     std::vector<cl::Memory> inBufVec, outBufVec;
-
-    // Allocate the buffers:
+	
+	
+	 // Allocate the buffers:
     OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
+  
+     OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice,      // buffer on the FPGA
+                                            CL_TRUE,             // blocking call
+                                            0,                   // buffer offset in bytes
+                                            image_in_size_bytes, // Size in bytes
+                                            imgInput.data,            // Pointer to the data to copy
+                                            nullptr, &event));
 
-    OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice,       // buffer on the FPGA
-                                        CL_TRUE,             // blocking call
-                                        0,                   // buffer offset in bytes
-                                        image_in_size_bytes, // Size in bytes
-                                        imgInput.data,       // Pointer to the data to copy
-                                        nullptr, &event));
+   
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);
@@ -133,14 +141,17 @@ int main(int argc, char** argv) {
     std::cout << (diff_prof / 1000000) << "ms" << std::endl;
 
     q.enqueueReadBuffer(imageFromDevice, // This buffers data will be read
-                        CL_TRUE,         // blocking call
-                        0,               // offset
-                        image_out_size_bytes,
-                        imgOutput.data, // Data will be stored here
-                        nullptr, &event);
+                            CL_TRUE,          // blocking call
+                            0,                // offset
+                            image_out_size_bytes,
+                            imgOutput.data, // Data will be stored here
+                            nullptr, &event);
     fprintf(stderr, "\nData copied from device to host\n");
     q.finish();
     fprintf(stderr, "\nExecution done!\n");
+
+
+
 
     /// hls_out_img.data = (unsigned char *)imgOutput.copyFrom();
     xf::cv::imwrite("hls_out.jpg", imgOutput);

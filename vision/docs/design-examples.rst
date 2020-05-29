@@ -1,3 +1,10 @@
+
+.. meta::
+   :keywords: Vision, Library, Vitis Vision Library, Iterative Pyramidal, Corner Tracking, cornerUpdate, cornersImgToList, 
+   :description: Design examples Using Vitis Vision library.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _design-example:
 
 Design Examples Using Vitis Vision Library
@@ -365,7 +372,6 @@ from the Vitis vision library. They are:
 
 -  xf::cv::GaussianBlur
 -  xf::cv::duplicateMat
--  xf::cv::delayMat
 -  xf::cv::subtract
 
 The Difference of Gaussian Filter function can be implemented by
@@ -373,10 +379,7 @@ applying Gaussian Filter on the original source image, and that Gaussian
 blurred image is duplicated as two images. The Gaussian blur function is
 applied to one of the duplicated images, whereas the other one is stored
 as it is. Later, perform the Subtraction function on, two times Gaussian
-applied image and one of the duplicated image. Here, the duplicated
-image has to wait until the Gaussian applied for other one generates at
-least for one pixel output. Therefore, here xf::cv::delayMat function is
-used to add delay.
+applied image and one of the duplicated image. 
 
 .. figure:: ./images/crx1554997276344.png
    :alt: 

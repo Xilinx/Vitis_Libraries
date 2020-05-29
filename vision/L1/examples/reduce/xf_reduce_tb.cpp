@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 #include "common/xf_headers.hpp"
 #include "xf_reduce_config.h"
 
@@ -60,6 +61,7 @@ int main(int argc, char** argv) {
         bytes = 1;
 
         cv::reduce(in_img, ocv_ref, DIM, REDUCTION_OP, CV_8UC1);
+
     }
 
     ////////////////////// HLS TOP function call ////////////////////////////
@@ -73,7 +75,9 @@ int main(int argc, char** argv) {
 
     imgInput.copyTo(in_img.data);
 
+
     reduce_accel(imgInput, imgOutput, DIM);
+
 
     dst_hls.data = imgOutput.copyFrom();
 

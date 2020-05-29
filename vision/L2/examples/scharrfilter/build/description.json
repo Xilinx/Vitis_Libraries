@@ -1,0 +1,81 @@
+{
+    "name": "Scharrfilter", 
+    "description": [
+        "Scharrfilter L2 function example"
+    ],
+    "flow": "vitis",
+    "platform_whitelist": [
+        "u200", "zcu102", "zcu104"
+    ], 
+    "platform_blacklist": [
+        "u280", "u250", "u50"
+    ], 
+    "launch": [
+        {
+            "target" : "sw_emu",
+            "cmd_args": "$(XF_LIB_DIR)/data/4k.jpg ",
+            "name": "generic launch for all flows"
+        },
+        {
+            "target" : "hw_emu",
+            "cmd_args": "$(XF_LIB_DIR)/data/4k.jpg ",
+            "name": "generic launch for all flows"
+        },
+        {
+            "target" : "hw",
+            "cmd_args": "$(XF_LIB_DIR)/data/4k.jpg ",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "data": ["$(XF_LIB_DIR)/data/4k.jpg"], 
+    "host": {
+        "host_exe": "scharrfilter", 
+        "compiler": {
+            "sources": [
+                "REPO_DIR/L2/examples/scharrfilter/xf_scharr_tb.cpp",
+                "REPO_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "options": "-O3 -std=c++0x ",
+            "symbols": ["__SDSVHLS__" ] 
+        }
+    },
+    "v++":{
+        "compiler": {
+            "symbols": [
+                
+            ],
+            "clflags": [
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "name": "krnl_scharr",
+            "accelerators": [
+                {
+                    "name": "scharr_accel", 
+                    "location": "REPO_DIR/L2/examples/scharrfilter/xf_scharr_accel.cpp"
+                }
+           ] 
+        }
+    ],
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 520
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    } 
+}

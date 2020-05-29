@@ -1,4 +1,10 @@
 
+.. meta::
+   :keywords: Vision, Library, Vitis Vision Library, HLS, Getting Started, C-simulation, C-synthesis, co-simulation, cv, Tcl
+   :description: Describes the methodology to create a kernel, corresponding host code and a suitable makefile to compile an Vitis Vision kernel for any of the supported platforms in Vitis.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 Getting Started with HLS
 #########################
 

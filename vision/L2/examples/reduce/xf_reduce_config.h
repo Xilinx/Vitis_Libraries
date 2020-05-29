@@ -38,19 +38,16 @@
 #endif
 
 // Set the optimization type:
-#if RO
-#define NPC1 XF_NPPC8
-#endif
+
 #if NO
 #define NPC1 XF_NPPC1
 #endif
 
 // Set the input pixel depth
 #define IN_TYPE XF_8UC1
+
 #if NO
 #define PTR_IN_WIDTH 8
-#else
-#define PTR_IN_WIDTH 64
 #endif
 
 // Resolve reduction type
@@ -60,8 +57,6 @@
 #define OUT_TYPE XF_32SC1
 #if NO
 #define PTR_OUT_WIDTH 32
-#else
-#define PTR_OUT_WIDTH 256
 #endif
 #elif REDUCTION_OP == 0
 #define XF_REDUCE XF_REDUCE_SUM
@@ -69,8 +64,6 @@
 #define OUT_TYPE XF_32SC1
 #if NO
 #define PTR_OUT_WIDTH 32
-#else
-#define PTR_OUT_WIDTH 256
 #endif
 #elif REDUCTION_OP == 2
 #define XF_REDUCE XF_REDUCE_MAX
@@ -78,8 +71,6 @@
 #define OUT_TYPE XF_8UC1
 #if NO
 #define PTR_OUT_WIDTH 8
-#else
-#define PTR_OUT_WIDTH 64
 #endif
 #else
 #define XF_REDUCE XF_REDUCE_MIN
@@ -87,8 +78,6 @@
 #define OUT_TYPE XF_8UC1
 #if NO
 #define PTR_OUT_WIDTH 8
-#else
-#define PTR_OUT_WIDTH 64
 #endif
 #endif
 

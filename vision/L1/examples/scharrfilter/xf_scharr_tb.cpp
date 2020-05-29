@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 #include "common/xf_headers.hpp"
 #include "xf_scharr_config.h"
 
@@ -29,17 +30,29 @@ int main(int argc, char** argv) {
     cv::Mat hls_grad_x, hls_grad_y;
     cv::Mat diff_grad_x, diff_grad_y;
 
-// reading in the gray image
+    // reading in the gray image
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else
     in_img = cv::imread(argv[1], 1);
 #endif
 
+#if T_8U
+
+ int ddepth = CV_8U;
 #if GRAY
 #define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
 #else
 #define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
+#endif
+#else
+	
+ int ddepth = CV_16S;
+#if GRAY
+#define PTYPE CV_16SC1 // Should be CV_16S when ddepth is CV_16S
+#else
+#define PTYPE CV_16SC3 // Should be CV_16S when ddepth is CV_16S
+#endif
 #endif
 
     if (in_img.data == NULL) {
@@ -60,10 +73,11 @@ int main(int argc, char** argv) {
     ////////////    Opencv Reference    //////////////////////
     int scale = 1;
     int delta = 0;
-    int ddepth = -1; // CV_16S;//
+   
 
     Scharr(in_img, c_grad_x, ddepth, 1, 0, scale, delta, cv::BORDER_CONSTANT);
     Scharr(in_img, c_grad_y, ddepth, 0, 1, scale, delta, cv::BORDER_CONSTANT);
+
 
     imwrite("out_ocvx.jpg", c_grad_x);
     imwrite("out_ocvy.jpg", c_grad_y);
@@ -73,13 +87,16 @@ int main(int argc, char** argv) {
     unsigned short height = in_img.rows;
     unsigned short width = in_img.cols;
 
+
     static xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(in_img.rows, in_img.cols);
     static xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutputx(in_img.rows, in_img.cols);
     static xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutputy(in_img.rows, in_img.cols);
 
     imgInput.copyTo(in_img.data);
 
+
     scharr_accel(imgInput, imgOutputx, imgOutputy);
+
 
     xf::cv::imwrite("hls_out_x.jpg", imgOutputx);
     xf::cv::imwrite("hls_out_y.jpg", imgOutputy);
@@ -103,33 +120,7 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(diff_grad_x, 0, err_per);
     xf::cv::analyzeDiff(diff_grad_y, 0, err_per1);
 
-    /*	for(int i=0;i<in_img.rows;i++)
-            {
-                    for(int j=0;j<in_img.cols;j++)
-                    {
-                            TYPE v = diff_grad_y.at<TYPE>(i,j);
-                            TYPE v1 = diff_grad_x.at<TYPE>(i,j);
-                            if (v>0)
-                                    cnt++;
-                            if (minval > v )
-                                    minval = v;
-                            if (maxval < v)
-                                    maxval = v;
-                            if (v1>0)
-                                    cnt1++;
-                            if (minval1 > v1 )
-                                    minval1 = v1;
-                            if (maxval1 < v1)
-                                    maxval1 = v1;
-                    }
-            }
-            float err_per = 100.0*(float)cnt/(in_img.rows*in_img.cols);
-            float err_per1 = 100.0*(float)cnt1/(in_img.rows*in_img.cols);
-
-            fprintf(stderr,"Minimum error in intensity = %f\n Maximum error in intensity = %f\n Percentage of pixels
-       above error threshold = %f\n",minval,maxval,err_per); fprintf(stderr,"Minimum error in intensity = %f\n Maximum
-       error in intensity = %f\n Percentage of pixels above error threshold = %f\n",minval1,maxval1,err_per1);
-    */
+   
     int ret = 0;
     if (err_per > 0.0f) {
         printf("Test failed .... !!!\n");

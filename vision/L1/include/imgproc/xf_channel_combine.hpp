@@ -202,7 +202,8 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
 
-    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC>(_src1, _src2, _dst, _src1.rows, _src1.cols);
+    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _dst, _src1.rows,
+                                                                                        _src1.cols);
 }
 
 /*******************************
@@ -230,7 +231,8 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
 
-    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC>(_src1, _src2, _src3, _dst, _src1.rows, _src1.cols);
+    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _src3, _dst,
+                                                                                        _src1.rows, _src1.cols);
 }
 
 /*******************************
