@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.imag_impulse", 
+    "name": "Xilinx Imaginary Impulse", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

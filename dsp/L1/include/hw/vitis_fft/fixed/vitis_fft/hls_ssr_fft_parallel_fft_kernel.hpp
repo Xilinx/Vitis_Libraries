@@ -62,7 +62,7 @@ void __parallel_fft_kernel_L2_R2x1_atree(T_bflyIn p_bflyIndata[2], T_bflyOut p_b
     stage1_accum D0t[2];
 #pragma HLS ARRAY_PARTITION variable = D0t complete dim = 1
     T_bflyIn D0[2];
-#pragma HLS ARRAY_PARTITION variable = D0t complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = D0 complete dim = 1
     for (int i = 0; i < 2; i++) {
 #pragma HLS UNROLL
         D0[i] = p_bflyIndata[i];
@@ -646,7 +646,7 @@ void __parallel_fft_kernel_L32_R16x2xS2_atree(T_bflyIn p_bflyIndata[32], T_bflyO
     }
     ////////////////////////////////////////////////////
     T_bflyIn D2[16];
-#pragma HLS ARRAY_PARTITION variable = D0 complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = D2 complete dim = 1
 
     for (int i = 0; i < 16; i++) {
 #pragma HLS UNROLL
@@ -1193,7 +1193,7 @@ void __parallel_fft_kernel_L32_R16x2xS2(T_bflyIn p_bflyIndata[32], T_bflyOut p_b
     }
     ////////////////////////////////////////////////////
     T_bflyIn D2[16];
-#pragma HLS ARRAY_PARTITION variable = D0 complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = D2 complete dim = 1
 
     for (int i = 0; i < 16; i++) {
 #pragma HLS UNROLL
