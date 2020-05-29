@@ -77,7 +77,8 @@ cl::Program::Binaries import_binary_file(std::string xclbin_file_name)
     bin_file.seekg (0, bin_file.beg);
     char *buf = new char [nb];
     bin_file.read(buf, nb);
-   
+    bin_file.close();   
+
     cl::Program::Binaries bins;
     bins.push_back({buf,nb});
     return bins;

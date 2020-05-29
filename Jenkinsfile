@@ -1,4 +1,4 @@
 @Library('pipeline-library')_
 
-VitisLibPipeline (branch: 'master', libname: 'xf_opencv', 
-                  email: 'amr@xilinx.com', devtest: 'RunOpenCV.sh', TOOLVERSION: '2019.2_daily')
+VitisLibPipeline (branch: 'master', libname: 'xf_opencv', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu',
+                  email: 'badermd@xilinx.com', devtest: 'RunDeploy.sh', TOOLVERSION: '2019.2_released')

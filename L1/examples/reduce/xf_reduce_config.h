@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _XF_THRESHOLD_CONFIG_H_
-#define _XF_THRESHOLD_CONFIG_H_
+#ifndef _XF_REDUCE_CONFIG_H_
+#define _XF_REDUCE_CONFIG_H_
 
 #include "hls_stream.h"
 #include "ap_int.h"
@@ -37,17 +37,12 @@
 #define ONE_D_WIDTH 128
 #endif
 
-#if RO
-#define NPIX XF_NPPC8
-#endif
 #if NO
 #define NPIX XF_NPPC1
 #endif
 
 #if GRAY
 #define SRC_T XF_8UC1
-#else
-#define SRC_T XF_8UC3
 #endif
 
 #if (REDUCTION_OP == 1)
@@ -61,4 +56,4 @@
 void reduce_accel(xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPIX>& _src,
                   xf::cv::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, XF_NPPC1>& _dst,
                   unsigned char dim);
-#endif // end of _XF_THRESHOLD_CONFIG_H_
+#endif // end of _XF_REDUCE_CONFIG_H_

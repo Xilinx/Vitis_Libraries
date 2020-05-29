@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 #ifndef _XF_ADD_WEIGHTED_HPP_
 #define _XF_ADD_WEIGHTED_HPP_
 
@@ -24,7 +25,7 @@
 #define XF_IN_STEP 8
 #endif
 #ifndef XF_OUT_STEP
-#define XF_OUT_STEP 16
+#define XF_OUT_STEP 8
 #endif
 /* calculates the weighted sum of 2 inut images */
 namespace xf {
@@ -49,9 +50,11 @@ int AddWeightedKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                       uint16_t height,
                       uint16_t width) {
     ap_uint<13> i, j, k, l;
-    ap_uint<24> temp = (alpha * (1 << 23));
-    ap_uint<24> temp1 = (beta * (1 << 23));
-    ap_uint<24> temp2 = (gama * (1 << 23));
+
+    ap_fixed<16,8,AP_RND> temp=alpha;
+    ap_fixed<16,8,AP_RND> temp1=beta;
+    ap_fixed<16,8,AP_RND> temp2=gama;
+
     int STEP = XF_PIXELWIDTH(SRC_T, NPC) / PLANES;
 
     XF_SNAME(WORDWIDTH_DST) pxl_pack_out;
@@ -61,13 +64,13 @@ RowLoop:
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN OFF
-    // clang-format on
+// clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
 // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             #pragma HLS pipeline
-            // clang-format on
+// clang-format on
 
             pxl_pack1 = (XF_SNAME(WORDWIDTH_SRC))(src1.read(i * width + j)); // reading from 1st input stream
             pxl_pack2 = (XF_SNAME(WORDWIDTH_SRC))(src2.read(i * width + j)); // reading from 2nd input stream
@@ -76,15 +79,24 @@ RowLoop:
                 XF_PTNAME(DEPTH_SRC) pxl1 = pxl_pack1.range(k + 7, k); // extracting each pixel in case of 8-pixel mode
                 XF_PTNAME(DEPTH_SRC) pxl2 = pxl_pack2.range(k + 7, k);
 
-                ap_uint<40> firstcmp = pxl1 * temp;
-                ap_uint<40> secondcmp = pxl2 * temp1;
+                ap_int<24> firstcmp = pxl1 * temp;
+                ap_int<24> secondcmp = pxl2 * temp1;
 
-                ap_uint<64> t = (firstcmp + secondcmp + temp2) >> 23;
+                ap_int<16> t = (firstcmp + secondcmp + temp2);// >> 23;
 
-                pxl_pack_out.range(l + XF_OUT_STEP - 1, l) = t;
+                if(t>255)
+                {
+                	t=255;
+                }
+                else if(t<0)
+                {
+                	t=0;
+                }
+
+                pxl_pack_out.range(l + XF_OUT_STEP - 1, l) = (unsigned char)t;
             }
 
-            dst.write(i * width + j, (XF_SNAME(WORDWIDTH_DST))pxl_pack_out); // writing into ouput stream
+            dst.write(i * width + j, (XF_SNAME(WORDWIDTH_DST))pxl_pack_out); // writing into output stream
         }
     }
     return 0;
@@ -97,13 +109,13 @@ void addWeighted(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                  float beta,
                  float gama,
                  xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst) {
-#ifndef __SYNTHESIS__
-    assert(((SRC_T == XF_8UC1)) && "Input TYPE must be XF_8UC1 for 1-channel");
-    assert(((DST_T == XF_16UC1)) && "Output TYPE must be XF_16UC1 for 1-channel ");
+#ifndef __SYNTHESIS__	 
+    assert(((SRC_T == XF_8UC1)||(SRC_T == XF_8UC3)) && "Input TYPE must be XF_8UC1 for 1-channel, XF_8UC3 for 3-channel");
+    assert(((DST_T == XF_8UC1)||(DST_T == XF_8UC3)) && "Output TYPE must be XF_8UC1 for 1-channel,XF_8UC3 for 3-channel ");
     assert(((src1.rows == src2.rows) && (src1.cols == src2.cols)) && "Both input images should have same size");
     assert(((src1.rows == dst.rows) && (src1.cols == dst.cols)) && "Input and output image should be of same size");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1,XF_NPPC2, XF_NPPC4,XF_NPPC8 ");
 #endif
     short width = src1.cols >> XF_BITSHIFT(NPC);
 
@@ -113,4 +125,4 @@ void addWeighted(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 }
 } // namespace cv
 } // namespace xf
-#endif //_XF_ACCUMULATE_WEIGHTED_HPP_
+#endif //_XF_ADD_WEIGHTED_HPP_

@@ -19,8 +19,7 @@
 #define NPPC XF_NPPC2
 
 #define T_8U 0
-#define T_10U 0
-#define T_12U 0
+
 #define T_16U 1
 
 #define BPATTERN XF_BAYER_RG

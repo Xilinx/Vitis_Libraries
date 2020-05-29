@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     cv::imwrite("opencv_image.png", output_image);
 
     static xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1> imgInput(input_image.rows, input_image.cols);
-    static xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1> imgOutput(output_height, output_width);
+    static xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1> imgOutput;
 
     imgInput.copyTo(input_image.data);
 

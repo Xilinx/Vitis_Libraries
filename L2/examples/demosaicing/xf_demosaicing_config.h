@@ -32,14 +32,6 @@
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC3
 #endif
-#if T_10U
-#define IN_TYPE XF_10UC1
-#define OUT_TYPE XF_10UC3
-#endif
-#if T_12U
-#define IN_TYPE XF_12UC1
-#define OUT_TYPE XF_12UC3
-#endif
 #if T_16U
 #define IN_TYPE XF_16UC1
 #define OUT_TYPE XF_16UC3

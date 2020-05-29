@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _XF_ACCUMULATE_CONFIG_H_
-#define _XF_ACCUMULATE_CONFIG_H_
+#ifndef _XF_ADDWEIGHTED_CONFIG_H_
+#define _XF_ADDWEIGHTED_CONFIG_H_
 #include "hls_stream.h"
 #include <ap_int.h>
 #include "xf_config_params.h"
@@ -24,7 +24,7 @@
 
 // Set the image height and width
 #define HEIGHT 128
-#define WIDTH 128
+#define WIDTH  128
 
 #if NO
 #define NPC1 XF_NPPC1
@@ -33,8 +33,14 @@
 #define NPC1 XF_NPPC8
 #endif
 
+#if GRAY
 #define IN_TYPE XF_8UC1
-#define OUT_TYPE XF_16UC1
+#define OUT_TYPE XF_8UC1
+#else
+#define IN_TYPE XF_8UC3
+#define OUT_TYPE XF_8UC3
+
+#endif
 
 void add_weighted_accel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
                         float alpha,
@@ -42,4 +48,4 @@ void add_weighted_accel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
                         float beta,
                         float gama,
                         xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1>& imgOutput);
-#endif //_XF_ACCUMULATE_CONFIG_H_
+#endif //_XF_ADDWEIGHTED_CONFIG_H_

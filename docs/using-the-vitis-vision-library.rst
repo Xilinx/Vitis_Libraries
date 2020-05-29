@@ -1,7 +1,13 @@
 
+.. meta::
+   :keywords: Vision, Library, Vitis Vision Library, cv
+   :description: Using the Vitis vision library.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 Using the Vitis vision Library
-------------------------------
+===============================
 
 This section describes using the Vitis vision library in the Vitis development
 environment.
@@ -9,18 +15,18 @@ environment.
 Note: The instructions in this section assume that you have downloaded
 and installed all the required packages. 
 
-include folder constitutes all the necessary components to build a
+*include* folder constitutes all the necessary components to build a
 Computer Vision or Image Processing pipeline using the library. The
-folders common and core contain the infrastructure that the library
+folders *common* and *core* contain the infrastructure that the library
 functions need for basic functions, Mat class, and macros. The library
-functions are categorized into 4 folders, features, video, dnn, and
-imgproc based on the operation they perform. The names of the folders
+functions are categorized into 4 folders, *features*, *video*, *dnn*, and
+*imgproc* based on the operation they perform. The names of the folders
 are self-explanatory.
 
 To work with the library functions, you need to include the path to the
-the include folder in the Vitis project. You can include relevant header files
+the *include* folder in the Vitis project. You can include relevant header files
 for the library functions you will be working with after you source the
-include folder’s path to the compiler. For example, if you would like to
+*include* folder’s path to the compiler. For example, if you would like to
 work with Harris Corner Detector and Bilateral Filter, you must use the
 following lines in the host code:
 
@@ -38,7 +44,7 @@ in the examples folder as reference.
 The following table gives the name of the header file, including the
 folder name, which contains the library function.
 
-.. table:: Table : Vitis Vision Library Contents
+.. table:: Table : Vitis Vision Library 
 
    +-------------------------------------------+-----------------------------------+
    | Function Name                             | File Path in the include folder   |
@@ -388,7 +394,7 @@ design is completely built and the board has booted up correctly.
    +--------------+---------------------------+--------------------------+
    | Difference   | xf::cv::GaussianBlur,     | ./<exe-name>.elf <path   |
    | of Gaussian  | xf::cv::duplicateMat,     | to input image>          |
-   |              | xf::cv::delayMat, and     |                          |
+   |              | and                       |                          |
    |              | xf::cv::subtract          |                          |
    +--------------+---------------------------+--------------------------+
    | Dilation     | xf::cv::dilate            | ./<executable name>.elf  |

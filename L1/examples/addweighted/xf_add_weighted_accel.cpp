@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 #include "xf_add_weighted_config.h"
 
 void add_weighted_accel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1>& imgInput1,
