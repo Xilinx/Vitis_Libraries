@@ -19,12 +19,11 @@
 void pyr_dense_optical_flow_pyr_down_accel(xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> mat_imagepyr1[NUM_LEVELS],
                                            xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> mat_imagepyr2[NUM_LEVELS]) {
     for (int pyr_comp = 0; pyr_comp < NUM_LEVELS - 1; pyr_comp++) {
-
-       xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM>(mat_imagepyr1[pyr_comp],
+        xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM>(mat_imagepyr1[pyr_comp],
                                                                        mat_imagepyr1[pyr_comp + 1]);
-       xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM>(mat_imagepyr2[pyr_comp],
+        xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM>(mat_imagepyr2[pyr_comp],
                                                                        mat_imagepyr2[pyr_comp + 1]);
-   }
+    }
 }
 
 void pyr_dense_optical_flow_accel(xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>& _current_img,

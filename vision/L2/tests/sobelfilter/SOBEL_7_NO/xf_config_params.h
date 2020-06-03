@@ -19,9 +19,9 @@
 
 /*  Set Filter size  */
 
-#define FILTER_SIZE_3  0
-#define FILTER_SIZE_5  0
-#define FILTER_SIZE_7  1
+#define FILTER_SIZE_3 0
+#define FILTER_SIZE_5 0
+#define FILTER_SIZE_7 1
 
 #define GRAY 1
 #define RGBA 0
@@ -29,7 +29,7 @@
 #define T_8U 1
 #define T_16S 0
 
-#define INPUT_PTR_WIDTH  256
+#define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
 
 #define XF_USE_URAM false

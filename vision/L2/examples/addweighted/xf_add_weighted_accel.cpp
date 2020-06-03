@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #include "xf_add_weighted_config.h"
 
 extern "C" {
@@ -24,7 +23,9 @@ void addweighted(ap_uint<PTR_IN_WIDTH>* img_in1,
                  float alpha,
                  float beta,
                  float gamma,
-                 ap_uint<PTR_OUT_WIDTH>* img_out,int height,int width) {
+                 ap_uint<PTR_OUT_WIDTH>* img_out,
+                 int height,
+                 int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0
 
@@ -39,7 +40,7 @@ void addweighted(ap_uint<PTR_IN_WIDTH>* img_in1,
     #pragma HLS INTERFACE s_axilite  port=width 			          bundle=control
 
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
-// clang-format on
+    // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput2(height, width);
@@ -53,7 +54,7 @@ void addweighted(ap_uint<PTR_IN_WIDTH>* img_in1,
 
 // clang-format off
     #pragma HLS DATAFLOW
-// clang-format on
+    // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in1, imgInput1);

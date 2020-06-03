@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #include "common/xf_headers.hpp"
 #include "xf_add_weighted_config.h"
 
@@ -48,14 +47,14 @@ int main(int argc, char** argv) {
     out_gray.create(in_gray.rows, in_gray.cols, CV_8UC1);
     diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
 #else
-    	ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-        out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
-        diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
 #endif
     float alpha = 0.2;
     float beta = 0.8;
     float gama = 0.0;
-// OpenCV function
+    // OpenCV function
     cv::addWeighted(in_gray, alpha, in_gray1, beta, gama, ocv_ref);
 
     // Write OpenCV reference image

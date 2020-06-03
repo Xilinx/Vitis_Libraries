@@ -2673,7 +2673,7 @@ Channel Combine
 ===============
 
 The ``merge`` function, merges single channel images into a
-multi-channel image. The number of channels to be merged should be four.
+multi-channel image. The number of channels to be merged should be two, three or four.
 
 
 .. rubric:: API Syntax
@@ -2684,6 +2684,11 @@ multi-channel image. The number of channels to be merged should be four.
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
    void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src3, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src4, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_dst)
 
+   template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
+   void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src3, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_dst)
+   
+   template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
+   void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_dst)
 
 .. rubric:: Parameter Descriptions
 
@@ -2696,11 +2701,11 @@ The following table describes the template and the function parameters.
    | Paramete | Description                                               |
    | r        |                                                           |
    +==========+===========================================================+
-   | SRC_T    | Input pixel type. Only 8-bit, unsigned, 1,2 and 3 channel |
+   | SRC_T    | Input pixel type. Only 8-bit, unsigned, 1, channel        |
    |          | is supported (XF_8UC1)                                    |
    +----------+-----------------------------------------------------------+
-   | DST_T    | Output pixel type. Only 8-bit, unsigned,4 channel is      |
-   |          | supported (XF_8UC4)                                       |
+   | DST_T    | Output pixel type. 8-bit, unsigned,2,3 and 4 channels are |
+   |          | supported (XF_8UC2, XF_8UC3 and XF_8UC4)                  |
    +----------+-----------------------------------------------------------+
    | ROWS     | Maximum height of input and output image.                 |
    +----------+-----------------------------------------------------------+
@@ -2714,9 +2719,9 @@ The following table describes the template and the function parameters.
    +----------+-----------------------------------------------------------+
    | \_src2   | Input single-channel image                                |
    +----------+-----------------------------------------------------------+
-   | \_src3   | Input single-channel image                                |
+   | \_src3   | Input single-channel image (only for 3 and 4 input config)|
    +----------+-----------------------------------------------------------+
-   | \_src4   | Input single-channel image                                |
+   | \_src4   | Input single-channel image (only for 4 input config)      |
    +----------+-----------------------------------------------------------+
    | \_dst    | Output multi-channel image                                |
    +----------+-----------------------------------------------------------+
@@ -11793,7 +11798,7 @@ dst(x,y)=max( src1(x,y) ,src2(x,y) )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void Max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -11893,7 +11898,7 @@ dst(I)=maxS( src(I) ,scl )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void MaxS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void maxS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -12116,7 +12121,7 @@ dst(I)=min( src1(I) ,src2(I) )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void Min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -12216,7 +12221,7 @@ dst(x,y)=minS( src(x,y) ,scl )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void MinS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void minS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions

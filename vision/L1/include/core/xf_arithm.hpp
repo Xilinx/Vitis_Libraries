@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #ifndef _XF_ARITHM_HPP_
 #define _XF_ARITHM_HPP_
 
@@ -34,7 +33,7 @@ class kernel_add {
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
 // clang-format off
         #pragma HLS inline
-// clang-format on
+        // clang-format on
         // for the input type of 8U
         if ((DEPTH == XF_8UP) || (DEPTH == XF_24UP)) {
             ap_uint<(XF_PIXELDEPTH(DEPTH) + 1)> result_temp;
@@ -67,7 +66,7 @@ class kernel_sub {
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
 // clang-format off
         #pragma HLS inline
-// clang-format on
+        // clang-format on
         // for the input type of 8U
         if ((DEPTH == XF_8UP) || (DEPTH == XF_24UP)) {
             ap_int<(XF_PIXELDEPTH(DEPTH) + 1)> result_temp;
@@ -100,7 +99,7 @@ class kernel_subRS {
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
 // clang-format off
         #pragma HLS inline
-// clang-format on
+        // clang-format on
         // for the input type of 8U
         if ((DEPTH == XF_8UP) || (DEPTH == XF_24UP)) {
             ap_int<(XF_PIXELDEPTH(DEPTH) + 1)> result_temp;
@@ -134,7 +133,7 @@ class kernel_max {
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
 // clang-format off
         #pragma HLS inline
-// clang-format on
+        // clang-format on
         XF_PTNAME(DEPTH) Max = 0;
         if (p > q) {
             Max = p;
@@ -152,7 +151,7 @@ class kernel_min {
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int _policytype) {
 // clang-format off
         #pragma HLS inline
-// clang-format on
+        // clang-format on
         XF_PTNAME(DEPTH) Min = 0;
         if (p < q) {
             Min = p;
@@ -170,7 +169,7 @@ class kernel_compare {
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int comp_op) {
 // clang-format off
         #pragma HLS inline
-// clang-format on
+        // clang-format on
         XF_PTNAME(DEPTH) Min = 0;
         switch (comp_op) {
             case XF_CMP_EQ:
@@ -202,7 +201,7 @@ class kernel_set {
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int comp_op) {
 // clang-format off
         #pragma HLS inline
-// clang-format on
+        // clang-format on
 
         r = (XF_PTNAME(DEPTH))q;
     }
@@ -213,7 +212,7 @@ class kernel_zero {
     static void apply(XF_PTNAME(DEPTH) & p, XF_PTNAME(DEPTH) & q, XF_PTNAME(DEPTH) & r, int comp_op) {
 // clang-format off
         #pragma HLS inline
-// clang-format on
+        // clang-format on
 
         r = 0;
     }
@@ -247,14 +246,14 @@ rowLoop:
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-// clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
 // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
-// clang-format on
+            // clang-format on
 
             val_src1 =
                 (XF_SNAME(WORDWIDTH_SRC))(_src1.read(i * image_width + j)); // reading the data from the first stream
@@ -265,7 +264,7 @@ rowLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += XF_PIXELDEPTH(DEPTH)) {
 // clang-format off
                 #pragma HLS unroll
-// clang-format on
+                // clang-format on
                 p = val_src1.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
                 q = val_src2.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
                 result = __ABS(p - q);                     // performing absolute difference for the input pixels
@@ -305,14 +304,14 @@ rowLoop:
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-// clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
 // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
-// clang-format on
+            // clang-format on
 
             val_src1 = (XF_SNAME(WORDWIDTH_SRC))(_src1.read(
                 i * image_width + j)); //(_src1.data[i*image_width+j]); // reading the data from the first stream
@@ -323,7 +322,7 @@ rowLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
 // clang-format off
                 #pragma HLS unroll
-// clang-format on
+                // clang-format on
                 p = val_src1.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
                 q = val_src2.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
                 result = p & q;                            // performing the bitwiseAND operation
@@ -363,14 +362,14 @@ rowLoop:
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-// clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
 // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
-// clang-format on
+            // clang-format on
             val_src1 = (XF_SNAME(WORDWIDTH_SRC))(_src1.read(
                 i * image_width + j)); //(_src1.data[i*image_width+j]);// reading the data from the first stream
             val_src2 = (XF_SNAME(WORDWIDTH_SRC))(_src2.read(
@@ -380,7 +379,7 @@ rowLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
 // clang-format off
                 #pragma HLS unroll
-// clang-format on
+                // clang-format on
                 p = val_src1.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
                 q = val_src2.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
                 result = p | q;                            // performing the bitwiseOR operation
@@ -419,21 +418,21 @@ rowLoop:
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-// clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
 // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
-// clang-format on
+            // clang-format on
             val_src = (XF_SNAME(WORDWIDTH_SRC))(_src.read(i * image_width + j)); // reading the data from the stream
 
         procLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
 // clang-format off
                 #pragma HLS unroll
-// clang-format on
+                // clang-format on
                 p = val_src.range(k + (STEP - 1), k);      // Get bits from certain range of positions.
                 result = ~p;                               // performing the bitwiseNOT operation
                 val_dst.range(k + (STEP - 1), k) = result; // Set bits in a range of positions.
@@ -472,14 +471,14 @@ rowLoop:
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-// clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
 // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
-// clang-format on
+            // clang-format on
             val_src1 =
                 (XF_SNAME(WORDWIDTH_SRC))(_src1.read(i * image_width + j)); // reading the data from the first stream
             val_src2 =
@@ -489,7 +488,7 @@ rowLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
 // clang-format off
                 #pragma HLS unroll
-// clang-format on
+                // clang-format on
                 p = val_src1.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
                 q = val_src2.range(k + (STEP - 1), k);     // Get bits from certain range of positions.
                 result = p ^ q;                            // performing the bitwise XOR operation
@@ -541,14 +540,14 @@ rowLoop:
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-// clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
 // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
-// clang-format on
+            // clang-format on
 
             val_src1 =
                 (XF_SNAME(WORDWIDTH_SRC))(src1.read(i * image_width + j)); // reading the data from the first stream
@@ -558,7 +557,7 @@ rowLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
 // clang-format off
                 #pragma HLS unroll
-// clang-format on
+                // clang-format on
                 p = val_src1.range(k + (STEP - 1), k); // Get bits from certain range of positions.
                 q = val_src2.range(k + (STEP - 1), k); // Get bits from certain range of positions.
 
@@ -598,15 +597,14 @@ void absdiff(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
 
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
-    	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) &&
-    			"NPC must be XF_NPPC1 or XF_NPPC8 ");
-    	assert(((SRC_T == XF_8UC1) ||(SRC_T == XF_8UC3)) &&
-    			"TYPE must be XF_8UC1 or XF_8UC3");
-    	assert(((_src1.rows <= ROWS ) && (_src1.cols <= COLS) && (_src2.rows <= ROWS ) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
+    assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS) && (_src2.rows <= ROWS) && (_src2.cols <= COLS)) &&
+           "ROWS and COLS should be greater than input image");
 #endif
     xFAbsDiffKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                     XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src1, _src2, _dst, _src1.rows, image_width);
@@ -620,11 +618,10 @@ void bitwise_and(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
 // clang-format on
 #ifndef __SYNTHESIS__
-    	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) &&
-    			"NPC must be XF_NPPC1 or XF_NPPC8 ");
-    	assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) &&
-    			"Image type must be XF_8UC1 or XF_8UC3 ");
-    	assert(((_src1.rows <= ROWS ) && (_src1.cols <= COLS) && (_src2.rows <= ROWS ) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "Image type must be XF_8UC1 or XF_8UC3 ");
+    assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS) && (_src2.rows <= ROWS) && (_src2.cols <= COLS)) &&
+           "ROWS and COLS should be greater than input image");
 #endif
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 
@@ -641,11 +638,10 @@ void bitwise_or(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
-    	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) &&
-    			"NPC must be XF_NPPC1 or XF_NPPC8 ");
-    	assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) &&
-    			"Image type must be XF_8UC1 or XF_8UC3 ");
-    	assert(((_src1.rows <= ROWS ) && (_src1.cols <= COLS) && (_src2.rows <= ROWS ) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "Image type must be XF_8UC1 or XF_8UC3 ");
+    assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS) && (_src2.rows <= ROWS) && (_src2.cols <= COLS)) &&
+           "ROWS and COLS should be greater than input image");
 #endif
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 
@@ -665,7 +661,7 @@ void bitwise_not(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<SRC_T, RO
     uint16_t image_width = src.cols >> XF_BITSHIFT(NPC);
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
 
     xFBitwiseNOTKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
                        XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src, dst, src.rows, image_width);
@@ -683,7 +679,7 @@ void bitwise_xor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 #endif
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
 
     uint16_t image_width = src1.cols >> XF_BITSHIFT(NPC);
 
@@ -754,14 +750,14 @@ rowLoop:
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
-// clang-format on
+    // clang-format on
 
     colLoop:
         for (j = 0; j < image_width; j++) {
 // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
             #pragma HLS pipeline
-// clang-format on
+            // clang-format on
             val_src1 =
                 (XF_SNAME(WORDWIDTH_SRC))(_src1.read(i * image_width + j)); // reading the data from the first stream
             if (USE_SRC2) {
@@ -771,7 +767,7 @@ rowLoop:
             for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
 // clang-format off
                 #pragma HLS unroll
-// clang-format on
+                // clang-format on
                 p = val_src1.range(k + (STEP - 1), k); // Get bits from certain range of positions.
                 if (USE_SRC2) {
                     q = val_src2.range(k + (STEP - 1), k);
@@ -794,11 +790,11 @@ void add(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3) ||  (SRC_T == XF_16SC3)) &&
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3) || (SRC_T == XF_16SC3)) &&
            "TYPE must be XF_8UC1,XF_8UC3,XF_16SC1 or XF_16SC3");
     assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
@@ -816,7 +812,7 @@ void addS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
@@ -842,7 +838,7 @@ void SubS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
@@ -868,11 +864,11 @@ void SubRS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1) ) && "TYPE must be XF_8UC1  ");
+    assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1  ");
     assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
@@ -893,7 +889,7 @@ void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
@@ -915,11 +911,11 @@ void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-     assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1");
+    assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1");
     assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
@@ -940,12 +936,12 @@ void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
-   assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
+    assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
 
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
@@ -961,7 +957,7 @@ void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
@@ -986,12 +982,12 @@ void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
-   assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
+    assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
     xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
@@ -1005,7 +1001,7 @@ void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
@@ -1032,12 +1028,12 @@ void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "TYPE must be XF_8UC1 or XF_8UC3");
-   assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
+    assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
 
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
@@ -1053,7 +1049,7 @@ void set(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
@@ -1075,7 +1071,7 @@ template <int SRC_T, int ROWS, int COLS, int NPC = 1>
 void zero(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
     #pragma HLS inline off
-// clang-format on
+    // clang-format on
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");

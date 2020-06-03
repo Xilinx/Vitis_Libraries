@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     in_gray = cv::imread(argv[1], 0);  // read image
     in_gray1 = cv::imread(argv[2], 0); // read image
 #else
-	 in_gray = cv::imread(argv[1], 1);  // read image
+    in_gray = cv::imread(argv[1], 1);  // read image
     in_gray1 = cv::imread(argv[2], 1); // read image
 #endif
     if (in_gray.data == NULL) {
@@ -41,17 +41,17 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Cannot open image %s\n", argv[2]);
         return EXIT_FAILURE;
     }
-    int height=in_gray.rows;
-    int width=in_gray.cols;	
-	#if GRAY
+    int height = in_gray.rows;
+    int width = in_gray.cols;
+#if GRAY
     ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC1);
     out_gray.create(in_gray.rows, in_gray.cols, CV_8UC1);
     diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
-	#else
+#else
     ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
     out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
     diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
-	#endif
+#endif
     float alpha = 0.2;
     float beta = 0.8;
     float gama = 0.0;
@@ -124,7 +124,6 @@ int main(int argc, char** argv) {
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel));
 
-
     // Copy Result from Device Global Memory to Host Local Memory
     queue.enqueueReadBuffer(buffer_outImage, // This buffers data will be read
                             CL_TRUE,         // blocking call
@@ -136,7 +135,7 @@ int main(int argc, char** argv) {
     // Clean up:
     queue.finish();
 
-   cv::imwrite("out_hls.jpg", out_gray);
+    cv::imwrite("out_hls.jpg", out_gray);
 
     // Compute absolute difference image
     absdiff(out_gray, ocv_ref, diff);

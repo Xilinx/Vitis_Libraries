@@ -594,7 +594,7 @@ int main(int argc, char** argv) {
         gly.release();
         outputimage.release();
 
-// Print PyrDown outputimage
+        // Print PyrDown outputimage
 
         for (int kk = 0; kk < NUM_LEVELS; kk++) {
             sprintf(pyr_out_img_name, "pyr1_out_img%d_%d.png", i, kk);
@@ -602,7 +602,6 @@ int main(int argc, char** argv) {
             xf::cv::imwrite(pyr_out_img_name, imagepyr1[kk]);
             xf::cv::imwrite(pyr_out_img_name2, imagepyr2[kk]);
         }
-
     }
     im0.data = NULL;
     im1.data = NULL;
