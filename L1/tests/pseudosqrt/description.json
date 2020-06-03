@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_pseudosqrt", 
+    "name": "Xilinx Pseudo Sqrt", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,33 +1,16 @@
 {
-    "name": "jks.L2_pomatrixinverse_opencl", 
+    "name": "Xilinx Symmetric Matrix Inverse", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
         "u250", 
-        "u200", 
-        "u280"
+        "u200"
     ], 
     "platform_blacklist": [
         "zc"
     ], 
     "platform_properties": {
-        "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
-                }
-            }, 
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u280.ini"
-                    ]
-                }
-            }
-        }, 
         "u250": {
             "host": {
                 "compiler": {
@@ -95,7 +78,21 @@
                 {
                     "location": "kernel_pomatrixinverse.cpp", 
                     "frequency": 300.0, 
-                    "name": "kernel_pomatrixinverse_0"
+                    "clflags": " -D KERNEL_NAME=kernel_pomatrixinverse_0", 
+                    "name": "kernel_pomatrixinverse_0", 
+                    "num_compute_units": 1, 
+                    "compute_units": [
+                        {
+                            "name": "kernel_pomatrixinverse_0_1", 
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "dataA", 
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 
@@ -121,5 +118,5 @@
         ], 
         "category": "canary"
     }, 
-    "gui": false
+    "gui": true
 }

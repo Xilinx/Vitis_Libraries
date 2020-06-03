@@ -43,10 +43,16 @@ copyright = '2019, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2019.2'
+version = '2020.1'
 # The full version, including alpha/beta/rc tags
-release = '2019.2 release'
+release = '2020.1 release'
+html_last_updated_fmt = '%B %d, %Y'
 
+rst_epilog = """
+.. |ProjectVersion| replace:: {versionnum}
+""".format(
+versionnum = version,
+)
 
 # -- General configuration ---------------------------------------------------
 
