@@ -80,6 +80,7 @@ else
 CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
 $(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
 endif
+CXX := xcpp
 endif
 else ifeq ($(HOST_ARCH), aarch64)
 CXX := $(XILINX_VITIS)/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++

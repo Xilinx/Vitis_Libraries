@@ -1,11 +1,49 @@
 {
-    "name": "jks.L2_gesvdj_opencl", 
+    "name": "Xilinx GESVDJ", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }, 
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/kernel_gesvdj.xclbin", 
@@ -16,11 +54,10 @@
         "host_exe": "test_gesvdj.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/benchmarks/gesvdj/test_gesvdj.cpp", 
+                "test_gesvdj.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/benchmarks/gesvdj", 
                 "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/ext/MatrixGen"
             ], 
@@ -30,14 +67,6 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/benchmarks/gesvdj", 
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/ext"
-            ]
-        }, 
-        "linker": {
-            "includepaths": [
-                "LIB_DIR/L2/benchmarks/gesvdj", 
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/ext"
             ]
@@ -47,7 +76,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/benchmarks/gesvdj/kernel_gesvdj.cpp", 
+                    "location": "kernel_gesvdj.cpp", 
                     "frequency": 300.0, 
                     "name": "kernel_gesvdj_0"
                 }
@@ -74,5 +103,6 @@
             "vitis_hw"
         ], 
         "category": "canary"
-    }
+    }, 
+    "gui": false
 }

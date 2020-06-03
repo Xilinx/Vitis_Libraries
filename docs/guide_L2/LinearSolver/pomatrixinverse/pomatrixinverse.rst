@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: POMATRIXINVERSE
+   :description: This function computes the inverse matrix of math:A
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *******************************************************
 Symmetric Matrix Inverse (POMATRIXINVERSE)
 *******************************************************

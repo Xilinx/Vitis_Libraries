@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GESVJ, Alveo, Lapack, Jacobi, matrix
+   :description: The hardware resources and performance for double datatype general matrix (GESVDJ).
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *******************************************************
 Singular Value Decomposition for general matrix (GESVJ)
 *******************************************************

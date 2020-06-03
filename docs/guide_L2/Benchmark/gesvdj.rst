@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GESVDJ, Alveo, Lapack, Jacobi, matrix
+   :description: The hardware resources and performance for double and float datatype for symmetric matrix (GESVDJ).
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **********************************************************
 Singular Value Decomposition for symmetric matrix (GESVDJ)
 **********************************************************

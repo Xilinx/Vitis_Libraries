@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: SYEVJ, Eigenvalue, Solver, Jacobi, Eigen
+   :description: Symmetric Matrix Jacobi based Eigen Value Decomposition (SYEVJ).
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *******************************************************
 Eigenvalue Solver (SYEVJ)
 *******************************************************

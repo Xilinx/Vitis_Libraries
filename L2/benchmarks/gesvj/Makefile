@@ -1,429 +1,224 @@
 #
-#Copyright 2019 Xilinx, Inc.
+# Copyright 2019 Xilinx, Inc.
 #
-#Licensed under the Apache License, Version 2.0(the "License");
-#you may not use this file except in compliance with the License.
-#You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#http: // www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#Unless required by applicable law or agreed to in writing, software
-#distributed under the License is distributed on an "AS IS" BASIS,
-#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#See the License for the specific language governing permissions and
-#limitations under the License.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
-
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
-#project common settings
-
-MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/benchmarks/*}')
-
-.SECONDEXPANSION:
-
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
-#common tool setup
-
-#MK_INC_BEGIN vitis_help.mk
-
+############################## Help Section ##############################
 .PHONY: help
 
 help::
-	@echo ""
-	@echo "Makefile Usage:"
-	@echo ""
-	@echo "  make build TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform>"
-	@echo "      Command to generate the design for specified target and device."
-	@echo ""
-	@echo "      TARGET defaults to sw_emu."
-	@echo ""
-	@echo "      DEVICE is case-insensitive and support awk regex."
-	@echo "      For example, \`make xclbin TARGET=hw DEVICE='u200.*qdma'\`"
-	@echo "      It can also be an absolute path to platform file."
-	@echo ""
-	@echo "      Use 'host' or 'xclbin' as make target to build only wanted binary."
-	@echo ""
-	@echo "  make run TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform>"
-	@echo "      Command to run application in emulation."
-	@echo ""
-	@echo "  make clean "
-	@echo "      Command to remove the generated non-hardware files."
-	@echo ""
-	@echo "  make cleanall"
-	@echo "      Command to remove all the generated files."
-	@echo ""
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to generate the design for specified Target and Shell."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make sd_card TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to prepare sd_card files."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make xclbin TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to build xclbin application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  make host DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "      Command to build host application."
+	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) ""
+	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
+	$(ECHO) ""
 
-#MK_INC_END vitis_help.mk
+############################## Setting up Project Variables ##############################
+MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/benchmarks/gesvj/*}')
+CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+XFLIB_DIR = $(XF_PROJ_ROOT)
 
-#MK_INC_BEGIN vivado.mk
-
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VIVADO))
-XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
-endif
-export XILINX_VIVADO
-
-.PHONY: check_vivado
-check_vivado:
-ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
-	@echo "Cannot locate Vivado installation. Please set XILINX_VIVADO variable." && false
-endif
-
-export PATH := $(XILINX_VIVADO)/bin:$(PATH)
-
-#MK_INC_END vivado.mk
-
-#MK_INC_BEGIN vitis.mk
-
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VITIS))
-XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
-endif
-export XILINX_VITIS
-.PHONY: check_vpp
-check_vpp:
-ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
-	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
-endif
-
-ifeq (,$(XILINX_XRT))
-XILINX_XRT = /opt/xilinx/xrt
-endif
-export XILINX_XRT
-.PHONY: check_xrt
-check_xrt:
-ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
-	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
-endif
-
-export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
-
-ifeq (,$(LD_LIBRARY_PATH))
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib
-else
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
-endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-#Target check
 TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
-$(error TARGET is not sw_emu, hw_emu or hw)
+HOST_ARCH := x86
+SYSROOT := ${SYSROOT}
+DEVICE ?= xilinx_u200_xdma_201830_2
+
+include ./utils.mk
+
+XDEVICE := $(call device2xsa, $(DEVICE))
+TEMP_DIR := _x_temp.$(TARGET).$(XDEVICE)
+TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XDEVICE)
+BUILD_DIR := build_dir.$(TARGET).$(XDEVICE)
+BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
+EMCONFIG_DIR := $(BUILD_DIR)
+
+# Setting tools
+VPP := v++
+SDCARD := sd_card
+EMU_DIR := $(SDCARD)/data/emulation
+
+############################## Setting up Host Variables ##############################
+#Include Required Host Source Files
+HOST_SRCS += $(XFLIB_DIR)/L2/benchmarks/gesvj/test_gesvj.cpp
+HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
+
+CXXFLAGS += -I$(XFLIB_DIR)/L2/benchmarks/gesvj
+CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+CXXFLAGS += -I$(XFLIB_DIR)/ext/MatrixGen
+
+
+
+# Host compiler global settings
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14  -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread 
+LDFLAGS += -L$(XILINX_XRT)/lib -lxilinxopencl -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE 
+LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+CXXFLAGS += -fmessage-length=0 -O3 
+CXXFLAGS +=-I$(CUR_DIR)/src/ 
+
+
+EXE_FILE := test_gesvj.exe
+SOC_HOST_ARGS :=  -xclbin $(BUILD_DIR)/kernel_gesvj.xclbin
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/kernel_gesvj.xclbin
+ifneq ($(HOST_ARCH), x86)
+	LDFLAGS += --sysroot=$(SYSROOT)
 endif
 
-#MK_INC_END vitis.mk
-
-#MK_INC_BEGIN vitis_set_platform.mk
-
-ifneq (,$(wildcard $(DEVICE)))
-#Use DEVICE as a file path
-XPLATFORM := $(DEVICE)
-else
-#Use DEVICE as a file name pattern
-DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-#Match the name
-ifneq (,$(PLATFORM_REPO_PATHS))
-XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-endif
-
-define MSG_PLATFORM
-No platform matched pattern '$(DEVICE)'.
-Avaialble platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
-endef
-export MSG_PLATFORM
-
-define MSG_DEVICE
-More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
-endef
-export MSG_DEVICE
-
-.PHONY: check_platform
-check_platform:
-ifeq (,$(XPLATFORM))
-	@echo "$${MSG_PLATFORM}" && false
-endif
-ifneq (,$(word 2,$(XPLATFORM)))
-	@echo "$${MSG_DEVICE}" && false
-endif
-
-XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
-
-# MK_INC_END vitis_set_platform.mk
-
-# -----------------------------------------------------------------------------
-# BEGIN_XF_MK_USER_SECTION
-# -----------------------------------------------------------------------------
-
-.PHONY: debug
-debug:
-	@echo "KERNELS ar"
-	@echo "KERNELS are $(KERNELS)"
-	@echo "> KERNEL_NAMES are $(KERNEL_NAMES)"
-	@echo "> XO_DIR is $(XO_DIR)"
-	@echo "> kernel_gesvj_0_SRCS is $(kernel_gesvj_0_SRCS)"
-	@echo "> kernel_gesvj_0_HDRS is $(kernel_gesvj_0_HDRS)"
-	@echo "> kernle_gesvj_0_VPP_CFLAGS is $(kernel_gesvj_0_VPP_CFLAGS)"
-
-XFLIB_DIR = $(abspath $(XF_PROJ_ROOT))
-KSRC_DIR = $(XFLIB_DIR)/L2/benchmarks/gesvj
-
-XCLBIN_NAME := kernel_gesvj
-KERNELS := kernel_gesvj_0:kernel_gesvj.cpp
-
-kernel_gesvj_0_EXTRA_HDRS = $(XFLIB_DIR)/L2/include/xf_solver_L2.hpp
-# FIXME still many missing
-# must provide path
-
-VPP_CFLAGS += -I$(HLS_DIR)
-kernel_gesvj_0_VPP_CFLAGS += -I$(XFLIB_DIR)/L2/include \
-		       -I$(XFLIB_DIR)/ext
-
+############################## Setting up Kernel Variables ##############################
+# Kernel compiler global settings
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
-# U280
-kernel_gesvj_0_VPP_CFLAGS += \
-  --sp kernel_gesvj_0_1.dataA:DDR[0] \
-  --sp kernel_gesvj_0_1.dataU:DDR[0] \
-  --sp kernel_gesvj_0_1.dataV:DDR[0] \
-  --sp kernel_gesvj_0_1.sigma:DDR[0]
-CXXFLAGS += -DUSE_DDR
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/ || /u250/'))
-kernel_gesvj_0_VPP_CFLAGS += \
-  --sp kernel_gesvj_0_1.dataA:bank0 \
-  --sp kernel_gesvj_0_1.dataU:bank0 \
-  --sp kernel_gesvj_0_1.dataV:bank0 \
-  --sp kernel_gesvj_0_1.sigma:bank0
+CXXFLAGS += -DUSE_HBM
+VPP_FLAGS += --config conn_u280.ini
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS += --config conn_u250.ini
 CXXFLAGS += -DUSE_DDR
 endif
 
-XFREQUENCY := 300
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+VPP_FLAGS += --config conn_u200.ini
+CXXFLAGS += -DUSE_DDR
+endif
 
-# -----------------------------------------------------------------------------
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
+LDCLFLAGS += --optimize 2 --jobs 8
+ifeq ($(TARGET),sw_emu)
+VPP_CFLAGS += -D VIVADO_HLS_SIM
+endif
+ifeq ($(TARGET),hw_emu)
+VPP_CFLAGS += -D VIVADO_HLS_SIM
+endif
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/benchmarks/gesvj
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
+VPP_FLAGS += -I$(XFLIB_DIR)/ext
 
-SRC_DIR = $(CUR_DIR)
 
-EXE_NAME = test_gesvj
-HOST_ARGS = -xclbin $(XCLBIN_FILE) 
+############################## Declaring Binary Containers ##############################
+BINARY_CONTAINERS += $(BUILD_DIR)/kernel_gesvj.xclbin
+BINARY_CONTAINER_kernel_gesvj_OBJS += $(TEMP_DIR)/kernel_gesvj_0.xo
 
-SRCS = test_gesvj.cpp
+############################## Setting Targets ##############################
+CP = cp -rf
 
-# must provide path
-test_gesvj_EXTRA_HDRS += $(EXT_DIR)/xcl2/xcl2.hpp
-test_gesvj_CXXFLAGS += -I $(EXT_DIR)/xcl2 -I $(KSRC_DIR) -I $(EXT_DIR)/MatrixGen/
-
-CXXFLAGS += -D XDEVICE=$(XDEVICE) -g
-
-# EXTRA_OBJS cannot be compiled from SRC_DIR, user should provide the rule
-EXTRA_OBJS += xcl2
-
-EXT_DIR = $(XFLIB_DIR)/ext
-xcl2_SRCS = $(EXT_DIR)/xcl2/xcl2.cpp
-xcl2_HDRS = $(EXT_DIR)/xcl2/xcl2.hpp
-xcl2_CXXFLAGS = -I $(EXT_DIR)/xcl2
-
-# -----------------------------------------------------------------------------
-# END_XF_MK_USER_SECTION
-# -----------------------------------------------------------------------------
-
-.PHONY: all
-all: xclbin
-
-# MK_INC_BEGIN vitis_kernel_rules.mk
-
-VPP_DIR_BASE ?= _x
-XO_DIR_BASE ?= xo
-XCLBIN_DIR_BASE ?= xclbin
-
-XCLBIN_DIR_SUFFIX ?= _$(XDEVICE)_$(TARGET)
-
-VPP_DIR = $(CUR_DIR)/$(VPP_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
-XO_DIR = $(CUR_DIR)/$(XO_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
-XCLBIN_DIR = $(CUR_DIR)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
-
-XFREQUENCY ?= 300
-
-VPP = v++
-VPP_CFLAGS += -I$(KSRC_DIR)
-VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
-VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 8 \
-  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
-
-KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
-XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)
-XCLBIN_FILE ?= $(XCLBIN_DIR)/$(XCLBIN_NAME).xclbin
-
-define kernel_src_dep
-kernelname := $(word 1, $(subst :, ,$(1)))
-kernelfile := $(if $(findstring :, $(1)),$(word 2, $(subst :, ,$(1))),$$(kernelname).cpp)
-$$(kernelname)_SRCS := $(KSRC_DIR)/$$(kernelfile)
-$$(kernelname)_SRCS += $$($$(kernelname)_EXTRA_SRCS)
-endef
-
-$(foreach k,$(KERNELS),$(eval $(call kernel_src_dep,$(k))))
-
-define kernel_hdr_dep
-kernelname := $(word 1, $(subst :, ,$(1)))
-kernelfile := $(if $(findstring :, $(1)),$(basename $(word 2, $(subst :, ,$(1)))),$$(kernelname))
-$$(kernelname)_HDRS := $$(wildcard $(KSRC_DIR)/$$(kernelfile).h $(KSRC_DIR)/$$(kernelfile).hpp)
-$$(kernelname)_HDRS += $$($(1)_EXTRA_HDRS)
-endef
-
-$(foreach k,$(KERNELS),$(eval $(call kernel_hdr_dep,$(k))))
-
-$(XO_DIR)/%.xo: VPP_CFLAGS += $($(*)_VPP_CFLAGS)
-$(XO_DIR)/%.xo: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp
-	@echo -e "----\nCompiling kernel $*..."
-	mkdir -p $(XO_DIR)
-	$(VPP) -o $@ --kernel $* --compile $(filter %.cpp,$^) \
-		$(VPP_CFLAGS)
-
-$(XCLBIN_FILE): $(XO_FILES) | check_vpp
-	@echo -e "----\nCompiling xclbin..."
-	mkdir -p $(XCLBIN_DIR)
-	$(VPP) -o $@ --link $^ \
-		$(VPP_CFLAGS) $(VPP_LFLAGS) \
-		$(foreach k,$(KERNEL_NAMES),$($(k)_VPP_CFLAGS)) \
-		$(foreach k,$(KERNEL_NAMES),$($(k)_VPP_LFLAGS))
-
-.PHONY: xo xclbin
-
-xo: check_vpp check_platform $(XO_FILES)
-
-xclbin: check_vpp check_platform $(XCLBIN_FILE)
-
-# MK_INC_END vitis_kernel_rules.mk
-
-# MK_INC_BEGIN vitis_host_rules.mk
-
-OBJ_DIR_BASE ?= obj
-BIN_DIR_BASE ?= bin
-
-BIN_DIR_SUFFIX ?= _$(XDEVICE)
-
-OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
-BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
-
-CXX := xcpp
-CC := gcc
-
-CXXFLAGS += -std=c++14 -fPIC \
-	-I$(SRC_DIR) -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include \
-	-Wall -Wno-unknown-pragmas -Wno-unused-label -pthread
-CFLAGS +=
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -lxilinxopencl
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr \
-	   -lIp_floating_point_v7_0_bitacc_cmodel
-
-OBJ_FILES = $(foreach s,$(SRCS),$(OBJ_DIR)/$(basename $(s)).o)
-
-define host_hdr_dep
-$(1)_HDRS := $$(wildcard $(SRC_DIR)/$(1).h $(SRC_DIR)/$(1).hpp)
-$(1)_HDRS += $$($(1)_EXTRA_HDRS)
-endef
-
-$(foreach s,$(SRCS),$(eval $(call host_hdr_dep,$(basename $(s)))))
-
-$(OBJ_DIR)/%.o: CXXFLAGS += $($(*)_CXXFLAGS)
-
-$(OBJ_FILES): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $$($$(*)_HDRS) | check_vpp check_xrt check_platform
-	@echo -e "----\nCompiling object $*..."
-	mkdir -p $(@D)
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
-
-EXTRA_OBJ_FILES = $(foreach f,$(EXTRA_OBJS),$(OBJ_DIR)/$(f).o)
-
-$(EXTRA_OBJ_FILES): $(OBJ_DIR)/%.o: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp check_xrt check_platform
-	@echo -e "----\nCompiling extra object $@..."
-	mkdir -p $(@D)
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
-
-EXE_EXT ?= exe
-EXE_FILE ?= $(BIN_DIR)/$(EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
-
-$(EXE_FILE): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platform
-	@echo -e "----\nCompiling host $(notdir $@)..."
-	mkdir -p $(BIN_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+.PHONY: all clean cleanall docs emconfig
+all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
 
 .PHONY: host
-host: check_vpp check_xrt check_platform $(EXE_FILE)
+host: $(EXE_FILE) | check_xrt
 
-# MK_INC_END vitis_host_rules.mk
+.PHONY: xclbin
+xclbin: check_vpp | $(BINARY_CONTAINERS)
 
-# MK_INC_BEGIN vitis_test_rules.mk
+############################## Setting Rules for Binary Containers (Building Kernels) ##############################
+$(TEMP_DIR)/kernel_gesvj_0.xo: $(XFLIB_DIR)/L2/benchmarks/gesvj/kernel_gesvj.cpp
+	$(ECHO) "Compiling Kernel: kernel_gesvj_0"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(kernel_gesvj_0_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k kernel_gesvj_0 -I'$(<D)' -o $@ $^
 
-# -----------------------------------------------------------------------------
-#                                clean up
+$(BUILD_DIR)/kernel_gesvj.xclbin: $(BINARY_CONTAINER_kernel_gesvj_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_gesvj -l $(LDCLFLAGS) $(LDCLFLAGS_kernel_gesvj) -o'$@' $(+)
 
-clean:
-ifneq (,$(OBJ_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(OBJ_DIR_BASE)*
-endif
-ifneq (,$(BIN_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*
-endif
+############################## Setting Rules for Host (Building Host Executable) ##############################
+$(EXE_FILE): $(HOST_SRCS) | check_xrt
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
-cleanx:
-ifneq (,$(VPP_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(VPP_DIR_BASE)*
-endif
-ifneq (,$(XO_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(XO_DIR_BASE)*
-endif
-ifneq (,$(XCLBIN_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(XCLBIN_DIR_BASE)*
-endif
-ifneq (,$(BIN_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*/emconfig.json
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(XPLATFORM) --od $(EMCONFIG_DIR)
+
+############################## Setting Essential Checks and Running Rules ##############################
+run: all
+ifeq ($(findstring zc*, $(DEVICE)), zc*)
+$(error This example is not supported for $(DEVICE))
 endif
 
-cleanall: clean cleanx
-	rm -rf *.log plist $(DATA_STAMP)
-
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
-#simulation run
-
-$(BIN_DIR)/emconfig.json :
-	emconfigutil --platform $(XPLATFORM) --od $(BIN_DIR)
-
-ifeq ($(TARGET),sw_emu)
-RUN_ENV += export XCL_EMULATION_MODE=sw_emu;
-EMU_CONFIG = $(BIN_DIR)/emconfig.json
-else ifeq ($(TARGET),hw_emu)
-RUN_ENV += export XCL_EMULATION_MODE=hw_emu;
-EMU_CONFIG = $(BIN_DIR)/emconfig.json
-else ifeq ($(TARGET),hw)
-RUN_ENV += echo "TARGET=hw";
-EMU_CONFIG =
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+ifeq ($(HOST_ARCH), x86)
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXE_FILE) $(HOST_ARGS)
+else
+	mkdir -p $(EMU_DIR)
+	$(CP) $(XILINX_VITIS)/data/emulation/unified $(EMU_DIR)
+	mkfatimg $(SDCARD) $(SDCARD).img 500000
+	launch_emulator -no-reboot -runtime ocl -t $(TARGET) -sd-card-image $(SDCARD).img -device-family $(DEV_FAM)
+endif
+else
+ifeq ($(HOST_ARCH), x86)
+	./$(EXE_FILE) $(HOST_ARGS)
+else
+	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
+endif
 endif
 
-.PHONY: run check
+############################## Preparing sdcard folder ##############################
+sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+ifneq ($(HOST_ARCH), x86)
+	mkdir -p $(SDCARD)/$(BUILD_DIR)
+	mkdir -p $(SDCARD)/data
+	$(CP) $(B_NAME)/sw/$(XDEVICE)/boot/generic.readme $(B_NAME)/sw/$(XDEVICE)/xrt/image/* xrt.ini $(EXE_FILE) $(SDCARD)
+	$(CP) $(BUILD_DIR)/*.xclbin $(SDCARD)/$(BUILD_DIR)/
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	$(ECHO) 'cd /mnt/' >> $(SDCARD)/init.sh
+	$(ECHO) 'export XILINX_VITIS=$$PWD' >> $(SDCARD)/init.sh
+	$(ECHO) 'export XCL_EMULATION_MODE=$(TARGET)' >> $(SDCARD)/init.sh
+	$(ECHO) './$(EXE_FILE) $(SOC_HOST_ARGS)' >> $(SDCARD)/init.sh
+	$(ECHO) 'reboot' >> $(SDCARD)/init.sh
+else
+	[ -f $(SDCARD)/BOOT.BIN ] && echo "INFO: BOOT.BIN already exists" || $(CP) $(BUILD_DIR)/sd_card/BOOT.BIN $(SDCARD)/
+	$(ECHO) './$(EXE_FILE) $(SOC_HOST_ARGS)' >> $(SDCARD)/init.sh
+endif
+endif
 
-run: host xclbin $(EMU_CONFIG) $(DATA_STAMP)
-	$(RUN_ENV) \
-	$(EXE_FILE) $(HOST_ARGS)
+############################## Cleaning Rules ##############################
+cleanh:
+	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
-check: run
+cleank:
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* sample_* 
+	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
+	-$(RMDIR) _x_temp.* 
 
-#MK_INC_END vitis_test_rules.mk
+cleanall: cleanh cleank
+	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) *.txt.* $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw
+	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
 
-.PHONY: build
-build: xclbin host
+
+clean: cleanh

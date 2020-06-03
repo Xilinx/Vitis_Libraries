@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GETRF_NOPIVOT, Decomposition
+   :description: This function computes the LU decomposition (without pivoting) of matrix.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *******************************************************
 Lower-Upper Decomposition (GETRF_NOPIVOT)
 *******************************************************

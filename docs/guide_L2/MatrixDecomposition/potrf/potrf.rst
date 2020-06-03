@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: POTRF, Decomposition, Cholesky, SPD, matrix
+   :description: This function computes the Cholesky decomposition of matrix.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 **********************************************
 Cholesky Decomposition for SPD matrix (POTRF)
 **********************************************

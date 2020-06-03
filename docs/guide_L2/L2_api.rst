@@ -15,6 +15,11 @@
 
 ..
 
+.. meta::
+   :keywords: Matrix, Decomposition, Linear, Solver, Eigenvalue
+   :description: Vitis Solver library L2 application programming interface reference.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
 
 Matrix Decomposition
 ====================

@@ -1,11 +1,49 @@
 {
-    "name": "jks.L2_potrf_opencl", 
+    "name": "Xilinx POTRF", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }, 
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/kernel_potrf.xclbin", 
@@ -16,11 +54,10 @@
         "host_exe": "test_potrf.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/potrf/test_potrf.cpp", 
+                "test_potrf.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/potrf", 
                 "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/ext/MatrixGen"
             ], 
@@ -30,14 +67,6 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/tests/potrf", 
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/ext"
-            ]
-        }, 
-        "linker": {
-            "includepaths": [
-                "LIB_DIR/L2/tests/potrf", 
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/ext"
             ]
@@ -47,7 +76,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/potrf/kernel_potrf.cpp", 
+                    "location": "kernel_potrf.cpp", 
                     "frequency": 300.0, 
                     "name": "kernel_potrf_0"
                 }
@@ -74,5 +103,6 @@
             "vitis_hw"
         ], 
         "category": "canary"
-    }
+    }, 
+    "gui": false
 }

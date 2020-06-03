@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Solver, Library, Vitis Solver Library, overview, matrix, linear, eigenvalue
+   :description: Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _overview:
 
 .. toctree::

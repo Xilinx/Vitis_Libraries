@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GESVDJ, SVD, Jacobi, symmetric, matrix, Decomposition, Singular
+   :description: The singular value decomposition (SVD) is a very useful technique for dealing with general dense matrix problems.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 **********************************************************
 Singular Value Decomposition for symmetric matrix (GESVDJ)
 **********************************************************
