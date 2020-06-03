@@ -1,11 +1,49 @@
 {
-    "name": "jks.L2_getrf_nopivot_opencl", 
+    "name": "Xilinx GETRF Without Pivoting", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }, 
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/kernel_getrf_nopivot.xclbin", 
@@ -16,11 +54,10 @@
         "host_exe": "test_getrf_nopivot.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/getrf_nopivot/test_getrf_nopivot.cpp", 
+                "test_getrf_nopivot.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/getrf_nopivot", 
                 "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/ext/MatrixGen"
             ], 
@@ -30,14 +67,6 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/tests/getrf_nopivot", 
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/ext"
-            ]
-        }, 
-        "linker": {
-            "includepaths": [
-                "LIB_DIR/L2/tests/getrf_nopivot", 
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/ext"
             ]
@@ -47,7 +76,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/getrf_nopivot/kernel_getrf_nopivot.cpp", 
+                    "location": "kernel_getrf_nopivot.cpp", 
                     "frequency": 300.0, 
                     "name": "kernel_getrf_nopivot_0"
                 }
@@ -74,5 +103,6 @@
             "vitis_hw"
         ], 
         "category": "canary"
-    }
+    }, 
+    "gui": false
 }

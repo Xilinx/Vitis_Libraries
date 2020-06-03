@@ -1,5 +1,5 @@
 {
     "id": "xf_solver",
-    "name": "vitis solver library",
+    "name": "Vitis Solver Library",
     "description": "Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers."
 }
