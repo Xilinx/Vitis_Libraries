@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GTSV
+   :description: Tri-diagonal linear solver. Compute solution to linear system with a tridiagonal matrix. Parallel Cyclic Reduction method.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *******************************************************
 Triangular Solver (GTSV)
 *******************************************************

@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GTSV, Alveo, Lapack, Jacobi, matrix
+   :description: The hardware resources and performance for Tridiagonal Linear Solver (GTSV).
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **********************************************************
 Tridiagonal Linear Solver (GTSV)
 **********************************************************

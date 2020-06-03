@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Solver, Library, Vitis Solver Library, quality, performance
+   :description: Vitis Solver Library quality and performance results.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 *********************************************
 Quality and Performance

@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GEQRF
+   :description: This function solves a system of linear equation with triangular coefficient matrix along with multiple right-hand side vector.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *******************************************************
 General QR Decomposition (GEQRF)
 *******************************************************

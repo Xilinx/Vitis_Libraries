@@ -14,11 +14,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GELINEARSOLVER
+   :description: This function solves a system of linear equation with general matrix along with multiple right-hand side vector.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *******************************************************
 General Linear Solver (GELINEARSOLVER)
 *******************************************************
 
-This function solves a system of linear equation with general matrix along with multiple right-hand side vector
+This function solves a system of linear equation with general matrix along with multiple right-hand side vector.
 
 .. math::
       Ax=B

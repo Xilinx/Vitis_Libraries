@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: GESVJ, SVD, general, matrix, Decomposition, Singular
+   :description: One-sided Jacobi alogirhm is a classic and robust method to calculate Singular Value Decompositon (SVD).
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *******************************************************
 Singular Value Decomposition for general matrix (GESVJ)
 *******************************************************

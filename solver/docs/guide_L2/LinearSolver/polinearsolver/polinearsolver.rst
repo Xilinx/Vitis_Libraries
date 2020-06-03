@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: POLINEARSOLVER
+   :description: This function solves a system of linear equation with symmetric positive definite (SPD) matrix along with multiple right-hand side vector.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *******************************************************
 Symmetric Linear Solver (POLINEARSOLVER)
 *******************************************************
