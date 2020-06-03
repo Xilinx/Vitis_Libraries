@@ -70,7 +70,48 @@
                     "location": "LIB_DIR/L2/tests/shortest_path_without_weight/kernel/shortestPath_top.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=shortestPath_top", 
-                    "name": "shortestPath_top"
+                    "name": "shortestPath_top",
+		    "num_compute_units": 1,
+		    "compute_units": [
+                        {
+                            "name": "shortestPath_top",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "config",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offset",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "column",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "ddrQue512",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "ddrQue",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "result512",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "result",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "info",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 

@@ -128,7 +128,7 @@ Loop_init_uram:
 #pragma HLS array_partition variable = addrAddrQue complete dim = 1
 
     DT k00, k01, k10, k11, k20, k21, k30;
-    //////////////
+//////////////
 
 loop_calcuIndex0:
     for (int i = 0; i < vertexLen; i++) {
@@ -306,9 +306,9 @@ void calcuIndexWrapper(
     ap_uint<addrWidth>** onChipAddr = new ap_uint<addrWidth>*[uramRow];
     ap_uint<dataOneLine>** valid = new ap_uint<dataOneLine>*[uramRow];
     for (int i = 0; i < uramRow; ++i) {
-        valid[i] = new ap_uint<dataOneLine>[groupUramPart];
+        valid[i] = new ap_uint<dataOneLine>[ groupUramPart ];
         onChipUram[i] = new uint512[groupUramPart];
-        onChipAddr[i] = new ap_uint<addrWidth>[groupUramPart];
+        onChipAddr[i] = new ap_uint<addrWidth>[ groupUramPart ];
     }
 #else
     ap_uint<dataOneLine> valid[uramRow][groupUramPart];

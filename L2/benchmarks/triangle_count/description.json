@@ -73,7 +73,44 @@
                     "location": "LIB_DIR/L2/benchmarks/triangle_count/kernel/TC_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=TC_kernel", 
-                    "name": "TC_kernel"
+                    "name": "TC_kernel",
+		    "num_compute_units": 1,
+		    "compute_units": [
+                        {
+                            "name": "TC_kernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "offsetsG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "rowsG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetsG2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "rowsG2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetsG3",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "rowsG3",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "TC",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 

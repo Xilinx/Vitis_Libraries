@@ -1,5 +1,5 @@
 {
-    "gui": false,
+    "gui": true,
     "name": "Xilinx Connected Component Benchmark", 
     "description": "", 
     "flow": "vitis", 
@@ -73,7 +73,60 @@
                     "location": "LIB_DIR/L2/benchmarks/connected_component/kernel/wcc_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=wcc_kernel", 
-                    "name": "wcc_kernel"
+                    "name": "wcc_kernel",
+		    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "wcc_kernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "columnG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "column512G2",
+                                    "memory": "DDR[1]"
+                                },
+				{
+                                    "name": "column32G2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG2Tmp1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG2Tmp2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "queue512",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "queue",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "result512",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "result32",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 

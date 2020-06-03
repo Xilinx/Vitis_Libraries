@@ -1,5 +1,5 @@
 {
-    "gui": false,
+    "gui": true,
     "name": "Xilinx Convert Csc Csr Test", 
     "description": "", 
     "flow": "vitis", 
@@ -73,7 +73,40 @@
                     "location": "LIB_DIR/L2/tests/convert_csc_csr/kernel/convertCsrCsc_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=convertCsrCsc_kernel", 
-                    "name": "convertCsrCsc_kernel"
+                    "name": "convertCsrCsc_kernel",
+		    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "convertCsrCsc_kernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "offsetG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "indexG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "indexG2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG2Tmp1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG2Tmp2",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 
