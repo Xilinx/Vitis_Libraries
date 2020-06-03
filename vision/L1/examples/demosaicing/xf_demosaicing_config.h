@@ -27,20 +27,12 @@
 #define SRC_T XF_8UC1
 #define DST_T XF_8UC3
 #endif
-#if T_10U
-#define SRC_T XF_10UC1
-#define DST_T XF_10UC3
-#endif
-#if T_12U
-#define SRC_T XF_12UC1
-#define DST_T XF_12UC3
-#endif
 #if T_16U
 #define SRC_T XF_16UC1
 #define DST_T XF_16UC3
 #endif
 
-#if (T_16U || T_10U || T_12U)
+#if T_16U 
 #define CV_INTYPE CV_16UC1
 #define CV_OUTTYPE CV_16UC3
 #else

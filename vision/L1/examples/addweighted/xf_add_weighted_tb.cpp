@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 #include "common/xf_headers.hpp"
 #include "xf_add_weighted_config.h"
 
@@ -25,8 +26,15 @@ int main(int argc, char** argv) {
     }
 
     cv::Mat in_gray, in_gray1, ocv_ref, out_gray, diff, ocv_ref_in1, ocv_ref_in2, inout_gray1;
-    in_gray = cv::imread(argv[1], 0);  // read image
-    in_gray1 = cv::imread(argv[2], 0); // read image
+
+#if GRAY
+    in_gray = cv::imread(argv[1], 0);  // read image1
+    in_gray1 = cv::imread(argv[2], 0); // read image2
+#else
+    in_gray = cv::imread(argv[1], 1);  // read image1
+    in_gray1 = cv::imread(argv[2], 1); // read image2
+
+#endif
     if (in_gray.data == NULL) {
         fprintf(stderr, "Cannot open image %s\n", argv[1]);
         return -1;
@@ -35,19 +43,20 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Cannot open image %s\n", argv[2]);
         return -1;
     }
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_32FC1);
-    out_gray.create(in_gray.rows, in_gray.cols, CV_16UC1);
+#if GRAY
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC1);
     diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
-
+#else
+    	ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
+        out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
+        diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+#endif
     float alpha = 0.2;
     float beta = 0.8;
     float gama = 0.0;
-
-    in_gray.convertTo(ocv_ref_in1, CV_32FC1);
-    in_gray1.convertTo(ocv_ref_in2, CV_32FC1);
-
-    // OpenCV function
-    cv::addWeighted(ocv_ref_in1, alpha, ocv_ref_in2, beta, gama, ocv_ref);
+// OpenCV function
+    cv::addWeighted(in_gray, alpha, in_gray1, beta, gama, ocv_ref);
 
     // Write OpenCV reference image
     imwrite("out_ocv.jpg", ocv_ref);
@@ -63,12 +72,10 @@ int main(int argc, char** argv) {
 
     out_gray.data = imgOutput.copyFrom();
 
-    out_gray.convertTo(inout_gray1, CV_32FC1);
-
     imwrite("out_hls.jpg", out_gray);
 
     // Compute absolute difference image
-    absdiff(inout_gray1, ocv_ref, diff);
+    absdiff(out_gray, ocv_ref, diff);
 
     // Save the difference image
     imwrite("diff.png", diff);
@@ -78,7 +85,7 @@ int main(int argc, char** argv) {
     int cnt = 0;
     for (int i = 0; i < in_gray.rows; i++) {
         for (int j = 0; j < in_gray.cols; j++) {
-            float v = diff.at<float>(i, j);
+            float v = diff.at<unsigned char>(i, j);
             if (v > 1) cnt++;
             if (minval > v) minval = v;
             if (maxval < v) maxval = v;

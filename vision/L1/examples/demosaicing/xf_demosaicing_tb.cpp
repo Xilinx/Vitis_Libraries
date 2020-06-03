@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
     // Create the Bayer pattern CFA output
     cv::Mat cfa_bayer_output(img.rows, img.cols, CV_8UC1); // simulate the Bayer pattern CFA output
 
-#if (T_16U || T_10U || T_12U)
+#if T_16U 
     cv::Mat cfa_bayer_16bit(img.rows, img.cols, CV_16UC1);
 #endif
     cv::Mat color_cfa_bayer_output(img.rows, img.cols, img.type()); // Bayer pattern CFA output in color
@@ -135,13 +135,13 @@ int main(int argc, char** argv) {
     bayerizeImage(img, color_cfa_bayer_output, cfa_bayer_output, code);
     imwrite("bayer_image.png", color_cfa_bayer_output);
     imwrite("cfa_output.png", cfa_bayer_output);
-#if (T_16U || T_10U || T_12U)
+#if T_16U 
     cfa_bayer_output.convertTo(cfa_bayer_16bit, CV_INTYPE);
 #endif
     // Demosaic the CFA output using reference code
 
     cv::Mat ref_output_image(img.rows, img.cols, CV_OUTTYPE);
-#if (T_16U || T_10U || T_12U)
+#if T_16U
     demosaicImage(cfa_bayer_16bit, ref_output_image, code);
 #else
 
@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < ((img.cols) >> (XF_BITSHIFT(NPPC))); j++) {
             XF_TNAME(SRC_T, NPPC) pix = 0;
             for (int k = 0; k < NPPC; k++) {
-#if (T_16U || T_10U || T_12U)
+#if T_16U
                 pix.range(step + step * k - 1, step * k) = cfa_bayer_16bit.at<unsigned short>(i, j * NPPC + k);
 #else
                 pix.range(step + step * k - 1, step * k) =

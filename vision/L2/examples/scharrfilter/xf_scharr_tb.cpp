@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+
 #include "common/xf_headers.hpp"
 #include "xf_scharr_config.h"
+
 
 #include "xcl2.hpp"
 
@@ -31,18 +33,32 @@ int main(int argc, char** argv) {
     cv::Mat hls_grad_x, hls_grad_y;
     cv::Mat diff_grad_x, diff_grad_y;
 
-// reading in the gray image
+    // reading in the gray image
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else
     in_img = cv::imread(argv[1], 1);
 #endif
 
+#if T_8U
+
+ int ddepth = CV_8U;
 #if GRAY
 #define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
 #else
 #define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
 #endif
+#else
+	
+ int ddepth = CV_16S;
+#if GRAY
+#define PTYPE CV_16SC1 // Should be CV_16S when ddepth is CV_16S
+#else
+#define PTYPE CV_16SC3 // Should be CV_16S when ddepth is CV_16S
+#endif
+#endif
+
+
 
     if (in_img.data == NULL) {
         fprintf(stderr, "Cannot open image\n");
@@ -62,7 +78,7 @@ int main(int argc, char** argv) {
     ////////////    Opencv Reference    //////////////////////
     int scale = 1;
     int delta = 0;
-    int ddepth = -1; // CV_16S;//
+ 
 
     Scharr(in_img, c_grad_x, ddepth, 1, 0, scale, delta, cv::BORDER_CONSTANT);
     Scharr(in_img, c_grad_y, ddepth, 0, 1, scale, delta, cv::BORDER_CONSTANT);
@@ -74,6 +90,12 @@ int main(int argc, char** argv) {
 
     int height = in_img.rows;
     int width = in_img.cols;
+	
+#if T_8U
+	int out_size = height * width * CH_TYPE ;
+#else
+	int out_size = height * width * CH_TYPE *2;
+#endif
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -89,11 +111,12 @@ int main(int argc, char** argv) {
     cl::Kernel krnl(program, "scharr_accel");
 
     std::vector<cl::Memory> inBufVec, outBufVec1, outBufVec2;
-    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * CH_TYPE)); //,in_img.data);
+    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY,
+                             (height * width * CH_TYPE)); //,in_img.data);
     cl::Buffer imageFromDevice1(context, CL_MEM_WRITE_ONLY,
-                                (height * width * CH_TYPE)); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_x.data);
+                                out_size); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_x.data);
     cl::Buffer imageFromDevice2(context, CL_MEM_WRITE_ONLY,
-                                (height * width * CH_TYPE)); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_y.data);
+                                out_size); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_y.data);
 
     // inBufVec.push_back(imageToDevice);
     // outBufVec1.push_back(imageFromDevice1);
@@ -125,8 +148,10 @@ int main(int argc, char** argv) {
 
     // q.enqueueMigrateMemObjects(outBufVec1,CL_MIGRATE_MEM_OBJECT_HOST);
     // q.enqueueMigrateMemObjects(outBufVec2,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.enqueueReadBuffer(imageFromDevice1, CL_TRUE, 0, (height * width * CH_TYPE), hls_grad_x.data);
-    q.enqueueReadBuffer(imageFromDevice2, CL_TRUE, 0, (height * width * CH_TYPE), hls_grad_y.data);
+    q.enqueueReadBuffer(imageFromDevice1, CL_TRUE, 0, out_size,
+                        hls_grad_x.data);
+    q.enqueueReadBuffer(imageFromDevice2, CL_TRUE, 0, out_size,
+                        hls_grad_y.data);
     q.finish();
     /////////////////////////////////////// end of CL ////////////////////////
 

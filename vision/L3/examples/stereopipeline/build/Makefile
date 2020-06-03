@@ -19,14 +19,14 @@
 
 MK_PATH       := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR       := $(patsubst %/,%,$(dir $(MK_PATH)))
-CASE_ROOT     ?= $(CUR_DIR)
+XF_CASE_ROOT     ?= $(CUR_DIR)
 
 
 #MK_COMMON_DIR := mk
 
 # Below should point to library repo
-XF_LIB_DIR    ?= $(abspath $(CASE_ROOT)/../../../..)
-MK_COMMON_DIR := $(XF_LIB_DIR)/ext/makefile_templates
+XF_PROJ_ROOT    ?= $(abspath $(XF_CASE_ROOT)/../../../..)
+MK_COMMON_DIR := $(XF_PROJ_ROOT)/ext/makefile_templates
 
 .SECONDEXPANSION:
 
@@ -182,7 +182,7 @@ data: $(DATA_STAMP)
 # -----------------------------------------------------------------------------
 #                          kernel setup
 
-KSRC_DIR 		:= $(XF_LIB_DIR)/L3/examples/stereopipeline
+KSRC_DIR 		:= $(XF_PROJ_ROOT)/L3/examples/stereopipeline
 
 ifeq ($(BOARD), Zynq)
 XFREQUENCY 		:= 150
@@ -195,7 +195,7 @@ XCLBIN_NAME 	:= krnl_stereopipeline
 KER_NAME    	:= stereopipeline_accel
 KERNELS += $(KER_NAME):xf_stereo_pipeline_accel.cpp
 
-VPP_CFLAGS  	+= -I$(XF_LIB_DIR)/include -I. -I$(XF_LIB_DIR)/L1/include
+VPP_CFLAGS  	+= -I$(XF_PROJ_ROOT)/include -I. -I$(XF_PROJ_ROOT)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 
 $(KER_NAME)_VPP_CFLAGS := --xp vivado_prop:run.impl_1.strategy=Performance_Explore 
@@ -208,16 +208,16 @@ endif
 # -----------------------------------------------------------------------------
 #                           host setup
 
-SRC_DIR 		:= $(XF_LIB_DIR)/L3/examples/stereopipeline
+SRC_DIR 		:= $(XF_PROJ_ROOT)/L3/examples/stereopipeline
 
 EXE_NAME  		:= stereopipeline
-HOST_ARGS 		= $(XF_LIB_DIR)/data/left.png $(XF_LIB_DIR)/data/right.png #$(XCLBIN_FILE)
+HOST_ARGS 		= $(XF_PROJ_ROOT)/data/left.png $(XF_PROJ_ROOT)/data/right.png #$(XCLBIN_FILE)
 SRCS      		:= xf_stereo_pipeline_tb
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 # Search paths:
-CXXFLAGS 		+= -I$(XF_LIB_DIR)/include -I. -I$(XF_LIB_DIR)/L1/include -I$(XF_LIB_DIR)/ext/xcl2
+CXXFLAGS 		+= -I$(XF_PROJ_ROOT)/include -I. -I$(XF_PROJ_ROOT)/L1/include -I$(XF_PROJ_ROOT)/ext/xcl2
 # Options
 CXXFLAGS 		+= -g
 
@@ -229,7 +229,7 @@ endif
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule
 EXTRA_OBJS 		+= xcl2
 
-EXT_DIR   		= $(XF_LIB_DIR)/ext
+EXT_DIR   		= $(XF_PROJ_ROOT)/ext
 xcl2_SRCS 		= $(EXT_DIR)/xcl2/xcl2.cpp
 xcl2_HDRS 		= $(EXT_DIR)/xcl2/xcl2.hpp
 xcl2_CXXFLAGS 	= -I $(EXT_DIR)/xcl2

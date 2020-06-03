@@ -89,7 +89,7 @@ void HOGDescriptor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat, xf::cv::Mat<DST
                                  (NOB * (BLOCK_HEIGHT / CELL_HEIGHT) * (BLOCK_WIDTH / CELL_WIDTH))) >>
                                 1);
         assert((DESC_SIZE == _desc_size) &&
-               "The intput template argument DESC_SIZE must match the '_desc_size' locally computed through the other "
+               "The input template argument DESC_SIZE must match the '_desc_size' locally computed through the other "
                "input template arguments!");
 
         // writes the block data and the descriptors are formed on the host

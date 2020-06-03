@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 #ifndef _XF_SCHARR_CONFIG_H_
 #define _XF_SCHARR_CONFIG_H_
 
@@ -39,12 +40,27 @@ typedef unsigned uint32_t;
 #define NPC1 XF_NPPC8
 #endif
 
+
+#if T_8U
+
 #if GRAY
 #define IN_TYPE XF_8UC1
-#define OUT_TYPE XF_8UC1 // XF_16SC1 //
+#define OUT_TYPE XF_8UC1 
 #else
 #define IN_TYPE XF_8UC3
-#define OUT_TYPE XF_8UC3 // XF_16SC1 //
+#define OUT_TYPE XF_8UC3 
+#endif
+
+#else
+	
+#if GRAY	
+#define IN_TYPE XF_8UC1
+#define OUT_TYPE XF_16SC1
+#else
+#define IN_TYPE XF_8UC3
+#define OUT_TYPE XF_16SC3
+#endif
+
 #endif
 
 void scharr_accel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1>& _src,

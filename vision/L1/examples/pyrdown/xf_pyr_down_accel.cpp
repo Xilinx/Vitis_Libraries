@@ -18,5 +18,8 @@
 
 void pyr_down_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1>& _src,
                     xf::cv::Mat<TYPE, HEIGHT, WIDTH, XF_NPPC1>& _dst) {
+    _dst.rows = OUT_HEIGHT;
+    _dst.cols = OUT_WIDTH;
+
     xf::cv::pyrDown<TYPE, HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM>(_src, _dst);
 }

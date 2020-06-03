@@ -1,0 +1,56 @@
+{
+    "name": "Colordetect", 
+    "description": [
+        "Colordetect L3 function example"
+    ],
+    "flow": "vitis",
+    "launch": [
+        {
+            "target" : "sw_emu",
+            "cmd_args": "REPO_DIR/data/colordetect_128x128.jpeg ",
+            "name": "generic launch for all flows"
+        },
+        {
+            "target" : "hw_emu",
+            "cmd_args": "REPO_DIR/data/colordetect_128x128.jpeg ",
+            "name": "generic launch for all flows"
+        },
+        {
+            "target" : "hw",
+            "cmd_args": "REPO_DIR/data/colordetect_128x128.jpeg ",
+            "name": "generic launch for all flows"
+        }
+    ],
+	"data": ["REPO_DIR/data/colordetect_128x128.jpeg"], 
+    "host": {
+        "host_exe": "colordetect", 
+        "compiler": {
+            "sources": [
+                "REPO_DIR/L3/examples/colordetect/xf_colordetect_tb.cpp",
+                "REPO_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "options": "-O3 -std=c++0x ",
+            "symbols": ["__SDSVHLS__" ] 
+        }
+    },
+    "v++":{
+        "compiler": {
+            "symbols": [
+                
+            ],
+            "clflags": [
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "name": "krnl_colordetect",
+            "accelerators": [
+                {
+                    "name": "color_detect", 
+                    "location": "REPO_DIR/L3/examples/colordetect/xf_colordetect_accel.cpp"
+                }
+           ] 
+        }
+    ] 
+}

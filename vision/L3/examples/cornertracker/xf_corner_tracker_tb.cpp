@@ -24,13 +24,10 @@
 
 #include "xcl2.hpp"
 #endif
-#if __SDSCC__
-#define MEMORYALLOC(x) sds_alloc_non_cacheable(x)
-#define MEMORYFREE(x) sds_free(x)
-#else
+
 #define MEMORYALLOC(x) malloc(x)
 #define MEMORYFREE(x) free(x)
-#endif
+
 /* Color Coding */
 // kernel returns this type. Packed strcuts on axi ned to be powers-of-2.
 typedef struct __rgba {
@@ -150,6 +147,8 @@ int main(int argc, char** argv) {
         return -1;
     }
     char* path = argv[1];
+    char img_name[1000], out_img_name[50], pyr_out_img_name[50], pyr_out_img_name2[50];
+
 #if VIDEO_INPUT
     cv::VideoCapture cap;
 
@@ -170,7 +169,6 @@ int main(int argc, char** argv) {
     unsigned int imageHeight = (cap.get(CV_CAP_PROP_FRAME_HEIGHT));
 #else
     cv::Mat frame;
-    char img_name[1000], out_img_name[50], pyr_out_img_name[50], pyr_out_img_name2[50];
     sprintf(img_name, "%s/im%d.png", path, 0);
     fprintf(stderr, "path is %s", img_name);
     frame = cv::imread(img_name, 1);
@@ -597,7 +595,6 @@ int main(int argc, char** argv) {
         outputimage.release();
 
 // Print PyrDown outputimage
-#if 1
 
         for (int kk = 0; kk < NUM_LEVELS; kk++) {
             sprintf(pyr_out_img_name, "pyr1_out_img%d_%d.png", i, kk);
@@ -606,7 +603,6 @@ int main(int argc, char** argv) {
             xf::cv::imwrite(pyr_out_img_name2, imagepyr2[kk]);
         }
 
-#endif
     }
     im0.data = NULL;
     im1.data = NULL;

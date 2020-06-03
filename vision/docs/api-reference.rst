@@ -1,3 +1,9 @@
+.. meta::
+   :keywords: Vision, Library, Vitis Vision Library, Iterative Pyramidal, Corner Tracking, cornerUpdate, cornersImgToList, cv, mat
+   :description: Vitis Vision library application programming interface reference.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _libapireference:
 
 
@@ -15,7 +21,7 @@ copied back to ``cv::Mat`` to write it into the memory.
 
 
 xf::cv::Mat Image Container Class
-#############################
+##################################
 
 ``xf::cv::Mat`` is a template class that serves as a container for storing
 image data and its attributes.
@@ -60,11 +66,9 @@ Class Definition
        Mat(int _rows, int _cols, void *_data);
        Mat(const Mat&);                        // copy constructor
 
-       =Mat();
+       ~Mat();
 
        Mat& operator= (const Mat&);            // Assignment operator
-   //  XF_TNAME(T, XF_NPPC1) operator() (unsigned int r, unsigned int c);
-   //  XF_CTUNAME(T, NPC) operator() (unsigned int r, unsigned int c, unsigned int ch);
        XF_TNAME(T,NPC) read(int index);
        float read_float(int index);
        void write(int index, XF_TNAME(T,NPC) val);
@@ -114,69 +118,69 @@ The following table lists the member functions and their descriptions:
 
 .. table:: Table xf::cv::Mat Member Function Descriptions
 
-   +---------------+------------------------------------------------------+
-   | Member        | Description                                          |
-   | Functions     |                                                      |
-   +===============+======================================================+
-   | Mat()         | This default constructor initializes the Mat object  |
-   |               | sizes, using the template parameters ROWS and COLS.  |
-   +---------------+------------------------------------------------------+
-   | Mat(int       | This constructor initializes the Mat object using    |
-   | \_rows, int   | arguments \_rows and \_cols.                         |
-   | \_cols)       |                                                      |
-   +---------------+------------------------------------------------------+
-   | Mat(const     | This constructor helps clone a Mat object to         |
-   | xf::cv::Mat   | another. New memory will be allocated for the newly  |
-   | &_src)        | created constructor.                                 |
-   +---------------+------------------------------------------------------+
-   | Mat(int       | This constructor initializes the Mat object using    |
-   | \_rows, int   | arguments \_rows, \_cols, and \_data. The \*data     |
-   | \_cols, void  | member of the Mat object points to the memory        |
-   | \*_data)      | allocated for \_data argument, when this constructor |
-   |               | is used. No new memory is allocated for the \*data   |
-   |               | member.                                              |
-   +---------------+------------------------------------------------------+
-   | convertTo(Mat | Refer to                                             |
-   | <DST_T,ROWS,  | `xf::cv::convertTo<api-reference.html#xf-convertto>` |                            
-   | COLS, NPC>    |                                                      |
-   | &dst, int     |                                                      |
-   | otype, double |                                                      |
-   | alpha=1,      |                                                      |
-   | double        |                                                      |
-   | beta=0)       |                                                      |
-   +---------------+------------------------------------------------------+
-   | copyTo(\*     | Copies the data from Data pointer into physically    |
-   | fromData)     | contiguous memory allocated inside the constructor.  |
-   +---------------+------------------------------------------------------+
-   | copyFrom()    | Returns the pointer to the first location of the     |
-   |               | \*data member.                                       |
-   +---------------+------------------------------------------------------+
-   | read(int      | Readout a value from a given location and return it  |
-   | index)        | as a packed (for multi-pixel/clock) value.           |
-   +---------------+------------------------------------------------------+
-   | read_float(in | Readout a value from a given location and return it  |
-   | t             | as a float value                                     |
-   | index)        |                                                      |
-   +---------------+------------------------------------------------------+
-   | write(int     | Writes a packed (for multi-pixel/clock) value into   |
-   | index,        | the given location.                                  |
-   | XF_TNAME(T,NP |                                                      |
-   | C)            |                                                      |
-   | val)          |                                                      |
-   +---------------+------------------------------------------------------+
-   | write_float(i | Writes a float value into the given location.        |
-   | nt            |                                                      |
-   | index, float  |                                                      |
-   | val)          |                                                      |
-   +---------------+------------------------------------------------------+
-   | type()        | Returns the type of the image.                       |
-   +---------------+------------------------------------------------------+
-   | depth()       | Returns the depth of the image                       |
-   +---------------+------------------------------------------------------+
-   | channels()    | Returns number of channels of the image              |
-   +---------------+------------------------------------------------------+
-   | =Mat()        | This is a default destructor of the Mat object.      |
-   +---------------+------------------------------------------------------+
+   +---------------+--------------------------------------------------------+
+   | Member        | Description                                            |
+   | Functions     |                                                        |
+   +===============+========================================================+
+   | Mat()         | This default constructor initializes the Mat object    |
+   |               | sizes, using the template parameters ROWS and COLS.    |
+   +---------------+--------------------------------------------------------+
+   | Mat(int       | This constructor initializes the Mat object using      |
+   | \_rows, int   | arguments \_rows and \_cols.                           |
+   | \_cols)       |                                                        |
+   +---------------+--------------------------------------------------------+
+   | Mat(const     | This constructor helps clone a Mat object to           |
+   | xf::cv::Mat   | another. New memory will be allocated for the newly    |
+   | &_src)        | created constructor.                                   |
+   +---------------+--------------------------------------------------------+
+   | Mat(int       | This constructor initializes the Mat object using      |
+   | \_rows, int   | arguments \_rows, \_cols, and \_data. The \*data       |
+   | \_cols, void  | member of the Mat object points to the memory          |
+   | \*_data)      | allocated for \_data argument, when this constructor   |
+   |               | is used. No new memory is allocated for the \*data     |
+   |               | member.                                                |
+   +---------------+--------------------------------------------------------+
+   | convertTo(Mat | Refer to                                               |
+   | <DST_T,ROWS,  |`xf::cv::convertTo <api-reference.html#xf-convertto>`__ |                            
+   | COLS, NPC>    |                                                        |
+   | &dst, int     |                                                        |
+   | otype, double |                                                        |
+   | alpha=1,      |                                                        |
+   | double        |                                                        |
+   | beta=0)       |                                                        |
+   +---------------+--------------------------------------------------------+
+   | copyTo(\*     | Copies the data from Data pointer into physically      |
+   | fromData)     | contiguous memory allocated inside the constructor.    |
+   +---------------+--------------------------------------------------------+
+   | copyFrom()    | Returns the pointer to the first location of the       |
+   |               | \*data member.                                         |
+   +---------------+--------------------------------------------------------+
+   | read(int      | Readout a value from a given location and return it    |
+   | index)        | as a packed (for multi-pixel/clock) value.             |
+   +---------------+--------------------------------------------------------+
+   | read_float(in | Readout a value from a given location and return it    |
+   | t             | as a float value                                       |
+   | index)        |                                                        |
+   +---------------+--------------------------------------------------------+
+   | write(int     | Writes a packed (for multi-pixel/clock) value into     |
+   | index,        | the given location.                                    |
+   | XF_TNAME(T,NP |                                                        |
+   | C)            |                                                        |
+   | val)          |                                                        |
+   +---------------+--------------------------------------------------------+
+   | write_float(i | Writes a float value into the given location.          |
+   | nt            |                                                        |
+   | index, float  |                                                        |
+   | val)          |                                                        |
+   +---------------+--------------------------------------------------------+
+   | type()        | Returns the type of the image.                         |
+   +---------------+--------------------------------------------------------+
+   | depth()       | Returns the depth of the image                         |
+   +---------------+--------------------------------------------------------+
+   | channels()    | Returns number of channels of the image                |
+   +---------------+--------------------------------------------------------+
+   | ~Mat()        | This is a default destructor of the Mat object.        |
+   +---------------+--------------------------------------------------------+
 
 Template parameters of the ``xf::cv::Mat`` class are used to set the depth
 of the pixel, number of channels in the image, number of pixels packed
@@ -317,7 +321,7 @@ class. The following are a few supported types:
 .. _xf-imread:
 
 xf::cv::imread
-===========
+==============
 
 The function `xf::cv::imread` loads an image from the specified file path,
 copies into xf::cv::Mat and returns it. If the image cannot be read (because
@@ -364,7 +368,7 @@ The table below describes the template and the function parameters.
 .. _ariaid-title4:
 
 xf::cv::imwrite
-===========
+===============
 
 The function xf::cv::imwrite saves the image to the specified file from the
 given xf::cv::Mat. The image format is chosen based on the file name
@@ -408,7 +412,7 @@ The table below describes the template and the function parameters.
 .. _xf-absdiff:
 
 xf::cv::absDiff
-============
+===============
 
 The function xf::cv::absDiff computes the absolute difference between each
 individual pixels of an xf::cv::Mat and a cv::Mat, and returns the
@@ -451,7 +455,7 @@ The table below describes the template and the function parameters.
 .. _xf-convertto:
 
 xf::cv::convertTo
-==============
+=================
 
 The xf::cv::convertTo function performs bit depth conversion on each
 individual pixel of the given input image. This method converts the
@@ -529,7 +533,7 @@ The table below describes the template and function parameters.
 
 
 Vitis Vision Library Functions
-###########################
+###############################
 
 The Vitis Vision library is a set of select OpenCV functions optimized for
 Zynq-7000 and Zynq UltraScale+ MPSoC devices. The maximum resolution supported for all the functions is 4K, except
@@ -1619,8 +1623,6 @@ The following table describes the template and the function parameters.
    |              |                                                       |
    |              | 16-bit, signed, 1 channel (XF_16SC1),                 |
    |              |                                                       |
-   |              | 32-bit, unsigned, 1 channel (XF_32UC1)                |
-   |              |                                                       |
    |              | 32-bit, signed, 1 channel (XF_32SC1) are supported.   |
    +--------------+-------------------------------------------------------+
    | DST_T        | Output pixel type. 8-bit, unsigned, 1 channel         |
@@ -1629,8 +1631,6 @@ The following table describes the template and the function parameters.
    |              | 16-bit, unsigned, 1 channel (XF_16UC1),               |
    |              |                                                       |
    |              | 16-bit, signed, 1 channel (XF_16SC1),                 |
-   |              |                                                       |
-   |              | 32-bit, unsigned, 1 channel (XF_32UC1)                |
    |              |                                                       |
    |              | 32-bit, signed, 1 channel (XF_32SC1) are supported.   |
    +--------------+-------------------------------------------------------+
@@ -2275,7 +2275,7 @@ The following table summarizes the resource utilization of the kernel in differe
 +----------------+----------------+---------------------------+------------------+-----------+-------+-------+--------+
 
 
-The following table summarizes the resource utilization of the kernel in different configurations, generated using the SDx™ 2019.1 tool for the xczu7ev-ffvc1156-2-e FPGA, to process a grayscale 4K (3840x2160) image with UltraRAM enable.
+The following table summarizes the resource utilization of the kernel in different configurations, generated using the Vivado HLS™ 2019.1 tool for the xczu7ev-ffvc1156-2-e FPGA, to process a grayscale 4K (3840x2160) image with UltraRAM enable.
 
 .. table:: Table 59. boxFilter Function Resource Utilization Summary with UltraRAM enabled
 
@@ -2613,7 +2613,7 @@ grayscale HD (1080x1920) image for Filter size is 3.
 
 
 The following table summarizes the resource utilization of ``xf::cv::Canny``
-and ``EdgeTracing`` in different configurations, generated using SDx
+and ``EdgeTracing`` in different configurations, generated using Vivado HLS
 2019.1 tool for the xczu7ev-ffvc1156-2-e FPGA, to process a grayscale 4K
 image for Filter size is 3.
 
@@ -7492,9 +7492,9 @@ The following table describes the template and the function parameters.
    |               | XF_BAYER_GR, and XF_BAYER_RG are the supported       |
    |               | values.                                              |
    +---------------+------------------------------------------------------+
-   | SRC_T         | Input pixel type. 8-bit, unsigned,1 and 3 channel    |
-   |               | (XF_8UC1 and XF_8UC3) and 16-bit, unsigned, 1 and 3  |
-   |               | channel (XF_16UC1 and XF_16UC3) are supported.       |
+   | SRC_T         | Input pixel type. 8-bit, unsigned,1 channel          |
+   |               | (XF_8UC1) and 16-bit, unsigned, 1                    |
+   |               | channel (XF_16UC1) are supported.                    |
    +---------------+------------------------------------------------------+
    | DST_T         | Output pixel type. 8-bit, unsigned, 4 channel        |
    |               | (XF_8UC4) and 16-bit, unsigned, 4 channel (XF_16UC4) |
@@ -7542,7 +7542,7 @@ the Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 
 The following table shows the resource utilization of the Demosaicing
-function, generated using SDx 2019.1 version tool for the
+function, generated using Vivado HLS 2019.1 version tool for the
 xczu7ev-ffvc1156-2-e FPGA.
 
 .. table:: Table 206. Demosaicing Function Resource Utilization Summary with UltraRAM Enabled
@@ -9110,7 +9110,7 @@ The following table summarizes the resource utilization for Sobel Filter = 7, Bo
 .. rubric:: Resource Utilization with URAM enable
 
 
-This section summarizes the resource utilization of the Harris corner detection in different configurations, generated using SDx 2019.1 version tool for the xczu7ev-ffvc1156-2-e FPGA, to process a grayscale 4K (3840X2160) image.
+This section summarizes the resource utilization of the Harris corner detection in different configurations, generated using Vivado HLS 2019.1 version tool for the xczu7ev-ffvc1156-2-e FPGA, to process a grayscale 4K (3840X2160) image.
 
 The following table summarizes the resource utilization for Sobel Filter = 3, Box filter=3 and NMS_RADIUS =1.
 
@@ -9952,7 +9952,7 @@ process an image of 1920x1080 resolution.
 +----------+-----------------------------------------------+-------+-------+-------+
 
 The following table shows the resource utilization of ``HOGDescriptor``
-function for normal operation (1 pixel) mode as generated in SDx 2019.1
+function for normal operation (1 pixel) mode as generated in Vivado HLS 2019.1
 version tool for the part xczu7ev-ffvc1156-2-e at 300 MHz to process an
 image of 1920x1080 resolution with UltraRAM enabled.
 
@@ -10521,7 +10521,7 @@ the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
 
 The following table summarizes the resource utilization of pyrDown for 1
 pixel per cycle implementation, for a maximum input image size of
-3840x2160 pixels. The results are after synthesis in SDx 2019.1 for the
+3840x2160 pixels. The results are after synthesis in Vivado HLS 2019.1 for the
 Xilinx xczu7eg-ffvb1156-1 FPGA at 300 MHz with UltraRAM enabled.
 
 .. table:: Table . pyrDown Function Resource Utilization Summary with UltraRAM Enabled
@@ -11004,7 +11004,7 @@ optical flow computed for a window size of 11 over an image size of
 The following table summarizes the resource utilization of
 densePyrOpticalFlow for 1 pixel per cycle implementation, with the
 optical flow computed for a window size of 11 over an image size of
-3840X2160 pixels. The results are after implementation in SDx 2019.1 for
+3840X2160 pixels. The results are after implementation in Vivado HLS 2019.1 for
 the Xilinx xczu7ev-ffvc1156-2 FPGA at 300 MHz with UltraRAM enabled.
 
 .. table:: Table . densePyrOpticalFlow Function Resource Utilization Summary
@@ -11165,7 +11165,7 @@ MHz.
 +----------------+---------------------+----------------------+----------+-------+-------+
 
 The following table summarizes the resource utilization of
-DenseNonPyrLKOpticalFlow for a 4K image, as generated in the SDx version
+DenseNonPyrLKOpticalFlow for a 4K image, as generated in the Vivado HLS version
 tool for the Xilinx Xczu7eg-ffvb1156-1 FPGA at 300 MHz with UltraRAM
 enabled.
 
@@ -11285,7 +11285,7 @@ P to address the numerical accuracy/stability problems.
 
 |image117|
 
-.. figure:: ./images/aov1559042986742.png
+.. figure:: ./images/aov1559042986742.svg
    :alt: 
    :figclass: image imagecenter
    :name: dfn1543222970064__image_d24_wrz_whb
@@ -11455,7 +11455,7 @@ Table . Kalman Filter Parameter Description
 
 
 The following table summarizes the resource utilization of the kernel in
-different configurations, generated using SDx 2019.1 tool for the Xilinx
+different configurations, generated using Vivado HLS 2019.1 tool for the Xilinx
 Xczu9eg-ffvb1156-1 FPGA.
 
 .. table:: Table . Kalman Filter Function Resource Utilization Summary
@@ -11478,7 +11478,7 @@ Xczu9eg-ffvb1156-1 FPGA.
 
 
 The following table shows the resource utilization of the kernel for a
-configuration with USE_URAM enable, generated using SDx 2019.1 for the
+configuration with USE_URAM enable, generated using Vivado HLS 2019.1 for the
 Xilinx xczu7ev-ffvc1156-2-e FPGA.
 
 .. table:: Table . Resource Utilization with UltraRAM Enabled
@@ -11504,7 +11504,7 @@ Xilinx xczu7ev-ffvc1156-2-e FPGA.
 
 
 The following table shows the performance of kernel for different
-configurations, as generated using SDx 2019.1 tool for the Xilinx®
+configurations, as generated using Vivado HLS 2019.1 tool for the Xilinx®
 Xczu9eg-ffvb1156-1, for one iteration. Latency estimate is calculated by
 taking average latency of 100 iteration.
 
@@ -11523,7 +11523,7 @@ taking average latency of 100 iteration.
 +-----------------------------------------------------+---------------------------+--------------+
 
 The following table shows the performance of kernel for a configuration
-with UltraRAM enable, as generated using SDx 2019.1 tool for the Xilinx
+with UltraRAM enable, as generated using Vivado HLS 2019.1 tool for the Xilinx
 xczu7ev-ffvc1156-2-e, for one iteration. Latency estimate is calculated
 by taking average latency of 100 iteration.
 
@@ -13357,7 +13357,7 @@ for the XF_INTERPOLATION_BILINEAR mode.
    +----------+----------------------+
 
 The following table summarizes the resource utilization of remap, for 4K
-(3840x2160) images generated in the SDx 2019.1 version tool for the
+(3840x2160) images generated in the Vivado HLS 2019.1 version tool for the
 Xilinx xczu7ev-ffvc1156 FPGA at 300 MHz, with WIN_ROWS as 100 for the
 XF_INTERPOLATION_BILINEAR mode using UltraRAM .
 
@@ -14067,7 +14067,7 @@ Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3 Channel image.
 +----------------+-------------+---------------------+----------------------+----------+------+------+
 
 The following table summarizes the resource utilization of the kernel in
-different configurations, generated using SDx 2019.1 tool for the Xilinx
+different configurations, generated using Vivado HLS 2019.1 tool for the Xilinx
 xczu7ev-ffvc1156-2-e FPGA, to process a grayscale 4K (3840x2160) image
 with UltraRAM enable.
 
@@ -14356,7 +14356,7 @@ The configurations are in the format: imageSize_WSIZE_NDisp_NDispUnits.
 +----------------+-----------+----------------------+--------+-------+-------+
 
 The following table summarizes the resource utilization of the kernel in
-different configurations, generated using SDx 2019.1 version tool for
+different configurations, generated using Vivado HLS 2019.1 version tool for
 the Xilinx xczu7ev-ffvc1156-2-e FPGA, to progress a grayscale HD
 (1080x1920) image with UltraRAM enable.
 
@@ -15483,7 +15483,7 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a BGR 4K image.
 
 
 The following table summarizes the resource utilization of the Warp
-transform, generated using SDx 2019.1 version tool for the Xilinx
+transform, generated using Vivado HLS 2019.1 version tool for the Xilinx
 xczu7ev-ffvc1156-2-e FPGA, to progress a grayscale 4K image with
 UltraRAM enabled.
 
@@ -15703,57 +15703,57 @@ Pattern Recognition, 2005.
    :class: image
 .. |image32| image:: ./images/mte1554997313655.png
    :class: image
-.. |image33| image:: ./images/kfj1558525968533.png
+.. |image33| image:: ./images/kfj1558525968533.svg
    :class: image
-.. |image34| image:: ./images/xuh1558526048657.png
+.. |image34| image:: ./images/xuh1558526048657.svg
    :class: image
-.. |image35| image:: ./images/xfi1558526076955.png
+.. |image35| image:: ./images/xfi1558526076955.svg
    :class: image
-.. |image36| image:: ./images/lfz1558526114011.png
+.. |image36| image:: ./images/lfz1558526114011.svg
    :class: image
-.. |image37| image:: ./images/wnz1558526149545.png
+.. |image37| image:: ./images/wnz1558526149545.svg
    :class: image
-.. |image38| image:: ./images/pxm1558526179484.png
+.. |image38| image:: ./images/pxm1558526179484.svg
    :class: image
-.. |image39| image:: ./images/fpa1558523902475.png
+.. |image39| image:: ./images/fpa1558523902475.svg
    :class: image
-.. |image40| image:: ./images/fif1558524209767.png
+.. |image40| image:: ./images/fif1558524209767.svg
    :class: image
-.. |image41| image:: ./images/imv1558524546359.png
+.. |image41| image:: ./images/imv1558524546359.svg
    :class: image
-.. |image42| image:: ./images/hmq1558524967044.png
+.. |image42| image:: ./images/hmq1558524967044.svg
    :class: image
-.. |image43| image:: ./images/tob1558525028884.png
+.. |image43| image:: ./images/tob1558525028884.svg
    :class: image
-.. |image44| image:: ./images/kzg1558525075919.png
+.. |image44| image:: ./images/kzg1558525075919.svg
    :class: image
-.. |image45| image:: ./images/tye1558525119805.png
+.. |image45| image:: ./images/tye1558525119805.svg
    :class: image
-.. |image46| image:: ./images/ajz1558525683240.png
+.. |image46| image:: ./images/ajz1558525683240.svg
    :class: image
-.. |image47| image:: ./images/wef1558525738589.png
+.. |image47| image:: ./images/wef1558525738589.svg
    :class: image
-.. |image48| image:: ./images/aut1558525773829.png
+.. |image48| image:: ./images/aut1558525773829.svg
    :class: image
-.. |image49| image:: ./images/scm1558525834241.png
+.. |image49| image:: ./images/scm1558525834241.svg
    :class: image
-.. |image50| image:: ./images/gjh1558525869079.png
+.. |image50| image:: ./images/gjh1558525869079.svg
    :class: image
-.. |image51| image:: ./images/nnt1558524820358.png
+.. |image51| image:: ./images/nnt1558524820358.svg
    :class: image
-.. |image52| image:: ./images/nwd1558525233086.png
+.. |image52| image:: ./images/nwd1558525233086.svg
    :class: image
-.. |image53| image:: ./images/buu1558525298988.png
+.. |image53| image:: ./images/buu1558525298988.svg
    :class: image
-.. |image54| image:: ./images/jxw1558525421508.png
+.. |image54| image:: ./images/jxw1558525421508.svg
    :class: image
-.. |image55| image:: ./images/iyx1558525466557.png
+.. |image55| image:: ./images/iyx1558525466557.svg
    :class: image
-.. |image56| image:: ./images/yst1558525525323.png
+.. |image56| image:: ./images/yst1558525525323.svg
    :class: image
-.. |image57| image:: ./images/meo1558525562310.png
+.. |image57| image:: ./images/meo1558525562310.svg
    :class: image
-.. |image58| image:: ./images/uqp1558524343595.png
+.. |image58| image:: ./images/uqp1558524343595.svg
    :class: image
 .. |image59| image:: ./images/cfh1554997085905.png
    :class: image
@@ -15873,62 +15873,44 @@ Pattern Recognition, 2005.
    :class: image
 .. |image117| image:: ./images/dwh1554997051814.png
    :class: image
-.. |image118| image:: ./images/zxo1559043147066.png
+.. |image118| image:: ./images/zxo1559043147066.svg
    :class: image imagecenter
-.. |image119| image:: ./images/qmc1559043175425.png
+.. |image119| image:: ./images/qmc1559043175425.svg
    :class: image imagecenter
-   :name: dfn1543222970064__image_xdz_csz_whb
-.. |image120| image:: ./images/bul1559043590548.png
+.. |image120| image:: ./images/bul1559043590548.svg
    :class: image imagecenter
-   :name: ica1559027384812__image_j5w_btz_whb
-.. |image121| image:: ./images/pum1559043643924.png
+.. |image121| image:: ./images/pum1559043643924.svg
    :class: image imagecenter
-   :name: ica1559027384812__image_fj4_dtz_whb
 .. |image122| image:: ./images/ose1554996999042.png
    :class: image
-   :name: ica1559027384812__image_xqh_v43_yfb
 .. |image123| image:: ./images/ztb1554997245160.png
    :class: image
-   :name: ica1559027384812__image_ty4_pjp_yfb
-.. |image124| image:: ./images/esk1559043764293.png
+.. |image124| image:: ./images/esk1559043764293.svg
    :class: image imagecenter
-   :name: ica1559027384812__image_y5n_ktz_whb
-.. |image125| image:: ./images/kne1559043826810.png
+.. |image125| image:: ./images/kne1559043826810.svg
    :class: image
-   :name: ica1559027384812__image_bq2_ptz_whb
-.. |image126| image:: ./images/vsn1559043927693.png
+.. |image126| image:: ./images/vsn1559043927693.svg
    :class: image imagecenter
-   :name: ica1559027384812__image_kb3_5tz_whb
-.. |image127| image:: ./images/yei1559108493186.png
+.. |image127| image:: ./images/yei1559108493186.svg
    :class: image
-   :name: ica1559027384812__image_ey2_cff_xhb
-.. |image128| image:: ./images/wip1559108542187.png
+.. |image128| image:: ./images/wip1559108542187.svg
    :class: image
-   :name: ica1559027384812__image_dcr_2ff_xhb
-.. |image129| image:: ./images/ooa1559108606429.png
+.. |image129| image:: ./images/ooa1559108606429.svg
    :class: image
-   :name: ica1559027384812__image_rfw_hff_xhb
-.. |image130| image:: ./images/hwd1559108701545.png
+.. |image130| image:: ./images/hwd1559108701545.svg
    :class: image
-   :name: ica1559027384812__image_fyl_nff_xhb
-.. |image131| image:: ./images/gua1559108773758.png
+.. |image131| image:: ./images/gua1559108773758.svg
    :class: image
-   :name: ica1559027384812__image_a5d_sff_xhb
-.. |image132| image:: ./images/fpc1559108827886.png
+.. |image132| image:: ./images/fpc1559108827886.svg
    :class: image imagecenter
-   :name: ica1559027384812__image_vqk_bgf_xhb
-.. |image133| image:: ./images/dna1559109031228.png
+.. |image133| image:: ./images/dna1559109031228.svg
    :class: image
-   :name: ica1559027384812__image_crj_ggf_xhb
-.. |image134| image:: ./images/ykm1559109115292.png
+.. |image134| image:: ./images/ykm1559109115292.svg
    :class: image imagecenter
-   :name: ica1559027384812__image_ibb_lgf_xhb
-.. |image135| image:: ./images/ghx1559109180151.png
+.. |image135| image:: ./images/ghx1559109180151.svg
    :class: image imagecenter
-   :name: ica1559027384812__image_ykr_4gf_xhb
-.. |image136| image:: ./images/esm1559109211624.png
+.. |image136| image:: ./images/esm1559109211624.svg
    :class: image imagecenter
-   :name: ica1559027384812__image_jkc_qgf_xhb
 .. |image137| image:: ./images/hib1554997370155.png
    :class: image
 .. |image138| image:: ./images/twe1554997326248.png
@@ -15949,32 +15931,24 @@ Pattern Recognition, 2005.
    :class: image
 .. |image146| image:: ./images/nrr1554997329905.png
    :class: image
-   :name: drc1504034280186__image_ksq_z5m_vz
 .. |image147| image:: ./images/wje1554997047563.png
    :class: image
 .. |image148| image:: ./images/wge1554997033196.png
    :class: image
-.. |image149| image:: ./images/cpn1554997351734.png
+.. |image149| image:: ./images/cpn1554997351734.svg
    :class: image
-   :name: dyd1504034280488__image_dpm_qpk_pgb
 .. |image150| image:: ./images/lwl1554996996061.png
    :class: image
-   :name: dyd1504034280488__image_k2m_so2_vz
 .. |image151| image:: ./images/wtp1554997045334.png
    :class: image
-   :name: dyd1504034280488__image_k2m_so3_vz
 .. |image152| image:: ./images/cua1554997256117.png
    :class: image
-   :name: dyd1504034280488__image_k2m_so4_vz
 .. |image153| image:: ./images/orr1554997031350.png
    :class: image
-   :name: dyd1504034280488__image_k2m_so5_vz
 .. |image154| image:: ./images/hqv1554997071866.png
    :class: image
-   :name: dyd1504034280488__image_k2m_so6_vz
 .. |image155| image:: ./images/lpz1554997361148.png
    :class: image
-   :name: ygw1504034273593__image_pmr_mf4_vz
 .. |image156| image:: ./images/iyi1554997248593.png
    :class: image
 .. |image157| image:: ./images/alo1554997278303.png

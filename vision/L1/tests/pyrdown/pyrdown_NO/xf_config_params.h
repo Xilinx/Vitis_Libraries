@@ -17,6 +17,8 @@
 #define WIDTH 128
 #define HEIGHT 128
 
+#define OUT_WIDTH ((WIDTH + 1) >> 1)
+#define OUT_HEIGHT ((HEIGHT + 1) >> 1)
 #define GRAY 1
 #define RGBA 0
 #define XF_USE_URAM false

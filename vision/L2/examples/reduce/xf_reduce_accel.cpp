@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+
 #include "xf_reduce_config.h"
 
 extern "C" {
 
-void reduce_accel(
-    ap_uint<PTR_IN_WIDTH>* img_in, unsigned char dimension, ap_uint<PTR_OUT_WIDTH>* img_out, int height, int width) {
+void reduce_accel(ap_uint<PTR_IN_WIDTH>* img_in, unsigned char dimension, ap_uint<PTR_OUT_WIDTH>* img_out, int height, int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1
@@ -27,9 +27,9 @@ void reduce_accel(
     #pragma HLS INTERFACE s_axilite  port=height 		      bundle=control
     #pragma HLS INTERFACE s_axilite  port=width 		      bundle=control
     #pragma HLS INTERFACE s_axilite  port=return		      bundle=control
-    // clang-format on
+// clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(height,width);
     xf::cv::Mat<OUT_TYPE, ONE_D_HEIGHT, ONE_D_WIDTH, XF_NPPC1> imgOutput;
 
 // clang-format off
@@ -44,7 +44,7 @@ void reduce_accel(
 
     // Run xfOpenCV kernel:
     xf::cv::reduce<XF_REDUCE, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, ONE_D_HEIGHT, ONE_D_WIDTH, NPC1>(imgInput, imgOutput,
-                                                                                                 dimension);
+                   dimension);
     // Convert _dst xf::cv::Mat object to output array:
     xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, ONE_D_HEIGHT, ONE_D_WIDTH, XF_NPPC1>(imgOutput, img_out);
 
