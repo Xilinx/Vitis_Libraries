@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #include "common/xf_headers.hpp"
 #include "xf_scharr_config.h"
 
@@ -30,7 +29,7 @@ int main(int argc, char** argv) {
     cv::Mat hls_grad_x, hls_grad_y;
     cv::Mat diff_grad_x, diff_grad_y;
 
-    // reading in the gray image
+// reading in the gray image
 #if GRAY
     in_img = cv::imread(argv[1], 0);
 #else
@@ -39,15 +38,15 @@ int main(int argc, char** argv) {
 
 #if T_8U
 
- int ddepth = CV_8U;
+    int ddepth = CV_8U;
 #if GRAY
 #define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
 #else
 #define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
 #endif
 #else
-	
- int ddepth = CV_16S;
+
+    int ddepth = CV_16S;
 #if GRAY
 #define PTYPE CV_16SC1 // Should be CV_16S when ddepth is CV_16S
 #else
@@ -73,11 +72,9 @@ int main(int argc, char** argv) {
     ////////////    Opencv Reference    //////////////////////
     int scale = 1;
     int delta = 0;
-   
 
     Scharr(in_img, c_grad_x, ddepth, 1, 0, scale, delta, cv::BORDER_CONSTANT);
     Scharr(in_img, c_grad_y, ddepth, 0, 1, scale, delta, cv::BORDER_CONSTANT);
-
 
     imwrite("out_ocvx.jpg", c_grad_x);
     imwrite("out_ocvy.jpg", c_grad_y);
@@ -87,16 +84,13 @@ int main(int argc, char** argv) {
     unsigned short height = in_img.rows;
     unsigned short width = in_img.cols;
 
-
     static xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(in_img.rows, in_img.cols);
     static xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutputx(in_img.rows, in_img.cols);
     static xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutputy(in_img.rows, in_img.cols);
 
     imgInput.copyTo(in_img.data);
 
-
     scharr_accel(imgInput, imgOutputx, imgOutputy);
-
 
     xf::cv::imwrite("hls_out_x.jpg", imgOutputx);
     xf::cv::imwrite("hls_out_y.jpg", imgOutputy);
@@ -120,7 +114,6 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(diff_grad_x, 0, err_per);
     xf::cv::analyzeDiff(diff_grad_y, 0, err_per1);
 
-   
     int ret = 0;
     if (err_per > 0.0f) {
         printf("Test failed .... !!!\n");
