@@ -73,7 +73,80 @@
                     "location": "LIB_DIR/L2/tests/strongly_connected_component/kernel/scc_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=scc_kernel", 
-                    "name": "scc_kernel"
+                    "name": "scc_kernel",
+		    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "scc_kernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "columnG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "column512G2",
+                                    "memory": "DDR[1]"
+                                },
+				{
+                                    "name": "column32G2",
+                                    "memory": "DDR[1]"
+                                },
+				{
+                                    "name": "offsetG2",
+                                    "memory": "DDR[1]"
+                                },
+				{
+                                    "name": "columnG3",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG3",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetG2Tmp1",
+                                    "memory": "DDR[1]"
+                                },
+				{
+                                    "name": "offsetG2Tmp2",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "colorMap512G1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "colorMap32G1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "queueG1",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "colorMap512G2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "colorMap32G2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "queueG2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "queueG3",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 

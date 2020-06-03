@@ -1,5 +1,5 @@
 {
-    "gui": false,
+    "gui": true,
     "name": "Xilinx Page Rank Cache Benchmark", 
     "description": "", 
     "flow": "vitis", 
@@ -32,7 +32,7 @@
     },
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/kernel_pagerank_0.xclbin", 
+            "cmd_args": " -xclbin BUILD/kernel_pagerank_0.xclbin -dataSetDir PROJECT/data/ -refDir PROJECT/data/", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -73,7 +73,48 @@
                     "location": "LIB_DIR/L2/benchmarks/pagerank_cache/kernel/kernel_pagerank_0.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL0", 
-                    "name": "kernel_pagerank_0"
+                    "name": "kernel_pagerank_0",
+		    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "kernel_pagerank_0",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "pagerank",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "degreeCSR",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetCSC",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "indiceCSC",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "cntValFull",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "buffPing",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "buffPong",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "orderUnroll",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 

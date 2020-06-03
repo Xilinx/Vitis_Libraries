@@ -117,7 +117,7 @@ endif
 
 ############################## Setting up Kernel Variables ##############################
 # Kernel compiler global settings
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --report_level 2
 LDCLFLAGS += --optimize 2 --jobs 8
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))

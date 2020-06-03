@@ -1,5 +1,5 @@
 {
-    "gui": false,
+    "gui": true,
     "name": "Xilinx Label Propagation Benchmark", 
     "description": "", 
     "flow": "vitis", 
@@ -73,7 +73,52 @@
                     "location": "LIB_DIR/L2/benchmarks/label_propagation/kernel/label_propagation_top.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=LPKernel", 
-                    "name": "LPKernel"
+                    "name": "LPKernel",
+		    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "LPKernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "offsetCSR",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "indexCSR",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "offsetCSC",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "indexCSC",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "indexCSC2",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "pingHashBuf",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "pongHashBuf",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "labelPing",
+                                    "memory": "DDR[0]"
+                                },
+				{
+                                    "name": "labelPong",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 

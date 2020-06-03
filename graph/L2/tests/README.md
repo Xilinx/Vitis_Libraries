@@ -1,6 +1,6 @@
 # Vitis Tests for Kernels
 
-This folder contains basic test for each of GQE kernels. They are meant to discover simple regression errors.
+This folder contains basic test for each of Graph kernels. They are meant to discover simple regression errors.
 
 **These kernels have only been tested on Alveo U200 and U250, the makefile does not support other devices.**
 
