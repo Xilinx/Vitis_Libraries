@@ -13,6 +13,11 @@
     "platform_blacklist": [
         "u280"
     ],
+    "platform_whitelist": [
+        "u200",
+        "u250"
+    ],
+
     "host": {
         "host_exe": "xil_snappy_streaming",
         "compiler": {
@@ -42,7 +47,7 @@
     "containers": [
         {
             "name": "compress_streaming",
-            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/compress.ini",
+            "ldclflags": "--config PROJECT/compress.ini",
             "accelerators": [
                 {
                     "name": "xilSnappyCompressStream",
@@ -56,7 +61,7 @@
         },
         {
             "name": "decompress_streaming",
-            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/decompress.ini",
+            "ldclflags": "--config PROJECT/decompress.ini",
             "accelerators": [
                 {
                     "name": "xilSnappyDecompressStream",

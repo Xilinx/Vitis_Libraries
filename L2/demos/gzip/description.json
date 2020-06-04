@@ -18,6 +18,10 @@
     "platform_blacklist": [
         "u280"
     ],
+     "platform_whitelist": [
+        "u200",
+        "u250"
+    ],
     "host": {
         "host_exe": "xil_gzip",
         "compiler": {
@@ -59,7 +63,7 @@
     "containers": [
         {
             "name": "compress_decompress",
-            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/opts.ini",
+            "ldclflags": "--config PROJECT/opts.ini",
             "accelerators": [
                 {
                     "name": "xilLz77Compress",

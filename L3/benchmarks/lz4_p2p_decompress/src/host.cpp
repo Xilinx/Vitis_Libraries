@@ -20,6 +20,12 @@
 #include <cassert>
 #include "cmdlineparser.h"
 
+// The default value set as non-P2P, so that design can work for all platforms.
+// For P2P enabled platform, user need to manually change this macro value to true.
+#ifndef ENABLE_P2P
+#define ENABLE_P2P false
+#endif
+
 int validate(std::string& inFile_name, std::string& outFile_name) {
     std::string command = "cmp " + inFile_name + " " + outFile_name;
     int ret = system(command.c_str());

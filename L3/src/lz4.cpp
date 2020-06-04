@@ -209,9 +209,19 @@ int xfLz4::init(const std::string& binaryFile, uint8_t flow, uint32_t block_size
 
 int xfLz4::release() {
     if (m_BinFlow) {
-        for (uint32_t i = 0; i < C_COMPUTE_UNIT; i++) delete (compress_kernel_lz4[i]);
+        for (uint32_t i = 0; i < C_COMPUTE_UNIT; i++) {
+            if (compress_kernel_lz4[i]) {
+                delete compress_kernel_lz4[i];
+                compress_kernel_lz4[i] = nullptr;
+            }
+        }
     } else {
-        for (uint32_t i = 0; i < D_COMPUTE_UNIT; i++) delete (decompress_kernel_lz4[i]);
+        for (uint32_t i = 0; i < D_COMPUTE_UNIT; i++) {
+            if (decompress_kernel_lz4[i]) {
+                delete decompress_kernel_lz4[i];
+                decompress_kernel_lz4[i] = nullptr;
+            }
+        }
     }
     delete (m_program);
     delete (m_q);
@@ -709,10 +719,22 @@ uint64_t xfLz4::decompress(uint8_t* in,
 
     for (uint32_t dBuf = 0; dBuf < D_COMPUTE_UNIT; dBuf++) {
         for (uint32_t flag = 0; flag < overlap_buf_count; flag++) {
-            delete (buffer_input[dBuf][flag]);
-            delete (buffer_output[dBuf][flag]);
-            delete (buffer_compressed_size[dBuf][flag]);
-            delete (buffer_block_size[dBuf][flag]);
+            if (buffer_input[dBuf][flag]) {
+                delete buffer_input[dBuf][flag];
+                buffer_input[dBuf][flag] = nullptr;
+            }
+            if (buffer_output[dBuf][flag]) {
+                delete buffer_output[dBuf][flag];
+                buffer_output[dBuf][flag] = nullptr;
+            }
+            if (buffer_compressed_size[dBuf][flag]) {
+                delete buffer_compressed_size[dBuf][flag];
+                buffer_compressed_size[dBuf][flag] = nullptr;
+            }
+            if (buffer_block_size[dBuf][flag]) {
+                delete buffer_block_size[dBuf][flag];
+                buffer_block_size[dBuf][flag] = nullptr;
+            }
         }
     }
     return original_size;
@@ -1042,10 +1064,22 @@ uint64_t xfLz4::compress(
 
     for (uint32_t cu = 0; cu < C_COMPUTE_UNIT; cu++) {
         for (uint32_t flag = 0; flag < overlap_buf_count; flag++) {
-            delete (buffer_input[cu][flag]);
-            delete (buffer_output[cu][flag]);
-            delete (buffer_compressed_size[cu][flag]);
-            delete (buffer_block_size[cu][flag]);
+            if (buffer_input[cu][flag]) {
+                delete buffer_input[cu][flag];
+                buffer_input[cu][flag] = nullptr;
+            }
+            if (buffer_output[cu][flag]) {
+                delete buffer_output[cu][flag];
+                buffer_output[cu][flag] = nullptr;
+            }
+            if (buffer_compressed_size[cu][flag]) {
+                delete buffer_compressed_size[cu][flag];
+                buffer_compressed_size[cu][flag] = nullptr;
+            }
+            if (buffer_block_size[cu][flag]) {
+                delete buffer_block_size[cu][flag];
+                buffer_block_size[cu][flag] = nullptr;
+            }
         }
     }
 

@@ -53,8 +53,8 @@
 #include "deflate.h"
 #include <stdlib.h>
 
-// Minimum size set as 128KB
-#define MIN_INPUT_SIZE (1<<17)
+// Minimum size set as 1MB
+#define MIN_INPUT_SIZE MEGA_BYTE
 using namespace xf::compression;
 const char deflate_copyright[] = " deflate 1.2.11 Copyright 1995-2017 Jean-loup Gailly and Mark Adler ";
 /*
@@ -828,10 +828,16 @@ int ZEXPORT deflate(z_streamp strm, int flush)
         use_fpga_sol = true;
     }
     
+    char *min_size = getenv("MIN_INPUT_SIZE");
+    uint32_t small_size = MIN_INPUT_SIZE;
+    if (min_size != NULL) {
+        small_size = atoi(min_size);
+    }
+
     // Check input size if its less than
     // MIN_INPUT_SIZE use SW flow
     uint64_t input_size = strm->avail_in;
-    if (input_size < MIN_INPUT_SIZE) {
+    if (input_size < small_size) {
 #ifdef VERBOSE
         std::cout << "Input Size is less than MIN_INPUT_SIZE";
         std::cout << " Falling back to SW Solution " << std::endl;

@@ -65,7 +65,7 @@ void lzCompress(hls::stream<ap_uint<8> >& inStream, hls::stream<compressd_dt>& o
     if (input_size == 0) return;
     // Dictionary
     uintDictV_t dict[LZ_DICT_SIZE];
-#pragma HLS RESOURCE variable = dict core = RAM_T2P_URAM 
+#pragma HLS RESOURCE variable = dict core = RAM_T2P_URAM
 
     uintDictV_t resetValue = 0;
     for (int i = 0; i < MATCH_LEVEL; i++) {

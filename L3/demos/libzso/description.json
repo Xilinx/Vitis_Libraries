@@ -4,6 +4,14 @@
         "ZLIB Shared Object demo present in `L3/demo/libzso` directory."
     ],
     "flow": "vitis",
+    "platform_blacklist": [
+        "u200",
+        "u250",
+        "vck"
+    ],
+    "platform_whitelist": [
+        "u50_gen3x16"
+    ],
     "launch": [
         {
             "cmd_args": "-v sample.txt",
@@ -14,7 +22,7 @@
     "match_ini": "false",
     "gui": false, 
     "host": {
-        "host_exe": "zlib_so.exe",
+        "host_exe": "xzlib",
         "compiler": {
             "sources": [
                 "./src/testapp.cpp",
