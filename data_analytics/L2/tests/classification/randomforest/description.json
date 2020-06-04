@@ -1,5 +1,5 @@
 {
-    "gui": false,
+    "gui": true,
     "name": "Xilinx Random Forest Classification Training", 
     "description": "", 
     "flow": "vitis", 
@@ -9,7 +9,7 @@
     "platform_blacklist": [], 
     "launch": [
         {
-            "cmd_args": "-xclbin $(XCLBIN_FILE) -in ml_datasets/ -trn 1000 -ten 100 -fn 26 -cn 2 -ln 2", 
+            "cmd_args": "-xclbin BUILD/rf_v0.xclbin -in PROJECT/ml_datasets/ -trn 1000 -ten 100 -fn 26 -cn 2 -ln 2", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -18,13 +18,15 @@
         "compiler": {
             "sources": [
                 "LIB_DIR/L2/tests/randomforest/host/test.cpp", 
-                "LIB_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/ext/xcl2/xcl2.cpp",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/randomforest/host", 
-                "LIB_DIR/ext/xcl2"
+                "host", 
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }
@@ -32,9 +34,9 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/src", 
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include" 
+                "LIB_DIR/L2/include",
+                "LIB_DIR/../utils/L1/include"
             ]
         }
     }, 
@@ -44,14 +46,50 @@
                 {
                     "location": "LIB_DIR/L2/src/classification/rf_trees_quantize.cpp", 
                     "frequency": 250.0, 
-                    "name": "DecisionTreeQT_0"
-                }
-            ], 
-            "accelerators": [
+                    "name": "DecisionTreeQT_0",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "DecisionTreeQT_0",
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "data",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "tree",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
+                },
                 {
                     "location": "LIB_DIR/L2/src/classification/rf_sps.cpp", 
                     "frequency": 250.0, 
-                    "name": "randomForestSP"
+                    "name": "randomForestSP",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "randomForestSP",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "data",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "configs",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "data_out",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 250.0, 

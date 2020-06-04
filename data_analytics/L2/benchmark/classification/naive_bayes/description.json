@@ -1,4 +1,5 @@
 {
+    "gui": true,
     "name": "Xilinx Naive Bayes Training", 
     "description": "", 
     "flow": "vitis", 
@@ -8,7 +9,7 @@
     "platform_blacklist": [], 
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/naiveBayesTrain_kernel.xclbin -in REPO_DIR/L1/benchmarks/naive_bayes/dat/test.dat -g REPO_DIR/L1/benchmarks/naive_bayes/dat/test_g.dat -c 10 -t 13107",
+            "cmd_args": " -xclbin BUILD/naiveBayesTrain_kernel.xclbin -in PROJECT/dat/test.dat -g PROJECT/dat/test_g.dat -c 10 -t 13107",
             "name": "generic launch for all flows"
         }
     ], 
@@ -16,29 +17,23 @@
         "host_exe": "test_nb.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L1/benchmarks/naive_bayes/host/test_nb.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "host/test_nb.cpp",
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L1/benchmarks/naive_bayes/host", 
-                "REPO_DIR/L1/benchmarks/naive_bayes/kernel", 
-                "REPO_DIR/ext/xcl2"
+                "LIB_DIR/L1/include",
+                "host",
+                "kernel",
+                "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 "
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L1/benchmarks/naive_bayes/kernel" 
-            ]
-        }, 
-        "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L1/benchmarks/naive_bayes/kernel" 
+            "includepaths": [
+                "LIB_DIR/L1/include",
+                "kernel"
             ]
         }
     }, 
@@ -46,7 +41,7 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L1/benchmarks/naive_bayes/kernel/naiveBayesTrain_kernel.cpp", 
+                    "location": "kernel/naiveBayesTrain_kernel.cpp",
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=naiveBayesTrain_kernel", 
                     "name": "naiveBayesTrain_kernel"

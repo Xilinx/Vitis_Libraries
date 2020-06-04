@@ -207,12 +207,13 @@ template <typename MType, unsigned WD>
 void DataPreocess(MType* samples,
                   ap_uint<8> numCategories[MAX_FEAS_],
                   Paras paras,
+                  std::string& in_dir,
                   ap_uint<30> samples_num,
                   ap_uint<8> features_num,
                   ap_uint<8> numClass,
                   ap_uint<512>* configs,
                   ap_uint<512>* data) {
-    std::ifstream fin_config("./config.txt");
+    std::ifstream fin_config(in_dir + "/config.txt");
     std::string line;
     int read_int[128];
     ap_uint<8> numSplits[128] = {0};

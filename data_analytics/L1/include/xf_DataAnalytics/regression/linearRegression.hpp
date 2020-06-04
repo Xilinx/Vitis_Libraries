@@ -18,7 +18,7 @@
  * @file linearRegression.hpp
  * @brief Linear regression predict and train function implementation
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_LINEAR_REGRESSION_HPP_
@@ -81,7 +81,7 @@ class linearLeastSquareRegressionPredict {
     /**
      * @brief set up intercept parameters for prediction
      *
-     * @param inputI intercept, should be set to zero if don't needed.
+     * @param inputI intercept should be set to zero if don't needed.
      */
     void setIntercept(MType inputI) { dotMulProcessor.setIntercept(inputI); }
 
@@ -94,9 +94,9 @@ class linearLeastSquareRegressionPredict {
      * Then feature D to 2*D - 1. The last round will readin fake data if L is not divisiable by D.
      * These data won't be used, just to allign D streams.
      * @param eOpStrm End flag of opStrm.
-     * @param retStrm, Prediction result.
-     * @param eRetStrm, End flag of retStrm.
-     * @param cols, Effective feature numbers.
+     * @param retStrm Prediction result.
+     * @param eRetStrm End flag of retStrm.
+     * @param cols Effective feature numbers.
      */
     void predict(hls::stream<MType> opStrm[D],
                  hls::stream<bool>& eOpStrm,
@@ -161,9 +161,9 @@ class LASSORegressionPredict {
      * Then feature D to 2*D - 1. The last round will readin fake data if L is not divisiable by D.
      * These data won't be used, just to allign D streams.
      * @param eOpStrm End flag of opStrm.
-     * @param retStrm, Prediction result.
-     * @param eRetStrm, End flag of retStrm.
-     * @param cols, Effective feature numbers.
+     * @param retStrm Prediction result.
+     * @param eRetStrm End flag of retStrm.
+     * @param cols Effective feature numbers.
      */
     void predict(hls::stream<MType> opStrm[D],
                  hls::stream<bool>& eOpStrm,
@@ -226,11 +226,11 @@ class ridgeRegressionPredict {
      * To get a vector of L features, opStrm will be read (L + D - 1) / D times.
      * Feature 0 to D-1 will be read from opStrm[0] to opStrm[D-1] at the first time.
      * Then feature D to 2*D - 1. The last round will readin fake data if L is not divisiable by D.
-     * These data won't be used, just to allign D streams.
+     * These data won't be used just to allign D streams.
      * @param eOpStrm End flag of opStrm.
-     * @param retStrm, Prediction result.
-     * @param eRetStrm, End flag of retStrm.
-     * @param cols, Effective feature numbers.
+     * @param retStrm Prediction result.
+     * @param eRetStrm End flag of retStrm.
+     * @param cols Effective feature numbers.
      */
     void predict(hls::stream<MType> opStrm[D],
                  hls::stream<bool>& eOpStrm,
@@ -249,7 +249,7 @@ namespace internal {
  * @tparam MType datatype of regression, support double and float
  * @tparam WAxi AXI interface width to load training data.
  * @tparam WData Data width of feature data type.
- * @tparam BurstLen, Length of burst read.
+ * @tparam BurstLen Length of burst read.
  * @tparam D Number of features that processed each cycle
  * @tparam DDepth DDepth * D is max feature numbers supported.
  * @tparam RAMWeight Use which kind of RAM to store weight, could be LUTRAM, BRAM or URAM.
@@ -290,7 +290,7 @@ class linearLeastSquareRegressionSGDTrainer
  * @tparam MType datatype of regression, support double and float
  * @tparam WAxi AXI interface width to load training data.
  * @tparam WData Data width of feature data type.
- * @tparam BurstLen, Length of burst read.
+ * @tparam BurstLen Length of burst read.
  * @tparam D Number of features that processed each cycle
  * @tparam DDepth DDepth * D is max feature numbers supported.
  * @tparam RAMWeight Use which kind of RAM to store weight, could be LUTRAM, BRAM or URAM.
@@ -378,7 +378,7 @@ class LASSORegressionSGDTrainer : public SGDFramework<linearLeastSquareGradientP
  * @tparam MType datatype of regression, support double and float
  * @tparam WAxi AXI interface width to load training data.
  * @tparam WData Data width of feature data type.
- * @tparam BurstLen, Length of burst read.
+ * @tparam BurstLen Length of burst read.
  * @tparam D Number of features that processed each cycle
  * @tparam DDepth DDepth * D is max feature numbers supported.
  * @tparam RAMWeight Use which kind of RAM to store weight, could be LUTRAM, BRAM or URAM.

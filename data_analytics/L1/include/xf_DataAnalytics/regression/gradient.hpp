@@ -18,7 +18,7 @@
  * @file gradient.hpp
  * @brief Linear least square gradient calculate and update functions implementation
  *
- * This file is part of Vitis ML Library
+ * This file is part of Vitis Data Analytics Library
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_GRADIENT_HPP_
@@ -429,90 +429,6 @@ class linearLeastSquareGradientProcessor {
         processCore(ddr, offset, rows, cols, cols_1, fraction, ifJump, bucketSize);
     }
 };
-
-/*
-template <typename MType,
-          int WAxi,
-          int WData,
-          int BurstLen,
-          int D,
-          int DDepth,
-          RAMType RAMWeight,
-          RAMType RAMIntercept,
-          RAMType RAMAvgWeight,
-          RAMType RAMAvgIntercept,
-          RAMType RAMScaleBuff,
-          RAMType RAMScaleFactor>
-class scalingLinearLeastSquareGradientProcessor {
-public:
-    static const int axi_fifo_depth = BurstLen * 2;
-    static const int LatencyR = sl2<MType, D, DDepth, 1, 1, &funcMul<MType>, &funcSum<MType>, &funcAssign<MType>,
-AdditionLatency<MType>::value, RAMWeight, RAMIntercept>::LatencyR;
-    static const int MaxLatency = LatencyR * DDepth * 2;
-    static const int InputW = WAxi;
-    static const int DFactor = D;
-    static const int DepthFactor = DDepth;
-    typedef MType DataType;
-    static const int L1 = s_aggr<MType, D, DDepth, &funcSum<MType>, AdditionLatency<MType>::value, RAMAvgWeight>::L;
-    static const int L2 = s_aggr<MType, 1, 1, &funcSum<MType>, AdditionLatency<MType>::value, RAMAvgIntercept>::L;
-    tagTableRandomLoader<WAxi, WData, BurstLen, MType, MType> scanner;
-    sl2<MType, D, DDepth, 1, 1, &funcMul<MType>, &funcSum<MType>, &funcAssign<MType>, AdditionLatency<MType>::value,
-RAMWeight, RAMIntercept> dotMulProcessor;
-    linearLeastSquareGradient<MType, D> sampleGradient;
-    s_aggr<MType, D, DDepth, &funcSum<MType>, AdditionLatency<MType>::value, RAMAvgWeight> avgThetaGradientProcessor;
-    s_aggr<MType, 1, 1, &funcSum<MType>, AdditionLatency<MType>::value, RAMAvgIntercept> avgInterceptGradientProcessor;
-    scalingProcess<D, DDepth, MType, MType, RAMScaleBuff, RAMScaleFactor> scaler;
-    void seedInitialization(ap_uint<32> seed) {
-        scanner.seedInitialization(seed);
-    }
-    void setParams(MType weight[D][DDepth],
-                   MType intercept,
-                   ap_uint<32> cols) {
-        dotMulProcessor.setWeight(weight, cols);
-        dotMulProcessor.setIntercept(intercept);
-    }
-    void process(ap_uint<WAxi> * ddr,
-                 const ap_uint<32> offset,
-                 const ap_uint<32> rows,
-                 const ap_uint<32> cols,
-                 const float fraction,
-                 const bool ifJump,
-                 const bool calcStdErr,
-                 const ap_uint<32> bucketSize) {
-        #pragma HLS dataflow
-        hls::stream<MType> xRawStrm[WAxi / WData];
-        hls::stream<bool> eXRawStrm;
-        hls::stream<MType> yRawStrm;
-        hls::stream<bool> eYRawStrm;
-        hls::stream<MType> xStrm1[WAxi / WData];
-        #pragma HLS array_partition variable = xStrm1 dim = 1 complete
-        #pragma HLS stream variable = xStrm1 depth = axi_fifo_depth
-        hls::stream<bool> eXStrm1;
-        #pragma HLS stream variable = eXStrm1 depth = axi_fifo_depth
-        hls::stream<MType> xStrm2[WAxi / WData];
-        #pragma HLS array_partition variable = xStrm2 dim = 1 complete
-        #pragma HLS stream variable = xStrm2 depth = axi_fifo_depth
-        hls::stream<bool> eXStrm2;
-        hls::stream<MType> yStrm;
-        hls::stream<bool> eYStrm;
-        hls::stream<MType> dotMulStrm[1];
-        hls::stream<bool> eDotMulStrm;
-        hls::stream<MType> thetaGradientStrm[WAxi / WData];
-        hls::stream<bool> eThetaGradientStrm;
-        hls::stream<MType> interceptGradientStrm[1];
-        hls::stream<bool> eInterceptGradientStrm;
-        scanner.sample(ddr, offset, rows, cols, fraction, ifJump, bucketSize, xRawStrm, eXRawStrm, yRawStrm, eYRawStrm);
-        scaler.scaling(xRawStrm, eXRawStrm, yRawStrm, eYRawStrm, cols, calcStdErr, xStrm1, eXStrm1, xStrm2, eXStrm2,
-yStrm, eYStrm);
-        dotMulProcessor.process(xStrm1, eXStrm1, dotMulStrm, eDotMulStrm, cols - 1, 1);
-        sampleGradient.process(cols - 1, xStrm2, eXStrm2, yStrm, eYStrm, dotMulStrm[0], eDotMulStrm,
-                                thetaGradientStrm, eThetaGradientStrm, interceptGradientStrm[0],
-eInterceptGradientStrm);
-        avgThetaGradientProcessor.processAvg(thetaGradientStrm, eThetaGradientStrm, cols - 1);
-        avgInterceptGradientProcessor.processAvg(interceptGradientStrm, eInterceptGradientStrm, 1);
-    }
-};
-*/
 
 } // namespace internal
 } // namespace regression

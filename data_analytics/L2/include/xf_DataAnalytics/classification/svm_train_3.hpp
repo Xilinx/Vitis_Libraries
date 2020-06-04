@@ -16,7 +16,7 @@
 
 /**
  * @file svm_train.hpp
- * @brief interface of ML svm train kernel.
+ * @brief interface of Data Analytics svm train kernel.
  */
 
 #ifndef _XF_DATA_ANALYTICS_CLASSIFICATION_SVM3_TRAIN_HPP_

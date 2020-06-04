@@ -16,7 +16,7 @@
 
 /**
  * @file utils.hpp
- * @brief This file is part of Vitis ML Library, contains utilities.
+ * @brief This file is part of Vitis Data Analytics Library, contains utilities.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_UTILS_HPP_

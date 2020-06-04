@@ -22,7 +22,7 @@
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../L2/include/docs/Doxyfile_L2
+INPUT                  = ../L2/include/xf_DataAnalytics/classification  ../L2/include/xf_DataAnalytics/clustering  ../L2/include/xf_DataAnalytics/regression
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of

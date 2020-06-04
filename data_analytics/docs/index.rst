@@ -13,11 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-**********************
-Vitis ML Library
-**********************
+*****************************
+Vitis Data Analytics Library
+*****************************
 
-Vitis ML Library is an open-sourced Vitis library written in C++ for accelerating data analytics applications in a variety of use cases.
+Vitis Data Analytics Library is an open-sourced Vitis library written in C++ for accelerating data analytics applications in a variety of use cases.
 
 It now covers L1 and L2 level primitives. It provides optimized hardware implementation of most common data analytics algorithms.
 

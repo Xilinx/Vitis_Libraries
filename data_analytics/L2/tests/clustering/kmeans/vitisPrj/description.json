@@ -1,29 +1,44 @@
 {
-    "gui": false,
-    "name": "Xilinx Kmeans Training", 
-    "description": "", 
-    "flow": "vitis", 
+    "gui": true,
+    "name": "Xilinx Kmeans Training",
+    "description": "",
+    "flow": "vitis",
+    "platform_type": "pcie",
     "platform_whitelist": [
         "u250"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ],
+    "platform_properties": {
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }
+        }
+    },
     "launch": [
         {
-            "cmd_args": "-xclbin $(XCLBIN_FILE) -in ml_datasets/ -trn 10000 -ten 1000 -fn 26 -cn 2", 
+            "cmd_args": "-xclbin BUILD/kmeanskernel.xclbin", 
             "name": "generic launch for all flows"
         }
     ], 
     "host": {
-        "host_exe": "kmeans_host.exe", 
+        "host_exe": "hostexe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/kmeans/vitisPrj/host/main.cpp", 
+                "host/main.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }
@@ -31,9 +46,9 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/src", 
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/include",
+                "LIB_DIR/../utils/L1/include"
             ]
         }
     }, 
@@ -41,13 +56,30 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/kmeans/vitisPrj/host/main.cpp", 
+                    "location": "kernel/kernel.cpp", 
                     "frequency": 300.0, 
-                    "name": "kmeans_train"
+                    "name": "kmeansKernel",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "kmeansKernel",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "centers",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 
-            "name": "kmeans_train"
+            "name": "kmeanskernel"
         }
     ], 
     "testinfo": {

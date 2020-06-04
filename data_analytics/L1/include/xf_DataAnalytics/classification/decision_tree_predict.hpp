@@ -18,7 +18,7 @@
  * @file decision_tree_predict.hpp
  * @brief Decision Tree predict function implementation.
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 #ifndef _XF_DATA_ANALYTICS_L1_CLASSIFICATION_DECISIONTREE_PREDICT_HPP_
 #define _XF_DATA_ANALYTICS_L1_CLASSIFICATION_DECISIONTREE_PREDICT_HPP_
@@ -158,7 +158,7 @@ namespace xf {
 namespace data_analytics {
 namespace classification {
 /**
- * @brief dtPredict, Top function of Decision Tree Predict.
+ * @brief decisionTreePredict, Top function of Decision Tree Predict.
  *
  * This function first loads decision tree (the corresponding function : getTree) from treeStrm
  * Then, read sample one by one from dstrm_batch, and output its category id into predictionsStrm streams
@@ -187,14 +187,14 @@ template <typename MType,
           unsigned int MAX_FEA_NUM,
           unsigned int MAX_TREE_DEPTH = 20,
           unsigned MAX_CAT_BITS = 8>
-void dtPredict(hls::stream<ap_uint<WD> > dstrm_batch[MAX_FEA_NUM],
-               hls::stream<bool>& estrm_batch,
-               hls::stream<ap_uint<512> >& treeStrm,
-               hls::stream<bool>& treeTag,
-               hls::stream<ap_uint<MAX_CAT_BITS> >& predictionsStrm,
-               hls::stream<bool>& predictionsTag) {
+void decisionTreePredict(hls::stream<ap_uint<WD> > dstrm_batch[MAX_FEA_NUM],
+                         hls::stream<bool>& estrm_batch,
+                         hls::stream<ap_uint<512> >& treeStrm,
+                         hls::stream<bool>& treeTag,
+                         hls::stream<ap_uint<MAX_CAT_BITS> >& predictionsStrm,
+                         hls::stream<bool>& predictionsTag) {
 #ifndef __SYNTHESIS__
-    struct Node<MType>(*nodes)[MAX_NODES_NUM] = new struct Node<MType>[(MAX_TREE_DEPTH + 1) / 2 + 1][MAX_NODES_NUM];
+    struct Node<MType>(*nodes)[MAX_NODES_NUM] = new struct Node<MType>[ (MAX_TREE_DEPTH + 1) / 2 + 1 ][MAX_NODES_NUM];
 #else
     struct Node<MType> nodes[(MAX_TREE_DEPTH + 1) / 2 + 1][MAX_NODES_NUM];
 #pragma HLS array_partition variable = nodes dim = 1

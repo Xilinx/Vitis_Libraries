@@ -16,7 +16,7 @@
 
 /**
  * @file decision_tree_quantize.hpp
- * @brief interface of ML randomforest train kernel.
+ * @brief interface of Data Analytics randomforest train kernel.
  */
 
 #ifndef _XF_DATA_ANALYTICS_CLASSIFICATION_RANDOMFOREST_TRAIN_HPP_

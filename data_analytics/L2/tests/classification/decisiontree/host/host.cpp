@@ -187,7 +187,8 @@ int main(int argc, const char* argv[]) {
     cl_mem_ext_ptr_t mext_configs = {XCL_BANK0, configs, 0};
     cl_mem_ext_ptr_t mext_tree = {XCL_BANK0, tree, 0};
     // preprocess, now in host
-    DataPreocess<DataType, 64>(datasets, numCategories, paras, samples_num, features_num, numClass, configs, data);
+    DataPreocess<DataType, 64>(datasets, numCategories, paras, in_dir, samples_num, features_num, numClass, configs,
+                               data);
     // Map buffers
     int err;
     cl::Buffer buf_data(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,

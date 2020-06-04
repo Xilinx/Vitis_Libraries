@@ -19,12 +19,11 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/benchmarks/*}')
 
 .SECONDEXPANSION:
 
 # -----------------------------------------------------------------------------
-#                            tool common setup
+#                            common setup
 
 # MK_INC_BEGIN vitis_help.mk
 
@@ -57,7 +56,6 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-
 TOOL_VERSION ?= 2019.2
 
 ifeq (,$(XILINX_VIVADO))
@@ -76,7 +74,6 @@ export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 # MK_INC_END vivado.mk
 
 # MK_INC_BEGIN vitis.mk
-
 
 TOOL_VERSION ?= 2019.2
 
@@ -144,7 +141,7 @@ endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
-Available platforms are: $(XPLATFORMS)
+Avaialble platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
 export MSG_PLATFORM
@@ -171,11 +168,11 @@ XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
 # -----------------------------------------------------------------------------
 # BEGIN_XF_MK_USER_SECTION
 # -----------------------------------------------------------------------------
-# TODO:                 data creation and other user targets
 
-# a (typically hidden) file as stamp
-DATA_STAMP :=
+DATA_STAMP := $(CUR_DIR)/db_data/dat/.stamp
 $(DATA_STAMP):
+#	make -C $(CUR_DIR)/db_data
+
 .PHONY: data
 data: $(DATA_STAMP)
 
@@ -183,61 +180,48 @@ data: $(DATA_STAMP)
 debug:
 	@echo "KERNELS are $(KERNELS)"
 	@echo "> KERNEL_NAMES are $(KERNEL_NAMES)"
-	@echo
-	@echo "naiveBayesTrain_kernel_EXTRA_SRCS is $(naiveBayesTrain_kernel_EXTRA_SRCS)"
-	@echo "naiveBayesTrain_kernel_EXTRA_HDRS is $(naiveBayesTrain_kernel_EXTRA_HDRS)"
-	@echo "> naiveBayesTrain_kernel_SRCS is $(naiveBayesTrain_kernel_SRCS)"
-	@echo "> naiveBayesTrain_kernel_HDRS is $(naiveBayesTrain_kernel_HDRS)"
-	@echo
-	@echo "main_EXTRA_HDRS is $(main_EXTRA_HDRS)"
-	@echo "> main_HDRS is $(main_HDRS)"
+	@echo "> gqeJoin_SRCS is $(gqeJoin_SRCS)"
+	@echo "> gqeJoin_HDRS is $(gqeJoin_HDRS)"
+	@echo "> gqeJoin_VPP_CFLAGS is $(gqeJoin_VPP_CFLAGS)"
+	@echo "$(CUR_DIR)"
+
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/tests/*}')
+XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 # -----------------------------------------------------------------------------
-# TODO:                          kernel setup
 
-XFLIB_DIR = $(XF_PROJ_ROOT)
 KSRC_DIR = $(CUR_DIR)/kernel
 
-XCLBIN_NAME := naiveBayesTrain_kernel
-KERNEL_IDS = 0
-KERNELS := naiveBayesTrain_kernel
+XCLBIN_NAME := ridge_regression
+KERNELS := ridgeRegressionTrain:kernel.cpp
 
-naiveBayesTrain_kernel_VPP_CFLAGS += -I$(KSRC_DIR)
+VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include/ -I$(XFLIB_DIR)/L2/include/ -I$(XFLIB_DIR)/../utils/L1/include/
 
-VPP_CFLAGS += -I$(XFLIB_DIR)/L1/include -I$(XFLIB_DIR)/../utils/L1/include
+VPP_LFLAGS += --sp ridgeRegressionTrain_1.input:DDR[0] \
+	      --sp ridgeRegressionTrain_1.output:DDR[0]
+VPP_LFLAGS += --slr ridgeRegressionTrain_1:SLR0 
 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/ || /u200/'))
-    VPP_CFLAGS += --config conn_u200_u250.ini
-else
-$(warning Unsupported platform $(XPLATFORM))
-endif
+VPP_LFLAGS += --xp "vivado_prop:run.impl_1.STEPS.OPT_DESIGN.ARGS.DIRECTIVE=Explore" \
+		--xp "vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.IS_ENABLED=true" \
+		--xp "vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore" \
+		--xp "vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore" \
+		--xp "vivado_prop:run.impl_1.{STEPS.ROUTE_DESIGN.ARGS.MORE OPTIONS}={-tns_cleanup}" \
+		--xp "vivado_prop:run.impl_1.STEPS.POST_ROUTE_PHYS_OPT_DESIGN.IS_ENABLED=true"
 
 # -----------------------------------------------------------------------------
-# TODO:                           host setup
+
+EXE_NAME = test_main
+
+HOST_ARGS = -xclbin $(XCLBIN_FILE)
 
 SRC_DIR = $(CUR_DIR)/host
-TB ?= test
 
-EXE_NAME = test_nb
-HOST_ARGS = -xclbin $(XCLBIN_FILE) -in $(CUR_DIR)/dat/$(TB).dat -g $(CUR_DIR)/dat/$(TB)_g.dat -c 10 -t 13107
+CXXFLAGS += -I $(XFLIB_DIR)/ext/xcl2 -I$(XFLIB_DIR)/L1/include -I$(XFLIB_DIR)/L2/include/ 
 
-SRCS = test_nb
+SRCS = host.cpp
+test_main_EXTRA_HDRS += $(XFLIB_DIR)/L2/include/xf_DataAnalytics/regression/decision_tree_L2.hpp
+test_main_CXXFLAGS += -I$(EXT_DIR)/xcl2
 
-test_nb_EXTRA_HDRS += $(KSRC_DIR)/naiveBayesTrain_kernel.hpp
-test_nb_CXXFLAGS += -I$(KSRC_DIR) -I$(EXT_DIR)/xcl2
-
-CXXFLAGS += -D XDEVICE=$(XDEVICE) -I$(XFLIB_DIR)/L1/include
-CXXFLAGS += -DPRAGMA
-
-HOST_CCOPT = DBG
-ifeq (${HOST_CCOPT},DBG)
-    CXXFLAGS += -g
-endif
-ifeq (${HOST_CCOPT},OPT)
-    CXXFLAGS += -O3
-endif
-
-# EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule
 EXTRA_OBJS += xcl2
 
 EXT_DIR = $(XFLIB_DIR)/ext
@@ -254,9 +238,9 @@ all: host xclbin
 
 # MK_INC_BEGIN vitis_kernel_rules.mk
 
-VPP_DIR_BASE ?= _x
-XO_DIR_BASE ?= xo
-XCLBIN_DIR_BASE ?= xclbin
+VPP_DIR_BASE ?= _x$(tag)
+XO_DIR_BASE ?= xo$(tag)
+XCLBIN_DIR_BASE ?= xclbin$(tag)
 
 XCLBIN_DIR_SUFFIX ?= _$(XDEVICE)_$(TARGET)
 
@@ -264,13 +248,14 @@ VPP_DIR = $(CUR_DIR)/$(VPP_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
 XO_DIR = $(CUR_DIR)/$(XO_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
 XCLBIN_DIR = $(CUR_DIR)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
 
-XFREQUENCY ?= 300
+XFREQUENCY ?= 250
 
 VPP = v++
 VPP_CFLAGS += -I$(KSRC_DIR)
 VPP_CFLAGS += --target $(TARGET) --platform $(XPLATFORM) --temp_dir $(VPP_DIR) --save-temps --debug
 VPP_CFLAGS += --kernel_frequency $(XFREQUENCY) --report_level 2
-VPP_LFLAGS += --optimize 2 --jobs 16
+VPP_LFLAGS += --optimize 2 --jobs 8 \
+  --xp "vivado_param:project.writeIntermediateCheckpoints=1"
 
 KERNEL_NAMES := $(foreach k,$(KERNELS),$(word 1, $(subst :, ,$(k))))
 XO_FILES := $(foreach k,$(KERNEL_NAMES),$(XO_DIR)/$(k).xo)
@@ -311,9 +296,9 @@ $(XCLBIN_FILE): $(XO_FILES) | check_vpp
 
 .PHONY: xo xclbin
 
-xo: $(XO_FILES) | check_vpp check_platform
+xo: check_vpp check_platform $(XO_FILES)
 
-xclbin: $(XCLBIN_FILE) | check_vpp check_platform
+xclbin: check_vpp check_platform $(XCLBIN_FILE)
 
 # MK_INC_END vitis_kernel_rules.mk
 
@@ -370,7 +355,7 @@ $(EXE_FILE): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platfor
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 .PHONY: host
-host: $(EXE_FILE) | check_vpp check_xrt check_platform
+host: check_vpp check_xrt check_platform $(EXE_FILE)
 
 # MK_INC_END vitis_host_rules.mk
 
@@ -438,9 +423,7 @@ run: host xclbin $(EMU_CONFIG) $(DATA_STAMP)
 
 check: run
 
-.PHONY: build
-
-build: xclbin host
-
 # MK_INC_END vitis_test_rules.mk
 
+.PHONY: build
+build: xclbin host
