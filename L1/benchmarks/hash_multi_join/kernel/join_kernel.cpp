@@ -51,7 +51,6 @@ COL_SPLITTER_P:
         l_2e.write(false);
 #ifndef __SYNTHESIS__
         ++cnt;
-        printf("%ld\n", (long)key);
 #if defined(Q5DEBUG) && defined(VERBOSE)
         printf("eprice = %ld, discount = %ld\n", (long)eprice, (long)discount);
 #endif

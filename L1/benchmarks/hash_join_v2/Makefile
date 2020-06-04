@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,15 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u280_xdma_201920_1
-
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-ifeq ($(findstring vck, $(DEVICE)), vck)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-
+DEVICE ?= xilinx_u280_xdma_201920_3
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
@@ -98,6 +90,10 @@ CXXFLAGS += -I$(CUR_DIR)/kernel
 
 
 
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
+CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
+CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+
 # Host compiler global settings
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
@@ -107,9 +103,14 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := test_join.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -scale 10  
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -scale 10
+endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -scale 5000
+endif
+ifeq ($(TARGET),$(filter $(TARGET),hw))
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_join_v2.xclbin
 endif
 
 ifneq ($(HOST_ARCH), x86)
@@ -127,10 +128,13 @@ VPP_FLAGS += --config $(CUR_DIR)/conn_u280.ini
 endif
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
+
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(CUR_DIR)/kernel
 VPP_FLAGS += -I$(CUR_DIR)/host
 
-
+join_kernel_VPP_FLAGS +=  -D KERNEL_NAME=join_kernel
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/hash_join_v2.xclbin
 BINARY_CONTAINER_hash_join_v2_OBJS += $(TEMP_DIR)/join_kernel.xo
