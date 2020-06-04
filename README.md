@@ -118,7 +118,6 @@ Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-    Copyright 2019 Xilinx, Inc.
 
 ## Contribution/Feedback
 
