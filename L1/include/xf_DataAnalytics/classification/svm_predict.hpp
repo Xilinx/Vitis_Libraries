@@ -18,7 +18,7 @@
  * @file svm_predict.hpp
  * @brief svm predict function implementation.
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 #ifndef _XF_DATA_ANALYTICS_L1_SVM_PREDICT_HPP_
 #define _XF_DATA_ANALYTICS_L1_SVM_PREDICT_HPP_

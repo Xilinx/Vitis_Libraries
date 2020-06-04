@@ -16,17 +16,16 @@
 .. _guide-kMeansPredict:
 
 ********************************
-Internals of kMeansPredict
+K-Means (Predict)
 ********************************
 
 .. toctree::
    :hidden:
    :maxdepth: 2
 
-This document describes the structure and execution of kMeansPredict,
-implemented as :ref:`kMeansPredict <cid-xf::ml::kMeansPredict>` function.
+This document describes the structure and execution of kMeansPredict.
 
-.. image:: /images/kMeansPredict.png
+.. image:: /images/kMeanPredict.png
    :alt: k-means prediction Structure
    :width: 80%
    :align: center
@@ -43,8 +42,4 @@ There are Applicable conditions:
 2.KU and DV should be configured properly due to limitation to local memory. For example,KU*DV=128 when centers are stored in URAMon U250.
 
 3.The dynamic confugures should close to static ones in order to void unuseful computing inside.
-
-.. CAUTION::
-   These Applicable conditions.
-
 

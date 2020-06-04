@@ -17,7 +17,7 @@
  * @file logisticRegression.hpp
  * @brief Logistic Regression alogrithm, both predict and training.
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_LOGISTIC_REGRESSION_HPP_
@@ -76,11 +76,11 @@ class logisticRegressionPredict {
     /**
      * @brief pick best weight vector for classification from K vectors
      *
-     * @param margin, K margins generate by K weight vectors.
-     * @param counter, start index of this K margins in all margins.
-     * @param ws, number of margins
-     * @param maxMargin, max of K margins.
-     * @param maxIndex, which index does max margin sits.
+     * @param margin K margins generate by K weight vectors.
+     * @param counter start index of this K margins in all margins.
+     * @param ws number of margins
+     * @param maxMargin max of K margins.
+     * @param maxIndex which index does max margin sits.
      */
     void pickFromK(MType margin[K], ap_uint<32> counter, ap_uint<32> ws, MType& maxMargin, ap_uint<32>& maxIndex) {
         MType tmpMargin = margin[0];
@@ -100,15 +100,15 @@ class logisticRegressionPredict {
     /**
      * @brief pick best weight vector for classification
      *
-     * @param marginStrm, margin stream.
+     * @param marginStrm margin stream.
      * To get a vector of L margins, marginStrm will be read (L + K - 1) / D times.
      * Margin 0 to K-1 will be read from marginStrm[0] to marginStrm[D-1] at the first time.
      * Then margin D to 2*D - 1. The last round will readin fake data if L is not divisiable by K.
      * These data won't be used, just to allign K streams.
-     * @param eMarginStrm, Endflag of marginStrm.
-     * @param retStrm, result stream of classification.
-     * @param eRetStrm, Endflag of retStrm.
-     * @param ws, number of weight vectors used.
+     * @param eMarginStrm Endflag of marginStrm.
+     * @param retStrm result stream of classification.
+     * @param eRetStrm Endflag of retStrm.
+     * @param ws number of weight vectors used.
      */
     void pick(hls::stream<MType> marginStrm[K],
               hls::stream<bool>& eMarginStrm,
@@ -179,9 +179,9 @@ class logisticRegressionPredict {
      * These data won't be used, just to allign D streams.
      * @param eOpStrm End flag of opStrm.
      * @param cols Feature numbers
-     * @param classNum, Number of classes.
-     * @param retStrm, result stream of classification.
-     * @param eRetStrm, Endflag of retStrm.
+     * @param classNum Number of classes.
+     * @param retStrm result stream of classification.
+     * @param eRetStrm Endflag of retStrm.
      */
     void predict(hls::stream<MType> opStrm[D],
                  hls::stream<bool>& eOpStrm,
@@ -198,7 +198,7 @@ class logisticRegressionPredict {
      *
      * @param inputW weight
      * @param cols Effective weight numbers
-     * @param classNum, number of classes.
+     * @param classNum number of classes.
      */
     void setWeight(MType inputW[K][D][KDepth * DDepth], ap_uint<32> cols, ap_uint<32> classNum) {
         marginProcessor.setWeight(inputW, cols, classNum - 1);
@@ -208,7 +208,7 @@ class logisticRegressionPredict {
      * @brief set up intercept parameters for prediction
      *
      * @param inputI intercept, should be set to zero if don't needed.
-     * @param classNum, number of classes.
+     * @param classNum number of classes.
      */
     void setIntercept(MType inputI[K][KDepth], ap_uint<32> classNum) {
         marginProcessor.setIntercept(inputI, classNum - 1);

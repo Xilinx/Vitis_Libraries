@@ -17,7 +17,7 @@
  * @file stream_local_processing.hpp
  * @brief Calculation patterns for stream input.
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_STREAM_LOCAL_PROCESSING_HPP_

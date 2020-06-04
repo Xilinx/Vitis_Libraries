@@ -1,5 +1,5 @@
 {
-    "gui": false,
+    "gui": true,
     "name": "Xilinx SVM Training", 
     "description": "", 
     "flow": "vitis", 
@@ -9,7 +9,7 @@
     "platform_blacklist": [], 
     "launch": [
         {
-            "cmd_args": "-xclbin $(XCLBIN_FILE) -in ml_datasets/1000.csv -trn 999 -ten 100 -fn 28 -itrn 1 -bn 10", 
+            "cmd_args": "-xclbin BUILD/svm.xclbin -in PROJECT/ml_datasets/1000.csv -trn 999 -ten 100 -fn 28 -itrn 1 -bn 10", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -17,14 +17,15 @@
         "host_exe": "test_svm.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/svm/host/host.cpp", 
+                "host/host.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/svm/host", 
-                "LIB_DIR/ext/xcl2"
+                "host", 
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }
@@ -32,9 +33,9 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/src", 
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/include",
+                "LIB_DIR/../utils/L1/include" 
             ]
         }
     }, 
@@ -44,11 +45,28 @@
                 {
                     "location": "LIB_DIR/L2/src/classification/svm.cpp", 
                     "frequency": 250.0, 
-                    "name": "SVM"
+                    "name": "SVM",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "DecisionTree",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "ddr",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "weight",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 250.0, 
-            "name": "SVM"
+            "name": "svm"
         }
     ], 
     "testinfo": {

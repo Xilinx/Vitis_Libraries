@@ -17,7 +17,7 @@
  * @file table_sample.hpp
  * @brief Table loading and sampling functions.
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_TABLE_SAMPLE_HPP_

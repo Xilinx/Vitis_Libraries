@@ -15,12 +15,15 @@
 
 .. _api:
 
-************************************
-API Functions of ``xf::ml``
-************************************
+****************************************
+API Functions of ``xf::data_analytics``
+****************************************
 
 .. toctree::
    :maxdepth: 2
 
-.. include:: ../rst_L2/namespace_xf_ml.rst
+.. include:: ../rst_L2/namespace_xf_data_analytics_clustering.rst
+   :start-after: FunctionSection
+
+.. include:: ../rst_L2/namespace_xf_data_analytics_regression.rst
    :start-after: FunctionSection

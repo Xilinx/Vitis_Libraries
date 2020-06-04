@@ -1,0 +1,91 @@
+{
+    "gui": true,
+    "name": "Xilinx Ridge Regression Training", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [], 
+    "launch": [
+        {
+            "cmd_args": "-xclbin BUILD/ridge_regression.xclbin", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "test_main.exe", 
+        "compiler": {
+            "sources": [
+                "host/host.cpp",
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "host",
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include",
+                "LIB_DIR/../utils/L1/include"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/kernel.cpp", 
+                    "frequency": 250.0, 
+                    "name": "ridgeRegressionTrain",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "ridgeRegressionTrain",
+                            "slr": "SLR0",
+                            "arguments" : [
+                                {
+                                    "name": "input",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "output",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ], 
+            "frequency": 250.0, 
+            "name": "ridge_regression"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": 520
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}
