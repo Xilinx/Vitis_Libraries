@@ -16,7 +16,7 @@
 
 .PHONY: all install xml rst html clean cleanhtml cleanall check_tools
 
-all: html
+all: install
 
 check_tools:
 ifeq (, $(shell which doxygen 2>/dev/null))
