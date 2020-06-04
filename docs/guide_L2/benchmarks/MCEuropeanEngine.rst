@@ -13,6 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: benchmark, European, engine, option
+   :description: This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
 
 *************************************************
 Benchmark of European Option Pricing Engine

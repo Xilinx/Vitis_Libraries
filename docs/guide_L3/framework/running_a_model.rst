@@ -13,6 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: finance model
+   :description: A series of classes are provided that represent the various financial models that are supported. These classes provide all the methods that are required to run that financial model on a given HW device.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
 
 ***************
 Running a Model

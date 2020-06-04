@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: fintech, sobol, LD sequence, Monte-Carlo, gray code, quasi-random
+   :description: Sobol sequence generator (SSG) is one of the critical utilities needed by Monte-Carlo Simulation. The SSG utility can generate the sequence with a quasi-random distribution.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 **********************************
 Sobol Sequence Generator
 **********************************
@@ -21,7 +27,7 @@ Sobol Sequence Generator
 Overview
 ========
 
-`Sobol sequence generator (SSG)` is one of the critical utilities needed by Monte-Carlo Simulation. We provide the SSG which can generate the sequence with a quasi-random distribution. The `Sobol sequence` is one of the most popular quasi-random sequence for its simplicity and efficiency in implementation. Specifically, sobol sequence in base `b=2`, it can be implemented efficiently using bit-vector operations to compute the radical inverse and there is only one point in the field `[0,1)` .
+`Sobol sequence generator (SSG)` is one of the critical utilities needed by Monte-Carlo Simulation. The SSG utility can generate the sequence with a quasi-random distribution. The `Sobol sequence` is one of the most popular quasi-random sequence for its simplicity and efficiency in implementation. Specifically, sobol sequence in base `b=2`, it can be implemented efficiently using bit-vector operations to compute the radical inverse and there is only one point in the field `[0,1)` .
 
 
 Algorithm

@@ -29,6 +29,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: fintech, Brownian, Brownian Bridge
+   :description: A Brownian bridge is a continuous-time stochastic process whose probability distribution is the conditional probability distribution of a Wiener process.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *************************
 Brownian Bridge Transform
 *************************

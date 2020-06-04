@@ -2,10 +2,48 @@
     "name": "jks.L2.binomialTreeEngine", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc*"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/binomialtree.xclbin", 
@@ -16,32 +54,41 @@
         "host_exe": "binomialtreehost.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/BinomialTreeEngine/src/binomialtreehost.cpp", 
-                "REPO_DIR/L2/tests/BinomialTreeEngine/src/binomialtreecpu.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L2/tests/BinomialTreeEngine/src/binomialtreehost.cpp", 
+                "LIB_DIR/L2/tests/BinomialTreeEngine/src/binomialtreecpu.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/BinomialTreeEngine/src", 
-                "REPO_DIR/ext/xcl2"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/BinomialTreeEngine/src", 
+                "LIB_DIR/ext/xcl2"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ", 
+            "symbols": [
+                "TEST_DT=double", 
+                "TEST_PARALLEL_ENGINES=8", 
+                "EVICE_PART=u250"
+            ]
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/BinomialTreeEngine/src"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/BinomialTreeEngine/src"
+            ], 
+            "symbols": [
+                "TEST_DT=double", 
+                "TEST_PARALLEL_ENGINES=8"
             ]
         }, 
         "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/BinomialTreeEngine/src"
+            "ldclflags": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/BinomialTreeEngine/src"
             ]
         }
     }, 
@@ -49,7 +96,7 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/BinomialTreeEngine/src/binomialtreekernel.cpp", 
+                    "location": "LIB_DIR/L2/tests/BinomialTreeEngine/src/binomialtreekernel.cpp", 
                     "frequency": 200.0, 
                     "name": "BinomialTreeKernel"
                 }

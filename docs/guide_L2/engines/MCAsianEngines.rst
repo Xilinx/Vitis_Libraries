@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Asian, pricing, engine, MCAsianAPEngine
+   :description: Asian option pricing engine uses Monte Carlo simulation to estimate the value of the Asian option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 
 ************************************************
 Internal Design of Asian Option Pricing Engine
@@ -21,7 +28,7 @@ Internal Design of Asian Option Pricing Engine
 Overview
 ========
 
-This engine uses Monte Carlo Simulation to estimate the value of Asian Option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+The Asian option pricing engine uses Monte Carlo Simulation to estimate the value of the Asian option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
 
 Asian Option is kind of exotic option. The payoff is path dependent and it is dependent on the
 average price of underlying asset over the settled period of time :math:`T`.

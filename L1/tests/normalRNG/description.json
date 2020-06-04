@@ -20,15 +20,14 @@
     }, 
     "testbench": {
         "source": [
-            "tb.cpp",
+            "tb.cpp", 
             "${XF_PROJ_ROOT}/ext/dcmt/dcmt/lib/libdcmt.a"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/ext/dcmt/dcmt/include", 
         "ldflags": "-L./ -ldcmt", 
         "argv": {}, 
-        "stdmath": false,
+        "stdmath": false, 
         "data_recipe": "make -C ${XF_PROJ_ROOT}/ext/dcmt"
-       
     }, 
     "testinfo": {
         "disable": false, 

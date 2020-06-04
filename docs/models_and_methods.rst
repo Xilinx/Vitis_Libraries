@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Finance, Library, Vitis Quantitative Finance Library, fintech
+   :description: Vitis Quantitative Finance library pricing models, numerical and closed-form solution methods.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ************************************
 Pricing Models and Numerical Methods
 ************************************

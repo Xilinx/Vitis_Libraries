@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Finance, Quantitative, Vitis Quantitative Finance Library, fintech, quality, performance
+   :description: Vitis Quantitative Finance library quality and performance results.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *********************************************
 Quality and Performance
 *********************************************

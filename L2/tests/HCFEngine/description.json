@@ -2,13 +2,51 @@
     "name": "jks.L2.HCFEngine", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc*"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
-            "cmd_args": " -f /proj/autoesl/fengx/work/xf_fintech/L2/tests/HCFEngine/utils/one.txt -v -c -b BUILD/hcf.xclbin", 
+            "cmd_args": " -f LIB_DIR/L2/tests/HCFEngine/utils/one.txt -v -c -b BUILD/hcf.xclbin", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -16,34 +54,38 @@
         "host_exe": "hcf_host.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/HCFEngine/src/hcf_host.cpp", 
-                "REPO_DIR/L2/tests/HCFEngine/src/hcf_cpu.cpp", 
-                "REPO_DIR/L2/tests/HCFEngine/src/hcf_parser.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L2/tests/HCFEngine/src/hcf_host.cpp", 
+                "LIB_DIR/L2/tests/HCFEngine/src/hcf_cpu.cpp", 
+                "LIB_DIR/L2/tests/HCFEngine/src/hcf_parser.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/HCFEngine/src", 
-                "REPO_DIR/ext/xcl2"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/HCFEngine/src", 
+                "LIB_DIR/ext/xcl2"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ", 
+            "symbols": [
+                "TEST_DT=float", 
+                "EVICE_PART=u250"
+            ]
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/HCFEngine/src"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/HCFEngine/src"
             ]
         }, 
         "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/HCFEngine/src"
+            "ldclflags": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/HCFEngine/src"
             ]
         }
     }, 
@@ -51,7 +93,7 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/HCFEngine/src/hcf_kernel.cpp", 
+                    "location": "LIB_DIR/L2/tests/HCFEngine/src/hcf_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D TEST_DT=float", 
                     "name": "hcf_kernel"

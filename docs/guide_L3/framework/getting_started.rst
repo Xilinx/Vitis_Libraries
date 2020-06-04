@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: framework, libxilinxfintech, getting started, setup, environment, building library
+   :description: Getting started with Vitis quantitative finance library.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ********************************
 Getting Started
 ********************************

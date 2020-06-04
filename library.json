@@ -1,0 +1,4 @@
+{
+    "id": "xf_fintech",
+    "name": "Vitis Fintech Library",
+    "description": "The XF FinTech Library is an Vitis Library aimed at providing a comprehensive FPGA acceleration library for quantitative finance. It is a free/open-source for a variety of real use case, such as modeling, trading, evaluation, risk-management and so on."}

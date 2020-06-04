@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Finite-Difference, FDM, Bermudan Swaption, Hull-White
+   :description: The pricing engine is based on Finite-difference methods (FDM) to estimate the value of Bermudan Swaption with an assumption that the floating rate at each time point conforms to Hull-White model.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 ********************************************************************************
 Internal Design of Finite-Difference Hull-White Bermudan Swaption Pricing Engine

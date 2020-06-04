@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Binomial Tree, Cox-Ross-Rubinstein, BOPM
+   :description: The binomial tree is used to model the propagation of stock price in time towards a set of possibilities at the Expiration date, based on the stock Volatility.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ******************************************
 Binomial Tree, Cox-Ross-Rubinstein, Method
 ******************************************
@@ -26,8 +33,7 @@ Overview
 The Cox-Ross-Rubinstein Binomial Tree method is an instance of the `Binomial Options Pricing Model (BOPM)`_ , published originally by Cox, Ross and Rubinstein in their 1979 paper "Option 
 Pricing: A Simplified Approach" [CRR1979]_.  
 
-In this method, the binomial tree is used to model the propagation
-of stock price in time towards a set of possibilities at the Expiration date, based on the stock Volatility. For "N" time steps into which the model scenario duration is subdivided, there 
+In this method, the binomial tree is used to model the propagation of stock price in time towards a set of possibilities at the Expiration date, based on the stock Volatility. For "N" time steps into which the model scenario duration is subdivided, there 
 are N+1 possible stock prices at the expiration time.
 
 Based on the N+1 Call or Put Option values at expiration, option values are backward-propagated to the initial time using step probabilities and the interest-rate, to obtain the Call or 

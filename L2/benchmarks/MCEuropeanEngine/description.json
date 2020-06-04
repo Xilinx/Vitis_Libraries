@@ -1,11 +1,52 @@
 {
-    "name": "jks.L2.MCEuropeanEngine", 
+    "gui": false,
+    "name": "jks.L2.benchmarks.MCEuropeanEngine", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR", 
+                        "KN=2"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR", 
+                        "KN=4"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/kernel_mc.xclbin", 
@@ -16,32 +57,28 @@
         "host_exe": "test.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/src/test.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "src/test.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/src", 
-                "REPO_DIR/ext/xcl2", 
-                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/benchmarks/MCEuropeanEngine/src", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ", 
+            "symbols": [
+                "SW_EMU_TEST"
+            ]
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
-            ]
-        }, 
-        "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
             ]
         }
     }, 
@@ -49,30 +86,31 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel/kernel_mc_0.cpp", 
+                    "location": "kernel/kernel_mc_0.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0", 
                     "name": "kernel_mc_0"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel/kernel_mc_1.cpp", 
+                    "location": "kernel/kernel_mc_1.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KN_1 -D KERNEL_NMAE=kernel_mc_1", 
                     "name": "kernel_mc_1"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel/kernel_mc_2.cpp", 
+                    "location": "kernel/kernel_mc_2.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KN_2 -D KERNEL_NMAE=kernel_mc_2", 
                     "name": "kernel_mc_2"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/benchmarks/MCEuropeanEngine/kernel/kernel_mc_3.cpp", 
+                    "location": "kernel/kernel_mc_3.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KN_3 -D KERNEL_NMAE=kernel_mc_3", 
                     "name": "kernel_mc_3"
                 }
             ], 
+            "ldclflags": " --nk kernel_mc_0:1:kernel_mc_0 --nk kernel_mc_1:1:kernel_mc_1 --nk kernel_mc_2:1:kernel_mc_2 --nk kernel_mc_3:1:kernel_mc_3", 
             "frequency": 300.0, 
             "name": "kernel_mc"
         }

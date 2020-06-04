@@ -38,11 +38,6 @@ Assuming an Alveo U250 card with the XRT configured, the hardware build is run a
 
 ## Example Output
 for the testbench, process it via the kernel and compare to the expected result, displaying the case difference. For example:
-
-    Environment info XCLBINNAME: ./xclbin_xilinx_u250_xdma_201830_1_hw/kernel_svd_0.xclbin
-    Environment info OUTPATH: 
-    Environment info OUTPATH: 
-    xclbin is ./xclbin_xilinx_u250_xdma_201830_1_hw/kernel_svd_0.xclbin
     Found Platform
     Platform Name: Xilinx
     Found Device=xilinx_u250_xdma_201830_1

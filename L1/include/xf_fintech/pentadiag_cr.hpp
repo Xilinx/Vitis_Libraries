@@ -282,6 +282,7 @@ void pentadiag_step(T a[P_SIZE],
 */
 template <typename T, unsigned int P_SIZE, unsigned int logN>
 void pentadiagCr(T a[P_SIZE], T b[P_SIZE], T c[P_SIZE], T d[P_SIZE], T e[P_SIZE], T v[P_SIZE], T u[P_SIZE]) {
+#pragma HLS INLINE off
     T a_out[P_SIZE];
     T d_out[P_SIZE];
     T e_out[P_SIZE];

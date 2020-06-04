@@ -1,11 +1,50 @@
 {
+    "gui": false,
     "name": "jks.L2.McEuropeanHestonGreeksEngine", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/MCEHGEngine_k0.xclbin", 
@@ -16,32 +55,31 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/MCEuropeanHestonGreeksEngine/host/main.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "host/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCEuropeanHestonGreeksEngine/host", 
-                "REPO_DIR/L2/tests/MCEuropeanHestonGreeksEngine/kernel", 
-                "REPO_DIR/ext/xcl2"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCEuropeanHestonGreeksEngine/host", 
+                "LIB_DIR/L2/tests/MCEuropeanHestonGreeksEngine/kernel", 
+                "LIB_DIR/ext/xcl2"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ", 
+            "symbols": [
+                "PRAGMA"
+            ]
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCEuropeanHestonGreeksEngine/kernel"
-            ]
-        }, 
-        "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCEuropeanHestonGreeksEngine/kernel"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCEuropeanHestonGreeksEngine/kernel"
+            ], 
+            "symbols": [
+                "HW_EMU_DEBUG"
             ]
         }
     }, 
@@ -49,12 +87,13 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/MCEuropeanHestonGreeksEngine/kernel/mcengine_top.cpp", 
+                    "location": "kernel/mcengine_top.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D GREEKS_TEST", 
                     "name": "MCEHGEngine_k0"
                 }
             ], 
+            "ldclflags": " --nk MCEHGEngine_k0:1:MCEHGEngine_k0", 
             "frequency": 300.0, 
             "name": "MCEHGEngine_k0"
         }

@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Quantitative Finance Library, engine
+   :description: Vitis quantitative finance library other engine kernel design. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **************************************
 Other Engine Kernel Design
 **************************************

@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Tree Lattice, trinomial, rollback
+   :description: Tree Lattice is among the most commonly used tools to price options in financial mathematics. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 *************************************************
 Internal Design of Tree Lattice 

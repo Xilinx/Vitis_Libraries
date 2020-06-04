@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: RNG,SobolRsg, BrownianBridge, TrinomialTree, TreeLattice, 1DMesher, OrnsteinUhlenbeckProcess, StochasticProcess1D, HWModel, G2Model, ECIRModel, CIRModel, VModel, HestonModel, BKModel, BSModel
+   :description: L1 Module is the low-level primitives which could be used to build kernel and accelerate the specific option pricing. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **************************************
 L1 Module User Guide
 **************************************

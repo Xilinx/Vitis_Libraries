@@ -112,7 +112,6 @@ int HestonFDTestCase::Run(string testcase, string testscheme, std::vector<double
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    // device based on DSA
     deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
 
     if (deviceList.size() == 0) {

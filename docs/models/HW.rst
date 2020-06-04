@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Model, finance, Hull-White, HWModel
+   :description: The Hull-White model is a model of future interest rates.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *******************
 Hull-White Model
 *******************

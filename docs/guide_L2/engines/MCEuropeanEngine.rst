@@ -13,14 +13,22 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-**************************************
-Internal Design of MCEuropeanEngine
-**************************************
+.. meta::
+   :keywords: European, pricing, engine, MCEuropeanEngine
+   :description: The European option pricing engine uses Monte Carlo Simulation to estimate the value of European Option. Here, we assume the process of asset pricing applies to Black-Scholes process.   
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
+**************************************************
+Internal Design of European Option Pricing Engine 
+**************************************************
 
 Overview
 =========
 
-This engine uses Monte Carlo Simulation to estimate the value of European Option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+The European option pricing engine uses Monte Carlo Simulation to estimate the value of European Option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
 
 European option is a kind of vanilla option and not path dependent. The option has the right
 but not the obligation, to be exercised at the maturity time. That is to say, the payoff

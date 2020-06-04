@@ -89,7 +89,7 @@ int main(int argc, const char* argv[]) {
     TEST_DT strike = 1;
     unsigned int optionType = 0;
     TEST_DT timeLength = 1;
-    TEST_DT *outputs = aligned_alloc<TEST_DT>(8);
+    TEST_DT* outputs = aligned_alloc<TEST_DT>(8);
 
     ap_uint<32> seed_2d[8][2];
     for (int i = 0; i < 8; i++) {

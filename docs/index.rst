@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Finance, Library, Vitis Quantitative Finance Library, fintech
+   :description: The Vitis Quantitative Finance Library is a Vitis Library aimed at providing a comprehensive FPGA acceleration library for quantitative finance. It is an open-sourced library that can be used in a variety of financial applications, such as modeling, trading, evaluation and risk management.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **********************************
 Vitis Quantitative Finance Library
 **********************************

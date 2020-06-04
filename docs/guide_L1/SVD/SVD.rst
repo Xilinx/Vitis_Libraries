@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: fintech, singular value decomposition, SVD, Jacobi, Profiling
+   :description: The singular value decomposition (SVD) is a very useful technique for dealing with general dense matrix problems.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **********************************
 Singular Value Decomposition (SVD)
 **********************************

@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Finite-Difference, FDM, Bermudan Swaption
+   :description: The pricing engine is based on Finite-difference methods (FDM) to estimate the value of Bermudan Swaption using the two-additive-factor gaussian (G2) model.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 ********************************************************************************
 Internal Design of Finite-Difference G2 Bermudan Swaption Pricing Engine

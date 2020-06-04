@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Model, finance, Cox-Ingersoll-Ross
+   :description: The Cox-Ingersoll-Ross model describes the evolution of interest rates. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ************************
 Cox-Ingersoll-Ross Model
 ************************

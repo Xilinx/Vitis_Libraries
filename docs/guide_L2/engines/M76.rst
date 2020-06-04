@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Merton 76 model, Merton Jump Diffusion model, Black-Scholes
+   :description: The Merton 76 model (or Merton Jump Diffusion model) models the dynamics of a financial market; it adds a random jump aspect to the Black-Scholes model.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 
 ****************************************
 Internal Design of Closed Form Merton 76

@@ -15,6 +15,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Model, finance, Heston, Stochastic, PED
+   :description: Heston model is a mathematical model that describing dynamics of underlying asset price.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *******************
 Heston Model
 *******************
