@@ -45,8 +45,8 @@ template <typename In_Type1, typename In_Type2, typename Out_Type>
 Out_Type alu_math(In_Type1 strm_in1, In_Type2 strm_in2, ap_uint<3> OP) {
 #pragma HLS INLINE
 
-    In_Type1 in1;
-    In_Type2 in2;
+    Out_Type in1;
+    Out_Type in2;
     Out_Type result_temp1;
     Out_Type result_temp2;
     Out_Type result;

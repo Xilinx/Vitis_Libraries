@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,15 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u280_xdma_201920_1
-
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-ifeq ($(findstring vck, $(DEVICE)), vck)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-
+DEVICE ?= xilinx_u280_xdma_201920_3
 
 ifneq ($(findstring u280, $(DEVICE)), u280)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
@@ -94,6 +86,10 @@ CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 
 
 
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
+CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
+CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+
 # Host compiler global settings
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
@@ -103,9 +99,14 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := test_gqeJoin.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/gqe_aggr.xclbin -scale 10000
+endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/gqe_aggr.xclbin -scale 10000
+endif
+ifeq ($(TARGET),$(filter $(TARGET),hw))
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/gqe_aggr.xclbin
 endif
 
 ifneq ($(HOST_ARCH), x86)
@@ -118,15 +119,15 @@ VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 LDCLFLAGS += --optimize 2 --jobs 8
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
-CXXFLAGS += -D USE_HBM
 VPP_FLAGS += --config $(CUR_DIR)/conn_u280.ini
 endif
 
-VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
+
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/../utils/L1/include
-
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/gqe_aggr.xclbin

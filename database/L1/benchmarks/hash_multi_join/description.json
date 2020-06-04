@@ -30,7 +30,7 @@
         {
             "name": "generic launch for sw_emu flows",
             "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/hash_multi_join.xclbin -scale 10"
+            "cmd_args": " -xclbin BUILD/hash_multi_join.xclbin -scale 5000"
         },
         {
             "name": "generic launch for hw_emu flows",

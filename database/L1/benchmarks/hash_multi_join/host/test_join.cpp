@@ -36,15 +36,13 @@
 typedef struct print_buf_result_data_ {
     int i;
     long long* v;
-    long long* g;
-    int* r;
+    long long* fvp;
 } print_buf_result_data_t;
 
 void CL_CALLBACK print_buf_result(cl_event event, cl_int cmd_exec_status, void* user_data) {
     print_buf_result_data_t* d = (print_buf_result_data_t*)user_data;
-    if ((*(d->g)) != (*(d->v))) (*(d->r))++;
     printf("FPGA result %d: %lld.%lld\n", d->i, *(d->v) / 10000, *(d->v) % 10000);
-    printf("Golden result %d: %lld.%lld\n", d->i, *(d->g) / 10000, *(d->g) % 10000);
+    *(d->fvp) = *(d->v);
 }
 #endif
 
@@ -61,13 +59,13 @@ int generate_data(T* data, int range, size_t n) {
     return 0;
 }
 
-ap_uint<64> get_golden_sum(int l_row,
-                           KEY_T* col_l_orderkey,
-                           MONEY_T* col_l_extendedprice,
-                           MONEY_T* col_l_discount,
-                           int o_row,
-                           KEY_T* col_o_orderkey) {
-    ap_uint<64> sum = 0;
+int64_t get_golden_sum(int l_row,
+                       KEY_T* col_l_orderkey,
+                       MONEY_T* col_l_extendedprice,
+                       MONEY_T* col_l_discount,
+                       int o_row,
+                       KEY_T* col_o_orderkey) {
+    int64_t sum = 0;
     int cnt = 0;
 
     std::unordered_multimap<uint32_t, uint32_t> ht1;
@@ -142,7 +140,7 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    const int k_bucket = 1;
+    const int k_bucket = 4;
     const int ht_hbm_size = 64 / 8 * PU_HT_DEPTH;
     const int s_hbm_size = 64 / 8 * PU_S_DEPTH;
 
@@ -184,6 +182,8 @@ int main(int argc, const char* argv[]) {
 
     long long golden =
         get_golden_sum(l_nrow, col_l_orderkey, col_l_extendedprice, col_l_discount, o_nrow, col_o_orderkey);
+    long long fpga_val = 0;
+    int ret = 0;
 
     const int PU_NM = 8;
 
@@ -202,8 +202,8 @@ int main(int argc, const char* argv[]) {
                 (ap_uint<64>*)tb_s[1], (ap_uint<64>*)tb_s[2], (ap_uint<64>*)tb_s[3], (ap_uint<64>*)tb_s[4],
                 (ap_uint<64>*)tb_s[5], (ap_uint<64>*)tb_s[6], (ap_uint<64>*)tb_s[7],
                 (ap_uint<W_TPCH_INT * 2>*)row_result_a);
-    long long* rv = (long long*)row_result_a;
-    printf("FPGA result: %lld.%lld\n", *rv / 10000, *rv % 10000);
+    fpga_val = *((long long*)row_result_a);
+    printf("FPGA result: %lld.%lld\n", fpga_val / 10000, fpga_val % 10000);
 #else
     // Get CL devices.
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -306,7 +306,6 @@ int main(int argc, const char* argv[]) {
     std::vector<print_buf_result_data_t>::iterator it = cbd.begin();
     print_buf_result_data_t* cbd_ptr = &(*it);
 
-    int ret = 0;
     for (int i = 0; i < num_rep; ++i) {
         int use_a = i & 1;
 
@@ -398,14 +397,12 @@ int main(int argc, const char* argv[]) {
         if (use_a) {
             cbd_ptr[i].i = i;
             cbd_ptr[i].v = (long long*)row_result_a;
-            cbd_ptr[i].g = &golden;
-            cbd_ptr[i].r = &ret;
+            cbd_ptr[i].fvp = &fpga_val;
             read_events[i][0].setCallback(CL_COMPLETE, print_buf_result, cbd_ptr + i);
         } else {
             cbd_ptr[i].i = i;
             cbd_ptr[i].v = (long long*)row_result_b;
-            cbd_ptr[i].g = &golden;
-            cbd_ptr[i].r = &ret;
+            cbd_ptr[i].fvp = &fpga_val;
             read_events[i][0].setCallback(CL_COMPLETE, print_buf_result, cbd_ptr + i);
         }
     }
@@ -429,6 +426,10 @@ int main(int argc, const char* argv[]) {
     }
 #endif
 
+    if (golden != fpga_val) {
+        ret = 1;
+        printf("Golden result: %lld.%lld\n", golden / 10000, golden % 10000);
+    }
     std::cout << "---------------------------------------------\n\n";
     return ret;
 }
