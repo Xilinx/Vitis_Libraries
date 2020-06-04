@@ -36,6 +36,7 @@ Core Utility
    :maxdepth: 1
    
    RNGs/RNG.rst
+   RNGs/xoshiro128.rst
    SVD/SVD.rst
    TRSV/TRSV.rst
    Pentadiag/Pentadiag.rst
@@ -46,7 +47,9 @@ Core Utility
    fdmmesher/fdmmesher.rst
    NumericalIntegration/NumericalIntegration.rst
    pca/pca.rst
-
+   covariance/covariance.rst
+   distribution/distribution.rst
+   interpolation/interpolation.rst
    
 
 L1 Module APIs

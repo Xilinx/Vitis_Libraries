@@ -1,6 +1,7 @@
 {
-    "name": "L2 MCEuropeanDowJonesEngine", 
-    "description": "L2 MCEuropeanDowJonesEngine", 
+    "gui": false,
+    "name": "Xilinx Monte Carlo European Dow Jones Engine",
+    "description": "L2 Monte Carlo European Dow Jones Engine",
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
@@ -64,7 +65,10 @@
                 "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/kernel"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ",
+			"symbols": [
+                "PRAGMA"
+            ]
         }
     }, 
     "v++": {
@@ -80,13 +84,13 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/kernel/kernel_mceuropeanengine.cpp", 
+                    "location": "kernel/kernel_mceuropeanengine.cpp",
                     "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0", 
+                    "clflags": "-D DPRAGMA -D KN_0 -D KERNEL_NAME=kernel_mc_0",
                     "name": "kernel_mc_0"
                 }
             ], 
-            "ldclflags": " --nk kernel_mc_0:1:kernel_mc_0", 
+            "ldclflags": "--nk kernel_mc_0:1:kernel_mc_0",
             "frequency": 300.0, 
             "name": "mc_european_dowjones"
         }

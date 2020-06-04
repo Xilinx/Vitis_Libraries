@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.MCMultiAssetEuropeanHestonEngine", 
+    "name": "Xilinx MC Multi Asset European Heston Engine Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

@@ -23,10 +23,4 @@ using namespace xf::fintech;
 
 int MCDemoRunEuropeanSingle(Device* pChosenDevice, MCEuropean* pMCEuropean);
 
-int MCDemoRunEuropeanMultiple1(Device* pChosenDevice, MCEuropean* pMCEuropean);
-
-int MCDemoRunEuropeanMultiple2(Device* pChosenDevice, MCEuropean* pMCEuropean);
-
-int MCDemoRunAmericanSingle(Device* pChosenDevice, MCAmerican* pMCAmerican);
-
 #endif /* _XF_FINTECH_MC_EXAMPLE_H_ */

@@ -2,8 +2,12 @@
 
 # Ensure environmental variables i.e. paths are set to used the modules
 from xf_fintech_python import DeviceManager, MCAmerican, OptionType
+import sys
 
 print("\nThe MCAmerican financial model\n==============================\n")
+print("....is no longer supported....\n")
+print("Please try a different model.\n\n")
+sys.exit()
 
 # Program Variables
 deviceList = DeviceManager.getDeviceList("u250")

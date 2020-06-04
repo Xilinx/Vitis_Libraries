@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_boxMullerTransform", 
+    "name": "Xilinx BoxMuller Based RNG Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

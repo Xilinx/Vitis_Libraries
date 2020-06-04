@@ -24,11 +24,6 @@
 
 using namespace xf::fintech;
 
-//
-// Here are our the objects that represent our the Fintech models we will be
-// using...
-MCEuropeanDJE mcEuropeanDJE;
-
 std::chrono::time_point<std::chrono::high_resolution_clock> start;
 std::chrono::time_point<std::chrono::high_resolution_clock> end;
 long long int duration;
@@ -76,6 +71,7 @@ double riskFreeRates[NUM_ASSETS];
 double volatility[NUM_ASSETS];
 double dividendYields[NUM_ASSETS];
 double timeToMaturity[NUM_ASSETS];
+double tolerance = 0.02;
 double requiredTolerance[NUM_ASSETS];
 
 double DJIA;
@@ -90,19 +86,27 @@ void InitialiseAssetArrays(void) {
         volatility[i] = 0.20;
         dividendYields[i] = 0.0;
         timeToMaturity[i] = 1.0;
-        requiredTolerance[i] = 0.02;
+        requiredTolerance[i] = tolerance;
     }
 }
 
-int main() {
+int main(int argc, char** argv) {
     int retval = XLNX_OK;
+
+    std::string path = std::string(argv[1]);
+    MCEuropeanDJE mcEuropeanDJE(path);
+
+    std::string device = TOSTRING(DEVICE_PART);
+    if (argc == 3) {
+        device = std::string(argv[2]);
+    }
 
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
     // Get a list of U250s available on the system (just because our current
     // bitstreams are built for U250s)
-    deviceList = DeviceManager::getDeviceList("u250");
+    deviceList = DeviceManager::getDeviceList(device);
 
     if (deviceList.size() == 0) {
         printf("[XLNX] No matching devices found\n");
@@ -146,8 +150,24 @@ int main() {
 
     if (retval == XLNX_OK) {
         printf("[XLNX] Running MCEuropeanDJE...\n");
-        retval = mcEuropeanDJE.run(optionTypes, STOCK_PRICES, strikePrices, riskFreeRates, dividendYields, volatility,
-                                   timeToMaturity, requiredTolerance, NUM_ASSETS, DOW_DIVISOR, &DJIA);
+
+        std::string mode_emu = "hw";
+        if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
+            mode_emu = std::getenv("XCL_EMULATION_MODE");
+        }
+        std::cout << "[XLNX] Running in " << mode_emu << " mode" << std::endl;
+
+        if (mode_emu.compare("hw_emu") == 0 || mode_emu.compare("sw_emu") == 0) {
+            // emulation limit to single asset and limited number of samples
+            unsigned int numAssets = 1;
+            double requiredSamples = 256;
+
+            retval = mcEuropeanDJE.run(optionTypes, STOCK_PRICES, strikePrices, riskFreeRates, dividendYields,
+                                       volatility, timeToMaturity, &requiredSamples, numAssets, DOW_DIVISOR, &DJIA);
+        } else {
+            retval = mcEuropeanDJE.run(optionTypes, STOCK_PRICES, strikePrices, riskFreeRates, dividendYields,
+                                       volatility, timeToMaturity, requiredTolerance, NUM_ASSETS, DOW_DIVISOR, &DJIA);
+        }
     }
 
     if (retval == XLNX_OK) {
@@ -157,5 +177,14 @@ int main() {
     printf("[XLNX] mcEuropeanDJE releasing device...\n");
     mcEuropeanDJE.releaseDevice();
 
-    return 0;
+    // quick fix to get pass/fail criteria
+    int ret = 0; // assume pass
+    if (std::abs(DJIA - 11.4370) > tolerance) {
+        printf("FAIL\n");
+        ret = 1;
+    } else {
+        printf("PASS\n");
+    }
+
+    return ret;
 }

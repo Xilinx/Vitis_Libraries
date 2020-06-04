@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.benchmarks.TreeSwaptionEngineBKModel", 
+    "name": "Xilinx Tree Swaption Engine BK Model Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

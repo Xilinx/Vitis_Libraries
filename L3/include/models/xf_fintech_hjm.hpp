@@ -32,7 +32,7 @@ namespace fintech {
  */
 class HJM : public OCLController {
    public:
-    HJM();
+    HJM(std::string xclbin_file);
     virtual ~HJM();
 
     /**
@@ -78,6 +78,8 @@ class HJM : public OCLController {
     std::vector<unsigned, aligned_allocator<unsigned> > m_hostSeedsBuffer;
 
     std::string getKernelTypeSubString(void);
+
+    std::string m_xclbin_file;
     std::string getXCLBINName(Device* device);
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runStartTime;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runEndTime;

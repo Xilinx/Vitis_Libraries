@@ -1,7 +1,7 @@
 {
-    "name": "L3 Garman Kohlhagen Model", 
+    "name": "Xilinx Garman Kohlhagen Model Framework API", 
     "description": [
-        "L3 Garman Kohlhagen Model"
+        "Garman Kohlhagen Model using the L3 framework"
         ], 
     "flow": "vitis", 
     "platform_type": "pcie",
@@ -78,10 +78,22 @@
             ]
         }
     },
-    "launch": [
-        {
-            "name": "generic launch for all flows",
-            "cmd_args": "BUILD/gk_kernel.xclbin u250"
+    "platform_properties":{
+        "u250":{
+            "launch": [
+                {
+                    "name": "generic launch for all flows for u250 card",
+                    "cmd_args": "BUILD/gk_kernel.xclbin u250"
+                }
+            ]
+        },
+        "u200":{
+            "launch": [
+                {
+                    "name": "generic launch for all flows for u200 card",
+                    "cmd_args": "BUILD/gk_kernel.xclbin u200"
+                }
+            ]
         }
-    ]
+    }
 }

@@ -177,7 +177,17 @@ int main(int argc, char* argv[]) {
     // OPENCL HOST CODE AREA END
 
     // Calculate absolute worst difference across whole grid compared to reference
-    util.CompareReference(price, ref, m_size);
+    FD_DATA_TYPE MaxDiff = util.CompareReference(price, ref, m_size);
 
-    return 0;
+    int ret = 0;
+    if (std::abs(MaxDiff) > 8e-12) {
+        std::cout << "FAIL: MaxDiff = " << MaxDiff << std::endl;
+        ret = 1;
+    }
+
+    if (!ret) {
+        std::cout << "PASS" << std::endl;
+    }
+
+    return ret;
 }

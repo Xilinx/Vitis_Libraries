@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_bernoulli_cdf", 
+    "name": "Xilinx Bernoulli CDF Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

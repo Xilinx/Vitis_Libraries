@@ -126,6 +126,8 @@ struct test_data_type test_data[] = {
 
 #define numberOptions ((int)(sizeof(test_data) / sizeof(struct test_data_type)))
 
+static float tolerance = 0.003;
+
 int main(int argc, char** argv) {
     // binomial tree fintech model...
 
@@ -178,6 +180,7 @@ int main(int argc, char** argv) {
         printf("[XF_FINTECH] Failed to claim device - error = %d\n", retval);
     }
 
+    int ret = 0; // assume pass
     if (retval == XLNX_OK) {
         printf("[XF_FINTECH] Multiple Options European Call [%d]\n", numberOptions);
 
@@ -206,8 +209,12 @@ int main(int argc, char** argv) {
                 printf("[%02u] S=%f, K=%f, sigma=%f, r=%f, T=%f, kappa=%f, lambda=%f, delta=%f\n", i, inputData[i].S,
                        inputData[i].K, inputData[i].sigma, inputData[i].r, inputData[i].T, inputData[i].kappa,
                        inputData[i].lambda, inputData[i].delta);
-                printf("    exp=%f, OptionPrice=%f, diff = %f\n\n", test_data[i].exp, outputData[i],
-                       fabs(test_data[i].exp - outputData[i]));
+                float diff = fabs(test_data[i].exp - outputData[i]);
+                printf("    exp=%f, OptionPrice=%f, diff = %f\n", test_data[i].exp, outputData[i], diff);
+                if (diff > tolerance) {
+                    printf("    FAIL\n");
+                    ret = 1;
+                }
             }
             long long int executionTime =
                 (long long int)std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -219,5 +226,10 @@ int main(int argc, char** argv) {
     printf("[XF_FINTECH] M76 releasing device...\n");
     retval = m76.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+    }
+    return ret;
 }

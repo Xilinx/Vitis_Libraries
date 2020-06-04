@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_fd_hw_model", 
+    "name": "Xilinx Finite Difference Hull White Model Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

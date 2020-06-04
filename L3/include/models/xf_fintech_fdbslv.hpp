@@ -37,7 +37,7 @@ namespace fintech {
 
 class fdbslv : public OCLController {
    public:
-    fdbslv(int N, int M);
+    fdbslv(int N, int M, std::string xclbin_file);
     virtual ~fdbslv();
 
     /**
@@ -85,7 +85,7 @@ class fdbslv : public OCLController {
     cl::Buffer* m_pHwInitialCondition;
     cl::Buffer* m_pHwSolution;
 
-    std::string getXCLBINName(Device* device);
+    std::string m_xclbin_file;
 };
 
 } // end namespace fintech

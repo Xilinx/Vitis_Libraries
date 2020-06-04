@@ -62,9 +62,10 @@ class ArgParser {
     std::vector<std::string> mTokens;
 };
 
-
 int main(int argc, const char* argv[]) {
     // cmd parser
+    TEST_DT maxDelta = 0;
+    TEST_DT tolerance = 0.001;
     ArgParser parser(argc, argv);
     std::string xclbin_path;
     std::string data_path;
@@ -72,7 +73,7 @@ int main(int argc, const char* argv[]) {
         std::cout << "ERROR:xclbin path is not set!\n";
         return 1;
     }
-    
+
     if (!parser.getCmdOption("-data", data_path)) {
         std::cout << "ERROR: datafile path is not set!\n";
         return 1;
@@ -142,8 +143,10 @@ int main(int argc, const char* argv[]) {
         ifstream inputFileTestCases;
         if (mode == "sw_emu" || mode == "hw_emu") {
             inputFileTestCases.open(inputTestCasesFileEmulationName);
+            tolerance = 1.25; // emulation uses less tree depth => less accuracy
         } else {
             inputFileTestCases.open(inputTestCasesFileName);
+            tolerance = 0.001;
         }
         ifstream inputFileSVGrid;
         inputFileSVGrid.open(inputSVGridFileName);
@@ -312,7 +315,9 @@ int main(int argc, const char* argv[]) {
                 for (int i = 0; i < numTests; i++) {
                     TEST_DT tempHostDelta = std::abs(npvCPUResults[i] - npvKernelResults[i]);
 
-                    if (tempHostDelta > hostMaxDelta) hostMaxDelta = tempHostDelta;
+                    if (tempHostDelta > hostMaxDelta) {
+                        hostMaxDelta = tempHostDelta;
+                    }
 
                     hostAverageDelta += pow(tempHostDelta, 2);
                 }
@@ -337,7 +342,10 @@ int main(int argc, const char* argv[]) {
                 for (int i = 0; i < numTests; i++) {
                     TEST_DT tempBlackScholesDelta = std::abs(blackScholesData[i] - npvKernelResults[i]);
 
-                    if (tempBlackScholesDelta > blackScholesMaxDelta) blackScholesMaxDelta = tempBlackScholesDelta;
+                    if (tempBlackScholesDelta > blackScholesMaxDelta) {
+                        blackScholesMaxDelta = tempBlackScholesDelta;
+                        maxDelta = tempBlackScholesDelta;
+                    }
 
                     blackScholesAverageDelta += pow(tempBlackScholesDelta, 2);
 
@@ -378,5 +386,13 @@ int main(int argc, const char* argv[]) {
         std::cout << "Exception" << std::endl;
     }
 
-    return 0;
+    int ret = 0;
+    if (maxDelta > tolerance) {
+        std::cout << "FAIL: maxDelta = " << maxDelta << std::endl;
+        ret = 1;
+    } else {
+        std::cout << "PASS" << std::endl;
+    }
+
+    return ret;
 }

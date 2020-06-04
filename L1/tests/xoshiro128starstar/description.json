@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_xoshiro128starstar", 
+    "name": "Xilinx Xoshiro128 Star Star Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

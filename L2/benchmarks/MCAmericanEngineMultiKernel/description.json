@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.benchmarks.MCAmericanEngine_MultiKernel", 
+    "name": "Xilinx MC American Engine Multi Kernel Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

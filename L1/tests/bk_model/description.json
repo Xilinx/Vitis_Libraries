@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_bk_model", 
+    "name": "Xilinx Black Karasinski Model Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

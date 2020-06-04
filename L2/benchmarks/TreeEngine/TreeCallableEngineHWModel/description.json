@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.benchmarks.TreeCallableEngineHWModel", 
+    "name": "Xilinx Tree Callable Engine HW Model Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

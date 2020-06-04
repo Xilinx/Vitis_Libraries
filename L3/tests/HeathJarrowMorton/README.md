@@ -1,36 +1,33 @@
 
-# Setup Environment
+## Heath Jarrow Morton Model Test
 
-source /opt/xilinx/xrt/setup.csh
+This test shows how to utilize the Heath Jarrow Morton Model in the L3 framework.
 
-source /*path to xf_fintech*/L3/src/env.csh
+## Prerequisites
+- Alveo card (eg U200) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
+- Xilinx runtime (XRT) installed
+- Xilinx Vitis 2020.1 installed and configured
 
-# Build Xilinx Fintech Library
+## Build Instuctions
+The demonstration application and kernel is built using a command line Makefile flow.
 
-cd  /*path to xf_fintech*/L3/src
+### Step 1:
+Setup the build environment using Vitis and XRT scripts:
 
-**make clean all**
+            source <install path>/Vitis/2020.1/settings64.sh
+            source /opt/xilinx/xrt/setup.sh
 
+### Step 2 :
+Call the Makefile. For example:
 
-# Build Instuctions
+	make check TARGET=sw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-To build the command line executable (hjm_cl) from this directory
+	make check TARGET=hw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-**make clean all**
+	make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
+        
+	make run TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
 
-> Note this requires the xilinx fintech library to already to built
+The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).
 
-
-# Run Instuctions
-
-Copy the prebuilt kernel files from /*path to xf_fintech*/L2/tests/HeathJarrowMorton/ to this directory
-
-**hjm_kernel_u200.xclbin**
-
-To run the command line exe and generate the Zero Coupon Bond price run
-
->output/hjm_cl.exe -d data.csv [-p no_paths] [-s sim_years] [-m zcb_maturity]
-
-or with default arguments
-
-**make run**
+If the make check or run option is used the demo will automatically be lauched.

@@ -1,6 +1,6 @@
 {
-    "gui": false,
-    "name": "jks.L2.CPICapFloorEngine", 
+    "gui": true,
+    "name": "Xilinx Consumer Price Index Cap Or Floor Engine Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -90,10 +90,34 @@
                     "location": "kernel/CPI_k0.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=CPI_k0", 
-                    "name": "CPI_k0"
+                    "name": "CPI_k0",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "CPI_k0",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "time",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "strike",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "price",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "NPV",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
-            "ldclflags": " --nk CPI_k0:1:CPI_k0", 
             "frequency": 300.0, 
             "name": "CPI_k"
         }

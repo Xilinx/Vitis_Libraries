@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.McAsianASEngine", 
+    "name": "Xilinx MC Asian Option With Average Strike Pricing Engine Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

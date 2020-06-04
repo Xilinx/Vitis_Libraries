@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_xoshiro128plus", 
+    "name": "Xilinx Xoshiro128 Plus Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

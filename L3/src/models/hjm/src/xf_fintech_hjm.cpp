@@ -23,14 +23,16 @@
 
 using namespace xf::fintech;
 
-HJM::HJM()
+HJM::HJM(std::string xclbin_file)
     : m_pContext(nullptr),
       m_pCommandQueue(nullptr),
       m_pProgram(nullptr),
       m_pHjmKernel(nullptr),
       m_pHwHistDataBuffer(nullptr),
       m_pHwOutPriceBuffer(nullptr),
-      m_pHwSeedsBuffer(nullptr) {}
+      m_pHwSeedsBuffer(nullptr) {
+    m_xclbin_file = xclbin_file;
+}
 
 HJM::~HJM() {
     if (deviceIsPrepared()) {
@@ -39,7 +41,7 @@ HJM::~HJM() {
 }
 
 std::string HJM::getXCLBINName(Device* device) {
-    return "hjm_kernel.xclbin";
+    return m_xclbin_file;
 }
 
 int HJM::createOCLObjects(Device* device) {

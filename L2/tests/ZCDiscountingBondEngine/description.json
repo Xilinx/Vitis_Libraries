@@ -1,6 +1,6 @@
 {
-    "gui": false,
-    "name": "jks.L2.ZCDiscountingBondEngine", 
+    "gui": true,
+    "name": "Xilinx ZC Discounting Bond Engine Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -90,10 +90,30 @@
                     "location": "kernel/BOND_k0.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL_NAME=BOND_k0", 
-                    "name": "BOND_k0"
+                    "name": "BOND_k0",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "BOND_k0",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "time",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "disc",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "NPV",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
-            "ldclflags": " --nk BOND_k0:1:BOND_k0", 
             "frequency": 300.0, 
             "name": "BOND_k"
         }

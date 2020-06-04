@@ -22,16 +22,25 @@
 #include <string>
 #include <vector>
 
+#include "xf_fintech_api.hpp"
 #include "xf_fintech_csv.hpp"
 #include "xf_fintech_heston_test_suite.hpp"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    if (argc == 3) {
+    int ret = 0; // assume pass
+    if (argc == 4 || argc == 5) {
         unsigned int argIndex = 1;
         string csvfile = argv[argIndex++];
         double delta = std::strtod(argv[argIndex++], NULL);
+
+        std::string xclbin = argv[argIndex++];
+        std::string device = TOSTRING(DEVICE_PART);
+        if (argc == 5) {
+            device = std::string(argv[argIndex++]);
+        }
+
         std::cout << "Test Harness Running. Input CSV file:" << csvfile << " Delta: " << delta << std::endl
                   << std::endl;
 
@@ -39,11 +48,17 @@ int main(int argc, char* argv[]) {
         CSV csv;
         csv.init(infile);
 
-        HestonFDTestSuite testSuite;
-        testSuite.Run(csv, delta);
+        HestonFDTestSuite testSuite(xclbin, device);
+        ret = testSuite.Run(csv, delta);
     } else {
-        std::cerr << "Usage: " << argv[0] << ": <CSV test case list> <delta>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << ": <CSV test case list> <delta> <xclbin>" << std::endl;
     }
 
-    return 0;
+    if (!ret) {
+        std::cout << "PASS" << std::endl;
+    } else {
+        std::cout << "FAIL" << std::endl;
+    }
+
+    return ret;
 }

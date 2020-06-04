@@ -1,7 +1,7 @@
 {
-    "name": "L3 Binomial model", 
+    "name": "Xilinx Binomial Model", 
     "description": [
-        "L3 Binomial model"
+        "Binomial model using the L3 framework"
         ], 
     "flow": "vitis", 
     "platform_type": "pcie",
@@ -37,7 +37,7 @@
             ],
             "options": "-O3 ",
             "symbols": [
-                "TEST_DT=float",
+                "TEST_DT=double",
                 "TEST_PARALLEL_ENGINES=8"
             ]
         }
@@ -48,7 +48,7 @@
                 {
                     "location": "LIB_DIR/L2/tests/BinomialTreeEngine/src/kernel/binomialtreekernel.cpp", 
                     "frequency": 300.0, 
-                    "clflags": " -D TEST_DT=float -D TEST_PARALLEL_ENGINES=8", 
+                    "clflags": " -D TEST_DT=double -D TEST_PARALLEL_ENGINES=8", 
                     "name": "BinomialTreeKernel"
                 }
             ], 
@@ -75,10 +75,22 @@
         ], 
         "category": "canary"
     },
-    "launch": [
-        {
-            "name": "generic launch for all flows",
-            "cmd_args": "BUILD/binomialtree.xclbin u250"
+    "platform_properties":{
+        "u250":{
+            "launch": [
+                {
+                    "name": "generic launch for all flows for u250 card",
+                    "cmd_args": "BUILD/binomialtree.xclbin u250"
+                }
+            ]
+        },
+        "u200":{
+            "launch": [
+                {
+                    "name": "generic launch for all flows for u200 card",
+                    "cmd_args": "BUILD/binomialtree.xclbin u200"
+                }
+            ]
         }
-    ]
+    }
 }

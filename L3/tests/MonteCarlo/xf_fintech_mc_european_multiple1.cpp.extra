@@ -39,6 +39,8 @@ using namespace xf::fintech;
 // of asset data.  This will allow us to
 // see the performance of each invocation of the HW.
 
+static double tolerance = 0.0001;
+
 static OptionType baseOptionType = Put;
 
 static const double baseStockPrice = 36.0;
@@ -172,6 +174,7 @@ static void PrintParameters(void) {
 
 int MCDemoRunEuropeanMultiple1(Device* pChosenDevice, MCEuropean* pMCEuropean) {
     int retval = XLNX_OK;
+    int ret = 1; // assume fail
     unsigned int i, j;
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
@@ -244,6 +247,11 @@ int MCDemoRunEuropeanMultiple1(Device* pChosenDevice, MCEuropean* pMCEuropean) {
             durationPerAsset = (double)duration / (double)MCEuropean::NUM_KERNELS;
 
             printf("[XLNX] | %9d | %9.4f  | %11lld us | %16.3f us |\n", i, optionPrice[0], duration, durationPerAsset);
+
+            // quick fix to get pass/fail criteria
+            if (i == 0 && std::abs(optionPrice[0] - 3.8761) <= tolerance) {
+                ret = 0;
+            }
         }
 
         printf("[XLNX] +-----------+-----------+----------------+---------------------+\n");
@@ -255,5 +263,5 @@ int MCDemoRunEuropeanMultiple1(Device* pChosenDevice, MCEuropean* pMCEuropean) {
     printf("[XLNX] mcEuropean releasing device...\n");
     retval = pMCEuropean->releaseDevice();
 
-    return retval;
+    return ret;
 }

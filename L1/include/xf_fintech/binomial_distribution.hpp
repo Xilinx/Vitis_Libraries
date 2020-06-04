@@ -35,13 +35,9 @@ namespace xf {
 namespace fintech {
 
 /**
- * @brief binomialPMF it implement a probability mass function for binomial distribution
+ * @brief BinomialDistribution binomial distribution
  *
  * @tparam DT data type supported include float and double
- *
- * @param n n independent Bernoulli trials
- * @param k k successes in n independent Bernoulli trials
- * @return it belong to [0, 1] and also is a probability value.
  */
 template <typename DT>
 class BinomialDistribution {
@@ -62,8 +58,8 @@ class BinomialDistribution {
     /**
      * @brief init initialize parameters
      *
-     * @param n n independent Bernoulli trials
-     * @param p p is the probability of success of a single trial.
+     * @param n_ n independent Bernoulli trials
+     * @param p_ p is the probability of success of a single trial.
      */
     void init(unsigned int n_, DT p_) {
         n = n_;
@@ -77,6 +73,11 @@ class BinomialDistribution {
         log1MP = hls::log(1 - p);
     }
 
+    /**
+     * @brief PMF it implement a probability mass function for binomial distribution
+     *
+     * @param k k successes in n independent Bernoulli trials
+     */
     DT PMF(int k) {
         if (p == 0.0) return (k == 0 ? 1.0 : 0.0);
         if (p == 1.0) return (k == n ? 1.0 : 0.0);

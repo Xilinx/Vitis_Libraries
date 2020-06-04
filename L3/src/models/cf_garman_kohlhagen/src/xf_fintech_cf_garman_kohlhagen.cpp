@@ -36,8 +36,8 @@ static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "g
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);
 
-CFGarmanKohlhagen::CFGarmanKohlhagen(unsigned int maxNumAssets, std::string xclbin_file) :
-    CFBlackScholes(maxNumAssets, xclbin_file) {
+CFGarmanKohlhagen::CFGarmanKohlhagen(unsigned int maxNumAssets, std::string xclbin_file)
+    : CFBlackScholes(maxNumAssets, xclbin_file) {
     allocateBuffers(maxNumAssets);
 }
 
@@ -176,4 +176,3 @@ static const char* gkKernelName = "gk_kernel";
 const char* CFGarmanKohlhagen::getKernelName() {
     return gkKernelName;
 }
-

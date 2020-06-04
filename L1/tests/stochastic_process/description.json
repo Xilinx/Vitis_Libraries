@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_stochastic_process", 
+    "name": "Xilinx Stochastic Process Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

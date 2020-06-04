@@ -103,7 +103,6 @@ class FdG2SwaptionEngine {
      * @param tGrid The steps of npv to calculate.
      * @param xGrid The numbers of x direction to calculate.
      * @param yGrid The numbers of y direction to calculate.
-     * @param layoutSize The numbers of mesher to calculate.
      * @param invEps The epsilon which is used to create the mesher, and the
      * default value should be 1.0e-5.
      * @param theta Parameter used to build up the differential equation, the
@@ -223,8 +222,8 @@ class FdG2SwaptionEngine {
     /**
      * @brief get x and y factors for every step
      *
-     * @param t the time is now to calculate
-     * @param iter the index to point the times every iteration
+     * @param i the time is now to calculate
+     * @param j the index to point the times every iteration
      * @param rates vector for saving two factors
      */
     void getState(Size i, Size j, DT rates[2]);
@@ -242,7 +241,7 @@ class FdG2SwaptionEngine {
      *
      * @param d the locations of x or y direction
      * @param uFd the coefficients of first derivative
-     * @param sFd the coefficients of second derivative
+     * @param uSd the coefficients of second derivative
      * @param hm the minus of on x or y direction
      * @param hp the plus of on x or y direction
      * @param iter the index for loop

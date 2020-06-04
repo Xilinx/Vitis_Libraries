@@ -36,7 +36,7 @@ m76::m76(std::string xclbin_file) {
 
     m_pHwInputBuffer = nullptr;
     m_pHwOutputBuffer = nullptr;
-    
+
     m_xclbin_file = xclbin_file;
 }
 

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_lognormal_pdf", 
+    "name": "Xilinx Lognormal PDF Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

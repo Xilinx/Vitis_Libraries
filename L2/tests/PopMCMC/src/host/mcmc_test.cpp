@@ -128,6 +128,7 @@ int main(int argc, char* argv[]) {
 
     q.finish();
 
+    int ret = 0;
     std::cout << "Kernel done!" << std::endl;
     std::cout << "Processed " << num_samples << " samples ";
     std::cout << "with " << NUM_CHAINS << " chains" << std::endl;
@@ -139,8 +140,21 @@ int main(int argc, char* argv[]) {
         if (k == num_samples - 1) {
             fprintf(fp, "%lf", sample[k]);
         }
-    };
+
+        // quick fix for pass/fail criteria
+        // This implementation shouldn't generate samples out of <-2,2>
+        if (std::abs(sample[k]) > 2) {
+            ret = 1;
+        }
+    }
     fclose(fp);
     std::cout << std::endl;
-    return 0;
+
+    if (ret) {
+        std::cout << "FAIL" << std::endl;
+    } else {
+        std::cout << "PASS" << std::endl;
+    }
+
+    return ret;
 }

@@ -41,7 +41,7 @@ namespace fintech {
 
 class PopMCMC : public OCLController {
    public:
-    PopMCMC();
+    PopMCMC(std::string xclbin_file);
     virtual ~PopMCMC();
 
     /**
@@ -82,6 +82,7 @@ class PopMCMC : public OCLController {
     std::vector<double, aligned_allocator<double> > m_hostOutputBufferSamples;
 
     std::string getKernelTypeSubString(void);
+    std::string m_xclbin_file;
     std::string getXCLBINName(Device* device);
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runStartTime;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runEndTime;

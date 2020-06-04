@@ -18,6 +18,8 @@
 
 static OptionType optionType = Put;
 
+static double tolerance = 0.0001;
+
 static const double initialStockPrice = 36.0;
 static const double initialStrikePrice = 40.0;
 static const double initialRiskFreeRate = 0.06;
@@ -42,6 +44,7 @@ static double optionPrice;
 
 int MCDemoRunAmericanSingle(Device* pChosenDevice, MCAmerican* pMCAmerican) {
     int retval = XLNX_OK;
+    int ret = 1; // assume fail
     int i;
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
@@ -114,6 +117,11 @@ int MCDemoRunAmericanSingle(Device* pChosenDevice, MCAmerican* pMCAmerican) {
                     "| %11lld us |\n",
                     i, stockPrice, strikePrice, riskFreeRate, dividendYield, volatility, optionPrice,
                     pMCAmerican->getLastRunTime());
+
+                // quick fix to get pass/fail criteria
+                if (i == 0 && std::abs(optionPrice - 3.9607) <= tolerance) {
+                    ret = 0;
+                }
             } else {
                 break; // out of loop
             }
@@ -131,5 +139,5 @@ int MCDemoRunAmericanSingle(Device* pChosenDevice, MCAmerican* pMCAmerican) {
     printf("[XLNX] mcAmerican releasing device...\n");
     retval = pMCAmerican->releaseDevice();
 
-    return retval;
+    return ret;
 }

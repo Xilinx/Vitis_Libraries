@@ -1,5 +1,5 @@
 {
-    "name": "L2 FDBlackScholesLocalVolatilityEngine", 
+    "name": "Xilinx Finite Difference Black Scholes Local Volatility Engine Model", 
     "description": "L2 Finite Difference Black Scholes with Local Volatility Engine", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -79,6 +79,7 @@
         ], 
         "targets": [
             "vitis_sw_emu", 
+            "vitis_hw_emu", 
             "vitis_hw"
         ], 
         "category": "canary"

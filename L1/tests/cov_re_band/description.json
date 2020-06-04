@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_cov_re_band", 
+    "name": "Xilinx Covariance Regularizaiton Band Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

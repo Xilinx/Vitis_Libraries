@@ -168,10 +168,20 @@ int main(int argc, char* argv[]) {
 
     // Calculate absolute worst difference across whole grid compared to reference
     std::vector<FD_DATA_TYPE, aligned_allocator<FD_DATA_TYPE> > diff(N);
-    util.CompareReference(solution, reference, N, diff);
+    FD_DATA_TYPE MaxDiff = util.CompareReference(solution, reference, N, diff);
     util.PrintVector("solution", solution, N);
     util.PrintVector("reference", reference, N);
     util.PrintVector("difference", diff, N);
 
-    return 0;
+    int ret = 0;
+    if (std::abs(MaxDiff) > 0.003) {
+        std::cout << "FAIL: MaxDiff = " << MaxDiff << std::endl;
+        ret = 1;
+    }
+
+    if (!ret) {
+        std::cout << "PASS" << std::endl;
+    }
+
+    return ret;
 }

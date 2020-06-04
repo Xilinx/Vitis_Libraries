@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_cov_re_hardshreshold", 
+    "name": "Xilinx Covariance Regularizaiton Hard Shreshold Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_fd_g2_model", 
+    "name": "Xilinx Finite Difference Two Additive Factor Gaussian Model Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

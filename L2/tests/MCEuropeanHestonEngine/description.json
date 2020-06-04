@@ -1,16 +1,16 @@
 {
-    "gui": false,
-    "name": "jks.L2.MCEuropeanHestonEngine", 
-    "description": "", 
-    "flow": "vitis", 
-    "platform_type": "pcie", 
+    "gui": true,
+    "name": "Xilinx MC European Heston Engine Test",
+    "description": "",
+    "flow": "vitis",
+    "platform_type": "pcie",
     "platform_whitelist": [
-        "u250", 
+        "u250",
         "u200"
-    ], 
+    ],
     "platform_blacklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u200": {
             "host": {
@@ -19,7 +19,7 @@
                         "USE_DDR"
                     ]
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -27,7 +27,7 @@
                     ]
                 }
             }
-        }, 
+        },
         "u250": {
             "host": {
                 "compiler": {
@@ -35,7 +35,7 @@
                         "USE_DDR"
                     ]
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -44,71 +44,83 @@
                 }
             }
         }
-    }, 
+    },
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/kernel_mc.xclbin", 
+            "cmd_args": " -xclbin BUILD/kernel_mc.xclbin",
             "name": "generic launch for all flows"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "test.exe", 
+        "host_exe": "test.exe",
         "compiler": {
             "sources": [
-                "src/test.cpp", 
+                "src/test.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/MCEuropeanHestonEngine/src", 
-                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/tests/MCEuropeanHestonEngine/src",
+                "LIB_DIR/ext/xcl2",
                 "LIB_DIR/L2/tests/MCEuropeanHestonEngine/kernel"
-            ], 
+            ],
             "options": "-O3 "
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include", 
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
                 "LIB_DIR/L2/tests/MCEuropeanHestonEngine/kernel"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "kernel/kernel_mceuropeanengine.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0", 
-                    "name": "kernel_mc_0"
+                    "location": "kernel/kernel_mceuropeanengine.cpp",
+                    "frequency": 300,
+                    "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0",
+                    "name": "kernel_mc_0",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "kernel_mc_0",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "m_axi_gmem",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
-            ], 
-            "ldclflags": " --nk kernel_mc_0:1:kernel_mc_0", 
-            "frequency": 300.0, 
+            ],
+            "frequency": 300,
             "name": "kernel_mc"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 32768, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
                 "max_time_min": 470
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }

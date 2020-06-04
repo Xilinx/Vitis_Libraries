@@ -354,7 +354,7 @@ loop_ave:
  * @param rows actual row number
  * @param cols actual column number
  * @param inMatrix input cols x rows matrix
- * @param outCovMatirx output rows x rows covariance matrix
+ * @param outCovMatrix output rows x rows covariance matrix
  *
  */
 template <typename DT, int N, int M, int U, int V>

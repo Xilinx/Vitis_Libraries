@@ -107,12 +107,12 @@ int HestonFDTestCase::Run(string testcase, string testscheme, std::vector<double
 
     std::cout << std::endl;
 
-    FDHeston fdHeston(m1, m2);
+    FDHeston fdHeston(m1, m2, m_xclbin);
 
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    deviceList = DeviceManager::getDeviceList();
+    deviceList = DeviceManager::getDeviceList(m_device);
 
     if (deviceList.size() == 0) {
         printf("No matching devices found\n");

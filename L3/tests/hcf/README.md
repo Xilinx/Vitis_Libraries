@@ -1,35 +1,32 @@
-# Heston Closed Form Call Test
+## Heston Closed Form Model Test
 
-This test shows how to utilize the Heston Closed Form Solution Model
+This test shows how to utilize the Heston Closed Form Model in the L3 framework.
 
-# Setup Environment
+## Prerequisites
+- Alveo card (eg U200) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
+- Xilinx runtime (XRT) installed
+- Xilinx Vitis 2020.1 installed and configured
 
-source /opt/xilinx/xrt/setup.csh
+## Build Instuctions
+The demonstration application and kernel is built using a command line Makefile flow.
 
-source /*path to xf_fintech*/L3/src/env.csh
+### Step 1:
+Setup the build environment using Vitis and XRT scripts:
 
+            source <install path>/Vitis/2020.1/settings64.sh
+            source /opt/xilinx/xrt/setup.sh
 
-# Build Xilinx Fintech Library
-cd  /*path to xf_fintech*/L3/src
+### Step 2 :
+Call the Makefile. For example:
 
-**make all**
+	make check TARGET=sw_emu DEVICE=xilinx_u200_xdma_201830_2
 
+	make check TARGET=hw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-# Build Instuctions
+	make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
+        
+	make run TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
 
-To build the command line executable from this directory
+The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).
 
-**make all**
-
-> Note this requires the xilinx fintech library to have already been built
-
-
-# Run Instuctions
-Copy the prebuilt kernel files to this directory
-
-**hcf_hw_u250_float.xclbin**
-
-To run the command line exe and generate the NPV
-
-**make run**
-
+If the make check or run option is used the demo will automatically be lauched.

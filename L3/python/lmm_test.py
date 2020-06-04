@@ -4,6 +4,11 @@
 from xf_fintech_python import DeviceManager, LMM
 import numpy as np
 from scipy.stats import norm
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. lmmratchet.xclbin")
 
 def genSeeds():
     return list((np.random.rand(UN) * 1000).astype(int))
@@ -67,7 +72,7 @@ chosenDevice = deviceList[0]
 print("Choosing the first, ", str(chosenDevice), "\n")
 
 # Selecting and loading into FPGA of chosen card the LMM model to be used
-lmm = LMM()
+lmm = LMM(sys.argv[1])
 
 # Examples of possible operations for Cap pricing
 

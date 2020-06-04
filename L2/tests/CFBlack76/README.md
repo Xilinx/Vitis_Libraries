@@ -1,11 +1,11 @@
 ## Black76 Closed Form Demonstration
-This is a demonstration of the Black76 (B76) closed form solver built using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U200.
+This is a demonstration of the Black76 (B76) closed form solver built using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 The demonstration generates a configurable number of randomized input parameter sets (one input parameter set consists of the underlying, volatility, risk free rate, time-to-maturity and strike price), passes them to the kernel and retrieves the pricing and associated Greeks.  These are then compared to a full precision model and the worst case difference between the kernel and model are displayed.
 
 ## Prerequisites
 
-- Xilinx Vitis 2019.2 installed and configured
+- Xilinx Vitis 2020.1 installed and configured
 - Xilinx runtime (XRT) installed
 - Supported Xilinx Board (e.g. Alveo U250) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted
 
@@ -15,7 +15,7 @@ The kernel and host application are built using a command line Makefile flow.
 ### Step 1 :
 Setup the build environment using the Vitis and XRT scripts:
 
-            source <install path>/Vitis/2019.2/settings64.sh
+            source <install path>/Vitis/2020.1/settings64.sh
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :

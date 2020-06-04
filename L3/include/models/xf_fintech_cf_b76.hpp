@@ -144,7 +144,6 @@ class CFB76 : public OCLController {
    protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runStartTime;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runEndTime;
-
 };
 
 } // end namespace fintech

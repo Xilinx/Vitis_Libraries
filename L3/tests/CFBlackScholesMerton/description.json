@@ -1,7 +1,7 @@
 {
-    "name": "L3 Black Scholes Merton", 
+    "name": "Xilinx Black Scholes Merton Model", 
     "description": [
-        "L3 Black Scholes Merton"
+        "Black Scholes Merton using the L3 framework"
         ], 
     "flow": "vitis", 
     "platform_type": "pcie",
@@ -78,10 +78,22 @@
             ]
         }
     },
-    "launch": [
-        {
-            "name": "generic launch for all flows",
-            "cmd_args": "BUILD/bsm_kernel.xclbin u250"
+    "platform_properties":{
+        "u250":{
+            "launch": [
+                {
+                    "name": "generic launch for all flows for u250 card",
+                    "cmd_args": "BUILD/bsm_kernel.xclbin u250"
+                }
+            ]
+        },
+        "u200":{
+            "launch": [
+                {
+                    "name": "generic launch for all flows for u200 card",
+                    "cmd_args": "BUILD/bsm_kernel.xclbin u200"
+                }
+            ]
         }
-    ]
+    }
 }

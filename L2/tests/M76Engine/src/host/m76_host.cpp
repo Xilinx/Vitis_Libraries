@@ -383,5 +383,14 @@ int main(int argc, char** argv) {
         std::cout << "Total passes = " << total_tests - total_fails << std::endl;
         std::cout << "Total fails  = " << total_fails << std::endl;
     }
-    return 0;
+
+    int ret = 0;
+    if (!total_fails) {
+        std::cout << "PASS" << std::endl;
+    } else {
+        std::cout << "FAIL" << std::endl;
+        ret = 1;
+    }
+
+    return ret;
 }

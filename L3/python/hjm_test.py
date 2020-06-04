@@ -33,6 +33,7 @@ def zcbExample(hjm, hist_data, maturity, paths):
 
 parser = argparse.ArgumentParser(description='Example of Heath-Jarrow-Morton framework running on a FPGA')
 parser.add_argument('data_in', type=str, help='Path to csv with historical rates data')
+parser.add_argument('load', type=str, help='filename of xlcbin load, e.g. hjm.xclbin')
 
 args = parser.parse_args()
 
@@ -42,6 +43,8 @@ MC_UN = 4
 hist_data = np.loadtxt(args.data_in, delimiter=',')
 tenors = hist_data.shape[1]
 curves = hist_data.shape[0]
+
+xclbin_load = (args.load)
 
 print("\nThe Heath-Jarrow-Morton model\n=================================\n")
 
@@ -59,7 +62,7 @@ print("Choosing the first, ", str(chosenDevice), "\n")
 
 
 # Selecting and loadings into FPGA of chosen card the financial model to be used
-hjm = HJM()
+hjm = HJM(xclbin_load)
 hjm.claimDevice(chosenDevice)
 
 # Examples of possible operations, showing MC convergence of prices

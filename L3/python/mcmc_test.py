@@ -2,7 +2,11 @@
 
 # Ensure environmental variables i.e. paths are set to used the modules
 from xf_fintech_python import DeviceManager, PopMCMC
-#import array
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. mcmc.xclbin")
 
 # State test financial model
 print("\nThe MCMC financial model\n==============================\n")
@@ -22,7 +26,7 @@ print("Choosing the first, ",str(chosenDevice),"\n")
 
 
 # Selecting and loading into FPGA on chosen card the financial model to be used
-PopMCMC = PopMCMC()
+PopMCMC = PopMCMC(sys.argv[1])
 PopMCMC.claimDevice(chosenDevice)
 
 # Example

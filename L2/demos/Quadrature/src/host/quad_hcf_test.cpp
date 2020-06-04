@@ -180,6 +180,12 @@ int main(int argc, char* argv[]) {
     std::cout << "    run kernel      = " << t_run << " us" << std::endl;
     std::cout << "    mem from device = " << t_mem_from_device << " us" << std::endl;
 
-    std::cout << "TEST PASS" << std::endl;
-    return 0;
+    int ret = 0;
+    if (!fails) {
+        std::cout << "TEST PASS" << std::endl;
+    } else {
+        std::cout << "FAIL" << std::endl;
+        ret = 1;
+    }
+    return ret;
 }

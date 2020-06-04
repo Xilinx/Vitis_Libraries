@@ -1,10 +1,10 @@
 ## Black 76 L3 Test 
-This is a test of the Black 76 model using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U200.
+This is a test of the Black 76 model using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 It uses a fixed set of test data with expected values as calculated by the C Model the kernel was developed from.
 
 ## Prerequisites
-- Alveo U200 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
+- Alveo card (eg U200) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
 - Xilinx runtime (XRT) installed
 - Xilinx Vitis 2020.1 installed and configured
 

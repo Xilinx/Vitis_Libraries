@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.McAmericanEngine", 
+    "name": "Xilinx MC American Option Pricing Engine Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

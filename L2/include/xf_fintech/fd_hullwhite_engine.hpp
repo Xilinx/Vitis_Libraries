@@ -19,7 +19,7 @@
  * @brief This header file includes implementation of finite-difference Hull-white bermudan swaption pricing engine.
  * This file is part of XF Fintech 1.0 Library.
  *
- * @detial engineInitialization module is used to read in configurations, create mesher, and build differential
+ * @detail engineInitialization module is used to read in configurations, create mesher, and build differential
  * equation.
  * rollbackImplementation module is the main evolve back process of the prcing process.
  *

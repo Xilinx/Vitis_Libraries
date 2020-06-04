@@ -1,6 +1,6 @@
 {
-    "gui": false,
-    "name": "jks.L2.benchmarks.MCEuropeanEngine", 
+    "gui": true,
+    "name": "Xilinx MC European Engine Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -110,7 +110,6 @@
                     "name": "kernel_mc_3"
                 }
             ], 
-            "ldclflags": " --nk kernel_mc_0:1:kernel_mc_0 --nk kernel_mc_1:1:kernel_mc_1 --nk kernel_mc_2:1:kernel_mc_2 --nk kernel_mc_3:1:kernel_mc_3", 
             "frequency": 300.0, 
             "name": "kernel_mc"
         }

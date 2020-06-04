@@ -24,11 +24,19 @@
 
 using namespace xf::fintech;
 
-int main() {
+static float tolerance = 0.001;
+
+int main(int argc, char** argv) {
     // hullwhite fintech model...
-    HullWhiteAnalytic hwa;
+    std::string path = std::string(argv[1]);
+    HullWhiteAnalytic hwa(path);
 
     int retval = XLNX_OK;
+
+    std::string device = TOSTRING(DEVICE_PART);
+    if (argc == 3) {
+        device = std::string(argv[2]);
+    }
 
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
@@ -36,7 +44,7 @@ int main() {
     Device* pChosenDevice;
 
     // device passed in via compile
-    deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
+    deviceList = DeviceManager::getDeviceList(device);
 
     if (deviceList.size() == 0) {
         printf("No matching devices found\n");
@@ -69,6 +77,7 @@ int main() {
         printf("[XF_FINTECH] Failed to claim device - error = %d\n", retval);
     }
 
+    int ret = 0; // assume pass
     if (retval == XLNX_OK) {
         // note these values should match the generated kernel
         static const int N_k0 = 16;
@@ -97,6 +106,12 @@ int main() {
         if (retval == XLNX_OK) {
             for (int i = 0; i < N_k0; i++) {
                 printf("[XF_FINTECH] [%02u] HullWhite Spread = %f\n", i, outputP[i]);
+
+                // quick fix for pass fail criteria
+                if (std::abs(outputP[N_k0 - 1] - 0.631695) > tolerance) {
+                    printf("FAIL\n");
+                    ret = 1;
+                }
             }
             long long int executionTime =
                 (long long int)std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -110,5 +125,8 @@ int main() {
     printf("[XF_FINTECH] HullWhite releasing device...\n");
     retval = hwa.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    }
+    return ret;
 }

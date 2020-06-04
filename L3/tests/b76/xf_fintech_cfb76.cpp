@@ -25,7 +25,16 @@
 using namespace xf::fintech;
 
 static const unsigned int numAssets = 1000;
+static float tolerance = 0.001;
 
+static int check(float actual, float expected, float tol) {
+    int ret = 1; // assume pass
+    if (std::abs(actual - expected) > tol) {
+        printf("ERROR: expected %0.6f, got %0.6f\n", expected, actual);
+        ret = 0;
+    }
+    return ret;
+}
 
 int main(int argc, char** argv) {
     int retval = XLNX_OK;
@@ -57,6 +66,7 @@ int main(int argc, char** argv) {
 
     retval = cfB76.claimDevice(pChosenDevice);
 
+    int ret = 0; // assume pass
     if (retval == XLNX_OK) {
         // Populate the asset data...
         for (unsigned int i = 0; i < numAssets; i++) {
@@ -87,6 +97,26 @@ int main(int argc, char** argv) {
         for (unsigned int i = 0; i < numAssets; i++) {
             printf("[XLNX] | %5u | %8.5f | %8.5f | %8.5f | %8.5f | %8.5f | %8.5f |\n", i, cfB76.optionPrice[i],
                    cfB76.delta[i], cfB76.gamma[i], cfB76.vega[i], cfB76.theta[i], cfB76.rho[i]);
+
+            // quick fix to get pass/fail criteria
+            if (!check(cfB76.optionPrice[i], 3.88931, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfB76.delta[i], -0.46821, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfB76.gamma[i], 0.03886, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfB76.vega[i], 0.38861, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfB76.theta[i], -0.00506, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfB76.rho[i], 0.50710, tolerance)) {
+                ret = 1;
+            }
         }
 
         printf(
@@ -98,5 +128,11 @@ int main(int argc, char** argv) {
 
     cfB76.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+    }
+
+    return ret;
 }

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_ICD", 
+    "name": "Xilinx Inverse Cumulative Transform Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

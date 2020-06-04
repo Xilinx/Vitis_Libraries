@@ -1,7 +1,7 @@
 {
-    "name": "L3 Credit Default Swap Model", 
+    "name": "Xilinx Credit Default Swap Model", 
     "description": [
-        "L3 Credit Default Swap Model"
+        "Credit Default Swap Model using the L3 framework"
         ], 
     "flow": "vitis", 
     "platform_type": "pcie",
@@ -79,10 +79,22 @@
             ]
         }
     },
-    "launch": [
-        {
-            "name": "generic launch for all flows",
-            "cmd_args": "BUILD/cds_kernel.xclbin u250"
+    "platform_properties":{
+        "u250":{
+            "launch": [
+                {
+                    "name": "generic launch for all flows for u250 card",
+                    "cmd_args": "BUILD/cds_kernel.xclbin u250"
+                }
+            ]
+        },
+        "u200":{
+            "launch": [
+                {
+                    "name": "generic launch for all flows for u200 card",
+                    "cmd_args": "BUILD/cds_kernel.xclbin u200"
+                }
+            ]
         }
-    ]
+    }
 }

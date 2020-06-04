@@ -1,5 +1,5 @@
 ## Population Markov Chain Mote Carlo (MCMC) Demonstration
-This is a demonstration of the Population based MCMC built using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U200.
+This is a demonstration of the Population based MCMC built using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 The demonstration run the kernel to generate configurable number of Samples. Samples are saved to a csv file for further analysis.
 
@@ -7,7 +7,7 @@ The demonstration run the kernel to generate configurable number of Samples. Sam
 
 - Alveo U200 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2019.2 installed and configured
+- Xilinx Vitis 2020.1 installed and configured
 
 ## Building the demonstration
 The kernel and host application is built using a command line Makefile flow.
@@ -15,7 +15,7 @@ The kernel and host application is built using a command line Makefile flow.
 ### Step 1 :
 Setup the build environment using the Vitis and XRT scripts:
 
-            source <install path>/Vitis/2019.2/settings64.sh
+            source <install path>/Vitis/2020.1/settings64.sh
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_hw_model", 
+    "name": "Xilinx Cubic Spline Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

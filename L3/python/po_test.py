@@ -2,6 +2,11 @@
 
 # Ensure environmental variables i.e. paths are set to the named the modules
 from xf_fintech_python import DeviceManager, portfolio_optimisation
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. po_kernel.xclbin")
 
 # State test financial model
 print("\nThe Portfolio Optimisation financial model\n==================================================\n")
@@ -99,7 +104,7 @@ print("Choosing the first suitable card\n")
 chosenDevice = deviceList[0]
 
 # Selecting and loading into FPGA on chosen card the financial model to be used
-portfolio_optimisation = portfolio_optimisation()
+portfolio_optimisation = portfolio_optimisation(sys.argv[1])
 portfolio_optimisation.claimDevice(chosenDevice)
 
 #Feed in the data and request the result

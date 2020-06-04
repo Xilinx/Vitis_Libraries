@@ -1,5 +1,5 @@
 {
-    "name": "L2 FdEuropeanHestonEngine", 
+    "name": "Xilinx Finite Difference European Heston Engine Model", 
     "description": "L2 Finite Difference Heston Engine for European options", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -12,8 +12,19 @@
     ], 
     "launch": [
         {
+            "target": "sw_emu",
             "cmd_args": " BUILD/fd_heston_kernel_u250_sw_emu_m8192_double.xclbin PROJECT/data 128 64 200", 
-            "name": "generic launch for all flows"
+            "name": "sw_emu-launch"
+        },
+        {
+            "target": "hw_emu",
+            "cmd_args": " BUILD/fd_heston_kernel_u250_sw_emu_m8192_double.xclbin PROJECT/data 16 8 2", 
+            "name": "hw_emu-launch"
+        },
+        {
+            "target": "hw",
+            "cmd_args": " BUILD/fd_heston_kernel_u250_sw_emu_m8192_double.xclbin PROJECT/data 128 64 200", 
+            "name": "hw-launch"
         }
     ], 
     "host": {
