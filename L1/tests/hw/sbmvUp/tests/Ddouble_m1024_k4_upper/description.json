@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_sbmv_Ddouble_m1024_k4_upper",
+    "name": "Xilinx XF_BLAS.sbmv_Ddouble_m1024_k4_upper",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

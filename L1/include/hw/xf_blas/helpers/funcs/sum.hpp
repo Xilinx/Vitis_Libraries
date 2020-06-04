@@ -111,8 +111,6 @@ void sum(unsigned int p_n,
     hls::stream<t_SumDataType> l_data, l_pad;
 #pragma HLS stream variable = l_data depth = 2
 #pragma HLS stream variable = l_pad depth = 2
-#pragma HLS data_pack variable = l_data
-#pragma HLS data_pack variable = l_pad
     unsigned int l_numElem = p_n >> t_LogParEntries;
     preProcess<t_DataType, t_LogParEntries, t_IndexType, t_SumDataType>(l_numElem, p_x, l_data, p_mulIters);
     padding<t_SumDataType, 1 << l_LogDelays, t_IndexType>(l_numElem, l_data, l_pad, p_mulIters);
@@ -140,7 +138,6 @@ void sum(unsigned int p_n,
          t_DataType& p_sum) {
 #pragma HLS DATAFLOW
     hls::stream<typename WideType<t_DataType, 1>::t_TypeInt> l_s;
-#pragma HLS data_pack variable = l_s
     sum<t_DataType, t_LogParEntries, t_IndexType>(p_n, p_x, l_s, 1);
     WideType<t_DataType, 1> l_v = l_s.read();
     p_sum = l_v[0];

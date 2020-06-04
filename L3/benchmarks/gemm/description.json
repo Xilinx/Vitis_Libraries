@@ -1,5 +1,5 @@
 {
-    "name": "jks.L3_gemm_benchmark",
+    "name": "Xilinx XF_BLAS.gemm_benchmark",
     "description": "",
     "flow": "vitis",
     "platform_whitelist": [

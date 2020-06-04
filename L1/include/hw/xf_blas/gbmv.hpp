@@ -100,8 +100,6 @@ void gbmv(const unsigned int p_m,
           hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_y,
           hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_yr) {
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_x, l_y;
-#pragma HLS data_pack variable = l_x
-#pragma HLS data_pack variable = l_y
 #pragma HLS DATAFLOW
     gbmv<t_DataType, t_ParEntries, t_MaxRows, t_IndexType, t_MacType>(p_m, p_n, p_kl, p_ku, p_M, p_x, l_x);
     scal<t_DataType, t_ParEntries, t_IndexType>(p_m, p_beta, p_y, l_y);

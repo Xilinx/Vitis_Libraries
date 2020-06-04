@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_spmv_Ddouble_m16_upper",
+    "name": "Xilinx XF_BLAS.spmv_Ddouble_m16_upper",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

@@ -32,7 +32,7 @@ L3 API GEMM benchmark
 1.1 Introduction
 -----------------
 
-Intel® Math Kernel Library provides performance improvement of math functions, e.g. GEMM, when running with Intel processors. To compare with Xilinx's XFBLAS library, you can use our run-script (run_gemm_mkl.sh) to generate the data and performance benchmark.
+Intel® Math Kernel Library provides performance improvement of math functions, e.g. GEMM, when running with Intel processors. To compare with Xilinx's Vitis BLAS library, you can use our run-script (run_gemm_mkl.sh) to generate the data and performance benchmark.
 
 .. _MKL_benchmark:
 
@@ -43,14 +43,14 @@ Intel® Math Kernel Library provides performance improvement of math functions, 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Follow the user guide `Vitis On Nimbix`_ to login to your Nimbix account
-- Launch application "Xilinx Vitis Unified Software Platform 2019.2" and select "Desktop Mode with FPGA"
+- Launch application "Xilinx Vitis Unified Software Platform 2020.1" and select "Desktop Mode with FPGA"
 - Choose machine type "16 core, 128 GB RAM, Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)"
 - Copy the L3/bencharks/gemm directory to the Nimbix machine, and navigate to the gemm/gemm_mkl directory
 - Follow the steps below to run Intel® MKL GEMM APIsbenchmarks.
 
 .. _Vitis On Nimbix: https://www.xilinx.com/xilinxtraining/assessments/portal/alveo/intro_nimbix_cloud/story_html5.html 
 
-.. NOTE:: FPGA is not required in Intel® Math Kernel Library but will be used in Xilinx's XFBLAS library.
+.. NOTE:: FPGA is not required in Intel® Math Kernel Library but will be used in Xilinx's Vitis BLAS library.
 
 1.2.2 Install Intel® MK library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -174,7 +174,7 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 .. _Benchmarking GEMM on Intel® Architecture Processors: https://software.intel.com/en-us/articles/benchmarking-gemm-with-intel-mkl-and-blis-on-intel-processors
 
 
-2. Benchmarking xfblasGemm - Xilinx's XFBLAS library
+2. Benchmarking xfblasGemm - Xilinx's Vitis BLAS library
 =====================================================
 
 Before benchmarking xfblashGemm, please download `xf blas xclbin files`_, unzip the file with "tar -xvzf" command, and copy the folder u250_xdma_201830_2 to directory L3/overlay.

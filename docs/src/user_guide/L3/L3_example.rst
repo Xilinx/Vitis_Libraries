@@ -14,7 +14,7 @@
    limitations under the License.
 
 .. meta::
-   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, example, level 3
+   :keywords: BLAS, Library, Vitis BLAS Library, Vitis BLAS, example, level 3
    :description: Vitis BLAS library level 3 appliction programming interface example.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
@@ -26,7 +26,7 @@ L3 API example
 =====================
 For example code references please follow the link below. 
 
-**1. XFBLAS L3 compilation**
+**1. Vitis BLAS L3 compilation**
 
 All examples provided here could be built with compilation steps similar to the following:
 
@@ -34,7 +34,7 @@ All examples provided here could be built with compilation steps similar to the 
 
   g++ -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-unused-parameter -Wno-unused-variable -I$(XILINX_XRT)/include -I/include/sw -o example.exe example.cpp -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
 
-**2. XFBLAS L3 run**
+**2. Vitis BLAS L3 run**
 
 Most of the examples could be run with steps similar to the following in machine with HW device installed. Detailed usages are also provided in each section.
 
@@ -43,9 +43,9 @@ Most of the examples could be run with steps similar to the following in machine
   ./example.exe PATH_TO_XCLBIN/example.xclbin PATH_TO_XCLBIN/config_info.dat
 
 
-**3. XFBLAS L3 code example**
+**3. Vitis BLAS L3 code example**
 
-The following is an example of how to use XFBLAS API. Users always need to include header file xf_blas.hpp. 
+The following is an example of how to use Vitis BLAS API. Users always need to include header file xf_blas.hpp. 
 
 .. code-block:: c++
 
@@ -135,7 +135,7 @@ The following is an example of how to use XFBLAS API. Users always need to inclu
   }
 
 
-These API functions run on the first kernel by default, but they could support multi-kernels xclbin. Users will need to put numbers of kernels or index of the kernel in those functions to let the API know. The following code shows how to initialize XFBLAS library to support a xclbin with 2 kernels and run with the second kernel.
+These API functions run on the first kernel by default, but they could support multi-kernels xclbin. Users will need to put numbers of kernels or index of the kernel in those functions to let the API know. The following code shows how to initialize Vitis BLAS library to support a xclbin with 2 kernels and run with the second kernel.
 
 .. code-block:: c++
    
@@ -150,7 +150,7 @@ These API functions run on the first kernel by default, but they could support m
     status = xfblasGetMatrixRestricted(c, 1);
   
   
-**4. XFBLAS L3 example**
+**4. Vitis BLAS L3 example**
 
 Please see L3 example folder for more example cases. 
 

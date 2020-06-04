@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_trmv_Dint32_t_m1024_lower",
+    "name": "Xilinx XF_BLAS.trmv_Dint32_t_m1024_lower",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

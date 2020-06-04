@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_gemv_Ddouble_m128-n4096",
+    "name": "Xilinx XF_BLAS.gemv_Ddouble_m128-n4096",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

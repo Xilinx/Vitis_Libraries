@@ -170,7 +170,6 @@ void transpMemWordBlocks(unsigned int p_blocks,
     static const unsigned int t_Size = t_ColWords * t_Rows;
 
     WideType<t_DataType, t_MemWidth> l_buf[t_Size];
-#pragma HLS data_pack variable = l_buf
     for (unsigned int b = 0; b < p_blocks; ++b) {
 #pragma HLS DATAFLOW
         for (unsigned int i = 0; i < t_Rows; ++i) {

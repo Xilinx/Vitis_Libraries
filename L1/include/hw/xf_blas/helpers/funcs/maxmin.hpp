@@ -145,10 +145,8 @@ void MaxMinHelper(unsigned int p_n, // number of element in the stream
                   t_IndexType& p_result) {
 #pragma HLS DATAFLOW
     hls::stream<t_DataType> l_valueStream;
-#pragma HLS data_pack variable = l_valueStream
 #pragma HLS stream variable = l_valueStream depth = 2
     hls::stream<t_IndexType> l_indexStream;
-#pragma HLS data_pack variable = l_indexStream
 #pragma HLS stream variable = l_indexStream depth = 2
 
     preProcess<t_DataType, t_LogParEntries, t_IndexType, t_Max>(p_n, l_valueStream, l_indexStream, p_x);

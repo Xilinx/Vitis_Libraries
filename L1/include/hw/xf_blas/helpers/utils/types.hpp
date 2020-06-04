@@ -78,14 +78,23 @@ class WideType {
     }
 
     WideType(const WideType& wt) {
+#pragma HLS INLINE
 #pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+        constructor(wt);
+    }
+
+    void constructor(const WideType& wt) {
         for (int i = 0; i < t_Width; i++)
 #pragma HLS UNROLL
             m_Val[i] = wt[i];
     }
 
     WideType(const t_TypeInt& p_val) {
+#pragma HLS INLINE
 #pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+        constructor(p_val);
+    }
+    void constructor(const t_TypeInt& p_val) {
         for (int i = 0; i < t_Width; ++i) {
 #pragma HLS UNROLL
             ap_uint<t_DataWidth> l_val = p_val.range(t_DataWidth * (1 + i) - 1, t_DataWidth * i);
@@ -94,7 +103,11 @@ class WideType {
     }
 
     WideType(const T p_initScalar) {
+#pragma HLS INLINE
 #pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
+        constructor(p_initScalar);
+    }
+    void constructor(const T p_initScalar) {
         for (int i = 0; i < t_Width; ++i) {
 #pragma HLS UNROLL
             m_Val[i] = p_initScalar;
@@ -102,7 +115,6 @@ class WideType {
     }
 
     operator const t_TypeInt() {
-#pragma HLS ARRAY_PARTITION variable = m_Val complete dim = 1
         t_TypeInt l_fVal;
         for (int i = 0; i < t_Width; ++i) {
 #pragma HLS UNROLL
@@ -256,7 +268,7 @@ class MemUtil {
 
 template <class T, uint8_t t_NumCycles>
 T hlsReg(T p_In) {
-#pragma HLS INLINE self off
+#pragma HLS INLINE
 #pragma HLS INTERFACE ap_none port = return register
     if (t_NumCycles == 1) {
         return p_In;
@@ -276,43 +288,43 @@ class BoolArr {
     bool m_Val[W];
 
    public:
-    BoolArr() {}
+    BoolArr() {
+#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable = m_Val COMPLETE
+    }
     BoolArr(bool p_Init) {
-#pragma HLS inline self
+#pragma HLS inline
         for (unsigned int i = 0; i < W; ++i) {
 #pragma HLS UNROLL
             m_Val[i] = p_Init;
         }
     }
     bool& operator[](unsigned int p_Idx) {
-#pragma HLS inline self
+#pragma HLS inline
         return m_Val[p_Idx];
     }
     bool And() {
-#pragma HLS inline self
+#pragma HLS inline
         bool l_ret = true;
         for (unsigned int i = 0; i < W; ++i) {
 #pragma HLS UNROLL
-#pragma HLS ARRAY_PARTITION variable = m_Val COMPLETE
             l_ret = l_ret && m_Val[i];
         }
         return (l_ret);
     }
     bool Or() {
-#pragma HLS inline self
+#pragma HLS inline
         bool l_ret = false;
         for (unsigned int i = 0; i < W; ++i) {
 #pragma HLS UNROLL
-#pragma HLS ARRAY_PARTITION variable = m_Val COMPLETE
             l_ret = l_ret || m_Val[i];
         }
         return (l_ret);
     }
     void Reset() {
-#pragma HLS inline self
+#pragma HLS inline
         for (unsigned int i = 0; i < W; ++i) {
 #pragma HLS UNROLL
-#pragma HLS ARRAY_PARTITION variable = m_Val COMPLETE
             m_Val[i] = false;
         }
     }
@@ -320,7 +332,7 @@ class BoolArr {
 
 template <class S, int W>
 bool streamsAreEmpty(S p_Sin[W]) {
-#pragma HLS inline self
+#pragma HLS inline
     bool l_allEmpty = true;
 LOOP_S_IDX:
     for (int w = 0; w < W; ++w) {

@@ -16,7 +16,7 @@
 
 
 .. meta::
-   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, level 3
+   :keywords: BLAS, Library, Vitis BLAS Library, Vitis BLAS, level 3
    :description: Vitis BLAS library level 3 provides software API functions to offload BLAS operations to pre-built FPGA images.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
@@ -26,15 +26,15 @@
 
 
 
-XFBLAS level 3 provides software API functions to offload BLAS operations to pre-built FPGA images. 
+Vitis BLAS level 3 provides software API functions to offload BLAS operations to pre-built FPGA images. 
 
 1. Introduction
 ================
-The XFBLAS level 3 library is an implementation of BLAS on top of the XILINX runtime (XRT). It allows software developers to use XFBLAS library without writing any runtime functions and hardware configurations. 
+The Vitis BLAS level 3 library is an implementation of BLAS on top of the XILINX runtime (XRT). It allows software developers to use Vitis BLAS library without writing any runtime functions and hardware configurations. 
 
 1.1 Data layout
 ---------------
-XFBLAS library uses row-major storage. The array index of a matrix element could be calculated by the following macro.
+Vitis BLAS library uses row-major storage. The array index of a matrix element could be calculated by the following macro.
   
 .. code-block::
 
@@ -42,7 +42,7 @@ XFBLAS library uses row-major storage. The array index of a matrix element could
   
 1.2 Memory Allocation
 ----------------------
-XFBLAS level 3 library supports three different versions of APIs to support memory allocation in device. Users could choose from different versions to better support their application based on the cases. Examples for using three different versions could be found in :doc:`BLAS Level 3 example<L3_example>`.
+Vitis BLAS level 3 library supports three different versions of APIs to support memory allocation in device. Users could choose from different versions to better support their application based on the cases. Examples for using three different versions could be found in :doc:`BLAS Level 3 example<L3_example>`.
 
 +--------------------------------+-------------------------------------+------------------------------+
 | Already have host memory input | Host memory matrix sizes are padded | Version to choose            |
@@ -72,18 +72,18 @@ Pre-allocated memory version
 - short
 - float
 
-2. Using the XFBLAS API
+2. Using the Vitis BLAS API
 ========================
 
 2.1 General description
 ------------------------
-This section describes how to use the XFBLAS library API level.
+This section describes how to use the Vitis BLAS library API level.
 
 2.1.1 Error status
 ^^^^^^^^^^^^^^^^^^^
-XFBLAS API function calls return the error status of datatype `xfblasStatus_t <2.2.1 xfblasStatus_t_>`_.
+Vitis BLAS API function calls return the error status of datatype `xfblasStatus_t <2.2.1 xfblasStatus_t_>`_.
 
-2.1.2 XFBLAS initialization
+2.1.2 Vitis BLAS initialization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To initialize the library, xfblasCreate() function must be called. This function will open the device, download the FPGA image to the device  and create context on the selected compute unit. For a multi-kernels xclbin, contexts will be opened on the corresponding compute units. Please refer to :doc:`gemm example<L3_example_gemm>` for detail usage.
 
@@ -92,18 +92,18 @@ To initialize the library, xfblasCreate() function must be called. This function
 
 2.2.1 xfblasStatus_t
 ^^^^^^^^^^^^^^^^^^^^^^
-The type is used for function status returns. All XFBLAS level 3 library functions return status which has the following values.
+The type is used for function status returns. All Vitis BLAS level 3 library functions return status which has the following values.
 
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
 | Item                          | Meaning                                                                                                           | Value  |
 +===============================+===================================================================================================================+========+
 | XFBLAS_STATUS_SUCCESS         | The function is completed successfully                                                                            | 0      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
-| XFBLAS_STATUS_NOT_INITIALIZED | The XFBLAS library was not initialized. This is usually caused by not calling function xfblasCreate previously.   | 1      |
+| XFBLAS_STATUS_NOT_INITIALIZED | The Vitis BLAS library was not initialized. This is usually caused by not calling function xfblasCreate previously.   | 1      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
 | XFBLAS_STATUS_INVALID_VALUE   | An unsupported value or parameter was passed to the function. For example, an negative matrix size.               | 2      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
-| XFBLAS_STATUS_ALLOC_FAILED    | Memory allocation failed inside the XFBLAS library.                                                               | 3      |
+| XFBLAS_STATUS_ALLOC_FAILED    | Memory allocation failed inside the Vitis BLAS library.                                                               | 3      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
 | XFBLAS_STATUS_NOT_SUPPORTED   | The functionality requested is not supported yet.                                                                 | 4      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------+--------+
@@ -112,7 +112,7 @@ The type is used for function status returns. All XFBLAS level 3 library functio
 
 2.2.2 xfblasEngine_t
 ^^^^^^^^^^^^^^^^^^^^^
-The xfblasEngine_t type indicates which engine needs to be performed when initializes the XFBLAS library. xfblasEngine_t type should be matched with the FPGA bitstream.
+The xfblasEngine_t type indicates which engine needs to be performed when initializes the Vitis BLAS library. xfblasEngine_t type should be matched with the FPGA bitstream.
 
 +--------------------+-----------------------------+
 | Value              | Meaning                     |
@@ -137,7 +137,7 @@ The xfblasOperation_t type indicates which operation needs to be performed with 
 | XFBLAS_OP_C | The conjugate transpose operation is selected |
 +-------------+-----------------------------------------------+
 
-2.3 XFBLAS Helper Function Reference
+2.3 Vitis BLAS Helper Function Reference
 -------------------------------------
 
 2.3.1 xfblasCreate
@@ -148,7 +148,7 @@ The xfblasOperation_t type indicates which operation needs to be performed with 
 
     xfblasStatus_t xfblasCreate(const char* xclbin, string configFile, const char* logFile, xfblasEngine_t engineName, unsigned int kernelNumber = 1, unsigned int deviceIndex = 0)
 
-This function initializes the XFBLAS library and creates a handle for the specific engine. It must be called prior to any other XFBLAS library calls.
+This function initializes the Vitis BLAS library and creates a handle for the specific engine. It must be called prior to any other Vitis BLAS library calls.
 
 .. rubric:: Parameters:
 
@@ -166,7 +166,7 @@ This function initializes the XFBLAS library and creates a handle for the specif
         - file path to log file
     *
         - engineName
-        - XFBLAS engine to run
+        - Vitis BLAS engine to run
     *
         - kernelNumber
         - number of kernels that is being used, default is 1
@@ -241,7 +241,7 @@ This function frees memory in FPGA device.
 
     xfblasStatus_t xfblasDestroy(unsigned int kernelNumber = 1, unsigned int deviceIndex = 0)
 
-This function releases handle used by the XFBLAS library.
+This function releases handle used by the Vitis BLAS library.
 
 .. rubric:: Parameters:
 
@@ -1232,7 +1232,7 @@ This function will synchronize all the device memory to host memory.
         - xfblasStatus_t
         - 3 if there is no FPGA device memory allocated for some of the matrices in the host memory
 
-2.4 XFBLAS Function Reference
+2.4 Vitis BLAS Function Reference
 ------------------------------
 
 2.4.1 xfblasGemm

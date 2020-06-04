@@ -14,7 +14,7 @@
    limitations under the License.
 
 .. meta::
-   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, level 3
+   :keywords: BLAS, Library, Vitis BLAS Library, Vitis BLAS, level 3
    :description: Vitis BLAS library level 3 overview.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials

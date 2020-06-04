@@ -30,7 +30,7 @@
 #include <fstream>
 
 #include "xf_blas.hpp"
-#include "../bench_helper.hpp"
+#include "bench_helper.hpp"
 #include "gemm_helper.hpp"
 
 using namespace std;

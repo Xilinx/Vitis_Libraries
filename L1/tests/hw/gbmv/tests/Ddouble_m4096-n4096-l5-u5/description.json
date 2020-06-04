@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_gbmv_Ddouble_m4096-n4096-l5-u5",
+    "name": "Xilinx XF_BLAS.gbmv_Ddouble_m4096-n4096-l5-u5",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],
