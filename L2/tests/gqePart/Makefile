@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,15 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
-
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-ifeq ($(findstring vck, $(DEVICE)), vck)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-
+DEVICE ?= xilinx_u280_xdma_201920_3
 
 ifneq ($(findstring u280, $(DEVICE)), u280)
 $(error [ERROR]: This project is not supported for $(DEVICE).)

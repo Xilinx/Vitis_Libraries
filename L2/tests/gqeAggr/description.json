@@ -33,7 +33,7 @@
             "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin -in PROJECT/db_data/dat -scale 10"
         },
         {
-            "name": "generic launch for all flows",
+            "name": "launch for hw_emu flow",
             "target": "hw_emu",
             "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin -in PROJECT/db_data/dat -scale 10000"
         }

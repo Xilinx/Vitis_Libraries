@@ -26,7 +26,7 @@ endif
 
 .PHONY: all install xml rst html clean cleanhtml cleanall check_html_dir
 
-all: html
+all: install
 
 check_html_dir:
 ifeq (, $(HTML_DEST_DIR))

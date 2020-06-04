@@ -33,7 +33,7 @@
             "cmd_args": " -mode fpga -xclbin BUILD/hash_aggr_kernel.xclbin -in PROJECT/db_data/dat -rep 1 -key_column 1 -pld_column 1 -scale 100"
         },
         {
-            "name": "generic launch for all flows",
+            "name": "launch for hw_emu flow",
             "target": "hw_emu",
             "cmd_args": " -mode fpga -xclbin BUILD/hash_aggr_kernel.xclbin -in PROJECT/db_data/dat -rep 1 -key_column 1 -pld_column 1 -scale 10000"
         }
