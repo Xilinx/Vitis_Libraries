@@ -4,7 +4,6 @@
         "Xilinx ZLIB P2P Decompression Parallel Byte 8_II1"
     ],
     "config_make": "./config.mk",
-    "gui": "false",
     "flow": "vitis",
     "platform_blacklist": [
         "u50",
@@ -62,7 +61,7 @@
     "containers": [
         {
             "name": "decompress_stream",
-            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/opts.ini",
+            "ldclflags": "--config PROJECT/opts.ini",
             "accelerators": [
                 {
                     "name": "xilZlibDmReader",

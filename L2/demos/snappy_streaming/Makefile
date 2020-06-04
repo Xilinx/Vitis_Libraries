@@ -135,10 +135,10 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 VPP_FLAGS += -DPARALLEL_BLOCK=8 
 
 # Kernel linker flags
-LDCLFLAGS_compress_streaming += --profile_kernel data:all:all:all --config $(CUR_DIR)/compress.ini
+LDCLFLAGS_compress_streaming += --config $(CUR_DIR)/compress.ini
 
 # Kernel linker flags
-LDCLFLAGS_decompress_streaming += --profile_kernel data:all:all:all --config $(CUR_DIR)/decompress.ini
+LDCLFLAGS_decompress_streaming += --config $(CUR_DIR)/decompress.ini
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/compress_streaming.xclbin

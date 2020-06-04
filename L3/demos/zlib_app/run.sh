@@ -3,7 +3,7 @@ EXE_FILE=$1
 LIB_PROJ_ROOT=$2
 XCLBIN_FILE=$3
 echo "XCL_MODE=${XCL_EMULATION_MODE}"
-if [ "${XCL_EMULATION_MODE}" == "hw" ] 
+if [ "${XCL_EMULATION_MODE}" != "hw_emu" ] 
 then
     cp $LIB_PROJ_ROOT/common/data/sample.txt ./sample_run.txt
     cp $LIB_PROJ_ROOT/common/data/test.list ./test.list
