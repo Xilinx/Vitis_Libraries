@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Inflation CapFloor, inflation
+   :description: Inflation option can be cap and floor. An inflation cap (floor) is a financial asset that offers protection against inflation being higher (lower) than a given rate of inflation, and can therefore be used by investors to insure against such inflation outcomes.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 *************************************************
 Internal Design of Inflation CapFloor Engine

@@ -1,11 +1,52 @@
 {
+    "gui": false,
     "name": "jks.L2.benchmarks.TreeSwaptionEngineBKModel", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR", 
+                        "KN=2"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR", 
+                        "KN=4"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/scanTreeKernel.xclbin", 
@@ -16,32 +57,31 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/host/main.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "host/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/host", 
-                "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel", 
-                "REPO_DIR/ext/xcl2"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/host", 
+                "LIB_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel", 
+                "LIB_DIR/ext/xcl2"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ", 
+            "symbols": [
+                "PRAGMA"
+            ]
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel"
-            ]
-        }, 
-        "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel"
+            ], 
+            "symbols": [
+                "HW_EMU_DEBUG"
             ]
         }
     }, 
@@ -49,30 +89,31 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel/scan_tree_kernel.cpp", 
+                    "location": "kernel/scan_tree_kernel1.cpp kernel/scan_tree_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL_NAME=scanTreeKernel1", 
                     "name": "scanTreeKernel1"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel/scan_tree_kernel2.cpp", 
+                    "location": "kernel/scan_tree_kernel2.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL_NAME=scanTreeKernel2", 
                     "name": "scanTreeKernel2"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel/scan_tree_kernel.cpp", 
+                    "location": "kernel/scan_tree_kernel3.cpp kernel/scan_tree_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL_NAME=scanTreeKernel3", 
                     "name": "scanTreeKernel3"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel/scan_tree_kernel.cpp", 
+                    "location": "kernel/scan_tree_kernel4.cpp kernel/scan_tree_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL_NAME=scanTreeKernel4", 
                     "name": "scanTreeKernel4"
                 }
             ], 
+            "ldclflags": " --nk scanTreeKernel1:1:scanTreeKernel1 --nk scanTreeKernel2:1:scanTreeKernel2 --nk scanTreeKernel3:1:scanTreeKernel3 --nk scanTreeKernel4:1:scanTreeKernel4", 
             "frequency": 300.0, 
             "name": "scanTreeKernel"
         }

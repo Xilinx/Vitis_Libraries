@@ -14,6 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Model, finance, Black-Scholes
+   :description: The Black-Scholes Model is a mathematical model for the dynamics of a financial market containing derivative investment instruments. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _black_scholes:
 
 *******************

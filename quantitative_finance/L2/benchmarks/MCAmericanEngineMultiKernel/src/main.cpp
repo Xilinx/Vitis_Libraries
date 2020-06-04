@@ -150,10 +150,10 @@ int main(int argc, const char* argv[]) {
     }
     std::cout << "[INFO]Running in " << mode << " mode" << std::endl;
     // AXI depth
-    int data_size = depthP;            // 20480;//= depthP = 1024(calibrate
-                                       // samples)*10(steps) *2(iter), width: 64*UN
-    int matdata_size = depthM;         ////180;//=depthM = 9*10(steps)*2(iter), width: 64
-    int coefdata_size = COEF_DEPTH; //TIMESTEPS - 1; // 9;//=(steps-1), width: 4*64
+    int data_size = depthP;         // 20480;//= depthP = 1024(calibrate
+                                    // samples)*10(steps) *2(iter), width: 64*UN
+    int matdata_size = depthM;      ////180;//=depthM = 9*10(steps)*2(iter), width: 64
+    int coefdata_size = COEF_DEPTH; // TIMESTEPS - 1; // 9;//=(steps-1), width: 4*64
     std::cout << "data_size is " << data_size << std::endl;
 
     ap_uint<64 * UN_K1>* output_price = aligned_alloc<ap_uint<64 * UN_K1> >(data_size); // 64*UN
@@ -232,10 +232,10 @@ int main(int argc, const char* argv[]) {
 
     // Creating Context and Command Queue for selected Device
     cl::Context context(device);
-#ifdef OUT_OF_ORDER
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
-#else
+#ifdef SW_EMU_TEST
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+#else
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #endif
 
     std::string devName = device.getInfo<CL_DEVICE_NAME>();

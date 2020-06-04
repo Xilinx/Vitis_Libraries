@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: framework, DeviceManager,  Device, Trace, DeviceType, OptionType
+   :description: Vitis Quantitative Finance library framework application programming interface reference.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *****************
 Framework Classes
 *****************

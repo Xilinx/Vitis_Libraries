@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Black-Scholes-Merton
+   :description: Black-Scholes-Merton models the dynamics of a financial market containing derivative investment instruments. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _black_scholes_merton_engine:
 
 ***************************************************

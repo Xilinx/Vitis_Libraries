@@ -13,6 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Finance, Quantitative, Vitis Quantitative Finance Library, models
+   :description: List of supported financial models.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 ********************************
 Available Models
 ********************************

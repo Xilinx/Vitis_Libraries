@@ -13,6 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: European, pricing, engine, MCEuropeanHestonEngine
+   :description: The European option is an option that can only be exercised at the expiration date. Heston Model is the most classic model for stock price.    
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 *******************************************
 Internal Design of MCEuropeanHestonEngine
 *******************************************
@@ -21,8 +29,7 @@ Internal Design of MCEuropeanHestonEngine
 Overview
 ========
 
-The European option is an option that can only be exercised at the expiration date. 
-Heston Model is the most classic model for stock price. 
+The European option is an option that can only be exercised at the expiration date. Heston Model is the most classic model for stock price. 
 This engine uses a large number of random samples to simulate stock price's dynamic based on Heston Model, 
 then calculates the value of option which use this stock as underlying asset.
 

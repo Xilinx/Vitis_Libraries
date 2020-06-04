@@ -15,6 +15,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: fintech, RNG, Random Number Generator, Monte Carlo, Mersenne Twister, NRNG, UDRNG, normal distributed, uniform distributed
+   :description: Random Number Generator (RNG) is one of the core utilities needed by Monte Carlo Simulation.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ***********************
 Random Number Generator
 ***********************

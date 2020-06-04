@@ -14,6 +14,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Model, finance, Black-Karasinski
+   :description: The Black-Karasinski model is a mathematical model of the term structure of interest rates. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 **********************
 Black-Karasinski Model
 **********************

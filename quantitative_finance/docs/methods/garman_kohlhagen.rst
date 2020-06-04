@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Garman-Kohlhagen, Closed-Form, Foreign Exchange, FX
+   :description: The Garman Kohlhagen model is used to price Foreign Exchange (FX) Options. An FX Option involves the right to exchange money in one currency into another currency at an agreed exchange rate on a specified date. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *************************************
 Garman-Kohlhagen Closed-Form Solution
 *************************************

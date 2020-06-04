@@ -87,7 +87,6 @@ int main() {
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    // device list based on DSA
     deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
 
     if (deviceList.size() == 0) {

@@ -14,13 +14,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: fintech, Stochastic, StochasticProcess1D
+   :description: Stochastic process uses a given point and a time step to calculate the expectation and variance.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *********************
 Stochastic Process
 *********************
 
 Overview
 =========
-`Stochastic processes` is a stochastic process which takes the use of Random Number Generator(RNG). It uses a given point :math:`(t,x)` and a time step :math:`\Delta t` to calculate the expectation and variance. The class `StochasticProcess1D` is 1-dimensional stochastic process, and it cooperates with Cox-Ingersoll-Ross and Extended Cox-Ingersoll-Ross Models.
+`Stochastic process` uses the Random Number Generator(RNG). It uses a given point :math:`(t,x)` and a time step :math:`\Delta t` to calculate the expectation and variance. The class `StochasticProcess1D` is 1-dimensional stochastic process, and it cooperates with Cox-Ingersoll-Ross and Extended Cox-Ingersoll-Ross Models.
 The stochastic process can be described as
 
 .. math::

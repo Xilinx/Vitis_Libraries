@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: American, pricing, engine, MCAmericanEnginePricing
+   :description: American option can be exercised at any time up until its maturity date.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 
 *************************************************
 Internal Design of American Option Pricing Engine
@@ -21,7 +28,7 @@ Internal Design of American Option Pricing Engine
 
 Overview
 ========
-American Option is an option that can be exercised at any time up until its maturity date. This early exercise feature of American Option gives the investors more freedom to exercise, compared to the European options. 
+The American option can be exercised at any time up until its maturity date. This early exercise feature of American Option gives the investors more freedom to exercise, compared to the European options. 
 
 
 Theory

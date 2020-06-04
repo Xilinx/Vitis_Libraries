@@ -15,6 +15,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: fintech, Tridiagonal Matrix Solver, solver, tridiagonal
+   :description: The Tridiagonal Matrix Solver solves a tridiagonal linear system using parallel cyclic reduction also known as odd-even elimination.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *************************
 Tridiagonal Matrix Solver
 *************************

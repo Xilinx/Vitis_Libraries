@@ -24,7 +24,7 @@
 
 using namespace xf::fintech;
 
-static const unsigned int numAssets = 100000
+static const unsigned int numAssets = 100000;
 
 CFBlackScholes cfBlackScholes(numAssets);
 

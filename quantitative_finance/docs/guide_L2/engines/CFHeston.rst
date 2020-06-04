@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Heston
+   :description: Black-Scholes-Merton models the dynamics of a financial market containing derivative investment instruments. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 *************************************
 Internal Design of Closed Form Heston

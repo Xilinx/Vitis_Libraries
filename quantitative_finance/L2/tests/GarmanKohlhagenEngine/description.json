@@ -2,10 +2,48 @@
     "name": "jks.L2.GarmanKohlhagenEngine", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc*"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " BUILD/gk_kernel.xclbin test_vectors_gk.txt", 
@@ -16,34 +54,34 @@
         "host_exe": "gk_test.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/GarmanKohlhagenEngine/src/host/gk_test.cpp", 
-                "REPO_DIR/L2/tests/GarmanKohlhagenEngine/src/host/gk_parser.cpp", 
-                "REPO_DIR/L2/tests/GarmanKohlhagenEngine/src/host/gk_cpu.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/host/gk_test.cpp", 
+                "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/host/gk_parser.cpp", 
+                "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/host/gk_cpu.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/GarmanKohlhagenEngine/src/host", 
-                "REPO_DIR/ext/xcl2", 
-                "REPO_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/host", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel"
             ], 
             "options": "-O3 "
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel"
             ]
         }, 
         "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel"
+            "ldclflags": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel"
             ]
         }
     }, 
@@ -51,7 +89,7 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel/gk_kernel.cpp", 
+                    "location": "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel/gk_kernel.cpp", 
                     "frequency": 300.0, 
                     "name": "gk_kernel"
                 }

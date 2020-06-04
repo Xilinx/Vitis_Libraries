@@ -1,11 +1,50 @@
 {
-    "name": "jks.L2.MCHullWhiteCapFloorEngine", 
-    "description": "", 
+    "gui": false,
+    "name": "L2 MCHullWhiteCapFloorEngine", 
+    "description": "L2 MCHullWhiteCapFloorEngine", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/kernel_mc.xclbin", 
@@ -16,32 +55,25 @@
         "host_exe": "test.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/MCHullWhiteCapFloorEngine/src/test.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "src/test.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCHullWhiteCapFloorEngine/src", 
-                "REPO_DIR/ext/xcl2", 
-                "REPO_DIR/L2/tests/MCHullWhiteCapFloorEngine/kernel"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCHullWhiteCapFloorEngine/src", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/L2/tests/MCHullWhiteCapFloorEngine/kernel"
             ], 
             "options": "-O3 "
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCHullWhiteCapFloorEngine/kernel"
-            ]
-        }, 
-        "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCHullWhiteCapFloorEngine/kernel"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCHullWhiteCapFloorEngine/kernel"
             ]
         }
     }, 
@@ -49,12 +81,13 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/MCHullWhiteCapFloorEngine/kernel/kernel_mceuropeanengine.cpp", 
+                    "location": "kernel/kernel_mceuropeanengine.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0", 
                     "name": "kernel_mc_0"
                 }
             ], 
+            "ldclflags": " --nk kernel_mc_0:1:kernel_mc_0", 
             "frequency": 300.0, 
             "name": "kernel_mc"
         }

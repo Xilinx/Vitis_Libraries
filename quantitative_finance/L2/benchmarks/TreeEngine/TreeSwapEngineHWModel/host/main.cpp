@@ -221,7 +221,7 @@ int main(int argc, const char* argv[]) {
     mext_out[0] = {XCL_MEM_DDR_BANK0, output[0], 0};
     mext_out[1] = {XCL_MEM_DDR_BANK1, output[1], 0};
     mext_out[2] = {XCL_MEM_DDR_BANK2, output[2], 0};
-    
+
     mext_in0[3] = {XCL_MEM_DDR_BANK3, inputParam0_alloc, 0};
     mext_in1[3] = {XCL_MEM_DDR_BANK3, inputParam1_alloc, 0};
     mext_out[3] = {XCL_MEM_DDR_BANK3, output[3], 0};

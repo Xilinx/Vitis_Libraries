@@ -13,6 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Quanto, Closed-Form, Black Scholes Merton
+   :description: The Quanto option gives the buyer the right to sell a foreign asset in a foreign currency at the exercise date and receive the proceeds in his domestic currency. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 ***************************
 Quanto Closed-Form Solution
 ***************************

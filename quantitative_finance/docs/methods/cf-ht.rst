@@ -13,6 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Heston, Closed-Form, Heston PDE
+   :description: The Heston model extends the well-known Black-Scholes options pricing model by adding a stochastic process for the stock volatility.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 *********************************
 Heston Model Closed-Form Solution
 *********************************

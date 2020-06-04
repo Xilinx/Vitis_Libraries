@@ -136,7 +136,7 @@ int main(int argc, const char* argv[]) {
     std::vector<cl::Device> deviceList;
     deviceList.push_back(device);
 
-#ifdef SW_EMU
+#ifdef SW_EMU_TEST
     // hls::exp and hls::log have bug in multi-thread.
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 #else

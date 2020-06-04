@@ -41,7 +41,7 @@
 #define XCL_BANK14 XCL_BANK(14)
 #define XCL_BANK15 XCL_BANK(15)
 
-void benchmark_svd_functions(std::string input_path, std::string xclbinName, std::string output_path, double& errA) {
+void benchmark_svd_functions(std::string xclbinName, double& errA) {
     // variables to measure time
     struct timeval tstart, tend;
     // platform related operations

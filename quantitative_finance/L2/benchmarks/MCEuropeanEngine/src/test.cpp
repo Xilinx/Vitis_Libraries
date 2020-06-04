@@ -157,7 +157,7 @@ int main(int argc, const char* argv[]) {
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl::Context context(device);
-#ifdef SW_EMU
+#ifdef SW_EMU_TEST
     // hls::exp and hls::log have bug in multi-thread.
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #else
