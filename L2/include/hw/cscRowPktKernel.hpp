@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef XF_SPARSE_CSCROWPKT_HPP
+#define XF_SPARSE_CSCROWPKT_HPP
 /**
- * @file cscRowPktKernel.cpp
+ * @file cscRowPktKernel.hpp
  * @brief cscRowPktKernel definition.
  *
  * This file is part of Vitis SPARSE Library.
  */
 
-#include "cscRowPktKernel.hpp"
+#include "cscKernel.hpp"
 
+typedef ap_axiu<SPARSE_dataBits * SPARSE_parEntries, 0, 0, 0> SPARSE_parDataPktType;
+
+/**
+ * @brief cscRowPkt Kernel
+ * @param p_aNnzIdx the device memory pointer for read the NNZ values and row indices
+ * @param p_memBlocks the number of device memory accesses to read the NNZ values androw indices
+ * @param p_nnzBlocks the number of parallel NNZ entries
+ * @param p_rowBlocks the number of parallel row vector entries
+ * @param in the input axi stream of column vector entries selected for the NNZs
+ * @param out the output axi stream of result row vector entries
+ */
 extern "C" void cscRowPktKernel(const ap_uint<SPARSE_hbmMemBits>* p_aNnzIdx,
                                 const unsigned int p_memBlocks,
                                 const unsigned int p_nnzBlocks,
                                 const unsigned int p_rowBlocks,
                                 hls::stream<SPARSE_parDataPktType>& in,
-                                hls::stream<SPARSE_parDataPktType>& out) {
-#pragma HLS INTERFACE m_axi port = p_aNnzIdx offset = slave bundle = gmem
-#pragma HLS INTERFACE axis port = in
-#pragma HLS INTERFACE axis port = out
-#pragma HLS INTERFACE s_axilite port = p_memBlocks bundle = control
-#pragma HLS INTERFACE s_axilite port = p_nnzBlocks bundle = control
-#pragma HLS INTERFACE s_axilite port = p_rowBlocks bundle = control
-#pragma HLS INTERFACE s_axilite port = p_aNNzIdx bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
-
-    xf::sparse::cscRowPkt<SPARSE_maxRowBlocks, SPARSE_logParEntries, SPARSE_logParGroups, SPARSE_dataType,
-                          SPARSE_indexType, SPARSE_dataBits, SPARSE_indexBits, SPARSE_hbmMemBits,
-                          SPARSE_parDataPktType>(p_aNnzIdx, p_memBlocks, p_nnzBlocks, p_rowBlocks, in, out);
-}
+                                hls::stream<SPARSE_parDataPktType>& out);
+#endif

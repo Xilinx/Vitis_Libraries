@@ -14,21 +14,18 @@
    limitations under the License.
 
 .. meta::
-   :keywords: SPARSE, Library, Vitis SPARSE Library, linear algebra, Subroutines
-   :description: Vitis SPARSE library release notes.
+   :keywords: Vitis Sparse Matrix Library, primitive details
+   :description: Vitis Sparse Matrix Library primitive implementation details.
 
-.. _release_note:
+.. _L1_details:
 
-Release Note
-============
+************************************
+Primitive Implementation Details 
+************************************
 
 .. toctree::
-   :hidden:
    :maxdepth: 1
 
-1.0
-----
-
-The 1.0 release introduces HLS primitives for SPARSE (Basic Linear Algebra Subroutines) operations. 
-These primitives are implemented with ``HLS::stream`` interfaces to allow them to operate in parallel
-with other hardware components. 
+   L1_xBarCol.rst
+   L1_cscRow.rst
+   L1_dispCol.rst

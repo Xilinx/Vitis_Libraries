@@ -13,28 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef XF_SPARSE_XBARCOL_HPP
+#define XF_SPARSE_XBARCOL_HPP
 /**
- * @file xBarColKernel.cpp
+ * @file xBarColKernel.hpp
  * @brief xBarColKernel definition.
  *
  * This file is part of Vitis SPARSE Library.
  */
 
-#include "xBarColKernel.hpp"
+#include "cscKernel.hpp"
 
+typedef ap_axiu<SPARSE_dataBits * SPARSE_parEntries, 0, 0, 0> SPARSE_parDataPktType;
+typedef ap_axiu<SPARSE_indexBits * SPARSE_parEntries, 0, 0, 0> SPARSE_parIndexPktType;
+
+/**
+ * @brief xBarCol Kernel
+ * @param p_colPtrBlocks number of parallel column pointer entries in the axi stream input in2
+ * @param p_nnzBlocks number of parallel NNZ entries in the input axi stream in1 and output axi stream out
+ * @param in1 input axi stream of parallel column vector entries
+ * @param in2 input axi stream of parallel column pointer entries
+ * @param out output axi stream of parallel column vector entries selected for the NNZs
+ */
 extern "C" void xBarColKernel(const unsigned int p_colPtrBlocks,
                               const unsigned int p_nnzBlocks,
                               hls::stream<SPARSE_parDataPktType>& in1,
                               hls::stream<SPARSE_parIndexPktType>& in2,
-                              hls::stream<SPARSE_parDataPktType>& out) {
-#pragma HLS INTERFACE axis port = in1
-#pragma HLS INTERFACE axis port = in2
-#pragma HLS INTERFACE axis port = out
-#pragma HLS INTERFACE s_axilite port = p_colPtrBlocks bundle = control
-#pragma HLS INTERFACE s_axilite port = p_nnzBlocks bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
-
-    xf::sparse::xBarColPkt<SPARSE_logParEntries, SPARSE_dataType, SPARSE_indexType, SPARSE_dataBits, SPARSE_indexBits,
-                           SPARSE_parDataPktType, SPARSE_parIndexPktType>(p_colPtrBlocks, p_nnzBlocks, in1, in2, out);
-}
+                              hls::stream<SPARSE_parDataPktType>& out);
+#endif

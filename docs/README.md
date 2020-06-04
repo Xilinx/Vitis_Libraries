@@ -1,7 +1,7 @@
 Document Source Code
 =========================
 
-## Gnerating HTML Document
+## Generating HTML Document
 
 ### Environment Variables
 
