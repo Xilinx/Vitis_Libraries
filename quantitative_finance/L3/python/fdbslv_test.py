@@ -2,6 +2,11 @@
 
 # Ensure environmental variables i.e. paths are set to used the modules
 from xf_fintech_python import DeviceManager, fdbslv
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. fdbslv.xclbin")
 
 
 # State test financial model
@@ -121,7 +126,7 @@ boundaryUpper = parameters[6]
 outputResultList = []
 
 
-deviceList = DeviceManager.getDeviceList("u200")
+deviceList = DeviceManager.getDeviceList("u250")
 # Identify which cards installed and choose the first available U200 card, alter above value to match your card type
 print("Found these {0} device(s):".format(len(deviceList)))
 for x in deviceList:
@@ -130,7 +135,7 @@ chosenDevice = deviceList[0]
 print("Choosing the first, ",str(chosenDevice),"\n")
 
 # Select and claim the chosen card with the financial model to be used
-fdbslv = fdbslv(solverN,solverM)
+fdbslv = fdbslv(solverN,solverM, sys.argv[1])
 fdbslv.claimDevice(chosenDevice)
 
 # Run the test

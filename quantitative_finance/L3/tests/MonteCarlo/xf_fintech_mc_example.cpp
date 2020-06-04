@@ -26,23 +26,25 @@
 
 using namespace xf::fintech;
 
-//
-// Here are our the objects that represent our the Fintech models we will be
-// using...
-MCEuropean mcEuropean;
-MCAmerican mcAmerican;
-
 double varianceMultiplier;
 
-int main() {
-    int retval = XLNX_OK;
+int main(int argc, char** argv) {
+    int retval = 0; // assume pass
+
+    std::string path = std::string(argv[1]);
+    MCEuropean mcEuropean(path);
+
+    std::string device = TOSTRING(DEVICE_PART);
+    if (argc == 3) {
+        device = std::string(argv[2]);
+    }
 
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
     // Get a list of U250s available on the system (just because our current
     // bitstreams are built for U250s)
-    deviceList = DeviceManager::getDeviceList("u250");
+    deviceList = DeviceManager::getDeviceList(device);
 
     if (deviceList.size() == 0) {
         printf("[XLNX] No matching devices found\n");
@@ -54,30 +56,19 @@ int main() {
     // we'll just pick the first device in the...
     pChosenDevice = deviceList[0];
 
-    if (retval == XLNX_OK) {
+    if (!retval) {
         // turn off trace output...turn it on here if you want extra debug output...
         Trace::setEnabled(false);
     }
 
-    if (retval == XLNX_OK) {
+    if (!retval) {
         retval = MCDemoRunEuropeanSingle(pChosenDevice, &mcEuropean);
     }
 
-    if (retval == XLNX_OK) {
-        retval = MCDemoRunEuropeanMultiple1(pChosenDevice, &mcEuropean);
+    if (!retval) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
     }
-
-    if (retval == XLNX_OK) {
-        retval = MCDemoRunEuropeanMultiple2(pChosenDevice, &mcEuropean);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Now switch to MC American...
-    //////////////////////////////////////////////////////////////////////////////////////////
-
-    if (retval == XLNX_OK) {
-        retval = MCDemoRunAmericanSingle(pChosenDevice, &mcAmerican);
-    }
-
-    return 0;
+    return retval;
 }

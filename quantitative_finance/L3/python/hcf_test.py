@@ -2,6 +2,11 @@
 
 # Ensure environmental variables i.e. paths are set to used the modules
 from xf_fintech_python import DeviceManager, hcf_input_data,hcf 
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. hcf.xclbin")
 
 # State test financial model
 print("\nThe Heston Closed Form Model, with Multiple Options European Call")
@@ -63,7 +68,7 @@ print("Choosing the first suitable card\n")
 chosenDevice = deviceList[0]
 
 
-hestonCF= hcf()
+hestonCF= hcf(sys.argv[1])
 hestonCF.claimDevice(chosenDevice)
 
 hestonCF.run(inputDataList, outputList, numberOptions) #This is the call to process contents of dataList

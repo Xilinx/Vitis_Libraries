@@ -1,5 +1,5 @@
 {
-    "name": "L2 CreditDefaultSwapEngine", 
+    "name": "Xilinx Credit Default Swap Engine Model", 
     "description": "L2 Credit Default Swap Model", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -76,6 +76,7 @@
         ], 
         "targets": [
             "vitis_sw_emu", 
+            "vitis_hw_emu", 
             "vitis_hw"
         ], 
         "category": "canary"

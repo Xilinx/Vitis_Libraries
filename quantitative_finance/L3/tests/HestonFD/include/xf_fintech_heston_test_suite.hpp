@@ -26,8 +26,15 @@ using namespace std;
 #include "xf_fintech_heston_test_case.hpp"
 
 class HestonFDTestSuite {
+   private:
+    std::string m_xclbin;
+    std::string m_device;
+
    public:
-    HestonFDTestSuite(){};
+    HestonFDTestSuite(std::string xclbin, std::string device) {
+        m_xclbin = xclbin;
+        m_device = device;
+    };
     int Run(CSV csv, double delta);
     ~HestonFDTestSuite();
 };

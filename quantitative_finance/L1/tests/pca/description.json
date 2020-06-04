@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_principalComponentAnalysis", 
+    "name": "Xilinx Principal Component Analysis Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

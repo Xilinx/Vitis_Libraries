@@ -1,5 +1,5 @@
 {
-    "name": "L2 CFBlackScholesMerton", 
+    "name": "Xilinx  Closed Form Black Scholes Merton Model", 
     "description": "L2 Closed Form Black Scholes Merton Model", 
     "flow": "vitis", 
     "platform_type": "pcie", 

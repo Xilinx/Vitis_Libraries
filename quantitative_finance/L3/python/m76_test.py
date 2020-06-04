@@ -2,6 +2,12 @@
 
 # Ensure environmental variables i.e. paths are set to used the modules
 from xf_fintech_python import DeviceManager, m76_input_data, m76
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. m76.xclbin")
+
 
 # State test financial model
 print("\nThe Merton76 financial model\n============================\n")
@@ -97,7 +103,7 @@ print("Choosing the first suitable card\n")
 chosenDevice = deviceList[0]
 
 
-merton76 = m76()
+merton76 = m76(sys.argv[1])
 merton76.claimDevice(chosenDevice)
 
 merton76.run(inputDataList, outputList, numberOptions) #This is the call to process contents of dataList

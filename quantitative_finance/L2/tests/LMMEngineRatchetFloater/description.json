@@ -1,6 +1,6 @@
 {
-    "name": "L2 LMMEngineRatchetFloater", 
-    "description": "L2 LMMEngineRatchetFloater", 
+    "name": "Xilinx Libor Market Model Engine With Ratchet Floater Pricing", 
+    "description": "L2 Libor Market Model Engine with Ratchet Floater pricing", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
@@ -38,7 +38,7 @@
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/../Vitis_Libraries/solver/L2/include", 
+                "LIB_DIR/../solver/L2/include", 
                 "LIB_DIR/L2/tests/LMMEngineRatchetFloater/kernel"
             ]
         } 
@@ -70,6 +70,7 @@
         ], 
         "targets": [
             "vitis_sw_emu", 
+            "vitis_hw_emu", 
             "vitis_hw"
         ], 
         "category": "canary"

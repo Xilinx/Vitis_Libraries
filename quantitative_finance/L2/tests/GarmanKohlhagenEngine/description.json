@@ -1,7 +1,7 @@
 {
-    "name": "L2 Garman Kohlhagen", 
+    "name": "Xilinx Garman Kohlhagen Model", 
     "description": [
-        "L2 Garman Kohlhagen"
+        "L2 Garman Kohlhagen Model"
         ], 
     "flow": "vitis", 
     "platform_type": "pcie",

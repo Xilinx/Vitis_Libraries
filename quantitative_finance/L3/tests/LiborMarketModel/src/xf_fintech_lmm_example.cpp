@@ -113,11 +113,13 @@ int main(int argc, char* argv[]) {
                                  {"rf_alpha", required_argument, 0, 'a'},
                                  {"rc_spread", required_argument, 0, 's'},
                                  {"rc_kappa0", required_argument, 0, 'k'},
+                                 {"xclbin", required_argument, 0, 'f'},
+                                 {"device", required_argument, 0, 'd'},
                                  {0, 0, 0, 0}};
 
     char arg = 0;
     int retval = XLNX_OK;
-    std::string liborFile, volaFile;
+    std::string liborFile, volaFile, path;
     TEST_DT rhoBeta = DEF_BETA;
     unsigned paths = DEF_PATHS;
     TEST_DT notional = DEF_NOTIONAL;
@@ -128,7 +130,8 @@ int main(int argc, char* argv[]) {
     TEST_DT rcSpread = DEF_RCSPREAD;
     TEST_DT rcKappa0 = DEF_RCKAPPA0;
 
-    while ((arg = getopt_long(argc, argv, "hl:v:b:p:n:c:x:y:a:s:k:", ops, NULL)) != -1) {
+    std::string device = TOSTRING(DEVICE_PART);
+    while ((arg = getopt_long(argc, argv, "hl:v:b:p:n:c:x:y:a:s:k:f:d:", ops, NULL)) != -1) {
         switch (arg) {
             case 'h':
                 printHelp(argv[0]);
@@ -166,6 +169,12 @@ int main(int argc, char* argv[]) {
             case 'k':
                 rcKappa0 = atof(optarg);
                 break;
+            case 'f':
+                path = string(optarg);
+                break;
+            case 'd':
+                device = string(optarg);
+                break;
             case '?':
             default:
                 cerr << "Error parsing arguments..." << endl;
@@ -198,6 +207,7 @@ int main(int argc, char* argv[]) {
     cout << "\trc_kappa0    = " << rcKappa0 << endl;
     cout << "========================================" << endl;
 
+    int ret = 1; // assume fail
     try {
         al_vec<TEST_DT> presentRates = readVectors(liborFile);
         if (presentRates.size() <= 2) {
@@ -218,9 +228,9 @@ int main(int argc, char* argv[]) {
 
         vector<Device*> deviceList;
         Device* pChosenDevice;
-        LMM lmm;
+        LMM lmm(path);
 
-        deviceList = DeviceManager::getDeviceList();
+        deviceList = DeviceManager::getDeviceList(device);
         if (deviceList.size() == 0) {
             cerr << "No matching devices found" << endl;
             return -1;
@@ -239,42 +249,12 @@ int main(int argc, char* argv[]) {
         if (retval == XLNX_OK) {
             cout << "Cap price = " << outPrice << endl;
             cout << "Duration = " << lmm.getLastRunTime() << " us" << endl;
+            if (std::abs(outPrice - 156903) <= 1500) {
+                ret = 0;
+            }
         } else {
             cerr << "ERROR: Failed to run LMM!" << endl;
         }
-        if (retval == XLNX_OK) {
-            retval = lmm.releaseDevice();
-        }
-
-        if ((retval = lmm.claimDeviceRatchetFloater(pChosenDevice)) == XLNX_OK) {
-            cout << "Running Ratchet Floater pricing..." << endl;
-            // Run Cap pricing
-            retval = lmm.runRatchetFloater(noTenors, paths, presentRates.data(), rhoBeta, capletVolas.data(), notional,
-                                           rfX, rfY, rfAlpha, seeds.data(), &outPrice);
-        }
-        if (retval == XLNX_OK) {
-            cout << "Ratchet Floater price = " << outPrice << endl;
-            cout << "Duration = " << lmm.getLastRunTime() << " us" << endl;
-        } else {
-            cerr << "ERROR: Failed to run LMM!" << endl;
-        }
-        if (retval == XLNX_OK) {
-            retval = lmm.releaseDevice();
-        }
-
-        if ((retval = lmm.claimDeviceRatchetCap(pChosenDevice)) == XLNX_OK) {
-            cout << "Running Ratchet Cap pricing..." << endl;
-            // Run Cap pricing
-            retval = lmm.runRatchetCap(noTenors, paths, presentRates.data(), rhoBeta, capletVolas.data(), notional,
-                                       rcSpread, rcKappa0, seeds.data(), &outPrice);
-        }
-        if (retval == XLNX_OK) {
-            cout << "Ratchet Cap price = " << outPrice << endl;
-            cout << "Duration = " << lmm.getLastRunTime() << " us" << endl;
-        } else {
-            cerr << "ERROR: Failed to run LMM!" << endl;
-        }
-
         if (retval == XLNX_OK) {
             retval = lmm.releaseDevice();
         }
@@ -286,5 +266,11 @@ int main(int argc, char* argv[]) {
         cerr << "Unhandled exception caught!" << endl;
     }
 
-    return retval;
+    if (ret == 0) {
+        std::cout << "PASS" << std::endl;
+    } else {
+        std::cout << "FAIL" << std::endl;
+    }
+
+    return ret;
 }

@@ -4,7 +4,7 @@
 This test shows how to utilize the Quanto Model in the L3 framework.
 
 ## Prerequisites
-- Alveo U200/250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
+- Alveo card (eg U200) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
 - Xilinx runtime (XRT) installed
 - Xilinx Vitis 2020.1 installed and configured
 

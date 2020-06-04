@@ -24,6 +24,17 @@
 
 using namespace xf::fintech;
 
+static float tolerance = 0.001;
+
+static int check(float actual, float expected, float tol) {
+    int ret = 1; // assume pass
+    if (std::abs(actual - expected) > tol) {
+        printf("ERROR: expected %0.6f, got %0.6f\n", expected, actual);
+        ret = 0;
+    }
+    return ret;
+}
+
 int main(int argc, char** argv) {
     // binomial tree fintech model...
     std::string path = std::string(argv[1]);
@@ -99,7 +110,25 @@ int main(int argc, char** argv) {
         printf("[XF_FINTECH] Failed to claim device - error = %d\n", retval);
     }
 
-    static const int numberOptions = 8;//64;
+    // quick fix to get pass/fail criteria
+    int ret = 0; // assume pass
+    double expectedPut[] = {2.987749, 3.271813, 3.573721, 3.896820, 4.238249, 4.598072, 4.976364, 5.377398};
+    double expectedCall[] = {17.66420, 16.97225, 16.29594, 15.63922, 14.99773, 14.37137, 13.76001, 13.16996};
+
+    static const int numberOptions = 8; // 64;
+
+    std::string mode = "hw";
+    if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
+        mode = std::getenv("XCL_EMULATION_MODE");
+    }
+
+    if (mode == "sw_emu" || mode == "hw_emu") {
+        // value of N reduced so tolerance also reduced
+        tolerance = 0.05;
+    }
+
+    std::cout << "Running in " << mode << " mode" << std::endl;
+
     if (retval == XLNX_OK) {
         printf("[XF_FINTECH] Multiple Options American Put [%d]\n", numberOptions);
 
@@ -122,7 +151,11 @@ int main(int argc, char** argv) {
             inputData[i].rf = rf;
             inputData[i].V = V;
             inputData[i].q = q;
-            inputData[i].N = 1024;
+            if (mode == "sw_emu" || mode == "hw_emu") {
+                inputData[i].N = 128;
+            } else {
+                inputData[i].N = 1024;
+            }
             if (i == 63) {
                 S = 80;
                 K = 85;
@@ -142,6 +175,9 @@ int main(int argc, char** argv) {
         if (retval == XLNX_OK) {
             for (int i = 0; i < numberOptions; i++) {
                 printf("[XF_FINTECH] [%02u] OptionPrice = %f\n", i, outputData[i]);
+                if (!check(outputData[i], expectedPut[i], tolerance)) {
+                    ret = 1;
+                }
             }
             long long int executionTime =
                 (long long int)std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -174,7 +210,11 @@ int main(int argc, char** argv) {
             inputData[i].rf = rf;
             inputData[i].V = V;
             inputData[i].q = q;
-            inputData[i].N = 1024;
+            if (mode == "sw_emu" || mode == "hw_emu") {
+                inputData[i].N = 128;
+            } else {
+                inputData[i].N = 1024;
+            }
             if (i == 63) {
                 S = 80;
                 K = 85;
@@ -194,6 +234,9 @@ int main(int argc, char** argv) {
         if (retval == XLNX_OK) {
             for (int i = 0; i < numberOptions; i++) {
                 printf("[XF_FINTECH] [%02u] OptionPrice = %f\n", i, outputData[i]);
+                if (!check(outputData[i], expectedCall[i], tolerance)) {
+                    ret = 1;
+                }
             }
             long long int executionTime =
                 (long long int)std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -207,5 +250,11 @@ int main(int argc, char** argv) {
     printf("[XF_FINTECH] BinomialTree releasing device...\n");
     retval = bt.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+    }
+
+    return ret;
 }

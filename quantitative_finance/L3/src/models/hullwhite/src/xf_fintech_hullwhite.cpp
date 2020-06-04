@@ -22,7 +22,7 @@
 
 using namespace xf::fintech;
 
-HullWhiteAnalytic::HullWhiteAnalytic() {
+HullWhiteAnalytic::HullWhiteAnalytic(std::string xclbin_file) {
     m_pContext = nullptr;
     m_pCommandQueue = nullptr;
     m_pProgram = nullptr;
@@ -40,6 +40,8 @@ HullWhiteAnalytic::HullWhiteAnalytic() {
     m_pHwInputMaturity = nullptr;
 
     m_pHwOutputBuffer = nullptr;
+
+    m_xclbin_file = xclbin_file;
 }
 
 HullWhiteAnalytic::~HullWhiteAnalytic() {
@@ -49,9 +51,7 @@ HullWhiteAnalytic::~HullWhiteAnalytic() {
 }
 
 std::string HullWhiteAnalytic::getXCLBINName(Device* device) {
-    std::string xclbinName;
-    xclbinName = "hwa_engine.xclbin";
-    return xclbinName;
+    return m_xclbin_file;
 }
 
 int HullWhiteAnalytic::createOCLObjects(Device* device) {

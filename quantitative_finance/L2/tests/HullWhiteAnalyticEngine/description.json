@@ -1,5 +1,6 @@
 {
-    "name": "L2 HullWhiteAnalyticEngine", 
+    "gui": false,
+    "name": "Xilinx Hull White Analytic Engine", 
     "description": "L2 Hull White Layer 2 Analytic Engine", 
     "flow": "vitis", 
     "platform_type": "pcie", 

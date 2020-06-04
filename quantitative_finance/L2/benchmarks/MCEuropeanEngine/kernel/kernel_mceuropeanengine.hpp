@@ -25,7 +25,7 @@ extern "C" void kernel_mc_0(unsigned int loop_nm,
                             DtUsed riskFreeRate, // model parameter
                             DtUsed timeLength,
                             DtUsed strike,
-                            bool optionType, // option parameter
+                            unsigned int optionType, // option parameter
                             DtUsed out[OUTDEP],
                             DtUsed requiredTolerance,
                             unsigned int requiredSamples,
@@ -38,7 +38,7 @@ extern "C" void kernel_mc_1(unsigned int loop_nm,
                             DtUsed riskFreeRate, // model parameter
                             DtUsed timeLength,
                             DtUsed strike,
-                            bool optionType, // option parameter
+                            unsigned int optionType, // option parameter
                             DtUsed out[OUTDEP],
                             DtUsed requiredTolerance,
                             unsigned int requiredSamples,
@@ -51,7 +51,7 @@ extern "C" void kernel_mc_2(unsigned int loop_nm,
                             DtUsed riskFreeRate, // model parameter
                             DtUsed timeLength,
                             DtUsed strike,
-                            bool optionType, // option parameter
+                            unsigned int optionType, // option parameter
                             DtUsed out[OUTDEP],
                             DtUsed requiredTolerance,
                             unsigned int requiredSamples,
@@ -64,7 +64,7 @@ extern "C" void kernel_mc_3(unsigned int loop_nm,
                             DtUsed riskFreeRate, // model parameter
                             DtUsed timeLength,
                             DtUsed strike,
-                            bool optionType, // option parameter
+                            unsigned int optionType, // option parameter
                             DtUsed out[OUTDEP],
                             DtUsed requiredTolerance,
                             unsigned int requiredSamples,

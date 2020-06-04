@@ -17,12 +17,12 @@ lastruntime = 0
 
 
 # In this example financial data to test the module is fed in via the command line. Below is an example
-# ./heston_fd_test.py 1.5 0.04 0.3 -0.9 0.025 1 100 200 1 200 128 64
+# ./heston_fd_test.py 1.5 0.04 0.3 -0.9 0.025 1 100 200 1 200 128 64 fd_heston,xclbin
 # and the expected value output for NPV is 111.832977
 
 # Basic checking that the number of arguments are correct
-if len(sys.argv) != 13:
-    sys.exit("Incorrect number of arguments supplied - 12 expected")
+if len(sys.argv) != 14:
+    sys.exit("Incorrect number of arguments supplied - 13 expected")
 
 #Take each suffixed value and give it a meaningful name and convert from arv string format to numerical
 meanReversionRate_kappa = float(sys.argv[1])
@@ -61,7 +61,7 @@ print("Choosing the first suitable card\n")
 chosenDevice = deviceList[0]
 
 # Selecting and loading into FPGA on chosen card the financial model to be used
-hestonFD = FDHeston()
+hestonFD = FDHeston(gridSizeForTheSdirection_m1, gridSizeForTheSdirection_m2, sys.argv[13])
 hestonFD.claimDevice(chosenDevice)
 
 

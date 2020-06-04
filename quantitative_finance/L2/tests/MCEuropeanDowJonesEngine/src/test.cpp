@@ -116,6 +116,7 @@ int main(int argc, const char* argv[]) {
     unsigned int maxSamples = 0;
     unsigned int timeSteps = 1;
     unsigned int loop_nm = 1;
+    DtUsed expectedDIA = 262.223;
 
     // outputs
     DtUsed optionValue[NUM_ASSETS] = {};
@@ -156,9 +157,9 @@ int main(int argc, const char* argv[]) {
     DtUsed* out0 = aligned_alloc<DtUsed>(OUTDEP);
     cl_mem_ext_ptr_t mext_out;
 #ifndef USE_HBM
-    mext_out = {XCL_MEM_DDR_BANK0, out0, 0};
+    mext_out = {XCL_MEM_DDR_BANK1, out0, 0};
 #else
-    mext_out = {XCL_BANK0, out0, 0};
+    mext_out = {XCL_BANK1, out0, 0};
 #endif
 
     cl::Buffer out_buff;
@@ -182,9 +183,10 @@ int main(int argc, const char* argv[]) {
     int asset_nm = NUM_ASSETS;
 
     if (mode_emu.compare("hw_emu") == 0) {
-        asset_nm = 2;
-    } else {
-        asset_nm = NUM_ASSETS;
+        requiredSamples = 256;
+        requiredTolerance = 0.05;
+        asset_nm = 1;
+        expectedDIA = 11.4478;
     }
 
     for (int i = 0; i < asset_nm; i++) {
@@ -246,5 +248,14 @@ int main(int argc, const char* argv[]) {
         std::cout << strike << "\t" << payoff_call << "\t" << payoff_put << std::endl;
     }
 
-    return 0;
+    // quick fix to get pass/fail criteria
+    int ret = 0;
+    if (std::abs(optionValueDIA - expectedDIA) > 0.1) {
+        std::cout << "FAIL optionValueDIA = " << optionValueDIA << std::endl;
+        ret = 1;
+    } else {
+        std::cout << "PASS" << std::endl;
+    }
+
+    return ret;
 }

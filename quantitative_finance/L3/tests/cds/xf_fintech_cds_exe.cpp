@@ -24,6 +24,17 @@
 
 using namespace xf::fintech;
 
+static float tolerance = 0.001;
+
+static int check(float actual, float expected, float tol) {
+    int ret = 1; // assume pass
+    if (std::abs(actual - expected) > tol) {
+        printf("ERROR: expected %0.6f, got %0.6f\n", expected, actual);
+        ret = 0;
+    }
+    return ret;
+}
+
 int main(int argc, char** argv) {
     // credit default swap fintech model...
     std::string path = std::string(argv[1]);
@@ -75,6 +86,7 @@ int main(int argc, char** argv) {
         printf("[XF_FINTECH] Failed to claim device - error = %d\n", retval);
     }
 
+    int ret = 0; // assume pass
     if (retval == XLNX_OK) {
         // note these values should match the generated kernel
         static const int IRLEN = 21;
@@ -95,6 +107,9 @@ int main(int argc, char** argv) {
         float nominal[N] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         float CDSSpread[N];
 
+        // quick fix to get pass/fail criteria
+        float expectedCDS[N] = {0.010623, 0.003858, 0.008916, 0.010177, 0.002179, 0.000104, 0.009482, 0.005963};
+
         printf("[XF_FINTECH] Multiple CDS Spread Calculations [%d]\n", N);
         retval = cds.run(timesIR, ratesIR, timesHazard, ratesHazard, nominal, recovery, maturity, frequency, CDSSpread);
         end = std::chrono::high_resolution_clock::now();
@@ -102,6 +117,9 @@ int main(int argc, char** argv) {
         if (retval == XLNX_OK) {
             for (int i = 0; i < N; i++) {
                 printf("[XF_FINTECH] [%02u] CDS Spread = %f\n", i, CDSSpread[i]);
+                if (!check(CDSSpread[i], expectedCDS[i], tolerance)) {
+                    ret = 1;
+                }
             }
             long long int executionTime =
                 (long long int)std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -115,5 +133,10 @@ int main(int argc, char** argv) {
     printf("[XF_FINTECH] Credit Default Swap releasing device...\n");
     retval = cds.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+    }
+    return ret;
 }

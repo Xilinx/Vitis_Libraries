@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_brownian_bridge", 
+    "name": "Xilinx Brownian Bridge Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

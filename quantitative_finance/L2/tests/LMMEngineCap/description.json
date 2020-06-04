@@ -1,6 +1,6 @@
 {
-    "name": "L2 LMMEngineCap", 
-    "description": "L2 LMMEngineCap", 
+    "name": "Xilinx Libor Market Model Engine With Cap Pricing", 
+    "description": "L2 Libor Market Model Engine with Cap pricing", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
@@ -38,7 +38,7 @@
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/../Vitis_Libraries/solver/L2/include", 
+                "LIB_DIR/../solver/L2/include", 
                 "LIB_DIR/L2/tests/LMMEngineCap/kernel"
             ]
         } 
@@ -70,6 +70,7 @@
         ], 
         "targets": [
             "vitis_sw_emu", 
+            "vitis_hw_emu", 
             "vitis_hw"
         ], 
         "category": "canary"

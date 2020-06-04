@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.McAsianGPEngine", 
+    "name": "Xilinx MC Asian Option With Geometric Average Price Engine Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.benchmarks.TreeSwaptionEngineECIRModel", 
+    "name": "Xilinx Tree Swaption Engine ECIR Model Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

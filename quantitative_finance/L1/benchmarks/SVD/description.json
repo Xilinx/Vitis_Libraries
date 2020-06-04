@@ -1,6 +1,6 @@
 {
-    "gui": false,
-    "name": "jks.L2.SVD", 
+    "gui": true,
+    "name": "Xilinx Jacobi Singular Value Decomposition Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -84,10 +84,34 @@
                     "location": "kernel/kernel_svd.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_0 -D KERNEL_NAME=kernel_svd_0", 
-                    "name": "kernel_svd_0"
+                    "name": "kernel_svd_0",
+					"num_compute_units": 1,
+					"compute_units": [
+						{
+							"name": "kernel_svd_0",
+							"slr": "SLR0",
+							"arguments": [
+								{
+									"name": "dataA",
+									"memory": "DDR[0]"
+								},
+								{
+									"name": "sigma",
+									"memory": "DDR[0]"
+								},
+								{
+									"name": "dataU",
+									"memory": "DDR[0]"
+								},
+								{
+									"name": "dataV",
+									"memory": "DDR[0]"
+								}
+							]
+						}
+					]
                 }
             ], 
-            "ldclflags": " --nk kernel_svd_0:1:kernel_svd_0", 
             "frequency": 300.0, 
             "name": "kernel_svd"
         }

@@ -1,5 +1,5 @@
 ## Heston Closed Form Call Demo
-This is a demonstration of the Heston Closed Form solver using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U200.
+This is a demonstration of the Heston Closed Form solver using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 There are 2 demos described in more detail below:
 - Run a series of tests and compare the results with pre-computed Heston Closed Form QuantLib results.
@@ -13,7 +13,7 @@ In all cases the following test parameters can be changed:
 ## Prerequisites
 - Alveo U200 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2019.2 installed and configured
+- Xilinx Vitis 2020.1 installed and configured
 
 ## Building the demonstration
 The demonstration application and kernel is built using a command line Makefile flow.
@@ -21,7 +21,7 @@ The demonstration application and kernel is built using a command line Makefile 
 ### Step 1.
 Setup the build environment using the Vitis and XRT scripts:
 
-            source <install path>/Vitis/2019.2/settings64.sh
+            source <install path>/Vitis/2020.1/settings64.sh
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2.

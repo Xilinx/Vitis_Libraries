@@ -76,7 +76,7 @@ DT normalCDF(DT average, DT sigma, DT x) {
  *
  * @param average the expected value of the distribution
  * @param sigma the  standard deviation of the distribution
- * @param x input of the distribution
+ * @param y input of the distribution
  * @return return the result of normal distribution
  */
 template <typename DT>
@@ -130,7 +130,7 @@ DT logNormalCDF(DT average, DT sigma, DT x) {
  *
  * @param average the expected value of the distribution
  * @param sigma the  standard deviation of the distribution
- * @param x input of the distribution
+ * @param y input of the distribution
  * @return return the result of log-normal distribution
  */
 template <typename DT>

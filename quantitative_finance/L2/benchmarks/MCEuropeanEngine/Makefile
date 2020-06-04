@@ -148,14 +148,21 @@ kernel_mc_2_VPP_FLAGS +=  -D DPRAGMA -D KN_2 -D KERNEL_NMAE=kernel_mc_2
 kernel_mc_3_VPP_FLAGS +=  -D DPRAGMA -D KN_3 -D KERNEL_NMAE=kernel_mc_3
 
 # Kernel linker flags
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+LDCLFLAGS_kernel_mc +=  --nk kernel_mc_0:1:kernel_mc_0 --nk kernel_mc_1:1:kernel_mc_1
+else
 LDCLFLAGS_kernel_mc +=  --nk kernel_mc_0:1:kernel_mc_0 --nk kernel_mc_1:1:kernel_mc_1 --nk kernel_mc_2:1:kernel_mc_2 --nk kernel_mc_3:1:kernel_mc_3
+endif
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel_mc.xclbin
 BINARY_CONTAINER_kernel_mc_OBJS += $(TEMP_DIR)/kernel_mc_0.xo
 BINARY_CONTAINER_kernel_mc_OBJS += $(TEMP_DIR)/kernel_mc_1.xo
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 BINARY_CONTAINER_kernel_mc_OBJS += $(TEMP_DIR)/kernel_mc_2.xo
 BINARY_CONTAINER_kernel_mc_OBJS += $(TEMP_DIR)/kernel_mc_3.xo
+endif
+
 
 ############################## Setting Targets ##############################
 CP = cp -rf

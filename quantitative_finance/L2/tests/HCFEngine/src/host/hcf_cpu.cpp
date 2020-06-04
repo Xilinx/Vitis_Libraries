@@ -19,7 +19,7 @@
 #include "hcf.hpp"
 #include "hcf_host.hpp"
 
-const std::complex<TEST_DT> _i (0, 1);
+const std::complex<TEST_DT> _i(0, 1);
 
 std::complex<TEST_DT> charFunc(struct xf::fintech::hcfEngineInputDataType<TEST_DT>* p, std::complex<TEST_DT> w) {
     TEST_DT vv = p->vvol * p->vvol;

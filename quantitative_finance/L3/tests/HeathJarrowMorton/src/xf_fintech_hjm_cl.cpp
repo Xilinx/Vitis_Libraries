@@ -34,6 +34,8 @@
 using namespace std;
 using namespace xf::fintech;
 
+static float tolerance = 0.001;
+
 template <typename T>
 using al_vec = std::vector<T, aligned_allocator<T> >;
 
@@ -82,6 +84,8 @@ int main(int argc, char* argv[]) {
                                  {"num_paths", required_argument, 0, 'p'},
                                  {"sim_years", required_argument, 0, 's'},
                                  {"zcb_mat", required_argument, 0, 'm'},
+                                 {"xclbin", required_argument, 0, 'x'},
+                                 {"device", required_argument, 0, 'f'},
                                  {0, 0, 0, 0}};
 
     char arg = 0;
@@ -90,8 +94,10 @@ int main(int argc, char* argv[]) {
     float zcbMaturity = DEF_YEARS;
     unsigned noPaths = DEF_PATHS;
     TEST_DT resZcb;
+    std::string path;
+    std::string device = TOSTRING(DEVICE_PART);
 
-    while ((arg = getopt_long(argc, argv, "hd:p:s:m:", ops, NULL)) != -1) {
+    while ((arg = getopt_long(argc, argv, "hd:p:s:m:x:f:", ops, NULL)) != -1) {
         switch (arg) {
             case 'd':
                 dataLoc = string(optarg);
@@ -104,6 +110,12 @@ int main(int argc, char* argv[]) {
                 break;
             case 'm':
                 zcbMaturity = atof(optarg);
+                break;
+            case 'x':
+                path = std::string(optarg);
+                break;
+            case 'f':
+                device = std::string(optarg);
                 break;
             case 'h':
                 printHelp(argv[0]);
@@ -124,6 +136,7 @@ int main(int argc, char* argv[]) {
          << "\tsim_years = " << simYears << endl
          << "\tzcb_mat   = " << zcbMaturity << endl;
 
+    int ret = 0; // assume pass
     try {
         al_vec<TEST_DT> dataIn;
         al_vec<unsigned> seeds = getFpgaSeeds();
@@ -146,9 +159,9 @@ int main(int argc, char* argv[]) {
         std::vector<Device*> deviceList;
         Device* pChosenDevice;
 
-        HJM hjm;
+        HJM hjm(path);
 
-        deviceList = DeviceManager::getDeviceList();
+        deviceList = DeviceManager::getDeviceList(device);
 
         if (deviceList.size() == 0) {
             cerr << "No matching devices found" << endl;
@@ -168,6 +181,11 @@ int main(int argc, char* argv[]) {
         if (retval == XLNX_OK) {
             cout << "Duration: " << hjm.getLastRunTime() << " us" << endl;
             cout << "ZCB Price: " << resZcb << endl;
+            // quick fix to get pass fail criteria
+            if (abs(resZcb - 0.62916) > tolerance) {
+                cout << "FAIL" << endl;
+                ret = 1;
+            }
         } else {
             cerr << "ERROR: Failed to run HJM!" << endl;
         }
@@ -183,5 +201,9 @@ int main(int argc, char* argv[]) {
         cerr << "Unhandled exception caught!" << endl;
     }
 
-    return 0;
+    if (!ret) {
+        cout << "PASS" << endl;
+    }
+
+    return ret;
 }

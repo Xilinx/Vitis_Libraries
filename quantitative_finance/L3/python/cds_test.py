@@ -2,6 +2,11 @@
 
 # Ensure environmental variables i.e. paths are set to the named the modules
 from xf_fintech_python import DeviceManager, CreditDefaultSwap
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. cds.xclbin")
 
 # State test financial model
 print("\nThe CreditDefaultSwap financial model\n==================================================\n")
@@ -35,7 +40,7 @@ chosenDevice = deviceList[0]
 
 # Selecting and loading into FPGA on chosen card the financial model to be used
 ##CFB76 = CFB76(numAssets)   # warning the lower levels to accomodate at least this figure
-CreditDefaultSwap = CreditDefaultSwap()
+CreditDefaultSwap = CreditDefaultSwap(sys.argv[1])
 CreditDefaultSwap.claimDevice(chosenDevice)
 #Feed in the data and request the result using tolerance method
 print("\nRunning...")

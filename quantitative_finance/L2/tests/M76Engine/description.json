@@ -1,6 +1,6 @@
 {
-    "name": "L2 M76Engine", 
-    "description": "L2 Merton76 Jump Diffusion Engine", 
+    "name": "Xilinx Merton 76 Model Engine", 
+    "description": "L2 Merton 76 Jump Diffusion Engine", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

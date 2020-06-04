@@ -1,40 +1,33 @@
 
-# Monte Carlo Example
+## Monte Carlo Test
 
-This example show how to utilize BOTH the MC-European and MC-American models within the same executable
+This example show how to utilize BOTH the MC-European and MC-American models in the L3 framework within the same executable
 
+## Prerequisites
+- Alveo card (eg U200) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
+- Xilinx runtime (XRT) installed
+- Xilinx Vitis 2020.1 installed and configured
 
-# Setup Environment
+## Build Instuctions
+The demonstration application and kernel is built using a command line Makefile flow.
 
-source /opt/xilinx/xrt/setup.csh
+### Step 1:
+Setup the build environment using Vitis and XRT scripts:
 
-source /*path to xf_fintech*/L3/src/env.csh
+            source <install path>/Vitis/2020.1/settings64.sh
+            source /opt/xilinx/xrt/setup.sh
 
+### Step 2 :
+Call the Makefile. For example:
 
-# Build Xilinx Fintech Library
+	make check TARGET=sw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-cd  /*path to xf_fintech*/L3/src
+	make check TARGET=hw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-**make all**
+	make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
+        
+	make run TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
 
+The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).
 
-# Build Instuctions
-
-To build the command line executable (mc_example) from this directory
-
-**make all**
-
-> Note this requires the xilinx fintech library to already to built
-
-
-# Run Instuctions
-
-Copy the prebuilt kernel files from /*path to xf_fintech*/L2/tests/MCEuropeanEngine/ & /*path to xf_fintech*/L2/tests/MCAmericanEngine/ to this directory
-
-**mc_euro_k.xclbin**
-**MCAE_k.xclbin**
-
-
-To run the command line exe and generate the results
-
-**make run**
+If the make check or run option is used the demo will automatically be lauched.

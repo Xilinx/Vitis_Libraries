@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_cubic_interpolation", 
+    "name": "Xilinx Cubic Interpolation Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

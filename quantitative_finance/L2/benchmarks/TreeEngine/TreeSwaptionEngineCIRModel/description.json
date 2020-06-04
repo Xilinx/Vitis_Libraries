@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.benchmarks.TreeSwaptionEngineCIRModel", 
+    "name": "Xilinx Tree Swaption Engine CIR Model Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

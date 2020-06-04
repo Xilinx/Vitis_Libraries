@@ -26,6 +26,16 @@ using namespace xf::fintech;
 
 static const unsigned int numAssets = 100;
 
+static float tolerance = 0.001;
+
+static int check(float actual, float expected, float tol) {
+    int ret = 1; // assume pass
+    if (std::abs(actual - expected) > tol) {
+        printf("ERROR: expected %0.6f, got %0.6f\n", expected, actual);
+        ret = 0;
+    }
+    return ret;
+}
 
 int main(int argc, char** argv) {
     int retval = XLNX_OK;
@@ -57,6 +67,7 @@ int main(int argc, char** argv) {
 
     retval = cfBlackScholes.claimDevice(pChosenDevice);
 
+    int ret = 0; // assume pass
     if (retval == XLNX_OK) {
         // Populate the asset data...
         for (unsigned int i = 0; i < numAssets; i++) {
@@ -88,6 +99,26 @@ int main(int argc, char** argv) {
             printf("[XLNX] | %5u | %8.5f | %8.5f | %8.5f | %8.5f | %8.5f | %8.5f |\n", i, cfBlackScholes.optionPrice[i],
                    cfBlackScholes.delta[i], cfBlackScholes.gamma[i], cfBlackScholes.vega[i], cfBlackScholes.theta[i],
                    cfBlackScholes.rho[i]);
+
+            // quick fix to get pass/fail criteria
+            if (!check(cfBlackScholes.optionPrice[i], 2.82636, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfBlackScholes.delta[i], -0.38209, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfBlackScholes.gamma[i], 0.03814, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfBlackScholes.vega[i], 0.38139, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfBlackScholes.theta[i], -0.00241, tolerance)) {
+                ret = 1;
+            }
+            if (!check(cfBlackScholes.rho[i], 0.41035, tolerance)) {
+                ret = 1;
+            }
         }
 
         printf(
@@ -99,5 +130,10 @@ int main(int argc, char** argv) {
 
     cfBlackScholes.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+    }
+    return ret;
 }

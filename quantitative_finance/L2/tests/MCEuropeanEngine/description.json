@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.McEuropeanEngineEngine", 
+    "name": "Xilinx MC European Option Pricing Engine Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

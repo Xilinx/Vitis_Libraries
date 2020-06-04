@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_normal_cdf", 
+    "name": "Xilinx Normal CDF Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

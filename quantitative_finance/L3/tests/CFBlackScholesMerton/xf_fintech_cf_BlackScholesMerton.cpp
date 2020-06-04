@@ -34,7 +34,7 @@ int check_result(float calculated, float expected, float tolerance) {
 
 int main(int argc, char** argv) {
     int retval = XLNX_OK;
-    float tolerance = 0.0001;
+    float tolerance = 0.01;
 
     std::string path = std::string(argv[1]);
     unsigned int numAssets = sizeof(test_data) / sizeof(struct test_data_type);
@@ -64,6 +64,8 @@ int main(int argc, char** argv) {
 
     retval = cfBlackScholesMerton.claimDevice(pChosenDevice);
 
+    int ret = 0; // assume pass
+    int numFails = 0;
     if (retval == XLNX_OK) {
         // Populate the asset data...
         for (unsigned int i = 0; i < numAssets; i++) {
@@ -99,6 +101,8 @@ int main(int argc, char** argv) {
 
             if (!check_result(cfBlackScholesMerton.optionPrice[i], test_data[i].exp, tolerance)) {
                 printf("[XLNX] expected(%8.5f), got (%8.5f)\n", test_data[i].exp, cfBlackScholesMerton.optionPrice[i]);
+                numFails++;
+                ret = 1;
             }
         }
 
@@ -111,5 +115,10 @@ int main(int argc, char** argv) {
 
     cfBlackScholesMerton.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL: %d failures\n", numFails);
+    }
+    return ret;
 }

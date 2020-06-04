@@ -125,9 +125,12 @@ int ReadTestcaseParameters(std::string filename, testcaseParams& params) {
     return 0;
 }
 
-int main() {
-    // Use the default Vanilla European test case
-    std::string test_dir = "../../../L2/tests/FDBlackScholesLocalVolatilityEngine/data/case0";
+int main(int argc, char** argv) {
+    // xclbin file
+    std::string path = std::string(argv[1]);
+
+    // test data
+    std::string test_dir = std::string(argv[2]);
 
     // Get the testcase parameters
     testcaseParams params;
@@ -138,15 +141,21 @@ int main() {
     const unsigned int N = params.solverN;
     const unsigned int M = params.solverM;
 
+    // device
+    std::string device = TOSTRING(DEVICE_PART);
+    if (argc == 4) {
+        device = std::string(argv[3]);
+    }
+
     // Create the FD solver object
-    fdbslv fdbslv(N, M);
+    fdbslv fdbslv(N, M, path);
 
     int retval = XLNX_OK;
 
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    deviceList = DeviceManager::getDeviceList(TOSTRING(DEVICE_PART));
+    deviceList = DeviceManager::getDeviceList(device);
 
     if (deviceList.size() == 0) {
         printf("No matching devices found\n");
@@ -207,5 +216,13 @@ int main() {
     // release the device
     retval = fdbslv.releaseDevice();
 
-    return 0;
+    int ret = 0; // assume pass
+    if (max_diff > 0.003) {
+        std::cout << "FAIL" << std::endl;
+        ret = 1;
+    } else {
+        std::cout << "PASS" << std::endl;
+    }
+
+    return ret;
 }

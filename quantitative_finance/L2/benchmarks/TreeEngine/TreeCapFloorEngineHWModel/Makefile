@@ -144,19 +144,27 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/benchmarks/TreeEngine/TreeCapFloorEngineHWModel/k
 
 scanTreeKernel1_VPP_FLAGS +=  -D DPRAGMA -D KERNEL_NAME=scanTreeKernel1
 scanTreeKernel2_VPP_FLAGS +=  -D DPRAGMA -D KERNEL_NAME=scanTreeKernel2
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 scanTreeKernel3_VPP_FLAGS +=  -D DPRAGMA -D KERNEL_NAME=scanTreeKernel3
 scanTreeKernel4_VPP_FLAGS +=  -D DPRAGMA -D KERNEL_NAME=scanTreeKernel4
+endif
 VPP_FLAGS += -DHW_EMU_DEBUG 
 
 # Kernel linker flags
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 LDCLFLAGS_scanTreeKernel +=  --nk scanTreeKernel1:1:scanTreeKernel1 --nk scanTreeKernel2:1:scanTreeKernel2 --nk scanTreeKernel3:1:scanTreeKernel3 --nk scanTreeKernel4:1:scanTreeKernel4
+else
+LDCLFLAGS_scanTreeKernel +=  --nk scanTreeKernel1:1:scanTreeKernel1 --nk scanTreeKernel2:1:scanTreeKernel2
+endif
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/scanTreeKernel.xclbin
 BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel1.xo
 BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel2.xo
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel3.xo
 BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel4.xo
+endif
 
 ############################## Setting Targets ##############################
 CP = cp -rf
@@ -181,6 +189,7 @@ $(TEMP_DIR)/scanTreeKernel2.xo: $(XFLIB_DIR)/L2/benchmarks/TreeEngine/TreeCapFlo
 	$(ECHO) "Compiling Kernel: scanTreeKernel2"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(scanTreeKernel2_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k scanTreeKernel2 -I'$(<D)' -o $@ $^
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 $(TEMP_DIR)/scanTreeKernel3.xo: kernel/scan_tree_kernel3.cpp kernel/scan_tree_kernel.cpp
 	$(ECHO) "Compiling Kernel: scanTreeKernel3"
 	mkdir -p $(TEMP_DIR)
@@ -189,6 +198,7 @@ $(TEMP_DIR)/scanTreeKernel4.xo: kernel/scan_tree_kernel4.cpp kernel/scan_tree_ke
 	$(ECHO) "Compiling Kernel: scanTreeKernel4"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(scanTreeKernel4_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k scanTreeKernel4 -I'$(<D)' -o $@ $^
+endif
 
 $(BUILD_DIR)/scanTreeKernel.xclbin: $(BINARY_CONTAINER_scanTreeKernel_OBJS)
 	mkdir -p $(BUILD_DIR)

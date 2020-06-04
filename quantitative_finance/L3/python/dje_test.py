@@ -3,6 +3,11 @@
 # Ensure environmental variables i.e. paths are set to used the modules
 from xf_fintech_python import DeviceManager, MCEuropeanDJE, OptionType
 import array
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. dje.xclbin")
 
 # State test financial model
 print("\nThe Dow Jones MCEuropean financial model\n========================================\n")
@@ -34,7 +39,7 @@ print("Choosing the first suitable card\n")
 chosenDevice = deviceList[0]
 
 # Selecting and loading into FPGA on chosen card the financial model to be used
-mcEuropeanDJE = MCEuropeanDJE()
+mcEuropeanDJE = MCEuropeanDJE(sys.argv[1])
 mcEuropeanDJE.claimDevice(chosenDevice)
 
 

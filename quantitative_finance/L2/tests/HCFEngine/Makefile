@@ -74,16 +74,17 @@ EMU_DIR := $(SDCARD)/data/emulation
 
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/HCFEngine/src/hcf_host.cpp
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/HCFEngine/src/hcf_cpu.cpp
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/HCFEngine/src/hcf_parser.cpp
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/HCFEngine/src/host/hcf_host.cpp
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/HCFEngine/src/host/hcf_cpu.cpp
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/HCFEngine/src/host/hcf_parser.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
 
 
 CXXFLAGS += -DTEST_DT=float -DEVICE_PART=u250
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
-CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/HCFEngine/src
+CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/HCFEngine/src/host
+CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/HCFEngine/src/kernel
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 
 
@@ -129,7 +130,7 @@ VPP_CFLAGS += -D VIVADO_HLS_SIM
 endif
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
-VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/HCFEngine/src
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/HCFEngine/src/kernel
 
 hcf_kernel_VPP_FLAGS +=  -D TEST_DT=float
 
@@ -150,7 +151,7 @@ host: $(EXE_FILE) | check_xrt
 xclbin: check_vpp | $(BINARY_CONTAINERS)
 
 ############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-$(TEMP_DIR)/hcf_kernel.xo: $(XFLIB_DIR)/L2/tests/HCFEngine/src/hcf_kernel.cpp
+$(TEMP_DIR)/hcf_kernel.xo: $(XFLIB_DIR)/L2/tests/HCFEngine/src/kernel/hcf_kernel.cpp
 	$(ECHO) "Compiling Kernel: hcf_kernel"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(hcf_kernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k hcf_kernel -I'$(<D)' -o $@ $^

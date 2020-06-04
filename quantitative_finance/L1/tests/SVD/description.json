@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_SVD", 
+    "name": "Xilinx Jacobi Sigular Value Decomposition Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

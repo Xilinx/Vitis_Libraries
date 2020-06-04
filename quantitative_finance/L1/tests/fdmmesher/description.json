@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_fdmmesher", 
+    "name": "Xilinx One Dimensional FDM Mdesher Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

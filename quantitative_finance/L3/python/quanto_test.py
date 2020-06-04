@@ -2,6 +2,11 @@
 
 # Ensure environmental variables i.e. paths are set to the named the modules
 from xf_fintech_python import DeviceManager, Quanto, OptionType
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. quanto.xclbin")
 
 # State test financial model
 print("\nThe Quanto financial model\n==============================\n")
@@ -19751,7 +19756,7 @@ print("Choosing the first suitable card\n")
 chosenDevice = deviceList[0]
 
 # Selecting and loading into FPGA on chosen card the financial model to be used
-Quanto = Quanto(numAssets)   # warning the lower levels to accomodate at least this figure
+Quanto = Quanto(numAssets, sys.argv[1])   # warning the lower levels to accomodate at least this figure
 Quanto.claimDevice(chosenDevice)
 #Feed in the data and request the result
 print("\nRunning...")

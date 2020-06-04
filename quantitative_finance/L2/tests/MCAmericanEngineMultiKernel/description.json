@@ -1,6 +1,6 @@
 {
     "gui": false,
-    "name": "jks.L2.MCAmericanEngine_MultiKernel", 
+    "name": "Xilinx MC American Option Pricing Engine With MultiKernel Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 

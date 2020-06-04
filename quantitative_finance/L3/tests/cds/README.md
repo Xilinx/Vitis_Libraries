@@ -1,42 +1,33 @@
 
-## Credit Default Swap Engine Example
+## Credit Default Swap Model Test
 
-This example show how to utilize the Credit Default Swap Model Engine
+This test shows how to utilize the Credit Default Swap Model in the L3 framework.
 
+## Prerequisites
+- Alveo card (eg U200) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
+- Xilinx runtime (XRT) installed
+- Xilinx Vitis 2020.1 installed and configured
 
-### Step 1 :
-Setup the build environment using the Vitis and XRT scripts:
+## Build Instuctions
+The demonstration application and kernel is built using a command line Makefile flow.
 
-    source <install path>/Vitis/2019.2/settings64.sh
+### Step 1:
+Setup the build environment using Vitis and XRT scripts:
 
-    source /opt/xilinx/xrt/setup.sh
-
+            source <install path>/Vitis/2020.1/settings64.sh
+            source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :
-Build the L3 Library
+Call the Makefile. For example:
 
-    cd L3/src
+	make check TARGET=sw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-    source env.sh or source env.csh
+	make check TARGET=hw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-    make
+	make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
+        
+	make run TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
 
+The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).
 
-### Step 3 :
-Build the matching Credit Default Swap Kernel
-
-    cd L2/tests/CreditDefaultSwapEngine
-
-    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
-
-
-### Step 4 :
-Build host code & run exeutable
-
-    cd L3/tests/cds
-
-    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
-
-
-*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to step 3 to build*
-
+If the make check or run option is used the demo will automatically be lauched.

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_SobolRsg", 
+    "name": "Xilinx Sobol Rsg Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

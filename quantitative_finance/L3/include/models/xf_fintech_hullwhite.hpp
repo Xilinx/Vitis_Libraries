@@ -41,7 +41,7 @@ namespace fintech {
 
 class HullWhiteAnalytic : public OCLController {
    public:
-    HullWhiteAnalytic();
+    HullWhiteAnalytic(std::string xclbin_file);
     virtual ~HullWhiteAnalytic();
 
     /**
@@ -87,6 +87,7 @@ class HullWhiteAnalytic : public OCLController {
 
    private:
     std::string getKernelTypeSubString(void);
+    std::string m_xclbin_file;
     std::string getXCLBINName(Device* device);
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runStartTime;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_runEndTime;

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_ecir_model", 
+    "name": "Xilinx Extended Cox Ingersoll Ross Model Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

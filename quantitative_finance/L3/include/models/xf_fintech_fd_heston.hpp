@@ -43,7 +43,7 @@ namespace fintech {
 class FDHeston : public OCLController {
    public:
     FDHeston();
-    FDHeston(int M1, int M2);
+    FDHeston(int M1, int M2, std::string xclbin);
 
    public:
     virtual ~FDHeston();
@@ -213,6 +213,7 @@ class FDHeston : public OCLController {
 
     int m_M1;
     int m_M2;
+    std::string m_xclbin;
 
     static const int DEFAULT_M1 = 128;
     static const int DEFAULT_M2 = 64;

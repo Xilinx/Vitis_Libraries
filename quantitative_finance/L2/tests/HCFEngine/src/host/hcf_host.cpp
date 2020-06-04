@@ -333,5 +333,13 @@ int main(int argc, char** argv) {
         generate_csv(file, input_data.data(), output_data.data(), num_tests);
     }
 
-    return 0;
+    int ret = 0;
+    if (!num_fails) {
+        std::cout << "PASS" << std::endl;
+    } else {
+        std::cout << "FAIL" << std::endl;
+        ret = 1;
+    }
+
+    return ret;
 }

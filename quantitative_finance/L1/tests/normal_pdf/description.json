@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_normal_pdf", 
+    "name": "Xilinx Normal PDF", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

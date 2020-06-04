@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_bs_model", 
+    "name": "Xilinx Black Scholes Model Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

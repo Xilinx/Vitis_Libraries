@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_mrng_test", 
+    "name": "Xilinx Multi Variate RNG Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

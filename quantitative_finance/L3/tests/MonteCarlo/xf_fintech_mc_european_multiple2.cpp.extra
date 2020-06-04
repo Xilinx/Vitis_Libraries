@@ -22,6 +22,8 @@
 
 using namespace xf::fintech;
 
+static double tolerance = 0.0001;
+
 static OptionType baseOptionType = Put;
 
 static const double baseStockPrice = 36.0;
@@ -91,6 +93,7 @@ static void InitialiseInput(void) {
 
 int MCDemoRunEuropeanMultiple2(Device* pChosenDevice, MCEuropean* pMCEuropean) {
     int retval = XLNX_OK;
+    int ret = 1; // assume fail
     unsigned int i;
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
@@ -157,6 +160,11 @@ int MCDemoRunEuropeanMultiple2(Device* pChosenDevice, MCEuropean* pMCEuropean) {
                 "|\n",
                 i, stockPriceArray[i], strikePriceArray[i], riskFreeRateArray[i], dividendYieldArray[i],
                 volatilityArray[i], optionPriceArray[i]);
+
+            // quick fix to get pass/fail criteria
+            if (i == 0 && std::abs(optionPriceArray[0] - 3.8761) <= tolerance) {
+                ret = 0;
+            }
         }
 
         printf(
@@ -180,5 +188,5 @@ int MCDemoRunEuropeanMultiple2(Device* pChosenDevice, MCEuropean* pMCEuropean) {
     printf("[XLNX] mcEuropean releasing device...\n");
     retval = pMCEuropean->releaseDevice();
 
-    return retval;
+    return ret;
 }
