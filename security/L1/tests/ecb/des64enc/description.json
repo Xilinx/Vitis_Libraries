@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_ecb_des64", 
+    "name": "Xilinx DES64ECB Encryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

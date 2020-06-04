@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_gmac_aes256", 
+    "name": "Xilinx GMAC AES256", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

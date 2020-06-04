@@ -1,11 +1,11 @@
 {
-    "gui": false,
-    "name": "jks.L1.benchmark_rc4Encrypt", 
+    "gui": true,
+    "name": "Xilinx RC4 Encryption Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "xilinx_u250_xdma_201830_2"
     ], 
     "platform_blacklist": [
         "zc"
@@ -43,8 +43,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L1/benchmarks/rc4Encrypt/host", 
-                "LIB_DIR/L1/benchmarks/rc4Encrypt/kernel", 
+                "host",
+                "kernel",
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 -lssl -lcrypto"
@@ -54,7 +54,7 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L1/benchmarks/rc4Encrypt/kernel"
+                "kernel"
             ]
         }
     }, 
@@ -64,22 +64,90 @@
                 {
                     "location": "kernel/rc4EncryptKernel1.cpp", 
                     "frequency": 300.0, 
-                    "name": "rc4EncryptKernel_1"
+                    "name": "rc4EncryptKernel_1",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "rc4EncryptKernel_1",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/rc4EncryptKernel2.cpp", 
                     "frequency": 300.0, 
-                    "name": "rc4EncryptKernel_2"
+                    "name": "rc4EncryptKernel_2",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "rc4EncryptKernel_2",
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/rc4EncryptKernel3.cpp", 
                     "frequency": 300.0, 
-                    "name": "rc4EncryptKernel_3"
+                    "name": "rc4EncryptKernel_3",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "rc4EncryptKernel_3",
+                            "slr": "SLR2",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[2]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[2]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/rc4EncryptKernel4.cpp", 
                     "frequency": 300.0, 
-                    "name": "rc4EncryptKernel_4"
+                    "name": "rc4EncryptKernel_4",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "rc4EncryptKernel_4",
+                            "slr": "SLR3",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[3]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[3]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 

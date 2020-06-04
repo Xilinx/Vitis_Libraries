@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_ofb_aes256", 
+    "name": "Xilinx AES256OFB Encryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

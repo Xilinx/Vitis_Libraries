@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_blake2b", 
+    "name": "Xilinx Blake2B", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -47,5 +47,6 @@
             "hls_vivado_impl"
         ], 
         "category": "canary"
-    }
+    }, 
+    "clock_uncertainty": 1.05
 }

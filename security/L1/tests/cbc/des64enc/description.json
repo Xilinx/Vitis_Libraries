@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_cbc_des64", 
+    "name": "Xilinx DES64CBC Encryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

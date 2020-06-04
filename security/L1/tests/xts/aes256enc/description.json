@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_xts_aes256", 
+    "name": "Xilinx AES256XTS Encryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

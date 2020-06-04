@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_md5", 
+    "name": "Xilinx MD5", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_iofb_des64", 
+    "name": "Xilinx DES64OFB Decryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

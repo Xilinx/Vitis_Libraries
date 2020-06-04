@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_shake256", 
+    "name": "Xilinx Shake256", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

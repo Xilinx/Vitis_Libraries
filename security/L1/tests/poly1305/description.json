@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_poly1305", 
+    "name": "Xilinx Poly1305", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

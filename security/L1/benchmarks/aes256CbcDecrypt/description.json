@@ -1,6 +1,6 @@
 {
-    "gui": false,
-    "name": "jks.L1.benchmark_aes256CbcDecrypt", 
+    "gui": true,
+    "name": "Xilinx AES256CBC Decryption Benchmark",
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -43,8 +43,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L1/benchmarks/aes256CbcDecrypt/host", 
-                "LIB_DIR/L1/benchmarks/aes256CbcDecrypt/kernel", 
+                "host",
+                "kernel",
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 -lssl -lcrypto"
@@ -54,7 +54,7 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L1/benchmarks/aes256CbcDecrypt/kernel"
+                "kernel"
             ]
         }
     }, 
@@ -64,10 +64,26 @@
                 {
                     "location": "kernel/aes256CbcDecryptKernel.cpp", 
                     "frequency": 300.0, 
-                    "name": "aes256CbcDecryptKernel"
+                    "name": "aes256CbcDecryptKernel",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "aes256CbcDecryptKernel",
+                            "slr": "SLR0",
+                            "arguments" : [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
-            "ldclflags": " --nk aes256CbcDecryptKernel:1:aes256CbcDecryptKernel", 
             "frequency": 300.0, 
             "name": "aes256CbcDecryptKernel"
         }
@@ -81,7 +97,7 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 32768, 
-                "max_time_min": 420
+                "max_time_min": 460
             }
         ], 
         "targets": [
