@@ -25,8 +25,8 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files code.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files "code.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files -tb "tb.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
 set_top round_robin_mpu
 
 open_solution -reset $SOLN
@@ -35,7 +35,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc
+  csim_design
 }
 
 if {$CSYNTH == 1} {

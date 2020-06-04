@@ -18,12 +18,15 @@ source settings.tcl
 
 set PROJ "test.prj"
 set SOLN "solution1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files -tb "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
 set_top dut
 
 open_solution -reset $SOLN
@@ -44,11 +47,11 @@ if {$COSIM == 1} {
 }
 
 if {$VIVADO_SYN == 1} {
-  puts "Pure C++ test."
+  export_design -flow syn -rtl verilog
 }
 
 if {$VIVADO_IMPL == 1} {
-  puts "Pure C++ test."
+  export_design -flow impl -rtl verilog
 }
 
 if {$QOR_CHECK == 1} {
