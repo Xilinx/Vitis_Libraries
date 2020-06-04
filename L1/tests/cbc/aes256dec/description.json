@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_icbc_aes256", 
+    "name": "Xilinx AES256CBC Decryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

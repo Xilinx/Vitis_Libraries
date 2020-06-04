@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_hmac_sha224", 
+    "name": "Xilinx HMAC SHA224", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

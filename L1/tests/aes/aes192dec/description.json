@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_aes192dec", 
+    "name": "Xilinx AES192 Decryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -40,7 +40,7 @@ int main() {
     }
     message.range(7, 0) = ap_uint<8>("0x0a");
 
-    ap_uint<2048> exponent = ap_uint<2048>("0x10001");
+    ap_uint<20> exponent = ap_uint<2048>("0x10001");
 
     ap_uint<2048> golden = ap_uint<2048>(
         "0x7E85E87850F80E298487446A567585F7FF39C7DD1E1BAB4303B0000CF581494182D9FB50B27946DD555921727DEA816F41D5750B57BF"
@@ -51,25 +51,8 @@ int main() {
 
     // get test result
     ap_uint<2048> result;
-    hls::stream<ap_uint<32> > messageStrm, modulusStrm, exponentStrm, resultStrm;
 
-    for (int i = 0; i < 64; i++) {
-        messageStrm.write(message.range(i * 32 + 31, i * 32));
-        modulusStrm.write(modulus.range(i * 32 + 31, i * 32));
-        exponentStrm.write(exponent.range(i * 32 + 31, i * 32));
-    }
-
-    rsa_test(messageStrm, modulusStrm, exponentStrm, resultStrm);
-
-    for (int i = 0; i < 64; i++) {
-        result.range(i * 32 + 31, i * 32) = resultStrm.read();
-    }
-    //
-    std::cout << "modulus:  " << modulus << std::endl;
-    std::cout << "pub key:  " << exponent << std::endl;
-    std::cout << "message:  " << message << std::endl;
-    std::cout << "golden:   " << golden << std::endl;
-    std::cout << "result:   " << result << std::endl;
+    rsa_test(message, modulus, exponent, result);
 
     if (result != golden) {
         std::cout << "Not Match !!!" << std::endl;

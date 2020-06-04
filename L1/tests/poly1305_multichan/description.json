@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_poly1305_multichan", 
+    "name": "Xilinx Multi Channel Poly1305", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

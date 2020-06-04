@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_iccm_aes128", 
+    "name": "Xilinx AES128CCM Decryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

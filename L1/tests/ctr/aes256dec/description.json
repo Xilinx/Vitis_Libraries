@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_ictr_aes256", 
+    "name": "Xilinx AES256CTR Decryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

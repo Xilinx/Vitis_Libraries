@@ -42,41 +42,16 @@ In Decryption we have:
 Optimized Implementation on FPGA
 =================================
 
-We seperate encryption into two part: updateKey and process. Each time we got an message with a new RSA key, we have to call updateKey before get into encryption/decryption. If we process messages with the same key continuously, updateKey only need be call once at the beginning.
+We seperate encryption into two part: updateKey and process. Each time we got an message with a new RSA key, we have to call updateKey before get into encryption/decryption. If we process messages with the same key continuously, updateKey only need be called once at the beginning. 
 
-RSA encryption and decryption are basically the same calculation: big integer exponent modulus.
-We first transform message to its Montgomery representation, then perform Montgomery modular exponentiation. 
-At last we tranform it back to normal expression to get final result. 
-By such implementation, we avoid all big integer division to get modulus, except for the one during transformation to Montegomery representation.
+It should be notice that we provide actually two implementation of function keydateKey. One have two inputs: modulus and exponent. The other one has three inputs: modulus, exponent and rMod. The extract argument "rMod" is actually 2^(2*N) mod modulus. This is a key parameters in the encryption/decryption calculation. If you has pre-calculated this arguments, you could call the second updateKey and directly set it up. If you don't have it, you could call the first one and we will do the calculation on chip, with extract resource.
 
-In updateKey, we calculate modular multiplicative inverse using extend Eculid Algorithms. Also we calculate the position of first non-zero big of exponent.Both calculation is to prepare for later process and save unnecessary calculations.
-
-In process, we need to do a lot of big integer multiplication which will cost a lot of DSPs. 
-Since All these multiplication are inter dependent, there're no way to parallelize. 
-So most optimization focused on pipeline DSP inside multiplications.
-We treat big integer, like a 2048 bits integer, as a BlockNum digits integer in radix BlockWidth.
-We choose BlockNum and BlockWidth so that :math:`2048 = BlockNum * BlockWidth`.
-A BlockWidth x BlockWdith multiplication is a basic operation, and a 2048 bits x 2048 bits multiplication could be done by BlockNum x BlockNum basic operations.
-We utilize DSPs in a way that they could finish these basic operations independently.
-In such way, we utilize fewer DSP and have better timing.
-
-.. image:: /images/rsa_1.png
-   :alt: Illustration of big integer multiplication.
-   :width: 30%
-   :align: center
+RSA encryption and decryption are basically the same calculation: big integer modulus exponential calculation.
+Instead of doing straight calculation, we convert the big integer into its Montgomery field and do exponential calculation. Finally we convert the result back to normal representation. In such we, we could avoid most integer division and multiplication to save resource and have higher frequency.
 
 Reference
 ========
 
 Peter Montgomery. "Modular Multiplication Without Trial Division", Mathematics of Computation, vol. 44 no. 170, pp. 519–521, April 1985.
 
-Knuth, Donald. The Art of Computer Programming. Addison-Wesley. Volume 2, Chapter 4.
-
-RSA Performance(Device: U250)
-=========================================
-
-====== ======= ======= ===== ====== ===== ====== ========
- CLB     LUT     FF     DSP   BRAM   SRL   URAM   CP(ns)
-====== ======= ======= ===== ====== ===== ====== ========
- 3428   28668   94455   128    0     942    0     3.160
-====== ======= ======= ===== ====== ===== ====== ========
+"Efficient architectures for implementing montgomery modular multiplication and RSA modular exponentiation" by Alan Daly, William Marnane

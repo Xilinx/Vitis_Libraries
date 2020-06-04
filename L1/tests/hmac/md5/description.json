@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_hmac_md5", 
+    "name": "Xilinx HMAC MD5", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

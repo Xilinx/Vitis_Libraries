@@ -212,9 +212,23 @@ static void scanMultiChannel(ap_uint<512>* ptr,
                                          endTextStrm, IVStrm, cipherkeyStrm);
 } // end scanMultiChannel
 
+template <unsigned int _keyWidth>
+static void singleCipherMode(ap_uint<64> taskNum,
+                             hls::stream<ap_uint<128> >& IVStrm,
+                             hls::stream<ap_uint<_keyWidth> >& cipherkeyStrm,
+                             hls::stream<ap_uint<128> >& textInStrm,
+                             hls::stream<bool>& endTextInStrm,
+                             hls::stream<ap_uint<128> >& textOutStrm,
+                             hls::stream<bool>& endTextOutStrm) {
+    for (ap_uint<64> i = 0; i < taskNum; i++) {
+        xf::security::internal::aesCbcDecrypt<_keyWidth>(textInStrm, endTextInStrm, cipherkeyStrm, IVStrm, textOutStrm,
+                                                         endTextOutStrm);
+    }
+}
 // @brief cipher mode in parallel
 template <unsigned int _channelNumber, unsigned int _keyWidth>
-static void cipherModeParallel(hls::stream<ap_uint<128> > IVStrm[_channelNumber],
+static void cipherModeParallel(ap_uint<64> taskNum,
+                               hls::stream<ap_uint<128> > IVStrm[_channelNumber],
                                hls::stream<ap_uint<_keyWidth> > cipherkeyStrm[_channelNumber],
                                hls::stream<ap_uint<128> > textInStrm[_channelNumber],
                                hls::stream<bool> endTextInStrm[_channelNumber],
@@ -224,10 +238,8 @@ static void cipherModeParallel(hls::stream<ap_uint<128> > IVStrm[_channelNumber]
 
     for (unsigned int m = 0; m < _channelNumber; m++) {
 #pragma HLS unroll
-        // XXX cipher mode core is called here
-        // the API called should be accordance with the _keyWidth
-        xf::security::internal::aesCbcDecrypt<_keyWidth>(textInStrm[m], endTextInStrm[m], cipherkeyStrm[m], IVStrm[m],
-                                                         textOutStrm[m], endTextOutStrm[m]);
+        singleCipherMode<_keyWidth>(taskNum, IVStrm[m], cipherkeyStrm[m], textInStrm[m], endTextInStrm[m],
+                                    textOutStrm[m], endTextOutStrm[m]);
     }
 } // end cipherModeParallel
 
@@ -244,10 +256,8 @@ static void cipherModeProcess(hls::stream<ap_uint<64> >& taskNumStrm,
     ap_uint<64> taskNum = taskNumStrm.read();
 
     // call paralleled cipher mode taskNum times
-    for (ap_uint<64> i = 0; i < taskNum; i++) {
-        cipherModeParallel<_channelNumber, _keyWidth>(IVStrm, cipherkeyStrm, textInStrm, endTextInStrm, textOutStrm,
-                                                      endTextOutStrm);
-    }
+    cipherModeParallel<_channelNumber, _keyWidth>(taskNum, IVStrm, cipherkeyStrm, textInStrm, endTextInStrm,
+                                                  textOutStrm, endTextOutStrm);
 } // end cipherModeProcess
 
 // @brief merge the multi-channel result into block stream
@@ -372,10 +382,10 @@ extern "C" void aes256CbcDecryptKernel(ap_uint<512> inputData[(1 << 30) + 100], 
 #pragma HLS stream variable = cipherkeyStrm depth = 32
 #pragma HLS resource variable = cipherkeyStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<128> > textInStrm[_channelNumber];
-#pragma HLS stream variable = textInStrm depth = 64
+#pragma HLS stream variable = textInStrm depth = 65
 #pragma HLS resource variable = textInStrm core = FIFO_LUTRAM
     hls::stream<bool> endTextInStrm[_channelNumber];
-#pragma HLS stream variable = endTextInStrm depth = 64
+#pragma HLS stream variable = endTextInStrm depth = 65
 #pragma HLS resource variable = endTextInStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<64> > msgNumStrm;
 #pragma HLS stream variable = msgNumStrm depth = 64

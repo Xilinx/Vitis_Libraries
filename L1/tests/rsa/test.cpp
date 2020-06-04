@@ -15,32 +15,8 @@
  */
 
 #include "test.hpp"
-void rsa_test(hls::stream<ap_uint<32> >& messageStrm,
-              hls::stream<ap_uint<32> >& NStrm,
-              hls::stream<ap_uint<32> >& keyStrm,
-              hls::stream<ap_uint<32> >& resultStrm) {
-#pragma HLS stream variable = messageStrm depth = 64
-#pragma HLS stream variable = NStrm depth = 64
-#pragma HLS stream variable = keyStrm depth = 64
-#pragma HLS stream variable = resultStrm depth = 64
-    ap_uint<2048> message, N, key, result;
-
-    for (int i = 0; i < 64; i++) {
-        message >>= 32;
-        N >>= 32;
-        key >>= 32;
-
-        message.range(2047, 2016) = messageStrm.read();
-        key.range(2047, 2016) = keyStrm.read();
-        N.range(2047, 2016) = NStrm.read();
-    }
-
-    xf::security::rsa<16, 128> inst;
-    inst.updateKey(N, key);
-    inst.process(message, result);
-
-    for (int i = 0; i < 64; i++) {
-        resultStrm.write(result.range(31, 0));
-        result >>= 32;
-    }
+void rsa_test(ap_uint<2048> message, ap_uint<2048> modulus, ap_uint<20> exponent, ap_uint<2048>& result) {
+    xf::security::rsa<2048, 20> processor;
+    processor.updateKey(modulus, exponent);
+    processor.process(message, result);
 }

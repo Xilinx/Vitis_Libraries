@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_ctr_aes128", 
+    "name": "Xilinx AES128CTR Encryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

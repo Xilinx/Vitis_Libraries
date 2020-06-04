@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
+#define AP_INT_MAX_W 4097
 #include "xf_security/asymmetric.hpp"
 #include <hls_stream.h>
 
-void rsa_test(hls::stream<ap_uint<32> >& messageStrm,
-              hls::stream<ap_uint<32> >& NStrm,
-              hls::stream<ap_uint<32> >& keyStrm,
-              hls::stream<ap_uint<32> >& resultStrm);
+void rsa_test(ap_uint<2048> messge, ap_uint<2048> modulus, ap_uint<20> exponent, ap_uint<2048>& result);
