@@ -28,8 +28,8 @@
 #define V 2
 #define E 2
 #else
-#define V 80000000
-#define E 80000000
+#define V 800000
+#define E 800000
 #endif
 
 #define N 1

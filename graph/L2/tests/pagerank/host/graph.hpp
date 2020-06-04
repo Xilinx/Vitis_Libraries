@@ -690,5 +690,38 @@ void readInRef(std::string filename1,
     }
 }
 
+template <class ID_T, class VALUE_T>
+void readInTigerRef(std::string filename1, std::vector<ID_T> row, std::vector<VALUE_T> value, VALUE_T* out, int nrows) {
+    std::fstream fin1(filename1.c_str(), std::ios::in);
+    if (!fin1) {
+        std::cout << "Error : file doesn't exist !" << std::endl;
+        exit(1);
+    }
+    std::string line;
+    int tmpNm;
+    std::getline(fin1, line); // throw the first row
+    std::cout << "get first line !" << std::endl;
+    while (std::getline(fin1, line)) {
+        std::vector<std::string> tmpVec;
+        StringSplit<int>(tmpVec, line, ",");
+        VALUE_T tmp;
+        ID_T row1;
+        row1 = std::stoi(tmpVec[0]);
+        tmp = std::atof(tmpVec[1].c_str());
+        row.push_back(row1 - 1);
+        value.push_back(tmp);
+    }
+    fin1.close();
+
+    std::vector<int> sortedIdx(nrows);
+    sortedIdx = sortInd<ID_T, VALUE_T>(row, value);
+    std::cout << "row.size() = " << row.size() << std::endl;
+    std::cout << "sortedIdx.size() = " << sortedIdx.size() << std::endl;
+
+    for (int i = 0; i < row.size(); ++i) {
+        out[row[sortedIdx[i]]] = value[sortedIdx[i]];
+    }
+}
+
 #endif //#ifndef __SYNTHESIS__
 #endif //#ifndef XF_GRAPH_HPP_
