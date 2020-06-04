@@ -18,13 +18,15 @@ source settings.tcl
 
 set PROJ "test.prj"
 set SOLN "solution1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files axi_to_stream_tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -std=c++0x"
-add_files -tb axi_to_stream_tb.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -std=c++0x"
-#
+add_files "axi_to_stream_tb.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -std=c++0x"
+add_files -tb "axi_to_stream_tb.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -std=c++0x"
 set_top top_axi_to_stream
 
 open_solution -reset $SOLN
@@ -34,7 +36,6 @@ create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design
- # csim_design -compiler gcc
 }
 
 if {$CSYNTH == 1} {
@@ -43,7 +44,6 @@ if {$CSYNTH == 1} {
 
 if {$COSIM == 1} {
   cosim_design
- # cosim_design
 }
 
 if {$VIVADO_SYN == 1} {

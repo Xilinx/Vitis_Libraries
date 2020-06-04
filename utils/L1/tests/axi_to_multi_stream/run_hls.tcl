@@ -18,13 +18,15 @@ source settings.tcl
 
 set PROJ "test.prj"
 set SOLN "solution1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files axi_to_multi_stream_tb.cpp -cflags "-std=c++0x -g -I${XF_PROJ_ROOT}/L1/include"
-add_files -tb  axi_to_multi_stream_tb.cpp -cflags "-std=c++0x -g -I${XF_PROJ_ROOT}/L1/include"
-
+add_files "axi_to_multi_stream_tb.cpp" -cflags "-std=c++0x -g -I${XF_PROJ_ROOT}/L1/include"
+add_files -tb "axi_to_multi_stream_tb.cpp" -cflags "-std=c++0x -g -I${XF_PROJ_ROOT}/L1/include"
 set_top top_func
 
 open_solution -reset $SOLN
