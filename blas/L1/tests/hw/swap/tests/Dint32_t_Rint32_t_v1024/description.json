@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_swap_Dint32_t_Rint32_t_v1024",
+    "name": "Xilinx XF_BLAS.swap_Dint32_t_Rint32_t_v1024",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

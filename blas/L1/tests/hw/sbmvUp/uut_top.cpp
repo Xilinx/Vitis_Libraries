@@ -33,13 +33,9 @@ void uut_top(uint32_t p_m,
              BLAS_dataType p_yRes[BLAS_vectorSize]) {
 #pragma HLS DATAFLOW
     hls::stream<typename WideType<BLAS_dataType, BLAS_parEntries>::t_TypeInt> l_strA;
-#pragma HLS data_pack variable = l_strA
     hls::stream<typename WideType<BLAS_dataType, BLAS_parEntries>::t_TypeInt> l_strX;
-#pragma HLS data_pack variable = l_strX
     hls::stream<typename WideType<BLAS_dataType, BLAS_parEntries>::t_TypeInt> l_strY;
-#pragma HLS data_pack variable = l_strY
     hls::stream<typename WideType<BLAS_dataType, BLAS_parEntries>::t_TypeInt> l_strYR;
-#pragma HLS data_pack variable = l_strYR
 #pragma HLS DATAFLOW
     sbmSuper2Stream<BLAS_dataType, BLAS_parEntries>(p_n, p_ku, p_a, l_strA);
     vec2GbMatStream<BLAS_dataType, BLAS_parEntries>(p_n, p_ku, p_ku, p_x, l_strX);

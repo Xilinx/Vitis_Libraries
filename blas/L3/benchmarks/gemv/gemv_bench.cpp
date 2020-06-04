@@ -29,7 +29,7 @@
 #include <fstream>
 
 #include "xf_blas.hpp"
-#include "../bench_helper.hpp"
+#include "bench_helper.hpp"
 #include "gemv_helper.hpp"
 
 using namespace std;

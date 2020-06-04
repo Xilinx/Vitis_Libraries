@@ -14,21 +14,21 @@
    limitations under the License.
 
 .. meta::
-   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, Keras MLP, Acceleration
+   :keywords: BLAS, Library, Vitis BLAS Library, Vitis BLAS, Keras MLP, Acceleration
    :description: Keras is Python based machine learning framework. It provides high level neural network APIs.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
 .. _keras_application_l3: 
  
-XFBLAS L3 based Keras MLP Acceleration
+Vitis BLAS L3 based Keras MLP Acceleration
 ===========================================
 
 1. Introduction
 ------------------
-Keras is Python based machine learning framework. It provides high level neural network APIs. It can run on top of other low level neural network frameworks for numerical computations. XFBLAS L3 Python APIs could be used for full connected Keras model and could provide better performance compared to CPU result. 
+Keras is Python based machine learning framework. It provides high level neural network APIs. It can run on top of other low level neural network frameworks for numerical computations. Vitis BLAS L3 Python APIs could be used for full connected Keras model and could provide better performance compared to CPU result. 
 
-In L3/applications/MLP/keras/simple, an example of using Keras to do classification on a simple model showed that how to use XFBLAS L3 Python APIs in Keras applications.
+In L3/applications/MLP/keras/simple, an example of using Keras to do classification on a simple model showed that how to use Vitis BLAS L3 Python APIs in Keras applications.
 
 2. Python Classes for using Keras
 -----------------------------------
@@ -67,7 +67,7 @@ This Keras application is using xclbin that included FCN (Fully Connected Networ
 1. C = pRelu(((A * B + X) * alpha) >> beta; where A, B, X and C are dense matrices, alpha and beta are integers.
 2. pRelu: for each c in C; c = (c < 0)? ((c * pRelu_alpha) >> pRelu_beta): c; where pRelu_alpha and pRelu_beta are integers.
 
-The following two packages are required for using XFBLAS L3 Python APIs:
+The following two packages are required for using Vitis BLAS L3 Python APIs:
 
 .. code-block:: python
 

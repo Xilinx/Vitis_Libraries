@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_gemv_Duint16_t_m1024-n512",
+    "name": "Xilinx XF_BLAS.gemv_Duint16_t_m1024-n512",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

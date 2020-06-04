@@ -235,18 +235,12 @@ void symUp2Stream(unsigned int p_n,
                   t_DataType* p_a,
                   hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_out) {
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_symTransp;
-#pragma HLS data_pack variable = l_symTransp
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_transp;
-#pragma HLS data_pack variable = l_transp
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_forward;
-#pragma HLS data_pack variable = l_forward
 
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_symTranspRes;
-#pragma HLS data_pack variable = l_symTranspRes
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_transpRes;
-#pragma HLS data_pack variable = l_transpRes
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_forwardRes;
-#pragma HLS data_pack variable = l_forwardRes
 
     unsigned int l_symBlocks = p_n / t_ParEntries;
     unsigned int l_transpBlocks = (l_symBlocks - 1) * l_symBlocks / 2;
@@ -274,18 +268,12 @@ void symLo2Stream(unsigned int p_n,
                   t_DataType* p_a,
                   hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_out) {
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_symTransp;
-#pragma HLS data_pack variable = l_symTransp
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_transp;
-#pragma HLS data_pack variable = l_transp
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_forward;
-#pragma HLS data_pack variable = l_forward
 
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_symTranspRes;
-#pragma HLS data_pack variable = l_symTranspRes
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_transpRes;
-#pragma HLS data_pack variable = l_transpRes
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_forwardRes;
-#pragma HLS data_pack variable = l_forwardRes
 
     unsigned int l_symBlocks = p_n / t_ParEntries;
     unsigned int l_transpBlocks = (l_symBlocks - 1) * l_symBlocks / 2;
@@ -313,18 +301,12 @@ void spmUp2Stream(unsigned int p_n,
                   t_DataType* p_a,
                   hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_out) {
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_symTransp;
-#pragma HLS data_pack variable = l_symTransp
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_transp;
-#pragma HLS data_pack variable = l_transp
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_forward;
-#pragma HLS data_pack variable = l_forward
 
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_symTranspRes;
-#pragma HLS data_pack variable = l_symTranspRes
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_transpRes;
-#pragma HLS data_pack variable = l_transpRes
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_forwardRes;
-#pragma HLS data_pack variable = l_forwardRes
 
     unsigned int l_symBlocks = p_n / t_ParEntries;
     unsigned int l_transpBlocks = (l_symBlocks - 1) * l_symBlocks / 2;
@@ -352,18 +334,12 @@ void spmLo2Stream(unsigned int p_n,
                   t_DataType* p_a,
                   hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>& p_out) {
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_symTransp;
-#pragma HLS data_pack variable = l_symTransp
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_transp;
-#pragma HLS data_pack variable = l_transp
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_forward;
-#pragma HLS data_pack variable = l_forward
 
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_symTranspRes;
-#pragma HLS data_pack variable = l_symTranspRes
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_transpRes;
-#pragma HLS data_pack variable = l_transpRes
     hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt> l_forwardRes;
-#pragma HLS data_pack variable = l_forwardRes
 
     unsigned int l_symBlocks = p_n / t_ParEntries;
     unsigned int l_transpBlocks = (l_symBlocks - 1) * l_symBlocks / 2;
