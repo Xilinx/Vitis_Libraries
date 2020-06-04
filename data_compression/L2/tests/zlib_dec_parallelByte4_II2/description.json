@@ -8,13 +8,16 @@
         "u50",
         "u280"
     ],
+     "platform_whitelist": [
+        "u200",
+        "u250"
+    ],
     "launch": [
         {
             "cmd_args": "-dx BUILD/decompress_stream.xclbin -d PROJECT/sample.txt.zlib",
             "name": "generic launch for all flows"
         }
     ],
-    "match_makefile": "false",
     "host": {
         "host_exe": "xil_zlib",
         "compiler": {
@@ -28,7 +31,8 @@
             ],
             "includepaths": [
                 "LIB_DIR/L2/include",
-                "LIB_DIR/L1/include/hw"
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L2/tests/src"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=1",
@@ -54,7 +58,7 @@
     "containers": [
         {
             "name": "decompress_stream",
-            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/opts.ini --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=PROJECT/post_route.tcl",
+            "ldclflags": "--config PROJECT/opts.ini --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=PROJECT/post_route.tcl",
             "accelerators": [
                 {
                     "name": "xilZlibDmReader",
@@ -69,6 +73,10 @@
                                 },
                                 {
                                     "name": "encoded_size",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "status_flag",
                                     "memory": "DDR[1]"
                                 }
                             ]

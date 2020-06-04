@@ -14,9 +14,6 @@ https://github.com/snappy/snappy
 This application is accelerated using generic hardware architecture for
 LZ based data compression algorithms.
 
-For more details refer this
-`link <https://xilinx.github.io/Vitis_Libraries/data_compression/source/L2/design.html>`__
-
 Results
 -------
 

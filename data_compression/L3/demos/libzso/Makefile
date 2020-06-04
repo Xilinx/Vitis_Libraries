@@ -199,13 +199,13 @@ COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
 HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/zlib_huffman_enc_mm.cpp
 DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_rd.cpp
 DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_wr.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_parallelbyte_decompress_stream.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_parallelbyte_decompress_full.cpp
 
 COMPRESS_KERNEL_NAME = xilLz77Compress
 HUFFMAN_KERNEL_NAME = xilHuffmanKernel
 DATAREADER_KERNEL_NAME = xilZlibDmReader
 DATAWRITER_KERNEL_NAME = xilZlibDmWriter
-DECOMPRESS_KERNEL_NAME = xilDecompressStream
+DECOMPRESS_KERNEL_NAME = xilDecompressFull
 
 KERNELS += $(COMPRESS_KERNEL_NAME) $(HUFFMAN_KERNEL_NAME)
 KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERNEL_NAME)
@@ -264,7 +264,7 @@ BIN_DIR_SUFFIX ?= _$(XDEVICE)
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 
 CXX := g++
-EXE_NAME := zlib_so.exe 
+EXE_NAME := xzlib 
 LIBZLIB_NAME := libz.so
 #EXE_EXT = exe
 
@@ -314,26 +314,27 @@ OBJ_FILES = $(foreach s,$(SRCS),$(OBJ_DIR)/$(basename $(s)).o)
 
 $(OBJ_DIR)/%.o: CXXFLAGS += $($(*)_CXXFLAGS)
 
-$(OBJ_FILES): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | check_vpp check_xrt check_platform
+$(OBJ_FILES): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo -e "----\nCompiling object $*..."
 	mkdir -p $(@D) 
 	$(CXX) -fPIC -o $@ -c $< $(CXXFLAGS) $(LDFLAGS)
 
 EXTRA_OBJ_FILES = $(foreach f,$(EXTRA_OBJS),$(OBJ_DIR)/$(f).o)
 
-$(EXTRA_OBJ_FILES): $(OBJ_DIR)/%.o: $$($$(*)_SRCS) $$($$(*)_HDRS) | check_vpp check_xrt check_platform
+$(EXTRA_OBJ_FILES): $(OBJ_DIR)/%.o: $$($$(*)_SRCS) $$($$(*)_HDRS)
 	@echo -e "----\nCompiling extra object $@..."
 	mkdir -p $(@D)
 	$(CXX) -fPIC -o $@ -c $< $(CXXFLAGS)
-$(LIBZLIB): $(OBJ_FILES) $(EXTRA_OBJ_FILES) | check_vpp check_xrt check_platform
+$(LIBZLIB): $(OBJ_FILES) $(EXTRA_OBJ_FILES)
 	@echo -e "----\nCompiling libz.so $(notdir $@)..."
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -shared -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ $(CXXFLAGS) $(LDFLAGS) -lc
+	cp $(BUILD_DIR)/libz.so .
 
-$(EXE_FILE): $(OBJ_FILES) | check_vpp check_xrt check_platform
+$(EXE_FILE): $(OBJ_FILES)
 	@echo -e "----\nCompiling libz.so $(notdir $@)..."
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ -L. $(BUILD_DIR)/libz.so
+	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ -L. libz.so 
 	
 # ------------------------------------------------------------
 #                      build rules
@@ -343,7 +344,7 @@ $(EXE_FILE): $(OBJ_FILES) | check_vpp check_xrt check_platform
 
 all: host xclbin
 
-host: $(EXE_FILE) | check_vpp check_xrt check_platform
+host: $(EXE_FILE)
 
 xclbin: $(XCLBIN_FILE)
 
@@ -389,8 +390,9 @@ else ifeq ($(TARGET),hw)
   EMU_CONFIG =
 endif
 
-RUN_ENV += export LD_LIBRARY_PATH=$(PWD)/$(BUILD_DIR):$(LD_LIBRARY_PATH)
+RUN_ENV += export LD_LIBRARY_PATH=$(PWD):$(LD_LIBRARY_PATH)
 RUN_ENV += export XILINX_LIBZ_XCLBIN=$(XCLBIN_FILE)
+RUN_ENV += export MIN_INPUT_SIZE=0
 
 run: xclbin lib host $(EMU_CONFIG)
 	$(RUN_ENV); \

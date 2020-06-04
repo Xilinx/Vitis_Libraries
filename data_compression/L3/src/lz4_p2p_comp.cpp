@@ -186,11 +186,14 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
             outputSize = RESIDUE_4K;
         } else {
             outputSize = inSizeVec[i];
+            //for CR=1 case extra bytes are added for each block
+            //so increasing outputSize by 64KB (64*1024).
+            outputSize += 64*1024;
         }
 
-        uint8_t* h_header = (uint8_t*)aligned_alloc(4096, 4096);
-        uint32_t* h_blksize = (uint32_t*)aligned_alloc(4096, 4096);
-        uint32_t* h_lz4outSize = (uint32_t*)aligned_alloc(4096, 4096);
+        uint8_t* h_header = (uint8_t*)aligned_alloc(4 * 1024, 4 * 1024);
+        uint32_t* h_blksize = (uint32_t*)aligned_alloc(4 * 1024, 64 * 1024);
+        uint32_t* h_lz4outSize = (uint32_t*)aligned_alloc(4 * 1024, 4 * 1024);
         uint32_t block_size_in_bytes = m_BlockSizeInKb * 1024;
         uint32_t head_size = create_header(h_header, inSizeVec[i]);
         headerSizeVec.push_back(head_size);
@@ -344,8 +347,8 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
         cl::Event write_event;
 
         // Migrate memory - Map host to device buffers
-        m_q->enqueueMigrateMemObjects({*(bufInputVec[i]), *(bufblockSizeVec[i])},
-                                      0 /* 0 means from host*/, NULL, &write_event);
+        m_q->enqueueMigrateMemObjects({*(bufInputVec[i]), *(bufblockSizeVec[i])}, 0 /* 0 means from host*/, NULL,
+                                      &write_event);
         writeWait.push_back(write_event);
 
         // Fire compress kernel

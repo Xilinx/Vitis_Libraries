@@ -13,6 +13,10 @@
     "platform_blacklist": [
         "u280"
     ],
+     "platform_whitelist": [
+        "u200",
+        "u250"
+   ],
     "host": {
         "host_exe": "xil_zlib",
         "compiler": {
@@ -50,7 +54,6 @@
     "containers": [
         {
             "name": "compress",
-            "ldclflags": "--profile_kernel data:all:all:all",
             "accelerators": [
                 {
                     "name": "xilLz77Compress",

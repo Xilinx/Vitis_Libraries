@@ -176,12 +176,18 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 }
 
 // Constructor
-xil_zlib::xil_zlib(const std::string& binaryFileName, uint8_t flow, uint8_t max_cr, uint8_t device_id, uint8_t d_type) {
+xil_zlib::xil_zlib(const std::string& binaryFileName,
+                   uint8_t flow,
+                   uint8_t max_cr,
+                   uint8_t device_id,
+                   uint8_t d_type,
+                   bool is_dec_overlap) {
     // Zlib Compression Binary Name
     m_deviceid = device_id;
     init(binaryFileName, flow, d_type);
 
     m_max_cr = max_cr;
+    m_useOverlapDec = is_dec_overlap;
 
     // printf("C_COMPUTE_UNIT \n");
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
@@ -382,7 +388,11 @@ uint32_t xil_zlib::decompress_file(
         inFile.read((char*)in.data(), input_size);
         // printme("Call to zlib_decompress \n");
         // Call decompress
-        debytes = decompress(in.data(), out.data(), input_size, cu, enable_p2p);
+        if (m_useOverlapDec) {
+            debytes = decompress(in.data(), out.data(), input_size, cu, enable_p2p);
+        } else {
+            debytes = decompressSeq(in.data(), out.data(), input_size, cu);
+        }
 
         // Close file
         inFile.close();
@@ -630,6 +640,93 @@ uint32_t xil_zlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, in
         std::cout << "E2E\t\t\t:" << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
     else
         std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+
+    // printme("Done with decompress \n");
+    return decmpSizeIdx;
+}
+
+uint32_t xil_zlib::decompressSeq(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
+    std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
+    uint32_t inBufferSize = input_size;
+    const uint64_t max_outbuf_size = input_size * m_max_cr;
+    const uint32_t lim_4gb = (uint32_t)(((uint64_t)4 * 1024 * 1024 * 1024) - 2); // 4GB limit on output size
+    uint32_t outBufferSize = 0;
+    // allocate < 4GB size for output buffer
+    if (max_outbuf_size > lim_4gb) {
+        outBufferSize = lim_4gb;
+    } else {
+        outBufferSize = (uint32_t)max_outbuf_size;
+    }
+    // host allocated aligned memory
+    std::vector<uint8_t, aligned_allocator<uint8_t> > dbuf_in(inBufferSize);
+    std::vector<uint8_t, aligned_allocator<uint8_t> > dbuf_out(outBufferSize);
+    std::vector<uint32_t, aligned_allocator<uint32_t> > dbuf_outSize(2);
+
+    // opencl buffer creation
+    cl::Buffer* buffer_dec_input =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, inBufferSize, dbuf_in.data());
+    cl::Buffer* buffer_dec_output =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, outBufferSize, dbuf_out.data());
+
+    cl::Buffer* buffer_size =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t), dbuf_outSize.data());
+    cl::Buffer* buffer_status =
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(uint32_t), h_dcompressStatus.data());
+
+    // Set Kernel Args
+    decompress_kernel->setArg(0, input_size);
+
+    data_writer_kernel->setArg(0, *(buffer_dec_input));
+    data_writer_kernel->setArg(1, inBufferSize);
+
+    data_reader_kernel->setArg(0, *(buffer_dec_output));
+    data_reader_kernel->setArg(1, *(buffer_size));
+    data_reader_kernel->setArg(2, *(buffer_status));
+    data_reader_kernel->setArg(3, outBufferSize);
+
+    // Copy input data
+    std::memcpy(dbuf_in.data(), in, inBufferSize); // must be equal to input_size
+    m_q_wr->enqueueMigrateMemObjects({*(buffer_dec_input)}, 0, NULL, NULL);
+    m_q_wr->finish();
+
+    // start parallel reader kernel enqueue thread
+    uint32_t decmpSizeIdx = 0;
+
+    // make sure that command queue is empty before decompression kernel enqueue
+    m_q_dec->finish();
+
+    // enqueue data movers
+    m_q_wr->enqueueTask(*data_writer_kernel);
+    m_q_rd->enqueueTask(*data_reader_kernel);
+
+    // enqueue decompression kernel
+    auto decompress_API_start = std::chrono::high_resolution_clock::now();
+
+    m_q_dec->enqueueTask(*decompress_kernel);
+    m_q_dec->finish();
+
+    auto decompress_API_end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
+    decompress_API_time_ns_1 += duration;
+
+    // wait for reader to finish
+    m_q_rd->finish();
+    // copy decompressed output data
+    m_q_rd->enqueueMigrateMemObjects({*(buffer_size), *(buffer_dec_output)}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, NULL);
+    m_q_rd->finish();
+    // decompressed size
+    decmpSizeIdx = dbuf_outSize[0];
+    // copy output decompressed data
+    std::memcpy(out, dbuf_out.data(), decmpSizeIdx);
+
+    float throughput_in_mbps_1 = (float)decmpSizeIdx * 1000 / decompress_API_time_ns_1.count();
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+
+    // free the cl buffers
+    delete buffer_dec_input;
+    delete buffer_dec_output;
+    delete buffer_size;
+    delete buffer_status;
 
     // printme("Done with decompress \n");
     return decmpSizeIdx;

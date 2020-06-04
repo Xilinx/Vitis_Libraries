@@ -13,6 +13,10 @@
     "platform_blacklist": [
         "u280"
     ],
+    "platform_whitelist": [
+        "u200",
+        "u250"
+    ],
     "host": {
         "host_exe": "xil_lz4",
         "compiler": {
@@ -44,7 +48,7 @@
     "containers": [
         {
             "name": "decompress",
-            "ldclflags": "--profile_kernel data:all:all:all --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=PROJECT/post_route.tcl",
+            "ldclflags": "--vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=PROJECT/post_route.tcl",
             "accelerators": [
                 {
                     "name": "xilLz4Decompress",

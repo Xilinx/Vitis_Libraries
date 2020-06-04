@@ -6,16 +6,19 @@
     "flow": "vitis",
     "launch": [
         {
-            "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt.snappy",
+            "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/sample.txt",
             "name": "generic launch for all flows"
         }
     ],
     "platform_blacklist": [
         "u280"
     ],
-    "match_makefile": "false",
+     "platform_whitelist": [
+        "u200",
+        "u250"
+    ],
     "host": {
-        "host_exe": "xil_snappy_streaming",
+        "host_exe": "xil_snappy_decompress_streaming",
         "compiler": {
             "sources": [
                 "./src/host.cpp",
@@ -26,7 +29,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/tests/src/"
             ],
             "symbols": [
                 "PARALLEL_BLOCK=1",

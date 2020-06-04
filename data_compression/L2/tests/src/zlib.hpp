@@ -83,6 +83,7 @@ class xil_zlib {
     int release();
     uint32_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
     uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run, bool enable_p2p = 0);
+    uint32_t decompressSeq(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run);
     uint32_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
     uint32_t decompress_file(
         std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run, bool enable_p2p = 0);
@@ -92,7 +93,8 @@ class xil_zlib {
              uint8_t flow,
              uint8_t max_cr = MAX_CR,
              uint8_t device_id = 0,
-             uint8_t d_type = DYNAMIC);
+             uint8_t d_type = DYNAMIC,
+             bool is_dec_overlap = false);
     ~xil_zlib();
 
    private:
@@ -102,6 +104,7 @@ class xil_zlib {
     uint8_t m_BinFlow;
     uint8_t m_deviceid;
     const uint32_t m_minfilesize = 200;
+    bool m_useOverlapDec = false;
 
     // Max cr
     uint8_t m_max_cr;

@@ -99,7 +99,6 @@ HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
 
 CXXFLAGS += -DPARALLEL_BLOCK=1
-CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 
 
@@ -134,9 +133,6 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 
 VPP_FLAGS += -DPARALLEL_BLOCK=1 -DPARALLEL_BYTE=4 
-
-# Kernel linker flags
-LDCLFLAGS_decompress += --profile_kernel data:all:all:all
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/decompress.xclbin
