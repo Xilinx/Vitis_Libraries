@@ -146,7 +146,7 @@ void xilLz4Unpacker(const xf::compression::uintMemWidth_t* in,
     dt_blockInfo bInfo;
 
     for (uint32_t blkIdx = 0; blkIdx < curr_no_blocks; blkIdx++) {
-	#pragma HLS PIPELINE off
+#pragma HLS PIPELINE off
         if (Idx2 + 32 <= GMEM_DWIDTH) {
             uintMemWidth_t inTemp;
             inTemp = in[Idx1];

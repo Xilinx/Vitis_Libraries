@@ -67,6 +67,9 @@ endif
 ifeq ($(findstring u50, $(DEVICE)), u50)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
+ifeq ($(findstring u280, $(DEVICE)), u280)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
 
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
@@ -87,6 +90,8 @@ EMCONFIG_DIR := $(BUILD_DIR)
 
 # Setting tools
 VPP := v++
+
+include ./config.mk
 
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files

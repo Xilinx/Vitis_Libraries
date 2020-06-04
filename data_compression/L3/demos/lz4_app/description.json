@@ -5,7 +5,12 @@
     ],
     "flow": "vitis",
     "platform_blacklist": [
-        "u50"
+        "u50",
+        "u280"
+    ],
+     "platform_whitelist": [
+        "u200",
+        "u250"
     ],
     "launch": [
         {
