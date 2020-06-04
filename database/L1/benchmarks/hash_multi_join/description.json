@@ -33,7 +33,7 @@
             "cmd_args": " -xclbin BUILD/hash_multi_join.xclbin -in PROJECT/db_data/dat"
         },
         {
-            "name": "generic launch for all flows",
+            "name": "launch for hw_emu flow",
             "target": "hw_emu",
             "cmd_args": " -xclbin BUILD/hash_multi_join.xclbin -in PROJECT/db_data/dat -scale 10000"
         }
