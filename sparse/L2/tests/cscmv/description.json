@@ -1,6 +1,6 @@
 {
-    "gui": false,
-    "name": "jks.L2_cscmv", 
+    "gui": true,
+    "name": "Xilinx Single CSCMV Unit", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -106,7 +106,24 @@
                 {
                     "location": "LIB_DIR/L2/src/hw/loadColPtrValKernel.cpp", 
                     "frequency": 300, 
-                    "name": "loadColPtrValKernel"
+                    "name": "loadColPtrValKernel",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "loadColPtrValKernel_1",
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "p_memColVal",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "p_memColPtr",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "location": "LIB_DIR/L2/src/hw/xBarColKernel.cpp", 
@@ -116,12 +133,38 @@
                 {
                     "location": "LIB_DIR/L2/src/hw/cscRowPktKernel.cpp", 
                     "frequency": 300, 
-                    "name": "cscRowPktKernel"
+                    "name": "cscRowPktKernel",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "cscRowPktKernel_1",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "p_aNnzIdx",
+                                    "memory": "HBM[0]"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "location": "LIB_DIR/L2/src/hw/storeDatPktKernel.cpp", 
                     "frequency": 300, 
-                    "name": "storeDatPktKernel"
+                    "name": "storeDatPktKernel",
+                    "num_compute_units": 1,
+                    "compute_units": [
+                        {
+                            "name": "storeDatPktKernel_1",
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "p_memPtr",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
                 }
                 
             ], 
