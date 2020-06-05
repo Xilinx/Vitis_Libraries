@@ -749,7 +749,7 @@ LOOP_SHA1_MAIN:
             for (ap_uint<7> t = 0; t < 80; t++) {
 #pragma HLS pipeline II = 1
                 ap_uint<w> Wt = w_strm.read();
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && __XF_SECURITY_SHA512_T_DEBUG__ == 1
                 std::cout << "W[" << std::dec << t << "] = " << std::hex << Wt << std::endl;
 #endif
                 ap_uint<w> T1 = h + BSIG1<w>(e) + Ch<w>(e, f, g) + K[t] + Wt;
@@ -762,7 +762,7 @@ LOOP_SHA1_MAIN:
                 c = b;
                 b = a;
                 a = T1 + T2;
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && __XF_SECURITY_SHA512_T_DEBUG__ == 1
                 std::cout << "a = " << std::hex << a << std::endl;
                 std::cout << "b = " << std::hex << b << std::endl;
                 std::cout << "c = " << std::hex << c << std::endl;
@@ -783,7 +783,7 @@ LOOP_SHA1_MAIN:
             H[5] = f + H[5];
             H[6] = g + H[6];
             H[7] = h + H[7];
-#ifndef __SYNTHESIS__
+#if !defined(__SYNTHESIS__) && __XF_SECURITY_SHA512_T_DEBUG__ == 1
             std::cout << "H[0] = " << std::hex << H[0] << std::endl;
             std::cout << "H[1] = " << std::hex << H[1] << std::endl;
             std::cout << "H[2] = " << std::hex << H[2] << std::endl;

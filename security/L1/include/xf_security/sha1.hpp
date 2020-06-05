@@ -361,80 +361,39 @@ ap_uint<w> Maj(
 
 /**
  *
- * @brief Duplicate 1 input stream to 2 output streams
- *
- * @tparam w The bit width of the streams.
- *
- * @param in_strm Input stream to be duplicated.
- * @param in_e_strm End flag of input stream.
- * @param out1_strm The first output stream.
- * @param out1_e_strm End flag of the first output stream.
- * @param out2_strm The second output stream.
- * @param out2_e_strm End flag of the second output stream.
- *
- */
-
-template <unsigned int w>
-void dup_strm(
-    // stream in
-    hls::stream<ap_uint<w> >& in_strm,
-    hls::stream<bool>& in_e_strm,
-    // stream out
-    hls::stream<ap_uint<w> >& out1_strm,
-    hls::stream<bool>& out1_e_strm,
-    hls::stream<ap_uint<w> >& out2_strm,
-    hls::stream<bool>& out2_e_strm) {
-    bool e = in_e_strm.read();
-
-LOOP_DUP_STREAM:
-    while (!e) {
-#pragma HLS loop_tripcount min = 1 max = 1 avg = 1
-#pragma HLS pipeline II = 1
-        ap_uint<w> in_r = in_strm.read();
-
-        out1_strm.write(in_r);
-        out1_e_strm.write(false);
-        out2_strm.write(in_r);
-        out2_e_strm.write(false);
-
-        e = in_e_strm.read();
-    }
-
-    out1_e_strm.write(true);
-    out2_e_strm.write(true);
-
-} // end dup_strm
-
-/**
- *
  * @brief Generate message schedule W (80 words) in stream.
  * The algorithm reference is : "Secure Hash Standard", which published by NIST in February 2012.
  *
  * @tparam w The bit width of message schedule W which defined in the standard.
  *
  * @param blk_strm Message block stream.
- * @param nblk_strm Number of message block stream.
- * @param end_nblk_strm End flag for number of message block stream.
+ * @param nblk_strm1 Number of message block stream.
+ * @param end_nblk_strm1 End flag for number of message block stream.
  * @param w_strm The message schedule in stream.
- *
+ * @param nblk_strm2 Number of message block stream.
+ * @param end_nblk_strm2 End flag for number of message block stream.
  */
 
 template <unsigned int w>
 void generateMsgSchedule(
     // inputs
     hls::stream<blockType>& blk_strm,
-    hls::stream<ap_uint<64> >& nblk_strm,
-    hls::stream<bool>& end_nblk_strm,
+    hls::stream<ap_uint<64> >& nblk_strm1,
+    hls::stream<bool>& end_nblk_strm1,
     // output
-    hls::stream<ap_uint<w> >& w_strm) {
+    hls::stream<ap_uint<w> >& w_strm,
+    hls::stream<ap_uint<64> >& nblk_strm2,
+    hls::stream<bool>& end_nblk_strm2) {
     //#pragma HLS inline
 
-    bool end = end_nblk_strm.read();
+    bool end = end_nblk_strm1.read();
+    end_nblk_strm2.write(end);
 
 LOOP_GEN_W_MAIN:
     while (!end) {
 #pragma HLS loop_tripcount min = 1 max = 1 avg = 1
-        ap_uint<64> numBlk = nblk_strm.read();
+        ap_uint<64> numBlk = nblk_strm1.read();
+        nblk_strm2.write(numBlk);
     LOOP_GEN_W_NBLK:
         for (ap_uint<64> i = 0; i < numBlk; i++) {
 #pragma HLS loop_tripcount min = 10 max = 10 avg = 10
@@ -464,7 +423,8 @@ LOOP_GEN_W_MAIN:
                 w_strm.write(Wt);
             }
         }
-        end = end_nblk_strm.read();
+        end = end_nblk_strm1.read();
+        end_nblk_strm2.write(end);
     }
 
 } // end generateMsgSchedule
@@ -628,44 +588,35 @@ void sha1(
 
     // 512-bit processing block stream
     hls::stream<internal::blockType> blk_strm("blk_strm");
-#pragma HLS stream variable = blk_strm depth = 32
+#pragma HLS stream variable = blk_strm depth = 4
 #pragma HLS resource variable = blk_strm core = FIFO_LUTRAM
 
     // number of blocks stream
-    hls::stream<ap_uint<64> > nblk_strm("nblk_strm");
-#pragma HLS stream variable = nblk_strm depth = 32
-#pragma HLS resource variable = nblk_strm core = FIFO_LUTRAM
     hls::stream<ap_uint<64> > nblk_strm1("nblk_strm1");
-#pragma HLS stream variable = nblk_strm1 depth = 32
+#pragma HLS stream variable = nblk_strm1 depth = 4
 #pragma HLS resource variable = nblk_strm1 core = FIFO_LUTRAM
     hls::stream<ap_uint<64> > nblk_strm2("nblk_strm2");
-#pragma HLS stream variable = nblk_strm2 depth = 32
+#pragma HLS stream variable = nblk_strm2 depth = 4
 #pragma HLS resource variable = nblk_strm2 core = FIFO_LUTRAM
 
     // end flag of number of blocks stream
-    hls::stream<bool> end_nblk_strm("end_nblk_strm");
-#pragma HLS stream variable = end_nblk_strm depth = 32
-#pragma HLS resource variable = end_nblk_strm core = FIFO_LUTRAM
     hls::stream<bool> end_nblk_strm1("end_nblk_strm1");
-#pragma HLS stream variable = end_nblk_strm1 depth = 32
+#pragma HLS stream variable = end_nblk_strm1 depth = 4
 #pragma HLS resource variable = end_nblk_strm1 core = FIFO_LUTRAM
     hls::stream<bool> end_nblk_strm2("end_nblk_strm2");
-#pragma HLS stream variable = end_nblk_strm2 depth = 32
+#pragma HLS stream variable = end_nblk_strm2 depth = 4
 #pragma HLS resource variable = end_nblk_strm2 core = FIFO_LUTRAM
 
     // message schedule stream
     hls::stream<ap_uint<w> > w_strm("w_strm");
-#pragma HLS stream variable = w_strm depth = 32
-#pragma HLS resource variable = w_strm core = FIFO_LUTRAM
+#pragma HLS stream variable = w_strm depth = 320
+#pragma HLS resource variable = w_strm core = FIFO_BRAM
 
     // padding and appending message words into blocks
-    internal::preProcessing(msg_strm, len_strm, end_len_strm, blk_strm, nblk_strm, end_nblk_strm);
-
-    // duplicate number of block stream and its end flag stream
-    internal::dup_strm<64>(nblk_strm, end_nblk_strm, nblk_strm1, end_nblk_strm1, nblk_strm2, end_nblk_strm2);
+    internal::preProcessing(msg_strm, len_strm, end_len_strm, blk_strm, nblk_strm1, end_nblk_strm1);
 
     // generate the message schedule in stream
-    internal::generateMsgSchedule<w>(blk_strm, nblk_strm1, end_nblk_strm1, w_strm);
+    internal::generateMsgSchedule<w>(blk_strm, nblk_strm1, end_nblk_strm1, w_strm, nblk_strm2, end_nblk_strm2);
 
     // digest precessing blocks into hash value
     internal::SHA1Digest<w>(w_strm, nblk_strm2, end_nblk_strm2, digest_strm, end_digest_strm);

@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Vitis Security design, API, functions
+   :description: Vitis Security Library application programming interface functions.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _api:
 
 ************************************
@@ -31,3 +38,5 @@ API Functions of ``xf::security``
 .. include:: ../rst_L1/class_xf_security_aesDec.rst
 
 .. include:: ../rst_L1/class_xf_security_rsa.rst
+
+.. include:: ../rst_L1/class_xf_security_dsa.rst

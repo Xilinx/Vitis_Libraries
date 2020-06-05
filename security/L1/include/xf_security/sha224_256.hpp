@@ -79,12 +79,12 @@ struct sha256_digest_config<false> {
 /// @param blk_strm the 512-bit hash block.
 /// @param nblk_strm the number of hash block for this message.
 /// @param end_nblk_strm end flag for number of hash block.
-void preProcessing(hls::stream<ap_uint<32> >& msg_strm,
-                   hls::stream<ap_uint<64> >& len_strm,
-                   hls::stream<bool>& end_len_strm,
-                   hls::stream<SHA256Block>& blk_strm,
-                   hls::stream<uint64_t>& nblk_strm,
-                   hls::stream<bool>& end_nblk_strm) {
+inline void preProcessing(hls::stream<ap_uint<32> >& msg_strm,
+                          hls::stream<ap_uint<64> >& len_strm,
+                          hls::stream<bool>& end_len_strm,
+                          hls::stream<SHA256Block>& blk_strm,
+                          hls::stream<uint64_t>& nblk_strm,
+                          hls::stream<bool>& end_nblk_strm) {
 LOOP_SHA256_GENENERATE_MAIN:
     for (bool end_flag = end_len_strm.read(); !end_flag; end_flag = end_len_strm.read()) {
         /// message length in byte.
@@ -282,12 +282,12 @@ LOOP_SHA256_GENENERATE_MAIN:
 /// @param blk_strm the 512-bit hash block.
 /// @param nblk_strm the number of hash block for this message.
 /// @param end_nblk_strm end flag for number of hash block.
-void preProcessing(hls::stream<ap_uint<64> >& msg_strm,
-                   hls::stream<ap_uint<64> >& len_strm,
-                   hls::stream<bool>& end_len_strm,
-                   hls::stream<SHA256Block>& blk_strm,
-                   hls::stream<uint64_t>& nblk_strm,
-                   hls::stream<bool>& end_nblk_strm) {
+inline void preProcessing(hls::stream<ap_uint<64> >& msg_strm,
+                          hls::stream<ap_uint<64> >& len_strm,
+                          hls::stream<bool>& end_len_strm,
+                          hls::stream<SHA256Block>& blk_strm,
+                          hls::stream<uint64_t>& nblk_strm,
+                          hls::stream<bool>& end_nblk_strm) {
 LOOP_SHA256_GENENERATE_MAIN:
     for (bool end_flag = end_len_strm.read(); !end_flag; end_flag = end_len_strm.read()) {
         /// message length in byte.
@@ -495,12 +495,12 @@ LOOP_SHA256_GENENERATE_MAIN:
 
 } // preProcessing (64bit ver)
 
-void dup_strm(hls::stream<uint64_t>& in_strm,
-              hls::stream<bool>& in_e_strm,
-              hls::stream<uint64_t>& out1_strm,
-              hls::stream<bool>& out1_e_strm,
-              hls::stream<uint64_t>& out2_strm,
-              hls::stream<bool>& out2_e_strm) {
+inline void dup_strm(hls::stream<uint64_t>& in_strm,
+                     hls::stream<bool>& in_e_strm,
+                     hls::stream<uint64_t>& out1_strm,
+                     hls::stream<bool>& out1_e_strm,
+                     hls::stream<uint64_t>& out2_strm,
+                     hls::stream<bool>& out2_e_strm) {
     bool e = in_e_strm.read();
 
     while (!e) {

@@ -46,6 +46,7 @@
 #define MSGW (8 * MSG_SIZE)
 #define HSHW (8 * HASH_SIZE)
 #define BLOCK_SIZE 64
+#define KEYL 32
 
 typedef ap_uint<64> u64;
 
@@ -62,14 +63,13 @@ struct sha224_wrapper {
 };
 
 void test_hmac_sha224(hls::stream<ap_uint<KEYW> >& keyStrm,
-                      hls::stream<u64>& lenKeyStrm,
                       hls::stream<ap_uint<MSGW> >& msgStrm,
                       hls::stream<u64>& lenStrm,
                       hls::stream<bool>& eLenStrm,
                       hls::stream<ap_uint<HSHW> >& hshStrm,
                       hls::stream<bool>& eHshStrm) {
-    xf::security::hmac<KEYW, MSGW, LENW, HSHW, BLOCK_SIZE, sha224_wrapper>(keyStrm, lenKeyStrm, msgStrm, lenStrm,
-                                                                           eLenStrm, hshStrm, eHshStrm);
+    xf::security::hmac<MSGW, LENW, HSHW, KEYL, BLOCK_SIZE, sha224_wrapper>(keyStrm, msgStrm, lenStrm, eLenStrm, hshStrm,
+                                                                           eHshStrm);
 }
 
 struct Test {
@@ -180,18 +180,19 @@ int main() {
     const char message[] = "The quick brown fox jumps over the lazy dog. Its hmac is 80070713463e7749b90c2dc24911e275";
     //	const char message[] = "The quick brown fox jumps over the lazy dog"; // Its hmac is
     // 80070713463e7749b90c2dc24911e275"; 	const char message[] = "ABCDEFGH";
-    const char key[] = "key";
+    const char key[] = "key0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     std::vector<Test> tests;
     // generate golden
     for (unsigned int i = 0; i < NUM_TESTS; i++) {
-        unsigned int len = i % 128;
+        unsigned int len = i % 128 + 80;
+        unsigned int klen = KEYL;
         char k[128] = {0};
         char m[128] = {0};
         if (len != 0) {
-            memcpy(k, key, len);
+            memcpy(k, key, klen);
             memcpy(m, message, len);
         }
-        k[len] = 0;
+        k[klen] = 0;
         m[len] = 0;
         unsigned char h[HASH_SIZE] = "";
         Test t(k, m, h);
@@ -222,13 +223,12 @@ int main() {
         string2Strm<KEYW>((test->key), "key", keyStrm);
         string2Strm<MSGW>((test->msg), "msg", msgStrm);
         // inform the prmitive how many bytes do we have in this message
-        lenKeyStrm.write((unsigned long long)((*test).key.length()));
         lenMsgStrm.write((unsigned long long)((*test).msg.length()));
         endLenStrm.write(false);
     }
     endLenStrm.write(true);
     // call fpga module
-    test_hmac_sha224(keyStrm, lenKeyStrm, msgStrm, lenMsgStrm, endLenStrm, hshStrm, endHshStrm);
+    test_hmac_sha224(keyStrm, msgStrm, lenMsgStrm, endLenStrm, hshStrm, endHshStrm);
 
     // check result
     for (std::vector<Test>::const_iterator test = tests.begin(); test != tests.end(); test++) {

@@ -367,5 +367,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Kernel has been run for " << std::dec << num_rep << " times." << std::endl;
     std::cout << "Total execution time " << tvdiff(&start_time, &end_time) << "us" << std::endl;
 
-    return 0;
+    if (checked) {
+        return 0;
+    } else {
+        return 1;
+    }
 }

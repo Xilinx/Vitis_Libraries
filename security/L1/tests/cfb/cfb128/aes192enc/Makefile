@@ -69,6 +69,7 @@ export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 # MK_INC_END vivado.mk
 
 DEVICE ?= u200
+
 # MK_INC_BEGIN vitis_set_part.mk
 
 .PHONY: check_part
@@ -178,7 +179,10 @@ endif # XPART
 # MK_INC_BEGIN hls_test_rules.mk
 
 
-.PHONY: run setup runhls clean
+.PHONY: run setup runhls clean cleanall check
+
+# Alias to run, for legacy test script
+check: run
 
 CSIM ?= 0
 CSYNTH ?= 0
@@ -186,7 +190,6 @@ COSIM ?= 0
 VIVADO_SYN ?= 0
 VIVADO_IMPL ?= 0
 QOR_CHECK ?= 0
-
 
 # at least RTL synthesis before check QoR
 ifeq (1,$(QOR_CHECK))
@@ -231,9 +234,9 @@ runhls: setup | check_vivado
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf *.prj *_hls.log settings.tcl
+	rm -rf settings.tcl *_hls.log cfb128_aes192_test.prj
 
-.PHONY: check
-check: run
+# Used by Jenkins test
+cleanall: clean
 
 # MK_INC_END hls_test_rules.mk

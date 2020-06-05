@@ -41,7 +41,8 @@ int main() {
         0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
     };
 
-    ap_uint<8> ciphertext[16];
+    ap_uint<8> golden[16] = {0x8e, 0xa2, 0xb7, 0xca, 0x51, 0x67, 0x45, 0xbf,
+                             0xea, 0xfc, 0x49, 0x90, 0x4b, 0x49, 0x60, 0x89};
 
     ap_uint<128>* p;
     ap_uint<256>* ck;
@@ -72,13 +73,12 @@ int main() {
         ciphertext_strm >> cp;
     }
 
-    for (int i = 0; i < 16; i++) {
-        ciphertext[i](7, 0) = cp(i * 8 + 7, i * 8);
+    ap_uint<128>* gd = (ap_uint<128>*)golden;
+    if (cp == *gd) {
+        std::cout << "\nAES256 test PASS\n" << std::endl;
+        return 0;
+    } else {
+        std::cout << "\nAES256 test FAIL\n" << std::endl;
+        return 1;
     }
-
-    cout << "Plaintext:" << hex << *p << endl;
-    cout << "Key:" << hex << *ck << endl;
-    cout << "Ciphertext:" << hex << cp << endl;
-
-    return 0;
 }
