@@ -127,7 +127,7 @@ void get_q1_cfg(ap_uint<32>* buf) {
         config[i + 2] = op(32 * (i + 1) - 1, 32 * i);
     }
     config[11][0] = op[288];
-    config[11](3, 1) = 0;
+    config[11](3, 1) = 5;
 
     // alu1: a * (1 - b) * (1 + c)
     xf::database::dynamicALUOPCompiler<uint32_t, uint32_t, uint32_t, uint32_t>("strm1*(-strm2+c2)*(strm3+c3)", 0, 100,

@@ -67,7 +67,7 @@
             "cmd_args": " -mode fpga -xclbin BUILD/hash_join_v2.xclbin -in PROJECT/db_data/dat"
         },
         {
-            "name": "generic launch for all flows",
+            "name": "launch for hw_emu flow",
             "target": "hw_emu",
             "cmd_args": " -mode fpga -xclbin BUILD/hash_join_v2.xclbin -in PROJECT/db_data/dat -scale 10000"
         }
