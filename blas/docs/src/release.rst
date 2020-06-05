@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, linear algebra, Subroutines
+   :description: Vitis BLAS library release notes.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _release_note:
 
 Release Note

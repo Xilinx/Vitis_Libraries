@@ -1,0 +1,59 @@
+{
+    "name": "Xilinx XF_BLAS.gemm_benchmark",
+    "description": "",
+    "flow": "vitis",
+    "platform_whitelist": [
+        "u200"
+    ],
+    "platform_blacklist": [],
+    "platform_type" : "pcie",
+    "gui": false,
+    "launch": [
+        {
+            "cmd_args": "",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "host": {
+        "host_exe": "gemm_bench.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L3/benchmarks/gemm/gemm_bench.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L3/include/sw",
+                "LIB_DIR/L3/benchmarks/gemm",
+                "LIB_DIR/L3/benchmarks"
+            ],
+            "symbols" : [ "XFBLAS_dataType=short" ]
+        },
+        "linker": {
+            "libraries" : ["uuid", "xrt_core"]
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": []
+        },
+        "linker": {
+            "ldclflags": []
+        }
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 4096,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_hw"
+        ],
+        "category": "canary"
+    }
+} 

@@ -13,6 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+
+
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, level 3
+   :description: Vitis BLAS library level 3 provides software API functions to offload BLAS operations to pre-built FPGA images.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _user_guide_overview_content_l3:
 
 

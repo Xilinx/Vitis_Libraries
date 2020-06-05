@@ -2,23 +2,25 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_sbmv_Dint32_t_m4096_k2_lower",
+    "name": "Xilinx XF_BLAS.sbmv_Dint32_t_m4096_k2_lower",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],
     "platform_whitelist": [
+        "u280",
         "u200"
     ],
     "project": "sbmv_Dint32_t_m4096_k2_lower_test",
     "solution": "sol",
     "testbench": {
         "argv": {
-            "0": "${XF_PROJ_ROOT}/L1/tests/hw/sbmvLo/tests/Dint32_t_m4096_k2_lower/TestBin.bin"
+            "hls_cosim": "${XF_PROJ_ROOT}/L1/tests/hw/sbmvLo/tests/Dint32_t_m4096_k2_lower/TestBin.bin",
+            "hls_csim": "${XF_PROJ_ROOT}/L1/tests/hw/sbmvLo/tests/Dint32_t_m4096_k2_lower/TestBin.bin"
         },
-        "cflags": "-I${XF_PROJ_ROOT}/ -I${XF_PROJ_ROOT}/L1/tests/sw/include               -DBLAS_pageSizeBytes=4096               -DBLAS_memWidthBytes=64               -DBLAS_instrSizeBytes=8               -DBLAS_maxNumInstrs=16               -DBLAS_instrPageIdx=0                -DBLAS_paramPageIdx=1                -DBLAS_statsPageIdx=2  -DBLAS_L2=true -DBLAS_opName=sbmv -DBLAS_resDataType=uint32_t             -DBLAS_vectorSize=4096 -DBLAS_matrixSize=16777216             -DBLAS_memorySize=12288 -DBLAS_dataType=int32_t -DBLAS_logParEntries=-1             -DBLAS_parEntries=4",
+        "cflags": "-std=c++11 -I${XF_PROJ_ROOT}/L1/tests/hw/ -I${XF_PROJ_ROOT}/ -I${XF_PROJ_ROOT}/L1/tests/sw/include               -DBLAS_pageSizeBytes=4096               -DBLAS_memWidthBytes=64               -DBLAS_instrSizeBytes=8               -DBLAS_maxNumInstrs=16               -DBLAS_instrPageIdx=0                -DBLAS_paramPageIdx=1                -DBLAS_statsPageIdx=2  -DBLAS_L2=true -DBLAS_opName=sbmv -DBLAS_resDataType=uint32_t             -DBLAS_vectorSize=4096 -DBLAS_matrixSize=16777216             -DBLAS_memorySize=12288 -DBLAS_dataType=int32_t -DBLAS_logParEntries=-1             -DBLAS_parEntries=4",
         "ldflags": "",
         "source": [
-            "${XF_PROJ_ROOT}/L1/tests/sw/test.cpp"
+            "${XF_PROJ_ROOT}/L1/tests/sw/src/test.cpp"
         ],
         "stdmath": false
     },

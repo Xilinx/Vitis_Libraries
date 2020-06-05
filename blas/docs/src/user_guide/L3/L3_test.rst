@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, level 3, test
+   :description: Vitis BLAS library level 3 provides an automatic test flow that could be run by simple one line command.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _test_l3:
 
 =====================

@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, L3, level 3
+   :description: Vitis BLAS library level 3 appliction programming interface benchmark.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _benchmark_l3:
 
 =====================

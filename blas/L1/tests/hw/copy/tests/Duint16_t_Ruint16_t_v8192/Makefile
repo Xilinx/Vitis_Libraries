@@ -51,7 +51,7 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-TOOL_VERSION ?= 2020.1
+TOOL_VERSION ?= 2019.2
 
 ifeq (,$(XILINX_VIVADO))
 XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
@@ -68,7 +68,7 @@ export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 
 # MK_INC_END vivado.mk
 
-DEVICE ?= u200
+DEVICE ?= u280
 
 # MK_INC_BEGIN vitis_set_part.mk
 
@@ -119,19 +119,36 @@ XPLATFORM := $(DEVICE)
 else
 # Use DEVICE as a file name pattern
 DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
+# 1. search paths specified by variable
 ifneq (,$(PLATFORM_REPO_PATHS))
+# 1.1 as exact name
+XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(DEVICE_L)/$(DEVICE_L).xpfm)))
+# 1.2 as a pattern
+ifeq (,$(XPLATFORM))
 XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 1.2
+endif # 1
+# 2. search Vitis installation
+ifeq (,$(XPLATFORM))
+# 2.1 as exact name
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 2.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 2.2
+endif # 2
+# 3. search default locations
+ifeq (,$(XPLATFORM))
+# 3.1 as exact name
+XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 3.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 3.2
+endif # 3
 endif
 
 define MSG_PLATFORM
@@ -211,7 +228,11 @@ ifeq (1,$(COSIM))
 override CSYNTH := 1
 endif
 
-run: setup runhls
+# From testbench.data_recipe of description.json
+data:
+	@true
+
+run: data setup runhls
 
 setup: | check_part
 	@rm -f ./settings.tcl
@@ -222,19 +243,19 @@ setup: | check_part
 	@echo 'set COSIM $(COSIM)' >> ./settings.tcl
 	@echo 'set VIVADO_SYN $(VIVADO_SYN)' >> ./settings.tcl
 	@echo 'set VIVADO_IMPL $(VIVADO_IMPL)' >> ./settings.tcl
-	@echo 'set QOR_CHECK $(QOR_CHECK)' >> ./settings.tcl
 	@echo 'set XF_PROJ_ROOT "$(XF_PROJ_ROOT)"' >> ./settings.tcl
+	@echo 'set CUR_DIR "$(CUR_DIR)"' >> ./settings.tcl
 	@echo "Configured: settings.tcl"
 	@echo "----"
 	@cat ./settings.tcl
 	@echo "----"
 
 HLS ?= vivado_hls
-runhls: setup | check_vivado check_vpp
+runhls: data setup | check_vivado
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf settings.tcl *_hls.log hls_prj/
+	rm -rf settings.tcl *_hls.log copy_Duint16_t_Ruint16_t_v8192_test.prj
 
 # Used by Jenkins test
 cleanall: clean

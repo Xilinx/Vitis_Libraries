@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, Keras MLP, Acceleration
+   :description: Keras is Python based machine learning framework. It provides high level neural network APIs.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _keras_application_l3: 
  
 XFBLAS L3 based Keras MLP Acceleration
