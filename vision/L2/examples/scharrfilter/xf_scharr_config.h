@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #ifndef _XF_SCHARR_CONFIG_H_
 #define _XF_SCHARR_CONFIG_H_
 
@@ -40,22 +39,21 @@ typedef unsigned uint32_t;
 #define NPC1 XF_NPPC8
 #endif
 
-
 #if T_8U
 
 #if GRAY
 #define IN_TYPE XF_8UC1
-#define OUT_TYPE XF_8UC1 
+#define OUT_TYPE XF_8UC1
 #define CH_TYPE XF_GRAY
 #else
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
-#define CH_TYPE XF_RGB 
+#define CH_TYPE XF_RGB
 #endif
 
 #else
-	
-#if GRAY	
+
+#if GRAY
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_16SC1
 #define CH_TYPE XF_GRAY

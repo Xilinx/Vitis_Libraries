@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
     // Create the Bayer pattern CFA output
     cv::Mat cfa_bayer_output(img.rows, img.cols, CV_8UC1); // simulate the Bayer pattern CFA output
 
-#if T_16U 
+#if T_16U
     cv::Mat cfa_bayer_16bit(img.rows, img.cols, CV_16UC1);
 #endif
     cv::Mat color_cfa_bayer_output(img.rows, img.cols, img.type()); // Bayer pattern CFA output in color
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
     bayerizeImage(img, color_cfa_bayer_output, cfa_bayer_output, code);
     imwrite("bayer_image.png", color_cfa_bayer_output);
     imwrite("cfa_output.png", cfa_bayer_output);
-#if T_16U 
+#if T_16U
     cfa_bayer_output.convertTo(cfa_bayer_16bit, CV_INTYPE);
 #endif
     // Demosaic the CFA output using reference code

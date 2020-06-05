@@ -20,5 +20,5 @@
 #define T_8U 1
 #define T_16S 0
 
-#define GRAY	1
-#define RGBA	0
+#define GRAY 1
+#define RGBA 0
