@@ -67,18 +67,24 @@ int main() {
     std::cout << "**********************************" << std::endl;
 
     // the original message to be digested
-    const char message[] =
-        "abcdefghijklmnopqrstuvwxyz"
-        "abcdefghijklmnopqrstuvwxyz"
-        "abcdefghijklmnopqrstuvwxyz"
-        "abcdefghijklmnopqrstuvwxyz"
-        "abcdefghijklmnopqrstuvwxyz";
+    const char pp[] = "abcdefghijklmnopqrstuvwxyz";
+
+    char message[1 << 16];
+    for (int i = 0; i < (1 << 16); i += 26) {
+        int cp_len = 0;
+        if ((i + 26) < (1 << 16)) {
+            cp_len = 26;
+        } else {
+            cp_len = (1 << 16) - i;
+        }
+        memcpy(message + i, pp, cp_len);
+    }
     vector<Test> tests;
 
     // generate golden
     for (unsigned int i = 0; i < NUM_TESTS; i++) {
-        unsigned int len = i % 128;
-        char m[128];
+        unsigned int len = i % 128 + (1 << 10);
+        char m[(1 << 16)];
         if (len != 0) {
             memcpy(m, message, len);
         }

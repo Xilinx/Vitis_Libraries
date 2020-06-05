@@ -33,16 +33,9 @@ import sys
 import recommonmark
 from recommonmark.transform import AutoStructify
 import shutil
-# sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('_ext'))
-sys.path.insert(0, os.path.abspath('docs'))
-doxyrest_path = os.path.dirname(shutil.which('doxyrest'))
-if os.path.isdir(os.path.abspath(os.path.join(doxyrest_path, '../share/doxyrest/sphinx'))):
-    # Doxyrest binary package file locations
-    sys.path.insert(1, os.path.abspath(os.path.join(doxyrest_path, '../share/doxyrest/sphinx')))
-else:
-    # Doxyrest built from bundle repository
-    sys.path.insert(1, os.path.abspath(os.path.join(doxyrest_path, '../share/doxyrest_b/sphinx')))
+
+tools_dir = os.path.abspath(os.path.join(os.path.dirname(shutil.which('doxyrest')), '..'))
+sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 
 # -- Project information -----------------------------------------------------
 
@@ -76,7 +69,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
 	'recommonmark',
-	'edit_on_github',
+    #'edit_on_github',
     # Auto-generate section labels.
     'sphinx.ext.autosectionlabel',
     #'sphinx.ext.imgmath',
@@ -133,7 +126,7 @@ pygments_style = None
 # a list of builtin themes.
 #
 html_theme = 'xilinx'
-html_theme_path = ["./_themes"]
+html_theme_path = [os.path.join(tools_dir, 'share/themes')]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

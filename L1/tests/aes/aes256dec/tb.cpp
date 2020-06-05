@@ -72,16 +72,20 @@ int main() {
 
     // dut(cp_strm, i_cp_strm, ck_strm, pt_strm, o_pt_strm);
     ap_uint<128> pt;
-    for (int i = 0; i < 10; i++) {
-        if (i == 5) *ck = 0;
-        dut(*cp, *ck, pt);
-        cout << "Plain text -> " << hex << pt << endl;
-    }
+    dut(*cp, *ck, pt);
 
     // while (!o_pt_strm.read()) {
     // ap_uint<128> result_hw = pt_strm.read();
     // cout << "Plain text -> " << hex << result_hw << endl;
     // }
+    ap_uint<128>* golden = (ap_uint<128>*)plaintext;
+    if (pt == *golden) {
+        std::cout << "\nAES256 test PASS\n" << std::endl;
+        return 0;
+    } else {
+        std::cout << "\nAES256 test FAIL\n" << std::endl;
+        return 1;
+    }
 
     return 0;
 }

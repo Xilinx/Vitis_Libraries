@@ -29,7 +29,7 @@ using namespace std;
 #include <string>
 #include <vector>
 
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 
 // number of times to perform the test in different message and length
 #define NUM_TESTS 300
@@ -60,6 +60,7 @@ std::string hash2str(unsigned char* h, int len) {
     return retstr;
 }
 
+/*
 // initialize hash values for SHA-512/256
 int sha512_256_init(SHA512_CTX* c) {
     c->h[0] = U64(0x22312194fc2bf72c);
@@ -77,6 +78,7 @@ int sha512_256_init(SHA512_CTX* c) {
     c->md_len = SHA256_DIGEST_LENGTH;
     return 1;
 }
+*/
 
 int main() {
     std::cout << "****************************************" << std::endl;
@@ -100,23 +102,38 @@ int main() {
 
     // open file
     FILE* fp = fopen("testcases.dat", "r");
+    // FILE* fpw = fopen("testcases.dat", "w");
 
     // generate golden
     for (unsigned int i = 0; i < NUM_TESTS; i++) {
         unsigned int len = i % 256;
-        char m[4];
+        char m[256];
         if (len != 0) {
             memcpy(m, message, len);
         }
         m[len] = 0;
         unsigned char h[DIG_SIZE];
+        /*
+        // generate goldens
+        unsigned int md_len;
+        EVP_MD_CTX *mdctx;
+        mdctx = EVP_MD_CTX_new();
+        EVP_DigestInit_ex(mdctx, EVP_sha512_256(), NULL);
+        EVP_DigestUpdate(mdctx, m, len);
+        EVP_DigestFinal_ex(mdctx, h, &md_len);
+        EVP_MD_CTX_destroy(mdctx);
+        */
         // read golden hash values from testcases.dat
         fread(h, sizeof(unsigned char), DIG_SIZE, fp);
+
+        // write out goldens
+        // fwrite(h, sizeof(unsigned char), DIG_SIZE, fpw);
 
         tests.push_back(Test(m, h));
     }
     // close file
     fclose(fp);
+    // fclose(fpw);
 
     unsigned int nerror = 0;
     unsigned int ncorrect = 0;
@@ -130,7 +147,7 @@ int main() {
     // generate input message words
     for (vector<Test>::const_iterator test = tests.begin(); test != tests.end(); test++) {
         ap_uint<8 * MSG_SIZE> msg;
-        cout << "Message = " << (*test).msg << " (length = " << dec << (*test).msg.length() << " bytes)" << endl;
+        // cout << "Message = " << (*test).msg << " (length = " << dec << (*test).msg.length() << " bytes)" << endl;
         unsigned int n = 0;
         // write msg stream word by word
         for (string::size_type i = 0; i < (*test).msg.length(); i++) {

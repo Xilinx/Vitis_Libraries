@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, SHA-2, Algorithm
+   :description: SHA-2 (Secure Hash Algorithm 2) is a set of cryptographic hash functions defined in RFC 6234: US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF). 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ****************
 SHA-2 Algorithms
 ****************

@@ -18,22 +18,25 @@ source settings.tcl
 
 set PROJ "poly1305_multichan.prj"
 set SOLN "sol"
-set CLKP 3.33
+
+if {![info exists CLKP]} {
+  set CLKP 3.33
+}
 
 open_project -reset $PROJ
 
-add_files test_mc.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb test_mc.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files "test_mc.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files -tb "test_mc.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
 set_top poly1305Top
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
+create_clock -period $CLKP
 set_clock_uncertainty 1.05
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc -ldflags "-lcrypto -lssl"
+  csim_design -ldflags "-lcrypto -lssl"
 }
 
 if {$CSYNTH == 1} {

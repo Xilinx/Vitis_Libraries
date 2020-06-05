@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <ap_int.h>
 #include <iostream>
 
@@ -22,20 +23,35 @@
 #include <new>
 #include <cstdlib>
 
+#ifndef HLS_TEST
 #include <xcl2.hpp>
+#endif
+
+#include <vector>
 
 #include "kernel_config.hpp"
 
-// text length for each task in 128-bit
-#define N_ROW 64
-// text length for each task in Byte, should be dividable by (4 * 16 / SUB_GRP_SZ)
+// max text length
+#define MAX_N_MSG 4096
+
+// text length for each task in Byte
 #define N_MSG 1024
 // number of tasks for a single PCIe block
-#define N_TASK 2 // 8192
-// number of PUs
-#define CH_NM 16
+#define N_TASK 20 // 8192
 // cipher key size in bytes
 #define KEY_SIZE 32
+
+#ifdef HLS_TEST
+extern "C" void hmacSha1Kernel_1(ap_uint<512> inputData[(1 << 20) + 100], ap_uint<512> outputData[1 << 20]);
+#endif
+
+ap_uint<GRP_WIDTH> char2ap_uint(unsigned char* data, int ptr) {
+    ap_uint<GRP_WIDTH> tmp = 0;
+    for (int i = 0; i < GRP_SIZE; i++) {
+        tmp.range(i * 8 + 7, i * 8) = data[ptr + i];
+    }
+    return tmp;
+}
 
 void hmacSHA1(const unsigned char* key,
               unsigned int keyLen,
@@ -108,12 +124,13 @@ T* aligned_alloc(std::size_t num) {
 int main(int argc, char* argv[]) {
     // cmd parser
     ArgParser parser(argc, (const char**)argv);
+#ifndef HLS_TEST
     std::string xclbin_path;
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "ERROR:xclbin path is not set!\n";
         return 1;
     }
-
+#endif
     // set repeat time
     int num_rep = 2;
     std::string num_str;
@@ -133,28 +150,46 @@ int main(int argc, char* argv[]) {
         std::cout << "WARNING: limited repeat to " << num_rep << " times.\n";
     }
 
-    // input data
-    const unsigned char datain[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                                    0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-
-    unsigned char messagein[N_MSG];
-    for (int i = 0; i < N_MSG; i += 16) {
-        for (int j = 0; j < 16; j++) {
-            messagein[i + j] = datain[j];
+    // set N_TASK and N_MSG
+    int n_task, n_msg;
+    if (parser.getCmdOption("-task", num_str)) {
+        try {
+            n_task = std::stoi(num_str);
+        } catch (...) {
+            n_task = N_TASK;
         }
     }
+    if (parser.getCmdOption("-msg", num_str)) {
+        try {
+            n_msg = std::stoi(num_str);
+        } catch (...) {
+            n_msg = N_MSG;
+        }
+    }
+    n_task = N_TASK;
+    n_msg = N_MSG;
+    std::cout << "task num : " << n_task << std::endl;
+    std::cout << "msg length in byte : " << n_msg << std::endl;
+
+    // input data
+    unsigned char datain[256];
+    for (int i = 0; i < 256; i++) {
+        datain[i] = (unsigned char)i;
+    }
+
+    unsigned char messagein[MAX_N_MSG];
+    for (int i = 0; i < n_msg; i++) {
+        messagein[i] = datain[i % 256];
+    }
+
     // cipher key
     const unsigned char key[] = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a,
                                  0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25,
                                  0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f};
 
-    // initialization vector
-    const unsigned char ivec[] = {0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
-                                  0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f};
-
     // generate golden
     unsigned char hmacResult[20];
-    hmacSHA1(key, 32, messagein, N_MSG, hmacResult);
+    hmacSHA1(key, 32, messagein, n_msg, hmacResult);
 
     // ouput length of the result
 
@@ -168,11 +203,6 @@ int main(int argc, char* argv[]) {
         keyReg.range(i * 8 + 7, i * 8) = key[i];
     }
 
-    ap_uint<128> IVReg;
-    for (unsigned int i = 0; i < 16; i++) {
-        IVReg.range(i * 8 + 7, i * 8) = ivec[i];
-    }
-
     ap_uint<128> dataReg;
     for (unsigned int i = 0; i < 16; i++) {
         dataReg.range(i * 8 + 7, i * 8) = datain[i];
@@ -181,32 +211,33 @@ int main(int argc, char* argv[]) {
     std::cout << "Goldens have been created using OpenSSL.\n";
 
     // Host buffers
-    ap_uint<512>* hb_in1 = aligned_alloc<ap_uint<512> >(N_ROW * N_TASK * CH_NM / 4 + CH_NM);
-    ap_uint<512>* hb_in2 = aligned_alloc<ap_uint<512> >(N_ROW * N_TASK * CH_NM / 4 + CH_NM);
-    ap_uint<512>* hb_in3 = aligned_alloc<ap_uint<512> >(N_ROW * N_TASK * CH_NM / 4 + CH_NM);
-    ap_uint<512>* hb_in4 = aligned_alloc<ap_uint<512> >(N_ROW * N_TASK * CH_NM / 4 + CH_NM);
+    ap_uint<512>* hb_in1 = aligned_alloc<ap_uint<512> >(n_msg * n_task * CH_NM / 64 + CH_NM);
+    ap_uint<512>* hb_in2 = aligned_alloc<ap_uint<512> >(n_msg * n_task * CH_NM / 64 + CH_NM);
+    ap_uint<512>* hb_in3 = aligned_alloc<ap_uint<512> >(n_msg * n_task * CH_NM / 64 + CH_NM);
+    ap_uint<512>* hb_in4 = aligned_alloc<ap_uint<512> >(n_msg * n_task * CH_NM / 64 + CH_NM);
+
     ap_uint<512>* hb_out_a[4];
     for (int i = 0; i < 4; i++) {
-        hb_out_a[i] = aligned_alloc<ap_uint<512> >(N_TASK * CH_NM);
+        hb_out_a[i] = aligned_alloc<ap_uint<512> >(n_task * CH_NM);
     }
     ap_uint<512>* hb_out_b[4];
     for (int i = 0; i < 4; i++) {
-        hb_out_b[i] = aligned_alloc<ap_uint<512> >(N_TASK * CH_NM);
+        hb_out_b[i] = aligned_alloc<ap_uint<512> >(n_task * CH_NM);
     }
 
     // generate configurations
     for (unsigned int j = 0; j < CH_NM; j++) {
         // massage length in 128-bit for each task
-        hb_in1[j].range(511, 448) = N_ROW;
-        hb_in2[j].range(511, 448) = N_ROW;
-        hb_in3[j].range(511, 448) = N_ROW;
-        hb_in4[j].range(511, 448) = N_ROW;
+        hb_in1[j].range(511, 448) = n_msg;
+        hb_in2[j].range(511, 448) = n_msg;
+        hb_in3[j].range(511, 448) = n_msg;
+        hb_in4[j].range(511, 448) = n_msg;
 
         // number of tasks in a single PCIe block
-        hb_in1[j].range(447, 384) = N_TASK;
-        hb_in2[j].range(447, 384) = N_TASK;
-        hb_in3[j].range(447, 384) = N_TASK;
-        hb_in4[j].range(447, 384) = N_TASK;
+        hb_in1[j].range(447, 384) = n_task;
+        hb_in2[j].range(447, 384) = n_task;
+        hb_in3[j].range(447, 384) = n_task;
+        hb_in4[j].range(447, 384) = n_task;
 
         // cipherkey
         hb_in1[j].range(255, 0) = keyReg.range(255, 0);
@@ -215,48 +246,20 @@ int main(int argc, char* argv[]) {
         hb_in4[j].range(255, 0) = keyReg.range(255, 0);
     }
     // generate texts
-    /*
-    for (int i = 0; i < N_TASK; i++) {
-        for(int j = 0; j < N_ROW; j++) {
-            for(int k = 0; k < 128 / 32; k++) {
-                for(int l = 0; l < CH_NM / 16; l++) {
-                    int pos = l + k * (CH_NM / 16) + j * (CH_NM / 16 * 128 / 32) + i * (CH_NM / 16 * 128 / 32 * N_ROW);
-                    for(int m = 0; m < 16; m++) {
-                        hb_in1[pos].range(m * 32 + 31, m * 32) = dataReg.range(k * 32 + 31, k * 32);
-                        hb_in2[pos].range(m * 32 + 31, m * 32) = dataReg.range(k * 32 + 31, k * 32);
-                        hb_in3[pos].range(m * 32 + 31, m * 32) = dataReg.range(k * 32 + 31, k * 32);
-                        hb_in4[pos].range(m * 32 + 31, m * 32) = dataReg.range(k * 32 + 31, k * 32);
-                    }
-                }
+    for (int i = 0; i < n_task; i++) {
+        for (int j = 0; j < n_msg; j += GRP_SIZE) {
+            int pos = (j / GRP_SIZE) + i * (n_msg / GRP_SIZE) + CH_NM;
+            for (int l = 0; l < SUB_GRP_SZ; l++) {
+                hb_in1[pos].range(l * GRP_WIDTH + GRP_WIDTH - 1, l * GRP_WIDTH) = char2ap_uint(messagein, j);
+                hb_in2[pos].range(l * GRP_WIDTH + GRP_WIDTH - 1, l * GRP_WIDTH) = char2ap_uint(messagein, j);
+                hb_in3[pos].range(l * GRP_WIDTH + GRP_WIDTH - 1, l * GRP_WIDTH) = char2ap_uint(messagein, j);
+                hb_in4[pos].range(l * GRP_WIDTH + GRP_WIDTH - 1, l * GRP_WIDTH) = char2ap_uint(messagein, j);
             }
         }
     }
-    */
-    int chWord = (512 / 32 / SUB_GRP_SZ);
-    for (int i = 0; i < N_TASK; i++) {
-        for (int j = 0; j < (N_MSG / 4); j += chWord) {
-            for (int k = 0; k < GRP_NM; k++) {
-                int pos = k + (j / chWord) * GRP_NM + i * (N_MSG * CH_NM / 64) + CH_NM;
-                for (int l = 0; l < SUB_GRP_SZ; l++) {
-                    if (SUB_GRP_SZ >= 4) {
-                        hb_in1[pos].range((l + 1) * 32 * chWord - 1, l * 32 * chWord) =
-                            dataReg.range(((j % 4) + 1) * chWord * 32 - 1, (j % 4) * chWord * 32);
-                        hb_in2[pos].range((l + 1) * 32 * chWord - 1, l * 32 * chWord) =
-                            dataReg.range(((j % 4) + 1) * chWord * 32 - 1, (j % 4) * chWord * 32);
-                        hb_in3[pos].range((l + 1) * 32 * chWord - 1, l * 32 * chWord) =
-                            dataReg.range(((j % 4) + 1) * chWord * 32 - 1, (j % 4) * chWord * 32);
-                        hb_in4[pos].range((l + 1) * 32 * chWord - 1, l * 32 * chWord) =
-                            dataReg.range(((j % 4) + 1) * chWord * 32 - 1, (j % 4) * chWord * 32);
-                    } else {
-                        std::cout << "SUB_GRP_SZ too small, not supported" << std::endl;
-                    }
-                }
-            }
-        }
-    }
-
     std::cout << "Host map buffer has been allocated and set.\n";
 
+#ifndef HLS_TEST
     // Get CL devices.
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -305,24 +308,24 @@ int main(int argc, char* argv[]) {
     // Map buffers
     for (int i = 0; i < 4; i++) {
         in_buff_a[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                  (size_t)(sizeof(ap_uint<512>) * (N_ROW * N_TASK * CH_NM / 4 + CH_NM)), &mext_in[i]);
+                                  (size_t)(sizeof(ap_uint<512>) * (n_msg * n_task * CH_NM / 64 + CH_NM)), &mext_in[i]);
         out_buff_a[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                   (size_t)(sizeof(ap_uint<512>) * (N_TASK * CH_NM)), &mext_out_a[i]);
+                                   (size_t)(sizeof(ap_uint<512>) * (n_task * CH_NM)), &mext_out_a[i]);
         in_buff_b[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                  (size_t)(sizeof(ap_uint<512>) * (N_ROW * N_TASK * CH_NM / 4 + CH_NM)), &mext_in[i]);
+                                  (size_t)(sizeof(ap_uint<512>) * (n_msg * n_task * CH_NM / 64 + CH_NM)), &mext_in[i]);
         out_buff_b[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                   (size_t)(sizeof(ap_uint<512>) * (N_TASK * CH_NM)), &mext_out_b[i]);
+                                   (size_t)(sizeof(ap_uint<512>) * (n_task * CH_NM)), &mext_out_b[i]);
     }
 
     std::cout << "DDR buffers have been mapped/copy-and-mapped\n";
-
+    q.flush();
     q.finish();
-
-    std::cout << "Here A" << std::endl;
+#endif
 
     struct timeval start_time, end_time;
     gettimeofday(&start_time, 0);
 
+#ifndef HLS_TEST
     std::vector<std::vector<cl::Event> > write_events(num_rep);
     std::vector<std::vector<cl::Event> > kernel_events(num_rep);
     std::vector<std::vector<cl::Event> > read_events(num_rep);
@@ -332,14 +335,12 @@ int main(int argc, char* argv[]) {
         read_events[i].resize(1);
     }
     std::cout << "num_rep " << num_rep << std::endl;
-    std::cout << "Here B" << std::endl;
     /*
      * W0-. W1----.     W2-.     W3-.
      *    '-K0--. '-K1-/-. '-K2-/-. '-K3---.
      *          '---R0-  '---R1-  '---R2   '--R3
      */
 
-    std::cout << "Here C" << std::endl;
     for (int i = 0; i < num_rep; i++) {
         int use_a = i & 1;
 
@@ -362,10 +363,8 @@ int main(int argc, char* argv[]) {
         } else {
             q.enqueueMigrateMemObjects(ib, 0, nullptr, &write_events[i][0]);
         }
-
-        q.finish();
-        std::cout << "Here C - 1" << std::endl;
         // set args and enqueue kernel
+
         if (use_a) {
             int j = 0;
             kernel0.setArg(j++, in_buff_a[0]);
@@ -395,21 +394,9 @@ int main(int argc, char* argv[]) {
         }
 
         q.enqueueTask(kernel0, &write_events[i], &kernel_events[i][0]);
-        q.finish();
-        std::cout << "Here C - 2" << std::endl;
-
         q.enqueueTask(kernel1, &write_events[i], &kernel_events[i][1]);
-        q.finish();
-        std::cout << "Here C - 3" << std::endl;
-
         q.enqueueTask(kernel2, &write_events[i], &kernel_events[i][2]);
-        q.finish();
-        std::cout << "Here C - 4" << std::endl;
-
         q.enqueueTask(kernel3, &write_events[i], &kernel_events[i][3]);
-        q.finish();
-        std::cout << "Here C - 5" << std::endl;
-
         // read data from DDR
         std::vector<cl::Memory> ob;
         if (use_a) {
@@ -423,26 +410,27 @@ int main(int argc, char* argv[]) {
             ob.push_back(out_buff_b[2]);
             ob.push_back(out_buff_b[3]);
         }
-        q.enqueueMigrateMemObjects(ob, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[i], &read_events[i][0]);
-        q.finish();
-        std::cout << "Here C - 6" << std::endl;
-    }
 
-    std::cout << "Here D" << std::endl;
+        q.enqueueMigrateMemObjects(ob, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events[i], &read_events[i][0]);
+        // q.enqueueMigrateMemObjects(ob, CL_MIGRATE_MEM_OBJECT_HOST, &write_events[i], &read_events[i][0]);
+    }
+#endif
     // wait all to finish
-    // q.flush();
-    std::cout << "Here D - 1" << std::endl;
+    q.flush();
     q.finish();
-    std::cout << "Here D - 2" << std::endl;
+
+#ifdef HLS_TEST
+    hmacSha1Kernel_1(hb_in1, hb_out_a[0]);
+#endif
     gettimeofday(&end_time, 0);
-    std::cout << "Here D - 3" << std::endl;
 
     // check result
     bool checked = true;
+
     // check ping buffer
     std::cout << "check ping buffer" << std::endl;
     for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < N_TASK; j++) {
+        for (int j = 0; j < n_task; j++) {
             for (int k = 0; k < CH_NM; k++) {
                 if (hb_out_a[i][j * CH_NM + k] != golden) {
                     checked = false;
@@ -454,10 +442,11 @@ int main(int argc, char* argv[]) {
             }
         }
     }
+#ifndef HLS_TEST
     // check pong buffer
     std::cout << "check pong buffer" << std::endl;
     for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < N_TASK; j++) {
+        for (int j = 0; j < n_task; j++) {
             for (int k = 0; k < CH_NM; k++) {
                 if (hb_out_b[i][j * CH_NM + k] != golden) {
                     checked = false;
@@ -469,15 +458,36 @@ int main(int argc, char* argv[]) {
             }
         }
     }
+#endif
     // final output
     std::cout << std::dec << std::endl;
     if (checked) {
-        std::cout << std::dec << CH_NM << " channels, " << N_TASK << " tasks, " << N_ROW
-                  << " messages verified. No error found!" << std::endl;
+        std::cout << std::dec << CH_NM << " channels, " << n_task << " tasks, " << n_msg
+                  << " bytes message each verified. No error found!" << std::endl;
     }
 
     std::cout << "Kernel has been run for " << std::dec << num_rep << " times." << std::endl;
     std::cout << "Total execution time " << tvdiff(&start_time, &end_time) << "us" << std::endl;
 
-    return 0;
+#ifndef HLS_TEST
+    free(hb_in1);
+    std::cout << "hb_in1 free" << std::endl;
+    free(hb_in2);
+    std::cout << "hb_in1 free" << std::endl;
+    free(hb_in3);
+    std::cout << "hb_in1 free" << std::endl;
+    free(hb_in4);
+    std::cout << "hb_in1 free" << std::endl;
+    for (int i = 0; i < 4; i++) {
+        free(hb_out_a[i]);
+        std::cout << "hb_out_a[" << i << "] free" << std::endl;
+        free(hb_out_b[i]);
+        std::cout << "hb_out_b[" << i << "] free" << std::endl;
+    }
+#endif
+    if (checked) {
+        return 0;
+    } else {
+        return 1;
+    }
 }

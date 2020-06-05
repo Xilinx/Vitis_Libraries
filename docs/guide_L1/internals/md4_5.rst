@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, MD4, MD5, message, digest, algorithms
+   :description: The MD4/MD5 Message-Digest Algorithm is a hash-based cryptographic function. It takes a message of arbitrary length as its input and produces a 128-bit digest.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *************************************
 The MD4/MD5 Message-Digest Algorithms
 *************************************

@@ -257,7 +257,7 @@ LOOP_SHA3_MAIN:
             // generate the last block
             LOOP_GEN_LAST_BLK:
                 for (ap_uint<5> i = 0; i < numMsgWord; ++i) {
-#pragma HLS unroll
+#pragma HLS pipeline II = 1
                     // still have full message words
                     if (i < (left >> 3)) {
                         // XXX algorithm assumes little-endian
@@ -432,7 +432,7 @@ LOOP_SHAKE_MAIN:
             // generate the last block
             LOOP_GEN_LAST_BLK:
                 for (ap_uint<5> i = 0; i < numMsgWord; ++i) {
-#pragma HLS unroll
+#pragma HLS pipeline II = 1
                     // still have full message words
                     if (i < (left >> 3)) {
                         // XXX algorithm assumes little-endian
