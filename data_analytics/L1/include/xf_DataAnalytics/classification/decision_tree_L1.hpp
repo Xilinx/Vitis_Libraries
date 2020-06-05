@@ -18,7 +18,7 @@
  * @file decision_tree.hpp
  * @brief DecisionTree Node data struct in kernel, for both train and predict.
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_CLASSIFICATION_DECISIONTREE_HPP_

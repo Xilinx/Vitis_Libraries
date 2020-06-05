@@ -27,7 +27,7 @@ void dut(hls::stream<ap_uint<dw> > dstrm_batch[MAX_FEA_NUM_],
          hls::stream<bool>& treeTag,
          hls::stream<ap_uint<MAX_CAT_BITS_> >& predictionsStrm,
          hls::stream<bool>& predictionsTag) {
-    xf::data_analytics::classification::dtPredict<DataType, dw, MAX_FEA_NUM_, MAX_TREE_DEPTH_, MAX_CAT_BITS_>(
+    xf::data_analytics::classification::decisionTreePredict<DataType, dw, MAX_FEA_NUM_, MAX_TREE_DEPTH_, MAX_CAT_BITS_>(
         dstrm_batch, estrm_batch, treeStrm, treeTag, predictionsStrm, predictionsTag);
 }
 

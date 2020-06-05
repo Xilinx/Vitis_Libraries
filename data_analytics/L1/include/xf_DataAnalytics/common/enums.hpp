@@ -18,7 +18,7 @@
  * @file enums.hpp
  * @brief Enums declaration.
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_ENUMS_HPP_

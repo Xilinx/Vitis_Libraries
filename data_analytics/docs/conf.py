@@ -39,7 +39,7 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Vitis Security Library'
+project = 'Vitis Data Analytics Library'
 copyright = '2020, Xilinx'
 author = 'Xilinx'
 
@@ -153,7 +153,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'xf_security'
+htmlhelp_basename = 'xf_DataAnalytics'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -180,7 +180,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'xf_security.tex', 'Vitis Security Library',
+    (master_doc, 'xf_DataAnalytics.tex', 'Vitis Data Analytics Library',
      'Xilinx', 'manual'),
 ]
 
@@ -190,7 +190,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'xf_security', 'Vitis Security Library',
+    (master_doc, 'xf_DataAnalytics', 'Vitis Data Analytics Library',
      [author], 1)
 ]
 
@@ -201,7 +201,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'xf_security', 'Vitis Security Library',
+    (master_doc, 'xf_DataAnalytics', 'Vitis Data Analytics Library',
      author, 'Xilinx', 'One line description of project.',
      'Miscellaneous'),
 ]

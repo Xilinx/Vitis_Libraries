@@ -37,3 +37,4 @@ The 1.0 release provides a range of HLS primitives for:
  * Ridge Regression
  * K-Means
  * Stochastic Gradient Descent Optimizer
+ * L-BFGS Optimizer

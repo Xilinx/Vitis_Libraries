@@ -17,7 +17,7 @@
  * @file SGD.hpp
  * @brief Stochastic Gradient Descent Framework
  *
- * This file is part of Vitis ML Library.
+ * This file is part of Vitis Data Analytics Library.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_SGD_HPP_
@@ -37,7 +37,7 @@ namespace common {
 /**
  * @brief Stochasitc Gradient Descent Framework
  *
- * @tparam Gradient, gradient class which suite into this framework.
+ * @tparam Gradient gradient class which suite into this framework.
  */
 template <typename Gradient>
 class SGDFramework {
@@ -85,10 +85,10 @@ class SGDFramework {
     /**
      * @brief Set configs for SGD iteration
      *
-     * @param inputStepSize, steps size of SGD iteration.
-     * @param inputTolerance, convergence tolerance of SGD.
-     * @param inputWithIntercept, if SGD includes intercept or not.
-     * @param inputMaxIter, max iteration number of SGD.
+     * @param inputStepSize steps size of SGD iteration.
+     * @param inputTolerance convergence tolerance of SGD.
+     * @param inputWithIntercept if SGD includes intercept or not.
+     * @param inputMaxIter max iteration number of SGD.
      */
     void setTrainingConfigs(MType inputStepSize,
                             MType inputTolerance,
@@ -103,12 +103,12 @@ class SGDFramework {
     /**
      * @brief Set configs for loading trainging data
      *
-     * @param inputOffset, offset of data in ddr.
-     * @param inputRows, number of rows of training data
-     * @param inputCols, number of features of training data
-     * @param inputBucketSize, bucketSize of jump sampling
-     * @param inputFraction, sample fraction
-     * @param inputIfJump, perform jump scaling or not.
+     * @param inputOffset offset of data in ddr.
+     * @param inputRows number of rows of training data
+     * @param inputCols number of features of training data
+     * @param inputBucketSize bucketSize of jump sampling
+     * @param inputFraction sample fraction
+     * @param inputIfJump perform jump scaling or not.
      */
     void setTrainingDataParams(ap_uint<32> inputOffset,
                                ap_uint<32> inputRows,

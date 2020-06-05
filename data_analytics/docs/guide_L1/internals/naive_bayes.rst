@@ -14,9 +14,9 @@
    limitations under the License.
 
 
-*************************************************
-Internal Design of Multinomial Naive Bayes
-*************************************************
+*************************
+Multinomial Naive Bayes
+*************************
 
 
 Overview

@@ -1,5 +1,5 @@
 {
-    "gui": false,
+    "gui": true,
     "name": "Xilinx Decision Tree Classification Training", 
     "description": "", 
     "flow": "vitis", 
@@ -9,7 +9,7 @@
     "platform_blacklist": [], 
     "launch": [
         {
-            "cmd_args": "-xclbin $(XCLBIN_FILE) -in ml_datasets/ -trn 1000 -ten 100 -fn 26 -cn 2", 
+            "cmd_args": "-xclbin BUILD/decision_tree.xclbin -in PROJECT/ml_datasets/ -trn 1000 -ten 100 -fn 26 -cn 2", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -17,14 +17,15 @@
         "host_exe": "test_decisionTree.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/decisiontree/host/host.cpp", 
+                "host/host.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/decisiontree/host", 
-                "LIB_DIR/ext/xcl2"
+                "host",
+                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
         }
@@ -32,9 +33,9 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/src", 
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include" 
+                "LIB_DIR/L2/include",
+                "LIB_DIR/../utils/L1/include"
             ]
         }
     }, 
@@ -44,7 +45,28 @@
                 {
                     "location": "LIB_DIR/L2/src/classification/decision_tree.cpp", 
                     "frequency": 250.0, 
-                    "name": "DecisionTree"
+                    "name": "DecisionTree",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "DecisionTree",
+                            "slr": "SLR0",
+                            "arguments" : [
+                                {
+                                    "name": "data",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "configs",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "tree",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 250.0, 

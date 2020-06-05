@@ -16,7 +16,7 @@
 
 /**
  * @file decision_tree.hpp
- * @brief interface of ML decisiontree train kernel.
+ * @brief interface of Data Analytics decisiontree train kernel.
  */
 
 #ifndef _XF_DATA_ANALYTICS_CLASSIFICATION_DECISIONTREE_TRAIN_HPP_

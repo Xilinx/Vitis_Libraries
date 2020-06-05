@@ -83,7 +83,7 @@ Ridge Regression uses L2 Update:
 .. math::
     currentstepsize = stepsize\cdot \frac{1}{\sqrt{iterIndex})}
 
-Implementation (inference)
+Implementation (Training)
 ===========================
 
 SGD Framework is basically two parts: gradient calculation and weight update.

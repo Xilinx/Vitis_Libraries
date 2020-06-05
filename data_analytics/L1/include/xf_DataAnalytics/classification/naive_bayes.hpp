@@ -18,7 +18,7 @@
  * @file naive_bayes.hpp
  * @brief Multinomial Naive Bayes function implementation.
  *
-* This file is part of Vitis ML Library.
+* This file is part of Vitis Data Analytics Library.
  */
 
 #ifndef _XF_DATA_ANALYTICS_L1_NAIVE_BAYES_HPP_
