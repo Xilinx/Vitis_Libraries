@@ -14,6 +14,13 @@
    limitations under the License.
 
 
+.. meta::
+   :keywords: Cox-Ross-Rubinstein, Binomial
+   :description: The Cox-Ross-Rubinstein Binomial Tree method is a numerical implementation of the assumptions in the Black-Scholes financial model. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ****************************************************
 Internal Design of Cox-Ross-Rubinstein Binomial Tree
 ****************************************************

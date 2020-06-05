@@ -1,11 +1,50 @@
 {
+    "gui": false,
     "name": "jks.L2.McAsianGPEngine", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/kernel_MCAsianGP.xclbin", 
@@ -16,33 +55,25 @@
         "host_exe": "test.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/MCAsianGPEngine/src/test.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "src/test.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCAsianGPEngine/src", 
-                "REPO_DIR/ext/xcl2", 
-                "REPO_DIR/L2/tests/MCAsianGPEngine/kernel"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCAsianGPEngine/src", 
+                "LIB_DIR/ext/xcl2", 
+                "LIB_DIR/L2/tests/MCAsianGPEngine/kernel"
             ], 
             "options": "-O3 "
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCAsianGPEngine/kernel"
-            ]
-        }, 
-        "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCAsianGPEngine/kernel"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCAsianGPEngine/kernel"
             ]
         }
     }, 
@@ -50,12 +81,13 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/MCAsianGPEngine/kernel/kernel_MCAsianGPEngine.cpp", 
+                    "location": "kernel/kernel_MCAsianGPEngine.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA", 
                     "name": "kernel_MCAsianGP_0"
                 }
             ], 
+            "ldclflags": " --nk kernel_MCAsianGP_0:1:kernel_MCAsianGP_0", 
             "frequency": 300.0, 
             "name": "kernel_MCAsianGP"
         }

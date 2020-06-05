@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Garman Kohlhagen, Foreign Exchange, FX, BSM, Black Scholes Merton
+   :description: The Garman Kohlhagen model prices Foreign Exchgange (FX) Options based on the Black Scholes Merton model.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 ***********************************
 Internal Design of Garman Kohlhagen
@@ -21,7 +27,7 @@ Internal Design of Garman Kohlhagen
 Overview
 ========
 
-The Garman Kohlhagen model prices Foreign Exchgange (FX) Options. It is based on the Black Scholes Merton model, where the BSM interest rate parameter is replaced with the domestic interest rate and the BSM dividend yield parameter is replaced with the foreign interest rate.
+The Garman Kohlhagen model prices Foreign Exchange (FX) Options. It is based on the Black Scholes Merton model, where the BSM interest rate parameter is replaced with the domestic interest rate and the BSM dividend yield parameter is replaced with the foreign interest rate.
 
 
 Design Structure

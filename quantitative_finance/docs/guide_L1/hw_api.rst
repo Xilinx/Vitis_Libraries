@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Quantitative Finance Library, RNG, SobolRsg, BrownianBridge, TrinomialTree, TreeLattice, 1DMesher, OrnsteinUhlenbeckProcess, StochasticProcess1D, HWModel, G2Model, ECIRModel, CIRModel, VModel, HestonModel, BKModel, BSModel
+   :description: L1 module application programming interface reference. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 
 RNG
 -----------------------

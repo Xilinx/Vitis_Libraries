@@ -14,13 +14,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: fintech, Ornstein-Uhlenbeck
+   :description: Ornstein-Uhlenbeck is a stochastic process which uses the Random Number Generator (RNG) to generate locations for mesher.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **************************
 Ornstein-Uhlenbeck Process
 **************************
 
 Overview
 =========
-`Ornstein-Uhlenbeck process` is a stochastic processe which takes the use of Random Number Generator (RNG). Here, we use it to generate locations for mesher. It uses a reference time point :math:`\Delta w` and a time step :math:`\Delta t` to calculate the drift and diffusion. The Ornstein-Uhlenbeck process is a simple stochastic processes, whose feature of interest is its mean-reverting drift term :math:`a(r-x)` and its constant diffusion term :math:`\sigma`.
+`Ornstein-Uhlenbeck process` is a stochastic process which uses the Random Number Generator (RNG) to generate locations for mesher. It uses a reference time point :math:`\Delta w` and a time step :math:`\Delta t` to calculate the drift and diffusion. The Ornstein-Uhlenbeck process is a simple stochastic processes, whose feature of interest is its mean-reverting drift term :math:`a(r-x)` and its constant diffusion term :math:`\sigma`.
 
 The Ornstein-Uhlenbeck process can be described by
 

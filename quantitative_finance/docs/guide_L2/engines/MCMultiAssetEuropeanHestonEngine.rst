@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: MCMultiAssetEuropeanHestonEngine
+   :description: MCMultiAssetEuropeanHestonEngine aims to calculate pay off of European option whose underlying asset is sum of multiple underlying assets. These assets may influence each other which means their volatility is not independent.   
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ***************************************************
 Internal Design of MCMultiAssetEuropeanHestonEngine
 ***************************************************

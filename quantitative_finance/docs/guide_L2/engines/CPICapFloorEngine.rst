@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: consumer price index, CPI
+   :description: A consumer price index (CPI) Cap/Floor is a call/put on the CPI.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 *************************************************
 Internal Design of CPI CapFloor Engine

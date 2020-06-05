@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: European, pricing, engine, MCEuropeanHestonGreeksEngine
+   :description: Greeks is often used to measure the sensitivity of the derivative values to changes in the behavior of the underlying instruments from which they are derived as well as changes in the broader market, such as shifts in interest rates (from STAC-A2).    
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ************************************************
 Internal Design of MCEuropeanHestonGreeksEngine
 ************************************************

@@ -540,10 +540,10 @@ int MCAmerican::runInternal(OptionType optionType,
         m_pCommandQueue->flush();
         m_pCommandQueue->finish();
 
-        // ----------------------------------------------------------------------------------------
-        // Average the outputs from the two pricing kernels, and give the result
-        // back to the caller
-        // ----------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
+// Average the outputs from the two pricing kernels, and give the result
+// back to the caller
+// ----------------------------------------------------------------------------------------
 #if KN2 == 2
         *pOptionPrice = (((KDataType*)m_hostOutputBuffer1)[0] + ((KDataType*)m_hostOutputBuffer2)[0]) / 2.0;
 #else

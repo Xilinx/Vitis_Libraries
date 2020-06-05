@@ -13,13 +13,21 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Barrier, pricing, engine, MCBarrierEngine
+   :description: Barrier option pricing engine uses Monte Carlo Simulation method to estimate the payoff of barrier option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 *************************************************
 Internal Design of Barrier Option Pricing Engine
 *************************************************
 Overview 
 =========
 
-This engine uses Monte Carlo Simulation method to estimate the payoff of barrier option. Here, we assume the process of asset pricing applies to Black-Scholes process.
+The Barrier option pricing engine uses Monte Carlo Simulation method to estimate the payoff of barrier option. Here, we assume the process of asset pricing applies to Black-Scholes process.
 
 Barrier option is a kind of option whose payoff depends on whether the option is effective at the maturity time. Only when the option is effective, the holder of the option has the right, but not the obligation, to buy/sell the underlying asset at the strike price. If the option is effective, the payoff of it will be calculated as the European Option.
 

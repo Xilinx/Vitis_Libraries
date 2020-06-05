@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Model, finance, Cox-Ingersoll-Ross, extended, ECIR
+   :description: The Extended Cox-Ingersoll-Ross (ECIR) model is a mathematical model of the term structure of interest rates. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 *********************************
 Extended Cox-Ingersoll-Ross Model
 *********************************

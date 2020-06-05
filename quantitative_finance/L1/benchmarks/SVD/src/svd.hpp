@@ -22,6 +22,6 @@
 //! store kernel execution results to a csv file
 void generate_output_file(int run, double* output_data, int output_size, std::string operation, std::string file_path);
 
-void benchmark_svd_functions(std::string input_path, std::string xclbinName, std::string output_path, double& errA);
+void benchmark_svd_functions(std::string xclbinName, double& errA);
 
 #endif

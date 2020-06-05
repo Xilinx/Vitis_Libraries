@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Quantitative Finance Library, Quanto
+   :description: The Quanto solution is based on the Black Scholes Merton model, where the BSM dividend yield parameter is replaced with a calculation involving various quanto parameters and the resulting BSM call price multiplied by another Quanto parameter.   
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 *************************
 Internal Design of Quanto

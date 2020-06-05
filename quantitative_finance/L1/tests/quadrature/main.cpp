@@ -20,7 +20,7 @@ double my_sin(double x, void* p) {
     return sin(x);
 }
 
-#define XF_INTEGRAND_FN my_sin 
+#define XF_INTEGRAND_FN my_sin
 #define XF_USER_DATA_TYPE void
 #define MAX_DEPTH 20
 #define MAX_ITERATIONS 10000
@@ -104,8 +104,7 @@ static int test_romberg_rule(double a, double b, double tol, double exp) {
     return 1;
 }
 
-struct test_data_type
-{
+struct test_data_type {
     double a;
     double b;
     double exp;
@@ -121,31 +120,24 @@ int main() {
     double res;
     int ret;
 
-    struct test_data_type test_data[] = 
-    {
-        {0,    0.1,    0.004996},
-        {0,    1.57,   0.999204},
-        {0,    1,      0.459698},
-        {1,    20,     0.132220},
-        {10.5, 20,     -0.883619},
-        {19.8, 20,     0.173240},
-        {-0.3, 0.2,    -0.024730},
-        {-1.3, -0.2,   -0.712568},
+    struct test_data_type test_data[] = {
+        {0, 0.1, 0.004996},    {0, 1.57, 0.999204},  {0, 1, 0.459698},       {1, 20, 0.132220},
+        {10.5, 20, -0.883619}, {19.8, 20, 0.173240}, {-0.3, 0.2, -0.024730}, {-1.3, -0.2, -0.712568},
     };
 
-    for (int i=0; i<sizeof(test_data)/sizeof(test_data_type); i++) {
+    for (int i = 0; i < sizeof(test_data) / sizeof(test_data_type); i++) {
         if (!test_trapezoidal_rule(test_data[i].a, test_data[i].b, tol, test_data[i].exp)) {
             return 1;
         }
     }
 
-    for (int i=0; i<sizeof(test_data)/sizeof(test_data_type); i++) {
+    for (int i = 0; i < sizeof(test_data) / sizeof(test_data_type); i++) {
         if (!test_simpson_rule(test_data[i].a, test_data[i].b, tol, test_data[i].exp)) {
             return 1;
         }
     }
 
-    for (int i=0; i<sizeof(test_data)/sizeof(test_data_type); i++) {
+    for (int i = 0; i < sizeof(test_data) / sizeof(test_data_type); i++) {
         if (!test_romberg_rule(test_data[i].a, test_data[i].b, tol, test_data[i].exp)) {
             return 1;
         }

@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Quantitative Finance Library, l2 kernel, pricing engine, demo, Markov Chain Monte Carlo
+   :description: Vitis quantitative finance library L2 kernel user guide. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ====================================
 L2 Kernel User Guide
 ====================================

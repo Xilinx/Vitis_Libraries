@@ -2,13 +2,51 @@
     "name": "jks.L2.M76Engine", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc*"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
-            "cmd_args": " -f /proj/autoesl/fengx/work/xf_fintech/L2/tests/M76Engine/example_test_data.csv -v -x -b BUILD/m76.xclbin", 
+            "cmd_args": " -f LIB_DIR/L2/tests/M76Engine/example_test_data.csv -v -x -b BUILD/m76.xclbin", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -16,34 +54,38 @@
         "host_exe": "m76_host.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/M76Engine/src/m76_host.cpp", 
-                "REPO_DIR/L2/tests/M76Engine/src/m76_cpu.cpp", 
-                "REPO_DIR/L2/tests/M76Engine/src/m76_parser.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L2/tests/M76Engine/src/m76_host.cpp", 
+                "LIB_DIR/L2/tests/M76Engine/src/m76_cpu.cpp", 
+                "LIB_DIR/L2/tests/M76Engine/src/m76_parser.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/M76Engine/src", 
-                "REPO_DIR/ext/xcl2"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/M76Engine/src", 
+                "LIB_DIR/ext/xcl2"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ", 
+            "symbols": [
+                "TEST_DT=float", 
+                "EVICE_PART=u250"
+            ]
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/M76Engine/src"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/M76Engine/src"
             ]
         }, 
         "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/M76Engine/src"
+            "ldclflags": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/M76Engine/src"
             ]
         }
     }, 
@@ -51,7 +93,7 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/M76Engine/src/m76_kernel.cpp", 
+                    "location": "LIB_DIR/L2/tests/M76Engine/src/m76_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D TEST_DT=float", 
                     "name": "m76_kernel"

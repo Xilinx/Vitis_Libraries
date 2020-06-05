@@ -13,6 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Quantitative Finance Library, pricing, engine, demo, MCEuropeanEngine, MCAmericanEngine
+   :description: Vitis quantitative finance library pricing engine demo. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
 
 ====================================
 Pricing Engines Demo

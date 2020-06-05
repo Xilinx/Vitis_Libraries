@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis Quantitative Finance Library, Black-Scholes-Merton, Heston, European, American, Asian, Barrier, Digital, Cliquet, Binomial Tree, Cox-Ross-Rubinstein, Hull-White, Black-Scholes, Monte Carlo
+   :description: Vitis quantitative finance library provides pricing engines to calculate price. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ***********************
 Pricing Engine Overview
 ***********************

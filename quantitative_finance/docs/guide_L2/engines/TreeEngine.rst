@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Tree Bermudan Swaption, engine, Swap, capfloor, callable
+   :description: Swap engine, swaption engine, capfloor engine and callable engine are all pricing engines to price the interested products.   
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 *************************************************
 Internal Design of Tree Bermudan Swaption Engine
@@ -21,13 +27,11 @@ Internal Design of Tree Bermudan Swaption Engine
 
 Overview
 ========
-Swap engine, swaption engine, capfloor engine and callable engine are all pricing engines to price the interested products. 
-
-The swap is mainly an interest rate swap. For both parties to the swap, the buyer needs execute a specified swap agreement with the issuer on a specified future date.
+Swap engine, swaption engine, capfloor engine and callable engine are all pricing engines to price the interested products. The swap is mainly an interest rate swap. For both parties to the swap, the buyer needs execute a specified swap agreement with the issuer on a specified future date.
 
 The swaption mainly refers to an option to do swap. The buyer acquires the right but not the obligation to enter into a specified swap agreement with the issuer on a specified future date. 
 
-The capfloor include 2 interest rate derivatives: cap, floor. For the interest rate cap, the buyer receives payments from the issuer at the end of each period in which the interest rate exceeds the agreed strike price. For interest rate floor, the buyer receives payments from the issuer at the end of each period in which the interest rate is below the agreed strike price.
+The capfloor includes 2 interest rate derivatives: cap, and floor. For the interest rate cap, the buyer receives payments from the issuer at the end of each period in which the interest rate exceeds the agreed strike price. For interest rate floor, the buyer receives payments from the issuer at the end of each period in which the interest rate is below the agreed strike price.
 
 The callable bond is a type of bond that provides the issuer of the bond with the right, but not the obligation, to redeem the bond on a specified future date before its maturity date.
 

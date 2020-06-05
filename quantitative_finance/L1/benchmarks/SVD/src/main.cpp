@@ -16,20 +16,39 @@
 #include <iostream>
 #include "svd.hpp"
 #include "util.hpp"
+#include <vector>
+#include <algorithm>
+#include <iterator>
 
-int main(int argc, char** argv) {
-    std::string xclbinName = read_verify_env_string("XCLBINNAME");
-    std::string input_path = read_verify_env_string("INPATH");
-    std::string output_path = read_verify_env_string("OUTPATH");
+class ArgParser {
+   public:
+    ArgParser(int& argc, const char** argv) {
+        for (int i = 1; i < argc; ++i) mTokens.push_back(std::string(argv[i]));
+    }
+    bool getCmdOption(const std::string option, std::string& value) const {
+        std::vector<std::string>::const_iterator itr;
+        itr = std::find(this->mTokens.begin(), this->mTokens.end(), option);
+        if (itr != this->mTokens.end() && ++itr != this->mTokens.end()) {
+            value = *itr;
+            return true;
+        }
+        return false;
+    }
 
-    std::cout << "Environment info XCLBINNAME: " << xclbinName << std::endl;
-    std::cout << "Environment info OUTPATH: " << input_path << std::endl;
-    std::cout << "Environment info OUTPATH: " << output_path << std::endl;
+   private:
+    std::vector<std::string> mTokens;
+};
 
-    std::cout << "xclbin is " << xclbinName << std::endl;
+int main(int argc, const char** argv) {
+    ArgParser parser(argc, argv);
+    std::string xclbin_path;
+    if (!parser.getCmdOption("-xclbin", xclbin_path)) {
+        std::cout << "ERROR:xclbin path is not set!\n";
+        return 1;
+    }
 
     double errA;
-    benchmark_svd_functions(input_path, xclbinName, output_path, errA);
+    benchmark_svd_functions(xclbin_path, errA);
 
     if (errA > 0.0001) {
         std::cout << "result false" << std::endl;

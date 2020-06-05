@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Digital, pricing, engine, MCDigitalEngine
+   :description: Digital Option pricing engine uses Monte Carlo Simulation to estimate the value of digital option. Here, we assume the process of asset pricing applies to Black-Scholes process.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ***************************************************
 Internal Design of Digital Option Pricing Engines
 ***************************************************
@@ -20,7 +27,7 @@ Internal Design of Digital Option Pricing Engines
 Overview
 =========
 
-This engine uses Monte Carlo Simulation to estimate the value of digital option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+Digital Option pricing engine uses Monte Carlo Simulation to estimate the value of digital option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
 
 Digital option is an option whose payoff is characterized as having only two potential values: a fixed payout, when the option is in the money or a zero payout otherwise. 
 It is not related to how far the asset price at maturity is above (call) or below (put) the strike.
@@ -28,7 +35,7 @@ It is not related to how far the asset price at maturity is above (call) or belo
 Digital options are attractive to buyers because the option payoff is a known constant amount, and this amount can be adjusted to provide the exact quantity of protection required. It overcomes a fundamental problem with the vanilla options, where the potential loss is unlimited, referring to the wiki.
 
 .. NOTE::
-   Here, we only support one type of digital options:
+   Only one type of digital options is supported:
 
    * Cash-or-nothing option: Pays some fixed amount of cash if the option expires in the money.
    * Asset-or-nothing option (not supported)

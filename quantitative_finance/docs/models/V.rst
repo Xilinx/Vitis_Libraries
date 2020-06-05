@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Model, finance, Vasicek, VModel
+   :description: The Vasicek Model is a mathematical model describing the evolution of interest rates.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ************************
 Vasicek Model
 ************************

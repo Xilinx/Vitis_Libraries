@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: device, enumeration, DeviceManager, getDeviceList, 
+   :description: In order to run any of the models, they must be associated with a particular hardware device. The DeviceManager utility class is used to discover the devices available on a given system. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 
 .. _device_enumeration:
 
@@ -20,10 +26,7 @@
 Device Enumeration
 ********************************
    
-In order to run any of the models, they must be associated with a particular HW device.
-
-To discover the devices available on a given system a utility class (DeviceManager) is provided
-
+In order to run any of the models, they must be associated with a particular hardware device. The DeviceManager utility class made available and is used to discover the devices available on a given system. 
 
 
 The following is an example to show how to enumerate ALL available Xilinx devices on a system:

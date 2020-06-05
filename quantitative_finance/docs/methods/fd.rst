@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Finite Difference, PDE, Heston Pricing Model, Hout, Foulon
+   :description: Finite Difference Methods are a family of numerical techniques to solve partial differential equations (PDEs). 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *************************
 Finite Difference Methods
 *************************

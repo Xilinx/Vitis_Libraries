@@ -1,11 +1,50 @@
 {
+    "gui": false,
     "name": "jks.L2.McDigitalEngine", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/MCDigitalEngine_k.xclbin", 
@@ -16,32 +55,31 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/MCDigitalEngine/host/main.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "host/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCDigitalEngine/host", 
-                "REPO_DIR/L2/tests/MCDigitalEngine/kernel", 
-                "REPO_DIR/ext/xcl2"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCDigitalEngine/host", 
+                "LIB_DIR/L2/tests/MCDigitalEngine/kernel", 
+                "LIB_DIR/ext/xcl2"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ", 
+            "symbols": [
+                "PRAGMA"
+            ]
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCDigitalEngine/kernel"
-            ]
-        }, 
-        "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCDigitalEngine/kernel"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCDigitalEngine/kernel"
+            ], 
+            "symbols": [
+                "HW_EMU_DEBUG"
             ]
         }
     }, 
@@ -49,12 +87,13 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/MCDigitalEngine/kernel/MCDigitalEngine_k.cpp", 
+                    "location": "kernel/MCDigitalEngine_k.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL_NAME=MCDigitalEngine_k", 
                     "name": "MCDigitalEngine_k"
                 }
             ], 
+            "ldclflags": " --nk MCDigitalEngine_k:1:MCDigitalEngine_k", 
             "frequency": 300.0, 
             "name": "MCDigitalEngine_k"
         }

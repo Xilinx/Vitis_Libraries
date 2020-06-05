@@ -161,11 +161,13 @@ int main(int argc, const char* argv[]) {
 
     // Creating Context and Command Queue for selected Device
     cl::Context context(device);
-#ifdef OUT_OF_ORDER
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+#ifdef SW_EMU_TEST
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 #else
-    std::string devName = device.getInfo<CL_DEVICE_NAME>();
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #endif
+
+    std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("Found Device=%s\n", devName.c_str());
 
     // cl::Program::Binaries xclBins =

@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Cliquet, pricing, engine, MCCliquetEngine
+   :description: Cliquet option pricing engine uses Monte Carlo Simulation to estimate the value of Cliquet Option. Here, we assume the process of asset pricing applies to Black-Scholes process.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 
 *************************************************
 Internal Design of Cliquet Option Pricing Engine
@@ -21,7 +28,7 @@ Internal Design of Cliquet Option Pricing Engine
 Overview
 =========
 
-This engine uses Monte Carlo Simulation to estimate the value of Cliquet Option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+The Cliquet option pricing engine uses Monte Carlo Simulation to estimate the value of Cliquet Option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
 
 The Cliquet Option is an exotic option. It is constructed by a series of forward start options. 
 The start dates, also called resets dates, are pre-determined in the contract in advance. Generally, 

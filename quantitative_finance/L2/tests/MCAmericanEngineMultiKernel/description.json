@@ -1,11 +1,52 @@
 {
+    "gui": false,
     "name": "jks.L2.MCAmericanEngine_MultiKernel", 
     "description": "", 
     "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u200"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR",
+                        "KN2=1"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR",
+                        "KN2=2"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -mode fpga -xclbin BUILD/MCAE_k.xclbin", 
@@ -16,32 +57,26 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/src/main.cpp", 
-                "REPO_DIR/ext/xcl2/xcl2.cpp"
+                "src/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/src", 
-                "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel", 
-                "REPO_DIR/ext/xcl2"
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCAmericanEngineMultiKernel/src", 
+                "LIB_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel", 
+                "LIB_DIR/ext/xcl2"
             ], 
-            "options": "-O3 "
+            "options": "-O3 ", 
+            "symbols": []
         }
     }, 
     "v++": {
         "compiler": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel"
-            ]
-        }, 
-        "linker": {
-            "includepath": [
-                "REPO_DIR/L1/include", 
-                "REPO_DIR/L2/include", 
-                "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel"
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel"
             ]
         }
     }, 
@@ -49,30 +84,31 @@
         {
             "accelerators": [
                 {
-                    "location": "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel/MCAE_k0.cpp", 
+                    "location": "kernel/MCAE_k0.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL0 -D KERNEL_NAME=MCAE_k0", 
                     "name": "MCAE_k0"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel/MCAE_k1.cpp", 
+                    "location": "kernel/MCAE_k1.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL1 -D KERNEL_NAME=MCAE_k1", 
                     "name": "MCAE_k1"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel/MCAE_k2.cpp", 
+                    "location": "kernel/MCAE_k2.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL2 -D KERNEL_NAME=MCAE_k2", 
                     "name": "MCAE_k2"
                 }, 
                 {
-                    "location": "REPO_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel/MCAE_k3.cpp", 
+                    "location": "kernel/MCAE_k3.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL3 -D KERNEL_NAME=MCAE_k3", 
                     "name": "MCAE_k3"
                 }
             ], 
+            "ldclflags": " --nk MCAE_k0:1:MCAE_k0 --nk MCAE_k1:1:MCAE_k1 --nk MCAE_k2:1:MCAE_k2 --nk MCAE_k3:1:MCAE_k3", 
             "frequency": 300.0, 
             "name": "MCAE_k"
         }

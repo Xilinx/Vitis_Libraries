@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Merton 76, Closed-Form, Black Scholes, Diffusion, Poisson
+   :description: Merton's Jump Diffusion Model superimposes a jump component on the Black Scholes Diffusion Component. This jump component is composed of log-normal jumps driven by a Poisson process.  
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *********************************
 Merton 76 Closed-Form Solution
 *********************************
