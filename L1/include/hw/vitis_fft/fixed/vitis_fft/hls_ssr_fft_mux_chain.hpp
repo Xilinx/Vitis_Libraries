@@ -42,7 +42,7 @@
 #define HLS_SSR_FFT_MUX_CHAIN_H_
 #include <ap_shift_reg.h>
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -80,6 +80,6 @@ void MuxChain<t_instanceID, t_stage, t_subStage, t_forkNumber, t_PF, 1>::genChai
 }
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_MUX_CHAIN_H_

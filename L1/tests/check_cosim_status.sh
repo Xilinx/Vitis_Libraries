@@ -30,10 +30,10 @@ do
     #echo "Entering Test Directory : $tdir"
     #echo "-------------------------------------------"
     cd $tdir
-    if [ -f "vivado_hls.log" ]; then
+    if [ -f "vitis_hls.log" ]; then
         test_finished=$((test_finished+1))
-        #res=$(grep -i "fail" vivado_hls.log)
-        res=$(grep -i "C/RTL co-simulation finished: PASS" vivado_hls.log)
+        #res=$(grep -i "fail" vitis_hls.log)
+        res=$(grep -i "C/RTL co-simulation finished: PASS" vitis_hls.log)
         echo "--------------------------------------------"
         echo "Test : $tdir"
         if [ -z "$res" ]

@@ -25,7 +25,7 @@
 #include "vitis_fft/hls_ssr_fft_utilities.hpp"
 #include "vitis_fft/hls_ssr_fft_data_commutor.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -140,6 +140,6 @@ void InputTransposeChain<1, t_outputForkingFactor>::swap(t_dtype p_in[t_R][t_L /
 }
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_TRANSPOSER_H_

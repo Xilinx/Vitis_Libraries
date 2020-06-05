@@ -24,7 +24,7 @@
 
 #define HLS_SSR_FFT_DEFAULT_INSTANCE_ID 999999
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -41,6 +41,6 @@ struct FFTIOTypes {
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //__HLS_SSR_FFT_TYPES_H__

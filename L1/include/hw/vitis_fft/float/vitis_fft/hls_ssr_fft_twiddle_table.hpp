@@ -47,7 +47,7 @@
 #include "vitis_fft/hls_ssr_fft_twiddle_table_traits.hpp"
 #include "vitis_fft/hls_ssr_fft_utility_traits.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -197,6 +197,6 @@ T_dtype_in readQuaterTwiddleTableReverse(ap_uint<t_phaseBitWidth> p_index, T_dty
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_TWIDDLE_TALBE_H_

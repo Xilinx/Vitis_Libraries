@@ -51,7 +51,7 @@
 #include "vitis_fft/fft_complex.hpp"
 #define HLS_SSR_FFT_DEFAULT_INSTANCE_ID 999999
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -89,6 +89,6 @@ struct ssr_fft_default_params {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_ENUMS_H_

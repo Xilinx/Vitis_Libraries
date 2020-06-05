@@ -35,7 +35,7 @@
 #include "vitis_fft/hls_ssr_fft_matrix_commutors.hpp"
 #define _HLS_SSR_FFT_2D_FIFO_SIZE__ 8
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -308,6 +308,6 @@ void fft2d(typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStreamType& p_me
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //__HLS_SSR_FFT_FFT_2D__

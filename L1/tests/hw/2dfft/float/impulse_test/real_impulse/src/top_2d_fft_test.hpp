@@ -27,7 +27,7 @@
 #ifndef __SYNTHESIS__
 #include <iostream>
 #endif
-using namespace vitis::dsp::fft;
+using namespace xf::dsp::fft;
 typedef float T_innerData;
 typedef complex_wrapper<T_innerData> T_elemType;
 const int k_memWidthBits = 512;

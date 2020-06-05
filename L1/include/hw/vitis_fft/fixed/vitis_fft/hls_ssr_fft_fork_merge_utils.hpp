@@ -55,7 +55,7 @@
  ========================================================================================
  */
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -317,6 +317,6 @@ void mergeSuperSampleStreamNonInvertOut(
 }
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_FORK_MERGE_UTILS_H_

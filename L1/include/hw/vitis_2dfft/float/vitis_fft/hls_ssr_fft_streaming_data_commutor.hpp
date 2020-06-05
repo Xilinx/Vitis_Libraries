@@ -30,7 +30,7 @@
 #include "vitis_fft/hls_ssr_fft_fork_merge_utils.hpp"
 #include "vitis_fft/fft_complex.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -515,6 +515,6 @@ void DataCommutationsS2Streaming<t_instanceID, t_stage, t_subStage, t_forkNumber
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //__HLS_SSR_FFT_STREAMING_DATA_COMMUTOR_H__

@@ -68,7 +68,7 @@
  ========================================================================================
  */
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -242,6 +242,6 @@ void digitReversalSimulationModel(T_in p_inData[t_R][t_L / t_R], T_out p_outData
 }
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // !HLS_SSR_FFT_DATA_REORDER_H

@@ -29,7 +29,7 @@
 #include <assert.h>
 #endif
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -300,6 +300,6 @@ void transpMemBlocks(typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStream
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //__HLS_SSR_FFT_MATRIX_COMMUTOR_H__

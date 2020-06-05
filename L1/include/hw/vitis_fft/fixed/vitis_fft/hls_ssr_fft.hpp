@@ -43,7 +43,7 @@
 
 #if 1
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -2418,7 +2418,7 @@ void fftKernel(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N
 
 } // namespace fft
 } // namespace dsp
-} // namespace vitis
+} // namespace xf
 
 #endif
 

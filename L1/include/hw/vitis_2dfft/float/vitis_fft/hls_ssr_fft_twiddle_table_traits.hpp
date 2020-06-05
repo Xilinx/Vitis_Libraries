@@ -65,7 +65,7 @@
 #define HLS_SSR_FFT_MIN_SIN_COS_TABLE_LEN 16
 #endif
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -178,6 +178,6 @@ struct TwiddleTypeCastingTraits<complex_wrapper<ap_fixed<IL, FL, A_Q, A_OVF, N> 
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_TWIDDLE_TABLE_TRAITS_H_

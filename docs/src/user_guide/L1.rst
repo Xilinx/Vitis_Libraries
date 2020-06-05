@@ -47,7 +47,7 @@ The structure above defines:
 
 .. code-block:: cpp
 
-   vitis::dsp::fft::fft<fftParams><ssr_fft_fix_params>(...);
+   xf::dsp::fft::fft<fftParams><ssr_fft_fix_params>(...);
 
 Multi-Instance Support
 ======================
@@ -55,17 +55,9 @@ The current release of Vitis FFT supports the use of multiple instances of 1-D S
 
 .. code-block:: cpp
    
-   vitis::dsp::fft::fft<fftParams,1><ssr_fft_fix_params>(...);
-   vitis::dsp::fft::fft<fftParams,2><ssr_fft_fix_params>(...);
+   xf::dsp::fft::fft<fftParams,1><ssr_fft_fix_params>(...);
+   xf::dsp::fft::fft<fftParams,2><ssr_fft_fix_params>(...);
 
-
-
-Performance
-===========
-The FFT throughput (initiation interval) can be calculated as L/R where R is the SSR value and L
-is the number of samples to be transformed. The possible values for R (SSR values) are: 2,4,8,16.
-These values allow for a Fmax range of **300-550 MHz** when targeting the slowest of UltraScale+
-speed-grade devices.
 
 Data Type Support for Synthesis
 ===============================
@@ -148,7 +140,7 @@ the support for synthesis and simulation.
 |                              |                           |                            |
 +------------------------------+---------------------------+----------------------------+
 |                              |                           |                            |
-|      complex_wrapper<float>  |              NO           |              YES           |
+|      complex_wrapper<double> |              NO           |              YES           |
 |                              |                           |                            |
 +------------------------------+---------------------------+----------------------------+
 |                              |                           |                            |
@@ -268,7 +260,7 @@ The Vitis 1-D FFT L1 module can be used in a C++ HLS design by:
 
 2- Include ``vt_fft.hpp``
 
-3- Use namespace ``vitis::dsp::fft``
+3- Use namespace ``xf::dsp::fft``
 
 4- Define fft parameter structure say call it ``params_fix`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D FFT Parameter Structure <FIXED_FFT_PARAMS_STRUCT_LABEL>`
 
@@ -285,11 +277,11 @@ To use the 1-D SSR FFT L1 module:
 
   #include "vt_fft.hpp"
 
-2. Use namespace ``vitis::dsp::fft``
+2. Use namespace ``xf::dsp::fft``
 
 .. code-block:: cpp
 
-   using namespace vitis::dsp::fft;
+   using namespace xf::dsp::fft;
 
 3. Define a C++ structure that extends ``ssr_fft_default_params``:
 
@@ -337,7 +329,7 @@ The Vitis 1-D FFT L1 module can be used in a C++ HLS design by:
 
 2- Include ``vt_fft.hpp``
 
-3- Use namespace ``vitis::dsp::fft``
+3- Use namespace ``xf::dsp::fft``
 
 4- Define fft parameter structure lets say call it ``params_float`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D FFT Parameter Structure <FLOAT_FFT_PARAMS_STRUCT_LABEL>`
 
@@ -354,11 +346,11 @@ To use the 1-D SSR FFT L1 module:
 
   #include "vt_fft.hpp"
 
-2. Use namespace ``vitis::dsp::fft``
+2. Use namespace ``xf::dsp::fft``
 
 .. code-block:: cpp
 
-   using namespace vitis::dsp::fft;
+   using namespace xf::dsp::fft;
 
 3. Define a C++ structure that extends ssr_fft_default_params:
 
@@ -395,7 +387,7 @@ mode based bit-growth and input bit-widths not relevant for type float).
 .. code-block:: cpp
 
 	typedef std::complex< float > I_TYPE;
-	typedef vitis::dsp::fft::ssr_fft_output_type<ssr_fft_params,I_TYPE>::t_ssr_fft_out O_TYPE;
+	typedef xf::dsp::fft::ssr_fft_output_type<ssr_fft_params,I_TYPE>::t_ssr_fft_out O_TYPE;
 	I_TYPE inD[SSR_FFT_R][SSR_FFT_L/SSR_FFT_R];
 	O_TYPE outD [R][L/R];
 
@@ -534,7 +526,7 @@ The following sections provides brief details of examples provided for 1-D Super
 
 1-D Fixed Point FFT Example 
 ----------------------------------------------------------
-The example below follows the sequence of steps described in previous sections to do a transform on impulse signal. The listing give below  ``data_path.hpp`` describes the datapath, by defining size,SSR, data-path bit-widths, scaling mode, out order etc.  It also includes top level library interfce header ``vt_fft.hpp``  which gives to ``fft``  function defined in namespace ``vitis::dsp::fft``
+The example below follows the sequence of steps described in previous sections to do a transform on impulse signal. The listing give below  ``data_path.hpp`` describes the datapath, by defining size,SSR, data-path bit-widths, scaling mode, out order etc.  It also includes top level library interfce header ``vt_fft.hpp``  which gives to ``fft``  function defined in namespace ``xf::dsp::fft``
 
 
 .. code-block:: cpp
@@ -545,7 +537,7 @@ The example below follows the sequence of steps described in previous sections t
 	#include <ap_fixed.h>
 	#include <complex>
 	#include "vt_fft.hpp"
-	using namespace vitis::dsp::fft;
+	using namespace xf::dsp::fft;
 
 	// Define FFT Size and Super Sample Rate
 	#define FFT_LEN 16
@@ -592,7 +584,7 @@ The listing ``top_module.hpp`` and ``top_module.cpp`` declare and define top lev
 	#include "top_module.hpp"
 	#include "data_path.hpp"
 	void fft_top(T_in p_inData[SSR][FFT_LEN / SSR], T_out p_outData[SSR][FFT_LEN / SSR]) {
-	    vitis::dsp::fft::fft<fftParams, IID>(p_inData, p_outData);
+	    xf::dsp::fft::fft<fftParams, IID>(p_inData, p_outData);
 	}
 
 The listing below gives main funtion that generates impulse data for FFT input in a 2-dimensional array which is SSRx(Size/SRR) and feeds it to top level which produces a 2-dimensional output array of same dimensions. The impulse input produces a step which is verified and test declared as passed.
@@ -674,7 +666,7 @@ which is simple as compared to fixed point since data-path constants scaling typ
 	#include <ap_fixed.h>
 	#include <complex>
 	#include "vt_fft.hpp"
-	using namespace vitis::dsp::fft;
+	using namespace xf::dsp::fft;
 
 	// Define FFT Size and Super Sample Rate
 	#define FFT_LEN 16
@@ -708,7 +700,7 @@ The following two listings ``top_moduel.hpp`` and ``top_module.cpp`` give top le
 	#include "top_module.hpp"
 	#include "data_path.hpp"
 	void fft_top(T_in p_inData[SSR][FFT_LEN / SSR], T_out p_outData[SSR][FFT_LEN / SSR]) {
-	vitis::dsp::fft::fft<fftParams, IID>(p_inData, p_outData);
+	xf::dsp::fft::fft<fftParams, IID>(p_inData, p_outData);
 
 The listing below ``main.cpp`` gives main function which creates and impulse input and verfies if the correct output is produced. The only significant change w.r.t to fixed point is the data type declaration and the param struct otherwise this example is very the same like the use of fixed point FFT.
 
@@ -803,3 +795,32 @@ Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the te
    source ${XILINX_VIVADO}/settings64.sh
 
 Once the install paths are setup launch the bash script named "run_all_cosim_tests.sh" to run all the tests.
+
+
+L1 Performance Benchmarks and QoR
+============================================
+The FFT throughput (initiation interval) can be calculated as L/R where R is the SSR value and L
+is the number of samples to be transformed. The possible values for R (SSR values) are: 2,4,8,16.
+These values allow for a Fmax range of **300-550 MHz** when targeting the slowest of UltraScale+
+speed-grade devices. 
+
+1-D Fixed Point FFT
+----------------------
+Following table gives the performance of 1-dimensional FFT for 27 bit fixed point complex input. Different SSR factors and FFT sizes are reported for comparison in terms of performance and resource utilization. The synthesis is performed for Alveo U250 FPGA part. From the table it is clear that SSR FFT when synthezied with size upto 4K can run with fmax ranging from 500 to 300 MHz. The results are reported for post place and route. The routing and placement is done using standard Vivado place and route flow no manual floorplanning or routing is done at all.
+
+
+.. csv-table:: 1-D Fixed Point FFT Performance and QoR Results
+   :file: ../csv_data_files/fft_l1_fixed_point_bench.csv
+   :align: center
+   :header: "Size","SSR","fmax(MHz)","Performance (GSPS)","Performance (2D-FFT/Sec) xMillion","Performance (GOPs)","DSPs","LUT (x1000)","FF (x1000)","BRAM","CP(ns)","II (Cycles)","FPGA/BOARD","Bandwidth (Gbytes/sec)"
+
+1-D Floating Point (fp32) FFT
+----------------------------------------
+
+Following table gives the performance of 1-dimensional FFT floating point (fp32) complex input under similar setting as used for fixed point 1-D FFT. For floating point types generally the resource usages is larger than fixed point because of larger data-path and need for more complicated compute units for doing operations such as addition, multiplication, comparison etc. The results are reported for post place and route. The routing and placement is done using standard Vivado place and route flow no manual floorplanning or routing is done at all.
+
+.. csv-table:: 1-D Floating Point (FP32) FFT Performance and QoR Results
+   :file: ../csv_data_files/fft_l1_fp32_bench.csv
+   :align: center
+   :header: "Size","SSR","fmax(MHz)","Performance (GSPS)","Performance (2D-FFT/Sec) xMillion","Performance (GOPs)","DSPs","LUT (x1000)","FF (x1000)","BRAM","CP(ns)","II (Cycles)","FPGA/BOARD","Bandwidth (Gbytes/sec)"
+

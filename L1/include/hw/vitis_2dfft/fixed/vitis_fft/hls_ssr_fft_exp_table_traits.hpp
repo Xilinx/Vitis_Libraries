@@ -47,7 +47,7 @@
  ========================================================================================
  */
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -62,6 +62,6 @@ struct ComplexExpTableTraits<std::complex<T> > {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_EXP_TABLE_TRAITS_H_

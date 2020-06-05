@@ -36,7 +36,7 @@ advanced users can easily tailor, optimize or combine them for their own needs.
 Demos and usage examples of different level implementations are also provided
 for reference. 
 
-**Note**: Current release of the Vitis FFT only provides L1 primitives. L2 and L3 kernels and applications APIs are planned to be provided in next releases. 
+**Note**: Current release of the Vitis FFT only provides L1 primitives, and it does not support vitis_hls.
 
 .. toctree::
    :caption: Library Overview
