@@ -24,7 +24,7 @@ using namespace xf::fintech;
 #define XSTR(X) STR(X)
 #define STR(X) #X
 
-fdbslv::fdbslv(int N, int M) {
+fdbslv::fdbslv(int N, int M, std::string xclbin_file) {
     m_pContext = nullptr;
     m_pCommandQueue = nullptr;
     m_pProgram = nullptr;
@@ -47,6 +47,7 @@ fdbslv::fdbslv(int N, int M) {
 
     m_N = N;
     m_M = M;
+    m_xclbin_file = xclbin_file;
 }
 
 fdbslv::~fdbslv() {
@@ -73,7 +74,7 @@ int fdbslv::createOCLObjects(Device* device) {
     }
 
     if (cl_retval == CL_SUCCESS) {
-        xclbinName = "fd_bs_lv_kernel_N128_M256.xclbin";
+        xclbinName = m_xclbin_file;
 
         start = std::chrono::high_resolution_clock::now();
         m_binaries.clear();

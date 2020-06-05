@@ -14,7 +14,7 @@
    limitations under the License.
 
 .. meta::
-   :keywords: Vitis Quantitative Finance Library, RNG, SobolRsg, BrownianBridge, TrinomialTree, TreeLattice, 1DMesher, OrnsteinUhlenbeckProcess, StochasticProcess1D, HWModel, G2Model, ECIRModel, CIRModel, VModel, HestonModel, BKModel, BSModel
+   :keywords: Vitis Quantitative Finance Library, RNG, SobolRsg, BrownianBridge, TrinomialTree, TreeLattice, 1DMesher, OrnsteinUhlenbeckProcess, StochasticProcess1D, HWModel, G2Model, ECIRModel, CIRModel, VModel, HestonModel, BKModel, BSModel, Interpolation, Distribution, XoShiRo128, Covariance
    :description: L1 module application programming interface reference. 
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
@@ -36,6 +36,19 @@ Defined in <xf_fintech/rng.hpp>
      class :ref:`MT19937BoxMullerNomralRng<doxid-classxf_1_1fintech_1_1_m_t19937_box_muller_normal_rng>`
      class :ref:`MT2203IcnRng<doxid-classxf_1_1fintech_1_1_m_t2203_icn_rng>`
      class :ref:`MultiVariateNormalRng<doxid-classxf_1_1fintech_1_1_multi_variate_normal_rng>`
+
+XoShiRo128
+----------
+
+Defined in <xf_fintech/xoshiro128.hpp>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+     :class: overview-code-block
+
+     class :ref:`XoShiRo128PlusPlus <doxid-classxf_1_1fintech_1_1_xo_shi_ro128_plus_plus>`
+     class :ref:`XoShiRo128Plus <doxid-classxf_1_1fintech_1_1_xo_shi_ro128_plus>`
+     class :ref:`XoShiRo128StarStar <doxid-classxf_1_1fintech_1_1_xo_shi_ro128_star_star>`
 
 
 SobolRsg
@@ -218,12 +231,6 @@ Defined in <xf_fintech/bs_model.hpp>
 
      class :ref:`BSModel <doxid-classxf_1_1fintech_1_1_b_s_model>`
 
-.. toctree::
-   :maxdepth: 2
-
-.. include:: ../rst_L1/namespace_xf_fintech.rst
-    :start-after: FunctionSection
-
 PCA
 --------------------------------
 
@@ -234,3 +241,44 @@ Defined in <xf_fintech/pca.hpp>
      :class: overview-code-block
 
      class :ref:`PCA <doxid-classxf_1_1fintech_1_1_p_c_a>`
+
+
+BicubicSplineInterpolation
+--------------------------------
+
+Defined in <xf_fintech/bicubic_spline_interpolation.hpp>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+     :class: overview-code-block
+
+     class :ref:`BicubicSplineInterpolation <doxid-classxf_1_1fintech_1_1_bicubic_spline_interpolation>`
+
+CubicInterpolation
+------------------
+
+Defined in <xf_fintech/cubic_interpolation.hpp>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+     :class: overview-code-block
+
+     class :ref:`CubicInterpolation <doxid-classxf_1_1fintech_1_1_cubic_interpolation>`
+
+BinomialDistribution
+--------------------
+
+Defined in <xf_fintech/binomial_distribution.hpp>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. ref-code-block:: cpp
+     :class: overview-code-block
+
+     class :ref:`BinomialDistribution <doxid-classxf_1_1fintech_1_1_binomial_distribution>`
+
+.. toctree::
+   :maxdepth: 2
+
+.. include:: ../rst_L1/namespace_xf_fintech.rst
+    :start-after: FunctionSection
+

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_pentadiag_pcr", 
+    "name": "Xilinx Pentadiag Pcr Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,7 +1,7 @@
 {
-    "name": "L2 Portfolio Optimisation", 
+    "name": "Xilinx Portfolio Optimisation Engine", 
     "description": [
-        "L2 Portfolio Optimisation"
+        "L2 Portfolio Optimisation Engine"
         ], 
     "flow": "vitis", 
     "platform_type": "pcie",

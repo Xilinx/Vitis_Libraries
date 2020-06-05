@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_binomial_pmf", 
+    "name": "Xilinx Binomial PMF Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

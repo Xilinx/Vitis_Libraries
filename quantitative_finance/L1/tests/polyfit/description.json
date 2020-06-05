@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_polyfit", 
+    "name": "Xilinx Polyfit Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

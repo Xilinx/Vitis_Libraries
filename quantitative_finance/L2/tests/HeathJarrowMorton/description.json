@@ -1,7 +1,9 @@
 {
-    "name": "L2 HeathJarrowMorton", 
+    "gui": false,
+    "name": "Xilinx Heath Jarrow Morton Model", 
     "description": "Heath Jarrow Morton Engine", 
     "flow": "vitis", 
+    "gui": "false", 
     "platform_type": "pcie", 
     "platform_whitelist": [
         "u250", 
@@ -38,7 +40,7 @@
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/../Vitis_Libraries/solver/L2/include", 
+                "LIB_DIR/../solver/L2/include", 
                 "LIB_DIR/L2/tests/HeathJarrowMorton/kernel"
             ]
         } 

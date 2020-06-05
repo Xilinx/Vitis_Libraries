@@ -25,8 +25,10 @@
 
 using namespace xf::fintech;
 
-int check_result(float calculated, float expected, float tolerance) {
+static float tolerance = 0.001;
+int check(float calculated, float expected, float tolerance) {
     if (std::abs(calculated - expected) > tolerance) {
+        printf("ERROR: expected %0.6f, got %0.6f\n", expected, calculated);
         return 0;
     }
     return 1;
@@ -34,7 +36,7 @@ int check_result(float calculated, float expected, float tolerance) {
 
 int main(int argc, char** argv) {
     int retval = XLNX_OK;
-    float tolerance = 0.0001;
+    float tolerance = 0.001;
 
     std::string path = std::string(argv[1]);
 
@@ -65,6 +67,7 @@ int main(int argc, char** argv) {
 
     retval = cfQuanto.claimDevice(pChosenDevice);
 
+    int ret = 0; // assume pass
     if (retval == XLNX_OK) {
         // Populate the asset data...
         for (unsigned int i = 0; i < numAssets; i++) {
@@ -102,6 +105,26 @@ int main(int argc, char** argv) {
                    cfQuanto.delta[i], cfQuanto.gamma[i], cfQuanto.vega[i], cfQuanto.theta[i], cfQuanto.rho[i]);
         }
 
+        // quick fix to get pass/fail criteria
+        if (!check(cfQuanto.optionPrice[numAssets - 2], 47.74052, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfQuanto.delta[numAssets - 2], 0.68087, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfQuanto.gamma[numAssets - 2], 0.00238, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfQuanto.vega[numAssets - 2], 0.34321, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfQuanto.theta[numAssets - 2], -0.03394, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfQuanto.rho[numAssets - 2], 0.33964, tolerance)) {
+            ret = 1;
+        }
+
         printf(
             "[XLNX] "
             "+-------+----------+----------+----------+----------+----------+------"
@@ -113,5 +136,10 @@ int main(int argc, char** argv) {
 
     cfQuanto.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+    }
+    return ret;
 }

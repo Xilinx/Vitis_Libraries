@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_mt2203_test", 
+    "name": "Xilinx Mersenne Twister 2203 RNG Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

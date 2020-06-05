@@ -25,6 +25,17 @@
 
 using namespace xf::fintech;
 
+static float tolerance = 0.001;
+
+static int check(float actual, float expected, float tol) {
+    int ret = 1; // assume pass
+    if (std::abs(actual - expected) > tol) {
+        printf("ERROR: expected %0.6f, got %0.6f\n", expected, actual);
+        ret = 0;
+    }
+    return ret;
+}
+
 int main(int argc, char** argv) {
     int retval = XLNX_OK;
 
@@ -62,6 +73,7 @@ int main(int argc, char** argv) {
 
     retval = cfGarmanKohlhagen.claimDevice(pChosenDevice);
 
+    int ret = 0; // assume pass
     if (retval == XLNX_OK) {
         // Populate the asset data...
         for (unsigned int i = 0; i < numAssets; i++) {
@@ -96,6 +108,26 @@ int main(int argc, char** argv) {
                    cfGarmanKohlhagen.vega[i], cfGarmanKohlhagen.theta[i], cfGarmanKohlhagen.rho[i]);
         }
 
+        // quick fix to get pass/fail criteria
+        if (!check(cfGarmanKohlhagen.optionPrice[numAssets - 1], 16.63863, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfGarmanKohlhagen.delta[numAssets - 1], 0.59054, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfGarmanKohlhagen.gamma[numAssets - 1], 0.00869, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfGarmanKohlhagen.vega[numAssets - 1], 0.16683, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfGarmanKohlhagen.theta[numAssets - 1], -0.07054, tolerance)) {
+            ret = 1;
+        }
+        if (!check(cfGarmanKohlhagen.rho[numAssets - 1], 0.09181, tolerance)) {
+            ret = 1;
+        }
+
         printf(
             "[XLNX] "
             "+-------+----------+----------+----------+----------+----------+------"
@@ -105,5 +137,10 @@ int main(int argc, char** argv) {
 
     cfGarmanKohlhagen.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+    }
+    return ret;
 }

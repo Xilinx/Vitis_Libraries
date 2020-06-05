@@ -106,20 +106,23 @@ int main(int argc, const char* argv[]) {
 
     std::string mode = {"hw"};
     unsigned int requiredSamples;
+    // golden value from Heston Closed form in STAC-A2.
+    TEST_DT golden[8] = {-0.047598475,    -0.108130457089, 0.506724428909,   1.0020988446,
+                         -4.348313105e-6, 0.406696644,     -3.4746136286e-6, 0.00260451088};
+
     if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
         mode = std::getenv("XCL_EMULATION_MODE");
     }
+    TEST_DT max_tolerance = 0;
     if (mode.compare("hw_emu") == 0) {
-        timeSteps = 1;
+        timeSteps = 3;
         requiredSamples = 1024;
+        max_tolerance = 0.2;
     } else {
         requiredSamples = 4096;
+        max_tolerance = 0.03;
     }
     unsigned int maxSamples = 1000000;
-
-    // goledn value from Heston Closed form in STAC-A2.
-    TEST_DT golden[8] = {-0.047598475,    -0.108130457089, 0.506724428909,   1.0020988446,
-                         -4.348313105e-6, 0.406696644,     -3.4746136286e-6, 0.00260451088};
 
 #ifndef HLS_TEST
     // do pre-process on CPU
@@ -205,9 +208,12 @@ int main(int argc, const char* argv[]) {
                    timeLength, timeSteps, requiredSamples, maxSamples, seed, requiredTolerance, outputs);
 #endif
 
-    std::cout << "difference :" << std::endl;
     for (int i = 0; i < 8; ++i) {
-        std::cout << "    " << i << ": " << std::fabs(golden[i] - outputs[i]) << std::endl;
+        TEST_DT er = std::fabs(golden[i] - outputs[i]); /// std::fabs(golden[i]);
+        if (er > max_tolerance) {
+            std::cout << "difference[" << i << "]: " << er << std::endl;
+            return -1;
+        }
     }
     std::cout << "theta: " << outputs[0] << ", rho: " << outputs[1] << ", delta: " << outputs[2]
               << ", gamma: " << outputs[3] << ", MV_kappa: " << outputs[4] << ", MV_theta: " << outputs[5]

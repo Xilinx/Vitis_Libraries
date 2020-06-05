@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_poisson_pmf", 
+    "name": "Xilinx Poisson PMF Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

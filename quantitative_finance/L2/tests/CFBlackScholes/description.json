@@ -1,5 +1,5 @@
 {
-    "name": "L2 CFBlackScholes", 
+    "name": "Xilinx Closed Form Black Scholes Model", 
     "description": "L2 Closed Form Black Scholes Model", 
     "flow": "vitis", 
     "platform_type": "pcie", 

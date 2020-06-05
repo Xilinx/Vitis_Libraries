@@ -1,6 +1,6 @@
 {
-    "gui": false,
-    "name": "jks.L2.treeSwaptionEngineBKModel", 
+    "gui": true,
+    "name": "Xilinx Tree Swaption Engine BK Model Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -90,10 +90,34 @@
                     "location": "kernel/TREE_k0.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D DPRAGMA -D KERNEL_NAME=TREE_k0", 
-                    "name": "TREE_k0"
+                    "name": "TREE_k0",
+		    "num_compute_units": 1,
+		    "compute_units": [
+			{
+			    "name": "TREE_k0",
+			    "slr": "SLR0",
+			    "arguments": [
+				{
+				    "name": "initTime",
+				    "memory": "DDR[0]"
+				},
+				{
+				    "name": "exerciseCnt",
+				    "memory": "DDR[0]"
+				},
+				{
+				    "name": "floatingCnt",
+				    "memory": "DDR[0]"
+				},
+				{
+				    "name": "fixedCnt",
+				    "memory": "DDR[0]"
+				}
+			    ]
+			}
+		    ]
                 }
             ], 
-            "ldclflags": " --nk TREE_k0:1:TREE_k0", 
             "frequency": 300.0, 
             "name": "TREE_k"
         }

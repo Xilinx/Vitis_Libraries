@@ -65,7 +65,7 @@ class LMMController : public OCLController {
  */
 class LMM {
    public:
-    LMM();
+    LMM(std::string xclbinfile);
     virtual ~LMM() {}
 
     /**

@@ -1,7 +1,7 @@
 {
-    "name": "L2 Quanto", 
+    "name": "Xilinx Quanto Options Model", 
     "description": [
-        "L2 Quanto"
+        "L2 Quanto Options Model"
         ], 
     "flow": "vitis", 
     "platform_type": "pcie",

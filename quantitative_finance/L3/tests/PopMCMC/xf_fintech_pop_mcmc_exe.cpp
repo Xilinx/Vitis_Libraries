@@ -24,9 +24,17 @@
 
 using namespace xf::fintech;
 
-int main() {
+static float tolerance = 0.001;
+
+int main(int argc, char** argv) {
+    std::string path = std::string(argv[1]);
     // population mcmc fintech model
-    PopMCMC popmcmc;
+    PopMCMC popmcmc(path);
+
+    std::string device = TOSTRING(DEVICE_PART);
+    if (argc == 3) {
+        device = std::string(argv[2]);
+    }
 
     int retval = XLNX_OK;
 
@@ -35,7 +43,7 @@ int main() {
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    deviceList = DeviceManager::getDeviceList("u250");
+    deviceList = DeviceManager::getDeviceList(device);
 
     if (deviceList.size() == 0) {
         printf("No matching devices found\n");
@@ -69,12 +77,25 @@ int main() {
     }
 
     static const int maxSamples = 5000;
-    int numSamples = 5000;
-    int numBurnInSamples = 500;
     double sigma = 0.4;
     double outputData[maxSamples];
     long long int lastRuntime = 0;
     FILE* fp;
+
+    std::string mode_emu = "hw_emu";
+    if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
+        mode_emu = std::getenv("XCL_EMULATION_MODE");
+    }
+    std::cout << "Running in " << mode_emu << " mode" << std::endl;
+
+    int numSamples = 5000;
+    int numBurnInSamples = 500;
+    double checkValue = 0.847094;
+    if (mode_emu == "hw_emu") {
+        numSamples = 2;
+        numBurnInSamples = 0;
+        checkValue = 0.661728;
+    }
 
     retval = popmcmc.run(numSamples, numBurnInSamples, sigma, outputData);
     lastRuntime = popmcmc.getLastRunTime();
@@ -98,5 +119,15 @@ int main() {
     printf("[XF_FINTECH] PopMCMC releasing device...\n");
     retval = popmcmc.releaseDevice();
 
-    return 0;
+    // quick fix to get pass/fail criteria
+    int ret = 0; // assume pass
+    if (std::abs(outputData[(numSamples - numBurnInSamples) - 1] - checkValue) > tolerance) {
+        printf("Value = %f\n", outputData[(numSamples - numBurnInSamples) - 1]);
+        printf("FAIL\n");
+        ret = 1;
+    } else {
+        printf("PASS\n");
+    }
+
+    return ret;
 }

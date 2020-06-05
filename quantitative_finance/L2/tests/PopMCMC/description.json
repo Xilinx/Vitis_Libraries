@@ -1,6 +1,6 @@
 {
-    "name": "L2 PopMCMC", 
-    "description": "L2 PopMCMC", 
+    "name": "Xilinx Population Based Markov Chain Monte Carlo Model", 
+    "description": "L2 Population Based Markov Chain Monte Carlo Model", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [

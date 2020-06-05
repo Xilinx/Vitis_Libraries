@@ -1,5 +1,5 @@
 {
-    "name": "L2 CFBlack76", 
+    "name": "Xilinx Closed Form Black 76 Model", 
     "description": "L2 Closed Form Black 76 Model", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -12,8 +12,19 @@
     ], 
     "launch": [
         {
-            "cmd_args": " BUILD/b76_kernel.xclbin 4096", 
-            "name": "generic launch for all flows"
+            "target": "hw_emu",
+            "cmd_args": " BUILD/b76_kernel.xclbin 16",
+            "name": "hw_emu-launch"
+        },
+        {
+            "target": "sw_emu",
+            "cmd_args": " BUILD/b76_kernel.xclbin 16384", 
+            "name": "sw_emu-launch"
+        },
+        {
+            "target": "hw",
+            "cmd_args": " BUILD/b76_kernel.xclbin 4194304", 
+            "name": "hw-launch"
         }
     ], 
     "host": {
@@ -63,6 +74,7 @@
         ], 
         "targets": [
             "vitis_sw_emu", 
+            "vitis_hw_emu", 
             "vitis_hw"
         ], 
         "category": "canary"

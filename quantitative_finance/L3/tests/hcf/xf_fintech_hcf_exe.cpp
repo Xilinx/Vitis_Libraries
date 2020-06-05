@@ -76,9 +76,15 @@
 
 using namespace xf::fintech;
 
-int main() {
+int main(int argc, char** argv) {
     // binomial tree fintech model...
-    hcf hcf;
+    std::string path = std::string(argv[1]);
+    hcf hcf(path);
+
+    std::string device = TOSTRING(DEVICE_PART);
+    if (argc == 3) {
+        device = std::string(argv[2]);
+    }
 
     int retval = XLNX_OK;
 
@@ -87,9 +93,8 @@ int main() {
     std::vector<Device*> deviceList;
     Device* pChosenDevice;
 
-    // Get a list of U200s available on the system (just because our current
-    // bitstreams are built for U200s)
-    deviceList = DeviceManager::getDeviceList("u250");
+    // device passed in command line args
+    deviceList = DeviceManager::getDeviceList(device);
 
     if (deviceList.size() == 0) {
         printf("No matching devices found\n");
@@ -147,6 +152,7 @@ int main() {
     }
 
     static const int numberOptions = 16;
+    int ret = 0; // assume pass
     if (retval == XLNX_OK) {
         printf("[XF_FINTECH] Multiple Options European Call [%d]\n", numberOptions);
 
@@ -185,10 +191,19 @@ int main() {
                 "microseconds)\n",
                 executionTime, executionTime / numberOptions);
         }
+        // quick fix to get pass/fail criteria
+        if (std::abs(outputData[numberOptions - 1] - 33.002968) > 0.001) {
+            ret = 1;
+        }
     }
 
     printf("[XF_FINTECH] HCF releasing device...\n");
     retval = hcf.releaseDevice();
 
-    return 0;
+    if (!ret) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+    }
+    return ret;
 }

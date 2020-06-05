@@ -25,7 +25,7 @@ using namespace xf::fintech;
 #define XSTR(X) STR(X)
 #define STR(X) #X
 
-hcf::hcf() {
+hcf::hcf(std::string xclbin_file) {
     m_pContext = nullptr;
     m_pCommandQueue = nullptr;
     m_pProgram = nullptr;
@@ -39,6 +39,8 @@ hcf::hcf() {
 
     m_dw = 0.5;
     m_w_max = 200;
+
+    m_xclbin_file = xclbin_file;
 }
 
 hcf::~hcf() {
@@ -48,16 +50,7 @@ hcf::~hcf() {
 }
 
 std::string hcf::getXCLBINName(Device* device) {
-    std::string xclbinName;
-    std::string deviceTypeString;
-    std::string dataTypeString;
-
-    deviceTypeString = device->getDeviceTypeString();
-    dataTypeString = XSTR(TEST_DT);
-
-    xclbinName = "hcf_hw_" + deviceTypeString + "_" + dataTypeString + ".xclbin";
-
-    return xclbinName;
+    return m_xclbin_file;
 }
 
 int hcf::createOCLObjects(Device* device) {

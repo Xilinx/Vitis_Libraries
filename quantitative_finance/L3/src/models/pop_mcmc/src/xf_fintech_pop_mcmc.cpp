@@ -22,7 +22,7 @@
 
 using namespace xf::fintech;
 
-PopMCMC::PopMCMC() {
+PopMCMC::PopMCMC(std::string xclbin_file) {
     m_pContext = nullptr;
     m_pCommandQueue = nullptr;
     m_pProgram = nullptr;
@@ -35,6 +35,8 @@ PopMCMC::PopMCMC() {
     mBufferInputInv = nullptr;
     mBufferInputSigma = nullptr;
     mBufferOutputSamples = nullptr;
+
+    m_xclbin_file = xclbin_file;
 }
 
 PopMCMC::~PopMCMC() {
@@ -44,8 +46,7 @@ PopMCMC::~PopMCMC() {
 }
 
 std::string PopMCMC::getXCLBINName(Device* device) {
-    std::string xclbinName = "mcmc_kernel.xclbin";
-    return xclbinName;
+    return m_xclbin_file;
 }
 
 int PopMCMC::createOCLObjects(Device* device) {

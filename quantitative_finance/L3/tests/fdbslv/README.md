@@ -1,40 +1,33 @@
 
-# Finite Difference Black Scholes Local Volatility Model test
+## Finite Difference Black Scholes Local Volatility Model Test
 
-This example show how to utilize the Finite Difference Black Scholes Local Volatility Model Model
+This test shows how to utilize the Finite Difference Black Scholes Local Volatility Model in the L3 framework.
 
-### Step 1 :
-Setup the build environment using the Vitis and XRT scripts:
+## Prerequisites
+- Alveo card (eg U200) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
+- Xilinx runtime (XRT) installed
+- Xilinx Vitis 2020.1 installed and configured
 
-    source <install path>/Vitis/2019.2/settings64.sh
+## Build Instuctions
+The demonstration application and kernel is built using a command line Makefile flow.
 
-    source /opt/xilinx/xrt/setup.sh
+### Step 1:
+Setup the build environment using Vitis and XRT scripts:
+
+            source <install path>/Vitis/2020.1/settings64.sh
+            source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :
-Build the L3 Library
+Call the Makefile. For example:
 
-    cd  L3/src
+	make check TARGET=sw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-    source env.sh or source env.csh
+	make check TARGET=hw_emu DEVICE=xilinx_u200_xdma_201830_2
 
-    make
+	make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
+        
+	make run TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
 
+The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).
 
-### Step 3 :
-Build the matching fd_bs_lv Kernel
-
-    cd L2/tests/FDBlackScholesLocalVolatilityEngine
-
-    make xclbin TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
-
-
-### Step 4 :
-Build host code & run executable
-
-    cd L3/tests/fdbslv
-
-    make run TARGET=sw_emu DEVICE=xilinx_u200_xdma_201920_1
-
-
-*A symbolic link to the L2 kernel will be used when running the example, note if an error is displayed that the kernel does not exist refer to step 3 to build*
-
+If the make check or run option is used the demo will automatically be lauched.

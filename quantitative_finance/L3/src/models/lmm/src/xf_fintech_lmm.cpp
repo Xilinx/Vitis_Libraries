@@ -39,8 +39,8 @@ LMMController::~LMMController() {
     }
 }
 
-LMM::LMM()
-    : m_lmmCapController("lmm_cap.xclbin", "lmmCapKernel"),
+LMM::LMM(std::string xclbinfile)
+    : m_lmmCapController(xclbinfile, "lmmCapKernel"),
       m_lmmRatchetFloaterController("lmm_ratchetfloater.xclbin", "lmmRatchetFloaterKernel"),
       m_lmmRatchetCapController("lmm_ratchetcap.xclbin", "lmmRatchetCapKernel") {}
 

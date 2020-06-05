@@ -33,20 +33,22 @@ import recommonmark
 from recommonmark.transform import AutoStructify
 import shutil
 # sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('_ext'))
-sys.path.insert(0, os.path.abspath('docs'))
-sys.path.insert(1, os.path.abspath(os.path.dirname(shutil.which('doxyrest')) + '/../share/doxyrest_b/sphinx'))
+#sys.path.insert(0, os.path.abspath('_ext'))
+#sys.path.insert(0, os.path.abspath('docs'))
+#sys.path.insert(1, os.path.abspath(os.path.dirname(shutil.which('doxyrest')) + '/../share/doxyrest_b/sphinx'))
+tools_dir = os.path.abspath(os.path.join(os.path.dirname(shutil.which('doxyrest')), '..'))
+sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Quantitative Finance Library'
-copyright = '2019, Xilinx'
+copyright = '2020, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2019.2'
+version = '2020.1'
 # The full version, including alpha/beta/rc tags
-release = 'v2019.2'
+release = 'v2020.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -69,7 +71,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
 	'recommonmark',
-	'edit_on_github',
+    #	'edit_on_github',
     # Auto-generate section labels.
     'sphinx.ext.autosectionlabel',	
     #'sphinx.ext.imgmath',
@@ -131,7 +133,7 @@ pygments_style = None
 # a list of builtin themes.
 #
 html_theme = 'xilinx'
-html_theme_path = ["./_themes"]
+html_theme_path = [os.path.join(tools_dir, 'share/themes')]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

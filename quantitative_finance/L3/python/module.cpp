@@ -57,7 +57,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
                     py::return_value_policy::reference_internal, py::call_guard<py::scoped_ostream_redirect>());
 
     py::class_<MCEuropean>(m, "MCEuropean")
-        .def(py::init())
+        .def(py::init<std::string>())
         .def("claimDevice", &MCEuropean::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &MCEuropean::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("deviceIsPrepared", &MCEuropean::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
@@ -169,7 +169,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
              });
 
     py::class_<MCEuropeanDJE>(m, "MCEuropeanDJE")
-        .def(py::init())
+        .def(py::init<std::string>())
         .def("claimDevice", &MCEuropeanDJE::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &MCEuropeanDJE::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("deviceIsPrepared", &MCEuropeanDJE::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
@@ -229,7 +229,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
         .def_readwrite("N", &BinomialTreeInputDataType<double>::N);
 
     py::class_<BinomialTree>(m, "BinomialTree")
-        .def(py::init())
+        .def(py::init<std::string>())
         .def("claimDevice", &BinomialTree::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &BinomialTree::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("deviceIsPrepared", &BinomialTree::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
@@ -262,7 +262,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
 
     py::class_<FDHeston>(m, "FDHeston")
 
-        .def(py::init())
+        .def(py::init<unsigned int, unsigned int, std::string>())
 
         .def("claimDevice", &FDHeston::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &FDHeston::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -328,7 +328,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
 
     py::class_<PopMCMC>(m, "PopMCMC")
 
-        .def(py::init())
+        .def(py::init<std::string>())
 
         .def("claimDevice", &PopMCMC::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &PopMCMC::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -349,7 +349,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
         });
 
     py::class_<CFBlackScholes>(m, "CFBlackScholes")
-        .def(py::init<unsigned int>())
+        .def(py::init<unsigned int, std::string>())
 
         .def("claimDevice", &CFBlackScholes::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &CFBlackScholes::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -392,7 +392,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
              });
 
     py::class_<CFBlackScholesMerton>(m, "CFBlackScholesMerton")
-        .def(py::init<unsigned int>())
+        .def(py::init<unsigned int, std::string>())
 
         .def("claimDevice", &CFBlackScholesMerton::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &CFBlackScholesMerton::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -437,7 +437,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
              });
 
     py::class_<CFQuanto>(m, "Quanto")
-        .def(py::init<unsigned int>())
+        .def(py::init<unsigned int, std::string>())
 
         .def("claimDevice", &CFQuanto::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &CFQuanto::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -498,7 +498,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
         .def_readwrite("delta", &m76::m76_input_data::delta);
 
     py::class_<m76>(m, "m76")
-        .def(py::init())
+        .def(py::init<std::string>())
 
         .def("claimDevice", &m76::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &m76::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -542,7 +542,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
         .def_readwrite("vbar", &hcf::hcf_input_data::vbar);
 
     py::class_<hcf>(m, "hcf")
-        .def(py::init())
+        .def(py::init<std::string>())
 
         .def("claimDevice", &hcf::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &hcf::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -574,7 +574,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
              });
 
     py::class_<HJM>(m, "HJM")
-        .def(py::init())
+        .def(py::init<std::string>())
 
         .def("claimDevice", &HJM::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &HJM::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -597,7 +597,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
         });
 
     py::class_<LMM>(m, "LMM")
-        .def(py::init())
+        .def(py::init<std::string>())
 
         .def("claimDeviceCap", &LMM::claimDeviceCap, py::call_guard<py::scoped_ostream_redirect>())
         .def("claimDeviceRatchetFloater", &LMM::claimDeviceRatchetFloater,
@@ -656,7 +656,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
              });
 
     py::class_<CFGarmanKohlhagen>(m, "CFGarmanKohlhagen")
-        .def(py::init<unsigned int>())
+        .def(py::init<unsigned int, std::string>())
 
         .def("claimDevice", &CFGarmanKohlhagen::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &CFGarmanKohlhagen::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -706,7 +706,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
              });
 
     py::class_<fdbslv>(m, "fdbslv")
-        .def(py::init<unsigned int, unsigned int>())
+        .def(py::init<unsigned int, unsigned int, std::string>())
         .def("claimDevice", &fdbslv::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &fdbslv::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("deviceIsPrepared", &fdbslv::deviceIsPrepared, py::call_guard<py::scoped_ostream_redirect>())
@@ -733,7 +733,9 @@ PYBIND11_MODULE(xf_fintech_python, m) {
              });
 
     py::class_<CFB76>(m, "CFB76")
-        .def(py::init<unsigned int>())
+        .def(py::init<unsigned int, std::string>())
+        // .def(py::init<std::string,unsigned int>())
+        // .def(py::init<unsigned int>())
 
         .def("claimDevice", &CFB76::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &CFB76::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -776,7 +778,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
              });
 
     py::class_<CreditDefaultSwap>(m, "CreditDefaultSwap")
-        .def(py::init())
+        .def(py::init<std::string>())
 
         .def("claimDevice", &CreditDefaultSwap::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &CreditDefaultSwap::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
@@ -805,7 +807,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
         });
 
     py::class_<portfolio_optimisation>(m, "portfolio_optimisation")
-        .def(py::init())
+        .def(py::init<std::string>())
         .def("claimDevice", &portfolio_optimisation::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &portfolio_optimisation::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("deviceIsPrepared", &portfolio_optimisation::deviceIsPrepared,
@@ -867,7 +869,7 @@ PYBIND11_MODULE(xf_fintech_python, m) {
         });
 
     py::class_<HullWhiteAnalytic>(m, "HullWhiteAnalytic")
-        .def(py::init())
+        .def(py::init<std::string>())
 
         .def("claimDevice", &HullWhiteAnalytic::claimDevice, py::call_guard<py::scoped_ostream_redirect>())
         .def("releaseDevice", &HullWhiteAnalytic::releaseDevice, py::call_guard<py::scoped_ostream_redirect>())

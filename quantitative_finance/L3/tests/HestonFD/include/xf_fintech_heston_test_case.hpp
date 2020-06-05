@@ -24,9 +24,15 @@ using namespace std;
 
 class HestonFDTestCase {
     double m_delta;
+    std::string m_xclbin;
+    std::string m_device;
 
    public:
-    HestonFDTestCase(double delta) { m_delta = delta; };
+    HestonFDTestCase(double delta, std::string xclbin, std::string device) {
+        m_delta = delta;
+        m_xclbin = xclbin;
+        m_device = device;
+    };
     int Run(string testCase, string testScheme, std::vector<double> csvTableEntry);
 
    private:

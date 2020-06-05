@@ -58,15 +58,18 @@ class ArgParser {
    private:
     std::vector<std::string> mTokens;
 };
-void print_result(double* out1, double* out2, double* out3, double* out4) {
-    if (KN == 4)
-        std::cout << "FPGA result:\n"
-                  << "            Kernel 0 - " << out1[0] << "            Kernel 1 - " << out2[0]
-                  << "            Kernel 2 - " << out3[0] << "            Kernel 3 - " << out4[0] << std::endl;
-    else if (KN == 2) {
-        std::cout << "FPGA result:\n"
-                  << "            Kernel 0 - " << out1[0] << "            Kernel 1 - " << out2[0] << std::endl;
+int print_result(double* out[4], double golden, double max_tol) {
+    std::cout << "FPGA result:\n";
+    for (int i = 0; i < KN; ++i) {
+        if (std::fabs(out[i][0] - golden) > max_tol) {
+            std::cout << "            Kernel " << i << " - " << out[i][0] << "            golden - " << golden
+                      << std::endl;
+            return -1;
+        } else {
+            std::cout << "            Kernel " << i << " - " << out[i][0] << std::endl;
+        }
     }
+    return 0;
 }
 
 int main(int argc, const char* argv[]) {
@@ -81,15 +84,12 @@ int main(int argc, const char* argv[]) {
     }
 
     struct timeval st_time, end_time;
-    DtUsed* out0_a = aligned_alloc<DtUsed>(OUTDEP);
-    DtUsed* out1_a = aligned_alloc<DtUsed>(OUTDEP);
-    DtUsed* out2_a = aligned_alloc<DtUsed>(OUTDEP);
-    DtUsed* out3_a = aligned_alloc<DtUsed>(OUTDEP);
-
-    DtUsed* out0_b = aligned_alloc<DtUsed>(OUTDEP);
-    DtUsed* out1_b = aligned_alloc<DtUsed>(OUTDEP);
-    DtUsed* out2_b = aligned_alloc<DtUsed>(OUTDEP);
-    DtUsed* out3_b = aligned_alloc<DtUsed>(OUTDEP);
+    DtUsed* out_a[4];
+    DtUsed* out_b[4];
+    for (int i = 0; i < 4; ++i) {
+        out_a[i] = aligned_alloc<DtUsed>(OUTDEP);
+        out_b[i] = aligned_alloc<DtUsed>(OUTDEP);
+    }
     // test data
     unsigned int timeSteps = 1;
     DtUsed requiredTolerance = 0.02;
@@ -98,7 +98,7 @@ int main(int argc, const char* argv[]) {
     DtUsed volatility = 0.20;
     DtUsed dividendYield = 0.0;
     DtUsed strike = 40;
-    bool optionType = 1;
+    unsigned int optionType = 1;
     DtUsed timeLength = 1;
 
     unsigned int requiredSamples = 0; // 262144; // 48128;//0;//1024;//0;
@@ -110,9 +110,6 @@ int main(int argc, const char* argv[]) {
         mode_emu = std::getenv("XCL_EMULATION_MODE");
     }
 
-#ifdef HLS_TEST
-    int num_rep = 20;
-#else
     int num_rep = 20;
     std::string num_str;
     if (parser.getCmdOption("-rep", num_str)) {
@@ -122,37 +119,19 @@ int main(int argc, const char* argv[]) {
             num_rep = 1;
         }
     }
+    DtUsed max_diff = requiredTolerance;
     if (mode_emu.compare("hw_emu") == 0) {
         loop_nm = 1;
-        num_rep = 1;
-        requiredSamples = 1024;
+        num_rep = KN;
+        requiredSamples = 1024 * MCM_NM;
+        max_diff = 0.06;
     } else if (mode_emu.compare("sw_emu") == 0) {
         loop_nm = 1;
-        num_rep = 10;
+        num_rep = KN * 3;
     }
     std::cout << "loop_nm = " << loop_nm << std::endl;
     std::cout << "num_rep = " << num_rep << std::endl;
     std::cout << "KN = " << KN << std::endl;
-
-#endif
-
-#ifdef HLS_TEST
-    kernel_mc_0(loop_nm, underlying, volatility, dividendYield, riskFreeRate, timeLength, strike, optionType, out0_b,
-                requiredTolerance, requiredSamples, timeSteps, maxSamples);
-#if KN > 1
-    kernel_mc_1(loop_nm, underlying, volatility, dividendYield, riskFreeRate, timeLength, strike, optionType, out1_b,
-                requiredTolerance, requiredSamples, timeSteps, maxSamples);
-#endif
-#if KN > 2
-    kernel_mc_2(loop_nm, underlying, volatility, dividendYield, riskFreeRate, timeLength, strike, optionType, out2_b,
-                requiredTolerance, requiredSamples, timeSteps, maxSamples);
-#endif
-#if KN > 3
-    kernel_mc_3(loop_nm, underlying, volatility, dividendYield, riskFreeRate, timeLength, strike, optionType, out3_b,
-                requiredTolerance, requiredSamples, timeSteps, maxSamples);
-#endif
-    print_result(out0_b, out1_b, out2_b, out3_b);
-#else
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -193,25 +172,25 @@ int main(int argc, const char* argv[]) {
     cl_mem_ext_ptr_t mext_out_a[4];
     cl_mem_ext_ptr_t mext_out_b[4];
 #ifndef USE_HBM
-    mext_out_a[0] = {XCL_MEM_DDR_BANK0, out0_a, 0};
-    mext_out_a[1] = {XCL_MEM_DDR_BANK1, out1_a, 0};
-    mext_out_a[2] = {XCL_MEM_DDR_BANK2, out2_a, 0};
-    mext_out_a[3] = {XCL_MEM_DDR_BANK3, out3_a, 0};
+    mext_out_a[0] = {XCL_MEM_DDR_BANK0, out_a[0], 0};
+    mext_out_a[1] = {XCL_MEM_DDR_BANK1, out_a[1], 0};
+    mext_out_a[2] = {XCL_MEM_DDR_BANK2, out_a[2], 0};
+    mext_out_a[3] = {XCL_MEM_DDR_BANK3, out_a[3], 0};
 
-    mext_out_b[0] = {XCL_MEM_DDR_BANK0, out0_b, 0};
-    mext_out_b[1] = {XCL_MEM_DDR_BANK1, out1_b, 0};
-    mext_out_b[2] = {XCL_MEM_DDR_BANK2, out2_b, 0};
-    mext_out_b[3] = {XCL_MEM_DDR_BANK3, out3_b, 0};
+    mext_out_b[0] = {XCL_MEM_DDR_BANK0, out_b[0], 0};
+    mext_out_b[1] = {XCL_MEM_DDR_BANK1, out_b[1], 0};
+    mext_out_b[2] = {XCL_MEM_DDR_BANK2, out_b[2], 0};
+    mext_out_b[3] = {XCL_MEM_DDR_BANK3, out_b[3], 0};
 #else
-    mext_out_a[0] = {XCL_BANK0, out0_a, 0};
-    mext_out_a[1] = {XCL_BANK1, out1_a, 0};
-    mext_out_a[2] = {XCL_BANK2, out2_a, 0};
-    mext_out_a[3] = {XCL_BANK3, out3_a, 0};
+    mext_out_a[0] = {XCL_BANK0, out_a[0], 0};
+    mext_out_a[1] = {XCL_BANK1, out_a[1], 0};
+    mext_out_a[2] = {XCL_BANK2, out_a[2], 0};
+    mext_out_a[3] = {XCL_BANK3, out_a[3], 0};
 
-    mext_out_b[0] = {XCL_BANK0, out0_b, 0};
-    mext_out_b[1] = {XCL_BANK1, out1_b, 0};
-    mext_out_b[2] = {XCL_BANK2, out2_b, 0};
-    mext_out_b[3] = {XCL_BANK3, out3_b, 0};
+    mext_out_b[0] = {XCL_BANK0, out_b[0], 0};
+    mext_out_b[1] = {XCL_BANK1, out_b[1], 0};
+    mext_out_b[2] = {XCL_BANK2, out_b[2], 0};
+    mext_out_b[3] = {XCL_BANK3, out_b[3], 0};
 #endif
     cl::Buffer out_buff_a[KN];
     cl::Buffer out_buff_b[KN];
@@ -422,12 +401,8 @@ int main(int argc, const char* argv[]) {
               << "opt/sec: " << double(loop_nm * num_rep) / time_elapsed << std::endl;
     DtUsed golden = 3.834522;
     std::cout << "Expected value: " << golden << ::std::endl;
-    if (num_rep > 1) {
-        print_result(out0_a, out1_a, out2_a, out3_a);
+    if (num_rep > KN) {
+        return print_result(out_a, golden, max_diff);
     }
-    print_result(out0_b, out1_b, out2_b, out3_b);
-
-#endif
-
-    return 0;
+    return print_result(out_b, golden, max_diff);
 }

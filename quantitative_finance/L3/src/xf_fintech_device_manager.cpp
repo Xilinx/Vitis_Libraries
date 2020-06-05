@@ -15,6 +15,8 @@
  */
 
 #include <cstring>
+#include <iostream>
+#include <string>
 
 #include "xf_fintech_device_manager.hpp"
 
@@ -80,7 +82,20 @@ std::vector<Device*> DeviceManager::getDeviceList(std::string deviceSubString) {
 
         s = device->getName();
 
-        if (s.find(deviceSubString) != std::string::npos) {
+        // check for path
+        std::string deviceName = deviceSubString;
+        const size_t last_slash_idx = deviceName.find_last_of("\\/");
+        if (std::string::npos != last_slash_idx) {
+            deviceName.erase(0, last_slash_idx + 1);
+        }
+
+        // check for extension
+        const size_t period_idx = deviceName.rfind('.');
+        if (std::string::npos != period_idx) {
+            deviceName.erase(period_idx);
+        }
+
+        if (s.find(deviceName) != std::string::npos) {
             matchingList.push_back(device);
         }
     }

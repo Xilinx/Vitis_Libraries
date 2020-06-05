@@ -1,7 +1,7 @@
 {
-    "name": "L2 Quadrature", 
+    "name": "Xilinx Quadrature Engine", 
     "description": [
-        "L2 Quadrature"
+        "L2 Quadrature Engine"
         ], 
     "flow": "vitis", 
     "platform_type": "pcie",

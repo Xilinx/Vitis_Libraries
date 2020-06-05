@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_poisson_cdf", 
+    "name": "Xilinx Poisson CDF Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

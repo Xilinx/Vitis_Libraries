@@ -42,8 +42,8 @@ const char* CFBlackScholesMerton::getKernelName() {
     return BSM_KERNEL_NAME;
 }
 
-CFBlackScholesMerton::CFBlackScholesMerton(unsigned int maxNumAssets, std::string xclbin_file) : 
-    CFBlackScholes(maxNumAssets, xclbin_file) {
+CFBlackScholesMerton::CFBlackScholesMerton(unsigned int maxNumAssets, std::string xclbin_file)
+    : CFBlackScholes(maxNumAssets, xclbin_file) {
     allocateBuffers(maxNumAssets);
 }
 

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_cov_re_softshreshold", 
+    "name": "Xilinx Covariance Regularizaiton Soft Shreshold Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_ICD_ppnd7", 
+    "name": "Xilinx Invese Cumulative Transform PPND7 Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

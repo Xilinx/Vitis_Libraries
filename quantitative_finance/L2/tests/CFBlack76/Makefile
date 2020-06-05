@@ -223,7 +223,7 @@ HOST_ARGS = $(XCLBIN_FILE)
 ifeq ($(TARGET),sw_emu)
 HOST_ARGS += 16384
 else ifeq ($(TARGET),hw_emu)
-HOST_ARGS += 4096
+HOST_ARGS += 16
 else
 HOST_ARGS += 4194304
 endif

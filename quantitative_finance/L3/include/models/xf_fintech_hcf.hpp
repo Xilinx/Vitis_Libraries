@@ -54,7 +54,7 @@ class hcf : public OCLController {
         float vbar;  // long term average variance (theta)
     };
 
-    hcf();
+    hcf(std::string xclbin_file);
     virtual ~hcf();
 
     /**
@@ -110,6 +110,7 @@ class hcf : public OCLController {
     int m_w_max; // the upper limit for the integration
     float m_dw;  // the delta w for the integration
 
+    std::string m_xclbin_file;
     std::string getXCLBINName(Device* device);
 };
 

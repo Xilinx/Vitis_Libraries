@@ -37,8 +37,7 @@ static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {{Device::DeviceType::U50, "q
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);
 
-CFQuanto::CFQuanto(unsigned int maxNumAssets, std::string xclbin_file) :
-    CFBlackScholes(maxNumAssets, xclbin_file) {
+CFQuanto::CFQuanto(unsigned int maxNumAssets, std::string xclbin_file) : CFBlackScholes(maxNumAssets, xclbin_file) {
     allocateBuffers(maxNumAssets);
 }
 
@@ -253,4 +252,3 @@ static const char* QuantoKernelName = "quanto_kernel";
 const char* CFQuanto::getKernelName() {
     return QuantoKernelName;
 }
-

@@ -240,5 +240,35 @@ int main(int argc, char* argv[]) {
     std::cout << "  Largest host-kernel theta difference = " << max_theta_diff << std::endl;
     std::cout << "  Largest host-kernel rho difference   = " << max_rho_diff << std::endl;
 
-    return 0;
+    int ret = 0;
+    if (std::abs(max_price_diff) > 7.0e-5) {
+        std::cout << "FAIL: max_price_diff = " << max_price_diff << std::endl;
+        ret = 1;
+    }
+    if (std::abs(max_delta_diff) > 5.0e-7) {
+        std::cout << "FAIL: max_delta_diff = " << max_delta_diff << std::endl;
+        ret = 1;
+    }
+    if (std::abs(max_gamma_diff) > 6.0e-8) {
+        std::cout << "FAIL: max_gamma_diff = " << max_gamma_diff << std::endl;
+        ret = 1;
+    }
+    if (std::abs(max_vega_diff) > 5.0e-7) {
+        std::cout << "FAIL: max_vega_diff = " << max_vega_diff << std::endl;
+        ret = 1;
+    }
+    if (std::abs(max_theta_diff) > 5.0e-8) {
+        std::cout << "FAIL: max_theta_diff = " << max_theta_diff << std::endl;
+        ret = 1;
+    }
+    if (std::abs(max_rho_diff) > 3.0e-6) {
+        std::cout << "FAIL: max_rho_diff = " << max_rho_diff << std::endl;
+        ret = 1;
+    }
+
+    if (!ret) {
+        std::cout << "PASS" << std::endl;
+    }
+
+    return ret;
 }

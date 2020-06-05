@@ -48,15 +48,16 @@ static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);
 
-FDHeston::FDHeston() : FDHeston(DEFAULT_M1, DEFAULT_M2) {}
+// FDHeston::FDHeston() : FDHeston(DEFAULT_M1, DEFAULT_M2) {}
 
-FDHeston::FDHeston(int M1, int M2) {
+FDHeston::FDHeston(int M1, int M2, std::string xclbin) {
     m_pContext = nullptr;
     m_pCommandQueue = nullptr;
     m_pProgram = nullptr;
 
     m_M1 = M1;
     m_M2 = M2;
+    m_xclbin = xclbin;
 }
 
 FDHeston::~FDHeston() {
@@ -66,23 +67,7 @@ FDHeston::~FDHeston() {
 }
 
 std::string FDHeston::getXCLBINName(Device* device) {
-    std::string xclbinName = "UNSUPPORTED_DEVICE";
-    Device::DeviceType deviceType;
-    unsigned int i;
-    XCLBINLookupElement* pElement;
-
-    deviceType = device->getDeviceType();
-
-    for (i = 0; i < NUM_XCLBIN_LOOKUP_TABLE_ENTRIES; i++) {
-        pElement = &XCLBIN_LOOKUP_TABLE[i];
-
-        if (pElement->deviceType == deviceType) {
-            xclbinName = pElement->xclbinName;
-            break; // out of loop
-        }
-    }
-
-    return xclbinName;
+    return m_xclbin;
 }
 
 int FDHeston::createOCLObjects(Device* device) {

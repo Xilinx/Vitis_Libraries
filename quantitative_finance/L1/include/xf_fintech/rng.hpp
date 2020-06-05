@@ -641,10 +641,10 @@ class MT19937 {
      */
     MT19937() {
 #pragma HLS inline
-//#pragma HLS RESOURCE variable = mt_even_0 core = RAM_T2P_BRAM
-//#pragma HLS RESOURCE variable = mt_even_1 core = RAM_T2P_BRAM
-//#pragma HLS RESOURCE variable = mt_odd_0 core = RAM_T2P_BRAM
-//#pragma HLS RESOURCE variable = mt_odd_1 core = RAM_T2P_BRAM
+        //#pragma HLS RESOURCE variable = mt_even_0 core = RAM_T2P_BRAM
+        //#pragma HLS RESOURCE variable = mt_even_1 core = RAM_T2P_BRAM
+        //#pragma HLS RESOURCE variable = mt_odd_0 core = RAM_T2P_BRAM
+        //#pragma HLS RESOURCE variable = mt_odd_1 core = RAM_T2P_BRAM
         //#pragma HLS ARRAY_PARTITION variable=mt cyclic factor=2
     }
 
@@ -655,10 +655,10 @@ class MT19937 {
      */
     MT19937(ap_uint<W> seed) {
 #pragma HLS inline
-//#pragma HLS RESOURCE variable = mt_even_0 core = RAM_T2P_BRAM
-//#pragma HLS RESOURCE variable = mt_even_1 core = RAM_T2P_BRAM
-//#pragma HLS RESOURCE variable = mt_odd_0 core = RAM_T2P_BRAM
-//#pragma HLS RESOURCE variable = mt_odd_1 core = RAM_T2P_BRAM
+        //#pragma HLS RESOURCE variable = mt_even_0 core = RAM_T2P_BRAM
+        //#pragma HLS RESOURCE variable = mt_even_1 core = RAM_T2P_BRAM
+        //#pragma HLS RESOURCE variable = mt_odd_0 core = RAM_T2P_BRAM
+        //#pragma HLS RESOURCE variable = mt_odd_1 core = RAM_T2P_BRAM
         //#pragma HLS ARRAY_PARTITION variable=mt cyclic factor=2
         seedInitialization(seed);
     }

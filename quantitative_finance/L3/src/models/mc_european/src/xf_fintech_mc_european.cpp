@@ -42,7 +42,7 @@ static XCLBINLookupElement XCLBIN_LOOKUP_TABLE[] = {
 static const unsigned int NUM_XCLBIN_LOOKUP_TABLE_ENTRIES =
     sizeof(XCLBIN_LOOKUP_TABLE) / sizeof(XCLBIN_LOOKUP_TABLE[0]);
 
-MCEuropean::MCEuropean() {
+MCEuropean::MCEuropean(std::string xclbin_file) {
     m_pContext = nullptr;
     m_pCommandQueue = nullptr;
     m_pProgram = nullptr;
@@ -53,6 +53,8 @@ MCEuropean::MCEuropean() {
         m_pHWBuffers[i] = nullptr;
     }
     m_pSeedBuf = nullptr;
+
+    m_xclbin_file = xclbin_file;
 }
 
 MCEuropean::~MCEuropean() {
@@ -62,23 +64,7 @@ MCEuropean::~MCEuropean() {
 }
 
 std::string MCEuropean::getXCLBINName(Device* device) {
-    std::string xclbinName = "UNSUPPORTED_DEVICE";
-    Device::DeviceType deviceType;
-    unsigned int i;
-    XCLBINLookupElement* pElement;
-
-    deviceType = device->getDeviceType();
-
-    for (i = 0; i < NUM_XCLBIN_LOOKUP_TABLE_ENTRIES; i++) {
-        pElement = &XCLBIN_LOOKUP_TABLE[i];
-
-        if (pElement->deviceType == deviceType) {
-            xclbinName = pElement->xclbinName;
-            break; // out of loop
-        }
-    }
-
-    return xclbinName;
+    return m_xclbin_file;
 }
 
 int MCEuropean::createOCLObjects(Device* device) {
@@ -175,29 +161,27 @@ int MCEuropean::createOCLObjects(Device* device) {
     ////////////////////////////
     // Setup HW BUFFER OPTIONS
     ////////////////////////////
-    if (cl_retval == CL_SUCCESS) {
-        if (NUM_KERNELS >= 1) {
-            m_hwBufferOptions[0] = {XCL_MEM_DDR_BANK0, m_hostOutputBuffers[0], 0};
-        }
 
-        if (NUM_KERNELS >= 2) {
-            m_hwBufferOptions[1] = {XCL_MEM_DDR_BANK1, m_hostOutputBuffers[1], 0};
-        }
+    Device::DeviceType deviceType = device->getDeviceType();
 
-        if (NUM_KERNELS >= 3) {
-            m_hwBufferOptions[2] = {XCL_MEM_DDR_BANK2, m_hostOutputBuffers[2], 0};
-        }
+    switch (deviceType) {
+        case Device::DeviceType::U200:
+            for (i = 0; i < NUM_KERNELS; i++) {
+                m_hwBufferOptions[i] = {XCL_MEM_DDR_BANK1, m_hostOutputBuffers[i], 0};
+            }
+            m_hwSeed = {XCL_MEM_DDR_BANK1, m_hostSeed, 0};
+            break;
 
-        if (NUM_KERNELS >= 4) {
-            m_hwBufferOptions[3] = {XCL_MEM_DDR_BANK3, m_hostOutputBuffers[3], 0};
-        }
+        default:
+        case Device::DeviceType::U250:
+            for (i = 0; i < NUM_KERNELS; i++) {
+                m_hwBufferOptions[i] = {XCL_MEM_DDR_BANK0, m_hostOutputBuffers[i], 0};
+            }
+            m_hwSeed = {XCL_MEM_DDR_BANK0, m_hostSeed, 0};
+            break;
     }
 
-    if (cl_retval == CL_SUCCESS) {
-        m_hwSeed = {XCL_MEM_DDR_BANK0, m_hostSeed, 0};
-    }
-
-    ////////////////////////////////
+    ///////////////////////////////
     // Allocate HW BUFFER Objects
     ////////////////////////////////
 

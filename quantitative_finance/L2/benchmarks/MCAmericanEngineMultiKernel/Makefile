@@ -148,14 +148,20 @@ MCAE_k2_VPP_FLAGS +=  -D DPRAGMA -D KERNEL2 -D KERNEL_NAME=MCAE_k2
 MCAE_k3_VPP_FLAGS +=  -D DPRAGMA -D KERNEL3 -D KERNEL_NAME=MCAE_k3
 
 # Kernel linker flags
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 LDCLFLAGS_MCAE_k +=  --nk MCAE_k0:1:MCAE_k0 --nk MCAE_k1:1:MCAE_k1 --nk MCAE_k2:1:MCAE_k2 --nk MCAE_k3:1:MCAE_k3
+else
+LDCLFLAGS_MCAE_k +=  --nk MCAE_k0:1:MCAE_k0 --nk MCAE_k1:1:MCAE_k1 --nk MCAE_k2:1:MCAE_k2
+endif
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/MCAE_k.xclbin
 BINARY_CONTAINER_MCAE_k_OBJS += $(TEMP_DIR)/MCAE_k0.xo
 BINARY_CONTAINER_MCAE_k_OBJS += $(TEMP_DIR)/MCAE_k1.xo
 BINARY_CONTAINER_MCAE_k_OBJS += $(TEMP_DIR)/MCAE_k2.xo
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 BINARY_CONTAINER_MCAE_k_OBJS += $(TEMP_DIR)/MCAE_k3.xo
+endif
 
 ############################## Setting Targets ##############################
 CP = cp -rf

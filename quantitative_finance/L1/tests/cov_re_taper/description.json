@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_cov_re_taper", 
+    "name": "Xilinx Covariance Regularizaiton Taper Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

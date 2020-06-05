@@ -33,7 +33,7 @@ namespace fintech {
  */
 class MCEuropean : public OCLController {
    public:
-    MCEuropean();
+    MCEuropean(std::string xclbin_file);
     virtual ~MCEuropean();
 
    public:
@@ -182,6 +182,7 @@ class MCEuropean : public OCLController {
                     unsigned int numAssets);
 
    private:
+    std::string m_xclbin_file;
     std::string getXCLBINName(Device* device);
 
    private:

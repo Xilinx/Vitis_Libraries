@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_linear_interpolation", 
+    "name": "Xilinx Linear Interpolation Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

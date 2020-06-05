@@ -266,9 +266,9 @@ class FdUtil {
     }
 
     /// @brief Compare a vector to reference
-    void CompareReference(std::vector<DT, aligned_allocator<DT> >& vIn,
-                          std::vector<DT, aligned_allocator<DT> >& vRef,
-                          const int size) {
+    DT CompareReference(std::vector<DT, aligned_allocator<DT> >& vIn,
+                        std::vector<DT, aligned_allocator<DT> >& vRef,
+                        const int size) {
         DT diff[size];
         DT maxv = 0.0;
         int maxi = 0;
@@ -282,6 +282,8 @@ class FdUtil {
         std::cout << "Maximum difference is " << maxv << ", found at array index " << maxi << std::endl
                   << std::endl
                   << std::endl;
+
+        return maxv;
     }
 
     /// @brief Round to next multiple

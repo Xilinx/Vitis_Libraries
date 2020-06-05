@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_quadrature", 
+    "name": "Xilinx Quadrature Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

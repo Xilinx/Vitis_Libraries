@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_normalRNG_test", 
+    "name": "Xilinx Normal RNG Test", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

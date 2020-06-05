@@ -1,12 +1,12 @@
 ## Binomial Tree  Demonstration
-This is a demonstration of the BinomialTree solver using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U200.
+This is a demonstration of the BinomialTree solver using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 It uses a fixed set of test data produced from quantlib (Black Scholes for European & Binomial Leisen Reimer for American) stored in the data directory and the output from the host/kernel. The demo will take the input data, compute a number of options using the kernel and then compare this to the reference data.  The largest difference between the reference data and the kernel computed grid will be displayed as well as the root mean squared.
 
 ## Prerequisites
-- Alveo U200 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
+- Alveo card (eg U200) installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2019.2 installed and configured
+- Xilinx Vitis 2020.1 installed and configured
 
 ## Building the Finite Difference demonstration
 The demonstration application and kernel is built using a command line Makefile flow.
@@ -14,15 +14,15 @@ The demonstration application and kernel is built using a command line Makefile 
 ### Step 1 :
 Setup the build environment using the Vitis and XRT scripts:
 
-            source <install path>/Vitis/2019.2/settings64.sh
+            source <install path>/Vitis/2020.1/settings64.sh
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :
 Call the Makefile. For example:
 
-	make check TARGET=sw_emu DEVICES=xilinx_u200_xdma_201830_2 DT=double PE=1
+	make run TARGET=sw_emu DEVICES=xilinx_u200_xdma_201830_2 DT=double PE=1
 
-	make check TARGET=hw_emu DEVICES=xilinx_u200_xdma_201830_2 DT=double PE=1
+	make run TARGET=hw_emu DEVICES=xilinx_u200_xdma_201830_2 DT=double PE=1
 
 	make all TARGET=hw DEVICES=xilinx_u200_xdma_201830_2 DT=double PE=1
         
@@ -36,7 +36,7 @@ The Makefile supports software emulation, hardware emulation and hardware target
 
 
 
-If the make check option is used the demo will automatically be lauched or else its possible to manually launch the exe.
+If the make run option is used the demo will automatically be lauched or else its possible to manually launch the exe.
 
 For example to run with a prebuilt kernel you can use:
 	    ./binarytree_demo

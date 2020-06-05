@@ -1,5 +1,5 @@
 {
-    "name": "L2 HCFEngine", 
+    "name": "Xilinx Heston Closed Form Engine", 
     "description": "L2 Heston Closed Form Solution", 
     "flow": "vitis", 
     "platform_type": "pcie", 
@@ -54,15 +54,16 @@
         "host_exe": "hcf_host.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/HCFEngine/src/hcf_host.cpp", 
-                "LIB_DIR/L2/tests/HCFEngine/src/hcf_cpu.cpp", 
-                "LIB_DIR/L2/tests/HCFEngine/src/hcf_parser.cpp", 
+                "LIB_DIR/L2/tests/HCFEngine/src/host/hcf_host.cpp", 
+                "LIB_DIR/L2/tests/HCFEngine/src/host/hcf_cpu.cpp", 
+                "LIB_DIR/L2/tests/HCFEngine/src/host/hcf_parser.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/HCFEngine/src", 
+                "LIB_DIR/L2/tests/HCFEngine/src/host", 
+                "LIB_DIR/L2/tests/HCFEngine/src/kernel", 
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 ", 
@@ -76,7 +77,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/HCFEngine/src/hcf_kernel.cpp", 
+                    "location": "LIB_DIR/L2/tests/HCFEngine/src/kernel/hcf_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D TEST_DT=float", 
                     "name": "hcf_kernel"

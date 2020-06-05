@@ -35,6 +35,8 @@ using namespace xf::fintech;
 // Each of the kernels produce an independent output.  These outputs are then
 // averaged to produce a final option price.
 
+static double tolerance = 0.0001;
+
 static OptionType optionType = Put;
 
 static const double initialStockPrice = 36.0;
@@ -59,8 +61,6 @@ static double requiredTolerance;
 /* The following variable will hold our calculated option price... */
 static double optionPrice;
 
-static const int NUM_ITERATIONS = 100;
-
 static void PrintParameters(void) {
     printf("\n");
     printf("\n");
@@ -83,8 +83,18 @@ static void PrintParameters(void) {
 int MCDemoRunEuropeanSingle(Device* pChosenDevice, MCEuropean* pMCEuropean) {
     int retval = XLNX_OK;
     int i;
+    int ret = 1; // assume fail
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
+
+    int NUM_ITERATIONS = 100;
+    std::string mode_emu = "hw_emu";
+    if (std::getenv("XCL_EMULATION_MODE") != nullptr) {
+        mode_emu = std::getenv("XCL_EMULATION_MODE");
+    }
+    if (mode_emu == "hw_emu") {
+        NUM_ITERATIONS = 1;
+    }
 
     printf("\n\n\n");
 
@@ -161,6 +171,11 @@ int MCDemoRunEuropeanSingle(Device* pChosenDevice, MCEuropean* pMCEuropean) {
             } else {
                 break; // out of loop
             }
+
+            // quick fix to get pass/fail criteria
+            if (i == 0 && std::abs(optionPrice - 3.8761) <= tolerance) {
+                ret = 0;
+            }
         }
 
         printf(
@@ -175,5 +190,5 @@ int MCDemoRunEuropeanSingle(Device* pChosenDevice, MCEuropean* pMCEuropean) {
     printf("[XLNX] mcEuropean releasing device...\n");
     retval = pMCEuropean->releaseDevice();
 
-    return retval;
+    return ret;
 }

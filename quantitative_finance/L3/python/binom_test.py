@@ -3,10 +3,14 @@
 # Ensure environmental variables i.e. paths are set to used the modules
 from xf_fintech_python import DeviceManager, BinomialTreeInputDataTypeDouble, BinomialTree, OptionType
 import array
+import sys
+
+# Basic checking that the number of arguments are correct
+if len(sys.argv) != 2:
+    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. binom.xclbin")
 
 # State test financial model
 print("\nThe Binomial financial model\n========================================\n")
-
 
 # The Binomial bitstream is currently built for a U200
 deviceList = DeviceManager.getDeviceList("u200")
@@ -42,7 +46,7 @@ dataList[1].N = 1024
 
 
 
-bto = BinomialTree()
+bto = BinomialTree(sys.argv[1])
 
 bto.claimDevice(chosenDevice)
 

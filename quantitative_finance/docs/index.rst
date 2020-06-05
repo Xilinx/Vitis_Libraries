@@ -109,6 +109,19 @@ Library Contents
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 | :ref:`BSModel <cid-xf::fintech::bsmodel>`                                                      | Black-Scholes process     | L1    |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`XoShiRo128PlusPlus <doxid-classxf_1_1fintech_1_1_xo_shi_ro128_plus_plus>`                | XoShiRo128PlusPlus        | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`XoShiRo128Plus <doxid-classxf_1_1fintech_1_1_xo_shi_ro128_plus>`                         | XoShiRo128Plus            | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`XoShiRo128StarStar <doxid-classxf_1_1fintech_1_1_xo_shi_ro128_star_star>`                | XoShiRo128StarStar        | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`BicubicSplineInterpolation <doxid-classxf_1_1fintech_1_1_bicubic_spline_interpolation>`  | Bicubic Spline            |       |
+|                                                                                                | Interpolation             | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`CubicInterpolation <doxid-classxf_1_1fintech_1_1_cubic_interpolation>`                   | Cubic Interpolation       | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`BinomialDistribution <doxid-classxf_1_1fintech_1_1_binomial_distribution>`               | Binomial Distribution     | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
 | :ref:`CPICapFloorEngine <cid-xf::fintech::cpicapfloorengine>`                                  | Pricing Consumer price    | L2    |
 |                                                                                                | index (CPI) using         |       |
 |                                                                                                | cap/floor methods         |       |
@@ -177,6 +190,73 @@ Library Contents
 | :ref:`PCA <cid-xf::fintech::PCA>`                                                              | Principal Component       | L1    |
 |                                                                                                | Analysis library          |       |
 |                                                                                                | implementation            |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`bernoulliPMF <cid-xf::fintech::bernoullipmf>`                                            | Probability mass function | L1    |
+|                                                                                                | for bernoulli distribution|       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`bernoulliCDF <cid-xf::fintech::bernoullicdf>`                                            | Cumulative distribution   | L1    |
+|                                                                                                | function for bernoulli    |       |
+|                                                                                                | distribution              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`covCoreMatrix <cid-xf::fintech::covcorematrix>`                                          | Calculate the covariance  | L1    |
+|                                                                                                | of the input matrix       |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`covCoreStrm <cid-xf::fintech::covcorestrm>`                                              | Calculate the covariance  | L1    |
+|                                                                                                | of the input matrix       |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`covReHardThreshold <cid-xf::fintech::covrehardthreshold>`                                | Hard-thresholding         | L1    |
+|                                                                                                | Covariance Regularization |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`covReSoftThreshold <cid-xf::fintech::covresoftthreshold>`                                | Soft-thresholding         | L1    | 
+|                                                                                                | Covariance Regularization |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`covReBand <cid-xf::fintech::covreband>`                                                  | Banding Covariance        | L1    |
+|                                                                                                | Regularization            |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`covReTaper <cid-xf::fintech::covretaper>`                                                | Tapering Covariance       | L1    | 
+|                                                                                                | Regularization            |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`gammaCDF <cid-xf::fintech::gammacdf>`                                                    | Cumulative distribution   | L1    |
+|                                                                                                | function for gamma        |       |
+|                                                                                                | distribution              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`linearImpl <cid-xf::fintech::linearimpl>`                                                | 1D linear interpolation   | L1    |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`normalPDF <cid-xf::fintech::normalpdf>`                                                  | Probability density       | L1    |
+|                                                                                                | function for normal       |       |
+|                                                                                                | distribution              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`normalCDF <cid-xf::fintech::normalcdf>`                                                  | Cumulative distribution   | L1    |
+|                                                                                                | function for normal       |       |
+|                                                                                                | distribution              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`normalICDF <cid-xf::fintech::normalicdf>`                                                | Inverse cumulative        | L1    |
+|                                                                                                | distribution function     |       |
+|                                                                                                | for normal distribution   |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`logNormalPDF <cid-xf::fintech::lognormalpdf>`                                            | Probability density       | L1    |
+|                                                                                                | function for log-normal   |       |
+|                                                                                                | distribution              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`logNormalCDF <cid-xf::fintech::lognormalcdf>`                                            | Cumulative distribution   | L1    |
+|                                                                                                | function for log-normal   |       |
+|                                                                                                | distribution              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`logNormalICDF <cid-xf::fintech::lognormalicdf>`                                          | Inverse cumulative        | L1    |
+|                                                                                                | distribution function for |       |
+|                                                                                                | log-normal distribution   |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`poissonPMF <cid-xf::fintech::poissonpmf>`                                                | Probability mass          | L1    |
+|                                                                                                | function for poisson      |       |
+|                                                                                                | distribution              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`poissonCDF <cid-xf::fintech::poissoncdf>`                                                | Cumulative distribution   | L1    |
+|                                                                                                | function for poisson      |       |
+|                                                                                                | distribution              |       |
++------------------------------------------------------------------------------------------------+---------------------------+-------+
+| :ref:`poissonICDF <cid-xf::fintech::poissonicdf>`                                              | Inverse cumulative        | L1    |
+|                                                                                                | distribution function     |       |
+|                                                                                                | for poisson distribution  |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 | :ref:`binomialTreeEngine <cid-xf::fintech::binomialtreeengine>`                                | Binomial tree engine      | L2    |
 |                                                                                                | using CRR                 |       |

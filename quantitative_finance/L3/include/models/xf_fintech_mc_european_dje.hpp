@@ -34,7 +34,7 @@ namespace fintech {
  */
 class MCEuropeanDJE : public OCLController {
    public:
-    MCEuropeanDJE();
+    MCEuropeanDJE(std::string xclbin_file);
     virtual ~MCEuropeanDJE();
 
    public:
@@ -128,6 +128,7 @@ class MCEuropeanDJE : public OCLController {
                     unsigned int numAssets);
 
    private:
+    std::string m_xclbin_file;
     std::string getXCLBINName(Device* device);
 
    private:
