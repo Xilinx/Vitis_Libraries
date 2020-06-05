@@ -87,7 +87,7 @@ template <int _WData, int _NData, int _NCache>
 class UramArray {
    public:
     UramArray() {
-#pragma HLS RESOURCE variable = blocks core = XPM_MEMORY uram
+#pragma HLS RESOURCE variable = blocks core = RAM_2P_URAM
 #pragma HLS ARRAY_PARTITION variable = blocks complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = blocks complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = _index complete dim = 1

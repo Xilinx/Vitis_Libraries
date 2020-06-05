@@ -18,13 +18,16 @@ source settings.tcl
 
 set PROJ "test.prj"
 set SOLN "solution1"
-set CLKP 2.5
+
+if {![info exists CLKP]} {
+  set CLKP 2.5
+}
 
 open_project -reset $PROJ
 
-add_files test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-set_top  test_core_comb_lsb
+add_files "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files -tb "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
+set_top test_core_comb_lsb
 
 open_solution -reset $SOLN
 
@@ -32,7 +35,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -compiler gcc
+  csim_design
 }
 
 if {$CSYNTH == 1} {
