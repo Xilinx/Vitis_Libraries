@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_chacha20", 
+    "name": "Xilinx Chacha20", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

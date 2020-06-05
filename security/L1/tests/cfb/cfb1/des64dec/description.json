@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_icfb1_des64", 
+    "name": "Xilinx DES64CBF1 Decryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

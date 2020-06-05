@@ -1,11 +1,11 @@
 {
-    "gui": false,
-    "name": "jks.L1.benchmark_aes256CbcEncrypt", 
+    "gui": true,
+    "name": "Xilinx AES256CBC Encryption Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "xilinx_u250_xdma_201830_2"
     ], 
     "platform_blacklist": [
         "zc"
@@ -43,8 +43,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L1/benchmarks/aes256CbcEncrypt/host", 
-                "LIB_DIR/L1/benchmarks/aes256CbcEncrypt/kernel", 
+                "host",
+                "kernel",
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 -lssl -lcrypto"
@@ -54,7 +54,7 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L1/benchmarks/aes256CbcEncrypt/kernel"
+                "kernel"
             ]
         }
     }, 
@@ -64,24 +64,92 @@
                 {
                     "location": "kernel/aes256CbcEncryptKernel1.cpp", 
                     "frequency": 300.0, 
-                    "name": "aes256CbcEncryptKernel_1"
+                    "name": "aes256CbcEncryptKernel_1",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "aes256CbcEncryptKernel_1",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/aes256CbcEncryptKernel2.cpp", 
                     "frequency": 300.0, 
-                    "name": "aes256CbcEncryptKernel_2"
+                    "name": "aes256CbcEncryptKernel_2",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "aes256CbcEncryptKernel_2",
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/aes256CbcEncryptKernel3.cpp", 
                     "frequency": 300.0, 
-                    "name": "aes256CbcEncryptKernel_3"
+                    "name": "aes256CbcEncryptKernel_3",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "aes256CbcEncryptKernel_3",
+                            "slr": "SLR2",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[2]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[2]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/aes256CbcEncryptKernel4.cpp", 
                     "frequency": 300.0, 
-                    "name": "aes256CbcEncryptKernel_4"
+                    "name": "aes256CbcEncryptKernel_4",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "aes256CbcEncryptKernel_4",
+                            "slr": "SLR3",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[3]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[3]"
+                                }
+                            ]
+                        }
+                    ]
                 }
-            ], 
+            ],
             "frequency": 300.0, 
             "name": "aes256CbcEncryptKernel"
         }

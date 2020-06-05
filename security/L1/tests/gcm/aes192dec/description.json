@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_igcm_aes192", 
+    "name": "Xilinx AES192GCM Decryption", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_shake128", 
+    "name": "Xilinx Shake128", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

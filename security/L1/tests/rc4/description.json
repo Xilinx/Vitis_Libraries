@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_rc4", 
+    "name": "Xilinx RC4", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

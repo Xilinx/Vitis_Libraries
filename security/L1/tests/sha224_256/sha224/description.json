@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_sha224", 
+    "name": "Xilinx SHA224", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

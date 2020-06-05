@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1_rsa", 
+    "name": "Xilinx RSA", 
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [

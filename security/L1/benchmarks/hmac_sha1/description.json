@@ -1,11 +1,11 @@
 {
-    "gui": false,
-    "name": "jks.L1.benchmark_hmacSha1", 
+    "gui": true,
+    "name": "Xilinx HMAC-SHA1 Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "xilinx_u250_xdma_201830_2"
     ], 
     "platform_blacklist": [
         "zc"
@@ -43,8 +43,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L1/benchmarks/hmac_sha1/host", 
-                "LIB_DIR/L1/benchmarks/hmac_sha1/kernel", 
+                "host", 
+                "kernel", 
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 -lssl -lcrypto"
@@ -54,7 +54,7 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L1/benchmarks/hmac_sha1/kernel"
+                "kernel"
             ]
         }
     }, 
@@ -64,22 +64,90 @@
                 {
                     "location": "kernel/hmacSha1Kernel1.cpp", 
                     "frequency": 300.0, 
-                    "name": "hmacSha1Kernel_1"
+                    "name": "hmacSha1Kernel_1",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "hmacSha1Kernel_1",
+                            "slr": "SLR0",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[0]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/hmacSha1Kernel2.cpp", 
                     "frequency": 300.0, 
-                    "name": "hmacSha1Kernel_2"
+                    "name": "hmacSha1Kernel_2",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "hmacSha1Kernel_2",
+                            "slr": "SLR1",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[1]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/hmacSha1Kernel3.cpp", 
                     "frequency": 300.0, 
-                    "name": "hmacSha1Kernel_3"
+                    "name": "hmacSha1Kernel_3",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "hmacSha1Kernel_3",
+                            "slr": "SLR2",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[2]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[2]"
+                                }
+                            ]
+                        }
+                    ]
                 }, 
                 {
                     "location": "kernel/hmacSha1Kernel4.cpp", 
                     "frequency": 300.0, 
-                    "name": "hmacSha1Kernel_4"
+                    "name": "hmacSha1Kernel_4",
+                    "num_compute_units": 1,
+                    "compute_units" : [
+                        {
+                            "name": "hmacSha1Kernel_4",
+                            "slr": "SLR3",
+                            "arguments": [
+                                {
+                                    "name": "inputData",
+                                    "memory": "DDR[3]"
+                                },
+                                {
+                                    "name": "outputData",
+                                    "memory": "DDR[3]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
             "frequency": 300.0, 
