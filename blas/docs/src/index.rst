@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, linear, algebra, subroutines, vitis
+   :description: Vitis BLAS Library is a fast FPGA-accelerated implementation of the standard basic linear algebra subroutines (BLAS).
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 =====================
 Vitis BLAS Library
 =====================

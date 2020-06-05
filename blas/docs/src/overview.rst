@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, linear, algebra, subroutines
+   :description: Vitis BLAS Library licensing, trademark notice and hardware & software requirements.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _overview:
 
 .. toctree::

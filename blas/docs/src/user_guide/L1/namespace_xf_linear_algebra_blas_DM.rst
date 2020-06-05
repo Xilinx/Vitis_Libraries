@@ -1,3 +1,10 @@
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, namespace, blas, DM
+   :description: Vitis BLAS library namespace xf::blas.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. index:: pair: namespace; xf::blas
 .. _doxid-namespacexf_1_1blas:
 

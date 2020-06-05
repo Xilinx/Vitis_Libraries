@@ -13,13 +13,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, L3, level 3
+   :description: Vitis BLAS library level 3 application programming interface reference. Intel Math Kernel Library provides performance improvement of math functions, e.g. GEMM, when running with Intel processors.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _benchmark_gemm_l3:
 
 ***********************
 L3 API GEMM benchmark
 ***********************
 
-1. Benchmarking Intel® Math Kernel Libray (MKL)
+1. Benchmarking Intel® Math Kernel Library (MKL)
 =================================================
 
 1.1 Introduction

@@ -38,7 +38,7 @@ bool compare(T x, T ref) {
 template <>
 bool compare<double>(double x, double ref) {
     bool l_exactMatch;
-    return isClose<float>(1e-3, 3e-6, x, ref, l_exactMatch);
+    return isClose<float>(1e-4, 3e-6, x, ref, l_exactMatch);
 }
 template <>
 bool compare<float>(float x, float ref) {

@@ -75,12 +75,12 @@ KERNELS :=
 
 SRC_DIR = $(CUR_DIR)
 
-EXE_NAME = gemm_bench
+EXE_NAME = gemm_bench.exe
 HOST_ARGS =
 
 SRCS = gemm_bench.cpp
 
-CXXFLAGS += -g -I$(XILINX_XRT)/include -I $(XFLIB_DIR)/L3/include/sw
+CXXFLAGS += -g -I$(XILINX_XRT)/include -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/L3/benchmarks/
 
 
 XFBLAS_dataType ?= short
@@ -102,6 +102,8 @@ all: host
 OBJ_DIR_BASE ?= obj
 BIN_DIR_BASE ?= bin
 
+TARGET = hw
+
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
 
@@ -117,16 +119,27 @@ CFLAGS +=
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -lxilinxopencl
 LDFLAGS += -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
 
+BUILD_DIR = out_host
 EXE_EXT ?= exe
-EXE_FILE ?= $(BIN_DIR)/$(EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
+EXE_FILE ?= $(BUILD_DIR)/$(EXE_NAME)
 
 $(EXE_FILE): $(SRCS) | check_xrt 
 	@echo -e "----\nCompiling host $(notdir $@)..."
-	mkdir -p $(BIN_DIR)
+	mkdir -p $(BUILD_DIR)
 	$(CC) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 .PHONY: host
 host: check_xrt $(EXE_FILE)
+
+xclbin: download_xclbin
+
+build: download_xclbin
+
+download_xclbin:
+ifeq (,$(wildcard ./xf_blas_xclbins))
+	wget -nc "https://www.xilinx.com/bin/public/openDownload?filename=vitis_BLAS_library_r1.0_xclbin.tar"
+	tar -zxvf openDownload?filename=vitis_BLAS_library_r1.0_xclbin.tar
+endif
 
 
 # -----------------------------------------------------------------------------
@@ -141,10 +154,12 @@ ifneq (,$(BIN_DIR_BASE))
 endif
 
 cleanall: clean 
-	rm -rf *.log plist $(DATA_STAMP)
+	rm -rf *.log plist $(DATA_STAMP) $(BUILD_DIR)
 
 .PHONY: run 
 
-run: host 
+run: host
+	$(EXE_FILE) xf_blas_xclbins/u200_xdma_201830_2/gemm_short_2kernel/gemx.xclbin xf_blas_xclbins/u200_xdma_201830_2/gemm_short_2kernel/config_info.dat 256 256 256 ./data/$(XFBLAS_dataType)/ ${XFBLAS_numKernels}
+
 
 check: run

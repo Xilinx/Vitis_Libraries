@@ -1,4 +1,12 @@
-Python environment setup guide
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, python, setup
+   :description: Python environment setup guide.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
+Python Environment Setup Guide
 ===============================
 
 **1. Installing Anaconda3**
