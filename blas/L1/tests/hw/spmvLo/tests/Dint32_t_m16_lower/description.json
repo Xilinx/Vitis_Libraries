@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_spmv_Dint32_t_m16_lower",
+    "name": "Xilinx XF_BLAS.spmv_Dint32_t_m16_lower",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

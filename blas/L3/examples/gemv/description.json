@@ -1,5 +1,5 @@
 {
-    "name": "jks.L3_gemv_example",
+    "name": "Xilinx XF_BLAS.gemv_example",
     "description": "",
     "flow": "vitis",
     "platform_whitelist": [

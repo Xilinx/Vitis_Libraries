@@ -41,7 +41,6 @@ void trmv(const bool uplo,
           hls::stream<typename WideType<t_DataType, 1 << t_LogParEntries>::t_TypeInt>& p_x,
           hls::stream<typename WideType<t_MacType, 1>::t_TypeInt>& p_y) {
     hls::stream<typename WideType<t_DataType, 1 << t_LogParEntries>::t_TypeInt> l_mulStr;
-#pragma HLS data_pack variable = l_mulStr
     const unsigned int l_parEntries = 1 << t_LogParEntries;
     const unsigned int l_blocks = p_n >> t_LogParEntries;
     for (t_IndexType i = 0; i < l_blocks; i++) {
@@ -81,8 +80,6 @@ void trmv(const bool uplo,
 #endif
     const unsigned int l_numIter = p_n >> t_LogParEntries;
     hls::stream<typename WideType<t_DataType, 1>::t_TypeInt> l_x, l_y;
-#pragma HLS data_pack variable = l_y
-#pragma HLS data_pack variable = l_x
 #pragma HLS DATAFLOW
     trmv<t_DataType, t_LogParEntries, t_IndexType>(uplo, p_n, p_M, p_x, l_x);
     scal<t_DataType, 1, t_IndexType>(p_n, p_beta, p_y, l_y);

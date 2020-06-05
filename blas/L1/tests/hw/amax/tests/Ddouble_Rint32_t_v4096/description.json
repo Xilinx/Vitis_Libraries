@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_amax_Ddouble_Rint32_t_v4096",
+    "name": "Xilinx XF_BLAS.amax_Ddouble_Rint32_t_v4096",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

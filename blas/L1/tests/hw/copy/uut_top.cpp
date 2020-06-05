@@ -30,9 +30,7 @@ void uut_top(uint32_t p_n,
              BLAS_dataType p_yRes[BLAS_vectorSize],
              BLAS_resDataType& p_goldRes) {
     hls::stream<typename WideType<BLAS_dataType, BLAS_parEntries>::t_TypeInt> l_strX;
-#pragma HLS data_pack variable = l_strX
     hls::stream<typename WideType<BLAS_dataType, BLAS_parEntries>::t_TypeInt> l_strR;
-#pragma HLS data_pack variable = l_strR
 #pragma HLS DATAFLOW
     readVec2Stream<BLAS_dataType, BLAS_parEntries>(p_x, p_n, l_strX);
     copy<BLAS_dataType, BLAS_parEntries>(p_n, l_strX, l_strR);
