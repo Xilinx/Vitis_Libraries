@@ -59,7 +59,7 @@
 
 #define HLS_SSR_FFT_ENABLE_ADDER_TREE_SCALING
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -317,6 +317,6 @@ struct ButterflyTraits<isFirtStage,
 #endif
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_BUTTERFLY_TRAITS_H_

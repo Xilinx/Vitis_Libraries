@@ -25,7 +25,7 @@
 #include "vitis_fft/hls_ssr_fft_twiddle_table_traits.hpp"
 #include "vitis_fft/hls_ssr_fft_utility_traits.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -62,7 +62,7 @@ void __parallel_fft_kernel_L2_R2x1_atree(T_bflyIn p_bflyIndata[2], T_bflyOut p_b
     stage1_accum D0t[2];
 #pragma HLS ARRAY_PARTITION variable = D0t complete dim = 1
     T_bflyIn D0[2];
-#pragma HLS ARRAY_PARTITION variable = D0t complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = D0 complete dim = 1
     for (int i = 0; i < 2; i++) {
 #pragma HLS UNROLL
         D0[i] = p_bflyIndata[i];
@@ -127,7 +127,6 @@ void __parallel_fft_kernel_L4_R4x1_atree(T_bflyIn p_bflyIndata[4], T_bflyOut p_b
     typedef typename ButterflyTraits<isFirstStage, t_scalingMode, T_productType>::T_butterflyAccumType stage1_accum;
     typedef typename ButterflyTraits<isFirstStage, t_scalingMode, stage1_accum>::T_butterflyAccumType stage2_accum;
     stage2_accum D0t[4];
-#pragma HLS ARRAY_PARTITION variable = D2t complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = D0t complete dim = 1
     stage2_accum accum;
     stage2_accum accum2;
@@ -304,7 +303,7 @@ void __parallel_fft_kernel_L16_R4x4xS2_atree(T_bflyIn p_bflyIndata[16], T_bflyOu
         T_twiddleRndSatType(-1.000000000000000, 0.000000000000000 * l_sign),
         T_twiddleRndSatType(-0.923879532511287, 0.382683432365090 * l_sign)};
 
-#pragma HLS ARRAY_PARTITION variable = local_r8_twiddle_table complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = local_r16_twiddle_table complete dim = 1
 
     const T_twiddleRndSatType local_r8_kernel[4][4] = {
         {T_twiddleRndSatType(1, 0 * l_sign), T_twiddleRndSatType(1, 0 * l_sign), T_twiddleRndSatType(1, 0 * l_sign),
@@ -647,7 +646,7 @@ void __parallel_fft_kernel_L32_R16x2xS2_atree(T_bflyIn p_bflyIndata[32], T_bflyO
     }
     ////////////////////////////////////////////////////
     T_bflyIn D2[16];
-#pragma HLS ARRAY_PARTITION variable = D0 complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = D2 complete dim = 1
 
     for (int i = 0; i < 16; i++) {
 #pragma HLS UNROLL
@@ -692,7 +691,6 @@ void __parallel_fft_kernel_L4_R4x1(T_bflyIn p_bflyIndata[4], T_bflyOut p_bflyOut
     typedef typename ButterflyTraits<isFirstStage, t_scalingMode, T_bflyIn>::T_butterflyAccumType stage1_accum;
     typedef typename ButterflyTraits<isFirstStage, t_scalingMode, stage1_accum>::T_butterflyAccumType stage2_accum;
     stage2_accum D0t[4];
-#pragma HLS ARRAY_PARTITION variable = D2t complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = D0t complete dim = 1
     stage2_accum accum;
     stage2_accum accum2;
@@ -853,7 +851,7 @@ void __parallel_fft_kernel_L16_R4x4xS2(T_bflyIn p_bflyIndata[16], T_bflyOut p_bf
         T_twiddle(-0.707106781186548, -0.707106781186547), T_twiddle(-0.923879532511287, -0.382683432365089),
         T_twiddle(-1.000000000000000, 0.000000000000000),  T_twiddle(-0.923879532511287, 0.382683432365090)};
 
-#pragma HLS ARRAY_PARTITION variable = local_r8_twiddle_table complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = local_r16_twiddle_table complete dim = 1
 
     const T_twiddle local_r8_kernel[4][4] = {{T_twiddle(1, 0), T_twiddle(1, 0), T_twiddle(1, 0), T_twiddle(1, 0)},
                                              {T_twiddle(1, 0), T_twiddle(0, -1), T_twiddle(-1, 0), T_twiddle(0, 1)},
@@ -1195,7 +1193,7 @@ void __parallel_fft_kernel_L32_R16x2xS2(T_bflyIn p_bflyIndata[32], T_bflyOut p_b
     }
     ////////////////////////////////////////////////////
     T_bflyIn D2[16];
-#pragma HLS ARRAY_PARTITION variable = D0 complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = D2 complete dim = 1
 
     for (int i = 0; i < 16; i++) {
 #pragma HLS UNROLL
@@ -1420,6 +1418,6 @@ L_CALC_R_BUTTERFLY_SAMPLE: // [```````` ONE BUTTERFLY`````]
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif

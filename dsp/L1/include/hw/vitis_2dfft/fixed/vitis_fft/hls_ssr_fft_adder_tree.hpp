@@ -51,7 +51,7 @@
 // 2di : No  2 dimensional arrays in this block for reshaping and streaming used
 //=====================================================================================
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -97,6 +97,6 @@ void AdderTreeClass<2>::createTreeLevel(T_in p_data[2], T_out& p_accumValue) {
 
 } // end namespace fft
 } // end namespace dsp
-} // namespace vitis
+} // namespace xf
 
 #endif //__HLS_SSR_FFT_ADDER_TREE_H__

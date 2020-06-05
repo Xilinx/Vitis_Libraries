@@ -23,7 +23,7 @@
 #ifndef __SYNTHESIS__
 #include <iostream>
 #endif
-using namespace vitis::dsp::fft;
+using namespace xf::dsp::fft;
 typedef ap_fixed<27, 8> T_innerData;
 typedef std::complex<T_innerData> T_elemType;
 const int k_memWidthBits = 512;

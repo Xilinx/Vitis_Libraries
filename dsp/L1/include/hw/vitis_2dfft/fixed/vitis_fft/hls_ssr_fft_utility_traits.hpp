@@ -20,7 +20,7 @@
 
 #include "vitis_fft/fft_complex.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -64,5 +64,5 @@ struct UtilityInnerTypeTraits<std::complex<ap_fixed<t_WL, t_IL, t_qMode, t_ovfMo
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 #endif //_HLS_SSR_FFT_UTILITY_TRAITS_H_

@@ -21,7 +21,7 @@
 
 #include "vitis_fft/fft_complex.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -37,5 +37,5 @@ void complexMultiply(complex_wrapper<T_op1> p_complexOp1,
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 } // end namespace fft
 } // end namespace dsp
-} // namespace vitis
+} // namespace xf
 #endif //_HLS_SSR_FFT_COMPLEX_MULTIPLIER_H_

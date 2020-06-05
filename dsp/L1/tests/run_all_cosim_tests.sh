@@ -26,15 +26,15 @@ done
 echo "=================================================="
 echo "Setting up test environment ..."
 source set_env.sh
-echo "Vivado_hls used :"
-which vivado_hls
+echo "Vitis_hls used :"
+which vitis_hls
 echo "=================================================="
 
 echo "Remove all old test run logs ..."
 for tdir in $all_tests_dirs
 do
     cd $tdir
-    rm -rf vivado_hls.log
+    rm -rf vitis_hls.log
 done
 echo "Cleaned all old run logs ..."
 
@@ -45,8 +45,8 @@ do
     echo "Entering Test Directory : $tdir"
     echo "-------------------------------------------"
     cd $tdir
-    rm -rf vivado_hls.log
-    #vivado_hls -f $script_name
+    rm -rf vitis_hls.log
+    #vitis_hls -f $script_name
     make run CSIM=1 CSYNTH=1 COSIM=1 XPART={xcu200-fsgd2104-2-e}
     echo "-------------------------------------------"
     echo "Finished test : $tdir/$script_name"
@@ -62,7 +62,7 @@ for tdir in $all_tests_dirs
 do
     total_test=$((total_test+1))
     cd $tdir 
-    res=$(grep -i "fail" vivado_hls.log)
+    res=$(grep -i "fail" vitis_hls.log)
     echo "--------------------------------------------"
     echo "Test : $tdir"
     if [ -z "$res" ]

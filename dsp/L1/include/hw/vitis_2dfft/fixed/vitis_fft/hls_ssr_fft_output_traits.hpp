@@ -53,7 +53,7 @@
  ========================================================================================
  */
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -399,7 +399,7 @@ struct ssr_fft_output_type {
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 //======================================================================================================================
 #endif // HLS_SSR_FFT_OUTPUT_TRAITS_H_

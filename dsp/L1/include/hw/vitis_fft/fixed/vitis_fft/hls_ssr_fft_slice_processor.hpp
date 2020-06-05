@@ -34,7 +34,7 @@
 #include "vitis_fft/hls_ssr_fft_demux.hpp"
 #include "vitis_fft/hls_ssr_fft_mux.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -83,6 +83,6 @@ class FFTMemWideSliceProcessor {
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif

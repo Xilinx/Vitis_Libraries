@@ -60,7 +60,7 @@
  -_-                                                                                   -_-
  ========================================================================================
  */
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -115,6 +115,6 @@ void MemReadBarrelShifter<1>::readMemAndBarrelShift(int p_lindex,
 }
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_READ_BARREL_SHIFTER_H_

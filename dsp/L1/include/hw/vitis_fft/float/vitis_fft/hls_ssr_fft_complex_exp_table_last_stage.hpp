@@ -57,7 +57,7 @@
 
 #include "vitis_fft/hls_ssr_fft_twiddle_table_traits.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -94,6 +94,6 @@ struct ComplexExpTableLastStage<t_R, transform_direction, butterfly_rnd_mode, t_
 };
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_COMPLEX_EXP_TALBE_LAST_STAGE_H_

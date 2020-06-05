@@ -22,7 +22,7 @@
 #include "vitis_fft/hls_ssr_fft_streaming_data_commutor.hpp"
 #include "vitis_fft/hls_ssr_fft_fork_merge_utils.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -278,11 +278,11 @@ void StreamingDataCommutorForkNonInvertOut<t_instanceID, t_stage, t_subStage, 1,
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 /////////////////////////////////////// New Class Purely Streaming : without conversion from array to stream
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -338,6 +338,6 @@ struct StreamingDataCommutorForkS2S<t_instanceID, t_stage, t_subStage, 1, t_L, t
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_STREAMING_FORKING_DATA_COMMUTOR_H_

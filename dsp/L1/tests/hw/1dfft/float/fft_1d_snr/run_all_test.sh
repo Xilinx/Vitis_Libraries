@@ -21,8 +21,8 @@ done
 echo "=================================================="
 echo "Setting up test environment ..."
 source set_env.sh
-echo "Vivado_hls used :"
-which vivado_hls
+echo "Vitis_hls used :"
+which vitis_hls
 echo "=================================================="
 
 for tdir in $all_tests_dirs
@@ -30,7 +30,7 @@ do
     echo "-------------------------------------------"
     echo "Entering Test Directory : $tdir"
     cd $tdir
-    vivado_hls -f $script_name
+    vitis_hls -f $script_name
     echo "Finished test : $tdir/$script_name"
     echo "-------------------------------------------"
 done

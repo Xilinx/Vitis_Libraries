@@ -29,7 +29,7 @@
 #include "vitis_fft/hls_ssr_fft_fork_merge_utils.hpp"
 #include "vitis_fft/hls_ssr_fft_wide_type_utilities.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -231,5 +231,5 @@ class FFTMemWideKernel1DArray<1, t_memWidth, t_numRows, t_numCols, ssr_fft_param
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 #endif

@@ -26,7 +26,7 @@
 
 #include "vitis_fft/hls_ssr_fft_kernel_types.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -66,6 +66,6 @@ MUX_STREAMING_LOOP:
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //__HLS_SSR_FFT_MUX_H__

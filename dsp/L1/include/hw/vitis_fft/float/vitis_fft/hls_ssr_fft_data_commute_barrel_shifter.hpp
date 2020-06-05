@@ -55,7 +55,7 @@
 
 #include "vitis_fft/hls_ssr_fft_utilities.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -162,5 +162,5 @@ void CommuteBarrelShifterPF1<1>::memReadCommuteBarrelShifterPF1(int p_offset,
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 #endif // HLS_SSR_FFT_DATA_COMMUTE_BARREL_SHIFTER_H_

@@ -30,7 +30,7 @@
 #include "vitis_fft/fft_complex.hpp"
 #include "vitis_fft/hls_ssr_fft_super_sample.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -147,5 +147,5 @@ struct WideTypeDefs {
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 #endif
