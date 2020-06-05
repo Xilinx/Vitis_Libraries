@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_rowRegAcc",
+    "name": "Xilinx Matrix Row Register Accumulator",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

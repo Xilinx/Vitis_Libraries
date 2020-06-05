@@ -16,8 +16,6 @@
 .. meta::
    :keywords: SPARSE, Library, Vitis SPARSE Library, primitives, L1, primitive
    :description: Vitis SPARSE library L1 primitive user guide.
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
 
 
 .. _module_guide:
@@ -29,4 +27,6 @@ L1 Primitives User Guide
 .. toctree::
    :maxdepth: 2
 
+   L1_intro.rst
+   L1_details.rst
    L1_api.rst

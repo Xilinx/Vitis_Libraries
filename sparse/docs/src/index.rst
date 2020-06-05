@@ -17,22 +17,20 @@
    :keywords: SPARSE, Library, Vitis SPARSE Library, linear, algebra, subroutines, vitis
    :description: Vitis SPARSE Library is a fast FPGA-accelerated implementation of the basic linear algebra subroutines for handling sparse matrices.
    :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
+   :xlnxdocumenttypes: Tutorials
 
 =====================
 Vitis SPARSE Library
 =====================
 
-Vitis SPARSE Library is a fast FPGA-accelerated implementation of the basic
-linear algebra subroutines for handling sparse matrices. Two types of implementations 
-in this library, namely L1 primitives and  L2 kernels. Those 
-implementations are organized in their corresponding directories L1 and L2.
-The L1 primitives' implementations can be leveraged by FPGA hardware developers.
-The L2 kernels' implementations provide usage examples for system and host code developers.
+Vitis SPARSE library is a fast FPGA-accelerated implementation of the basic
+linear algebra subroutines for handling sparse matrices. The library provides two types of implementations: L1 primitives and  L2 kernels. These implementations are organized in their corresponding L1 and L2 directories.
+- L1 primitives implementation can be leveraged by FPGA hardware developers.
+- L2 kernels implementation provide usage examples for system and host code developers.
 
-Since all the kernel code is developed with the permissive Apache 2.0 license,
-advanced users can easily tailor, optimize or combine them for their own need.
-Demos and usage examples of different levels' implementations are also provided
+Advanced users can easily tailor, optimize or combine the kernel code as it is developed with the permissive Apache 2.0 license.
+
+Demos and usage examples of different level implementations are also provided
 for reference. 
 
 .. toctree::
@@ -43,10 +41,11 @@ for reference.
    release.rst
  
 .. toctree::
-   :caption: L1 User Guide
+   :caption: User Guide
    :maxdepth: 2
 
    user_guide/L1_user_guide.rst
+   user_guide/L2_user_guide.rst
 
 Index
 -----

@@ -2,7 +2,7 @@
     "clock": "3.3333",
     "description": "",
     "flow": "hls",
-    "name": "jks.L1_dispCol",
+    "name": "Xilinx Column Vector Dispatching",
     "part_blacklist": [],
     "part_whitelist": [],
     "platform_blacklist": [],

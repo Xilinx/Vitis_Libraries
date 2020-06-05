@@ -13,22 +13,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. meta::
-   :keywords: SPARSE, Library, Vitis SPARSE Library, linear algebra, Subroutines
-   :description: Vitis SPARSE library release notes.
+.. _L2_api:
 
-.. _release_note:
+************************************
+CSCMV Kernel APIs
+************************************
 
-Release Note
-============
 
 .. toctree::
-   :hidden:
-   :maxdepth: 1
+      :maxdepth: 1
 
-1.0
-----
+.. NOTE::
+   CSCMV implementation only uses one HBM channel on U280 card. In future releases, multiple (up to 32) HBM channels may be used to achieve the maximum performance.
 
-The 1.0 release introduces HLS primitives for SPARSE (Basic Linear Algebra Subroutines) operations. 
-These primitives are implemented with ``HLS::stream`` interfaces to allow them to operate in parallel
-with other hardware components. 
+.. include:: ../../rst/global.rst
+      :start-after: _cid-cscrowpktkernel:

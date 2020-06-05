@@ -14,21 +14,18 @@
    limitations under the License.
 
 .. meta::
-   :keywords: SPARSE, Library, Vitis SPARSE Library, linear algebra, Subroutines
-   :description: Vitis SPARSE library release notes.
+   :keywords: SPARSE, Library, Vitis SPARSE Library, kernel, L2
+   :description: Vitis SPARSE library L2 kernel user guide.
 
-.. _release_note:
 
-Release Note
-============
+.. _L2_guide:
+
+=========================
+L2 Kernel User Guide
+=========================
 
 .. toctree::
-   :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
 
-1.0
-----
-
-The 1.0 release introduces HLS primitives for SPARSE (Basic Linear Algebra Subroutines) operations. 
-These primitives are implemented with ``HLS::stream`` interfaces to allow them to operate in parallel
-with other hardware components. 
+   L2_intro.rst
+   L2_api.rst

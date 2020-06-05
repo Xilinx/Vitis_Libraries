@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef XF_SPARSE_STOREDATPKT_HPP
+#define XF_SPARSE_STOREDATPKT_HPP
 /**
- * @file storeDatKernel.cpp
+ * @file storeDatKernel.hpp
  * @brief storeDatKernel definition.
  *
  * This file is part of Vitis SPARSE Library.
  */
 
-#include "storeDatPktKernel.hpp"
+#include "cscKernel.hpp"
 
+typedef ap_axiu<SPARSE_dataBits * SPARSE_parEntries, 0, 0, 0> SPARSE_parDataPktType;
+/**
+ * @brief storeDataPkt Kernel
+ * @param in the input axi stream of row vector entries of cscmv operation results
+ * @param p_memPtr the device memory pointer for writing the row vector entries
+ * @param p_memBlocks the number of vector entries in each memory write
+ */
 extern "C" void storeDatPktKernel(hls::stream<SPARSE_parDataPktType>& in,
                                   ap_uint<SPARSE_ddrMemBits>* p_memPtr,
-                                  unsigned int p_memBlocks) {
-#pragma HLS INTERFACE m_axi port = p_memPtr offset = slave bundle = gmem
-#pragma HLS INTERFACE axis port = in
-#pragma HLS INTERFACE s_axilite port = p_memPtr bundle = control
-#pragma HLS INTERFACE s_axilite port = p_memBlocks bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
-    xf::sparse::storeDatPkt<SPARSE_parEntries, SPARSE_ddrMemBits, SPARSE_dataBits, SPARSE_parDataPktType>(
-        in, p_memBlocks, p_memPtr);
-}
+                                  unsigned int p_memBlocks);
+#endif
