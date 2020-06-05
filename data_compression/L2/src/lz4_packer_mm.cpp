@@ -51,16 +51,9 @@ void xilLz4Packer(uint512_t* in,
 #pragma HLS INTERFACE s_axilite port = input_size bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-    xf::compression::lz4PackerMM<GMEM_DWIDTH, GMEM_BURST_SIZE>(orig_input_data,
-                                                                in,
-                                                                out,
-                                                                in_block_size,
-                                                                compressd_size,
-                                                                encoded_size,
-                                                                xxhashVal,
-                                                                block_size_in_kb,
-                                                                no_blocks,
-                                                                input_size);
+    xf::compression::lz4PackerMM<GMEM_DWIDTH, GMEM_BURST_SIZE>(orig_input_data, in, out, in_block_size, compressd_size,
+                                                               encoded_size, xxhashVal, block_size_in_kb, no_blocks,
+                                                               input_size);
     return;
 }
 }

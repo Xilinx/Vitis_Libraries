@@ -24,9 +24,6 @@ Apache 2.0 license. Demos of different data
 compression acceleration are also provided with the library for easy
 on-boarding.
 
-For more information, see the `comprehensive HTML
-document <https://xilinx.github.io/Vitis_Libraries/data_compression/>`__.
-
 Requirements
 ------------
 
@@ -75,10 +72,6 @@ By offloading compression to FPGA, we achieved 3.6x speedup against
 single threaded LZ4 default (v1.9.0) and a 4.4x speedup against single
 core Snappy (v1.1.4). Benchmark evaluation of compression performance is
 of reference Silesia Corpus.
-
-For detailed information, please reference to the `benchmark
-section <https://xilinx.github.io/Vitis_Libraries/data_compression/source/results.html>`__
-of document.
 
 LICENSE
 -------

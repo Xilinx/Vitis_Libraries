@@ -15,14 +15,13 @@
     ],
     "launch": [
         {
-            "cmd_args": "-dx BUILD/compress_decompress.xclbin -l PROJECT/test.list", 
+            "cmd_args": "-dx BUILD/decompress.xclbin -l PROJECT/test.list", 
             "name": "generic launch for all flows"
         }
     ], 
-    "match_makefile": "false",
-    "match_ini": "false",
-    "config_make": "config.mk",
     "gui": "false", 
+    "match_ini": "false",
+    "config_make": "./config.mk",
     "host": {
         "host_exe": "xil_lz4", 
         "compiler": {
@@ -36,9 +35,14 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include",
-		"LIB_DIR/L2/include"
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L1/include/hw"
             ], 
-            "symbols": [ "PARALLEL_BLOCK=8", "ENABLE_P2P=1" ] 
+            "symbols": [ "PARALLEL_BLOCK=8", 
+                         "C_COMPUTE_UNIT=1",
+                         "D_COMPUTE_UNIT=2",
+                         "OVERLAP_HOST_DEVICE" 
+                       ] 
         }
     },
     "v++":{

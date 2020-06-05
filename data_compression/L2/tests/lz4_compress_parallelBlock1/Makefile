@@ -134,9 +134,6 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 VPP_FLAGS += -DPARALLEL_BLOCK=1 
 
-# Kernel linker flags
-LDCLFLAGS_compress += --profile_kernel data:all:all:all
-
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/compress.xclbin
 BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilLz4Compress.xo

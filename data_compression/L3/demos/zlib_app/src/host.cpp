@@ -332,7 +332,7 @@ int main(int argc, char* argv[]) {
 
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.addSwitch("--cu", "-k", "CU", "0");
-    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
+    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
     parser.parse(argc, argv);
 
     std::string compress_mod = parser.value("compress");
