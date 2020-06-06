@@ -35,31 +35,22 @@ int main(int argc, char** argv) {
     }
 
 #if DIM
-if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM))
-{
-    dst_hls.create(in_img.rows, 1, CV_32SC1);
-    ocv_ref.create(in_img.rows, 1, CV_32SC1);
+    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM)) {
+        dst_hls.create(in_img.rows, 1, CV_32SC1);
+        ocv_ref.create(in_img.rows, 1, CV_32SC1);
 
-}
-else
-{
-    dst_hls.create(in_img.rows, 1, CV_8UC1);
-    ocv_ref.create(in_img.rows, 1, CV_8UC1);
-
-
-}
+    } else {
+        dst_hls.create(in_img.rows, 1, CV_8UC1);
+        ocv_ref.create(in_img.rows, 1, CV_8UC1);
+    }
 #else
-if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM))
-{
-    dst_hls.create(1, in_img.cols, CV_32SC1);
-    ocv_ref.create(1, in_img.cols, CV_32SC1);
-}
-else
-{
-      dst_hls.create(1, in_img.cols, CV_8UC1);
-      ocv_ref.create(1, in_img.cols, CV_8UC1);
-
-}
+    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM)) {
+        dst_hls.create(1, in_img.cols, CV_32SC1);
+        ocv_ref.create(1, in_img.cols, CV_32SC1);
+    } else {
+        dst_hls.create(1, in_img.cols, CV_8UC1);
+        ocv_ref.create(1, in_img.cols, CV_8UC1);
+    }
 #endif
 
     unsigned char dimension = DIM;
@@ -129,7 +120,7 @@ else
                             CL_TRUE,         // blocking call
                             0,               // offset
                             image_out_size_bytes,
-                            (ap_uint<PTR_OUT_WIDTH> *)dst_hls.data, // Data will be stored here
+                            (ap_uint<PTR_OUT_WIDTH>*)dst_hls.data, // Data will be stored here
                             nullptr, &event);
 
     // Clean up:
@@ -140,7 +131,6 @@ else
         cv::reduce(in_img, ocv_ref, DIM, CV_REDUCE, CV_32SC1); // avg, sum
     else
         cv::reduce(in_img, ocv_ref, DIM, CV_REDUCE, CV_8UC1);
-
 
     // Results verification:
     FILE* fp = fopen("hls", "w");
@@ -173,7 +163,7 @@ else
 #endif
     fclose(fp);
     fclose(fp1);
-printf("after file write\n");
+    printf("after file write\n");
     if (err_cnt > 0) {
         std::cout << "ERROR: Test Failed." << std::endl;
         return EXIT_FAILURE;

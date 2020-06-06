@@ -16,8 +16,10 @@
 
 #include "xf_dense_npyr_optical_flow_config.h"
 
-static constexpr int __XF_DEPTH_IN=(MAX_HEIGHT*MAX_WIDTH*(XF_PIXELWIDTH(XF_8UC1,NPPC))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(MAX_HEIGHT*MAX_WIDTH*(XF_PIXELWIDTH(XF_32FC1,NPPC))/32) / (OUTPUT_PTR_WIDTH/32);
+static constexpr int __XF_DEPTH_IN =
+    (MAX_HEIGHT * MAX_WIDTH * (XF_PIXELWIDTH(XF_8UC1, NPPC)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT =
+    (MAX_HEIGHT * MAX_WIDTH * (XF_PIXELWIDTH(XF_32FC1, NPPC)) / 32) / (OUTPUT_PTR_WIDTH / 32);
 
 void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
                             ap_uint<INPUT_PTR_WIDTH>* img_prev,
@@ -32,7 +34,7 @@ void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
     #pragma HLS INTERFACE m_axi     port=img_outy  offset=slave bundle=gmem4 depth=_XF_DEPTH_OUT
     #pragma HLS INTERFACE s_axilite port=cols  
     #pragma HLS INTERFACE s_axilite port=rows  
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC> in_curr_mat(rows, cols);
@@ -52,4 +54,3 @@ void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC>(outx_mat, img_outx);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC>(outy_mat, img_outy);
 }
-

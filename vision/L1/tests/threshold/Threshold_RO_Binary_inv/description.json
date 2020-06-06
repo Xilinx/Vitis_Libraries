@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.Threshold_RO_Binary_inv", 
+    "name": "Xilinx Threshold_Ro_Binary_Inv Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

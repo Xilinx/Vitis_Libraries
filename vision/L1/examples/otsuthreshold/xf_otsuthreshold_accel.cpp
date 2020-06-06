@@ -16,15 +16,15 @@
 
 #include "xf_otsuthreshold_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
-void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char &Otsuval, int height, int width) {
+void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char& Otsuval, int height, int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=Otsuval       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE s_axilite  port=height		      
     #pragma HLS INTERFACE s_axilite  port=width 		      
-    #pragma HLS INTERFACE s_axilite  port=return 		      
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
@@ -41,4 +41,3 @@ void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char &Otsuval, int
 
     return;
 } // End of kernel
-

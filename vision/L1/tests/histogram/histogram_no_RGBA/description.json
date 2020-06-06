@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.histogram_no_RGBA", 
+    "name": "Xilinx Histogram_No_Rgba Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

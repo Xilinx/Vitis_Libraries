@@ -16,5 +16,3 @@
 
 #define RO 1
 #define NO 0
-
-

@@ -28,5 +28,3 @@
 #define DIM 1
 
 #define REDUCTION_OP XF_REDUCE_MAX
-
-

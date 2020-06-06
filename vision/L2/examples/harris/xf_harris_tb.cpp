@@ -70,8 +70,6 @@ int main(int argc, char** argv) {
     // Initialize the buffers:
     cl::Event event;
 
-  
-
     /////////////////////////////////////// CL ////////////////////////
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -101,7 +99,7 @@ int main(int argc, char** argv) {
                                         CL_TRUE,             // blocking call
                                         0,                   // buffer offset in bytes
                                         image_in_size_bytes, // Size in bytes
-                                        in_img.data,       // Pointer to the data to copy
+                                        in_img.data,         // Pointer to the data to copy
                                         nullptr, &event));
 
     // Set the kernel arguments
@@ -156,21 +154,19 @@ int main(int argc, char** argv) {
     for (int j = 0; j < in_img.rows; j++) {
         int l = 0;
         for (int i = 0; i < (in_img.cols); i++) {
-         
-                unsigned char pix = hls_out_img.at<unsigned char>(j,i);
-                if (pix != 0) {
-                    cv::Point tmp;
-                    tmp.x = i;
-                    tmp.y = j;
-                    if ((tmp.x < in_img.cols) && (tmp.y < in_img.rows) && (j > 0)) {
-                        hls_points.push_back(tmp);
-                    }
-                    short int y, x;
-                    y = j;
-                    x = i;
-                    if (j > 0) cv::circle(out_img, cv::Point(x, y), 5, cv::Scalar(0, 0, 255, 255), 2, 8, 0);
+            unsigned char pix = hls_out_img.at<unsigned char>(j, i);
+            if (pix != 0) {
+                cv::Point tmp;
+                tmp.x = i;
+                tmp.y = j;
+                if ((tmp.x < in_img.cols) && (tmp.y < in_img.rows) && (j > 0)) {
+                    hls_points.push_back(tmp);
                 }
-           
+                short int y, x;
+                y = j;
+                x = i;
+                if (j > 0) cv::circle(out_img, cv::Point(x, y), 5, cv::Scalar(0, 0, 255, 255), 2, 8, 0);
+            }
         }
     }
 

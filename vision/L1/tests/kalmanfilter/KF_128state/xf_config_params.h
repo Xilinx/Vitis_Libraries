@@ -21,5 +21,3 @@
 #define KF_MMU 16
 #define XF_USE_URAM 0
 #define KF_EKF 0
-
-

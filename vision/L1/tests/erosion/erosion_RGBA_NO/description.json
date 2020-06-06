@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.erosion_RGBA_NO", 
+    "name": "Xilinx Erosion_Rgba_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

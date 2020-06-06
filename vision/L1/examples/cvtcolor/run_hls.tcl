@@ -33,7 +33,7 @@ set_top ${ACCELTOP}
 open_solution -reset $SOLN
 
 #set_part $XPART
-set_part {xc7vx485t-ffg1157-1}
+set_part {xcu200-fsgd2104-2-e}
 create_clock -period $CLKP
 
 if {$CSIM == 1} {

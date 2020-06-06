@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.hog.build", 
+    "name": "Xilinx Hog Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.erosion_NO_ELLIPSE", 
+    "name": "Xilinx Erosion_No_Ellipse Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

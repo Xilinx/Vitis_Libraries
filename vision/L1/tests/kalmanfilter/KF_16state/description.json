@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.KF_16state", 
+    "name": "Xilinx Kf_16State Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

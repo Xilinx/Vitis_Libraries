@@ -40,8 +40,9 @@ int main(int argc, char** argv) {
     int height = in_rgba.rows;
     int width = in_rgba.cols;
 
-	//Call the top function
-	channel_extract_accel((ap_uint<INPUT_PTR_WIDTH> *)in_rgba.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, channel, height, width);
+    // Call the top function
+    channel_extract_accel((ap_uint<INPUT_PTR_WIDTH>*)in_rgba.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, channel,
+                          height, width);
 
     cv::imwrite("hls_out.png", out_img);
 

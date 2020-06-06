@@ -1,5 +1,5 @@
 {
-    "name": "Kalmanfilter", 
+    "name": "Xilinx Kf_64State_Uram L2 Test", 
     "description": [
         "Kalmanfilter L2 function example"
     ],

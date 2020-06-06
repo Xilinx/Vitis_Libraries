@@ -16,8 +16,7 @@
 
 #include "xf_gammacorrection_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void gammacorrection_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, float gammaval, int rows, int cols) {
@@ -27,11 +26,11 @@ void gammacorrection_accel(
 #pragma HLS INTERFACE s_axilite port=gammaval 
 #pragma HLS INTERFACE s_axilite port=rows     
 #pragma HLS INTERFACE s_axilite port=cols     
-#pragma HLS INTERFACE s_axilite port=return   
+#pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);
-// clang-format off
+    // clang-format off
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> out_mat(rows, cols);
@@ -46,4 +45,3 @@ void gammacorrection_accel(
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
 }
-

@@ -49,24 +49,24 @@ void kalmanfilter_accel(ap_uint<32>* in_A,
     #pragma HLS INTERFACE m_axi      port=out_U     offset=slave  bundle=gmem12
     #pragma HLS INTERFACE m_axi      port=out_D     offset=slave  bundle=gmem13
     #pragma HLS INTERFACE s_axilite  port=control_flag 	          
-    #pragma HLS INTERFACE s_axilite  port=return 		          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> A_mat(KF_N,KF_N);
-    xf::cv::Mat<TYPE, KF_N, KF_C, NPC1> B_mat(KF_N,KF_C);
-    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> Uq_mat(KF_N,KF_N);
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1> Dq_mat(KF_N,1);
-    xf::cv::Mat<TYPE, KF_M, KF_N, NPC1> H_mat(KF_M,KF_N);
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1> X0_mat(KF_N,1);
-    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> U0_mat(KF_N,KF_N);
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1> D0_mat(KF_N,1);
-    xf::cv::Mat<TYPE, KF_M, 1, NPC1> R_mat(KF_M,1);
-    xf::cv::Mat<TYPE, KF_C, 1, NPC1> u_mat(KF_C,1);
-    xf::cv::Mat<TYPE, KF_M, 1, NPC1> y_mat(KF_M,1);
+    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> A_mat(KF_N, KF_N);
+    xf::cv::Mat<TYPE, KF_N, KF_C, NPC1> B_mat(KF_N, KF_C);
+    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> Uq_mat(KF_N, KF_N);
+    xf::cv::Mat<TYPE, KF_N, 1, NPC1> Dq_mat(KF_N, 1);
+    xf::cv::Mat<TYPE, KF_M, KF_N, NPC1> H_mat(KF_M, KF_N);
+    xf::cv::Mat<TYPE, KF_N, 1, NPC1> X0_mat(KF_N, 1);
+    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> U0_mat(KF_N, KF_N);
+    xf::cv::Mat<TYPE, KF_N, 1, NPC1> D0_mat(KF_N, 1);
+    xf::cv::Mat<TYPE, KF_M, 1, NPC1> R_mat(KF_M, 1);
+    xf::cv::Mat<TYPE, KF_C, 1, NPC1> u_mat(KF_C, 1);
+    xf::cv::Mat<TYPE, KF_M, 1, NPC1> y_mat(KF_M, 1);
 
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1> Xout_mat(KF_N,1);
-    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> Uout_mat(KF_N,KF_N);
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1> Dout_mat(KF_N,1);
+    xf::cv::Mat<TYPE, KF_N, 1, NPC1> Xout_mat(KF_N, 1);
+    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1> Uout_mat(KF_N, KF_N);
+    xf::cv::Mat<TYPE, KF_N, 1, NPC1> Dout_mat(KF_N, 1);
 
 // clang-format off
     #pragma HLS STREAM variable=A_mat.data depth=2

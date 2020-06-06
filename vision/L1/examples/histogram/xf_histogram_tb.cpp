@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_histogram_config.h"
 
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1>" << std::endl;
@@ -63,17 +62,15 @@ int main(int argc, char** argv) {
     cv::calcHist(&bgr_planes[2], 1, 0, cv::Mat(), r_hist, 1, &histSize, histRange, 1, 0);
 #endif
 
-   // Create a memory to hold HLS implementation output:
+    // Create a memory to hold HLS implementation output:
 
-	unsigned int *histogram = (unsigned int *)malloc(histSize*in_img.channels()*sizeof(unsigned int));
+    unsigned int* histogram = (unsigned int*)malloc(histSize * in_img.channels() * sizeof(unsigned int));
 
     int rows = in_img.rows;
     int cols = in_img.cols;
 
-//////////////// Top function call ///////////////////////
-	histogram_accel((ap_uint<PTR_WIDTH> *)in_img.data, histogram, rows, cols);
-	
-	
+    //////////////// Top function call ///////////////////////
+    histogram_accel((ap_uint<PTR_WIDTH>*)in_img.data, histogram, rows, cols);
 
 #if GRAY
     FILE *fp, *fp1;

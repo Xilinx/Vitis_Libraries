@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.DOG", 
+    "name": "Xilinx Dog Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

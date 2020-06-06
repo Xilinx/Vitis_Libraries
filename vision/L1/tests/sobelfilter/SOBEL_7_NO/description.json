@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.SOBEL_7_NO", 
+    "name": "Xilinx Sobel_7_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

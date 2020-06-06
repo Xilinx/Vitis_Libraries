@@ -60,10 +60,12 @@
 #define OUT_TYPE XF_8UC3
 #endif
 void add_weighted_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                 ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                 float alpha,
-                 float beta,
-                 float gamma,
-                 ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width);
+                        ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                        float alpha,
+                        float beta,
+                        float gamma,
+                        ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                        int height,
+                        int width);
 
 #endif //_XF_ADD_WEIGHTED_CONFIG_H_

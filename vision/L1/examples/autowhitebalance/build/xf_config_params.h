@@ -18,4 +18,3 @@
 #define RO 0 // Resource Optimized
 
 #define WB_TYPE XF_WB_GRAY
-

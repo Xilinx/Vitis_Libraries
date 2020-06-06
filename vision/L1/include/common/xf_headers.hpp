@@ -25,7 +25,6 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgcodecs/imgcodecs.hpp"
 
-
 #include "common/xf_sw_utils.hpp"
 
 #endif //_XF_HEADERS_H_

@@ -1,5 +1,5 @@
 {
-    "name": "Meanshifttracking", 
+    "name": "Xilinx Mean_Shift_250_10_4 L2 Test", 
     "description": [
         "Meanshifttracking L2 function example"
     ],
@@ -62,7 +62,7 @@
     "launch": [
         {
             "target" : "sw_emu",
-            "cmd_args": "LIB_DIR/data/mst_images 3",
+            "cmd_args": "LIB_DIR/data/mst_imgs 3",
             "name": "sw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -72,7 +72,7 @@
         },
         {
             "target" : "hw_emu",
-            "cmd_args": "LIB_DIR/data/mst_images 3",
+            "cmd_args": "LIB_DIR/data/mst_imgs 3",
             "name": "hw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -82,7 +82,7 @@
         },
         {
             "target" : "hw",
-            "cmd_args": "LIB_DIR/data/mst_images 3",
+            "cmd_args": "LIB_DIR/data/mst_imgs 3",
             "name": "hardware_build",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -91,7 +91,7 @@
 	    ]
         }
     ],
-    "data": ["LIB_DIR/data/mst_images", "3"], 
+    "data": ["LIB_DIR/data/mst_imgs", "3"], 
     "host": {
         "host_exe": "meanshifttracking", 
         "compiler": {
@@ -100,13 +100,13 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "options": "-O3",
-            "symbols": ["__SDSVHLS__" ] 
+            "symbols": ["__SDSVHLS__", "__SDA_MEM_MAP__" ] 
         }
     },
     "v++":{
         "compiler": {
             "symbols": [
-                
+                "__SDA_MEM_MAP__"
             ],
             "clflags": [
             ]

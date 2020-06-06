@@ -107,22 +107,16 @@ void pyrof_hw(cv::Mat im0,
         }
     }
     // creating image pyramid
-  for (int pyr_comp = 0; pyr_comp < NUM_LEVELS - 1; pyr_comp++) {
-			pyr_dense_optical_flow_pyr_down_accel((ap_uint<INPUT_PTR_WIDTH>* )mat_imagepyr1[pyr_comp].data, 
-											(ap_uint<OUTPUT_PTR_WIDTH>* )mat_imagepyr1[pyr_comp + 1].data,
-											mat_imagepyr1[pyr_comp].rows,
-											mat_imagepyr1[pyr_comp].cols,
-											mat_imagepyr1[pyr_comp + 1].rows,
-											mat_imagepyr1[pyr_comp + 1].cols
-											);
-			pyr_dense_optical_flow_pyr_down_accel((ap_uint<INPUT_PTR_WIDTH>* )mat_imagepyr2[pyr_comp].data, 
-											(ap_uint<OUTPUT_PTR_WIDTH>* )mat_imagepyr2[pyr_comp + 1].data,
-											mat_imagepyr2[pyr_comp].rows,
-											mat_imagepyr2[pyr_comp].cols,
-											mat_imagepyr2[pyr_comp + 1].rows,
-											mat_imagepyr2[pyr_comp + 1].cols
-											);	
-  }
+    for (int pyr_comp = 0; pyr_comp < NUM_LEVELS - 1; pyr_comp++) {
+        pyr_dense_optical_flow_pyr_down_accel((ap_uint<INPUT_PTR_WIDTH>*)mat_imagepyr1[pyr_comp].data,
+                                              (ap_uint<OUTPUT_PTR_WIDTH>*)mat_imagepyr1[pyr_comp + 1].data,
+                                              mat_imagepyr1[pyr_comp].rows, mat_imagepyr1[pyr_comp].cols,
+                                              mat_imagepyr1[pyr_comp + 1].rows, mat_imagepyr1[pyr_comp + 1].cols);
+        pyr_dense_optical_flow_pyr_down_accel((ap_uint<INPUT_PTR_WIDTH>*)mat_imagepyr2[pyr_comp].data,
+                                              (ap_uint<OUTPUT_PTR_WIDTH>*)mat_imagepyr2[pyr_comp + 1].data,
+                                              mat_imagepyr2[pyr_comp].rows, mat_imagepyr2[pyr_comp].cols,
+                                              mat_imagepyr2[pyr_comp + 1].rows, mat_imagepyr2[pyr_comp + 1].cols);
+    }
 
     bool flag_flowin = 1;
     flow.rows = pyr_h[NUM_LEVELS - 1];
@@ -148,45 +142,21 @@ void pyrof_hw(cv::Mat im0,
                 flow.rows = pyr_h[l];
                 flow.cols = pyr_w[l];
                 flow.size = pyr_h[l] * pyr_w[l];
-                pyr_dense_optical_flow_accel((ap_uint<INPUT_PTR_WIDTH>* )mat_imagepyr1[l].data, 
-											(ap_uint<INPUT_PTR_WIDTH>* )mat_imagepyr2[l].data, 
-											(ap_uint<OUTPUT_PTR_WIDTH>* )flow_iter.data, 
-											(ap_uint<OUTPUT_PTR_WIDTH>* )flow.data, 
-											l, 
-											scale_up_flag,
-                                            scale_in, 
-											init_flag,
-											mat_imagepyr1[l].rows,
-											mat_imagepyr1[l].cols,											
-											mat_imagepyr2[l].rows,
-											mat_imagepyr2[l].cols,		
-											flow_iter.rows, 
-											flow_iter.cols, 
-											flow.rows,
-											flow.cols											
-											);
+                pyr_dense_optical_flow_accel(
+                    (ap_uint<INPUT_PTR_WIDTH>*)mat_imagepyr1[l].data, (ap_uint<INPUT_PTR_WIDTH>*)mat_imagepyr2[l].data,
+                    (ap_uint<OUTPUT_PTR_WIDTH>*)flow_iter.data, (ap_uint<OUTPUT_PTR_WIDTH>*)flow.data, l, scale_up_flag,
+                    scale_in, init_flag, mat_imagepyr1[l].rows, mat_imagepyr1[l].cols, mat_imagepyr2[l].rows,
+                    mat_imagepyr2[l].cols, flow_iter.rows, flow_iter.cols, flow.rows, flow.cols);
                 flag_flowin = 0;
             } else {
                 flow_iter.rows = pyr_h[l];
                 flow_iter.cols = pyr_w[l];
                 flow_iter.size = pyr_h[l] * pyr_w[l];
-                pyr_dense_optical_flow_accel((ap_uint<INPUT_PTR_WIDTH>* )mat_imagepyr1[l].data, 
-											(ap_uint<INPUT_PTR_WIDTH>* )mat_imagepyr2[l].data, 
-											(ap_uint<OUTPUT_PTR_WIDTH>* )flow.data, 
-											(ap_uint<OUTPUT_PTR_WIDTH>* )flow_iter.data, 
-											l, 
-											scale_up_flag,
-                                            scale_in, 
-											init_flag,
-											mat_imagepyr1[l].rows,
-											mat_imagepyr1[l].cols,											
-											mat_imagepyr2[l].rows,
-											mat_imagepyr2[l].cols,			
-											flow.rows, 
-											flow.cols, 
-											flow_iter.rows,
-											flow_iter.cols
-											);
+                pyr_dense_optical_flow_accel(
+                    (ap_uint<INPUT_PTR_WIDTH>*)mat_imagepyr1[l].data, (ap_uint<INPUT_PTR_WIDTH>*)mat_imagepyr2[l].data,
+                    (ap_uint<OUTPUT_PTR_WIDTH>*)flow.data, (ap_uint<OUTPUT_PTR_WIDTH>*)flow_iter.data, l, scale_up_flag,
+                    scale_in, init_flag, mat_imagepyr1[l].rows, mat_imagepyr1[l].cols, mat_imagepyr2[l].rows,
+                    mat_imagepyr2[l].cols, flow.rows, flow.cols, flow_iter.rows, flow_iter.cols);
                 flag_flowin = 1;
             }
         } // end iterative coptical flow computation

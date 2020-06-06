@@ -1,5 +1,5 @@
 {
-    "name": "Boundingbox", 
+    "name": "Xilinx Boundingbox_Rgb L2 Test", 
     "description": [
         "Boundingbox L2 function example"
     ],
@@ -100,13 +100,13 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "options": "-O3",
-            "symbols": ["__SDSVHLS__" ] 
+            "symbols": ["__SDSVHLS__", "__SDA_MEM_MAP__" ] 
         }
     },
     "v++":{
         "compiler": {
             "symbols": [
-                
+                "__SDA_MEM_MAP__"
             ],
             "clflags": [
             ]

@@ -26,7 +26,7 @@ void minmaxloc_accel(
     #pragma HLS INTERFACE m_axi      port=min_max_loc_xy  offset=slave  bundle=gmem2
     #pragma HLS INTERFACE s_axilite  port=height 			
     #pragma HLS INTERFACE s_axilite  port=width 			
-    #pragma HLS INTERFACE s_axilite  port=return 			
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     // Local objects:

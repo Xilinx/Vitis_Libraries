@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.resize_DOWN_BILINEAR_NO_RGB", 
+    "name": "Xilinx Resize_Down_Bilinear_No_Rgb Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "Cvtcolor", 
+    "name": "Xilinx Cvtcolor L2 Test", 
     "description": [
         "Cvtcolor L2 function example"
     ],
@@ -123,7 +123,7 @@
             "name": "krnl_cvt_color",
             "accelerators": [
                 {
-                    "name": "cvtcolor_rgba2iyuv", 
+                    "name": "cvtcolor_bgr2gray", 
                     "location": "LIB_DIR/L2/examples/cvtcolor/xf_cvt_color_accel.cpp"
                 }
            ] 

@@ -24,7 +24,7 @@ void medianblur_accel(ap_uint<PTR_WIDTH>* img_in, int rows, int cols, ap_uint<PT
     #pragma HLS INTERFACE m_axi      port=img_out        offset=slave bundle=gmem1
     #pragma HLS INTERFACE s_axilite  port=rows 			       	   	  
 	#pragma HLS INTERFACE s_axilite  port=cols 			              
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);

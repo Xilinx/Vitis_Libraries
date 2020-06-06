@@ -19,7 +19,6 @@
 #include <ap_int.h>
 #include "xf_accumulate_weighted_config.h"
 
-
 int main(int argc, char** argv) {
     if (argc != 3) {
         std::cout << "Usage: <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
@@ -82,8 +81,9 @@ int main(int argc, char** argv) {
     // Write OpenCV reference image
     cv::imwrite("out_ocv.jpg", ocv_ref);
 
-	accumulate_weighted_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray.data, (ap_uint<INPUT_PTR_WIDTH> *)in_gray1.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_gray.data, alpha,height,width);
-	
+    accumulate_weighted_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray1.data,
+                              (ap_uint<OUTPUT_PTR_WIDTH>*)out_gray.data, alpha, height, width);
+
     cv::imwrite("out_hls.jpg", out_gray);
 #if GRAY
     out_gray.convertTo(inout_gray1, CV_32FC1);

@@ -33,5 +33,3 @@
 // OpenCV reference macros
 #define CV_FUNCT_NAME max
 //#define CV_EXTRA_ARG  0.05
-
-

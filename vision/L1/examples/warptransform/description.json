@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.warptransform.build", 
+    "name": "Xilinx Warptransform Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

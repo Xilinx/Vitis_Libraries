@@ -16,8 +16,9 @@
 
 #include "xf_pyr_down_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC_T))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(OUT_HEIGHT*OUT_WIDTH*(XF_PIXELWIDTH(TYPE,NPC_T))/8) / (OUTPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC_T)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT =
+    (OUT_HEIGHT * OUT_WIDTH * (XF_PIXELWIDTH(TYPE, NPC_T)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
@@ -32,7 +33,7 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=in_cols  
     #pragma HLS INTERFACE s_axilite port=out_rows 
     #pragma HLS INTERFACE s_axilite port=out_cols 
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> in_mat(in_rows, in_cols);

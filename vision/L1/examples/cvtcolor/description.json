@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.cvtcolor.build", 
+    "name": "Xilinx Cvtcolor Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

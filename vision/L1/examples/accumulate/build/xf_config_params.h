@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-
 /* Set the optimisation type */
-#define NO  1  // Normal Operation
-#define RO  0 // Resource Optimized
+#define NO 1 // Normal Operation
+#define RO 0 // Resource Optimized
 
 /* Image type */
 #define RGB 0
 #define GRAY 1
-

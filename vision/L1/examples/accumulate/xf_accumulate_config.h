@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #ifndef _XF_ACCUMULATE_CONFIG_H_
 #define _XF_ACCUMULATE_CONFIG_H_
 
@@ -26,31 +25,30 @@
 
 #include "imgproc/xf_accumulate_image.hpp"
 
-
 /* Set the image height and width */
 #define HEIGHT 128
 #define WIDTH 128
 
 // Resolve the optimization type:
 #if NO
-	#define NPC1 XF_NPPC1
-	#if GRAY
-	#define INPUT_PTR_WIDTH 8
-	#define OUTPUT_PTR_WIDTH 16
-	#else
-	#define INPUT_PTR_WIDTH 32
-	#define OUTPUT_PTR_WIDTH 64
-	#endif
+#define NPC1 XF_NPPC1
+#if GRAY
+#define INPUT_PTR_WIDTH 8
+#define OUTPUT_PTR_WIDTH 16
+#else
+#define INPUT_PTR_WIDTH 32
+#define OUTPUT_PTR_WIDTH 64
+#endif
 #endif
 #if RO
-	#define NPC1 XF_NPPC8
-	#if GRAY
-	#define INPUT_PTR_WIDTH 64
-	#define OUTPUT_PTR_WIDTH 128
-	#else
-	#define INPUT_PTR_WIDTH 256
-	#define OUTPUT_PTR_WIDTH 512
-	#endif
+#define NPC1 XF_NPPC8
+#if GRAY
+#define INPUT_PTR_WIDTH 64
+#define OUTPUT_PTR_WIDTH 128
+#else
+#define INPUT_PTR_WIDTH 256
+#define OUTPUT_PTR_WIDTH 512
+#endif
 #endif
 
 // Set the input and output pixel depth:
@@ -62,11 +60,10 @@
 #define OUT_TYPE XF_16UC3
 #endif
 
-
-void accumulate_accel (
-	ap_uint<INPUT_PTR_WIDTH> *img_in1,
-	ap_uint<INPUT_PTR_WIDTH> *img_in2,
-	ap_uint<OUTPUT_PTR_WIDTH> *img_out,
-        int height, int width);
+void accumulate_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
+                      ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                      ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                      int height,
+                      int width);
 
 #endif //_XF_ACCUMULATE_CONFIG_H_

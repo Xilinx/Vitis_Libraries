@@ -18,5 +18,3 @@
 #define NO 1 // Normal Operation (1-pixel implementation)
 
 #define L2NORM 1
-
-

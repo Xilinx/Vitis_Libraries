@@ -1,5 +1,5 @@
 {
-    "name": "X+ML", 
+    "name": "Xilinx X+Ml Benchmark", 
     "description": [
         "X+ML L3 function example"
     ],
@@ -45,7 +45,7 @@
     "launch": [
         {
             "target" : "sw_emu",
-            "cmd_args": "LIB_DIR/L3/benchmarks/x+ml/im0.png",
+            "cmd_args": "PROJECT/im0.png",
             "name": "sw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -55,7 +55,7 @@
         },
         {
             "target" : "hw_emu",
-            "cmd_args": "LIB_DIR/L3/benchmarks/x+ml/im0.png",
+            "cmd_args": "PROJECT/im0.png",
             "name": "hw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -65,7 +65,7 @@
         },
         {
             "target" : "hw",
-            "cmd_args": "LIB_DIR/L3/benchmarks/x+ml/im0.png",
+            "cmd_args": "PROJECT/im0.png",
             "name": "Hardware",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -74,7 +74,7 @@
 	    ]
         }
     ],
-    "data": ["LIB_DIR/L3/benchmarks/x+ml/im0.png"], 
+    "data": ["PROJECT/im0.png"], 
     "host": {
         "host_exe": "pp_pipeline", 
         "compiler": {

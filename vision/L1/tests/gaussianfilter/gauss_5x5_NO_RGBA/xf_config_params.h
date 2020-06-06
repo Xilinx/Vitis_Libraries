@@ -23,5 +23,3 @@
 
 #define GRAY 0
 #define RGBA 1
-
-

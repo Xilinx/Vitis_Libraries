@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.boundingbox_RGB", 
+    "name": "Xilinx Boundingbox_Rgb Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.hist_equalization_no", 
+    "name": "Xilinx Hist_Equalization_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

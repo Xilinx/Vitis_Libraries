@@ -53,6 +53,6 @@ void magnitude_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                      ap_uint<INPUT_PTR_WIDTH>* img_inp2,
                      ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                      int rows,
-                     int cols) ;
+                     int cols);
 
 #endif // end of _XF_MAGNITUDE_CONFIG_H_

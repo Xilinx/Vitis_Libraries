@@ -133,7 +133,7 @@ template <int SRC_T,
           int WORDWIDTH_DST,
           int TC,
           int TC1,
-		  int TC2,
+          int TC2,
           int FILTER_TYPE,
           bool USE_URAM>
 void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
@@ -144,13 +144,12 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                    uint16_t img_width) {
 // clang-format off
     #pragma HLS INLINE OFF
-    // clang-format on
-	
-	// clang-format off
+// clang-format on
+
+// clang-format off
         #pragma HLS DATAFLOW
-        // clang-format on
-		
-		
+    // clang-format on
+
     if (NPC == 8) {
         xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC> gaussian_mat(img_height, img_width);
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradx_mat(img_height, img_width);
@@ -159,8 +158,8 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady_mat(img_height, img_width);
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady1_mat(img_height, img_width);
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady2_mat(img_height, img_width);
-        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC,TC1> magnitude_mat(img_height, img_width);
-        xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC,TC2> phase_mat(img_height, img_width);
+        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, TC1> magnitude_mat(img_height, img_width);
+        xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC, TC2> phase_mat(img_height, img_width);
         xf::cv::Mat<XF_2UC1, ROWS, COLS, NPC> nms_mat(img_height, img_width);
 
 // clang-format off
@@ -172,12 +171,12 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         #pragma HLS STREAM variable=grady1_mat.data depth=2
         #pragma HLS STREAM variable=grady2_mat.data depth=2
         #pragma HLS STREAM variable=nms_mat.data depth=2
-        // clang-format on
+// clang-format on
 
 // clang-format off
             #pragma HLS STREAM variable=phase_mat.data depth=TC1
             #pragma HLS STREAM variable=magnitude_mat.data depth=TC2
-            // clang-format on
+        // clang-format on
 
         xFAverageGaussianMask3x3<SRC_T, SRC_T, ROWS, COLS, DEPTH_IN, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC))>(
             _src_mat, gaussian_mat, img_height, img_width);
@@ -185,12 +184,12 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
             gaussian_mat, gradx_mat, grady_mat, XF_BORDER_REPLICATE, img_height, img_width);
         xFDuplicate_rows<XF_16SC1, ROWS, COLS, XF_16SP, NPC, XF_128UW, TC>(
             gradx_mat, grady_mat, gradx1_mat, gradx2_mat, grady1_mat, grady2_mat, img_height, img_width);
-         magnitude<NORM_TYPE, XF_16SC1, XF_16SC1, ROWS, COLS, NPC,TC1>(gradx1_mat, grady1_mat, magnitude_mat);
-        xFAngle<XF_16SC1, XF_8UC1, ROWS, COLS, XF_16SP, XF_8UP, NPC, XF_128UW, XF_64UW,TC2>(
+        magnitude<NORM_TYPE, XF_16SC1, XF_16SC1, ROWS, COLS, NPC, TC1>(gradx1_mat, grady1_mat, magnitude_mat);
+        xFAngle<XF_16SC1, XF_8UC1, ROWS, COLS, XF_16SP, XF_8UP, NPC, XF_128UW, XF_64UW, TC2>(
             gradx2_mat, grady2_mat, phase_mat, img_height, img_width);
         xFSuppression3x3<XF_16SC1, XF_8UC1, XF_2UC1, ROWS, COLS, XF_16SP, XF_8UP, DEPTH_OUT, NPC, XF_128UW, XF_64UW,
-                         XF_16UW, (COLS >> XF_BITSHIFT(NPC)),TC2,TC1>(magnitude_mat, phase_mat, nms_mat, _lowthreshold,
-                                                              _highthreshold, img_height, img_width);
+                         XF_16UW, (COLS >> XF_BITSHIFT(NPC)), TC2, TC1>(
+            magnitude_mat, phase_mat, nms_mat, _lowthreshold, _highthreshold, img_height, img_width);
         xFPackNMS<XF_2UC1, DST_T, ROWS, COLS, XF_2UP, DEPTH_OUT, NPC, NPC1, XF_16UW, WORDWIDTH_DST>(
             nms_mat, _dst_mat, img_height, img_width);
     }
@@ -203,15 +202,14 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady_mat(img_height, img_width);
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady1_mat(img_height, img_width);
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady2_mat(img_height, img_width);
-        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC,TC1> magnitude_mat(img_height, img_width);
-        xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC,TC2> phase_mat(img_height, img_width);
+        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, TC1> magnitude_mat(img_height, img_width);
+        xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC, TC2> phase_mat(img_height, img_width);
         xf::cv::Mat<XF_2UC1, ROWS, COLS, NPC> nms_mat(img_height, img_width);
-		
 
 // clang-format off
             #pragma HLS STREAM variable=phase_mat.data depth=TC1
             #pragma HLS STREAM variable=magnitude_mat.data depth=TC2
-            // clang-format on
+// clang-format on
 
 // clang-format off
         #pragma HLS STREAM variable=gaussian_mat.data depth=2
@@ -224,19 +222,18 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         #pragma HLS STREAM variable=nms_mat.data depth=2
         // clang-format on
 
-       
         xFAverageGaussianMask3x3<SRC_T, SRC_T, ROWS, COLS, DEPTH_IN, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC))>(
             _src_mat, gaussian_mat, img_height, img_width);
         xFSobel<SRC_T, XF_16SC1, ROWS, COLS, DEPTH_IN, XF_16SP, NPC, WORDWIDTH_SRC, XF_16UW, FILTER_TYPE, USE_URAM>(
             gaussian_mat, gradx_mat, grady_mat, XF_BORDER_REPLICATE, img_height, img_width);
         xFDuplicate_rows<XF_16SC1, ROWS, COLS, XF_16SP, NPC, XF_16UW, TC>(
             gradx_mat, grady_mat, gradx1_mat, gradx2_mat, grady1_mat, grady2_mat, img_height, img_width);
-        magnitude<NORM_TYPE, XF_16SC1, XF_16SC1, ROWS, COLS, NPC,TC1>(gradx1_mat, grady1_mat, magnitude_mat);
-        xFAngle<XF_16SC1, XF_8UC1, ROWS, COLS, XF_16SP, XF_8UP, NPC, XF_16UW, XF_8UW,TC2>(gradx2_mat, grady2_mat, phase_mat,
-                                                                                      img_height, img_width);
+        magnitude<NORM_TYPE, XF_16SC1, XF_16SC1, ROWS, COLS, NPC, TC1>(gradx1_mat, grady1_mat, magnitude_mat);
+        xFAngle<XF_16SC1, XF_8UC1, ROWS, COLS, XF_16SP, XF_8UP, NPC, XF_16UW, XF_8UW, TC2>(
+            gradx2_mat, grady2_mat, phase_mat, img_height, img_width);
         xFSuppression3x3<XF_16SC1, XF_8UC1, XF_2UC1, ROWS, COLS, XF_16SP, XF_8UP, XF_2UP, NPC, XF_16UW, XF_8UW, XF_2UW,
-                         (COLS >> XF_BITSHIFT(NPC)),TC2,TC1>(magnitude_mat, phase_mat, nms_mat, _lowthreshold, _highthreshold,
-                                                     img_height, img_width);
+                         (COLS >> XF_BITSHIFT(NPC)), TC2, TC1>(magnitude_mat, phase_mat, nms_mat, _lowthreshold,
+                                                               _highthreshold, img_height, img_width);
         xFPackNMS<XF_2UC1, DST_T, ROWS, COLS, XF_2UP, DEPTH_OUT, NPC, NPC1, XF_2UW, WORDWIDTH_DST>(
             nms_mat, _dst_mat, img_height, img_width);
     }
@@ -291,20 +288,17 @@ void Canny(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
            "The _norm_type must be 'XF_L1NORM' or'XF_L2NORM'");
 #endif
 
-	if(NORM_TYPE==1)
-	{
-    xFCannyKernel<SRC_T, DST_T, NORM_TYPE, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC1), NPC, NPC1,
-                  XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC1), (COLS >> XF_BITSHIFT(NPC)),
-                  ((COLS >> XF_BITSHIFT(NPC)) * 3),2, FILTER_TYPE, USE_URAM>(
-        _src_mat, _dst_mat, _lowthreshold, _highthreshold, _src_mat.rows, _src_mat.cols);
-	}else{
-		
-		xFCannyKernel<SRC_T, DST_T, NORM_TYPE, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC1), NPC, NPC1,
-                  XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC1), (COLS >> XF_BITSHIFT(NPC)),2,
-                  ((COLS >> XF_BITSHIFT(NPC)) * 3), FILTER_TYPE, USE_URAM>(
-        _src_mat, _dst_mat, _lowthreshold, _highthreshold, _src_mat.rows, _src_mat.cols);
-		
-	}
+    if (NORM_TYPE == 1) {
+        xFCannyKernel<SRC_T, DST_T, NORM_TYPE, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC1), NPC, NPC1,
+                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC1), (COLS >> XF_BITSHIFT(NPC)),
+                      ((COLS >> XF_BITSHIFT(NPC)) * 3), 2, FILTER_TYPE, USE_URAM>(
+            _src_mat, _dst_mat, _lowthreshold, _highthreshold, _src_mat.rows, _src_mat.cols);
+    } else {
+        xFCannyKernel<SRC_T, DST_T, NORM_TYPE, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC1), NPC, NPC1,
+                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC1), (COLS >> XF_BITSHIFT(NPC)), 2,
+                      ((COLS >> XF_BITSHIFT(NPC)) * 3), FILTER_TYPE, USE_URAM>(
+            _src_mat, _dst_mat, _lowthreshold, _highthreshold, _src_mat.rows, _src_mat.cols);
+    }
 }
 } // namespace cv
 } // namespace xf

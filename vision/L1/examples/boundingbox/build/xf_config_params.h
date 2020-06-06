@@ -24,4 +24,3 @@
 
 /*  set the type of thresholding*/
 #define GRAY 1
-

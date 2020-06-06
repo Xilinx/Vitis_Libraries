@@ -14,41 +14,37 @@
  * limitations under the License.
  */
 
-
 #include "common/xf_headers.hpp"
 #include "xf_gaincontrol_config.h"
 
-int main(int argc, char** argv)
-{
-	if (argc != 2)
-	{
-		fprintf(stderr,"Invalid Number of Arguments!\nUsage:\n");
-		fprintf(stderr,"<Executable Name> <input image path1> \n");
-		return -1;
-	}
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
+        fprintf(stderr, "<Executable Name> <input image path1> \n");
+        return -1;
+    }
 
-	cv::Mat in_gray, in_gray1, ocv_ref,out_gray,diff,ocv_ref_in1,ocv_ref_in2,inout_gray1,ocv_ref_gw;
-	in_gray  = cv::imread(argv[1], 0); // read image
-	if (in_gray.data == NULL)
-	{
-		fprintf(stderr, "Cannot open image %s\n", argv[1]);
-		return -1;
-	}
+    cv::Mat in_gray, in_gray1, ocv_ref, out_gray, diff, ocv_ref_in1, ocv_ref_in2, inout_gray1, ocv_ref_gw;
+    in_gray = cv::imread(argv[1], 0); // read image
+    if (in_gray.data == NULL) {
+        fprintf(stderr, "Cannot open image %s\n", argv[1]);
+        return -1;
+    }
 
-	ocv_ref.create(in_gray.rows,in_gray.cols,CV_8UC1);
-	ocv_ref_gw.create(in_gray.rows,in_gray.cols,CV_8UC1);
-	out_gray.create(in_gray.rows,in_gray.cols,CV_8UC1);
-	diff.create(in_gray.rows,in_gray.cols,CV_8UC1);
-
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    ocv_ref_gw.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
 
     int height = in_gray.rows;
     int width = in_gray.cols;
 
-///////////////////////////Top function call ///////////////////////////
+    ///////////////////////////Top function call ///////////////////////////
 
-	gaincontrol_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_gray.data, height,width);
-	
-	imwrite("out_hls.jpg", out_gray);
+    gaincontrol_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_gray.data, height,
+                      width);
 
-	return 0;
+    imwrite("out_hls.jpg", out_gray);
+
+    return 0;
 }

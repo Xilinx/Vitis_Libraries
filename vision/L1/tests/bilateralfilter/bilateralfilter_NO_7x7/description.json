@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.bilateralfilter_NO_7x7", 
+    "name": "Xilinx Bilateralfilter_No_7X7 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

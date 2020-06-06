@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.gammacorrection.build", 
+    "name": "Xilinx Gammacorrection Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

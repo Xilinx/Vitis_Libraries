@@ -333,20 +333,19 @@ int main(int argc, char** argv) {
     cvtColor(dst, crefxi, CV_GRAY2BGR);
     cvtColor(dst, crefcv, CV_GRAY2BGR);
 
-    //std::vector<float> outputrho(LINESMAX);
-    //std::vector<float> outputtheta(LINESMAX);
-	
-	float *outputrho = (float *)malloc(LINESMAX*sizeof(float));
-	float *outputtheta = (float *)malloc(LINESMAX*sizeof(float));
-	
+    // std::vector<float> outputrho(LINESMAX);
+    // std::vector<float> outputtheta(LINESMAX);
+
+    float* outputrho = (float*)malloc(LINESMAX * sizeof(float));
+    float* outputtheta = (float*)malloc(LINESMAX * sizeof(float));
+
     short threshold = 75;
     short maxlines = LINESMAX;
 
     int height = in_gray.rows;
     int width = in_gray.cols;
 
-
-	houghlines_accel((ap_uint<PTR_WIDTH> *)in_gray.data, threshold, LINESMAX, outputrho,outputtheta,height,width);
+    houghlines_accel((ap_uint<PTR_WIDTH>*)in_gray.data, threshold, LINESMAX, outputrho, outputtheta, height, width);
 
     // Running the reference function:
     std::vector<cv::Vec2f> linesxi;

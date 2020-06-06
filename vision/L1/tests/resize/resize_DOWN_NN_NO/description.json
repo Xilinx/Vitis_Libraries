@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.resize_DOWN_NN_NO", 
+    "name": "Xilinx Resize_Down_Nn_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

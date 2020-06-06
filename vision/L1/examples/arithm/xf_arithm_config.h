@@ -114,23 +114,23 @@
 #endif
 #endif
 
-
 #if ARRAY
 #if defined(FUNCT_BITWISENOT) || defined(FUNCT_ZERO)
-void arithm_accel(
-    ap_uint<PTR_WIDTH>* img_in1, ap_uint<PTR_WIDTH>* img_in2, ap_uint<PTR_WIDTH>* img_out);
+void arithm_accel(ap_uint<PTR_WIDTH>* img_in1, ap_uint<PTR_WIDTH>* img_in2, ap_uint<PTR_WIDTH>* img_out);
 #else
 void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
                   ap_uint<PTR_WIDTH>* img_in2,
 #ifdef FUNCT_MULTIPLY
                   float scale,
 #endif
-                  ap_uint<PTR_WIDTH>* img_out, int height, int width);
-#endif		
-#endif	
+                  ap_uint<PTR_WIDTH>* img_out,
+                  int height,
+                  int width);
+#endif
+#endif
 #if SCALAR
 void arithm_accel(
-    ap_uint<PTR_WIDTH>* img_in1, unsigned char* scl_in, ap_uint<PTR_WIDTH>* img_out, int height, int width); 
-#endif				  
+    ap_uint<PTR_WIDTH>* img_in1, unsigned char* scl_in, ap_uint<PTR_WIDTH>* img_out, int height, int width);
+#endif
 
 #endif // end of _XF_ARITHM_CONFIG_H_

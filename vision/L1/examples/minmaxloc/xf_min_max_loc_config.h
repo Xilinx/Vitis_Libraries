@@ -74,7 +74,14 @@
 #define NPC1 XF_NPPC8
 #endif
 
-void min_max_loc_accel(
-    ap_uint<PTR_WIDTH>* img_in, int32_t &min_value, int32_t &max_value, uint16_t &min_loc_x, uint16_t &min_loc_y, uint16_t &max_loc_x, uint16_t &max_loc_y, int height, int width);
+void min_max_loc_accel(ap_uint<PTR_WIDTH>* img_in,
+                       int32_t& min_value,
+                       int32_t& max_value,
+                       uint16_t& min_loc_x,
+                       uint16_t& min_loc_y,
+                       uint16_t& max_loc_x,
+                       uint16_t& max_loc_y,
+                       int height,
+                       int width);
 
 #endif

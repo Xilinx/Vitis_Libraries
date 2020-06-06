@@ -24,5 +24,3 @@
 #define KERNEL_SHAPE XF_SHAPE_ELLIPSE
 
 #define ITERATIONS 1
-
-

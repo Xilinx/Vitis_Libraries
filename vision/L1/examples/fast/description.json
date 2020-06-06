@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.fast.build", 
+    "name": "Xilinx Fast Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

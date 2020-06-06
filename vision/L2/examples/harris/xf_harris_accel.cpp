@@ -27,7 +27,7 @@ void cornerHarris_accel(
     #pragma HLS INTERFACE s_axilite port=cols     
     #pragma HLS INTERFACE s_axilite port=threshold     
     #pragma HLS INTERFACE s_axilite port=k     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     const int pROWS = HEIGHT;

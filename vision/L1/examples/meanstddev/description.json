@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.meanstddev.build", 
+    "name": "Xilinx Meanstddev Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

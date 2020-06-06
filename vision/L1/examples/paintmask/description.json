@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.paintmask.build", 
+    "name": "Xilinx Paintmask Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

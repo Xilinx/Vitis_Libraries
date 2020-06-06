@@ -127,8 +127,8 @@ int main(int argc, char** argv) {
     cv::imwrite("error.png", diff);
     float err_per;
     xf::cv::analyzeDiff(diff, 10, err_per);
-	
-	if (err_per > 0.0f) {
+
+    if (err_per > 0.0f) {
         return 1;
     }
 

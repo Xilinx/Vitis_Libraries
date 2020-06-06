@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.compareS_no", 
+    "name": "Xilinx Compares_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

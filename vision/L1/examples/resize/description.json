@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.resize.build", 
+    "name": "Xilinx Resize Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

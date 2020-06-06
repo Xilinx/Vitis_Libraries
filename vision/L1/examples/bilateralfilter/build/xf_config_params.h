@@ -25,4 +25,3 @@
 
 #define GRAY 0
 #define RGB 1
-

@@ -16,17 +16,17 @@
 
 #include "xf_channel_combine_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(HEIGHT*WIDTH*(XF_PIXELWIDTH(OUT_TYPE,NPC1))/8) / (OUTPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPC1)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 #if FOUR_INPUT
 void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in3,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in4,
-                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                     int height,
-                     int width) {
+                           ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                           ap_uint<INPUT_PTR_WIDTH>* img_in3,
+                           ap_uint<INPUT_PTR_WIDTH>* img_in4,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           int height,
+                           int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1 depth=__XF_DEPTH
@@ -35,7 +35,7 @@ void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4 depth=__XF_DEPTH_OUT
     #pragma HLS interface s_axilite  port=height	              
     #pragma HLS interface s_axilite  port=width 	              
-    #pragma HLS interface s_axilite  port=return	              
+    #pragma HLS interface s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
@@ -43,7 +43,6 @@ void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput3(height, width);
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput4(height, width);
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
-
 
 // clang-format off
     #pragma HLS DATAFLOW
@@ -69,11 +68,11 @@ void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 
 #if THREE_INPUT
 void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in3,
-                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                     int height,
-                     int width) {
+                           ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                           ap_uint<INPUT_PTR_WIDTH>* img_in3,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           int height,
+                           int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1 depth=__XF_DEPTH
@@ -81,7 +80,7 @@ void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4 depth=__XF_DEPTH_OUT
     #pragma HLS interface s_axilite  port=height	             
     #pragma HLS interface s_axilite  port=width 	             
-    #pragma HLS interface s_axilite  port=return	             
+    #pragma HLS interface s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
@@ -108,20 +107,19 @@ void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 }
 #endif
 
-
 #if TWO_INPUT
 void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                     int height,
-                     int width) {
+                           ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           int height,
+                           int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1  depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4 depth=__XF_DEPTH_OUT
     #pragma HLS interface s_axilite  port=height	              
     #pragma HLS interface s_axilite  port=width 	              
-    #pragma HLS interface s_axilite  port=return	             
+    #pragma HLS interface s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);

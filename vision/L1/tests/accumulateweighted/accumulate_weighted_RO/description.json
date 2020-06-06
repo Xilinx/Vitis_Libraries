@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.accumulate_weighted_RO", 
+    "name": "Xilinx Accumulate_Weighted_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

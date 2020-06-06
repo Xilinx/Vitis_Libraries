@@ -19,11 +19,11 @@ hardware.
 Prerequisites
 =============
 
-#. Valid installation of Vitis™ 2019.2 or later version and the
+#. Valid installation of Vitis™ 2020.1 or later version and the
    corresponding licenses.
 #. Install the Vitis Vision libraries, if you intend to use libraries
    compiled differently than what is provided in Vitis.
-#. Install the card for which the platform is supported in Vitis 2019.2 or
+#. Install the card for which the platform is supported in Vitis 2020.1 or
    later versions.
 #. If targeting an embedded platform, set up the evaluation board.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software
@@ -108,8 +108,6 @@ top-level (or wrapper) function for the kernel as shown below:
    { 
    void func_top (ap_uint *gmem_in, ap_uint *gmem_out, ...) { 
    xf::cv::Mat<…> in_mat(…), out_mat(…);
-   #pragma HLS stream variable=in_mat.data depth=2
-   #pragma HLS stream variable=out_mat.data depth=2
    #pragma HLS dataflow 
    xf::cv::Array2xfMat<…> (gmem_in, in_mat); 
    xf::cv::Vitis Vision-func<…> (in_mat, out_mat…); 
@@ -130,10 +128,6 @@ multiple instances of the adapter functions are necessary. For this,
    void func_top (ap_uint *gmem_in1, ap_uint *gmem_in2, ap_uint *gmem_in3, ap_uint *gmem_out, ...) { 
    xf::cv::Mat<...,HEIGHT,WIDTH,…> in_mat1(…), out_mat(…);
    xf::cv::Mat<...,HEIGHT/4,WIDTH,…>  in_mat2(…), in_mat3(…); 
-   #pragma HLS stream variable=in_mat1.data depth=2
-   #pragma HLS stream variable=in_mat2.data depth=2
-   #pragma HLS stream variable=in_mat3.data depth=2
-   #pragma HLS stream variable=out_mat.data depth=2
    #pragma HLS dataflow 
    xf::cv::accel_utils obj_a, obj_b;
    obj_a.Array2xfMat<…,HEIGHT,WIDTH,…> (gmem_in1, in_mat1);
@@ -151,7 +145,7 @@ performed for the output of the xfcv kernel. To perform this, two
 utility functions are provided, xf::cv::Array2xfMat() and xf::cv::xfMat2Array().
 
 Array2xfMat
-^^^^^^^^^^^
+~~~~~~~~~~~
 
 This function converts the input array to xf::cv::Mat. The Vitis Vision kernel
 would require the input to be of type, xf::cv::Mat. This function would read
@@ -192,7 +186,7 @@ created.
 
 
 xfMat2Array
-^^^^^^^^^^^
+~~~~~~~~~~~
 
 This function converts the input xf::cv::Mat to output array. The output of
 the xf::kernel function will be xf::cv::Mat, and it will require to convert
@@ -231,7 +225,7 @@ that to output pointer.
 
 
 Interface pointer widths
-'''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Minimum pointer widths for different configurations is shown in the
 following table:
@@ -267,7 +261,7 @@ of data between two kernels. For more details on kernel-to-kernel streaming, ref
 Kernels" section of UG1277 document.
 
 axiStrm2xfMat
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 axiStrm2xfMat is used by consumer kernel to support streaming data transfer between two kernels. 
 Consumer kernel receives data from producer kernel through kernel streaming interface which is defined by hls:stream 
@@ -302,7 +296,7 @@ on particular configuration (bit-depth, channels, pixel-parallelism) the xf::cv:
    +-----------------+-------------------------------------------------------------------------------------+
 
 xfMat2axiStrm
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 xfMat2axiStrm is used by producer kernel to support streaming data transfer between two kernels. 
 This function converts the input xf:cv::Mat to AXI stream based on particular configuration (bit-depth, channels, pixel-parallelism). 
@@ -365,9 +359,7 @@ are allowed.
 Makefile
 ---------
 
-In the current use model, only a makefile based flow is provided to
-build applications with Vitis Vision on Vitis. Examples for makefile are
-provided in the examples and tests section of GitHub.
+Examples for makefile are provided in the examples and tests section of GitHub.
 
 
 Design example Using Library on Vitis
@@ -495,11 +487,8 @@ Below is the top-level/wrapper function with all necessary glue logic.
    #pragma HLS INTERFACE s_axilite port=return   bundle=control
 
        xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, INTYPE> in_mat(rows,cols);
-   #pragma HLS stream variable=in_mat.data depth=2
        
        xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> dst_mat(rows,cols);
-   #pragma HLS stream variable=dst_mat.data depth=2
-       
        
        #pragma HLS DATAFLOW 
 
@@ -545,8 +534,8 @@ commands to setup the environment:
 
    $ cd <path to the folder where makefile is present>
    $ source <path to the Vitis installation folder>/Vitis/<version number>/settings64.sh
-   $ source <path to Xilinx_xrt>/packages/setenv.sh
-   $ export DEVICE=<path to the platform folder>
+   $ source <path to Xilinx_xrt>/setup.sh
+   $ export DEVICE=<path-to-platform-directory>/<platform>.xpfm
 
 
 Software Emulation
@@ -634,7 +623,7 @@ the steps to build the kernel and run on a hardware:
 
 *Note1*. For non-DFX platforms, BOOT.BIN has to be manually copied from < build-directory >/< xclbin-folder >/sd\_card / to the top level sd_card folder.
 
-*Note2*. For hw run on embedded devices, copy the generated sd_card folder content to an SDCARD and run the following commands on the board:
+*Note2*. For hw run on embedded devices, copy the generated sd_card folder content under package_hw directory to an SDCARD and run the following commands on the board:
 
 .. code:: c
 

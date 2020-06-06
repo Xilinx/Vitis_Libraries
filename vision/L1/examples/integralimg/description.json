@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.integralimg.build", 
+    "name": "Xilinx Integralimg Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

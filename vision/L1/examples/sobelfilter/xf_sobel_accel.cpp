@@ -16,9 +16,8 @@
 
 #include "xf_sobel_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(HEIGHT*WIDTH*(XF_PIXELWIDTH(OUT_TYPE,NPC1))/8) / (OUTPUT_PTR_WIDTH/8);
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPC1)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void sobel_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                  ap_uint<OUTPUT_PTR_WIDTH>* img_out1,
@@ -39,11 +38,11 @@ void sobel_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);
-// clang-format off
+    // clang-format off
     // clang-format on
 
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> _dstgx(rows, cols);
-// clang-format off
+    // clang-format off
     // clang-format on
 
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> _dstgy(rows, cols);

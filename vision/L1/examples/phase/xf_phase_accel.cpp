@@ -16,7 +16,7 @@
 
 #include "xf_phase_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_16SC1,NPC1))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_16SC1, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void phase_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                  ap_uint<INPUT_PTR_WIDTH>* img_inp2,
@@ -36,11 +36,11 @@ void phase_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
     // clang-format on
 
     xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _src1(rows, cols);
-// clang-format off
+    // clang-format off
     // clang-format on
 
     xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _src2(rows, cols);
-// clang-format off
+    // clang-format off
     // clang-format on
 
     xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _dst(rows, cols);
@@ -57,5 +57,4 @@ void phase_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
     xf::cv::phase<DEG_TYPE, XF_16SC1, XF_16SC1, HEIGHT, WIDTH, NPC1>(_src1, _src2, _dst);
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1>(_dst, img_out);
-
 }

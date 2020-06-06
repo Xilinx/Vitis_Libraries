@@ -286,49 +286,48 @@ int main(int argc, char* argv[]) {
     // OpenCv Kalman Filter in Double Precision - correct/update:
     kf.correct(zk);
 
-    ap_uint<PTR_WIDTH>* A_ptr_in		= (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* B_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_C * sizeof(float));
-    ap_uint<PTR_WIDTH>* Uq_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* Dq_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* H_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_M * KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* X0_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* U0_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* D0_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* R_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_M * sizeof(float));
-    ap_uint<PTR_WIDTH>* u_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_C * sizeof(float));
-    ap_uint<PTR_WIDTH>* y_ptr_in 		= (ap_uint<PTR_WIDTH>*)malloc(KF_M * sizeof(float));
-    ap_uint<PTR_WIDTH>* X_ptr_out 	= (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* U_ptr_out 	= (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_N * sizeof(float));
-    ap_uint<PTR_WIDTH>* D_ptr_out 	= (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* A_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* B_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_C * sizeof(float));
+    ap_uint<PTR_WIDTH>* Uq_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* Dq_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* H_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_M * KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* X0_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* U0_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* D0_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* R_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_M * sizeof(float));
+    ap_uint<PTR_WIDTH>* u_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_C * sizeof(float));
+    ap_uint<PTR_WIDTH>* y_ptr_in = (ap_uint<PTR_WIDTH>*)malloc(KF_M * sizeof(float));
+    ap_uint<PTR_WIDTH>* X_ptr_out = (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* U_ptr_out = (ap_uint<PTR_WIDTH>*)malloc(KF_N * KF_N * sizeof(float));
+    ap_uint<PTR_WIDTH>* D_ptr_out = (ap_uint<PTR_WIDTH>*)malloc(KF_N * sizeof(float));
 
-    A_ptr_in = (ap_uint<PTR_WIDTH> *)A_ptr;
-    B_ptr_in = (ap_uint<PTR_WIDTH> *)B_ptr;
-    Uq_ptr_in = (ap_uint<PTR_WIDTH> *)Uq_ptr;
-    Dq_ptr_in = (ap_uint<PTR_WIDTH> *)Dq_ptr;
-    H_ptr_in = (ap_uint<PTR_WIDTH> *)H_ptr;
-    X0_ptr_in = (ap_uint<PTR_WIDTH> *)X0_ptr;
-    U0_ptr_in = (ap_uint<PTR_WIDTH> *)U0_ptr;
-    D0_ptr_in = (ap_uint<PTR_WIDTH> *)D0_ptr;
-    R_ptr_in = (ap_uint<PTR_WIDTH> *)R_ptr;
-    u_ptr_in = (ap_uint<PTR_WIDTH> *)u_ptr;
-    y_ptr_in = (ap_uint<PTR_WIDTH> *)y_ptr;
+    A_ptr_in = (ap_uint<PTR_WIDTH>*)A_ptr;
+    B_ptr_in = (ap_uint<PTR_WIDTH>*)B_ptr;
+    Uq_ptr_in = (ap_uint<PTR_WIDTH>*)Uq_ptr;
+    Dq_ptr_in = (ap_uint<PTR_WIDTH>*)Dq_ptr;
+    H_ptr_in = (ap_uint<PTR_WIDTH>*)H_ptr;
+    X0_ptr_in = (ap_uint<PTR_WIDTH>*)X0_ptr;
+    U0_ptr_in = (ap_uint<PTR_WIDTH>*)U0_ptr;
+    D0_ptr_in = (ap_uint<PTR_WIDTH>*)D0_ptr;
+    R_ptr_in = (ap_uint<PTR_WIDTH>*)R_ptr;
+    u_ptr_in = (ap_uint<PTR_WIDTH>*)u_ptr;
+    y_ptr_in = (ap_uint<PTR_WIDTH>*)y_ptr;
 
     // Init + Time Update + Measurement Update: Xilinx Kalman filter in Single Precision
-    kalmanfilter_accel(	A_ptr_in,  
-#if KF_C != 0	
-						B_ptr_in,  
-#endif						
-						Uq_ptr_in,  Dq_ptr_in, H_ptr_in,  X0_ptr_in, U0_ptr_in, D0_ptr_in, R_ptr_in,  
-#if KF_C != 0						
-						u_ptr_in, 
-#endif						
-						y_ptr_in, 
-						INIT_EN+ TIMEUPDATE_EN+ MEASUPDATE_EN + XOUT_EN_MU + UDOUT_EN_MU, 
-						X_ptr_out, U_ptr_out, D_ptr_out);
+    kalmanfilter_accel(A_ptr_in,
+#if KF_C != 0
+                       B_ptr_in,
+#endif
+                       Uq_ptr_in, Dq_ptr_in, H_ptr_in, X0_ptr_in, U0_ptr_in, D0_ptr_in, R_ptr_in,
+#if KF_C != 0
+                       u_ptr_in,
+#endif
+                       y_ptr_in, INIT_EN + TIMEUPDATE_EN + MEASUPDATE_EN + XOUT_EN_MU + UDOUT_EN_MU, X_ptr_out,
+                       U_ptr_out, D_ptr_out);
 
     Xout_ptr = (float*)X_ptr_out;
     Uout_ptr = (float*)U_ptr_out;
-    Dout_ptr = (float*)D_ptr_out;		
+    Dout_ptr = (float*)D_ptr_out;
 
     // Results verification:
     float error;

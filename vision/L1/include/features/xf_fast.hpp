@@ -914,17 +914,15 @@ void xFFastCornerDetection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     xf::cv::Mat<SRC_T, ROWS, COLS, NPC> _dst(_image_height, _image_width);
 // clang-format off
         #pragma HLS DATAFLOW
-        // clang-format on
+// clang-format on
 #pragma HLS stream variable = _dst.data dim = 1 depth = 2
 
     if (NMSVAL == 1) {
-
         xFfast7x7<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC)) + (7 >> 1), 7, 7 * 7>(
             _src_mat, _dst, 7, _image_height, _image_width, _threshold);
         xFfastnms<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC)) + (3 >> 1), 3, 3 * 3>(
             _dst, _dst_mat, 3, _image_height, _image_width);
     } else if (NMSVAL == 0) {
-
         xFfast7x7<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC)) + (7 >> 1), 7, 7 * 7>(
             _src_mat, _dst_mat, 7, _image_height, _image_width, _threshold);
     }

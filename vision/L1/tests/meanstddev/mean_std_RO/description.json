@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.mean_std_RO", 
+    "name": "Xilinx Mean_Std_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

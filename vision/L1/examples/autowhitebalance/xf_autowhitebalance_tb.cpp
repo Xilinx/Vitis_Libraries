@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_autowhitebalance_config.h"
 
-
 template <typename T>
 void balanceWhiteSimple(std::vector<cv::Mat_<T> >& src,
                         cv::Mat& dst,
@@ -53,7 +52,7 @@ void balanceWhiteSimple(std::vector<cv::Mat_<T> >& src,
 
             float interval = float(maxValue - minValue) / bins;
 
-            for (int j = 0; j < depth; ++j) {
+            for (int j = 0; j < 1; ++j) {
                 int currentBin = int((val - minValue + 1e-4f) / interval);
                 ++hist[pos + currentBin];
 
@@ -67,6 +66,13 @@ void balanceWhiteSimple(std::vector<cv::Mat_<T> >& src,
 
             countval++;
         }
+        FILE* fp = fopen("hist.txt", "a");
+
+        for (int j = 0; j < 256; j++) {
+            fprintf(fp, "%d\n", hist[j]);
+        }
+
+        fclose(fp);
 
         int total = int(src[i].total());
 
@@ -78,7 +84,7 @@ void balanceWhiteSimple(std::vector<cv::Mat_<T> >& src,
 
         float interval = (maxValue - minValue) / float(bins);
 
-        for (int j = 0; j < depth; ++j)
+        for (int j = 0; j < 1; ++j)
         // searching for s1 and s2
         {
             while (n1 + hist[p1] < s1 * total / 100.0f) {
@@ -199,14 +205,14 @@ int main(int argc, char** argv) {
     float outputMax = 255.0f;
     float p = 2.0f;
 
-    
-
     int height = in_gray.rows;
     int width = in_gray.cols;
 
-    //Call the top function	
-	autowhitebalance_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray.data,(ap_uint<INPUT_PTR_WIDTH> *)in_gray.data,(ap_uint<INPUT_PTR_WIDTH> *)out_gray.data,thresh,height,width,inputMin,inputMax,outputMin,outputMax);
-	
+    for (int i = 0; i < 2; i++) {
+        // Call the top function
+        autowhitebalance_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, (ap_uint<INPUT_PTR_WIDTH>*)out_gray.data,
+                               thresh, height, width, inputMin, inputMax, outputMin, outputMax);
+    }
 
     imwrite("out_hls.jpg", out_gray);
 

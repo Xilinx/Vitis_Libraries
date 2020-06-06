@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
     int height = in_gray1.rows;
     int width = in_gray1.cols;
 
-    // Allocate memory for the output images:
+// Allocate memory for the output images:
 #if TWO_INPUT
     out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC2);
 #endif
@@ -91,17 +91,21 @@ int main(int argc, char** argv) {
     out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC4);
 #endif
 
-	//Call the top function
+// Call the top function
 #if TWO_INPUT
-    channel_combine_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray1.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray2.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, height, width);
+    channel_combine_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray1.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray2.data,
+                          (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width);
 #endif
 #if THREE_INPUT
-    channel_combine_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray1.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray2.data, (ap_uint<INPUT_PTR_WIDTH>  *)in_gray3.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, height, width);
+    channel_combine_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray1.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray2.data,
+                          (ap_uint<INPUT_PTR_WIDTH>*)in_gray3.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height,
+                          width);
 #endif
 #if FOUR_INPUT
-    channel_combine_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray1.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray2.data, (ap_uint<INPUT_PTR_WIDTH>  *)in_gray3.data, (ap_uint<INPUT_PTR_WIDTH>  *)in_gray4.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, height, width);
+    channel_combine_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray1.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray2.data,
+                          (ap_uint<INPUT_PTR_WIDTH>*)in_gray3.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray4.data,
+                          (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width);
 #endif
-
 
 #if !TWO_INPUT
     // Write the kernel output image:
@@ -122,7 +126,7 @@ int main(int argc, char** argv) {
 
     cv::merge(bgr_planes, merged);
 
-// Results verification:
+    // Results verification:
     cv::imwrite("out_ocv.jpg", merged);
     cv::absdiff(merged, out_img, diff);
     cv::imwrite("diff.jpg", diff);

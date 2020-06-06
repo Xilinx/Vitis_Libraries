@@ -43,8 +43,8 @@ int main(int argc, char** argv) {
 
     out_hls.create(in_gray.rows, in_gray.cols, CV_8U);
 
-	//Call the top function
-    fast_accel((ap_uint<PTR_WIDTH> *)in_gray.data, threshold, (ap_uint<PTR_WIDTH> *)out_hls.data, imgheight, imgwidth);
+    // Call the top function
+    fast_accel((ap_uint<PTR_WIDTH>*)in_gray.data, threshold, (ap_uint<PTR_WIDTH>*)out_hls.data, imgheight, imgwidth);
 
     std::vector<cv::Point> hls_points;
     std::vector<cv::Point> ocv_points;
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     }
     cv::imwrite("output_ocv.png", out_img_ocv);
     //
- out_img = in_gray.clone();
+    out_img = in_gray.clone();
 
     for (int j = 0; j < out_hls.rows; j++) {
         for (int i = 0; i < out_hls.cols; i++) {
@@ -153,5 +153,4 @@ int main(int argc, char** argv) {
     }
 
     return 0;
-
 }

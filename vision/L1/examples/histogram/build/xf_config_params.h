@@ -19,4 +19,3 @@
 
 #define GRAY 1
 #define RGBA 0
-

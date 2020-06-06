@@ -19,14 +19,14 @@
 
 MK_PATH       := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR       := $(patsubst %/,%,$(dir $(MK_PATH)))
-CASE_ROOT     ?= $(CUR_DIR)
+XF_CASE_ROOT     ?= $(CUR_DIR)
 
 
 #MK_COMMON_DIR := mk
 
 # Below should point to library repo
-XF_LIB_DIR    ?= $(abspath $(CASE_ROOT)/../../../..)
-MK_COMMON_DIR := $(XF_LIB_DIR)/ext/makefile_templates
+XF_PROJ_ROOT    ?= $(abspath $(XF_CASE_ROOT)/../../..)
+MK_COMMON_DIR := $(XF_PROJ_ROOT)/ext/makefile_templates
 
 .SECONDEXPANSION:
 
@@ -42,7 +42,10 @@ help::
 	@echo "Makefile Usage:"
 	@echo ""
 	@echo "  make host xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform>"
-	@echo "      Command to generate the design for specified target and device."
+	@echo "      Command to generate the design for specified target and a PCIe device."
+	@echo ""	
+	@echo "  make host xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform> BOARD=Zynq ARCH=<aarch32 | aarch64>"
+	@echo "      Command to generate the design for specified target and an Embedded device."	
 	@echo ""
 	@echo "      TARGET defaults to sw_emu."
 	@echo ""
@@ -182,7 +185,7 @@ data: $(DATA_STAMP)
 # -----------------------------------------------------------------------------
 #                          kernel setup
 
-KSRC_DIR 		:= $(XF_LIB_DIR)/L3/examples/ISPPipeline
+KSRC_DIR 		:= $(XF_PROJ_ROOT)/L3/examples/isppipeline
 XFREQUENCY 		:= 300
 VIVADO_FREQUENCY        =$(shell echo $$(( $(XFREQUENCY) * 1000000 )))
 
@@ -190,7 +193,7 @@ XCLBIN_NAME 	:= krnl_ISPPipeline
 KER_NAME    	:= ISPPipeline_accel
 KERNELS += $(KER_NAME):xf_isp_accel.cpp
 
-VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
+VPP_CFLAGS  	+=  -I. -I$(XF_PROJ_ROOT)/L1/include -I$(KSRC_DIR)/build
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 
 
@@ -204,16 +207,16 @@ endif
 # -----------------------------------------------------------------------------
 #                           host setup
 
-SRC_DIR 		:= $(XF_LIB_DIR)/L3/examples/ISPPipeline
+SRC_DIR 		:= $(XF_PROJ_ROOT)/L3/examples/isppipeline
 
 EXE_NAME  		:= ISPPipeline
-HOST_ARGS 		= $(XF_LIB_DIR)/data/gaincontrol_hd_input.png #$(XCLBIN_FILE)
+HOST_ARGS 		= $(XF_PROJ_ROOT)/data/gaincontrol_hd_input.png #$(XCLBIN_FILE)
 SRCS      		:= xf_isp_tb xf_isp_accel
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 # Search paths:
-CXXFLAGS 		+=  -I. -I$(XF_LIB_DIR)/L1/include -I$(XF_LIB_DIR)/ext/xcl2
+CXXFLAGS 		+=  -I. -I$(XF_PROJ_ROOT)/L1/include -I$(XF_PROJ_ROOT)/ext/xcl2 -I$(SRC_DIR)/build
 # Options
 CXXFLAGS 		+= -g
 
@@ -227,7 +230,7 @@ endif
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule
 EXTRA_OBJS 		+= xcl2
 
-EXT_DIR   		= $(XF_LIB_DIR)/ext
+EXT_DIR   		= $(XF_PROJ_ROOT)/ext
 xcl2_SRCS 		= $(EXT_DIR)/xcl2/xcl2.cpp
 xcl2_HDRS 		= $(EXT_DIR)/xcl2/xcl2.hpp
 xcl2_CXXFLAGS 	= -I $(EXT_DIR)/xcl2
@@ -340,7 +343,17 @@ else ifeq ($(ARCH), aarch32)
 	DEV_FAM = 7Series
 endif
 
-SDCARD := sd_card
+
+PKG_OUT_DIR := package_$(TARGET)
+
+EMBEDDED_EXEC_SCRIPT = run_emu.sh
+EMBEDDED_PACKAGE_OUT = package_$(TARGET)
+
+ifneq (,$(findstring zc706, $(XDEVICE)))
+	ROOTFS := $(SYSROOT)/../../uImage
+else
+	ROOTFS := $(SYSROOT)/../../Image
+endif
 
 CC := gcc
 
@@ -417,7 +430,9 @@ ifneq (,$(BIN_DIR_BASE))
 endif
 
 cleanall: clean cleanx
-	rm -rf *.log plist $(DATA_STAMP)
+	rm -rf *.log plist $(DATA_STAMP) run_emu.sh ..link_summary $(PKG_OUT_DIR) emconfig.json
+	rm -rf _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	rm -rf *.jpg *.jpeg *.png _xocc_* .Xil dltmp* xmltmp* *.jou *.wcfg *.wdb *.csv *.protoinst .ipcache sd_card* sample_link.ini sample_compile.ini
 	rm -rf *.ini sd_card* emulation _vimage .Xil
 # -----------------------------------------------------------------------------
 #                                simulation run
@@ -429,36 +444,39 @@ $(BIN_DIR)/emconfig.json :
         EMU_CONFIG = $(BIN_DIR)/emconfig.json
     endif
 
-emulate : host xclbin $(EMU_CONFIG) sd_card
+
 ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
-       RUN_ENV += mkdir -p sd_card/data/emulation;
-       RUN_ENV += cp -rf $(XILINX_VITIS)/data/emulation/unified sd_card/data/emulation;
-       RUN_ENV += mkfatimg sd_card sd_card.img 500000;
-       EMU_CMD = launch_emulator -no-reboot -runtime ocl -t $(TARGET) -sd-card-image sd_card.img -device-family $(DEV_FAM);
+       EMU_CMD = /tools/xgs/perl/5.8.5/bin/perl $(XF_PROJ_ROOT)/ext/make_utility/embedded_run_emulation.pl "./$(PKG_OUT_DIR)/launch_$(TARGET).sh -no-reboot" "./run_emu.sh" "" "12"
 else ifeq ($(TARGET), hw)
        RUN_ENV += 
        EMU_CMD += @echo "Please copy the contents of sd_card and input images to an SD Card and run on the board"
 endif
 
+emulate : host xclbin $(EMU_CONFIG) sd_card
+
+SD_FILE_LIST = $(foreach sd_file,$(HOST_ARGS),--package.sd_file $(sd_file))
+
 sd_card : host xclbin
 	@echo "Generating sd_card folder...."
-	mkdir -p $(SDCARD)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
-	cp -rf $(XCLBIN_DIR)/*.xclbin $(SDCARD)/$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)
-	cp -rf $(B_NAME)/sw/$(XDEVICE)/boot/generic.readme $(B_NAME)/sw/$(XDEVICE)/xrt/image/* $(EXE_FILE) $(HOST_ARGS) $(SDCARD)
+	mkdir -p $(PKG_OUT_DIR)
+	rm -rf run_emu.sh
+	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> run_emu.sh
 ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
-	@echo 'cd /mnt/' >> $(SDCARD)/init.sh
-	@echo 'export XILINX_VITIS=$$PWD' >> $(SDCARD)/init.sh
-	@echo 'export XCL_BINDIR=$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)' >> $(SDCARD)/init.sh
-	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(SDCARD)/init.sh
-	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> $(SDCARD)/init.sh
-	@echo 'reboot' >> $(SDCARD)/init.sh
-	@echo "sd_card folder generation done!"
-else ifeq ($(TARGET), hw)
-	@echo 'cp -rf $(XCLBIN_DIR)/BOOT.BIN $(SDCARD)/'
-	@echo 'export XCL_BINDIR=$(XCLBIN_DIR_BASE)$(XCLBIN_DIR_SUFFIX)' >> $(SDCARD)/init.sh
-	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> $(SDCARD)/init.sh
-	@echo "sd_card folder generation done!"
+	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> run_emu.sh
 endif
+	@echo 'export XILINX_VITIS=/mnt' >> run_emu.sh
+	@echo 'export XILINX_XRT=/usr' >> run_emu.sh
+	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_emu.sh
+	emconfigutil --platform $(DEVICE) --nd 1;
+	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> run_emu.sh
+	@echo 'return_code=$$?' >> run_emu.sh
+	@echo 'if [ $$return_code -ne 0 ]; then' >> run_emu.sh
+	@echo '		echo "ERROR: Embedded host run failed, RC=$$return_code"' >> run_emu.sh
+	@echo 'fi' >> run_emu.sh
+	@echo 'echo "INFO: Embedded host run completed."' >> run_emu.sh
+	v++ -t $(TARGET) --platform $(DEVICE) -p $(XCLBIN_FILE) --package.out_dir $(PKG_OUT_DIR) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.sd_file $(ROOTFS) --package.sd_file run_emu.sh --package.sd_file $(EXE_FILE) $(SD_FILE_LIST) --package.sd_file emconfig.json
+	@echo "### ***** sd_card generation done! ***** ###"
+
 
 
 
@@ -564,8 +582,9 @@ ifneq (,$(BIN_DIR_BASE))
 endif
 
 cleanall: clean cleanx
-	rm -rf *.log plist $(DATA_STAMP)
-
+	rm -rf *.log plist $(DATA_STAMP) run_emu.sh ..link_summary $(PKG_OUT_DIR) emconfig.json
+	rm -rf _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
+	rm -rf *.jpg *.jpeg *.png _xocc_* .Xil dltmp* xmltmp* *.jou *.wcfg *.wdb *.csv *.protoinst .ipcache sd_card* sample_link.ini sample_compile.ini
 # -----------------------------------------------------------------------------
 #                                simulation run
 

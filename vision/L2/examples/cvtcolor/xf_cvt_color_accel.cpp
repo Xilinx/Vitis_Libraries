@@ -39,7 +39,7 @@ void cvtcolor_rgba2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -105,7 +105,7 @@ void cvtcolor_rgba2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -163,7 +163,7 @@ void cvtcolor_rgba2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -223,7 +223,7 @@ void cvtcolor_rgba2yuv4(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -288,7 +288,7 @@ void cvtcolor_rgb2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -355,7 +355,7 @@ void cvtcolor_rgb2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -414,7 +414,7 @@ void cvtcolor_bgr2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -473,7 +473,7 @@ void cvtcolor_rgb2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -532,7 +532,7 @@ void cvtcolor_bgr2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
     #pragma HLS INTERFACE s_axilite port=cols_uv            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -593,7 +593,7 @@ void cvtcolor_rgb2yuv4(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=cols_y             
     #pragma HLS INTERFACE s_axilite port=rows_uv            
     #pragma HLS INTERFACE s_axilite port=cols_uv            
-    #pragma HLS INTERFACE s_axilite port=return             
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -644,7 +644,7 @@ void cvtcolor_rgb2yuyv(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE m_axi     port=img_yuyv  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -676,7 +676,7 @@ void cvtcolor_bgr2yuyv(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE m_axi     port=img_yuyv  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -708,7 +708,7 @@ void cvtcolor_rgb2uyvy(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE m_axi     port=img_uyvy  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -740,7 +740,7 @@ void cvtcolor_bgr2uyvy(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE m_axi     port=img_uyvy  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -791,11 +791,11 @@ void cvtcolor_iyuv2nv12(ap_uint<INPUT_PTR_WIDTH>* img_y,
     #pragma HLS INTERFACE s_axilite port=rows_v              
     #pragma HLS INTERFACE s_axilite port=cols_v            	 
     #pragma HLS INTERFACE s_axilite port=rows_uv             
-    #pragma HLS INTERFACE s_axilite port=cols_uv             
+    #pragma HLS INTERFACE s_axilite port=cols_uv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -873,11 +873,11 @@ void cvtcolor_iyuv2rgba(ap_uint<INPUT_PTR_WIDTH>* img_y,
     #pragma HLS INTERFACE s_axilite port=rows_u              
     #pragma HLS INTERFACE s_axilite port=cols_u            	 
     #pragma HLS INTERFACE s_axilite port=rows_v              
-    #pragma HLS INTERFACE s_axilite port=cols_v            	 
+    #pragma HLS INTERFACE s_axilite port=cols_v
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -943,11 +943,11 @@ void cvtcolor_iyuv2rgb(ap_uint<INPUT_PTR_WIDTH>* img_y,
     #pragma HLS INTERFACE s_axilite port=rows_u              
     #pragma HLS INTERFACE s_axilite port=cols_u            	 
     #pragma HLS INTERFACE s_axilite port=rows_v              
-    #pragma HLS INTERFACE s_axilite port=cols_v            	 
+    #pragma HLS INTERFACE s_axilite port=cols_v
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1024,11 +1024,11 @@ void cvtcolor_iyuv2yuv4(ap_uint<INPUT_PTR_WIDTH>* img_y,
     #pragma HLS INTERFACE s_axilite port=rows_u              
     #pragma HLS INTERFACE s_axilite port=cols_u            	 
     #pragma HLS INTERFACE s_axilite port=rows_v              
-    #pragma HLS INTERFACE s_axilite port=cols_v            	 
+    #pragma HLS INTERFACE s_axilite port=cols_v
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1122,11 +1122,11 @@ void cvtcolor_nv122iyuv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=rows_outy           
     #pragma HLS INTERFACE s_axilite port=cols_outy           
     #pragma HLS INTERFACE s_axilite port=rows_outuv           
-    #pragma HLS INTERFACE s_axilite port=cols_outuv           
+    #pragma HLS INTERFACE s_axilite port=cols_outuv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1197,7 +1197,7 @@ void cvtcolor_nv122rgba(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1253,7 +1253,7 @@ void cvtcolor_nv122yuv4(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1324,7 +1324,7 @@ void cvtcolor_nv122rgb(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1378,7 +1378,7 @@ void cvtcolor_nv122bgr(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1431,7 +1431,7 @@ void cvtcolor_nv212bgr(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1484,7 +1484,7 @@ void cvtcolor_nv122yuyv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1537,7 +1537,7 @@ void cvtcolor_nv122nv21(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_y           
     #pragma HLS INTERFACE s_axilite port=rows_uv          
     #pragma HLS INTERFACE s_axilite port=cols_uv          
-    #pragma HLS INTERFACE s_axilite port=return           
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1598,7 +1598,7 @@ void cvtcolor_nv212nv12(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_y           
     #pragma HLS INTERFACE s_axilite port=rows_uv          
     #pragma HLS INTERFACE s_axilite port=cols_uv          
-    #pragma HLS INTERFACE s_axilite port=return           
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1658,7 +1658,7 @@ void cvtcolor_nv212yuyv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1710,7 +1710,7 @@ void cvtcolor_nv122uyvy(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1762,7 +1762,7 @@ void cvtcolor_nv212uyvy(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1804,7 +1804,7 @@ void cvtcolor_yuyv2uyvy(ap_uint<INPUT_PTR_WIDTH>* yuyv, ap_uint<INPUT_PTR_WIDTH>
     #pragma HLS INTERFACE m_axi     port=uyvy  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows             
     #pragma HLS INTERFACE s_axilite port=cols            
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1837,7 +1837,7 @@ void cvtcolor_uyvy2yuyv(ap_uint<INPUT_PTR_WIDTH>* uyvy, ap_uint<OUTPUT_PTR_WIDTH
     #pragma HLS INTERFACE m_axi     port=uyvy  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows             
     #pragma HLS INTERFACE s_axilite port=cols            
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1896,11 +1896,11 @@ void cvtcolor_nv212iyuv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=rows_outy           
     #pragma HLS INTERFACE s_axilite port=cols_outy           
     #pragma HLS INTERFACE s_axilite port=rows_outuv           
-    #pragma HLS INTERFACE s_axilite port=cols_outuv           
+    #pragma HLS INTERFACE s_axilite port=cols_outuv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -1970,7 +1970,7 @@ void cvtcolor_nv212rgba(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2023,7 +2023,7 @@ void cvtcolor_nv212rgb(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2077,18 +2077,18 @@ rows_imgy, int cols_imgy,int rows_imguv,int cols_imguv,int rows_outy,int cols_ou
 // clang-format on
 
 // clang-format off
-                #pragma HLS INTERFACE s_axilite port=rows_imgy           
-                #pragma HLS INTERFACE s_axilite port=cols_imgy           
-                #pragma HLS INTERFACE s_axilite port=rows_imguv          
-                #pragma HLS INTERFACE s_axilite port=cols_imguv          
-                #pragma HLS INTERFACE s_axilite port=rows_outy           
-                #pragma HLS INTERFACE s_axilite port=cols_outy           
-                #pragma HLS INTERFACE s_axilite port=rows_outuv           
-                #pragma HLS INTERFACE s_axilite port=cols_outuv           
+                #pragma HLS INTERFACE s_axilite port=rows_imgy
+                #pragma HLS INTERFACE s_axilite port=cols_imgy
+                #pragma HLS INTERFACE s_axilite port=rows_imguv
+                #pragma HLS INTERFACE s_axilite port=cols_imguv
+                #pragma HLS INTERFACE s_axilite port=rows_outy
+                #pragma HLS INTERFACE s_axilite port=cols_outy
+                #pragma HLS INTERFACE s_axilite port=rows_outuv
+                #pragma HLS INTERFACE s_axilite port=cols_outuv
 // clang-format on
 
 // clang-format off
-                #pragma HLS INTERFACE s_axilite port=return            	 
+                #pragma HLS INTERFACE s_axilite port=return
 // clang-format on
 
 
@@ -2156,7 +2156,7 @@ void cvtcolor_nv212yuv4(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=cols_imgy           
     #pragma HLS INTERFACE s_axilite port=rows_imguv          
     #pragma HLS INTERFACE s_axilite port=cols_imguv          
-    #pragma HLS INTERFACE s_axilite port=return            	 
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2237,7 +2237,7 @@ void cvtcolor_uyvy2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
     #pragma HLS INTERFACE s_axilite port=cols_u            	 
     #pragma HLS INTERFACE s_axilite port=rows_v              
     #pragma HLS INTERFACE s_axilite port=cols_v            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2305,11 +2305,11 @@ void cvtcolor_uyvy2nv12(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
     #pragma HLS INTERFACE s_axilite port=rows_y              
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
-    #pragma HLS INTERFACE s_axilite port=cols_uv            	 
+    #pragma HLS INTERFACE s_axilite port=cols_uv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2369,11 +2369,11 @@ void cvtcolor_uyvy2nv21(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
     #pragma HLS INTERFACE s_axilite port=rows_y              
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv              
-    #pragma HLS INTERFACE s_axilite port=cols_uv            	 
+    #pragma HLS INTERFACE s_axilite port=cols_uv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2421,11 +2421,11 @@ void cvtcolor_uyvy2rgba(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
 
 // clang-format off
     #pragma HLS INTERFACE s_axilite port=rows_uyvy           
-    #pragma HLS INTERFACE s_axilite port=cols_uyvy           
+    #pragma HLS INTERFACE s_axilite port=cols_uyvy
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2464,11 +2464,11 @@ void cvtcolor_uyvy2rgb(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
 
 // clang-format off
     #pragma HLS INTERFACE s_axilite port=rows_uyvy           
-    #pragma HLS INTERFACE s_axilite port=cols_uyvy           
+    #pragma HLS INTERFACE s_axilite port=cols_uyvy
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2522,7 +2522,7 @@ void cvtcolor_yuyv2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
     #pragma HLS INTERFACE s_axilite port=cols_u            	 
     #pragma HLS INTERFACE s_axilite port=rows_v              
     #pragma HLS INTERFACE s_axilite port=cols_v            	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2593,11 +2593,11 @@ void cvtcolor_yuyv2nv12(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
     #pragma HLS INTERFACE s_axilite port=rows_y              
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv             
-    #pragma HLS INTERFACE s_axilite port=cols_uv             
+    #pragma HLS INTERFACE s_axilite port=cols_uv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2658,11 +2658,11 @@ void cvtcolor_yuyv2nv21(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
     #pragma HLS INTERFACE s_axilite port=rows_y              
     #pragma HLS INTERFACE s_axilite port=cols_y              
     #pragma HLS INTERFACE s_axilite port=rows_uv             
-    #pragma HLS INTERFACE s_axilite port=cols_uv             
+    #pragma HLS INTERFACE s_axilite port=cols_uv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2710,11 +2710,11 @@ void cvtcolor_yuyv2rgba(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
 
 // clang-format off
     #pragma HLS INTERFACE s_axilite port=rows_yuyv           
-    #pragma HLS INTERFACE s_axilite port=cols_yuyv           
+    #pragma HLS INTERFACE s_axilite port=cols_yuyv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2752,11 +2752,11 @@ void cvtcolor_yuyv2rgb(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
 
 // clang-format off
     #pragma HLS INTERFACE s_axilite port=rows_yuyv           
-    #pragma HLS INTERFACE s_axilite port=cols_yuyv           
+    #pragma HLS INTERFACE s_axilite port=cols_yuyv
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2789,7 +2789,7 @@ void cvtcolor_rgb2gray(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE m_axi     port=img_gray  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2820,7 +2820,7 @@ void cvtcolor_bgr2gray(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE m_axi     port=img_gray  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2851,7 +2851,7 @@ void cvtcolor_gray2rgb(ap_uint<INPUT_PTR_WIDTH>* img_gray, ap_uint<OUTPUT_PTR_WI
     #pragma HLS INTERFACE m_axi     port=img_rgb  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2883,7 +2883,7 @@ void cvtcolor_gray2bgr(ap_uint<INPUT_PTR_WIDTH>* img_gray, ap_uint<OUTPUT_PTR_WI
     #pragma HLS INTERFACE m_axi     port=img_bgr  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2915,7 +2915,7 @@ void cvtcolor_rgb2bgr(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_bgr  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2947,7 +2947,7 @@ void cvtcolor_bgr2rgb(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_bgr  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -2979,7 +2979,7 @@ void cvtcolor_rgb2xyz(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_xyz  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3010,7 +3010,7 @@ void cvtcolor_bgr2xyz(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_xyz  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3042,7 +3042,7 @@ void cvtcolor_xyz2rgb(ap_uint<INPUT_PTR_WIDTH>* img_xyz, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_rgb  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3073,7 +3073,7 @@ void cvtcolor_xyz2bgr(ap_uint<INPUT_PTR_WIDTH>* img_xyz, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_bgr  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3105,7 +3105,7 @@ void cvtcolor_rgb2ycrcb(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WI
     #pragma HLS INTERFACE m_axi     port=img_ycrcb  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3138,7 +3138,7 @@ void cvtcolor_bgr2ycrcb(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WI
     #pragma HLS INTERFACE m_axi     port=img_ycrcb  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3171,7 +3171,7 @@ void cvtcolor_ycrcb2rgb(ap_uint<INPUT_PTR_WIDTH>* img_ycrcb, ap_uint<OUTPUT_PTR_
     #pragma HLS INTERFACE m_axi     port=img_rgb  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3203,7 +3203,7 @@ void cvtcolor_ycrcb2bgr(ap_uint<INPUT_PTR_WIDTH>* img_ycrcb, ap_uint<OUTPUT_PTR_
     #pragma HLS INTERFACE m_axi     port=img_bgr  		offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3234,7 +3234,7 @@ void cvtcolor_rgb2hls(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_hls  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3265,7 +3265,7 @@ void cvtcolor_bgr2hls(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_hls  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3297,7 +3297,7 @@ void cvtcolor_hls2rgb(ap_uint<INPUT_PTR_WIDTH>* img_hls, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_rgb  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3329,7 +3329,7 @@ void cvtcolor_hls2bgr(ap_uint<INPUT_PTR_WIDTH>* img_hls, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_bgr  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3361,7 +3361,7 @@ void cvtcolor_rgb2hsv(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_hsv  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3394,7 +3394,7 @@ void cvtcolor_bgr2hsv(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_hsv  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3414,7 +3414,7 @@ void cvtcolor_bgr2hsv(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS DATAFLOW
     // clang-format on
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_bgr, imgInput0);
-    xf::cv::bgr2hsv<XF_8UC3, HEIGHT, WIDTH, NPC1> (imgInput0, imgOutput0);
+    xf::cv::bgr2hsv<XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_hsv);
 }
 #endif
@@ -3426,7 +3426,7 @@ void cvtcolor_hsv2rgb(ap_uint<INPUT_PTR_WIDTH>* img_hsv, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_rgb  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
@@ -3458,7 +3458,7 @@ void cvtcolor_hsv2bgr(ap_uint<INPUT_PTR_WIDTH>* img_hsv, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE m_axi     port=img_bgr  	offset=slave bundle=gmem2
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;

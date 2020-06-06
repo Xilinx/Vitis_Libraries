@@ -27,7 +27,7 @@ void erosion(
     #pragma HLS INTERFACE s_axilite  port=height 			          
     #pragma HLS INTERFACE s_axilite  port=width 			          
 
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.scharr_NO", 
+    "name": "Xilinx Scharr_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

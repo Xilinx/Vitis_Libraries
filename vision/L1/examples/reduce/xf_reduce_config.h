@@ -63,5 +63,9 @@
 #define DST_T XF_8UC1
 #define OUTPUT_PTR_WIDTH 8
 #endif
-void reduce_accel( ap_uint<INPUT_PTR_WIDTH>* img_in, unsigned char dimension, ap_uint<OUTPUT_PTR_WIDTH>* img_out,int height, int width);
+void reduce_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
+                  unsigned char dimension,
+                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                  int height,
+                  int width);
 #endif // end of _XF_REDUCE_CONFIG_H_

@@ -53,7 +53,7 @@ void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
     #pragma HLS INTERFACE s_axilite port=flow_cols   
     #pragma HLS INTERFACE s_axilite port=flow_iter_rows   
     #pragma HLS INTERFACE s_axilite port=flow_iter_cols   
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     const int pROWS = HEIGHT;

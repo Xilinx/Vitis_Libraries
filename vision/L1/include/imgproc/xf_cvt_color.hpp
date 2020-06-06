@@ -3961,7 +3961,7 @@ void KernIyuv2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
                   uint16_t width) {
     ap_uint<13> i, j;
     hls::stream<XF_SNAME(WORDWIDTH_SRC)> uStream, vStream;
-    // clang-format off
+// clang-format off
     #pragma HLS STREAM variable=&uStream  depth=TC
     #pragma HLS STREAM variable=&vStream  depth=TC
     // clang-format on
@@ -3976,13 +3976,13 @@ void KernIyuv2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
     bool evenRow = true, evenBlock = true;
 RowLoop:
     for (i = 0; i < height; i++) {
-        // clang-format off
+// clang-format off
         #pragma HLS LOOP_FLATTEN off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        // clang-format on
+    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-            // clang-format off
+// clang-format off
             #pragma HLS pipeline
             #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
@@ -3990,7 +3990,7 @@ RowLoop:
             // dummy1 =  dst1.read();
             // dummy2 = dst2.read();
 
-            ap_uint<XF_BITSHIFT(NPC)+1> k1;
+            ap_uint<XF_BITSHIFT(NPC) + 1> k1;
             if (evenBlock) {
                 if (evenRow) {
                     uPacked = _u.read(idx);
@@ -4004,39 +4004,38 @@ RowLoop:
                 }
                 k1 = 0;
             } else {
-                k1 = NPC/2;
+                k1 = NPC / 2;
             }
 
-            ap_uint<XF_BITSHIFT(NPC)+1> k;
+            ap_uint<XF_BITSHIFT(NPC) + 1> k;
             bool evenPixel = true;
-            for(k = 0; k < NPC; k++) {
-                // clang-format off
+            for (k = 0; k < NPC; k++) {
+// clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
 
-
-                y1 = (uint8_t)yPacked.range((8*k + 7), 8*k) > 16 ? (uint8_t)yPacked.range((8*k + 7), 8*k) - 16 : 0;
-                u = (uint8_t)uPacked.range((8*k1 + 7), 8*k1) - 128;
-                v = (uint8_t)vPacked.range((8*k1 + 7), 8*k1) - 128;
-                if(evenPixel == false) {
+                y1 = (uint8_t)yPacked.range((8 * k + 7), 8 * k) > 16 ? (uint8_t)yPacked.range((8 * k + 7), 8 * k) - 16
+                                                                     : 0;
+                u = (uint8_t)uPacked.range((8 * k1 + 7), 8 * k1) - 128;
+                v = (uint8_t)vPacked.range((8 * k1 + 7), 8 * k1) - 128;
+                if (evenPixel == false) {
                     k1 = k1 + 1;
                     evenPixel = true;
                 } else {
                     evenPixel = false;
                 }
 
-
                 V2Rtemp = v * (short int)V2R;
                 U2Gtemp = (short int)U2G * u;
                 V2Gtemp = (short int)V2G * v;
                 U2Btemp = u * (short int)U2B;
-                
+
                 // R = 1.164*Y + 1.596*V = Y + 0.164*Y + V + 0.596*V
                 // G = 1.164*Y - 0.813*V - 0.391*U = Y + 0.164*Y - 0.813*V - 0.391*U
                 // B = 1.164*Y + 2.018*U = Y + 0.164 + 2*U + 0.018*U
-                rgba.range((24*k + 7),  (24*k))      = CalculateR(y1, V2Rtemp, v);        // R
-                rgba.range((24*k + 15), (24*k + 8))  = CalculateG(y1, U2Gtemp, V2Gtemp); // G
-                rgba.range((24*k + 23), (24*k + 16)) = CalculateB(y1, U2Btemp, u);      // B
+                rgba.range((24 * k + 7), (24 * k)) = CalculateR(y1, V2Rtemp, v);            // R
+                rgba.range((24 * k + 15), (24 * k + 8)) = CalculateG(y1, U2Gtemp, V2Gtemp); // G
+                rgba.range((24 * k + 23), (24 * k + 16)) = CalculateB(y1, U2Btemp, u);      // B
             }
             _rgba.write(idx1++, rgba);
             evenBlock = evenBlock ? false : true;

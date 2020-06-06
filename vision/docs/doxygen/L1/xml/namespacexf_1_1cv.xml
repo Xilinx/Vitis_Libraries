@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3">
+  <compounddef id="namespacexf_1_1cv" kind="namespace">
+    <compoundname>xf::cv</compoundname>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="namespacexf_1_1cv_1acd442e9091610a362b520eb14c563928" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>int</type>
+            <declname>TYPE</declname>
+            <defname>TYPE</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>SRC_ROWS</declname>
+            <defname>SRC_ROWS</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>SRC_COLS</declname>
+            <defname>SRC_COLS</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>DST_ROWS</declname>
+            <defname>DST_ROWS</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>DST_COLS</declname>
+            <defname>DST_COLS</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>NPC</declname>
+            <defname>NPC</defname>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void xf::cv::insertBorder</definition>
+        <argsstring>(xf::cv::Mat&lt; TYPE, SRC_ROWS, SRC_COLS, NPC &gt; &amp;_src, xf::cv::Mat&lt; TYPE, DST_ROWS, DST_COLS, NPC &gt; &amp;_dst, int insert_pad_val)</argsstring>
+        <name>insertBorder</name>
+        <param>
+          <type>xf::cv::Mat&lt; TYPE, SRC_ROWS, SRC_COLS, NPC &gt; &amp;</type>
+          <declname>_src</declname>
+        </param>
+        <param>
+          <type>xf::cv::Mat&lt; TYPE, DST_ROWS, DST_COLS, NPC &gt; &amp;</type>
+          <declname>_dst</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>insert_pad_val</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="templateparam"><parameteritem>
+<parameternamelist>
+<parametername>TYPE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>input and ouput type </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SRC_ROWS</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>rows of the input image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SRC_COLS</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>cols of the input image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>DST_ROWS</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>rows of the output image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>DST_COLS</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>cols of the output image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>NPC</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>number of pixels processed per cycle </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>input image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_dst</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>output image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>insert_pad_val</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>insert pad value </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/proj/sdxapps/users/ckreddy/2020doc/faas_tools_kit-master/faas_tools_kit-master/xf_opencv/L1/include/dnn/xf_insertBorder.hpp" line="48" bodyfile="/proj/sdxapps/users/ckreddy/2020doc/faas_tools_kit-master/faas_tools_kit-master/xf_opencv/L1/include/dnn/xf_insertBorder.hpp" bodystart="46" bodyend="241"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/proj/sdxapps/users/ckreddy/2020doc/faas_tools_kit-master/faas_tools_kit-master/xf_opencv/L1/include/dnn/xf_insertBorder.hpp" line="31"/>
+  </compounddef>
+</doxygen>

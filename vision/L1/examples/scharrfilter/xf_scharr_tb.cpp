@@ -17,8 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_scharr_config.h"
 
-
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
@@ -38,34 +36,31 @@ int main(int argc, char** argv) {
     in_img = cv::imread(argv[1], 1);
 #endif
 
-
 #if T_8U
 
- int ddepth = CV_8U;
+    int ddepth = CV_8U;
 #if GRAY
 #define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
 #else
 #define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
 #endif
 
-typedef unsigned char TYPE; // short int TYPE; //
+    typedef unsigned char TYPE; // short int TYPE; //
 #else
-	
- int ddepth = CV_16S;
+
+    int ddepth = CV_16S;
 #if GRAY
 #define PTYPE CV_16SC1 // Should be CV_16S when ddepth is CV_16S
 #else
 #define PTYPE CV_16SC3 // Should be CV_16S when ddepth is CV_16S
 #endif
-typedef unsigned short TYPE; // short int TYPE; //
+    typedef unsigned short TYPE; // short int TYPE; //
 #endif
 
     if (in_img.data == NULL) {
         fprintf(stderr, "Cannot open image\n");
         return 0;
     }
-
-    
 
     // create memory for output images
     c_grad_x.create(in_img.rows, in_img.cols, PTYPE);
@@ -78,22 +73,20 @@ typedef unsigned short TYPE; // short int TYPE; //
     ////////////    Opencv Reference    //////////////////////
     int scale = 1;
     int delta = 0;
-   
-    
+
     Scharr(in_img, c_grad_x, ddepth, 1, 0, scale, delta, cv::BORDER_CONSTANT);
     Scharr(in_img, c_grad_y, ddepth, 0, 1, scale, delta, cv::BORDER_CONSTANT);
 
     imwrite("out_ocvx.jpg", c_grad_x);
     imwrite("out_ocvy.jpg", c_grad_y);
 
-
     int rows = in_img.rows;
     int cols = in_img.cols;
-	
-    //Call the top function	
 
-    scharr_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH> *)hls_grad_x.data, (ap_uint<OUTPUT_PTR_WIDTH> *)hls_grad_y.data, rows, cols);
-	
+    // Call the top function
+
+    scharr_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_x.data,
+                 (ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_y.data, rows, cols);
 
     imwrite("out_hlsx.jpg", hls_grad_x);
     imwrite("out_hlsy.jpg", hls_grad_y);

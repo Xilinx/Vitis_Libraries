@@ -25,7 +25,7 @@ void convertbitdepth(ap_uint<PTR_IN_WIDTH>* img_in, int shift, ap_uint<PTR_OUT_W
     #pragma HLS INTERFACE s_axilite  port=shift			      
     #pragma HLS INTERFACE s_axilite  port=height 		      
     #pragma HLS INTERFACE s_axilite  port=width 		      
-    #pragma HLS INTERFACE s_axilite  port=return 		      
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);

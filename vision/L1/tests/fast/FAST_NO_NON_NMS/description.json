@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.FAST_NO_NON_NMS", 
+    "name": "Xilinx Fast_No_Non_Nms Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

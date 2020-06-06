@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.meanshifttracking.build", 
+    "name": "Xilinx Meanshifttracking Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -61,7 +61,7 @@ void inrange_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                    unsigned char lower_thresh,
                    unsigned char upper_thresh,
                    ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-				   int height, 
-				   int width);
+                   int height,
+                   int width);
 
 #endif // end of _XF_THRESHOLD_CONFIG_H_

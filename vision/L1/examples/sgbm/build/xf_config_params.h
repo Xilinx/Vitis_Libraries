@@ -17,7 +17,6 @@
 #define HEIGHT 720
 #define WIDTH 1280
 
-
 /* set penalties for SGM */
 #define SMALL_PENALTY 20
 #define LARGE_PENALTY 40
@@ -34,4 +33,3 @@
 
 /* Number of directions */
 #define NUM_DIR 4
-

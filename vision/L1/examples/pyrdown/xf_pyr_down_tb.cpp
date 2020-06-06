@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_pyr_down_config.h"
 
-
 int main(int argc, char* argv[]) {
     cv::Mat input_image, output_image, output_diff_xf_cv, output_xf;
 
@@ -51,14 +50,9 @@ int main(int argc, char* argv[]) {
 
     ////////////////////	HLS TOP function call	/////////////////
 
-   pyr_down_accel( (ap_uint<INPUT_PTR_WIDTH> *)input_image.data,
-                    (ap_uint<OUTPUT_PTR_WIDTH> *)output_xf.data,
-                    input_height,
-                    input_width,
-                    output_height,
-                    output_width);
-					
-					
+    pyr_down_accel((ap_uint<INPUT_PTR_WIDTH>*)input_image.data, (ap_uint<OUTPUT_PTR_WIDTH>*)output_xf.data,
+                   input_height, input_width, output_height, output_width);
+
     float err_per;
     cv::absdiff(output_image, output_xf, output_diff_xf_cv);
     xf::cv::analyzeDiff(output_diff_xf_cv, 0, err_per);

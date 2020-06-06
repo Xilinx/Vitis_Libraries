@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.bilateral_RGBA_NO_3X3", 
+    "name": "Xilinx Bilateral_Rgba_No_3X3 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

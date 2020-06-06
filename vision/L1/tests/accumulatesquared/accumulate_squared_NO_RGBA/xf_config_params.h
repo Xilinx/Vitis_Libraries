@@ -18,5 +18,3 @@
 #define RO 0
 
 #define GRAY 0
-
-

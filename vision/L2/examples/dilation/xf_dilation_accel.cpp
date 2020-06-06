@@ -25,7 +25,7 @@ void dilation_accel(
     #pragma HLS INTERFACE m_axi     port=kernel  offset=slave bundle=gmem3
     #pragma HLS INTERFACE s_axilite port=rows     
     #pragma HLS INTERFACE s_axilite port=cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> in_mat(rows, cols);

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.stereo_pipeline_config_1", 
+    "name": "Xilinx Stereo_Pipeline_Config_1 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -40,7 +40,7 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 16384, 
+                "max_memory_MB": 32768, 
                 "max_time_min": 300
             }
         ], 

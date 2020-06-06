@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.v64_16_300", 
+    "name": "Xilinx V64_16_300 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -40,8 +40,8 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 16384, 
-                "max_time_min": 300
+                "max_memory_MB": 65536, 
+                "max_time_min": 500
             }
         ], 
         "targets": [

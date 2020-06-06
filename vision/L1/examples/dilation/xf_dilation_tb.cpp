@@ -41,8 +41,8 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-int height=in_img.rows;
-int width=in_img.cols;
+    int height = in_img.rows;
+    int width = in_img.cols;
 // create memory for output images
 #if GRAY
     ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
@@ -68,9 +68,10 @@ int width=in_img.cols;
     }
     // Write output image
     cv::imwrite("hw_out.jpg", out_img);
-	
-	dilation_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, structure_element, height, width);
-	
+
+    dilation_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, structure_element,
+                   height, width);
+
     //////////////////  Compute Absolute Difference ////////////////////
     cv::absdiff(ocv_ref, out_img, diff);
     cv::imwrite("out_error.jpg", diff);

@@ -111,9 +111,8 @@ typedef unsigned int uint32_t;
 #endif
 #endif
 
-#define INPUT_PTR_WIDTH  128
-#define OUTPUT_PTR_WIDTH 128    
-
+#define INPUT_PTR_WIDTH 128
+#define OUTPUT_PTR_WIDTH 128
 
 void sobel_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                  ap_uint<OUTPUT_PTR_WIDTH>* img_out1,

@@ -19,5 +19,3 @@
 
 /*  set the type of thresholding*/
 #define THRESH_TYPE XF_THRESHOLD_TYPE_BINARY
-
-

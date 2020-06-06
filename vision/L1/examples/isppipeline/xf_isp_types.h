@@ -48,20 +48,18 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "imgproc/xf_autowhitebalance.hpp"
 #include "imgproc/xf_demosaicing.hpp"
 
-
-
 // --------------------------------------------------------------------
 // Macros definations
 // --------------------------------------------------------------------
 
 // Useful macro functions definations
 #define _DATA_WIDTH_(_T, _N) (XF_PIXELWIDTH(_T, _N) * XF_NPIXPERCYCLE(_N))
-#define _BYTE_ALIGN_(_N)     ((((_N)+7)/8)*8)
+#define _BYTE_ALIGN_(_N) ((((_N) + 7) / 8) * 8)
 
-#define IN_DATA_WIDTH  _DATA_WIDTH_(XF_SRC_T, XF_NPPC)
+#define IN_DATA_WIDTH _DATA_WIDTH_(XF_SRC_T, XF_NPPC)
 #define OUT_DATA_WIDTH _DATA_WIDTH_(XF_DST_T, XF_NPPC)
 
-#define AXI_WIDTH_IN  _BYTE_ALIGN_(IN_DATA_WIDTH)
+#define AXI_WIDTH_IN _BYTE_ALIGN_(IN_DATA_WIDTH)
 #define AXI_WIDTH_OUT _BYTE_ALIGN_(OUT_DATA_WIDTH)
 
 #define NR_COMPONENTS 3
@@ -69,28 +67,25 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Internal types
 // --------------------------------------------------------------------
 // Input/Output AXI video buses
-typedef ap_axiu<AXI_WIDTH_IN, 1, 1, 1>  InVideoStrmBus_t;
+typedef ap_axiu<AXI_WIDTH_IN, 1, 1, 1> InVideoStrmBus_t;
 typedef ap_axiu<AXI_WIDTH_OUT, 1, 1, 1> OutVideoStrmBus_t;
 
 // Input/Output AXI video stream
-typedef hls::stream<InVideoStrmBus_t>  InVideoStrm_t;
+typedef hls::stream<InVideoStrmBus_t> InVideoStrm_t;
 typedef hls::stream<OutVideoStrmBus_t> OutVideoStrm_t;
 
 // HW Registers
 typedef struct {
     uint16_t width;
     uint16_t height;
-//    uint16_t video_format;
+    //    uint16_t video_format;
     uint16_t bayer_phase;
 } HW_STRUCT_REG;
-
 
 // --------------------------------------------------------------------
 // Prototype
 // --------------------------------------------------------------------
 // top level function for HW synthesis
-void ISPPipeline_accel (HW_STRUCT_REG   HwReg,
-                 InVideoStrm_t  &s_axis_video,
-                 OutVideoStrm_t &m_axis_video);
+void ISPPipeline_accel(HW_STRUCT_REG HwReg, InVideoStrm_t& s_axis_video, OutVideoStrm_t& m_axis_video);
 
 #endif //_XF_ISP_TYPES_H_

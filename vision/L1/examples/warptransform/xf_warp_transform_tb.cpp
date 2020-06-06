@@ -113,11 +113,11 @@ int main(int argc, char* argv[]) {
     // Allocate memory for the output images:
     image_output.create(image_input.rows, image_input.cols, image_input.type());
     diff_img.create(image_input.rows, image_input.cols, image_input.type());
-	
-    //Call the top function
-    warp_transform_accel((ap_uint<PTR_WIDTH> *)image_input.data, R,(ap_uint<PTR_WIDTH> *)image_output.data , image_input.rows, image_input.cols);
 
-	
+    // Call the top function
+    warp_transform_accel((ap_uint<PTR_WIDTH>*)image_input.data, R, (ap_uint<PTR_WIDTH>*)image_output.data,
+                         image_input.rows, image_input.cols);
+
     cv::imwrite("output.png", image_output);
 
     // OpenCV reference:

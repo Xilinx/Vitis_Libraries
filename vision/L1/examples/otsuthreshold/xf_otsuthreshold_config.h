@@ -41,6 +41,6 @@
 // Set the pixel depth:
 #define TYPE XF_8UC1
 
-void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char &Otsuval, int height, int width);
+void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char& Otsuval, int height, int width);
 
 #endif

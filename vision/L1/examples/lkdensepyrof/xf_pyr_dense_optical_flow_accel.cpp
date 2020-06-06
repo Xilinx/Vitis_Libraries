@@ -16,16 +16,16 @@
 
 #include "xf_pyr_dense_optical_flow_config.h"
 
-static constexpr int __XF_DEPTH_IN=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_8UC1,NPPC))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_32FC1,NPPC))/32) / (OUTPUT_PTR_WIDTH/32);
+static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_8UC1, NPPC)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_32FC1, NPPC)) / 32) / (OUTPUT_PTR_WIDTH / 32);
 
-//void pyr_down_accel
+// void pyr_down_accel
 void pyr_dense_optical_flow_pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-                    ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                    int in_rows,
-                    int in_cols,
-                    int out_rows,
-                    int out_cols) {
+                                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                                           int in_rows,
+                                           int in_cols,
+                                           int out_rows,
+                                           int out_cols) {
 // clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1 depth=__XF_DEPTH_IN
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2 depth=__XF_DEPTH_IN
@@ -36,11 +36,11 @@ void pyr_dense_optical_flow_pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=in_cols     
     #pragma HLS INTERFACE s_axilite port=out_rows     
     #pragma HLS INTERFACE s_axilite port=out_cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPPC> in_mat(in_rows,in_cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPPC> out_mat(out_rows,out_cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPPC> in_mat(in_rows, in_cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPPC> out_mat(out_rows, out_cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
@@ -49,8 +49,6 @@ void pyr_dense_optical_flow_pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::pyrDown<TYPE, HEIGHT, WIDTH, NPPC, XF_USE_URAM>(in_mat, out_mat);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPPC>(out_mat, img_out);
 }
-
-
 
 void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
                                   ap_uint<INPUT_PTR_WIDTH>* _next_image,
@@ -88,12 +86,12 @@ void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
     #pragma HLS INTERFACE s_axilite port=flow_cols   
     #pragma HLS INTERFACE s_axilite port=flow_iter_rows   
     #pragma HLS INTERFACE s_axilite port=flow_iter_cols   
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPPC> current_img_mat(cur_img_rows, cur_img_cols);
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPPC> next_img_mat(next_img_rows,next_img_cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPPC> next_img_mat(next_img_rows, next_img_cols);
 
     xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, NPPC> streamFlowin_mat(flow_rows, flow_cols);
 

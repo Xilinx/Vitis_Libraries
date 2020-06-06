@@ -38,7 +38,6 @@ typedef unsigned char uchar;
 // Set the optimization type:
 #define NPC1 XF_NPPC1
 
-
 #define INDEX_ARR_1 0
 #define INDEX_ARR_2 0
 

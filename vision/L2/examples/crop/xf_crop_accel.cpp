@@ -35,7 +35,7 @@ void crop_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
     #pragma HLS INTERFACE m_axi     port=roi   offset=slave bundle=gmem4
     #pragma HLS INTERFACE s_axilite port=height     
     #pragma HLS INTERFACE s_axilite port=width     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     printf("started loading rect execution\n");

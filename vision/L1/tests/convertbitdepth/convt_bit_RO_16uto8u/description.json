@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.convt_bit_RO_16uto8u", 
+    "name": "Xilinx Convt_Bit_Ro_16Uto8U Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

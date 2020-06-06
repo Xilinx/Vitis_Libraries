@@ -24,7 +24,9 @@ examples are described in this section:
 -  `Color Detection <#color-detection>`_
 -  `Difference of Gaussian Filter <#difference-gaussian-filter>`_
 -  `Stereo Vision Pipeline <#stereo-vision>`_
--  `X + ML Pipeline <#x-ml-pipeline>`_
+-  `X + ML Pipeline <#x-mlpipeline>`_
+-  `Letterbox <#letter-box>`_
+-  `Image Sensor Processing pipeline <#isp>`_
 
 .. _interative-pyramidal:
 
@@ -287,48 +289,47 @@ The following example demonstrates the Color Detection algorithm.
 
 .. code:: c
 
-   void color_detect(ap_uint<PTR_IN_WIDTH>* img_in,
+	void color_detect(ap_uint<PTR_IN_WIDTH>* img_in,
                   unsigned char* low_thresh,
                   unsigned char* high_thresh,
                   unsigned char* process_shape,
                   ap_uint<PTR_OUT_WIDTH>* img_out,
                   int rows,
                   int cols) {
-   
-    #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
-    #pragma HLS INTERFACE m_axi      port=low_thresh    offset=slave  bundle=gmem1
-    #pragma HLS INTERFACE m_axi      port=high_thresh   offset=slave  bundle=gmem2
-    #pragma HLS INTERFACE s_axilite  port=rows 			      bundle=control
-    #pragma HLS INTERFACE s_axilite  port=cols 			      bundle=control
-    #pragma HLS INTERFACE m_axi      port=process_shape offset=slave  bundle=gmem3 
-    #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4
-    #pragma HLS INTERFACE s_axilite  port=return 		bundle=control
-   
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);   
-    #pragma HLS stream variable=imgInput.data depth=2  
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> rgb2hsv(rows, cols);   
-    #pragma HLS stream variable=rgb2hsv.data depth=2
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper1(rows, cols);
-    #pragma HLS stream variable=imgHelper1.data depth=2
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper2(rows, cols);  
-    #pragma HLS stream variable=imgHelper2.data depth=2
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper3(rows, cols);
-    #pragma HLS stream variable=imgHelper3.data depth=2 
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper4(rows, cols);
-    #pragma HLS stream variable=imgHelper4.data depth=2
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
-    #pragma HLS stream variable=imgOutput.data depth=2
+    #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
    
+    #pragma HLS INTERFACE m_axi      port=low_thresh    offset=slave  bundle=gmem1
+    #pragma HLS INTERFACE s_axilite  port=low_thresh 			     
+    #pragma HLS INTERFACE m_axi      port=high_thresh   offset=slave  bundle=gmem2
+    #pragma HLS INTERFACE s_axilite  port=high_thresh 			      
+    #pragma HLS INTERFACE s_axilite  port=rows 			      
+    #pragma HLS INTERFACE s_axilite  port=cols 			      
+    #pragma HLS INTERFACE m_axi      port=process_shape offset=slave  bundle=gmem3
+    #pragma HLS INTERFACE s_axilite  port=process_shape			      
+    #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4
+
+    #pragma HLS INTERFACE s_axilite  port=return
+
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> rgb2hsv(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper1(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper2(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper3(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgHelper4(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
+
     // Copy the shape data:
     unsigned char _kernel[FILTER_SIZE * FILTER_SIZE];
     for (unsigned int i = 0; i < FILTER_SIZE * FILTER_SIZE; ++i) {
+
         #pragma HLS PIPELINE
+        // clang-format on
         _kernel[i] = process_shape[i];
     }
-	
+
     #pragma HLS DATAFLOW
-   
+    // clang-format on
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
 
@@ -338,6 +339,7 @@ The following example demonstrates the Color Detection algorithm.
     // Do the color thresholding:
     xf::cv::colorthresholding<IN_TYPE, OUT_TYPE, MAXCOLORS, HEIGHT, WIDTH, NPC1>(rgb2hsv, imgHelper1, low_thresh,
                                                                                  high_thresh);
+
     // Use erode and dilate to fully mark color areas:
     xf::cv::erode<XF_BORDER_CONSTANT, OUT_TYPE, HEIGHT, WIDTH, XF_KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS,
                   NPC1>(imgHelper1, imgHelper2, _kernel);
@@ -353,7 +355,8 @@ The following example demonstrates the Color Detection algorithm.
 
     return;
 
-} // End of kernel
+	} // End of kernel
+
 
 In the given example, the source image is passed to the ``xf::cv::BGR2HSV``
 function, the output of that function is passed to the
@@ -379,10 +382,7 @@ applying Gaussian Filter on the original source image, and that Gaussian
 blurred image is duplicated as two images. The Gaussian blur function is
 applied to one of the duplicated images, whereas the other one is stored
 as it is. Later, perform the Subtraction function on, two times Gaussian
-applied image and one of the duplicated image. Here, the duplicated
-image has to wait until the Gaussian applied for other one generates at
-least for one pixel output. Therefore, here xf::cv::delayMat function is
-used to add delay.
+applied image and one of the duplicated image. 
 
 .. figure:: ./images/crx1554997276344.png
    :alt: 
@@ -394,41 +394,33 @@ example.
 
 .. code:: c
 
-   void gaussiandiference(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WIDTH>* img_out, int rows, int cols) {
-   
+	void gaussiandiference(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WIDTH>* img_out, int rows, int cols) {
+
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1  
-    #pragma HLS INTERFACE s_axilite  port=sigma 			          bundle=control
-	#pragma HLS INTERFACE s_axilite  port=rows 			          bundle=control
-	#pragma HLS INTERFACE s_axilite  port=cols 			          bundle=control
-    #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
-    
+    #pragma HLS INTERFACE s_axilite  port=sigma 			          
+	#pragma HLS INTERFACE s_axilite  port=rows 			          
+	#pragma HLS INTERFACE s_axilite  port=cols 			          
+    #pragma HLS INTERFACE s_axilite  port=return
+
+
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgin1(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgin2(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgin3(rows, cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, 15360> imgin3(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgin4(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
 
- 
-    #pragma HLS STREAM variable=imgInput.data depth=2
-    #pragma HLS STREAM variable=imgin1.data depth=2
-    #pragma HLS STREAM variable=imgin2.data depth=2
-    #pragma HLS STREAM variable=imgin3.data depth=15360
-    #pragma HLS STREAM variable=imgin4.data depth=2
-    #pragma HLS STREAM variable=imgOutput.data depth=2
-   
     #pragma HLS DATAFLOW
-    
 
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
     xf::cv::GaussianBlur<FILTER_WIDTH, XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, NPC1>(imgInput, imgin1, sigma);
-    xf::cv::duplicateMat<TYPE, HEIGHT, WIDTH, NPC1>(imgin1, imgin2, imgin3);
+    xf::cv::duplicateMat<TYPE, HEIGHT, WIDTH, NPC1, 15360>(imgin1, imgin2, imgin3);
     xf::cv::GaussianBlur<FILTER_WIDTH, XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, NPC1>(imgin2, imgin4, sigma);
-    xf::cv::subtract<XF_CONVERT_POLICY_SATURATE, TYPE, HEIGHT, WIDTH, NPC1>(imgin3, imgin4, imgOutput);
+    xf::cv::subtract<XF_CONVERT_POLICY_SATURATE, TYPE, HEIGHT, WIDTH, NPC1, 15360>(imgin3, imgin4, imgOutput);
 
     // Convert output xf::cv::Mat object to output array:
     xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
@@ -472,7 +464,7 @@ The following code is for the pipeline.
 
 .. code:: c
 
-  void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
+	void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
                           ap_uint<INPUT_PTR_WIDTH>* img_R,
                           ap_uint<OUTPUT_PTR_WIDTH>* img_disp,
                           float* cameraMA_l,
@@ -484,7 +476,7 @@ The following code is for the pipeline.
                           int* bm_state_arr,
                           int rows,
                           int cols) {
-   
+
     #pragma HLS INTERFACE m_axi     port=img_L  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_R  offset=slave bundle=gmem5
     #pragma HLS INTERFACE m_axi     port=img_disp  offset=slave bundle=gmem6
@@ -495,28 +487,27 @@ The following code is for the pipeline.
     #pragma HLS INTERFACE m_axi     port=irA_l  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=irA_r  offset=slave bundle=gmem2
     #pragma HLS INTERFACE m_axi     port=bm_state_arr  offset=slave bundle=gmem4
-    #pragma HLS INTERFACE s_axilite port=rows               bundle=control
-    #pragma HLS INTERFACE s_axilite port=cols               bundle=control
-    #pragma HLS INTERFACE s_axilite port=return                bundle=control
-    
+    #pragma HLS INTERFACE s_axilite port=rows               
+    #pragma HLS INTERFACE s_axilite port=cols               
+    #pragma HLS INTERFACE s_axilite port=return
 
     ap_fixed<32, 12> cameraMA_l_fix[XF_CAMERA_MATRIX_SIZE], cameraMA_r_fix[XF_CAMERA_MATRIX_SIZE],
         distC_l_fix[XF_DIST_COEFF_SIZE], distC_r_fix[XF_DIST_COEFF_SIZE], irA_l_fix[XF_CAMERA_MATRIX_SIZE],
         irA_r_fix[XF_CAMERA_MATRIX_SIZE];
 
     for (int i = 0; i < XF_CAMERA_MATRIX_SIZE; i++) {
-       
+
         #pragma HLS PIPELINE II=1
-       
+        // clang-format on
         cameraMA_l_fix[i] = (ap_fixed<32, 12>)cameraMA_l[i];
         cameraMA_r_fix[i] = (ap_fixed<32, 12>)cameraMA_r[i];
         irA_l_fix[i] = (ap_fixed<32, 12>)irA_l[i];
         irA_r_fix[i] = (ap_fixed<32, 12>)irA_r[i];
     }
     for (int i = 0; i < XF_DIST_COEFF_SIZE; i++) {
-       
+
         #pragma HLS PIPELINE II=1
-       
+        // clang-format on
         distC_l_fix[i] = (ap_fixed<32, 12>)distC_l[i];
         distC_r_fix[i] = (ap_fixed<32, 12>)distC_r[i];
     }
@@ -536,27 +527,27 @@ The following code is for the pipeline.
 
     int _cm_size = 9, _dc_size = 5;
 
-    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_L(rows, cols);  
-    #pragma HLS stream variable=mat_L.data depth=2 
-    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_R(rows, cols);  
-    #pragma HLS stream variable=mat_R.data depth=2
+    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_L(rows, cols);
+
+    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_R(rows, cols);
+
     xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_disp(rows, cols);
-    #pragma HLS stream variable=mat_disp.data depth=2
+
     xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapxLMat(rows, cols);
-    #pragma HLS stream variable=mapxLMat.data depth=2
+
     xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapyLMat(rows, cols);
-    #pragma HLS stream variable=mapyLMat.data depth=2
+
     xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapxRMat(rows, cols);
-    #pragma HLS stream variable=mapxRMat.data depth=2
+
     xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapyRMat(rows, cols);
-    #pragma HLS stream variable=mapyRMat.data depth=2
+
     xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> leftRemappedMat(rows, cols);
-    #pragma HLS stream variable=leftRemappedMat.data depth=2
+
     xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> rightRemappedMat(rows, cols);
-    #pragma HLS stream variable=rightRemappedMat.data depth=2
-   
+
+
     #pragma HLS DATAFLOW
-   
+
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>(img_L, mat_L);
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>(img_R, mat_R);
 
@@ -576,12 +567,13 @@ The following code is for the pipeline.
                      XF_NPPC1, XF_USE_URAM>(leftRemappedMat, rightRemappedMat, mat_disp, bm_state);
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>(mat_disp, img_disp);
- }
+	}
+	
 
-.. _x-ml-pipeline: 
+.. _x-mlpipeline: 
 
 X + ML Pipeline
-================
+===============
 
 This example shows how various xfOpenCV funtions can be used to accelerate preprocessing of input images before feeding them to a Deep Neural Network (DNN) accelerator.
 
@@ -612,13 +604,10 @@ The following code shows the top level wrapper containing the ``xf::cv::resize()
 
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1>   imgInput0(rows_in, cols_in);
 
-        #pragma HLS stream variable=imgInput0.data depth=2
-
-        
+       
     xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T> out_mat(rows_out, cols_out);
 
-    #pragma HLS stream variable=out_mat.data depth=2
-        
+       
         hls::stream<ap_uint<256> > resizeStrmout;
         int srcMat_cols_align_npc = ((out_mat.cols + (NPC_T - 1)) >> XF_BITSHIFT(NPC_T)) << XF_BITSHIFT(NPC_T);
 
@@ -632,8 +621,8 @@ The following code shows the top level wrapper containing the ``xf::cv::resize()
 
     }
 
-This piepeline is integrated with `xDNN
-<https://www.xilinx.com/support/documentation/white_papers/wp504-accel-dnns.pdf>`_ accelerator and `MLsuite <https://github.com/Xilinx/ml-suite>`_ to run Googlenet_v1 inference on Alveo-U200 accelerator card and achieved
+This piepeline is integrated with Deep learning Processign Unit(DPU) as part of `Vitis-AI-Library
+<https://github.com/Xilinx/Vitis-AI/tree/master/Vitis-AI-Library>`_  and achieved
 11 % speed up compared to software pre-procesing. 
 
 * Overall Performance (Images/sec):
@@ -642,8 +631,187 @@ This piepeline is integrated with `xDNN
 
 * with hardware accelerated pre-processing : 140 images/sec
 
+.. _letter-box: 
+
+Letterbox
+=========
+
+The Letterbox algorithm is used for scaling input image to desired output size while preserving aspect ratio of original image. If required, zeroes are padded for preserving the aspect ratio post resize.
+
+An application of letterbox is in the pre-processing block of machine learning pipelines used in image processing.
+
+|pp_image1|
+
+The following example demonstrates the Letterbox algorithm.
+
+.. code:: c
+
+    void letterbox_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+			ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+			int rows_in,
+			int cols_in,
+			int rows_out,
+			int cols_out,
+			int insert_pad_value) {
+			
+			#pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
+			#pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
+			#pragma HLS INTERFACE s_axilite port=rows_in               
+			#pragma HLS INTERFACE s_axilite port=cols_in               
+			#pragma HLS INTERFACE s_axilite port=rows_out
+			#pragma HLS INTERFACE s_axilite port=cols_out
+			#pragma HLS INTERFACE s_axilite port=insert_pad_value
+			#pragma HLS INTERFACE s_axilite port=return                
+  
+
+			// Compute Resize output image size for Letterbox
+			float scale_height = (float)rows_out/(float)rows_in;
+			float scale_width = (float)cols_out/(float)cols_in;
+			int rows_out_resize, cols_out_resize;
+			if(scale_width<scale_height){
+				cols_out_resize = cols_out;
+				rows_out_resize = (int)((float)(rows_in*cols_out)/(float)cols_in);
+			}
+			else{
+				cols_out_resize = (int)((float)(cols_in*rows_out)/(float)rows_in);
+				rows_out_resize = rows_out;
+			}
+
+			xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> imgInput0(rows_in, cols_in);
+			xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T> out_mat_resize(rows_out_resize, cols_out_resize);
+			xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T> out_mat(rows_out, cols_out);
+		
+			#pragma HLS DATAFLOW
+		
+			xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, NPC_T>  (img_inp, imgInput0);
+			xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T,MAXDOWNSCALE> (imgInput0, out_mat_resize);
+			xf::cv::insertBorder<TYPE, NEWHEIGHT, NEWWIDTH, NEWHEIGHT, NEWWIDTH, NPC_T>(out_mat_resize, out_mat, insert_pad_value);
+			xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, NEWHEIGHT, NEWWIDTH, NPC_T>(out_mat, img_out);
+			return;
+			}// end kernel
+
+
+The Letterbox example uses two hardware functions from the Vitis vision library. They are:
+
+* xf::cv::resize
+
+* xf::cv::insertBorder
+
+In the given example, the source image is passed to the xf::cv::resize function.
+The output of that function is passed to the xf::cv::insertBorder module and the final output image are returned.
+
+.. rubric:: Insert Border API Syntax
+
+.. code:: c
+
+	template <
+	    int TYPE,
+	    int SRC_ROWS,
+	    int SRC_COLS,
+	    int DST_ROWS,
+	    int DST_COLS,
+	    int NPC
+	    >
+	void insertBorder (
+	    xf::cv::Mat <TYPE, SRC_ROWS, SRC_COLS, NPC>& _src,
+	    xf::cv::Mat <TYPE, DST_ROWS, DST_COLS, NPC>& _dst,
+	    int insert_pad_val
+	    )
+		
+.. include:: doxygen/L1/rst/namespace_xf_cv.rst
+   :start-after:    "dnn/xf_insertBorder.hpp"
+
+.. _isp: 
+
+Image Sensor Processing pipeline
+================================
+
+Image Sensor Processing (ISP) is a pipeline of image processing functions processing the raw image from the sensor. 
+
+Current ISP includes following 4 blocks:
+
+
+-  BPC (Bad pixel correction) : An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
+-  Gain Control : The Gain control module improves the overall brightness of the image.
+-  Demosaicing : The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
+-  Auto white balance: The AWB module improves color balance of the image by using  image statistics.
+
+Current design example demonstrates how to use ISP functions in a pipeline. User can include other modules (like gamma correction, color conversion, resize etc) based on their need.
+
+|pp_image_es|
+
+The following example demonstrates the ISP pipeline.
+
+.. code:: c
+
+			void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) {
+		
+			#pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
+			#pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
+			#pragma HLS INTERFACE s_axilite port=height     
+			#pragma HLS INTERFACE s_axilite port=width     
+			#pragma HLS INTERFACE s_axilite port=return
+			#pragma HLS ARRAY_PARTITION variable=hist0 complete dim=1
+			#pragma HLS ARRAY_PARTITION variable=hist1 complete dim=1
+			
+			if (!flag) {
+				ISPpipeline(img_inp, img_out, height, width, hist0, hist1);
+				flag = 1;
+			} else {
+				ISPpipeline(img_inp, img_out, height, width, hist1, hist0);
+				flag = 0;
+			}
+			}
+			void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+							 ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+							 int height,
+							 int width,
+							 uint32_t hist0[3][256],
+							 uint32_t hist1[3][256]) {
+			#pragma HLS INLINE OFF
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> bpc_out(height, width);
+				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
+				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
+
+			#pragma HLS stream variable=bpc_out.data dim=1 depth=2
+			#pragma HLS stream variable=gain_out.data dim=1 depth=2
+			#pragma HLS stream variable=demosaic_out.data dim=1 depth=2
+			#pragma HLS stream variable=imgInput1.data dim=1 depth=2
+			#pragma HLS stream variable=impop.data dim=1 depth=2
+			#pragma HLS stream variable=_dst.data dim=1 depth=2
+
+			#pragma HLS DATAFLOW
+				
+
+				float inputMin = 0.0f;
+				float inputMax = 255.0f;
+				float outputMin = 0.0f;
+				float outputMax = 255.0f;
+				float p = 2.0f;
+
+				xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput1);
+				xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0>(imgInput1, bpc_out);
+				xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(bpc_out, gain_out);
+				xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
+				xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE>(
+					demosaic_out, impop, hist0, p, inputMin, inputMax, outputMin, outputMax);
+				xf::cv::AWBNormalization<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE>(impop, _dst, hist1, p, inputMin,
+																									inputMax, outputMin, outputMax);
+				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, img_out);
+			}
+
+
+.. |pp_image1| image:: ./images/letterbox.png
+   :class: image 
+   :width: 1000
+   
+.. |pp_image_es| image:: ./images/isp.png
+   :class: image 
+   :width: 1000
 
 .. |pp_image| image:: ./images/gnet_pp.png
    :class: image 
    :width: 500
-

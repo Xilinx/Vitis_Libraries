@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.medianblur.build", 
+    "name": "Xilinx Medianblur Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

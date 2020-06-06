@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.convertScaleAbs_ro", 
+    "name": "Xilinx Convertscaleabs_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

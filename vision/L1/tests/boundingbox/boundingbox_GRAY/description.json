@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.boundingbox_GRAY", 
+    "name": "Xilinx Boundingbox_Gray Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

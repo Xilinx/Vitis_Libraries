@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.FAST_RO_NMS", 
+    "name": "Xilinx Fast_Ro_Nms Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.PHASE_NO_DEG", 
+    "name": "Xilinx Phase_No_Deg Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

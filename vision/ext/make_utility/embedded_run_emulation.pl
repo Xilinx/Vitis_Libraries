@@ -108,7 +108,7 @@ $exp-> send( "$EXECUTABLE\r");
 #| Check for finish of the host app:
 #while ($j<20)
 #{
-if( $exp-> expect(int($delay)*60, "Embedded host run completed" )) {
+if( $exp-> expect(int($delay)*45, "Embedded host run completed" )) {
     $k=1;
     #last;
 }
@@ -127,7 +127,14 @@ if($k==1) {
     #last;
 } else {
     print "\nERROR: Host application did not complete - pass/end string not found. Exiting as a failure\n";
+    $exp-> send("\x01");
+    sleep(2);
+    $exp-> send("x");
+    sleep(5);
+    $exp->soft_close();
+    sleep(5);
     $exit_val=1;
+    exit($exit_val);
   }
 #if($j==3)
 #{
@@ -152,12 +159,19 @@ if($k==1) {
 print "\nINFO: Exiting QEMU \n";
 sleep(1);
 print "\nINFO: Running reboot \n";
-$exp->send("reboot\r");
+my $start_time = time();
+$exp->send("reboot -f\r");
 
-if( $exp-> expect(300, '-re', "Emulation ran successfully" )) {
+if( $exp-> expect(600, '-re', "Emulation ran successfully" )) {
+    my $end_time = time();
+    my $diff_time = $end_time - $start_time;
+    print "INFO: Found reboot finishing string. Reboot took: ${diff_time} seconds.\n";
     sleep(20);
     $exp->soft_close();
+} else {
+    print "\nWARNING: Reboot did not finish in 10mins.\n";
 }
+
 
 #sleep(120);
 #$exp->soft_close();

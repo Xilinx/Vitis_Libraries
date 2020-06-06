@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.accumulate_weighted_NO_RGBA", 
+    "name": "Xilinx Accumulate_Weighted_No_Rgba Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

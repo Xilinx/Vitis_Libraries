@@ -17,5 +17,4 @@
 #define NO 1 // Normal Operation
 #define RO 0 // Resource Optimized
 
-#define GRAY 	1
-
+#define GRAY 1

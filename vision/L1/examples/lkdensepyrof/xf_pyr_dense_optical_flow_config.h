@@ -37,11 +37,11 @@
 #define NPPC XF_NPPC1
 
 void pyr_dense_optical_flow_pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-                    ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                    int in_rows,
-                    int in_cols,
-                    int out_rows,
-                    int out_cols);
+                                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                                           int in_rows,
+                                           int in_cols,
+                                           int out_rows,
+                                           int out_cols);
 
 void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
                                   ap_uint<INPUT_PTR_WIDTH>* _next_image,
@@ -59,6 +59,5 @@ void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
                                   int flow_cols,
                                   int flow_iter_rows,
                                   int flow_iter_cols);
-
 
 #endif

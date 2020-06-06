@@ -549,7 +549,23 @@ void xFSGBMoptimization(hls::stream<ap_uint<8> > _cost[PU],
     uint8_t store_lr_for_min[R][PU];
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=store_lr_for_min complete dim=0
-// clang-format on
+    // clang-format on
+    for (int i = 0; i < R - 1; i++) {
+        for (int j = 0; j < NDISP; j++) {
+            for (int k = 0; k < COLS; k++) {
+                Lr[i][j][k] = 0;
+            }
+        }
+    }
+    for (int j = 0; j < NDISP; j++) {
+        Lr_r0[j] = 0;
+    }
+    for (int i = 0; i < R - 1; i++) {
+        for (int k = 0; k < COLS; k++) {
+            Lr_min[i][k] = 0;
+        }
+    }
+    tmp_Lr_min_post[0] = 0;
 
 loop_row:
     for (int ro = 0; ro < height; ro++) {
@@ -574,7 +590,7 @@ loop_row:
 // clang-format off
                 #pragma HLS PIPELINE II=2
                 #pragma HLS DEPENDENCE variable=Lr array intra false
-                #pragma HLS DEPENDENCE variable=Lr array inter false
+                //#pragma HLS DEPENDENCE variable=Lr array inter false
                 #pragma HLS DEPENDENCE variable=Lr_min array inter false
                 #pragma HLS LOOP_FLATTEN
                 // clang-format on
@@ -906,7 +922,7 @@ void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
     int width = _src_mat_l.cols;
     int dheight = _dst_mat.rows;
     int dwidth = _dst_mat.cols;
-    
+
     // Reading data from Mat to stream
     for (int i = 0; i < height; i++) {
 // clang-format off

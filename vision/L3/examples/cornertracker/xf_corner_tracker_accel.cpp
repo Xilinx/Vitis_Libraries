@@ -31,7 +31,7 @@ void cornerTracker(
 // clang-format off
     #pragma HLS INTERFACE s_axilite port=harris_rows     
     #pragma HLS INTERFACE s_axilite port=harris_cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     uint16_t Thresh = params[1];

@@ -90,7 +90,7 @@ ap_fixed<IT_WIDTH, IT_INT> findIntensity(unsigned char lineBuffer[NUM_LINES + 1]
         ap_uint<8> i2 = 0;
         ap_uint<8> i3 = 0;
         i0 = lineBuffer[b0][lx0];
-       i1 = lineBuffer[b0][lx1];
+        i1 = lineBuffer[b0][lx1];
         i2 = lineBuffer[b1][lx0];
         i3 = lineBuffer[b1][lx1];
         *fi0 = i0;
@@ -125,8 +125,8 @@ template <unsigned short MAXHEIGHT,
           int RMAPPX_WIDTH,
           int RMAPPX_INT,
           bool USE_URAM>
-void findGradients(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1> &currImg3,
-                   xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1> &nextImg,
+void findGradients(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& currImg3,
+                   xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& nextImg,
                    hls::stream<ap_fixed<IT_WIDTH, IT_INT> >& strmIt,
                    hls::stream<ap_int<9> >& strmIx,
                    hls::stream<ap_int<9> >& strmIy,
@@ -236,7 +236,7 @@ L3:
                 if (j < cols) {
                     if (i < rows - totalLinesInBuffer / 2) {
                         lineBuffer[lineStore][j] = nextImg.read(read_nxtimg);
-						
+
                         read_nxtimg++;
                         // lineBuffer[lineStore][j] = *(nextImg + (i+(totalLinesInBuffer/2))*cols + j);
                     }

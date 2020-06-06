@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.GC_2PIXEL", 
+    "name": "Xilinx Gc_2Pixel Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

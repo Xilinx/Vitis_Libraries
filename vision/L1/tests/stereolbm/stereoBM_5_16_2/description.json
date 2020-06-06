@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.stereoBM_5_16_2", 
+    "name": "Xilinx Stereobm_5_16_2 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

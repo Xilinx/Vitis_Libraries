@@ -29,7 +29,7 @@ void svm_accel(ap_uint<PTR_IN_WIDTH>* img_in1,
     #pragma HLS INTERFACE m_axi      port=params         offset=slave  bundle=gmem2
     #pragma HLS INTERFACE m_axi      port=fractional_out offset=slave  bundle=gmem3
     #pragma HLS INTERFACE m_axi      port=result_out     offset=slave  bundle=gmem4
-    #pragma HLS INTERFACE s_axilite  port=return 			           
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPC1> imgInput1;

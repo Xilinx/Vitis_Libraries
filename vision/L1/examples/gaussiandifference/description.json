@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.gaussiandifference.build", 
+    "name": "Xilinx Gaussiandifference Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

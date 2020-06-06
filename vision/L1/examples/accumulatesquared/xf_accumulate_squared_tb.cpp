@@ -84,9 +84,10 @@ int main(int argc, char** argv) {
     // Write OpenCV reference output
     cv::imwrite("out_ocv.jpg", ocv_ref);
 
-	//Call the top function
-	accumulate_squared((ap_uint<INPUT_PTR_WIDTH> *)in_gray.data, (ap_uint<INPUT_PTR_WIDTH> *)in_gray1.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_gray.data, height, width);
-	
+    // Call the top function
+    accumulate_squared((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray1.data,
+                       (ap_uint<OUTPUT_PTR_WIDTH>*)out_gray.data, height, width);
+
     // Write the output
     cv::imwrite("out_hls.jpg", out_gray);
     out_gray.convertTo(inout_gray1, CV_32FC1);

@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 #include <set>
-#include <sstream> 
+#include <sstream>
 #include <assert.h>
 
 // Image Dimensions
@@ -29,29 +29,29 @@ int main(int argc, char** argv) {
 const std::string gBenchFooter = R"INLINE_CODE(
 
     float err_per;
-    xf::cv::analyzeDiff(errImg0,ERROR_THRESHOLD,err_per);
+xf::cv::analyzeDiff(errImg0, ERROR_THRESHOLD, err_per);
 
-    if (err_per > 3.0f) {
-        printf("\n1st Image Test Failed\n");
-    }
+if (err_per > 3.0f) {
+    printf("\n1st Image Test Failed\n");
+}
 #if (IYUV2NV12 || RGBA2NV12 || RGBA2NV21 || UYVY2NV12 || YUYV2NV12 || NV122IYUV || NV212IYUV || IYUV2YUV4 || \
      NV122YUV4 || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV || YUYV2IYUV || NV122NV21 || NV212NV12)
-    xf::cv::analyzeDiff(errImg1,ERROR_THRESHOLD,err_per);
-    if (err_per > 3.0f) {
-        printf("\n2nd Image Test Failed\n");
-        return 1;
-    }
+xf::cv::analyzeDiff(errImg1, ERROR_THRESHOLD, err_per);
+if (err_per > 3.0f) {
+    printf("\n2nd Image Test Failed\n");
+    return 1;
+}
 
 #endif
 #if (IYUV2YUV4 || NV122IYUV || NV122YUV4 || NV212IYUV || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV || YUYV2IYUV)
-    xf::cv::analyzeDiff(errImg2,ERROR_THRESHOLD,err_per);
-    if (err_per > 3.0f) {
-        printf("\n3rd Image Test Failed\n");
-        return 1;
-    }
+xf::cv::analyzeDiff(errImg2, ERROR_THRESHOLD, err_per);
+if (err_per > 3.0f) {
+    printf("\n3rd Image Test Failed\n");
+    return 1;
+}
 #endif
-    /* ## *************************************************************** ##*/
-    return 0;
+/* ## *************************************************************** ##*/
+return 0;
 }
 )INLINE_CODE";
 
@@ -59,21 +59,18 @@ const std::string gCopyRight = R"INLINE_CODE(/*
  * Copyright 2019 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+*you may not use this file except in compliance with the License.*You may obtain a copy of the License at *
+        *http : // www.apache.org/licenses/LICENSE-2.0
+                **Unless required by applicable law or
+    agreed to in writing,
+    software *distributed under the License is distributed on an "AS IS" BASIS,
+    *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or
+        implied.*See the License for the specific language governing permissions and*limitations under the License.*/
 
-)INLINE_CODE";
+    ) INLINE_CODE ";
 
-const std::string gHeaderConfig = R"INLINE_CODE(
+    const std::string gHeaderConfig = R "INLINE_CODE(
 #include "hls_stream.h"
 #include "ap_int.h"
 #include "xf_config_params.h"
@@ -86,10 +83,9 @@ const std::string gHeaderConfig = R"INLINE_CODE(
 // Has to be set when synthesizing
 #define _XF_SYNTHESIS_ 1
 
-// Image Dimensions
-static constexpr int WIDTH = 1920;
+    // Image Dimensions
+    static constexpr int WIDTH = 1920;
 static constexpr int HEIGHT = 1080;
-
 
 #if (IYUV2NV12 || NV122IYUV || NV212IYUV || NV122YUV4 || NV212YUV4 || UYVY2NV12 || UYVY2NV21 || YUYV2NV12 ||           \
      YUYV2NV21 || RGBA2NV12 || RGBA2NV21 || RGB2NV12 || RGB2NV21 || NV122RGBA || NV212RGB || NV212RGBA || NV122RGB ||  \
@@ -125,9 +121,8 @@ struct PortType {
     int ptr_width;
     int im_read_mode;
 
-    int channels()
-    {
-        char C = type[type.size()-1];
+    int channels() {
+        char C = type[type.size() - 1];
         std::stringstream ss;
         ss << C;
         int Cint;
@@ -135,28 +130,24 @@ struct PortType {
         return Cint;
     }
 
-    int bitwidth()
-    {
+    int bitwidth() {
         int i = 3;
         int width = 0;
-        while((type[i] >= '0') && (type[i] <= '9'))
-        {
-            width = 10*width + (type[i] - '0');
+        while ((type[i] >= '0') && (type[i] <= '9')) {
+            width = 10 * width + (type[i] - '0');
             i++;
         }
         return width;
     }
 
-    std::string ptrwidth()
-    {
+    std::string ptrwidth() {
         std::stringstream ss;
         ss << ptr_width << "*" << npc;
         return ss.str();
     }
 };
 
-std::ostream& operator<<(std::ostream &out, const PortType &type)
-{
+std::ostream& operator<<(std::ostream& out, const PortType& type) {
     out << type.type << ", " << type.height << ", " << type.width << ", " << type.npc;
     return out;
 }
@@ -166,119 +157,110 @@ struct ImgType {
     std::vector<PortType> portVec;
 };
 
-//1 Port
-                                 /* type         cv type     height    width    npc    ptr_width cv::imread parameter*/
-static ImgType BGR   = {"BGR"   ,{{"XF_8UC3"  , "CV_8UC3" , "HEIGHT" ,"WIDTH" ,"NPC1", 32,  1}}};
-static ImgType GRAY  = {"GRAY"  ,{{"XF_8UC1"  , "CV_8UC1" , "HEIGHT" ,"WIDTH" ,"NPC1",  8,  0}}};
-static ImgType HLS   = {"HLS"   ,{{"XF_8UC3"  , "CV_8UC3" , "HEIGHT" ,"WIDTH" ,"NPC1", 32,  1}}};
-static ImgType HSV   = {"HSV"   ,{{"XF_8UC3"  , "CV_8UC3" , "HEIGHT" ,"WIDTH" ,"NPC1", 32,  1}}};
-static ImgType RGB   = {"RGB"   ,{{"XF_8UC3"  , "CV_8UC3" , "HEIGHT" ,"WIDTH" ,"NPC1", 32,  1}}};
-static ImgType RGBA  = {"RGBA"  ,{{"XF_8UC4"  , "CV_8UC4" , "HEIGHT" ,"WIDTH" ,"NPC1", 32,  1}}};
-static ImgType UYVY  = {"UYVY"  ,{{"XF_16UC1" , "CV_16UC1", "HEIGHT" ,"WIDTH" ,"NPC1", 16, -1}}};
-static ImgType XYZ   = {"XYZ"   ,{{"XF_8UC3"  , "CV_8UC3" , "HEIGHT" ,"WIDTH" ,"NPC1", 32,  1}}};
-static ImgType YCRCB = {"YCrCb" ,{{"XF_8UC3"  , "CV_8UC3" , "HEIGHT" ,"WIDTH" ,"NPC1", 32,  1}}};
-static ImgType YUYV  = {"YUYV"  ,{{"XF_16UC1" , "CV_16UC1", "HEIGHT" ,"WIDTH" ,"NPC1", 16, -1}}};
+// 1 Port
+/* type         cv type     height    width    npc    ptr_width cv::imread parameter*/
+static ImgType BGR = {"BGR", {{"XF_8UC3", "CV_8UC3", "HEIGHT", "WIDTH", "NPC1", 32, 1}}};
+static ImgType GRAY = {"GRAY", {{"XF_8UC1", "CV_8UC1", "HEIGHT", "WIDTH", "NPC1", 8, 0}}};
+static ImgType HLS = {"HLS", {{"XF_8UC3", "CV_8UC3", "HEIGHT", "WIDTH", "NPC1", 32, 1}}};
+static ImgType HSV = {"HSV", {{"XF_8UC3", "CV_8UC3", "HEIGHT", "WIDTH", "NPC1", 32, 1}}};
+static ImgType RGB = {"RGB", {{"XF_8UC3", "CV_8UC3", "HEIGHT", "WIDTH", "NPC1", 32, 1}}};
+static ImgType RGBA = {"RGBA", {{"XF_8UC4", "CV_8UC4", "HEIGHT", "WIDTH", "NPC1", 32, 1}}};
+static ImgType UYVY = {"UYVY", {{"XF_16UC1", "CV_16UC1", "HEIGHT", "WIDTH", "NPC1", 16, -1}}};
+static ImgType XYZ = {"XYZ", {{"XF_8UC3", "CV_8UC3", "HEIGHT", "WIDTH", "NPC1", 32, 1}}};
+static ImgType YCRCB = {"YCrCb", {{"XF_8UC3", "CV_8UC3", "HEIGHT", "WIDTH", "NPC1", 32, 1}}};
+static ImgType YUYV = {"YUYV", {{"XF_16UC1", "CV_16UC1", "HEIGHT", "WIDTH", "NPC1", 16, -1}}};
 
-//2 Ports
-static ImgType NV12  = {"NV12"  ,{{"XF_8UC1"  , "CV_8UC1" , "HEIGHT"       ,"WIDTH"       , "NPC1",  8,  0},
-                                  {"XF_8UC2"  , "CV_16UC1", "(HEIGHT / 2)" ,"(WIDTH / 2)" , "NPC2", 16, -1}}};
+// 2 Ports
+static ImgType NV12 = {"NV12",
+                       {{"XF_8UC1", "CV_8UC1", "HEIGHT", "WIDTH", "NPC1", 8, 0},
+                        {"XF_8UC2", "CV_16UC1", "(HEIGHT / 2)", "(WIDTH / 2)", "NPC2", 16, -1}}};
 
-static ImgType NV21  = {"NV21"  ,{{"XF_8UC1"  , "CV_8UC1" , "HEIGHT"       ,"WIDTH"       , "NPC1",  8,  0},
-                                  {"XF_8UC2"  , "CV_16UC1", "(HEIGHT / 2)" ,"(WIDTH / 2)" , "NPC2", 16, -1}}};
+static ImgType NV21 = {"NV21",
+                       {{"XF_8UC1", "CV_8UC1", "HEIGHT", "WIDTH", "NPC1", 8, 0},
+                        {"XF_8UC2", "CV_16UC1", "(HEIGHT / 2)", "(WIDTH / 2)", "NPC2", 16, -1}}};
 
-//3 Ports
-static ImgType IYUV  = {"IYUV", {{"XF_8UC1" , "CV_8UC1", "HEIGHT"       ,"WIDTH" ,"NPC1", 8, 0},
-                                 {"XF_8UC1" , "CV_8UC1", "(HEIGHT / 4)" ,"WIDTH" ,"NPC1", 8, 0},
-                                 {"XF_8UC1" , "CV_8UC1", "(HEIGHT / 4)" ,"WIDTH" ,"NPC1", 8, 0}}};
+// 3 Ports
+static ImgType IYUV = {"IYUV",
+                       {{"XF_8UC1", "CV_8UC1", "HEIGHT", "WIDTH", "NPC1", 8, 0},
+                        {"XF_8UC1", "CV_8UC1", "(HEIGHT / 4)", "WIDTH", "NPC1", 8, 0},
+                        {"XF_8UC1", "CV_8UC1", "(HEIGHT / 4)", "WIDTH", "NPC1", 8, 0}}};
 
-static ImgType YUV4  = {"YUV4", {{"XF_8UC1" , "CV_8UC1", "HEIGHT" ,"WIDTH" ,"NPC1", 8, 0},
-                                 {"XF_8UC1" , "CV_8UC1", "HEIGHT" ,"WIDTH" ,"NPC1", 8, 0},
-                                 {"XF_8UC1" , "CV_8UC1", "HEIGHT" ,"WIDTH" ,"NPC1", 8, 0}}};
+static ImgType YUV4 = {"YUV4",
+                       {{"XF_8UC1", "CV_8UC1", "HEIGHT", "WIDTH", "NPC1", 8, 0},
+                        {"XF_8UC1", "CV_8UC1", "HEIGHT", "WIDTH", "NPC1", 8, 0},
+                        {"XF_8UC1", "CV_8UC1", "HEIGHT", "WIDTH", "NPC1", 8, 0}}};
 
 std::string tolower(std::string data) {
-    std::transform(data.begin(), data.end(), data.begin(),
-                [](unsigned char c){ return std::tolower(c); });
+    std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c) { return std::tolower(c); });
     return data;
 }
 
-struct comp { 
-    bool operator() (const std::string& lhs, const std::string& rhs) const {
-        return  tolower(lhs) < tolower(rhs);
-    }
+struct comp {
+    bool operator()(const std::string& lhs, const std::string& rhs) const { return tolower(lhs) < tolower(rhs); }
 };
 
-static std::map<std::string,ImgType,comp> ports;
-void initPorts()
-{
-    ports[BGR.name]   = BGR;
-    ports[GRAY.name]  = GRAY;
-    ports[HLS.name]   = HLS;
-    ports[HSV.name]   = HSV;
-    ports[RGB.name]   = RGB;
-    ports[RGBA.name]  = RGBA;
-    ports[UYVY.name]  = UYVY;
-    ports[XYZ.name]   = XYZ;
+static std::map<std::string, ImgType, comp> ports;
+void initPorts() {
+    ports[BGR.name] = BGR;
+    ports[GRAY.name] = GRAY;
+    ports[HLS.name] = HLS;
+    ports[HSV.name] = HSV;
+    ports[RGB.name] = RGB;
+    ports[RGBA.name] = RGBA;
+    ports[UYVY.name] = UYVY;
+    ports[XYZ.name] = XYZ;
     ports[YCRCB.name] = YCRCB;
-    ports[YUYV.name]  = YUYV;
+    ports[YUYV.name] = YUYV;
 
-    ports[NV12.name]  = NV12;
-    ports[NV21.name]  = NV21;
+    ports[NV12.name] = NV12;
+    ports[NV21.name] = NV21;
 
-    ports[IYUV.name]  = IYUV;
-    ports[YUV4.name]  = YUV4;
+    ports[IYUV.name] = IYUV;
+    ports[YUV4.name] = YUV4;
 }
 
-std::vector<std::string> merge(ImgType A, ImgType B)
-{
-    //Currently only 4 parameters are passed to XF::CV call.
-    //Of theese 4 parameters 1st (Image type) and 4rth (NPC) only need merging
-    //2nd (HIEGHT) and 3rd(WIDTH) are passed as is
+std::vector<std::string> merge(ImgType A, ImgType B) {
+    // Currently only 4 parameters are passed to XF::CV call.
+    // Of theese 4 parameters 1st (Image type) and 4rth (NPC) only need merging
+    // 2nd (HIEGHT) and 3rd(WIDTH) are passed as is
     std::vector<std::string> ret;
     std::set<std::string> unqSetA;
-    //Merge types
-    for(int j = 0; j < A.portVec.size(); j++)
-    {
-        if(A.portVec.size() == 1) 
+    // Merge types
+    for (int j = 0; j < A.portVec.size(); j++) {
+        if (A.portVec.size() == 1)
             ret.push_back(A.portVec[j].type);
-        else if(unqSetA.find(A.portVec[j].type) == unqSetA.end())
-        {
+        else if (unqSetA.find(A.portVec[j].type) == unqSetA.end()) {
             ret.push_back(A.portVec[j].type);
             unqSetA.insert(A.portVec[j].type);
         }
     }
 
-    for(int j = 0; j < B.portVec.size(); j++)
-    {
-        if(B.portVec.size() == 1) 
+    for (int j = 0; j < B.portVec.size(); j++) {
+        if (B.portVec.size() == 1)
             ret.push_back(B.portVec[j].type);
-        else if(unqSetA.find(B.portVec[j].type) == unqSetA.end())
-        {
+        else if (unqSetA.find(B.portVec[j].type) == unqSetA.end()) {
             ret.push_back(B.portVec[j].type);
             unqSetA.insert(B.portVec[j].type);
         }
     }
-    
-    //HEIGHT
+
+    // HEIGHT
     ret.push_back(A.portVec[0].height);
 
-    //WIDTH
+    // WIDTH
     ret.push_back(A.portVec[0].width);
 
-    //Merge NPC
+    // Merge NPC
     std::set<std::string> unqSet;
-    for(int j = 0; j < A.portVec.size(); j++)
-    {
-        if(unqSet.find(A.portVec[j].npc) == unqSet.end())
-        {
+    for (int j = 0; j < A.portVec.size(); j++) {
+        if (unqSet.find(A.portVec[j].npc) == unqSet.end()) {
             ret.push_back(A.portVec[j].npc);
             unqSet.insert(A.portVec[j].npc);
         }
     }
 
-    for(int j = 0; j < B.portVec.size(); j++)
-    {
-        if(unqSet.find(B.portVec[j].npc) == unqSet.end())
-        {
+    for (int j = 0; j < B.portVec.size(); j++) {
+        if (unqSet.find(B.portVec[j].npc) == unqSet.end()) {
             ret.push_back(B.portVec[j].npc);
             unqSet.insert(B.portVec[j].npc);
         }
@@ -289,16 +271,12 @@ std::vector<std::string> merge(ImgType A, ImgType B)
 
 long gnIndent = 0;
 template <typename T>
-void printIndent(T& ofs)
-{
-    for(int i = 0; i < gnIndent; i++)
-        ofs << " ";
+void printIndent(T& ofs) {
+    for (int i = 0; i < gnIndent; i++) ofs << " ";
 }
 
-void printVitisDepthExpr(ImgType In, bool bFrom, std::ofstream& ofs)
-{
-    for(int i = 0; i < In.portVec.size(); i++)
-    {
+void printVitisDepthExpr(ImgType In, bool bFrom, std::ofstream& ofs) {
+    for (int i = 0; i < In.portVec.size(); i++) {
         gnIndent = 4;
         printIndent(ofs);
         gnIndent = 0;
@@ -316,7 +294,7 @@ void printVitisDepthExpr(ImgType In, bool bFrom, std::ofstream& ofs)
         sdepth += ")";
 
         ofs << "static constexpr int __XF_DEPTH";
-        if(bFrom)
+        if (bFrom)
             ofs << "_INP";
         else
             ofs << "_OUT";
@@ -325,31 +303,31 @@ void printVitisDepthExpr(ImgType In, bool bFrom, std::ofstream& ofs)
     }
 }
 
-void printVitisPortPragma(ImgType In, bool bFrom, std::ofstream& ofs)
-{
-    for(int i = 0; i < In.portVec.size(); i++)
-    {
+void printVitisPortPragma(ImgType In, bool bFrom, std::ofstream& ofs) {
+    for (int i = 0; i < In.portVec.size(); i++) {
         gnIndent = 4;
         printIndent(ofs);
         gnIndent = 0;
 
         ofs << "#pragma HLS INTERFACE m_axi      port=";
         std::ostringstream name;
-        if(bFrom) name << "imgInput";
-        else name << "imgOutput";
-        if(In.portVec.size() > 1) name << i;
+        if (bFrom)
+            name << "imgInput";
+        else
+            name << "imgOutput";
+        if (In.portVec.size() > 1) name << i;
 
         ofs << name.str();
         gnIndent = (12 - name.str().size());
         printIndent(ofs);
         gnIndent = 0;
-        if(bFrom)
+        if (bFrom)
             ofs << "offset=slave  bundle=gmem_in" << i << "  depth=";
         else
             ofs << "offset=slave  bundle=gmem_out" << i << " depth=";
 
         ofs << "__XF_DEPTH";
-        if(bFrom)
+        if (bFrom)
             ofs << "_INP";
         else
             ofs << "_OUT";
@@ -357,8 +335,7 @@ void printVitisPortPragma(ImgType In, bool bFrom, std::ofstream& ofs)
         ofs << std::endl;
     }
 
-    if(!bFrom)
-    {
+    if (!bFrom) {
         gnIndent = 4;
         printIndent(ofs);
         ofs << "#pragma HLS INTERFACE s_axilite  port=return" << std::endl;
@@ -367,11 +344,9 @@ void printVitisPortPragma(ImgType In, bool bFrom, std::ofstream& ofs)
 }
 
 /* This function generates port for accel function*/
-void printPort(ImgType In, bool bFrom, std::ostringstream& ss)
-{
-    for(int i = 0; i < In.portVec.size(); i++)
-    {
-        if((!bFrom) || (i != 0)) printIndent(ss);
+void printPort(ImgType In, bool bFrom, std::ostringstream& ss) {
+    for (int i = 0; i < In.portVec.size(); i++) {
+        if ((!bFrom) || (i != 0)) printIndent(ss);
 
 #ifdef VITIS
         ss << "ap_uint<";
@@ -381,10 +356,12 @@ void printPort(ImgType In, bool bFrom, std::ostringstream& ss)
         ss << "xf::cv::Mat<";
         ss << In.portVec[i] << ">& ";
 #endif
-        if(bFrom) ss << "imgInput";
-        else ss << "imgOutput";
+        if (bFrom)
+            ss << "imgInput";
+        else
+            ss << "imgOutput";
 
-        if(In.portVec.size() > 1) ss << i;
+        if (In.portVec.size() > 1) ss << i;
         ss << ",\n";
     }
 }
@@ -392,12 +369,9 @@ void printPort(ImgType In, bool bFrom, std::ostringstream& ss)
 /*This function when called with bDecl = true generates local xf::cv::Mat declarations for Vitis flow
  * When called with bDecl = false generates the formal arguements for xf::cv::<CVT function>
  */
-void printPortUsage_VitisDecl(ImgType In, bool bFrom, bool bDecl, std::ofstream& ofs)
-{
-    for(int i = 0; i < In.portVec.size(); i++)
-    {
-        if(bDecl)
-        {
+void printPortUsage_VitisDecl(ImgType In, bool bFrom, bool bDecl, std::ofstream& ofs) {
+    for (int i = 0; i < In.portVec.size(); i++) {
+        if (bDecl) {
 #ifdef VITIS
             gnIndent = 4;
             printIndent(ofs);
@@ -405,7 +379,7 @@ void printPortUsage_VitisDecl(ImgType In, bool bFrom, bool bDecl, std::ofstream&
             ofs << "xf::cv::Mat<";
             ofs << In.portVec[i] << "> ";
 #else
-            assert(bDecl == false); //for non vitis code gen, bdecl should never be true
+            assert(bDecl == false); // for non vitis code gen, bdecl should never be true
 #endif
         }
 
@@ -413,38 +387,36 @@ void printPortUsage_VitisDecl(ImgType In, bool bFrom, bool bDecl, std::ofstream&
 #ifdef VITIS
         name << "_";
 #endif
-        if(bFrom) name << "imgInput";
-        else name << "imgOutput";
-        if(In.portVec.size() > 1) name << i;
+        if (bFrom)
+            name << "imgInput";
+        else
+            name << "imgOutput";
+        if (In.portVec.size() > 1) name << i;
 
         ofs << name.str();
-        if(bDecl)
-        {
+        if (bDecl) {
 #ifdef VITIS
-            ofs << "(" << In.portVec[i].height << ", " << In.portVec[i].width <<  ");";
+            ofs << "(" << In.portVec[i].height << ", " << In.portVec[i].width << ");";
 #else
             ofs << ",";
 #endif
             ofs << std::endl;
-        }
-        else
+        } else
             ofs << ", ";
     }
 }
 
 /*This function generates conversion functions from ap_unit<> to xf::cv::Mat*/
-void printConversions(ImgType In, bool bFrom, std::ofstream& ofs)
-{
+void printConversions(ImgType In, bool bFrom, std::ofstream& ofs) {
 #ifndef VITIS
-    assert(0); //Function meant for only VITIS
+    assert(0); // Function meant for only VITIS
 #endif
 
-    for(int i = 0; i < In.portVec.size(); i++)
-    {
+    for (int i = 0; i < In.portVec.size(); i++) {
         gnIndent = 4;
         printIndent(ofs);
         gnIndent = 0;
-        if(bFrom)
+        if (bFrom)
             ofs << "xf::cv::Array2xfMat<";
         else
             ofs << "xf::cv::xfMat2Array<";
@@ -454,23 +426,19 @@ void printConversions(ImgType In, bool bFrom, std::ofstream& ofs)
         ofs << ">";
 
         ofs << "(";
-        //Arguements
+        // Arguements
         std::ostringstream name_src;
         std::ostringstream name_dst;
 
-        if(bFrom)
-        {
+        if (bFrom) {
             name_src << "imgInput";
             name_dst << "_imgInput";
-        }
-        else
-        {
+        } else {
             name_src << "_imgOutput";
             name_dst << "imgOutput";
         }
 
-        if(In.portVec.size() > 1)
-        {
+        if (In.portVec.size() > 1) {
             name_src << i;
             name_dst << i;
         }
@@ -480,10 +448,8 @@ void printConversions(ImgType In, bool bFrom, std::ofstream& ofs)
     }
 }
 
-void printErrorImageInBench(ImgType In, std::ofstream& ofs)
-{
-    for(int i = 0; i < In.portVec.size(); i++)
-    {
+void printErrorImageInBench(ImgType In, std::ofstream& ofs) {
+    for (int i = 0; i < In.portVec.size(); i++) {
         std::stringstream ss;
         ss << "errImg" << i;
 
@@ -493,13 +459,12 @@ void printErrorImageInBench(ImgType In, std::ofstream& ofs)
         ofs << "cv::Size S" << i << "(" << In.portVec[i].width << ", " << In.portVec[i].height << ");" << std::endl;
 
         printIndent(ofs);
-        ofs << name <<  ".create(S" << i << ", " << In.portVec[i].cv_type << ");" << std::endl;
+        ofs << name << ".create(S" << i << ", " << In.portVec[i].cv_type << ");" << std::endl;
         gnIndent = 0;
     }
 }
 
-void printInputOrRefImageInBench(int& i, const std::string name, PortType port, std::ofstream& ofs)
-{
+void printInputOrRefImageInBench(int& i, const std::string name, PortType port, std::ofstream& ofs) {
     gnIndent = 4;
     printIndent(ofs);
 
@@ -530,12 +495,10 @@ bool gbDisableRGBToBGR = false;
  * HLS2RGB
  * HSV2RGB
  */
-void printImageInBench(ImgType In, bool bRef, int& argCnt, std::ofstream& ofs)
-{
-    for(int i = 0; i < In.portVec.size(); i++)
-    {
+void printImageInBench(ImgType In, bool bRef, int& argCnt, std::ofstream& ofs) {
+    for (int i = 0; i < In.portVec.size(); i++) {
         std::stringstream ss;
-        if(bRef)
+        if (bRef)
             ss << "refOutput" << i;
         else
             ss << "imgInput" << i;
@@ -545,15 +508,11 @@ void printImageInBench(ImgType In, bool bRef, int& argCnt, std::ofstream& ofs)
         argCnt++;
 
         gnIndent = 4;
-        if(bRef == false)
-        {
-            if(In.name == "RGBA")
-            {      
+        if (bRef == false) {
+            if (In.name == "RGBA") {
                 printIndent(ofs);
                 ofs << "cvtColor(" << name << ", " << name << ", CV_BGR2RGBA);" << std::endl;
-            }
-            else if((gbDisableRGBToBGR == false) && (In.name == "RGB"))
-            {
+            } else if ((gbDisableRGBToBGR == false) && (In.name == "RGB")) {
                 printIndent(ofs);
                 ofs << "cvtColor(" << name << ", " << name << ", CV_BGR2RGB);" << std::endl;
             }
@@ -565,23 +524,18 @@ void printImageInBench(ImgType In, bool bRef, int& argCnt, std::ofstream& ofs)
         std::string type_str = tss.str();
 
         std::stringstream new_name_ss;
-        if(bRef)
+        if (bRef)
             new_name_ss << "_imgOutput" << i;
         else
             new_name_ss << "_imgInput" << i;
         std::string new_name = new_name_ss.str();
 
-        ofs << type_str << "* " << new_name
-            << " = "
+        ofs << type_str << "* " << new_name << " = "
             << "(" << type_str << " *)";
-        if(bRef)
-        {
-            ofs << "malloc("
-                << In.portVec[i].height << "*" << In.portVec[i].width << "*" << In.portVec[i].ptr_width
+        if (bRef) {
+            ofs << "malloc(" << In.portVec[i].height << "*" << In.portVec[i].width << "*" << In.portVec[i].ptr_width
                 << ");" << std::endl;
-        }
-        else
-        {
+        } else {
             ofs << name << ".data;" << std::endl;
         }
         gnIndent = 0;
@@ -589,47 +543,35 @@ void printImageInBench(ImgType In, bool bRef, int& argCnt, std::ofstream& ofs)
     }
 }
 
-void printOutputImageInBench(ImgType In, std::ofstream& ofs)
-{
+void printOutputImageInBench(ImgType In, std::ofstream& ofs) {
     ofs << std::endl;
-    for(int i = 0; i < In.portVec.size(); i++)
-    {
+    for (int i = 0; i < In.portVec.size(); i++) {
         std::stringstream ss;
         ss << "imgOutput" << i;
         std::string name = ss.str();
 
         gnIndent = 4;
         printIndent(ofs);
-        ofs << "cv::Mat "
-            << name
-            << "("
-            << In.portVec[i].height
-            <<", "
-            << In.portVec[i].width
-            <<", "
-            << In.portVec[i].cv_type
-            << ");" << std::endl;
+        ofs << "cv::Mat " << name << "(" << In.portVec[i].height << ", " << In.portVec[i].width << ", "
+            << In.portVec[i].cv_type << ");" << std::endl;
         gnIndent = 0;
     }
 }
 
-void printCall(ImgType From, ImgType To, std::ofstream& ofs)
-{
+void printCall(ImgType From, ImgType To, std::ofstream& ofs) {
     ofs << std::endl;
     std::ostringstream funcCall;
     funcCall << "cvtcolor_" << tolower(From.name) << "2" << tolower(To.name);
 
     funcCall << "(";
-    for(int i = 0; i < From.portVec.size(); i++)
-    {
+    for (int i = 0; i < From.portVec.size(); i++) {
         std::stringstream ss;
         ss << "_imgInput" << i;
 
         funcCall << ss.str() << ", ";
     }
 
-    for(int i = 0; i < To.portVec.size(); i++)
-    {
+    for (int i = 0; i < To.portVec.size(); i++) {
         std::stringstream ss;
         ss << "_imgOutput" << i;
 
@@ -638,7 +580,7 @@ void printCall(ImgType From, ImgType To, std::ofstream& ofs)
 
     long nPos = funcCall.tellp();
     funcCall.seekp(nPos - 2);
-    funcCall.write(");",2);
+    funcCall.write(");", 2);
 
     gnIndent = 4;
     printIndent(ofs);
@@ -647,11 +589,9 @@ void printCall(ImgType From, ImgType To, std::ofstream& ofs)
     gnIndent = 0;
 }
 
-void printDiff(ImgType To, std::ofstream& ofs)
-{
+void printDiff(ImgType To, std::ofstream& ofs) {
     ofs << std::endl;
-    for(int i = 0; i < To.portVec.size(); i++)
-    {
+    for (int i = 0; i < To.portVec.size(); i++) {
         std::stringstream refss;
         std::stringstream outss;
         std::stringstream errss;
@@ -667,10 +607,8 @@ void printDiff(ImgType To, std::ofstream& ofs)
     }
 }
 
-void printOutputs(ImgType To, std::ofstream& ofs)
-{
-    for(int i = 0; i < To.portVec.size(); i++)
-    {
+void printOutputs(ImgType To, std::ofstream& ofs) {
+    for (int i = 0; i < To.portVec.size(); i++) {
         std::stringstream ss;
         ss << "imgOutput" << i;
 
@@ -680,13 +618,10 @@ void printOutputs(ImgType To, std::ofstream& ofs)
         gnIndent = 4;
         printIndent(ofs);
         ofs << name1 << ".data = (unsigned char*)" << name2 << ";" << std::endl;
-        if(To.name == "RGBA")
-        {
+        if (To.name == "RGBA") {
             printIndent(ofs);
             ofs << "cvtColor(" << name1 << ", " << name1 << ", CV_RGBA2BGR);" << std::endl;
-        }
-        else if(To.name == "RGB")
-        {
+        } else if (To.name == "RGB") {
             printIndent(ofs);
             ofs << "cvtColor(" << name1 << ", " << name1 << ", CV_RGB2BGR);" << std::endl;
         }
@@ -694,11 +629,9 @@ void printOutputs(ImgType To, std::ofstream& ofs)
     ofs << std::endl;
 }
 
-void printImageWrite(ImgType To, bool bErr, std::ofstream& ofs)
-{
+void printImageWrite(ImgType To, bool bErr, std::ofstream& ofs) {
     ofs << std::endl;
-    for(int i = 0; i < To.portVec.size(); i++)
-    {
+    for (int i = 0; i < To.portVec.size(); i++) {
         std::stringstream ss;
         ss << "imgOutput" << i;
         std::string name1 = ss.str();
@@ -707,21 +640,23 @@ void printImageWrite(ImgType To, bool bErr, std::ofstream& ofs)
         printIndent(ofs);
         ofs << "cv::imwrite(";
         std::stringstream fss;
-        if(bErr) fss << "err_";
-        else     fss << "out_";
-        if((To.name == "NV12") || (To.name == "NV21"))
-        {
-            if(i == 0) fss << "Y";
-            else       fss << "UV";
-        }
-        else if((To.name == "IYUV") || (To.name == "YUV4"))
-        {
-            if(i == 0) fss << "Y";
-            else if(i == 1) fss << "U";
-            else fss << "V";
-        }
+        if (bErr)
+            fss << "err_";
         else
-        {
+            fss << "out_";
+        if ((To.name == "NV12") || (To.name == "NV21")) {
+            if (i == 0)
+                fss << "Y";
+            else
+                fss << "UV";
+        } else if ((To.name == "IYUV") || (To.name == "YUV4")) {
+            if (i == 0)
+                fss << "Y";
+            else if (i == 1)
+                fss << "U";
+            else
+                fss << "V";
+        } else {
             fss << To.name;
         }
         fss << ".png";
@@ -730,39 +665,29 @@ void printImageWrite(ImgType To, bool bErr, std::ofstream& ofs)
 }
 
 #ifdef VITIS
-int genBench(std::string& from, std::string& to, std::ofstream& ofs)
-{
-    std::map<std::string,ImgType,comp>::iterator it_from = ports.find(from);
-    std::map<std::string,ImgType,comp>::iterator it_to = ports.find(to);
+int genBench(std::string& from, std::string& to, std::ofstream& ofs) {
+    std::map<std::string, ImgType, comp>::iterator it_from = ports.find(from);
+    std::map<std::string, ImgType, comp>::iterator it_to = ports.find(to);
 
     bool bErr = false;
-    if(it_from == ports.end())
-    {
+    if (it_from == ports.end()) {
         std::cout << "Unrecognozed from target " << from << std::endl;
         bErr = true;
     }
 
-    if(it_to == ports.end())
-    {
+    if (it_to == ports.end()) {
         std::cout << "Unrecognozed to target " << from << std::endl;
         bErr = true;
     }
-    if(bErr) return -1;
-    
+    if (bErr) return -1;
 
-    //Code generator
+    // Code generator
     //#ifdef
     ofs << "#if " << it_from->first << "2" << it_to->first << std::endl;
     int argCnt = 1;
-    if(it_to->second.name == "RGB")
-    {
-        if((it_from->second.name == "BGR") ||
-           (it_from->second.name == "GRAY") ||
-           (it_from->second.name == "XYZ") ||
-           (it_from->second.name == "YCrCb") ||
-           (it_from->second.name == "HLS") ||
-           (it_from->second.name == "HSV")
-          )
+    if (it_to->second.name == "RGB") {
+        if ((it_from->second.name == "BGR") || (it_from->second.name == "GRAY") || (it_from->second.name == "XYZ") ||
+            (it_from->second.name == "YCrCb") || (it_from->second.name == "HLS") || (it_from->second.name == "HSV"))
             gbDisableRGBToBGR = true;
         else
             gbDisableRGBToBGR = false;
@@ -783,31 +708,27 @@ int genBench(std::string& from, std::string& to, std::ofstream& ofs)
 }
 #endif
 
-int genCode(std::string& from, std::string& to, std::ofstream& ofs, std::ofstream& ofs_h)
-{
-    std::map<std::string,ImgType,comp>::iterator it_from = ports.find(from);
-    std::map<std::string,ImgType,comp>::iterator it_to = ports.find(to);
+int genCode(std::string& from, std::string& to, std::ofstream& ofs, std::ofstream& ofs_h) {
+    std::map<std::string, ImgType, comp>::iterator it_from = ports.find(from);
+    std::map<std::string, ImgType, comp>::iterator it_to = ports.find(to);
 
     bool bErr = false;
-    if(it_from == ports.end())
-    {
+    if (it_from == ports.end()) {
         std::cout << "Unrecognozed from target " << from << std::endl;
         bErr = true;
     }
 
-    if(it_to == ports.end())
-    {
+    if (it_to == ports.end()) {
         std::cout << "Unrecognozed to target " << from << std::endl;
         bErr = true;
     }
-    if(bErr) return -1;
-    
+    if (bErr) return -1;
 
-    //Code generator
+    // Code generator
     //#ifdef
-    ofs <<  "#if " << it_from->first << "2" << it_to->first << std::endl;
-    
-    //Function name
+    ofs << "#if " << it_from->first << "2" << it_to->first << std::endl;
+
+    // Function name
     std::ostringstream funcHeader;
     funcHeader << "void cvtcolor_";
     funcHeader << tolower(from);
@@ -815,58 +736,58 @@ int genCode(std::string& from, std::string& to, std::ofstream& ofs, std::ofstrea
     funcHeader << tolower(to);
     funcHeader << "(";
 
-    //Function ports
+    // Function ports
     gnIndent = funcHeader.str().size();
-    printPort(it_from->second,true,funcHeader);
-    printPort(it_to->second,false,funcHeader);
+    printPort(it_from->second, true, funcHeader);
+    printPort(it_to->second, false, funcHeader);
     gnIndent = 0;
     long nPos = funcHeader.tellp();
     funcHeader.seekp(nPos - 2);
-    funcHeader.write(");",2);
+    funcHeader.write(");", 2);
     ofs_h << funcHeader.str() << std::endl;
 
     funcHeader.seekp(nPos - 2);
-    funcHeader.write(") ",2);
+    funcHeader.write(") ", 2);
     ofs << funcHeader.str();
     ofs << "{" << std::endl;
 
 #ifdef VITIS
-    ofs << std::endl; 
-    printVitisDepthExpr(it_from->second,true,ofs);
-    printVitisDepthExpr(it_to->second,false,ofs);
-    ofs << std::endl; 
+    ofs << std::endl;
+    printVitisDepthExpr(it_from->second, true, ofs);
+    printVitisDepthExpr(it_to->second, false, ofs);
+    ofs << std::endl;
 
     gnIndent = 4;
     printIndent(ofs);
-    ofs << "//clang-format off" << std::endl;
+    ofs << "// clang-format off" << std::endl;
     gnIndent = 0;
-    printVitisPortPragma(it_from->second,true,ofs);
-    printVitisPortPragma(it_to->second,false,ofs);
+    printVitisPortPragma(it_from->second, true, ofs);
+    printVitisPortPragma(it_to->second, false, ofs);
 
     gnIndent = 4;
     printIndent(ofs);
-    ofs << "//clang-format on" << std::endl;
+    ofs << "// clang-format on" << std::endl;
     gnIndent = 0;
-    ofs << std::endl; 
+    ofs << std::endl;
 
-    printPortUsage_VitisDecl(it_from->second,true,true,ofs);
-    printPortUsage_VitisDecl(it_to->second,false,true,ofs);
+    printPortUsage_VitisDecl(it_from->second, true, true, ofs);
+    printPortUsage_VitisDecl(it_to->second, false, true, ofs);
     ofs << std::endl;
 #endif
 
-    //XF CV inner call #[
+    // XF CV inner call #[
     gnIndent = 4;
     printIndent(ofs);
-    ofs << "//clang-format off" << std::endl;
+    ofs << "// clang-format off" << std::endl;
     printIndent(ofs);
     ofs << "#pragma HLS DATAFLOW" << std::endl;
     printIndent(ofs);
-    ofs << "//clang-format on" << std::endl;
+    ofs << "// clang-format on" << std::endl;
     ofs << std::endl;
     gnIndent = 0;
 
 #ifdef VITIS
-    printConversions(it_from->second,true,ofs);
+    printConversions(it_from->second, true, ofs);
 #endif
 
     ofs << std::endl;
@@ -875,32 +796,30 @@ int genCode(std::string& from, std::string& to, std::ofstream& ofs, std::ofstrea
     gnIndent = 0;
     ofs << "xf::cv::" << tolower(from) << "2" << tolower(to) << "<";
     std::vector<std::string> mergeParam = merge(it_from->second, it_to->second);
-    for(int i = 0; i < mergeParam.size(); i++)
-    {
+    for (int i = 0; i < mergeParam.size(); i++) {
         ofs << mergeParam[i];
-        if(i < (mergeParam.size()-1)) ofs << ", ";
+        if (i < (mergeParam.size() - 1)) ofs << ", ";
     }
     ofs << ">";
 
     ofs << "(";
-    printPortUsage_VitisDecl(it_from->second,true,false,ofs);
-    printPortUsage_VitisDecl(it_to->second,false,false,ofs);
+    printPortUsage_VitisDecl(it_from->second, true, false, ofs);
+    printPortUsage_VitisDecl(it_to->second, false, false, ofs);
     nPos = ofs.tellp();
     ofs.seekp(nPos - 2);
-    ofs.write(");",2);
+    ofs.write(");", 2);
     ofs << std::endl;
     ofs << std::endl;
-    //#]
-    
+//#]
+
 #ifdef VITIS
-    printConversions(it_to->second,false,ofs);
+    printConversions(it_to->second, false, ofs);
 #endif
     ofs << "}" << std::endl;
     ofs << "#endif" << std::endl;
 }
 
-int main()
-{
+int main() {
     initPorts();
 
     std::string output_gen = "XF_CVT_COLOR_ACCEL_GEN";
@@ -912,51 +831,55 @@ int main()
     output_conf += "_VITIS";
     output_bench += "_VITIS";
 #endif
-    std::ifstream ifs("convConfigs",std::ifstream::in);
-    if(!ifs.is_open())
-    {
+    std::ifstream ifs("convConfigs", std::ifstream::in);
+    if (!ifs.is_open()) {
         std::cout << "Unable to open file convConfigs. Exiting ..." << std::endl;
         return -1;
     }
 
     std::string output_cpp = tolower(output_gen) + ".cpp";
     std::string output_h = tolower(output_conf) + ".h";
-    std::ofstream ofs(output_cpp.c_str(),std::ofstream::out);
-    std::ofstream ofs_h(output_h.c_str(),std::ofstream::out);
+    std::ofstream ofs(output_cpp.c_str(), std::ofstream::out);
+    std::ofstream ofs_h(output_h.c_str(), std::ofstream::out);
 
 #ifdef VITIS
     std::string output_bench_cpp = tolower(output_bench) + ".cpp";
-    std::ofstream ofs_bench(output_bench_cpp.c_str(),std::ofstream::out);
+    std::ofstream ofs_bench(output_bench_cpp.c_str(), std::ofstream::out);
 #endif
 
-    //Global comments and headers
+    // Global comments and headers
     ofs << gCopyRight;
-    ofs << "#include " << "\"" << output_h << "\"" << std::endl << std::endl;
+    ofs << "#include "
+        << "\"" << output_h << "\"" << std::endl
+        << std::endl;
 
     ofs_h << gCopyRight;
-    ofs_h << "#ifndef " << "_" << output_conf << "_H_" << std::endl;
-    ofs_h << "#define " << "_" << output_conf << "_H_" << std::endl;
+    ofs_h << "#ifndef "
+          << "_" << output_conf << "_H_" << std::endl;
+    ofs_h << "#define "
+          << "_" << output_conf << "_H_" << std::endl;
     ofs_h << gHeaderConfig;
 
 #ifdef VITIS
     ofs_bench << gCopyRight;
     ofs_bench << gBenchHeader;
-    ofs_bench << "#include " << "\"" << output_h << "\"" << std::endl << std::endl;
+    ofs_bench << "#include "
+              << "\"" << output_h << "\"" << std::endl
+              << std::endl;
     ofs_bench << gBenchMain;
 #endif
 
     int stat = 0;
     std::string line;
-    while(std::getline(ifs,line))
-    {
+    while (std::getline(ifs, line)) {
         std::stringstream ss(line);
         std::string from;
         std::string to;
         ss >> from >> to;
 
-        stat |= genCode(from,to,ofs,ofs_h);
+        stat |= genCode(from, to, ofs, ofs_h);
 #ifdef VITIS
-        stat |= genBench(from,to,ofs_bench);
+        stat |= genBench(from, to, ofs_bench);
 #endif
     }
 #ifdef VITIS

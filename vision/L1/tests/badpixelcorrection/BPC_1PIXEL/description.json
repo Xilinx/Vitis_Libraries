@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.BPC_1PIXEL", 
+    "name": "Xilinx Bpc_1Pixel Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

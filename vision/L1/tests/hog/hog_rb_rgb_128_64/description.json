@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.hog_rb_rgb_128_64", 
+    "name": "Xilinx Hog_Rb_Rgb_128_64 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

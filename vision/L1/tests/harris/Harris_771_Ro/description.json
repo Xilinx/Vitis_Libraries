@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.Harris_771_Ro", 
+    "name": "Xilinx Harris_771_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

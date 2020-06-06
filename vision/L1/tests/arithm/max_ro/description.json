@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.max_ro", 
+    "name": "Xilinx Max_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

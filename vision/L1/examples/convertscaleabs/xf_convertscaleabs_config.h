@@ -43,8 +43,11 @@
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
 
-
-void convertScaleAbs_accel( ap_uint<INPUT_PTR_WIDTH>* img_in, float scale, float shift, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width);
-
+void convertScaleAbs_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
+                           float scale,
+                           float shift,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           int height,
+                           int width);
 
 #endif //_XF_SCALE_CONFIG_H_

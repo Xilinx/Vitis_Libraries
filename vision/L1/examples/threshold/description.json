@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.threshold.build", 
+    "name": "Xilinx Threshold Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

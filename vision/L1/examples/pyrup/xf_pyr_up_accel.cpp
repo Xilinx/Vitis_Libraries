@@ -16,9 +16,9 @@
 
 #include "xf_pyr_up_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC_T))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(2*HEIGHT*2*WIDTH*(XF_PIXELWIDTH(TYPE,NPC_T))/8) / (OUTPUT_PTR_WIDTH/8);
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC_T)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT =
+    (2 * HEIGHT * 2 * WIDTH * (XF_PIXELWIDTH(TYPE, NPC_T)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void pyr_up_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                   ap_uint<OUTPUT_PTR_WIDTH>* img_out,

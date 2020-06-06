@@ -66,10 +66,10 @@ int main(int argc, char** argv) {
 
     // enable this if the above code is obsolete
     cv::Ptr<cv::StereoBM> stereobm = cv::StereoBM::create(NO_OF_DISPARITIES, SAD_WINDOW_SIZE);
-    stereobm-> setPreFilterCap(_PRE_FILTER_CAP_);
-    stereobm-> setUniquenessRatio(_UNIQUENESS_RATIO_);
-    stereobm-> setTextureThreshold(_TEXTURE_THRESHOLD_);
-    stereobm-> compute(left_img,right_img,disp); 
+    stereobm->setPreFilterCap(_PRE_FILTER_CAP_);
+    stereobm->setUniquenessRatio(_UNIQUENESS_RATIO_);
+    stereobm->setTextureThreshold(_TEXTURE_THRESHOLD_);
+    stereobm->compute(left_img, right_img, disp);
 
     cv::Mat disp8, hls_disp8;
     disp.convertTo(disp8, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
@@ -87,7 +87,8 @@ int main(int argc, char** argv) {
     bm_state_params[2] = _TEXTURE_THRESHOLD_;
     bm_state_params[3] = _MIN_DISP_;
 
-    stereolbm_accel((ap_uint<INPUT_PTR_WIDTH> *)left_img.data,(ap_uint<INPUT_PTR_WIDTH> *)right_img.data,(unsigned char*)bm_state_params.data(),(ap_uint<OUTPUT_PTR_WIDTH> *)hls_disp.data,rows,cols);
+    stereolbm_accel((ap_uint<INPUT_PTR_WIDTH>*)left_img.data, (ap_uint<INPUT_PTR_WIDTH>*)right_img.data,
+                    (unsigned char*)bm_state_params.data(), (ap_uint<OUTPUT_PTR_WIDTH>*)hls_disp.data, rows, cols);
 
     // Convert 16U output to 8U output:
     hls_disp.convertTo(hls_disp8, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));

@@ -35,11 +35,11 @@
 #define OUTPUT_PTR_WIDTH 32
 
 void semiglobalbm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in_l,
-                ap_uint<INPUT_PTR_WIDTH>* img_in_r,
-                unsigned char penalty_small,
-                unsigned char penalty_large,
-                ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                int rows,
-                int cols);
+                        ap_uint<INPUT_PTR_WIDTH>* img_in_r,
+                        unsigned char penalty_small,
+                        unsigned char penalty_large,
+                        ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                        int rows,
+                        int cols);
 
 #endif // end of _XF_SGBM_CONFIG_H_

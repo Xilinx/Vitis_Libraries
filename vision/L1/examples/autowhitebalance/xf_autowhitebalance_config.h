@@ -17,7 +17,6 @@
 #ifndef _XF_AWB_CONFIG_H_
 #define _XF_AWB_CONFIG_H_
 
-
 #include "hls_stream.h"
 #include <ap_int.h>
 #include "xf_config_params.h"
@@ -43,7 +42,6 @@
 #define OUTPUT_PTR_WIDTH 256
 
 void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-                            ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                             ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                             float thresh,
                             int rows,

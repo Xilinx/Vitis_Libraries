@@ -48,6 +48,6 @@ void threshold_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                      unsigned char thresh,
                      unsigned char maxval,
                      int rows,
-                     int cols) ;
+                     int cols);
 
 #endif // end of _XF_THRESHOLD_CONFIG_H_

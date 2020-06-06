@@ -34,5 +34,3 @@
 #endif
 
 #define XF_USE_URAM false
-
-

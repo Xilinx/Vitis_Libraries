@@ -24,7 +24,7 @@
 #include "imgproc/xf_custom_convolution.hpp"
 #include "xf_config_params.h"
 
-#define HEIGHT 128 
+#define HEIGHT 128
 #define WIDTH 128
 
 /*  specify the shift parameter */
@@ -93,9 +93,9 @@
 #endif
 
 void Filter2d_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
-                short int* filter,
-                unsigned char shift,
-                ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                int rows,
-                int cols) ;
+                    short int* filter,
+                    unsigned char shift,
+                    ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                    int rows,
+                    int cols);
 #endif // end of _XF_CUSTOM_CONV_CONFIG_H_
