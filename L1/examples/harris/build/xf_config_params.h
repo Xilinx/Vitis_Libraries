@@ -24,4 +24,3 @@
 #define MAXCORNERS 1024
 
 #define XF_USE_URAM false
-

@@ -17,8 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_integral_image_config.h"
 
-
-
 int main(int argc, char** argv) {
     cv::Mat in_img, in_img1, out_img, ocv_ref, ocv_ref1;
     cv::Mat in_gray, in_gray1, diff;
@@ -52,13 +50,12 @@ int main(int argc, char** argv) {
     // create memory for output image
     diff.create(in_img.rows, in_img.cols, CV_32S);
     out_img.create(in_img.rows, in_img.cols, CV_32S);
-	
-	int cols = in_img.cols;
+
+    int cols = in_img.cols;
     int rows = in_img.rows;
 
-////////////Top function call //////////////////
-	integral_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, rows,cols);
-	
+    ////////////Top function call //////////////////
+    integral_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, rows, cols);
 
     // Write output image
     imwrite("hls_out.jpg", out_img);

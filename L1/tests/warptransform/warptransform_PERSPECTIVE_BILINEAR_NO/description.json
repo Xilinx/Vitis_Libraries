@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.warptransform_PERSPECTIVE_BILINEAR_NO", 
+    "name": "Xilinx Warptransform_Perspective_Bilinear_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.reduce_DIM_0_MAX", 
+    "name": "Xilinx Reduce_Dim_0_Max Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

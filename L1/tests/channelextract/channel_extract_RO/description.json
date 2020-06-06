@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.channel_extract_RO", 
+    "name": "Xilinx Channel_Extract_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

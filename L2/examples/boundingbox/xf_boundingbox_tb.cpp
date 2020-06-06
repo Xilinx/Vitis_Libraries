@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
     if (in_img.data == NULL) {
         fprintf(stderr, "Cannot open image at %s\n", argv[1]);
-        return 0;
+        return 1;
     }
     unsigned int x_loc[MAX_BOXES], y_loc[MAX_BOXES], ROI_height[MAX_BOXES], ROI_width[MAX_BOXES];
 

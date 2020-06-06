@@ -33,4 +33,3 @@
 #define CV_FUNCT_NAME compare
 #define CV_EXTRA_ARG CV_CMP_LE
 #define FUNCT_COMPARE
-

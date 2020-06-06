@@ -69,9 +69,9 @@ int main(int argc, char** argv) {
 
 #endif
 
-    //Call the top function
-	lut_accel((ap_uint<PTR_WIDTH> *)in_img.data, lut, (ap_uint<PTR_WIDTH> *)out_img.data, height, width);
-	
+    // Call the top function
+    lut_accel((ap_uint<PTR_WIDTH>*)in_img.data, lut, (ap_uint<PTR_WIDTH>*)out_img.data, height, width);
+
     // Write output image
     cv::imwrite("hls_out.jpg", out_img);
 

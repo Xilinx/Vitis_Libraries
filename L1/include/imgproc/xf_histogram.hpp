@@ -32,8 +32,8 @@ void xFHistogramKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                        uint16_t& imgheight,
                        uint16_t& imgwidth) {
     // Temporary array used while computing histogram
-    uint32_t tmp_hist[(PLANES << XF_BITSHIFT(NPC))][256] ;
-    uint32_t tmp_hist1[(PLANES << XF_BITSHIFT(NPC))][256] ;
+    uint32_t tmp_hist[(PLANES << XF_BITSHIFT(NPC))][256];
+    uint32_t tmp_hist1[(PLANES << XF_BITSHIFT(NPC))][256];
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
     #pragma HLS ARRAY_PARTITION variable=tmp_hist1 complete dim=1

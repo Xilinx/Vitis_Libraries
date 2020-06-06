@@ -35,10 +35,10 @@ template <int NUM_PYR_LEVELS,
           int COLS,
           int NPC,
           bool USE_URAM = false>
-void densePyrOpticalFlow(xf::cv::Mat<XF_8UC1, ROWS, COLS, XF_NPPC1> &_current_img,
-                         xf::cv::Mat<XF_8UC1, ROWS, COLS, XF_NPPC1> &_next_image,
-                         xf::cv::Mat<XF_32UC1, ROWS, COLS, XF_NPPC1> &_streamFlowin,
-                         xf::cv::Mat<XF_32UC1, ROWS, COLS, XF_NPPC1> &_streamFlowout,
+void densePyrOpticalFlow(xf::cv::Mat<XF_8UC1, ROWS, COLS, XF_NPPC1>& _current_img,
+                         xf::cv::Mat<XF_8UC1, ROWS, COLS, XF_NPPC1>& _next_image,
+                         xf::cv::Mat<XF_32UC1, ROWS, COLS, XF_NPPC1>& _streamFlowin,
+                         xf::cv::Mat<XF_32UC1, ROWS, COLS, XF_NPPC1>& _streamFlowout,
                          const int level,
                          const unsigned char scale_up_flag,
                          float scale_in,
@@ -47,9 +47,8 @@ void densePyrOpticalFlow(xf::cv::Mat<XF_8UC1, ROWS, COLS, XF_NPPC1> &_current_im
     #pragma HLS INLINE OFF
     // clang-format on
     xFLKOpticalFlowDenseKernel<ROWS, COLS, NUM_PYR_LEVELS, NUM_LINES, WINSIZE, FLOW_WIDTH, FLOW_INT, USE_URAM>(
-        _current_img, _next_image, _streamFlowin,
-        _streamFlowout, _current_img.rows, _current_img.cols, _streamFlowin.rows,
-        _streamFlowin.cols, level, scale_up_flag, scale_in, init_flag);
+        _current_img, _next_image, _streamFlowin, _streamFlowout, _current_img.rows, _current_img.cols,
+        _streamFlowin.rows, _streamFlowin.cols, level, scale_up_flag, scale_in, init_flag);
 }
 } // namespace cv
 } // namespace xf

@@ -16,7 +16,8 @@
 
 #include "xf_mean_shift_config.h"
 
-static constexpr int __XF_DEPTH=(XF_HEIGHT*XF_WIDTH*(XF_PIXELWIDTH(XF_8UC4,XF_NPPC1))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH =
+    (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(XF_8UC4, XF_NPPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void mean_shift_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                       uint16_t* tlx,
@@ -45,7 +46,7 @@ void mean_shift_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=no_of_iterations     
     #pragma HLS INTERFACE s_axilite port=rows     
     #pragma HLS INTERFACE s_axilite port=cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC4, XF_HEIGHT, XF_WIDTH, XF_NPPC1> inMat(rows, cols, img_inp);

@@ -54,7 +54,7 @@ void balanceWhiteSimple(std::vector<cv::Mat_<T> >& src,
 
             float interval = float(maxValue - minValue) / bins;
 
-            for (int j = 0; j < depth; ++j) {
+            for (int j = 0; j < 1; ++j) {
                 int currentBin = int((val - minValue + 1e-4f) / interval);
                 ++hist[pos + currentBin];
 
@@ -79,7 +79,7 @@ void balanceWhiteSimple(std::vector<cv::Mat_<T> >& src,
 
         float interval = (maxValue - minValue) / float(bins);
 
-        for (int j = 0; j < depth; ++j)
+        for (int j = 0; j < 1; ++j)
         // searching for s1 and s2
         {
             while (n1 + hist[p1] < s1 * total / 100.0f) {
@@ -220,44 +220,43 @@ int main(int argc, char** argv) {
 
     std::vector<cl::Memory> inBufVec, outBufVec;
     cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * 3));
-    cl::Buffer imageToDevice1(context, CL_MEM_READ_ONLY, (height * width * 3));
     cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width * 3));
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);
-    krnl.setArg(1, imageToDevice1);
-    krnl.setArg(2, imageFromDevice);
-    krnl.setArg(3, thresh);
-    krnl.setArg(4, height);
-    krnl.setArg(5, width);
-    krnl.setArg(6, inputMin);
-    krnl.setArg(7, inputMax);
-    krnl.setArg(8, outputMin);
-    krnl.setArg(9, outputMax);
+    krnl.setArg(1, imageFromDevice);
+    krnl.setArg(2, thresh);
+    krnl.setArg(3, height);
+    krnl.setArg(4, width);
+    krnl.setArg(5, inputMin);
+    krnl.setArg(6, inputMax);
+    krnl.setArg(7, outputMin);
+    krnl.setArg(8, outputMax);
 
-    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * 3), in_gray.data);
-    q.enqueueWriteBuffer(imageToDevice1, CL_TRUE, 0, (height * width * 3), in_gray.data);
+    for (int i = 0; i < 2; i++) {
+        q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * 3), in_gray.data);
 
-    // Profiling Objects
-    cl_ulong start = 0;
-    cl_ulong end = 0;
-    double diff_prof = 0.0f;
-    cl::Event event_sp;
+        // Profiling Objects
+        cl_ulong start = 0;
+        cl_ulong end = 0;
+        double diff_prof = 0.0f;
+        cl::Event event_sp;
 
-    printf("\nbefore kernel\n");
-    // Launch the kernel
-    q.enqueueTask(krnl, NULL, &event_sp);
-    clWaitForEvents(1, (const cl_event*)&event_sp);
+        printf("\nbefore kernel\n");
+        // Launch the kernel
+        q.enqueueTask(krnl, NULL, &event_sp);
+        clWaitForEvents(1, (const cl_event*)&event_sp);
 
-    printf("\nafter kernel\n");
+        printf("\nafter kernel\n");
 
-    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
-    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
-    diff_prof = end - start;
-    std::cout << (diff_prof / 1000000) << "ms" << std::endl;
+        event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+        event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+        diff_prof = end - start;
+        std::cout << (diff_prof / 1000000) << "ms" << std::endl;
 
-    // Copying Device result data to Host memory
-    q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width * 3), out_gray.data);
+        // Copying Device result data to Host memory
+        q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width * 3), out_gray.data);
+    }
 
     q.finish();
 

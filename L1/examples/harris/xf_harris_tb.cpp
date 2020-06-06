@@ -58,8 +58,9 @@ int main(int argc, char** argv) {
     uint32_t nCorners = 0;
     int imgwidth = in_img.cols;
     int imgheight = in_img.rows;
-    
-    cornerHarris_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH> *)hls_out_img.data, imgheight, imgwidth, Thresh, k);
+
+    cornerHarris_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)hls_out_img.data, imgheight,
+                       imgwidth, Thresh, k);
 
     /// hls_out_img.data = (unsigned char *)imgOutput.copyFrom();
     cv::imwrite("hls_out.jpg", hls_out_img);
@@ -78,21 +79,19 @@ int main(int argc, char** argv) {
     for (int j = 0; j < in_img.rows; j++) {
         int l = 0;
         for (int i = 0; i < (in_img.cols); i++) {
-         
-                unsigned char pix = hls_out_img.at<unsigned char>(j,i);
-                if (pix != 0) {
-                    cv::Point tmp;
-                    tmp.x = i;
-                    tmp.y = j;
-                    if ((tmp.x < in_img.cols) && (tmp.y < in_img.rows) && (j > 0)) {
-                        hls_points.push_back(tmp);
-                    }
-                    short int y, x;
-                    y = j;
-                    x = i;
-                    if (j > 0) cv::circle(out_img, cv::Point(x, y), 5, cv::Scalar(0, 0, 255, 255), 2, 8, 0);
+            unsigned char pix = hls_out_img.at<unsigned char>(j, i);
+            if (pix != 0) {
+                cv::Point tmp;
+                tmp.x = i;
+                tmp.y = j;
+                if ((tmp.x < in_img.cols) && (tmp.y < in_img.rows) && (j > 0)) {
+                    hls_points.push_back(tmp);
                 }
-           
+                short int y, x;
+                y = j;
+                x = i;
+                if (j > 0) cv::circle(out_img, cv::Point(x, y), 5, cv::Scalar(0, 0, 255, 255), 2, 8, 0);
+            }
         }
     }
 

@@ -63,7 +63,7 @@ void xFLUTKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 
     // creating a temporary buffers for Resource Optimization and Performance optimization
     if ((NPC != 0) || (PLANES != 3)) {
-        for (i = 0; i < ( XF_NPIXPERCYCLE(NPC)* PLANES); i++) {
+        for (i = 0; i < (XF_NPIXPERCYCLE(NPC) * PLANES); i++) {
             for (j = 0; j < 256; j++) {
                 lut[i][j] = _lut[j];
             }

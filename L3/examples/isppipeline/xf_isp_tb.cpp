@@ -52,18 +52,16 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-
     out_img.create(in_img.rows, in_img.cols, CV_8UC3);
 
-
-	// Write input image
+    // Write input image
     imwrite("input.png", in_img);
 
-   /////////////////////////////////////// CL ////////////////////////
+    /////////////////////////////////////// CL ////////////////////////
 
     int height = in_img.rows;
     int width = in_img.cols;
-	//int channels=out_img.channels();
+    // int channels=out_img.channels();
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -82,42 +80,38 @@ int main(int argc, char** argv) {
 
     // Create a kernel:
     OCL_CHECK(err, cl::Kernel kernel(program, "ISPPipeline_accel", &err));
-	
 
     std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width), NULL, &err));
-    OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width*3), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width * 3), NULL, &err));
 
     // Set the kernel arguments
     OCL_CHECK(err, err = kernel.setArg(0, imageToDevice));
     OCL_CHECK(err, err = kernel.setArg(1, imageFromDevice));
     OCL_CHECK(err, err = kernel.setArg(2, height));
     OCL_CHECK(err, err = kernel.setArg(3, width));
-	
-	for(int i=0;i<2;i++)
-	{
 
-    OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width), in_img.data));
+    for (int i = 0; i < 2; i++) {
+        OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width), in_img.data));
 
-    // Profiling Objects
-    cl_ulong start = 0;
-    cl_ulong end = 0;
-    double diff_prof = 0.0f;
-    cl::Event event_sp;
+        // Profiling Objects
+        cl_ulong start = 0;
+        cl_ulong end = 0;
+        double diff_prof = 0.0f;
+        cl::Event event_sp;
 
-    // Launch the kernel
-    OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &event_sp));
-    clWaitForEvents(1, (const cl_event*)&event_sp);
+        // Launch the kernel
+        OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &event_sp));
+        clWaitForEvents(1, (const cl_event*)&event_sp);
 
-    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
-    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
-    diff_prof = end - start;
-    std::cout << (diff_prof / 1000000) << "ms" << std::endl;
+        event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+        event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+        diff_prof = end - start;
+        std::cout << (diff_prof / 1000000) << "ms" << std::endl;
 
-    // Copying Device result data to Host memory
-    q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width * 3), out_img.data);
-	
-	}
+        // Copying Device result data to Host memory
+        q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width * 3), out_img.data);
+    }
 
     q.finish();
 
@@ -125,8 +119,6 @@ int main(int argc, char** argv) {
 
     // Write output image
     imwrite("hls_out.png", out_img);
-
-   
 
     return 0;
 }

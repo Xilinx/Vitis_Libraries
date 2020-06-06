@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.sum.build", 
+    "name": "Xilinx Sum Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

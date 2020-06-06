@@ -16,7 +16,7 @@
 
 #include "xf_bilateral_filter_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
 void bilateral_filter_accel(
     ap_uint<PTR_WIDTH>* img_in, float sigma_color, float sigma_space, int rows, int cols, ap_uint<PTR_WIDTH>* img_out) {
@@ -27,7 +27,7 @@ void bilateral_filter_accel(
     #pragma HLS INTERFACE s_axilite  port=sigma_space  		          
     #pragma HLS INTERFACE s_axilite  port=rows 				  
     #pragma HLS INTERFACE s_axilite  port=cols  			  
-    #pragma HLS INTERFACE s_axilite  port=return 			  
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);

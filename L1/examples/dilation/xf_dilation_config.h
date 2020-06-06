@@ -46,6 +46,10 @@
 #define CH_TYPE XF_RGB
 #endif
 
-void dilation_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, unsigned char* kernel, int height, int width);
+void dilation_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+                    ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                    unsigned char* kernel,
+                    int height,
+                    int width);
 
 #endif // _XF_DILATION_CONFIG_H_

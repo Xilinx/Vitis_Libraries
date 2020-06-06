@@ -16,11 +16,17 @@
 
 #include "xf_min_max_loc_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
-
-void min_max_loc_accel(
-    ap_uint<PTR_WIDTH>* img_in, int32_t &min_value, int32_t &max_value, uint16_t &min_loc_x, uint16_t &min_loc_y, uint16_t &max_loc_x, uint16_t &max_loc_y, int height, int width) {
+void min_max_loc_accel(ap_uint<PTR_WIDTH>* img_in,
+                       int32_t& min_value,
+                       int32_t& max_value,
+                       uint16_t& min_loc_x,
+                       uint16_t& min_loc_y,
+                       uint16_t& max_loc_x,
+                       uint16_t& max_loc_y,
+                       int height,
+                       int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in          offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=min_value       offset=slave  bundle=gmem1
@@ -31,7 +37,7 @@ void min_max_loc_accel(
     #pragma HLS INTERFACE m_axi      port=max_loc_y  offset=slave  bundle=gmem2
     #pragma HLS INTERFACE s_axilite  port=height 			
     #pragma HLS INTERFACE s_axilite  port=width 			
-    #pragma HLS INTERFACE s_axilite  port=return 			
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     // Local objects:
@@ -50,4 +56,3 @@ void min_max_loc_accel(
 
     return;
 } // End of kernel
-

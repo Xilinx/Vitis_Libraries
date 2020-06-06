@@ -33,7 +33,7 @@ void sgbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
     #pragma HLS INTERFACE s_axilite  port=penalty_large  	          
 	#pragma HLS INTERFACE s_axilite  port=rows  	          		  
 	#pragma HLS INTERFACE s_axilite  port=cols  	          		  
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputL(rows, cols);

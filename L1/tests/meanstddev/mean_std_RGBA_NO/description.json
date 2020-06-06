@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.mean_std_RGBA_NO", 
+    "name": "Xilinx Mean_Std_Rgba_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

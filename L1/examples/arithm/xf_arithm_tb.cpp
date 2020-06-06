@@ -19,7 +19,6 @@
 #include <ap_int.h>
 #include "xf_arithm_config.h"
 
-
 int main(int argc, char** argv) {
 #if ARRAY
     if (argc != 3) {
@@ -73,7 +72,6 @@ int main(int argc, char** argv) {
     int height = in_gray1.rows;
     int width = in_gray1.cols;
 
-
 #if SCALAR
     unsigned char scalar[XF_CHANNELS(TYPE, NPC1)];
 
@@ -116,18 +114,17 @@ int main(int argc, char** argv) {
     float scale = 0.05;
 #endif
 
-
 #if ARRAY
-		arithm_accel((ap_uint<PTR_WIDTH> *)in_gray1.data, (ap_uint<PTR_WIDTH> *)in_gray2.data,
-		#ifdef FUNCT_MULTIPLY
-				scale,
-		#endif
-		(ap_uint<PTR_WIDTH> *)out_img.data, height, width);
+    arithm_accel((ap_uint<PTR_WIDTH>*)in_gray1.data, (ap_uint<PTR_WIDTH>*)in_gray2.data,
+#ifdef FUNCT_MULTIPLY
+                 scale,
+#endif
+                 (ap_uint<PTR_WIDTH>*)out_img.data, height, width);
 
-		// Write down the kernel result:
-		cv::imwrite("hls_out.jpg", out_img);
+    // Write down the kernel result:
+    cv::imwrite("hls_out.jpg", out_img);
 #else
-	arithm_accel((ap_uint<PTR_WIDTH> *)in_gray1.data, scalar, (ap_uint<PTR_WIDTH> *)out_img.data, height, width);
+    arithm_accel((ap_uint<PTR_WIDTH>*)in_gray1.data, scalar, (ap_uint<PTR_WIDTH>*)out_img.data, height, width);
 
 #endif
     printf("cv_referencestarted\n");

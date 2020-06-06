@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_hist_equalize_config.h"
 
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
@@ -48,9 +47,9 @@ int main(int argc, char** argv) {
     cv::equalizeHist(in_img, ocv_ref);
 
     ///////////////// Call the top function ///////////////////////
-   
-    equalizeHist_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<INPUT_PTR_WIDTH>*)in_img_copy.data, (ap_uint<OUTPUT_PTR_WIDTH>*) out_img.data, height, width); 
 
+    equalizeHist_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<INPUT_PTR_WIDTH>*)in_img_copy.data,
+                       (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width);
 
     //////////////////  Compute Absolute Difference ////////////////////
     cv::absdiff(ocv_ref, out_img, diff);

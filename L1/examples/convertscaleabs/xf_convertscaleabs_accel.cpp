@@ -16,12 +16,14 @@
 
 #include "xf_convertscaleabs_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
-
-
-void convertScaleAbs_accel(
-    ap_uint<INPUT_PTR_WIDTH>* img_in, float scale, float shift, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) {
+void convertScaleAbs_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
+                           float scale,
+                           float shift,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           int height,
+                           int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
 
@@ -51,5 +53,3 @@ void convertScaleAbs_accel(
 
     return;
 } // End of kernel
-
-

@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_gaussian_diff_config.h"
 
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
@@ -52,13 +51,11 @@ int main(int argc, char** argv) {
     size_t image_in_size_bytes = in_gray.rows * in_gray.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = image_in_size_bytes;
 
-   
     int rows = in_gray.rows;
     int cols = in_gray.cols;
 
-//////////Top function call //////////////////////////////
-	gaussian_diff_accel((ap_uint<PTR_WIDTH> *)in_gray.data,sigma, (ap_uint<PTR_WIDTH> *)out_img.data, rows,cols);
-	
+    //////////Top function call //////////////////////////////
+    gaussian_diff_accel((ap_uint<PTR_WIDTH>*)in_gray.data, sigma, (ap_uint<PTR_WIDTH>*)out_img.data, rows, cols);
 
     // Write the output of kernel:
     cv::imwrite("output_hls.png", out_img);

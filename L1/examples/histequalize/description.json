@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.histequalize.build", 
+    "name": "Xilinx Histequalize Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

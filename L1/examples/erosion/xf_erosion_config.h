@@ -53,5 +53,5 @@
 #endif
 
 void erosion_accel(
-    ap_uint<PTR_WIDTH>* img_in, unsigned char* process_shape, ap_uint<PTR_WIDTH>* img_out, int height,int width);
+    ap_uint<PTR_WIDTH>* img_in, unsigned char* process_shape, ap_uint<PTR_WIDTH>* img_out, int height, int width);
 #endif // _XF_EROSION_CONFIG_H_

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.Remap_LI_RGB", 
+    "name": "Xilinx Remap_Li_Rgb Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

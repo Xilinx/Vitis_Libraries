@@ -16,8 +16,10 @@
 
 #include "xf_stereo_pipeline_config.h"
 
-static constexpr int __XF_DEPTH=(XF_HEIGHT*XF_WIDTH*(XF_PIXELWIDTH(XF_8UC1,XF_NPPC1))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_DISP=(XF_HEIGHT*XF_WIDTH*(XF_PIXELWIDTH(XF_16UC1,XF_NPPC1))/8) / (OUTPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH =
+    (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(XF_8UC1, XF_NPPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_DISP =
+    (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(XF_16UC1, XF_NPPC1)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
                           ap_uint<INPUT_PTR_WIDTH>* img_R,
@@ -117,4 +119,3 @@ void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1>(mat_disp, img_disp);
 }
-

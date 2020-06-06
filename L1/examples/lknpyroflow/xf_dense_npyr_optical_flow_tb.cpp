@@ -58,10 +58,12 @@ int main(int argc, char** argv) {
 
     int height = frame0.rows;
     int width = frame0.cols;
-	size_t image_in_size_bytes = frame0.rows * frame0.cols * 1 * sizeof(unsigned char);
-	size_t image_out_size_bytes = frame0.rows * frame0.cols * 4 * sizeof(unsigned char);
-	
-    dense_non_pyr_of_accel((ap_uint<INPUT_PTR_WIDTH> *)frame0.data, (ap_uint<INPUT_PTR_WIDTH> *)frame1.data, (ap_uint<OUTPUT_PTR_WIDTH> *)flowx.data, (ap_uint<OUTPUT_PTR_WIDTH> *)flowy.data, height, width);
+    size_t image_in_size_bytes = frame0.rows * frame0.cols * 1 * sizeof(unsigned char);
+    size_t image_out_size_bytes = frame0.rows * frame0.cols * 4 * sizeof(unsigned char);
+
+    dense_non_pyr_of_accel((ap_uint<INPUT_PTR_WIDTH>*)frame0.data, (ap_uint<INPUT_PTR_WIDTH>*)frame1.data,
+                           (ap_uint<OUTPUT_PTR_WIDTH>*)flowx.data, (ap_uint<OUTPUT_PTR_WIDTH>*)flowy.data, height,
+                           width);
 
     float* flowx_copy;
     float* flowy_copy;
@@ -82,7 +84,6 @@ int main(int argc, char** argv) {
             flowy_copy[f * width + i] = flowy.at<float>(f, i);
         }
     }
-
 
     unsigned int* outputBuffer;
     outputBuffer = (unsigned int*)malloc(MAX_HEIGHT * MAX_WIDTH * (sizeof(unsigned int)));

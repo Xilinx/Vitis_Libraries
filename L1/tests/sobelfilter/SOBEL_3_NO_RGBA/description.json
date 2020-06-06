@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.SOBEL_3_NO_RGBA", 
+    "name": "Xilinx Sobel_3_No_Rgba Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

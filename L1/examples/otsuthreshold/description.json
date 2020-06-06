@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.otsuthreshold.build", 
+    "name": "Xilinx Otsuthreshold Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

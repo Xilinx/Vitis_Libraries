@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.demosaicing_4ppc_8bit_BG", 
+    "name": "Xilinx Demosaicing_4Ppc_8Bit_Bg Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

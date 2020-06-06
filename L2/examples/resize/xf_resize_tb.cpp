@@ -20,23 +20,11 @@
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        printf("Usage : <executable> <input image> \n");
+    if (argc != 4) {
+        printf("Usage : <executable> <input image> <output image height> <output image width>\n");
         return -1;
     }
     cv::Mat img, result_hls, result_ocv, error;
-
-#if GRAY
-    img.create(cv::Size(WIDTH, HEIGHT), CV_8UC1);
-    result_hls.create(cv::Size(NEWWIDTH, NEWHEIGHT), CV_8UC1);
-    result_ocv.create(cv::Size(NEWWIDTH, NEWHEIGHT), CV_8UC1);
-    error.create(cv::Size(NEWWIDTH, NEWHEIGHT), CV_8UC1);
-#else
-    img.create(cv::Size(WIDTH, HEIGHT), CV_8UC3);
-    result_hls.create(cv::Size(NEWWIDTH, NEWHEIGHT), CV_8UC3);
-    result_ocv.create(cv::Size(NEWWIDTH, NEWHEIGHT), CV_8UC3);
-    error.create(cv::Size(NEWWIDTH, NEWHEIGHT), CV_8UC3);
-#endif
 
 #if GRAY
     // reading in the color image
@@ -51,13 +39,20 @@ int main(int argc, char** argv) {
 
     cv::imwrite("input.png", img);
 
-    int in_width, in_height;
-    int out_width, out_height;
+    int in_width = img.cols;
+    int in_height = img.rows;
+    int out_height = atoi(argv[2]);
+    int out_width = atoi(argv[3]);
 
-    in_width = img.cols;
-    in_height = img.rows;
-    out_height = NEWHEIGHT;
-    out_width = NEWWIDTH;
+#if GRAY
+    result_hls.create(cv::Size(out_width, out_height), CV_8UC1);
+    result_ocv.create(cv::Size(out_width, out_height), CV_8UC1);
+    error.create(cv::Size(out_width, out_height), CV_8UC1);
+#else
+    result_hls.create(cv::Size(out_width, out_height), CV_8UC3);
+    result_ocv.create(cv::Size(out_width, out_height), CV_8UC3);
+    error.create(cv::Size(out_width, out_height), CV_8UC3);
+#endif
 
 // OpenCL section:
 #if GRAY
@@ -151,7 +146,7 @@ int main(int argc, char** argv) {
     cv::absdiff(result_hls, result_ocv, error);
     float err_per;
     xf::cv::analyzeDiff(error, 5, err_per);
-	
+
     if (err_per > 1.0f) {
         return 1;
     }

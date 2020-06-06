@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.Integral_NO", 
+    "name": "Xilinx Integral_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

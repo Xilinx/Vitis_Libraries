@@ -26,7 +26,7 @@ void reduce_accel(
     #pragma HLS INTERFACE s_axilite  port=dimension 		      
     #pragma HLS INTERFACE s_axilite  port=height 		      
     #pragma HLS INTERFACE s_axilite  port=width 		      
-    #pragma HLS INTERFACE s_axilite  port=return		      
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);

@@ -22,13 +22,13 @@ void edgetracing_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem3
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem4
     #pragma HLS INTERFACE s_axilite port=img_inp  
-    #pragma HLS INTERFACE s_axilite port=img_out  
+    #pragma HLS INTERFACE s_axilite port=img_out
 // clang-format on
 
 // clang-format off
     #pragma HLS INTERFACE s_axilite port=rows     
     #pragma HLS INTERFACE s_axilite port=cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     printf("\nbefore allocate\n");

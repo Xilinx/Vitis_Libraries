@@ -1,5 +1,5 @@
 {
-    "name": "Gaussianfilter", 
+    "name": "Xilinx Gauss_7X7_No L2 Test", 
     "description": [
         "Gaussianfilter L2 function example"
     ],

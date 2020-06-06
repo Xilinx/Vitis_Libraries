@@ -25,7 +25,7 @@ void histogram_accel(ap_uint<PTR_WIDTH>* img_in, unsigned int* histogram, int ro
     #pragma HLS INTERFACE m_axi      port=histogram    offset=slave     bundle=gmem1
 	#pragma HLS INTERFACE s_axilite  port=rows 			          
 	#pragma HLS INTERFACE s_axilite  port=cols 			          
-    #pragma HLS INTERFACE s_axilite  port=return 			            
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);

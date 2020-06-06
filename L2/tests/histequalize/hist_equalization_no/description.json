@@ -1,5 +1,5 @@
 {
-    "name": "Histequalize", 
+    "name": "Xilinx Hist_Equalization_No L2 Test", 
     "description": [
         "Histequalize L2 function example"
     ],

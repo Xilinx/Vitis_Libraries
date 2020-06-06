@@ -16,8 +16,7 @@
 
 #include "xf_box_filter_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_T,NPIX))/8) / (INPUT_PTR_WIDTH/8);
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_T, NPIX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void boxfilter_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols) {
 // clang-format off
@@ -29,10 +28,8 @@ void boxfilter_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH
     #pragma HLS INTERFACE s_axilite port=return   bundle=control
     // clang-format on
 
-
-
     xf::cv::Mat<IN_T, HEIGHT, WIDTH, NPIX> in_mat(rows, cols);
-// clang-format off
+    // clang-format off
     // clang-format on
 
     xf::cv::Mat<IN_T, HEIGHT, WIDTH, NPIX> _dst(rows, cols);
@@ -49,4 +46,3 @@ void boxfilter_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_T, HEIGHT, WIDTH, NPIX>(_dst, img_out);
 }
-

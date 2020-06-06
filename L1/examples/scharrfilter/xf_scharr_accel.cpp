@@ -16,9 +16,8 @@
 
 #include "xf_scharr_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(HEIGHT*WIDTH*(XF_PIXELWIDTH(OUT_TYPE,NPC1))/8) / (OUTPUT_PTR_WIDTH/8);
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPC1)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void scharr_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                   ap_uint<OUTPUT_PTR_WIDTH>* img_out1,
@@ -35,7 +34,7 @@ void scharr_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     
     #pragma HLS INTERFACE s_axilite port=rows     
     #pragma HLS INTERFACE s_axilite port=cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);

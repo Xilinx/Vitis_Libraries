@@ -16,8 +16,7 @@
 
 #include "xf_threshold_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_8UC1,NPIX))/8) / (INPUT_PTR_WIDTH/8);
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_8UC1, NPIX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void threshold_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                      ap_uint<OUTPUT_PTR_WIDTH>* img_out,
@@ -41,7 +40,7 @@ void threshold_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     const int pNPC1 = NPIX;
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPIX> in_mat(rows, cols);
-// clang-format off
+    // clang-format off
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPIX> out_mat(rows, cols);
@@ -58,4 +57,3 @@ void threshold_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPIX>(out_mat, img_out);
 }
-

@@ -16,7 +16,7 @@
 
 #include "xf_median_blur_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
 void median_blur_accel(ap_uint<PTR_WIDTH>* img_in, int rows, int cols, ap_uint<PTR_WIDTH>* img_out) {
 // clang-format off

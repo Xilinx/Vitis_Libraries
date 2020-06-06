@@ -17,8 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_phase_config.h"
 
-
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
@@ -26,7 +24,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-  cv::Mat in_img, in_gray, c_grad_x, c_grad_y, c_grad_x1, c_grad_y1, ocv_ref, out_img, diff;
+    cv::Mat in_img, in_gray, c_grad_x, c_grad_y, c_grad_x1, c_grad_y1, ocv_ref, out_img, diff;
 
     int scale = 1;
     int delta = 0;
@@ -66,13 +64,13 @@ int main(int argc, char** argv) {
     phase(c_grad_x1, c_grad_y1, ocv_ref, false);
 #endif
     /////////   End Opencv Phase computation API  ///////
-	
-	int rows = in_img.rows;
+
+    int rows = in_img.rows;
     int cols = in_img.cols;
 
-	// Call the top function
-	phase_accel((ap_uint<INPUT_PTR_WIDTH> *)c_grad_x.data, (ap_uint<INPUT_PTR_WIDTH> *)c_grad_y.data, (ap_uint<INPUT_PTR_WIDTH> *)out_img.data,rows,cols);
-
+    // Call the top function
+    phase_accel((ap_uint<INPUT_PTR_WIDTH>*)c_grad_x.data, (ap_uint<INPUT_PTR_WIDTH>*)c_grad_y.data,
+                (ap_uint<INPUT_PTR_WIDTH>*)out_img.data, rows, cols);
 
 #if DEGREES
     /////   writing the difference between the OpenCV and the Kernel output into a text file /////

@@ -32,5 +32,3 @@
 // OpenCV reference macros
 #define CV_FUNCT_NAME min
 //#define CV_EXTRA_ARG  0.05
-
-

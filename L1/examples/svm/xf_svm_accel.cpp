@@ -16,9 +16,10 @@
 
 #include "xf_svm_config.h"
 
-static constexpr int __XF_DEPTH=(IN_ARRAY_SIZE_1 * IN_ARRAY_SIZE_1 * (XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH2=(IN_ARRAY_SIZE_2 * IN_ARRAY_SIZE_2 * (XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
-
+static constexpr int __XF_DEPTH =
+    (IN_ARRAY_SIZE_1 * IN_ARRAY_SIZE_1 * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH2 =
+    (IN_ARRAY_SIZE_2 * IN_ARRAY_SIZE_2 * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
                ap_uint<INPUT_PTR_WIDTH>* img_in2,
@@ -31,7 +32,7 @@ void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
     #pragma HLS INTERFACE m_axi      port=params         offset=slave  bundle=gmem2 depth=5
     #pragma HLS INTERFACE m_axi      port=fractional_out offset=slave  bundle=gmem3 depth=2
     #pragma HLS INTERFACE m_axi      port=result_out     offset=slave  bundle=gmem4 depth=2
-    #pragma HLS INTERFACE s_axilite  port=return 			           
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPC1> imgInput1;
@@ -57,4 +58,3 @@ void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 
     return;
 } // End of kernel
-

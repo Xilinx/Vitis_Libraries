@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.convertbitdepth.build", 
+    "name": "Xilinx Convertbitdepth Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -33,5 +33,3 @@
 
 /* Number of directions */
 #define NUM_DIR 4
-
-

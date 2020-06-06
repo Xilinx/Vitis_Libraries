@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.demosaicing_2ppc_16bit", 
+    "name": "Xilinx Demosaicing_2Ppc_16Bit Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

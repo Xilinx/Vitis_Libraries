@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.lknpyroflow_NPPC2", 
+    "name": "Xilinx Lknpyroflow_Nppc1 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -22,5 +22,3 @@
 #define FOUR_INPUT 0
 
 #define NPC XF_NPPC1
-
-

@@ -17,8 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_threshold_config.h"
 
-
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
@@ -54,8 +52,9 @@ int main(int argc, char** argv) {
     //////////////////  end opencv reference code//////////
 
     /////////////// Call the top function ////////////////
-    threshold_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, thresh, maxval, in_height, in_width);
-	
+    threshold_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, thresh, maxval,
+                    in_height, in_width);
+
     // Write output image
     imwrite("hls_out.jpg", out_img);
 

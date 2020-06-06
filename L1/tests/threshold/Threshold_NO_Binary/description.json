@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.Threshold_NO_Binary", 
+    "name": "Xilinx Threshold_No_Binary Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

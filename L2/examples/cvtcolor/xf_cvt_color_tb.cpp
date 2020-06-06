@@ -5721,14 +5721,16 @@ int main(int argc, char** argv) {
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_bgr2hsv", &err));
 
-    OCL_CHECK(err, cl::Buffer imageToDevicebgr(context, CL_MEM_READ_ONLY, (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), NULL, &err));
-    OCL_CHECK(err,
-              cl::Buffer imageFromDevicehsv(context, CL_MEM_WRITE_ONLY, (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageToDevicebgr(context, CL_MEM_READ_ONLY,
+                                               (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageFromDevicehsv(context, CL_MEM_WRITE_ONLY,
+                                                 (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE), NULL, &err));
 
     printf("finished buffer creation task\n");
 
     /* Copy input vectors to memory */
-    OCL_CHECK(err, err = q.enqueueWriteBuffer(imageToDevicebgr, CL_TRUE, 0, (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), inputimg.data));
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(imageToDevicebgr, CL_TRUE, 0,
+                                              (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), inputimg.data));
     printf("finished enqueueing task\n");
 
     // Set the kernel arguments
@@ -5755,7 +5757,9 @@ int main(int argc, char** argv) {
     diff_prof = end - start;
     std::cout << (diff_prof / 1000000) << "ms" << std::endl;
 
-    OCL_CHECK(err, err = q.enqueueReadBuffer(imageFromDevicehsv, CL_TRUE, 0, (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE), (ap_uint<OUTPUT_PTR_WIDTH>*)outputimg.data));
+    OCL_CHECK(err, err = q.enqueueReadBuffer(imageFromDevicehsv, CL_TRUE, 0,
+                                             (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE),
+                                             (ap_uint<OUTPUT_PTR_WIDTH>*)outputimg.data));
     q.finish();
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
@@ -5781,18 +5785,18 @@ int main(int argc, char** argv) {
     int height = inputimg.rows;
     int width = inputimg.cols;
 
-
-
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_hsv2rgb", &err));
 
-    OCL_CHECK(err, cl::Buffer imageToDevicehsv(context, CL_MEM_READ_ONLY, (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), NULL, &err));
-    OCL_CHECK(err, cl::Buffer imageFromDevicergb(context, CL_MEM_WRITE_ONLY, (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageToDevicehsv(context, CL_MEM_READ_ONLY,
+                                               (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageFromDevicergb(context, CL_MEM_WRITE_ONLY,
+                                                 (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE), NULL, &err));
 
     printf("finished buffer creation task\n");
 
     /* Copy input vectors to memory */
-    OCL_CHECK(err, err = q.enqueueWriteBuffer(imageToDevicehsv, CL_TRUE, 0, (inputimg.rows * inputimg.cols * INPUT_CH_TYPE),
-                         inputimg.data));
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(imageToDevicehsv, CL_TRUE, 0,
+                                              (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), inputimg.data));
     printf("finished enqueueing task\n");
 
     // Set the kernel arguments
@@ -5818,8 +5822,9 @@ int main(int argc, char** argv) {
     event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
     diff_prof = end - start;
     std::cout << (diff_prof / 1000000) << "ms" << std::endl;
-    OCL_CHECK(err, err = q.enqueueReadBuffer(imageFromDevicergb, CL_TRUE, 0, (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE),
-                        (ap_uint<OUTPUT_PTR_WIDTH>*)outputimg.data));
+    OCL_CHECK(err, err = q.enqueueReadBuffer(imageFromDevicergb, CL_TRUE, 0,
+                                             (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE),
+                                             (ap_uint<OUTPUT_PTR_WIDTH>*)outputimg.data));
     q.finish();
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
@@ -5845,18 +5850,18 @@ int main(int argc, char** argv) {
     int height = inputimg.rows;
     int width = inputimg.cols;
 
-
-
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_hsv2bgr", &err));
 
-    OCL_CHECK(err, cl::Buffer imageToDevicehsv(context, CL_MEM_READ_ONLY, (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), NULL, &err));
-    OCL_CHECK(err, cl::Buffer imageFromDevicebgr(context, CL_MEM_WRITE_ONLY, (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageToDevicehsv(context, CL_MEM_READ_ONLY,
+                                               (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageFromDevicebgr(context, CL_MEM_WRITE_ONLY,
+                                                 (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE), NULL, &err));
 
     printf("finished buffer creation task\n");
 
     /* Copy input vectors to memory */
-    OCL_CHECK(err, err = q.enqueueWriteBuffer(imageToDevicehsv, CL_TRUE, 0, (inputimg.rows * inputimg.cols * INPUT_CH_TYPE),
-                         inputimg.data));
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(imageToDevicehsv, CL_TRUE, 0,
+                                              (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), inputimg.data));
     printf("finished enqueueing task\n");
 
     // Set the kernel arguments
@@ -5882,8 +5887,9 @@ int main(int argc, char** argv) {
     event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
     diff_prof = end - start;
     std::cout << (diff_prof / 1000000) << "ms" << std::endl;
-    OCL_CHECK(err, err = q.enqueueReadBuffer(imageFromDevicebgr, CL_TRUE, 0, (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE),
-                        (ap_uint<OUTPUT_PTR_WIDTH>*)outputimg.data));
+    OCL_CHECK(err, err = q.enqueueReadBuffer(imageFromDevicebgr, CL_TRUE, 0,
+                                             (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE),
+                                             (ap_uint<OUTPUT_PTR_WIDTH>*)outputimg.data));
     q.finish();
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////

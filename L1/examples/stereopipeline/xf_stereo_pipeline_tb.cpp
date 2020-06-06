@@ -18,7 +18,6 @@
 #include "xf_stereo_pipeline_config.h"
 #include "cameraParameters.h"
 
-
 #define _PROFILE_ 0
 
 using namespace std;
@@ -88,8 +87,10 @@ int main(int argc, char** argv) {
     }
 
     // Launch the kernel
-    stereopipeline_accel((ap_uint<INPUT_PTR_WIDTH> *)left_img.data,(ap_uint<INPUT_PTR_WIDTH> *)right_img.data,(ap_uint<OUTPUT_PTR_WIDTH> *)disp_img.data,cameraMA_l_fl,cameraMA_r_fl,distC_l_fl,distC_r_fl,irA_l_fl,irA_r_fl,bm_state_arr,rows,cols);
-    
+    stereopipeline_accel((ap_uint<INPUT_PTR_WIDTH>*)left_img.data, (ap_uint<INPUT_PTR_WIDTH>*)right_img.data,
+                         (ap_uint<OUTPUT_PTR_WIDTH>*)disp_img.data, cameraMA_l_fl, cameraMA_r_fl, distC_l_fl,
+                         distC_r_fl, irA_l_fl, irA_r_fl, bm_state_arr, rows, cols);
+
     // Write output image
     cv::Mat out_disp_img(rows, cols, CV_8UC1);
     disp_img.convertTo(out_disp_img, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));

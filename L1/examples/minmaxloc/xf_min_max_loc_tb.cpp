@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
     double cv_minval = 0, cv_maxval = 0;
     cv::Point cv_minloc, cv_maxloc;
     int height = in_img.rows;
-    int width  = in_img.cols;
+    int width = in_img.cols;
 
     /////////  OpenCV reference  ///////
     cv::minMaxLoc(in_conv, &cv_minval, &cv_maxval, &cv_minloc, &cv_maxloc, cv::noArray());
@@ -60,7 +60,8 @@ int main(int argc, char** argv) {
     uint16_t _min_locx, _min_locy, _max_locx, _max_locy;
 
     ////////  Call the Top function ///
-    min_max_loc_accel((ap_uint<PTR_WIDTH> *)in_conv.data, min_value, max_value, _min_locx, _min_locy, _max_locx, _max_locy, height, width);
+    min_max_loc_accel((ap_uint<PTR_WIDTH>*)in_conv.data, min_value, max_value, _min_locx, _min_locy, _max_locx,
+                      _max_locy, height, width);
 
     /////// OpenCV output ////////
     std::cout << "OCV-Minvalue = " << cv_minval << std::endl;

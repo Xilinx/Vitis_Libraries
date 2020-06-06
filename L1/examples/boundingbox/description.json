@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.boundingbox.build", 
+    "name": "Xilinx Boundingbox Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

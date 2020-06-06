@@ -29,5 +29,3 @@
 #define XF_WIN_HEIGHT 128
 #define XF_WIN_WIDTH 64
 #define XF_USE_URAM false
-
-

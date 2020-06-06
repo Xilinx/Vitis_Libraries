@@ -16,9 +16,8 @@
 
 #include "xf_histogram_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
-static constexpr int __XF_DEPTH__PTR=(256*(XF_CHANNELS(TYPE,NPC1)));
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH__PTR = (256 * (XF_CHANNELS(TYPE, NPC1)));
 
 void histogram_accel(ap_uint<PTR_WIDTH>* img_in, unsigned int* histogram, int rows, int cols) {
 // clang-format off
@@ -27,7 +26,7 @@ void histogram_accel(ap_uint<PTR_WIDTH>* img_in, unsigned int* histogram, int ro
     #pragma HLS INTERFACE m_axi      port=histogram    offset=slave     bundle=gmem1 depth=__XF_DEPTH_PTR
 	#pragma HLS INTERFACE s_axilite  port=rows 			          
 	#pragma HLS INTERFACE s_axilite  port=cols 			          
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);

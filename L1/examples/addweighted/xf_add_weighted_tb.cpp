@@ -19,9 +19,8 @@
 #include <ap_int.h>
 #include "xf_add_weighted_config.h"
 
-
 int main(int argc, char** argv) {
-     if (argc != 3) {
+    if (argc != 3) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
         fprintf(stderr, "<Executable Name> <input image path1> <input image path2> \n");
         return -1;
@@ -45,29 +44,30 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Cannot open image %s\n", argv[2]);
         return -1;
     }
-	int height=in_gray.rows;
-	int width=in_gray.cols;
+    int height = in_gray.rows;
+    int width = in_gray.cols;
 #if GRAY
     ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC1);
     out_gray.create(in_gray.rows, in_gray.cols, CV_8UC1);
     diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
 #else
-    	ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-        out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
-        diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
 #endif
     float alpha = 0.2;
     float beta = 0.8;
     float gama = 0.0;
 
-     // OpenCV function
-      cv::addWeighted(in_gray, alpha, in_gray1, beta, gama, ocv_ref);
+    // OpenCV function
+    cv::addWeighted(in_gray, alpha, in_gray1, beta, gama, ocv_ref);
 
     // Write OpenCV reference image
     cv::imwrite("out_ocv.jpg", ocv_ref);
 
-	//Call the top function
-	add_weighted_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray.data, (ap_uint<INPUT_PTR_WIDTH> *)in_gray1.data, alpha,  beta, gama, (ap_uint<OUTPUT_PTR_WIDTH> *)out_gray.data, height, width);
+    // Call the top function
+    add_weighted_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray1.data, alpha, beta,
+                       gama, (ap_uint<OUTPUT_PTR_WIDTH>*)out_gray.data, height, width);
 
     imwrite("out_hls.jpg", out_gray);
 

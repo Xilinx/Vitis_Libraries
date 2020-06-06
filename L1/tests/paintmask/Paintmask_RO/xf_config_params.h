@@ -18,5 +18,3 @@
 #define RO 1 // Resource Optimized
 
 #define GRAY 1
-
-

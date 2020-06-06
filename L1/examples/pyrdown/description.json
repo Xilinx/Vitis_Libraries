@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.pyrdown.build", 
+    "name": "Xilinx Pyrdown Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

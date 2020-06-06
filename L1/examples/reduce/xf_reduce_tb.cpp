@@ -36,41 +36,33 @@ int main(int argc, char** argv) {
     }
 
 #if DIM
-    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM))
-    {
+    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM)) {
         dst_hls.create(in_img.rows, 1, CV_32SC1);
         ocv_ref.create(in_img.rows, 1, CV_32SC1);
-    }
-    else
-    {
+    } else {
         dst_hls.create(in_img.rows, 1, CV_8UC1);
         ocv_ref.create(in_img.rows, 1, CV_8UC1);
-
     }
 
 #else
-    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM))
-    {
-     dst_hls.create(1, in_img.cols, CV_32SC1);
-     ocv_ref.create(1, in_img.cols, CV_32SC1);
-    }
-    else
-    {
-      dst_hls.create(1, in_img.cols, CV_8UC1);
-      ocv_ref.create(1, in_img.cols, CV_8UC1);
-
+    if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM)) {
+        dst_hls.create(1, in_img.cols, CV_32SC1);
+        ocv_ref.create(1, in_img.cols, CV_32SC1);
+    } else {
+        dst_hls.create(1, in_img.cols, CV_8UC1);
+        ocv_ref.create(1, in_img.cols, CV_8UC1);
     }
 #endif
 
-	int height=in_img.rows;
-	int width=in_img.cols;
+    int height = in_img.rows;
+    int width = in_img.cols;
     unsigned char dimension = DIM;
     size_t image_out_size_bytes;
 
-	//Call the top function
-	reduce_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data, dimension, (ap_uint<OUTPUT_PTR_WIDTH> *)dst_hls.data, height, width);
-	
-	
+    // Call the top function
+    reduce_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, dimension, (ap_uint<OUTPUT_PTR_WIDTH>*)dst_hls.data, height,
+                 width);
+
     // Reference function
     if ((REDUCTION_OP == CV_REDUCE_AVG) || (REDUCTION_OP == CV_REDUCE_SUM))
         cv::reduce(in_img, ocv_ref, DIM, REDUCTION_OP, CV_32SC1); // avg, sum

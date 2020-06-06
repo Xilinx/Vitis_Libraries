@@ -16,8 +16,8 @@
 
 #include "xf_remap_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC))/8) / (PTR_IMG_WIDTH/8);
-static constexpr int __XF_DEPTH_MAP=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE_XY,NPC))/8) / (4);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC)) / 8) / (PTR_IMG_WIDTH / 8);
+static constexpr int __XF_DEPTH_MAP = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE_XY, NPC)) / 8) / (4);
 
 void remap_accel(
     ap_uint<PTR_IMG_WIDTH>* img_in, float* map_x, float* map_y, ap_uint<PTR_IMG_WIDTH>* img_out, int rows, int cols) {
@@ -28,7 +28,7 @@ void remap_accel(
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem3 depth=__XF_DEPTH
     #pragma HLS INTERFACE s_axilite  port=rows 	        
     #pragma HLS INTERFACE s_axilite  port=cols 	        
-    #pragma HLS INTERFACE s_axilite  port=return 	
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> imgInput(rows, cols);

@@ -42,7 +42,7 @@ void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
     #pragma HLS INTERFACE m_axi     port=bm_state_arr  offset=slave bundle=gmem4
     #pragma HLS INTERFACE s_axilite port=rows               
     #pragma HLS INTERFACE s_axilite port=cols               
-    #pragma HLS INTERFACE s_axilite port=return                
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     ap_fixed<32, 12> cameraMA_l_fix[XF_CAMERA_MATRIX_SIZE], cameraMA_r_fix[XF_CAMERA_MATRIX_SIZE],
@@ -82,41 +82,22 @@ void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
     int _cm_size = 9, _dc_size = 5;
 
     xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_L(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=mat_L.data depth=2
-    // clang-format on
+
     xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_R(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=mat_R.data depth=2
-    // clang-format on
+
     xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mat_disp(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=mat_disp.data depth=2
-    // clang-format on
+
     xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapxLMat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=mapxLMat.data depth=2
-    // clang-format on
+
     xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapyLMat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=mapyLMat.data depth=2
-    // clang-format on
+
     xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapxRMat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=mapxRMat.data depth=2
-    // clang-format on
+
     xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> mapyRMat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=mapyRMat.data depth=2
-    // clang-format on
+
     xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> leftRemappedMat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=leftRemappedMat.data depth=2
-    // clang-format on
+
     xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> rightRemappedMat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=rightRemappedMat.data depth=2
-// clang-format on
 
 // clang-format off
     #pragma HLS DATAFLOW

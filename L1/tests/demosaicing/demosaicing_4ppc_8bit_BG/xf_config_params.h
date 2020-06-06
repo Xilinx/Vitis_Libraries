@@ -25,5 +25,3 @@
 #define BPATTERN XF_BAYER_BG
 
 #define XF_USE_URAM 0
-
-

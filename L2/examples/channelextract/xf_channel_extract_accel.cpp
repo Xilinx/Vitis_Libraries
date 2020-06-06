@@ -25,7 +25,7 @@ void channel_extract_accel(
     #pragma HLS INTERFACE s_axilite port=rows              	 
     #pragma HLS INTERFACE s_axilite port=cols              	 
     #pragma HLS INTERFACE s_axilite port=channel              	 
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, XF_NPPC1> imgInput0;

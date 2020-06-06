@@ -48,5 +48,5 @@
 /*  set the height and weight  */
 #define HEIGHT 128
 #define WIDTH 128
-void lut_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char* lut_ptr, ap_uint<PTR_WIDTH>* img_out,int height,int width);
+void lut_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char* lut_ptr, ap_uint<PTR_WIDTH>* img_out, int height, int width);
 #endif // end of _XF_LUT_CONFIG_H_

@@ -30,7 +30,7 @@ void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
     #pragma HLS INTERFACE m_axi     port=img_outy  offset=slave bundle=gmem4
     #pragma HLS INTERFACE s_axilite port=cols  
     #pragma HLS INTERFACE s_axilite port=rows  
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC> in_curr_mat(rows, cols);

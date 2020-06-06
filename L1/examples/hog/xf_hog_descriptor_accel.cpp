@@ -16,8 +16,8 @@
 
 #include "xf_hog_descriptor_config.h"
 
-static constexpr int __XF_DEPTH=(XF_HEIGHT*XF_WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(1*XF_DESC_SIZE*(XF_PIXELWIDTH(OUT_TYPE,NPC))/8) / (OUTPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (1 * XF_DESC_SIZE * (XF_PIXELWIDTH(OUT_TYPE, NPC)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void hog_descriptor_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* desc_out, int rows, int cols, int _desc_size) {

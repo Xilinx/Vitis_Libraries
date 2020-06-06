@@ -16,9 +16,10 @@
 
 #include "xf_convert_bitdepth_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
-void convert_bitdepth_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, int shift, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) {
+void convert_bitdepth_accel(
+    ap_uint<INPUT_PTR_WIDTH>* img_in, int shift, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1 depth=__XF_DEPTH
@@ -43,4 +44,3 @@ void convert_bitdepth_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, int shift, ap_uint
 
     return;
 } // End of kernel
-

@@ -16,17 +16,17 @@
 
 #include "xf_colordetect_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(HEIGHT*WIDTH*(XF_PIXELWIDTH(OUT_TYPE,NPC1))/8) / (OUTPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_FILTER=(FILTER_SIZE*FILTER_SIZE);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPC1)) / 8) / (OUTPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_FILTER = (FILTER_SIZE * FILTER_SIZE);
 
 void colordetect_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
-                  unsigned char* low_thresh,
-                  unsigned char* high_thresh,
-                  unsigned char* process_shape,
-                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                  int rows,
-                  int cols) {
+                       unsigned char* low_thresh,
+                       unsigned char* high_thresh,
+                       unsigned char* process_shape,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                       int rows,
+                       int cols) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
    
@@ -40,7 +40,7 @@ void colordetect_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
     #pragma HLS INTERFACE s_axilite  port=process_shape			      
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4 depth=__XF_DEPTH_OUT
   
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
@@ -89,5 +89,3 @@ void colordetect_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
     return;
 
 } // End of kernel
-
-

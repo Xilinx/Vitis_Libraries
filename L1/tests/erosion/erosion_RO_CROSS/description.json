@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.erosion_RO_CROSS", 
+    "name": "Xilinx Erosion_Ro_Cross Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

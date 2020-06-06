@@ -31,13 +31,12 @@ void accumulatesquared(ap_uint<PTR_IN_WIDTH>* img_in1,
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
     #pragma HLS INTERFACE s_axilite  port=height 			          
     #pragma HLS INTERFACE s_axilite  port=width 			          
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput2(height, width);
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
-
 
 // clang-format off
     #pragma HLS DATAFLOW

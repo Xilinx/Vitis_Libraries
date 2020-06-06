@@ -50,7 +50,8 @@ int main(int argc, char** argv) {
     int height = in_img.rows;
     int width = in_img.cols;
 
-    convert_bitdepth_accel((ap_uint<INPUT_PTR_WIDTH> *)input_img.data, shift, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, height, width);
+    convert_bitdepth_accel((ap_uint<INPUT_PTR_WIDTH>*)input_img.data, shift, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data,
+                           height, width);
 
     // Write output image:
     cv::imwrite("hls_out.png", out_img);

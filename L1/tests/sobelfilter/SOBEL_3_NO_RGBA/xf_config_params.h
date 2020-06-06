@@ -27,5 +27,3 @@
 #define RGBA 1
 
 #define XF_USE_URAM false
-
-

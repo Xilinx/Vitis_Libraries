@@ -1,5 +1,5 @@
 {
-    "name": "Kalmanfilter", 
+    "name": "Xilinx Kalmanfilter L2 Test", 
     "description": [
         "Kalmanfilter L2 function example"
     ],

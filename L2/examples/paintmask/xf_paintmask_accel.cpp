@@ -31,7 +31,7 @@ void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem3
     #pragma HLS INTERFACE s_axilite  port=height 		      
     #pragma HLS INTERFACE s_axilite  port=width		 	      
-    #pragma HLS INTERFACE s_axilite  port=return 		      
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);

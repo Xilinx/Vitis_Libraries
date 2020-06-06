@@ -1,14 +1,14 @@
 {
-    "name": "Warptransform", 
+    "name": "Xilinx Warptransform_Perspective_Bilinear_No_Rgba L2 Test", 
     "description": [
         "Warptransform L2 function example"
     ],
     "flow": "vitis",
     "platform_whitelist": [
-        "u200", "zcu102", "zcu104"
+        "u200", "zcu102"
     ], 
     "platform_blacklist": [
-        "u280", "u250", "u50"
+        "u280", "u250", "u50", "zcu104"
     ], 
     "platform_properties": {
         "u200": {

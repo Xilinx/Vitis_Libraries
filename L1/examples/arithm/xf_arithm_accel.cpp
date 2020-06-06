@@ -16,14 +16,12 @@
 
 #include "xf_arithm_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
-
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
 #if ARRAY
 #if defined(FUNCT_BITWISENOT) || defined(FUNCT_ZERO)
 void arithm_accel(
-    ap_uint<PTR_WIDTH>* img_in1, ap_uint<PTR_WIDTH>* img_in2, ap_uint<PTR_WIDTH>* img_out, int height,int width) {
+    ap_uint<PTR_WIDTH>* img_in1, ap_uint<PTR_WIDTH>* img_in2, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
 // clang-format off
 #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
 #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1 depth=__XF_DEPTH
@@ -42,7 +40,7 @@ void arithm_accel(
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
 // clang-format off
- 
+
 // clang-format on
 
 // clang-format off
@@ -66,7 +64,9 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
 #ifdef FUNCT_MULTIPLY
                   float scale,
 #endif
-                  ap_uint<PTR_WIDTH>* img_out, int height,int width) {
+                  ap_uint<PTR_WIDTH>* img_out,
+                  int height,
+                  int width) {
 // clang-format off
 #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
 
@@ -121,7 +121,7 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
 
 #if SCALAR
 void arithm_accel(
-    ap_uint<PTR_WIDTH>* img_in1, unsigned char* scl_in, ap_uint<PTR_WIDTH>* img_out, int height,int width) {
+    ap_uint<PTR_WIDTH>* img_in1, unsigned char* scl_in, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=scl_in        offset=slave  bundle=gmem1 depth=3
@@ -133,7 +133,7 @@ void arithm_accel(
     unsigned char scl[XF_CHANNELS(TYPE, NPC1)];
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
 
-// clang-format off
+    // clang-format off
 
     // clang-format on
     for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
@@ -159,5 +159,3 @@ void arithm_accel(
     return;
 } // End of kernel
 #endif
-
-

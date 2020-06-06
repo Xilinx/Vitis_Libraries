@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.pyrup.build", 
+    "name": "Xilinx Pyrup Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

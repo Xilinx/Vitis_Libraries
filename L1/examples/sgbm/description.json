@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.sgbm.build", 
+    "name": "Xilinx Sgbm Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -40,8 +40,8 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 16384, 
-                "max_time_min": 300
+                "max_memory_MB": 64536, 
+                "max_time_min": 500
             }
         ], 
         "targets": [

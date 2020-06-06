@@ -55,15 +55,16 @@ int main(int argc, char** argv) {
         }
     }
 
-    unsigned char color[XF_CHANNELS(TYPE,NPC1)];
+    unsigned char color[XF_CHANNELS(TYPE, NPC1)];
     for (int i = 0; i < in_img.channels(); i++) {
         color[i] = 150;
     }
 
-	//Call the top function
+    // Call the top function
 
-	paintmask_accel((ap_uint<PTR_WIDTH> *)in_img.data, (ap_uint<PTR_WIDTH> *)in_mask.data, color, (ap_uint<PTR_WIDTH> *)out_img.data, height, width);
-	
+    paintmask_accel((ap_uint<PTR_WIDTH>*)in_img.data, (ap_uint<PTR_WIDTH>*)in_mask.data, color,
+                    (ap_uint<PTR_WIDTH>*)out_img.data, height, width);
+
     // Reference function:
     unsigned long long int p = 0;
     for (int i = 0; i < ocv_ref.rows; i++) {

@@ -24,7 +24,7 @@ void integral_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>
    
     #pragma HLS INTERFACE s_axilite port=rows     
     #pragma HLS INTERFACE s_axilite port=cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);

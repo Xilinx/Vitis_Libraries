@@ -52,6 +52,6 @@ void resize_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                   int rows_in,
                   int cols_in,
                   int rows_out,
-                  int cols_out) ;
+                  int cols_out);
 
 #endif

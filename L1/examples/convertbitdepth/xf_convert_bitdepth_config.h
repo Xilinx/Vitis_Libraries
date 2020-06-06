@@ -205,6 +205,7 @@
 #endif
 #endif
 
-void convert_bitdepth_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, int shift, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width);
+void convert_bitdepth_accel(
+    ap_uint<INPUT_PTR_WIDTH>* img_in, int shift, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width);
 
 #endif // _XF_CONVERT_BITDEPTH_CONFIG_H_

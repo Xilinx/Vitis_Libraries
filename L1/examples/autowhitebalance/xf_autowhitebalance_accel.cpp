@@ -16,11 +16,57 @@
 
 #include "xf_autowhitebalance_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_8UC3,NPC1))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_8UC3, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
+static bool flag;
+
+static uint32_t hist0[3][256];
+static uint32_t hist1[3][256];
+static int igain_0[3];
+static int igain_1[3];
+
+void AWBKernel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
+               ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+               int height,
+               int width,
+               uint32_t hist0[3][256],
+               uint32_t hist1[3][256],
+               int gain0[3],
+               int gain1[3],
+               float thresh,
+               float inputMin,
+               float inputMax,
+               float outputMin,
+               float outputMax) {
+#pragma HLS INLINE OFF
+
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> in_mat(height, width);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> out_mat(height, width);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> impop(height, width);
+
+// clang-format off
+#pragma HLS DATAFLOW
+// clang-format on
+
+// clang-format off
+#pragma HLS stream variable=impop.data dim=1 depth=2
+    // clang-format on
+
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
+
+    if (WB_TYPE == 1) {
+        xf::cv::AWBhistogram<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, 1>(in_mat, impop, hist0, thresh, inputMin, inputMax,
+                                                                       outputMin, outputMax);
+        xf::cv::AWBNormalization<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, 1>(impop, out_mat, hist1, thresh, inputMin,
+                                                                           inputMax, outputMin, outputMax);
+    } else {
+        xf::cv::AWBChannelGain<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, 0>(in_mat, impop, thresh, gain0);
+        xf::cv::AWBGainUpdate<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, 0>(impop, out_mat, thresh, gain1);
+    }
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
+}
 
 void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-                            ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                             ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                             float thresh,
                             int rows,
@@ -31,7 +77,6 @@ void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                             float outputMax) {
 // clang-format off
 #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1 depth=__XF_DEPTH
-#pragma HLS INTERFACE m_axi     port=img_inp1  offset=slave bundle=gmem2 depth=__XF_DEPTH
 #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem3  depth=__XF_DEPTH
 
 #pragma HLS INTERFACE s_axilite port=thresh   
@@ -41,33 +86,23 @@ void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 #pragma HLS INTERFACE s_axilite port=outputMax
 #pragma HLS INTERFACE s_axilite port=rows     
 #pragma HLS INTERFACE s_axilite port=cols     
-#pragma HLS INTERFACE s_axilite port=return   
+#pragma HLS INTERFACE s_axilite port=return
+#pragma HLS ARRAY_PARTITION variable=hist0 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=hist1 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=igain_0 complete 
+#pragma HLS ARRAY_PARTITION variable=igain_1 complete
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> in_mat(rows,cols);
-// clang-format off
-    // clang-format on
-    
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> in_mat1(rows,cols);
-// clang-format off
-    // clang-format on
-    
+    if (!flag) {
+        AWBKernel(img_inp, img_out, rows, cols, hist0, hist1, igain_0, igain_1, thresh, inputMin, inputMax, outputMin,
+                  outputMax);
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> out_mat(rows,cols);
-// clang-format off
-    // clang-format on
-   
+        flag = 1;
 
-// clang-format off
-#pragma HLS DATAFLOW
-    // clang-format on
+    } else {
+        AWBKernel(img_inp, img_out, rows, cols, hist1, hist0, igain_1, igain_0, thresh, inputMin, inputMax, outputMin,
+                  outputMax);
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_inp1, in_mat1);
-
-    xf::cv::balanceWhite<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, WB_TYPE>(in_mat, in_mat1, out_mat, thresh, inputMin,
-                                                                          inputMax, outputMin, outputMax);
-
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
+        flag = 0;
+    }
 }
-

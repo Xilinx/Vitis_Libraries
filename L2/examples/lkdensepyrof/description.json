@@ -1,5 +1,5 @@
 {
-    "name": "Lkdensepyrof", 
+    "name": "Xilinx Lkdensepyrof L2 Test", 
     "description": [
         "Lkdensepyrof L2 function example"
     ],
@@ -62,7 +62,7 @@
     "launch": [
         {
             "target" : "sw_emu",
-            "cmd_args": "LIB_DIR/data/lkof_im0_512x512.png",
+            "cmd_args": "LIB_DIR/data/lkof_im0_256x128.png LIB_DIR/data/lkof_im1_256x128.png",
             "name": "sw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -72,7 +72,7 @@
         },
         {
             "target" : "hw_emu",
-            "cmd_args": "LIB_DIR/data/lkof_im0_512x512.png",
+            "cmd_args": "LIB_DIR/data/lkof_im0_256x128.png LIB_DIR/data/lkof_im1_256x128.png",
             "name": "hw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -82,7 +82,7 @@
         },
         {
             "target" : "hw",
-            "cmd_args": "LIB_DIR/data/lkof_im0_512x512.png",
+            "cmd_args": "LIB_DIR/data/lkof_im0_512x512.png LIB_DIR/data/lkof_im1_512x512.png",
             "name": "hardware_build",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -91,7 +91,7 @@
 	    ]
         }
     ],
-    "data": ["LIB_DIR/data/lkof_im0_512x512.png"], 
+    "data": ["LIB_DIR/data/lkof_im0_512x512.png", "LIB_DIR/data/lkof_im1_512x512.png", "LIB_DIR/data/lkof_im0_256x128.png", "LIB_DIR/data/lkof_im1_256x128.png"], 
     "host": {
         "host_exe": "lkdensepyrof", 
         "compiler": {
@@ -142,7 +142,7 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 32768, 
-                "max_time_min": 520
+                "max_time_min": 600
             }
         ], 
         "targets": [

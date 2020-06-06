@@ -1,5 +1,5 @@
 {
-    "name": "Canny", 
+    "name": "Xilinx Canny_L2_Ro_5 L2 Test", 
     "description": [
         "Canny L2 function example"
     ],
@@ -122,6 +122,7 @@
 		},
                 {
                     "name": "edgetracing_accel", 
+					"clflags": "-D__SDA_MEM_MAP__",  
                     "location": "LIB_DIR/L2/examples/canny/xf_edgetracing_accel.cpp"
                 }
            ] 

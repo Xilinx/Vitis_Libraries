@@ -1,5 +1,5 @@
 {
-    "name": "Cornertracker", 
+    "name": "Xilinx Cornertrack L3 Test", 
     "description": [
         "Cornertracker L3 function example"
     ],
@@ -91,7 +91,7 @@
 	    ]
         }
     ],
-    "data": ["LIB_DIR/data"], 
+    "data": ["LIB_DIR/data/im0.png", "LIB_DIR/data/im1.png", "LIB_DIR/data/im2.png", "LIB_DIR/data/im3.png", "LIB_DIR/data/im4.png"], 
     "host": {
         "host_exe": "cornertracker", 
         "compiler": {
@@ -130,7 +130,8 @@
                 },
 				{
                     "name": "cornerupdate_accel", 
-                    "location": "LIB_DIR/L3/examples/cornertracker/xf_cornerupdate_accel.cpp"
+                    "location": "LIB_DIR/L3/examples/cornertracker/xf_cornerupdate_accel.cpp",
+                    "clflags" : "-D__SDA_MEM_MAP__"
                 }
            ] 
         }

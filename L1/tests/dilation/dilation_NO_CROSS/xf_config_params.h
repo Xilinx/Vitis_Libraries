@@ -24,5 +24,3 @@
 #define KERNEL_SHAPE XF_SHAPE_CROSS
 
 #define ITERATIONS 1
-
-

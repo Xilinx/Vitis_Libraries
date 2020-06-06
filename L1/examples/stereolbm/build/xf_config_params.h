@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #define SAD_WINDOW_SIZE 11
 
 /* NO_OF_DISPARITIES must be greater than '0' and less than the image width */
@@ -25,4 +24,3 @@
 #define PARALLEL_UNITS 32
 
 #define XF_USE_URAM false
-

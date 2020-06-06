@@ -157,11 +157,7 @@ xFapplygaussian3x3(XF_PTNAME(DEPTH) D1,
 
     sum = (value1)*weights[0] + sum2 * weights[1];
 
-#if __x86_64__
     unsigned char val = (sum + 32768) >> 16;
-#else
-    unsigned char val = (sum) >> 16;
-#endif
 
     out_pix = (XF_PTNAME(DEPTH))val;
 
@@ -210,11 +206,8 @@ xfapplygaussian5x5(XF_PTNAME(DEPTH) * src_buf1,
 
         sumval = (unsigned int)tmp_sum[0] * weights[0] + tmp_sum[1] * weights[1] + tmp_sum[2] * weights[2];
 
-#if __x86_64__
         unsigned short val = ((sumval + 32768) >> 16);
-#else
-        unsigned short val = ((sumval) >> 16);
-#endif
+
         if (val >= 255) {
             value = 255;
         } else {
@@ -283,11 +276,8 @@ xfapplygaussian7x7(XF_PTNAME(DEPTH) * src_buf1,
 
         sum_value = (sum)*weights[0] + (sum1)*weights[1] + (sum2)*weights[2] + (sum3)*weights[3];
 
-#if __x86_64__
         unsigned short val = ((sum_value + 32768) >> 16);
-#else
-        unsigned short val = ((sum_value) >> 16);
-#endif
+
         unsigned char value;
 
         if (val >= 255) {
@@ -575,7 +565,7 @@ void ProcessGaussian5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
                         XF_SNAME(WORDWIDTH) & inter_valx,
                         uint16_t img_width,
                         uint16_t img_height,
-						ap_uint<13> row_ind,
+                        ap_uint<13> row_ind,
                         uint16_t& shift_x,
                         ap_uint<4> tp1,
                         ap_uint<4> tp2,
@@ -646,8 +636,6 @@ Col_Loop:
 
             xfPackPixels<NPC, WORDWIDTH, DEPTH>(&OutputValues[0], inter_valx, 2, (npc - 2), shift_x);
 
-           
-
         } else {
             if (NPC == XF_NPPC8) {
                 xfPackPixels<NPC, WORDWIDTH, DEPTH>(&OutputValues[0], inter_valx, 0, 2, shift_x);
@@ -661,7 +649,7 @@ Col_Loop:
 
             } else {
                 if (col >= 2) {
-                     if (PLANES == 1) {
+                    if (PLANES == 1) {
                         inter_valx((max_loop - 1), (max_loop - 8)) = OutputValues[0];
                         _out_mat.write(write_index++, inter_valx);
                     } else {
@@ -796,16 +784,17 @@ Row_Loop:
 
         ProcessGaussian5x5<SRC_T, ROWS, COLS, PLANES, DEPTH, NPC, WORDWIDTH, TC, FOR_IMAGE_PYRAMID>(
             _src_mat, _out_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, OutputValues, inter_valx,
-            img_width, img_height,row_ind, shift_x, tp1, tp2, mid, bottom1, bottom2, row, weights, read_index, write_index);
+            img_width, img_height, row_ind, shift_x, tp1, tp2, mid, bottom1, bottom2, row, weights, read_index,
+            write_index);
 
         if ((NPC == XF_NPPC8) || (NPC == XF_NPPC16)) {
-           for (ap_uint<6> i = 4; i < (XF_NPIXPERCYCLE(NPC) + 4); i++) {
-				src_buf1[i] = 0;
-				src_buf2[i] = 0;
-				src_buf3[i] = 0;
-				src_buf4[i] = 0;
-				src_buf5[i] = 0;
-			}
+            for (ap_uint<6> i = 4; i < (XF_NPIXPERCYCLE(NPC) + 4); i++) {
+                src_buf1[i] = 0;
+                src_buf2[i] = 0;
+                src_buf3[i] = 0;
+                src_buf4[i] = 0;
+                src_buf5[i] = 0;
+            }
             OutputValues[0] = xfapplygaussian5x5<PLANES, DEPTH, FOR_IMAGE_PYRAMID>(
                 &src_buf1[0], &src_buf2[0], &src_buf3[0], &src_buf4[0], &src_buf5[0], weights);
 

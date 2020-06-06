@@ -53,10 +53,11 @@ template <int SRC_T,
           int NPC,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
-          int COLS_TRIP,int TC>
+          int COLS_TRIP,
+          int TC>
 void xFMagnitudeKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
                        xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _src2,
-                       xf::cv::Mat<DST_T, ROWS, COLS, NPC,TC>& _dst_mat,
+                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, TC>& _dst_mat,
                        int _norm_type,
                        uint16_t& imgheight,
                        uint16_t& imgwidth) {
@@ -129,10 +130,10 @@ void xFMagnitudeComputation(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& src1,
         src1, src2, _dst, _norm_type, imgheight, imgwidth);
 }
 
-template <int NORM_TYPE, int SRC_T, int DST_T, int ROWS, int COLS, int NPC,int TC>
+template <int NORM_TYPE, int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int TC>
 void magnitude(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_matx,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _src_maty,
-               xf::cv::Mat<DST_T, ROWS, COLS, NPC,TC>& _dst_mat) {
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, TC>& _dst_mat) {
 #ifndef __SYNTHESIS__
     assert(((_src_matx.rows <= ROWS) && (_src_matx.cols <= COLS)) &&
            "ROWS and COLS should be greater than input image");
@@ -152,7 +153,7 @@ void magnitude(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_matx,
     uint16_t height = _src_matx.rows;
 
     xFMagnitudeKernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC,
-                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)),TC>(
+                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)), TC>(
         _src_matx, _src_maty, _dst_mat, NORM_TYPE, height, imgwidth);
 }
 } // namespace cv

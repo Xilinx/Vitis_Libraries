@@ -16,10 +16,9 @@
 
 #include "xf_houghlines_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_Y=LINESMAX;
-static constexpr int __XF_DEPTH_X=LINESMAX;
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_Y = LINESMAX;
+static constexpr int __XF_DEPTH_X = LINESMAX;
 
 void houghlines_accel(
     ap_uint<PTR_WIDTH>* img_in, short threshold, short maxlines, float* arrayy, float* arrayx, int rows, int cols) {
@@ -34,7 +33,7 @@ void houghlines_accel(
     #pragma HLS INTERFACE s_axilite  port=maxlines 			      
 	 #pragma HLS INTERFACE s_axilite port=rows     
     #pragma HLS INTERFACE s_axilite port=cols     
-    #pragma HLS INTERFACE s_axilite  port=return 			      
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
@@ -52,4 +51,3 @@ void houghlines_accel(
 
     return;
 } // End of kernel
-

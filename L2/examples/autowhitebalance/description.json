@@ -1,5 +1,5 @@
 {
-    "name": "Autowhitebalance", 
+    "name": "Xilinx Autowhitebalance L2 Test", 
     "description": [
         "Autowhitebalance L2 function example"
     ],
@@ -62,7 +62,7 @@
     "launch": [
         {
             "target" : "sw_emu",
-            "cmd_args": "LIB_DIR/data/4k.jpg ",
+            "cmd_args": "LIB_DIR/data/128x128.png ",
             "name": "sw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",

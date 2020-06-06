@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include "xf_corner_tracker_config.h"
 
-#define VIDEO_INPUT 0 
+#define VIDEO_INPUT 0
 #define HLS 0
 
 #if !HLS
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
                   << std::endl;
         return -1;
     }
-    char img_name[1000], out_img_name[50], pyr_out_img_name[50], pyr_out_img_name2[50];  
+    char img_name[1000], out_img_name[50], pyr_out_img_name[50], pyr_out_img_name2[50];
     char* path = argv[1];
 #if VIDEO_INPUT
     cv::VideoCapture cap;
@@ -534,8 +534,8 @@ int main(int argc, char** argv) {
         cu_krnl.setArg(5, flow.rows);
         cu_krnl.setArg(6, flow.cols);
         fprintf(stderr, "\nkernel args set\n");
-        fprintf(stderr, "\n flow_rows = %d flow_cols=%d num of corners=%d harris_flag=%d", flow.rows,
-                flow.cols, params[0], params[2]);
+        fprintf(stderr, "\n flow_rows = %d flow_cols=%d num of corners=%d harris_flag=%d", flow.rows, flow.cols,
+                params[0], params[2]);
 
         cl::Event cu_event_sp;
 
@@ -593,14 +593,13 @@ int main(int argc, char** argv) {
         gly.release();
         outputimage.release();
 
-// Print PyrDown outputimage
+        // Print PyrDown outputimage
         for (int kk = 0; kk < NUM_LEVELS; kk++) {
             sprintf(pyr_out_img_name, "pyr1_out_img%d_%d.png", i, kk);
             sprintf(pyr_out_img_name2, "pyr2_out_img%d_%d.png", i, kk);
             xf::cv::imwrite(pyr_out_img_name, imagepyr1[kk]);
             xf::cv::imwrite(pyr_out_img_name2, imagepyr2[kk]);
         }
-
     }
     im0.data = NULL;
     im1.data = NULL;

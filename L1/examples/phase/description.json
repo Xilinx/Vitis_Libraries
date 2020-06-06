@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.phase.build", 
+    "name": "Xilinx Phase Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

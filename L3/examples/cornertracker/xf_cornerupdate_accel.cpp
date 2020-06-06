@@ -35,7 +35,7 @@ void cornerupdate_accel(unsigned long* list_fix,
     #pragma HLS INTERFACE s_axilite port=harris_flag     
     #pragma HLS INTERFACE s_axilite port=flow_rows     
     #pragma HLS INTERFACE s_axilite port=flow_cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> flow_mat(flow_rows, flow_cols, flow_vectors);

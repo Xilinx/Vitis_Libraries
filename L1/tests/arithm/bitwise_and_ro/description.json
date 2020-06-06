@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.bitwise_and_ro", 
+    "name": "Xilinx Bitwise_And_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

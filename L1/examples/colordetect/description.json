@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.colordetect.build", 
+    "name": "Xilinx Colordetect Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -40,7 +40,7 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 16384, 
+                "max_memory_MB": 65536, 
                 "max_time_min": 300
             }
         ], 

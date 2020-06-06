@@ -370,7 +370,8 @@ int main(int argc, char** argv) {
     int height = in_imgL.rows;
     int width = in_imgL.cols;
 
-    semiglobalbm_accel((ap_uint<INPUT_PTR_WIDTH> *)in_imgL.data,(ap_uint<INPUT_PTR_WIDTH> *)in_imgR.data,small_penalty,large_penalty,(ap_uint<OUTPUT_PTR_WIDTH> *)hls_out.data,height,width);
+    semiglobalbm_accel((ap_uint<INPUT_PTR_WIDTH>*)in_imgL.data, (ap_uint<INPUT_PTR_WIDTH>*)in_imgR.data, small_penalty,
+                       large_penalty, (ap_uint<OUTPUT_PTR_WIDTH>*)hls_out.data, height, width);
 
     // Write down the HLS result:
     cv::imwrite("hls_out.png", hls_out);

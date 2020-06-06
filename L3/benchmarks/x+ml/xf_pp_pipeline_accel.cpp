@@ -38,7 +38,7 @@ void pp_pipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 #pragma HLS INTERFACE s_axilite port=th1     
 #pragma HLS INTERFACE s_axilite port=th2     
 
-#pragma HLS INTERFACE s_axilite port=return   
+#pragma HLS INTERFACE s_axilite port=return
     // clang-format on
     xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0(rows_in, cols_in);
 // clang-format off

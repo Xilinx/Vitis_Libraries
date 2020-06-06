@@ -28,5 +28,3 @@
 #define DIM 0
 
 #define REDUCTION_OP XF_REDUCE_SUM
-
-

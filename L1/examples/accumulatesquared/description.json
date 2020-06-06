@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.accumulatesquared.build", 
+    "name": "Xilinx Accumulatesquared Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

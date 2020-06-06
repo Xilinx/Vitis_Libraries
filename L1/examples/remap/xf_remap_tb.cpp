@@ -92,8 +92,8 @@ int main(int argc, char** argv) {
     cv::remap(src, ocv_remapped, map_x, map_y, cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
 #endif
 
-    
-    remap_accel((ap_uint<PTR_IMG_WIDTH> *)src.data,(float *)map_x.data,(float *)map_y.data,(ap_uint<PTR_IMG_WIDTH> *)hls_remapped.data,src.rows,src.cols);
+    remap_accel((ap_uint<PTR_IMG_WIDTH>*)src.data, (float*)map_x.data, (float*)map_y.data,
+                (ap_uint<PTR_IMG_WIDTH>*)hls_remapped.data, src.rows, src.cols);
 
     // Save the results:
     cv::imwrite("ocv_reference_out.jpg", ocv_remapped); // Opencv Result

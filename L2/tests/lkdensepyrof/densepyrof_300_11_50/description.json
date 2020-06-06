@@ -1,5 +1,5 @@
 {
-    "name": "Lkdensepyrof", 
+    "name": "Xilinx Densepyrof_300_11_50 L2 Test", 
     "description": [
         "Lkdensepyrof L2 function example"
     ],
@@ -62,7 +62,7 @@
     "launch": [
         {
             "target" : "sw_emu",
-            "cmd_args": "LIB_DIR/data/lkof_im0_512x512.png",
+            "cmd_args": "LIB_DIR/data/lkof_im0_256x128.png LIB_DIR/data/lkof_im1_256x128.png",
             "name": "sw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -72,7 +72,7 @@
         },
         {
             "target" : "hw_emu",
-            "cmd_args": "LIB_DIR/data/lkof_im0_512x512.png",
+            "cmd_args": "LIB_DIR/data/lkof_im0_256x128.png LIB_DIR/data/lkof_im1_256x128.png",
             "name": "hw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -82,7 +82,7 @@
         },
         {
             "target" : "hw",
-            "cmd_args": "LIB_DIR/data/lkof_im0_512x512.png",
+            "cmd_args": "LIB_DIR/data/lkof_im0_512x512.png LIB_DIR/data/lkof_im1_512x512.png",
             "name": "hardware_build",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -91,14 +91,17 @@
 	    ]
         }
     ],
-    "data": ["LIB_DIR/data/lkof_im0_512x512.png"], 
+    "data": ["LIB_DIR/data/lkof_im0_512x512.png", "LIB_DIR/data/lkof_im1_512x512.png", "LIB_DIR/data/lkof_im0_256x128.png", "LIB_DIR/data/lkof_im1_256x128.png"],  
     "host": {
         "host_exe": "lkdensepyrof", 
         "compiler": {
             "sources": [
                 "LIB_DIR/L2/examples/lkdensepyrof/xf_pyr_dense_optical_flow_tb.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
+           "includepaths" : [
+                "LIB_DIR/L2/examples/lkdensepyrof/build"
+            ],
             "options": "-O3",
             "symbols": ["__SDSVHLS__" ] 
         }
@@ -107,6 +110,9 @@
         "compiler": {
             "symbols": [
                 
+            ],
+           "includepaths" : [
+                "LIB_DIR/L2/examples/lkdensepyrof/build"
             ],
             "clflags": [
             ]

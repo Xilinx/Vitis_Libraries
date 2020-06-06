@@ -16,12 +16,14 @@
 
 #include "xf_accumulate_weighted_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void accumulate_weighted_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                        ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                        ap_uint<OUTPUT_PTR_WIDTH>* img_out,float alpha, int height, int width)
-{
+                               ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                               ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                               float alpha,
+                               int height,
+                               int width) {
 // clang-format off
 	#pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
 	#pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1 depth=__XF_DEPTH
@@ -49,5 +51,3 @@ void accumulate_weighted_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 
     return;
 } // End of kernel
-
-

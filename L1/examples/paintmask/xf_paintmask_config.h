@@ -43,7 +43,6 @@
 #define TYPE XF_8UC1
 #define M_TYPE XF_8UC1
 
-
 void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
                      ap_uint<PTR_WIDTH>* mask_in,
                      unsigned char* color,

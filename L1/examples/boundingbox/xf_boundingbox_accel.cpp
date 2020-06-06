@@ -16,14 +16,14 @@
 
 #include "xf_boundingbox_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPIX))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPIX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void boundingbox_accel(
     ap_uint<INPUT_PTR_WIDTH>* in_img, int* roi, int color_info[MAX_BOXES][4], int height, int width, int num_box) {
 // clang-format off
     #pragma HLS INTERFACE m_axi     port=in_img  	offset=slave bundle=gmem1 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi     port=roi  	    	offset=slave bundle=gmem2 depth=20
-    #pragma HLS INTERFACE m_axi     port=color_info  	offset=slave bundle=gmem3 
+    #pragma HLS INTERFACE m_axi     port=color_info  	offset=slave bundle=gmem3
 // clang-format on
 
 // clang-format off
@@ -33,7 +33,7 @@ void boundingbox_accel(
     #pragma HLS INTERFACE s_axilite port=num_box           	 
     #pragma HLS INTERFACE s_axilite port=height              
     #pragma HLS INTERFACE s_axilite port=width               
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Rect_<int> _roi[MAX_BOXES];
@@ -53,4 +53,3 @@ void boundingbox_accel(
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPIX> in_mat(height, width, in_img);
     xf::cv::boundingbox<TYPE, HEIGHT, WIDTH, MAX_BOXES, NPIX>(in_mat, _roi, color, num_box);
 }
-

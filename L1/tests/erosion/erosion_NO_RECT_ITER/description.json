@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.erosion_NO_RECT_ITER", 
+    "name": "Xilinx Erosion_No_Rect_Iter Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

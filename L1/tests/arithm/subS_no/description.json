@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.subS_no", 
+    "name": "Xilinx Subs_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

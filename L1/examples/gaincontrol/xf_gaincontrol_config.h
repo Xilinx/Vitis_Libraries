@@ -24,10 +24,9 @@
 #include "imgproc/xf_gaincontrol.hpp"
 #include "imgproc/xf_duplicateimage.hpp"
 
-
 // Set the image height and width
-#define HEIGHT 128//2160
-#define WIDTH  128//3840
+#define HEIGHT 128 // 2160
+#define WIDTH 128  // 3840
 
 #define WB_TYPE 1
 
@@ -43,6 +42,5 @@
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
 
-
 void gaincontrol_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols);
-#endif//_XF_GC_CONFIG_H_
+#endif //_XF_GC_CONFIG_H_

@@ -16,15 +16,15 @@
 
 #include "xf_sgbm_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void semiglobalbm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in_l,
-                ap_uint<INPUT_PTR_WIDTH>* img_in_r,
-                unsigned char penalty_small,
-                unsigned char penalty_large,
-                ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                int rows,
-                int cols) {
+                        ap_uint<INPUT_PTR_WIDTH>* img_in_r,
+                        unsigned char penalty_small,
+                        unsigned char penalty_large,
+                        ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                        int rows,
+                        int cols) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in_l      offset=slave  bundle=gmem0 depth=230400
     #pragma HLS INTERFACE m_axi      port=img_in_r      offset=slave  bundle=gmem1 depth=230400

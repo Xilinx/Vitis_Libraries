@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.min_max_16s_no", 
+    "name": "Xilinx Min_Max_16S_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

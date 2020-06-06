@@ -401,12 +401,12 @@ void xFWriteHOGDescRB(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _block_strm,
     uint16_t nohw = (((_width - WIN_WIDTH) / WIN_STRIDE) + 1);
     uint16_t novb = ((_height / CELL_HEIGHT) - 1);
     uint16_t nohb = ((_width / CELL_WIDTH) - 1);
-    xFWriteHOGDescKernelRB<
-        NOB, WIN_STRIDE, CELL_HEIGHT, CELL_WIDTH, ((WIN_HEIGHT / CELL_HEIGHT) - 1), ((WIN_WIDTH / CELL_WIDTH) - 1),
-        (((ROWS - WIN_HEIGHT) / WIN_STRIDE) + 1), (((COLS - WIN_WIDTH) / WIN_STRIDE) + 1), ((ROWS / CELL_HEIGHT) - 1),
-        ((COLS / CELL_WIDTH) - 1), ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST,
-        (XF_WORDDEPTH(WORDWIDTH_SRC)/XF_WORDDEPTH(WORDWIDTH_DST)), USE_URAM>(_block_strm, _desc_strm, novw,
-                                                                                       nohw, novb, nohb);
+    xFWriteHOGDescKernelRB<NOB, WIN_STRIDE, CELL_HEIGHT, CELL_WIDTH, ((WIN_HEIGHT / CELL_HEIGHT) - 1),
+                           ((WIN_WIDTH / CELL_WIDTH) - 1), (((ROWS - WIN_HEIGHT) / WIN_STRIDE) + 1),
+                           (((COLS - WIN_WIDTH) / WIN_STRIDE) + 1), ((ROWS / CELL_HEIGHT) - 1),
+                           ((COLS / CELL_WIDTH) - 1), ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC,
+                           WORDWIDTH_DST, (XF_WORDDEPTH(WORDWIDTH_SRC) / XF_WORDDEPTH(WORDWIDTH_DST)), USE_URAM>(
+        _block_strm, _desc_strm, novw, nohw, novb, nohb);
 }
 
 /*******************************************************************************************

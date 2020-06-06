@@ -25,7 +25,7 @@
 #include "xf_config_params.h"
 
 #define INPUT_PTR_WIDTH 128
-#define OUTPUT_PTR_WIDTH 128 
+#define OUTPUT_PTR_WIDTH 128
 
 // Resolve input and output pixel type:
 #if T_8U

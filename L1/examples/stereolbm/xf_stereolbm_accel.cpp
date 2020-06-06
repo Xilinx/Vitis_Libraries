@@ -16,8 +16,8 @@
 
 #include "xf_stereolbm_config.h"
 
-static constexpr int __XF_DEPTH_IN=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(HEIGHT*WIDTH*(XF_PIXELWIDTH(OUT_TYPE,NPC))/8) / (OUTPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPC)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void stereolbm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in_l,
                      ap_uint<INPUT_PTR_WIDTH>* img_in_r,

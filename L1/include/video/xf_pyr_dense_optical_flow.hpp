@@ -29,7 +29,7 @@
 template <unsigned short MAXHEIGHT, unsigned short MAXWIDTH, int FLOW_WIDTH, int FLOW_INT>
 void stitch_stream_fixed_int(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& in_stream1,
                              hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& in_stream2,
-                             xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1> &sitched_stream,
+                             xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& sitched_stream,
                              unsigned int rows,
                              unsigned int cols,
                              unsigned int level) {
@@ -83,7 +83,7 @@ void stitch_stream_fixed_int(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& in_st
 #endif
 } // end split_stream()
 template <unsigned short MAXHEIGHT, unsigned short MAXWIDTH, int FLOW_WIDTH, int FLOW_INT>
-void split_stream_int_fixed(xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1> &instream,
+void split_stream_int_fixed(xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& instream,
                             hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& out_stream1,
                             hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& out_stream2,
                             unsigned int rows,
@@ -281,10 +281,10 @@ template <unsigned short MAXHEIGHT,
           int FLOW_WIDTH,
           int FLOW_INT,
           bool USE_URAM>
-void xFLKOpticalFlowDenseKernel(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1> &currImg,
-                                xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1> &nextImg,
-                                xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1> &strmFlowin,
-                                xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1> &strmFlow,
+void xFLKOpticalFlowDenseKernel(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& currImg,
+                                xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& nextImg,
+                                xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& strmFlowin,
+                                xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& strmFlow,
                                 const unsigned int rows,
                                 const unsigned int cols,
                                 const unsigned int prev_rows,

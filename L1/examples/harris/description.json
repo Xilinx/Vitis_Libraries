@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.harris.build", 
+    "name": "Xilinx Harris Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

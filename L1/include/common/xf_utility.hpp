@@ -296,9 +296,9 @@ class accel_utils {
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
     void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
 #if !defined(__XF_USE_OLD_IMPL__)
-        MMIterIn<PTR_WIDTH,MAT_T,ROWS,COLS,NPC>::Array2xfMat(srcPtr, dstMat);
+        MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::Array2xfMat(srcPtr, dstMat);
 #else
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
@@ -441,9 +441,9 @@ class accel_utils {
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
     void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
 #if !defined(__XF_USE_OLD_IMPL__)
-        MMIterOut<PTR_WIDTH,MAT_T,ROWS,COLS,NPC>::xfMat2Array(srcMat, dstPtr);
+        MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::xfMat2Array(srcMat, dstPtr);
 #else
-        // clang-format off
+// clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
@@ -507,7 +507,7 @@ class accel_utils {
 template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
 void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
 #if !defined(__XF_USE_OLD_IMPL__)
-    MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::xfMat2Array(srcMat,dstPtr);
+    MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::xfMat2Array(srcMat, dstPtr);
 #else
     accel_utils au;
     au.xfMat2Array<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcMat, dstPtr);
@@ -517,7 +517,7 @@ void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>
 template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
 void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
 #if !defined(__XF_USE_OLD_IMPL__)
-    MMIterIn<PTR_WIDTH,MAT_T,ROWS,COLS,NPC>::Array2xfMat(srcPtr, dstMat);
+    MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::Array2xfMat(srcPtr, dstMat);
 #else
     accel_utils au;
     au.Array2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcPtr, dstMat);

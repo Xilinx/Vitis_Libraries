@@ -18,4 +18,3 @@
 
 #define HEIGHT 128
 #define WIDTH 128
-

@@ -19,5 +19,3 @@
 
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
-
-

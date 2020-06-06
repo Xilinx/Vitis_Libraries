@@ -16,8 +16,9 @@
 
 #include "xf_channel_extract_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_8UC4,XF_NPPC1))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_8UC1,XF_NPPC1))/8) / (OUTPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_8UC4, XF_NPPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT =
+    (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_8UC1, XF_NPPC1)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void channel_extract_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_rgba, ap_uint<OUTPUT_PTR_WIDTH>* img_gray, uint16_t channel, int rows, int cols) {
@@ -47,4 +48,3 @@ void channel_extract_accel(
     xf::cv::extractChannel<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(imgInput0, imgOutput0, channel);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(imgOutput0, img_gray);
 }
-

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.custconv_NO_5_RGBA", 
+    "name": "Xilinx Custconv_No_5_Rgba Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

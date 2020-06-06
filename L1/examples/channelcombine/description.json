@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.channelcombine.build", 
+    "name": "Xilinx Channelcombine Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

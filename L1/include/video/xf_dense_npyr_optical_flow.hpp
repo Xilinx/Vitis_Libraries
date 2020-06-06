@@ -86,8 +86,11 @@ static void getPseudoColorInt(pix_t pix, float fx, float fy, rgba_t& rgba) {
 // void readMatRows ( mywide_t< XF_NPIXPERCYCLE(NPC) >  *matB, hls::stream < mywide_t< XF_NPIXPERCYCLE(NPC) > >&
 // pixStream)
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
-static void readMatRows16(
-    xf::cv::Mat<TYPE, ROWS, COLS, NPC> &src, hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& pixStream, int rows, int cols, int size) {
+static void readMatRows16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& src,
+                          hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& pixStream,
+                          int rows,
+                          int cols,
+                          int size) {
     unsigned int count = 0;
     for (int i = 0; i < size; i++) {
 // clang-format off
@@ -131,8 +134,12 @@ static void writeMatRowsRGBA16(
 // write rgba stream to external array dst. The "a" is just padding and is
 // unused
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
-static void pack2Vectors(
-    hls::stream<float>& flow0, hls::stream<float>& flow1, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &out_flow, int rows, int cols, int size) {
+static void pack2Vectors(hls::stream<float>& flow0,
+                         hls::stream<float>& flow1,
+                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& out_flow,
+                         int rows,
+                         int cols,
+                         int size) {
     for (int i = 0; i < size; i++) {
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS*COLS/NPC
@@ -146,7 +153,7 @@ static void pack2Vectors(
         d1_int = (ap_uint<32>*)&d1;
         // as 0th word will have d0_int and 1st word will have d1_int
         ap_uint<64> l = ((unsigned long long)(*d1_int) << 32) | (unsigned long long)(*d0_int);
-		out_flow.write(i, l);
+        out_flow.write(i, l);
     }
 }
 
@@ -685,8 +692,13 @@ static void lbWrapper16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& f0Stream,
 // top level wrapper to avoid dataflow problems
 // void flowWrap (mywide_t frame0[NUM_WORDS], mywide_t frame1[NUM_WORDS], rgba2_t framef[NUM_WORDS])
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
-static void flowWrap16(
-    xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame0, xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame1, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowx, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowy, int rows, int cols, int size) {
+static void flowWrap16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
+                       xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
+                       xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
+                       xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
+                       int rows,
+                       int cols,
+                       int size) {
 //#pragma HLS data_pack variable=frame0
 //#pragma HLS data_pack variable=frame1
 //#pragma HLS data_pack variable=framef
@@ -774,8 +786,13 @@ static void flowWrap16(
 // void fpga_optflow (unsigned short frame0[NUM_WORDS], unsigned short frame1[NUM_WORDS], unsigned long long
 // framef[NUM_WORDS])
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
-static void fpga_optflow16(
-    xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame0, xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame1, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowx, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowy, int rows, int cols, int size) {
+static void fpga_optflow16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
+                           xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
+                           xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
+                           xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
+                           int rows,
+                           int cols,
+                           int size) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -789,7 +806,8 @@ static void fpga_optflow16(
 // Can be simplified to a single loop with II=1 TODO, hls::stream< mywide_t< XF_NPIXPERCYCLE(NPC) > > &frame1,
 // hls::stream<rgba_t> &framef
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
-static void readMatRows(xf::cv::Mat<TYPE, ROWS, COLS, NPC> &matB, hls::stream<pix_t>& pixStream, int rows, int cols, int size) {
+static void readMatRows(
+    xf::cv::Mat<TYPE, ROWS, COLS, NPC>& matB, hls::stream<pix_t>& pixStream, int rows, int cols, int size) {
     const int WORD_SIZE = (NPC == XF_NPPC1) ? 1 : 2;
     for (int i = 0; i < size; i++) {
 // clang-format off
@@ -798,11 +816,11 @@ static void readMatRows(xf::cv::Mat<TYPE, ROWS, COLS, NPC> &matB, hls::stream<pi
         // clang-format on
         mywide_t<XF_NPIXPERCYCLE(NPC)> tmpData;
         tmpData.data[0] = matB.read(i);
-		
-        //for (int k = 0; k < WORD_SIZE; ++k) {
+
+        // for (int k = 0; k < WORD_SIZE; ++k) {
         //    pixStream.write(tmpData.data[k]);
-       // }
-            pixStream.write(tmpData.data[0]);
+        // }
+        pixStream.write(tmpData.data[0]);
     }
 }
 
@@ -1110,8 +1128,8 @@ static void computeFlow(hls::stream<int>& ixix,
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void writeOutput8(hls::stream<float>& fx_in,
                          hls::stream<float>& fy_in,
-                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowx,
-                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowy,
+                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
+                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
                          int size) {
     for (int r = 0; r < size; r++) {
 // clang-format off
@@ -1127,8 +1145,8 @@ static void writeOutput8(hls::stream<float>& fx_in,
         fy_out_int = (ap_uint<32>*)&fy_out;
         flowx.write(r, *fx_out_int);
         flowy.write(r, *fy_out_int);
-       // ap_uint<32> a32 = flowx.read(r);
-       // ap_uint<32> b32 = flowy.read(r);
+        // ap_uint<32> a32 = flowx.read(r);
+        // ap_uint<32> b32 = flowy.read(r);
     }
 }
 
@@ -1205,14 +1223,12 @@ loop_rows:
             // read in the new pixels at col=c and row=bottom_of_lb
             pix_t pix0 = f0Stream.read();
 
-
             lb1[(WINDOW_SIZE + 1) - 1][c] = pix0;
             img1Col[(WINDOW_SIZE + 1) - 1].write(pix0);
 
             pix_t pix1 = f1Stream.read();
 
-            
-	    lb2[(WINDOW_SIZE + 1) - 1][c] = pix1;
+            lb2[(WINDOW_SIZE + 1) - 1][c] = pix1;
             img2Col[(WINDOW_SIZE + 1) - 1].write(pix1);
         }
     }
@@ -1235,10 +1251,10 @@ loop_rows:
 
 // top level wrapper to avoid dataflow problems
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
-static void flowWrap(xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame0,
-                     xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame1,
-                     xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowx,
-                     xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowy,
+static void flowWrap(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
+                     xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
+                     xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
+                     xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
                      int rows,
                      int cols,
                      int size) {
@@ -1304,10 +1320,10 @@ static void flowWrap(xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame0,
 //  frame1 - Second input frame (grayscale 1 byte per pixel)
 //  framef - Output frame with flows visualized. 3 bytes per pixel + 1 byte padding
 template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
-static void fpga_optflow8(xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame0,
-                          xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame1,
-                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowx,
-                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowy,
+static void fpga_optflow8(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
+                          xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
+                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
+                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
                           int rows,
                           int cols,
                           int size) {
@@ -1320,18 +1336,16 @@ static void fpga_optflow8(xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame0,
     return;
 }
 template <int WINDOW_SIZE, int TYPE, int ROWS, int COLS, int NPC, bool USE_URAM = false>
-void DenseNonPyrLKOpticalFlow(xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame0,
-                              xf::cv::Mat<TYPE, ROWS, COLS, NPC> &frame1,
-                              xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowx,
-                              xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC> &flowy) {
-								  
+void DenseNonPyrLKOpticalFlow(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
+                              xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
+                              xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
+                              xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy) {
     if (NPC == XF_NPPC1) {
-        fpga_optflow8<TYPE, ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx,
-                                                              flowy, frame0.rows, frame0.cols, frame0.size);
+        fpga_optflow8<TYPE, ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx, flowy, frame0.rows,
+                                                                    frame0.cols, frame0.size);
     } else {
-        fpga_optflow16<TYPE, ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(frame0, frame1,
-                                                               flowx, flowy,
-                                                               frame0.rows, frame0.cols, frame0.size);
+        fpga_optflow16<TYPE, ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx, flowy, frame0.rows,
+                                                                     frame0.cols, frame0.size);
     }
 }
 } // namespace cv

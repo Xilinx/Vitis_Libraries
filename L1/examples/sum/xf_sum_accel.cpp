@@ -16,9 +16,7 @@
 
 #include "xf_sum_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
-
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
 void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out) {
 // clang-format off
@@ -28,10 +26,10 @@ void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out) {
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(HEIGHT, WIDTH);
-    double sum_local[XF_CHANNELS(TYPE,NPC1)];
+    double sum_local[XF_CHANNELS(TYPE, NPC1)];
 
 // clang-format off
-   
+
 // clang-format on
 
 // clang-format off
@@ -45,10 +43,9 @@ void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out) {
     xf::cv::sum<TYPE, HEIGHT, WIDTH, NPC1>(imgInput, sum_local);
 
     // Copy the result to output port:
-    for (unsigned int i = 0; i < XF_CHANNELS(TYPE,NPC1); ++i) {
+    for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
         sum_out[i] = sum_local[i];
     }
 
     return;
 } // End of kernel
-

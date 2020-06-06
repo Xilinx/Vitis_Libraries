@@ -59,7 +59,10 @@
 #endif
 
 void accumulate_weighted_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                        ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                        ap_uint<OUTPUT_PTR_WIDTH>* img_out,float alpha, int height, int width);
+                               ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                               ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                               float alpha,
+                               int height,
+                               int width);
 
 #endif //_XF_ACCUMULATE_WEIGHTED_CONFIG_H_

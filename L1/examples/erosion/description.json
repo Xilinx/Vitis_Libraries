@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.erosion.build", 
+    "name": "Xilinx Erosion Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

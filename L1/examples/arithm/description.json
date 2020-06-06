@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.arithm.build", 
+    "name": "Xilinx Arithm Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

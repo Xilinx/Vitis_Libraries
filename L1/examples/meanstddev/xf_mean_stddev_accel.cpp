@@ -16,21 +16,21 @@
 
 #include "xf_mean_stddev_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,__NPPC))/8) / (PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_MS=XF_CHANNELS(TYPE,__NPPC);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, __NPPC)) / 8) / (PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_MS = XF_CHANNELS(TYPE, __NPPC);
 
-void mean_stddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned short* stddev, int height, int width) {
+void mean_stddev_accel(
+    ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned short* stddev, int height, int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=mean          offset=slave  bundle=gmem1 depth=__XF_DEPTH_MS
     #pragma HLS INTERFACE m_axi      port=stddev        offset=slave  bundle=gmem2 depth=__XF_DEPTH_MS
     #pragma HLS INTERFACE s_axilite  port=height 		      
     #pragma HLS INTERFACE s_axilite  port=width 		      
-    #pragma HLS INTERFACE s_axilite  port=return 		      
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, __NPPC> imgInput(height, width);
-
 
 // clang-format off
     #pragma HLS DATAFLOW
@@ -44,4 +44,3 @@ void mean_stddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigne
 
     return;
 } // End of kernel
-

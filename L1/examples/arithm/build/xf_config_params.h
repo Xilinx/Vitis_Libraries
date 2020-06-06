@@ -33,4 +33,3 @@
 // OpenCV reference macros
 #define CV_FUNCT_NAME absdiff
 // //#define CV_EXTRA_ARG  0.05
-

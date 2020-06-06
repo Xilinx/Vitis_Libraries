@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.medianblur_3x3_RO", 
+    "name": "Xilinx Medianblur_3X3_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

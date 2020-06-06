@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 #endif
 
     int height = in_img.rows;
-    int width  = in_img.cols;
+    int width = in_img.cols;
 
     // OpenCV Gaussian filter function
     cv::GaussianBlur(in_img, ocv_ref, cvSize(FILTER_WIDTH, FILTER_WIDTH), FILTER_WIDTH / 6.0, FILTER_WIDTH / 6.0,
@@ -69,7 +69,8 @@ int main(int argc, char** argv) {
     imwrite("output_ocv.png", ocv_ref);
 
     // Call the top function
-    gaussian_filter_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width, sigma);
+    gaussian_filter_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height,
+                          width, sigma);
 
     // Write output image
     cv::imwrite("hls_out.jpg", out_img);
@@ -81,8 +82,8 @@ int main(int argc, char** argv) {
 
     float err_per;
     xf::cv::analyzeDiff(diff, 0, err_per);
-	
-	if (err_per > 0.0f) {
+
+    if (err_per > 0.0f) {
         return 1;
     }
 

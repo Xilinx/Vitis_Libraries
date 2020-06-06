@@ -33,7 +33,7 @@ void customconv(ap_uint<PTR_IN_WIDTH>* img_in,
     #pragma HLS INTERFACE s_axilite  port=shift 			          
 	#pragma HLS INTERFACE s_axilite  port=rows 			          
 	#pragma HLS INTERFACE s_axilite  port=cols 			          
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<INTYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
