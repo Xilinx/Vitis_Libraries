@@ -84,8 +84,8 @@
 #include "inftrees.h"
 #include "inflate.h"
 #include "inffast.h"
-// Minimum size set as 128KB
-#define MIN_INPUT_SIZE (1<<17)
+// Minimum size set as 1MB
+#define MIN_INPUT_SIZE MEGA_BYTE
 using namespace xf::compression;
 #ifdef MAKEFIXED
 #ifndef BUILDFIXED
@@ -661,10 +661,16 @@ int ZEXPORT inflate(z_streamp strm, int flush)
         use_fpga_sol = true;
     }
     
+    char *min_size = getenv("MIN_INPUT_SIZE");
+    uint32_t small_size = MIN_INPUT_SIZE;
+    if (min_size != NULL) {
+        small_size = atoi(min_size);
+    }
+    
     // Check input size if its less than
     // MIN_INPUT_SIZE use SW flow
     uint64_t input_size = strm->avail_in;
-    if (input_size < MIN_INPUT_SIZE) {
+    if (input_size < small_size) {
 #ifdef VERBOSE
         std::cout << "Input Size is less than MIN_INPUT_SIZE";
         std::cout << " Falling back to SW Solution " << std::endl;
@@ -679,7 +685,7 @@ int ZEXPORT inflate(z_streamp strm, int flush)
         xfZlib *xlz = nullptr;
         bool flag = false;
         do {
-            xlz = new xfZlib(u50_xclbin.c_str(), c_max_cr, DECOMP_ONLY);
+            xlz = new xfZlib(u50_xclbin.c_str(), c_max_cr, DECOMP_ONLY, 0, 0, FULL);
             int err_code = xlz->error_code();
             if (err_code && (err_code != c_clOutOfResource)) {
 #ifdef VERBOSE

@@ -13,6 +13,10 @@
     "platform_blacklist": [
         "u280"
     ],
+    "platform_whitelist": [
+        "u200",
+        "u250"
+    ],
     "host": {
         "host_exe": "xil_lz4_streaming",
         "compiler": {
@@ -42,7 +46,7 @@
     "containers": [
         {
             "name": "decompress_streaming",
-            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/decompress.ini",
+            "ldclflags": "--config PROJECT/decompress.ini",
             "accelerators": [
                 {
                     "name": "xilLz4DecompressStream",

@@ -13,7 +13,10 @@
     "platform_blacklist": [
         "u280"
     ],
-    "match_makefile": "false",
+     "platform_whitelist": [
+        "u200",
+        "u250"
+    ],
     "host": {
         "host_exe": "xil_zlib",
         "compiler": {
@@ -26,7 +29,9 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ],
             "includepaths": [
-                "LIB_DIR/L2/include"
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L2/tests/src/" 
             ],
             "symbols": [
                 "PARALLEL_BLOCK=8"
@@ -39,7 +44,7 @@
             "PROJECT/hls_directives.tcl"
         ],
         "compiler": {
-            "symbols": [
+           "symbols": [
                 "PARALLEL_BLOCK=8",
                 "HIGH_FMAX=2",
                 "MULTIPLE_BYTES=4"
@@ -52,7 +57,7 @@
     "containers": [
         {
             "name": "decompress",
-            "ldclflags": "--profile_kernel data:all:all:all --config PROJECT/opts.ini",
+            "ldclflags": "--config PROJECT/opts.ini",
             "accelerators": [
                 {
                     "name": "xilZlibDmReader", 

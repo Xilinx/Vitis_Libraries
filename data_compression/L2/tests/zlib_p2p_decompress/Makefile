@@ -147,7 +147,7 @@ VPP_FLAGS += --config $(CUR_DIR)/advanced.ini
 VPP_FLAGS += -DPARALLEL_BLOCK=1 -DMULTIPLE_BYTES=8 
 
 # Kernel linker flags
-LDCLFLAGS_decompress_stream += --profile_kernel data:all:all:all --config $(CUR_DIR)/opts.ini
+LDCLFLAGS_decompress_stream += --config $(CUR_DIR)/opts.ini
 # Adding config files to linker
 LDCLFLAGS_decompress_stream+= --config auto_decompress_stream.ini 
 

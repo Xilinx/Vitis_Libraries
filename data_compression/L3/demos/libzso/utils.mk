@@ -41,9 +41,9 @@ VXX_FLAGS += --dk protocol:all:all:all
 endif
 
 #Checks for XILINX_VITIS
-ifndef XILINX_VITIS
-$(error XILINX_VITIS variable is not set, please set correctly and rerun)
-endif
+#ifndef XILINX_VITIS
+#$(error XILINX_VITIS variable is not set, please set correctly and rerun)
+#endif
 
 #   sanitize_xsa - create a filesystem friendly name from xsa name
 #   $(1) - name of xsa

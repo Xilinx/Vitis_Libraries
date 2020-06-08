@@ -137,7 +137,7 @@ VPP_FLAGS += --config $(CUR_DIR)/advanced.ini
 VPP_FLAGS += -DPARALLEL_BLOCK=8 -DMULTIPLE_BYTES=4 -DHIGH_FMAX_II=2 -DDECODER_TYPE=2 
 
 # Kernel linker flags
-LDCLFLAGS_compress_decompress += --profile_kernel data:all:all:all --config $(CUR_DIR)/opts.ini
+LDCLFLAGS_compress_decompress += --config $(CUR_DIR)/opts.ini
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/compress_decompress.xclbin

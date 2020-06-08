@@ -135,7 +135,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 VPP_FLAGS += -DPARALLEL_BLOCK=1 -DPARALLEL_BYTE=4 
 
 # Kernel linker flags
-LDCLFLAGS_decompress += --profile_kernel data:all:all:all --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=$(CUR_DIR)/post_route.tcl
+LDCLFLAGS_decompress += --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=$(CUR_DIR)/post_route.tcl
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/decompress.xclbin
