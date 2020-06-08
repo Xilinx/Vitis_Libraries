@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.warptransform_AFFINE_NN_NO", 
+    "name": "Xilinx Warptransform_Affine_Nn_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

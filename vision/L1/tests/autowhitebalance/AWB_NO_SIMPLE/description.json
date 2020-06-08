@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.AWB_NO_SIMPLE", 
+    "name": "Xilinx Awb_No_Simple Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

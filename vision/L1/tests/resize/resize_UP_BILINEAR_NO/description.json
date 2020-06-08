@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.resize_UP_BILINEAR_NO", 
+    "name": "Xilinx Resize_Up_Bilinear_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

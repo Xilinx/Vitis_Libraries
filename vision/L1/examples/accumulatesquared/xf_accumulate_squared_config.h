@@ -59,5 +59,7 @@
 #endif
 #endif //_XF_ACCUMULATE_SQUARED_CONFIG_H_
 void accumulate_squared(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                       ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,int height, int width);
+                        ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                        ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                        int height,
+                        int width);

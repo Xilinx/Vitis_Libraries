@@ -32,7 +32,7 @@ void boundingbox_accel(
     #pragma HLS INTERFACE s_axilite port=num_box           	 
     #pragma HLS INTERFACE s_axilite port=height              
     #pragma HLS INTERFACE s_axilite port=width               
-    #pragma HLS INTERFACE s_axilite port=return              
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Rect_<int> _roi[MAX_BOXES];

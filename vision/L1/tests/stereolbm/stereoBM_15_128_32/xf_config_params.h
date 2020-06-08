@@ -24,5 +24,3 @@
 #define PARALLEL_UNITS 32
 
 #define XF_USE_URAM false
-
-

@@ -16,7 +16,7 @@
 
 #include "xf_fast_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
 void fast_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char threshold, ap_uint<PTR_WIDTH>* img_out, int rows, int cols) {
 // clang-format off
@@ -26,7 +26,7 @@ void fast_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char threshold, ap_uint<PTR
     #pragma HLS INTERFACE s_axilite  port=rows 			          
 	#pragma HLS INTERFACE s_axilite  port=cols 			          
     #pragma HLS INTERFACE s_axilite  port=threshold 			  
-    #pragma HLS INTERFACE s_axilite  port=return 			      
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);

@@ -16,7 +16,7 @@
 
 #include "xf_hist_equalize_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_8UC1,NPC_T))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_8UC1, NPC_T)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void equalizeHist_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                         ap_uint<INPUT_PTR_WIDTH>* img_inp1,
@@ -30,11 +30,11 @@ void equalizeHist_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     
     #pragma HLS INTERFACE s_axilite port=rows              
     #pragma HLS INTERFACE s_axilite port=cols              
-    #pragma HLS INTERFACE s_axilite port=return                
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC_T> in_mat(rows, cols);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC_T> in_mat1(rows,cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC_T> in_mat1(rows, cols);
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC_T> out_mat(rows, cols);
 
 // clang-format off
@@ -45,4 +45,3 @@ void equalizeHist_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::equalizeHist<XF_8UC1, HEIGHT, WIDTH, NPC_T>(in_mat, in_mat1, out_mat);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC_T>(out_mat, img_out);
 }
-

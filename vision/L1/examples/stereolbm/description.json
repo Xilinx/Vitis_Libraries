@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.stereolbm.build", 
+    "name": "Xilinx Stereolbm Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -40,7 +40,7 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 16384, 
+                "max_memory_MB": 65535, 
                 "max_time_min": 300
             }
         ], 

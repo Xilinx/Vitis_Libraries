@@ -16,7 +16,7 @@
 
 #include "xf_gaussian_diff_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
 void gaussian_diff_accel(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WIDTH>* img_out, int rows, int cols) {
 // clang-format off
@@ -31,10 +31,10 @@ void gaussian_diff_accel(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WI
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgin1(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgin2(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1,15360> imgin3(rows, cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, 15360> imgin3(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgin4(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
-	
+
 // clang-format off
     #pragma HLS STREAM variable=imgInput.data depth=2
     #pragma HLS STREAM variable=imgin1.data depth=2
@@ -43,7 +43,6 @@ void gaussian_diff_accel(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WI
     #pragma HLS STREAM variable=imgin4.data depth=2
     #pragma HLS STREAM variable=imgOutput.data depth=2
 // clang-format on
-
 
 // clang-format off
     #pragma HLS DATAFLOW
@@ -54,13 +53,12 @@ void gaussian_diff_accel(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WI
 
     // Run xfOpenCV kernel:
     xf::cv::GaussianBlur<FILTER_WIDTH, XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, NPC1>(imgInput, imgin1, sigma);
-    xf::cv::duplicateMat<TYPE, HEIGHT, WIDTH, NPC1,15360>(imgin1, imgin2, imgin3);
+    xf::cv::duplicateMat<TYPE, HEIGHT, WIDTH, NPC1, 15360>(imgin1, imgin2, imgin3);
     xf::cv::GaussianBlur<FILTER_WIDTH, XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, NPC1>(imgin2, imgin4, sigma);
-    xf::cv::subtract<XF_CONVERT_POLICY_SATURATE, TYPE, HEIGHT, WIDTH, NPC1,15360>(imgin3, imgin4, imgOutput);
+    xf::cv::subtract<XF_CONVERT_POLICY_SATURATE, TYPE, HEIGHT, WIDTH, NPC1, 15360>(imgin3, imgin4, imgOutput);
 
     // Convert output xf::cv::Mat object to output array:
     xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
 
     return;
 } // End of kernel
-

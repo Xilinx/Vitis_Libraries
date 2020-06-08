@@ -40,7 +40,7 @@
 // Resolve optimization type:
 #define NPC1 NPPC
 
-#if (T_16U )
+#if (T_16U)
 #define CV_INTYPE CV_16UC1
 #define CV_OUTTYPE CV_16UC3
 #else

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.medianblur_5x5_RGB_NO", 
+    "name": "Xilinx Medianblur_5X5_Rgb_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

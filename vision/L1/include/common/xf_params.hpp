@@ -169,7 +169,7 @@ enum _word_width {
     XF_512UW = 43,
     XF_560SW = 44,
     XF_576UW = 45,
-    XF_96FW  = 46,
+    XF_96FW = 46,
     XF_192FW = 47,
     XF_384FW = 48,
     XF_768FW = 49,

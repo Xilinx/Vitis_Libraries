@@ -27,12 +27,11 @@ void bilateralfilter(
     #pragma HLS INTERFACE s_axilite  port=sigma_space 			          
     #pragma HLS INTERFACE s_axilite  port=rows 			          
     #pragma HLS INTERFACE s_axilite  port=cols 			          
-    #pragma HLS INTERFACE s_axilite  port=return 	
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
-
 
 // clang-format off
     #pragma HLS DATAFLOW

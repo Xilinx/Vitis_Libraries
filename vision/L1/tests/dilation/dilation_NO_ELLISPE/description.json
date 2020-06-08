@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.dilation_NO_ELLISPE", 
+    "name": "Xilinx Dilation_No_Ellispe Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

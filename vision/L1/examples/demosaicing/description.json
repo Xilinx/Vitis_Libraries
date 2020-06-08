@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.demosaicing.build", 
+    "name": "Xilinx Demosaicing Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

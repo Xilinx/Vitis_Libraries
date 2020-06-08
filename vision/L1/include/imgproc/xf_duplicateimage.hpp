@@ -27,10 +27,10 @@
 
 namespace xf {
 namespace cv {
-template <int ROWS, int COLS, int SRC_T, int DEPTH, int NPC, int WORDWIDTH,int XFPDEPTH>
+template <int ROWS, int COLS, int SRC_T, int DEPTH, int NPC, int WORDWIDTH, int XFPDEPTH>
 void xFDuplicate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst1,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC,XFPDEPTH>& _dst2,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFPDEPTH>& _dst2,
                  uint16_t img_height,
                  uint16_t img_width) {
     img_width = img_width >> XF_BITSHIFT(NPC);
@@ -57,18 +57,17 @@ Row_Loop:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC,int XFPDEPTH>
+template <int SRC_T, int ROWS, int COLS, int NPC, int XFPDEPTH>
 void duplicateMat(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst1,
-                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC,XFPDEPTH>& _dst2) {
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFPDEPTH>& _dst2) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
 
-    xFDuplicate<ROWS, COLS, SRC_T, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),XFPDEPTH>(_src, _dst1, _dst2, _src.rows,
-                                                                                        _src.cols);
+    xFDuplicate<ROWS, COLS, SRC_T, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC), XFPDEPTH>(_src, _dst1, _dst2,
+                                                                                                  _src.rows, _src.cols);
 }
-
 
 template <int ROWS, int COLS, int SRC_T, int DEPTH, int NPC, int WORDWIDTH>
 void xFDuplicate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,

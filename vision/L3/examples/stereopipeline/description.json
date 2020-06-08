@@ -1,7 +1,7 @@
 {
-    "name": "Stereopipeline", 
+    "name": "Xilinx Stereopipeline L3 Test", 
     "description": [
-        "Stereopipeline L2 function example"
+        "Stereopipeline L3 function example"
     ],
     "flow": "vitis",
     "platform_whitelist": [

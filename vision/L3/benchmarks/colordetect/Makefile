@@ -25,8 +25,8 @@ CASE_ROOT     ?= $(CUR_DIR)
 #MK_COMMON_DIR := mk
 
 # Below should point to library repo
-XF_LIB_DIR    ?= $(abspath $(CASE_ROOT)/../../..)
-MK_COMMON_DIR := $(XF_LIB_DIR)/ext/makefile_templates
+XF_PROJ_ROOT    ?= $(abspath $(CASE_ROOT)/../../..)
+MK_COMMON_DIR := $(XF_PROJ_ROOT)/ext/makefile_templates
 
 .SECONDEXPANSION:
 
@@ -42,7 +42,10 @@ help::
 	@echo "Makefile Usage:"
 	@echo ""
 	@echo "  make host xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform>"
-	@echo "      Command to generate the design for specified target and device."
+	@echo "      Command to generate the design for specified target and a PCIe device."
+	@echo ""	
+	@echo "  make host xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform> BOARD=Zynq ARCH=<aarch32 | aarch64>"
+	@echo "      Command to generate the design for specified target and an Embedded device."	
 	@echo ""
 	@echo "      TARGET defaults to sw_emu."
 	@echo ""
@@ -182,7 +185,7 @@ data: $(DATA_STAMP)
 # -----------------------------------------------------------------------------
 #                          kernel setup
 
-KSRC_DIR 		:= $(XF_LIB_DIR)/L3/benchmarks/colordetect
+KSRC_DIR 		:= $(XF_PROJ_ROOT)/L3/benchmarks/colordetect
 XFREQUENCY 		:= 300
 VIVADO_FREQUENCY        =$(shell echo $$(( $(XFREQUENCY) * 1000000 )))
 
@@ -190,7 +193,7 @@ XCLBIN_NAME 	:= krnl_colordetect
 KER_NAME    	:= color_detect
 KERNELS += $(KER_NAME):xf_colordetect_accel.cpp
 
-VPP_CFLAGS  	+=  -I. -I$(XF_LIB_DIR)/L1/include
+VPP_CFLAGS  	+=  -I. -I$(XF_PROJ_ROOT)/L1/include
 VPP_CFLAGS  	+= -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 
 
@@ -204,16 +207,16 @@ endif
 # -----------------------------------------------------------------------------
 #                           host setup
 
-SRC_DIR 		:= $(XF_LIB_DIR)/L3/benchmarks/colordetect
+SRC_DIR 		:= $(XF_PROJ_ROOT)/L3/benchmarks/colordetect
 
 EXE_NAME  		:= colordetect
-HOST_ARGS 		= $(XF_LIB_DIR)/data/colordetect_128x128.jpeg #$(XCLBIN_FILE)
+HOST_ARGS 		= $(XF_PROJ_ROOT)/data/colordetect_128x128.jpeg #$(XCLBIN_FILE)
 SRCS      		:= xf_colordetect_tb
 
 # Macro definitions
 CXXFLAGS 		+= -D XDEVICE=$(XDEVICE) -DVIVADO_HLS_SIM -D__SDSVHLS__ -DHLS_NO_XIL_FPO_LIB
 # Search paths:
-CXXFLAGS 		+=  -I. -I$(XF_LIB_DIR)/L1/include -I$(XF_LIB_DIR)/ext/xcl2 
+CXXFLAGS 		+=  -I. -I$(XF_PROJ_ROOT)/L1/include -I$(XF_PROJ_ROOT)/ext/xcl2 
 # Options
 CXXFLAGS 		+= -g
 
@@ -225,7 +228,7 @@ endif
 # EXTRA_OBJS is cannot be compiled from SRC_DIR, user should provide the rule
 EXTRA_OBJS 		+= xcl2
 
-EXT_DIR   		= $(XF_LIB_DIR)/ext
+EXT_DIR   		= $(XF_PROJ_ROOT)/ext
 xcl2_SRCS 		= $(EXT_DIR)/xcl2/xcl2.cpp
 xcl2_HDRS 		= $(EXT_DIR)/xcl2/xcl2.hpp
 xcl2_CXXFLAGS 	= -I $(EXT_DIR)/xcl2
@@ -341,6 +344,15 @@ endif
 
 PKG_OUT_DIR := package_$(TARGET)
 
+EMBEDDED_EXEC_SCRIPT = run_emu.sh
+EMBEDDED_PACKAGE_OUT = package_$(TARGET)
+
+ifneq (,$(findstring zc706, $(XDEVICE)))
+	ROOTFS := $(SYSROOT)/../../uImage
+else
+	ROOTFS := $(SYSROOT)/../../Image
+endif
+
 CC := gcc
 
 CXXFLAGS += -std=c++14 -fPIC -I$(OPENCV_INCLUDE) \
@@ -446,7 +458,9 @@ sd_card : host xclbin
 	mkdir -p $(PKG_OUT_DIR)
 	rm -rf run_emu.sh
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> run_emu.sh
+ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> run_emu.sh
+endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_emu.sh
 	@echo 'export XILINX_XRT=/usr' >> run_emu.sh
 	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_emu.sh
@@ -457,7 +471,7 @@ sd_card : host xclbin
 	@echo '		echo "ERROR: Embedded host run failed, RC=$$return_code"' >> run_emu.sh
 	@echo 'fi' >> run_emu.sh
 	@echo 'echo "INFO: Embedded host run completed."' >> run_emu.sh
-	v++ -t $(TARGET) --platform $(DEVICE) -p $(XCLBIN_FILE) --package.out_dir $(PKG_OUT_DIR) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.sd_file $(SYSROOT)/../../Image --package.sd_file run_emu.sh --package.sd_file $(EXE_FILE) $(SD_FILE_LIST) --package.sd_file emconfig.json
+	v++ -t $(TARGET) --platform $(DEVICE) -p $(XCLBIN_FILE) --package.out_dir $(PKG_OUT_DIR) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.sd_file $(ROOTFS) --package.sd_file run_emu.sh --package.sd_file $(EXE_FILE) $(SD_FILE_LIST) --package.sd_file emconfig.json
 	@echo "### ***** sd_card generation done! ***** ###"
 
 

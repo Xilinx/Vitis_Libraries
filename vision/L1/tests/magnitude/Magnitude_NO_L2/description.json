@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.Magnitude_NO_L2", 
+    "name": "Xilinx Magnitude_No_L2 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -40,5 +40,3 @@
 /* Output image Dimensions */
 #define NEWWIDTH 64  // Maximum output image width
 #define NEWHEIGHT 64 // Maximum output image height
-
-

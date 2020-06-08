@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.custconv_NO_3_16", 
+    "name": "Xilinx Custconv_No_3_16 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

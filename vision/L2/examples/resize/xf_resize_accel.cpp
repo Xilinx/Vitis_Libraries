@@ -30,7 +30,7 @@ void resize_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=cols_in              
     #pragma HLS INTERFACE s_axilite port=rows_out              
     #pragma HLS INTERFACE s_axilite port=cols_out              
-    #pragma HLS INTERFACE s_axilite port=return                
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> in_mat(rows_in, cols_in);

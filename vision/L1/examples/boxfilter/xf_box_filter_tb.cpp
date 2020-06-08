@@ -17,8 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_box_filter_config.h"
 
-
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
@@ -60,18 +58,17 @@ int main(int argc, char** argv) {
     cv::boxFilter(in_conv_img, ocv_ref, -1, cv::Size(7, 7), cv::Point(-1, -1), true, cv::BORDER_CONSTANT);
 #endif
 
-
     int in_height = in_img.rows;
     int in_width = in_img.cols;
 
-/////////////////////Top function call////////////////////////////////////////	
+    /////////////////////Top function call////////////////////////////////////////
 
-    boxfilter_accel((ap_uint<INPUT_PTR_WIDTH> *)in_conv_img.data, (ap_uint<INPUT_PTR_WIDTH> *)out_img.data,in_height,in_width);
-	
+    boxfilter_accel((ap_uint<INPUT_PTR_WIDTH>*)in_conv_img.data, (ap_uint<INPUT_PTR_WIDTH>*)out_img.data, in_height,
+                    in_width);
 
     absdiff(ocv_ref, out_img, diff);
-	imwrite("outputocv.jpg", ocv_ref); 
-	imwrite("outputhls.jpg", out_img); 
+    imwrite("outputocv.jpg", ocv_ref);
+    imwrite("outputhls.jpg", out_img);
     imwrite("diff_img.jpg", diff); // Save the difference image for debugging purpose
 
     // Find minimum and maximum differences.

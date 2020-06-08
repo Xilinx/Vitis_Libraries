@@ -50,7 +50,7 @@ void HOGDescriptor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat, xf::cv::Mat<DST
     hls::stream<XF_CTUNAME(SRC_T, NPC)> in[IMG_COLOR];
     hls::stream<XF_SNAME(XF_576UW)> _block_strm;
     hls::stream<XF_TNAME(DST_T, NPC)> desc_strm;
-    
+
     int dsize = _desc_mat.size;
 
 // clang-format off

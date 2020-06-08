@@ -50,9 +50,9 @@ int main(int argc, char** argv) {
     out_gray.create(in_gray.rows, in_gray.cols, CV_8UC1);
     diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
 #else
-    	ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-        out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
-        diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
 #endif
     float alpha = 0.2;
     float beta = 0.8;
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     // Clean up:
     queue.finish();
 
-//    out_gray.convertTo(inout_gray1, CV_32FC1);
+    //    out_gray.convertTo(inout_gray1, CV_32FC1);
 
     cv::imwrite("out_hls.jpg", out_gray);
 

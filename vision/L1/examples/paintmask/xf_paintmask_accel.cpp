@@ -16,9 +16,7 @@
 
 #include "xf_paintmask_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(TYPE,NPC1))/8) / (PTR_WIDTH/8);
-
-
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
 
 void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
                      ap_uint<PTR_WIDTH>* mask_in,
@@ -63,5 +61,3 @@ void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
 
     return;
 } // End of kernel
-
-

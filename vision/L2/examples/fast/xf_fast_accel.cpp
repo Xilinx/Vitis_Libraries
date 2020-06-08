@@ -26,7 +26,7 @@ void fast_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char threshold, ap_uint<PTR
    #pragma HLS INTERFACE s_axilite  port=rows 			          
 	#pragma HLS INTERFACE s_axilite  port=cols 			          
     #pragma HLS INTERFACE s_axilite  port=threshold 			      
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);

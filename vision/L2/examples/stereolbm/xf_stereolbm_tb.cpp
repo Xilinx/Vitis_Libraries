@@ -55,22 +55,22 @@ int main(int argc, char** argv) {
     cv::Mat disp, hls_disp;
 
     // OpenCV reference function:
-/*    cv::StereoBM bm;
-    bm.state->preFilterCap = _PRE_FILTER_CAP_;
-    bm.state->preFilterType = CV_STEREO_BM_XSOBEL;
-    bm.state->SADWindowSize = SAD_WINDOW_SIZE;
-    bm.state->minDisparity = _MIN_DISP_;
-    bm.state->numberOfDisparities = NO_OF_DISPARITIES;
-    bm.state->textureThreshold = _TEXTURE_THRESHOLD_;
-    bm.state->uniquenessRatio = _UNIQUENESS_RATIO_;
-    bm(left_img, right_img, disp);
-*/
+    /*    cv::StereoBM bm;
+        bm.state->preFilterCap = _PRE_FILTER_CAP_;
+        bm.state->preFilterType = CV_STEREO_BM_XSOBEL;
+        bm.state->SADWindowSize = SAD_WINDOW_SIZE;
+        bm.state->minDisparity = _MIN_DISP_;
+        bm.state->numberOfDisparities = NO_OF_DISPARITIES;
+        bm.state->textureThreshold = _TEXTURE_THRESHOLD_;
+        bm.state->uniquenessRatio = _UNIQUENESS_RATIO_;
+        bm(left_img, right_img, disp);
+    */
     // enable this if the above code is obsolete
     cv::Ptr<cv::StereoBM> stereobm = cv::StereoBM::create(NO_OF_DISPARITIES, SAD_WINDOW_SIZE);
-    stereobm-> setPreFilterCap(_PRE_FILTER_CAP_);
-    stereobm-> setUniquenessRatio(_UNIQUENESS_RATIO_);
-    stereobm-> setTextureThreshold(_TEXTURE_THRESHOLD_);
-    stereobm-> compute(left_img,right_img,disp);
+    stereobm->setPreFilterCap(_PRE_FILTER_CAP_);
+    stereobm->setUniquenessRatio(_UNIQUENESS_RATIO_);
+    stereobm->setTextureThreshold(_TEXTURE_THRESHOLD_);
+    stereobm->compute(left_img, right_img, disp);
 
     cv::Mat disp8, hls_disp8;
     disp.convertTo(disp8, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));

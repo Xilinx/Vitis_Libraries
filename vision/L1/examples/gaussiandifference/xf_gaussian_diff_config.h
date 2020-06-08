@@ -55,7 +55,6 @@
 // Define pixel depth:
 #define TYPE XF_8UC1
 
-
 void gaussian_diff_accel(ap_uint<PTR_WIDTH>* img_in, float sigma, ap_uint<PTR_WIDTH>* img_out, int rows, int cols);
 
 #endif //_XF_GAUSSIAN_FILTER_CONFIG_H_

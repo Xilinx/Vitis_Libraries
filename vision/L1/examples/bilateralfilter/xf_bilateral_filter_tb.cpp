@@ -70,9 +70,10 @@ int main(int argc, char** argv) {
 #endif
     size_t image_out_size_bytes = image_in_size_bytes;
 
-	//Call the top function
-    bilateral_filter_accel((ap_uint<PTR_WIDTH> *)in_img.data, sigma_color, sigma_space, in_img.rows, in_img.cols, (ap_uint<PTR_WIDTH> *)out_img.data);
-	
+    // Call the top function
+    bilateral_filter_accel((ap_uint<PTR_WIDTH>*)in_img.data, sigma_color, sigma_space, in_img.rows, in_img.cols,
+                           (ap_uint<PTR_WIDTH>*)out_img.data);
+
     // Write output image
     cv::imwrite("hls_out.jpg", out_img);
 

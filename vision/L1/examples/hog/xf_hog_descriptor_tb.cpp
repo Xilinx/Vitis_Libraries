@@ -101,7 +101,8 @@ int main(int argc, char** argv) {
     std::vector<uint32_t> outMat(1 * no_of_descs_hw);
 
     // Execute the kernel:
-    hog_descriptor_accel((ap_uint<INPUT_PTR_WIDTH> *)img.data,(ap_uint<32>*)outMat.data(),img.rows,img.cols,no_of_descs_hw);
+    hog_descriptor_accel((ap_uint<INPUT_PTR_WIDTH>*)img.data, (ap_uint<32>*)outMat.data(), img.rows, img.cols,
+                         no_of_descs_hw);
 
 #if REPETITIVE_BLOCKS
     std::vector<uint32_t> output(dim_rb);

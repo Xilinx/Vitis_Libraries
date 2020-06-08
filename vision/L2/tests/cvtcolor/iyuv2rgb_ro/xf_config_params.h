@@ -18,8 +18,13 @@
 #define NO 0 // Normal Operation
 #define RO 1 // Resource Optimized
 
-//Check if define already passed in command line
-#if !(defined(BGR2NV12) || defined(BGR2NV21) || defined(NV122BGR) || defined(NV122IYUV) || defined(NV122NV21) || defined(NV122UYVY) || defined(NV122YUV4) || defined(NV122YUYV) || defined(NV212BGR) || defined(NV212IYUV) || defined(NV212NV12) || defined(NV212UYVY) || defined(NV212YUYV) || defined(RGB2IYUV) || defined(RGB2NV12) || defined(RGB2NV21) || defined(RGB2UYVY) || defined(RGB2YUV4) || defined(RGB2YUYV) || defined(RGBA2IYUV) || defined(UYVY2IYUV) || defined(UYVY2NV12) || defined(UYVY2NV21) || defined(UYVY2RGB) || defined(UYVY2YUYV) || defined(YUYV2IYUV) || defined(YUYV2NV12) || defined(YUYV2RGBA) || defined(YUYV2UYVY))
+// Check if define already passed in command line
+#if !(defined(BGR2NV12) || defined(BGR2NV21) || defined(NV122BGR) || defined(NV122IYUV) || defined(NV122NV21) ||   \
+      defined(NV122UYVY) || defined(NV122YUV4) || defined(NV122YUYV) || defined(NV212BGR) || defined(NV212IYUV) || \
+      defined(NV212NV12) || defined(NV212UYVY) || defined(NV212YUYV) || defined(RGB2IYUV) || defined(RGB2NV12) ||  \
+      defined(RGB2NV21) || defined(RGB2UYVY) || defined(RGB2YUV4) || defined(RGB2YUYV) || defined(RGBA2IYUV) ||    \
+      defined(UYVY2IYUV) || defined(UYVY2NV12) || defined(UYVY2NV21) || defined(UYVY2RGB) || defined(UYVY2YUYV) || \
+      defined(YUYV2IYUV) || defined(YUYV2NV12) || defined(YUYV2RGBA) || defined(YUYV2UYVY))
 
 #ifndef RGBA2IYUV
 #define RGBA2IYUV 0

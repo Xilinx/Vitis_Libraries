@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.iyuv2rgb_ro", 
+    "name": "Xilinx Iyuv2Rgb_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

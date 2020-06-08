@@ -19,7 +19,6 @@
 #include <ap_int.h>
 #include "xf_convertscaleabs_config.h"
 
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << "<INPUT IMAGE PATH 1>" << std::endl;
@@ -52,8 +51,9 @@ int main(int argc, char** argv) {
     // Write OpenCV reference image:
     cv::imwrite("out_ocv.jpg", ocv_ref);
 
-	convertScaleAbs_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray.data,scale,shift, (ap_uint<OUTPUT_PTR_WIDTH> *)out_gray.data,height,width);
-	
+    convertScaleAbs_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, scale, shift,
+                          (ap_uint<OUTPUT_PTR_WIDTH>*)out_gray.data, height, width);
+
     // Write kernel output:
     cv::imwrite("out_hls.jpg", out_gray);
 

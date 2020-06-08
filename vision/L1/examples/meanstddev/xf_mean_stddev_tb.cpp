@@ -84,8 +84,8 @@ int main(int argc, char** argv) {
     int channels = in_img.channels();
     printf("Channels - %d\n", channels);
     const int xfcv_channels = XF_CHANNELS(TYPE, __NPPC);
-	int height = in_img.rows;
-	int width = in_img.cols;
+    int height = in_img.rows;
+    int width = in_img.cols;
 
     //////////////// 	Opencv  Reference  ////////////////////////
     float* mean_c = (float*)malloc(channels * sizeof(float));
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
     unsigned short* stddev = (unsigned short*)malloc(channels * sizeof(unsigned short));
 
     /// HLS function call
-    mean_stddev_accel((ap_uint<PTR_WIDTH> *)in_img.data, mean, stddev, height, width);
+    mean_stddev_accel((ap_uint<PTR_WIDTH>*)in_img.data, mean, stddev, height, width);
 
     for (int c = 0; c < channels; c++) {
         stddev_c[c] = sqrt(var_c[c]);
@@ -118,11 +118,11 @@ int main(int argc, char** argv) {
         }
     }
 
-   free(mean_c);
-   free(stddev_c);
-   free(var_c);
-   free(mean);
-   free(stddev);
+    free(mean_c);
+    free(stddev_c);
+    free(var_c);
+    free(mean);
+    free(stddev);
 
     return 0;
 }

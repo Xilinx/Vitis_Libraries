@@ -31,5 +31,3 @@
 // OpenCV reference macros
 #define CV_FUNCT_NAME bitwise_or
 //#define CV_EXTRA_ARG  0.05
-
-

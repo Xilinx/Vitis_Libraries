@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
     absdiff(c_grad_y_1, hls_grad_y, diff_grad_y);
 #endif
 #if (FILTER_WIDTH == 7)
-	if (OUT_TYPE == XF_8UC1 || OUT_TYPE == XF_16SC1 || OUT_TYPE == XF_8UC3 || OUT_TYPE == XF_16SC3) {
+    if (OUT_TYPE == XF_8UC1 || OUT_TYPE == XF_16SC1 || OUT_TYPE == XF_8UC3 || OUT_TYPE == XF_16SC3) {
         absdiff(c_grad_x_1, hls_grad_x, diff_grad_x);
         absdiff(c_grad_y_1, hls_grad_y, diff_grad_y);
     } else if (OUT_TYPE == XF_32UC1) {

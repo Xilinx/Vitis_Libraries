@@ -1,5 +1,5 @@
 {
-    "name": "Resize", 
+    "name": "Xilinx Resize L2 Test", 
     "description": [
         "Resize L2 function example"
     ],
@@ -72,7 +72,7 @@
         },
         {
             "target" : "hw_emu",
-            "cmd_args": "LIB_DIR/data/128x128.png  ",
+            "cmd_args": "LIB_DIR/data/4k.jpg ",
             "name": "hw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -91,7 +91,7 @@
 	    ]
         }
     ],
-    "data": ["LIB_DIR/data/4k.jpg", "LIB_DIR/data/128x128.png"], 
+    "data": ["LIB_DIR/data/4k.jpg"], 
     "host": {
         "host_exe": "resize", 
         "compiler": {

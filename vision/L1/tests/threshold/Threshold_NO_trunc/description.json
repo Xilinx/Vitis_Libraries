@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.Threshold_NO_trunc", 
+    "name": "Xilinx Threshold_No_Trunc Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

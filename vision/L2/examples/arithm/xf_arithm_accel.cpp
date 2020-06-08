@@ -27,20 +27,19 @@ void arithm_accel(
 #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1
 #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
 #pragma HLS INTERFACE s_axilite  port=height 			          
-#pragma HLS INTERFACE s_axilite  port=width 			          
+#pragma HLS INTERFACE s_axilite  port=width
 // clang-format on
 #ifdef FUNCT_MULTIPLY
 // clang-format off
-#pragma HLS INTERFACE s_axilite  port=scale 			          
+#pragma HLS INTERFACE s_axilite  port=scale
 // clang-format on
 #endif
 // clang-format off
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
-
 
 // clang-format off
     #pragma HLS DATAFLOW
@@ -73,21 +72,20 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
 
 #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2
 #pragma HLS INTERFACE s_axilite  port=height 			          
-#pragma HLS INTERFACE s_axilite  port=width 			          
+#pragma HLS INTERFACE s_axilite  port=width
 // clang-format on
 #ifdef FUNCT_MULTIPLY
 // clang-format off
-#pragma HLS INTERFACE s_axilite  port=scale 			          
+#pragma HLS INTERFACE s_axilite  port=scale
 // clang-format on
 #endif
 // clang-format off
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput2(height, width);
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
-
 
 // clang-format off
     #pragma HLS DATAFLOW
@@ -127,7 +125,7 @@ void arithm_accel(
    
     #pragma HLS INTERFACE s_axilite  port=height 			          
     #pragma HLS INTERFACE s_axilite  port=width 			          
-    #pragma HLS INTERFACE s_axilite  port=return 			          
+    #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);

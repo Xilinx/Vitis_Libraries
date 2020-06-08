@@ -33,7 +33,7 @@ void channel_combine(ap_uint<PTR_IN_WIDTH>* img_in1,
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem4
     #pragma HLS interface s_axilite  port=height	              
     #pragma HLS interface s_axilite  port=width 	              
-    #pragma HLS interface s_axilite  port=return	              
+    #pragma HLS interface s_axilite  port=return
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);

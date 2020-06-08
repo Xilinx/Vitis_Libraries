@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3">
+  <compounddef id="dir_b73a57fd60408aec6e6e213c98964faf" kind="dir">
+    <compoundname>/proj/sdxapps/users/ckreddy/2020doc/faas_tools_kit-master/faas_tools_kit-master/xf_opencv/L1/include</compoundname>
+    <innerdir refid="dir_80f7e95dc4c3fa023c41e1d94e303691">/proj/sdxapps/users/ckreddy/2020doc/faas_tools_kit-master/faas_tools_kit-master/xf_opencv/L1/include/dnn</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/proj/sdxapps/users/ckreddy/2020doc/faas_tools_kit-master/faas_tools_kit-master/xf_opencv/L1/include/"/>
+  </compounddef>
+</doxygen>

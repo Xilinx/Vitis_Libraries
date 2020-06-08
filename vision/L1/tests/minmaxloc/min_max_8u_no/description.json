@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.min_max_8u_no", 
+    "name": "Xilinx Min_Max_8U_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

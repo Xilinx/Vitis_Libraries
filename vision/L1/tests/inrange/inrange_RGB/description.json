@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.inrange_RGB", 
+    "name": "Xilinx Inrange_Rgb Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

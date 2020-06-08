@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.reduce_DIM_1_SUM", 
+    "name": "Xilinx Reduce_Dim_1_Sum Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

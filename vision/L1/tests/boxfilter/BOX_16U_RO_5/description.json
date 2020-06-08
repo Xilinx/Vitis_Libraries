@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.BOX_16U_RO_5", 
+    "name": "Xilinx Box_16U_Ro_5 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

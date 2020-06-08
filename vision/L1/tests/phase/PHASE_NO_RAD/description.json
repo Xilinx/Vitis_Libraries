@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.PHASE_NO_RAD", 
+    "name": "Xilinx Phase_No_Rad Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

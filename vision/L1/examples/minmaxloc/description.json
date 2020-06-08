@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.minmaxloc.build", 
+    "name": "Xilinx Minmaxloc Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "Sobelfilter", 
+    "name": "Xilinx Sobelfilter L2 Test", 
     "description": [
         "Sobelfilter L2 function example"
     ],

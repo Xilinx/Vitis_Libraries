@@ -46,12 +46,12 @@
 #define OUT_TYPE XF_8UC4
 #define CV_TYPE CV_8UC4
 void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in3,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in4,
-                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                     int height,
-                     int width);
+                           ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                           ap_uint<INPUT_PTR_WIDTH>* img_in3,
+                           ap_uint<INPUT_PTR_WIDTH>* img_in4,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           int height,
+                           int width);
 #endif
 
 #if THREE_INPUT
@@ -59,11 +59,11 @@ void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 #define OUT_TYPE XF_8UC3
 #define CV_TYPE CV_8UC3
 void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in3,
-                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                     int height,
-                     int width);
+                           ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                           ap_uint<INPUT_PTR_WIDTH>* img_in3,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           int height,
+                           int width);
 
 #endif
 
@@ -72,9 +72,9 @@ void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 #define OUT_TYPE XF_8UC2
 #endif
 void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
-                     ap_uint<INPUT_PTR_WIDTH>* img_in2,
-                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                     int height,
-                     int width);
+                           ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                           ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                           int height,
+                           int width);
 
 #endif //_XF_CHANNEL_COMBINE_CONFIG_H_

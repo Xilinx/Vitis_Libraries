@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.otsu_RO", 
+    "name": "Xilinx Otsu_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

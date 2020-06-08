@@ -7,7 +7,7 @@
 
 
 Using the Vitis vision Library
-------------------------------
+===============================
 
 This section describes using the Vitis vision library in the Vitis development
 environment.
@@ -44,7 +44,7 @@ in the examples folder as reference.
 The following table gives the name of the header file, including the
 folder name, which contains the library function.
 
-.. table:: Table : Vitis Vision Library Contents
+.. table:: Table : Vitis Vision Library 
 
    +-------------------------------------------+-----------------------------------+
    | Function Name                             | File Path in the include folder   |

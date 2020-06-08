@@ -1,5 +1,5 @@
 {
-    "name": "Crop", 
+    "name": "Xilinx Crop L2 Test", 
     "description": [
         "Crop L2 function example"
     ],
@@ -72,7 +72,7 @@
         },
         {
             "target" : "hw_emu",
-            "cmd_args": "LIB_DIR/data/128x128.png  ",
+            "cmd_args": "LIB_DIR/data/4k.jpg  ",
             "name": "hw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -91,7 +91,7 @@
 	    ]
         }
     ],
-    "data": ["LIB_DIR/data/4k.jpg", "LIB_DIR/data/128x128.png"], 
+    "data": ["LIB_DIR/data/4k.jpg"], 
     "host": {
         "host_exe": "crop", 
         "compiler": {
@@ -103,13 +103,13 @@
 		"LIB_DIR/L2/examples/crop/build"
 	    ], 
             "options": "-O3",
-            "symbols": ["__SDSVHLS__" ] 
+            "symbols": ["__SDSVHLS__", "__SDA_MEM_MAP__" ] 
         }
     },
     "v++":{
         "compiler": {
             "symbols": [
-                
+               "__SDA_MEM_MAP__" 
             ],
  	    "includepaths": [
 		"LIB_DIR/L2/examples/crop/build"

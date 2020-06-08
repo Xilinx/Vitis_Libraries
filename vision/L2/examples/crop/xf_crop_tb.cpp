@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     x_loc[0] = 0;
     y_loc[0] = 0;
     ROI_height[0] = 480;
-    ROI_width[0] = 640;
+    ROI_width[0] = 320;
 
     x_loc[1] = 0;
     y_loc[1] = 0;

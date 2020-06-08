@@ -32,7 +32,7 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=in_cols     
     #pragma HLS INTERFACE s_axilite port=out_rows     
     #pragma HLS INTERFACE s_axilite port=out_cols     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> in_mat;

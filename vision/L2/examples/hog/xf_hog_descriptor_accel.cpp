@@ -26,7 +26,7 @@ void hog_descriptor_accel(
     #pragma HLS INTERFACE s_axilite  port=rows        	
     #pragma HLS INTERFACE s_axilite  port=cols	      	
     #pragma HLS INTERFACE s_axilite  port=_desc_size	
-    #pragma HLS INTERFACE s_axilite  port=return        
+    #pragma HLS INTERFACE s_axilite  port=return
 // clang-format on
 
 // clang-format off

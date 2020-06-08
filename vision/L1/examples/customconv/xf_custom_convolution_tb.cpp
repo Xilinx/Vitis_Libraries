@@ -17,7 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_custom_convolution_config.h"
 
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
@@ -80,15 +79,15 @@ int main(int argc, char** argv) {
 
     cv::imwrite("ref_img.jpg", ocv_ref); // reference image
 
-  /*  std::vector<short int> filter_vec(FILTER_WIDTH * FILTER_HEIGHT);
+    /*  std::vector<short int> filter_vec(FILTER_WIDTH * FILTER_HEIGHT);
 
-    for (int i = 0; i < FILTER_HEIGHT; i++) {
-        for (int j = 0; j < FILTER_WIDTH; j++) {
-            filter_vec[i * FILTER_WIDTH + j] = 3640;
-        }
-    }*/
-	
-	 short int* filter_ptr = (short int*)malloc(FILTER_WIDTH * FILTER_HEIGHT * sizeof(short int));
+      for (int i = 0; i < FILTER_HEIGHT; i++) {
+          for (int j = 0; j < FILTER_WIDTH; j++) {
+              filter_vec[i * FILTER_WIDTH + j] = 3640;
+          }
+      }*/
+
+    short int* filter_ptr = (short int*)malloc(FILTER_WIDTH * FILTER_HEIGHT * sizeof(short int));
 
     for (int i = 0; i < FILTER_HEIGHT; i++) {
         for (int j = 0; j < FILTER_WIDTH; j++) {
@@ -106,8 +105,6 @@ int main(int argc, char** argv) {
     size_t image_in_size_bytes = in_img.rows * in_img.cols * 3 * sizeof(unsigned char);
 #endif
 
-   
-
 #if GRAY
 #if OUT_8U == 1
     size_t image_out_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
@@ -122,10 +119,10 @@ int main(int argc, char** argv) {
 #endif
 #endif
 
-//////////////Top function call /////////////////////////////
+    //////////////Top function call /////////////////////////////
 
-    Filter2d_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data,filter_ptr, shift,(ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data,rows,cols);
-	
+    Filter2d_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, filter_ptr, shift, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data,
+                   rows, cols);
 
     // Save the kernel result:
     cv::imwrite("out_img.jpg", out_img);

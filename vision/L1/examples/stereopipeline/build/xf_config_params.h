@@ -28,4 +28,3 @@
 #define XF_REMAP_BUFSIZE 128
 
 #define XF_USE_URAM false
-

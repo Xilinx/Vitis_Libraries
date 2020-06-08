@@ -17,7 +17,6 @@
 #define XF_HEIGHT 128
 #define XF_WIDTH 128
 
-
 /* Input type */
 #define GRAY_T 1
 #define RGB_T 0
@@ -30,4 +29,3 @@
 #define XF_WIN_HEIGHT 128
 #define XF_WIN_WIDTH 64
 #define XF_USE_URAM false
-

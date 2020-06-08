@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.KF_64state_uram", 
+    "name": "Xilinx Kf_64State_Uram Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

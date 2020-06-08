@@ -48,7 +48,6 @@ int main(int argc, char** argv) {
     diff.create(in_img.rows, in_img.cols, CV_8UC3);
 #endif
 
-
     // OpenCV reference:
     cv::medianBlur(in_img, ocv_ref, WINDOW_SIZE);
 
@@ -60,9 +59,9 @@ int main(int argc, char** argv) {
 #endif
     size_t image_out_size_bytes = image_in_size_bytes;
 
-    //Call the top function
-    median_blur_accel((ap_uint<PTR_WIDTH> *)in_img.data, in_img.rows, in_img.cols, (ap_uint<PTR_WIDTH> *)out_img.data);
- 
+    // Call the top function
+    median_blur_accel((ap_uint<PTR_WIDTH>*)in_img.data, in_img.rows, in_img.cols, (ap_uint<PTR_WIDTH>*)out_img.data);
+
     // Write down output images:
     cv::imwrite("hls_out.jpg", out_img); // kernel output
     cv::imwrite("ref_img.jpg", ocv_ref); // reference image

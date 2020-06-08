@@ -16,8 +16,8 @@
 
 #include "xf_integral_image_config.h"
 
-static constexpr int __XF_DEPTH_IN=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_8UC1,NPC1))/8) / (INPUT_PTR_WIDTH/8);
-static constexpr int __XF_DEPTH_OUT=(HEIGHT*WIDTH*(XF_PIXELWIDTH(XF_32UC1,NPC1))/8) / (OUTPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_8UC1, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_32UC1, NPC1)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void integral_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols) {
 // clang-format off

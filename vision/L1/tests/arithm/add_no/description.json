@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.add_no", 
+    "name": "Xilinx Add_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

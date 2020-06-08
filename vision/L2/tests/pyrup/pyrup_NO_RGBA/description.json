@@ -1,5 +1,5 @@
 {
-    "name": "Pyrup", 
+    "name": "Xilinx Pyrup_No_Rgba L2 Test", 
     "description": [
         "Pyrup L2 function example"
     ],
@@ -62,7 +62,7 @@
     "launch": [
         {
             "target" : "sw_emu",
-            "cmd_args": "LIB_DIR/data/4k.jpg ",
+            "cmd_args": "LIB_DIR/data/HD.jpg ",
             "name": "sw_emu",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -82,7 +82,7 @@
         },
         {
             "target" : "hw",
-            "cmd_args": "LIB_DIR/data/4k.jpg ",
+            "cmd_args": "LIB_DIR/data/HD.jpg ",
             "name": "hardware_build",
 	    "ld_library_path" : [
 		"$(OPENCV_LIB)",
@@ -91,7 +91,7 @@
 	    ]
         }
     ],
-    "data": ["LIB_DIR/data/4k.jpg", "LIB_DIR/data/128x128.png"], 
+    "data": ["LIB_DIR/data/HD.jpg", "LIB_DIR/data/128x128.png"], 
     "host": {
         "host_exe": "pyrup", 
         "compiler": {

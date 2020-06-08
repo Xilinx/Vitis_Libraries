@@ -21,7 +21,7 @@ copied back to ``cv::Mat`` to write it into the memory.
 
 
 xf::cv::Mat Image Container Class
-#############################
+##################################
 
 ``xf::cv::Mat`` is a template class that serves as a container for storing
 image data and its attributes.
@@ -36,55 +36,48 @@ Class Definition
 
 .. code:: c
 
-   template<int T, int ROWS, int COLS, int NPC>
-   class Mat {
+	template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = 2>
+	class Mat {
+	   public:
+		unsigned char allocatedFlag; // flag to mark memory allocation in this class
+		int rows, cols, size;        // actual image size
 
-     public:
-       unsigned char allocatedFlag;            // flag to mark memory allocation in this class
-       int rows, cols, size;                   // actual image size
+		typedef XF_TNAME(T, NPC) DATATYPE;
 
-   #ifdef __SDSVHLS__
-       typedef XF_TNAME(T,NPC) DATATYPE;
-   #else                                       // When not being built for V-HLS
-       typedef struct {
-           XF_CTUNAME(T,NPC) chnl[XF_NPIXPERCYCLE(NPC)][XF_CHANNELS(T,NPC)];
-       } __attribute__ ((packed)) DATATYPE;
-   #endif
+	#if defined(__SYNTHESIS__) && !defined(__SDA_MEM_MAP__)
+		hls::stream<DATATYPE, XFCVDEPTH> data;
+	#else
+		DATATYPE* data;
+	#endif
 
-   //#if (defined  (__SDSCC__) ) || (defined (__SYNTHESIS__))
-   #if defined (__SYNTHESIS__) && !defined (__SDA_MEM_MAP__)
-       DATATYPE *data __attribute((xcl_array_geometry((ROWS)*(COLS>> (XF_BITSHIFT(NPC))))));//data[ ROWS * ( COLS >> ( XF_BITSHIFT ( NPC ) ) ) ];
-   #else
-       DATATYPE *data;
-   #endif
+		Mat(); // default constructor
+		Mat(Size _sz);
+		Mat(int _rows, int _cols);
+		Mat(int _size, int _rows, int _cols);
+		Mat(int _rows, int _cols, void* _data);
+		Mat(const Mat&); // copy constructor
 
+		~Mat();
 
-       Mat();                                  // default constructor
-       Mat(Size _sz);
-       Mat(int _rows, int _cols);
-       Mat(int _size, int _rows, int _cols);
-       Mat(int _rows, int _cols, void *_data);
-       Mat(const Mat&);                        // copy constructor
+		Mat& operator=(const Mat&); // Assignment operator
+		//  XF_TNAME(T, XF_NPPC1) operator() (unsigned int r, unsigned int c);
+		//  XF_CTUNAME(T, NPC) operator() (unsigned int r, unsigned int c, unsigned int ch);
+		XF_TNAME(T, NPC) read(int index);
+		float read_float(int index);
+		void write(int index, XF_TNAME(T, NPC) val);
+		void write_float(int index, float val);
 
-       ~Mat();
+		void init(int _rows, int _cols, bool allocate = true);
+		void copyTo(void* fromData);
+		unsigned char* copyFrom();
 
-       Mat& operator= (const Mat&);            // Assignment operator
-       XF_TNAME(T,NPC) read(int index);
-       float read_float(int index);
-       void write(int index, XF_TNAME(T,NPC) val);
-       void write_float(int index, float val);
+		const int type() const;
+		const int depth() const;
+		const int channels() const;
 
-       void init (int _rows, int _cols, bool allocate=true);
-       void copyTo (void* fromData);
-       unsigned char* copyFrom ();
-
-       const int type() const;
-       const int depth() const;
-       const int channels() const;
-
-       template<int DST_T>
-       void convertTo (Mat<DST_T, ROWS, COLS, NPC> &dst, int otype, double alpha=1, double beta=0);
-   };
+		template <int DST_T>
+		void convertTo(Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH>& dst, int otype, double alpha = 1, double beta = 0);
+	};
 
 .. rubric:: Parameter Descriptions
 
@@ -118,69 +111,69 @@ The following table lists the member functions and their descriptions:
 
 .. table:: Table xf::cv::Mat Member Function Descriptions
 
-   +---------------+------------------------------------------------------+
-   | Member        | Description                                          |
-   | Functions     |                                                      |
-   +===============+======================================================+
-   | Mat()         | This default constructor initializes the Mat object  |
-   |               | sizes, using the template parameters ROWS and COLS.  |
-   +---------------+------------------------------------------------------+
-   | Mat(int       | This constructor initializes the Mat object using    |
-   | \_rows, int   | arguments \_rows and \_cols.                         |
-   | \_cols)       |                                                      |
-   +---------------+------------------------------------------------------+
-   | Mat(const     | This constructor helps clone a Mat object to         |
-   | xf::cv::Mat   | another. New memory will be allocated for the newly  |
-   | &_src)        | created constructor.                                 |
-   +---------------+------------------------------------------------------+
-   | Mat(int       | This constructor initializes the Mat object using    |
-   | \_rows, int   | arguments \_rows, \_cols, and \_data. The \*data     |
-   | \_cols, void  | member of the Mat object points to the memory        |
-   | \*_data)      | allocated for \_data argument, when this constructor |
-   |               | is used. No new memory is allocated for the \*data   |
-   |               | member.                                              |
-   +---------------+------------------------------------------------------+
-   | convertTo(Mat | Refer to                                             |
-   | <DST_T,ROWS,  | `xf::cv::convertTo<api-reference.html#xf-convertto>` |                            
-   | COLS, NPC>    |                                                      |
-   | &dst, int     |                                                      |
-   | otype, double |                                                      |
-   | alpha=1,      |                                                      |
-   | double        |                                                      |
-   | beta=0)       |                                                      |
-   +---------------+------------------------------------------------------+
-   | copyTo(\*     | Copies the data from Data pointer into physically    |
-   | fromData)     | contiguous memory allocated inside the constructor.  |
-   +---------------+------------------------------------------------------+
-   | copyFrom()    | Returns the pointer to the first location of the     |
-   |               | \*data member.                                       |
-   +---------------+------------------------------------------------------+
-   | read(int      | Readout a value from a given location and return it  |
-   | index)        | as a packed (for multi-pixel/clock) value.           |
-   +---------------+------------------------------------------------------+
-   | read_float(in | Readout a value from a given location and return it  |
-   | t             | as a float value                                     |
-   | index)        |                                                      |
-   +---------------+------------------------------------------------------+
-   | write(int     | Writes a packed (for multi-pixel/clock) value into   |
-   | index,        | the given location.                                  |
-   | XF_TNAME(T,NP |                                                      |
-   | C)            |                                                      |
-   | val)          |                                                      |
-   +---------------+------------------------------------------------------+
-   | write_float(i | Writes a float value into the given location.        |
-   | nt            |                                                      |
-   | index, float  |                                                      |
-   | val)          |                                                      |
-   +---------------+------------------------------------------------------+
-   | type()        | Returns the type of the image.                       |
-   +---------------+------------------------------------------------------+
-   | depth()       | Returns the depth of the image                       |
-   +---------------+------------------------------------------------------+
-   | channels()    | Returns number of channels of the image              |
-   +---------------+------------------------------------------------------+
-   | =Mat()        | This is a default destructor of the Mat object.      |
-   +---------------+------------------------------------------------------+
+   +---------------+--------------------------------------------------------+
+   | Member        | Description                                            |
+   | Functions     |                                                        |
+   +===============+========================================================+
+   | Mat()         | This default constructor initializes the Mat object    |
+   |               | sizes, using the template parameters ROWS and COLS.    |
+   +---------------+--------------------------------------------------------+
+   | Mat(int       | This constructor initializes the Mat object using      |
+   | \_rows, int   | arguments \_rows and \_cols.                           |
+   | \_cols)       |                                                        |
+   +---------------+--------------------------------------------------------+
+   | Mat(const     | This constructor helps clone a Mat object to           |
+   | xf::cv::Mat   | another. New memory will be allocated for the newly    |
+   | &_src)        | created constructor.                                   |
+   +---------------+--------------------------------------------------------+
+   | Mat(int       | This constructor initializes the Mat object using      |
+   | \_rows, int   | arguments \_rows, \_cols, and \_data. The \*data       |
+   | \_cols, void  | member of the Mat object points to the memory          |
+   | \*_data)      | allocated for \_data argument, when this constructor   |
+   |               | is used. No new memory is allocated for the \*data     |
+   |               | member.                                                |
+   +---------------+--------------------------------------------------------+
+   | convertTo(Mat | Refer to                                               |
+   | <DST_T,ROWS,  |`xf::cv::convertTo <api-reference.html#xf-convertto>`__ |                            
+   | COLS, NPC>    |                                                        |
+   | &dst, int     |                                                        |
+   | otype, double |                                                        |
+   | alpha=1,      |                                                        |
+   | double        |                                                        |
+   | beta=0)       |                                                        |
+   +---------------+--------------------------------------------------------+
+   | copyTo(\*     | Copies the data from Data pointer into physically      |
+   | fromData)     | contiguous memory allocated inside the constructor.    |
+   +---------------+--------------------------------------------------------+
+   | copyFrom()    | Returns the pointer to the first location of the       |
+   |               | \*data member.                                         |
+   +---------------+--------------------------------------------------------+
+   | read(int      | Readout a value from a given location and return it    |
+   | index)        | as a packed (for multi-pixel/clock) value.             |
+   +---------------+--------------------------------------------------------+
+   | read_float(in | Readout a value from a given location and return it    |
+   | t             | as a float value                                       |
+   | index)        |                                                        |
+   +---------------+--------------------------------------------------------+
+   | write(int     | Writes a packed (for multi-pixel/clock) value into     |
+   | index,        | the given location.                                    |
+   | XF_TNAME(T,NP |                                                        |
+   | C)            |                                                        |
+   | val)          |                                                        |
+   +---------------+--------------------------------------------------------+
+   | write_float(i | Writes a float value into the given location.          |
+   | nt            |                                                        |
+   | index, float  |                                                        |
+   | val)          |                                                        |
+   +---------------+--------------------------------------------------------+
+   | type()        | Returns the type of the image.                         |
+   +---------------+--------------------------------------------------------+
+   | depth()       | Returns the depth of the image                         |
+   +---------------+--------------------------------------------------------+
+   | channels()    | Returns number of channels of the image                |
+   +---------------+--------------------------------------------------------+
+   | ~Mat()        | This is a default destructor of the Mat object.        |
+   +---------------+--------------------------------------------------------+
 
 Template parameters of the ``xf::cv::Mat`` class are used to set the depth
 of the pixel, number of channels in the image, number of pixels packed
@@ -321,7 +314,7 @@ class. The following are a few supported types:
 .. _xf-imread:
 
 xf::cv::imread
-===========
+==============
 
 The function `xf::cv::imread` loads an image from the specified file path,
 copies into xf::cv::Mat and returns it. If the image cannot be read (because
@@ -368,7 +361,7 @@ The table below describes the template and the function parameters.
 .. _ariaid-title4:
 
 xf::cv::imwrite
-===========
+===============
 
 The function xf::cv::imwrite saves the image to the specified file from the
 given xf::cv::Mat. The image format is chosen based on the file name
@@ -412,7 +405,7 @@ The table below describes the template and the function parameters.
 .. _xf-absdiff:
 
 xf::cv::absDiff
-============
+===============
 
 The function xf::cv::absDiff computes the absolute difference between each
 individual pixels of an xf::cv::Mat and a cv::Mat, and returns the
@@ -455,7 +448,7 @@ The table below describes the template and the function parameters.
 .. _xf-convertto:
 
 xf::cv::convertTo
-==============
+=================
 
 The xf::cv::convertTo function performs bit depth conversion on each
 individual pixel of the given input image. This method converts the
@@ -533,10 +526,10 @@ The table below describes the template and function parameters.
 
 
 Vitis Vision Library Functions
-###########################
+###############################
 
 The Vitis Vision library is a set of select OpenCV functions optimized for
-Zynq-7000 and Zynq UltraScale+ MPSoC devices. The maximum resolution supported for all the functions is 4K, except
+Zynq-7000, Zynq UltraScale+ MPSoC and Alveo U200 devices. The maximum resolution supported for all the functions is 4K, except
 Houghlines and HOG (RB mode).
 
 .. note:: `Resolution Conversion (Resize) <#resolution-conversion>`_ in 8 pixel per cycle mode, `Dense Pyramidal LK Optical Flow <#dense-pyramidal-lk-optical>`_, and `Dense Non-Pyramidal LK Optical Flow <#dense-non-pyramidal-lk-optical>`_ functions are not 
@@ -2673,7 +2666,7 @@ Channel Combine
 ===============
 
 The ``merge`` function, merges single channel images into a
-multi-channel image. The number of channels to be merged should be four.
+multi-channel image. The number of channels to be merged should be two, three or four.
 
 
 .. rubric:: API Syntax
@@ -2684,6 +2677,11 @@ multi-channel image. The number of channels to be merged should be four.
    template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
    void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src3, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src4, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_dst)
 
+   template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
+   void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src3, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_dst)
+   
+   template<int SRC_T, int DST_T, int ROWS, int COLS, int NPC=1>
+   void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &_src2, xf::cv::Mat<DST_T, ROWS, COLS, NPC> &_dst)
 
 .. rubric:: Parameter Descriptions
 
@@ -2696,11 +2694,11 @@ The following table describes the template and the function parameters.
    | Paramete | Description                                               |
    | r        |                                                           |
    +==========+===========================================================+
-   | SRC_T    | Input pixel type. Only 8-bit, unsigned, 1,2 and 3 channel |
+   | SRC_T    | Input pixel type. Only 8-bit, unsigned, 1, channel        |
    |          | is supported (XF_8UC1)                                    |
    +----------+-----------------------------------------------------------+
-   | DST_T    | Output pixel type. Only 8-bit, unsigned,4 channel is      |
-   |          | supported (XF_8UC4)                                       |
+   | DST_T    | Output pixel type. 8-bit, unsigned,2,3 and 4 channels are |
+   |          | supported (XF_8UC2, XF_8UC3 and XF_8UC4)                  |
    +----------+-----------------------------------------------------------+
    | ROWS     | Maximum height of input and output image.                 |
    +----------+-----------------------------------------------------------+
@@ -2714,9 +2712,9 @@ The following table describes the template and the function parameters.
    +----------+-----------------------------------------------------------+
    | \_src2   | Input single-channel image                                |
    +----------+-----------------------------------------------------------+
-   | \_src3   | Input single-channel image                                |
+   | \_src3   | Input single-channel image (only for 3 and 4 input config)|
    +----------+-----------------------------------------------------------+
-   | \_src4   | Input single-channel image                                |
+   | \_src4   | Input single-channel image (only for 4 input config)      |
    +----------+-----------------------------------------------------------+
    | \_dst    | Output multi-channel image                                |
    +----------+-----------------------------------------------------------+
@@ -7492,9 +7490,9 @@ The following table describes the template and the function parameters.
    |               | XF_BAYER_GR, and XF_BAYER_RG are the supported       |
    |               | values.                                              |
    +---------------+------------------------------------------------------+
-   | SRC_T         | Input pixel type. 8-bit, unsigned,1 and 3 channel    |
-   |               | (XF_8UC1 and XF_8UC3) and 16-bit, unsigned, 1 and 3  |
-   |               | channel (XF_16UC1 and XF_16UC3) are supported.       |
+   | SRC_T         | Input pixel type. 8-bit, unsigned,1 channel          |
+   |               | (XF_8UC1) and 16-bit, unsigned, 1                    |
+   |               | channel (XF_16UC1) are supported.                    |
    +---------------+------------------------------------------------------+
    | DST_T         | Output pixel type. 8-bit, unsigned, 4 channel        |
    |               | (XF_8UC4) and 16-bit, unsigned, 4 channel (XF_16UC4) |
@@ -11793,7 +11791,7 @@ dst(x,y)=max( src1(x,y) ,src2(x,y) )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void Max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -11893,7 +11891,7 @@ dst(I)=maxS( src(I) ,scl )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void MaxS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void maxS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -12116,7 +12114,7 @@ dst(I)=min( src1(I) ,src2(I) )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void Min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src2, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -12216,7 +12214,7 @@ dst(x,y)=minS( src(x,y) ,scl )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void MinS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void minS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions

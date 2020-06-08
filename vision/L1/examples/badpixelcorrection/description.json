@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.badpixelcorrection.build", 
+    "name": "Xilinx Badpixelcorrection Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

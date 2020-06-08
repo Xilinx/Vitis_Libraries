@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.gauss_7x7_NO", 
+    "name": "Xilinx Gauss_7X7_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

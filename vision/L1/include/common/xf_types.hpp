@@ -25,7 +25,6 @@
 #include "xf_params.hpp"
 #include <stdint.h>
 
-
 template <int N>
 struct floatn {
     float f[N];

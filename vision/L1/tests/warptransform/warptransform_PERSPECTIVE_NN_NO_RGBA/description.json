@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.warptransform_PERSPECTIVE_NN_NO_RGBA", 
+    "name": "Xilinx Warptransform_Perspective_Nn_No_Rgba Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

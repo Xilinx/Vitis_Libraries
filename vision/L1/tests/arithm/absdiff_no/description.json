@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.absdiff_no", 
+    "name": "Xilinx Absdiff_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

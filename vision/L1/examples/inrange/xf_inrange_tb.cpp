@@ -57,9 +57,8 @@ int main(int argc, char** argv) {
     cv::inRange(in_img, cv::Scalar(lower_thresh), cv::Scalar(upper_thresh), ocv_ref);
 #endif
 
-
-	inrange_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data,lower_thresh, upper_thresh, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data,height,width);
-	
+    inrange_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, lower_thresh, upper_thresh,
+                  (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width);
 
     // Write output image:
     cv::imwrite("hls_out.jpg", out_img);

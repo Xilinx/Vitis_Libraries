@@ -1,7 +1,7 @@
 {
-    "name": "Colordetect", 
+    "name": "Xilinx Colordetect_No L3 Test", 
     "description": [
-        "Colordetect L2 function example"
+        "Colordetect L3 function example"
     ],
     "flow": "vitis",
     "platform_whitelist": [

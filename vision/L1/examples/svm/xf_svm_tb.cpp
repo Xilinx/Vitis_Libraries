@@ -47,15 +47,14 @@ int main() {
     uint16_t frac2 = IN_FRAC_BITS_2;
     uint16_t n = NO_OF_KERNEL_ELEMENTS;
 
-
     // fixed point conversion of input data & filling into Mat
 
-    ap_uint<16> *infix_1 = (ap_uint<16> *)malloc(IN_ARRAY_SIZE_1*sizeof(short));
-    ap_uint<16> *infix_2 = (ap_uint<16> *)malloc(IN_ARRAY_SIZE_1*sizeof(short));
+    ap_uint<16>* infix_1 = (ap_uint<16>*)malloc(IN_ARRAY_SIZE_1 * sizeof(short));
+    ap_uint<16>* infix_2 = (ap_uint<16>*)malloc(IN_ARRAY_SIZE_1 * sizeof(short));
 
     for (int i = 0; i < TOTAL_ARRAY_ELEMENTS; i++) {
-          infix_1[i] = (in_1[i] * pow(2, IN_FRAC_BITS_1));
-          infix_2[i] = (in_2[i] * pow(2, IN_FRAC_BITS_2));
+        infix_1[i] = (in_1[i] * pow(2, IN_FRAC_BITS_1));
+        infix_2[i] = (in_2[i] * pow(2, IN_FRAC_BITS_2));
     }
 
     ap_int<32> resultFIX;

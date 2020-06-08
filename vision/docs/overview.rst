@@ -15,9 +15,8 @@ Vitis vision library functions are mostly similar in functionality to their
 OpenCV equivalent. Any deviations, if present, are documented.
 
 
-.. seealso:: For more information on the Vitis vision library prerequisites, see
-prerequisites_. To
-familiarize yourself with the steps required to use the Vitis vision library
+.. seealso:: For more information on the Vitis vision library prerequisites, see Prerequisites_. 
+To familiarize yourself with the steps required to use the Vitis vision library
 functions, see the `Using the Vitis vision
 Library <using-the-vitis-vision-library.html>`__.
 
@@ -51,18 +50,8 @@ Vitis Vision Kernel on Vitis
 The Vitis vision library is designed to be used with the Vitis development
 environment. 
 
-The following steps describe the general flow of an example design,
-where both the input and the output are image files.
-
-#. Read the image using ``cv::imread()``.
-#. Copy the data to ``xf::cv::Mat``.
-#. Call the processing function(s) in Vitis vision.
-#. Copy the data from ``xf::cv::Mat`` to ``cv::Mat``.
-#. Write the output to image using ``cv::imwrite()``.
-
-The entire code is written as the host code for the pipeline , from
-which all the calls to Vitis vision functions are moved to hardware.
-Functions from Vitis vision are used to read and write images in the memory.
+The OpenCL host code is written in the testbench file, whereas the calls to Vitis 
+Vision functions are done from the accel file.
 The image containers for Vitis vision library functions are ``xf::cv::Mat``
 objects. For more information, see the `xf::cv::Mat Image Container
 Class <api-reference.html>`__.
@@ -80,11 +69,12 @@ The following table lists the contents of the Vitis vision library.
 	| Folder                            | Details                           |
 	+===================================+===================================+
 	| L1/examples                       | Contains the sample testbench code|
-	|                                   | to facilitate running unit tests. |
-	|                                   | The examples/ contains the folders|
-	|                                   | with algorithm names.Each algorith|
-	|                                   | m folder contains testbench files |
-	|                                   | data folder.                      |
+	|                                   | to facilitate running unit tests  |
+	|                                   | on Vitis/Vivado HLS. The examples/|
+	|                                   | has folders with algorithm names. |
+	|                                   | Each algorithm folder contains    |
+	|                                   | testbench, accel, config, Makefile|
+	|                                   | , Json file and a 'build' folder. |
 	+-----------------------------------+-----------------------------------+
 	| L1/include/common                 | Contains the common library       |
 	|                                   | infrastructure headers, such as   |
@@ -119,18 +109,18 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | makefile and tcl files to run     |
 	|                                   | tests.                            |
 	+-----------------------------------+-----------------------------------+
-	| L1/examples/build                 | Contains makefile, run_hls.tcl and|
-	|                                   | xf_config_params.h file to run    |
-	|                                   | simulations, synthesis and export |
-	|                                   | RTL.                              |
+	| L1/examples/build                 | Contains xf_config_params.h file, |
+	|                                   | which has configurable macros and |
+	|                                   | varibales related to the particula|
+	|                                   | r example.                        |
 	+-----------------------------------+-----------------------------------+
-	| L2/examples                       | Contains the sample test bench    |
-	|                                   | code to facilitate running unit   |
-	|                                   | tests. The examples/ folder       |
-	|                                   | contains the folders with         |
-	|                                   | algorithm names. Each algorithm   |
-	|                                   | folder contains host files        |
-	|                                   | and data folder.                  |
+	| L2/examples                       | Contains the sample testbench code|
+	|                                   | to facilitate running unit tests  |
+	|                                   | on Vitis. The examples/ contains  |
+	|                                   | the folders with algorithm names. |
+	|                                   | Each algorithm folder contains    |
+	|                                   | testbench, accel, config, Makefile|
+	|                                   | , Json file and a 'build' folder. |
 	+-----------------------------------+-----------------------------------+
 	| L2/tests                          | Contains all test folders to run  |
 	|                                   | software, hardware emulations     |
@@ -141,20 +131,18 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | has makefile and tcl files to run |
 	|                                   | tests.                            |
 	+-----------------------------------+-----------------------------------+
-	| L2/examples/build                 | Contains makefile and             |
-	|                                   | xf_config_params.h file to run    |
-	|                                   | software,hardware emulation and   |
-	|                                   | hardware build                    |
+	| L2/examples/build                 | Contains xf_config_params.h file, |
+	|                                   | which has configurable macros and |
+	|                                   | varibales related to the particula|
+	|                                   | r example.                        |
 	+-----------------------------------+-----------------------------------+
-	| L3/examples                       | Contains the sample test bench    |
-	|                                   | code to facilitate running unit   |
-	|                                   | tests. The examples/ folder       |
-	|                                   | contains the folders with         |
-	|                                   | algorithm names. Each algorithm   |
-	|                                   | folder contains host files        |
-	|                                   | and data folder.The L3/examples   |
-	|                                   | contains the pipeline examples usi|
-	|                                   | ng L1 modules.                    |
+	| L3/examples                       | Contains the sample testbench code|
+	|                                   | to build pipeline functions       |
+	|                                   | on Vitis. The examples/ contains  |
+	|                                   | the folders with algorithm names. |
+	|                                   | Each algorithm folder contains    |
+	|                                   | testbench, accel, config, Makefile|
+	|                                   | , Json file and a 'build' folder. |
 	+-----------------------------------+-----------------------------------+
 	| L3/tests                          | Contains all test folders to run  |
 	|                                   | software, hardware emulations     |
@@ -165,10 +153,10 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | inside configuration folders      |
 	|                                   | makefile is present to run tests. |
 	+-----------------------------------+-----------------------------------+
-	| L3/examples/build                 | Contains makefile and             |
-	|                                   | xf_config_params.h file to run    |
-	|                                   | software,hardware emulation and   |
-	|                                   | hardware build.                   |
+	| L3/examples/build                 | Contains xf_config_params.h file, |
+	|                                   | which has configurable macros and |
+	|                                   | varibales related to the particula|
+	|                                   | r example.                        |
 	+-----------------------------------+-----------------------------------+
 	| L3/benchmarks                     | Contains benchmark examples to    |
 	|                                   | compare the software              |
@@ -182,7 +170,7 @@ The following table lists the contents of the Vitis vision library.
 
 
 .. include:: getting-started-with-vitis-vision.rst 
+.. include:: using-the-vitis-vision-library.rst
 .. include:: getting-started-with-hls.rst
 .. include:: migrating-hls-video-library-to-vitis-vision.rst 
 .. include:: design-examples.rst 
-.. include:: using-the-vitis-vision-library.rst

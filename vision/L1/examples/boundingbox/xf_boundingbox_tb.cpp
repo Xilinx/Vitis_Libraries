@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
     int width = in_img.cols;
 
     //////////////// Call the top function ////////////////
-    boundingbox_accel((ap_uint<INPUT_PTR_WIDTH>*) in_img.data, roi, color_info, height, width, num_box);
+    boundingbox_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, roi, color_info, height, width, num_box);
 
     cv::imwrite("hls_out.jpg", in_img);
 

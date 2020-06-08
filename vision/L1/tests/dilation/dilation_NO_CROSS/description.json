@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.dilation_NO_CROSS", 
+    "name": "Xilinx Dilation_No_Cross Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

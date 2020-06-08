@@ -729,8 +729,9 @@ template <int SRC_T,
           int WORDWIDTH_DST,
           int COLS_TRIP,
           typename KERNEL,
-          int USE_SRC2 = 0,int XFPDEPTH>
-void xFarithm_proc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC,XFPDEPTH>& _src1,
+          int USE_SRC2 = 0,
+          int XFPDEPTH>
+void xFarithm_proc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFPDEPTH>& _src1,
                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
                    xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl,
                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
@@ -783,7 +784,6 @@ rowLoop:
         }
     }
 }
-
 
 template <int SRC_T,
           int ROWS,
@@ -949,8 +949,8 @@ void SubRS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
         _src1, _src1, scl, _dst, POLICY_TYPE, _src1.rows, image_width);
 }
 /*  subtract API call*/
-template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1,int XFPDEPTH>
-void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC,XFPDEPTH>& _src1,
+template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1, int XFPDEPTH>
+void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFPDEPTH>& _src1,
               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
@@ -967,7 +967,7 @@ void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC,XFPDEPTH>& _src1,
     assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
 #endif
     xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_sub, 1,XFPDEPTH>(
+                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_sub, 1, XFPDEPTH>(
         _src1, _src2, 0, _dst, POLICY_TYPE, _src1.rows, image_width);
 }
 

@@ -77,13 +77,9 @@ int main(int argc, char** argv) {
 
     cv::Mat element = cv::getStructuringElement(0, cv::Size(FILTER_SIZE, FILTER_SIZE), cv::Point(-1, -1));
 
-    
-	
-	unsigned char *high_thresh = (unsigned char *)malloc(FILTER_SIZE*(FILTER_SIZE)*sizeof(unsigned char));
-	unsigned char *low_thresh = (unsigned char *)malloc(FILTER_SIZE*(FILTER_SIZE)*sizeof(unsigned char));
-	unsigned char *shape = (unsigned char *)malloc(FILTER_SIZE*(FILTER_SIZE)*sizeof(unsigned char));
-
-    
+    unsigned char* high_thresh = (unsigned char*)malloc(FILTER_SIZE * (FILTER_SIZE) * sizeof(unsigned char));
+    unsigned char* low_thresh = (unsigned char*)malloc(FILTER_SIZE * (FILTER_SIZE) * sizeof(unsigned char));
+    unsigned char* shape = (unsigned char*)malloc(FILTER_SIZE * (FILTER_SIZE) * sizeof(unsigned char));
 
     // Define the low and high thresholds
     // Want to grab 3 colors (Yellow, Green, Red) for the input image
@@ -110,8 +106,8 @@ int main(int argc, char** argv) {
     high_thresh[6] = 179; // Upper boundary for Red
     high_thresh[7] = 255;
     high_thresh[8] = 255;
-	
-	for (int i = 0; i < (FILTER_SIZE * FILTER_SIZE); i++) {
+
+    for (int i = 0; i < (FILTER_SIZE * FILTER_SIZE); i++) {
         shape[i] = element.data[i];
     }
 
@@ -126,9 +122,8 @@ int main(int argc, char** argv) {
     // Write down reference and input image:
     cv::imwrite("outputref.png", ocv_ref);
 
-
-    colordetect_accel((ap_uint<INPUT_PTR_WIDTH> *)in_img.data,low_thresh, high_thresh,shape, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, rows,cols);
-	
+    colordetect_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, low_thresh, high_thresh, shape,
+                      (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, rows, cols);
 
     // Write down the kernel output image:
     cv::imwrite("output.png", out_img);

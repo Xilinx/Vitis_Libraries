@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.AWB_NO_GRAYWB", 
+    "name": "Xilinx Awb_No_Graywb Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

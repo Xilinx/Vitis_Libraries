@@ -17,19 +17,19 @@
 // Set Conversion type
 #define IYUV2NV12 0
 #define IYUV2RGBA 0
-#define IYUV2RGB  0
+#define IYUV2RGB 0
 #define IYUV2YUV4 0
 
 #define NV122IYUV 0
 #define NV122RGBA 0
-#define NV122RGB  0
-#define NV122BGR  0
+#define NV122RGB 0
+#define NV122BGR 0
 #define NV122YUV4 0
 
 #define NV212IYUV 0
 #define NV212RGBA 0
-#define NV212RGB  0
-#define NV212BGR  0
+#define NV212RGB 0
+#define NV212BGR 0
 #define NV212YUV4 0
 
 #define RGBA2IYUV 0
@@ -50,7 +50,7 @@
 #define YUYV2IYUV 0
 #define YUYV2NV12 0
 #define YUYV2RGBA 0
-#define YUYV2RGB  0
+#define YUYV2RGB 0
 
 #define RGB2GRAY 0
 #define BGR2GRAY 1

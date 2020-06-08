@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.kalmanfilter.build", 
+    "name": "Xilinx Kalmanfilter Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

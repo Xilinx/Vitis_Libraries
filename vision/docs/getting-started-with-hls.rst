@@ -8,31 +8,20 @@
 Getting Started with HLS
 #########################
 
-The Vitis vision library can be used to build applications in Vivado® HLS.
+The Vitis vision library can be used to build applications in Vivado® HLS as well as Vitis HLS.
 This section provides details on how the Vitis vision library components can
-be integrated into a design in Vivado HLS 2019.2. This section of the
+be integrated into a design in Vivado HLS or Vitis HLS 2020.1. This section of the
 document provides steps on how to run a single library component through
-the Vivado HLS 2019.2 use flow which includes, C-simulation,
+the Vivado HLS or Vitis HLS 2020.1 flow which includes, C-simulation,
 C-synthesis, C/RTL co-simulation, and exporting the RTL as an IP.
 
 You are required to do the following changes to facilitate proper
-functioning of the use model in Vivado HLS 2019.2:
+functioning of the use model in Vivado HLS 2020.1. This is not applicable when using 
+Vitis HLS.:
 
 #. Use of appropriate compile-time options - When using the Vitis vision
-   functions in HLS, the ``-D__SDSVHLS__`` and ``-std=c++0x`` options
-   need to be provided at the time of compilation:
-#. Specifying interface pragmas to the interface level arguments - For
-   the functions with top level interface arguments as pointers (with
-   more than one read/write access), the ``m_axi`` Interface pragma must
-   be specified. For example,
-
-   .. code:: c
-
-      void lut_accel(xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> &imgInput, xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> &imgOutput, unsigned char *lut_ptr)
-      {
-      #pragma HLS INTERFACE m_axi depth=256 port=lut_ptr offset=direct bundle=lut_ptr
-          xf::cv::LUT< TYPE, HEIGHT, WIDTH, NPC1> (imgInput,imgOutput,lut_ptr);
-      }
+   functions in Vivado HLS, the ``-std=c++0x`` option
+   need to be provided as a compilation flag. 
 
 
 HLS Standalone Mode
@@ -48,13 +37,13 @@ Tcl Script Mode
 ----------------
 
 Use the following steps to operate the HLS Standalone Mode using Tcl
-Script:
+Script. The first 2 steps are applicable to Vivado HLS only:
 
 #. In the Vivado® HLS tcl script file, update the cflags in all the
    add_files sections.
+#. Add the ``-std=c++0x`` compiler flags.
 #. Append the path to the vision/L1/include directory, as it contains all
    the header files required by the library.
-#. Add the ``-D__SDSVHLS__`` and ``-std=c++0x`` compiler flags.
 
 Note: When using Vivado HLS in the Windows operating system, provide the
 ``-std=c++0x`` flag only for C-Sim and Co-Sim. Do not include the flag
@@ -66,13 +55,13 @@ Setting flags for source files:
 
 .. code:: c
 
-   add_files xf_dilation_accel.cpp -cflags "-I<path-to-include-directory> -D__SDSVHLS__ -std=c++0x" 
+   add_files xf_dilation_accel.cpp -cflags "-I<path-to-include-directory> -std=c++0x" 
 
 Setting flags for testbench files:
 
 .. code:: c
 
-   add_files -tb xf_dilation_tb.cpp -cflags "-I<path-to-include-directory> -D__SDSVHLS__ -std=c++0x"
+   add_files -tb xf_dilation_tb.cpp -cflags "-I<path-to-include-directory> -std=c++0x"
 
 
 GUI Mode
@@ -80,7 +69,7 @@ GUI Mode
 
 Use the following steps to operate the HLS Standalone Mode using GUI:
 
-#. Open Vivado® HLS in GUI mode and create a new project
+#. Open Vivado® HLS or Vitis HLS in GUI mode and create a new project
 #. Specify the name of the project. For example - Dilation.
 #. Click Browse to enter a workspace folder used to store your projects.
 #. Click Next.
@@ -98,7 +87,7 @@ Use the following steps to operate the HLS Standalone Mode using GUI:
 #. Files added under the Test Bench section will be displayed. Select a
    file and click Edit CFLAGS.
 #. Enter
-   ``-I<path-to-include-directory> -D__SDSVHLS__ -std=c++0x``.
+   ``-I<path-to-include-directory> -std=c++0x``.
    
    Note: When using Vivado HLS in the Windows operating system, make
    sure to provide the ``-std=c++0x`` flag only for C-Sim and Co-Sim. Do

@@ -193,7 +193,6 @@ int main(int argc, char** argv) {
     }
 #endif
 
-
     unsigned int* outputBuffer;
     outputBuffer = (unsigned int*)malloc(MAX_HEIGHT * MAX_WIDTH * (sizeof(unsigned int)));
     if (outputBuffer == NULL) {

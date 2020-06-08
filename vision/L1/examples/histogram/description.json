@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.histogram.build", 
+    "name": "Xilinx Histogram Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

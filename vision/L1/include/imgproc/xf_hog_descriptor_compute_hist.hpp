@@ -367,7 +367,7 @@ accumulate_HA:
  *
  *		-> ssv : sum of squared value (output)
  *
- *    note: This code is disabled for now, and when further develpoment for 
+ *    note: This code is disabled for now, and when further develpoment for
  *    higher parallelism is introduced, it will be develped from this code
  ***************************************************************************/
 /*template <int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int CELL_HEIGHT,

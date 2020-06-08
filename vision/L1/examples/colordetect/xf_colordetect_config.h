@@ -63,11 +63,11 @@
 #endif
 
 void colordetect_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
-                  unsigned char* low_thresh,
-                  unsigned char* high_thresh,
-                  unsigned char* process_shape,
-                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                  int rows,
-                  int cols);
+                       unsigned char* low_thresh,
+                       unsigned char* high_thresh,
+                       unsigned char* process_shape,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                       int rows,
+                       int cols);
 
 #endif

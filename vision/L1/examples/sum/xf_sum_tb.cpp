@@ -42,19 +42,18 @@ int main(int argc, char** argv) {
     std::vector<double> ocv_scl(channels);
 
     for (int i = 0; i < channels; ++i) ocv_scl[i] = cv::sum(in_gray)[i];
-	
+
     double* scl = (double*)malloc(channels * sizeof(double));
 
-    //Call the top function
-    sum_accel((ap_uint<PTR_WIDTH> *)in_gray.data, scl);
-
+    // Call the top function
+    sum_accel((ap_uint<PTR_WIDTH>*)in_gray.data, scl);
 
     for (int i = 0; i < in_gray.channels(); i++) {
         printf("sum of opencv is=== %lf\n", ocv_scl[i]);
         printf("sum of hls is====== %lf\n", scl[i]);
     }
 
-	     // Results verification:
+    // Results verification:
     int cnt = 0;
 
     for (int i = 0; i < in_gray.channels(); i++) {

@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.channel_combine_4_input", 
+    "name": "Xilinx Channel_Combine_4_Input Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

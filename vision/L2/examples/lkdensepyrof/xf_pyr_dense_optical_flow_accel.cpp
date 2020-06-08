@@ -53,12 +53,12 @@ void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
     #pragma HLS INTERFACE s_axilite port=flow_cols   
     #pragma HLS INTERFACE s_axilite port=flow_iter_rows   
     #pragma HLS INTERFACE s_axilite port=flow_iter_cols   
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> current_img_mat(cur_img_rows, cur_img_cols);
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> next_img_mat(next_img_rows,next_img_cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> next_img_mat(next_img_rows, next_img_cols);
 
     xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> streamFlowin_mat(flow_rows, flow_cols);
 

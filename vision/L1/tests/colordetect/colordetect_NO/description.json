@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.colordetect_NO", 
+    "name": "Xilinx Colordetect_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

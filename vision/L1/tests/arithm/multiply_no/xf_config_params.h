@@ -34,4 +34,3 @@
 #define CV_FUNCT_NAME multiply
 #define CV_EXTRA_ARG 0.05
 #define FUNCT_MULTIPLY
-

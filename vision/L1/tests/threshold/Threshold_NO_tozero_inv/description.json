@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.Threshold_NO_tozero_inv", 
+    "name": "Xilinx Threshold_No_Tozero_Inv Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

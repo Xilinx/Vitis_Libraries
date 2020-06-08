@@ -1,7 +1,7 @@
 {
-    "name": "Gaussiandifference", 
+    "name": "Xilinx Dog L3 Test", 
     "description": [
-        "Gaussiandifference L2 function example"
+        "Gaussiandifference L3 function example"
     ],
     "flow": "vitis",
     "platform_whitelist": [

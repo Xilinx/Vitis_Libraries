@@ -35,18 +35,18 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* inImgPyr1,
     #pragma HLS INTERFACE s_axilite port=inImgPyr1  
     #pragma HLS INTERFACE s_axilite port=outImgPyr1  
     #pragma HLS INTERFACE s_axilite port=inImgPyr2     
-    #pragma HLS INTERFACE s_axilite port=outImgPyr2     
+    #pragma HLS INTERFACE s_axilite port=outImgPyr2
 // clang-format on
 
 // clang-format off
     #pragma HLS INTERFACE s_axilite port=pyr_h     
     #pragma HLS INTERFACE s_axilite port=pyr_w     
     #pragma HLS INTERFACE s_axilite port=pyr_out_h     
-    #pragma HLS INTERFACE s_axilite port=pyr_out_w     
+    #pragma HLS INTERFACE s_axilite port=pyr_out_w
 // clang-format on
 
 // clang-format off
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     const int pROWS = HEIGHT;

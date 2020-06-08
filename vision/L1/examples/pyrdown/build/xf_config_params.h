@@ -21,4 +21,3 @@
 #define GRAY 1
 #define RGBA 0
 #define XF_USE_URAM false
-

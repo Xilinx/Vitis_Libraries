@@ -23,5 +23,3 @@
 #define HEIGHT 128
 
 #define MAXCORNERS 1024
-
-

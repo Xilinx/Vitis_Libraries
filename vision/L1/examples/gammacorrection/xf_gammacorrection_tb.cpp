@@ -17,8 +17,6 @@
 #include "common/xf_headers.hpp"
 #include "xf_gammacorrection_config.h"
 
-
-
 float mean_pixel(cv::Mat img) {
     if (img.channels() > 2) {
         cvtColor(img.clone(), img, CV_BGR2GRAY);
@@ -63,9 +61,10 @@ int main(int argc, char** argv) {
     int height = in_gray.rows;
     int width = in_gray.cols;
 
-///////////////////////Top function call //////////////////////////////	
-	gammacorrection_accel((ap_uint<INPUT_PTR_WIDTH> *)in_gray.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_gray.data, gamma_, height,width);
-	
+    ///////////////////////Top function call //////////////////////////////
+    gammacorrection_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_gray.data, gamma_,
+                          height, width);
+
     cv::imwrite("out_hls.jpg", out_gray);
 
     return 0;

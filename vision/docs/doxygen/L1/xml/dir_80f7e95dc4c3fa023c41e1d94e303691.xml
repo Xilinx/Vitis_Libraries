@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3">
+  <compounddef id="dir_80f7e95dc4c3fa023c41e1d94e303691" kind="dir">
+    <compoundname>/proj/sdxapps/users/ckreddy/2020doc/faas_tools_kit-master/faas_tools_kit-master/xf_opencv/L1/include/dnn</compoundname>
+    <innerfile refid="xf__insertBorder_8hpp">xf_insertBorder.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/proj/sdxapps/users/ckreddy/2020doc/faas_tools_kit-master/faas_tools_kit-master/xf_opencv/L1/include/dnn/"/>
+  </compounddef>
+</doxygen>

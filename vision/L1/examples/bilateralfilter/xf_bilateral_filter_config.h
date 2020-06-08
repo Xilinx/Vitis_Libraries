@@ -61,5 +61,4 @@ typedef unsigned short int uint16_t;
 void bilateral_filter_accel(
     ap_uint<PTR_WIDTH>* img_in, float sigma_color, float sigma_space, int rows, int cols, ap_uint<PTR_WIDTH>* img_out);
 
-
 #endif //_XF_BILATERAL_FILTER_CONFIG_H_

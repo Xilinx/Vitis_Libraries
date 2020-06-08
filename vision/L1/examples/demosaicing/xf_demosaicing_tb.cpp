@@ -125,26 +125,26 @@ int main(int argc, char** argv) {
     }
 
     // Create the Bayer pattern CFA output
-    cv::Mat cfa_bayer_output(img.rows, img.cols, CV_8UC1);             // simulate the Bayer pattern CFA outputi
+    cv::Mat cfa_bayer_output(img.rows, img.cols, CV_8UC1); // simulate the Bayer pattern CFA outputi
 
-#if (T_16U )
+#if (T_16U)
     cv::Mat cfa_bayer_16bit(img.rows, img.cols, CV_16UC1);
 #endif
 
-    cv::Mat color_cfa_bayer_output(img.rows, img.cols, img.type());    // Bayer pattern CFA output in color
-    int code = BPATTERN;                                               // Bayer format BG-0; GB-1; GR-2; RG-3
+    cv::Mat color_cfa_bayer_output(img.rows, img.cols, img.type()); // Bayer pattern CFA output in color
+    int code = BPATTERN;                                            // Bayer format BG-0; GB-1; GR-2; RG-3
 
     bayerizeImage(img, color_cfa_bayer_output, cfa_bayer_output, code);
     cv::imwrite("bayer_image.png", color_cfa_bayer_output);
     cv::imwrite("cfa_output.png", cfa_bayer_output);
 
-#if (T_16U )
+#if (T_16U)
     cfa_bayer_output.convertTo(cfa_bayer_16bit, CV_INTYPE);
 #endif
 
     // Demosaic the CFA output using reference code
     cv::Mat ref_output_image(img.rows, img.cols, CV_OUTTYPE);
-#if (T_16U )
+#if (T_16U)
     demosaicImage(cfa_bayer_16bit, ref_output_image, code);
 #else
     demosaicImage(cfa_bayer_output, ref_output_image, code);
@@ -169,10 +169,12 @@ int main(int argc, char** argv) {
     int height = img.rows;
     int width = img.cols;
 
-#if (T_16U )
-    demosaicing_accel((ap_uint<INPUT_PTR_WIDTH>*)cfa_bayer_16bit.data, (ap_uint<OUTPUT_PTR_WIDTH> *)output_image_hls.data, height, width);
+#if (T_16U)
+    demosaicing_accel((ap_uint<INPUT_PTR_WIDTH>*)cfa_bayer_16bit.data,
+                      (ap_uint<OUTPUT_PTR_WIDTH>*)output_image_hls.data, height, width);
 #else
-    demosaicing_accel((ap_uint<INPUT_PTR_WIDTH>*)cfa_bayer_output.data, (ap_uint<OUTPUT_PTR_WIDTH> *)output_image_hls.data, height, width);
+    demosaicing_accel((ap_uint<INPUT_PTR_WIDTH>*)cfa_bayer_output.data,
+                      (ap_uint<OUTPUT_PTR_WIDTH>*)output_image_hls.data, height, width);
 #endif
 
     // Results verification:

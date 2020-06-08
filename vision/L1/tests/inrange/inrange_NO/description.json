@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.inrange_NO", 
+    "name": "Xilinx Inrange_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

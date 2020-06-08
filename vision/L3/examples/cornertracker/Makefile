@@ -42,7 +42,10 @@ help::
 	@echo "Makefile Usage:"
 	@echo ""
 	@echo "  make host xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform>"
-	@echo "      Command to generate the design for specified target and device."
+	@echo "      Command to generate the design for specified target and a PCIe device."
+	@echo ""	
+	@echo "  make host xclbin TARGET=<sw_emu|hw_emu|hw> DEVICE=<FPGA platform> BOARD=Zynq ARCH=<aarch32 | aarch64>"
+	@echo "      Command to generate the design for specified target and an Embedded device."	
 	@echo ""
 	@echo "      TARGET defaults to sw_emu."
 	@echo ""
@@ -217,7 +220,7 @@ $(KER_NAME3)_VPP_CFLAGS := -D__SDA_MEM_MAP__
 SRC_DIR 		:= $(XF_PROJ_ROOT)/L3/examples/cornertracker
 
 EXE_NAME  		:= cornertracker
-HOST_ARGS 		= $(XF_PROJ_ROOT)/data 4 20000 5
+HOST_ARGS 		= $(XF_PROJ_ROOT)/data/cornertracker 4 20000 5
 SRCS      		:= xf_corner_tracker_tb
 
 # Macro definitions
@@ -352,6 +355,15 @@ endif
 
 PKG_OUT_DIR := package_$(TARGET)
 
+EMBEDDED_EXEC_SCRIPT = run_emu.sh
+EMBEDDED_PACKAGE_OUT = package_$(TARGET)
+
+ifneq (,$(findstring zc706, $(XDEVICE)))
+	ROOTFS := $(SYSROOT)/../../uImage
+else
+	ROOTFS := $(SYSROOT)/../../Image
+endif
+
 CC := gcc
 
 CXXFLAGS += -std=c++14 -fPIC -I$(OPENCV_INCLUDE) \
@@ -442,7 +454,7 @@ $(BIN_DIR)/emconfig.json :
     endif
 
 ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
-       EMU_CMD = /tools/xgs/perl/5.8.5/bin/perl $(XF_PROJ_ROOT)/ext/make_utility/embedded_run_emulation.pl "./$(PKG_OUT_DIR)/launch_$(TARGET).sh -no-reboot" "./run_emu.sh"
+       EMU_CMD = /tools/xgs/perl/5.8.5/bin/perl $(XF_PROJ_ROOT)/ext/make_utility/embedded_run_emulation.pl "./$(PKG_OUT_DIR)/launch_$(TARGET).sh -no-reboot" "./run_emu.sh" "" "12"
 else ifeq ($(TARGET), hw)
        RUN_ENV += 
        EMU_CMD += @echo "Please copy the contents of sd_card and input images to an SD Card and run on the board"
@@ -457,7 +469,9 @@ sd_card : host xclbin
 	mkdir -p $(PKG_OUT_DIR)
 	rm -rf run_emu.sh
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> run_emu.sh
+ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> run_emu.sh
+endif
 	@echo 'export XILINX_VITIS=/mnt' >> run_emu.sh
 	@echo 'export XILINX_XRT=/usr' >> run_emu.sh
 	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_emu.sh
@@ -468,7 +482,7 @@ sd_card : host xclbin
 	@echo '		echo "ERROR: Embedded host run failed, RC=$$return_code"' >> run_emu.sh
 	@echo 'fi' >> run_emu.sh
 	@echo 'echo "INFO: Embedded host run completed."' >> run_emu.sh
-	v++ -t $(TARGET) --platform $(DEVICE) -p $(XCLBIN_FILE) --package.out_dir $(PKG_OUT_DIR) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.sd_file $(SYSROOT)/../../Image --package.sd_file run_emu.sh --package.sd_file $(EXE_FILE) $(SD_FILE_LIST) --package.sd_file emconfig.json
+	v++ -t $(TARGET) --platform $(DEVICE) -p $(XCLBIN_FILE) --package.out_dir $(PKG_OUT_DIR) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.sd_file $(ROOTFS) --package.sd_file run_emu.sh --package.sd_file $(EXE_FILE) --package.sd_dir $(XF_PROJ_ROOT)/data/cornertracker --package.sd_file emconfig.json
 	@echo "### ***** sd_card generation done! ***** ###"
 
 

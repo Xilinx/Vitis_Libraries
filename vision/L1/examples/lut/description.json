@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.lut.build", 
+    "name": "Xilinx Lut Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

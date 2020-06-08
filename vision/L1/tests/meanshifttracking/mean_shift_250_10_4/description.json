@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.mean_shift_250_10_4", 
+    "name": "Xilinx Mean_Shift_250_10_4 Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

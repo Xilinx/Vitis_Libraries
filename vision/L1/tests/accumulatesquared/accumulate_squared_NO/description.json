@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.accumulate_squared_NO", 
+    "name": "Xilinx Accumulate_Squared_No Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

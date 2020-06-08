@@ -70,8 +70,9 @@ int main(int argc, char** argv) {
     cv::resize(img, result_ocv, cv::Size(out_width, out_height), 0, 0, CV_INTER_AREA);
 #endif
 
-/* Call the top function */
-    resize_accel((ap_uint<INPUT_PTR_WIDTH> *)img.data, (ap_uint<OUTPUT_PTR_WIDTH> *)out_img.data, in_height, in_width, out_height, out_width);
+    /* Call the top function */
+    resize_accel((ap_uint<INPUT_PTR_WIDTH>*)img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, in_height, in_width,
+                 out_height, out_width);
 
     float err_per;
     cv::absdiff(result_ocv, out_img, error);

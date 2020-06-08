@@ -39,7 +39,6 @@
 #define NPC_T XF_NPPC8
 #endif
 
-
 // Maximum rows and cols
 #define HEIGHT 128
 #define WIDTH 128

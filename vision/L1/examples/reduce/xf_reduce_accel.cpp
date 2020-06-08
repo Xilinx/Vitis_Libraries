@@ -16,12 +16,13 @@
 
 #include "xf_reduce_config.h"
 
-static constexpr int __XF_DEPTH=(HEIGHT*WIDTH*(XF_PIXELWIDTH(IN_TYPE,NPC1))/8) / (INPUT_PTR_WIDTH/8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
-
-
-void reduce_accel( ap_uint<INPUT_PTR_WIDTH>* img_in, unsigned char dimension, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) 
-{
+void reduce_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
+                  unsigned char dimension,
+                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                  int height,
+                  int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
 	#pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1 depth=128
@@ -45,5 +46,3 @@ void reduce_accel( ap_uint<INPUT_PTR_WIDTH>* img_in, unsigned char dimension, ap
 
     return;
 } // End of kernel
-
-

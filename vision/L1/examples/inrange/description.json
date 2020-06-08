@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.inrange.build", 
+    "name": "Xilinx Inrange Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

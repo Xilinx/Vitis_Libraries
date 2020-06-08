@@ -34,7 +34,7 @@ void canny_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=cols     
     #pragma HLS INTERFACE s_axilite port=low_threshold     
     #pragma HLS INTERFACE s_axilite port=high_threshold     
-    #pragma HLS INTERFACE s_axilite port=return   
+    #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, INTYPE> in_mat(rows, cols);

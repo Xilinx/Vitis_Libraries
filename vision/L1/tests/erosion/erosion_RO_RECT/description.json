@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.erosion_RO_RECT", 
+    "name": "Xilinx Erosion_Ro_Rect Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

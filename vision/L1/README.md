@@ -2,11 +2,11 @@
 
 The Level 1 APIs are presented as HLS C++ classes and functions.
 
-This level of API is mainly provide for hardware-savvy HLS developers.The API description and design details of these modules can be found in Vitis Vision User Guide.
+This level of API is mainly provide for hardware-savvy HLS developers. The API description and design details of these modules can be found in Vitis Vision User Guide. 
 
-'examples' folder contains the testbench and accel C++ files that demonstrate the call of Vitis Vision functions with xf::Mat interfaces.
+'examples' folder contains the testbench and accel C++ files that demonstrate the call of Vitis Vision functions in HLS flow.
 
-'build' folder inside 'examples' folder has makefile that would build the default configuration of the function.
+'build' folder inside 'examples' folder has the configuration file that would help modify the default configuration of the function.
 
 'include' folder contains the definitions of all the functions in various hpp files
 
@@ -17,13 +17,15 @@ This level of API is mainly provide for hardware-savvy HLS developers.The API de
 
 source < path-to-Vitis-installation-directory >/settings64.sh
 
-source < part-to-XRT-installation-directory >/setenv.sh
+source < part-to-XRT-installation-directory >/setup.sh
 
 export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
 export OPENCV_INCLUDE=< path-to-opencv-include-folder >
 
 export OPENCV_LIB=< path-to-opencv-lib-folder >
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
 
 make run CSIM=1 CSYNTH=1 COSIM=0
 

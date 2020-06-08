@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.min_ro", 
+    "name": "Xilinx Min_Ro Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [

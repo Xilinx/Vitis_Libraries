@@ -1,5 +1,5 @@
 {
-    "name": "jks.L1.lkdensepyrof.build", 
+    "name": "Xilinx Lkdensepyrof Test", 
     "description": "HLS case", 
     "flow": "hls", 
     "platform_whitelist": [
