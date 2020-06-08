@@ -56,7 +56,7 @@
 #include "hls_ssr_fft_streaming_forking_data_commutor.hpp"
 #include "vitis_fft/hls_ssr_fft_pragma_controls.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -346,6 +346,6 @@ void InputTransposeChainStreamingS2S<t_instanceID, 1, t_subStage, t_forkNumber, 
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //__HLS_SSR_FFT_STREAMING_TRANSPOSER__

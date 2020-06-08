@@ -32,7 +32,7 @@
 #include "vitis_fft/hls_ssr_fft_kernel_types.hpp"
 #include "vitis_fft/hls_ssr_fft_utilities.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -124,6 +124,6 @@ narroToWideConverter_LOOP:
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //__HLS_SSR_FFT_WIDE_TYPE_UTILITIES_H__

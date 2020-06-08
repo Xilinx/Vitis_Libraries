@@ -30,7 +30,7 @@
 #include "vitis_fft/hls_ssr_fft_enums.hpp"
 #include "vitis_fft/hls_ssr_fft_utilities.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -168,6 +168,6 @@ struct DataWidthDefsWithPerf : public DataWidthDefs<t_elemType, t_memWidthBits, 
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //__HLS_SSR_FFT_DATA_WIDTH_DEFS_H__

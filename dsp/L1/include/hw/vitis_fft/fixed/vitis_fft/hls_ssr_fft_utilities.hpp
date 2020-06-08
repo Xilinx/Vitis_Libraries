@@ -63,7 +63,7 @@
 
 #include <ap_int.h>
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -212,6 +212,6 @@ unsigned int digitReversalFractionIsLSB(unsigned int p_number) {
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif /* HLS_SSR_FFT_UTILITIES_H_ */

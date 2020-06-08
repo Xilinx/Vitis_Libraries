@@ -25,7 +25,7 @@
 #include <hls_stream.h>
 #include "vitis_fft/hls_ssr_fft_kernel_types.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -66,5 +66,5 @@ DEMUX_STREAMING_LOOP:
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 #endif

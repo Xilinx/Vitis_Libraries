@@ -18,7 +18,7 @@
 #ifndef _HLS_SSR_FFT_MULTIPLICATION_TRAITS_H_
 #define _HLS_SSR_FFT_MULTIPLICATION_TRAITS_H_
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -183,6 +183,6 @@ struct FFTMultiplicationTraits<
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif //_HLS_SSR_FFT_MULTIPLICATION_TRAITS_H_

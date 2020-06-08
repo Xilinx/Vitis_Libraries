@@ -22,7 +22,7 @@
 
 #include "vitis_fft/hls_ssr_fft_dsp48.hpp"
 #include "vitis_fft/fft_complex.hpp"
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -89,6 +89,6 @@ struct FFTInputTraits<std::complex<ap_ufixed<tp_WL, tp_IL, t_in_q_mode, t_inOver
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_INPUT_TRAITS_H_

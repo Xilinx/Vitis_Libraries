@@ -67,7 +67,7 @@
  ========================================================================================
  */
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -290,6 +290,6 @@ void OutputDataReOrder<0>::digitReversal2Phase(hls::stream<SuperSampleContainer<
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_OUTPUT_REORDER_h_

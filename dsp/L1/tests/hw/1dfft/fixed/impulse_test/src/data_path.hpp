@@ -22,7 +22,7 @@
 #include <ap_fixed.h>
 #include <complex>
 #include "vt_fft.hpp"
-using namespace vitis::dsp::fft;
+using namespace xf::dsp::fft;
 
 // Define FFT Size and Super Sample Rate
 #define FFT_LEN 16

@@ -20,7 +20,7 @@
 
 #include "vitis_fft/hls_ssr_fft_utilities.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -95,6 +95,6 @@ SSR_LOOP:
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_ROTATE_CRISS_CROSS_MULTIPLEXER_H_

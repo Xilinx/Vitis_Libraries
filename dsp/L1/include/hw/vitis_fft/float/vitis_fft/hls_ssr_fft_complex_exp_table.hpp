@@ -52,7 +52,7 @@
 
 #include <ap_fixed.h>
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -86,6 +86,6 @@ struct ComplexExpTable<t_R, transform_direction, butterfly_rnd_mode, complex_wra
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFT_COMPLEX_EXP_TALBE_H_

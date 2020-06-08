@@ -27,12 +27,12 @@
 
 void fft_top(T_SSR_FFT_IN inD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R], T_SSR_FFT_OUT outD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R]) {
 #pragma HLS TOP
-    vitis::dsp::fft::fft<ssr_fft_params>(inD, outD);
+    xf::dsp::fft::fft<ssr_fft_params>(inD, outD);
 }
 
 void fft_top_c(T_SSR_FFT_IN inD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R],
                T_SSR_FFT_OUT outD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R]) {
-    vitis::dsp::fft::fft<ssr_fft_params>(inD, outD);
+    xf::dsp::fft::fft<ssr_fft_params>(inD, outD);
 }
 
 #ifndef __SYNTHESIS__

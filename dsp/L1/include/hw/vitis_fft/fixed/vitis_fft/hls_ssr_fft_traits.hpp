@@ -31,7 +31,7 @@
 #include "vitis_fft/hls_ssr_fft_butterfly_traits.hpp"
 #include "vitis_fft/fft_complex.hpp"
 
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -562,7 +562,7 @@ struct FFTTraits<SSR_FFT_GROW_TO_MAX_WIDTH,
 
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 ///////////////////////////////////////////////////////////////////////
 

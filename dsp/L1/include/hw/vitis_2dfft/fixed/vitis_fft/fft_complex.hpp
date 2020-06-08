@@ -25,7 +25,7 @@
 #include <iostream>
 #endif
 #ifdef __USE_NAME_SPACE__
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 #endif
@@ -219,7 +219,7 @@ inline bool operator!=(const std::complex<T_in>& lhs, const std::complex<T_in>& 
 #ifdef __USE_NAME_SPACE__
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 #endif
 
 #endif //__FFT_COMPLEX__

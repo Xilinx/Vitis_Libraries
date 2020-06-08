@@ -172,7 +172,7 @@ To use the fixed point Vitis 2-D FFT L1 module in a C++ HLS design:
 
 2- Include ``vt_fft.hpp``
 
-3- Use namespace ``vitis::dsp::fft``
+3- Use namespace ``xf::dsp::fft``
 
 4- Define parameter structures for 1-D FFT processors used along rows and columns lets say call them ``params_row`` and ``parms_column`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D FFT Parameter Structure <FIXED_FFT_PARAMS_STRUCT_LABEL>`
 
@@ -189,11 +189,11 @@ To use the 2-D FFT L1 library:
 
   #include "vt_fft.hpp"
 
-2. Use namespace ``vitis::dsp::fft``
+2. Use namespace ``xf::dsp::fft``
 
 .. code-block:: cpp
 
-   using namespace vitis::dsp::fft;
+   using namespace xf::dsp::fft;
 
 3. Define two C++ structure that extends ssr_fft_default_params, one for row and one for column processors:
 
@@ -250,7 +250,7 @@ To use the Vitis 2-D FFT L1 module in a C++ HLS design:
 
 2- Include ``vt_fft.hpp``
 
-3- Use namespace ``vitis::dsp::fft``
+3- Use namespace ``xf::dsp::fft``
 
 4- Define parameter structures for 1-D FFT processors used along rows and columns lets say call them ``params_row`` and ``parms_column`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D FFT Parameter Structure <FLOAT_FFT_PARAMS_STRUCT_LABEL>`
 
@@ -267,11 +267,11 @@ To use the 2-D FFT L1 library:
 
   #include "vt_fft.hpp"
 
-2. Use namespace ``vitis::dsp::fft``
+2. Use namespace ``xf::dsp::fft``
 
 .. code-block:: cpp
 
-   using namespace vitis::dsp::fft;
+   using namespace xf::dsp::fft;
 
 3. Define two C++ structure that extends ssr_fft_default_params, one for row and one for column processors:
 
@@ -339,7 +339,7 @@ the declaration of top level function ``top_fft2d`` that will be synthesized.
 	#ifndef __SYNTHESIS__
 	#include <iostream>
 	#endif
-	using namespace vitis::dsp::fft;
+	using namespace xf::dsp::fft;
 	typedef ap_fixed<27, 8> T_innerData;
 	typedef std::complex<T_innerData> T_elemType;
 	const int k_memWidthBits = 512;
@@ -531,7 +531,7 @@ the declaration of top level function ``top_fft2d`` that will be synthesized.
 	#ifndef __SYNTHESIS__
 	#include <iostream>
 	#endif
-	using namespace vitis::dsp::fft;
+	using namespace xf::dsp::fft;
 	typedef float T_innerData;
 	typedef complex_wrapper<T_innerData> T_elemType;
 	const int k_memWidthBits = 512;
@@ -724,4 +724,29 @@ Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the te
    source ${XILINX_VIVADO}/settings64.sh
 
 Once the install paths are setup launch the bash script named "run_all_cosim_tests.sh" to run all the tests.
+
+
+L1 Performance Benchmarks and QoR
+===========================================
+This section gives L1 performance benchmarks and QoR for 2-dimensional FFT for fixed point and floating point implementation for different sizes of inputs. The results are reported for post place and route implementation using standard automated flow. No manual routing and placement is done.
+
+2-D Fixed Point FFT
+----------------------
+Following table gives results for fixed point complex data type with sizes ranging from 32x32 to 256x256. The results show that 2-D FFT fixed point FFT with different sizes can easily run at more than 350MHz clock speed. 
+
+.. csv-table:: 2-D Fixed Point FFT Performance and QoR Results
+   :file: ../csv_data_files/fft2d_l1_fixed_point_bench.csv
+   :align: center
+   :header: "Size","SSR","No. of 1D-Processors","fmax (MHz)","Performance (GSPS)","Performance (2D-FFT/Sec) x1000","Performance (GOPs)","DSPs","LUT (x1000)","FF (x1000)","BRAM","URAMs',"CP(ns)","II (Cycles)","Latency (Cycles)","FPGA/BOARD","Bandwidth (Gbytes/sec)"
+
+
+2-D Floating Point(fp32) FFT
+-----------------------------------------
+Following table gives results for floating point complex data type with sizes ranging from 32x32 to 256x256. The results show that 2-D FFT floating point FFT with different sizes can easily run at more than 300MHz clock speed. 
+
+.. csv-table:: 2-D Floating Point(fp32) FFT Performance and QoR Results
+   :file: ../csv_data_files/fft2d_l1_fp32_bench.csv
+   :align: center
+   :header: "Size","SSR","No. of 1D-Processors","fmax (MHz)","Performance (GSPS)","Performance (2D-FFT/Sec) x1000","Performance (GOPs)","DSPs","LUT (x1000)","FF (x1000)","BRAM","URAMs',"CP(ns)","II (Cycles)","Latency (Cycles)","FPGA/BOARD","Bandwidth (Gbytes/sec)"
+
 

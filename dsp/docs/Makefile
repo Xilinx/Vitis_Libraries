@@ -41,7 +41,7 @@ install: .stamp/sphinx
 	mkdir -p .stamp
 	touch .stamp/doxygen
 
-#DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
+DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 .stamp/doxyrest: .stamp/doxygen
 	mkdir -p $(HTML_DEST_DIR)
 	mkdir -p _build
@@ -49,7 +49,7 @@ install: .stamp/sphinx
 	rm -rf rst
 	mkdir rst
 	doxyrest xml/index.xml -o rst/index.rst \
-		-F ./src/doxyrest_frame/cfamily -F ./src/doxyrest_frame/common  -f index.rst.in -Dg_verbatimToCodeBlock
+		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 	touch .stamp/doxyrest
 
 .stamp/sphinx: .stamp/doxyrest Makefile.sphinx

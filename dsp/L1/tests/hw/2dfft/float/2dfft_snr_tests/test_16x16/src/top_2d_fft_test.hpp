@@ -25,7 +25,7 @@
 //#define DEBUG_WIDE_TO_NARROW_CONVERTOR_
 #include "vt_fft.hpp"
 #include <iostream>
-using namespace vitis::dsp::fft;
+using namespace xf::dsp::fft;
 typedef float T_innerData;
 typedef complex_wrapper<T_innerData> T_elemType;
 const int k_memWidthBits = 512;

@@ -59,7 +59,7 @@
 #include "vitis_fft/hls_ssr_fft_fork_merge_utils.hpp"
 #include "vitis_fft/hls_ssr_fft_data_commute_barrel_shifter.hpp"
 #include "vitis_fft/hls_ssr_fft_pragma_controls.hpp"
-namespace vitis {
+namespace xf {
 namespace dsp {
 namespace fft {
 
@@ -667,6 +667,6 @@ void DataCommutorForkNonInvertOut<t_stage, 1, t_forkingFactor>::copyForkCommuteA
 }
 } // end namespace fft
 } // end namespace dsp
-} // end namespace vitis
+} // end namespace xf
 
 #endif // HLS_SSR_FFR_DATA_COMMUTOR_H_

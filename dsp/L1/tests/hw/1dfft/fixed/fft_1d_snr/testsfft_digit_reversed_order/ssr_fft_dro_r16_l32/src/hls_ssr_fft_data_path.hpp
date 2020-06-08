@@ -25,7 +25,7 @@
  */
 
 #include "fft_size.hpp"
-using namespace vitis::dsp::fft;
+using namespace xf::dsp::fft;
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *  Set appropriate bit-width for the storage of sine/cosine or exponential tables and also define input bit widths
@@ -99,6 +99,6 @@ struct ssr_fft_params : ssr_fft_default_params {
  *above
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-typedef vitis::dsp::fft::ssr_fft_output_type<ssr_fft_params, T_SSR_FFT_IN>::t_ssr_fft_out T_SSR_FFT_OUT;
+typedef xf::dsp::fft::ssr_fft_output_type<ssr_fft_params, T_SSR_FFT_IN>::t_ssr_fft_out T_SSR_FFT_OUT;
 
 #endif // HLS_SSR_FFT_DATA_PATH_
