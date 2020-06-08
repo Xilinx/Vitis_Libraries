@@ -22,7 +22,7 @@ Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries
 
 ### Software Platform
 
-This library is designed to work with Vitis 2019.2 and later, and therefore inherits the system requirements of Vitis and XRT.
+This library is designed to work with Vitis 2020.1 and later, and therefore inherits the system requirements of Vitis and XRT.
 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
 With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
@@ -30,7 +30,7 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### PCIE Accelerator Card
 
-Hardware modules and kernels are designed to work with 16nm Alveo cards. GQE kernels are best tuned for U280, and could be tailored for other devices.
+All the modules and APIs works with Alveo U280 out of the box, many support U250 and U200 as well. Most of the APIs can be scaled and tailored for any 16nm Alveo card.
 
 * [Alveo U280](https://www.xilinx.com/products/boards-and-kits/alveo/u280.html#gettingStarted)
 * [Alveo U250](https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted)
@@ -41,7 +41,7 @@ Hardware modules and kernels are designed to work with 16nm Alveo cards. GQE ker
 Setup the build environment using the Vitis and XRT scripts.
 
 ```console
-source /opt/xilinx/Vitis/2019.2/settings64.sh
+source /opt/xilinx/Vitis/2020.1/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
@@ -172,7 +172,7 @@ In `L2/demos`, GQE Kernels are combined into xclbins, and the host code shows ho
 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
-    Copyright 2019 Xilinx, Inc.
+    Copyright 2019-2020 Xilinx, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -185,7 +185,6 @@ Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-    Copyright 2019 Xilinx, Inc.
 
 ## Contribution/Feedback
 

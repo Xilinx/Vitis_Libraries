@@ -42,9 +42,11 @@ typedef struct print_buf_result_data_ {
 
 void CL_CALLBACK print_buf_result(cl_event event, cl_int cmd_exec_status, void* user_data) {
     print_buf_result_data_t* d = (print_buf_result_data_t*)user_data;
-    if ((*(d->g)) != (*(d->v))) (*(d->r))++;
     printf("FPGA result %d: %lld.%lld\n", d->i, *(d->v) / 10000, *(d->v) % 10000);
-    printf("Golden result %d: %lld.%lld\n", d->i, *(d->g) / 10000, *(d->g) % 10000);
+    if ((*(d->g)) != (*(d->v))) {
+        (*(d->r))++;
+        printf("Golden result %d: %lld.%lld\n", d->i, *(d->g) / 10000, *(d->g) % 10000);
+    }
 }
 #endif
 
@@ -61,13 +63,13 @@ int generate_data(T* data, int range, size_t n) {
     return 0;
 }
 
-ap_uint<64> get_golden_sum(int l_row,
-                           KEY_T* col_l_orderkey,
-                           MONEY_T* col_l_extendedprice,
-                           MONEY_T* col_l_discount,
-                           int o_row,
-                           KEY_T* col_o_orderkey) {
-    ap_uint<64> sum = 0;
+int64_t get_golden_sum(int l_row,
+                       KEY_T* col_l_orderkey,
+                       MONEY_T* col_l_extendedprice,
+                       MONEY_T* col_l_discount,
+                       int o_row,
+                       KEY_T* col_o_orderkey) {
+    int64_t sum = 0;
     int cnt = 0;
 
     std::unordered_multimap<uint32_t, uint32_t> ht1;

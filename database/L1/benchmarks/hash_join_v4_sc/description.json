@@ -40,7 +40,7 @@
         {
             "name": "generic launch for hw flows",
             "target": "hw",
-            "cmd_args": " -xclbin BUILD/hash_join.xclbin"
+            "cmd_args": " -xclbin BUILD/join_kernel.xclbin"
         }
     ],
     "host": {
