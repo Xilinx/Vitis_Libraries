@@ -104,7 +104,7 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 EXE_NAME := test_join.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_multi_join.xclbin -scale 5000
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_multi_join.xclbin -scale 100
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_multi_join.xclbin -scale 5000
