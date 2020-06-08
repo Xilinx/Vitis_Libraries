@@ -94,8 +94,12 @@ int main(int argc, char* argv[]) {
         std::cout << "WARNING: limited repeat to " << num_rep << " times.\n";
     }
 
+    std::cout << "Starting test.\n";
+
     // input data
     const char datain[] = {0x01};
+    //    const char datain2[] = {0x01};
+    const char datain2[] = {0x7e};
 
     // cipher key
     const unsigned char key[] = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c,
@@ -108,7 +112,7 @@ int main(int argc, char* argv[]) {
     // ouput length of the result
     int outlen = 0;
     // output result
-    unsigned char golden[N_ROW];
+    unsigned char golden[4][N_ROW];
 
     // call OpenSSL API to get the golden
     EVP_CIPHER_CTX* ctx;
@@ -117,7 +121,45 @@ int main(int argc, char* argv[]) {
     EVP_CIPHER_CTX_set_key_length(ctx, KEY_SIZE);
     EVP_CipherInit_ex(ctx, NULL, NULL, key, NULL, 1);
     for (unsigned int i = 0; i < N_ROW; i++) {
-        EVP_CipherUpdate(ctx, golden + i, &outlen, (const unsigned char*)datain, 1);
+        EVP_CipherUpdate(ctx, golden[0] + i, &outlen, (const unsigned char*)datain, 1);
+        i++;
+        EVP_CipherUpdate(ctx, golden[0] + i, &outlen, (const unsigned char*)datain2, 1);
+    }
+    EVP_CIPHER_CTX_free(ctx);
+
+    outlen = 0;
+    ctx = EVP_CIPHER_CTX_new();
+    EVP_CipherInit_ex(ctx, EVP_rc4(), NULL, NULL, NULL, 1);
+    EVP_CIPHER_CTX_set_key_length(ctx, KEY_SIZE);
+    EVP_CipherInit_ex(ctx, NULL, NULL, key, NULL, 1);
+    for (unsigned int i = 0; i < N_ROW; i++) {
+        EVP_CipherUpdate(ctx, golden[1] + i, &outlen, (const unsigned char*)datain, 1);
+        i++;
+        EVP_CipherUpdate(ctx, golden[1] + i, &outlen, (const unsigned char*)datain2, 1);
+    }
+    EVP_CIPHER_CTX_free(ctx);
+
+    outlen = 0;
+    ctx = EVP_CIPHER_CTX_new();
+    EVP_CipherInit_ex(ctx, EVP_rc4(), NULL, NULL, NULL, 1);
+    EVP_CIPHER_CTX_set_key_length(ctx, KEY_SIZE);
+    EVP_CipherInit_ex(ctx, NULL, NULL, key, NULL, 1);
+    for (unsigned int i = 0; i < N_ROW; i++) {
+        EVP_CipherUpdate(ctx, golden[2] + i, &outlen, (const unsigned char*)datain, 1);
+        i++;
+        EVP_CipherUpdate(ctx, golden[2] + i, &outlen, (const unsigned char*)datain2, 1);
+    }
+    EVP_CIPHER_CTX_free(ctx);
+
+    outlen = 0;
+    ctx = EVP_CIPHER_CTX_new();
+    EVP_CipherInit_ex(ctx, EVP_rc4(), NULL, NULL, NULL, 1);
+    EVP_CIPHER_CTX_set_key_length(ctx, KEY_SIZE);
+    EVP_CipherInit_ex(ctx, NULL, NULL, key, NULL, 1);
+    for (unsigned int i = 0; i < N_ROW; i++) {
+        EVP_CipherUpdate(ctx, golden[3] + i, &outlen, (const unsigned char*)datain, 1);
+        i++;
+        EVP_CipherUpdate(ctx, golden[3] + i, &outlen, (const unsigned char*)datain2, 1);
     }
     EVP_CIPHER_CTX_free(ctx);
 
@@ -128,7 +170,11 @@ int main(int argc, char* argv[]) {
 
     ap_uint<512> dataBlock;
     for (unsigned int i = 0; i < 64; i++) {
-        dataBlock.range(i * 8 + 7, i * 8) = datain[0];
+        if (i % 2 == 0) {
+            dataBlock.range(i * 8 + 7, i * 8) = datain[0];
+        } else {
+            dataBlock.range(i * 8 + 7, i * 8) = datain2[0];
+        }
     }
 
     std::cout << "Goldens have been created using OpenSSL.\n";
@@ -344,11 +390,11 @@ int main(int argc, char* argv[]) {
             for (unsigned int k = 0; k < CH_NM; k++) {
                 for (unsigned int i = 0; i < N_ROW; i++) {
                     if (hb_out_a[n][j * ((N_ROW / 32) * (CH_NM / 2)) + (i / 32) * (CH_NM / 2) + k / 2].range(
-                            (k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8) != golden[i]) {
+                            (k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8) != golden[n][i]) {
                         checked = false;
                         std::cout << "Error found in kernel_ " << std::dec << n << " " << k << " channel, " << j
                                   << " task, " << i << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden[n] = " << std::hex << (int)golden[n][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_a[n][j * ((N_ROW / 32) * (CH_NM / 2)) + (i / 32) * (CH_NM / 2) + k / 2]
                                          .range((k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8)
@@ -365,11 +411,11 @@ int main(int argc, char* argv[]) {
             for (unsigned int k = 0; k < CH_NM; k++) {
                 for (unsigned int i = 0; i < N_ROW; i++) {
                     if (hb_out_b[n][j * ((N_ROW / 32) * (CH_NM / 2)) + (i / 32) * (CH_NM / 2) + k / 2].range(
-                            (k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8) != golden[i]) {
+                            (k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8) != golden[n][i]) {
                         checked = false;
                         std::cout << "Error found in kernel_ " << std::dec << n << " " << k << " channel, " << j
                                   << " task, " << i << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden[n] = " << std::hex << (int)golden[n][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_b[n][j * ((N_ROW / 32) * (CH_NM / 2)) + (i / 32) * (CH_NM / 2) + k / 2]
                                          .range((k % 2) * 256 + (i % 32) * 8 + 7, (k % 2) * 256 + (i % 32) * 8)
@@ -383,7 +429,8 @@ int main(int argc, char* argv[]) {
     if (checked) {
         std::cout << std::dec << CH_NM << " channels, " << N_TASK << " tasks, " << N_ROW
                   << " messages verified. No error found!" << std::endl;
+        return 0;
+    } else {
+        return 1;
     }
-
-    return 0;
 }

@@ -41,9 +41,9 @@ int main() {
 
     if (cipher == *golden) {
         std::cout << "\nAES192 test PASS\n" << std::endl;
+        return 0;
     } else {
         std::cout << "\nAES192 test FAIL\n" << std::endl;
+        return 1;
     }
-
-    return 0;
 }

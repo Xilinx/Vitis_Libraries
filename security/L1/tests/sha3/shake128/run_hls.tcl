@@ -18,20 +18,22 @@ source settings.tcl
 
 set PROJ "shake128_test.prj"
 set SOLN "solution1"
-set CLKP 3.00
+
+if {![info exists CLKP]} {
+  set CLKP 3.00
+}
 
 open_project -reset $PROJ
 
-add_files test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb main.cpp
-add_files -tb testcases.dat
+add_files "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files -tb "main.cpp testcases.dat"
 set_top test
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
-#set_clock_uncertainty 1.05
+create_clock -period $CLKP
+set_clock_uncertainty 1.05
 
 if {$CSIM == 1} {
   csim_design

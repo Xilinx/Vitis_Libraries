@@ -93,8 +93,22 @@ int main(int argc, char* argv[]) {
     }
 
     // input data
-    const char datain[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                           0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    const char datain00[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                             0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    const char datain01[] = {0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                             0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    const char datain10[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10};
+    const char datain11[] = {0x02, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10};
+    const char datain20[] = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+                             0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
+    const char datain21[] = {0x11, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+                             0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
+    const char datain30[] = {0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+                             0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f};
+    const char datain31[] = {0x41, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+                             0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f};
 
     // cipher key
     const unsigned char key[] = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a,
@@ -112,23 +126,79 @@ int main(int argc, char* argv[]) {
     // input data length 16 bytes
     unsigned int inlen = 16;
     // output result buffer
-    unsigned char dout[N_ROW * inlen];
+    unsigned char dout[4][N_ROW * inlen];
 
     // call OpenSSL API to get the golden
     EVP_CIPHER_CTX* ctx;
     ctx = EVP_CIPHER_CTX_new();
     EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, ivec);
-    for (unsigned int i = 0; i < N_ROW; i++) {
-        EVP_EncryptUpdate(ctx, dout + plaintext_len, &outlen, (const unsigned char*)datain, inlen);
+    for (unsigned int i = 0; i < N_ROW; i += 2) {
+        EVP_EncryptUpdate(ctx, dout[0] + plaintext_len, &outlen, (const unsigned char*)datain00, inlen);
+        plaintext_len += outlen;
+        EVP_EncryptUpdate(ctx, dout[0] + plaintext_len, &outlen, (const unsigned char*)datain01, inlen);
         plaintext_len += outlen;
     }
-    EVP_EncryptFinal_ex(ctx, dout + plaintext_len, &outlen);
+    EVP_EncryptFinal_ex(ctx, dout[0] + plaintext_len, &outlen);
     EVP_CIPHER_CTX_free(ctx);
 
-    ap_uint<128> golden[N_ROW];
+    outlen = 0;
+    plaintext_len = 0;
+    ctx = EVP_CIPHER_CTX_new();
+    EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, ivec);
+    for (unsigned int i = 0; i < N_ROW; i += 2) {
+        EVP_EncryptUpdate(ctx, dout[1] + plaintext_len, &outlen, (const unsigned char*)datain10, inlen);
+        plaintext_len += outlen;
+        EVP_EncryptUpdate(ctx, dout[1] + plaintext_len, &outlen, (const unsigned char*)datain11, inlen);
+        plaintext_len += outlen;
+    }
+    EVP_EncryptFinal_ex(ctx, dout[1] + plaintext_len, &outlen);
+    EVP_CIPHER_CTX_free(ctx);
+
+    outlen = 0;
+    plaintext_len = 0;
+    ctx = EVP_CIPHER_CTX_new();
+    EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, ivec);
+    for (unsigned int i = 0; i < N_ROW; i += 2) {
+        EVP_EncryptUpdate(ctx, dout[2] + plaintext_len, &outlen, (const unsigned char*)datain20, inlen);
+        plaintext_len += outlen;
+        EVP_EncryptUpdate(ctx, dout[2] + plaintext_len, &outlen, (const unsigned char*)datain21, inlen);
+        plaintext_len += outlen;
+    }
+    EVP_EncryptFinal_ex(ctx, dout[2] + plaintext_len, &outlen);
+    EVP_CIPHER_CTX_free(ctx);
+
+    outlen = 0;
+    plaintext_len = 0;
+    ctx = EVP_CIPHER_CTX_new();
+    EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, ivec);
+    for (unsigned int i = 0; i < N_ROW; i += 2) {
+        EVP_EncryptUpdate(ctx, dout[3] + plaintext_len, &outlen, (const unsigned char*)datain30, inlen);
+        plaintext_len += outlen;
+        EVP_EncryptUpdate(ctx, dout[3] + plaintext_len, &outlen, (const unsigned char*)datain31, inlen);
+        plaintext_len += outlen;
+    }
+    EVP_EncryptFinal_ex(ctx, dout[3] + plaintext_len, &outlen);
+    EVP_CIPHER_CTX_free(ctx);
+
+    ap_uint<128> golden[4][N_ROW];
     for (unsigned int i = 0; i < N_ROW; i++) {
         for (unsigned int j = 0; j < 16; j++) {
-            golden[i].range(j * 8 + 7, j * 8) = dout[i * 16 + j];
+            golden[0][i].range(j * 8 + 7, j * 8) = dout[0][i * 16 + j];
+        }
+    }
+    for (unsigned int i = 0; i < N_ROW; i++) {
+        for (unsigned int j = 0; j < 16; j++) {
+            golden[1][i].range(j * 8 + 7, j * 8) = dout[1][i * 16 + j];
+        }
+    }
+    for (unsigned int i = 0; i < N_ROW; i++) {
+        for (unsigned int j = 0; j < 16; j++) {
+            golden[2][i].range(j * 8 + 7, j * 8) = dout[2][i * 16 + j];
+        }
+    }
+    for (unsigned int i = 0; i < N_ROW; i++) {
+        for (unsigned int j = 0; j < 16; j++) {
+            golden[3][i].range(j * 8 + 7, j * 8) = dout[3][i * 16 + j];
         }
     }
 
@@ -142,9 +212,30 @@ int main(int argc, char* argv[]) {
         IVReg.range(i * 8 + 7, i * 8) = ivec[i];
     }
 
-    ap_uint<128> dataReg;
+    ap_uint<128> dataReg[2][4];
     for (unsigned int i = 0; i < 16; i++) {
-        dataReg.range(i * 8 + 7, i * 8) = datain[i];
+        dataReg[0][0].range(i * 8 + 7, i * 8) = datain00[i];
+    }
+    for (unsigned int i = 0; i < 16; i++) {
+        dataReg[1][0].range(i * 8 + 7, i * 8) = datain01[i];
+    }
+    for (unsigned int i = 0; i < 16; i++) {
+        dataReg[0][1].range(i * 8 + 7, i * 8) = datain10[i];
+    }
+    for (unsigned int i = 0; i < 16; i++) {
+        dataReg[1][1].range(i * 8 + 7, i * 8) = datain11[i];
+    }
+    for (unsigned int i = 0; i < 16; i++) {
+        dataReg[0][2].range(i * 8 + 7, i * 8) = datain20[i];
+    }
+    for (unsigned int i = 0; i < 16; i++) {
+        dataReg[1][2].range(i * 8 + 7, i * 8) = datain21[i];
+    }
+    for (unsigned int i = 0; i < 16; i++) {
+        dataReg[0][3].range(i * 8 + 7, i * 8) = datain30[i];
+    }
+    for (unsigned int i = 0; i < 16; i++) {
+        dataReg[1][3].range(i * 8 + 7, i * 8) = datain31[i];
     }
 
     std::cout << "Goldens have been created using OpenSSL.\n";
@@ -190,23 +281,25 @@ int main(int argc, char* argv[]) {
         hb_in4[j].range(255, 0) = keyReg.range(255, 0);
     }
     // generate texts
-    for (unsigned int j = CH_NM; j < N_ROW * N_TASK * CH_NM / 4 + CH_NM; j++) {
-        hb_in1[j].range(511, 384) = dataReg.range(127, 0);
-        hb_in1[j].range(383, 256) = dataReg.range(127, 0);
-        hb_in1[j].range(255, 128) = dataReg.range(127, 0);
-        hb_in1[j].range(127, 0) = dataReg.range(127, 0);
-        hb_in2[j].range(511, 384) = dataReg.range(127, 0);
-        hb_in2[j].range(383, 256) = dataReg.range(127, 0);
-        hb_in2[j].range(255, 128) = dataReg.range(127, 0);
-        hb_in2[j].range(127, 0) = dataReg.range(127, 0);
-        hb_in3[j].range(511, 384) = dataReg.range(127, 0);
-        hb_in3[j].range(383, 256) = dataReg.range(127, 0);
-        hb_in3[j].range(255, 128) = dataReg.range(127, 0);
-        hb_in3[j].range(127, 0) = dataReg.range(127, 0);
-        hb_in4[j].range(511, 384) = dataReg.range(127, 0);
-        hb_in4[j].range(383, 256) = dataReg.range(127, 0);
-        hb_in4[j].range(255, 128) = dataReg.range(127, 0);
-        hb_in4[j].range(127, 0) = dataReg.range(127, 0);
+    for (unsigned int j = 0; j < N_ROW * N_TASK; j++) {
+        for (unsigned int k = 0; k < CH_NM / 4; k++) {
+            hb_in1[j * CH_NM / 4 + k + CH_NM].range(511, 384) = dataReg[j % 2][3].range(127, 0);
+            hb_in1[j * CH_NM / 4 + k + CH_NM].range(383, 256) = dataReg[j % 2][2].range(127, 0);
+            hb_in1[j * CH_NM / 4 + k + CH_NM].range(255, 128) = dataReg[j % 2][1].range(127, 0);
+            hb_in1[j * CH_NM / 4 + k + CH_NM].range(127, 0) = dataReg[j % 2][0].range(127, 0);
+            hb_in2[j * CH_NM / 4 + k + CH_NM].range(511, 384) = dataReg[j % 2][3].range(127, 0);
+            hb_in2[j * CH_NM / 4 + k + CH_NM].range(383, 256) = dataReg[j % 2][2].range(127, 0);
+            hb_in2[j * CH_NM / 4 + k + CH_NM].range(255, 128) = dataReg[j % 2][1].range(127, 0);
+            hb_in2[j * CH_NM / 4 + k + CH_NM].range(127, 0) = dataReg[j % 2][0].range(127, 0);
+            hb_in3[j * CH_NM / 4 + k + CH_NM].range(511, 384) = dataReg[j % 2][3].range(127, 0);
+            hb_in3[j * CH_NM / 4 + k + CH_NM].range(383, 256) = dataReg[j % 2][2].range(127, 0);
+            hb_in3[j * CH_NM / 4 + k + CH_NM].range(255, 128) = dataReg[j % 2][1].range(127, 0);
+            hb_in3[j * CH_NM / 4 + k + CH_NM].range(127, 0) = dataReg[j % 2][0].range(127, 0);
+            hb_in4[j * CH_NM / 4 + k + CH_NM].range(511, 384) = dataReg[j % 2][3].range(127, 0);
+            hb_in4[j * CH_NM / 4 + k + CH_NM].range(383, 256) = dataReg[j % 2][2].range(127, 0);
+            hb_in4[j * CH_NM / 4 + k + CH_NM].range(255, 128) = dataReg[j % 2][1].range(127, 0);
+            hb_in4[j * CH_NM / 4 + k + CH_NM].range(127, 0) = dataReg[j % 2][0].range(127, 0);
+        }
     }
 
     std::cout << "Host map buffer has been allocated and set.\n";
@@ -373,38 +466,38 @@ int main(int argc, char* argv[]) {
         for (unsigned int j = 0; j < N_TASK; j++) {
             for (unsigned int i = 0; i < N_ROW; i++) {
                 for (unsigned int k = 0; k < CH_NM / 4; k++) {
-                    if (hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(511, 384) != golden[i]) {
+                    if (hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(511, 384) != golden[3][i]) {
                         checked = false;
                         std::cout << "Error found in " << std::dec << k + 3 << " channel, " << j << " task, " << i
                                   << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden = " << std::hex << golden[3][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(511, 384)
                                   << std::endl;
                     }
-                    if (hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(383, 256) != golden[i]) {
+                    if (hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(383, 256) != golden[2][i]) {
                         checked = false;
                         std::cout << "Error found in " << std::dec << k + 2 << " channel, " << j << " task, " << i
                                   << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden = " << std::hex << golden[2][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(383, 256)
                                   << std::endl;
                     }
-                    if (hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(255, 128) != golden[i]) {
+                    if (hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(255, 128) != golden[1][i]) {
                         checked = false;
                         std::cout << "Error found in " << std::dec << k + 1 << " channel, " << j << " task, " << i
                                   << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden = " << std::hex << golden[1][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(255, 128)
                                   << std::endl;
                     }
-                    if (hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(127, 0) != golden[i]) {
+                    if (hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(127, 0) != golden[0][i]) {
                         checked = false;
                         std::cout << "Error found in " << std::dec << k << " channel, " << j << " task, " << i
                                   << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden = " << std::hex << golden[0][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_a[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(127, 0) << std::endl;
                     }
@@ -417,38 +510,38 @@ int main(int argc, char* argv[]) {
         for (unsigned int j = 0; j < N_TASK; j++) {
             for (unsigned int i = 0; i < N_ROW; i++) {
                 for (unsigned int k = 0; k < CH_NM / 4; k++) {
-                    if (hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(511, 384) != golden[i]) {
+                    if (hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(511, 384) != golden[3][i]) {
                         checked = false;
                         std::cout << "Error found in " << std::dec << k + 3 << " channel, " << j << " task, " << i
                                   << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden = " << std::hex << golden[3][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(511, 384)
                                   << std::endl;
                     }
-                    if (hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(383, 256) != golden[i]) {
+                    if (hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(383, 256) != golden[2][i]) {
                         checked = false;
                         std::cout << "Error found in " << std::dec << k + 2 << " channel, " << j << " task, " << i
                                   << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden = " << std::hex << golden[2][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(383, 256)
                                   << std::endl;
                     }
-                    if (hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(255, 128) != golden[i]) {
+                    if (hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(255, 128) != golden[1][i]) {
                         checked = false;
                         std::cout << "Error found in " << std::dec << k + 1 << " channel, " << j << " task, " << i
                                   << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden = " << std::hex << golden[1][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(255, 128)
                                   << std::endl;
                     }
-                    if (hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(127, 0) != golden[i]) {
+                    if (hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(127, 0) != golden[0][i]) {
                         checked = false;
                         std::cout << "Error found in " << std::dec << k << " channel, " << j << " task, " << i
                                   << " message" << std::endl;
-                        std::cout << "golden = " << std::hex << golden[i] << std::endl;
+                        std::cout << "golden = " << std::hex << golden[0][i] << std::endl;
                         std::cout << "fpga   = " << std::hex
                                   << hb_out_b[n][j * N_ROW * CH_NM / 4 + i * CH_NM / 4 + k].range(127, 0) << std::endl;
                     }
@@ -460,6 +553,8 @@ int main(int argc, char* argv[]) {
     if (checked) {
         std::cout << std::dec << CH_NM << " channels, " << N_TASK << " tasks, " << N_ROW
                   << " messages verified. No error found!" << std::endl;
+    } else {
+        return -1;
     }
 
     std::cout << "Kernel has been run for " << std::dec << num_rep << " times." << std::endl;

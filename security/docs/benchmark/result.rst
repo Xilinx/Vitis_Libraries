@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Vitis Security design, benchmark, result
+   :description: Vitis Security Library benchmark results.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. result:
 
 *****************
@@ -72,13 +79,13 @@ Kernel utilization and throughput is shown in table below.
 hmacSha1 throughput
 ===================
 
-To profile performance of hmacSha1, we prepare a datapack of 24 messages, each message is 2Mbyte.
-We have 4 kernels, each kernel has 8 PUs.
+To profile performance of hmacSha1, we prepare a datapack of 512K messages, each message is 1Kbyte,
+key length is 256bits. We have 4 kernels, each kernel has 16 PUs.
 Kernel utilization and throughput is shown in table below. 
 
 =========== ================ ================== ============== ======= ========== =============
  Frequency        LUT                REG             BRAM       URAM       DSP     Throughput
 =========== ================ ================== ============== ======= ========== =============
- 281MHz      648,274(37.5%)   1,074,803(31.1%)   726 (27.0%)    0      56(0.5%)    2.1GB/s
+ 227 MHz     959,078(55.5%)   1,794,522(52.0%)   777 (28.9%)     0      56(0.5%)    8.0 GB/s
 =========== ================ ================== ============== ======= ========== =============
 

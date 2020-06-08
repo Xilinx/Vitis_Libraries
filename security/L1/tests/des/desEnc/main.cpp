@@ -100,8 +100,9 @@ int main() {
     std::cout << "\nTest DES ";
     if (cipherAP == cipher && blockText == *a) {
         std::cout << "PASS\n" << std::endl;
+        return 0;
     } else {
         std::cout << "FAIL\n" << std::endl;
+        return 1;
     }
-    return 0;
 }

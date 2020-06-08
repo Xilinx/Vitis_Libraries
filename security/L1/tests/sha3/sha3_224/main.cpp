@@ -29,8 +29,11 @@ using namespace std;
 #include <string>
 #include <vector>
 
+// for using evp structure and SHA-3 API family
+// #include "openssl/evp.h"
+
 // number of times to perform the test in different message and length
-#define NUM_TESTS 1000
+#define NUM_TESTS 400
 // the size of each message word in byte
 #define MSG_SIZE 8
 // the size of the digest in byte
@@ -65,6 +68,76 @@ int main() {
 
     // the original message to be digested
     const char message[] =
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
+        // "abcdefghijklmnopqrstuvwxyz"
         "abcdefghijklmnopqrstuvwxyz"
         "abcdefghijklmnopqrstuvwxyz"
         "abcdefghijklmnopqrstuvwxyz"
@@ -83,12 +156,22 @@ int main() {
     // generate golden
     for (unsigned int i = 0; i < NUM_TESTS; i++) {
         unsigned int len = i % 256;
-        char m[256];
+        // unsigned int len = i;
+        char m[NUM_TESTS];
         if (len != 0) {
             memcpy(m, message, len);
         }
         m[len] = 0;
         unsigned char h[DIG_SIZE];
+
+        // generate goldens using openSSL API
+        // unsigned int md_len;
+        // EVP_MD_CTX* mdctx;
+        // mdctx = EVP_MD_CTX_new();
+        // EVP_DigestInit_ex(mdctx, EVP_sha3_224(), NULL);
+        // EVP_DigestUpdate(mdctx, m, len);
+        // EVP_DigestFinal_ex(mdctx, h, &md_len);
+        // EVP_MD_CTX_destroy(mdctx);
 
         // read golden hash values from testcases.dat
         fread(h, sizeof(unsigned char), DIG_SIZE, fp);
@@ -140,6 +223,7 @@ int main() {
     test(msg_strm, len_strm, end_len_strm, digest_strm, end_digest_strm);
 
     // check result
+    int index = 0;
     for (vector<Test>::const_iterator test = tests.begin(); test != tests.end(); test++) {
         ap_uint<8 * DIG_SIZE> digest = digest_strm.read();
         bool x = end_digest_strm.read();
@@ -151,11 +235,13 @@ int main() {
 
         if (memcmp((*test).hash, hash, DIG_SIZE)) {
             ++nerror;
+            cout << "No." << index << endl;
             cout << "fpga   : " << hash2str((unsigned char*)hash, DIG_SIZE) << endl;
             cout << "golden : " << hash2str((unsigned char*)(*test).hash, DIG_SIZE) << endl;
         } else {
             ++ncorrect;
         }
+        index++;
     }
 
     bool x = end_digest_strm.read();

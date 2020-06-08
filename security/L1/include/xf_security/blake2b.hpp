@@ -402,7 +402,6 @@ void halfMixing(
     ap_uint<4> mi5,
     ap_uint<4> mi6,
     ap_uint<4> mi7) {
-#pragma HLS unroll
 #pragma HLS inline off
 
     G<w>(v, vi0, vi1, vi2, vi3, m[mi0], m[mi1]);

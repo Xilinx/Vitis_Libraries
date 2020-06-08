@@ -29,9 +29,6 @@
 #include "xf_security/sha1.hpp"
 #include "xf_security/hmac.hpp"
 #include "kernel_config.hpp"
-#ifndef __SYNTHESIS__
-#include <iostream>
-#endif
 
 template <int msgW, int lW, int hshW>
 struct sha1_wrapper {
@@ -45,14 +42,12 @@ struct sha1_wrapper {
 };
 
 static void test_hmac_sha1(hls::stream<ap_uint<32> >& keyStrm,
-                           hls::stream<ap_uint<64> >& lenKeyStrm,
                            hls::stream<ap_uint<32> >& msgStrm,
                            hls::stream<ap_uint<64> >& lenStrm,
                            hls::stream<bool>& eLenStrm,
                            hls::stream<ap_uint<160> >& hshStrm,
                            hls::stream<bool>& eHshStrm) {
-    xf::security::hmac<32, 32, 64, 160, 64, sha1_wrapper>(keyStrm, lenKeyStrm, msgStrm, lenStrm, eLenStrm, hshStrm,
-                                                          eHshStrm);
+    xf::security::hmac<32, 64, 160, 32, 64, sha1_wrapper>(keyStrm, msgStrm, lenStrm, eLenStrm, hshStrm, eHshStrm);
 }
 
 template <unsigned int _burstLength, unsigned int _channelNumber>
@@ -61,7 +56,7 @@ static void readIn(ap_uint<512>* ptr,
                    hls::stream<ap_uint<64> >& textLengthStrm,
                    hls::stream<ap_uint<64> >& textNumStrm,
                    hls::stream<ap_uint<256> >& keyInStrm) {
-    // number of message blocks in 128 bits
+    // number of message blocks in Byte
     ap_uint<64> textLength;
     // number of messages for single PU
     ap_uint<64> textNum;
@@ -84,162 +79,139 @@ LOOP_READ_CONFIG:
             textNumStrm.write(textNum);
             keyInStrm.write(key);
         }
-#ifndef __SYNTHESIS__
-        std::cout << std::hex << "textlen " << textLength << " textnum " << textNum << " key " << key << std::endl;
-#endif
     }
 
-    ap_uint<64> totalAxiBlock = textNum * textLength * _channelNumber / 4;
-#ifndef __SYNTHESIS__
-    std::cout << "totalAxiBlock" << std::hex << totalAxiBlock << std::endl;
-#endif
+    ap_uint<64> totalAxiBlock = textNum * textLength * _channelNumber / 64;
 
 LOOP_READ_DATA:
-    for (ap_uint<64> i = 0; i < totalAxiBlock; i++) {
+    for (ap_uint<64> i = 0; i < totalAxiBlock; i += _burstLength) {
+        ap_uint<16> readLen, nextStop;
+
+        nextStop = i + _burstLength;
+        if (nextStop < totalAxiBlock) {
+            readLen = _burstLength;
+        } else {
+            readLen = totalAxiBlock - i;
+        }
+
+        for (ap_uint<16> j = 0; j < readLen; j++) {
 #pragma HLS pipeline II = 1
-        ap_uint<512> axiBlock = ptr[_channelNumber + i];
-        textInStrm.write(axiBlock);
+            ap_uint<512> axiBlock = ptr[_channelNumber + i + j];
+            textInStrm.write(axiBlock);
+        }
     }
 }
-
+/*
 static void writeOneStrmGroup(ap_uint<256> key,
                               ap_uint<64> textLengthInByte,
                               hls::stream<ap_uint<32> >& keyStrm,
-                              hls::stream<ap_uint<64> >& keyLenStrm,
                               hls::stream<ap_uint<64> >& msgLenStrm) {
-#pragma HLS inline off
     for (ap_uint<8> k = 0; k < (256 / 32); k++) {
 #pragma HLS pipeline II = 1
         keyStrm.write(key.range(k * 32 + 31, k * 32));
     }
-    keyLenStrm.write(256 / 8);
     msgLenStrm.write(textLengthInByte);
 }
+
 template <unsigned int _channelNumber>
 static void writeStrmGroups(ap_uint<256> key,
                             ap_uint<64> textLengthInByte,
                             hls::stream<ap_uint<32> > keyStrm[_channelNumber],
-                            hls::stream<ap_uint<64> > keyLenStrm[_channelNumber],
                             hls::stream<ap_uint<64> > msgLenStrm[_channelNumber]) {
 #pragma HLS dataflow
     for (unsigned int i = 0; i < _channelNumber; i++) {
 #pragma HLS unroll
-        writeOneStrmGroup(key, textLengthInByte, keyStrm[i], keyLenStrm[i], msgLenStrm[i]);
+        writeOneStrmGroup(key, textLengthInByte, keyStrm[i], msgLenStrm[i]);
+    }
+}
+*/
+
+template <unsigned int _channelNumber>
+void splitText(hls::stream<ap_uint<512> >& textStrm, hls::stream<ap_uint<32> > msgStrm[_channelNumber]) {
+#pragma HLS inline off
+    ap_uint<512> axiWord = textStrm.read();
+    for (unsigned int i = 0; i < _channelNumber; i++) {
+#pragma HLS unroll
+        for (unsigned int j = 0; j < (512 / _channelNumber / 32); j++) {
+#pragma HLS pipeline II = 1
+            msgStrm[i].write(axiWord(i * GRP_WIDTH + j * 32 + 31, i * GRP_WIDTH + j * 32));
+        }
     }
 }
 
 template <unsigned int _channelNumber, unsigned int _burstLength>
-static void splitInput(hls::stream<ap_uint<512> >& textInStrm,
-                       hls::stream<ap_uint<64> >& textLengthStrm,
-                       hls::stream<ap_uint<64> >& textNumStrm,
-                       hls::stream<ap_uint<256> >& keyInStrm,
-                       hls::stream<ap_uint<32> > keyStrm[_channelNumber],
-                       hls::stream<ap_uint<64> > keyLenStrm[_channelNumber],
-                       hls::stream<ap_uint<32> > msgStrm[_channelNumber],
-                       hls::stream<ap_uint<64> > msgLenStrm[_channelNumber],
-                       hls::stream<bool> eMsgLenStrm[_channelNumber]) {
+void splitInput(hls::stream<ap_uint<512> >& textInStrm,
+                hls::stream<ap_uint<64> >& textLengthStrm,
+                hls::stream<ap_uint<64> >& textNumStrm,
+                hls::stream<ap_uint<256> >& keyInStrm,
+                hls::stream<ap_uint<32> > keyStrm[_channelNumber],
+                hls::stream<ap_uint<32> > msgStrm[_channelNumber],
+                hls::stream<ap_uint<64> > msgLenStrm[_channelNumber],
+                hls::stream<bool> eMsgLenStrm[_channelNumber]) {
     // number of message blocks in 128 bits
     ap_uint<64> textLength = textLengthStrm.read();
-    // transform to message length in bytes
-    ap_uint<64> textLengthInByte = textLength * (128 / 8);
     // transform to message length in 32bits
-    ap_uint<64> textLengthIn32Bits = textLength * (128 / 32);
-
+    ap_uint<64> textLengthInGrpSize = textLength / GRP_SIZE;
     // number of messages for single PU
     ap_uint<64> textNum = textNumStrm.read();
     // hmac key
     ap_uint<256> key = keyInStrm.read();
-#ifndef __SYNTHESIS__
-    std::cout << std::dec << "txtLen:" << textLength << " txtNum: " << textNum << " key: " << std::hex << key
-              << std::endl;
-#endif
 
 LOOP_TEXTNUM:
     for (ap_uint<64> i = 0; i < textNum; i++) {
-        // write out key and keylength for all channel
-        /*
-        for(ap_uint<8> j = 0; j < _channelNumber; j++) {
-            #pragma HLS unroll
-            for(ap_uint<8> k = 0; k < 256 / 32; k++) {
-                #pragma HLS pipeline II=1
+        for (unsigned int j = 0; j < _channelNumber; j++) {
+#pragma HLS unroll
+            eMsgLenStrm[j].write(false);
+            msgLenStrm[j].write(textLength);
+            for (unsigned int k = 0; k < (256 / 32); k++) {
+#pragma HLS pipeline II = 1
                 keyStrm[j].write(key.range(k * 32 + 31, k * 32));
             }
-            keyLenStrm[j].write(256 / 8);//in byte
-            msgLenStrm[j].write(textLengthInByte);//in byte
-            eMsgLenStrm[j].write(false);
         }
-        */
-        writeStrmGroups<_channelNumber>(key, textLengthInByte, keyStrm, keyLenStrm, msgLenStrm);
-        for (unsigned int j = 0; j < _channelNumber; j++) {
-            eMsgLenStrm[j].write(false);
+        for (int j = 0; j < textLengthInGrpSize; j++) {
+            splitText<_channelNumber>(textInStrm, msgStrm);
         }
-    LOOP_TEXTLEN:
-        for (ap_uint<64> j = 0; j < textLengthIn32Bits; j++) {
-        LOOP_CHANNELGRP:
-            for (unsigned char k = 0; k < _channelNumber; k += 16) {
-                ap_uint<512> text = textInStrm.read();
+    }
+    for (unsigned int i = 0; i < _channelNumber; i++) {
+        eMsgLenStrm[i].write(true);
+    }
+    /*
+    LOOP_TEXTNUM:
+        for (ap_uint<64> i = 0; i < textNum; i++) {
 
-                ap_uint<32> data[16];
-                for (unsigned char l = 0; l < 16; l++) {
-#pragma HLS unroll
-                    data[l] = text.range(32 * l + 31, 32 * l);
-                }
+            writeStrmGroups<_channelNumber>(key, textLength, keyStrm, msgLenStrm);
 
-                // multiplexer for channels to decider when to write
-                for (ap_uint<8> l = 0; l < _channelNumber; l++) {
-#pragma HLS unroll
-                    if ((l >= k) && (l < k + 16)) {
-                        ap_uint<4> m = l.range(3, 0);
-                        msgStrm[l].write(data[m]);
+            for (unsigned int j = 0; j < _channelNumber; j++) {
+                #pragma HLS unroll
+                eMsgLenStrm[j].write(false);
+            }
+
+        LOOP_TEXTLEN:
+            for(ap_uint<64> j = 0; j < textLengthInGrpSize; j++) {
+
+                ap_uint<512> axiWord = textInStrm.read();
+
+            LOOP_GRP_WIDTH:
+                for(ap_uint<8> l = 0; l < (GRP_WIDTH / 32); l++) {
+                    #pragma HLS pipeline II=1
+
+                    for(ap_uint<8> m = 0; m < CH_NM; m++) {
+                        #pragma HLS unroll
+                        msgStrm[m].write(axiWord.range(m * GRP_WIDTH + l * 32 + 31, m * GRP_WIDTH + l * 32));
                     }
                 }
             }
         }
-    }
-    for (ap_uint<8> l = 0; l < _channelNumber; l++) {
-#pragma HLS unroll
-        eMsgLenStrm[l].write(true);
-    }
-}
 
-#ifndef __SYNTHESIS__
-template <unsigned int _channelNumber, unsigned int _burstLength>
-static void check_splitInput(hls::stream<ap_uint<32> > keyStrm[_channelNumber],
-                             hls::stream<ap_uint<64> > keyLenStrm[_channelNumber],
-                             hls::stream<ap_uint<32> > msgStrm[_channelNumber],
-                             hls::stream<ap_uint<64> > msgLenStrm[_channelNumber],
-                             hls::stream<bool> eMsgLenStrm[_channelNumber]) {
-    ap_uint<32> key;
-    ap_uint<64> keyl;
-    ap_uint<32> msg;
-    ap_uint<64> msgl;
-    bool e;
-    for (int i = 0; i < _channelNumber; i++) {
-        for (int j = 0; j < 2; j++) {
-            keyl = keyLenStrm[i].read();
-            msgl = msgLenStrm[i].read();
-            e = eMsgLenStrm[i].read();
-            std::cout << "kl:" << keyl << " ml:" << msgl << "e:" << e << std::endl;
-            for (int m = 0; m < 256 / 32; m++) {
-                key = keyStrm[i].read();
-                std::cout << "key:" << std::hex << key;
-            }
-            std::cout << std::endl << std::dec;
-            for (int m = 0; m < (64 * 128 / 32); m++) {
-                msg = msgStrm[i].read();
-                // std::cout << "msg:"<<std::hex<<msg;
-            }
-            std::cout << std::endl;
+        for (ap_uint<8> i = 0; i < _channelNumber; i++) {
+    #pragma HLS unroll
+            eMsgLenStrm[i].write(true);
         }
-        e = eMsgLenStrm[i].read();
-        std::cout << "expect: 1, actual:" << e << std::endl;
-    }
+    */
 }
-#endif
 
 template <unsigned int _channelNumber>
 static void hmacSha1Parallel(hls::stream<ap_uint<32> > keyStrm[_channelNumber],
-                             hls::stream<ap_uint<64> > keyLenStrm[_channelNumber],
                              hls::stream<ap_uint<32> > msgStrm[_channelNumber],
                              hls::stream<ap_uint<64> > msgLenStrm[_channelNumber],
                              hls::stream<bool> eMsgLenStrm[_channelNumber],
@@ -248,28 +220,9 @@ static void hmacSha1Parallel(hls::stream<ap_uint<32> > keyStrm[_channelNumber],
 #pragma HLS dataflow
     for (int i = 0; i < _channelNumber; i++) {
 #pragma HLS unroll
-#ifndef __SYNTHESIS__
-        std::cout << std::dec << i << "th channel" << std::endl;
-#endif
-        test_hmac_sha1(keyStrm[i], keyLenStrm[i], msgStrm[i], msgLenStrm[i], eMsgLenStrm[i], hshStrm[i], eHshStrm[i]);
+        test_hmac_sha1(keyStrm[i], msgStrm[i], msgLenStrm[i], eMsgLenStrm[i], hshStrm[i], eHshStrm[i]);
     }
 }
-
-#ifndef __SYNTHESIS___
-template <unsigned int _channelNumber>
-static void check_hmacSha1Parallel(hls::stream<ap_uint<160> > hshStrm[_channelNumber],
-                                   hls::stream<bool> eHshStrm[_channelNumber]) {
-    for (int i = 0; i < _channelNumber; i++) {
-        bool e;
-        ap_uint<160> result;
-        e = eHshStrm[i].read();
-        while (!e) {
-            result = hshStrm[i].read();
-            e = eHshStrm[i].read();
-        }
-    }
-}
-#endif
 
 template <unsigned int _channelNumber, unsigned int _burstLen>
 static void mergeResult(hls::stream<ap_uint<160> > hshStrm[_channelNumber],
@@ -284,8 +237,11 @@ static void mergeResult(hls::stream<ap_uint<160> > hshStrm[_channelNumber],
 
     unsigned int counter = 0;
 
+LOOP_WHILE:
     while (unfinish != 0) {
+    LOOP_CHANNEL:
         for (int i = 0; i < _channelNumber; i++) {
+#pragma HLS pipeline II = 1
             bool e = eHshStrm[i].read();
             if (!e) {
                 ap_uint<160> hsh = hshStrm[i].read();
@@ -308,22 +264,6 @@ static void mergeResult(hls::stream<ap_uint<160> > hshStrm[_channelNumber],
     burstLenStrm.write(0);
 }
 
-#ifndef __SYNTHESIS__
-static void check_mergeResult(hls::stream<ap_uint<512> >& outStrm, hls::stream<unsigned int>& burstLenStrm) {
-    unsigned int len;
-    len = burstLenStrm.read();
-    while (len != 0) {
-        std::cout << len << std::endl;
-        for (int i = 0; i < len; i++) {
-            ap_uint<512> result = 0;
-            result = outStrm.read();
-            std::cout << "Result: " << std::hex << result << std::endl;
-        }
-        len = burstLenStrm.read();
-    }
-}
-#endif
-
 template <unsigned int _burstLength, unsigned int _channelNumber>
 static void writeOut(hls::stream<ap_uint<512> >& outStrm, hls::stream<unsigned int>& burstLenStrm, ap_uint<512>* ptr) {
     unsigned int burstLen = burstLenStrm.read();
@@ -338,13 +278,15 @@ static void writeOut(hls::stream<ap_uint<512> >& outStrm, hls::stream<unsigned i
     }
 }
 // @brief top of kernel
-extern "C" void hmacSha1Kernel_3(ap_uint<512> inputData[(1 << 30) + 100], ap_uint<512> outputData[1 << 30]) {
+extern "C" void hmacSha1Kernel_3(ap_uint<512> inputData[(1 << 20) + 100], ap_uint<512> outputData[1 << 20]) {
 #pragma HLS dataflow
 
+    const unsigned int fifobatch = 4;
     const unsigned int _channelNumber = CH_NM;
     const unsigned int _burstLength = BURST_LEN;
-    const unsigned int fifoDepth = _burstLength * 2;
-    const unsigned int keyDepth = 256 / 32 * 2;
+    const unsigned int fifoDepth = _burstLength * fifobatch;
+    const unsigned int msgDepth = fifoDepth * (512 / 32 / CH_NM);
+    const unsigned int keyDepth = (256 / 32) * fifobatch;
 
 // clang-format off
 #pragma HLS INTERFACE m_axi offset = slave latency = 64 \
@@ -364,48 +306,52 @@ extern "C" void hmacSha1Kernel_3(ap_uint<512> inputData[(1 << 30) + 100], ap_uin
 
     hls::stream<ap_uint<512> > textInStrm;
 #pragma HLS stream variable = textInStrm depth = fifoDepth
+#pragma HLS resource variable = textInStrm core = FIFO_BRAM
     hls::stream<ap_uint<64> > textLengthStrm;
-#pragma HLS stream variable = textLengthStrm depth = 4
+#pragma HLS stream variable = textLengthStrm depth = fifobatch
+#pragma HLS resource variable = textLengthStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<64> > textNumStrm;
-#pragma HLS stream variable = textNumStrm depth = 4
+#pragma HLS stream variable = textNumStrm depth = fifobatch
+#pragma HLS resource variable = textNumStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<256> > keyInStrm;
-#pragma HLS stream variable = keyInStrm depth = 4
+#pragma HLS stream variable = keyInStrm depth = fifobatch
+#pragma HLS resource variable = keyInStrm core = FIFO_LUTRAM
 
     hls::stream<ap_uint<32> > keyStrm[_channelNumber];
 #pragma HLS stream variable = keyStrm depth = keyDepth
-    hls::stream<ap_uint<64> > keyLenStrm[_channelNumber];
-#pragma HLS stream variable = keyLenStrm depth = 2
+#pragma HLS resource variable = keyStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<32> > msgStrm[_channelNumber];
-#pragma HLS stream variable = msgStrm depth = fifoDepth
+#pragma HLS stream variable = msgStrm depth = msgDepth
+#pragma HLS resource variable = msgStrm core = FIFO_BRAM
     hls::stream<ap_uint<64> > msgLenStrm[_channelNumber];
-#pragma HLS stream variable = msgLenStrm depth = 2
+#pragma HLS stream variable = msgLenStrm depth = 128
+#pragma HLS resource variable = msgLenStrm core = FIFO_BRAM
     hls::stream<bool> eMsgLenStrm[_channelNumber];
-#pragma HLS stream variable = eMsgLenStrm depth = 2
+#pragma HLS stream variable = eMsgLenStrm depth = 128
+#pragma HLS resource variable = eMsgLenStrm core = FIFO_LUTRAM
 
     hls::stream<ap_uint<160> > hshStrm[_channelNumber];
-#pragma HLS stream variable = hshStrm depth = 4
+#pragma HLS stream variable = hshStrm depth = fifobatch
+#pragma HLS resource variable = hshStrm core = FIFO_LUTRAM
     hls::stream<bool> eHshStrm[_channelNumber];
-#pragma HLS stream variable = eHshStrm depth = 4
+#pragma HLS stream variable = eHshStrm depth = fifobatch
+#pragma HLS resource variable = eHshStrm core = FIFO_LUTRAM
 
     hls::stream<ap_uint<512> > outStrm;
 #pragma HLS stream variable = outStrm depth = fifoDepth
+#pragma HLS resource variable = outStrm core = FIFO_BRAM
     hls::stream<unsigned int> burstLenStrm;
-#pragma HLS stream variable = burstLenStrm depth = 2
+#pragma HLS stream variable = burstLenStrm depth = fifobatch
+#pragma HLS resource variable = burstLenStrm core = FIFO_LUTRAM
 
     readIn<_burstLength, _channelNumber>(inputData, textInStrm, textLengthStrm, textNumStrm, keyInStrm);
 
-    splitInput<_channelNumber, _burstLength>(textInStrm, textLengthStrm, textNumStrm, keyInStrm, keyStrm, keyLenStrm,
-                                             msgStrm, msgLenStrm, eMsgLenStrm);
-    // check_splitInput<_channelNumber, _burstLength>(keyStrm, keyLenStrm, msgStrm, msgLenStrm, eMsgLenStrm);
+    splitInput<_channelNumber, _burstLength>(textInStrm, textLengthStrm, textNumStrm, keyInStrm, keyStrm, msgStrm,
+                                             msgLenStrm, eMsgLenStrm);
 
-    hmacSha1Parallel<_channelNumber>(keyStrm, keyLenStrm, msgStrm, msgLenStrm, eMsgLenStrm, hshStrm, eHshStrm);
-
-    // check_hmacSha1Parallel<_channelNumber>(hshStrm, eHshStrm);
+    hmacSha1Parallel<_channelNumber>(keyStrm, msgStrm, msgLenStrm, eMsgLenStrm, hshStrm, eHshStrm);
 
     mergeResult<_channelNumber, _burstLength>(hshStrm, eHshStrm, outStrm, burstLenStrm);
 
-    // check_mergeResult(outStrm, burstLenStrm);
-
     writeOut<_burstLength, _channelNumber>(outStrm, burstLenStrm, outputData);
-
-} // end aes256CbcEncryptKernel_1
+}

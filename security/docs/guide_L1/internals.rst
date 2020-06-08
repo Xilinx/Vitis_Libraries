@@ -13,11 +13,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Vitis Security design, internals, design internals
+   :description: Vitis Security Library design internals.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **************************************
 Design Internals
 **************************************
-
-The profiling in this documentation is based on U250, and the tool version is Vitis-2019.2.
 
 .. toctree::
    :maxdepth: 1
@@ -30,6 +35,7 @@ The profiling in this documentation is based on U250, and the tool version is Vi
    internals/chacha20.rst
    internals/ctr.rst
    internals/des.rst
+   internals/dsa.rst
    internals/ecb.rst
    internals/gcm.rst
    internals/gmac.rst

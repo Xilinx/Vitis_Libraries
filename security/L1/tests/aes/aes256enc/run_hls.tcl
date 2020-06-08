@@ -18,18 +18,21 @@ source settings.tcl
 
 set PROJ "aesTest.prj"
 set SOLN "solution1"
-set CLKP 3.33
+
+if {![info exists CLKP]} {
+  set CLKP 3.33
+}
 
 open_project -reset $PROJ
 
-add_files test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb main.cpp
+add_files "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include"
+add_files -tb "main.cpp"
 set_top test
 
 open_solution -reset $SOLN
 
 set_part $XPART
-create_clock -period $CLKP -name default
+create_clock -period $CLKP
 set_clock_uncertainty 1.05
 
 if {$CSIM == 1} {
@@ -49,7 +52,7 @@ if {$VIVADO_SYN == 1} {
 }
 
 if {$VIVADO_IMPL == 1} {
-  export_design -flow impl -rtl verilog -format ip_catalog
+  export_design -flow impl -rtl verilog
 }
 
 if {$QOR_CHECK == 1} {

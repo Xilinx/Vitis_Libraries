@@ -371,10 +371,10 @@ extern "C" void aes256CbcEncryptKernel_4(ap_uint<512> inputData[(1 << 30) + 100]
 #pragma HLS stream variable = cipherkeyStrm depth = 32
 #pragma HLS resource variable = cipherkeyStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<128> > textInStrm[_channelNumber];
-#pragma HLS stream variable = textInStrm depth = 64
+#pragma HLS stream variable = textInStrm depth = 65
 #pragma HLS resource variable = textInStrm core = FIFO_LUTRAM
     hls::stream<bool> endTextInStrm[_channelNumber];
-#pragma HLS stream variable = endTextInStrm depth = 64
+#pragma HLS stream variable = endTextInStrm depth = 65
 #pragma HLS resource variable = endTextInStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<64> > msgNumStrm;
 #pragma HLS stream variable = msgNumStrm depth = 64

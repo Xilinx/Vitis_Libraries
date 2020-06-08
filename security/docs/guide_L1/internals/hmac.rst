@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, HMAC, mode
+   :description: HMAC is a message authentication code (MAC) using a hash function. It combines with any cryptographic hash function, for example, md5, sha1, sha256.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *****************************
 HMAC Algorithms
 *****************************
@@ -51,7 +58,6 @@ Configuration
 Implementation
 =======================
 
-There are two implementations: in sequence and in parallel. If the macro `XF_SECURITY_DECRYPT_HMAC_DATAFLOW` is not defined (by default), HMAC will call the sequence version.
 HMAC consists of 3 parts: compute kipad and kopad, `mhsh=hash(kipad+msg)`, `hash(kopad+msh)`.
 kipad and kopad are derived from the input key. When the length of key is greater than hash's block size, `K=hash(key)`. kipad is `K XOR kip` while kopad is `K XOR kop`, in which kip is a constant consisting of repeated bytes valued 0x36 block size times and kop is repeating 0x5c.
 
@@ -65,20 +71,20 @@ kipad and kopad are derived from the input key. When the length of key is greate
 Performance (Device: U250)
 =================================
 
-============ ===== ====== ====== ======= ====== ===== ====== ====== =======
-    name      II    CLB    LUT     FF     DSP   BRAM   SRL   URAM   CP(ns)
------------- ----- ------ ------ ------- ------ ----- ------ ------ -------
- hmac+md4     16    1639   7054   8663     0     8      3      0     3.211
------------- ----- ------ ------ ------- ------ ----- ------ ------ -------
- hmac+md5     16    1560   7576   9524     0     8      3      0     2.934
------------- ----- ------ ------ ------- ------ ----- ------ ------ -------
- hmac+sha1    16    1818   7171   12918    0     8      3      0     2.914
------------- ----- ------ ------ ------- ------ ----- ------ ------ -------
- hmac+sha224  16    1881   7875   13622    0     8      3      0     3.080
------------- ----- ------ ------ ------- ------ ----- ------ ------ -------
- hmac+sha256  16    1939   7971   13909    0     8      3      0     3.013 
------------- ----- ------ ------ ------- ------ ----- ------ ------ -------
- hmac+sha384  16    3516   14577  25835    0     16     3      0     3.198 
------------- ----- ------ ------ ------- ------ ----- ------ ------ -------
- hmac+sha512  16    3537   14970  26995    0     16     3      0     3.176 
-============ ===== ====== ====== ======= ====== ===== ====== ====== =======
+============ ====== ======= ======= ===== ====== ===== ====== ========
+    name      CLB     LUT     FF     DSP   BRAM   SRL   URAM   CP(ns)
+------------ ------ ------- ------- ----- ------ ----- ------ --------
+ hmac+md4     2510   11048   13928    0      1     0      0     3.167
+------------ ------ ------- ------- ----- ------ ----- ------ --------
+ hmac+md5     2460   11890   15646    0      0     0      0     2.992
+------------ ------ ------- ------- ----- ------ ----- ------ --------
+ hmac+sha1    3422   13750   27992    0      4     0      0     2.988
+------------ ------ ------- ------- ----- ------ ----- ------ --------
+ hmac+sha224  2861   11960   22434    0      1     0      0     3.049
+------------ ------ ------- ------- ----- ------ ----- ------ --------
+ hmac+sha256  2880   11835   22596    0      1     0      0     3.214
+------------ ------ ------- ------- ----- ------ ----- ------ --------
+ hmac+sha384  4655   19515   39299    0      2     0      0     3.245
+------------ ------ ------- ------- ----- ------ ----- ------ --------
+ hmac+sha512  4810   19695   39933    0      2     0      0     3.498
+============ ====== ======= ======= ===== ====== ===== ====== ========

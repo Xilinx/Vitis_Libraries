@@ -57,9 +57,9 @@ int main() {
 
     if (block == *input) {
         std::cout << "\nAES128 test PASS\n" << std::endl;
+        return 0;
     } else {
         std::cout << "\nAES128 test FAIL\n" << std::endl;
+        return 1;
     }
-
-    return 0;
 }
