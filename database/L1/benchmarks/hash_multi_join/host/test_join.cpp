@@ -84,8 +84,7 @@ int64_t get_golden_sum(int l_row,
         uint32_t p = col_l_extendedprice[i];
         uint32_t d = col_l_discount[i];
         // check hash table
-        auto its = ht1.equal_range(k);
-        for (auto it = its.first; it != its.second; ++it) {
+        if (ht1.find(k) != ht1.end()) {
             sum += (p * (100 - d));
             ++cnt;
         }
