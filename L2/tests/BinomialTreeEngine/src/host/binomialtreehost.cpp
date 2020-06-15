@@ -65,7 +65,7 @@ class ArgParser {
 int main(int argc, const char* argv[]) {
     // cmd parser
     TEST_DT maxDelta = 0;
-    TEST_DT tolerance = 0.001;
+    TEST_DT tolerance = 0.02;
     ArgParser parser(argc, argv);
     std::string xclbin_path;
     std::string data_path;
@@ -146,7 +146,7 @@ int main(int argc, const char* argv[]) {
             tolerance = 1.25; // emulation uses less tree depth => less accuracy
         } else {
             inputFileTestCases.open(inputTestCasesFileName);
-            tolerance = 0.001;
+            tolerance = 0.02;
         }
         ifstream inputFileSVGrid;
         inputFileSVGrid.open(inputSVGridFileName);
