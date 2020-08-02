@@ -295,7 +295,10 @@ class accel_utils {
 
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
     void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
-// clang-format off
+#if defined(__XF_USE_NEW_IMPL__)
+        MMIterIn<PTR_WIDTH,MAT_T,ROWS,COLS,NPC>::Array2xfMat(srcPtr, dstMat);
+#else
+        // clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
@@ -310,6 +313,7 @@ class accel_utils {
         Array2hlsStrm<PTR_WIDTH, ROWS, COLS, NPC, XF_CHANNELS(MAT_T, NPC), ch_width,
                       ((ROWS * COLS * XF_CHANNELS(MAT_T, NPC) * ch_width) / PTR_WIDTH)>(srcPtr, strm, rows, cols);
         hlsStrm2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, (ROWS * COLS) / NPC>(strm, dstMat, dstMat_cols_align_npc);
+#endif
     }
 
     template <int PTR_WIDTH, int ROWS, int COLS, int NPC, int COLOR_T, int CH_WIDTH, int TRIPCOUNT>
@@ -436,7 +440,10 @@ class accel_utils {
 
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
     void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
-// clang-format off
+#if defined(__XF_USE_NEW_IMPL__)
+        MMIterOut<PTR_WIDTH,MAT_T,ROWS,COLS,NPC>::xfMat2Array(srcMat, dstPtr);
+#else
+        // clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
@@ -453,6 +460,7 @@ class accel_utils {
                                                                                         srcMat_cols_align_npc);
         hlsStrm2Array<PTR_WIDTH, ROWS, COLS, NPC, XF_CHANNELS(MAT_T, NPC), ch_width,
                       ((ROWS * COLS * XF_CHANNELS(MAT_T, NPC) * ch_width) / PTR_WIDTH)>(strm, dstPtr, rows, cols);
+#endif
     }
 
     template <int PTR_WIDTH, int ROWS, int COLS, int NPC, int COLOR_T, int CH_WIDTH, int TRIPCOUNT>
@@ -498,14 +506,22 @@ class accel_utils {
 
 template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
 void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
+#if defined(__XF_USE_NEW_IMPL__)
+    MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::xfMat2Array(srcMat,dstPtr);
+#else
     accel_utils au;
     au.xfMat2Array<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcMat, dstPtr);
+#endif
 }
 
 template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
 void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
+#if defined(__XF_USE_NEW_IMPL__)
+    MMIterIn<PTR_WIDTH,MAT_T,ROWS,COLS,NPC>::Array2xfMat(srcPtr, dstMat);
+#else
     accel_utils au;
     au.Array2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcPtr, dstMat);
+#endif
 }
 
 template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>

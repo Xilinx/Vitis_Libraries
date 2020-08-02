@@ -29,6 +29,8 @@
 #include <assert.h>
 #include "xf_types.hpp"
 #include "hls_stream.h"
+#include "ap_axi_sdata.h"
+
 
 #if __SDSCC__
 #include "sds_lib.h"
@@ -949,6 +951,503 @@ Mat<SRC_T, ROWS, COLS, NPC>::~Mat() {
 #endif
 }
 //----------------------------------------------------------------------------------------------------//
+
+#if defined(__XF_USE_NEW_IMPL__)
+//Template metaprogramming implementation of floor log2 [[
+template<int N>
+struct log2{
+    public:
+    static constexpr int fvalue = 1 + (log2<N/2>::fvalue); //floor value
+    static constexpr int cvalue = (N > (1 << fvalue)) ? (fvalue + 1) : fvalue; //ceiling value
+};
+
+template<>
+struct log2<1> {
+    public:
+    static constexpr int fvalue = 0;
+    static constexpr int cvalue = 0;
+};
+//]]
+
+/*
+ * The purpose of this class is to provide an interator over ap_uint<PTR_WIDTH> object array such
+ * that at each iter step one can get data bits corresponding to data to be processed per cycle.
+ *
+*/
+template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC>
+class MMIter : public Mat<T, ROWS, COLS, NPC> {
+   public:
+    using Mat<T, ROWS, COLS, NPC>::data;
+    using Mat<T, ROWS, COLS, NPC>::rows;
+    using Mat<T, ROWS, COLS, NPC>::cols;
+
+    static constexpr int XF_BITS_PER_CLOCK = XF_PIXELWIDTH(T, NPC) * XF_NPIXPERCYCLE(NPC);
+    static constexpr int COLS_BOUND_PER_NPC = ((COLS + (XF_NPIXPERCYCLE(NPC) - 1)) >> XF_BITSHIFT(NPC));
+    static constexpr int LOOPBOUND = ROWS * COLS_BOUND_PER_NPC;
+    static constexpr int ADDRBOUND = ((ROWS * COLS * XF_PIXELWIDTH(T, NPC)) + (PTR_WIDTH - 1)) >>
+                                     (log2<PTR_WIDTH>::cvalue);
+    static constexpr int LAST_BLK_PXL_WIDTH =
+        ((COLS >> XF_BITSHIFT(NPC)) == COLS_BOUND_PER_NPC)
+            ? XF_BITS_PER_CLOCK
+            : XF_PIXELWIDTH(T, NPC) * (COLS - ((COLS >> XF_BITSHIFT(NPC)) << XF_BITSHIFT(NPC)));
+
+    static int cols_npc_aligned(int cols) { return ((cols + (XF_NPIXPERCYCLE(NPC) - 1)) >> XF_BITSHIFT(NPC)); }
+
+    static int last_blk_pxl_width(int cols, int cols_bound_per_npc) {
+        return ((cols >> XF_BITSHIFT(NPC)) == cols_bound_per_npc)
+                   ? XF_BITS_PER_CLOCK
+                   : XF_PIXELWIDTH(T, NPC) * (cols - ((cols >> XF_BITSHIFT(NPC)) << XF_BITSHIFT(NPC)));
+    }
+
+    static int loopbound(int rows, int cols) { return rows * cols_npc_aligned(cols); }
+
+    int loopbound() { return rows * cols_npc_aligned(cols); }
+
+    static int addrbound(int rows, int cols) {
+        return ((rows * cols * XF_PIXELWIDTH(T, NPC)) + (PTR_WIDTH - 1)) >> (log2<PTR_WIDTH>::cvalue);
+    }
+
+    MMIter() : Mat<T, ROWS, COLS, NPC>() {}
+
+    MMIter(int _rows, int _cols) : Mat<T, ROWS, COLS, NPC>(_rows, _cols) {}
+};
+
+template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC>
+class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
+   public:
+    using Mat<T, ROWS, COLS, NPC>::data;
+    using Mat<T, ROWS, COLS, NPC>::rows;
+    using Mat<T, ROWS, COLS, NPC>::cols;
+
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::XF_BITS_PER_CLOCK;
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::ADDRBOUND;
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::COLS_BOUND_PER_NPC;
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::LAST_BLK_PXL_WIDTH;
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::LOOPBOUND;
+
+   private:
+    static void Axi2AxiStream(ap_uint<PTR_WIDTH>* din,
+                              hls::stream<ap_uint<PTR_WIDTH> >& dout,
+                              ap_uint<log2<ADDRBOUND>::cvalue + 1>& addrbound) {
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> i;
+    MMIterInLoop1:
+        for (i = 0; i < addrbound; i++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
+            #pragma HLS PIPELINE
+            // clang-format on
+            dout.write(din[i]);
+        }
+    }
+
+    static void Axi2AxiStream(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& din,
+                              hls::stream<ap_uint<PTR_WIDTH> >& dout,
+                              ap_uint<log2<ADDRBOUND>::cvalue + 1>& addrbound) {
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> i;
+    MMIterInLoop3:
+        for (i = 0; i < addrbound; i++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
+            #pragma HLS PIPELINE
+            // clang-format on
+            ap_axiu<PTR_WIDTH, 0, 0, 0> v = din.read();
+            dout.write(v.data);
+        }
+    }
+
+    static void AxiStream2MatStream(hls::stream<ap_uint<PTR_WIDTH> >& din,
+                                    hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& dout,
+                                    int rows,
+                                    int cols_bound_per_npc,
+                                    int last_blk_width) {
+        int rem = 0;
+        ap_uint<PTR_WIDTH> val = 0;
+        int i;
+        int j = 0;
+        int bound = rows * cols_bound_per_npc;
+    MMIterInLoopRow:
+        for (i = 0; i < bound; i++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
+            #pragma HLS PIPELINE
+            // clang-format on
+            bool bLast = (j == (cols_bound_per_npc - 1));
+            int xf_bits_per_clock = bLast ? last_blk_width : XF_BITS_PER_CLOCK;
+            int ptr_width_minus = bLast ? (PTR_WIDTH - last_blk_width) : (PTR_WIDTH - XF_BITS_PER_CLOCK);
+            int ptr_width_plus = bLast ? (PTR_WIDTH + last_blk_width) : (PTR_WIDTH + XF_BITS_PER_CLOCK);
+
+            ap_uint<XF_BITS_PER_CLOCK> localbuffer = 0;
+            if (rem < xf_bits_per_clock) {
+                if (rem != 0) {
+                    localbuffer.range(rem - 1, 0) = val.range(PTR_WIDTH - 1, (PTR_WIDTH - rem));
+                }
+                val = din.read();
+                localbuffer.range((xf_bits_per_clock - 1), rem) = val.range(((xf_bits_per_clock - 1) - rem), 0);
+                rem = ptr_width_minus + rem;
+            } else {
+                localbuffer = val.range(((ptr_width_plus - 1) - rem), (PTR_WIDTH - rem));
+                rem = rem - xf_bits_per_clock;
+            }
+            dout.write(localbuffer);
+            j = (bLast) ? 0 : (j + 1);
+        }
+    }
+
+    static void MatStream2Mat(hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& din,
+                              ap_uint<XF_BITS_PER_CLOCK>* dout,
+                              int rows,
+                              int cols_bound_per_npc) {
+        int i;
+        int bound = rows * cols_bound_per_npc;
+    MMIterInLoop2:
+        for (i = 0; i < bound; i++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
+            #pragma HLS PIPELINE
+            // clang-format on
+            dout[i] = din.read();
+        }
+    }
+
+    static void AxiStream2Mat(hls::stream<ap_uint<PTR_WIDTH> >& din,
+                              hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& dout,
+                              int rows = ROWS,
+                              int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
+        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        AxiStream2MatStream(din, dout, rows, cols_bound_per_npc, last_blk_width);
+    }
+
+    static void AxiStream2Mat(hls::stream<ap_uint<PTR_WIDTH> >& din,
+                              ap_uint<XF_BITS_PER_CLOCK>* dout,
+                              int rows = ROWS,
+                              int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<XF_BITS_PER_CLOCK>> ldata;
+        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
+        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        AxiStream2MatStream(din, ldata, rows, cols_bound_per_npc, last_blk_width);
+        MatStream2Mat(ldata, dout, rows, cols_bound_per_npc);
+    }
+
+    static void Axi2Mat(ap_uint<PTR_WIDTH>* din,
+                        hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& dout,
+                        int rows = ROWS,
+                        int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<PTR_WIDTH> > ldata;
+        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
+        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        Axi2AxiStream(din, ldata, axibound);
+        AxiStream2MatStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width);
+    }
+
+    static void Axi2Mat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& din,
+                        hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& dout,
+                        int rows = ROWS,
+                        int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<PTR_WIDTH> > ldata;
+        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
+        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        Axi2AxiStream(din, ldata, axibound);
+        AxiStream2MatStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width);
+    }
+
+    static void Axi2Mat(ap_uint<PTR_WIDTH>* din, ap_uint<XF_BITS_PER_CLOCK>* dout, int rows = ROWS, int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<PTR_WIDTH> > ldata;
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        Axi2AxiStream(din, ldata, axibound);
+        AxiStream2Mat(ldata, dout, rows, cols);
+    }
+
+    static void Axi2Mat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& din,
+                        ap_uint<XF_BITS_PER_CLOCK>* dout,
+                        int rows = ROWS,
+                        int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<PTR_WIDTH> > ldata;
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        Axi2AxiStream(din, ldata, axibound);
+        AxiStream2Mat(ldata, dout, rows, cols);
+    }
+
+   public:
+    MMIterIn(ap_uint<PTR_WIDTH>* d) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>() { Axi2Mat(d, data); }
+
+    MMIterIn(ap_uint<PTR_WIDTH>* d, int _rows, int _cols) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>(_rows, _cols) {
+        Axi2Mat(d, data, rows, cols);
+    }
+
+    MMIterIn(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& d) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>() {
+        Axi2Mat(d, data);
+    }
+
+    MMIterIn(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& d, int _rows, int _cols)
+        : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>(_rows, _cols) {
+        Axi2Mat(d, data, rows, cols);
+    }
+
+    MMIterIn(hls::stream<ap_uint<PTR_WIDTH> >& d) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>() { AxiStream2Mat(d, data); }
+
+    MMIterIn(hls::stream<ap_uint<PTR_WIDTH> >& d, int _rows, int _cols)
+        : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>(_rows, _cols) {
+        AxiStream2Mat(d, data, rows, cols);
+    }
+
+    inline static ap_uint<XF_BITS_PER_CLOCK> read(hls::stream<ap_uint<XF_BITS_PER_CLOCK> >& din, int index) {
+        return din.read();
+    }
+
+    inline static ap_uint<XF_BITS_PER_CLOCK> read(ap_uint<XF_BITS_PER_CLOCK>* din, int index) { return din[index]; }
+
+    ap_uint<XF_BITS_PER_CLOCK> read(int index) { return read(data, index); }
+
+    static void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<T, ROWS, COLS, NPC>& dstMat) {
+        Axi2Mat(srcPtr, dstMat.data, dstMat.rows, dstMat.cols);
+    }
+
+    static void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr,
+                              xf::cv::Mat<T, ROWS, COLS, NPC>& dstMat) {
+        Axi2Mat(srcPtr, dstMat.data, dstMat.rows, dstMat.cols);
+    }
+};
+
+template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC>
+class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
+   public:
+    using Mat<T, ROWS, COLS, NPC>::data;
+    using Mat<T, ROWS, COLS, NPC>::rows;
+    using Mat<T, ROWS, COLS, NPC>::cols;
+
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::XF_BITS_PER_CLOCK;
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::ADDRBOUND;
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::COLS_BOUND_PER_NPC;
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::LAST_BLK_PXL_WIDTH;
+    using MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::LOOPBOUND;
+
+   private:
+    static void Mat2MatStream(ap_uint<XF_BITS_PER_CLOCK>* din,
+                              hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& dout,
+                              int rows,
+                              int cols_bound_per_npc) {
+        int i;
+        int bound = rows * cols_bound_per_npc;
+    MMIterOutLoop1:
+        for (i = 0; i < bound; i++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
+            #pragma HLS PIPELINE
+            // clang-format on
+            dout.write(din[i]);
+        }
+    }
+
+    static void MatStream2AxiStream(hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& din,
+                                    hls::stream<ap_uint<PTR_WIDTH> >& dout,
+                                    int rows,
+                                    int cols_bound_per_npc,
+                                    int last_blk_width) {
+        ap_uint<log2<PTR_WIDTH>::cvalue + 1> filled = 0; // valid bits remaining in current buffer
+        ap_uint<PTR_WIDTH> localbuffer = 0;
+        int i;
+        int j;
+    MMIterOutRow:
+        for (i = 0; i < rows; i++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
+        // clang-format on
+        MMIterOutCol:
+            for (j = 0; j < cols_bound_per_npc; j++) {
+// clang-format off
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS_BOUND_PER_NPC
+                #pragma HLS PIPELINE
+                // clang-format on
+
+                bool bLast = (j == (cols_bound_per_npc - 1));
+                int xf_bits_per_clock = bLast ? last_blk_width : XF_BITS_PER_CLOCK;
+                ap_uint<PTR_WIDTH> val = din.read();
+                ap_uint<PTR_WIDTH> tempval = (val << filled);
+                localbuffer = (localbuffer | tempval);
+                ap_uint<log2<PTR_WIDTH>::cvalue + 1> filled_next;
+                if (filled < (PTR_WIDTH - xf_bits_per_clock)) {
+                    filled_next = filled + xf_bits_per_clock;
+                } else {
+                    dout.write(localbuffer);
+                    localbuffer = (val >> (PTR_WIDTH - filled));
+                    filled_next = filled + (xf_bits_per_clock - PTR_WIDTH);
+                }
+                filled = filled_next;
+            }
+        }
+
+        if (filled != 0) {
+            dout.write(localbuffer);
+        }
+    }
+
+    static void Mat2AxiStream(hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& din,
+                              hls::stream<ap_uint<PTR_WIDTH> >& dout,
+                              int rows = ROWS,
+                              int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
+        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        MatStream2AxiStream(din, dout, rows, cols_bound_per_npc, last_blk_width);
+    }
+
+    static void Mat2AxiStream(ap_uint<XF_BITS_PER_CLOCK>* din,
+                              hls::stream<ap_uint<PTR_WIDTH> >& dout,
+                              int rows = ROWS,
+                              int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<XF_BITS_PER_CLOCK>> ldata;
+        int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
+        int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
+        Mat2MatStream(din, ldata, rows, cols_bound_per_npc);
+        MatStream2AxiStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width);
+    }
+
+    static void AxiStream2Axi(hls::stream<ap_uint<PTR_WIDTH> >& din,
+                              ap_uint<PTR_WIDTH>* dout,
+                              ap_uint<log2<ADDRBOUND>::cvalue + 1>& addrbound) {
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> i;
+    MMIterOutLoop2:
+        for (i = 0; i < addrbound; i++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
+            #pragma HLS PIPELINE
+            // clang-format on
+            dout[i] = din.read();
+        }
+    }
+
+    static void AxiStream2Axi(hls::stream<ap_uint<PTR_WIDTH> >& din,
+                              hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dout,
+                              ap_uint<log2<ADDRBOUND>::cvalue + 1>& addrbound) {
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> i;
+    MMIterOutLoop3:
+        for (i = 0; i < addrbound; i++) {
+// clang-format off
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
+            #pragma HLS PIPELINE
+            // clang-format on
+            ap_axiu<PTR_WIDTH, 0, 0, 0> v;
+            v.data = din.read();
+            dout.write(v);
+        }
+    }
+
+    static void Mat2Axi(hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& din,
+                        ap_uint<PTR_WIDTH>* dout,
+                        int rows = ROWS,
+                        int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<PTR_WIDTH> > ldata;
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        Mat2AxiStream(din, ldata, rows, cols);
+        AxiStream2Axi(ldata, dout, axibound);
+    }
+
+    static void Mat2Axi(ap_uint<XF_BITS_PER_CLOCK>* din, ap_uint<PTR_WIDTH>* dout, int rows = ROWS, int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<PTR_WIDTH> > ldata;
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        Mat2AxiStream(din, ldata, rows, cols);
+        AxiStream2Axi(ldata, dout, axibound);
+    }
+
+    static void Mat2Axi(hls::stream<ap_uint<XF_BITS_PER_CLOCK>>& din,
+                        hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dout,
+                        int rows = ROWS,
+                        int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<PTR_WIDTH> > ldata;
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        Mat2AxiStream(din, ldata, rows, cols);
+        AxiStream2Axi(ldata, dout, axibound);
+    }
+
+    static void Mat2Axi(ap_uint<XF_BITS_PER_CLOCK>* din,
+                        hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dout,
+                        int rows = ROWS,
+                        int cols = COLS) {
+// clang-format off
+        #pragma HLS DATAFLOW
+        // clang-format on
+        hls::stream<ap_uint<PTR_WIDTH> > ldata;
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+        Mat2AxiStream(din, ldata, rows, cols);
+        AxiStream2Axi(ldata, dout, axibound);
+    }
+
+   public:
+    MMIterOut() : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>() {}
+
+    MMIterOut(int _rows, int _cols) : MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>(_rows, _cols) {}
+
+    inline static void write(hls::stream<ap_uint<XF_BITS_PER_CLOCK> >& dout,
+                             ap_uint<XF_BITS_PER_CLOCK>& val,
+                             int index) {
+        dout.write(val);
+    }
+
+    inline static void write(ap_uint<XF_BITS_PER_CLOCK>* dout, ap_uint<XF_BITS_PER_CLOCK>& val, int index) {
+        dout[index] = val;
+    }
+
+    void write(ap_uint<XF_BITS_PER_CLOCK>& val, int index) { write(data, val, index); }
+
+    void transfer(ap_uint<PTR_WIDTH>* dout) { Mat2Axi(data, dout); }
+
+    void transfer(ap_uint<PTR_WIDTH>* dout, int rows, int cols) { Mat2Axi(data, dout, rows, cols); }
+
+    void transfer(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dout) { Mat2Axi(data, dout); }
+
+    void transfer(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dout, int rows, int cols) {
+        Mat2Axi(data, dout, rows, cols);
+    }
+
+    void transfer(hls::stream<ap_uint<PTR_WIDTH> >& dout) { Mat2AxiStream(data, dout); }
+
+    void transfer(hls::stream<ap_uint<PTR_WIDTH> >& dout, int rows, int cols) { Mat2AxiStream(data, dout, rows, cols); }
+
+    static void xfMat2Array(xf::cv::Mat<T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
+        Mat2Axi(srcMat.data, dstPtr, srcMat.rows, srcMat.cols);
+    }
+
+    static void xfMat2axiStrm(xf::cv::Mat<T, ROWS, COLS, NPC>& srcMat,
+                              hls::stream<ap_uint<PTR_WIDTH> >& dstPtr) {
+        Mat2Axi(srcMat.data, dstPtr, srcMat.rows, srcMat.cols);
+    }
+};
+#endif
 
 } // namespace cv
 } // namespace xf
