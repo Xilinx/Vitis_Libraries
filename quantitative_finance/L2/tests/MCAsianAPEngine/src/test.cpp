@@ -22,24 +22,7 @@
 
 #include <math.h>
 #include "kernel_MCAsianAPEngine.hpp"
-#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
-#define XCL_BANK0 XCL_BANK(0)
-#define XCL_BANK1 XCL_BANK(1)
-#define XCL_BANK2 XCL_BANK(2)
-#define XCL_BANK3 XCL_BANK(3)
-#define XCL_BANK4 XCL_BANK(4)
-#define XCL_BANK5 XCL_BANK(5)
-#define XCL_BANK6 XCL_BANK(6)
-#define XCL_BANK7 XCL_BANK(7)
-#define XCL_BANK8 XCL_BANK(8)
-#define XCL_BANK9 XCL_BANK(9)
-#define XCL_BANK10 XCL_BANK(10)
-#define XCL_BANK11 XCL_BANK(11)
-#define XCL_BANK12 XCL_BANK(12)
-#define XCL_BANK13 XCL_BANK(13)
-#define XCL_BANK14 XCL_BANK(14)
-#define XCL_BANK15 XCL_BANK(15)
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -143,11 +126,7 @@ int main(int argc, const char* argv[]) {
     std::cout << "Kernel has been created\n";
 
     cl_mem_ext_ptr_t mext_out;
-#ifndef USE_HBM
-    mext_out = {XCL_MEM_DDR_BANK0, outputs, 0};
-#else
-    mext_out = {XCL_BANK0, outputs, 0};
-#endif
+    mext_out = {7, outputs, kernel_asianAP()};
 
     cl::Buffer out_buff;
     out_buff = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
@@ -206,7 +185,6 @@ int main(int argc, const char* argv[]) {
     q.finish();
     gettimeofday(&end_time, 0);
 
-    int exec_time = tvdiff(&st_time, &end_time);
     TEST_DT diff = 0;
     for (int i = 0; i < run_num; i++) {
         std::cout << "output[" << i << "] = " << std::setprecision(12) << result[i] << ",   "

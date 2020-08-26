@@ -1,25 +1,24 @@
 {
-    "gui": true,
-    "name": "Xilinx MC Barrier Option Engine With Bias Test",
-    "description": "",
-    "flow": "vitis",
-    "platform_type": "pcie",
+    "gui": true, 
+    "name": "Xilinx MC Barrier Option Engine With Bias Test", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250",
-        "u200"
-    ],
+        "u250", 
+        "u200", 
+        "u50"
+    ], 
     "platform_blacklist": [
         "zc"
-    ],
+    ], 
     "platform_properties": {
         "u200": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
+                    "symbols": []
                 }
-            },
+            }, 
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -27,15 +26,13 @@
                     ]
                 }
             }
-        },
+        }, 
         "u250": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
+                    "symbols": []
                 }
-            },
+            }, 
             "v++": {
                 "compiler": {
                     "cflags": [
@@ -43,90 +40,106 @@
                     ]
                 }
             }
+        }, 
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
+                    ]
+                }
+            }
         }
-    },
+    }, 
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/McBarrierBiasedEngine_k.xclbin",
+            "cmd_args": " -xclbin BUILD/McBarrierBiasedEngine_k.xclbin", 
             "name": "generic launch for all flows"
         }
-    ],
+    ], 
     "host": {
-        "host_exe": "host.exe",
+        "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "host/main.cpp",
+                "host/main.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ],
+            ], 
             "includepaths": [
-                "LIB_DIR/L1/include",
-                "LIB_DIR/L2/include",
-                "LIB_DIR/L2/tests/MCBarrierBiasedEngine/host",
-                "LIB_DIR/L2/tests/MCBarrierBiasedEngine/kernel",
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/tests/MCBarrierBiasedEngine/host", 
+                "LIB_DIR/L2/tests/MCBarrierBiasedEngine/kernel", 
                 "LIB_DIR/ext/xcl2"
-            ],
-            "options": "-O3 ",
-            "symbols": [
-                "PRAGMA"
-            ]
+            ], 
+            "options": "-O3 ", 
+            "symbols": []
         }
-    },
+    }, 
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include",
-                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L2/include", 
                 "LIB_DIR/L2/tests/MCBarrierBiasedEngine/kernel"
-            ],
-            "symbols": [
-                "HW_EMU_DEBUG"
-            ]
+            ], 
+            "symbols": []
         }
-    },
+    }, 
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "kernel/McBarrierBiasedEngine_k.cpp",
-                    "frequency": 300,
-                    "clflags": " -D KERNEL_NAME=McBarrierBiasedEngine_k",
-                    "name": "McBarrierBiasedEngine_k",
-                    "num_compute_units": 1,
+                    "location": "kernel/McBarrierBiasedEngine_k.cpp", 
+                    "frequency": 300, 
+                    "clflags": " -D DPRAGMA", 
+                    "name": "McBarrierBiasedEngine_k", 
+                    "num_compute_units": 1, 
                     "compute_units": [
                         {
-                            "name": "McBarrierBiasedEngine_k",
-                            "slr": "SLR0",
+                            "name": "McBarrierBiasedEngine_k_1", 
+                            "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "m_axi_gmem",
+                                    "name": "m_axi_gmem", 
                                     "memory": "DDR[0]"
                                 }
                             ]
                         }
                     ]
                 }
-            ],
-            "frequency": 300,
+            ], 
+            "frequency": 300, 
             "name": "McBarrierBiasedEngine_k"
         }
-    ],
+    ], 
     "testinfo": {
-        "disable": false,
+        "disable": false, 
         "jobs": [
             {
-                "index": 0,
-                "dependency": [],
-                "env": "",
-                "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 360
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 360, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
-        ],
+        ], 
         "targets": [
-            "vitis_sw_emu",
-            "vitis_hw_emu",
-            "vitis_hw"
-        ],
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
         "category": "canary"
     }
 }

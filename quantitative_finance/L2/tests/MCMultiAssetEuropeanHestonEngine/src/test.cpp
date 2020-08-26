@@ -23,24 +23,6 @@
 #include <math.h>
 #include "kernel_mceuropeanengine.hpp"
 
-#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
-
-#define XCL_BANK0 XCL_BANK(0)
-#define XCL_BANK1 XCL_BANK(1)
-#define XCL_BANK2 XCL_BANK(2)
-#define XCL_BANK3 XCL_BANK(3)
-#define XCL_BANK4 XCL_BANK(4)
-#define XCL_BANK5 XCL_BANK(5)
-#define XCL_BANK6 XCL_BANK(6)
-#define XCL_BANK7 XCL_BANK(7)
-#define XCL_BANK8 XCL_BANK(8)
-#define XCL_BANK9 XCL_BANK(9)
-#define XCL_BANK10 XCL_BANK(10)
-#define XCL_BANK11 XCL_BANK(11)
-#define XCL_BANK12 XCL_BANK(12)
-#define XCL_BANK13 XCL_BANK(13)
-#define XCL_BANK14 XCL_BANK(14)
-#define XCL_BANK15 XCL_BANK(15)
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -189,23 +171,15 @@ int main(int argc, const char* argv[]) {
     cl_mem_ext_ptr_t mext_kappa[KN];
     cl_mem_ext_ptr_t mext_rho[KN];
     cl_mem_ext_ptr_t mext_dividendYield[KN];
-#ifndef USE_HBM
-    mext_underlying[0] = {XCL_MEM_DDR_BANK0, underlying, 0};
-    mext_sigma[0] = {XCL_MEM_DDR_BANK0, sigma, 0};
-    mext_v0[0] = {XCL_MEM_DDR_BANK0, v0, 0};
-    mext_theta[0] = {XCL_MEM_DDR_BANK0, theta, 0};
-    mext_kappa[0] = {XCL_MEM_DDR_BANK0, kappa, 0};
-    mext_rho[0] = {XCL_MEM_DDR_BANK0, rho, 0};
-    mext_dividendYield[0] = {XCL_MEM_DDR_BANK0, dividendYield, 0};
-#else
-    mext_underlying[0] = {XCL_BANK0, underlying, 0};
-    mext_sigma[0] = {XCL_BANK0, sigma, 0};
-    mext_v0[0] = {XCL_BANK0, v0, 0};
-    mext_theta[0] = {XCL_BANK0, theta, 0};
-    mext_kappa[0] = {XCL_BANK0, kappa, 0};
-    mext_rho[0] = {XCL_BANK0, rho, 0};
-    mext_dividendYield[0] = {XCL_BANK0, dividendYield, 0};
-#endif
+
+    mext_underlying[0] = {1, underlying, kernel0[0]()};
+    mext_sigma[0] = {3, sigma, kernel0[0]()};
+    mext_v0[0] = {4, v0, kernel0[0]()};
+    mext_theta[0] = {5, theta, kernel0[0]()};
+    mext_kappa[0] = {6, kappa, kernel0[0]()};
+    mext_rho[0] = {7, rho, kernel0[0]()};
+    mext_dividendYield[0] = {8, dividendYield, kernel0[0]()};
+
     cl::Buffer in_buff_underlying[KN];
     cl::Buffer in_buff_sigma[KN];
     cl::Buffer in_buff_v0[KN];
@@ -216,15 +190,9 @@ int main(int argc, const char* argv[]) {
 
     cl_mem_ext_ptr_t mext_out_a[KN];
     cl_mem_ext_ptr_t mext_out_b[KN];
-#ifndef USE_HBM
-    mext_out_a[0] = {XCL_MEM_DDR_BANK0, out0_a, 0};
+    mext_out_a[0] = {12, out0_a, kernel0[0]()};
+    mext_out_b[0] = {12, out0_b, kernel0[1]()};
 
-    mext_out_b[0] = {XCL_MEM_DDR_BANK0, out0_b, 0};
-#else
-    mext_out_a[0] = {XCL_BANK0, out0_a, 0};
-
-    mext_out_b[0] = {XCL_BANK0, out0_b, 0};
-#endif
     cl::Buffer out_buff_a[KN];
     cl::Buffer out_buff_b[KN];
     for (int i = 0; i < KN; i++) {

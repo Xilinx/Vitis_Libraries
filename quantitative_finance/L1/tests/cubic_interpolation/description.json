@@ -13,11 +13,15 @@
     "clock": "3.33", 
     "topfunction": "dut", 
     "top": {
-        "source": ["dut.cpp"], 
+        "source": [
+            "dut.cpp"
+        ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/xf_fintech"
     }, 
     "testbench": {
-        "source": ["tb.cpp"], 
+        "source": [
+            "tb.cpp"
+        ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/xf_fintech", 
         "ldflags": "", 
         "argv": {}
@@ -31,7 +35,13 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 16384, 
-                "max_time_min": 300
+                "max_time_min": {
+                    "hls_vivado_syn": 300, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 300, 
+                    "hls_vivado_impl": 300, 
+                    "hls_csynth": 60
+                }
             }
         ], 
         "targets": [

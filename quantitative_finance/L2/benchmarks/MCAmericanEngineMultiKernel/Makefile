@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,7 +56,18 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
+DEVICE ?= xilinx_u250_xdma_201830_2
+ifeq ($(findstring zc, $(DEVICE)), zc)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+
+ifneq ($(findstring u250, $(DEVICE)), u250)
+ifneq ($(findstring u200, $(DEVICE)), u200)
+ifneq ($(findstring u50, $(DEVICE)), u50)
+$(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
+endif
+endif
 
 include ./utils.mk
 
@@ -72,7 +83,7 @@ VPP := v++
 
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L2/benchmarks/MCAmericanEngineMultiKernel/src/main.cpp
+HOST_SRCS += $(CUR_DIR)/src/main.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
 
 
@@ -95,10 +106,12 @@ ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
 endif
 
+ifeq ($(TARGET),hw_emu)
+CXXFLAGS += -D HW_EMU_TEST
+endif
 # Host compiler global settings
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE 
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
 
@@ -115,59 +128,52 @@ endif
 # Kernel compiler global settings
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 LDCLFLAGS += --optimize 2 --jobs 8
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-CXXFLAGS += -D USE_DDR -D KN2=2
-VPP_FLAGS += --config $(CUR_DIR)/conn_u250.ini
-else ifneq (,$(XPLATFORM))
-$(warning WARNING: Unsupported platform $(XPLATFORM))
-endif
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-CXXFLAGS += -D USE_DDR -D KN2=1
 VPP_FLAGS += --config $(CUR_DIR)/conn_u200.ini
-else ifneq (,$(XPLATFORM))
-$(warning WARNING: Unsupported platform $(XPLATFORM))
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u250.ini
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50.ini
 endif
 
-ifeq ($(TARGET),sw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
-endif
-ifeq ($(TARGET),hw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
-endif
-VPP_FLAGS +=-I$(XFLIB_DIR)/L1/include
-VPP_FLAGS +=-I$(XFLIB_DIR)/L2/include
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/benchmarks/MCAmericanEngineMultiKernel/kernel
 
-MCAE_k0_VPP_FLAGS +=  -D DPRAGMA -D KERNEL0 -D KERNEL_NAME=MCAE_k0
-MCAE_k1_VPP_FLAGS +=  -D DPRAGMA -D KERNEL1 -D KERNEL_NAME=MCAE_k1
-MCAE_k2_VPP_FLAGS +=  -D DPRAGMA -D KERNEL2 -D KERNEL_NAME=MCAE_k2
-MCAE_k3_VPP_FLAGS +=  -D DPRAGMA -D KERNEL3 -D KERNEL_NAME=MCAE_k3
 
-# Kernel linker flags
+
+
+MCAE_k0_VPP_FLAGS +=  -D DPRAGMA
+MCAE_k1_VPP_FLAGS +=  -D DPRAGMA
+MCAE_k2_VPP_FLAGS +=  -D DPRAGMA
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+LDCLFLAGS_MCAE_k += --nk MCAE_k0:1:MCAE_k0_1 --nk MCAE_k1:1:MCAE_k1_1 --nk MCAE_k2:1:MCAE_k2_1
+endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-LDCLFLAGS_MCAE_k +=  --nk MCAE_k0:1:MCAE_k0 --nk MCAE_k1:1:MCAE_k1 --nk MCAE_k2:1:MCAE_k2 --nk MCAE_k3:1:MCAE_k3
-else
-LDCLFLAGS_MCAE_k +=  --nk MCAE_k0:1:MCAE_k0 --nk MCAE_k1:1:MCAE_k1 --nk MCAE_k2:1:MCAE_k2
+LDCLFLAGS_MCAE_k += --nk MCAE_k0:1:MCAE_k0_1 --nk MCAE_k1:1:MCAE_k1_1 --nk MCAE_k2:2:MCAE_k2_1.MCAE_k2_2
+endif
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+LDCLFLAGS_MCAE_k += --nk MCAE_k0:1:MCAE_k0_1 --nk MCAE_k1:1:MCAE_k1_1 --nk MCAE_k2:1:MCAE_k2_1
 endif
 
 ############################## Declaring Binary Containers ##############################
+
+
 BINARY_CONTAINERS += $(BUILD_DIR)/MCAE_k.xclbin
 BINARY_CONTAINER_MCAE_k_OBJS += $(TEMP_DIR)/MCAE_k0.xo
 BINARY_CONTAINER_MCAE_k_OBJS += $(TEMP_DIR)/MCAE_k1.xo
 BINARY_CONTAINER_MCAE_k_OBJS += $(TEMP_DIR)/MCAE_k2.xo
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-BINARY_CONTAINER_MCAE_k_OBJS += $(TEMP_DIR)/MCAE_k3.xo
-endif
-
 ############################## Setting Targets ##############################
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig 
+all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+
 .PHONY: host
 host: $(EXE_FILE) | check_xrt
 
@@ -178,26 +184,41 @@ xclbin: check_vpp | $(BINARY_CONTAINERS)
 build: xclbin
 
 ############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-$(TEMP_DIR)/MCAE_k0.xo: $(XFLIB_DIR)/L2/benchmarks/MCAmericanEngineMultiKernel/kernel/MCAE_k0.cpp
+
+
+$(TEMP_DIR)/MCAE_k0.xo: $(CUR_DIR)/kernel/MCAE_k0.cpp
 	$(ECHO) "Compiling Kernel: MCAE_k0"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(MCAE_k0_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k MCAE_k0 -I'$(<D)' -o $@ $^
-$(TEMP_DIR)/MCAE_k1.xo: $(XFLIB_DIR)/L2/benchmarks/MCAmericanEngineMultiKernel/kernel/MCAE_k1.cpp
+	$(VPP) $(MCAE_k0_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k MCAE_k0 -I'$(<D)' -o'$@' '$<'
+
+$(TEMP_DIR)/MCAE_k1.xo: $(CUR_DIR)/kernel/MCAE_k1.cpp
 	$(ECHO) "Compiling Kernel: MCAE_k1"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(MCAE_k1_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k MCAE_k1 -I'$(<D)' -o $@ $^
-$(TEMP_DIR)/MCAE_k2.xo: $(XFLIB_DIR)/L2/benchmarks/MCAmericanEngineMultiKernel/kernel/MCAE_k2.cpp
+	$(VPP) $(MCAE_k1_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k MCAE_k1 -I'$(<D)' -o'$@' '$<'
+
+$(TEMP_DIR)/MCAE_k2.xo: $(CUR_DIR)/kernel/MCAE_k2.cpp
 	$(ECHO) "Compiling Kernel: MCAE_k2"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(MCAE_k2_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k MCAE_k2 -I'$(<D)' -o $@ $^
-$(TEMP_DIR)/MCAE_k3.xo: $(XFLIB_DIR)/L2/benchmarks/MCAmericanEngineMultiKernel/kernel/MCAE_k3.cpp
-	$(ECHO) "Compiling Kernel: MCAE_k3"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(MCAE_k3_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k MCAE_k3 -I'$(<D)' -o $@ $^
+	$(VPP) $(MCAE_k2_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k MCAE_k2 -I'$(<D)' -o'$@' '$<'
 
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 $(BUILD_DIR)/MCAE_k.xclbin: $(BINARY_CONTAINER_MCAE_k_OBJS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/MCAE_k -l $(LDCLFLAGS) $(LDCLFLAGS_MCAE_k) -o'$@' $(+)
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+$(BUILD_DIR)/MCAE_k.xclbin: $(BINARY_CONTAINER_MCAE_k_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/MCAE_k -l $(LDCLFLAGS) $(LDCLFLAGS_MCAE_k) -o'$@' $(+)
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+$(BUILD_DIR)/MCAE_k.xclbin: $(BINARY_CONTAINER_MCAE_k_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/MCAE_k -l $(LDCLFLAGS) $(LDCLFLAGS_MCAE_k) -o'$@' $(+)
+else 
+$(BUILD_DIR)/MCAE_k.xclbin: $(BINARY_CONTAINER_MCAE_k_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/MCAE_k -l $(LDCLFLAGS) $(LDCLFLAGS_MCAE_k) -o'$@' $(+)
+endif
+
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(HOST_SRCS) | check_xrt
@@ -210,16 +231,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 ############################## Setting Essential Checks and Running Rules ##############################
 run: all
-ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u200, $(DEVICE)), u200)
-$(error This example is not supported for $(DEVICE))
-endif
-endif
-
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error This example is not supported for $(DEVICE))
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)

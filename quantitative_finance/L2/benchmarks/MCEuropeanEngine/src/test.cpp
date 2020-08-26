@@ -22,24 +22,6 @@
 #include <math.h>
 #include "kernel_mceuropeanengine.hpp"
 
-#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
-
-#define XCL_BANK0 XCL_BANK(0)
-#define XCL_BANK1 XCL_BANK(1)
-#define XCL_BANK2 XCL_BANK(2)
-#define XCL_BANK3 XCL_BANK(3)
-#define XCL_BANK4 XCL_BANK(4)
-#define XCL_BANK5 XCL_BANK(5)
-#define XCL_BANK6 XCL_BANK(6)
-#define XCL_BANK7 XCL_BANK(7)
-#define XCL_BANK8 XCL_BANK(8)
-#define XCL_BANK9 XCL_BANK(9)
-#define XCL_BANK10 XCL_BANK(10)
-#define XCL_BANK11 XCL_BANK(11)
-#define XCL_BANK12 XCL_BANK(12)
-#define XCL_BANK13 XCL_BANK(13)
-#define XCL_BANK14 XCL_BANK(14)
-#define XCL_BANK15 XCL_BANK(15)
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -58,9 +40,9 @@ class ArgParser {
    private:
     std::vector<std::string> mTokens;
 };
-int print_result(double* out[4], double golden, double max_tol) {
+int print_result(int cu_number, std::vector<double*>& out, double golden, double max_tol) {
     std::cout << "FPGA result:\n";
-    for (int i = 0; i < KN; ++i) {
+    for (int i = 0; i < cu_number; ++i) {
         if (std::fabs(out[i][0] - golden) > max_tol) {
             std::cout << "            Kernel " << i << " - " << out[i][0] << "            golden - " << golden
                       << std::endl;
@@ -84,12 +66,7 @@ int main(int argc, const char* argv[]) {
     }
 
     struct timeval st_time, end_time;
-    DtUsed* out_a[4];
-    DtUsed* out_b[4];
-    for (int i = 0; i < 4; ++i) {
-        out_a[i] = aligned_alloc<DtUsed>(OUTDEP);
-        out_b[i] = aligned_alloc<DtUsed>(OUTDEP);
-    }
+
     // test data
     unsigned int timeSteps = 1;
     DtUsed requiredTolerance = 0.02;
@@ -100,7 +77,7 @@ int main(int argc, const char* argv[]) {
     DtUsed strike = 40;
     unsigned int optionType = 1;
     DtUsed timeLength = 1;
-
+    unsigned int seeds[4] = {4332, 441242, 42, 13342};
     unsigned int requiredSamples = 0; // 262144; // 48128;//0;//1024;//0;
     unsigned int maxSamples = 0;
     //
@@ -120,18 +97,6 @@ int main(int argc, const char* argv[]) {
         }
     }
     DtUsed max_diff = requiredTolerance;
-    if (mode_emu.compare("hw_emu") == 0) {
-        loop_nm = 1;
-        num_rep = KN;
-        requiredSamples = 1024 * MCM_NM;
-        max_diff = 0.06;
-    } else if (mode_emu.compare("sw_emu") == 0) {
-        loop_nm = 1;
-        num_rep = KN * 3;
-    }
-    std::cout << "loop_nm = " << loop_nm << std::endl;
-    std::cout << "num_rep = " << num_rep << std::endl;
-    std::cout << "KN = " << KN << std::endl;
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -151,50 +116,50 @@ int main(int argc, const char* argv[]) {
 
     cl::Program program(context, devices, xclbins);
 
-    cl::Kernel kernel0[2];
-    cl::Kernel kernel1[2];
-    cl::Kernel kernel2[2];
-    cl::Kernel kernel3[2];
-    for (int i = 0; i < 2; ++i) {
-        kernel0[i] = cl::Kernel(program, "kernel_mc_0");
-#if KN > 1
-        kernel1[i] = cl::Kernel(program, "kernel_mc_1");
-#endif
-#if KN > 2
-        kernel2[i] = cl::Kernel(program, "kernel_mc_2");
-#endif
-#if KN > 3
-        kernel3[i] = cl::Kernel(program, "kernel_mc_3");
-#endif
+    std::string krnl_name = "kernel_mc";
+    cl_uint cu_number;
+    {
+        cl::Kernel k(program, krnl_name.c_str());
+        k.getInfo(CL_KERNEL_COMPUTE_UNIT_COUNT, &cu_number);
+    }
+    if (mode_emu.compare("hw_emu") == 0) {
+        loop_nm = 1;
+        num_rep = cu_number;
+        requiredSamples = 1024 * MCM_NM;
+        max_diff = 0.06;
+    } else if (mode_emu.compare("sw_emu") == 0) {
+        loop_nm = 1;
+        num_rep = cu_number * 3;
+    }
+
+    std::cout << "loop_nm = " << loop_nm << std::endl;
+    std::cout << "num_rep = " << num_rep << std::endl;
+    std::cout << "cu_number = " << cu_number << std::endl;
+    std::vector<cl::Kernel> krnl0(cu_number);
+    std::vector<cl::Kernel> krnl1(cu_number);
+
+    for (cl_uint i = 0; i < cu_number; ++i) {
+        std::string krnl_full_name = krnl_name + ":{" + krnl_name + "_" + std::to_string(i + 1) + "}";
+        krnl0[i] = cl::Kernel(program, krnl_full_name.c_str());
+        krnl1[i] = cl::Kernel(program, krnl_full_name.c_str());
     }
     std::cout << "Kernel has been created\n";
 
-    cl_mem_ext_ptr_t mext_out_a[4];
-    cl_mem_ext_ptr_t mext_out_b[4];
-#ifndef USE_HBM
-    mext_out_a[0] = {XCL_MEM_DDR_BANK0, out_a[0], 0};
-    mext_out_a[1] = {XCL_MEM_DDR_BANK1, out_a[1], 0};
-    mext_out_a[2] = {XCL_MEM_DDR_BANK2, out_a[2], 0};
-    mext_out_a[3] = {XCL_MEM_DDR_BANK3, out_a[3], 0};
-
-    mext_out_b[0] = {XCL_MEM_DDR_BANK0, out_b[0], 0};
-    mext_out_b[1] = {XCL_MEM_DDR_BANK1, out_b[1], 0};
-    mext_out_b[2] = {XCL_MEM_DDR_BANK2, out_b[2], 0};
-    mext_out_b[3] = {XCL_MEM_DDR_BANK3, out_b[3], 0};
-#else
-    mext_out_a[0] = {XCL_BANK0, out_a[0], 0};
-    mext_out_a[1] = {XCL_BANK1, out_a[1], 0};
-    mext_out_a[2] = {XCL_BANK2, out_a[2], 0};
-    mext_out_a[3] = {XCL_BANK3, out_a[3], 0};
-
-    mext_out_b[0] = {XCL_BANK0, out_b[0], 0};
-    mext_out_b[1] = {XCL_BANK1, out_b[1], 0};
-    mext_out_b[2] = {XCL_BANK2, out_b[2], 0};
-    mext_out_b[3] = {XCL_BANK3, out_b[3], 0};
-#endif
-    cl::Buffer out_buff_a[KN];
-    cl::Buffer out_buff_b[KN];
-    for (int i = 0; i < KN; i++) {
+    std::vector<DtUsed*> out_a(cu_number);
+    std::vector<DtUsed*> out_b(cu_number);
+    for (int i = 0; i < cu_number; ++i) {
+        out_a[i] = aligned_alloc<DtUsed>(OUTDEP);
+        out_b[i] = aligned_alloc<DtUsed>(OUTDEP);
+    }
+    std::vector<cl_mem_ext_ptr_t> mext_out_a(cu_number);
+    std::vector<cl_mem_ext_ptr_t> mext_out_b(cu_number);
+    for (int i = 0; i < cu_number; ++i) {
+        mext_out_a[i] = {9, out_a[i], krnl0[i]()};
+        mext_out_b[i] = {9, out_b[i], krnl1[i]()};
+    }
+    std::vector<cl::Buffer> out_buff_a(cu_number);
+    std::vector<cl::Buffer> out_buff_b(cu_number);
+    for (int i = 0; i < cu_number; i++) {
         out_buff_a[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                    (size_t)(OUTDEP * sizeof(DtUsed)), &mext_out_a[i]);
         out_buff_b[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
@@ -203,185 +168,73 @@ int main(int argc, const char* argv[]) {
     std::vector<std::vector<cl::Event> > kernel_events(num_rep);
     std::vector<std::vector<cl::Event> > read_events(num_rep);
     for (int i = 0; i < num_rep; ++i) {
-        kernel_events[i].resize(KN);
+        kernel_events[i].resize(cu_number);
         read_events[i].resize(1);
     }
-    int j = 0;
-    kernel0[0].setArg(j++, loop_nm);
-    kernel0[0].setArg(j++, underlying);
-    kernel0[0].setArg(j++, volatility);
-    kernel0[0].setArg(j++, dividendYield);
-    kernel0[0].setArg(j++, riskFreeRate);
-    kernel0[0].setArg(j++, timeLength);
-    kernel0[0].setArg(j++, strike);
-    kernel0[0].setArg(j++, optionType);
-    kernel0[0].setArg(j++, out_buff_a[0]);
-    kernel0[0].setArg(j++, requiredTolerance);
-    kernel0[0].setArg(j++, requiredSamples);
-    kernel0[0].setArg(j++, timeSteps);
-    kernel0[0].setArg(j++, maxSamples);
-    j = 0;
-    kernel0[1].setArg(j++, loop_nm);
-    kernel0[1].setArg(j++, underlying);
-    kernel0[1].setArg(j++, volatility);
-    kernel0[1].setArg(j++, dividendYield);
-    kernel0[1].setArg(j++, riskFreeRate);
-    kernel0[1].setArg(j++, timeLength);
-    kernel0[1].setArg(j++, strike);
-    kernel0[1].setArg(j++, optionType);
-    kernel0[1].setArg(j++, out_buff_b[0]);
-    kernel0[1].setArg(j++, requiredTolerance);
-    kernel0[1].setArg(j++, requiredSamples);
-    kernel0[1].setArg(j++, timeSteps);
-    kernel0[1].setArg(j++, maxSamples);
-#if KN > 1
-    j = 0;
-    kernel1[0].setArg(j++, loop_nm);
-    kernel1[0].setArg(j++, underlying);
-    kernel1[0].setArg(j++, volatility);
-    kernel1[0].setArg(j++, dividendYield);
-    kernel1[0].setArg(j++, riskFreeRate);
-    kernel1[0].setArg(j++, timeLength);
-    kernel1[0].setArg(j++, strike);
-    kernel1[0].setArg(j++, optionType);
-    kernel1[0].setArg(j++, out_buff_a[1]);
-    kernel1[0].setArg(j++, requiredTolerance);
-    kernel1[0].setArg(j++, requiredSamples);
-    kernel1[0].setArg(j++, timeSteps);
-    kernel1[0].setArg(j++, maxSamples);
-    j = 0;
-    kernel1[1].setArg(j++, loop_nm);
-    kernel1[1].setArg(j++, underlying);
-    kernel1[1].setArg(j++, volatility);
-    kernel1[1].setArg(j++, dividendYield);
-    kernel1[1].setArg(j++, riskFreeRate);
-    kernel1[1].setArg(j++, timeLength);
-    kernel1[1].setArg(j++, strike);
-    kernel1[1].setArg(j++, optionType);
-    kernel1[1].setArg(j++, out_buff_b[1]);
-    kernel1[1].setArg(j++, requiredTolerance);
-    kernel1[1].setArg(j++, requiredSamples);
-    kernel1[1].setArg(j++, timeSteps);
-    kernel1[1].setArg(j++, maxSamples);
-#endif
-#if KN > 2
-    j = 0;
-    kernel2[0].setArg(j++, loop_nm);
-    kernel2[0].setArg(j++, underlying);
-    kernel2[0].setArg(j++, volatility);
-    kernel2[0].setArg(j++, dividendYield);
-    kernel2[0].setArg(j++, riskFreeRate);
-    kernel2[0].setArg(j++, timeLength);
-    kernel2[0].setArg(j++, strike);
-    kernel2[0].setArg(j++, optionType);
-    kernel2[0].setArg(j++, out_buff_a[2]);
-    kernel2[0].setArg(j++, requiredTolerance);
-    kernel2[0].setArg(j++, requiredSamples);
-    kernel2[0].setArg(j++, timeSteps);
-    kernel2[0].setArg(j++, maxSamples);
-    j = 0;
-    kernel2[1].setArg(j++, loop_nm);
-    kernel2[1].setArg(j++, underlying);
-    kernel2[1].setArg(j++, volatility);
-    kernel2[1].setArg(j++, dividendYield);
-    kernel2[1].setArg(j++, riskFreeRate);
-    kernel2[1].setArg(j++, timeLength);
-    kernel2[1].setArg(j++, strike);
-    kernel2[1].setArg(j++, optionType);
-    kernel2[1].setArg(j++, out_buff_b[2]);
-    kernel2[1].setArg(j++, requiredTolerance);
-    kernel2[1].setArg(j++, requiredSamples);
-    kernel2[1].setArg(j++, timeSteps);
-    kernel2[1].setArg(j++, maxSamples);
-#endif
-#if KN > 3
-    j = 0;
-    kernel3[0].setArg(j++, loop_nm);
-    kernel3[0].setArg(j++, underlying);
-    kernel3[0].setArg(j++, volatility);
-    kernel3[0].setArg(j++, dividendYield);
-    kernel3[0].setArg(j++, riskFreeRate);
-    kernel3[0].setArg(j++, timeLength);
-    kernel3[0].setArg(j++, strike);
-    kernel3[0].setArg(j++, optionType);
-    kernel3[0].setArg(j++, out_buff_a[3]);
-    kernel3[0].setArg(j++, requiredTolerance);
-    kernel3[0].setArg(j++, requiredSamples);
-    kernel3[0].setArg(j++, timeSteps);
-    kernel3[0].setArg(j++, maxSamples);
-    j = 0;
-    kernel3[1].setArg(j++, loop_nm);
-    kernel3[1].setArg(j++, underlying);
-    kernel3[1].setArg(j++, volatility);
-    kernel3[1].setArg(j++, dividendYield);
-    kernel3[1].setArg(j++, riskFreeRate);
-    kernel3[1].setArg(j++, timeLength);
-    kernel3[1].setArg(j++, strike);
-    kernel3[1].setArg(j++, optionType);
-    kernel3[1].setArg(j++, out_buff_b[3]);
-    kernel3[1].setArg(j++, requiredTolerance);
-    kernel3[1].setArg(j++, requiredSamples);
-    kernel3[1].setArg(j++, timeSteps);
-    kernel3[1].setArg(j++, maxSamples);
-#endif
+    for (int i = 0; i < cu_number; ++i) {
+        int j = 0;
+        krnl0[i].setArg(j++, loop_nm);
+        krnl0[i].setArg(j++, seeds[i]);
+        krnl0[i].setArg(j++, underlying);
+        krnl0[i].setArg(j++, volatility);
+        krnl0[i].setArg(j++, dividendYield);
+        krnl0[i].setArg(j++, riskFreeRate);
+        krnl0[i].setArg(j++, timeLength);
+        krnl0[i].setArg(j++, strike);
+        krnl0[i].setArg(j++, optionType);
+        krnl0[i].setArg(j++, out_buff_a[i]);
+        krnl0[i].setArg(j++, requiredTolerance);
+        krnl0[i].setArg(j++, requiredSamples);
+        krnl0[i].setArg(j++, timeSteps);
+        krnl0[i].setArg(j++, maxSamples);
+    }
+    for (int i = 0; i < cu_number; ++i) {
+        int j = 0;
+        krnl1[i].setArg(j++, loop_nm);
+        krnl1[i].setArg(j++, seeds[i]);
+        krnl1[i].setArg(j++, underlying);
+        krnl1[i].setArg(j++, volatility);
+        krnl1[i].setArg(j++, dividendYield);
+        krnl1[i].setArg(j++, riskFreeRate);
+        krnl1[i].setArg(j++, timeLength);
+        krnl1[i].setArg(j++, strike);
+        krnl1[i].setArg(j++, optionType);
+        krnl1[i].setArg(j++, out_buff_b[i]);
+        krnl1[i].setArg(j++, requiredTolerance);
+        krnl1[i].setArg(j++, requiredSamples);
+        krnl1[i].setArg(j++, timeSteps);
+        krnl1[i].setArg(j++, maxSamples);
+    }
 
     std::vector<cl::Memory> out_vec_a; //{out_buff[0]};
     std::vector<cl::Memory> out_vec_b; //{out_buff[0]};
-    for (int i = 0; i < KN; ++i) {
+    for (int i = 0; i < cu_number; ++i) {
         out_vec_a.push_back(out_buff_a[i]);
         out_vec_b.push_back(out_buff_b[i]);
     }
     q.finish();
     gettimeofday(&st_time, 0);
-    for (int i = 0; i < num_rep / KN; ++i) {
+    for (int i = 0; i < num_rep / cu_number; ++i) {
         int use_a = i & 1;
         if (use_a) {
             if (i > 1) {
-                q.enqueueTask(kernel0[0], &read_events[i - 2], &kernel_events[i][0]);
-#if KN > 1
-                q.enqueueTask(kernel1[0], &read_events[i - 2], &kernel_events[i][1]);
-#endif
-#if KN > 2
-                q.enqueueTask(kernel2[0], &read_events[i - 2], &kernel_events[i][2]);
-#endif
-#if KN > 3
-                q.enqueueTask(kernel3[0], &read_events[i - 2], &kernel_events[i][3]);
-#endif
+                for (int c = 0; c < cu_number; ++c) {
+                    q.enqueueTask(krnl0[c], &read_events[i - 2], &kernel_events[i][c]);
+                }
             } else {
-                q.enqueueTask(kernel0[0], nullptr, &kernel_events[i][0]);
-#if KN > 1
-                q.enqueueTask(kernel1[0], nullptr, &kernel_events[i][1]);
-#endif
-#if KN > 2
-                q.enqueueTask(kernel2[0], nullptr, &kernel_events[i][2]);
-#endif
-#if KN > 3
-                q.enqueueTask(kernel3[0], nullptr, &kernel_events[i][3]);
-#endif
+                for (int c = 0; c < cu_number; ++c) {
+                    q.enqueueTask(krnl0[c], nullptr, &kernel_events[i][c]);
+                }
             }
         } else {
             if (i > 1) {
-                q.enqueueTask(kernel0[1], &read_events[i - 2], &kernel_events[i][0]);
-#if KN > 1
-                q.enqueueTask(kernel1[1], &read_events[i - 2], &kernel_events[i][1]);
-#endif
-#if KN > 2
-                q.enqueueTask(kernel2[1], &read_events[i - 2], &kernel_events[i][2]);
-#endif
-#if KN > 3
-                q.enqueueTask(kernel3[1], &read_events[i - 2], &kernel_events[i][3]);
-#endif
+                for (int c = 0; c < cu_number; ++c) {
+                    q.enqueueTask(krnl1[c], &read_events[i - 2], &kernel_events[i][c]);
+                }
             } else {
-                q.enqueueTask(kernel0[1], nullptr, &kernel_events[i][0]);
-#if KN > 1
-                q.enqueueTask(kernel1[1], nullptr, &kernel_events[i][1]);
-#endif
-#if KN > 2
-                q.enqueueTask(kernel2[1], nullptr, &kernel_events[i][2]);
-#endif
-#if KN > 3
-                q.enqueueTask(kernel3[1], nullptr, &kernel_events[i][3]);
-#endif
+                for (int c = 0; c < cu_number; ++c) {
+                    q.enqueueTask(krnl1[c], nullptr, &kernel_events[i][c]);
+                }
             }
         }
         if (use_a) {
@@ -401,8 +254,8 @@ int main(int argc, const char* argv[]) {
               << "opt/sec: " << double(loop_nm * num_rep) / time_elapsed << std::endl;
     DtUsed golden = 3.834522;
     std::cout << "Expected value: " << golden << ::std::endl;
-    if (num_rep > KN) {
-        return print_result(out_a, golden, max_diff);
+    if (num_rep > cu_number) {
+        return print_result(cu_number, out_a, golden, max_diff);
     }
-    return print_result(out_b, golden, max_diff);
+    return print_result(cu_number, out_b, golden, max_diff);
 }

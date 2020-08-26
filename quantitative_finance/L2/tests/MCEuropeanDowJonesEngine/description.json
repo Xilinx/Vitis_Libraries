@@ -1,7 +1,7 @@
 {
-    "gui": false,
-    "name": "Xilinx Monte Carlo European Dow Jones Engine",
-    "description": "L2 Monte Carlo European Dow Jones Engine",
+    "gui": false, 
+    "name": "Xilinx Monte Carlo European Dow Jones Engine", 
+    "description": "L2 Monte Carlo European Dow Jones Engine", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
@@ -65,8 +65,8 @@
                 "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/kernel"
             ], 
-            "options": "-O3 ",
-			"symbols": [
+            "options": "-O3 ", 
+            "symbols": [
                 "PRAGMA"
             ]
         }
@@ -78,19 +78,19 @@
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L2/tests/MCEuropeanDowJonesEngine/kernel"
             ]
-        } 
+        }
     }, 
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "kernel/kernel_mceuropeanengine.cpp",
+                    "location": "kernel/kernel_mceuropeanengine.cpp", 
                     "frequency": 300.0, 
-                    "clflags": "-D DPRAGMA -D KN_0 -D KERNEL_NAME=kernel_mc_0",
+                    "clflags": "-D DPRAGMA -D KN_0 -D KERNEL_NAME=kernel_mc_0", 
                     "name": "kernel_mc_0"
                 }
             ], 
-            "ldclflags": "--nk kernel_mc_0:1:kernel_mc_0",
+            "ldclflags": "--nk kernel_mc_0:1:kernel_mc_0", 
             "frequency": 300.0, 
             "name": "mc_european_dowjones"
         }
@@ -104,12 +104,18 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }
