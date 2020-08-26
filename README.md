@@ -11,7 +11,7 @@ The Vitis Quantitative Finance Library provides comprehensive tools from the bot
 
 * The software API level (L3) wraps the details of offloading acceleration with pre-built binary (overlay) and allow users to accelerate supported pricing tasks on Alveo cards without engaging hardware development.
 
-Check the [comprehensive HTML documentation](https://xilinx.github.io/Vitis_Libraries/quantitative_finance/) for more details.
+Check the [comprehensive HTML documentation](https://xilinx.github.io/Vitis_Libraries/quantitative_finance/2019.2/) for more details.
 
 ## Library Contents
 
