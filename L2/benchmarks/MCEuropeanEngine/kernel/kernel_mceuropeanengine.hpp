@@ -14,60 +14,24 @@
  * limitations under the License.
  */
 #ifndef KERNEL_MCEUROPEANENGINHE_H
+#define KERNEL_MCEUROPEANENGINHE_H
+
 #define DtUsed double
 #define MCM_NM 8
 #define OUTDEP 1024
 
-extern "C" void kernel_mc_0(unsigned int loop_nm,
-                            DtUsed underlying,
-                            DtUsed volatility,
-                            DtUsed dividendYield,
-                            DtUsed riskFreeRate, // model parameter
-                            DtUsed timeLength,
-                            DtUsed strike,
-                            unsigned int optionType, // option parameter
-                            DtUsed out[OUTDEP],
-                            DtUsed requiredTolerance,
-                            unsigned int requiredSamples,
-                            unsigned int timeSteps,
-                            unsigned int maxSamples);
-extern "C" void kernel_mc_1(unsigned int loop_nm,
-                            DtUsed underlying,
-                            DtUsed volatility,
-                            DtUsed dividendYield,
-                            DtUsed riskFreeRate, // model parameter
-                            DtUsed timeLength,
-                            DtUsed strike,
-                            unsigned int optionType, // option parameter
-                            DtUsed out[OUTDEP],
-                            DtUsed requiredTolerance,
-                            unsigned int requiredSamples,
-                            unsigned int timeSteps,
-                            unsigned int maxSamples);
-extern "C" void kernel_mc_2(unsigned int loop_nm,
-                            DtUsed underlying,
-                            DtUsed volatility,
-                            DtUsed dividendYield,
-                            DtUsed riskFreeRate, // model parameter
-                            DtUsed timeLength,
-                            DtUsed strike,
-                            unsigned int optionType, // option parameter
-                            DtUsed out[OUTDEP],
-                            DtUsed requiredTolerance,
-                            unsigned int requiredSamples,
-                            unsigned int timeSteps,
-                            unsigned int maxSamples);
-extern "C" void kernel_mc_3(unsigned int loop_nm,
-                            DtUsed underlying,
-                            DtUsed volatility,
-                            DtUsed dividendYield,
-                            DtUsed riskFreeRate, // model parameter
-                            DtUsed timeLength,
-                            DtUsed strike,
-                            unsigned int optionType, // option parameter
-                            DtUsed out[OUTDEP],
-                            DtUsed requiredTolerance,
-                            unsigned int requiredSamples,
-                            unsigned int timeSteps,
-                            unsigned int maxSamples);
+extern "C" void kernel_mc(unsigned int loop_nm,
+                          unsigned int seed,
+                          DtUsed underlying,
+                          DtUsed volatility,
+                          DtUsed dividendYield,
+                          DtUsed riskFreeRate, // model parameter
+                          DtUsed timeLength,
+                          DtUsed strike,
+                          unsigned int optionType, // option parameter
+                          DtUsed out[OUTDEP],
+                          DtUsed requiredTolerance,
+                          unsigned int requiredSamples,
+                          unsigned int timeSteps,
+                          unsigned int maxSamples);
 #endif

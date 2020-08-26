@@ -25,24 +25,6 @@
 
 #define KN 1
 #define OUTDEP 1024
-#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
-
-#define XCL_BANK0 XCL_BANK(0)
-#define XCL_BANK1 XCL_BANK(1)
-#define XCL_BANK2 XCL_BANK(2)
-#define XCL_BANK3 XCL_BANK(3)
-#define XCL_BANK4 XCL_BANK(4)
-#define XCL_BANK5 XCL_BANK(5)
-#define XCL_BANK6 XCL_BANK(6)
-#define XCL_BANK7 XCL_BANK(7)
-#define XCL_BANK8 XCL_BANK(8)
-#define XCL_BANK9 XCL_BANK(9)
-#define XCL_BANK10 XCL_BANK(10)
-#define XCL_BANK11 XCL_BANK(11)
-#define XCL_BANK12 XCL_BANK(12)
-#define XCL_BANK13 XCL_BANK(13)
-#define XCL_BANK14 XCL_BANK(14)
-#define XCL_BANK15 XCL_BANK(15)
 
 class ArgParser {
    public:
@@ -193,13 +175,8 @@ int main(int argc, const char* argv[]) {
 
     cl_mem_ext_ptr_t mext_out_a;
     cl_mem_ext_ptr_t mext_out_b;
-#ifndef USE_HBM
-    mext_out_a = {XCL_MEM_DDR_BANK0, out0_a, 0};
-    mext_out_b = {XCL_MEM_DDR_BANK0, out0_b, 0};
-#else
-    mext_out_a = {XCL_BANK0, out0_a, 0};
-    mext_out_b = {XCL_BANK0, out0_b, 0};
-#endif
+    mext_out_a = {9, out0_a, kernel0[0]()};
+    mext_out_b = {9, out0_b, kernel0[1]()};
 
     cl::Buffer out_buff_a;
     cl::Buffer out_buff_b;

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,7 +56,18 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
+DEVICE ?= xilinx_u250_xdma_201830_2
+ifeq ($(findstring zc, $(DEVICE)), zc)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+
+ifneq ($(findstring u250, $(DEVICE)), u250)
+ifneq ($(findstring u200, $(DEVICE)), u200)
+ifneq ($(findstring u50, $(DEVICE)), u50)
+$(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
+endif
+endif
 
 include ./utils.mk
 
@@ -72,11 +83,11 @@ VPP := v++
 
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/host/main.cpp
+HOST_SRCS += $(CUR_DIR)/host/main.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
 
 
-CXXFLAGS += -DPRAGMA
+CXXFLAGS +=
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/host
@@ -95,10 +106,12 @@ ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
 endif
 
+ifeq ($(TARGET),hw_emu)
+CXXFLAGS += -D HW_EMU_TEST
+endif
 # Host compiler global settings
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE 
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
 
@@ -115,62 +128,49 @@ endif
 # Kernel compiler global settings
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 LDCLFLAGS += --optimize 2 --jobs 8
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-CXXFLAGS += -D USE_DDR -D KN=4
-VPP_FLAGS += --config $(CUR_DIR)/conn_u250.ini
-else ifneq (,$(XPLATFORM))
-$(warning WARNING: Unsupported platform $(XPLATFORM))
-endif
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-CXXFLAGS += -D USE_DDR -D KN=2
 VPP_FLAGS += --config $(CUR_DIR)/conn_u200.ini
-else ifneq (,$(XPLATFORM))
-$(warning WARNING: Unsupported platform $(XPLATFORM))
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u250.ini
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50.ini
 endif
 
-ifeq ($(TARGET),sw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
-endif
-ifeq ($(TARGET),hw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
-endif
-VPP_FLAGS +=-I$(XFLIB_DIR)/L1/include
-VPP_FLAGS +=-I$(XFLIB_DIR)/L2/include
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel
 
-scanTreeKernel1_VPP_FLAGS +=  -D DPRAGMA -D KERNEL_NAME=scanTreeKernel1
-scanTreeKernel2_VPP_FLAGS +=  -D DPRAGMA -D KERNEL_NAME=scanTreeKernel2
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-scanTreeKernel3_VPP_FLAGS +=  -D DPRAGMA -D KERNEL_NAME=scanTreeKernel3
-scanTreeKernel4_VPP_FLAGS +=  -D DPRAGMA -D KERNEL_NAME=scanTreeKernel4
-endif
-VPP_FLAGS += -DHW_EMU_DEBUG 
 
-# Kernel linker flags
+
+
+scanTreeKernel_VPP_FLAGS +=  -D DPRAGMA
+VPP_FLAGS += 
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+LDCLFLAGS_scanTreeKernel += --nk scanTreeKernel:2:scanTreeKernel_1.scanTreeKernel_2
+endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-LDCLFLAGS_scanTreeKernel +=  --nk scanTreeKernel1:1:scanTreeKernel1 --nk scanTreeKernel2:1:scanTreeKernel2 --nk scanTreeKernel3:1:scanTreeKernel3 --nk scanTreeKernel4:1:scanTreeKernel4
-else
-LDCLFLAGS_scanTreeKernel +=  --nk scanTreeKernel1:1:scanTreeKernel1 --nk scanTreeKernel2:1:scanTreeKernel2
+LDCLFLAGS_scanTreeKernel += --nk scanTreeKernel:4:scanTreeKernel_1.scanTreeKernel_2.scanTreeKernel_3.scanTreeKernel_4
+endif
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+LDCLFLAGS_scanTreeKernel += --nk scanTreeKernel:2:scanTreeKernel_1.scanTreeKernel_2
 endif
 
 ############################## Declaring Binary Containers ##############################
-BINARY_CONTAINERS += $(BUILD_DIR)/scanTreeKernel.xclbin
-BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel1.xo
-BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel2.xo
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel3.xo
-BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel4.xo
-endif
 
+
+BINARY_CONTAINERS += $(BUILD_DIR)/scanTreeKernel.xclbin
+BINARY_CONTAINER_scanTreeKernel_OBJS += $(TEMP_DIR)/scanTreeKernel.xo
 ############################## Setting Targets ##############################
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig 
+all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+
 .PHONY: host
 host: $(EXE_FILE) | check_xrt
 
@@ -181,28 +181,31 @@ xclbin: check_vpp | $(BINARY_CONTAINERS)
 build: xclbin
 
 ############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-$(TEMP_DIR)/scanTreeKernel1.xo: kernel/scan_tree_kernel1.cpp kernel/scan_tree_kernel.cpp
-	$(ECHO) "Compiling Kernel: scanTreeKernel1"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(scanTreeKernel1_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k scanTreeKernel1 -I'$(<D)' -o $@ $^
-$(TEMP_DIR)/scanTreeKernel2.xo: $(XFLIB_DIR)/L2/benchmarks/TreeEngine/TreeSwaptionEngineBKModel/kernel/scan_tree_kernel2.cpp
-	$(ECHO) "Compiling Kernel: scanTreeKernel2"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(scanTreeKernel2_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k scanTreeKernel2 -I'$(<D)' -o $@ $^
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-$(TEMP_DIR)/scanTreeKernel3.xo: kernel/scan_tree_kernel3.cpp kernel/scan_tree_kernel.cpp
-	$(ECHO) "Compiling Kernel: scanTreeKernel3"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(scanTreeKernel3_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k scanTreeKernel3 -I'$(<D)' -o $@ $^
-$(TEMP_DIR)/scanTreeKernel4.xo: kernel/scan_tree_kernel4.cpp kernel/scan_tree_kernel.cpp
-	$(ECHO) "Compiling Kernel: scanTreeKernel4"
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(scanTreeKernel4_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k scanTreeKernel4 -I'$(<D)' -o $@ $^
-endif
 
+
+$(TEMP_DIR)/scanTreeKernel.xo: $(CUR_DIR)/kernel/scan_tree_kernel.cpp
+	$(ECHO) "Compiling Kernel: scanTreeKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) $(scanTreeKernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k scanTreeKernel -I'$(<D)' -o'$@' '$<'
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 $(BUILD_DIR)/scanTreeKernel.xclbin: $(BINARY_CONTAINER_scanTreeKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/scanTreeKernel -l $(LDCLFLAGS) $(LDCLFLAGS_scanTreeKernel) -o'$@' $(+)
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+$(BUILD_DIR)/scanTreeKernel.xclbin: $(BINARY_CONTAINER_scanTreeKernel_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/scanTreeKernel -l $(LDCLFLAGS) $(LDCLFLAGS_scanTreeKernel) -o'$@' $(+)
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+$(BUILD_DIR)/scanTreeKernel.xclbin: $(BINARY_CONTAINER_scanTreeKernel_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/scanTreeKernel -l $(LDCLFLAGS) $(LDCLFLAGS_scanTreeKernel) -o'$@' $(+)
+else 
+$(BUILD_DIR)/scanTreeKernel.xclbin: $(BINARY_CONTAINER_scanTreeKernel_OBJS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/scanTreeKernel -l $(LDCLFLAGS) $(LDCLFLAGS_scanTreeKernel) -o'$@' $(+)
+endif
+
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(HOST_SRCS) | check_xrt
@@ -215,16 +218,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 ############################## Setting Essential Checks and Running Rules ##############################
 run: all
-ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u200, $(DEVICE)), u200)
-$(error This example is not supported for $(DEVICE))
-endif
-endif
-
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error This example is not supported for $(DEVICE))
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)

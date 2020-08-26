@@ -16,7 +16,7 @@ calculate_returns_loop1:
         for (int row = 0; row < num_assets; row++) {
 #pragma HLS LOOP_TRIPCOUNT min = 100 max = 100
 #pragma HLS unroll factor = 8
-#pragma HLS pipeline II = 1
+#pragma HLS pipeline II = 8
             returns[row][col - 1] = (prices[row + col * num_assets] / prices[row + ((col - 1) * num_assets)]) - 1;
         }
     }
