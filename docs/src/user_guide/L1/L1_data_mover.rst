@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, data mover
+   :description: Vitis BLAS library L1 data mover modules are used to move matrix and vector data between their on-chip storage and the input/output streams of the computation modules.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _user_guide_data_mover_l1:
 
 ***********************

@@ -13,6 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, level 3
+   :description: Vitis BLAS library level 3 application programming interface user guide.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 .. _user_guide_l3:
 
 =====================
@@ -26,3 +34,5 @@ L3 API User Guide
    L3_example.rst
    L3_benchmark.rst
    L3_test.rst
+   L3_python_bindings.rst
+   L3_application.rst

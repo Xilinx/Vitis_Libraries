@@ -62,8 +62,7 @@ int main(int argc, char** argv) {
             delete[] l_yRes;
             if (!l_return) break;
         }
-#endif
-#if BLAS_L2
+#elif BLAS_L2
         if (l_curInstr.m_opClass == B2_OP_CLASS) {
             uint32_t l_m, l_n, l_ku, l_kl;
             BLAS_dataType l_alpha, l_beta;
@@ -84,6 +83,8 @@ int main(int argc, char** argv) {
             delete[] l_yRes;
             if (!l_return) break;
         }
+#else
+        return EXIT_FAILURE;
 #endif
     }
     // compute

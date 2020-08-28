@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, primitives, matrix storage
+   :description: Vitis BLAS library L1 primitives are the C++ implementation of BLAS functions.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _user_guide_overview_content_l1:
 
 

@@ -13,13 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, primitives, L1 test
+   :description: Vitis BLAS library L1 primitive implementations have been tested against numpy functions. That is, a python based testing environment has been developed to generate random test inputs for each primitive and its corresponding function in numpy, compute the golden reference via the numpy function call, and finally compare the golden reference with the csim and cosim outputs of the primitive to verify the correctness of the implementation.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 .. _user_guide_test_l1:
 
 *******************************
 L1 Test
 *******************************
 
-All L1 primitives' implementations have been tested against numpy functions. That is, a python based testing environment has been developed to generate random test inputs for each primitive and its corresponding function in numpy, compute the golden reference via the numpy function call, and finally compare the golden reference with the csim and cosim outputs of the primitive to verify the correctness of the implementation.
+All L1 primitive implementations have been tested against numpy functions. That is, a python based testing environment has been developed to generate random test inputs for each primitive and its corresponding function in numpy, compute the golden reference via the numpy function call, and finally compare the golden reference with the csim and cosim outputs of the primitive to verify the correctness of the implementation.
 To run the testing process of L1 primitives, please follow the steps below.
 
 1. Set up Python environment

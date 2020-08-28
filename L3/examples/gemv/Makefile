@@ -75,7 +75,7 @@ KERNELS :=
 
 SRC_DIR = $(CUR_DIR)
 
-EXE_NAME = gemv_example
+EXE_NAME = gemv_example.exe
 HOST_ARGS =
 
 SRCS = gemv_example.cpp
@@ -103,6 +103,8 @@ RUN_ENV =
 OBJ_FILES = 
 EXTRA_OBJS = 
 
+TARGET = hw
+
 CXX := xcpp
 CC := gcc
 
@@ -111,27 +113,29 @@ CFLAGS +=
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -lxilinxopencl
 LDFLAGS += -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
 
+BUILD_DIR = out_host
 EXE_EXT ?= exe
-EXE_FILE ?= $(EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
+EXE_FILE ?= $(BUILD_DIR)/$(EXE_NAME)
 
-$(EXE_FILE): $(SRCS) | check_xrt 
+$(EXE_FILE): $(SRCS) | check_xrt
+	mkdir -p $(BUILD_DIR)
 	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 .PHONY: host
 host: check_xrt $(EXE_FILE)
 
-short: gemv_example.exe
+xclbin: download_xclbin
 
-float: gemv_example_float.exe
+build: download_xclbin
+
+download_xclbin:
+ifeq (,$(wildcard ./xf_blas_xclbins))
+	wget -nc "https://www.xilinx.com/bin/public/openDownload?filename=vitis_BLAS_library_r1.0_xclbin.tar"
+	tar -zxvf openDownload?filename=vitis_BLAS_library_r1.0_xclbin.tar
+endif
 
 common: gemv_common_example.exe
 
-gemv_example.exe: gemv_example.cpp
-	$(CC) -D XFBLAS_dataType=short -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-gemv_example_float.exe: gemv_example.cpp
-	$(CC) -D XFBLAS_dataType=float -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-	
 gemv_common_example.exe: gemv_common_example.cpp
 	$(CC) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
@@ -147,14 +151,15 @@ endif
 ifneq (,$(BIN_DIR_BASE))
 	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*
 endif
-	rm -rf *.exe
+	rm -rf *.exe $(BUILD_DIR)
 
 cleanall: clean 
 	rm -rf *.log plist $(DATA_STAMP)
 
 .PHONY: run 
 
-run: host 
+run: host
+	$(EXE_FILE) xf_blas_xclbins/u200_xdma_201830_2/gemv_short_1kernel/gemx.xclbin xf_blas_xclbins/u200_xdma_201830_2/gemv_short_1kernel/config_info.dat
 
 check: run
 

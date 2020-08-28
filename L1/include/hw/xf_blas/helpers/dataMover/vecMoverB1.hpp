@@ -73,7 +73,7 @@ void combineStream(unsigned int p_n,
 }
 
 template <typename t_DataType, typename t_DesDataType = t_DataType>
-void mem2stream(unsigned int p_n, t_DataType* p_in, hls::stream<t_DesDataType>& p_out) {
+void mem2stream(unsigned int p_n, const t_DataType* p_in, hls::stream<t_DesDataType>& p_out) {
     for (unsigned int i = 0; i < p_n; ++i) {
 #pragma HLS PIPELINE
         t_DesDataType l_val = p_in[i];

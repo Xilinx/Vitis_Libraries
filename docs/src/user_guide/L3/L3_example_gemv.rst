@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, GEMV, level 3
+   :description: Vitis BLAS library level 3 appliction programming interface GEMV example.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _example_gemv_l3:
 
 =====================

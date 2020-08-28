@@ -13,6 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+
+
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, XFBLAS, level 3
+   :description: Vitis BLAS library level 3 provides software API functions to offload BLAS operations to pre-built FPGA images.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _user_guide_overview_content_l3:
 
 
@@ -1383,5 +1392,6 @@ This function performs the matrix-vector multiplication y = alpha*op(A) x+ beta*
         
 3. Obtain FPGA bitstream 
 =========================
-FPGA bitstreams (xclbins) will be available to download from Xilinx websites in the future. Currently, xclbins could be found in L3/overlay folder.
+FPGA bitstreams (xclbin files) can be downloaded `here`_. After downloading the package, please unzip the file with "tar -xvzf" command, and copy the folders to directory L3/overlay.
 
+.. _here: https://www.xilinx.com/bin/public/openDownload?filename=vitis_BLAS_library_r1.0_xclbin.tar

@@ -51,7 +51,6 @@ void preProcess(unsigned int p_numElems,
         for (t_IndexType i = 0; i < p_numElems; i++) {
 #pragma HLS PIPELINE
             WideType<t_DataType, 1 << t_LogParEntries> l_x = p_x.read();
-#pragma HLS ARRAY_PARTITION variable = l_x complete dim = 1
             t_SumDataType l_sum;
             l_sum = BinarySum<t_DataType, l_ParEntries, t_SumDataType>::sum(l_x.getValAddr());
             p_data.write(l_sum);
@@ -72,7 +71,6 @@ void postProcess(unsigned int p_numElems,
         for (t_IndexType i = 0; i < l_numIter; i++) {
 #pragma HLS PIPELINE II = l_Delays
             WideType<t_DataType, l_Delays> l_input;
-#pragma HLS ARRAY_PARTITION variable = l_input complete dim = 1
             for (t_IndexType j = 0; j < l_Delays; j++) {
 #pragma HLS UNROLL
                 l_input.shift(p_pad.read());
