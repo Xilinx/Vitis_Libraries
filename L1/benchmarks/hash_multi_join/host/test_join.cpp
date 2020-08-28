@@ -222,12 +222,12 @@ int main(int argc, const char* argv[]) {
     cl::Kernel kernel0(program, "join_kernel"); // XXX must match
     std::cout << "Kernel has been created\n";
 
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_BANK(0), col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_BANK(1), col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_BANK(2), col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_BANK(3), col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_result_a = {XCL_BANK(4), row_result_a, 0};
-    cl_mem_ext_ptr_t mext_result_b = {XCL_BANK(4), row_result_b, 0};
+    cl_mem_ext_ptr_t mext_o_orderkey = {1, col_o_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_orderkey = {3, col_l_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {4, col_l_extendedprice, kernel0()};
+    cl_mem_ext_ptr_t mext_l_discount = {5, col_l_discount, kernel0()};
+    cl_mem_ext_ptr_t mext_result_a = {24, row_result_a, kernel0()};
+    cl_mem_ext_ptr_t mext_result_b = {24, row_result_b, kernel0()};
 
     // Map buffers
     // a

@@ -5,7 +5,8 @@
     "gui": true,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280"
+        "u280",
+        "u50"
     ],
     "platform_blacklist": [
         "zc"
@@ -21,6 +22,20 @@
                 "compiler": {
                     "cflags": [
                         "--config PROJECT/conn_u280.ini"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
                     ]
                 }
             }
@@ -74,100 +89,7 @@
                 {
                     "location": "kernel/join_kernel.cpp",
                     "frequency": 280,
-                    "name": "join_kernel",
-                    "num_compute_units": 1,
-                    "compute_units": [
-                        {
-                            "name": "join_kernel",
-                            "slr": "SLR0",
-                            "arguments": [
-                                {
-                                    "name": "buf_o_orderkey",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_l_orderkey",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_l_extendedprice",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_l_discount",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "pu0_ht",
-                                    "memory": "HBM[0]"
-                                },
-                                {
-                                    "name": "pu1_ht",
-                                    "memory": "HBM[4]"
-                                },
-                                {
-                                    "name": "pu2_ht",
-                                    "memory": "HBM[8]"
-                                },
-                                {
-                                    "name": "pu3_ht",
-                                    "memory": "HBM[12]"
-                                },
-                                {
-                                    "name": "pu4_ht",
-                                    "memory": "HBM[16]"
-                                },
-                                {
-                                    "name": "pu5_ht",
-                                    "memory": "HBM[20]"
-                                },
-                                {
-                                    "name": "pu6_ht",
-                                    "memory": "HBM[24]"
-                                },
-                                {
-                                    "name": "pu7_ht",
-                                    "memory": "HBM[28]"
-                                },
-                                {
-                                    "name": "pu0_s",
-                                    "memory": "HBM[2]"
-                                },
-                                {
-                                    "name": "pu1_s",
-                                    "memory": "HBM[6]"
-                                },
-                                {
-                                    "name": "pu2_s",
-                                    "memory": "HBM[10]"
-                                },
-                                {
-                                    "name": "pu3_s",
-                                    "memory": "HBM[14]"
-                                },
-                                {
-                                    "name": "pu4_s",
-                                    "memory": "HBM[18]"
-                                },
-                                {
-                                    "name": "pu5_s",
-                                    "memory": "HBM[22]"
-                                },
-                                {
-                                    "name": "pu6_s",
-                                    "memory": "HBM[26]"
-                                },
-                                {
-                                    "name": "pu7_s",
-                                    "memory": "HBM[30]"
-                                },
-                                {
-                                    "name": "buf_result",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        }
-                    ]
+                    "name": "join_kernel"
                 }
             ],
             "frequency": 280,
@@ -183,13 +105,19 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": 32768,
-                "max_time_min": 520
+                "max_time_min": {
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
+                    "vitis_hw_run": 10
+                }
             }
         ],
         "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu",
-            "vitis_hw"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }

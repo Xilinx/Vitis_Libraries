@@ -122,32 +122,35 @@ int main(int argc, const char* argv[]) {
     };
 
     /**
-     * 4.allocate device
+     * 4.kernels creation
      */
-    for (int i = 0; i < NumTable; i++) {
-        tbs[i].allocateDevBuffer(context, 32);
-    }
-    tk0.allocateDevBuffer(context, 33);
-    tk1.allocateDevBuffer(context, 33);
-
-    for (int i = 0; i < NumSweep; i++) {
-        cfgcmds[i].allocateDevBuffer(context, 32);
-        cfgcmd_out[i].allocateDevBuffer(context, 33);
-    };
-
-    std::cout << "Table allocation device done." << std::endl;
-
-    /**
-     * 5.kernels (host and device)
-     */
-
-    AggrBufferTmp buftmp(context);
 
     // kernel Engine
     AggrKrnlEngine krnlstep[NumSweep];
     for (int i = 0; i < NumSweep; i++) {
         krnlstep[i] = AggrKrnlEngine(program, q, "gqeAggr");
     }
+    /**
+     * 5.allocate device
+     */
+    for (int i = 0; i < NumTable; i++) {
+        tbs[i].allocateDevBuffer(context, 0, krnlstep[0].getKernel());
+    }
+    tk0.allocateDevBuffer(context, 1, krnlstep[0].getKernel());
+
+    for (int i = 0; i < NumSweep; i++) {
+        cfgcmds[i].allocateDevBuffer(context, 2, krnlstep[0].getKernel());
+        cfgcmd_out[i].allocateDevBuffer(context, 3, krnlstep[0].getKernel());
+    };
+
+    AggrBufferTmp buftmp(context);
+
+    std::cout << "Table allocation device done." << std::endl;
+
+    /**
+     * 6.kernels setup
+     */
+
     krnlstep[0].setup(tbs[0], tk0, cfgcmds[0], cfgcmd_out[0], buftmp);
 
     // transfer Engine

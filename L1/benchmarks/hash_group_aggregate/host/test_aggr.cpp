@@ -373,9 +373,9 @@ int main(int argc, const char* argv[]) {
     const size_t r_depth = R_MAX_ROW;
 
     ap_uint<1024>* aggr_result_buf_a; // result
-    aggr_result_buf_a = aligned_alloc<ap_uint<1024> >(r_depth);
+    aggr_result_buf_a = aligned_alloc<ap_uint<1024> >(r_depth / sim_scale);
     ap_uint<1024>* aggr_result_buf_b; // result
-    aggr_result_buf_b = aligned_alloc<ap_uint<1024> >(r_depth);
+    aggr_result_buf_b = aligned_alloc<ap_uint<1024> >(r_depth / sim_scale);
 
     ap_uint<32>* pu_begin_status_a;
     ap_uint<32>* pu_begin_status_b;
@@ -473,14 +473,14 @@ int main(int argc, const char* argv[]) {
     cl::Kernel kernel0(program, "hash_aggr_kernel"); // XXX must match
     std::cout << "Kernel has been created\n";
 
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_BANK(32), col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_BANK(32), col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_result_a = {XCL_BANK(33), aggr_result_buf_a, 0};
-    cl_mem_ext_ptr_t mext_result_b = {XCL_BANK(33), aggr_result_buf_b, 0};
-    cl_mem_ext_ptr_t mext_begin_status_a = {XCL_BANK(32), pu_begin_status_a, 0};
-    cl_mem_ext_ptr_t mext_begin_status_b = {XCL_BANK(32), pu_begin_status_b, 0};
-    cl_mem_ext_ptr_t mext_end_status_a = {XCL_BANK(33), pu_end_status_a, 0};
-    cl_mem_ext_ptr_t mext_end_status_b = {XCL_BANK(33), pu_end_status_b, 0};
+    cl_mem_ext_ptr_t mext_l_orderkey = {0, col_l_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {1, col_l_extendedprice, kernel0()};
+    cl_mem_ext_ptr_t mext_result_a = {13, aggr_result_buf_a, kernel0()};
+    cl_mem_ext_ptr_t mext_result_b = {13, aggr_result_buf_b, kernel0()};
+    cl_mem_ext_ptr_t mext_begin_status_a = {3, pu_begin_status_a, kernel0()};
+    cl_mem_ext_ptr_t mext_begin_status_b = {3, pu_begin_status_b, kernel0()};
+    cl_mem_ext_ptr_t mext_end_status_a = {4, pu_end_status_a, kernel0()};
+    cl_mem_ext_ptr_t mext_end_status_b = {4, pu_end_status_b, kernel0()};
 
     // Map buffers
     // a
@@ -491,7 +491,7 @@ int main(int argc, const char* argv[]) {
                                      (size_t)(MONEY_SZ * l_depth), &mext_l_extendedprice);
 
     cl::Buffer buf_result_a(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                            (size_t)(1024 / 8 * r_depth), &mext_result_a);
+                            (size_t)(1024 / 8 * r_depth / sim_scale), &mext_result_a);
 
     cl::Buffer buf_begin_status_a(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                                   (size_t)(32 / 8 * PU_STATUS_DEPTH), &mext_begin_status_a);
@@ -507,7 +507,7 @@ int main(int argc, const char* argv[]) {
                                      (size_t)(MONEY_SZ * l_depth), &mext_l_extendedprice);
 
     cl::Buffer buf_result_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                            (size_t)(1024 / 8 * r_depth), &mext_result_b);
+                            (size_t)(1024 / 8 * r_depth / sim_scale), &mext_result_b);
 
     cl::Buffer buf_begin_status_b(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                                   (size_t)(32 / 8 * PU_STATUS_DEPTH), &mext_begin_status_b);

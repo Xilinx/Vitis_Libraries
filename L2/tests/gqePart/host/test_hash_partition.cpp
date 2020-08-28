@@ -286,9 +286,13 @@ int main(int argc, const char* argv[]) {
     std::cout << "Kernel has been created\n";
 
     cl_mem_ext_ptr_t mext_table_l, mext_table_out, mext_cfg;
-    mext_table_l = {XCL_BANK(33), table_l, 0};
-    mext_table_out = {XCL_BANK(32), table_out, 0};
-    mext_cfg = {XCL_BANK(32), table_cfg, 0};
+
+    mext_table_l = {3, table_l, kernel0table()};
+    mext_table_out = {4, table_out, kernel0table()};
+    mext_cfg = {5, table_cfg, kernel0table()};
+    // mext_table_l = {XCL_BANK(33), table_l, 0};
+    // mext_table_out = {XCL_BANK(32), table_out, 0};
+    // mext_cfg = {XCL_BANK(32), table_cfg, 0};
 
     // Map buffers
     cl::Buffer buf_table_l(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
