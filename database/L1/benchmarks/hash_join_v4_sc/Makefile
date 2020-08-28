@@ -62,7 +62,9 @@ $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
 ifneq ($(findstring u280, $(DEVICE)), u280)
+ifneq ($(findstring u50, $(DEVICE)), u50)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
 endif
 
 include ./utils.mk
@@ -124,6 +126,8 @@ LDCLFLAGS += --optimize 2 --jobs 8
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 VPP_FLAGS += --config $(CUR_DIR)/conn_u280.ini
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50.ini
 endif
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw

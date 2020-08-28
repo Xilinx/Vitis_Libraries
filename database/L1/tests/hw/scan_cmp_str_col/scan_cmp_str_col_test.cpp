@@ -38,7 +38,7 @@ void dut(ap_uint<512>* ddr_ptr,
          hls::stream<bool>& out_stream,
          hls::stream<bool>& e_str_o) {
 #pragma HLS INTERFACE s_axilite port = ddr_ptr
-#pragma HLS INTERFACE m_axi depth = 32 port = ddr_ptr
+#pragma HLS INTERFACE m_axi depth = 32 port = ddr_ptr offset = slave
     xf::database::scanCmpStrCol(ddr_ptr, size, num_str, //
                                 cnst_stream, out_stream, e_str_o);
 }

@@ -32,10 +32,10 @@ help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make run TARGET=<sw_emu|hw_emu|hw> DEVICE=u280-es1_xdma_201830_1"
+	@echo "  make run TARGET=<sw_emu|hw_emu|hw>"
 	@echo "      Command to build xclbin files to be used in demos"
 	@echo ""
-	@echo "  make run TARGET=<sw_emu|hw_emu|hw> DEVICE=u280-es1_xdma_201830_1 TB=<Q1|Q2|...> MDOE=<FPGA|CPU>"
+	@echo "  make run TARGET=<sw_emu|hw_emu|hw> TB=<Q1|Q2|...> MDOE=<FPGA|CPU>"
 	@echo "      Command to run a specific demo."
 	@echo ""
 	@echo "  make clean "
@@ -48,116 +48,19 @@ ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
 $(error TARGET is not sw_emu, hw_emu or hw)
 endif
 
-DEVICE ?= u280-es1_xdma_201830_1
+.PHONY: all
+all: host
 
-# MK_INC_BEGIN vivado.mk
-
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VIVADO))
-XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
-endif
-export XILINX_VIVADO
-
-.PHONY: check_vivado
-check_vivado:
-ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
-	@echo "Cannot locate Vivado installation. Please set XILINX_VIVADO variable." && false
+DEVICE ?= xilinx_u280_xdma_201920_3
+ifneq ($(findstring u280, $(DEVICE)), u280)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
-export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 
-# MK_INC_END vivado.mk
-
-# MK_INC_BEGIN vitis.mk
-
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VITIS))
-XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
-endif
-export XILINX_VITIS
-.PHONY: check_vpp
-check_vpp:
-ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
-	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
-endif
-
-ifeq (,$(XILINX_XRT))
-XILINX_XRT = /opt/xilinx/xrt
-endif
-export XILINX_XRT
-.PHONY: check_xrt
-check_xrt:
-ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
-	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
-endif
-
-export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
-
-ifeq (,$(LD_LIBRARY_PATH))
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib
-else
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
-endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-# MK_INC_END vitis.mk
-
-# MK_INC_BEGIN vitis_set_platform.mk
-
-ifneq (,$(wildcard $(DEVICE)))
-# Use DEVICE as a file path
-XPLATFORM := $(DEVICE)
-else
-# Use DEVICE as a file name pattern
-DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
-ifneq (,$(PLATFORM_REPO_PATHS))
-XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
-endif
-
-define MSG_PLATFORM
-No platform matched pattern '$(DEVICE)'.
-Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
-endef
-export MSG_PLATFORM
-
-define MSG_DEVICE
-More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
-endef
-export MSG_DEVICE
-
-.PHONY: check_platform
-check_platform:
-ifeq (,$(XPLATFORM))
-	@echo "$${MSG_PLATFORM}" && false
-endif
-ifneq (,$(word 2,$(XPLATFORM)))
-	@echo "$${MSG_DEVICE}" && false
-endif
+HOST_ARCH := x86
+include $(CUR_DIR)/utils.mk
 
 XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
-
-# MK_INC_END vitis_set_platform.mk
-
-ifeq (,$(shell echo $(DEVICE) | awk '/u280/'))
-$(error DEVICE must be a version of U280 XSA.)
-endif
 
 # -----------------------------------------------------------------------------
 # data creation and other user targets
@@ -378,9 +281,6 @@ BIN_DIR_SUFFIX := _$(MODE)_$(SF)_$(XDEVICE)
 
 # -----------------------------------------------------------------------------
 
-.PHONY: all
-all: host
-
 # MK_INC_BEGIN vitis_host_rules.mk
 
 OBJ_DIR_BASE ?= obj
@@ -390,9 +290,6 @@ BIN_DIR_SUFFIX ?= _$(XDEVICE)
 
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
-
-CXX := xcpp
-CC := gcc
 
 CXXFLAGS += -std=c++14 -fPIC \
 	-I$(SRC_DIR) -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include \

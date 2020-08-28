@@ -36,13 +36,13 @@ void aggr(hls::stream<ap_uint<64> >& c0_strm,
 extern "C" {
 void Test(ap_uint<64 * VEC_LEN> buf0[BUF_DEPTH], ap_uint<64 * VEC_LEN> buf1[BUF_DEPTH], int nrow, ap_uint<64>* bufo) {
 #pragma HLS INTERFACE m_axi port = buf0 bundle = gmem0_0 num_read_outstanding = 4 max_read_burst_length = \
-    64 num_write_outstanding = 4 max_write_burst_length = 64 latency = 125
+    64 num_write_outstanding = 4 max_write_burst_length = 64 latency = 125 offset = slave
 
 #pragma HLS INTERFACE m_axi port = buf1 bundle = gmem0_1 num_read_outstanding = 4 max_read_burst_length = \
-    64 num_write_outstanding = 4 max_write_burst_length = 64 latency = 125
+    64 num_write_outstanding = 4 max_write_burst_length = 64 latency = 125 offset = slave
 
 #pragma HLS INTERFACE m_axi port = bufo bundle = gmem2_0 num_read_outstanding = 4 max_read_burst_length = \
-    64 num_write_outstanding = 4 max_write_burst_length = 64 latency = 125
+    64 num_write_outstanding = 4 max_write_burst_length = 64 latency = 125 offset = slave
 
 #pragma HLS INTERFACE s_axilite port = buf0 bundle = control
 #pragma HLS INTERFACE s_axilite port = buf1 bundle = control
