@@ -16,7 +16,7 @@ Since all the kernel code is developed in HLS C++ with the permissive Apache 2.0
 advanced users can easily tailor, optimize or combine with property logic at any levels.
 Demo/examples of different database acceleration approach are also provided with the library for easy on-boarding.
 
-Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/database/) for more details.
+Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/database/2019.2/) for more details.
 
 ## Requirements
 
