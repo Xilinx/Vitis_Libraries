@@ -1,11 +1,12 @@
 {
-    "gui": true,
-    "name": "Xilinx AES256CBC Decryption Benchmark",
+    "gui": true, 
+    "name": "Xilinx AES256CBC Decryption Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250"
+        "u250",
+        "u50"
     ], 
     "platform_blacklist": [
         "zc"
@@ -26,6 +27,22 @@
                     ]
                 }
             }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_HBM"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
+                    ]
+                }
+            }
         }
     }, 
     "launch": [
@@ -43,8 +60,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "host",
-                "kernel",
+                "host", 
+                "kernel", 
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 -lssl -lcrypto"
@@ -64,19 +81,19 @@
                 {
                     "location": "kernel/aes256CbcDecryptKernel.cpp", 
                     "frequency": 300.0, 
-                    "name": "aes256CbcDecryptKernel",
-                    "num_compute_units": 1,
-                    "compute_units" : [
+                    "name": "aes256CbcDecryptKernel", 
+                    "num_compute_units": 1, 
+                    "compute_units": [
                         {
-                            "name": "aes256CbcDecryptKernel",
-                            "slr": "SLR0",
-                            "arguments" : [
+                            "name": "aes256CbcDecryptKernel", 
+                            "slr": "SLR0", 
+                            "arguments": [
                                 {
-                                    "name": "inputData",
+                                    "name": "inputData", 
                                     "memory": "DDR[0]"
-                                },
+                                }, 
                                 {
-                                    "name": "outputData",
+                                    "name": "outputData", 
                                     "memory": "DDR[1]"
                                 }
                             ]
@@ -97,13 +114,19 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 32768, 
-                "max_time_min": 460
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 460, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

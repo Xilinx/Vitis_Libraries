@@ -437,7 +437,7 @@ void Compress(
     ap_uint<w> m[16],
     ap_uint<2 * w> t,
     bool last) {
-#pragma HLS allocation instances = halfMixing limit = 1 function
+#pragma HLS allocation function instances = halfMixing limit = 1
 
     // message schedule sigma
     const ap_uint<4> sigma[12][16] = {

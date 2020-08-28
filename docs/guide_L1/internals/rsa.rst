@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, RSA, Cryptography
+   :description: RSA is a public-key cryptosystem. Its encryption key is public and different from decryption key. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ****************
 RSA Cryptography
 ****************
