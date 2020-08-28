@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, HMAC, mode
+   :description: HMAC is a message authentication code (MAC) using a hash function. It combines with any cryptographic hash function, for example, md5, sha1, sha256.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *****************************
 HMAC Algorithms
 *****************************

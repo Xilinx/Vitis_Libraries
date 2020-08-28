@@ -9,7 +9,7 @@ Since all the primitive code is developed in HLS C++ with the permissive Apache 
 advanced users can easily tailor, optimize or assemble property logic.
 Benchmarks of 4 different acceleration applications are also provided with the library for easy on-boarding and comparison.
 
-[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/security/)
+[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/security/2020.1/index.html)
 
 ## Library Contents
 

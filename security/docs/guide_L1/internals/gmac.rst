@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, GMAC, mode
+   :description: Galois Message Authentication Code (GMAC) is an specialization of the GCM(Galois/Counter mode) and used for authentication, as defined in NIST800_38D.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ****
 GMAC
 ****
@@ -23,8 +29,7 @@ GMAC
 Overview
 ========
 
-Galois Message Authentication Code (GMAC) is an specialization of the GCM(Galois/Counter mode) and used for authentication,
-it is defined in `NIST800_38D`_.
+Galois Message Authentication Code (GMAC) is an specialization of the GCM(Galois/Counter mode) and used for authentication, as defined in `NIST800_38D`_.
 In this version, we provide Advanced Encryption Standard (AES) based processing ability,
 The cipherkey length for AES should be 128/192/256 bits.
 Our implementation takes a fix-sized (128 bits per block) data stream, but text in real world has a variety of lengths.
