@@ -23,10 +23,10 @@ void top_fft2d(MemWideIFStreamTypeIn& p_inStream, MemWideIFStreamTypeOut& p_outS
     MemWideIFTypeOut MemWideIFTypeOut_temp;
 #endif
 
-#pragma HLS INLINE
-#pragma HLS DATA_PACK variable = p_inStream
-#pragma HLS DATA_PACK variable = p_outStream
-#pragma HLS interface ap_ctrl_none port = return
+//#pragma HLS INLINE
+//#pragma HLS DATA_PACK variable = p_inStream
+//#pragma HLS DATA_PACK variable = p_outStream
+//#pragma HLS interface ap_ctrl_none port = return
 
 #ifndef __SYNTHESIS__
     std::cout << "================================================================================" << std::endl;

@@ -98,7 +98,7 @@ T_dtype readTwiddleTable(ap_uint<index_bw> p_index, T_dtype p_table[]) {
 template <int t_L, int t_R, unsigned int t_phaseBitWidth, typename T_dtype_in>
 T_dtype_in readQuaterTwiddleTable(ap_uint<t_phaseBitWidth> p_index, T_dtype_in p_table[]) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II = 1
+    //#pragma HLS PIPELINE II = 1
     const ap_int<2> MAX_OUT = -1;
     ap_uint<t_phaseBitWidth> index_cos = p_index + (3 * t_L / 4);
     ap_uint<t_phaseBitWidth> index_sin = p_index;

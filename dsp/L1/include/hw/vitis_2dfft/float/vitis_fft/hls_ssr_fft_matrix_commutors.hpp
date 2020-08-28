@@ -49,7 +49,7 @@ template <unsigned int t_numRows,
           typename T_elemType>
 void transpWideBlksInMatrix(typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStreamType& p_inWideStream,
                             typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStreamType& p_outWideStream) {
-#pragma HLS INLINE
+//#pragma HLS INLINE
 #ifndef __SYNTHESIS__
     assert(t_numCols % t_memWidth == 0);
 #endif
@@ -65,19 +65,19 @@ void transpWideBlksInMatrix(typename WideTypeDefs<t_memWidth, T_elemType>::WideI
     // matrix
     WideSampleType l_memWidePipoBuff[k_numWideRowsInBlk * k_numWideColsInBlk];
 #pragma HLS RESOURCE variable = l_memWidePipoBuff core = XPM_MEMORY uram
-#pragma HLS DATA_PACK variable = l_memWidePipoBuff
+    //#pragma HLS DATA_PACK variable = l_memWidePipoBuff
 
-#ifndef __SYNTHESIS__
+    //#ifndef __SYNTHESIS__
     for (unsigned int blk = 0; blk < k_numWideBlks; ++blk) {
-#pragma HLS DATAFLOW disable_start_propagation
-#endif
+    //#pragma HLS DATAFLOW disable_start_propagation
+    //#endif
     // read in row major order///////////////////////////////////////
     transpWideBlksInMatrix_writePIPO:
         for (unsigned int r = 0; r < k_numWideRowsInBlk; r++) {
             for (unsigned int c = 0; c < k_numWideColsInBlk; c++) {
 #pragma HLS PIPELINE II = 1 rewind
                 WideSampleType l_wideSample = p_inWideStream.read();
-#pragma HLS DATA_PACK variable = l_wideSample
+                //#pragma HLS DATA_PACK variable = l_wideSample
                 l_memWidePipoBuff[r * k_numWideColsInBlk + c] = l_wideSample;
             }
         }
@@ -90,14 +90,14 @@ void transpWideBlksInMatrix(typename WideTypeDefs<t_memWidth, T_elemType>::WideI
             for (unsigned int r = 0; r < k_numWideRowsInBlk; r++) {
 #pragma HLS PIPELINE II = 1 rewind
                 WideSampleType l_wideSample = l_memWidePipoBuff[r * k_numWideColsInBlk + c];
-#pragma HLS DATA_PACK variable = l_wideSample
+                //#pragma HLS DATA_PACK variable = l_wideSample
                 p_outWideStream.write(l_wideSample);
             }
         }
 
-#ifndef __SYNTHESIS__
+        //#ifndef __SYNTHESIS__
     }
-#endif
+    //#endif
 }
 
 /**
@@ -116,7 +116,7 @@ template <unsigned int t_numRows,
           typename T_elemType>
 void invTranspWideBlksInMatrix(typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStreamType& p_inWideStream,
                                typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStreamType& p_outWideStream) {
-#pragma HLS INLINE
+//#pragma HLS INLINE
 
 #ifndef __SYNTHESIS__
     assert(t_numCols % t_memWidth == 0);
@@ -133,19 +133,19 @@ void invTranspWideBlksInMatrix(typename WideTypeDefs<t_memWidth, T_elemType>::Wi
     // matrix
     WideSampleType l_memWidePipoBuff[k_numWideRowsInBlk * k_numWideColsInBlk];
 #pragma HLS RESOURCE variable = l_memWidePipoBuff core = XPM_MEMORY uram
-#pragma HLS DATA_PACK variable = l_memWidePipoBuff
-#ifndef __SYNTHESIS__
+    //#pragma HLS DATA_PACK variable = l_memWidePipoBuff
+    //#ifndef __SYNTHESIS__
     for (unsigned int blk = 0; blk < k_numWideBlks; ++blk) {
-#pragma HLS DATAFLOW disable_start_propagation
-//#pragma HLS DATAFLOW
-#endif
+    //#pragma HLS DATAFLOW disable_start_propagation
+    //#pragma HLS DATAFLOW
+    //#endif
     // Read/Store in column major order/////////////////////////////////
     invTranspWideBlksInMatrix_writePIPO:
         for (unsigned int c = 0; c < k_numWideColsInBlk; ++c) {
             for (unsigned int r = 0; r < k_numWideRowsInBlk; r++) {
 #pragma HLS PIPELINE II = 1 rewind
                 WideSampleType l_wideSample = p_inWideStream.read();
-#pragma HLS DATA_PACK variable = l_wideSample
+                //#pragma HLS DATA_PACK variable = l_wideSample
                 l_memWidePipoBuff[r * k_numWideColsInBlk + c] = l_wideSample;
             }
         }
@@ -155,16 +155,16 @@ void invTranspWideBlksInMatrix(typename WideTypeDefs<t_memWidth, T_elemType>::Wi
             for (unsigned int c = 0; c < k_numWideColsInBlk; c++) {
 #pragma HLS PIPELINE II = 1 rewind
                 WideSampleType l_wideSample;
-#pragma HLS DATA_PACK variable = l_wideSample
+                //#pragma HLS DATA_PACK variable = l_wideSample
                 l_wideSample = l_memWidePipoBuff[r * k_numWideColsInBlk + c];
                 p_outWideStream.write(l_wideSample);
             }
         }
-////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////
 
-#ifndef __SYNTHESIS__
+        //#ifndef __SYNTHESIS__
     }
-#endif
+    //#endif
 }
 
 /**
@@ -242,7 +242,7 @@ template <unsigned int t_numBlocks,
           typename T_elemType>
 void transpMemBlocks(typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStreamType& p_inWideStream,
                      typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStreamType& p_outWideStream) {
-#pragma HLS INLINE
+//#pragma HLS INLINE
 #ifndef __SYNTHESIS__
     assert(t_numCols % t_memWidth == 0);
     assert(t_numRows % t_memWidth == 0);
@@ -258,12 +258,12 @@ void transpMemBlocks(typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStream
 #pragma HLS RESOURCE variable = l_buf core = XPM_MEMORY uram
 #pragma HLS ARRAY_PARTITION variable = l_buf complete dim = 2
 
-#ifndef __SYNTHESIS__
+    //#ifndef __SYNTHESIS__
     for (unsigned int b = 0; b < t_numBlocks; ++b) {
-#pragma HLS DATAFLOW disable_start_propagation
+    //#pragma HLS DATAFLOW disable_start_propagation
 
-//#pragma HLS DATAFLOW
-#endif
+    //#pragma HLS DATAFLOW
+    //#endif
     transpMemBlocks_writePIPO:
         for (unsigned int i = 0; i < t_numRows; ++i) {
             for (unsigned int j = 0; j < k_ColWords; ++j) {
@@ -293,9 +293,9 @@ void transpMemBlocks(typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStream
                 p_outWideStream.write(l_out);
             }
         }
-#ifndef __SYNTHESIS__
+        //#ifndef __SYNTHESIS__
     }
-#endif
+    //#endif
 }
 
 } // end namespace fft

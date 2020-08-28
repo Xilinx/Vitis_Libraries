@@ -88,7 +88,7 @@ struct FFT2d {
     typedef typename WideTypeDefs<t_memWidth, T_outType_col>::WideIFStreamType MemWideIFStreamTypeOut_col;
 
     void fft2dProc(MemWideIFStreamTypeIn_row& p_memWideStreamIn, MemWideIFStreamTypeOut_col& p_memWideStreamOut) {
-#pragma HLS INLINE
+//#pragma HLS INLINE
 #ifndef __SYNTHESIS__
         assert((t_ssrFFTParamsRowProc::R) == (t_ssrFFTParamsColProc::R));
         assert(t_ssrFFTParamsRowProc::R > 2);
@@ -99,39 +99,39 @@ struct FFT2d {
 
         // block wise tranposer output stream
         MemWideIFStreamTypeIn_row l_transBlkMatrixStream;
-#pragma HLS DATA_PACK variable = l_transBlkMatrixStream
-#pragma HLS STREAM variable = l_transBlkMatrixStream depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = l_transBlkMatrixStream
+#pragma HLS STREAM variable = l_transBlkMatrixStream depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = l_transBlkMatrixStream core = FIFO_LUTRAM
         // row processor output stream
         MemWideIFStreamTypeOut_row l_rowProcOutStream;
-#pragma HLS DATA_PACK variable = l_rowProcOutStream
-#pragma HLS STREAM variable = l_rowProcOutStream depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = l_rowProcOutStream
+#pragma HLS STREAM variable = l_rowProcOutStream depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = l_rowProcOutStream core = FIFO_LUTRAM
 
         // inverse blk wise tranposer output stream
         MemWideIFStreamTypeOut_row l_invTranspBlkMatrixStream;
-#pragma HLS DATA_PACK variable = l_invTranspBlkMatrixStream
-#pragma HLS STREAM variable = l_invTranspBlkMatrixStream depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = l_invTranspBlkMatrixStream
+#pragma HLS STREAM variable = l_invTranspBlkMatrixStream depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = l_invTranspBlkMatrixStream core = FIFO_LUTRAM
 
         MemWideIFStreamTypeOut_row l_transpMatrixStream;
-#pragma HLS DATA_PACK variable = l_transpMatrixStream
-#pragma HLS STREAM variable = l_transpMatrixStream depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = l_transpMatrixStream
+#pragma HLS STREAM variable = l_transpMatrixStream depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = l_transpMatrixStream core = FIFO_LUTRAM
 
         MemWideIFStreamTypeOut_row l_transpBlkMatrixStream2;
-#pragma HLS DATA_PACK variable = l_transpBlkMatrixStream2
-#pragma HLS STREAM variable = l_transpBlkMatrixStream2 depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = l_transpBlkMatrixStream2
+#pragma HLS STREAM variable = l_transpBlkMatrixStream2 depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = l_transpBlkMatrixStream2 core = FIFO_LUTRAM
 
         MemWideIFStreamTypeOut_col l_colProcOutStream;
-#pragma HLS DATA_PACK variable = l_colProcOutStream
-#pragma HLS STREAM variable = l_colProcOutStream depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = l_colProcOutStream
+#pragma HLS STREAM variable = l_colProcOutStream depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = l_colProcOutStream core = FIFO_LUTRAM
 
         MemWideIFStreamTypeOut_col l_invTranspBlkMatrixStream2;
-#pragma HLS DATA_PACK variable = l_invTranspBlkMatrixStream2
-#pragma HLS STREAM variable = l_invTranspBlkMatrixStream2 depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = l_invTranspBlkMatrixStream2
+#pragma HLS STREAM variable = l_invTranspBlkMatrixStream2 depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = l_invTranspBlkMatrixStream2 core = FIFO_LUTRAM
 
         FFTMemWideSliceProcessor<t_memWidth, t_numRows, t_numCols, t_numKernels, t_ssrFFTParamsRowProc,
@@ -141,8 +141,8 @@ struct FFT2d {
                                  t_colInstanceIDOffset, T_elemType_col>
             l_colProcObj;
 
-#pragma HLS DATAFLOW disable_start_propagation
-#pragma HLS interface ap_ctrl_none port = return
+#pragma HLS DATAFLOW // disable_start_propagation
+        //#pragma HLS interface ap_ctrl_none port = return
 
         // Perform transpose on blocks of data size : t_numKernel x t_numCols
         // Transpose is done block-wise on whole matrix
@@ -299,7 +299,7 @@ void fft2d(typename WideTypeDefs<t_memWidth, T_elemType>::WideIFStreamType& p_me
                >::WideIFStreamType& p_memWideStreamOut)
 
 {
-#pragma HLS INLINE
+    //#pragma HLS INLINE
     FFT2d<t_memWidth, t_numRows, t_numCols, t_numKernels, t_ssrFFTParamsRowProc, t_ssrFFTParamsColProc,
           t_rowInstanceIDOffset, t_colInstanceIDOffset, T_elemType>
         obj_fft2d;

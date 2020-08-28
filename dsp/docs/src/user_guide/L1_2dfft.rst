@@ -692,7 +692,7 @@ change the setting of environment variable **TA_PATH** to point to the installat
    source ${XILINX_VIVADO}/settings64.sh
 
 The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
-Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
+Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` and simulat, build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target.
 
 2-D FFT Tests 
 ----------------------------------------------------------
@@ -714,7 +714,7 @@ Once the environment settings are done an idividual test can be launched by goin
 
 Launching all the Tests Collectivey
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the test inside the repo. These scripts will try to find all the tests with this ``test``  folder and launh them one by one and print the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that setup up Vitis HLS compiler paths and should look something like this:
+Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the tests inside the repo. These scripts will try to find all the tests within this ``test``  folder and launch them one by one, printing the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that sets up Vitis HLS compiler paths and should look something like this:
 
 .. code-block:: bash
 
@@ -723,7 +723,7 @@ Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the te
    export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
    source ${XILINX_VIVADO}/settings64.sh
 
-Once the install paths are setup launch the bash script named "run_all_cosim_tests.sh" to run all the tests.
+Once the install paths are setup, launch the bash script named "run_all_cosim_tests.sh" to run all the tests.
 
 
 L1 Performance Benchmarks and QoR
