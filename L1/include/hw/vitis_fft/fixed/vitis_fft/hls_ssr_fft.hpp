@@ -41,8 +41,6 @@
 #include "vitis_fft/fft_complex.hpp"
 #include "vitis_fft/hls_ssr_fft_types.hpp"
 
-#if 1
-
 namespace xf {
 namespace dsp {
 namespace fft {
@@ -51,6 +49,7 @@ namespace fft {
  * Convert a 2-D array interface to hls::streaming interface for connection with next
  * stages which are all stream based.
  */
+// SSR_FFT_VIVADO_BEGIN
 template <int t_L, int t_R, typename T_in, typename T_out>
 void castArrayS2Streaming(T_in p_inData[t_R][t_L / t_R], hls::stream<SuperSampleContainer<t_R, T_out> >& p_outData) {
 #pragma HLS INLINE off
@@ -66,6 +65,22 @@ CONVERT_ARRAY_TO_STREAM_LOOP:
         p_outData.write(temp);
     }
 }
+// SSR_FFT_VIVADO_END
+template <int t_L, int t_R, typename T_in, typename T_out>
+void castArrayS2Streaming(hls::stream<T_in> p_inData[t_R], hls::stream<SuperSampleContainer<t_R, T_out> >& p_outData) {
+#pragma HLS INLINE off
+CONVERT_ARRAY_TO_STREAM_LOOP:
+    for (int t = 0; t < t_L / t_R; t++) {
+#pragma HLS PIPELINE II = 1 rewind
+        SuperSampleContainer<t_R, T_out> temp;
+
+        for (int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            temp.superSample[r] = p_inData[r].read();
+        }
+        p_outData.write(temp);
+    }
+}
 
 template <int t_L,
           int t_R,
@@ -74,14 +89,15 @@ template <int t_L,
           typename T_exp,
           typename T_twiddleInType,
           typename T_twiddleOutType>
-void twiddleFactorMulS2S(T_twiddleInType p_inData[t_R], T_twiddleOutType p_outData[t_R], T_exp p_twiddleTable[], int p_k
-
-                         ) {
-#pragma HLS INLINE
+void twiddleFactorMulS2S(T_twiddleInType p_inData[t_R],
+                         T_twiddleOutType p_outData[t_R],
+                         T_exp p_twiddleTable[],
+                         int p_k) {
+    //#pragma HLS INLINE
     typedef T_twiddleInType inType;
     typedef T_twiddleOutType outType;
-#pragma HLS DATA_PACK variable = p_outData
-#pragma HLS DATA_PACK variable = p_inData
+//#pragma HLS data_pack variable = p_outData
+//#pragma HLS data_pack variable = p_inData
 
 L_TWIDDLE_FACTOR_MUL:
     for (int n = 0; n < t_R; n++) {
@@ -120,7 +136,7 @@ void fftStageKernelS2S(T_complexExpTableType p_complexExpTable[],
                        T_fftTwiddleType p_twiddleTable[TwiddleTableLENTraits<t_L, t_R>::EXTENDED_TWIDDLE_TALBE_LENGTH],
                        hls::stream<SuperSampleContainer<t_R, T_in> >& p_fftReOrderedInput,
                        hls::stream<SuperSampleContainer<t_R, T_out> >& p_fftOutData_local) {
-#pragma HLS INLINE region recursive
+    //#pragma HLS INLINE recursive
 
     const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
     const unsigned int s = NO_OF_FFT_STAGES - stage;
@@ -134,37 +150,40 @@ L_FFTs_LOOP:
     L_BFLYs_LOOP:
         for (int k = 0; k < no_bflys_per_fft; k++) {
 #pragma HLS PIPELINE II = 1 rewind
+            if (p_fftReOrderedInput.empty()) {
+                k--;
+            } else {
+                T_in X_of_ns[t_R];
+                T_complexMulOutType complexExpMulOut[t_R];
 
-            T_in X_of_ns[t_R];
-            T_complexMulOutType complexExpMulOut[t_R];
+                //#pragma HLS data_pack variable = complexExpMulOut
 
-#pragma HLS DATA_PACK variable = complexExpMulOut
+                T_out bflyOutData[t_R];
 
-            T_out bflyOutData[t_R];
+                //#pragma HLS data_pack variable = bflyOutData
 
-#pragma HLS DATA_PACK variable = bflyOutData
-
-            SuperSampleContainer<t_R, T_in> temp_super_sample_in = p_fftReOrderedInput.read();
-        // The following loop should be unrolled for implementation
-        L_READ_R_IN_SAMPLES:
-            for (int n = 0; n < t_R; n++) {
+                SuperSampleContainer<t_R, T_in> temp_super_sample_in = p_fftReOrderedInput.read();
+            // The following loop should be unrolled for implementation
+            L_READ_R_IN_SAMPLES:
+                for (int n = 0; n < t_R; n++) {
 #pragma HLS UNROLL
-                X_of_ns[n] = temp_super_sample_in.superSample[n];
-            }
-            Butterfly<t_R> Butterfly_obj;
-            Butterfly_obj
-                .template calcButterFly<t_L, isFirstStage, t_scalingMode, transform_direction, butterfly_rnd_mode>(
-                    X_of_ns, bflyOutData, p_complexExpTable);
-            twiddleFactorMulS2S<t_L, t_R, transform_direction, butterfly_rnd_mode>(
-                bflyOutData, complexExpMulOut, p_twiddleTable, (k << (ssrFFTLog2<t_L / current_fft_length>::val)));
+                    X_of_ns[n] = temp_super_sample_in.superSample[n];
+                }
+                Butterfly<t_R> Butterfly_obj;
+                Butterfly_obj
+                    .template calcButterFly<t_L, isFirstStage, t_scalingMode, transform_direction, butterfly_rnd_mode>(
+                        X_of_ns, bflyOutData, p_complexExpTable);
+                twiddleFactorMulS2S<t_L, t_R, transform_direction, butterfly_rnd_mode>(
+                    bflyOutData, complexExpMulOut, p_twiddleTable, (k << (ssrFFTLog2<t_L / current_fft_length>::val)));
 
-            SuperSampleContainer<t_R, T_out> temp_super_sample_out;
-        L_WRITE_R_BUTTERFLY_OUT_SAMPLES:
-            for (int r = 0; r < t_R; r++) {
+                SuperSampleContainer<t_R, T_out> temp_super_sample_out;
+            L_WRITE_R_BUTTERFLY_OUT_SAMPLES:
+                for (int r = 0; r < t_R; r++) {
 #pragma HLS UNROLL
-                temp_super_sample_out.superSample[r] = complexExpMulOut[r];
+                    temp_super_sample_out.superSample[r] = complexExpMulOut[r];
+                }
+                p_fftOutData_local.write(temp_super_sample_out);
             }
-            p_fftOutData_local.write(temp_super_sample_out);
         } // butterflies loop
     }     // sub ffts loop
 }
@@ -182,7 +201,7 @@ template <int t_L,
 void fftStageKernelLastStageS2S(T_complexExpTableType p_complexExpTable[],
                                 hls::stream<SuperSampleContainer<t_R, T_in> >& p_fftReOrderedInput,
                                 hls::stream<SuperSampleContainer<t_R, T_out> >& p_fftOutData_local) {
-#pragma HLS INLINE region recursive
+    //#pragma HLS INLINE recursive
 
     const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
     const unsigned int s = NO_OF_FFT_STAGES - stage;
@@ -195,11 +214,13 @@ void fftStageKernelLastStageS2S(T_complexExpTableType p_complexExpTable[],
 L_FFTs_LOOP:
     for (int iter = 0; iter < iter_max_count; iter++) {
 #pragma HLS PIPELINE II = 1 rewind
-        {
+        if (p_fftReOrderedInput.empty()) {
+            iter--;
+        } else {
             T_in X_of_ns[t_R];
-#pragma HLS DATA_PACK variable = X_of_ns
+            //#pragma HLS data_pack variable = X_of_ns
             T_out bflyOutData[t_R];
-#pragma HLS DATA_PACK variable = bflyOutData
+            //#pragma HLS data_pack variable = bflyOutData
             SuperSampleContainer<t_R, T_in> temp_super_sample_in;
             temp_super_sample_in = p_fftReOrderedInput.read();
         L_READ_R_IN_SAMPLES:
@@ -226,8 +247,8 @@ L_FFTs_LOOP:
                 temp_super_sample_out.superSample[r] = bflyOutData[r];
             }
             p_fftOutData_local.write(temp_super_sample_out);
-        } // butterflies loop
-    }     // sub ffts loop
+        }
+    } // butterflies loop // sub ffts loop
 }
 
 // stage kernel is for generalized length FFT , where Length of not power of radix
@@ -249,7 +270,7 @@ void fftStageKernelFullForForkingS2S(
     hls::stream<SuperSampleContainer<t_R, T_out> >& p_fftOutDataLocal
 
     ) {
-#pragma HLS INLINE region recursive
+    //#pragma HLS INLINE recursive
 
     const int NO_OF_FFT_STAGES = (ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val) + 1;
     const unsigned int s = NO_OF_FFT_STAGES - stage;
@@ -267,35 +288,38 @@ L_FFTs_LOOP:
     L_BFLYs_LOOP:
         for (int k = 0; k < no_bflys_per_fft; k++) {
 #pragma HLS PIPELINE II = 1 rewind
+            if (p_fftReOrderedInput.empty()) {
+                k--;
+            } else {
+                T_in X_of_ns[t_R];
+                T_complexMulOutType complexExpMulOut[t_R];
+                //#pragma HLS data_pack variable = complexExpMulOut
+                T_out bflyOutData[t_R];
+                //#pragma HLS data_pack variable = bflyOutData
 
-            T_in X_of_ns[t_R];
-            T_complexMulOutType complexExpMulOut[t_R];
-#pragma HLS DATA_PACK variable = complexExpMulOut
-            T_out bflyOutData[t_R];
-#pragma HLS DATA_PACK variable = bflyOutData
-
-            // The following loop should be unrolled for implementation
-            SuperSampleContainer<t_R, T_in> temp_super_sample_in = p_fftReOrderedInput.read();
-        L_READ_R_IN_SAMPLES:
-            for (int n = 0; n < t_R; n++) {
+                // The following loop should be unrolled for implementation
+                SuperSampleContainer<t_R, T_in> temp_super_sample_in = p_fftReOrderedInput.read();
+            L_READ_R_IN_SAMPLES:
+                for (int n = 0; n < t_R; n++) {
 #pragma HLS UNROLL
-                X_of_ns[n] = temp_super_sample_in.superSample[n];
-            }
-            Butterfly<t_R> Butterfly_obj;
-            Butterfly_obj
-                .template calcButterFly<t_L, isFirstStage, t_scalingMode, transform_direction, butterfly_rnd_mode>(
-                    X_of_ns, bflyOutData, p_complexExpTable);
+                    X_of_ns[n] = temp_super_sample_in.superSample[n];
+                }
+                Butterfly<t_R> Butterfly_obj;
+                Butterfly_obj
+                    .template calcButterFly<t_L, isFirstStage, t_scalingMode, transform_direction, butterfly_rnd_mode>(
+                        X_of_ns, bflyOutData, p_complexExpTable);
 
-            twiddleFactorMulS2S<t_L, t_R, transform_direction, butterfly_rnd_mode>
+                twiddleFactorMulS2S<t_L, t_R, transform_direction, butterfly_rnd_mode>
 
-                (bflyOutData, complexExpMulOut, p_twiddleTable, k << (ssrFFTLog2<t_L / current_fft_length>::val));
-            SuperSampleContainer<t_R, T_out> temp_super_sample_out;
-        L_WRITE_R_BUTTERFLY_OUT_SAMPLES:
-            for (int r = 0; r < t_R; r++) {
+                    (bflyOutData, complexExpMulOut, p_twiddleTable, k << (ssrFFTLog2<t_L / current_fft_length>::val));
+                SuperSampleContainer<t_R, T_out> temp_super_sample_out;
+            L_WRITE_R_BUTTERFLY_OUT_SAMPLES:
+                for (int r = 0; r < t_R; r++) {
 #pragma HLS UNROLL
-                temp_super_sample_out.superSample[r] = complexExpMulOut[r];
+                    temp_super_sample_out.superSample[r] = complexExpMulOut[r];
+                }
+                p_fftOutDataLocal.write(temp_super_sample_out);
             }
-            p_fftOutDataLocal.write(temp_super_sample_out);
         } // butterflies loop
     }     // sub ffts loop
 }
@@ -327,10 +351,7 @@ struct KernelProcessForkS2S {
               typename T_out>
     void fftStageKernelLastStageFork(T_complexExpTableType p_complexExpTable[],
                                      hls::stream<SuperSampleContainer<t_R, T_in> >& p_fftReOrderedInput,
-
-                                     hls::stream<SuperSampleContainer<t_R, T_out> >& p_fftOutDataLocal
-
-                                     );
+                                     hls::stream<SuperSampleContainer<t_R, T_out> >& p_fftOutDataLocal);
 };
 
 template <int t_forkNumber, int t_forkingFactor, int t_instanceID>
@@ -351,19 +372,19 @@ void KernelProcessForkS2S<t_forkNumber, t_forkingFactor, t_instanceID>::fftStage
     hls::stream<SuperSampleContainer<t_R, T_out> >& p_fftOutDataLocal)
 
 {
-#pragma HLS INLINE
+#pragma HLS INLINE off
+#pragma HLS dataflow
 
     hls::stream<SuperSampleContainer<t_R / t_forkingFactor, T_in> > superSampleStreamArray_in[t_forkingFactor];
-
-#pragma HLS DATA_PACK variable = superSampleStreamArray_in
+//#pragma HLS data_pack variable = superSampleStreamArray_in
 #pragma HLS RESOURCE variable = superSampleStreamArray_in core = FIFO_LUTRAM
-#pragma HLS ARRAY_PARTITION variable = superSampleStreamArray_in complete dim = 1
+//#pragma HLS ARRAY_PARTITION variable = superSampleStreamArray_in complete dim = 1
 #pragma HLS STREAM variable = superSampleStreamArray_in depth = 8
 
     hls::stream<SuperSampleContainer<t_R / t_forkingFactor, T_out> > superSampleStreamArray_out[t_forkingFactor];
-#pragma HLS DATA_PACK variable = superSampleStreamArray_out
+//#pragma HLS data_pack variable = superSampleStreamArray_out
 #pragma HLS RESOURCE variable = superSampleStreamArray_out core = FIFO_LUTRAM
-#pragma HLS ARRAY_PARTITION variable = superSampleStreamArray_out complete dim = 1
+//#pragma HLS ARRAY_PARTITION variable = superSampleStreamArray_out complete dim = 1
 #pragma HLS STREAM variable = superSampleStreamArray_out depth = 8
 
     forkSuperSampleStream<t_L, t_R, t_forkingFactor, t_forkingFactor, T_in>(p_fftReOrderedInput,
@@ -426,6 +447,7 @@ class FFTStageClassS2S {
             T_stageOutType T_stageOutType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
 
@@ -444,13 +466,59 @@ class FFTStageClassS2S {
 
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 #pragma HLS STREAM variable = fftOutData_local depth = 8
 
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local2;
 
-#pragma HLS DATA_PACK variable = fftOutData_local2
+//#pragma HLS data_pack variable = fftOutData_local2
+#pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local2 depth = 8
+
+        fftStageKernelS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage, T_stageOutType>(
+            p_complexExpTable, p_twiddleTable, p_fftInData, fftOutData_local);
+
+        static const int t_isLargeMemFlag =
+            ((this_stage_pf * t_R > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
+
+        DataCommutationsS2Streaming<t_instanceID, stage, 10000, t_R, t_L, t_R, this_stage_pf, t_isLargeMemFlag> dcomObj;
+
+        dcomObj.template streamingDataCommutor<T_stageOutType>(fftOutData_local, fftOutData_local2);
+        FFTStageClassS2S<t_L, t_R, t_instanceID, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                         tp_output_data_order, stage - 1,
+                         t_complexExpTableType, // T2_expTabType,
+                         T_twiddleType,         // T2_twiddleType,
+                         T_stageOutType, T_fftOut>::fftStage(p_complexExpTable, p_twiddleTable, fftOutData_local2,
+                                                             p_fftOutData);
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
+
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+/// Stage Level inline pragma required for
+/// proper implementation of SSR FFT
+//#pragma HLS INLINE
+#pragma HLS dataflow disable_start_propagation
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+        const int this_stage_pf = ssrFFTPow<t_R, stage - 2>::val;
+    /****************************  Function call : Dataflow Pipeline Part 1 ****************************************/
+    L_FFT_DATAFLOW_PIPELINE_FUNC1:
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local2;
+
+//#pragma HLS data_pack variable = fftOutData_local2
 #pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
 #pragma HLS STREAM variable = fftOutData_local2 depth = 8
 
@@ -514,6 +582,7 @@ class FFTStageClassS2S<t_L,
         typename FFTScaledOutput<t_L, transform_direction, T_stageOutType>::T_scaledFFTOutputType T_scaledFFTOutputType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
 
@@ -532,7 +601,39 @@ class FFTStageClassS2S<t_L,
 
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+
+        fftStageKernelLastStageS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
+                                   T_stageOutType
+
+                                   >(p_complexExpTable, p_fftInData, fftOutData_local);
+        convertSuperStreamToArrayNScale<stage, transform_direction, 50000, t_L, t_R, T_stageOutType>(fftOutData_local,
+                                                                                                     p_fftOutData);
+
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
+
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+/// Stage Level inline pragma required for
+/// proper implementation of SSR FFT
+//#pragma HLS INLINE
+#pragma HLS dataflow
+        const int stage = 1;
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+    /****************************  Function call : Dataflow Pipeline Part 1 ****************************************/
+    L_FFT_DATAFLOW_PIPELINE_FUNC1:
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 #pragma HLS STREAM variable = fftOutData_local depth = 8
 
@@ -590,6 +691,7 @@ class FFTStageClassS2S<t_L,
         typename FFTScaledOutput<t_L, transform_direction, T_stageOutType>::T_scaledFFTOutputType T_scaledFFTOutputType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
                          hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
@@ -603,15 +705,60 @@ class FFTStageClassS2S<t_L,
     L_FFT_DATAFLOW_PIPELINE_FUNC1:
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 #pragma HLS STREAM variable = fftOutData_local depth = 8
 
-        T_scaledFFTOutputType fftOutData_local2[t_R][t_L / t_R];
+        hls::stream<T_scaledFFTOutputType> fftOutData_local2[t_R];
 
-#pragma HLS DATA_PACK variable = fftOutData_local2
+//#pragma HLS data_pack variable = fftOutData_local2
 #pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = fftOutData_local2 depth = 8 dim = 2
+#pragma HLS STREAM variable = fftOutData_local2 depth = 8
+
+        fftStageKernelLastStageS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
+                                   T_stageOutType>(p_complexExpTable, p_fftInData, fftOutData_local);
+
+        /*convertSuperStreamToArray<
+                                  stage,
+                                  50000,
+                                  t_L,
+                                  t_R,
+                                  T_stageOutType
+                                  >
+                                 (
+                                   fftOutData_local,
+                                   fftOutData_local2
+                                  );*/
+        convertSuperStreamToArrayNScale<stage, transform_direction, 50000, t_L, t_R, T_stageOutType>(fftOutData_local,
+                                                                                                     fftOutData_local2);
+        // last stage so write to fft output to buffer
+        digitReversedDataReOrder<t_L, t_R>(fftOutData_local2, p_fftOutData);
+
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+#pragma HLS dataflow
+        //#pragma HLS INLINE /// Stage Level inline pragma required for proper implementation of SSR FFT
+        const int stage = 1;
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+    /****************************  Function call : Dataflow Pipeline Part 1 ****************************************/
+    L_FFT_DATAFLOW_PIPELINE_FUNC1:
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+
+        hls::stream<T_scaledFFTOutputType> fftOutData_local2[t_R];
+
+//#pragma HLS data_pack variable = fftOutData_local2
+#pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local2 depth = 8
 
         fftStageKernelLastStageS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
                                    T_stageOutType>(p_complexExpTable, p_fftInData, fftOutData_local);
@@ -673,6 +820,7 @@ class FFTStageClassS2SWithTable {
             T_stageOutType T_stageOutType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
 
@@ -692,13 +840,57 @@ class FFTStageClassS2SWithTable {
 
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 #pragma HLS STREAM variable = fftOutData_local depth = 8
 
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local2;
 
-#pragma HLS DATA_PACK variable = fftOutData_local2
+//#pragma HLS data_pack variable = fftOutData_local2
+#pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local2 depth = 8
+
+        fftStageKernelS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage, T_stageOutType>(
+            p_complexExpTable, twiddleObj.twiddleTable, p_fftInData, fftOutData_local);
+
+        static const int t_isLargeMemFlag =
+            ((this_stage_pf * t_R > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
+
+        DataCommutationsS2Streaming<t_instanceID, stage, 10000, t_R, t_L, t_R, this_stage_pf, t_isLargeMemFlag> dcomObj;
+
+        dcomObj.template streamingDataCommutor<T_stageOutType>(fftOutData_local, fftOutData_local2);
+        FFTStageClassS2SWithTable<t_L, t_R, t_instanceID, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                  tp_output_data_order, stage - 1, t_complexExpTableType, T_twiddleType, T_stageOutType,
+                                  T_fftOut>::fftStage(p_complexExpTable, fftOutData_local2, p_fftOutData);
+    } // end ssr_fft_model function
+    // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+/// Stage Level inline pragma required for
+/// proper implementation of SSR FFT
+//#pragma HLS INLINE
+#pragma HLS dataflow disable_start_propagation
+        static TwiddleTableWrapper<t_L, t_R, t_instanceID, T_fftTwiddleType> twiddleObj;
+        //#pragma HLS RESOURCE variable = twiddleObj.twiddleTable core = ROM_nP_LUTRAM
+        //#pragma HLS RESOURCE variable=twiddleObj.twiddleTable
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+        const int this_stage_pf = ssrFFTPow<t_R, stage - 2>::val;
+    /****************************  Function call : Dataflow Pipeline Part 1 ****************************************/
+    L_FFT_DATAFLOW_PIPELINE_FUNC1:
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local2;
+
+//#pragma HLS data_pack variable = fftOutData_local2
 #pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
 #pragma HLS STREAM variable = fftOutData_local2 depth = 8
 
@@ -759,6 +951,7 @@ class FFTStageClassS2SWithTable<t_L,
         typename FFTScaledOutput<t_L, transform_direction, T_stageOutType>::T_scaledFFTOutputType T_scaledFFTOutputType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
 
                          hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
@@ -776,7 +969,38 @@ class FFTStageClassS2SWithTable<t_L,
 
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+
+        fftStageKernelLastStageS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
+                                   T_stageOutType
+
+                                   >(p_complexExpTable, p_fftInData, fftOutData_local);
+        convertSuperStreamToArrayNScale<stage, transform_direction, 50000, t_L, t_R, T_stageOutType>(fftOutData_local,
+                                                                                                     p_fftOutData);
+
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+/// Stage Level inline pragma required for
+/// proper implementation of SSR FFT
+//#pragma HLS INLINE
+#pragma HLS dataflow
+        const int stage = 1;
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+    /****************************  Function call : Dataflow Pipeline Part 1 ****************************************/
+    L_FFT_DATAFLOW_PIPELINE_FUNC1:
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 #pragma HLS STREAM variable = fftOutData_local depth = 8
 
@@ -834,6 +1058,7 @@ class FFTStageClassS2SWithTable<t_L,
         typename FFTScaledOutput<t_L, transform_direction, T_stageOutType>::T_scaledFFTOutputType T_scaledFFTOutputType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
                          T_fftOut p_fftOutData[t_R][t_L / t_R]) {
@@ -846,15 +1071,48 @@ class FFTStageClassS2SWithTable<t_L,
     L_FFT_DATAFLOW_PIPELINE_FUNC1:
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 #pragma HLS STREAM variable = fftOutData_local depth = 8
 
-        T_scaledFFTOutputType fftOutData_local2[t_R][t_L / t_R];
+        hls::stream<T_scaledFFTOutputType> fftOutData_local2[t_R];
 
-#pragma HLS DATA_PACK variable = fftOutData_local2
+//#pragma HLS data_pack variable = fftOutData_local2
 #pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = fftOutData_local2 depth = 8 dim = 2
+#pragma HLS STREAM variable = fftOutData_local2 depth = 8
+
+        fftStageKernelLastStageS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
+                                   T_stageOutType>(p_complexExpTable, p_fftInData, fftOutData_local);
+
+        convertSuperStreamToArrayNScale<stage, transform_direction, 50000, t_L, t_R, T_stageOutType>(fftOutData_local,
+                                                                                                     fftOutData_local2);
+        // last stage so write to fft output to buffer
+        digitReversedDataReOrder<t_L, t_R>(fftOutData_local2, p_fftOutData);
+
+    } // end ssr_fft_model function
+    // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+//#pragma HLS INLINE /// Stage Level inline pragma required for proper implementation of SSR FFT
+#pragma HLS dataflow
+        const int stage = 1;
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+    /****************************  Function call : Dataflow Pipeline Part 1 ****************************************/
+    L_FFT_DATAFLOW_PIPELINE_FUNC1:
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+
+        hls::stream<T_scaledFFTOutputType> fftOutData_local2[t_R];
+
+//#pragma HLS data_pack variable = fftOutData_local2
+#pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
+#pragma HLS STREAM variable = fftOutData_local2 depth = 8
 
         fftStageKernelLastStageS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
                                    T_stageOutType>(p_complexExpTable, p_fftInData, fftOutData_local);
@@ -912,6 +1170,7 @@ class FFTStageClassForkingOutputS2S {
             T_stageOutType T_stageOutType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          t_complexExpTableType p_complexExpTableForkingStage[],
                          T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
@@ -929,7 +1188,7 @@ class FFTStageClassForkingOutputS2S {
 
 #pragma HLS STREAM variable = fftOutData_local depth = 8
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
-#pragma HLS DATA_PACK variable = fftOutData_local
+        //#pragma HLS data_pack variable = fftOutData_local
 
         fftStageKernelFullForForkingS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
                                         T_stageOutType>(p_complexExpTable, p_twiddleTable, p_fftInData,
@@ -944,7 +1203,55 @@ class FFTStageClassForkingOutputS2S {
 
 #pragma HLS STREAM variable = fftOutData_local2 depth = 8
 #pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
-#pragma HLS DATA_PACK variable = fftOutData_local2
+        //#pragma HLS data_pack variable = fftOutData_local2
+
+        static const int t_isLargeMemFlag =
+            ((this_stage_pf * t_R > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
+
+        DataCommutationsS2Streaming<t_instanceID, stage, 20000, t_R, t_L, t_R, this_stage_pf, t_isLargeMemFlag> dcomObj;
+        dcomObj.template streamingDataCommutor<T_stageOutType>(fftOutData_local, fftOutData_local2);
+
+        FFTStageClassForkingOutputS2S<tp_outputForkingFactor, t_L, t_R, t_instanceID, t_scalingMode,
+                                      transform_direction, butterfly_rnd_mode, tp_output_data_order, stage - 1,
+                                      T_complexExpTableType, T_fftTwiddleType, T_stageOutType,
+                                      T_fftOut>::fftStage(p_complexExpTable, p_complexExpTableForkingStage,
+                                                          p_twiddleTable, fftOutData_local2, p_fftOutData);
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         t_complexExpTableType p_complexExpTableForkingStage[],
+                         T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+#pragma HLS dataflow disable_start_propagation
+        /// Stage Level inline pragma required
+        // for proper implementation of SSR FFT
+        //#pragma HLS INLINE
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+        const int this_stage_pf = (ssrFFTPow<t_R, stage - 2>::val) / tp_outputForkingFactor;
+    L_FFT_DATAFLOW_PIPELINE_FUNC1:
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+        //#pragma HLS data_pack variable = fftOutData_local
+
+        fftStageKernelFullForForkingS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
+                                        T_stageOutType>(p_complexExpTable, p_twiddleTable, p_fftInData,
+                                                        fftOutData_local);
+    //**RW Info :: Read and Written in order and declared
+    // as stream, p_fftInData declared as stream in top level
+
+    /************  Function call : Dataflow Pipeline Part 2 ************/
+    L_FFT_DATAFLOW_PIPELINE_FUNC2:
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local2;
+
+#pragma HLS STREAM variable = fftOutData_local2 depth = 8
+#pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
+        //#pragma HLS data_pack variable = fftOutData_local2
 
         static const int t_isLargeMemFlag =
             ((this_stage_pf * t_R > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
@@ -1015,6 +1322,7 @@ class FFTStageClassForkingOutputS2S<tp_outputForkingFactor,
         T_stageOutType T_stageOutType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          t_complexExpTableType p_complexExpTableForkingStage[],
                          T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
@@ -1037,7 +1345,7 @@ class FFTStageClassForkingOutputS2S<tp_outputForkingFactor,
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
 #pragma HLS STREAM variable = fftOutData_local depth = 8
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 
         /// Replaced for : fft_stage_kernel , because of stage
@@ -1055,21 +1363,95 @@ class FFTStageClassForkingOutputS2S<tp_outputForkingFactor,
 
 #pragma HLS STREAM variable = superStreamArray depth = 8
 #pragma HLS RESOURCE variable = superStreamArray core = FIFO_LUTRAM
-#pragma HLS ARRAY_PARTITION variable = superStreamArray complete dim = 1
-#pragma HLS DATA_PACK variable = superStreamArray
+        //#pragma HLS ARRAY_PARTITION variable = superStreamArray complete dim = 1
+        //#pragma HLS data_pack variable = superStreamArray
 
         hls::stream<SuperSampleContainer<t_R / tp_outputForkingFactor, T_stageOutType> >
             superStreamArray_out[tp_outputForkingFactor];
 
 #pragma HLS STREAM variable = superStreamArray_out depth = 8
 #pragma HLS RESOURCE variable = superStreamArray_out core = FIFO_LUTRAM
-#pragma HLS ARRAY_PARTITION variable = superStreamArray_out complete dim = 1
-#pragma HLS DATA_PACK variable = superStreamArray_out
+        //#pragma HLS ARRAY_PARTITION variable = superStreamArray_out complete dim = 1
+        //#pragma HLS data_pack variable = superStreamArray_out
 
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > mergedSuperStream;
 
 #pragma HLS STREAM variable = mergedSuperStream depth = 8
-#pragma HLS DATA_PACK variable = mergedSuperStream
+//#pragma HLS data_pack variable = mergedSuperStream
+#pragma HLS RESOURCE variable = mergedSuperStream core = FIFO_LUTRAM
+
+        forkSuperSampleStream<t_L, t_R, tp_outputForkingFactor, tp_outputForkingFactor, T_stageOutType>(
+            fftOutData_local, superStreamArray);
+        StreamingDataCommutorForkS2S<t_instanceID, 2, 30000, tp_outputForkingFactor, t_L, t_R, this_stage_pf,
+                                     tp_outputForkingFactor>
+            dcom_obj;
+        dcom_obj.template forkedCompute<T_stageOutType>(superStreamArray, superStreamArray_out);
+        mergeSuperSampleStreamNonInvertOut<t_L, t_R, tp_outputForkingFactor, tp_outputForkingFactor, T_stageOutType>(
+            superStreamArray_out, mergedSuperStream);
+
+        FFTStageClassForkingOutputS2S<tp_outputForkingFactor, t_L, t_R, t_instanceID, t_scalingMode,
+                                      transform_direction, butterfly_rnd_mode, tp_output_data_order, 2 - 1,
+                                      T_complexExpTableType, T_fftTwiddleType, T_stageOutType,
+                                      T_fftOut>::fftStage(p_complexExpTable, p_complexExpTableForkingStage,
+                                                          p_twiddleTable, mergedSuperStream, p_fftOutData);
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         t_complexExpTableType p_complexExpTableForkingStage[],
+                         T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+#pragma HLS dataflow
+        /// Stage Level inline pragma required
+        // for proper implementation of SSR FFT
+        //#pragma HLS INLINE
+        // +1 is added for rounding in this case, bcoz log L is not multple of log R
+
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val + 1;
+
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - 2;
+
+        const int this_stage_pf = (ssrFFTPow<t_R, 2 - 2>::val / tp_outputForkingFactor)
+                                      ? (ssrFFTPow<t_R, 2 - 2>::val / tp_outputForkingFactor)
+                                      : 1;
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+
+        /// Replaced for : fft_stage_kernel , because of stage
+        // calculation exceptions
+        fftStageKernelFullForForkingS2S<
+
+            t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, 2, T_stageOutType>(
+            p_complexExpTable, p_twiddleTable, p_fftInData, fftOutData_local);
+        //**RW Ifno :: Read and Written in order and declared
+        // as stream, p_fftInData declared as stream in top level
+        // Array of Streams to be used for forking the output
+        // into forkingFactor number of arrays
+        hls::stream<SuperSampleContainer<t_R / tp_outputForkingFactor, T_stageOutType> >
+            superStreamArray[tp_outputForkingFactor];
+
+#pragma HLS STREAM variable = superStreamArray depth = 8
+#pragma HLS RESOURCE variable = superStreamArray core = FIFO_LUTRAM
+        //#pragma HLS ARRAY_PARTITION variable = superStreamArray complete dim = 1
+        //#pragma HLS data_pack variable = superStreamArray
+
+        hls::stream<SuperSampleContainer<t_R / tp_outputForkingFactor, T_stageOutType> >
+            superStreamArray_out[tp_outputForkingFactor];
+
+#pragma HLS STREAM variable = superStreamArray_out depth = 8
+#pragma HLS RESOURCE variable = superStreamArray_out core = FIFO_LUTRAM
+        //#pragma HLS ARRAY_PARTITION variable = superStreamArray_out complete dim = 1
+        //#pragma HLS data_pack variable = superStreamArray_out
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > mergedSuperStream;
+
+#pragma HLS STREAM variable = mergedSuperStream depth = 8
+//#pragma HLS data_pack variable = mergedSuperStream
 #pragma HLS RESOURCE variable = mergedSuperStream core = FIFO_LUTRAM
 
         forkSuperSampleStream<t_L, t_R, tp_outputForkingFactor, tp_outputForkingFactor, T_stageOutType>(
@@ -1146,6 +1528,7 @@ class FFTStageClassForkingOutputS2S<tp_outputForkingFactor,
         T_stageOutType T_stageOutType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          t_complexExpTableType p_complexExpTableForkingStage[],
                          T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
@@ -1162,7 +1545,44 @@ class FFTStageClassForkingOutputS2S<tp_outputForkingFactor,
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
 #pragma HLS STREAM variable = fftOutData_local depth = 8
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+
+        /*
+         * ==================================================================================================================
+         * Last kernel stage that will create fork of PARFFT or kernel computation block without data commutors and
+         * complexMul
+         * ==================================================================================================================
+         */
+
+        KernelProcessForkS2S<tp_outputForkingFactor, tp_outputForkingFactor, t_instanceID> KernelProcessFork_obj;
+
+        KernelProcessFork_obj.template fftStageKernelLastStageFork<
+            t_L, t_R, t_instanceID, t_scalingMode, transform_direction, butterfly_rnd_mode, stage, T_stageOutType>(
+            p_complexExpTableForkingStage, p_fftInData, fftOutData_local);
+
+        convertSuperStreamToArrayNScale<stage, transform_direction, 59999, t_L, t_R>(fftOutData_local, p_fftOutData);
+
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         t_complexExpTableType p_complexExpTableForkingStage[],
+                         T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+#pragma HLS dataflow
+        //#pragma HLS INLINE
+        /// Stage Level inline pragma required
+        // for proper implementation of SSR FFT
+        const int stage = 1;
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 
         /*
@@ -1244,6 +1664,7 @@ class FFTStageClassForkingOutputS2S<tp_outputForkingFactor,
         typename FFTScaledOutput<t_L, transform_direction, T_stageOutType>::T_scaledFFTOutputType T_scaledFFTOutputType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          t_complexExpTableType p_complexExpTableForkingStage[],
                          T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
@@ -1260,12 +1681,50 @@ class FFTStageClassForkingOutputS2S<tp_outputForkingFactor,
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
 #pragma HLS STREAM variable = fftOutData_local depth = 8
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 
         hls::stream<SuperSampleContainer<t_R, T_scaledFFTOutputType> > fftOutData_scaled;
 #pragma HLS STREAM variable = fftOutData_scaled depth = 8
-#pragma HLS DATA_PACK variable = fftOutData_scaled
+//#pragma HLS data_pack variable = fftOutData_scaled
+#pragma HLS RESOURCE variable = fftOutData_scaled core = FIFO_LUTRAM
+        KernelProcessForkS2S<tp_outputForkingFactor, tp_outputForkingFactor, t_instanceID> KernelProcessFork_obj;
+
+        KernelProcessFork_obj.template fftStageKernelLastStageFork<
+            t_L, t_R, t_instanceID, t_scalingMode, transform_direction, butterfly_rnd_mode, stage, T_stageOutType>(
+
+            p_complexExpTableForkingStage, p_fftInData, fftOutData_local);
+
+        superStreamNScale<1, transform_direction, t_instanceID, t_L, t_R>(fftOutData_local, fftOutData_scaled);
+        OutputDataReOrder<(t_L) / (t_R * t_R)> OutputDataReOrder_obj;
+
+        OutputDataReOrder_obj.template digitReversal2Phase<t_L, t_R>(fftOutData_scaled, p_fftOutData);
+
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         t_complexExpTableType p_complexExpTableForkingStage[],
+                         T_twiddleType p_twiddleTable[TWIDDLE_TALBE_LENGTH],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+#pragma HLS dataflow
+        /// Stage Level inline pragma required
+        // for proper implementation of SSR FFT
+        //#pragma HLS INLINE
+        const int stage = 1;
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+
+        hls::stream<SuperSampleContainer<t_R, T_scaledFFTOutputType> > fftOutData_scaled;
+#pragma HLS STREAM variable = fftOutData_scaled depth = 8
+//#pragma HLS data_pack variable = fftOutData_scaled
 #pragma HLS RESOURCE variable = fftOutData_scaled core = FIFO_LUTRAM
         KernelProcessForkS2S<tp_outputForkingFactor, tp_outputForkingFactor, t_instanceID> KernelProcessFork_obj;
 
@@ -1319,6 +1778,7 @@ class FFTForkingStage {
             T_stageOutType T_stageOutType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          t_complexExpTableType p_complexExpTableForkingStage[],
                          hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
@@ -1339,7 +1799,7 @@ class FFTForkingStage {
 
 #pragma HLS STREAM variable = fftOutData_local depth = 8
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
-#pragma HLS DATA_PACK variable = fftOutData_local
+        //#pragma HLS data_pack variable = fftOutData_local
 
         fftStageKernelFullForForkingS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
                                         T_stageOutType>(p_complexExpTable, twiddleObj.twiddleTable, p_fftInData,
@@ -1354,7 +1814,57 @@ class FFTForkingStage {
 
 #pragma HLS STREAM variable = fftOutData_local2 depth = 8
 #pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
-#pragma HLS DATA_PACK variable = fftOutData_local2
+        //#pragma HLS data_pack variable = fftOutData_local2
+
+        static const int t_isLargeMemFlag =
+            ((this_stage_pf * t_R > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
+
+        DataCommutationsS2Streaming<t_instanceID, stage, 20000, t_R, t_L, t_R, this_stage_pf, t_isLargeMemFlag> dcomObj;
+        dcomObj.template streamingDataCommutor<T_stageOutType>(fftOutData_local, fftOutData_local2);
+
+        FFTForkingStage<tp_outputForkingFactor, t_L, t_R, t_instanceID, t_scalingMode, transform_direction,
+                        butterfly_rnd_mode, tp_output_data_order, stage - 1, T_complexExpTableType, T_fftTwiddleType,
+                        T_stageOutType, T_fftOut>::fftStage(p_complexExpTable, p_complexExpTableForkingStage,
+                                                            fftOutData_local2, p_fftOutData);
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         t_complexExpTableType p_complexExpTableForkingStage[],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+/// Stage Level inline pragma required
+// for proper implementation of SSR FFT
+//#pragma HLS INLINE
+#pragma HLS dataflow disable_start_propagation
+
+        static TwiddleTableWrapper<t_L, t_R, t_instanceID, T_fftTwiddleType> twiddleObj;
+        //#pragma HLS RESOURCE variable = twiddleObj.twiddleTable core = ROM_nP_LUTRAM
+
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+        const int this_stage_pf = (ssrFFTPow<t_R, stage - 2>::val) / tp_outputForkingFactor;
+    L_FFT_DATAFLOW_PIPELINE_FUNC1:
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+        //#pragma HLS data_pack variable = fftOutData_local
+
+        fftStageKernelFullForForkingS2S<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, stage,
+                                        T_stageOutType>(p_complexExpTable, twiddleObj.twiddleTable, p_fftInData,
+                                                        fftOutData_local);
+    //**RW Info :: Read and Written in order and declared
+    // as stream, p_fftInData declared as stream in top level
+
+    /************  Function call : Dataflow Pipeline Part 2 ************/
+    L_FFT_DATAFLOW_PIPELINE_FUNC2:
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local2;
+
+#pragma HLS STREAM variable = fftOutData_local2 depth = 8
+#pragma HLS RESOURCE variable = fftOutData_local2 core = FIFO_LUTRAM
+        //#pragma HLS data_pack variable = fftOutData_local2
 
         static const int t_isLargeMemFlag =
             ((this_stage_pf * t_R > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
@@ -1424,6 +1934,7 @@ class FFTForkingStage<tp_outputForkingFactor,
         T_stageOutType T_stageOutType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          t_complexExpTableType p_complexExpTableForkingStage[],
                          hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
@@ -1448,7 +1959,7 @@ class FFTForkingStage<tp_outputForkingFactor,
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
 #pragma HLS STREAM variable = fftOutData_local depth = 8
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 
         /// Replaced for : fft_stage_kernel , because of stage
@@ -1466,21 +1977,96 @@ class FFTForkingStage<tp_outputForkingFactor,
 
 #pragma HLS STREAM variable = superStreamArray depth = 8
 #pragma HLS RESOURCE variable = superStreamArray core = FIFO_LUTRAM
-#pragma HLS ARRAY_PARTITION variable = superStreamArray complete dim = 1
-#pragma HLS DATA_PACK variable = superStreamArray
+        //#pragma HLS ARRAY_PARTITION variable = superStreamArray complete dim = 1
+        //#pragma HLS data_pack variable = superStreamArray
 
         hls::stream<SuperSampleContainer<t_R / tp_outputForkingFactor, T_stageOutType> >
             superStreamArray_out[tp_outputForkingFactor];
 
 #pragma HLS STREAM variable = superStreamArray_out depth = 8
 #pragma HLS RESOURCE variable = superStreamArray_out core = FIFO_LUTRAM
-#pragma HLS ARRAY_PARTITION variable = superStreamArray_out complete dim = 1
-#pragma HLS DATA_PACK variable = superStreamArray_out
+        //#pragma HLS ARRAY_PARTITION variable = superStreamArray_out complete dim = 1
+        //#pragma HLS data_pack variable = superStreamArray_out
 
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > mergedSuperStream;
 
 #pragma HLS STREAM variable = mergedSuperStream depth = 8
-#pragma HLS DATA_PACK variable = mergedSuperStream
+//#pragma HLS data_pack variable = mergedSuperStream
+#pragma HLS RESOURCE variable = mergedSuperStream core = FIFO_LUTRAM
+
+        forkSuperSampleStream<t_L, t_R, tp_outputForkingFactor, tp_outputForkingFactor, T_stageOutType>(
+            fftOutData_local, superStreamArray);
+        StreamingDataCommutorForkS2S<t_instanceID, 2, 30000, tp_outputForkingFactor, t_L, t_R, this_stage_pf,
+                                     tp_outputForkingFactor>
+            dcom_obj;
+        dcom_obj.template forkedCompute<T_stageOutType>(superStreamArray, superStreamArray_out);
+        mergeSuperSampleStreamNonInvertOut<t_L, t_R, tp_outputForkingFactor, tp_outputForkingFactor, T_stageOutType>(
+            superStreamArray_out, mergedSuperStream);
+
+        FFTForkingStage<tp_outputForkingFactor, t_L, t_R, t_instanceID, t_scalingMode, transform_direction,
+                        butterfly_rnd_mode, tp_output_data_order, 2 - 1, T_complexExpTableType, T_fftTwiddleType,
+                        T_stageOutType, T_fftOut>::fftStage(p_complexExpTable, p_complexExpTableForkingStage,
+                                                            mergedSuperStream, p_fftOutData);
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         t_complexExpTableType p_complexExpTableForkingStage[],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+/// Stage Level inline pragma required
+// for proper implementation of SSR FFT
+//#pragma HLS INLINE
+#pragma HLS dataflow disable_start_propagation
+        static TwiddleTableWrapper<t_L, t_R, t_instanceID, T_fftTwiddleType> twiddleObj;
+        //#pragma HLS RESOURCE variable = twiddleObj.twiddleTable core = ROM_nP_LUTRAM
+
+        // +1 is added for rounding in this case, bcoz log L is not multple of log R
+
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val + 1;
+
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - 2;
+
+        const int this_stage_pf = (ssrFFTPow<t_R, 2 - 2>::val / tp_outputForkingFactor)
+                                      ? (ssrFFTPow<t_R, 2 - 2>::val / tp_outputForkingFactor)
+                                      : 1;
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+
+        /// Replaced for : fft_stage_kernel , because of stage
+        // calculation exceptions
+        fftStageKernelFullForForkingS2S<
+
+            t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode, 2, T_stageOutType>(
+            p_complexExpTable, twiddleObj.twiddleTable, p_fftInData, fftOutData_local);
+        //**RW Ifno :: Read and Written in order and declared
+        // as stream, p_fftInData declared as stream in top level
+        // Array of Streams to be used for forking the output
+        // into forkingFactor number of arrays
+        hls::stream<SuperSampleContainer<t_R / tp_outputForkingFactor, T_stageOutType> >
+            superStreamArray[tp_outputForkingFactor];
+
+#pragma HLS STREAM variable = superStreamArray depth = 8
+#pragma HLS RESOURCE variable = superStreamArray core = FIFO_LUTRAM
+        //#pragma HLS ARRAY_PARTITION variable = superStreamArray complete dim = 1
+        //#pragma HLS data_pack variable = superStreamArray
+
+        hls::stream<SuperSampleContainer<t_R / tp_outputForkingFactor, T_stageOutType> >
+            superStreamArray_out[tp_outputForkingFactor];
+
+#pragma HLS STREAM variable = superStreamArray_out depth = 8
+#pragma HLS RESOURCE variable = superStreamArray_out core = FIFO_LUTRAM
+        //#pragma HLS ARRAY_PARTITION variable = superStreamArray_out complete dim = 1
+        //#pragma HLS data_pack variable = superStreamArray_out
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > mergedSuperStream;
+
+#pragma HLS STREAM variable = mergedSuperStream depth = 8
+//#pragma HLS data_pack variable = mergedSuperStream
 #pragma HLS RESOURCE variable = mergedSuperStream core = FIFO_LUTRAM
 
         forkSuperSampleStream<t_L, t_R, tp_outputForkingFactor, tp_outputForkingFactor, T_stageOutType>(
@@ -1556,6 +2142,7 @@ class FFTForkingStage<tp_outputForkingFactor,
         T_stageOutType T_stageOutType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          t_complexExpTableType p_complexExpTableForkingStage[],
                          hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
@@ -1571,7 +2158,43 @@ class FFTForkingStage<tp_outputForkingFactor,
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
 #pragma HLS STREAM variable = fftOutData_local depth = 8
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+
+        /*
+         * ==================================================================================================================
+         * Last kernel stage that will create fork of PARFFT or kernel computation block without data commutors and
+         * complexMul
+         * ==================================================================================================================
+         */
+
+        KernelProcessForkS2S<tp_outputForkingFactor, tp_outputForkingFactor, t_instanceID> KernelProcessFork_obj;
+
+        KernelProcessFork_obj.template fftStageKernelLastStageFork<
+            t_L, t_R, t_instanceID, t_scalingMode, transform_direction, butterfly_rnd_mode, stage, T_stageOutType>(
+            p_complexExpTableForkingStage, p_fftInData, fftOutData_local);
+
+        convertSuperStreamToArrayNScale<stage, transform_direction, 59999, t_L, t_R>(fftOutData_local, p_fftOutData);
+
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         t_complexExpTableType p_complexExpTableForkingStage[],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+#pragma HLS dataflow
+        //#pragma HLS INLINE
+        /// Stage Level inline pragma required
+        // for proper implementation of SSR FFT
+        const int stage = 1;
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 
         /*
@@ -1653,6 +2276,7 @@ class FFTForkingStage<tp_outputForkingFactor,
         typename FFTScaledOutput<t_L, transform_direction, T_stageOutType>::T_scaledFFTOutputType T_scaledFFTOutputType;
 
    public:
+    // SSR_FFT_VIVADO_BEGIN
     static void fftStage(t_complexExpTableType p_complexExpTable[],
                          t_complexExpTableType p_complexExpTableForkingStage[],
                          hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
@@ -1668,12 +2292,49 @@ class FFTForkingStage<tp_outputForkingFactor,
         hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
 
 #pragma HLS STREAM variable = fftOutData_local depth = 8
-#pragma HLS DATA_PACK variable = fftOutData_local
+//#pragma HLS data_pack variable = fftOutData_local
 #pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
 
         hls::stream<SuperSampleContainer<t_R, T_scaledFFTOutputType> > fftOutData_scaled;
 #pragma HLS STREAM variable = fftOutData_scaled depth = 8
-#pragma HLS DATA_PACK variable = fftOutData_scaled
+//#pragma HLS data_pack variable = fftOutData_scaled
+#pragma HLS RESOURCE variable = fftOutData_scaled core = FIFO_LUTRAM
+        KernelProcessForkS2S<tp_outputForkingFactor, tp_outputForkingFactor, t_instanceID> KernelProcessFork_obj;
+
+        KernelProcessFork_obj.template fftStageKernelLastStageFork<
+            t_L, t_R, t_instanceID, t_scalingMode, transform_direction, butterfly_rnd_mode, stage, T_stageOutType>(
+
+            p_complexExpTableForkingStage, p_fftInData, fftOutData_local);
+
+        superStreamNScale<1, transform_direction, t_instanceID, t_L, t_R>(fftOutData_local, fftOutData_scaled);
+        OutputDataReOrder<(t_L) / (t_R * t_R)> OutputDataReOrder_obj;
+
+        OutputDataReOrder_obj.template digitReversal2Phase<t_L, t_R>(fftOutData_scaled, p_fftOutData);
+
+    } // end ssr_fft_model function
+      // SSR_FFT_VIVADO_END
+    static void fftStage(t_complexExpTableType p_complexExpTable[],
+                         t_complexExpTableType p_complexExpTableForkingStage[],
+                         hls::stream<SuperSampleContainer<t_R, T_stageInType> >& p_fftInData,
+                         hls::stream<T_fftOut> p_fftOutData[t_R]) {
+/// Stage Level inline pragma required
+// for proper implementation of SSR FFT
+//#pragma HLS INLINE
+#pragma HLS dataflow
+        const int stage = 1;
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        const int tp_log2R = ssrFFTLog2<t_R>::val;
+        const unsigned int s = NO_OF_FFT_STAGES - stage;
+
+        hls::stream<SuperSampleContainer<t_R, T_stageOutType> > fftOutData_local;
+
+#pragma HLS STREAM variable = fftOutData_local depth = 8
+//#pragma HLS data_pack variable = fftOutData_local
+#pragma HLS RESOURCE variable = fftOutData_local core = FIFO_LUTRAM
+
+        hls::stream<SuperSampleContainer<t_R, T_scaledFFTOutputType> > fftOutData_scaled;
+#pragma HLS STREAM variable = fftOutData_scaled depth = 8
+//#pragma HLS data_pack variable = fftOutData_scaled
 #pragma HLS RESOURCE variable = fftOutData_scaled core = FIFO_LUTRAM
         KernelProcessForkS2S<tp_outputForkingFactor, tp_outputForkingFactor, t_instanceID> KernelProcessFork_obj;
 
@@ -1714,7 +2375,7 @@ template <int t_L,
 void fftStageKernelLastStageOld(T_complexExpTableType complexExpTable[],
                                 T_in p_fftReOrderedInput[t_R][t_L / t_R],
                                 T_out p_fftOutDataLocal[t_R][t_L / t_R]) {
-#pragma HLS INLINE region recursive
+#pragma HLS INLINE recursive
     const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
     const unsigned int s = NO_OF_FFT_STAGES - stage;
     static const bool isFirstStage = (NO_OF_FFT_STAGES == stage);
@@ -1729,9 +2390,9 @@ L_FFTs_LOOP: // fft_length/(radix^(stage+1)) L=64,R=4, S=0 the FFTs=16
         {
 #pragma HLS LOOP_FLATTEN
             T_in X_of_ns[t_R];
-#pragma HLS DATA_PACK variable = X_of_ns
+            //#pragma HLS data_pack variable = X_of_ns
             T_out bflyOutData[t_R];
-#pragma HLS DATA_PACK variable = bflyOutData
+        //#pragma HLS data_pack variable = bflyOutData
         L_READ_R_IN_SAMPLES:
             for (int n = 0; n < t_R; n++) {
 #pragma HLS UNROLL
@@ -1760,6 +2421,7 @@ L_FFTs_LOOP: // fft_length/(radix^(stage+1)) L=64,R=4, S=0 the FFTs=16
 template <int t_isForkedFFT, int t_isTiny, int t_instanceID>
 struct FFTWrapper // Declaration only
 {
+    // SSR_FFT_VIVADO_BEGIN
     template <int t_L,
               int t_R,
               int iid,
@@ -1772,6 +2434,19 @@ struct FFTWrapper // Declaration only
               typename T_in,
               typename T_out>
     static void innerFFT(T_in p_fftInData[t_R][t_L / t_R], T_out p_fftOutData[t_R][t_L / t_R]);
+    // SSR_FFT_VIVADO_END
+    template <int t_L,
+              int t_R,
+              int iid,
+              scaling_mode_enum t_scalingMode,
+              transform_direction_enum transform_direction,
+              butterfly_rnd_mode_enum butterfly_rnd_mode,
+              fft_output_order_enum tp_output_data_order,
+              typename T_complexExpTableType,
+              typename T_fftTwiddleType,
+              typename T_in,
+              typename T_out>
+    static void innerFFT(hls::stream<T_in> p_fftInData[t_R], hls::stream<T_out> p_fftOutData[t_R]);
 };
 
 /*
@@ -1784,6 +2459,7 @@ template <int t_instanceID>
 struct FFTWrapper<0, 0, t_instanceID> // The Specialization when the FFT is not forked, tiny does not matter so this
                                       // specialization is used in all the cases
 {
+    // SSR_FFT_VIVADO_BEGIN
     template <int t_L,
               int t_R,
               int iid,
@@ -1799,8 +2475,8 @@ struct FFTWrapper<0, 0, t_instanceID> // The Specialization when the FFT is not 
 #pragma HLS INLINE
 #ifndef SSR_FFT_SEPERATE_REAL_IMAG_PARTS
 
-#pragma HLS DATA_PACK variable = p_fftInData
-#pragma HLS DATA_PACK variable = p_fftOutData
+//#pragma HLS data_pack variable = p_fftInData
+//#pragma HLS data_pack variable = p_fftOutData
 
 #endif
 
@@ -1833,12 +2509,65 @@ struct FFTWrapper<0, 0, t_instanceID> // The Specialization when the FFT is not 
         const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
         typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
         hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
-#pragma HLS DATA_PACK variable = p_fftInData_reOrdered
-#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
+//#pragma HLS data_pack variable = p_fftInData_reOrdered
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8
 #pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
         hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
-#pragma HLS DATA_PACK variable = casted_output
-#pragma HLS STREAM variable = casted_output depth = 8 dim = 2
+//#pragma HLS data_pack variable = casted_output
+#pragma HLS STREAM variable = casted_output depth = 8
+#pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
+
+        castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
+        // InputTransposeChainStreamingS2S<NO_OF_FFT_STAGES-1,1,iid> swapObj;
+        // swapObj.template swap<t_L,t_R,iid,1>(casted_output, p_fftInData_reOrdered);
+        // template <int t_instanceID, int stage,int sub_stage,int tp_fork_number,int t_L, int t_R, int t_PF, int
+        // tp_outputForkingFactor>
+        InputTransposeChainStreamingS2S<t_instanceID, NO_OF_FFT_STAGES - 1, 40000, t_R, t_L, t_R, 1, 1> swapObj;
+
+        swapObj.template swap<casted_type>(casted_output, p_fftInData_reOrdered);
+        FFTStageClassS2SWithTable<
+            t_L, t_R, iid, t_scalingMode, transform_direction, butterfly_rnd_mode, tp_output_data_order,
+            NO_OF_FFT_STAGES, T_complexExpTableType, T_fftTwiddleType,
+            typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType, T_complexExpTableType,
+                               casted_type, T_out>::T_stageInType,
+            typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                     casted_type>::T_FFTOutType>::fftStage(complexExpTable, p_fftInData_reOrdered,
+                                                                           p_fftOutData);
+    }
+    // SSR_FFT_VIVADO_END
+    template <int t_L,
+              int t_R,
+              int iid,
+              scaling_mode_enum t_scalingMode,
+              transform_direction_enum transform_direction,
+              butterfly_rnd_mode_enum butterfly_rnd_mode,
+              fft_output_order_enum tp_output_data_order,
+              typename T_complexExpTableType,
+              typename T_fftTwiddleType,
+              typename T_in,
+              typename T_out>
+    static void innerFFT(hls::stream<T_in> p_fftInData[t_R], hls::stream<T_out> p_fftOutData[t_R]) {
+#pragma HLS dataflow disable_start_propagation
+//#pragma HLS INLINE
+
+#ifndef __SYNTHESIS__
+        assert((t_R) == (ssrFFTPow<2, ssrFFTLog2<t_R>::val>::val)); // radix should be power of 2 always
+        assert((t_L) == (ssrFFTPow<2, ssrFFTLog2<t_L>::val>::val)); // Length of FFT should be power of 2 always
+#endif
+        T_complexExpTableType complexExpTable[ComplexExpTableLENTraits<0, t_L, t_R>::EXTENDED_EXP_TALBE_LENGTH];
+#pragma HLS ARRAY_PARTITION variable = complexExpTable complete dim = 1
+        ComplexExpTable<t_R, transform_direction, butterfly_rnd_mode,
+                        typename ComplexExpTableTraits<T_complexExpTableType>::t_complexExpTableType>::
+            initComplexExpTable(complexExpTable);
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
+        hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
+//#pragma HLS data_pack variable = p_fftInData_reOrdered
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8
+#pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
+        hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
+//#pragma HLS data_pack variable = casted_output
+#pragma HLS STREAM variable = casted_output depth = 8
 #pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
 
         castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
@@ -1864,6 +2593,7 @@ template <int t_instanceID>
 struct FFTWrapper<0, 1, t_instanceID> // The Specialization when the FFT is not forked, tiny does not matter so this
                                       // specialization is used in all the cases
 {
+    // SSR_FFT_VIVADO_BEGIN
     template <int t_L,
               int t_R,
               int iid,
@@ -1879,8 +2609,8 @@ struct FFTWrapper<0, 1, t_instanceID> // The Specialization when the FFT is not 
 #pragma HLS INLINE
 #ifndef SSR_FFT_SEPERATE_REAL_IMAG_PARTS
 
-#pragma HLS DATA_PACK variable = p_fftInData
-#pragma HLS DATA_PACK variable = p_fftOutData
+//#pragma HLS data_pack variable = p_fftInData
+//#pragma HLS data_pack variable = p_fftOutData
 
 #endif
 
@@ -1915,27 +2645,67 @@ struct FFTWrapper<0, 1, t_instanceID> // The Specialization when the FFT is not 
         const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
         typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
         hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
-#pragma HLS DATA_PACK variable = p_fftInData_reOrdered
+//#pragma HLS data_pack variable = p_fftInData_reOrdered
 #pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
 #pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
-        /*#ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
-         #pragma HLS ARRAY_PARTITION variable=p_fftInData_reOrdered complete dim=1
-         #else
-         #pragma HLS ARRAY_RESHAPE variable=p_fftInData_reOrdered complete dim=1
-         #endif*/
-
         hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
-#pragma HLS DATA_PACK variable = casted_output
+//#pragma HLS data_pack variable = casted_output
 #pragma HLS STREAM variable = casted_output depth = 8 dim = 2
 #pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
-        /*#pragma HLS ARRAY_PARTITION variable=casted_output complete dim=1
-         #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
-         #pragma HLS ARRAY_PARTITION variable=casted_output complete dim=1
-         #else
-         #pragma HLS ARRAY_RESHAPE variable=casted_output complete dim=1
-         #endif*/
         castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
+        InputTransposeChainStreamingS2S<t_instanceID, NO_OF_FFT_STAGES - 1, 50000, t_R, t_L, t_R, 1, 1> swapObj;
+        swapObj.template swap<casted_type>(casted_output, p_fftInData_reOrdered);
 
+        FFTStageClassS2S<t_L, t_R, iid, t_scalingMode, transform_direction, butterfly_rnd_mode, tp_output_data_order,
+                         NO_OF_FFT_STAGES,
+                         typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType,
+                                            T_complexExpTableType, casted_type, T_out>::T_expTabType,
+                         typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType,
+                                            T_complexExpTableType, casted_type, T_out>::T_twiddleType,
+                         typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType,
+                                            T_complexExpTableType, casted_type, T_out>::T_stageInType,
+                         typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                                  casted_type>::T_FFTOutType>::fftStage(complexExpTable,
+                                                                                        p_fftInData_reOrdered,
+                                                                                        p_fftOutData);
+    }
+    // SSR_FFT_VIVADO_END
+    template <int t_L,
+              int t_R,
+              int iid,
+              scaling_mode_enum t_scalingMode,
+              transform_direction_enum transform_direction,
+              butterfly_rnd_mode_enum butterfly_rnd_mode,
+              fft_output_order_enum tp_output_data_order,
+              typename T_complexExpTableType,
+              typename T_fftTwiddleType,
+              typename T_in,
+              typename T_out>
+    static void innerFFT(hls::stream<T_in> p_fftInData[t_R], hls::stream<T_out> p_fftOutData[t_R]) {
+//#pragma HLS INLINE
+#pragma HLS dataflow
+
+#ifndef __SYNTHESIS__
+        assert((t_R) == (ssrFFTPow<2, ssrFFTLog2<t_R>::val>::val)); // radix should be power of 2 always
+        assert((t_L) == (ssrFFTPow<2, ssrFFTLog2<t_L>::val>::val)); // Length of FFt should be power of 2 always
+#endif
+
+        T_complexExpTableType complexExpTable[ComplexExpTableLENTraits<0, t_L, t_R>::EXTENDED_EXP_TALBE_LENGTH];
+#pragma HLS ARRAY_PARTITION variable = complexExpTable complete dim = 1
+        ComplexExpTable<t_R, transform_direction, butterfly_rnd_mode,
+                        typename ComplexExpTableTraits<T_complexExpTableType>::t_complexExpTableType>::
+            initComplexExpTable(complexExpTable);
+        const int NO_OF_FFT_STAGES = ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val;
+        typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
+        hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
+//#pragma HLS data_pack variable = p_fftInData_reOrdered
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8
+#pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
+        hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
+//#pragma HLS data_pack variable = casted_output
+#pragma HLS STREAM variable = casted_output depth = 8
+#pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
+        castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
         InputTransposeChainStreamingS2S<t_instanceID, NO_OF_FFT_STAGES - 1, 50000, t_R, t_L, t_R, 1, 1> swapObj;
         swapObj.template swap<casted_type>(casted_output, p_fftInData_reOrdered);
 
@@ -1959,6 +2729,7 @@ struct FFTWrapper<0, 1, t_instanceID> // The Specialization when the FFT is not 
 // t_L not power of t_R
 template <int t_instanceID>
 struct FFTWrapper<1, 0, t_instanceID> {
+    // SSR_FFT_VIVADO_BEGIN
     template <int t_L,
               int t_R,
               int iid,
@@ -1975,8 +2746,8 @@ struct FFTWrapper<1, 0, t_instanceID> {
 
 #ifndef SSR_FFT_SEPERATE_REAL_IMAG_PARTS
 
-#pragma HLS DATA_PACK variable = p_fftInData
-#pragma HLS DATA_PACK variable = p_fftOutData
+//#pragma HLS data_pack variable = p_fftInData
+//#pragma HLS data_pack variable = p_fftOutData
 
 #endif
 
@@ -2012,18 +2783,75 @@ struct FFTWrapper<1, 0, t_instanceID> {
         const int NO_OF_FFT_STAGES = (ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val) + 1;
         typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
         hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
+//#pragma HLS data_pack variable = p_fftInData_reOrdered
 #pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
-#pragma HLS DATA_PACK variable = p_fftInData_reOrdered
 #pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
         hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
-#pragma HLS DATA_PACK variable = casted_output
+//#pragma HLS data_pack variable = casted_output
 #pragma HLS STREAM variable = casted_output depth = 8 dim = 2
 #pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
-        /*#ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
-         #pragma HLS ARRAY_PARTITION variable=casted_output complete dim=1
-         #else
-         #pragma HLS ARRAY_RESHAPE variable=casted_output complete dim=1
-         #endif*/
+        castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
+        InputTransposeChainStreamingS2S<t_instanceID, NO_OF_FFT_STAGES - 1, 60000, t_R, t_L, t_R, 1,
+                                        tp_outputForkingFactor>
+            swapObj;
+        swapObj.template swap<casted_type>(casted_output, p_fftInData_reOrdered);
+
+        FFTForkingStage<
+
+            tp_outputForkingFactor, t_L, t_R, iid, t_scalingMode, transform_direction, butterfly_rnd_mode,
+            tp_output_data_order, NO_OF_FFT_STAGES,
+            typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType, T_complexExpTableType,
+                               casted_type, T_out>::T_expTabType,
+            typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType, T_complexExpTableType,
+                               casted_type, T_out>::T_twiddleType,
+            typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType, T_complexExpTableType,
+                               casted_type, T_out>::T_stageInType,
+            typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                     casted_type>::T_FFTOutType>::fftStage(complexExpTable,
+                                                                           complexExpTable_forkingStage,
+                                                                           p_fftInData_reOrdered, p_fftOutData);
+    }
+    // SSR_FFT_VIVADO_END
+    template <int t_L,
+              int t_R,
+              int iid,
+              scaling_mode_enum t_scalingMode,
+              transform_direction_enum transform_direction,
+              butterfly_rnd_mode_enum butterfly_rnd_mode,
+              fft_output_order_enum tp_output_data_order,
+              typename T_complexExpTableType,
+              typename T_fftTwiddleType,
+              typename T_in,
+              typename T_out>
+    static void innerFFT(hls::stream<T_in> p_fftInData[t_R], hls::stream<T_out> p_fftOutData[t_R]) {
+//#pragma HLS INLINE
+#pragma HLS dataflow disable_start_propagation
+
+        const int tp_outputForkingFactor =
+            ssrFFTPow<t_R, ((ssrFFTLog2<t_L>::val) / (ssrFFTLog2<t_R>::val) + 1)>::val / (t_L);
+        T_complexExpTableType
+            complexExpTable[ComplexExpTableLENTraits<tp_outputForkingFactor, t_L, t_R>::EXTENDED_EXP_TALBE_LENGTH];
+#pragma HLS ARRAY_PARTITION variable = complexExpTable complete dim = 1
+        T_complexExpTableType complexExpTable_forkingStage[ComplexExpTableLENTraits<tp_outputForkingFactor, t_L,
+                                                                                    t_R>::EXTENDED_EXP_TALBE_LENGTH];
+#pragma HLS ARRAY_PARTITION variable = complexExpTable_forkingStage complete dim = 1
+        ComplexExpTable<ComplexExpTableLENTraits<tp_outputForkingFactor, t_L, t_R>::EXP_TALBE_LENGTH,
+                        transform_direction, butterfly_rnd_mode,
+                        typename ComplexExpTableTraits<T_complexExpTableType>::t_complexExpTableType>::
+            initComplexExpTable(complexExpTable);
+        ComplexExpTableLastStage<
+            t_R, transform_direction, butterfly_rnd_mode,
+            ComplexExpTableLENTraits<tp_outputForkingFactor, t_L, t_R>::EXP_TALBE_LENGTH_LAST_STAGE,
+            typename ComplexExpTableTraits<T_complexExpTableType>::t_complexExpTableType>::
+            initComplexExpTable(complexExpTable_forkingStage);
+        const int NO_OF_FFT_STAGES = (ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val) + 1;
+        typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
+        hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8
+#pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
+        hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
+#pragma HLS STREAM variable = casted_output depth = 8
+#pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
         castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
         InputTransposeChainStreamingS2S<t_instanceID, NO_OF_FFT_STAGES - 1, 60000, t_R, t_L, t_R, 1,
                                         tp_outputForkingFactor>
@@ -2049,6 +2877,7 @@ struct FFTWrapper<1, 0, t_instanceID> {
 
 template <int t_instanceID>
 struct FFTWrapper<1, 1, t_instanceID> {
+    // SSR_FFT_VIVADO_BEGIN
     template <int t_L,
               int t_R,
               int iid,
@@ -2064,8 +2893,8 @@ struct FFTWrapper<1, 1, t_instanceID> {
 #pragma HLS INLINE
 #ifndef SSR_FFT_SEPERATE_REAL_IMAG_PARTS
 //////////////////////////////////////////////
-#pragma HLS DATA_PACK variable = p_fftInData
-#pragma HLS DATA_PACK variable = p_fftOutData
+//#pragma HLS data_pack variable = p_fftInData
+//#pragma HLS data_pack variable = p_fftOutData
 /////////////////////////////////////////////
 #endif
 
@@ -2093,7 +2922,7 @@ struct FFTWrapper<1, 1, t_instanceID> {
         T_complexExpTableType complexExpTable_forkingStage[ComplexExpTableLENTraits<tp_outputForkingFactor, t_L,
                                                                                     t_R>::EXTENDED_EXP_TALBE_LENGTH];
 
-#pragma HLS DATA_PACK variable = complexExpTable_forkingStage
+//#pragma HLS data_pack variable = complexExpTable_forkingStage
 #pragma HLS ARRAY_PARTITION variable = complexExpTable_forkingStage complete dim = 1
 
         ComplexExpTable<ComplexExpTableLENTraits<tp_outputForkingFactor, t_L, t_R>::EXP_TALBE_LENGTH,
@@ -2110,12 +2939,89 @@ struct FFTWrapper<1, 1, t_instanceID> {
         typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
 
         hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
+//#pragma HLS data_pack variable = p_fftInData_reOrdered
 #pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
-#pragma HLS DATA_PACK variable = p_fftInData_reOrdered
 #pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
 
         hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
-#pragma HLS DATA_PACK variable = casted_output
+//#pragma HLS data_pack variable = casted_output
+#pragma HLS STREAM variable = casted_output depth = 8 dim = 2
+#pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
+
+        /* The casted output cannot be reshaped in this case because it is the TINY case where the
+         * casted output will be directly consumed by multiple data commuter processes and when it
+         * re-shaped it will produced data-flow error of "multiple functions have read accesses to the streamed
+         * variable"
+         */
+
+        castArrayS2Streaming<t_L, t_R, T_in, casted_type>(p_fftInData, casted_output);
+
+        InputTransposeChainStreamingS2S<t_instanceID, NO_OF_FFT_STAGES - 1, 70000, t_R, t_L, t_R, 1,
+                                        tp_outputForkingFactor>
+            swapObj;
+        swapObj.template swap<casted_type>(casted_output, p_fftInData_reOrdered);
+
+        FFTForkingStage<tp_outputForkingFactor, t_L, t_R, iid, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                        tp_output_data_order, NO_OF_FFT_STAGES,
+                        typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType,
+                                           T_complexExpTableType, casted_type, T_out>::T_expTabType,
+                        typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType,
+                                           T_complexExpTableType, casted_type, T_out>::T_twiddleType,
+                        typename FFTTraits<t_scalingMode, t_L, t_R, NO_OF_FFT_STAGES, T_fftTwiddleType,
+                                           T_complexExpTableType, casted_type, T_out>::T_stageInType,
+                        typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                                 casted_type>::T_FFTOutType>::fftStage(complexExpTable,
+                                                                                       complexExpTable_forkingStage,
+                                                                                       // twiddleTable,
+                                                                                       p_fftInData_reOrdered,
+                                                                                       p_fftOutData);
+    }
+    // SSR_FFT_VIVADO_END
+    template <int t_L,
+              int t_R,
+              int iid,
+              scaling_mode_enum t_scalingMode,
+              transform_direction_enum transform_direction,
+              butterfly_rnd_mode_enum butterfly_rnd_mode,
+              fft_output_order_enum tp_output_data_order,
+              typename T_complexExpTableType,
+              typename T_fftTwiddleType,
+              typename T_in,
+              typename T_out>
+    static void innerFFT(hls::stream<T_in> p_fftInData[t_R], hls::stream<T_out> p_fftOutData[t_R]) {
+//#pragma HLS INLINE
+#pragma HLS dataflow disable_start_propagation
+
+        const int tp_outputForkingFactor =
+            ssrFFTPow<t_R, ((ssrFFTLog2<t_L>::val) / (ssrFFTLog2<t_R>::val) + 1)>::val / (t_L);
+        T_complexExpTableType
+            complexExpTable[ComplexExpTableLENTraits<tp_outputForkingFactor, t_L, t_R>::EXTENDED_EXP_TALBE_LENGTH];
+#pragma HLS ARRAY_PARTITION variable = complexExpTable complete dim = 1
+        T_complexExpTableType complexExpTable_forkingStage[ComplexExpTableLENTraits<tp_outputForkingFactor, t_L,
+                                                                                    t_R>::EXTENDED_EXP_TALBE_LENGTH];
+//#pragma HLS data_pack variable = complexExpTable_forkingStage
+#pragma HLS ARRAY_PARTITION variable = complexExpTable_forkingStage complete dim = 1
+
+        ComplexExpTable<ComplexExpTableLENTraits<tp_outputForkingFactor, t_L, t_R>::EXP_TALBE_LENGTH,
+                        transform_direction, butterfly_rnd_mode,
+                        typename ComplexExpTableTraits<T_complexExpTableType>::t_complexExpTableType>::
+            initComplexExpTable(complexExpTable);
+        ComplexExpTableLastStage<
+            t_R, transform_direction, butterfly_rnd_mode,
+            ComplexExpTableLENTraits<tp_outputForkingFactor, t_L, t_R>::EXP_TALBE_LENGTH_LAST_STAGE,
+            typename ComplexExpTableTraits<T_complexExpTableType>::t_complexExpTableType>::
+            initComplexExpTable(complexExpTable_forkingStage);
+        const int NO_OF_FFT_STAGES = (ssrFFTLog2<t_L>::val / ssrFFTLog2<t_R>::val) + 1;
+
+        typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
+
+        hls::stream<SuperSampleContainer<t_R, casted_type> > p_fftInData_reOrdered;
+//#pragma HLS data_pack variable = p_fftInData_reOrdered
+#pragma HLS STREAM variable = p_fftInData_reOrdered depth = 8 dim = 2
+#pragma HLS RESOURCE variable = p_fftInData_reOrdered core = FIFO_LUTRAM
+
+        hls::stream<SuperSampleContainer<t_R, casted_type> > casted_output;
+//#pragma HLS data_pack variable = casted_output
 #pragma HLS STREAM variable = casted_output depth = 8 dim = 2
 #pragma HLS RESOURCE variable = casted_output core = FIFO_LUTRAM
 
@@ -2269,7 +3175,7 @@ void fftKernelInputAdapter(
     T_in p_inData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R],
     T_in p_outDataStream[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R]) {
 #pragma HLS INLINE off
-#pragma HLS DATA_PACK variable = p_inData
+//#pragma HLS data_pack variable = p_inData
 #pragma HLS ARRAY_RESHAPE variable = p_inData complete dim = 1
     const static int T = ssr_fft_param_struct::N / ssr_fft_param_struct::R;
     const static int R = ssr_fft_param_struct::R;
@@ -2299,7 +3205,7 @@ void fftKernelOutputAdapter(
                              typename FFTInputTraits<T_in>::T_castedType>::T_FFTOutType
         p_outData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R]) {
 #pragma HLS INLINE off
-#pragma HLS DATA_PACK variable = p_outData
+//#pragma HLS data_pack variable = p_outData
 #pragma HLS ARRAY_RESHAPE variable = p_outData complete dim = 1
 
     const static int T = ssr_fft_param_struct::N / ssr_fft_param_struct::R;
@@ -2313,6 +3219,8 @@ void fftKernelOutputAdapter(
     }
 }
 
+#if 0
+// SSR_FFT_VIVADO_BEGIN
 template <typename ssr_fft_param_struct, typename T_in>
 void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R],
          typename FFTIOTypes<ssr_fft_param_struct, T_in>::T_outType
@@ -2352,13 +3260,83 @@ void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr
                            typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
                                                     casted_type>::T_FFTOutType>(p_fftInData, p_fftOutData);
 }
+// SSR_FFT_VIVADO_END
+#endif
+template <int t_L, int t_R, typename T_in>
+void array2Stream(T_in arrayIn[t_R][t_L / t_R], hls::stream<T_in> strmOut[t_R]) {
+    for (int i = 0; i < t_L / t_R; i++) {
+        for (int j = 0; j < t_R; j++) {
+#pragma HLS pipeline II = 1
+            strmOut[j].write(arrayIn[j][i]);
+        }
+    }
+}
+template <int t_L, int t_R, typename T_out>
+void stream2Array(hls::stream<T_out> strmIn[t_R], T_out arrayOut[t_R][t_L / t_R]) {
+    for (int i = 0; i < t_L / t_R; i++) {
+        for (int j = 0; j < t_R; j++) {
+#pragma HLS pipeline II = 1
+            arrayOut[j][i] = strmIn[j].read();
+        }
+    }
+}
+template <typename ssr_fft_param_struct, typename T_in>
+void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R],
+         typename FFTIOTypes<ssr_fft_param_struct, T_in>::T_outType
+             p_fftOutData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R]) {
+    enum { FIFO_SIZE = ssr_fft_param_struct::N / ssr_fft_param_struct::R };
+    //#pragma HLS INLINE
+    //#pragma HLS DATAFLOW  disable_start_propagation
+
+    static const int t_L = ssr_fft_param_struct::N;
+    static const int t_R = ssr_fft_param_struct::R;
+    static const scaling_mode_enum t_scalingMode = ssr_fft_param_struct::scaling_mode;
+    static const fft_output_order_enum tp_output_data_order = ssr_fft_param_struct::output_data_order;
+    static const int tw_WL = ssr_fft_param_struct::twiddle_table_word_length;
+    static const int tw_IL = ssr_fft_param_struct::twiddle_table_intger_part_length;
+    static const int default_t_instanceID = ssr_fft_param_struct::default_t_instanceID;
+    static const transform_direction_enum transform_direction = ssr_fft_param_struct::transform_direction;
+    static const butterfly_rnd_mode_enum butterfly_rnd_mode = ssr_fft_param_struct::butterfly_rnd_mode;
+    typedef typename FFTInputTraits<T_in>::T_castedType casted_type;
+
+#ifndef __SYNTHESIS__
+    checkFFTparams<t_L, t_R, tw_WL, tw_IL>();
+// std::cout<<"SRR FFT INSTANCE_ID = "<<default_t_instanceID<<std::endl;
+#endif
+    typedef typename InputBasedTwiddleTraits<ssr_fft_param_struct, casted_type>::T_twiddleType T_fftTwiddleType;
+    typedef typename InputBasedTwiddleTraits<ssr_fft_param_struct, casted_type>::T_expTabType T_complexExpTableType;
+
+#ifndef __SYNTHESIS__
+    assert((t_R) == (ssrFFTPow<2, ssrFFTLog2<t_R>::val>::val)); // radix should be power of 2 always
+    assert((t_L) == (ssrFFTPow<2, ssrFFTLog2<t_L>::val>::val)); // Length of FFt should be power of 2 always
+#endif
+    hls::stream<T_in> fftInStrm[t_R];
+#pragma HLS stream variable = fftInStrm depth = FIFO_SIZE
+    hls::stream<typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                         casted_type>::T_FFTOutType>
+        fftOutStrm[t_R];
+#pragma HLS stream variable = fftOutStrm depth = FIFO_SIZE
+    array2Stream<t_L, t_R, T_in>(p_fftInData, fftInStrm);
+    FFTWrapper<(((ssrFFTLog2<t_L>::val) % (ssrFFTLog2<t_R>::val)) > 0), (t_L) < ((t_R * t_R)), default_t_instanceID>
+        ssr_fft_wrapper_obj;
+    // The 1st template arguments select : if the FFT is forked , if it is then a different architecture is required
+    // 2nd template argument select if the L < (t_R^2) , which requires removal of interface bundle pragma
+    ssr_fft_wrapper_obj
+        .template innerFFT<t_L, t_R, default_t_instanceID, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                           tp_output_data_order, T_complexExpTableType, T_fftTwiddleType, T_in,
+                           typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                                    casted_type>::T_FFTOutType>(fftInStrm, fftOutStrm);
+    stream2Array<t_L, t_R, typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                                    casted_type>::T_FFTOutType>(fftOutStrm, p_fftOutData);
+}
 
 template <typename ssr_fft_param_struct, int t_instanceID, typename T_in>
 void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R],
          typename FFTIOTypes<ssr_fft_param_struct, T_in>::T_outType
              p_fftOutData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R]) {
-#pragma HLS INLINE
-#pragma HLS DATAFLOW disable_start_propagation
+    enum { FIFO_SIZE = ssr_fft_param_struct::N / ssr_fft_param_struct::R };
+    //#pragma HLS INLINE
+    //#pragma HLS DATAFLOW disable_start_propagation
 
     static const int t_L = ssr_fft_param_struct::N;
     static const int t_R = ssr_fft_param_struct::R;
@@ -2381,6 +3359,13 @@ void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr
     assert((t_R) == (ssrFFTPow<2, ssrFFTLog2<t_R>::val>::val)); // radix should be power of 2 always
     assert((t_L) == (ssrFFTPow<2, ssrFFTLog2<t_L>::val>::val)); // Length of FFt should be power of 2 always
 #endif
+    hls::stream<T_in> fftInStrm[t_R];
+#pragma HLS stream variable = fftInStrm depth = FIFO_SIZE
+    hls::stream<typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                         casted_type>::T_FFTOutType>
+        fftOutStrm[t_R];
+#pragma HLS stream variable = fftOutStrm depth = FIFO_SIZE
+    array2Stream<t_L, t_R, T_in>(p_fftInData, fftInStrm);
     FFTWrapper<(((ssrFFTLog2<t_L>::val) % (ssrFFTLog2<t_R>::val)) > 0), (t_L) < ((t_R * t_R)), t_instanceID>
         ssr_fft_wrapper_obj;
     // The 1st template arguments select : if the FFT is forked , if it is then a different architecture is required
@@ -2389,7 +3374,9 @@ void fft(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr
         .template innerFFT<t_L, t_R, t_instanceID, t_scalingMode, transform_direction, butterfly_rnd_mode,
                            tp_output_data_order, T_complexExpTableType, T_fftTwiddleType, T_in,
                            typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
-                                                    casted_type>::T_FFTOutType>(p_fftInData, p_fftOutData);
+                                                    casted_type>::T_FFTOutType>(fftInStrm, fftOutStrm);
+    stream2Array<t_L, t_R, typename FFTOutputTraits<t_L, t_R, t_scalingMode, transform_direction, butterfly_rnd_mode,
+                                                    casted_type>::T_FFTOutType>(fftOutStrm, p_fftOutData);
 }
 
 template <typename ssr_fft_param_struct, typename T_in>
@@ -2402,24 +3389,23 @@ void fftKernel(T_in p_fftInData[ssr_fft_param_struct::R][ssr_fft_param_struct::N
                                         typename FFTInputTraits<T_in>::T_castedType>::T_FFTOutType
                    p_fftOutData[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R]) {
 #pragma HLS INLINE
-#pragma HLS DATAFLOW disable_start_propagation
-    const static int N = ssr_fft_param_struct::N;
-    const static int R = ssr_fft_param_struct::R;
+    //#pragma HLS DATAFLOW disable_start_propagation
+    // const static int N = ssr_fft_param_struct::N;
+    // const static int R = ssr_fft_param_struct::R;
 
-    T_in inData_stream[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R];
-    typename FFTOutputTraits<N, R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction,
-                             ssr_fft_param_struct::butterfly_rnd_mode,
-                             typename FFTInputTraits<T_in>::T_castedType>::T_FFTOutType
-        outData_stream[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R];
-    fftKernelInputAdapter<ssr_fft_param_struct, T_in>(p_fftInData, inData_stream);
-    fft<ssr_fft_param_struct, T_in>(inData_stream, outData_stream);
-    fftKernelOutputAdapter<ssr_fft_param_struct, T_in>(outData_stream, p_fftOutData);
+    // T_in inData_stream[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R];
+    // typename FFTOutputTraits<N, R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction,
+    //                         ssr_fft_param_struct::butterfly_rnd_mode,
+    //                         typename FFTInputTraits<T_in>::T_castedType>::T_FFTOutType
+    //    outData_stream[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R];
+    // fftKernelInputAdapter<ssr_fft_param_struct, T_in>(p_fftInData, inData_stream);
+    // fft<ssr_fft_param_struct, T_in>(inData_stream, outData_stream);
+    // fftKernelOutputAdapter<ssr_fft_param_struct, T_in>(outData_stream, p_fftOutData);
+    fft<ssr_fft_param_struct, T_in>(p_fftInData, p_fftOutData);
 }
 
 } // namespace fft
 } // namespace dsp
 } // namespace xf
-
-#endif
 
 #endif // !HLS_SSR_FFT_H

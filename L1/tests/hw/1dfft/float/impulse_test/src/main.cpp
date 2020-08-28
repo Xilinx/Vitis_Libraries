@@ -18,6 +18,8 @@
 #include "top_module.hpp"
 #include <iostream>
 
+#define NUM_TEST 1
+
 int main(int argc, char** argv) {
     T_in inData[SSR][FFT_LEN / SSR];
     T_out outData[SSR][FFT_LEN / SSR];
@@ -29,7 +31,7 @@ int main(int argc, char** argv) {
                 inData[r][t] = 0;
         }
     }
-    for (int t = 0; t < 4; ++t) {
+    for (int t = 0; t < NUM_TEST; ++t) {
         // Added Dummy loop iterations
         // to make II measurable in cosim
         fft_top(inData, outData);

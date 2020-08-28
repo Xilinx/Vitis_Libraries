@@ -26,7 +26,7 @@
 #include "utils/sorting.hpp"
 
 void fft_top(T_SSR_FFT_IN inD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R], T_SSR_FFT_OUT outD[SSR_FFT_R][SSR_FFT_L / SSR_FFT_R]) {
-#pragma HLS TOP
+    //#pragma HLS TOP
     xf::dsp::fft::fft<ssr_fft_params>(inD, outD);
 }
 

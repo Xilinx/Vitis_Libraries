@@ -38,7 +38,7 @@
             "src/main_2d_fft_test.cpp", 
             "src/top_2d_fft_test.cpp"
         ], 
-                "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas", 
         "ldflags": "", 
         "argv": {}, 
         "stdmath": false
@@ -52,7 +52,13 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 32768, 
-                "max_time_min": 470
+                "max_time_min": {
+                    "hls_vivado_syn": 470, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 470, 
+                    "hls_vivado_impl": 470, 
+                    "hls_csynth": 60
+                }
             }
         ], 
         "targets": [
