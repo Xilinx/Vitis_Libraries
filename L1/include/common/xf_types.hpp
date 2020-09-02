@@ -25,6 +25,15 @@
 #include "xf_params.hpp"
 #include <stdint.h>
 
+
+template <int N>
+struct floatn {
+    float f[N];
+    float& operator[](int idx) { return f[idx]; }
+    const float& operator[](int idx) const { return f[idx]; }
+};
+typedef floatn<3> float3;
+
 template <int T>
 struct StreamType {};
 template <>
@@ -96,6 +105,31 @@ template <>
 struct StreamType<XF_32FW> {
     typedef float name;
     static const int bitdepth = 32;
+};
+template <>
+struct StreamType<XF_96FW> {
+    typedef floatn<3> name;
+    static const int bitdepth = 96;
+};
+template <>
+struct StreamType<XF_192FW> {
+    typedef floatn<6> name;
+    static const int bitdepth = 192;
+};
+template <>
+struct StreamType<XF_384FW> {
+    typedef floatn<12> name;
+    static const int bitdepth = 384;
+};
+template <>
+struct StreamType<XF_768FW> {
+    typedef floatn<24> name;
+    static const int bitdepth = 768;
+};
+template <>
+struct StreamType<XF_1536FW> {
+    typedef floatn<48> name;
+    static const int bitdepth = 1536;
 };
 template <>
 struct StreamType<XF_35SW> {
@@ -320,6 +354,11 @@ template <>
 struct PixelType<XF_32FP> {
     typedef float name;
     static const int bitdepth = 32;
+};
+template <>
+struct PixelType<XF_96FP> {
+    typedef floatn<3> name;
+    static const int bitdepth = 96;
 };
 template <>
 struct PixelType<XF_24SP> {
@@ -912,6 +951,72 @@ struct DataType<XF_32FC1, XF_NPPC16> {
     static const int pixeldepth = XF_32FP;
     static const int wordwidth = XF_512UW;
     static const int channel = 1;
+};
+
+template <>
+struct DataType<XF_32FC3, XF_NPPC1> {
+    typedef ap_uint<96> name;
+    typedef ap_uint<96> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<3> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 96;
+    static const int pixeldepth = XF_96FP;
+    static const int wordwidth = XF_96FW;
+    static const int channel = 3;
+};
+template <>
+struct DataType<XF_32FC3, XF_NPPC2> {
+    typedef ap_uint<192> name;
+    typedef ap_uint<96> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<6> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 96;
+    static const int pixeldepth = XF_96FP;
+    static const int wordwidth = XF_192FW;
+    static const int channel = 3;
+};
+template <>
+struct DataType<XF_32FC3, XF_NPPC4> {
+    typedef ap_uint<384> name;
+    typedef ap_uint<96> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<12> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 96;
+    static const int pixeldepth = XF_96FP;
+    static const int wordwidth = XF_384FW;
+    static const int channel = 3;
+};
+template <>
+struct DataType<XF_32FC3, XF_NPPC8> {
+    typedef ap_uint<768> name;
+    typedef ap_uint<96> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<24> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 96;
+    static const int pixeldepth = XF_96FP;
+    static const int wordwidth = XF_768FW;
+    static const int channel = 3;
+};
+template <>
+struct DataType<XF_32FC3, XF_NPPC16> {
+    typedef ap_uint<1536> name;
+    typedef ap_uint<96> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<48> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 96;
+    static const int pixeldepth = XF_96FP;
+    static const int wordwidth = XF_1536FW;
+    static const int channel = 3;
 };
 
 template <>

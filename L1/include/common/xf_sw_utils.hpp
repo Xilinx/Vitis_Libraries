@@ -147,7 +147,6 @@ void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
             int v = 0;
             for (int k = 0; k < diff_img.channels(); k++) {
                 int v_tmp;
-                float v_tmp1;
                 if (diff_img.channels() == 1) {
                     if (cv_bitdepth == 8)
                         v_tmp = (int)diff_img.at<unsigned char>(i, j);
@@ -157,8 +156,6 @@ void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
                         v_tmp = (int)diff_img.at<short>(i, j);
                     else if (cv_bitdepth == 32 && diff_img.depth() == CV_32S)
                         v_tmp = (int)diff_img.at<int>(i, j);
-                    else
-                        v_tmp1 = (float)diff_img.at<float>(i, j);
                 } else // 3 channels
                     v_tmp = (int)diff_img.at< ::cv::Vec3b>(i, j)[k];
 
