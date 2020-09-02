@@ -38,9 +38,6 @@
 #endif
 
 // Set the optimization type:
-#if RO
-#define NPC1 XF_NPPC8
-#endif
 #if NO
 #define NPC1 XF_NPPC1
 #endif
@@ -49,8 +46,6 @@
 #define IN_TYPE XF_8UC1
 #if NO
 #define INPUT_PTR_WIDTH 8
-#else
-#define INPUT_PTR_WIDTH 64
 #endif
 
 #if (REDUCTION_OP == 1)

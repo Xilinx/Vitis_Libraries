@@ -17,6 +17,7 @@
 #include "xf_custom_convolution_config.h"
 
 static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(INTYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_FILTER = FILTER_HEIGHT * FILTER_WIDTH ;
 
 void Filter2d_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                     short int* filter,
@@ -27,7 +28,7 @@ void Filter2d_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
    
-    #pragma HLS INTERFACE m_axi      port=filter        offset=slave  bundle=gmem1 depth=25
+    #pragma HLS INTERFACE m_axi      port=filter        offset=slave  bundle=gmem1 depth=__XF_DEPTH_FILTER
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem2 depth=__XF_DEPTH
    
     #pragma HLS INTERFACE s_axilite  port=shift 			          bundle=control
