@@ -24,7 +24,7 @@ U200 platform, available in the Vitis tool, is required to build and run the lib
 
 ## OTHER INFORMATION
 Full User Guide for Vitis Vision and using OpenCV on Xilinx devices Check here:
-[Xilinx Vitis Vision User Guide](https://xilinx.github.io/Vitis_Libraries/vision/)
+[Xilinx Vitis Vision User Guide](https://xilinx.github.io/Vitis_Libraries/vision/2019.2/index.html)
 
 ## SUPPORT
 For questions and to get help on this project or your own projects, visit the [Xilinx Forums][] (link yet to be updated).
