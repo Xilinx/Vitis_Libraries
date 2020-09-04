@@ -2,7 +2,7 @@
 
 Vitis BLAS Library is an Vitis library for accelerating linear algebra functions.
 
-[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/blas/)
+[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/blas/2019.2/)
 
 Copyright 2019 Xilinx, Inc.
 
