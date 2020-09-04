@@ -44,6 +44,7 @@ if {$CSYNTH == 1} {
 
 if {$COSIM == 1} {
   cosim_design
+#  cosim_design -trace_level all -wave_debug
 }
 
 if {$VIVADO_SYN == 1} {

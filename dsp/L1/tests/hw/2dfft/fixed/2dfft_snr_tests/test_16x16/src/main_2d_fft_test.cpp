@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
     MemWideIFStreamTypeIn l_matToStream("matrixToStreaming");
     MemWideIFStreamTypeOut fftOutputStream("fftOutputStream");
     // Pass same data stream multiple times to measure the II correctly
-    for (int runs = 0; runs < 5; ++runs) {
+    for (int runs = 0; runs < 1; ++runs) {
         stream2DMatrix<k_fftKernelSize, k_fftKernelSize, k_memWidth, T_elemType, MemWideIFTypeIn>(l_inMat,
                                                                                                   l_matToStream);
         top_fft2d(l_matToStream, fftOutputStream);

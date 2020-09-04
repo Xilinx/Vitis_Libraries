@@ -21,7 +21,7 @@
 //#define SSR_FFT_PARTITION_INTERFACE_ARRAYS      // defining this will partition interface arrays otherwise it will use
 // reshape
 
-//#define SSR_FFT_PARTITION_IO_ARRAYS    // define this if final output SSR=R number of sample needed as Separate ports
+#define SSR_FFT_PARTITION_IO_ARRAYS // define this if final output SSR=R number of sample needed as Separate ports
 //#define SSR_FFT_SEPERATE_REAL_IMAG_PARTS // define this if complex outputs needed Separate as REAL and image ports
 
 #ifndef SSR_FFT_URAM_SELECTION_THRESHHOLD

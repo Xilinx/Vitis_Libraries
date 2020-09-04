@@ -24,12 +24,12 @@
 
 /*
  =========================================================================================
- -_- -_-
- -_- -_-
- -_- -_-
- -_- -_-
- -_- -_-
- -_- -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
  -_-
 
  SSR FFT in last few stages break its kernel into small FFT kernel
@@ -44,14 +44,14 @@
  These utility functions are used to create a smaller forked stream
  and also to merge a small stream into big one for final output.
 
- -_- -_-
- -_- -_-
- -_- -_-
- -_- -_-
- -_- -_-
- -_- -_-
- -_- -_-
- -_- -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
+ -_-                                                                                   -_-
  ========================================================================================
  */
 
@@ -135,6 +135,24 @@ void convertArrayToSuperStream(T_dtype p_inDataArray[t_R][t_L / t_R],
         p_out.write(temp);
     }
 }
+template <int t_stage, int t_id, int t_L, int t_R, typename T_dtype>
+void convertArrayToSuperStream(hls::stream<T_dtype> p_inDataArray[t_R],
+                               hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_out) {
+#pragma HLS INLINE off
+    //#pragma HLS STREAM variable=p_inDataArray dim=2
+    //#pragma HLS ARRAY_PARTITION variable = p_inDataArray complete dim = 1
+
+    for (int i = 0; i < t_L / t_R; i++) {
+#pragma HLS PIPELINE II = 1 rewind
+        SuperSampleContainer<t_R, T_dtype> temp;
+#pragma HLS ARRAY_PARTITION variable = temp.superSample complete dim = 1
+        for (int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            temp.superSample[r] = p_inDataArray[r].read(); // p_inDataArray[r][i];
+        }
+        p_out.write(temp);
+    }
+}
 
 template <int t_stage, int t_id, int t_L, int t_R, typename T_dtype, typename T_dtype1>
 void convertSuperStreamToArray(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_in,
@@ -170,7 +188,7 @@ void convertSuperStreamToArrayNScale(hls::stream<SuperSampleContainer<t_R, T_dty
     static const int SCALING_FACTOR = (transform_direction == REVERSE_TRANSFORM) ? t_L : 1;
     SuperSampleContainer<t_R, T_dtype> temp;
 #pragma HLS ARRAY_PARTITION variable = temp.superSample complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = p_outDataArray complete dim = 1
+    //#pragma HLS ARRAY_PARTITION variable = p_outDataArray complete dim = 1
 
     for (int i = 0; i < t_L / t_R; i++) {
 #pragma HLS PIPELINE II = 1 rewind
@@ -179,9 +197,37 @@ void convertSuperStreamToArrayNScale(hls::stream<SuperSampleContainer<t_R, T_dty
 
         for (int r = 0; r < t_R; r++) {
 #pragma HLS UNROLL
-            // p_in[r].read();
             p_outDataArray[r][i] =
                 T_dtype1(temp.superSample[r].real() / SCALING_FACTOR, temp.superSample[r].imag() / SCALING_FACTOR);
+        }
+    }
+}
+
+template <int t_stage,
+          transform_direction_enum transform_direction,
+          int t_id,
+          int t_L,
+          int t_R,
+          typename T_dtype,
+          typename T_dtype1>
+void convertSuperStreamToArrayNScale(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_in,
+                                     hls::stream<T_dtype1> p_outDataArray[t_R]) {
+#pragma HLS INLINE off
+
+    static const int SCALING_FACTOR = (transform_direction == REVERSE_TRANSFORM) ? t_L : 1;
+    SuperSampleContainer<t_R, T_dtype> temp;
+#pragma HLS ARRAY_PARTITION variable = temp.superSample complete dim = 1
+    //#pragma HLS ARRAY_PARTITION variable = p_outDataArray complete dim = 1
+
+    for (int i = 0; i < t_L / t_R; i++) {
+#pragma HLS PIPELINE II = 1 rewind
+
+        p_in.read(temp);
+
+        for (int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            p_outDataArray[r].write(
+                T_dtype1(temp.superSample[r].real() / SCALING_FACTOR, temp.superSample[r].imag() / SCALING_FACTOR));
         }
     }
 }
@@ -235,6 +281,44 @@ void streamJoinUtilitySISO(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_i
             // p_out[r][t]=p_in[r][t];
             p_out[r][t] = temp_super_sample_in.superSample[r];
         }
+    }
+}
+template <int t_L, int t_R, typename T_dtype>
+void streamJoinUtilitySISO(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_in, hls::stream<T_dtype> p_out[t_R]) {
+#pragma HLS INLINE off
+    for (int t = 0; t < t_L / t_R; t++) {
+#pragma HLS PIPELINE II = 1 rewind
+        SuperSampleContainer<t_R, T_dtype> temp_super_sample_in;
+        temp_super_sample_in = p_in.read();
+        for (int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            // p_out[r][t]=p_in[r][t];
+            p_out[r].write(temp_super_sample_in.superSample[r]);
+        }
+    }
+}
+
+template <int t_L, int t_R, int t_forkNumber, int t_forkingFactor, typename T_dtype>
+void mergeSuperSampleStreamNonInvertOut(
+    hls::stream<SuperSampleContainer<t_R / t_forkingFactor, T_dtype> > p_in[t_forkingFactor],
+    hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_outSuperStream) {
+#pragma HLS INLINE off
+    SuperSampleContainer<t_R / t_forkingFactor, T_dtype> sub_sample_in;
+    SuperSampleContainer<t_R, T_dtype> super_sample_sample_out;
+    const unsigned int fork_size = t_R / t_forkingFactor;
+
+    for (int t = 0; t < t_L / t_R; ++t) {
+#pragma HLS PIPELINE II = 1 rewind
+        for (int fork_no = 0; fork_no < t_forkingFactor; fork_no++) {
+#pragma HLS UNROLL
+            sub_sample_in = p_in[fork_no].read();
+            for (int sample_no = 0; sample_no < fork_size; sample_no++) {
+#pragma HLS UNROLL
+                super_sample_sample_out.superSample[fork_no * fork_size + sample_no] =
+                    sub_sample_in.superSample[sample_no];
+            }
+        }
+        p_outSuperStream.write(super_sample_sample_out);
     }
 }
 
@@ -292,29 +376,6 @@ void mergeSuperSampleStream(hls::stream<SuperSampleContainer<t_R / t_forkingFact
     }
 }
 
-template <int t_L, int t_R, int t_forkNumber, int t_forkingFactor, typename T_dtype>
-void mergeSuperSampleStreamNonInvertOut(
-    hls::stream<SuperSampleContainer<t_R / t_forkingFactor, T_dtype> > p_in[t_forkingFactor],
-    hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_outSuperStream) {
-#pragma HLS INLINE off
-    SuperSampleContainer<t_R / t_forkingFactor, T_dtype> sub_sample_in;
-    SuperSampleContainer<t_R, T_dtype> super_sample_sample_out;
-    const unsigned int fork_size = t_R / t_forkingFactor;
-
-    for (int t = 0; t < t_L / t_R; ++t) {
-#pragma HLS PIPELINE II = 1 rewind
-        for (int fork_no = 0; fork_no < t_forkingFactor; fork_no++) {
-#pragma HLS UNROLL
-            sub_sample_in = p_in[fork_no].read();
-            for (int sample_no = 0; sample_no < fork_size; sample_no++) {
-#pragma HLS UNROLL
-                super_sample_sample_out.superSample[fork_no * fork_size + sample_no] =
-                    sub_sample_in.superSample[sample_no];
-            }
-        }
-        p_outSuperStream.write(super_sample_sample_out);
-    }
-}
 } // end namespace fft
 } // end namespace dsp
 } // end namespace xf
