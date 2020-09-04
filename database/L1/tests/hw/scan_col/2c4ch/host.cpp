@@ -23,7 +23,7 @@
 
 int main(int argc, const char* argv[]) {
     ap_uint<64>* buf0 = aligned_alloc<ap_uint<64> >(VEC_LEN * BUF_DEPTH);
-    ap_uint<64>* buf1 = aligned_alloc<ap_uint<64> >(1);
+    ap_uint<64>* buf1 = aligned_alloc<ap_uint<64> >(VEC_LEN * BUF_DEPTH);
     ap_uint<64>* bufo = aligned_alloc<ap_uint<64> >(2);
     int nrow = VEC_LEN * BUF_DEPTH - VEC_LEN;
     std::cout << "testing " << nrow << " rows\n";

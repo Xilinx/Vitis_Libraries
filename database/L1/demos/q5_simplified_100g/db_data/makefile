@@ -31,8 +31,13 @@ all: $(DAT_DIR)/.stamp
 
 exe: columngen/columnize.exe
 
+# Not actually used, just to set right CXX with utils.mk
+TARGET ?= sw_emu
+HOST_ARCH ?= x86
+include $(CUR_DIR)/../utils.mk
+
 %.exe: %.cpp
-	$(CXX) $< -o $@ -I../host -std=c++11 -g -O3 -pthread
+	$(CXX) $< -o $@ -I$(CUR_DIR)/../host -std=c++11 -g -O3 -pthread
 
 $(DEST_DIR)/sf$(SF)/%.tbl:
 	make -f $(SSB_DIR)/Makefile DEST_DIR=$(DEST_DIR) SF=$(SF)

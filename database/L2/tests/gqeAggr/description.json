@@ -5,7 +5,8 @@
     "gui": true,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280"
+        "u280",
+        "u50"
     ],
     "platform_blacklist": [
         "other"
@@ -21,6 +22,20 @@
                 "compiler": {
                     "cflags": [
                         "--config PROJECT/conn_u280.ini"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
                     ]
                 }
             }
@@ -74,64 +89,7 @@
                 {
                     "location": "LIB_DIR/L2/src/gqe_aggr.cpp",
                     "frequency": 200,
-                    "name": "gqeAggr",
-                    "num_compute_units": 1,
-                    "compute_units": [
-                        {
-                            "name": "gqe_aggr",
-                            "slr": "SLR0",
-                            "arguments": [
-                                {
-                                    "name": "buf_in",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_out",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "buf_cfg",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_result_info",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "ping_buf0",
-                                    "memory": "HBM[8]"
-                                },
-                                {
-                                    "name": "ping_buf1",
-                                    "memory": "HBM[12]"
-                                },
-                                {
-                                    "name": "ping_buf2",
-                                    "memory": "HBM[16]"
-                                },
-                                {
-                                    "name": "ping_buf3",
-                                    "memory": "HBM[20]"
-                                },
-                                {
-                                    "name": "pong_buf0",
-                                    "memory": "HBM[10]"
-                                },
-                                {
-                                    "name": "pong_buf1",
-                                    "memory": "HBM[14]"
-                                },
-                                {
-                                    "name": "pong_buf2",
-                                    "memory": "HBM[18]"
-                                },
-                                {
-                                    "name": "pong_buf3",
-                                    "memory": "HBM[22]"
-                                }
-                            ]
-                        }
-                    ]
+                    "name": "gqeAggr"
                 }
             ],
             "frequency": 200,
@@ -147,13 +105,19 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": 32768,
-                "max_time_min": 520
+                "max_time_min": {
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
+                    "vitis_hw_run": 10
+                }
             }
         ],
         "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu",
-            "vitis_hw"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }

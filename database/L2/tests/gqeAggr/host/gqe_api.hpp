@@ -372,7 +372,7 @@ class Table {
     }
 
     //! Buffer allocation
-    void allocateDevBuffer(cl::Context& context, int bank) {
+    void allocateDevBuffer(cl::Context& context, int bank, cl::Kernel k) {
         // getKdata();
         int cpNum = 0;
         for (size_t i = 0; i < ncol; i++) {
@@ -384,13 +384,13 @@ class Table {
         size_t sizeonecol = size_t((4 * depth + 64 - 1) / 64);
 
         if (getKdata()) {
-            mext = {XCL_MEM_TOPOLOGY | (unsigned int)(bank), datak, 0};
+            mext = {bank, datak, k()};
             buffer = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                 (size_t)(64 * sizeonecol * cpNum), &mext);
             std::cout << name << " Buffer size: " << (64 * sizeonecol * cpNum) / (1024 * 1024) << " MByte "
                       << std::endl;
         } else {
-            mext = {XCL_MEM_TOPOLOGY | (unsigned int)(bank), data, 0};
+            mext = {bank, data, k()};
             buffer = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                 (size_t)(64 * size512.back()), &mext);
             std::cout << name << " XBuffer size: " << (64 * size512.back() / (1024 * 1024)) << " MByte " << std::endl;
@@ -561,8 +561,8 @@ class AggrCfgCmd {
         memset(cmd, 0, 4 * 128);
     };
 
-    void allocateDevBuffer(cl::Context& context, int bank) {
-        cl_mem_ext_ptr_t mext = {XCL_MEM_TOPOLOGY | (unsigned int)(bank), cmd, 0};
+    void allocateDevBuffer(cl::Context& context, int bank, cl::Kernel k) {
+        cl_mem_ext_ptr_t mext = {bank, cmd, k()};
 
         buffer = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, (size_t)(4 * 128),
                             &mext);
@@ -779,6 +779,7 @@ class AggrKrnlEngine {
 
    public:
     AggrKrnlEngine(){};
+    cl::Kernel getKernel() { return krnl; }
 
     AggrKrnlEngine(cl::Program& program, cl::CommandQueue& q, const std::string krnname) {
         krnl = cl::Kernel(program, krnname.c_str());

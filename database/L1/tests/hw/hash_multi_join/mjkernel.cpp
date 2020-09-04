@@ -175,22 +175,22 @@ extern "C" void mjkernel(
 #pragma HLS INTERFACE s_axilite port = hj_end_status bundle = control
 #pragma HLS INTERFACE s_axilite port = j_res bundle = control
 
-#pragma HLS INTERFACE m_axi port = pu0_ht bundle = gmem1_0 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu1_ht bundle = gmem1_1 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu2_ht bundle = gmem1_2 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu3_ht bundle = gmem1_3 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu4_ht bundle = gmem1_4 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu5_ht bundle = gmem1_5 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu6_ht bundle = gmem1_6 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu7_ht bundle = gmem1_7 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu0_ht bundle = gmem1_0 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu1_ht bundle = gmem1_1 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu2_ht bundle = gmem1_2 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu3_ht bundle = gmem1_3 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu4_ht bundle = gmem1_4 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu5_ht bundle = gmem1_5 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu6_ht bundle = gmem1_6 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu7_ht bundle = gmem1_7 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
 
 #pragma HLS INTERFACE s_axilite port = pu0_ht bundle = control
 #pragma HLS INTERFACE s_axilite port = pu1_ht bundle = control
@@ -201,22 +201,22 @@ extern "C" void mjkernel(
 #pragma HLS INTERFACE s_axilite port = pu6_ht bundle = control
 #pragma HLS INTERFACE s_axilite port = pu7_ht bundle = control
 
-#pragma HLS INTERFACE m_axi port = pu0_s bundle = gmem2_0 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu1_s bundle = gmem2_1 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu2_s bundle = gmem2_2 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu3_s bundle = gmem2_3 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu4_s bundle = gmem2_4 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu5_s bundle = gmem2_5 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu6_s bundle = gmem2_6 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
-#pragma HLS INTERFACE m_axi port = pu7_s bundle = gmem2_7 num_write_outstanding = 32 num_read_outstanding = \
-    32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu0_s bundle = gmem2_0 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu1_s bundle = gmem2_1 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu2_s bundle = gmem2_2 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu3_s bundle = gmem2_3 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu4_s bundle = gmem2_4 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu5_s bundle = gmem2_5 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu6_s bundle = gmem2_6 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
+#pragma HLS INTERFACE m_axi offset = slave port = pu7_s bundle = gmem2_7 num_write_outstanding = \
+    32 num_read_outstanding = 32 max_read_burst_length = 8 latency = 125
 
 #pragma HLS INTERFACE s_axilite port = pu0_s bundle = control
 #pragma HLS INTERFACE s_axilite port = pu1_s bundle = control

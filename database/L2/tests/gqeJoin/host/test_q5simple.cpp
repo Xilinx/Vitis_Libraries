@@ -268,11 +268,11 @@ int main(int argc, const char* argv[]) {
     cl_mem_ext_ptr_t mext_table_o, mext_table_l, mext_table_out_a, mext_table_out_b, mext_cfg5s;
     cl_mem_ext_ptr_t memExt[PU_NM * 2];
 
-    mext_table_o = {XCL_MEM_TOPOLOGY | unsigned(32), table_o, 0};
-    mext_table_l = {XCL_MEM_TOPOLOGY | unsigned(32), table_l, 0};
-    mext_table_out_a = {XCL_MEM_TOPOLOGY | unsigned(32), table_out_a, 0};
-    mext_table_out_b = {XCL_MEM_TOPOLOGY | unsigned(32), table_out_b, 0};
-    mext_cfg5s = {XCL_MEM_TOPOLOGY | unsigned(32), table_cfg5s, 0};
+    mext_table_o = {0, table_o, kernel0table[0]()};
+    mext_table_l = {1, table_l, kernel0table[0]()};
+    mext_table_out_a = {2, table_out_a, kernel0table[0]()};
+    mext_table_out_b = {2, table_out_b, kernel0table[0]()};
+    mext_cfg5s = {3, table_cfg5s, kernel0table[0]()};
 
     memExt[0].flags = (unsigned int)(2) | XCL_MEM_TOPOLOGY;
     memExt[1].flags = (unsigned int)(3) | XCL_MEM_TOPOLOGY;

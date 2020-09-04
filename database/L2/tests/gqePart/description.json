@@ -5,7 +5,8 @@
     "gui": true,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280"
+        "u280",
+        "u50"
     ],
     "platform_blacklist": [
         "other"
@@ -21,6 +22,20 @@
                 "compiler": {
                     "cflags": [
                         "--config PROJECT/conn_u280.ini"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
                     ]
                 }
             }
@@ -74,28 +89,7 @@
                 {
                     "location": "LIB_DIR/L2/src/gqe_part.cpp",
                     "frequency": 200,
-                    "name": "gqePart",
-                    "num_compute_units": 1,
-                    "compute_units": [
-                        {
-                            "name": "part_kernel",
-                            "slr": "SLR0",
-                            "arguments": [
-                                {
-                                    "name": "buf_A",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "buf_B",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_D",
-                                    "memory": "DDR[0]"
-                                }
-                            ]
-                        }
-                    ]
+                    "name": "gqePart"
                 }
             ],
             "frequency": 200,
@@ -111,13 +105,19 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": 32768,
-                "max_time_min": 520
+                "max_time_min": {
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
+                    "vitis_hw_run": 10
+                }
             }
         ],
         "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu",
-            "vitis_hw"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }
