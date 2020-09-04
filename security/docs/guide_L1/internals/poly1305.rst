@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Poly1305, algorithm
+   :description: The Poly1305 is a cryptographic message authentication code (MAC) created by Daniel J. Bernstein. It can be used to verify the data integrity and the authenticity of a message.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ******************
 Poly1305 Algorithm
 ******************
@@ -23,7 +30,7 @@ Poly1305 Algorithm
 Overview
 ========
 
-The Poly1305 is a cryptographic message authentication code (MAC) created by Daniel J. Bernstein. It can be used to verify the data integrity and the authenticity of a message (from viki).
+The Poly1305 is a cryptographic message authentication code (MAC) created by Daniel J. Bernstein. It can be used to verify the data integrity and the authenticity of a message.
 
 The Poly1305 algorithm is defined in `RFC 8439`_.
 

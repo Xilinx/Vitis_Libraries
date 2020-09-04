@@ -150,6 +150,27 @@ ap_uint<N> addMod(ap_uint<N> opA, ap_uint<N> opB, ap_uint<N> opM) {
 }
 
 /**
+ * @brief return (opA - opB) mod opM
+ *
+ * @tparam N bit width of opA, opB and opM
+ *
+ * @param opA Product input, should be less than opM
+ * @param opB Product input, should be less than opM
+ * @param opM Modulus
+ */
+template <int N>
+ap_uint<N> subMod(ap_uint<N> opA, ap_uint<N> opB, ap_uint<N> opM) {
+    ap_uint<N + 1> sum;
+    if (opA >= opB) {
+        sum = opA - opB;
+    } else {
+        sum = opA + opM;
+        sum -= opB;
+    }
+    return sum;
+}
+
+/**
  * @brief return montgomery inverse of opA
  * Reference: "The Montgomery Modular Inverse - Revisited" by E Savas, CK Koç
  *
@@ -209,7 +230,7 @@ ap_uint<N> monInv(ap_uint<N> opA, ap_uint<N> opM) {
  * @brief return modular inverse of opA
  * Reference: "The Montgomery Modular Inverse - Revisited" by E Savas, CK Koç
  *
- * @tparam N bit width of opA and opM
+ * @tparam N bit width of opA and opM, opM should no less than 2^(N-1)
  *
  * @param opA Input of modular inverse.
  * @param opM Modulus of modular inverse.

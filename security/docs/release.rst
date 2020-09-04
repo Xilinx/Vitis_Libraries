@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Vitis Security Library, release, notes, release notes
+   :description: Vitis Security Library release notes.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 .. _release_note:
 
 Release Note

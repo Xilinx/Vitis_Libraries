@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, RC4, algorithm
+   :description: RC4(Rivest Cipher 4), also called ARC4, is a stream cipher. It is used widely because of its simplicity and remarkable speed.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *****************************
 RC4 Algorithms
 *****************************

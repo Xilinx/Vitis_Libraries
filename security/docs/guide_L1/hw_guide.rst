@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Vitis Security design, level 1, L1
+   :description: Vitis Security Library level 1 module user guide.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ======================
 L1 Module User Guide
 ======================

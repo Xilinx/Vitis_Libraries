@@ -83,8 +83,8 @@ void aesGctrEncrypt(
     hls::stream<ap_uint<64> >& ciphertext_length,
     hls::stream<ap_uint<128> >& ciphertext1,
     hls::stream<ap_uint<64> >& ciphertext_length1) {
-#pragma HLS allocation instances = updateKey limit = 1 function
-#pragma HLS allocation instances = process limit = 1 function
+#pragma HLS allocation function instances = updateKey limit = 1
+#pragma HLS allocation function instances = process limit = 1
 
     bool end = end_text_length.read();
 
@@ -306,8 +306,8 @@ void aesGctrDecrypt(
     hls::stream<ap_uint<64> >& ciphertext_length_out,
     hls::stream<ap_uint<128> >& plaintext,
     hls::stream<ap_uint<64> >& plaintext_length) {
-#pragma HLS allocation instances = updateKey limit = 1 function
-#pragma HLS allocation instances = process limit = 1 function
+#pragma HLS allocation function instances = updateKey limit = 1
+#pragma HLS allocation function instances = process limit = 1
 
     bool end = end_text_length.read();
     end_length.write(end);

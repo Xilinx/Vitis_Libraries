@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, SHA-1, Algorithm
+   :description: The SHA-1 secure hash algorithm is a hash-based cryptographic function, it takes a message of arbitrary length as its input, produces a 160-bit digest. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 ***************
 SHA-1 Algorithm
 ***************
