@@ -17,7 +17,8 @@
 #ifndef __SYNTHESIS__
 #include <iostream>
 #endif
-extern "C" void MCAE_k2(TEST_DT underlying,
+extern "C" void MCAE_k2(unsigned int seed,
+                        TEST_DT underlying,
                         TEST_DT volatility,
                         TEST_DT dividendYield,
                         TEST_DT riskFreeRate,
@@ -33,6 +34,7 @@ extern "C" void MCAE_k2(TEST_DT underlying,
     16 max_read_burst_length = 32
 #pragma HLS INTERFACE m_axi port = outputs bundle = gmem1 offset = slave
 
+#pragma HLS INTERFACE s_axilite port = seed bundle = control
 #pragma HLS INTERFACE s_axilite port = underlying bundle = control
 #pragma HLS INTERFACE s_axilite port = volatility bundle = control
 #pragma HLS INTERFACE s_axilite port = dividendYield bundle = control
@@ -62,13 +64,13 @@ extern "C" void MCAE_k2(TEST_DT underlying,
 
     bool option = (optionType) ? 1 : 0;
 
-    ap_uint<32> seed[4];
-    seed[0] = 11111;
-    seed[1] = 33333;
-    seed[2] = 66666;
-    seed[3] = 99999;
+    ap_uint<32> seeds[4];
+    seeds[0] = seed;
+    seeds[1] = seed * 3;
+    seeds[2] = seed * 6;
+    seeds[3] = seed * 9;
 
     xf::fintech::MCAmericanEnginePricing<double, UN_K3>(underlying, volatility, dividendYield, riskFreeRate, timeLength,
-                                                        strike, option, seed, coefIn, outputs, requiredTolerance,
+                                                        strike, option, seeds, coefIn, outputs, requiredTolerance,
                                                         requiredSamples, timeSteps);
 }

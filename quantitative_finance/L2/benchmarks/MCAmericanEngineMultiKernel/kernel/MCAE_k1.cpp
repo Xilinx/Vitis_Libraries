@@ -17,7 +17,6 @@
 #ifndef __SYNTHESIS__
 #include <iostream>
 #endif
-#ifdef KERNEL1
 
 extern "C" void MCAE_k1(TEST_DT timeLength,
                         TEST_DT riskFreeRate,
@@ -60,4 +59,3 @@ extern "C" void MCAE_k1(TEST_DT timeLength,
     xf::fintech::MCAmericanEngineCalibrate<TEST_DT, UN_K2_PATH, UN_K2_STEP>(
         timeLength, riskFreeRate, strike, option, priceIn, matIn, coefOut, calibSamples, timeSteps);
 }
-#endif

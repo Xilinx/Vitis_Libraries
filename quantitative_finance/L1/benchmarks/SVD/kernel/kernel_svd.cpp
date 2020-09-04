@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "kernel_svd.hpp"
-#ifdef KERNEL_0
 extern "C" void kernel_svd_0(
     double dataA[NA * NA], double sigma[NA], double dataU[NA * NA], double dataV[NA * NA], int diagSize1) {
 #pragma HLS INTERFACE m_axi port = dataA bundle = gmem0 offset = slave num_read_outstanding = \
@@ -66,4 +65,3 @@ extern "C" void kernel_svd_0(
         }
     }
 }
-#endif

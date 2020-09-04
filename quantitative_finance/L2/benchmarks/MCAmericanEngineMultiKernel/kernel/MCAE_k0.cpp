@@ -17,7 +17,6 @@
 #ifndef __SYNTHESIS__
 #include <iostream>
 #endif
-#ifdef KERNEL0
 
 extern "C" void MCAE_k0(TEST_DT underlying,
                         TEST_DT volatility,
@@ -69,4 +68,3 @@ extern "C" void MCAE_k0(TEST_DT underlying,
                                                             timeLength, strike, option, seeds, pOut, mOut, calibSamples,
                                                             timeSteps);
 }
-#endif

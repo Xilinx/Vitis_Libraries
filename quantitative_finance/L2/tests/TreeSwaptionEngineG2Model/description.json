@@ -1,12 +1,13 @@
 {
-    "gui": true,
+    "gui": true, 
     "name": "Xilinx Tree Swaption Engine G2 Model Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
         "u250", 
-        "u200"
+        "u200", 
+        "u50"
     ], 
     "platform_blacklist": [
         "zc"
@@ -15,9 +16,7 @@
         "u200": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
+                    "symbols": []
                 }
             }, 
             "v++": {
@@ -31,15 +30,27 @@
         "u250": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
+                    "symbols": []
                 }
             }, 
             "v++": {
                 "compiler": {
                     "cflags": [
                         "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
                     ]
                 }
             }
@@ -66,9 +77,7 @@
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 ", 
-            "symbols": [
-                "PRAGMA"
-            ]
+            "symbols": []
         }
     }, 
     "v++": {
@@ -78,9 +87,7 @@
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L2/tests/TreeSwaptionEngineG2Model/kernel"
             ], 
-            "symbols": [
-                "HW_EMU_DEBUG"
-            ]
+            "symbols": []
         }
     }, 
     "containers": [
@@ -89,28 +96,28 @@
                 {
                     "location": "kernel/TREE_k0.cpp", 
                     "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA -D KERNEL_NAME=TREE_k0", 
-                    "name": "TREE_k0",
-                    "num_compute_units": 1,
+                    "clflags": " -D DPRAGMA", 
+                    "name": "TREE_k0", 
+                    "num_compute_units": 1, 
                     "compute_units": [
                         {
-                            "name": "TREE_k0",
-                            "slr": "SLR0",
+                            "name": "TREE_k0_1", 
+                            "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "initTime",
+                                    "name": "initTime", 
                                     "memory": "DDR[0]"
-                                },
+                                }, 
                                 {
-                                    "name": "exerciseCnt",
+                                    "name": "exerciseCnt", 
                                     "memory": "DDR[0]"
-                                },
+                                }, 
                                 {
-                                    "name": "floatingCnt",
+                                    "name": "floatingCnt", 
                                     "memory": "DDR[0]"
-                                },
+                                }, 
                                 {
-                                    "name": "fixedCnt",
+                                    "name": "fixedCnt", 
                                     "memory": "DDR[0]"
                                 }
                             ]
@@ -131,13 +138,19 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }
