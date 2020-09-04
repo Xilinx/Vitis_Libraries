@@ -31,6 +31,8 @@ Level 2 contains the host-callable kernels and engines for various Vitis Vision 
 **For embedded devices:**
 
     export SYSROOT=< path-to-platform-sysroot >
+	
+	export PERL=< path-to-perl-installed-location > #For example, "export PERL=/usr/bin/perl"
 
     make host xclbin TARGET=< sw_emu|hw_emu|hw > BOARD=Zynq ARCH=< aarch32 | aarch64 >
 

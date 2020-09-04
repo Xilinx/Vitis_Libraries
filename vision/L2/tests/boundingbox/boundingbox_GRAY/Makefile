@@ -347,8 +347,9 @@ endif
 
 PKG_OUT_DIR := package_$(TARGET)
 
-EMBEDDED_EXEC_SCRIPT = run_emu.sh
+EMBEDDED_EXEC_SCRIPT = run_script.sh
 EMBEDDED_PACKAGE_OUT = package_$(TARGET)
+PERL ?= perl
 
 ifneq (,$(findstring zc706, $(XDEVICE)))
 	ROOTFS := $(SYSROOT)/../../uImage
@@ -431,7 +432,7 @@ ifneq (,$(BIN_DIR_BASE))
 endif
 
 cleanall: clean cleanx
-	rm -rf *.log plist $(DATA_STAMP) run_emu.sh ..link_summary $(PKG_OUT_DIR) emconfig.json *summary
+	rm -rf *.log plist $(DATA_STAMP) run_script.sh ..link_summary $(PKG_OUT_DIR) emconfig.json *summary
 	rm -rf _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
 	rm -rf *.jpg *.jpeg *.png _xocc_* .Xil dltmp* xmltmp* *.jou *.wcfg *.wdb *.csv *.protoinst .ipcache sd_card* sample_link.ini sample_compile.ini
 	rm -rf *.ini sd_card* emulation _vimage .Xil
@@ -446,7 +447,7 @@ $(BIN_DIR)/emconfig.json :
     endif
 
 ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
-       EMU_CMD = /tools/xgs/perl/5.8.5/bin/perl $(XF_PROJ_ROOT)/ext/make_utility/embedded_run_emulation.pl "./$(PKG_OUT_DIR)/launch_$(TARGET).sh -no-reboot" "./run_emu.sh"
+       EMU_CMD = $(PERL) $(XF_PROJ_ROOT)/ext/make_utility/embedded_run_emulation.pl "./$(PKG_OUT_DIR)/launch_$(TARGET).sh -no-reboot" "./run_script.sh"
 else ifeq ($(TARGET), hw)
        RUN_ENV += 
        EMU_CMD += @echo "Please copy the contents of sd_card and input images to an SD Card and run on the board"
@@ -459,22 +460,22 @@ SD_FILE_LIST = $(foreach sd_file,$(HOST_ARGS),--package.sd_file $(sd_file))
 sd_card : host xclbin
 	@echo "Generating sd_card folder...."
 	mkdir -p $(PKG_OUT_DIR)
-	rm -rf run_emu.sh
-	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> run_emu.sh
+	rm -rf run_script.sh
+	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> run_script.sh
 ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
-	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> run_emu.sh
+	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> run_script.sh
 endif
-	@echo 'export XILINX_VITIS=/mnt' >> run_emu.sh
-	@echo 'export XILINX_XRT=/usr' >> run_emu.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_emu.sh
+	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
+	@echo 'export XILINX_XRT=/usr' >> run_script.sh
+	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
 	emconfigutil --platform $(DEVICE) --nd 1;
-	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> run_emu.sh
-	@echo 'return_code=$$?' >> run_emu.sh
-	@echo 'if [ $$return_code -ne 0 ]; then' >> run_emu.sh
-	@echo '		echo "ERROR: Embedded host run failed, RC=$$return_code"' >> run_emu.sh
-	@echo 'fi' >> run_emu.sh
-	@echo 'echo "INFO: Embedded host run completed."' >> run_emu.sh
-	v++ -t $(TARGET) --platform $(DEVICE) -p $(XCLBIN_FILE) --package.out_dir $(PKG_OUT_DIR) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.sd_file $(ROOTFS) --package.sd_file run_emu.sh --package.sd_file $(EXE_FILE)  --package.sd_file $(XF_PROJ_ROOT)/data/4k.jpg  --package.sd_file emconfig.json
+	@echo './$(EXE_NAME).$(EXE_EXT) $(notdir $(HOST_ARGS))' >> run_script.sh
+	@echo 'return_code=$$?' >> run_script.sh
+	@echo 'if [ $$return_code -ne 0 ]; then' >> run_script.sh
+	@echo '		echo "ERROR: Embedded host run failed, RC=$$return_code"' >> run_script.sh
+	@echo 'fi' >> run_script.sh
+	@echo 'echo "INFO: Embedded host run completed."' >> run_script.sh
+	v++ -t $(TARGET) --platform $(DEVICE) -p $(XCLBIN_FILE) --package.out_dir $(PKG_OUT_DIR) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.sd_file $(ROOTFS) --package.sd_file run_script.sh --package.sd_file $(EXE_FILE)  --package.sd_file $(XF_PROJ_ROOT)/data/4k.jpg  --package.sd_file emconfig.json
 	@echo "### ***** sd_card generation done! ***** ###"
 
 
@@ -581,7 +582,7 @@ ifneq (,$(BIN_DIR_BASE))
 endif
 
 cleanall: clean cleanx
-	rm -rf *.log plist $(DATA_STAMP) run_emu.sh ..link_summary $(PKG_OUT_DIR) emconfig.json *summary
+	rm -rf *.log plist $(DATA_STAMP) run_script.sh ..link_summary $(PKG_OUT_DIR) emconfig.json *summary
 	rm -rf _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
 	rm -rf *.jpg *.jpeg *.png _xocc_* .Xil dltmp* xmltmp* *.jou *.wcfg *.wdb *.csv *.protoinst .ipcache sd_card* sample_link.ini sample_compile.ini
 
