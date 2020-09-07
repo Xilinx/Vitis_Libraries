@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Chacha20, algorithms
+   :description: Chacha20 is a cipher stream. Its input includes a 256-bit key, a 32-bit counter, a 96-bit nonce and plain text.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 *****************************
 Chacha20 Algorithms
 *****************************

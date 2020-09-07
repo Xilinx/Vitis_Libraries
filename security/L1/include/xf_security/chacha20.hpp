@@ -149,6 +149,56 @@ void chacha20Imp(hls::stream<ap_uint<256> >& keyStrm,
 #endif
 }
 
+void hchacha20(hls::stream<ap_uint<256> >& keyStrm,
+               hls::stream<ap_uint<192> >& nonceStrm,
+               hls::stream<ap_uint<256> >& subKeyStrm,
+               hls::stream<ap_uint<128> >& counterNonceStrm) {
+    ap_uint<256> key = keyStrm.read();
+    ap_uint<192> nonce = nonceStrm.read();
+
+    ap_uint<32> x[16];
+#pragma HLS array_partition variable = x complete
+
+    x[0] = 0x61707865;
+    x[1] = 0x3320646e;
+    x[2] = 0x79622d32;
+    x[3] = 0x6b206574;
+    for (int i = 0; i < 8; ++i) {
+#pragma HLS unroll
+        x[i + 4] = key.range(32 * (i + 1) - 1, i * 32);
+    }
+    for (int i = 0; i < 4; ++i) {
+#pragma HLS unroll
+        x[i + 12] = nonce.range(i * 32 + 31, i * 32);
+    }
+
+    for (int i = 0; i < ROUNDS; i += 2) {
+        // Odd round
+        QR(x[0], x[4], x[8], x[12]);  // column 0
+        QR(x[1], x[5], x[9], x[13]);  // column 1
+        QR(x[2], x[6], x[10], x[14]); // column 2
+        QR(x[3], x[7], x[11], x[15]); // column 3
+        // Even round
+        QR(x[0], x[5], x[10], x[15]); // diagonal 1 (main diagonal)
+        QR(x[1], x[6], x[11], x[12]); // diagonal 2
+        QR(x[2], x[7], x[8], x[13]);  // diagonal 3
+        QR(x[3], x[4], x[9], x[14]);  // diagonal 4
+    }
+
+    for (int i = 0; i < 4; i++) {
+#pragma HLS unroll
+        key.range(i * 32 + 31, i * 32) = x[i];
+        key.range(i * 32 + 159, i * 32 + 128) = x[i + 12];
+    }
+
+    ap_uint<128> counterNonce = 0;
+    counterNonce.range(31, 0) = 1;
+    counterNonce.range(127, 64) = nonce.range(191, 128);
+
+    subKeyStrm.write(key);
+    counterNonceStrm.write(counterNonce);
+}
+
 } // end of namespace internal
 
 /**
@@ -193,6 +243,36 @@ void chacha20(hls::stream<ap_uint<256> >& keyStrm,
               hls::stream<bool>& eCipherStrm) {
     internal::chacha20Imp(keyStrm, counterNonceStrm, plainStrm, ePlainStrm, cipherStrm, eCipherStrm);
 }
+
+/**
+ * @brief xchahcha20 is variant of original chacha20 to support longer nonce of 192bits.
+ *
+ * @param keyStrm initail key
+ * @param nonceStm initial nonce
+ * @param plainStrm input  plain text to be encrypted
+ * @param ePlainStrm the end flag of plainStrm
+ * @param cipherStrm  output encrypted text
+ * @param eCipherStrm the end flag of cipherStrm
+ */
+
+void xchacha20(hls::stream<ap_uint<256> >& keyStrm,
+               hls::stream<ap_uint<192> >& nonceStrm,
+               hls::stream<ap_uint<512> >& plainStrm,
+               hls::stream<bool>& ePlainStrm,
+               hls::stream<ap_uint<512> >& cipherStrm,
+               hls::stream<bool>& eCipherStrm) {
+#pragma HLS dataflow
+    hls::stream<ap_uint<256> > subKeyStrm;
+#pragma HLS stream variable = subKeyStrm depth = 2
+#pragma HLS resource variable = subKeyStrm core = FIFO_LUTRAM
+    hls::stream<ap_uint<128> > counterNonceStrm;
+#pragma HLS stream variable = counterNonceStrm depth = 2
+#pragma HLS resource variable = counterNonceStrm core = FIFO_LUTRAM
+
+    internal::hchacha20(keyStrm, nonceStrm, subKeyStrm, counterNonceStrm);
+    internal::chacha20Imp(subKeyStrm, counterNonceStrm, plainStrm, ePlainStrm, cipherStrm, eCipherStrm);
+}
+
 } // end of namespace security
 } // end of namespace xf
 #endif // _XF_SECURITY_CHACHA20_HPP_

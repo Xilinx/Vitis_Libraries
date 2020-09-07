@@ -13,6 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, CCM, mode
+   :description: The Counter with Cipher Block Chaining-Message Authentication Code (CCM) mode is a typical block cipher mode of operation using block cipher algorithm.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 ********
 CCM Mode
 ********

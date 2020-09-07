@@ -13,6 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, BLAKE2, algorithms
+   :description: BLAKE2 is a set of cryptographic hash functions defined in  RFC 7693 : The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC).
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 *****************
 BLAKE2 Algorithms
 *****************
@@ -23,8 +31,7 @@ BLAKE2 Algorithms
 Overview
 ========
 
-BLAKE2 is a set of cryptographic hash functions defined in
-`RFC 7693`_: The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC).
+BLAKE2 is a set of cryptographic hash functions defined in `RFC 7693`_: The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC).
 
 The BLAKE2 family consists of 2 hash functions, and both of them provide security superior to SHA-2.
 The BLAKE2B is optimized for 64-bit platforms, while the BLAKE2S is optimized for 8-bit to 32-bit platforms.
