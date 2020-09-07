@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, GCM, mode
+   :description: The Electronic Codebook (ECB) mode is a typical block cipher mode of operation using block cipher algorithm. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ********
 GCM Mode
 ********

@@ -194,9 +194,17 @@ int main(int argc, char* argv[]) {
     cl::Kernel kernel0(program, "aes256CbcDecryptKernel");
     std::cout << "Kernel has been created.\n";
 
+#ifdef USE_DDR
+    std::cout << "allocate to DDR" << std::endl;
     cl_mem_ext_ptr_t mext_in = {XCL_MEM_DDR_BANK0, hb_in, 0};
     cl_mem_ext_ptr_t mext_out_a = {XCL_MEM_DDR_BANK1, hb_out_a, 0};
     cl_mem_ext_ptr_t mext_out_b = {XCL_MEM_DDR_BANK1, hb_out_b, 0};
+#else
+    std::cout << "allocate to HBM" << std::endl;
+    cl_mem_ext_ptr_t mext_in{0, hb_in, kernel0()};
+    cl_mem_ext_ptr_t mext_out_a{1, hb_out_a, kernel0()};
+    cl_mem_ext_ptr_t mext_out_b{1, hb_out_b, kernel0()};
+#endif
 
     // Map buffers
     // ping buffer

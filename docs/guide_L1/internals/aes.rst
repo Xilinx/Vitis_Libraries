@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, AES, encryption, algorithms
+   :description: ES-128/192/256 algorithm processes plain data blocks of 128 bits, and generates cipher data blocks of 128 bits using cipher keys of 128/192/256 bits.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **************************
 AES Encryption Algorithms
 **************************
@@ -20,8 +27,7 @@ AES Encryption Algorithms
 .. toctree::
    :maxdepth: 1
 
-AES-128/192/256 Algorithm process plain data blocks of 128 bits,
-generates cipher data blocks of 128 bits using cipher keys of 128/192/256 bits.
+AES-128/192/256 algorithm processes plain data blocks of 128 bits, generates cipher data blocks of 128 bits using cipher keys of 128/192/256 bits.
 Basic unit of AES algorithms operation is a two dimensional array of 16 bytes called states.
 Its mapping relation is as illustrated in the figure below.
 

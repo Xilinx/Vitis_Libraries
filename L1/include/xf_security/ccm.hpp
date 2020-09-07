@@ -236,9 +236,6 @@ void aesCtrEncrypt(
     hls::stream<ap_uint<128> >& S0Strm,
     hls::stream<ap_uint<128> >& cipherStrm,
     hls::stream<ap_uint<64> >& lenCphStrm) {
-#pragma HLS allocation instances = updateKey limit = 1 function
-#pragma HLS allocation instances = process limit = 1 function
-
     bool end = endLenPldStrm.read();
     xf::security::aesEnc<_keyWidth> cipher;
 
@@ -414,9 +411,6 @@ void aesCtrDecrypt(
     hls::stream<ap_uint<128> >& S0Strm,
     hls::stream<ap_uint<128> >& cipherStrm,
     hls::stream<ap_uint<64> >& lenCphStrm) {
-#pragma HLS allocation instances = updateKey limit = 1 function
-#pragma HLS allocation instances = process limit = 1 function
-
     bool end = endLenPldStrm.read();
     xf::security::aesEnc<_keyWidth> cipher;
     while (!end) {
@@ -596,9 +590,6 @@ void CBC_MAC(
     // stream out
     hls::stream<ap_uint<8 * _t> >& tagStrm,
     hls::stream<bool>& endTagStrm) {
-#pragma HLS allocation instances = updateKey limit = 1 function
-#pragma HLS allocation instances = process limit = 1 function
-
     bool end = endLenStrm.read();
     xf::security::aesEnc<_keyWidth> cipher;
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ help::
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
@@ -56,7 +56,14 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
+DEVICE ?= xilinx_u250_xdma_201830_2
+ifeq ($(findstring zc, $(DEVICE)), zc)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+
+ifneq ($(findstring u250, $(DEVICE)), u250)
+$(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
 
 include ./utils.mk
 
@@ -69,57 +76,57 @@ EMCONFIG_DIR := $(BUILD_DIR)
 
 # Setting tools
 VPP := v++
-SDCARD := sd_card
-EMU_DIR := $(SDCARD)/data/emulation
 
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L1/benchmarks/aes256CbcDecrypt/host/main.cpp
+HOST_SRCS += $(CUR_DIR)/host/main.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
 
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include
-CXXFLAGS += -I$(XFLIB_DIR)/L1/benchmarks/aes256CbcDecrypt/host
-CXXFLAGS += -I$(XFLIB_DIR)/L1/benchmarks/aes256CbcDecrypt/kernel
+CXXFLAGS += -I$(CUR_DIR)/host
+CXXFLAGS += -I$(CUR_DIR)/kernel
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 
 
 
+CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
+
+
+
+LDFLAGS += -lssl -lcrypto
+
 # Host compiler global settings
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14  -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread 
-LDFLAGS += -L$(XILINX_XRT)/lib -lxilinxopencl -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE 
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 -lssl -lcrypto
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
 
 
-EXE_FILE := aes256CbcDecryptBenchmark.exe
-SOC_HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/aes256CbcDecryptKernel.xclbin
+EXE_NAME := aes256CbcDecryptBenchmark.exe
+EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/aes256CbcDecryptKernel.xclbin
+
 ifneq ($(HOST_ARCH), x86)
 	LDFLAGS += --sysroot=$(SYSROOT)
 endif
 
 ############################## Setting up Kernel Variables ##############################
 # Kernel compiler global settings
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-VPP_FLAGS += --config conn_u250.ini
-CXXFLAGS += -DUSE_DDR
-endif
-
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 LDCLFLAGS += --optimize 2 --jobs 8
-ifeq ($(TARGET),sw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+CXXFLAGS += -D USE_DDR
+VPP_FLAGS += --config $(CUR_DIR)/conn_u250.ini
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+CXXFLAGS += -D USE_HBM
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50.ini
 endif
-ifeq ($(TARGET),hw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
-endif
+
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
-VPP_FLAGS += -I$(XFLIB_DIR)/L1/benchmarks/aes256CbcDecrypt/kernel
 
-
-# Kernel linker flags
-LDCLFLAGS_aes256CbcDecryptKernel +=  --nk aes256CbcDecryptKernel:1:aes256CbcDecryptKernel
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
+VPP_FLAGS += -I$(CUR_DIR)/kernel
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/aes256CbcDecryptKernel.xclbin
@@ -129,7 +136,7 @@ BINARY_CONTAINER_aes256CbcDecryptKernel_OBJS += $(TEMP_DIR)/aes256CbcDecryptKern
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
+all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: host
 host: $(EXE_FILE) | check_xrt
@@ -137,11 +144,14 @@ host: $(EXE_FILE) | check_xrt
 .PHONY: xclbin
 xclbin: check_vpp | $(BINARY_CONTAINERS)
 
+.PHONY: build
+build: xclbin
+
 ############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-$(TEMP_DIR)/aes256CbcDecryptKernel.xo: $(XFLIB_DIR)/L1/benchmarks/aes256CbcDecrypt/kernel/aes256CbcDecryptKernel.cpp
+$(TEMP_DIR)/aes256CbcDecryptKernel.xo: $(CUR_DIR)/kernel/aes256CbcDecryptKernel.cpp
 	$(ECHO) "Compiling Kernel: aes256CbcDecryptKernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(aes256CbcDecryptKernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k aes256CbcDecryptKernel -I'$(<D)' -o $@ $^
+	$(VPP) $(aes256CbcDecryptKernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k aes256CbcDecryptKernel -I'$(<D)' -o'$@' '$<'
 
 $(BUILD_DIR)/aes256CbcDecryptKernel.xclbin: $(BINARY_CONTAINER_aes256CbcDecryptKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
@@ -149,6 +159,7 @@ $(BUILD_DIR)/aes256CbcDecryptKernel.xclbin: $(BINARY_CONTAINER_aes256CbcDecryptK
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(HOST_SRCS) | check_xrt
+	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -157,45 +168,11 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 ############################## Setting Essential Checks and Running Rules ##############################
 run: all
-ifeq ($(findstring zc*, $(DEVICE)), zc*)
-$(error This example is not supported for $(DEVICE))
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-ifeq ($(HOST_ARCH), x86)
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 else
-	mkdir -p $(EMU_DIR)
-	$(CP) $(XILINX_VITIS)/data/emulation/unified $(EMU_DIR)
-	mkfatimg $(SDCARD) $(SDCARD).img 500000
-	launch_emulator -no-reboot -runtime ocl -t $(TARGET) -sd-card-image $(SDCARD).img -device-family $(DEV_FAM)
-endif
-else
-ifeq ($(HOST_ARCH), x86)
-	./$(EXE_FILE) $(HOST_ARGS)
-else
-	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
-endif
-endif
-
-############################## Preparing sdcard folder ##############################
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-ifneq ($(HOST_ARCH), x86)
-	mkdir -p $(SDCARD)/$(BUILD_DIR)
-	mkdir -p $(SDCARD)/data
-	$(CP) $(B_NAME)/sw/$(XDEVICE)/boot/generic.readme $(B_NAME)/sw/$(XDEVICE)/xrt/image/* xrt.ini $(EXE_FILE) $(SDCARD)
-	$(CP) $(BUILD_DIR)/*.xclbin $(SDCARD)/$(BUILD_DIR)/
-ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-	$(ECHO) 'cd /mnt/' >> $(SDCARD)/init.sh
-	$(ECHO) 'export XILINX_VITIS=$$PWD' >> $(SDCARD)/init.sh
-	$(ECHO) 'export XCL_EMULATION_MODE=$(TARGET)' >> $(SDCARD)/init.sh
-	$(ECHO) './$(EXE_FILE) $(SOC_HOST_ARGS)' >> $(SDCARD)/init.sh
-	$(ECHO) 'reboot' >> $(SDCARD)/init.sh
-else
-	[ -f $(SDCARD)/BOOT.BIN ] && echo "INFO: BOOT.BIN already exists" || $(CP) $(BUILD_DIR)/sd_card/BOOT.BIN $(SDCARD)/
-	$(ECHO) './$(EXE_FILE) $(SOC_HOST_ARGS)' >> $(SDCARD)/init.sh
-endif
+	$(EXE_FILE) $(HOST_ARGS)
 endif
 
 ############################## Cleaning Rules ##############################
@@ -205,12 +182,12 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* sample_* 
+	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* 
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) *.txt.* $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw
+	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
 
 

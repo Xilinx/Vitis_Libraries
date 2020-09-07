@@ -13,6 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, DES, 3DES, algorithm, Triple DES
+   :description: DES (Data Encryption Algorithm) is to encipher and decipher 64 bit data blocks using 64 bit key. 3DES (Triple DES) is an enhancement of DES. It needs 3 keys, and consists of 3 rounds of DES. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+
 *****************************
 DES and 3DES Algorithms
 *****************************
@@ -20,15 +28,13 @@ DES and 3DES Algorithms
 .. toctree::
    :maxdepth: 1
 
-DES (Data Encryption Algorithm) is to encipher and decipher 64 bit data
-blocks using 64 bit key. The key is scheduled to construct 16 round keys.
+DES (Data Encryption Algorithm) is to encipher and decipher 64 bit data blocks using 64 bit key. The key is scheduled to construct 16 round keys.
 These round keys are used in encryption and decryption flow.
 
 In DES specification, data blocks and keys are composed of bits numbered
 from left to right, meaning that the left most bit is bit one.
 
-3DES (Triple DES) is an enhancement of DES. It needs 3 keys, and consists of
-3 rounds of DES. 
+3DES (Triple DES) is an enhancement of DES. It needs 3 keys, and consists of 3 rounds of DES. 
 
 Algorithm Flow
 =======================
