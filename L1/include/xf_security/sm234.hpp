@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file sm234.hpp
+ * @brief header file for SM2 / SM3 / SM4 algorithm related functions.
+ * This file is part of Vitis Security Library.
+ */
+
 #ifndef _XF_SECURITY_SM234_HPP_
 #define _XF_SECURITY_SM234_HPP_
 
@@ -27,6 +33,11 @@ namespace internal {
 
 struct sm3BlkPack {
     uint32_t M[16];
+
+    sm3BlkPack() {
+#pragma HLS inline
+#pragma HLS array_partition variable = M dim = 1 complete
+    }
 };
 
 static void sm3Packing(hls::stream<ap_uint<64> >& msgStrm,
@@ -41,9 +52,9 @@ static void sm3Packing(hls::stream<ap_uint<64> >& msgStrm,
         numPackStrm.write(numPack);
         endNumPackStrm.write(false);
         for (ap_uint<64> i = 0; i < ap_uint<64>(len >> 9); i++) {
-#pragma HLS pipeline II = 16
             sm3BlkPack blkPack;
             for (int j = 0; j < 16; j += 2) {
+#pragma HLS pipeline II = 8
                 uint64_t ll = msgStrm.read().to_uint64();
                 uint32_t l = ll & 0xffffffffUL;
                 l = ((0x000000ffUL & l) << 24) | ((0x0000ff00UL & l) << 8) | ((0x00ff0000UL & l) >> 8) |
@@ -53,14 +64,15 @@ static void sm3Packing(hls::stream<ap_uint<64> >& msgStrm,
                 l = ((0x000000ffUL & l) << 24) | ((0x0000ff00UL & l) << 8) | ((0x00ff0000UL & l) >> 8) |
                     ((0xff000000UL & l) >> 24);
                 blkPack.M[j + 1] = l;
+                if (j == 14) {
+                    packStrm.write(blkPack);
+                }
             }
-            packStrm.write(blkPack);
         }
         // last pack
         ap_uint<10> left = len.range(8, 0);
         sm3BlkPack blkPack;
         for (ap_uint<10> i = 0; i < 512; i += 64) {
-#pragma HLS pipeline II = 2
             if (i < left) {
                 ap_uint<10> ii = (i >> 5);
                 uint64_t ll = msgStrm.read().to_uint64();
@@ -88,6 +100,7 @@ static void sm3Packing(hls::stream<ap_uint<64> >& msgStrm,
         } else {
             packStrm.write(blkPack);
             for (int i = 0; i < 14; i++) {
+#pragma HLS unroll
                 blkPack.M[i] = 0;
             }
             blkPack.M[14] = len.range(63, 32);
@@ -170,25 +183,27 @@ static void sm3Expand(hls::stream<sm3BlkPack>& packStrm,
         ap_uint<32> regF = ap_uint<32>("0x163138aa");
         ap_uint<32> regG = ap_uint<32>("0xe38dee4d");
         ap_uint<32> regH = ap_uint<32>("0xb0fb0e4e");
+        ap_uint<32> recA = regA;
+        ap_uint<32> recB = regB;
+        ap_uint<32> recC = regC;
+        ap_uint<32> recD = regD;
+        ap_uint<32> recE = regE;
+        ap_uint<32> recF = regF;
+        ap_uint<32> recG = regG;
+        ap_uint<32> recH = regH;
+
+        sm3BlkPack pack;
+        uint32_t msgWord[68];
+#pragma HLS array_partition variable = msgWord dim = 1
+        uint32_t msgWordP[64];
+#pragma HLS array_partition variable = msgWordP dim = 1
 
         for (ap_uint<64> i = 0; i < numPack; i++) {
-#pragma HLS pipeline II = 68
-            sm3BlkPack pack = packStrm.read();
-            uint32_t msgWord[68];
-#pragma HLS array_partition variable = msgWord dim = 1
-            uint32_t msgWordP[64];
-#pragma HLS array_partition variable = msgWordP dim = 1
-            ap_uint<32> recA = regA;
-            ap_uint<32> recB = regB;
-            ap_uint<32> recC = regC;
-            ap_uint<32> recD = regD;
-            ap_uint<32> recE = regE;
-            ap_uint<32> recF = regF;
-            ap_uint<32> recG = regG;
-            ap_uint<32> recH = regH;
-
             for (int j = 0; j < 68; j++) {
 #pragma HLS pipeline II = 1
+                if (j == 0) {
+                    pack = packStrm.read();
+                }
                 if (j < 16) {
                     msgWord[j] = pack.M[j];
                 } else {
@@ -214,15 +229,26 @@ static void sm3Expand(hls::stream<sm3BlkPack>& packStrm,
                     regF = regE;
                     regE = sm3P0(tt2);
                 }
+                if (j == 67) {
+                    regA ^= recA;
+                    regB ^= recB;
+                    regC ^= recC;
+                    regD ^= recD;
+                    regE ^= recE;
+                    regF ^= recF;
+                    regG ^= recG;
+                    regH ^= recH;
+
+                    recA = regA;
+                    recB = regB;
+                    recC = regC;
+                    recD = regD;
+                    recE = regE;
+                    recF = regF;
+                    recG = regG;
+                    recH = regH;
+                }
             }
-            regA ^= recA;
-            regB ^= recB;
-            regC ^= recC;
-            regD ^= recD;
-            regE ^= recE;
-            regF ^= recF;
-            regG ^= recG;
-            regH ^= recH;
         }
         ap_uint<256> digest;
         digest.range(31, 0) = sm3ByteShift(regA);
@@ -247,17 +273,36 @@ uint32_t sm4LSH(uint32_t x) {
 
 } // namespace internal
 
+/**
+ * @brief SM2 algorithm related function.
+ * This class provide signing and verifying functions.
+ *
+ * @tparam W Bit width of SM2 curve's parameters.
+ */
 template <int W>
 class sm2 : public xf::security::ecc<W> {
    public:
+    /// X coordinate of generation point
     ap_uint<W> Gx;
+    /// Y coordinate of generation point
     ap_uint<W> Gy;
+    /// Order of generation point
     ap_uint<W> n;
 
     sm2() {
 #pragma HLS inline
     }
 
+    /**
+     * @brief Setup parameters for curve y^2 = x^3 + ax + b in GF(p)
+     *
+     * @param inputA Parameter a for y^2 = x^3 + ax + b in GF(p)
+     * @param inputB Parameter b for y^2 = x^3 + ax + b in GF(p)
+     * @param inputP Parameter p for y^2 = x^3 + ax + b in GF(p)
+     * @param inputGx X coordinate of generation point G.
+     * @param inputGy Y coordinate of generation point G.
+     * @param inputN Order of generation point.
+     */
     void init(ap_uint<W> inputA,
               ap_uint<W> inputB,
               ap_uint<W> inputP,
@@ -272,6 +317,16 @@ class sm2 : public xf::security::ecc<W> {
         n = inputN;
     };
 
+    /**
+     * @brief signing function.
+     * It will return true if input parameters are legal, otherwise return false.
+     *
+     * @param hashZaM Digest value of message to be signed.
+     * @param k A random key to sign the message, should kept different each time to be used.
+     * @param privateKey Private Key to sign the message
+     * @param r part of signing pair {r, s}
+     * @param s part of signing pair {r, s}
+     */
     bool sign(ap_uint<W> hashZaM, ap_uint<W> k, ap_uint<W> privateKey, ap_uint<W>& r, ap_uint<256>& s) {
         bool valid = true;
         ap_uint<W> x, y;
@@ -305,6 +360,16 @@ class sm2 : public xf::security::ecc<W> {
         return valid;
     }
 
+    /**
+     * @brief verifying function.
+     * It will return true if verified, otherwise false.
+     *
+     * @param r part of signing pair {r, s}
+     * @param s part of signing pair {r, s}
+     * @param hashZaM Digest value of message to be signed.
+     * @param Px X coordinate of public key point P.
+     * @param Py Y coordinate of public key point P.
+     */
     bool verify(ap_uint<W> r, ap_uint<W> s, ap_uint<W> hashZaM, ap_uint<W> Px, ap_uint<W> Py) {
         bool valid = true;
         if (r == 0 || r >= n || s == 0 || s >= n) {
@@ -334,6 +399,14 @@ class sm2 : public xf::security::ecc<W> {
     }
 };
 
+/**
+ * @brief SM3 function to genrate digest value for input messages.
+ * @param msgStrm Stream to input messages to be signed.
+ * @param lenStrm Stream to input length of input messages.
+ * @param endLenStrm Stream of end flag of lenStrm.
+ * @param hashStrm Stream to output digests of messges.
+ * @param endHashStrm Stream of end flag of hashStrm.
+ */
 void sm3(hls::stream<ap_uint<64> >& msgStrm,
          hls::stream<ap_uint<64> >& lenStrm,
          hls::stream<bool>& endLenStrm,
@@ -354,6 +427,9 @@ void sm3(hls::stream<ap_uint<64> >& msgStrm,
     xf::security::internal::sm3Expand(packStrm, numPackStrm, endNumPackStrm, hashStrm, endHashStrm);
 }
 
+/**
+ * @brief SM4 encryption / decryption functions.
+ */
 class sm4 {
    public:
     const ap_uint<8> sbox[256] = {
@@ -414,6 +490,10 @@ class sm4 {
 #pragma HLS array_partition variable = sbox dim = 1
     }
 
+    /**
+     * @brief Genrate extension key used in encryption/decryption.
+     * @param key Key.
+     */
     void keyExtension(ap_uint<128> key) {
         const ap_uint<32> FK[4] = {0xA3B1BAC6, 0x56AA3350, 0x677D9197, 0xB27022DC};
         for (int i = 0; i < 4; i++) {
@@ -426,6 +506,11 @@ class sm4 {
         }
     }
 
+    /**
+     * @brief encryption function.
+     * @param input Input block for encryption.
+     * @param output Output of encrypted block.
+     */
     void encrypt(ap_uint<128> input, ap_uint<128>& output) {
         for (int i = 0; i < 32; i++) {
 #pragma HLS pipeline
@@ -442,6 +527,11 @@ class sm4 {
         output = tmp;
     }
 
+    /**
+     * @brief decryption function.
+     * @param input Input block for decryption.
+     * @param output Output of decrypted block.
+     */
     void decrypt(ap_uint<128> input, ap_uint<128>& output) {
         for (int i = 0; i < 32; i++) {
 #pragma HLS pipeline
@@ -458,10 +548,7 @@ class sm4 {
         output = tmp;
     }
 };
-/*
-template <int k>
-uint32_t sm4LSH(uint32_t x)
-*/
+
 } // namespace security
 } // namespace xf
 

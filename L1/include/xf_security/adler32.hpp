@@ -35,9 +35,48 @@ namespace xf {
 namespace security {
 namespace internal {
 
-const ap_uint<32> BASE[] = {
+const ap_uint<20> BASE[] = {
     65521,  131042, 196563, 262084, 327605, 393126, 458647, 524168,
     589689, 655210, 720731, 786252, 851773, 917294, 982815, 1048336}; /* largest prime smaller than 65536 */
+
+template <int IW, int NW>
+struct treeAdd {
+    static ap_uint<IW + NW> f(ap_uint<IW> input[1 << NW]) {
+#pragma HLS inline
+        ap_uint<IW + 1> tmp[1 << (NW - 1)];
+#pragma HLS array_partition variable = tmp dim = 1 complete
+        for (int i = 0; i < (1 << (NW - 1)); i++) {
+#pragma HLS unroll
+            tmp[i] = input[i * 2] + input[i * 2 + 1];
+        }
+        return treeAdd<IW + 1, NW - 1>::f(tmp);
+    }
+};
+
+template <int IW>
+struct treeAdd<IW, 0> {
+    static ap_uint<IW + 1> f(ap_uint<IW> input[1]) {
+#pragma HLS inline
+        return input[0];
+    }
+};
+
+template <int W>
+void chooseFromBase(ap_uint<32>& s) {
+    ap_uint<W> tmp;
+    for (int i = 0; i < W; i++) {
+#pragma HLS unroll
+        if (s > BASE[i]) {
+            tmp[i] = 1;
+        } else {
+            tmp[i] = 0;
+        }
+    }
+    ap_uint<5> clz = tmp.countLeadingZeros();
+    if (clz != W) {
+        s -= BASE[W - 1 - clz];
+    }
+}
 
 } // end of namespace internal
 
@@ -71,28 +110,36 @@ void adler32(hls::stream<ap_uint<32> >& adlerStrm,
 #pragma HLS PIPELINE II = 1
 #pragma HLS loop_tripcount max = 100 min = 100
             inData = inStrm.read();
-            ap_uint<32> sTmp[W];
+            ap_uint<12> sTmp[W];
 #pragma HLS array_partition variable = sTmp dim = 1
             for (int i = 0; i < W; i++) {
 #pragma HLS unroll
                 sTmp[i] = 0;
-            }
-            for (int j = 0; j < W; j++) {
-                for (int k = 0; k < W; k++) {
-                    if (k >= j) sTmp[k] += inData(j * 8 + 7, j * 8);
+                for (int j = 0; j <= i; j++) {
+                    sTmp[i] += inData(j * 8 + 7, j * 8);
                 }
             }
+
             s2 += s1 * W;
-            for (int j = 0; j < W; j++) {
-                s2 += sTmp[j];
+            if (W == 16) {
+                s2 += internal::treeAdd<12, 4>::f(sTmp);
+            } else if (W == 8) {
+                s2 += internal::treeAdd<12, 3>::f(sTmp);
+            } else if (W == 4) {
+                s2 += internal::treeAdd<12, 2>::f(sTmp);
+            } else if (W == 2) {
+                s2 += internal::treeAdd<12, 1>::f(sTmp);
+            } else if (W == 1) {
+                s2 += internal::treeAdd<12, 0>::f(sTmp);
             }
-            s1 += sTmp[W - 1];
+
             for (int j = 0; j < W; j++) {
                 if (s2 > internal::BASE[W - 1 - j]) {
                     s2 -= internal::BASE[W - 1 - j];
                     break;
                 }
             }
+            s1 += sTmp[W - 1];
             if (s1 > internal::BASE[0]) s1 -= internal::BASE[0];
         }
         for (int j = 0; j < len - (len / W) * W; j++) {
@@ -104,6 +151,7 @@ void adler32(hls::stream<ap_uint<32> >& adlerStrm,
             s2 += s1;
             if (s2 > internal::BASE[0]) s2 -= internal::BASE[0];
         }
+
         ap_uint<32> res = (s2 << 16) + s1;
         outStrm.write(res);
         endOutStrm.write(false);
