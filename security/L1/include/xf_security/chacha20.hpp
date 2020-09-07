@@ -244,6 +244,17 @@ void chacha20(hls::stream<ap_uint<256> >& keyStrm,
     internal::chacha20Imp(keyStrm, counterNonceStrm, plainStrm, ePlainStrm, cipherStrm, eCipherStrm);
 }
 
+/**
+ * @brief xchahcha20 is variant of original chacha20 to support longer nonce of 192bits.
+ *
+ * @param keyStrm initail key
+ * @param nonceStm initial nonce
+ * @param plainStrm input  plain text to be encrypted
+ * @param ePlainStrm the end flag of plainStrm
+ * @param cipherStrm  output encrypted text
+ * @param eCipherStrm the end flag of cipherStrm
+ */
+
 void xchacha20(hls::stream<ap_uint<256> >& keyStrm,
                hls::stream<ap_uint<192> >& nonceStrm,
                hls::stream<ap_uint<512> >& plainStrm,

@@ -118,9 +118,6 @@ void preGMAC(hls::stream<ap_uint<_keyWidth> >& cipherkeyStrm,
              hls::stream<ap_uint<96> >& IVStrm,
              hls::stream<ap_uint<128> >& HStrm,
              hls::stream<ap_uint<128> >& EKY0Strm) {
-#pragma HLS allocation function instances = updateKey limit = 1
-#pragma HLS allocation function instances = process limit = 1
-
     // register cipherkeyStrm
     ap_uint<_keyWidth> key = cipherkeyStrm.read();
     xf::security::aesEnc<_keyWidth> cipher;
@@ -184,8 +181,6 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
              hls::stream<bool>& endLenStrm,
              hls::stream<ap_uint<128> >& tagStrm,
              hls::stream<bool>& endTagStrm) {
-#pragma HLS allocation function instances = GF128_mult limit = 1
-
     bool end = endLenStrm.read();
 
     while (!end) {
@@ -350,8 +345,6 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
              hls::stream<ap_uint<128> >& HStrm,
              hls::stream<ap_uint<128> >& EKY0Strm,
              hls::stream<ap_uint<128> >& tagStrm) {
-#pragma HLS allocation function instances = GF128_mult limit = 1
-
     // register lenAAD
     ap_uint<64> lenAAD = lenAADStrm.read();
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)

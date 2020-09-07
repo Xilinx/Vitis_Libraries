@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file ecdsa.hpp
+ * @brief header file for Elliptic Curve Digital Signature Algorithm
+ * related function. Now it support curve secp256k1.
+ * This file is part of Vitis Security Library.
+ */
+
 #ifndef _XF_SECURITY_ECDSA_HPP_
 #define _XF_SECURITY_ECDSA_HPP_
 
@@ -22,18 +29,29 @@
 
 namespace xf {
 namespace security {
-//
+/**
+ * @brief Elliptic Curve Digital Signature Algorithm on curve secp256k1.
+ * This class provide signing and verifying functions.
+ *
+ * @tparam HashW Bit Width of digest that used for signting and verifying.
+ */
 template <int HashW>
 class ecdsaSecp256k1 : public xf::security::ecc<256> {
    public:
+    /// X coordinate of generation point of curve secp256k1.
     ap_uint<256> Gx;
+    /// Y coordinate of generation point of curve secp256k1.
     ap_uint<256> Gy;
+    /// Order of curve secp256k1.
     ap_uint<256> n;
 
     ecdsaSecp256k1() {
 #pragma HLS inline
     }
 
+    /**
+     * @brief Setup parameters for curve y^2 = x^3 + ax + b in GF(p)
+     */
     void init() {
         this->a = ap_uint<256>("0x0");
         this->b = ap_uint<256>("0x7");
@@ -43,10 +61,27 @@ class ecdsaSecp256k1 : public xf::security::ecc<256> {
         n = ap_uint<256>("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
     };
 
+    /**
+     * @brief Generate Public Key point Q from private key
+     *
+     * @param privateKey Private Key.
+     * @param Qx X coordinate of point Q.
+     * @param Qy Y coordinate of point Q.
+     */
     void generatePubKey(ap_uint<256> privateKey, ap_uint<256>& Qx, ap_uint<256>& Qy) {
         this->dotProduct(Gx, Gy, privateKey, Qx, Qy);
     }
 
+    /**
+     * @brief signing function.
+     * It will return true if input parameters are legal, otherwise return false.
+     *
+     * @param hash Digest value of message to be signed.
+     * @param k A random key to sign the message, should kept different each time to be used.
+     * @param privateKey Private Key to sign the message
+     * @param r part of signing pair {r, s}
+     * @param s part of signing pair {r, s}
+     */
     bool sign(ap_uint<HashW> hash, ap_uint<256> k, ap_uint<256> privateKey, ap_uint<256>& r, ap_uint<256>& s) {
         ap_uint<256> x, y;
         this->dotProduct(Gx, Gy, k, x, y); //(x, y) = k * (Gx, Gy);
@@ -88,6 +123,16 @@ class ecdsaSecp256k1 : public xf::security::ecc<256> {
         }
     }
 
+    /**
+     * @brief verifying function.
+     * It will return true if verified, otherwise false.
+     *
+     * @param r part of signing pair {r, s}
+     * @param s part of signing pair {r, s}
+     * @param hash Digest value of message to be signed.
+     * @param Px X coordinate of public key point P.
+     * @param Py Y coordinate of public key point P.
+     */
     bool verify(ap_uint<256> r, ap_uint<256> s, ap_uint<HashW> hash, ap_uint<256> Px, ap_uint<256> Py) {
         if (Px == 0 && Py == 0) {
             return false; // return false if public key is zero.
