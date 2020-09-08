@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, SHA-3, Algorithm
+   :description: SHA-3 (Secure Hash Algorithm 3) is a set of cryptographic hash functions defined in FIPS 202: SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions. 
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 ****************
 SHA-3 Algorithms
 ****************

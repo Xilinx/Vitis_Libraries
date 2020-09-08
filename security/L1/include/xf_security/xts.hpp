@@ -74,8 +74,6 @@ void aesXtsEncrypt(
     // stream out
     hls::stream<ap_uint<128> >& ciphertext_strm,
     hls::stream<bool>& ciphertext_e_strm) {
-#pragma HLS allocation instances = aesEncrypt limit = 1 function
-
     // register cipherkey and IV
     ap_uint<_keyWidth> key_1 = cipherkey_strm.read();
     ap_uint<_keyWidth> key_2 = cipherkey_strm.read();
@@ -217,8 +215,6 @@ void aesXtsDecrypt(
     // stream out
     hls::stream<ap_uint<128> >& plaintext_strm,
     hls::stream<bool>& plaintext_e_strm) {
-#pragma HLS allocation instances = aesDecrypt limit = 1 function
-
     // register cipherkey and IV
     ap_uint<_keyWidth> key_1 = cipherkey_strm.read();
     ap_uint<_keyWidth> key_2 = cipherkey_strm.read();

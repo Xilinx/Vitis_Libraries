@@ -40,12 +40,39 @@ namespace xf {
 namespace security {
 namespace internal {
 
+static ap_uint<128> lsh_by1_modify(ap_uint<128> x) {
+    // This is left shift by 1 in GF(2^128)
+    ap_uint<128> res;
+    for (int i = 0; i < 16; i++) {
+#pragma HLS unroll
+        res.range(i * 8 + 7, i * 8) = ap_uint<8>(x.range(i * 8 + 7, i * 8)) >> 1;
+        if (i == 0) {
+            res[i * 8 + 7] = 0;
+            if (x[120] == 1) {
+                res.range(i * 8 + 7, i * 8) = res.range(i * 8 + 7, i * 8) ^ 0xE1;
+            }
+        } else {
+            res[i * 8 + 7] = x[(i - 1) * 8];
+        }
+    }
+    return res;
+}
+
+static void GF128_prepare(ap_uint<128> H, ap_uint<128> Y[128]) {
+    Y[0] = H;
+    for (int i = 1; i < 128; i++) {
+#pragma HLS pipeline
+        Y[i] = lsh_by1_modify(Y[i - 1]);
+    }
+}
+
 /**
  *
- * @brief Calculate Z = X * Y in Galois Field(2^128)
+ * @brief Optimized version of multiplication in GF(2^128)
  *
- * The algorithm reference is: "IEEE Standard for Authenticated Encryption with Length Expansion for Storage Devices"
- * The implementation is modified for better performance.
+ * Because in call of GF128_mult_origin within a loop, the input Y is fixed.
+ * So we pre-calculate Y^n in GF(2^128) with GF128_prepare().
+ * This will reduce II in genGMAC from 23 to 1
  *
  * @param X The first operand.
  * @param Y The second operand.
@@ -53,95 +80,27 @@ namespace internal {
  *
  */
 
-static void GF128_mult(
-    // input port
-    ap_uint<128> X,
-    ap_uint<128> Y,
-    // output port
-    ap_uint<128>& Z) {
-    // register and reshape input X
-    ap_uint<128> V = X;
-    V.range(127, 120) = X.range(7, 0);
-    V.range(119, 112) = X.range(15, 8);
-    V.range(111, 104) = X.range(23, 16);
-    V.range(103, 96) = X.range(31, 24);
-    V.range(95, 88) = X.range(39, 32);
-    V.range(87, 80) = X.range(47, 40);
-    V.range(79, 72) = X.range(55, 48);
-    V.range(71, 64) = X.range(63, 56);
-    V.range(63, 56) = X.range(71, 64);
-    V.range(55, 48) = X.range(79, 72);
-    V.range(47, 40) = X.range(87, 80);
-    V.range(39, 32) = X.range(95, 88);
-    V.range(31, 24) = X.range(103, 96);
-    V.range(23, 16) = X.range(111, 104);
-    V.range(15, 8) = X.range(119, 112);
-    V.range(7, 0) = X.range(127, 120);
-    V.reverse();
-
-    // register and reshape input Y
-    ap_uint<128> Y_r = Y;
-    Y_r.range(127, 120) = Y.range(7, 0);
-    Y_r.range(119, 112) = Y.range(15, 8);
-    Y_r.range(111, 104) = Y.range(23, 16);
-    Y_r.range(103, 96) = Y.range(31, 24);
-    Y_r.range(95, 88) = Y.range(39, 32);
-    Y_r.range(87, 80) = Y.range(47, 40);
-    Y_r.range(79, 72) = Y.range(55, 48);
-    Y_r.range(71, 64) = Y.range(63, 56);
-    Y_r.range(63, 56) = Y.range(71, 64);
-    Y_r.range(55, 48) = Y.range(79, 72);
-    Y_r.range(47, 40) = Y.range(87, 80);
-    Y_r.range(39, 32) = Y.range(95, 88);
-    Y_r.range(31, 24) = Y.range(103, 96);
-    Y_r.range(23, 16) = Y.range(111, 104);
-    Y_r.range(15, 8) = Y.range(119, 112);
-    Y_r.range(7, 0) = Y.range(127, 120);
-    Y_r.reverse();
-
-    // calculate multiplication product
-    ap_uint<128> P = 0;
-LOOP_MULT:
-    for (int i = 0; i < 128; i++) {
-#pragma HLS pipeline II = 1
-        if (1 == Y_r[i]) {
-            P = P ^ V;
-        }
-        if (0 == V[127]) {
-            V = V << 1;
-        } else {
-            V = V << 1;
-            V.range(127, 64) = V.range(127, 64) ^ 0x0000000000000000;
-            V.range(63, 0) = V.range(63, 0) ^ 0x0000000000000087;
+static void GF128_mult(ap_uint<128>& X, ap_int<128> AAD, ap_uint<128> Y[128]) {
+    ap_uint<128> res = 0;
+    ap_uint<128> tmpX = X ^ AAD;
+    for (int i = 0; i < 128; i += 8) {
+#pragma HLS unroll
+        for (int j = 0; j < 8; j++) {
+#pragma HLS unroll
+            if (tmpX[i + 7 - j] == 1) {
+                res ^= Y[i + j];
+            }
         }
     }
-
-    // reshape and write out the result
-    P.reverse();
-    Z.range(127, 120) = P.range(7, 0);
-    Z.range(119, 112) = P.range(15, 8);
-    Z.range(111, 104) = P.range(23, 16);
-    Z.range(103, 96) = P.range(31, 24);
-    Z.range(95, 88) = P.range(39, 32);
-    Z.range(87, 80) = P.range(47, 40);
-    Z.range(79, 72) = P.range(55, 48);
-    Z.range(71, 64) = P.range(63, 56);
-    Z.range(63, 56) = P.range(71, 64);
-    Z.range(55, 48) = P.range(79, 72);
-    Z.range(47, 40) = P.range(87, 80);
-    Z.range(39, 32) = P.range(95, 88);
-    Z.range(31, 24) = P.range(103, 96);
-    Z.range(23, 16) = P.range(111, 104);
-    Z.range(15, 8) = P.range(119, 112);
-    Z.range(7, 0) = P.range(127, 120);
-
-} // end GF128_mult
+    X = res;
+}
 
 /**
  *
  * @brief preGMAC generates H and E_K_Y0 based on AES block cipher.
  *
- * The algorithm reference is: "IEEE Standard for Authenticated Encryption with Length Expansion for Storage Devices"
+ * The algorithm reference is: "IEEE Standard for Authenticated Encryption with Length Expansion for Storage
+ * Devices"
  * The implementation is modified for less resource utilizations while having a reasonable latency.
  *
  * @tparam _keyWidth	The bit-width of the cipherkey.
@@ -159,9 +118,6 @@ void preGMAC(hls::stream<ap_uint<_keyWidth> >& cipherkeyStrm,
              hls::stream<ap_uint<96> >& IVStrm,
              hls::stream<ap_uint<128> >& HStrm,
              hls::stream<ap_uint<128> >& EKY0Strm) {
-#pragma HLS allocation instances = updateKey limit = 1 function
-#pragma HLS allocation instances = process limit = 1 function
-
     // register cipherkeyStrm
     ap_uint<_keyWidth> key = cipherkeyStrm.read();
     xf::security::aesEnc<_keyWidth> cipher;
@@ -225,8 +181,6 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
              hls::stream<bool>& endLenStrm,
              hls::stream<ap_uint<128> >& tagStrm,
              hls::stream<bool>& endTagStrm) {
-#pragma HLS allocation instances = GF128_mult limit = 1 function
-
     bool end = endLenStrm.read();
 
     while (!end) {
@@ -242,6 +196,10 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
         std::cout << "H = " << std::hex << H << std::endl;
 #endif
+
+        ap_uint<128> Y[128];
+#pragma HLS array_partition variable = Y dim = 1 complete
+        GF128_prepare(H, Y);
 
         // register E(K,Y0)
         ap_uint<128> EKY0 = EKY0Strm.read();
@@ -260,11 +218,8 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
             std::cout << "AAD = " << std::hex << AAD << std::endl;
 #endif
 
-            // calculate the input for GHASH
-            multIn = multResult ^ AAD;
-
             // calculate GHASH
-            GF128_mult(multIn, H, multResult);
+            GF128_mult(multResult, AAD, Y);
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
             std::cout << "X = " << std::hex << multResult << std::endl;
 #endif
@@ -278,11 +233,8 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
 #endif
             AAD.range(127, lenAAD % 128) = 0;
 
-            // calculate the input for GHASH
-            multIn = multResult ^ AAD;
-
             // calculate GHASH
-            GF128_mult(multIn, H, multResult);
+            GF128_mult(multResult, AAD, Y);
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
             std::cout << "X = " << std::hex << multResult << std::endl;
 #endif
@@ -306,7 +258,7 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
             multIn = multResult ^ pld;
 
             // calculate GHASH
-            GF128_mult(multIn, H, multResult);
+            GF128_mult(multResult, pld, Y);
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
             std::cout << "X = " << std::hex << multResult << std::endl;
 #endif
@@ -324,7 +276,7 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
             multIn = multResult ^ pld;
 
             // calculate GHASH
-            GF128_mult(multIn, H, multResult);
+            GF128_mult(multResult, pld, Y);
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
             std::cout << "X = " << std::hex << multResult << std::endl;
 #endif
@@ -354,11 +306,8 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
         std::cout << "lenAC = " << std::hex << lenAC << std::endl;
 #endif
 
-        // calculate the input for GHASH
-        multIn = multResult ^ lenAC;
-
         // calculate GHASH
-        GF128_mult(multIn, H, multResult);
+        GF128_mult(multResult, lenAC, Y);
 
         // calculate the MAC
         ap_uint<128> tag = multResult ^ EKY0;
@@ -396,8 +345,6 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
              hls::stream<ap_uint<128> >& HStrm,
              hls::stream<ap_uint<128> >& EKY0Strm,
              hls::stream<ap_uint<128> >& tagStrm) {
-#pragma HLS allocation instances = GF128_mult limit = 1 function
-
     // register lenAAD
     ap_uint<64> lenAAD = lenAADStrm.read();
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
@@ -409,6 +356,10 @@ void genGMAC(hls::stream<ap_uint<128> >& AADStrm,
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
     std::cout << "H = " << std::hex << H << std::endl;
 #endif
+
+    ap_uint<128> Y[128];
+#pragma HLS array_partition variable = Y dim = 1 complete
+    GF128_prepare(H, Y);
 
     // register E(K,Y0)
     ap_uint<128> EKY0 = EKY0Strm.read();
@@ -427,11 +378,8 @@ LOOP_FIRST_HALF:
         std::cout << "AAD = " << std::hex << AAD << std::endl;
 #endif
 
-        // calculate the input for GHASH
-        multIn = multResult ^ AAD;
-
         // calculate GHASH
-        GF128_mult(multIn, H, multResult);
+        GF128_mult(multResult, AAD, Y);
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
         std::cout << "X = " << std::hex << multResult << std::endl;
 #endif
@@ -445,11 +393,8 @@ LOOP_FIRST_HALF:
 #endif
         AAD.range(127, lenAAD % 128) = 0;
 
-        // calculate the input for GHASH
-        multIn = multResult ^ AAD;
-
         // calculate GHASH
-        GF128_mult(multIn, H, multResult);
+        GF128_mult(multResult, AAD, Y);
 #if !defined(__SYNTHESIS__) && (_XF_SECURITY_GMAC_DEBUG_ == 1)
         std::cout << "X = " << std::hex << multResult << std::endl;
 #endif
@@ -472,11 +417,8 @@ LOOP_FIRST_HALF:
     std::cout << "lenAC = " << std::hex << lenAC << std::endl;
 #endif
 
-    // calculate the input for GHASH
-    multIn = multResult ^ lenAC;
-
     // calculate GHASH
-    GF128_mult(multIn, H, multResult);
+    GF128_mult(multResult, lenAC, Y);
 
     // calculate the MAC
     ap_uint<128> tag = multResult ^ EKY0;

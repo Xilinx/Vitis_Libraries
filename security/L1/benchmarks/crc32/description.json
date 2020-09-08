@@ -1,0 +1,112 @@
+{
+    "gui": true, 
+    "name": "Xilinx CRC32 Benchmark", 
+    "description": "", 
+    "flow": "vitis", 
+    "platform_whitelist": [
+        "u50"
+    ], 
+    "platform_blacklist": [
+        "zc"
+    ], 
+    "platform_properties": {
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
+                    ]
+                }
+            }
+        }
+    }, 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/CRC32Kernel.xclbin -data PROJECT/data/test.dat -num 16", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L1/benchmarks/crc32/host/main.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L1/benchmarks/crc32/host", 
+                "LIB_DIR/L1/benchmarks/crc32/kernel", 
+                "LIB_DIR/ext/xcl2"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include", 
+                "LIB_DIR/L1/benchmarks/crc32/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L1/benchmarks/crc32/kernel/crc32_kernel.cpp", 
+                    "frequency": 300.0, 
+                    "name": "CRC32Kernel", 
+                    "num_compute_units": 1, 
+                    "compute_units": [
+                        {
+                            "name": "CRC32Kernel", 
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "len", 
+                                    "memory": "DDR[0]"
+                                }, 
+                                {
+                                    "name": "inData", 
+                                    "memory": "DDR[8]"
+                                }, 
+                                {
+                                    "name": "crc32Result", 
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ], 
+            "frequency": 300.0, 
+            "name": "CRC32Kernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }
+}

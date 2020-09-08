@@ -13,6 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Vitis Security design, internals, design internals
+   :description: Vitis Security Library design internals.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
 **************************************
 Design Internals
 **************************************

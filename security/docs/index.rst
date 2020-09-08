@@ -13,6 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+.. meta::
+   :keywords: Vitis, Security, Library, Vitis Security Library, overview
+   :description: Vitis Security Library is an open-sourced Vitis library written in C++ for accelerating security applications in a variety of use cases.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
 **********************
 Vitis Security Library
 **********************
