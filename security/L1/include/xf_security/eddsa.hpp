@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file eddsa.hpp
+ * @brief header file for Edwards-curve Digital Signature Algorithm related function.
+ * Now it support curve ed25519.
+ * This file is part of Vitis Security Library.
+ */
+
 #ifndef _XF_SECURITY_EDDSA_HPP_
 #define _XF_SECURITY_EDDSA_HPP_
 
@@ -23,9 +30,15 @@
 
 namespace xf {
 namespace security {
-//
+
+/**
+ * @brief Edwards-curve Digital Signature Algorithm on curve ed25519.
+ * It take RFC 8032 "Edwards-Curve Digital Signature Algorithm (EdDSA)" as reference.
+ * This class provide signing and verifying functions.
+ */
 class eddsaEd25519 {
    public:
+    /// ed25519 related curve parameters.
     const int b = 256;
     const int c = 3;
     const int n = 254;
@@ -46,12 +59,26 @@ class eddsaEd25519 {
 #pragma HLS inline
     }
 
+    /**
+     * @brief Compress a point (x, y) on curve to its compressed form
+     *
+     * @param x X coordinate of point.
+     * @param y Y coordinate of point.
+     * @param res compressed point representation.
+     */
     void compress(ap_uint<256> x, ap_uint<256> y, ap_uint<256>& res) {
         ap_uint<256> tmp = y;
         tmp[255] = x[0];
         res = tmp;
     }
 
+    /**
+     * @brief Calculate square root of u/v.
+     *
+     * @param u Input u of u/v to calculate square root.
+     * @param v Input u of u/v to calculate square root.
+     * @param sqrt_a Square root of u/v.
+     */
     bool modularSqrt(ap_uint<256> u, ap_uint<256> v, ap_uint<256>& sqrt_a) {
         ap_uint<256> uv = xf::security::internal::productMod<256>(u, v, p);
         ap_uint<256> v2 = xf::security::internal::productMod<256>(v, v, p);
@@ -73,6 +100,13 @@ class eddsaEd25519 {
         }
     }
 
+    /**
+     * @brief Decompress a point (Px, Py) from its compressed representation.
+     *
+     * @param P compressed point representation.
+     * @param Px X coordinate of the point.
+     * @param Py Y coordinate of the point.
+     */
     bool decompress(ap_uint<256> P, ap_uint<256>& Px, ap_uint<256>& Py) {
         Py = P.range(254, 0);
         ap_uint<256> y2 = xf::security::internal::productMod<256>(Py, Py, p);
@@ -90,6 +124,7 @@ class eddsaEd25519 {
         return valid;
     }
 
+   private:
     void writeWholeMsg(ap_uint<8> headLength,
                        ap_uint<128> msgLength,
                        hls::stream<ap_uint<64> >& msgStrm,
@@ -178,6 +213,17 @@ class eddsaEd25519 {
         return digestStrm.read();
     }
 
+   public:
+    /**
+     * @brief perform point addition in ed25519, (x3, y3) = (x1, y1) + (x2, y2)
+     *
+     * @param x1 X coordinate of point 1.
+     * @param y1 Y coordinate of point 1.
+     * @param x2 X coordinate of point 2.
+     * @param y2 Y coordinate of point 2.
+     * @param x3 X coordinate of point 3.
+     * @param y3 Y coordinate of point 3.
+     */
     void pointAdd(
         ap_uint<256> x1, ap_uint<256> y1, ap_uint<256> x2, ap_uint<256> y2, ap_uint<256>& x3, ap_uint<256>& y3) {
         //
@@ -198,6 +244,15 @@ class eddsaEd25519 {
         y3 = xf::security::internal::productMod<256>(yu, yvInv, p);
     }
 
+    /**
+     * @brief perform point multiply scalar in ed25519, (resX, resY) = (x, y) * mag
+     *
+     * @param x X coordinate of point to be multiplied.
+     * @param y Y coordinate of point to be multiplied.
+     * @param mag scalar operand of this multiplication.
+     * @param resX X coordinate of result.
+     * @param resY Y coordinate of result.
+     */
     void pointMul(ap_uint<256> x, ap_uint<256> y, ap_uint<256> mag, ap_uint<256>& resX, ap_uint<256>& resY) {
         //
         ap_uint<256> tmpX = x;
@@ -214,6 +269,13 @@ class eddsaEd25519 {
         resY = tmpResY;
     }
 
+    /**
+     * @brief Generate public key and digest value of privateKey hash value from privateKey.
+     *
+     * @param privateKey Private Key.
+     * @param publicKey Public Key.
+     * @param privateKeyHash Digest value of private key.
+     */
     void generatePublicKey(ap_uint<256> privateKey, ap_uint<256>& publicKey, ap_uint<512>& privateKeyHash) {
         for (int i = 0; i < 4; i++) {
 #pragma HLS pipeline II = 1
@@ -235,6 +297,17 @@ class eddsaEd25519 {
         publicKey = tmpRes;
     }
 
+    /**
+     * @brief signing function
+     *
+     * @param msgStrm Stream to input messages to be signed, each message should be input throught this stream twice.
+     * @param lenStrm Stream to input length of input messages.
+     * @param endLenStrm Stream of end flag of lenStrm.
+     * @param publicKey Public Key.
+     * @param privateKeyHash Digest value of private key.
+     * @param signatureStrm Stream to output signature.
+     * @param endSignatureStrm Stream of end flag of signatureStrm.
+     */
     void sign(hls::stream<ap_uint<64> >& msgStrm,
               hls::stream<ap_uint<128> >& lenStrm,
               hls::stream<bool>& endLenStrm,
@@ -291,6 +364,17 @@ class eddsaEd25519 {
         endSignatureStrm.write(true);
     }
 
+    /**
+     * @brief verifying function
+     *
+     * @param msgStrm Stream to input messages to be signed.
+     * @param lenStrm Stream to input length of input messages.
+     * @param signatureStrm Stream to input signatures.
+     * @param endSignatureStrm Stream of end flag of signatures.
+     * @param publicKeyStrm Stream to input public key.
+     * @param ifValidStrm Stream to output if message signature is valid.
+     * @param endIfValidStrm Stream of end flag of ifValidStrm.
+     */
     void verify(hls::stream<ap_uint<64> >& msgStrm,
                 hls::stream<ap_uint<128> >& lenStrm,
                 hls::stream<ap_uint<512> >& signatureStrm,
