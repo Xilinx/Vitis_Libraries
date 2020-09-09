@@ -96,133 +96,135 @@ Unpack a AXI video stream into a xf::cv::Mat<> object
  *output: img
  */
 
-template <int W, int T, int ROWS, int COLS, int NPC>
-int AXIvideo2xfMat(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, xf::cv::Mat<T, ROWS, COLS, NPC>& img) {
+template <int W, int TYPE, int ROWS, int COLS, int NPPC>
+int AXIvideo2xfMat(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& img) {
+    ap_axiu<W, 1, 1, 1> axi;
+    int res = 0;
+
+    const int m_pix_width = XF_PIXELWIDTH(TYPE, NPPC) * XF_NPIXPERCYCLE(NPPC);
+
+    int rows = img.rows;
+    int cols = img.cols >> XF_BITSHIFT(NPPC);
+    int idx = 0;
+
+    assert(img.rows <= ROWS);
+    assert(img.cols <= COLS);
+
+    bool start = false;
+    bool last = false;
+
+loop_start_hunt:
+    while (!start) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS pipeline II=1
+#pragma HLS loop_tripcount avg=1 max=1
     // clang-format on
 
-    int res = 0, val = 0, depth;
-    ap_axiu<W, 1, 1, 1> axi;
-    xf::cv::Scalar<XF_CHANNELS(T, NPC), XF_TNAME(T, NPC)> pix;
-    depth = XF_WORDDEPTH(XF_WORDWIDTH(T, NPC));
-    //    HLS_SIZE_T rows = img.rows;
-    //    HLS_SIZE_T cols = img.cols;
-    int rows = img.rows;
-    int cols = img.cols;
-    assert(rows <= ROWS);
-    assert(cols <= COLS);
-    bool sof = 0;
-loop_wait_for_start:
-    while (!sof) { // checking starting of frame
-                   // clang-format off
-        #pragma HLS pipeline II=1
-        #pragma HLS loop_tripcount avg=0 max=0
-        // clang-format on
         AXI_video_strm >> axi;
-        sof = axi.user.to_int();
+        start = axi.user.to_bool();
     }
-loop_height:
-    for (int i = 0; i < rows; i++) {
-        bool eol = 0;
-    loop_width:
-        for (int j = 0; j < (cols / NPC); j++) {
-// clang-format off
-            #pragma HLS loop_flatten off
-            #pragma HLS pipeline II=1
-            // clang-format on
-            if (sof || eol) {
-                sof = 0;
-                eol = axi.last.to_int();
-            } else {
-                AXI_video_strm >> axi; // If we didn't reach EOL, then read the next pixel
 
-                eol = axi.last.to_int();
+loop_row_axi2mat:
+    for (int i = 0; i < rows; i++) {
+        last = false;
+
+    loop_col_zxi2mat:
+        for (int j = 0; j < cols; j++) {
+// clang-format off
+#pragma HLS loop_flatten off
+#pragma HLS pipeline II=1
+    // clang-format on
+
+            if (start || last) {
+                start = false;
+            } else {
+                AXI_video_strm >> axi;
+
                 bool user = axi.user.to_int();
                 if (user) {
                     res |= ERROR_IO_SOF_EARLY;
                 }
             }
-            if (eol && (j != cols - 1)) { // checking end of each row
+            if (last && (j != img.cols - 1)) { // checking end of each row
                 res |= ERROR_IO_EOL_EARLY;
             }
-            // All channels are merged in cvMat2AXIVideoxf function
-            xf::cv::AXIGetBitFields(axi, 0, depth, pix.val[0]);
 
-            fetchingmatdata<T, ROWS, COLS, NPC>(img, pix, val);
-            val++;
+            last = axi.last.to_bool();
+
+            img.write(idx++, axi.data(m_pix_width - 1, 0));
         }
-    loop_wait_for_eol:
-        while (!eol) {
+
+    loop_last_hunt:
+        while (!last) {
 // clang-format off
-            #pragma HLS pipeline II=1
-            #pragma HLS loop_tripcount avg=0 max=0
-            // clang-format on
-            // Keep reading until we get to EOL
+#pragma HLS pipeline II=1
+#pragma HLS loop_tripcount avg=1 max=1
+    // clang-format on
+
             AXI_video_strm >> axi;
-            eol = axi.last.to_int();
+            last = axi.last.to_bool();
             res |= ERROR_IO_EOL_LATE;
         }
     }
+
     return res;
 }
 
 // Pack the data of a xf::cv::Mat<> object into an AXI Video stream
 /*
  *  input: img
- *  output: AXI_video_stream
+ *  output: AXI_video_strm
  */
-template <int W, int T, int ROWS, int COLS, int NPC>
-int xfMat2AXIvideo(xf::cv::Mat<T, ROWS, COLS, NPC>& img, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
-// clang-format off
-    #pragma HLS inline
-    // clang-format on
-    int res = 0, index = 0, depth;
-    xf::cv::Scalar<XF_CHANNELS(T, NPC), XF_TNAME(T, NPC)> pix;
+template <int W, int TYPE, int ROWS, int COLS, int NPPC>
+int xfMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& img, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
     ap_axiu<W, 1, 1, 1> axi;
-    depth = XF_WORDDEPTH(XF_WORDWIDTH(T, NPC)); // 8;// HLS_TBITDEPTH(T);
+    int res = 0;
 
-    // std::cout << W << " " << depth << " " << HLS_MAT_CN(T) << "\n";
-    assert(W >= depth * HLS_MAT_CN(T) &&
-           "Bit-Width of AXI stream must be greater than the total number of bits in a pixel");
-    //    HLS_SIZE_T rows = img.rows;
-    //    HLS_SIZE_T cols = img.cols;
     int rows = img.rows;
-    int cols = img.cols;
-    assert(rows <= ROWS);
-    assert(cols <= COLS);
-    bool sof = 1;
-loop_height:
-    for (int i = 0; i < rows; i++) {
-    loop_width:
-        for (int j = 0; j < (cols / NPC); j++) {
-// clang-format off
-            #pragma HLS loop_flatten off
-            #pragma HLS pipeline II=1
-            // clang-format on
-            if (sof) { // checking the start of frame
-                axi.user = 1;
-                sof = 0;
+    int cols = img.cols >> XF_BITSHIFT(NPPC);
+    int idx = 0;
 
+    assert(img.rows <= ROWS);
+    assert(img.cols <= COLS);
+
+    const int m_pix_width = XF_PIXELWIDTH(TYPE, NPPC) * XF_NPIXPERCYCLE(NPPC);
+
+    bool sof = true; // Indicates start of frame
+
+loop_row_mat2axi:
+    for (int i = 0; i < rows; i++) {
+    loop_col_mat2axi:
+        for (int j = 0; j < cols; j++) {
+// clang-format off
+#pragma HLS loop_flatten off
+#pragma HLS pipeline II=1
+    // clang-format on
+
+            if (sof) {
+                axi.user = 1;
             } else {
                 axi.user = 0;
             }
-            if (j == (cols - 1)) { // enabling the last signat at end each row
+
+            if (j == cols - 1) {
                 axi.last = 1;
             } else {
                 axi.last = 0;
             }
-            fillingdata<T, ROWS, COLS, NPC>(img, pix, index); // reading data from img writing into scalar pix
-            index++;
-            axi.data = -1;
 
-            xf::cv::AXISetBitFields(axi, 0, depth, pix.val[0]); // assigning the pix value to AXI data structure
+            axi.data = 0;
+            axi.data(m_pix_width - 1, 0) = img.read(idx++);
+
             axi.keep = -1;
-            AXI_video_strm << axi; // writing axi data into AXI stream
+            AXI_video_strm << axi;
+
+            sof = false;
         }
     }
+
     return res;
 }
+
 } // namespace cv
 } // namespace xf
 
