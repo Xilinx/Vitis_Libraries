@@ -29,31 +29,35 @@ void xil_compress_decompress_list(std::string& file_list,
                                   int cu,
                                   std::string& single_bin,
                                   uint8_t max_cr,
-                                  enum list_mode mode = COMP_DECOMP,
-                                  uint8_t device_id = 0) {
+                                  list_mode mode = COMP_DECOMP,
+                                  uint8_t device_id = 0,
+                                  design_flow dflow = XILINX_GZIP) {
     // Create xfZlib object
-    xfZlib xlz(single_bin, max_cr, BOTH, device_id, 0, FULL);
+    xfZlib xlz(single_bin, max_cr, BOTH, device_id, 0, FULL, dflow);
     ERROR_STATUS(xlz.error_code());
 
     if (mode != ONLY_DECOMPRESS) {
         std::cout << "--------------------------------------------------------------" << std::endl;
-        std::cout << "                     Xilinx GZip Compress                          " << std::endl;
+        if (dflow)
+            std::cout << "                     Xilinx Zlib Compress" << std::endl;
+        else
+            std::cout << "                     Xilinx GZip Compress" << std::endl;
         std::cout << "--------------------------------------------------------------" << std::endl;
 
         std::cout << "\n";
         std::cout << "E2E(MBps)\tCR\t\tFile Size(MB)\t\tFile Name" << std::endl;
         std::cout << "\n";
 
-        std::ifstream infilelist(file_list.c_str());
+        std::ifstream infilelist(file_list);
         std::string line;
 
         // Compress list of files
         // This loop does LZ4 compression on list
         // of files.
         while (std::getline(infilelist, line)) {
-            std::ifstream inFile(line.c_str(), std::ifstream::binary);
+            std::ifstream inFile(line, std::ifstream::binary);
             if (!inFile) {
-                std::cout << "Unable to open file";
+                std::cerr << "Unable to open file" << std::endl;
                 exit(1);
             }
 
@@ -74,12 +78,15 @@ void xil_compress_decompress_list(std::string& file_list,
 
     // Decompress
     if (mode != ONLY_COMPRESS) {
-        std::ifstream infilelist_dec(file_list.c_str());
+        std::ifstream infilelist_dec(file_list);
         std::string line_dec;
 
         std::cout << "\n";
         std::cout << "--------------------------------------------------------------" << std::endl;
-        std::cout << "                     Xilinx GZip DeCompress                       " << std::endl;
+        if (dflow)
+            std::cout << "                     Xilinx Zlib DeCompress" << std::endl;
+        else
+            std::cout << "                     Xilinx GZip DeCompress" << std::endl;
         std::cout << "--------------------------------------------------------------" << std::endl;
         std::cout << "\n";
         std::cout << "E2E(MBps)\tFile Size(MB)\t\tFile Name" << std::endl;
@@ -90,9 +97,9 @@ void xil_compress_decompress_list(std::string& file_list,
             std::string file_line = line_dec;
             file_line = file_line + ext2;
 
-            std::ifstream inFile_dec(file_line.c_str(), std::ifstream::binary);
+            std::ifstream inFile_dec(file_line, std::ifstream::binary);
             if (!inFile_dec) {
-                std::cout << "Unable to open file";
+                std::cerr << "Unable to open file" << std::endl;
                 exit(1);
             }
 
@@ -112,26 +119,39 @@ void xil_compress_decompress_list(std::string& file_list,
     }
 }
 
-void xil_batch_verify(
-    std::string& file_list, int cu, enum list_mode mode, std::string& single_bin, uint8_t device_id, uint8_t max_cr) {
+void xil_batch_verify(std::string& file_list,
+                      int cu,
+                      list_mode mode,
+                      std::string& single_bin,
+                      uint8_t device_id,
+                      uint8_t max_cr,
+                      design_flow dflow) {
     std::string ext1;
     std::string ext2;
-
+    std::string ext3;
     // Xilinx ZLIB Compression
-    ext1 = ".xe2xd.gz";
-    ext2 = ".xe2xd.gz";
-
-    xil_compress_decompress_list(file_list, ext1, ext2, cu, single_bin, max_cr, mode, device_id);
+    if (dflow) {
+        ext1 = ".xe2xd.xz";
+        ext2 = ".xe2xd.xz";
+        ext3 = ".xe2xd.xz.orig";
+    } else {
+        ext1 = ".xe2xd.gz";
+        ext2 = ".xe2xd.gz";
+        ext3 = ".xe2xd.gz.orig";
+    }
+    xil_compress_decompress_list(file_list, ext1, ext2, cu, single_bin, max_cr, mode, device_id, dflow);
 
     // Validate
     std::cout << "\n";
     std::cout << "----------------------------------------------------------------------------------------"
               << std::endl;
-    std::cout << "                       Validate: Xilinx GZip Compress vs Xilinx GZip Decompress           "
-              << std::endl;
+    if (dflow)
+        std::cout << "                       Validate: Xilinx Zlib Compress vs Xilinx Zlib Decompress " << std::endl;
+    else
+        std::cout << "                       Validate: Xilinx GZip Compress vs Xilinx GZip Decompress " << std::endl;
     std::cout << "----------------------------------------------------------------------------------------"
               << std::endl;
-    std::string ext3 = ".xe2xd.gz.orig";
+
     xil_validate(file_list, ext3);
 }
 
@@ -140,12 +160,9 @@ void xil_decompress_top(
     // Xilinx ZLIB object
     xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id, 0, FULL);
     ERROR_STATUS(xlz.error_code());
-
-    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
-
-    std::ifstream inFile(decompress_mod.c_str(), std::ifstream::binary);
+    std::ifstream inFile(decompress_mod, std::ifstream::binary);
     if (!inFile) {
-        std::cout << "Unable to open file";
+        std::cerr << "Unable to open file" << std::endl;
         exit(1);
     }
     uint64_t input_size = get_file_size(inFile);
@@ -154,6 +171,7 @@ void xil_decompress_top(
     std::string lz_decompress_out = decompress_mod;
     lz_decompress_out = lz_decompress_out + ".raw";
 
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
     // Call ZLIB compression
     // uint32_t enbytes =
     xlz.decompress_file(lz_decompress_in, lz_decompress_out, input_size, cu);
@@ -162,27 +180,28 @@ void xil_decompress_top(
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 }
 
-void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_t device_id, uint8_t max_cr) {
+void xil_compress_top(
+    std::string& compress_mod, std::string& single_bin, uint8_t device_id, uint8_t max_cr, design_flow dflow) {
     // Xilinx ZLIB object
-    xfZlib xlz(single_bin, max_cr, COMP_ONLY, device_id, 0, FULL);
+    xfZlib xlz(single_bin, max_cr, COMP_ONLY, device_id, 0, FULL, dflow);
     ERROR_STATUS(xlz.error_code());
-
-    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
-
-    std::ifstream inFile(compress_mod.c_str(), std::ifstream::binary);
+    std::ifstream inFile(compress_mod, std::ifstream::binary);
     if (!inFile) {
-        std::cout << "Unable to open file";
+        std::cerr << "Unable to open file" << std::endl;
         exit(1);
     }
     uint64_t input_size = get_file_size(inFile);
 
     std::string lz_compress_in = compress_mod;
     std::string lz_compress_out = compress_mod;
-    lz_compress_out = lz_compress_out + ".gz";
+    if (dflow)
+        lz_compress_out = lz_compress_out + ".xz";
+    else
+        lz_compress_out = lz_compress_out + ".gz";
 
+    std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
     // Call ZLIB compression
     uint64_t enbytes = xlz.compress_file(lz_compress_in, lz_compress_out, input_size);
-
     std::cout.precision(3);
     std::cout << std::fixed << std::setprecision(2) << std::endl
               << "ZLIB_CR\t\t\t:" << (double)input_size / enbytes << std::endl
@@ -197,7 +216,7 @@ void xil_validate(std::string& file_list, std::string& ext) {
     std::cout << "Status\t\tFile Name" << std::endl;
     std::cout << "\n";
 
-    std::ifstream infilelist_val(file_list.c_str());
+    std::ifstream infilelist_val(file_list);
     std::string line_val;
 
     while (std::getline(infilelist_val, line_val)) {
@@ -210,7 +229,7 @@ void xil_validate(std::string& file_list, std::string& ext) {
         if (ret == 0) {
             std::cout << (ret ? "FAILED\t" : "PASSED\t") << "\t" << line_in << std::endl;
         } else {
-            std::cout << "Validation Failed" << line_out.c_str() << std::endl;
+            std::cerr << "Validation Failed" << line_out.c_str() << std::endl;
             exit(1);
         }
     }
@@ -219,22 +238,25 @@ void xil_validate(std::string& file_list, std::string& ext) {
 void xilCompressDecompressTop(std::string& compress_decompress_mod,
                               std::string& single_bin,
                               uint8_t device_id,
-                              uint8_t max_cr_val) {
+                              uint8_t max_cr_val,
+                              design_flow dflow) {
     // Create xfZlib object
-    xfZlib xlz(single_bin, max_cr_val, BOTH, device_id, 0, FULL);
+    xfZlib xlz(single_bin, max_cr_val, BOTH, device_id, 0, FULL, dflow);
     ERROR_STATUS(xlz.error_code());
-
     std::cout << "--------------------------------------------------------------" << std::endl;
-    std::cout << "                     Xilinx GZip Compress                     " << std::endl;
+    if (dflow)
+        std::cout << "                     Xilinx Zlib Compress" << std::endl;
+    else
+        std::cout << "                     Xilinx GZip Compress" << std::endl;
     std::cout << "--------------------------------------------------------------" << std::endl;
 
     std::cout << "\n";
 
     std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
-    std::ifstream inFile(compress_decompress_mod.c_str(), std::ifstream::binary);
+    std::ifstream inFile(compress_decompress_mod, std::ifstream::binary);
     if (!inFile) {
-        std::cout << "Unable to open file";
+        std::cerr << "Unable to open file" << std::endl;
         exit(1);
     }
 
@@ -243,7 +265,10 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
 
     std::string compress_in = compress_decompress_mod;
     std::string compress_out = compress_decompress_mod;
-    compress_out = compress_out + ".gz";
+    if (dflow)
+        compress_out = compress_out + ".xz";
+    else
+        compress_out = compress_out + ".gz";
 
     // Call Zlib compression
     uint64_t enbytes = xlz.compress_file(compress_in, compress_out, input_size);
@@ -256,21 +281,26 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
 
     std::cout << "\n";
     std::cout << "--------------------------------------------------------------" << std::endl;
-    std::cout << "                     Xilinx GZip DeCompress                       " << std::endl;
+    if (dflow)
+        std::cout << "                     Xilinx Zlib DeCompress" << std::endl;
+    else
+        std::cout << "                     Xilinx GZip DeCompress" << std::endl;
     std::cout << "--------------------------------------------------------------" << std::endl;
     std::cout << "\n";
 
     std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
     // Decompress list of files
-
-    std::string lz_decompress_in = compress_decompress_mod + ".gz";
-    std::string lz_decompress_out = compress_decompress_mod;
+    std::string lz_decompress_in, lz_decompress_out;
+    if (dflow)
+        lz_decompress_in = compress_decompress_mod + ".xz";
+    else
+        lz_decompress_in = compress_decompress_mod + ".gz";
     lz_decompress_out = lz_decompress_in + ".orig";
 
-    std::ifstream inFile_dec(lz_decompress_in.c_str(), std::ifstream::binary);
+    std::ifstream inFile_dec(lz_decompress_in, std::ifstream::binary);
     if (!inFile_dec) {
-        std::cout << "Unable to open file";
+        std::cerr << "Unable to open file" << std::endl;
         exit(1);
     }
 
@@ -287,8 +317,12 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
     // Validate
     std::cout << "\n";
 
+    std::string outputFile = compress_decompress_mod;
     std::string inputFile = compress_decompress_mod;
-    std::string outputFile = compress_decompress_mod + ".gz" + ".orig";
+    if (dflow)
+        outputFile = outputFile + ".xz" + ".orig";
+    else
+        outputFile = outputFile + ".gz" + ".orig";
     int ret = validate(inputFile, outputFile);
     if (ret == 0) {
         std::cout << (ret ? "FAILED\t" : "PASSED\t") << "\t" << inputFile << std::endl;
@@ -302,45 +336,52 @@ int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--compress", "-c", "Compress", "");
     parser.addSwitch("--decompress", "-d", "DeCompress", "");
-    parser.addSwitch("--single_xclbin", "-sx", "Single XCLBIN", "single");
-    parser.addSwitch("--compress_decompress", "-v", "Compress Decompress", "");
-
+    parser.addSwitch("--test", "-t", "Compress Decompress", "");
+    parser.addSwitch("--single_xclbin", "-sx", "Single XCLBIN [Optional]", "");
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.addSwitch("--cu", "-k", "CU", "0");
     parser.addSwitch("--id", "-id", "Device ID", "0");
+    parser.addSwitch("--zlib", "-zlib", "[0:GZIP, 1:ZLIB]", "0");
     parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
     parser.parse(argc, argv);
 
     std::string compress_mod = parser.value("compress");
     std::string filelist = parser.value("file_list");
     std::string decompress_mod = parser.value("decompress");
+    std::string compress_decompress_mod = parser.value("test");
     std::string single_bin = parser.value("single_xclbin");
-    std::string compress_decompress_mod = parser.value("compress_decompress");
     std::string cu = parser.value("cu");
     std::string device_ids = parser.value("id");
+    std::string is_Zlib = parser.value("zlib");
     std::string mcr = parser.value("max_cr");
 
+    if (single_bin.empty()) single_bin = getenv("XILINX_LIBZ_XCLBIN");
+
     uint8_t max_cr_val = 0;
-    if (!(mcr.empty())) {
-        max_cr_val = atoi(mcr.c_str());
+    if (!mcr.empty()) {
+        max_cr_val = std::stoi(mcr);
     } else {
         // Default block size
         max_cr_val = MAX_CR;
     }
 
     uint8_t device_id = 0;
-
-    if (!(device_ids.empty())) device_id = atoi(device_ids.c_str());
+    design_flow dflow = std::stoi(is_Zlib) ? XILINX_ZLIB : XILINX_GZIP;
+    if (!device_ids.empty()) device_id = std::stoi(device_ids);
 
     if (cu.empty()) {
-        std::cout << "please provide -k option for cu" << std::endl;
+        std::cerr << "please provide -k option for cu" << std::endl;
         exit(0);
     } else {
         cu_run = atoi(cu.c_str());
+        if (cu_run > 8) {
+            std::cerr << "Input compute unit value is not valid, it ranges from 0 - 8" << std::endl;
+            exit(0);
+        }
     }
 
     if (!compress_decompress_mod.empty())
-        xilCompressDecompressTop(compress_decompress_mod, single_bin, device_id, max_cr_val);
+        xilCompressDecompressTop(compress_decompress_mod, single_bin, device_id, max_cr_val, dflow);
 
     if (!filelist.empty()) {
         list_mode lMode;
@@ -352,10 +393,10 @@ int main(int argc, char* argv[]) {
         } else {
             lMode = COMP_DECOMP;
         }
-        xil_batch_verify(filelist, cu_run, lMode, single_bin, device_id, max_cr_val);
+        xil_batch_verify(filelist, cu_run, lMode, single_bin, device_id, max_cr_val, dflow);
     } else if (!compress_mod.empty()) {
         // "-c" - Compress Mode
-        xil_compress_top(compress_mod, single_bin, device_id, max_cr_val);
+        xil_compress_top(compress_mod, single_bin, device_id, max_cr_val, dflow);
     } else if (!decompress_mod.empty())
         // "-d" - DeCompress Mode
         xil_decompress_top(decompress_mod, cu_run, single_bin, device_id, max_cr_val);

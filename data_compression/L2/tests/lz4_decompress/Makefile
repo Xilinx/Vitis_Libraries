@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,20 +57,16 @@ TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
 DEVICE ?= xilinx_u200_xdma_201830_2
-
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 ifeq ($(findstring vck, $(DEVICE)), vck)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
-ifeq ($(findstring u280, $(DEVICE)), u280)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u280, $(DEVICE)), u280)
+ifneq ($(findstring u50, $(DEVICE)), u50)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
 endif
 endif
@@ -108,6 +104,13 @@ CXXFLAGS += -I$(XFLIB_DIR)/common/libs/cmdparser
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/logger
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
 
+ifeq ($(TARGET),sw_emu)
+CXXFLAGS += -D SW_EMU_TEST
+endif
+
+ifeq ($(TARGET),hw_emu)
+CXXFLAGS += -D HW_EMU_TEST
+endif
 # Host compiler global settings
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
@@ -132,12 +135,15 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 
+
 VPP_FLAGS += -DPARALLEL_BLOCK=8 
 
+
+
 ############################## Declaring Binary Containers ##############################
+
 BINARY_CONTAINERS += $(BUILD_DIR)/decompress.xclbin
 BINARY_CONTAINER_decompress_OBJS += $(TEMP_DIR)/xilLz4Decompress.xo
-
 ############################## Setting Targets ##############################
 CP = cp -rf
 
@@ -154,6 +160,7 @@ xclbin: check_vpp | $(BINARY_CONTAINERS)
 build: xclbin
 
 ############################## Setting Rules for Binary Containers (Building Kernels) ##############################
+
 $(TEMP_DIR)/xilLz4Decompress.xo: $(XFLIB_DIR)/L2/src/lz4_decompress_mm.cpp
 	$(ECHO) "Compiling Kernel: xilLz4Decompress"
 	mkdir -p $(TEMP_DIR)
@@ -177,8 +184,10 @@ run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/decompress.xclbin
 else
 	$(EXE_FILE) $(HOST_ARGS)
+	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/decompress.xclbin
 endif
 
 ############################## Cleaning Rules ##############################

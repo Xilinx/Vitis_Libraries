@@ -31,7 +31,7 @@ void xil_compress_decompress_list(std::string& file_list,
                                   uint8_t max_cr,
                                   enum list_mode mode = COMP_DECOMP) {
     // Create xfZlib object
-    xfZlib xlz(single_bin, max_cr, BOTH);
+    xfZlib xlz(single_bin, max_cr, BOTH, 0, 0, DYNAMIC, XILINX_ZLIB);
     ERROR_STATUS(xlz.error_code());
 
     if (mode != ONLY_DECOMPRESS) {
@@ -111,7 +111,8 @@ void xil_compress_decompress_list(std::string& file_list,
     }
 }
 
-void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::string& single_bin, uint8_t max_cr) {
+void xil_batch_verify(
+    std::string& file_list, int cu, enum list_mode mode, std::string& single_bin, uint8_t max_cr, uint8_t device_id) {
     std::string ext1;
     std::string ext2;
 
@@ -133,9 +134,10 @@ void xil_batch_verify(std::string& file_list, int cu, enum list_mode mode, std::
     xil_validate(file_list, ext3);
 }
 
-void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single_bin, uint8_t max_cr) {
+void xil_decompress_top(
+    std::string& decompress_mod, int cu, std::string& single_bin, uint8_t max_cr, uint8_t device_id) {
     // Xilinx ZLIB object
-    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY);
+    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id, 0, DYNAMIC, XILINX_ZLIB);
     ERROR_STATUS(xlz.error_code());
 
     std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
@@ -167,9 +169,9 @@ void xil_decompress_top(std::string& decompress_mod, int cu, std::string& single
               << "File Name\t\t:" << lz_decompress_in << std::endl;
 }
 
-void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_t max_cr) {
+void xil_compress_top(std::string& compress_mod, std::string& single_bin, uint8_t max_cr, uint8_t device_id) {
     // Xilinx ZLIB object
-    xfZlib xlz(single_bin, max_cr, COMP_ONLY);
+    xfZlib xlz(single_bin, max_cr, COMP_ONLY, device_id, 0, DYNAMIC, XILINX_ZLIB);
     ERROR_STATUS(xlz.error_code());
 
     std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
@@ -229,9 +231,12 @@ void xil_validate(std::string& file_list, std::string& ext) {
     }
 }
 
-void xilCompressDecompressTop(std::string& compress_decompress_mod, std::string& single_bin, uint8_t max_cr_val) {
+void xilCompressDecompressTop(std::string& compress_decompress_mod,
+                              std::string& single_bin,
+                              uint8_t device_id,
+                              uint8_t max_cr_val) {
     // Create xfZlib object
-    xfZlib xlz(single_bin, max_cr_val, BOTH);
+    xfZlib xlz(single_bin, max_cr_val, BOTH, device_id, 0, DYNAMIC, XILINX_ZLIB);
     ERROR_STATUS(xlz.error_code());
 
     std::cout << "--------------------------------------------------------------" << std::endl;
@@ -332,7 +337,8 @@ int main(int argc, char* argv[]) {
 
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.addSwitch("--cu", "-k", "CU", "0");
-    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
+    parser.addSwitch("--id", "-id", "Device ID", "0");
+    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
     parser.parse(argc, argv);
 
     std::string compress_mod = parser.value("compress");
@@ -341,6 +347,7 @@ int main(int argc, char* argv[]) {
     std::string single_bin = parser.value("single_xclbin");
     std::string compress_decompress_mod = parser.value("compress_decompress");
     std::string cu = parser.value("cu");
+    std::string device_ids = parser.value("id");
     std::string mcr = parser.value("max_cr");
 
     uint8_t max_cr_val = 0;
@@ -351,6 +358,9 @@ int main(int argc, char* argv[]) {
         max_cr_val = MAX_CR;
     }
 
+    uint8_t device_id = 0;
+    if (!(device_ids.empty())) device_id = std::stoi(device_ids);
+
     if (cu.empty()) {
         printf("please give -k option for cu\n");
         exit(0);
@@ -358,7 +368,8 @@ int main(int argc, char* argv[]) {
         cu_run = atoi(cu.c_str());
     }
 
-    if (!compress_decompress_mod.empty()) xilCompressDecompressTop(compress_decompress_mod, single_bin, max_cr_val);
+    if (!compress_decompress_mod.empty())
+        xilCompressDecompressTop(compress_decompress_mod, single_bin, device_id, max_cr_val);
 
     if (!filelist.empty()) {
         list_mode lMode;
@@ -370,11 +381,11 @@ int main(int argc, char* argv[]) {
         } else {
             lMode = COMP_DECOMP;
         }
-        xil_batch_verify(filelist, cu_run, lMode, single_bin, max_cr_val);
+        xil_batch_verify(filelist, cu_run, lMode, single_bin, max_cr_val, device_id);
     } else if (!compress_mod.empty()) {
         // "-c" - Compress Mode
-        xil_compress_top(compress_mod, single_bin, max_cr_val);
+        xil_compress_top(compress_mod, single_bin, max_cr_val, device_id);
     } else if (!decompress_mod.empty())
         // "-d" - DeCompress Mode
-        xil_decompress_top(decompress_mod, cu_run, single_bin, max_cr_val);
+        xil_decompress_top(decompress_mod, cu_run, single_bin, max_cr_val, device_id);
 }

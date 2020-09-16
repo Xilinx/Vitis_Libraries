@@ -1,114 +1,124 @@
 {
-    "name": "Xilinx ZLIB Libzso Shared Object Demo",
+    "name": "Xilinx ZLIB Libzso Shared Object Demo", 
     "description": [
         "ZLIB Shared Object demo present in `L3/demo/libzso` directory."
-    ],
-    "flow": "vitis",
+    ], 
+    "flow": "vitis", 
     "platform_blacklist": [
-        "u200",
-        "u250",
+        "u200", 
+        "u250", 
         "vck"
-    ],
+    ], 
     "platform_whitelist": [
         "u50_gen3x16"
-    ],
+    ], 
     "launch": [
         {
-            "cmd_args": "-v sample.txt",
+            "cmd_args": "-v sample.txt", 
             "name": "generic launch for all flows"
         }
-    ],
-    "match_makefile": "false",
-    "match_ini": "false",
+    ], 
+    "match_makefile": "false", 
+    "match_ini": "false", 
     "gui": false, 
     "host": {
-        "host_exe": "xzlib",
+        "host_exe": "xzlib", 
         "compiler": {
             "sources": [
-                "./src/testapp.cpp",
-                "LIB_DIR/L3/src/zlib.cpp",
-                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
-                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
-                "LIB_DIR/common/libs/logger/logger.cpp",
+                "./src/testapp.cpp", 
+                "LIB_DIR/L3/src/zlib.cpp", 
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
+                "LIB_DIR/common/libs/logger/logger.cpp", 
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
-            ],
+            ], 
             "includepaths": [
                 "LIB_DIR/L3/include"
-            ],
-            "options": "-O3 ",
-            "symbols": [ "PARALLEL_BLOCK=8" ]
+            ], 
+            "options": "-O3 ", 
+            "symbols": [
+                "PARALLEL_BLOCK=8"
+            ]
         }
-    },
+    }, 
     "v++": {
-        "build_datafiles" : [
+        "build_datafiles": [
             "PROJECT/advanced.ini"
-        ],
+        ], 
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=8"
-            ],
+            ], 
             "clflags": [
                 "--config PROJECT/advanced.ini"
             ]
         }
-    },
+    }, 
     "containers": [
         {
-            "name": "compress_decompress",
-	    "ldclflags": "--config PROJECT/opts.ini",
+            "name": "compress_decompress", 
+            "ldclflags": "--config PROJECT/opts.ini", 
             "accelerators": [
                 {
-                    "name": "xilLz77Compress",
-                    "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp",
+                    "name": "xilLz77Compress", 
+                    "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp", 
                     "num_compute_units": "1"
-                },
+                }, 
                 {
-                    "name": "xilHuffmanKernel",
-                    "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp",
+                    "name": "xilHuffmanKernel", 
+                    "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp", 
                     "num_compute_units": "1"
-                },
+                }, 
                 {
-                    "name": "xilTreegenKernel",
-                    "location": "LIB_DIR/L2/src/zlib_treegen_mm.cpp",
+                    "name": "xilTreegenKernel", 
+                    "location": "LIB_DIR/L2/src/zlib_treegen_mm.cpp", 
                     "num_compute_units": "1"
-                },
+                }, 
                 {
-                    "name": "xilZlibDmReader",
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_rd.cpp",
+                    "name": "xilZlibDmReader", 
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_rd.cpp", 
                     "num_compute_units": "1"
-                },
+                }, 
                 {
-                    "name": "xilZlibDmWriter",
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_wr.cpp",
+                    "name": "xilZlibDmWriter", 
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_wr.cpp", 
                     "num_compute_units": "1"
-                },
+                }, 
                 {
-                    "name": "xilDecompressStream",
-                    "location": "LIB_DIR/L2/src/zlib_decompress_stream.cpp",
+                    "name": "xilDecompressStream", 
+                    "location": "LIB_DIR/L2/src/zlib_decompress_stream.cpp", 
                     "num_compute_units": "1"
                 }
             ]
         }
-    ],
-    "output_files" : "sample.txt.*",
-    "match_ini": "false",
+    ], 
+    "output_files": "sample.txt.*", 
     "testinfo": {
-        "disable": false,
+        "disable": false, 
         "jobs": [
             {
-                "index": 0,
-                "dependency": [],
-                "env": "",
-                "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 300
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
-        ],
+        ], 
         "targets": [
-            "vitis_sw_emu",
-            "vitis_hw_emu",
-            "vitis_hw"
-        ],
+            "vitis_sw_emu", 
+            "vitis_hw_run"
+        ], 
         "category": "canary"
     }
 }

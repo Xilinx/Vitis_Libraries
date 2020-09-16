@@ -49,7 +49,7 @@ CmdLineParser::CmdLineParser() {
     // TODO Auto-generated constructor stub
     m_strDefaultKey = "";
     m_appname = "application.exe";
-    addSwitch("--help", "-h", "Print Help Options", "", true);
+    addSwitch("--help", "-h", "Print Help Options", "");
 }
 
 /*
@@ -153,6 +153,11 @@ bool CmdLineParser::setDefaultKey(const char* key) {
 }
 
 int CmdLineParser::parse(int argc, char* argv[]) {
+    // capture real app name
+    if (argc > 0) {
+        m_appname = string(argv[0]);
+    }
+
     int i = 0;
     int ctOptions = 0;
     while (i < argc) {
@@ -173,7 +178,7 @@ int CmdLineParser::parse(int argc, char* argv[]) {
         if (starts_with(token, string("--"))) {
             if (m_mapKeySwitch.find(token) == m_mapKeySwitch.end()) {
                 LogError("Unrecognized key passed %s", token.c_str());
-                // printHelp();
+                printHelp();
                 return -1;
             }
 
@@ -184,7 +189,7 @@ int CmdLineParser::parse(int argc, char* argv[]) {
         else if (starts_with(token, "-")) {
             if (m_mapShortcutKeys.find(token) == m_mapShortcutKeys.end()) {
                 LogError("Unrecognized shortcut key passed %s", token.c_str());
-                // printHelp();
+                printHelp();
                 return -1;
             }
 
@@ -224,6 +229,11 @@ int CmdLineParser::parse(int argc, char* argv[]) {
                 pcmd->isvalid = true;
             } else {
                 i++;
+                if (argc <= i) {
+                    LogError("Incomplete Switch %s", token.c_str());
+                    printHelp();
+                    exit(EXIT_FAILURE);
+                }
                 pcmd->value = string(argv[i]);
                 pcmd->isvalid = true;
             }
@@ -231,11 +241,6 @@ int CmdLineParser::parse(int argc, char* argv[]) {
 
         // next token
         i++;
-    }
-
-    // capture real app name
-    if (argc > 0) {
-        m_appname = string(argv[0]);
     }
 
     return ctOptions;
@@ -306,13 +311,14 @@ bool CmdLineParser::isValid(const char* key) {
 }
 
 void CmdLineParser::printHelp() {
-    std::cout << "\n===========================================================\n";
+    std::cout << "\n==================================================================\n";
     string strAllShortcuts = "";
     for (auto pcmd : m_vSwitches) {
         if (pcmd && !pcmd->shortcut.empty()) strAllShortcuts = strAllShortcuts + pcmd->shortcut;
     }
     // example
-    std::cout << "Usage: " << m_appname << ", -[" << strAllShortcuts << "]\n\n";
+    std::cout << "Usage: " << m_appname << " [Options] "
+              << "[Files] \n\n";
 
     // finding maximum
     size_t first_max = 0;

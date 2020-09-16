@@ -35,7 +35,6 @@
 
 #define IN_BITWIDTH 16
 #define OUT_BITWIDTH (MULTIPLE_BYTES * 8)
-#define USE_GZIP 1
 #define HUFF_LOOP 1
 const uint32_t sizeof_in = (IN_BITWIDTH / 8);
 const uint32_t sizeof_out = (OUT_BITWIDTH / 8);
@@ -52,7 +51,7 @@ void gzipMultiByteDecompressEngineRun(hls::stream<in_t>& inStream,
 {
     const int c_decoderType = (int)HUFFMAN_TYPE;
 
-    xf::compression::details::inflateMultiByteCore<c_decoderType, MULTIPLE_BYTES, HUFF_LOOP, HISTORY_SIZE, USE_GZIP>(
+    xf::compression::details::inflateMultiByteCore<c_decoderType, MULTIPLE_BYTES, HUFF_LOOP, HISTORY_SIZE>(
         inStream, outStream, outStreamEoS, outSizeStream, input_size);
 }
 

@@ -1,0 +1,350 @@
+{
+    "name": "Xilinx FPGA Based ZLIB Single Compress Streaming Design For HBM Platforms", 
+    "description": [
+        "ZLIB Compress application for HBM resides in `L3/tests/zlib_compress_hbm` directory."
+    ], 
+    "flow": "vitis", 
+    "platform_blacklist": [
+        "u250", 
+        "vck", 
+        "u200"
+    ], 
+    "platform_whitelist": [
+        "u50", 
+        "u280"
+    ], 
+    "launch": [
+        {
+            "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "match_ini": "false", 
+    "host": {
+        "host_exe": "xil_zlibc", 
+        "compiler": {
+            "sources": [
+                "./src/host.cpp", 
+                "LIB_DIR/L3/src/zlib.cpp", 
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
+                "LIB_DIR/common/libs/logger/logger.cpp", 
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c", 
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/adler32.c"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L3/include", 
+                "LIB_DIR/L1/include/hw"
+            ], 
+            "options": "-O3 ", 
+            "symbols": [
+
+                "C_COMPUTE_UNIT=12", 
+                "PARALLEL_BLOCK=4",
+                "USE_SINGLE_KERNEL_ZLIBC",
+                "ENABLE_HW_CHECKSUM" 
+            ]
+        }
+    }, 
+    "v++": {
+        "build_datafiles": [
+            "PROJECT/advanced.ini", 
+            "PROJECT/hls_directives.tcl"
+        ], 
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/tests/src/", 
+                "LIB_DIR/../security/L1/include"
+            ], 
+            "symbols": [
+                "PARALLEL_BLOCK=4"
+            ], 
+            "clflags": [
+                "--config PROJECT/advanced.ini"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "name": "compress", 
+            "ldclflags": "--kernel_frequency 250", 
+            "accelerators": [
+                {
+                    "name": "xilZlibCompressFull", 
+                    "location": "LIB_DIR/L2/src/zlib_compress_multi_engine_mm.cpp", 
+                    "num_compute_units": "12", 
+                    "compute_units": [
+                        {
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[10]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[10]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[10]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[11]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[11]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[11]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[12]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[12]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[12]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[13]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[13]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[13]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[14]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[14]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[14]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[15]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[15]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[15]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR1", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[16]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[16]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[16]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR1", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[17]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[17]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[17]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR1", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[18]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[18]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[18]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR1", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[19]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[19]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[19]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[20]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[20]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[20]"
+                                }
+                            ]
+                        },
+                        {
+                            "slr": "SLR1", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[21]"
+                                }, 
+                                {
+                                    "name": "out", 
+                                    "memory": "HBM[21]"
+                                }, 
+                                {
+                                    "name": "compressd_size", 
+                                    "memory": "HBM[21]"
+                                }
+                            ]
+                        }
+                    ]
+                }, 
+                {
+                    "name": "xilChecksum32", 
+                    "location": "LIB_DIR/L2/src/checksum_mm.cpp", 
+                    "num_compute_units": "2", 
+                    "compute_units": [
+                        {
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[0:31]"
+                                }, 
+                                {
+                                    "name": "initData", 
+                                    "memory": "HBM[0:31]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "in", 
+                                    "memory": "HBM[0:31]"
+                                }, 
+                                {
+                                    "name": "initData", 
+                                    "memory": "HBM[0:31]"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ], 
+    "output_files": "sample.txt.*", 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }
+}

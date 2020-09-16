@@ -56,7 +56,7 @@
 /**
  * Maximum host buffer used to operate per kernel invocation
  */
-#define HOST_BUFFER_SIZE (2 * 1024 * 1024)
+#define HOST_BUFFER_SIZE (64 * 1024 * 1024)
 
 /**
  * Default block size
@@ -118,7 +118,7 @@ class xfSnappyStreaming {
      * @param actual_size input size
      */
     uint32_t decompressFileFull(
-        std::string& inFile_name, std::string& outFile_name, uint32_t inputSize, uint32_t outputSize, bool m_flow);
+        std::string& inFile_name, std::string& outFile_name, uint32_t inputSize, bool m_flow, bool enable_p2p = 0);
 
     /**
      * @brief Decompress sequential.
@@ -136,7 +136,7 @@ class xfSnappyStreaming {
      * @param out output byte sequence
      * @param actual_size input size
      */
-    uint32_t decompressFull(uint8_t* in, uint8_t* out, uint32_t inputSize, uint32_t outputSize);
+    uint32_t decompressFull(uint8_t* in, uint8_t* out, uint32_t inputSize, bool enable_p2p = 0);
 
     /**
      * @brief Get the duration of input event
@@ -184,6 +184,7 @@ class xfSnappyStreaming {
     // Compression related
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in;
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_out;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_buf_decompressSize;
     std::vector<uint32_t, aligned_allocator<uint8_t> > h_blksize;
     std::vector<uint32_t, aligned_allocator<uint8_t> > h_compressSize;
 

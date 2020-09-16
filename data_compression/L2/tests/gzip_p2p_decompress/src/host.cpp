@@ -146,12 +146,14 @@ int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--decompress", "-d", "DeCompress", "");
     parser.addSwitch("--decompress_xclbin", "-dx", "decompress XCLBIN", "single");
+    parser.addSwitch("--p2p_mode", "-p2p", "P2P Mode", "");
     parser.addSwitch("--device", "-dev", "FPGA Card # to be used", "");
 
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.parse(argc, argv);
 
     std::string filelist = parser.value("file_list");
+    std::string p2pMode = parser.value("p2p_mode");
     std::string decompress_mod = parser.value("decompress");
     std::string decompress_bin = parser.value("decompress_xclbin");
     std::string dev_id_str = parser.value("device");
@@ -163,6 +165,7 @@ int main(int argc, char* argv[]) {
 
     // p2p flow enable/disable
     bool enable_p2p = ENABLE_P2P;
+    if (!p2pMode.empty()) enable_p2p = std::stoi(p2pMode);
 
     if (!filelist.empty()) {
         // "-l" - List of files

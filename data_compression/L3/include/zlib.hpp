@@ -33,14 +33,38 @@
 #include <sys/stat.h>
 #include <random>
 #include <new>
+#include <map>
+#include <future>
+#ifdef ENABLE_XRM
+#include <xrm.h>
+#endif
+#include <syslog.h>
+
 const int gz_max_literal_count = 4096;
 
 #define PARALLEL_ENGINES 8
+
+#ifndef C_COMPUTE_UNIT
+#define C_COMPUTE_UNIT 1
+#endif
+
+#ifndef H_COMPUTE_UNIT
+#define H_COMPUTE_UNIT 1
+#endif
+
+#ifndef D_COMPUTE_UNIT
+#define D_COMPUTE_UNIT 1
+#endif
+
 #define MAX_CCOMP_UNITS C_COMPUTE_UNIT
 #define MAX_DDCOMP_UNITS D_COMPUTE_UNIT
 
 // Default block size
+#ifdef USE_SINGLE_KERNEL_ZLIBC
+#define BLOCK_SIZE_IN_KB 32
+#else
 #define BLOCK_SIZE_IN_KB 1024
+#endif
 
 // Input and output buffer size
 #define INPUT_BUFFER_SIZE (8 * MEGA_BYTE)
@@ -55,17 +79,33 @@ const int gz_max_literal_count = 4096;
 
 // Maximum host buffer used to operate
 // per kernel invocation
+#ifdef USE_SINGLE_KERNEL_ZLIBC
+#define MAX_HOST_BUFFER_SIZE (2 * 1024 * 1024)
+#define HOST_BUFFER_SIZE (1024 * 1024)
+#else
 #define HOST_BUFFER_SIZE (PARALLEL_ENGINES * BLOCK_SIZE_IN_KB * 1024)
+#endif
 
 // Value below is used to associate with
 // Overlapped buffers, ideally overlapped
 // execution requires 2 resources per invocation
+#ifdef USE_SINGLE_KERNEL_ZLIBC
+#ifndef OVERLAP_BUF_COUNT
+#define OVERLAP_BUF_COUNT (2 * (MAX_HOST_BUFFER_SIZE / HOST_BUFFER_SIZE))
+#endif
+#else
 #define OVERLAP_BUF_COUNT 2
+#endif
 
 // Maximum number of blocks based on host buffer size
 #define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
 
 #define DECOMP_OUT_SIZE 170
+
+// Zlib method information
+constexpr auto DEFLATE_METHOD = 8;
+
+constexpr auto MIN_BLOCK_SIZE = 1024;
 constexpr auto page_aligned_mem = (1 << 21);
 
 int validate(std::string& inFile_name, std::string& outFile_name);
@@ -74,12 +114,31 @@ uint64_t get_file_size(std::ifstream& file);
 enum comp_decom_flows { BOTH, COMP_ONLY, DECOMP_ONLY };
 enum list_mode { ONLY_COMPRESS, ONLY_DECOMPRESS, COMP_DECOMP };
 enum d_type { DYNAMIC = 0, FIXED = 1, FULL = 2 };
+enum design_flow { XILINX_GZIP, XILINX_ZLIB };
 
 constexpr auto c_clOutOfResource = -5;
 constexpr auto c_clinvalidbin = -42;
 constexpr auto c_clinvalidvalue = -30;
+constexpr auto c_clOutOfHostMemory = -6;
+constexpr auto c_headermismatch = 404;
+constexpr auto c_hardXclbinPath = "/opt/xilinx/zlib/u50_gen3x16_xdma_201920_3.xclbin";
 
-#ifdef VERBOSE
+// Structure to hold
+// libzso - deflate/inflate info
+typedef struct {
+    uint8_t* in_buf;
+    uint8_t* out_buf;
+    uint64_t input_size;
+    uint64_t output_size;
+    int level;
+    int strategy;
+    int window_bits;
+    uint32_t adler32;
+    int flush;
+    std::string u50_xclbin;
+} xlibData;
+
+#if (VERBOSE_LEVEL >= 3)
 #define ZOCL_CHECK(error, call, eflag, expected)                                    \
     call;                                                                           \
     if (error != CL_SUCCESS) {                                                      \
@@ -92,6 +151,8 @@ constexpr auto c_clinvalidvalue = -30;
             std::cout << error_string(expected) << std::endl;                       \
             eflag = error;                                                          \
         } else {                                                                    \
+            std::cout << __FILE__ << ":" << __LINE__ << " OPENCL API --> ";         \
+            std::cout << #call;                                                     \
             std::cout << "Unexpected Error \n" << error_string(error) << std::endl; \
             exit(EXIT_FAILURE);                                                     \
         }                                                                           \
@@ -109,7 +170,7 @@ constexpr auto c_clinvalidvalue = -30;
     }
 #endif
 
-#ifdef VERBOSE
+#if (VERBOSE_LEVEL >= 3)
 #define ZOCL_CHECK_2(error, call, eflag, expected_1, expected_2)                    \
     call;                                                                           \
     if (error != CL_SUCCESS) {                                                      \
@@ -130,6 +191,8 @@ constexpr auto c_clinvalidvalue = -30;
             std::cout << error_string(expected_2) << std::endl;                     \
             eflag = error;                                                          \
         } else {                                                                    \
+            std::cout << __FILE__ << ":" << __LINE__ << " OPENCL API --> ";         \
+            std::cout << #call;                                                     \
             std::cout << "Unexpected Error \n" << error_string(error) << std::endl; \
             exit(EXIT_FAILURE);                                                     \
         }                                                                           \
@@ -206,10 +269,16 @@ class xfZlib {
      * @param in input byte sequence
      * @param out output byte sequence
      * @param actual_size input size
+     * @param last_buffer
      * @param host_buffer_size host buffer size
      */
 
-    uint64_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
+    size_t compress_buffer(uint8_t* in,
+                           uint8_t* out,
+                           size_t actual_size,
+                           bool last_buffer = true,
+                           uint32_t host_buffer_size = HOST_BUFFER_SIZE,
+                           int cu = 0);
 
     /**
      * @brief This method does serial execution of decompression
@@ -224,28 +293,20 @@ class xfZlib {
     uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run);
 
     /**
-     * @brief In shared library flow this call can be used for compress buffer
-     * in overlapped manner. This is used in libz.so created.
+     * @brief This API does end to end compression in a single call
      *
-     *
-     * @param in input byte sequence
-     * @param out output byte sequence
-     * @param input_size input size
-     */
-
-    uint64_t compress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size);
-
-    /**
-     * @brief In shared library flow this call can be used for decompress buffer
-     * in serial manner. This is used in libz.so created.
      *
      *
      * @param in input byte sequence
      * @param out output byte sequence
      * @param input_size input size
      */
-
-    int decompress_buffer(uint8_t* in, uint8_t* out, uint64_t input_size, uint8_t cu_id);
+    // Default values
+    // Level    = Fast method
+    // Strategy = Default
+    // Window   = 32K (Max supported)
+    size_t compress(
+        uint8_t* in, uint8_t* out, size_t input_size, int cu, int level = 1, int strategy = 0, int window_bits = 15);
 
     /**
      * @brief This method does file operations and invokes compress API which
@@ -256,7 +317,7 @@ class xfZlib {
      * @param actual_size input size
      */
 
-    uint64_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
+    uint64_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run = 0);
 
     /**
      * @brief This method  does file operations and invokes decompress API which
@@ -281,7 +342,8 @@ class xfZlib {
            uint8_t cd_flow = BOTH,
            uint8_t device_id = 0,
            uint8_t profile = 0,
-           uint8_t d_type = DYNAMIC);
+           uint8_t d_type = DYNAMIC,
+           enum design_flow dflow = XILINX_GZIP);
 
     /**
      * @brief OpenCL setup initialization
@@ -306,20 +368,64 @@ class xfZlib {
      */
     int error_code(void);
 
+    /**
+     * @brief returns check sum value (CRC32/Adler32)
+     */
+    uint32_t get_checksum(void);
+
+    /**
+     * @brief set check sum value (CRC32/Adler32)
+     */
+    void set_checksum(uint32_t cval);
+
+    /**
+     * @brief get compress kernel name
+     */
+    std::string getCompressKernel(int index);
+
+    /**
+     * @brief get decompress kernel name
+     */
+    std::string getDeCompressKernel(int index);
+
    private:
     void _enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, int cu);
     void _enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, int cu, uint32_t max_outbuf);
+    size_t add_header(uint8_t* out, int level, int strategy, int window_bits);
+    size_t add_footer(uint8_t* out, size_t compressSize);
+    void release_dec_buffers(void);
+
+    enum m_threadStatus { IDLE, RUNNING };
+    bool m_isGzip = 0; // Zlib=0, Gzip=1
+    uint32_t m_checksum = 0;
+    m_threadStatus m_checksumStatus = IDLE;
+    std::thread* m_thread_checksum;
+
+    void gzip_headers(std::string& inFile, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes);
+    void zlib_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes);
+
+    void generate_checksum(uint8_t* in, size_t input_size);
+    uint32_t calculate_crc32(uint8_t* in, size_t input_size);
+    uint32_t calculate_adler32(uint8_t* in, size_t input_size);
+    std::future<uint32_t> m_future_checksum;
+    enum design_flow m_zlibFlow;
 
     uint8_t m_cdflow;
     bool m_isProfile;
     uint8_t m_deviceid = 0;
     uint8_t m_max_cr = MAX_CR;
     int m_err_code = 0;
+    std::string m_infile;
+    uint32_t m_kidx;
 
     cl::Device m_device;
     cl::Context* m_context = nullptr;
     cl::Program* m_program = nullptr;
+#ifdef USE_SINGLE_KERNEL_ZLIBC
+    cl::CommandQueue* m_q[C_COMPUTE_UNIT] = {nullptr};
+#else
     cl::CommandQueue* m_q[C_COMPUTE_UNIT * OVERLAP_BUF_COUNT] = {nullptr};
+#endif
     cl::CommandQueue* m_q_dec[D_COMPUTE_UNIT] = {nullptr};
     cl::CommandQueue* m_q_rd[D_COMPUTE_UNIT] = {nullptr};
     cl::CommandQueue* m_q_rdd[D_COMPUTE_UNIT] = {nullptr};
@@ -327,6 +433,7 @@ class xfZlib {
     cl::CommandQueue* m_q_wrd[D_COMPUTE_UNIT] = {nullptr};
 
     // Kernel declaration
+    cl::Kernel* checksum_kernel = {nullptr};
     cl::Kernel* compress_kernel[C_COMPUTE_UNIT] = {nullptr};
     cl::Kernel* huffman_kernel[H_COMPUTE_UNIT] = {nullptr};
     cl::Kernel* decompress_kernel[D_COMPUTE_UNIT] = {nullptr};
@@ -340,16 +447,21 @@ class xfZlib {
     std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_blksize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
     std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_compressSize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
+#ifdef ENABLE_HW_CHECKSUM
+    // Checksum related
+    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_buf_checksum_data;
+#endif
+
     // Decompression Related
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbuf_in[MAX_DDCOMP_UNITS];
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbuf_zlibout[MAX_DDCOMP_UNITS];
     std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize[MAX_DDCOMP_UNITS];
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_in[DIN_BUFFERCOUNT];
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[DOUT_BUFFERCOUNT];
+    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[DOUT_BUFFERCOUNT + 1];
     std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize_stream[DOUT_BUFFERCOUNT];
     std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressStatus;
 
-    // Device buffers
+    // Compress Device buffers
     cl::Buffer* buffer_input[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
     cl::Buffer* buffer_lz77_output[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
     cl::Buffer* buffer_zlib_output[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
@@ -359,18 +471,30 @@ class xfZlib {
     cl::Buffer* buffer_dyn_ltree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
     cl::Buffer* buffer_dyn_dtree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
+#ifdef ENABLE_HW_CHECKSUM
+    // Checksum Device buffers
+    cl::Buffer* buffer_checksum_data;
+#endif
+
     // Decompress Device Buffers
     cl::Buffer* buffer_dec_input[DIN_BUFFERCOUNT] = {nullptr};
-    cl::Buffer* buffer_dec_zlib_output[DOUT_BUFFERCOUNT] = {nullptr};
+    cl::Buffer* buffer_dec_zlib_output[DOUT_BUFFERCOUNT + 1] = {nullptr};
     cl::Buffer* buffer_dec_compress_size[MAX_DDCOMP_UNITS];
 
     // Kernel names
-    std::vector<std::string> compress_kernel_names = {"xilLz77Compress"};
+    std::vector<std::string> compress_kernel_names = {"xilLz77Compress", "xilZlibCompressFull"};
     std::vector<std::string> huffman_kernel_names = {"xilHuffmanKernel"};
+#ifdef ENABLE_HW_CHECKSUM
+    std::vector<std::string> checksum_kernel_names = {"xilChecksum32"};
+#endif
     std::vector<std::string> stream_decompress_kernel_name = {"xilDecompressStream", "xilDecompressFixed",
                                                               "xilDecompressFull"};
     std::string data_writer_kernel_name = "xilZlibDmWriter";
     std::string data_reader_kernel_name = "xilZlibDmReader";
+    std::map<std::string, int> compressKernelMap;
+    std::map<std::string, int> decKernelMap;
+    std::map<std::string, int> lz77KernelMap;
+    std::map<std::string, int> huffKernelMap;
 };
 }
 }

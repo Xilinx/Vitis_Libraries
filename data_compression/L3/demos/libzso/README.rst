@@ -2,70 +2,52 @@
 Zlib (SO) Demo
 ====================
 
-This demo presents usage and generation of libz.so (FPGA port).
-This demo support Alveo U200, Alveo U280, Alveo U50 (2020.1 Vitis)
+Infrastructure
+--------------
 
-Build Instructions
--------------------
+List below presents infrastructure required to build & deploy this demo.
+Mandatory requirements are marked accordingly in order to get this demo working in
+deployment environment. Vitis is required only for development.
 
-.. highlight:: bash
-
-    make run TARGET=sw_emu --> Software Emulation 
-    make run TARGET=hw_emu --> Hardware Emulation
-
-    NOTE: This command builds/runs for sample data set. 
-
+    ``Vitis: 2020.1_released (Only for Developers)``
+    
+    ``XRT: 2020.1_PU1 (Mandatory)``
+    
+    ``XRM: 2020.1_released (Mandatory)``
+    
+    ``SHELL: u50_gen3x16_xdma_201920_3 (Mandatory)``
+    
+    
 Application Usage
-------------------
+-----------------
 
-Following instructions helps in testing and validation.
+**Compression**     -->  ``./xzlib input_file``
 
-Copy ``libz.so`` to current directory
-from ``L3/demos/libzso_app/build/`` directory. In case of make run
-this step is automated.
+**Decompression**   -->  ``./xzlib -d input_file.zlib``
 
+**Test Flow**       -->  ``./xzlib -t input_file`` 
 
-Environment Setup:
-~~~~~~~~~~~~~~~~~
+**No Acceleration** -->  ``./xzlib -t input_file -n 0`` 
 
-.. highlight:: bash
+**Help**           -->  ``./xzlib -h``
 
-``export LD_LIBRARY_PATH=$(PWD):$(LD_LIBRARY_PATH)``
-
-``export LD_LIBRARY_PATH=$(PWD):$(LD_LIBRARY_PATH)`` 
-
-``export XILINX_LIBZ_XCLBIN=<path to xclbin>``
-
-``source /opt/Xilinx/Vitis/2020.1/settings64.sh``
-
-``source /opt/Xilinx/xbb/xrt/packages/setup.sh``
+**Regression**     --> Refer ``run.sh`` script to understand usage of various options provided with ``xzlib`` utility. 
 
 
-*It is must to set the LD_LIBRARY_PATH to environment variable
-to the directory where libz.so inorder to use FPGA flow.
+Deployment
+----------
 
-  
-Compression:
-~~~~~~~~~~~~
+**#1** ``source setup.csh <absolute path to xclbin>`` --> Setup of XRT, XRM, Environment Variables, XRM Daemon Start done
 
-``./build/zlib_so.exe -c <input_file>``
+**#2**  ``./xrmxclbin.sh <number of devices>`` --> XRM loads XCLBIN to devices as per user input
+ 
+**#3** Build libz.so (Shared Object file) - ``make lib ENABLE_XRM=yes`` --> Current directory contains libz.so.1.2.7
 
-Decompression:
-~~~~~~~~~~~~~~
+**#4** Build xzlib (Host Executable) - ``make host ENABLE_XRM=yes`` --> ./build directory contains ``xzlib`` executable
 
-``./build/zlib_so.exe -d <input_file.zlib>``
+References
+----------
 
-Validate (Both flows):
-~~~~~~~~~~~~~~~~~~~~~
+**[XRM Build and Installation]**: https://xilinx.github.io/XRM/Build.html
 
-This command does compress/decompress and
-compares results.
-
-
-``./build/zlib_so.exe -v <input_file>``
-
-
-Help Section:
-~~~~~~~~~~~~~
-
-``./build/zlib_so.exe -h``
+**[XRM Test Instructions]**: https://xilinx.github.io/XRM/Test.html

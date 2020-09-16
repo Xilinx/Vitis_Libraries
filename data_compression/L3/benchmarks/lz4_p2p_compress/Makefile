@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,29 +57,22 @@ TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
 DEVICE ?= xilinx_u200_xdma_201830_2
-
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-ifeq ($(findstring vck, $(DEVICE)), vck)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 ifeq ($(findstring u50, $(DEVICE)), u50)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 ifeq ($(findstring u280, $(DEVICE)), u280)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
+ifeq ($(findstring zc, $(DEVICE)), zc)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+ifeq ($(findstring vck, $(DEVICE)), vck)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
 
-ifneq ($(findstring u200, $(DEVICE)), u200)
-ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u280, $(DEVICE)), u280)
 ifneq ($(findstring samsung_u2, $(DEVICE)), samsung_u2)
 ifneq ($(findstring samsung_U2, $(DEVICE)), samsung_U2)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
-endif
-endif
-endif
 endif
 endif
 
@@ -118,6 +111,13 @@ CXXFLAGS += -I$(XFLIB_DIR)/common/libs/cmdparser
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/logger
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
 
+ifeq ($(TARGET),sw_emu)
+CXXFLAGS += -D SW_EMU_TEST
+endif
+
+ifeq ($(TARGET),hw_emu)
+CXXFLAGS += -D HW_EMU_TEST
+endif
 # Host compiler global settings
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
@@ -127,7 +127,7 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := xil_lz4
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -cx $(BUILD_DIR)/compress.xclbin -l $(CUR_DIR)/test.list
+HOST_ARGS := -cx $(BUILD_DIR)/compress.xclbin -c $(CUR_DIR)/sample.txt
 
 ifneq ($(HOST_ARCH), x86)
 	LDFLAGS += --sysroot=$(SYSROOT)
@@ -142,18 +142,20 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 
+
 VPP_FLAGS += -DPARALLEL_BLOCK=8 -DC_COMPUTE_UNITS=2 
 
 # Kernel linker flags
-LDCLFLAGS_compress += --profile_kernel data:all:all:all
+LDCLFLAGS_compress_temp := --profile_kernel data:all:all:all
+LDCLFLAGS_compress += $(LDCLFLAGS_compress_temp)
+
 # Adding config files to linker
 LDCLFLAGS_compress+= --config auto_compress.ini 
 
 ############################## Declaring Binary Containers ##############################
-BINARY_CONTAINERS += $(BUILD_DIR)/compress.xclbin
-BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilLz4Compress.xo
+BINARY_CONTAINERS += $(BUILD_DIR)/compress.xclbin	
+BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilLz4Compress.xo	
 BINARY_CONTAINER_compress_OBJS += $(TEMP_DIR)/xilLz4Packer.xo
-
 ############################## Setting Targets ##############################
 CP = cp -rf
 
@@ -170,10 +172,12 @@ xclbin: check_vpp | $(BINARY_CONTAINERS)
 build: xclbin
 
 ############################## Setting Rules for Binary Containers (Building Kernels) ##############################
+
 $(TEMP_DIR)/xilLz4Compress.xo: $(XFLIB_DIR)/L2/src/lz4_compress_mm.cpp
 	$(ECHO) "Compiling Kernel: xilLz4Compress"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(xilLz4Compress_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilLz4Compress -I'$(<D)' -o'$@' '$<'
+
 $(TEMP_DIR)/xilLz4Packer.xo: $(XFLIB_DIR)/L2/src/lz4_packer_mm.cpp
 	$(ECHO) "Compiling Kernel: xilLz4Packer"
 	mkdir -p $(TEMP_DIR)
@@ -197,8 +201,10 @@ run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
 else
 	$(EXE_FILE) $(HOST_ARGS)
+	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress.xclbin
 endif
 
 ############################## Cleaning Rules ##############################

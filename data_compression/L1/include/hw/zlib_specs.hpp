@@ -61,7 +61,7 @@ const auto c_fixedDecoder = 0;
 const auto c_dynamicDecoder = 1;
 const auto c_fullDecoder = 2;
 
-const uint16_t c_frequency_bits = 24;
+const uint16_t c_frequency_bits = 32;
 const uint16_t c_codeword_bits = 20;
 const uint16_t c_litCodeCount = 286;
 const uint16_t c_dstCodeCount = 30;

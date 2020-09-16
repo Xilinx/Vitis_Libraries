@@ -110,12 +110,27 @@ void xil_decompress_file_list(std::string& file_list, std::string& decompress_bi
     decompress_multiple_files(inFileList, outFileList, decompress_bin, enable_p2p);
     std::cout << std::endl;
     for (size_t i = 0; i < inFileList.size(); i++) {
-        int ret = validate(orgFileList[i], outFileList[i]);
-        if (ret) {
-            std::cout << "FAILED: " << inFileList[i] << std::endl;
-        } else {
-            std::cout << "PASSED: " << inFileList[i] << std::endl;
-        }
+        auto ret = validate(orgFileList[i], outFileList[i]) ? "FAILED: " : "PASSED: ";
+        std::cout << ret << inFileList[i] << std::endl;
+    }
+}
+
+void xil_decompress_file(std::string& file, std::string& decompress_bin, bool enable_p2p) {
+    std::string line_dec = file.c_str();
+    std::string ext1 = ".lz4";
+    std::vector<std::string> inFileList;
+    std::vector<std::string> outFileList;
+    std::vector<std::string> orgFileList;
+    std::string in_file = line_dec + ext1;
+    std::string out_file = line_dec + ext1 + ".org";
+    inFileList.push_back(in_file);
+    orgFileList.push_back(line_dec);
+    outFileList.push_back(out_file);
+    decompress_multiple_files(inFileList, outFileList, decompress_bin, enable_p2p);
+    std::cout << std::endl;
+    for (size_t i = 0; i < inFileList.size(); i++) {
+        auto ret = validate(orgFileList[i], outFileList[i]) ? "FAILED: " : "PASSED: ";
+        std::cout << ret << inFileList[i] << std::endl;
     }
 }
 
@@ -123,21 +138,22 @@ int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--decompress_xclbin", "-dx", "Decompress XCLBIN", "decompress");
     parser.addSwitch("--decompress_mode", "-d", "Decompress Mode", "");
+    parser.addSwitch("--p2p_mod", "-p2p", "P2P Mode", "");
     parser.addSwitch("--single_xclbin", "-sx", "Single XCLBIN", "p2p_decompress");
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
     parser.parse(argc, argv);
 
     std::string decompress_xclbin = parser.value("decompress_xclbin");
     std::string decompress_mod = parser.value("decompress_mode");
+    std::string p2pMode = parser.value("p2p_mod");
     std::string single_bin = parser.value("single_xclbin");
     std::string filelist = parser.value("file_list");
 
     bool enable_p2p = ENABLE_P2P;
+    if (!p2pMode.empty()) enable_p2p = std::stoi(p2pMode);
 
-    int fopt = 1;
+    if (!decompress_mod.empty()) xil_decompress_file(decompress_mod, decompress_xclbin, enable_p2p);
 
     // "-l" List of Files
-    if (!filelist.empty()) {
-        xil_decompress_file_list(filelist, decompress_xclbin, enable_p2p);
-    }
+    if (!filelist.empty()) xil_decompress_file_list(filelist, decompress_xclbin, enable_p2p);
 }

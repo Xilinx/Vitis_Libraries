@@ -31,7 +31,7 @@ void xil_validate(std::string& file_list, std::string& ext);
 void xil_decompress_list(
     std::string& file_list, std::string& ext, std::string& decompress_bin, uint8_t deviceId, bool enable_p2p) {
     // Xilinx ZLIB object
-    xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId);
+    xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId, FULL);
 
     // Decompress
     std::ifstream infilelist_dec(file_list.c_str());
@@ -93,7 +93,7 @@ void xil_batch_verify(std::string& file_list, std::string& decompress_bin, uint8
 
 void xil_decompress_top(std::string& decompress_mod, std::string& decompress_bin, uint8_t deviceId, bool enable_p2p) {
     // Xilinx ZLIB object
-    xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId);
+    xil_zlib xlz(decompress_bin, 0, MAX_CR, deviceId, FULL);
 
     // std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
@@ -151,6 +151,7 @@ void xil_validate(std::string& file_list, std::string& ext) {
 int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--decompress", "-d", "DeCompress", "");
+    parser.addSwitch("--p2p_mod", "-p2p", "P2P Mode", "");
     parser.addSwitch("--decompress_xclbin", "-dx", "decompress XCLBIN", "single");
     parser.addSwitch("--device", "-dev", "FPGA Card # to be used", "");
 
@@ -158,6 +159,7 @@ int main(int argc, char* argv[]) {
     parser.parse(argc, argv);
 
     std::string filelist = parser.value("file_list");
+    std::string p2pMode = parser.value("p2p_mod");
     std::string decompress_mod = parser.value("decompress");
     std::string decompress_bin = parser.value("decompress_xclbin");
     std::string dev_id_str = parser.value("device");
@@ -169,6 +171,7 @@ int main(int argc, char* argv[]) {
 
     // p2p flow enable/disable
     bool enable_p2p = ENABLE_P2P;
+    if (!p2pMode.empty()) enable_p2p = std::stoi(p2pMode);
 
     if (!filelist.empty()) {
         // "-l" - List of files

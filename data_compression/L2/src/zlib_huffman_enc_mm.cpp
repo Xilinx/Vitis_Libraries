@@ -45,8 +45,8 @@ void huffmanCore(hls::stream<ap_uint<32> >& inStreamVec,
 #pragma HLS STREAM variable = bitVals depth = c_gmemBSize
 #pragma HLS STREAM variable = bitLen depth = c_gmemBSize
 
-#pragma HLS RESOURCE variable = bitVals core = FIFO_SRL
-#pragma HLS RESOURCE variable = bitLen core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = bitVals type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = bitLen type = FIFO impl = SRL
 
 #pragma HLS dataflow
     // Read data from kernel 1 in stream downsized manner
@@ -81,10 +81,10 @@ void huffman(const xf::compression::uintMemWidth_t* in,
 #pragma HLS STREAM variable = outStreamEos depth = c_gmemBSize
 #pragma HLS STREAM variable = codeStream depth = 3
 #pragma HLS STREAM variable = codeSize depth = 3
-#pragma HLS RESOURCE variable = outStreamSize core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStreamVec core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamVec core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamEos core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = outStreamSize type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = inStreamVec type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStreamVec type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStreamEos type = FIFO impl = SRL
 
 #pragma HLS dataflow
     for (uint8_t i = 0; i < n_blocks; i++) {
