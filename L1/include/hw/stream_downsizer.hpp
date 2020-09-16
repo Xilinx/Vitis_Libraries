@@ -34,6 +34,78 @@ namespace xf {
 namespace compression {
 namespace details {
 
+template <int IN_DATAWIDTH, int OUT_DATAWIDTH>
+void passDownsizer(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
+                   hls::stream<uint32_t>& inSizeStream,
+                   hls::stream<ap_uint<OUT_DATAWIDTH> >& outStream) {
+    constexpr int c_factor = IN_DATAWIDTH / OUT_DATAWIDTH;
+    ap_uint<IN_DATAWIDTH> inBuffer = 0;
+
+downsizer_top:
+    for (uint32_t inSize = inSizeStream.read(); inSize != 0; inSize = inSizeStream.read()) {
+        uint32_t outSizeV = inSize;
+    downsizer_assign:
+        for (uint32_t itr = 0; itr < outSizeV; itr++) {
+#pragma HLS PIPELINE II = 1
+            int idx = itr % c_factor;
+            if (idx == 0) inBuffer = inStream.read();
+            ap_uint<OUT_DATAWIDTH> tmpValue = inBuffer.range((idx + 1) * OUT_DATAWIDTH - 1, idx * OUT_DATAWIDTH);
+            outStream << tmpValue;
+        }
+    }
+}
+
+template <int IN_DATAWIDTH, int OUT_DATAWIDTH>
+void simpleStreamDownSizer(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
+                           hls::stream<uint16_t>& inSizeStream,
+                           hls::stream<ap_uint<OUT_DATAWIDTH> >& outStream) {
+    const int c_byteWidth = 8;
+    const int c_inputWord = IN_DATAWIDTH / c_byteWidth;
+    const int c_outWord = OUT_DATAWIDTH / c_byteWidth;
+    const int factor = c_inputWord / c_outWord;
+    ap_uint<IN_DATAWIDTH> inBuffer = 0;
+
+downsizer_top:
+    for (uint16_t inSize = inSizeStream.read(); inSize != 0; inSize = inSizeStream.read()) {
+        uint16_t outSizeV = (inSize - 1) / c_outWord + 1;
+    downsizer_assign:
+        for (uint16_t itr = 0; itr < outSizeV; itr++) {
+#pragma HLS PIPELINE II = 1
+            int idx = itr % factor;
+            if (idx == 0) inBuffer = inStream.read();
+            ap_uint<OUT_DATAWIDTH> tmpValue = inBuffer.range((idx + 1) * OUT_DATAWIDTH - 1, idx * OUT_DATAWIDTH);
+            outStream << tmpValue;
+        }
+    }
+}
+
+template <int IN_DATAWIDTH, int OUT_DATAWIDTH>
+void streamDownSizerSize(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
+                         hls::stream<uint32_t>& inSizeStream,
+                         hls::stream<ap_uint<OUT_DATAWIDTH> >& outStream,
+                         hls::stream<uint32_t>& outSizeStream) {
+    constexpr int c_byteWidth = 8;
+    constexpr int c_inputWord = IN_DATAWIDTH / c_byteWidth;
+    constexpr int c_outWord = OUT_DATAWIDTH / c_byteWidth;
+    constexpr int factor = c_inputWord / c_outWord;
+    ap_uint<IN_DATAWIDTH> inBuffer = 0;
+
+downsizer_top:
+    for (uint32_t inSize = inSizeStream.read(); inSize != 0; inSize = inSizeStream.read()) {
+        outSizeStream << inSize;
+        uint32_t outSizeV = (inSize - 1) / c_outWord + 1;
+    downsizer_assign:
+        for (uint32_t itr = 0; itr < outSizeV; itr++) {
+#pragma HLS PIPELINE II = 1
+            int idx = itr % factor;
+            if (idx == 0) inBuffer = inStream.read();
+            ap_uint<OUT_DATAWIDTH> tmpValue = inBuffer.range((idx + 1) * OUT_DATAWIDTH - 1, idx * OUT_DATAWIDTH);
+            outStream << tmpValue;
+        }
+    }
+    outSizeStream << 0;
+}
+
 template <class SIZE_DT, int IN_WIDTH, int OUT_WIDTH>
 void streamDownsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
                      hls::stream<ap_uint<OUT_WIDTH> >& outStream,

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,20 +57,16 @@ TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
 DEVICE ?= xilinx_u200_xdma_201830_2
-
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 ifeq ($(findstring vck, $(DEVICE)), vck)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
-ifeq ($(findstring u280, $(DEVICE)), u280)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u280, $(DEVICE)), u280)
+ifneq ($(findstring u50, $(DEVICE)), u50)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
 endif
 endif
@@ -96,7 +92,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
-
+HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
 
 CXXFLAGS += -DPARALLEL_BLOCK=8 -DGZIP_MODE=1
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
@@ -108,6 +104,7 @@ CXXFLAGS += -I$(XFLIB_DIR)/common/libs/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/cmdparser
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/logger
 CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
+CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/
 
 # Host compiler global settings
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
@@ -134,7 +131,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 
 VPP_FLAGS += --config $(CUR_DIR)/advanced.ini
-VPP_FLAGS += -DPARALLEL_BLOCK=8 -DMULTIPLE_BYTES=4 -DHIGH_FMAX_II=2 -DGZIP_MODE=1 
+VPP_FLAGS += -DPARALLEL_BLOCK=8 -DMULTIPLE_BYTES=4 -DGZIP_MODE=1 
 
 # Kernel linker flags
 LDCLFLAGS_compress_decompress += --config $(CUR_DIR)/opts.ini

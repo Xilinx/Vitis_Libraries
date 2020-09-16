@@ -250,7 +250,7 @@ setup: | check_part
 	@cat ./settings.tcl
 	@echo "----"
 
-HLS ?= vivado_hls
+HLS ?= vitis_hls
 runhls: data setup | check_vivado
 	$(HLS) -f run_hls.tcl;
 

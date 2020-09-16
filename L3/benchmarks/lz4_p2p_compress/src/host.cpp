@@ -35,14 +35,10 @@ void compress_multiple_files(const std::vector<std::string>& inFileVec,
     std::vector<char*> outVec;
     std::vector<uint32_t> inSizeVec;
 
-    uint64_t total_size = 0;
-    uint64_t total_in_size = 0;
-
-    printf("NumFiles:%d\n\n", inFileVec.size());
+    std::cout << "\n\nNumFiles:" << inFileVec.size() << std::endl;
 
     std::cout << "\x1B[31m[Disk Operation]\033[0m Reading Input Files Started ..." << std::endl;
     for (uint32_t fid = 0; fid < inFileVec.size(); fid++) {
-        uint64_t original_size = 0;
         std::string inFile_name = inFileVec[fid];
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
         if (!inFile) {
@@ -52,7 +48,6 @@ void compress_multiple_files(const std::vector<std::string>& inFileVec,
         uint32_t input_size = xflz4::get_file_size(inFile);
 
         std::string outFile_name = outFileVec[fid];
-        uint32_t out_size;
 
         char* in = (char*)aligned_alloc(4096, input_size);
         inFile.read(in, input_size);
@@ -97,30 +92,48 @@ void xil_compress_file_list(std::string& file_list, uint32_t block_size, std::st
     std::cout << std::endl;
 }
 
+void xil_compress_file(std::string& file, uint32_t block_size, std::string& compress_bin, bool enable_p2p) {
+    std::string line_comp = file.c_str();
+    std::string ext1 = ".xe2sd";
+
+    std::vector<std::string> inFileList;
+    std::vector<std::string> outFileList;
+    std::vector<std::string> origFileList;
+
+    std::string orig_file = line_comp + ext1;
+    std::string out_file = line_comp + ext1 + ".lz4";
+    inFileList.push_back(line_comp);
+    origFileList.push_back(orig_file);
+    outFileList.push_back(out_file);
+    compress_multiple_files(inFileList, outFileList, block_size, compress_bin, enable_p2p);
+    std::cout << std::endl;
+}
+
 int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--compress_xclbin", "-cx", "Compress XCLBIN", "compress");
+    parser.addSwitch("--compress", "-c", "Compress", "");
     parser.addSwitch("--file_list", "-l", "List of Input Files", "");
+    parser.addSwitch("--p2p_mod", "-p2p", "P2P Mode", "");
     parser.addSwitch("--block_size", "-B", "Compress Block Size [0-64: 1-256: 2-1024: 3-4096]", "0");
     parser.addSwitch("--id", "-id", "Device ID", "0");
     parser.parse(argc, argv);
 
+    std::string compress_file = parser.value("compress");
     std::string compress_bin = parser.value("compress_xclbin");
+    std::string p2pMode = parser.value("p2p_mod");
     std::string filelist = parser.value("file_list");
     std::string block_size = parser.value("block_size");
     std::string device_ids = parser.value("id");
-    uint8_t device_id = 0;
 
-    if (!(device_ids.empty())) {
-        device_id = atoi(device_ids.c_str());
-    }
     uint32_t bSize = 0;
 
     bool enable_p2p = ENABLE_P2P;
+    if (!p2pMode.empty()) enable_p2p = std::stoi(p2pMode);
 
     // Block Size
     if (!(block_size.empty())) {
-        bSize = atoi(block_size.c_str());
+        bSize = stoi(block_size);
 
         switch (bSize) {
             case 0:
@@ -144,6 +157,9 @@ int main(int argc, char* argv[]) {
         // Default Block Size - 64KB
         bSize = BLOCK_SIZE_IN_KB;
     }
+
+    // "-c" - Compress Mode
+    if (!compress_file.empty()) xil_compress_file(compress_file, bSize, compress_bin, enable_p2p);
 
     // "-l" List of Files
     if (!filelist.empty()) {

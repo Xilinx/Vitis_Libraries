@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,25 +57,18 @@ TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
 DEVICE ?= xilinx_u200_xdma_201830_2
-
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 ifeq ($(findstring vck, $(DEVICE)), vck)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
-ifeq ($(findstring u50, $(DEVICE)), u50)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-ifeq ($(findstring u280, $(DEVICE)), u280)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 
-ifneq ($(findstring u200, $(DEVICE)), u200)
-ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u280, $(DEVICE)), u280)
 ifneq ($(findstring samsung_u2, $(DEVICE)), samsung_u2)
 ifneq ($(findstring samsung_U2, $(DEVICE)), samsung_U2)
+ifneq ($(findstring u200, $(DEVICE)), u200)
+ifneq ($(findstring u250, $(DEVICE)), u250)
+ifneq ($(findstring u50, $(DEVICE)), u50)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
 endif
 endif
@@ -105,12 +98,14 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
+HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
 
 
-CXXFLAGS += -DPARALLEL_BLOCK=1 -DD_COMPUTE_UNIT=1 -DINPUT_BUFFER_SIZE=128*1024*1024 -DOUTPUT_BUFFER_SIZE=128*1024*1024
+CXXFLAGS += -DPARALLEL_BLOCK=1 -DD_COMPUTE_UNIT=1
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
+CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/zlib-1.2.7
 
 
 
@@ -128,7 +123,7 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := xil_zlib
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -dx $(BUILD_DIR)/decompress_stream.xclbin -d $(CUR_DIR)/sample.txt.zlib
+HOST_ARGS := -dx $(BUILD_DIR)/decompress_stream.xclbin -d $(CUR_DIR)/sample.txt.full.zlib
 
 ifneq ($(HOST_ARCH), x86)
 	LDFLAGS += --sysroot=$(SYSROOT)
@@ -148,14 +143,12 @@ VPP_FLAGS += -DPARALLEL_BLOCK=1 -DMULTIPLE_BYTES=8
 
 # Kernel linker flags
 LDCLFLAGS_decompress_stream += --config $(CUR_DIR)/opts.ini
-# Adding config files to linker
-LDCLFLAGS_decompress_stream+= --config auto_decompress_stream.ini 
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/decompress_stream.xclbin
 BINARY_CONTAINER_decompress_stream_OBJS += $(TEMP_DIR)/xilZlibDmReader.xo
 BINARY_CONTAINER_decompress_stream_OBJS += $(TEMP_DIR)/xilZlibDmWriter.xo
-BINARY_CONTAINER_decompress_stream_OBJS += $(TEMP_DIR)/xilDecompressStream.xo
+BINARY_CONTAINER_decompress_stream_OBJS += $(TEMP_DIR)/xilDecompressFull.xo
 
 ############################## Setting Targets ##############################
 CP = cp -rf
@@ -181,10 +174,10 @@ $(TEMP_DIR)/xilZlibDmWriter.xo: $(XFLIB_DIR)/L2/tests/src/zlib_dm_multibyte_wr.c
 	$(ECHO) "Compiling Kernel: xilZlibDmWriter"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(xilZlibDmWriter_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilZlibDmWriter -I'$(<D)' -o'$@' '$<'
-$(TEMP_DIR)/xilDecompressStream.xo: $(XFLIB_DIR)/L2/src/zlib_parallelbyte_decompress_stream.cpp
-	$(ECHO) "Compiling Kernel: xilDecompressStream"
+$(TEMP_DIR)/xilDecompressFull.xo: $(XFLIB_DIR)/L2/src/zlib_parallelbyte_decompress_full.cpp
+	$(ECHO) "Compiling Kernel: xilDecompressFull"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(xilDecompressStream_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilDecompressStream -I'$(<D)' -o'$@' '$<'
+	$(VPP) $(xilDecompressFull_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilDecompressFull -I'$(<D)' -o'$@' '$<'
 
 $(BUILD_DIR)/decompress_stream.xclbin: $(BINARY_CONTAINER_decompress_stream_OBJS)
 	mkdir -p $(BUILD_DIR)
@@ -204,8 +197,10 @@ run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/decompress_stream.xclbin
 else
 	$(EXE_FILE) $(HOST_ARGS)
+	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/decompress_stream.xclbin
 endif
 
 ############################## Cleaning Rules ##############################
@@ -222,6 +217,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) ./sample.txt.zlib.* 
+	-$(RMDIR) ./sample.txt.full.zlib.* 
 
 clean: cleanh

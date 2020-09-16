@@ -639,70 +639,101 @@ int flush;
 int ZEXPORT inflate(z_streamp strm, int flush)
 #endif
 {
+    std::string u50_xclbin("/opt/xilinx/zlib/u50_gen3x16_xdma_201920_3.xclbin");
+    std::string xrt_ini("/opt/xilinx/zlib/xrt.ini");
     const uint8_t c_max_cr = 0;
     bool use_cpu_sol = false;
     bool use_fpga_sol = false;
-    char *xclbin = getenv("XILINX_LIBZ_XCLBIN");
-    char *cu_id = getenv("XILINX_CU_ID");   
-    std::string u50_xclbin = xclbin;
- 
-    if (u50_xclbin.c_str() == NULL) {
-        u50_xclbin = "/opt/Xilinx/zlib/u50_gen3x16_xdma_201920_3.xclbin";
-        std::ifstream bin_file(u50_xclbin.c_str(), std::ifstream::binary);
-        if (bin_file.fail()) {
-#ifdef VERBOSE
-            std::cout << "Unable to open binary file " << std::endl;
-#endif
-            use_cpu_sol = true;
-        }else {
-            use_fpga_sol = true;
-        }
-    } else {
-        use_fpga_sol = true;
+    char* xclbin = getenv("XILINX_LIBZ_XCLBIN");
+    if (xclbin && *xclbin) u50_xclbin = xclbin;
+    char* xrtent = getenv("XRT_INI_PATH");
+    if (xrtent && *xrtent) xrt_ini = xrtent;
+    char* cu_id = getenv("XILINX_CU_ID");
+
+    uint8_t no_cu = 0;
+    if (cu_id) {
+        no_cu = atoi(cu_id);
+        if (no_cu > D_COMPUTE_UNIT) no_cu %= D_COMPUTE_UNIT;
     }
-    
-    char *min_size = getenv("MIN_INPUT_SIZE");
+
+    std::ifstream xrt_ini_file(xrt_ini.c_str(), std::ifstream::binary);
+    if (xrt_ini_file.is_open()) {
+        // Path to XRT ini file
+        setenv("XRT_INI_PATH", xrt_ini.c_str(), 1);
+        xrt_ini_file.close();
+    }
+
+    std::ifstream bin_file(u50_xclbin.c_str(), std::ifstream::binary);
+    if (bin_file.is_open()) {
+        use_fpga_sol = true;
+        bin_file.close();
+    } else {
+#if (VERBOSE_LEVEL >= 1)
+        std::cout << "Unable to open binary file " << std::endl;
+#endif
+        use_cpu_sol = true;
+    }
+
+    char* min_size = getenv("MIN_INPUT_SIZE");
     uint32_t small_size = MIN_INPUT_SIZE;
     if (min_size != NULL) {
         small_size = atoi(min_size);
     }
-    
+
     // Check input size if its less than
     // MIN_INPUT_SIZE use SW flow
     uint64_t input_size = strm->avail_in;
     if (input_size < small_size) {
-#ifdef VERBOSE
+#if (VERBOSE_LEVEL >= 1)
         std::cout << "Input Size is less than MIN_INPUT_SIZE";
         std::cout << " Falling back to SW Solution " << std::endl;
 #endif
         use_cpu_sol = true;
         use_fpga_sol = false;
     }
-    
+
     if (use_fpga_sol) {
         // Arg 1: xclbin
-        // Xilinx ZLIB object
-        xfZlib *xlz = nullptr;
+        // xilinx ZLIB object
+        xfZlib* xlz = nullptr;
         bool flag = false;
         do {
             xlz = new xfZlib(u50_xclbin.c_str(), c_max_cr, DECOMP_ONLY, 0, 0, FULL);
             int err_code = xlz->error_code();
             if (err_code && (err_code != c_clOutOfResource)) {
-#ifdef VERBOSE
-                std::cout << "Failed to use FPGA for Decompression, "; 
+#if (VERBOSE_LEVEL >= 1)
+                std::cout << "Failed to use FPGA for Decompression, ";
                 std::cout << " switching to SW solution \n" << std::endl;
 #endif
                 use_cpu_sol = true;
+                break;
             } else {
                 uint8_t* input = strm->next_in;
                 uint8_t* output = strm->next_out;
-                // Zlib decompression
-                int debytes = xlz->decompress_buffer((uint8_t*)input, (uint8_t*)output, input_size, atoi(cu_id));
+                int debytes = 0;
+                if (cu_id) {
+                    // Zlib decompression -- Set CU ID
+                    debytes = xlz->decompress((uint8_t*)input, (uint8_t*)output, input_size, no_cu);
+                } else {
+                    // Zlib decompression -- Random CU generation
+                    debytes = xlz->decompress_buffer((uint8_t*)input, (uint8_t*)output, input_size);
+                }
+                int err_code = xlz->error_code();
                 delete xlz;
                 if (debytes == 0) {
-#ifdef VERBOSE
-                    std::cout << "Failed to create device buffer, Retrying . . ." << std::endl;
+                    if (err_code == c_headermismatch) {
+#if (VERBOSE_LEVEL >= 1)
+                        std::cout << "Zlib Data Format Check Failed" << std::endl;
 #endif
+                        use_cpu_sol = true;
+                        break;
+                    }
+
+                    if (err_code == c_clOutOfResource) {
+#if (VERBOSE_LEVEL >= 1)
+                        std::cout << "Failed to create device buffer, Retrying . . ." << std::endl;
+#endif
+                    }
                     flag = true;
                 } else {
                     strm->total_out = debytes;
@@ -710,11 +741,11 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                     return 1;
                 }
             }
-        }while(flag);
+        } while (flag);
     }
 
     if (use_cpu_sol) {
-#ifdef VERBOSE
+#if (VERBOSE_LEVEL >= 1)
         printf("CPU Solution \n");
 #endif
         // printf("In inflate integrated \n");
@@ -974,8 +1005,8 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                     }
                     state->distcode = (const code FAR*)(state->next);
                     state->distbits = 6;
-                    ret = inflate_table(DISTS, state->lens + state->nlen, state->ndist, &(state->next), &(state->distbits),
-                                        state->work);
+                    ret = inflate_table(DISTS, state->lens + state->nlen, state->ndist, &(state->next),
+                                        &(state->distbits), state->work);
                     // printf("ret %d build distance tables\n", ret);
                     if (ret) {
                         strm->msg = (char*)"invalid distances set";
@@ -1040,9 +1071,7 @@ int ZEXPORT inflate(z_streamp strm, int flush)
                           (state->mode == LEN_ || state->mode == COPY_ ? 256 : 0);
         // printf("in %d out %d flush %d ret %d \n", in, out, flush, ret);
         if (((in == 0 && out == 0) || flush == Z_FINISH) && ret == Z_OK) {
-            // ret = Z_BUF_ERROR;
-            ret = 1;
-            // printf("ret %d \n", ret);
+            ret = Z_BUF_ERROR;
         }
         return ret;
     }

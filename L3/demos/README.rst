@@ -66,7 +66,6 @@ Implemented Algorithms
 
 The following is a list of implemented compression algorithms:
 
--  `LZ4 Compress/Decompress <./lz4>`__
--  `Snappy Compress/Decompress <./snappy>`__
--  `GZip Compress/Decompress <./gzip>`__
--  `Zlib Compress Decompress <./zlib>`__
+-  `LZ4 Compress/Decompress <./lz4_app>`__
+-  `GZip Compress/Decompress <./gzip_app>`__
+-  `Zlib Compress Decompress <./zlib_app>`__

@@ -33,8 +33,8 @@ void __xf_decomp_datamover(xf::compression::uintMemWidth_t* in,
                            hls::stream<ap_axiu<8, 0, 0, 0> >& instream_orig,
                            hls::stream<ap_axiu<8, 0, 0, 0> >& outstream_dest) {
     hls::stream<xf::compression::uintMemWidth_t> instream512("inputStream");
-    hls::stream<xf::compression::streamDt> outdownstream("outDownStream");
-    hls::stream<xf::compression::streamDt> decompoutstream("decompoutstream");
+    hls::stream<ap_uint<8> > outdownstream("outDownStream");
+    hls::stream<ap_uint<8> > decompoutstream("decompoutstream");
     hls::stream<xf::compression::uintMemWidth_t> outstream512("outputStream");
 
 #pragma HLS STREAM variable = outdownstream depth = 2

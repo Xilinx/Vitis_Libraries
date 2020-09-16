@@ -37,7 +37,7 @@ void lz4CoreDec(hls::stream<ap_uint<PARALLEL_BYTE * 8> >& inStream,
                 const uint32_t _input_size) {
     uint32_t input_size = _input_size;
     hls::stream<uint32_t> decStreamSize;
-    hls::stream<uint16_t> blockCompSize;
+    hls::stream<uint32_t> blockCompSize;
 
     // send each block compressed size and 0 to indicate end of data
     blockCompSize << input_size;
@@ -66,9 +66,9 @@ void lz4Dec(const ap_uint<PARALLEL_BYTE * 8>* in,
 #pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = endOfStream depth = c_gmemBurstSize
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = endOfStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = endOfStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel

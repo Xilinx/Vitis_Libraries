@@ -51,9 +51,9 @@ void xilSnappyDecompressStream(hls::stream<ap_axiu<c_parallelBit, 0, 0, 0> >& in
 #pragma HLS STREAM variable = decompressedStream depth = 32
 #pragma HLS STREAM variable = lzxendOfStream depth = 32
 
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = decompressedStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = lzxendOfStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = decompressedStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = lzxendOfStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
 

@@ -23,22 +23,39 @@
 
 // Default values
 constexpr auto M_PROC = 1;
-constexpr auto NUM_ITER = 10;
+constexpr auto NUM_ITER = 1;
 
 using namespace xf::compression;
 
 // Bandwidth measurement API
-void xil_compress_bandwidth(
-    const std::string& single_bin, uint8_t* in, uint8_t* out, uint32_t input_size, uint8_t device_id, uint8_t max_cr) {
+void xil_compress_bandwidth(const std::string& single_bin,
+                            uint8_t* in,
+                            uint8_t* out,
+                            uint32_t input_size,
+                            uint8_t device_id,
+                            uint8_t max_cr,
+                            uint32_t num_iter) {
     uint32_t enbytes = 0;
-    uint32_t num_iter = NUM_ITER;
-    xfZlib xlz(single_bin, max_cr, COMP_ONLY, device_id);
-    ERROR_STATUS(xlz.error_code());
+    bool retry_flag = false;
+    xfZlib* xlz = nullptr;
+    do {
+        xlz = new xfZlib(single_bin, max_cr, COMP_ONLY, device_id, 0, DYNAMIC, XILINX_ZLIB);
+        if (xlz->error_code()) {
+#ifdef VERBOSE
+            std::cout << "Failed to proceed retrying ..." << std::endl;
+#endif
+            retry_flag = true;
+            delete xlz;
+        } else {
+            retry_flag = false;
+        }
+    } while (retry_flag);
+
     std::chrono::duration<double, std::nano> compress_API_time_ns_1(0);
     std::chrono::duration<double, std::milli> compress_API_time_ms_1(0);
     auto compress_API_start = std::chrono::high_resolution_clock::now();
 
-    for (uint32_t i = 0; i < num_iter; i++) enbytes = xlz.compress_buffer(in, out, input_size);
+    for (uint32_t i = 0; i < num_iter; i++) enbytes = xlz->compress_buffer(in, out, input_size);
 
     auto compress_API_end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::nano>(compress_API_end - compress_API_start);
@@ -63,26 +80,55 @@ void xil_decompress_bandwidth(const std::string& single_bin,
                               uint32_t input_size,
                               uint32_t cu,
                               uint8_t device_id,
-                              uint8_t max_cr) {
+                              uint8_t max_cr,
+                              uint32_t num_iter) {
     uint32_t debytes = 0;
-    uint32_t num_iter = NUM_ITER;
-    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id);
-    ERROR_STATUS(xlz.error_code());
     std::chrono::duration<double, std::nano> decompress_API_time_ns_1(0);
     std::chrono::duration<double, std::milli> decompress_API_time_ms_1(0);
-    auto decompress_API_start = std::chrono::high_resolution_clock::now();
+    bool retry_flag = false;
 
-    for (uint32_t i = 0; i < num_iter; i++) debytes = xlz.decompress(in, out, input_size, cu);
+    xfZlib* xlz = nullptr;
 
-    auto decompress_API_end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
-    auto duration_ms = std::chrono::duration<double, std::milli>(decompress_API_end - decompress_API_start);
+    do {
+        xlz = new xfZlib(single_bin, max_cr, DECOMP_ONLY, device_id, 0, FULL, XILINX_ZLIB);
+        int err_code = xlz->error_code();
+        if (err_code && (err_code != c_clOutOfHostMemory)) {
+#ifdef VERBOSE
+            std::cout << "Failed to create object" << std::endl;
+#endif
+            delete xlz;
+            continue;
+        }
 
-    decompress_API_time_ns_1 = duration / num_iter;
-    decompress_API_time_ms_1 = duration_ms / num_iter;
+        // Decompress API
+        auto decompress_API_start = std::chrono::high_resolution_clock::now();
+        // Call decompress API
+        for (int i = 0; i < num_iter; i++) {
+            debytes = xlz->decompress(in, out, input_size, cu);
+        }
+        auto decompress_API_end = std::chrono::high_resolution_clock::now();
+        delete xlz;
+
+        if (debytes == 0) {
+#ifdef VERBOSE
+            std::cout << "\n";
+            std::cout << "Failed to create device buffer, Retrying . . ." << std::endl;
+#endif
+            cu++;
+            cu = cu % D_COMPUTE_UNIT;
+            retry_flag = true;
+        } else {
+            auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
+            auto duration_ms = std::chrono::duration<double, std::milli>(decompress_API_end - decompress_API_start);
+            decompress_API_time_ns_1 = duration / num_iter;
+            decompress_API_time_ms_1 = duration_ms / num_iter;
+            retry_flag = false;
+        }
+    } while (retry_flag);
+
     float throughput_in_mbps_1 = (float)debytes * 1000 / decompress_API_time_ns_1.count();
     std::cout << "Input Size: " << input_size / 1024 << "KB ";
-    std::cout << "Compressed Size: " << debytes / 1024 << "KB ";
+    std::cout << "UnCompressed Size: " << debytes / 1024 << "KB ";
     std::cout << "CU: " << cu;
     std::cout << " PID: " << getpid();
     std::cout << " PPID: " << getppid();
@@ -98,6 +144,7 @@ int main(int argc, char* argv[]) {
     parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
     parser.addSwitch("--multi_process", "-p", "Multiple Process", "1");
     parser.addSwitch("--id", "-id", "Device ID", "0");
+    parser.addSwitch("--num_iter", "-nitr", "Number of Iterations", "1");
 
     parser.parse(argc, argv);
 
@@ -107,9 +154,13 @@ int main(int argc, char* argv[]) {
     std::string mcr = parser.value("max_cr");
     std::string mproc = parser.value("multi_process");
     std::string device_ids = parser.value("id");
+    std::string num_iter = parser.value("num_iter");
 
     uint8_t device_id = 0;
     if (!(device_ids.empty())) device_id = atoi(device_ids.c_str());
+
+    uint32_t nitr = NUM_ITER;
+    if (!(num_iter.empty())) nitr = atoi(num_iter.c_str());
 
     uint8_t max_cr_val = MAX_CR;
     if (!(mcr.empty())) {
@@ -127,10 +178,6 @@ int main(int argc, char* argv[]) {
     }
 
     if (!compress_mod.empty()) {
-        if (multi_proc > 2) {
-            multi_proc = 2;
-            std::cout << "More than two processes may crash, resetting to 2" << std::endl;
-        }
         // "-c" - Compress Mode
         std::string inFile_name = compress_mod;
         std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
@@ -157,10 +204,11 @@ int main(int argc, char* argv[]) {
 
         std::cout << "\n";
 
-        std::cout << "No of Process " << (int)multi_proc << std::endl;
+        std::cout << "No of Process " << (int)multi_proc << " Num Iter: " << nitr << std::endl;
         for (int i = 0; i < multi_proc; i++) {
             if (fork() == 0) {
-                xil_compress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, device_id, max_cr_val);
+                xil_compress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, device_id, max_cr_val,
+                                       nitr);
                 exit(0);
             }
         }
@@ -191,11 +239,12 @@ int main(int argc, char* argv[]) {
         for (int i = 1; i < multi_proc; i++) {
             std::memcpy(in[i].data(), in[0].data(), input_size);
         }
-
-        std::cout << "No of Process " << (int)multi_proc << std::endl;
+        std::cout << "No of Process " << (int)multi_proc << " Num Iter: " << nitr << std::endl;
         for (int i = 0; i < multi_proc; i++) {
+            uint8_t cu_id = i % D_COMPUTE_UNIT;
             if (fork() == 0) {
-                xil_decompress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, i, device_id, max_cr_val);
+                xil_decompress_bandwidth(single_bin, in[i].data(), out[i].data(), input_size, cu_id, device_id,
+                                         max_cr_val, nitr);
                 exit(0);
             }
         }

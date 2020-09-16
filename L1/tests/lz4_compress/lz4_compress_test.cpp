@@ -59,8 +59,8 @@ void lz4CompressEngineRun(hls::stream<uintV_t>& inStream,
 #pragma HLS STREAM variable = bestMatchStream depth = 8
 #pragma HLS STREAM variable = boosterStream depth = 8
 
-#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = compressdStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = boosterStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::lzCompress<MATCH_LEN, c_minMatch, LZ_MAX_OFFSET_LIMIT, c_matchLevel, c_minOffset>(

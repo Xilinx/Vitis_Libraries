@@ -27,12 +27,109 @@
 namespace xf {
 namespace compression {
 
-typedef ap_uint<8> streamDt;
-
 namespace details {
 
+template <int OUT_DWIDTH>
+void hlsStream2axiu(hls::stream<ap_uint<OUT_DWIDTH> >& inputStream,
+                    hls::stream<bool>& inputStreamEos,
+                    hls::stream<ap_axiu<OUT_DWIDTH, 0, 0, 0> >& outAxiStream,
+                    hls::stream<ap_axiu<32, 0, 0, 0> >& outAxiSizeStream,
+                    hls::stream<uint32_t>& inputTotalCmpSizeStream) {
+    for (uint32_t input_size = inputTotalCmpSizeStream.read(); input_size != 0;
+         input_size = inputTotalCmpSizeStream.read()) {
+        bool flag;
+        do {
+            ap_uint<OUT_DWIDTH> temp = inputStream.read();
+            flag = inputStreamEos.read();
+            ap_axiu<OUT_DWIDTH, 0, 0, 0> tOut;
+            tOut.data = temp;
+            tOut.last = flag;
+            tOut.keep = -1;
+            outAxiStream << tOut;
+        } while (!flag);
+
+        ap_axiu<32, 0, 0, 0> totalSize;
+        totalSize.data = input_size;
+        outAxiSizeStream << totalSize;
+    }
+}
+
+template <int OUT_DWIDTH>
+void hlsStreamSize2axiu(hls::stream<ap_uint<OUT_DWIDTH> >& inputStream,
+                        hls::stream<bool>& inputStreamEos,
+                        hls::stream<ap_axiu<OUT_DWIDTH, 0, 0, 0> >& outAxiStream,
+                        hls::stream<ap_axiu<32, 0, 0, 0> >& outAxiSizeStream,
+                        hls::stream<uint32_t>& inputTotalCmpSizeStream,
+                        hls::stream<bool>& inNumBlockStreamEos) {
+    for (bool eos = inNumBlockStreamEos.read(); eos == false; eos = inNumBlockStreamEos.read()) {
+        bool flag;
+        do {
+            ap_uint<OUT_DWIDTH> temp = inputStream.read();
+            flag = inputStreamEos.read();
+            ap_axiu<OUT_DWIDTH, 0, 0, 0> tOut;
+            tOut.data = temp;
+            tOut.last = flag;
+            tOut.keep = -1;
+            outAxiStream << tOut;
+        } while (!flag);
+
+        ap_axiu<32, 0, 0, 0> totalSize;
+        totalSize.data = inputTotalCmpSizeStream.read();
+        outAxiSizeStream << totalSize;
+    }
+}
+
+template <int IN_DWIDTH, int BLCK_SIZE>
+void axiu2hlsStreamBlockMaker(hls::stream<ap_axiu<IN_DWIDTH, 0, 0, 0> >& inputAxiStream,
+                              hls::stream<ap_uint<IN_DWIDTH> >& outputStream,
+                              hls::stream<uint32_t>& outputBlockSizeStream,
+                              hls::stream<ap_axiu<32, 0, 0, 0> >& inSizeStream,
+                              hls::stream<ap_uint<32> >& outNumBlockStream) {
+    constexpr int c_parallelByte = IN_DWIDTH / 8;
+    for (ap_axiu<32, 0, 0, 0> tempSize = inSizeStream.read(); tempSize.data != 0; tempSize = inSizeStream.read()) {
+        ap_uint<32> inputSize = tempSize.data;
+        ap_uint<32> no_blocks = (inputSize - 1) / BLCK_SIZE + 1;
+        outNumBlockStream << no_blocks;
+        uint32_t readSize = 0;
+
+        for (uint32_t i = 0; i < no_blocks; i++) {
+            uint32_t block_length = BLCK_SIZE;
+            if (readSize + BLCK_SIZE > inputSize) block_length = inputSize - readSize;
+            outputBlockSizeStream << block_length;
+            for (uint32_t j = 0; j < block_length; j += c_parallelByte) {
+#pragma HLS PIPELINE II = 1
+                ap_axiu<IN_DWIDTH, 0, 0, 0> tempVal = inputAxiStream.read();
+                ap_uint<IN_DWIDTH> tmpOut = tempVal.data;
+                outputStream << tmpOut;
+            }
+            readSize += BLCK_SIZE;
+        }
+    }
+    outputBlockSizeStream << 0;
+    outNumBlockStream << 0;
+}
+
+template <int IN_DWIDTH>
+void axiu2hlsStreamSize(hls::stream<ap_axiu<IN_DWIDTH, 0, 0, 0> >& inputAxiStream,
+                        hls::stream<ap_uint<IN_DWIDTH> >& outputStream,
+                        hls::stream<uint32_t>& outputSizeStream,
+                        hls::stream<ap_axiu<32, 0, 0, 0> >& inSizeStream) {
+    const int c_parallelByte = IN_DWIDTH / 8;
+    for (ap_axiu<32, 0, 0, 0> tempSize = inSizeStream.read(); tempSize.data != 0; tempSize = inSizeStream.read()) {
+        ap_uint<32> inputSize = tempSize.data;
+        outputSizeStream << inputSize;
+        for (uint32_t j = 0; j < inputSize; j += c_parallelByte) {
+#pragma HLS PIPELINE II = 1
+            ap_axiu<IN_DWIDTH, 0, 0, 0> tempVal = inputAxiStream.read();
+            ap_uint<IN_DWIDTH> tmpOut = tempVal.data;
+            outputStream << tmpOut;
+        }
+    }
+    outputSizeStream << 0;
+}
+
 void axis2hlsStreamFixedSize(hls::stream<qdma_axis<8, 0, 0, 0> >& inputAxiStream,
-                             hls::stream<streamDt>& inputStream,
+                             hls::stream<ap_uint<8> >& inputStream,
                              uint32_t inputSize) {
     /**
      * @brief Read data from axi stream and write to internal hls stream.
@@ -51,7 +148,7 @@ void axis2hlsStreamFixedSize(hls::stream<qdma_axis<8, 0, 0, 0> >& inputAxiStream
     }
 }
 
-void hlsStream2axis(hls::stream<streamDt>& outputStream,
+void hlsStream2axis(hls::stream<ap_uint<8> >& outputStream,
                     hls::stream<bool>& outStreamEos,
                     hls::stream<qdma_axis<8, 0, 0, 0> >& outputAxiStream,
                     hls::stream<uint32_t>& outStreamSize,
@@ -86,7 +183,7 @@ void hlsStream2axis(hls::stream<streamDt>& outputStream,
     outAxiStreamSize.write(tOutSize);
 }
 
-void hlsStream2axiStreamFixedSize(hls::stream<streamDt>& hlsInStream,
+void hlsStream2axiStreamFixedSize(hls::stream<ap_uint<8> >& hlsInStream,
                                   hls::stream<qdma_axis<8, 0, 0, 0> >& outputAxiStream,
                                   uint32_t originalSize) {
     /**

@@ -66,7 +66,8 @@ Performance Data
 
 .. [*] Decompression uses high fmax options (Bitwidth: 32bit, ByteGen Loop: 2) 
 
-Executable Usage:
+Executable Usage
+----------------
 
 1. To execute single file for compression 	          : ``./build/xil_gzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -c <input file_name>``
 2. To execute single file for decompression           : ``./build/xil_gzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -d <compressed file_name>``
@@ -88,3 +89,23 @@ The usage of the generated executable is as follows:
         --compress_decompress,  -v      Compress Decompress
         --cu,                   -k      CU                   Default: [0]
 
+
+Standard GZip Support
+---------------------
+
+This application is compatible with standard Gzip application (compress/decompres).  
+Compatibility is validated on Linux environment.
+
+Following is the command to use standard "**gzip**" to decompress files
+compressed using Xilinx GZip application. 
+
+.. code-block:: bash
+
+   gzip -dc <compressed_file.gz>  > out
+
+At present we dont support CRC32 check for GZip, due this following error
+message is expected while running the above command. 
+
+Expected Error Message: 
+
+``invalid compressed data--crc error``
