@@ -44,15 +44,14 @@ void lz4CoreDec(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidth,
     uint32_t output_size1 = output_size;
     uint32_t input_start_idx = _input_start_idx;
     hls::stream<uintV_t> instreamV("instreamV");
-    hls::stream<xf::compression::compressd_dt> decompressd_stream("decompressd_stream");
+    hls::stream<ap_uint<32> > decompressd_stream("decompressd_stream");
     hls::stream<uintV_t> decompressed_stream("decompressed_stream");
 #pragma HLS STREAM variable = instreamV depth = 8
 #pragma HLS STREAM variable = decompressd_stream depth = 8
 #pragma HLS STREAM variable = decompressed_stream depth = 8
-#pragma HLS RESOURCE variable = instreamV core = FIFO_SRL
-#pragma HLS RESOURCE variable = decompressd_stream core = FIFO_SRL
-#pragma HLS RESOURCE variable = decompressed_stream core = FIFO_SRL
-
+#pragma HLS BIND_STORAGE variable = instreamV type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = decompressd_stream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = decompressed_stream type = FIFO impl = SRL
     bool uncomp_flag = 0;
     if (input_size == output_size) uncomp_flag = 1;
 
@@ -78,8 +77,8 @@ void lz4Dec(const xf::compression::uintMemWidth_t* in,
     hls::stream<xf::compression::uintMemWidth_t> outStreamMemWidth[PARALLEL_BLOCK];
 #pragma HLS STREAM variable = inStreamMemWidth depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStreamMemWidth depth = c_gmemBurstSize
-#pragma HLS RESOURCE variable = inStreamMemWidth core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamMemWidth core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = inStreamMemWidth type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStreamMemWidth type = FIFO impl = SRL
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel

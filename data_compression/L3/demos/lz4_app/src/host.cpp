@@ -149,7 +149,7 @@ void xilCompressDecompressList(std::string& file_list,
 
     if (c_flow == 0) {
         std::cout << "\n";
-        std::cout << "E2E(MBps)\tKT(MBps)\tLZ4_CR\t\tFile Size(MB)\t\tFile Name" << std::endl;
+        std::cout << "E2E(MBps)\tLZ4_CR\t\tFile Size(MB)\t\tFile Name" << std::endl;
         std::cout << "\n";
     } else {
         std::cout << "\n";
@@ -220,7 +220,7 @@ void xilCompressDecompressList(std::string& file_list,
     std::cout << "--------------------------------------------------------------" << std::endl;
     if (d_flow == 0) {
         std::cout << "\n";
-        std::cout << "E2E(MBps)\tKT(MBps)\tFile Size(MB)\t\tFile Name" << std::endl;
+        std::cout << "E2E(MBps)\tFile Size(MB)\t\tFile Name" << std::endl;
         std::cout << "\n";
     } else {
         std::cout << "\n";

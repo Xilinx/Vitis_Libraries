@@ -1,223 +1,120 @@
 {
-    "name": "Xilinx ZLIB 8 Parallel Bytes Decompress 4 Instances",
+    "name": "Xilinx ZLIB 8 Parallel Bytes Decompress 4 Instances", 
     "description": [
         "Xilinx ZLIB Decompression Parallel Byte 8_II1 4_inst"
-    ],
-    "flow": "vitis",
+    ], 
+    "flow": "vitis", 
     "platform_blacklist": [
-        "u50",
-        "u280"
-    ],
-     "platform_whitelist": [
-        "u200",
-        "u250"
-    ],
+        "zc", 
+        "vck"
+    ], 
+    "platform_whitelist": [
+        "u200", 
+        "u250", 
+        "u50"
+    ], 
     "launch": [
         {
-            "cmd_args": "-dx BUILD/decompress_stream.xclbin -d PROJECT/sample.txt.zlib",
+            "cmd_args": "-dx BUILD/decompress_stream.xclbin -d PROJECT/sample.txt.zlib", 
             "name": "generic launch for all flows"
         }
-    ],
+    ], 
+    "post_launch": [
+        {
+            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/decompress_stream.xclbin"
+        }
+    ], 
     "host": {
-        "host_exe": "xil_zlib",
+        "host_exe": "xil_zlib", 
         "compiler": {
             "sources": [
-                "./src/host.cpp",
-                "LIB_DIR/L2/tests/src/zlib.cpp",
-                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
-                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
-                "LIB_DIR/common/libs/logger/logger.cpp",
-                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
-            ],
+                "./src/host.cpp", 
+                "LIB_DIR/L2/tests/src/zlib.cpp", 
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
+                "LIB_DIR/common/libs/logger/logger.cpp", 
+                "LIB_DIR/common/thirdParty/xxhash/xxhash.c", 
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c"
+            ], 
             "includepaths": [
-                "LIB_DIR/L2/include",
-                "LIB_DIR/L1/include/hw",
-                "LIB_DIR/L2/tests/src"
-            ],
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L2/tests/src", 
+                "LIB_DIR/common/thirdParty/zlib-1.2.7"
+            ], 
             "symbols": [
-                "PARALLEL_BLOCK=1",
+                "PARALLEL_BLOCK=1", 
                 "D_COMPUTE_UNIT=1"
             ]
         }
-    },
+    }, 
     "v++": {
-        "build_datafiles" : [
-            "PROJECT/advanced.ini",
+        "build_datafiles": [
+            "PROJECT/advanced.ini", 
             "PROJECT/hls_directives.tcl"
-        ],
+        ], 
         "compiler": {
             "symbols": [
-                "PARALLEL_BLOCK=1",
+                "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8"
-            ],
+            ], 
             "clflags": [
                 "--config PROJECT/advanced.ini"
             ]
         }
-    },
+    }, 
     "containers": [
         {
-            "name": "decompress_stream",
-            "ldclflags": "--config PROJECT/opts.ini --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=PROJECT/post_route.tcl",
+            "name": "decompress_stream", 
+            "ldclflags": "--config PROJECT/opts.ini --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=PROJECT/post_route.tcl", 
             "accelerators": [
                 {
-                    "name": "xilZlibDmReader",
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp",
-                    "num_compute_units" : "4",
-                    "compute_units": [
-                        {
-                            "slr": "SLR1",
-                            "arguments": [
-                                {
-                                    "name": "out",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "encoded_size",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "status_flag",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        },
-                        {
-                            "slr": "SLR1",
-                            "arguments": [
-                                {
-                                    "name": "out",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "encoded_size",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "status_flag",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        },
-                        {
-                            "slr": "SLR1",
-                            "arguments": [
-                                {
-                                    "name": "out",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "encoded_size",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "status_flag",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        },
-                        {
-                            "slr": "SLR1",
-                            "arguments": [
-                                {
-                                    "name": "out",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "encoded_size",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "status_flag",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        }
-                    ]
-                },
+                    "name": "xilZlibDmReader", 
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp", 
+                    "num_compute_units": "4"
+                }, 
                 {
-                    "name": "xilZlibDmWriter",
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp",
-                    "num_compute_units" : "4",
-                    "compute_units": [
-                        {
-                            "slr": "SLR1",
-                            "arguments": [
-                                {
-                                    "name": "in",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        },
-                        {
-                            "slr": "SLR1",
-                            "arguments": [
-                                {
-                                    "name": "in",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        },
-                        {
-                            "slr": "SLR1",
-                            "arguments": [
-                                {
-                                    "name": "in",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        },
-                        {
-                            "slr": "SLR1",
-                            "arguments": [
-                                {
-                                    "name": "in",
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        }
-                    ]
-                },
+                    "name": "xilZlibDmWriter", 
+                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp", 
+                    "num_compute_units": "4"
+                }, 
                 {
-                    "name": "xilDecompressStream",
-                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_stream.cpp",
-                    "num_compute_units" : "4",
-                    "compute_units": [
-                        {
-                            "slr": "SLR1"
-                        },
-                        {
-                            "slr": "SLR1"
-                        },
-                        {
-                            "slr": "SLR1"
-                        },
-                        {
-                            "slr": "SLR1"
-                        }
-                    ]
+                    "name": "xilDecompressStream", 
+                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_stream.cpp", 
+                    "num_compute_units": "4"
                 }
             ]
         }
-    ],
-    "output_files" : "sample.txt.zlib.*",
+    ], 
+    "output_files": "sample.txt.zlib.*", 
     "testinfo": {
-        "disable": false,
+        "disable": false, 
         "jobs": [
             {
-                "index": 0,
-                "dependency": [],
-                "env": "",
-                "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 300
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 55, 
+                    "vitis_sw_emu": 25, 
+                    "vitis_hw_run": 10
+                }
             }
-        ],
+        ], 
         "targets": [
-            "vitis_sw_emu",
-            "vitis_hw_emu",
-            "vitis_hw"
-        ],
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
         "category": "canary"
     }
 }

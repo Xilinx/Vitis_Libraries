@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,23 +57,16 @@ TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
 DEVICE ?= xilinx_u200_xdma_201830_2
-
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 ifeq ($(findstring vck, $(DEVICE)), vck)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
-ifeq ($(findstring u50, $(DEVICE)), u50)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-ifeq ($(findstring u280, $(DEVICE)), u280)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u280, $(DEVICE)), u280)
+ifneq ($(findstring u50, $(DEVICE)), u50)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
 endif
 endif
@@ -99,12 +92,14 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
+HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
 
 
 CXXFLAGS += -DPARALLEL_BLOCK=1 -DD_COMPUTE_UNIT=1
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src
+CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/zlib-1.2.7
 
 
 
@@ -142,8 +137,6 @@ VPP_FLAGS += -DPARALLEL_BLOCK=1 -DMULTIPLE_BYTES=4
 
 # Kernel linker flags
 LDCLFLAGS_decompress_stream += --config $(CUR_DIR)/opts.ini --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=$(CUR_DIR)/post_route.tcl
-# Adding config files to linker
-LDCLFLAGS_decompress_stream+= --config auto_decompress_stream.ini 
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/decompress_stream.xclbin
@@ -198,8 +191,10 @@ run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/decompress_stream.xclbin
 else
 	$(EXE_FILE) $(HOST_ARGS)
+	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/decompress_stream.xclbin
 endif
 
 ############################## Cleaning Rules ##############################

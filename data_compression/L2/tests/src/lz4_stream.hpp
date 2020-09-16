@@ -49,7 +49,7 @@
 /**
  * Maximum host buffer used to operate per kernel invocation
  */
-#define HOST_BUFFER_SIZE (2 * 1024 * 1024)
+#define HOST_BUFFER_SIZE (64 * 1024 * 1024)
 
 /**
  * Default block size
@@ -148,6 +148,18 @@ class xfLz4Streaming {
     uint64_t decompressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size, bool m_flow);
 
     /**
+    * @brief Decompress the input file full.
+    *
+    * @param inFile_name input file name
+    * @param outFile_name output file name
+    * @param input_size input size
+    * @param m_flow decompress flow
+    * @param enable_p2p runs p2p mode
+    */
+    uint32_t decompressFileFull(
+        std::string& inFile_name, std::string& outFile_name, uint32_t inputSize, bool m_flow, bool enable_p2p = 0);
+
+    /**
      * @brief Decompress streaming.
      *
      * @param in input byte sequence
@@ -157,6 +169,17 @@ class xfLz4Streaming {
      * @param host_buffer_size host buffer size
      */
     uint64_t decompressStream(uint8_t* in, uint8_t* out, uint64_t actual_size, uint64_t original_size);
+
+    /**
+    * @brief Decompress sequential migrate full inputSize.
+    *
+    * @param in input byte sequence
+    * @param out output byte sequence
+    * @param input_size input size
+    * @param m_flow decompress flow
+    * @param enable_p2p runs p2p mode
+    */
+    uint32_t decompressFull(uint8_t* in, uint8_t* out, uint32_t inputSize, bool enable_p2p = 0);
 
     /**
      * @brief Get the duration of input event
@@ -204,12 +227,14 @@ class xfLz4Streaming {
     // Compression related
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in;
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_out;
+    std::vector<uint32_t, aligned_allocator<uint32_t> > h_buf_decompressSize;
     std::vector<uint32_t, aligned_allocator<uint8_t> > h_blksize;
     std::vector<uint32_t, aligned_allocator<uint8_t> > h_compressSize;
 
     // Device buffers
     cl::Buffer* buffer_input;
     cl::Buffer* buffer_output;
+    cl::Buffer* bufferOutputSize;
     cl::Buffer* buffer_compressed_size;
     cl::Buffer* buffer_block_size;
 

@@ -1,0 +1,2 @@
+echo "libz.so relink back to  %{link_file}"
+ln -fs /usr/lib64/%{link_file}  /usr/lib64/libz.so.1

@@ -84,17 +84,6 @@ void xilCompressDecompressList(
     // of files.
     do {
         std::string file_line = line_dec;
-        std::ifstream origFile_dec(file_line.c_str(), std::ifstream::binary);
-        if (!origFile_dec) {
-            std::cout << "Unable to open file";
-            exit(1);
-        }
-
-        uint32_t output_size = getFileSize(origFile_dec);
-        origFile_dec.close();
-
-        file_line = file_line + ext;
-
         std::ifstream inFile_dec(file_line.c_str(), std::ifstream::binary);
         if (!inFile_dec) {
             std::cout << "Unable to open file";
@@ -109,7 +98,7 @@ void xilCompressDecompressList(
         lz_decompress_out = lz_decompress_out + ".orig";
 
         // Call SNAPPY decompression
-        xlz->decompressFileFull(lz_decompress_in, lz_decompress_out, input_size, output_size, d_flow);
+        xlz->decompressFileFull(lz_decompress_in, lz_decompress_out, input_size, d_flow);
 
         if (d_flow == 0) {
             std::cout << "\t\t" << (double)input_size / 1000000 << "\t\t\t" << lz_decompress_in << std::endl;
@@ -141,18 +130,7 @@ void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::str
     // Create xilSnappyStreaming object
     xfSnappyStreaming* xlz = new xfSnappyStreaming(decompress_bin, 0, block_size);
 
-    std::string file = decompress_mod.c_str();
-    std::ifstream origFile_dec(file.c_str(), std::ifstream::binary);
-    if (!origFile_dec) {
-        std::cout << "Unable to open file";
-        exit(1);
-    }
-
-    uint32_t output_size = getFileSize(origFile_dec);
-    origFile_dec.close();
-
-    file = file + ".snappy";
-
+    std::string file = decompress_mod;
     std::ifstream inFile_dec(file.c_str(), std::ifstream::binary);
     if (!inFile_dec) {
         std::cout << "Unable to open file";
@@ -170,13 +148,13 @@ void xilDecompressTop(std::string& decompress_mod, uint32_t block_size, std::str
         len = len / 1000;
     }
 
-    string lz_decompress_in = decompress_mod + ".snappy";
+    string lz_decompress_in = decompress_mod;
     string lz_decompress_out = lz_decompress_in;
     lz_decompress_out = lz_decompress_out + ".orig";
 
     std::cout << "KT(MB/s)\t\t:";
     // Call SNAPPY decompression
-    xlz->decompressFileFull(lz_decompress_in, lz_decompress_out, input_size, output_size, 0);
+    xlz->decompressFileFull(lz_decompress_in, lz_decompress_out, input_size, 0);
 #ifdef VERBOSE
     std::cout << std::fixed << std::setprecision(2) << "\nFile Size(" << sizes[order] << ")\t\t:" << len << std::endl
               << "File Name\t\t:" << lz_decompress_in << std::endl;

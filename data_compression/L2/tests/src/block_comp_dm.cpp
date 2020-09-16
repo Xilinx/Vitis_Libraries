@@ -32,8 +32,8 @@ void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
                          hls::stream<ap_axiu<8, 0, 0, 0> >& instream_orig,
                          hls::stream<ap_axiu<8, 0, 0, 0> >& outstream_dest) {
     hls::stream<xf::compression::uintMemWidth_t> instream512("inputStream");
-    hls::stream<xf::compression::streamDt> outdownstream("outDownStream");
-    hls::stream<xf::compression::streamDt> compoutstream("compoutstream");
+    hls::stream<ap_uint<8> > outdownstream("outDownStream");
+    hls::stream<ap_uint<8> > compoutstream("compoutstream");
     hls::stream<bool> lz4OutEos("lz4OutEos");
     hls::stream<xf::compression::uintMemWidth_t> outstream512("outputStream");
     hls::stream<bool> outstream512_eos("outputStreamSize");
@@ -46,8 +46,8 @@ void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
 #pragma HLS STREAM variable = outstream512_eos depth = 8
 #pragma HLS STREAM variable = lz4OutEos depth = 8
 
-#pragma HLS RESOURCE variable = instream512 core = FIFO_SRL
-#pragma HLS RESOURCE variable = outstream512 core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = instream512 type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outstream512 type = FIFO impl = SRL
 
     hls::stream<uint32_t> compSizeVal;
 #pragma HLS STREAM variable = compSizeVal depth = 2

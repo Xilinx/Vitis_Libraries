@@ -21,44 +21,51 @@ speed but there is a high demand for accelerated GZip which provides throughput
 in terms of GB/s. 
 
 This demo is aimed at showcasing Xilinx Alveo U50 (HBM Platform) acceleration of GZip for both
-compression and decompression. 
+        compression and decompression, it also supports Zlib using a host argument switch. 
 
-.. code-block:: bash
+        .. code-block:: bash
 
-   Tested Tool: 2020.1
-   Tested XRT:  2020.1
-   Tested XSA:  xilinx_u50_gen3x16_xdma_201920_3 
+           Tested Tool: 2020.1
+           Tested XRT:  2020.1
+           Tested XSA:  xilinx_u50_gen3x16_xdma_201920_3 
 
 
-Executable Usage
-----------------
+        Executable Usage
+        ----------------
 
-This application is present under ``L3/demos/gzip_hbm/`` directory. Follow build instructions to generate executable and binary.
+        This application is present under ``L3/demos/gzip_hbm/`` directory. Follow build instructions to generate executable and binary.
 
-The host executable generated is named as "**xil_gzip**" and it is generated in ``./build`` directory.
+        The host executable generated is named as "**xgzip**" and it is generated in ``./build`` directory.
 
-Following is the usage of the executable:
+        Following is the usage of the executable:
 
-1. To execute single file for compression 	          : ``./build/xil_gzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -c <input file_name>``
-2. To execute single file for decompression           : ``./build/xil_gzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -d <compressed file_name>``
-3. To validate single file (compress & decompress)    : ``./build/xil_gzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -v <input file_name>``
-4. To validate multiple files (compress & decompress) : ``./build/xil_gzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -l <files.list>``
+        1. To execute single file for compression                      : ``./build/xgzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -c <input file_name>``
+        2. To execute single file for decompression                    : ``./build/xgzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -d <compressed file_name>``
+        3. To test and validate single file (compress & decompress)    : ``./build/xgzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -t <input file_name>``
+        4. To validate multiple files (compress & decompress)          : ``./build/xgzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -l <files.list>``
 
-	- ``<files.list>``: Contains various file names with current path
+                - ``<files.list>``: Contains various file names with current path
+
+        The default design flow is GZIP design to run the ZLIB, enable the switch ``-zlib`` in the command line, as mentioned below:
+``./build/xgzip -sx ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -c <input file_name> -zlib 1``
+
+The -sx option mentioned above is optional, you can provide path to your binary file using -sx option otherwise it will by default map to ``./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin`` 
 
 The usage of the generated executable is as follows:
 
 .. code-block:: bash
  
-   Usage: application.exe -[-h-c-d-sx-v-l-k-id-mcr]
-        --help,                 -h      Print Help Options   Default: [false]
-        --compress,             -c      Compress
-        --decompress,           -d      Decompress
-        --single_xclbin,        -sx     Single XCLBIN        Default: [single]
-        --file_list,            -l      List of Input Files
-        --compress_decompress,  -v      Compress Decompress
-        --cu,                   -k      CU                   Default: [0]
-        --id,                   -id     Device ID            Default: [0]
-        --max_cr,               -mcr    Maximum CR           Default: [10]
+   Usage: application.exe -[-h-c-d-t-sx-l-k-id-zlib-mcr]
+
+          --help,              -h        Print Help Options
+          --compress,          -c        Compress
+          --decompress,        -d        DeCompress
+          --test,              -t        Compress Decompress
+          --single_xclbin,     -sx       Single XCLBIN [Optional]
+          --file_list,         -l        List of Input Files
+          --cu,                -k        CU                           Default: [0]
+          --id,                -id       Device ID                    Default: [0]
+          --zlib,              -zlib     [0:GZIP, 1:ZLIB]             Default: [0]
+          --max_cr,            -mcr      Maximum CR                   Default: [10]
 ===========================================================
 

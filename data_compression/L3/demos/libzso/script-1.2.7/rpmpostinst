@@ -1,0 +1,5 @@
+%define link_version  %(ls -l /usr/lib64/libz.so.1 | egrep -o "(libz\.so\.[0-9]*\.[0-9]*\..*)")
+%define link_file %(echo "%{link_version}" | sed -E 's/.*(libz\.so\.[0-9]*.*).*/\\1/')
+echo "libz.so.1 originally link to %{link_file}"
+ln -fs /opt/xilinx/zlib/libzxilinx.so.1.2.7 /usr/lib64/libz.so.1
+chmod 0755 /opt/xilinx/zlib/xzlib

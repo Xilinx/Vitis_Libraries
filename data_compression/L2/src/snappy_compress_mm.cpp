@@ -51,8 +51,8 @@ void snappyCore(hls::stream<uintInV_t>& inStream,
 #pragma HLS STREAM variable = boosterStream depth = 8
 #pragma HLS STREAM variable = litOut depth = c_snappyMaxLiteralStream
 
-#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = compressdStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = boosterStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::lzCompress<MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(inStream, compressdStream, input_size);
@@ -76,9 +76,9 @@ void snappy(const xf::compression::uintMemWidth_t* in,
 #pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStream depth = c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = outStreamEos core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = outStreamEos type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStream type = FIFO impl = SRL
 
     hls::stream<uint32_t> compressedSize[PARALLEL_BLOCK];
 

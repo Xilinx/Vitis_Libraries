@@ -1,0 +1,70 @@
+cmake_minimum_required(VERSION 2.8.11)
+
+project(xzlib)
+
+# Linking variables
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/")
+
+
+# Set the location for library installation
+
+set(ZLIB_XCLBIN_PATH "${CMAKE_SOURCE_DIR}/pre-compiled")
+set(ZLIB_XCLBIN "${ZLIB_XCLBIN_PATH}/${XCLBIN_NAME}")
+install(FILES "${ZLIB_XCLBIN}.xclbin" DESTINATION ${CMAKE_INSTALL_PREFIX}/zlib)
+install(FILES "${ZLIB_XCLBIN_PATH}/xrt.ini" DESTINATION ${CMAKE_INSTALL_PREFIX}/zlib)
+install(FILES "${CMAKE_SOURCE_DIR}/pre-compiled/xzlib" DESTINATION ${CMAKE_INSTALL_PREFIX}/zlib)
+
+#install(FILES "${ZLIB_XCLBIN}_lite.xclbin" DESTINATION ${CMAKE_INSTALL_PREFIX}/zlib)
+
+set(TARGET_LIB "libzxilinx.so.${LIB_VERSION}")
+#set(LINK_LIB "libz.so")
+
+message(STATUS "DEBUG:: ${CPACK_GENERATOR}")
+message(STATUS "DEBUG:: ${CMAKE_SOURCE_DIR}")
+
+if("${CPACK_GENERATOR}" STREQUAL "RPM")
+install(FILES ${TARGET_LIB} DESTINATION "${CMAKE_INSTALL_PREFIX}/zlib"
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE) #755
+endif()
+    
+if("${CPACK_GENERATOR}" STREQUAL "DEB")
+  install(FILES ${TARGET_LIB} DESTINATION "${CMAKE_INSTALL_PREFIX}/zlib")
+endif()
+
+# Packaging section
+set(CPACK_PACKAGE_NAME "xzlib")
+if("${LIB_VERSION}" STREQUAL "1.2.7")
+  set(CPACK_PACKAGE_VERSION "1-2-7-2020-1")
+endif()
+
+if("${LIB_VERSION}" STREQUAL "1.2.11")
+  set(CPACK_PACKAGE_VERSION "1-2-11-2020-1")
+endif()
+
+if("${PROD}" STREQUAL "0")
+    set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}-cisco")
+endif()
+
+set(CPACK_PACKAGE_CONTACT "Xilinx Zlib Development Team")
+set(CPACK_PACKAGE_VENDOR "Xilinx")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Xilinx Compression and Decompression Acceleration")
+set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+
+if("${PROD}" STREQUAL "0")
+set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/script-${LIB_VERSION}/rpmpostinst")
+set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpmprerm")
+endif()
+
+set(CPACK_RPM_PACKAGE_REQUIRES "xrt >= 2.1.0, xrm >= 1.1.0, zlib == ${LIB_VERSION}")
+
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
+
+if("${PROD}" STREQUAL "0")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/script-${LIB_VERSION}/postinst;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+endif()
+
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/opt" "/opt/xilinx" "/usr/lib64" )
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "xrt (>= 2.1.0), xrm (>= 1.1.0), zlib1g (== ${LIB_VERSION})")
+include(CPack)

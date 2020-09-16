@@ -1,4 +1,4 @@
-#
+
 # Copyright 2019 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,15 @@
 # limitations under the License.
 #
 
-C_COMPUTE_UNITS := 2
-H_COMPUTE_UNITS := 2
-D_COMPUTE_UNITS := 9
-PARALLEL_BLOCK  := 8
-MULTIPLE_BYTES  := 8
 VERBOSE := no
-
-CXXFLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) -DC_COMPUTE_UNIT=$(C_COMPUTE_UNITS) -DH_COMPUTE_UNIT=$(H_COMPUTE_UNITS) -DD_COMPUTE_UNIT=$(D_COMPUTE_UNITS) -DOVERLAP_HOST_DEVICE
+ENABLE_SW_CHECKSUM := yes
 
 # Generate Verbose content
 ifeq ($(VERBOSE),yes)
 CXXFLAGS += -DVERBOSE
+endif
+
+# Enable checksum
+ifeq ($(ENABLE_SW_CHECKSUM), yes)
+CXXFLAGS += -DENABLE_SW_CHECKSUM
 endif
