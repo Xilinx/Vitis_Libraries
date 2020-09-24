@@ -546,7 +546,7 @@ void GenAty(hls::stream<DT>& pStrm,
             DT strike,
             DT invStk) {
     const int buff_num = 16;
-    //ap_uint<4> cnt = 0;
+    // ap_uint<4> cnt = 0;
     DT AtyBuff[COEFNM][buff_num];
 #pragma HLS array_partition variable = AtyBuff dim = 1
 GENAty_Loop:
@@ -631,7 +631,7 @@ GENAty_Loop:
         }
         y[j] = newY_1;
         pBuff[j] = in;
-        //cnt++;
+        // cnt++;
     }
 
 Merge16To8_Loop:
