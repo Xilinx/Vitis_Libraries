@@ -168,17 +168,17 @@ int main(int argc, const char* argv[]) {
     }
 
     cl_mem_ext_ptr_t mextIn0[8];
-    mextIn0[0] = {XCL_MEM_DDR_BANK1, timesIR_alloc, 0};
-    mextIn0[1] = {XCL_MEM_DDR_BANK1, ratesIR_alloc, 0};
-    mextIn0[2] = {XCL_MEM_DDR_BANK1, timesHazard_alloc, 0};
-    mextIn0[3] = {XCL_MEM_DDR_BANK1, ratesHazard_alloc, 0};
-    mextIn0[4] = {XCL_MEM_DDR_BANK1, nominal_alloc, 0};
-    mextIn0[5] = {XCL_MEM_DDR_BANK1, recovery_alloc, 0};
-    mextIn0[6] = {XCL_MEM_DDR_BANK1, maturity_alloc, 0};
-    mextIn0[7] = {XCL_MEM_DDR_BANK1, frequency_alloc, 0};
+    mextIn0[0] = {0, timesIR_alloc, kernel_cds()};
+    mextIn0[1] = {1, ratesIR_alloc, kernel_cds()};
+    mextIn0[2] = {2, timesHazard_alloc, kernel_cds()};
+    mextIn0[3] = {3, ratesHazard_alloc, kernel_cds()};
+    mextIn0[4] = {4, nominal_alloc, kernel_cds()};
+    mextIn0[5] = {5, recovery_alloc, kernel_cds()};
+    mextIn0[6] = {6, maturity_alloc, kernel_cds()};
+    mextIn0[7] = {7, frequency_alloc, kernel_cds()};
 
     cl_mem_ext_ptr_t mextOut0;
-    mextOut0 = {XCL_MEM_DDR_BANK1, outputP, 0};
+    mextOut0 = {8, outputP, kernel_cds()};
 
     // create device buffer and map dev buf to host buf
     cl::Buffer outputBuf;
@@ -201,8 +201,8 @@ int main(int argc, const char* argv[]) {
                               sizeof(TEST_DT) * N, &mextIn0[5]);
     inputBuf0[6] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                               sizeof(TEST_DT) * N, &mextIn0[6]);
-    inputBuf0[7] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                              sizeof(TEST_DT) * N, &mextIn0[7]);
+    inputBuf0[7] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(int) * N,
+                              &mextIn0[7]);
 
     std::vector<cl::Memory> obIn0;
     obIn0.push_back(inputBuf0[0]);

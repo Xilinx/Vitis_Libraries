@@ -63,7 +63,9 @@ endif
 
 ifneq ($(findstring u250, $(DEVICE)), u250)
 ifneq ($(findstring u200, $(DEVICE)), u200)
+ifneq ($(findstring u50, $(DEVICE)), u50)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
 endif
 endif
 
@@ -86,7 +88,7 @@ HOST_SRCS += $(XFLIB_DIR)/L2/tests/CreditDefaultSwapEngine/src/host/cpu.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
 
 
-CXXFLAGS += -DTEST_DT=float -DDEVICE_PART=u250
+CXXFLAGS += -DTEST_DT=float
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/CreditDefaultSwapEngine/src/kernel
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include
@@ -119,6 +121,14 @@ endif
 # Kernel compiler global settings
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 LDCLFLAGS += --optimize 2 --jobs 8
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u250.ini
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u200.ini
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50.ini
+endif
+
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 
