@@ -1,15 +1,60 @@
 {
-    "name": "Xilinx Credit Default Swap Engine Model", 
-    "description": "L2 Credit Default Swap Model", 
+    "name": "Xilinx Credit Default Swap Engine", 
+    "description": "L2 Credit Default Swap", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
         "u250", 
-        "u200"
+        "u200", 
+        "u50"
     ], 
     "platform_blacklist": [
         "zc"
     ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/cds_engine.xclbin", 
@@ -32,8 +77,7 @@
             ], 
             "options": "-O3 ", 
             "symbols": [
-                "TEST_DT=float", 
-                "DEVICE_PART=u250"
+                "TEST_DT=float"
             ]
         }
     }, 
@@ -70,7 +114,12 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
                 "max_time_min": {
                     "vitis_hw_build": 470, 
                     "vitis_hw_emu": 300, 

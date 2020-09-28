@@ -92,7 +92,7 @@ Check the [comprehensive HTML documentation](https://xilinx.github.io/Vitis_Libr
 
 ### Software Platform
 
-This library is designed to work with Vitis 2019.2 and later, and therefore inherits the system requirements of Vitis and XRT.
+This library is designed to work with Vitis 2020.1 and later, and therefore inherits the system requirements of Vitis and XRT.
 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
 With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
@@ -109,7 +109,7 @@ Hardware modules and kernels are designed to work with Alveo cards. Specific req
 Setup the build environment using the Vitis and XRT scripts, and set the PLATFORM_REPO_PATHS to installation folder of platform files.
 
 ```console
-    $ source <install path>/Vitis/2019.2/settings64.sh
+    $ source <install path>/Vitis/2020.1/settings64.sh
     $ source /opt/xilinx/xrt/setup.sh
     $ export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
@@ -128,7 +128,7 @@ The common tool and library prerequisites that apply across all design flows are
 
 L1 provides the low-level primitives used to build kernels.
 
-The recommended flow to evaluate and test L1 components is described as follows using the Vivado HLS tool. A top level C/C++ testbench (typically `main.cpp` or `tb.cpp`) prepares the input data, passes this to the design under test (typically `dut.cpp` which makes the L1 level library calls) then performs any output data post processing and validation checks.
+The recommended flow to evaluate and test L1 components is described as follows using the Vitis HLS tool. A top level C/C++ testbench (typically `main.cpp` or `tb.cpp`) prepares the input data, passes this to the design under test (typically `dut.cpp` which makes the L1 level library calls) then performs any output data post processing and validation checks.
 
 A Makefile is used to drive this flow with available steps including `CSIM` (high level simulation), `CSYNTH` (high level synthesis to RTL), `COSIM` (cosimulation between software testbench and generated RTL), VIVADO_SYN (synthesis by Vivado), and VIVADO_IMPL (implementation by Vivado). The flow is launched from the shell by calling `make` with variables set as in the example below:
 

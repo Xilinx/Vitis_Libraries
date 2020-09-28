@@ -142,10 +142,13 @@ xclbin: check_vpp | $(BINARY_CONTAINERS)
 build: xclbin
 
 ############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-$(TEMP_DIR)/quad_hcf_kernel.xo: $(CUR_DIR)/src/kernel/quad_hcf_kernel_wrapper.cpp
+EXTRA_SRCS += $(CUR_DIR)/src/kernel/quad_hcf_engine.cpp
+EXTRA_SRCS += $(CUR_DIR)/src/kernel/quad_integrate_pi1.cpp 
+EXTRA_SRCS += $(CUR_DIR)/src/kernel/quad_integrate_pi2.cpp 
+$(TEMP_DIR)/quad_hcf_kernel.xo: $(CUR_DIR)/src/kernel/quad_hcf_kernel_wrapper.cpp $(EXTRA_SRCS) 
 	$(ECHO) "Compiling Kernel: quad_hcf_kernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(quad_hcf_kernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k quad_hcf_kernel -I'$(<D)' -o'$@' '$<'
+	$(VPP) $(quad_hcf_kernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k quad_hcf_kernel -I'$(<D)' -o'$@' '$<' $(EXTRA_SRCS)
 
 $(BUILD_DIR)/quad_hcf_kernel.xclbin: $(BINARY_CONTAINER_quad_hcf_kernel_OBJS)
 	mkdir -p $(BUILD_DIR)

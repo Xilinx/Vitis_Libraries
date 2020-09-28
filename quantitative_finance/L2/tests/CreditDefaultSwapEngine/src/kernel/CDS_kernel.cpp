@@ -35,15 +35,15 @@ extern "C" void CDS_kernel(TEST_DT timesIR[IRLEN],
                            int frequency[N],
                            TEST_DT cds[N]) {
 #ifndef HLS_TEST
-#pragma HLS INTERFACE m_axi port = cds offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = frequency offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = maturity offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = recovery offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = notional offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = ratesHazard offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = timesHazard offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = ratesIR offset = slave bundle = gmem0
 #pragma HLS INTERFACE m_axi port = timesIR offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = ratesIR offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = timesHazard offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = ratesHazard offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = notional offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = recovery offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = maturity offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = frequency offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = cds offset = slave bundle = gmem0
 
 #pragma HLS INTERFACE s_axilite port = cds bundle = control
 #pragma HLS INTERFACE s_axilite port = frequency bundle = control

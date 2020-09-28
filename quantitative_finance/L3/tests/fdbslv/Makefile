@@ -123,7 +123,7 @@ ifneq ($(HOST_ARCH), x86)
 endif
 
 #added to autogen Makefile
-HOST_ARGS := $(BUILD_DIR)/fd_bs_lv_kernel.xclbin ../../../L2/tests/FDBlackScholesLocalVolatilityEngine/data/case0
+HOST_ARGS := $(BUILD_DIR)/fd_bs_lv_kernel.xclbin data/case0
 
 ############################## Setting up Kernel Variables ##############################
 # Kernel compiler global settings
