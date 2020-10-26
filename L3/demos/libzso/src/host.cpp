@@ -20,10 +20,11 @@ extern void zerr(int ret);
 constexpr std::size_t KiB = 1024;
 constexpr std::size_t MiB = KiB * 1024;
 constexpr std::size_t GiB = MiB * 1024;
-
+constexpr std::size_t BSIZE = 32 * KiB;
 // CLI Option global params
 constexpr std::uint16_t NUM_ITER = 1;
-constexpr std::uint8_t MAX_CR = 20;
+constexpr std::uint16_t MAX_CR = 20;
+uint16_t max_cr_val = MAX_CR;
 std::uint8_t verbosity = 0;
 uint16_t num_iter = NUM_ITER;
 bool chunk_mode = false;
@@ -113,8 +114,17 @@ void zlib_compress(std::string& inFile_name) {
         // File operations
         // Input and Output buffers
         in.resize(input_size);
-        compress_out.resize(2 * input_size);
-        compress_len = 2 * input_size;
+
+        size_t numBlocks = (input_size - 1) / BSIZE + 1;
+        size_t outBufSize = input_size;
+        // Over head for header and footer
+        outBufSize += 128;
+        // Over head per block
+        outBufSize += (numBlocks)*128;
+
+        // Allocate output buffer
+        compress_out.resize(outBufSize);
+        compress_len = outBufSize;
 
         // Read input data from file
         inFile.read((char*)in.data(), input_size);
@@ -137,7 +147,6 @@ void zlib_compress(std::string& inFile_name) {
         }
         if (ret != Z_OK) zerr(ret);
     }
-
     auto compress_API_end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::nano>(compress_API_end - compress_API_start);
     auto duration_ms = std::chrono::duration<double, std::milli>(compress_API_end - compress_API_start);
@@ -183,7 +192,7 @@ void zlib_uncompress(std::string& inFile_name) {
     std::ifstream inFile(dec_in.c_str(), std::ifstream::binary);
     if (!inFile) throw std::runtime_error("Unable to Open Input File: " + dec_in);
     size_t input_size = get_file_size(inFile);
-    size_t output_size = input_size * MAX_CR;
+    size_t output_size = input_size * max_cr_val;
 
     // Input and Output buffers
     std::vector<uint8_t> in(input_size);
@@ -199,6 +208,10 @@ void zlib_uncompress(std::string& inFile_name) {
     // Close file
     inFile.close();
 
+#ifdef COMPONLY_FLOW
+    setenv("XILINX_NO_ACCEL", "0", 1);
+#endif
+
     int ret = 0;
     std::chrono::duration<double, std::milli> compress_API_time_ms_1(0);
     std::chrono::duration<double, std::nano> compress_API_time_ns_1(0);
@@ -209,7 +222,9 @@ void zlib_uncompress(std::string& inFile_name) {
         // thirdParty/zlib-1.2.7/uncompress.c
         ret = uncompress(out.data(), &uncompress_len, in.data(), input_size);
         if (ret != Z_OK) {
-            if (ret == Z_BUF_ERROR) throw std::runtime_error("Output Buffer Size Exceeds limits ... ");
+            if (ret == Z_BUF_ERROR)
+                throw std::runtime_error(
+                    "Output Buffer Size Exceeds limits ... use -mcr option (Increase/Reduce Buffer Size) ");
             zerr(ret);
         }
     }
@@ -281,6 +296,7 @@ bool verify(std::string& verify) {
 
 int main(int argc, char* argv[]) {
     sda::utils::CmdLineParser parser;
+    parser.addSwitch("--compress", "-c", "Compress the specified files", "");
     parser.addSwitch("--decompress", "-d", "Decompress the specified files", "");
     parser.addSwitch("--test", "-t",
                      "Compress followed by Decompress to test that decompression produces original files", "");
@@ -294,17 +310,18 @@ int main(int argc, char* argv[]) {
                      "-1");
     parser.addSwitch("--chunk_mode", "-cm", "Chunk Mode: Input file divided and deflate/inflate called in a loop [0|1]",
                      "0");
-    parser.addSwitch("--cu_id", "-cu", "Compute Unit", "1");
     parser.addSwitch("--c_file_list", "-cfl", "Compression List of Files", "");
     parser.addSwitch("--d_file_list", "-dfl", "Decompression List of Files", "");
     parser.addSwitch("--file_list", "-l", "File List (Compress, Decompress and Validation)", "");
     parser.addSwitch("--num_iter", "-nitr", "Number of Iterations", "1");
+    parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
 #endif
     if (argc == 1) {
         parser.printHelp();
         exit(EXIT_FAILURE);
     }
     parser.parse(argc, argv);
+    std::string compress_mod = parser.value("compress");
     std::string decompress_mod = parser.value("decompress");
     std::string verify_mod = parser.value("test");
     std::string verbosity_mod = parser.value("verbosity");
@@ -319,33 +336,30 @@ int main(int argc, char* argv[]) {
     std::string chunkmode = parser.value("chunk_mode");
     std::string cfilelist = parser.value("c_file_list");
     std::string dfilelist = parser.value("d_file_list");
-    std::string cuid = parser.value("cu_id");
     std::string filelist = parser.value("file_list");
     std::string numitr = parser.value("num_iter");
+    std::string mcr = parser.value("max_cr");
+
+    // Maximum CR value
+    if (!(mcr.empty())) {
+        max_cr_val = atoi(mcr.c_str());
+    }
+
     if (!chunkmode.empty()) ERRCHCK(chunk_mode = boost::lexical_cast<bool>(chunkmode));
     if (!compLevel.empty()) ERRCHCK(compressLevel = boost::lexical_cast<int>(compLevel));
-#ifndef RANDCU
-    setenv("XILINX_CU_ID", cuid.c_str(), 1);
-#endif
     if (!numitr.empty()) num_iter = boost::lexical_cast<uint16_t>(numitr);
 #endif
-
-    if (!decompress_mod.empty()) {
+    if (!compress_mod.empty()) {
         // Compression with no option for it
         std::vector<std::string> fname_vec;
-        uint8_t sIdx = 0;
-        if (!(strcmp(argv[1], "-d")))
-            sIdx = 2;
-        else
-            sIdx = 4;
-        for (auto i = sIdx; i < argc; i++) {
-            if (strcmp(argv[i], "-v"))
-                fname_vec.push_back(argv[i]);
-            else {
-                if (!verbosity_mod.empty()) verbosity = boost::lexical_cast<uint16_t>(verbosity_mod);
-                break;
-            }
-        }
+        if (!verbosity_mod.empty()) verbosity = boost::lexical_cast<uint16_t>(verbosity_mod);
+        fname_vec.push_back(compress_mod);
+        for (auto fr : fname_vec) ERRCHCK(zlib_compress(fr));
+    } else if (!decompress_mod.empty()) {
+        // Compression with no option for it
+        std::vector<std::string> fname_vec;
+        if (!verbosity_mod.empty()) verbosity = boost::lexical_cast<uint16_t>(verbosity_mod);
+        fname_vec.push_back(decompress_mod);
         for (auto fr : fname_vec) ERRCHCK(zlib_uncompress(fr));
     } else if (!verify_mod.empty()) {
         verbosity = 1;
@@ -375,8 +389,7 @@ int main(int argc, char* argv[]) {
             for (auto fr : fname_vec) {
                 cu_id = std::to_string(cntr++);
                 if (fork() == 0) {
-                    std::string temp = fr + ".zlib";
-                    ERRCHCK(zlib_uncompress(temp));
+                    ERRCHCK(zlib_uncompress(fr));
                     exit(0);
                 }
             }
@@ -428,24 +441,6 @@ int main(int argc, char* argv[]) {
             }
         }
 #endif
-    } else {
-        uint8_t sIdx = 0;
-        if ((strcmp(argv[1], "-v")))
-            sIdx = 1;
-        else
-            sIdx = 3;
-
-        // Compression no switch
-        std::vector<std::string> fname_vec;
-        for (auto i = sIdx; i < argc; i++) {
-            if (strcmp(argv[i], "-v"))
-                fname_vec.push_back(argv[i]);
-            else {
-                if (!verbosity_mod.empty()) ERRCHCK(verbosity = boost::lexical_cast<uint16_t>(verbosity_mod));
-                break;
-            }
-        }
-        for (auto fr : fname_vec) ERRCHCK(zlib_compress(fr));
     }
     return EXIT_SUCCESS;
 }

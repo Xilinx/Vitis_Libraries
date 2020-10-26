@@ -8,7 +8,7 @@ throughput when multiple files run concurrently on both compute units.
 
     Tool: 2020.1
     XRT : 2020.1
-    XSA : xilinx_samsung_U2x4_201920_1
+    XSA : xilinx_samsung_u2x4_201920_2
 
 
 

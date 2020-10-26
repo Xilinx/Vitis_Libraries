@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string>
 
-#include "snappy_decompress.hpp"
+#include "snappy_decompress_details.hpp"
 #define MULTIPLE_BYTES 8
 
 #define MAX_OFFSET (64 * 1024)

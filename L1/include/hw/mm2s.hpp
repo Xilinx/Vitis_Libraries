@@ -171,7 +171,8 @@ void mm2multStreamBlockGenerator(const ap_uint<IN_DATAWIDTH>* in,
 
     uint32_t block_idx = 0;
     uint32_t no_blks = (input_size - 1) / BLOCK_SIZE + 1;
-    uint32_t engine_no_blks = (no_blks - 1) / NUM_BLOCKS + 1;
+    uint32_t engine_no_blks = no_blks / NUM_BLOCKS;
+    uint32_t engine_no_blks_rem = no_blks % NUM_BLOCKS;
     uint32_t max_block_length = engine_no_blks * BLOCK_SIZE;
 
     uint32_t readBlockSize = 0;
@@ -184,11 +185,12 @@ void mm2multStreamBlockGenerator(const ap_uint<IN_DATAWIDTH>* in,
     // Figure out total blocks & block sizes
     for (uint8_t j = 0; j < NUM_BLOCKS; j++) {
         uint32_t inBlockSize = max_block_length;
-        if (readBlockSize + max_block_length > input_size) inBlockSize = input_size - readBlockSize;
+        if (j < engine_no_blks_rem) inBlockSize = max_block_length + BLOCK_SIZE;
+        if (readBlockSize + inBlockSize > input_size) inBlockSize = input_size - readBlockSize;
         input_block_size[j] = inBlockSize;
-        readBlockSize += inBlockSize;
-        input_idx[j] = j * ((max_block_length - 1) / c_wordSize + 1);
+        input_idx[j] = readBlockSize / c_wordSize;
         outBaseIdx[j] << input_idx[j];
+        readBlockSize += inBlockSize;
     }
 
     // Call for parallel mm2s

@@ -32,7 +32,7 @@
  * Maximum host buffer used to operate per kernel invocation
  */
 #ifndef HOST_BUFFER_SIZE
-#define HOST_BUFFER_SIZE (2 * 1024 * 1024)
+#define HOST_BUFFER_SIZE (1 * 1024 * 1024)
 #endif
 
 /**

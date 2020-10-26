@@ -27,7 +27,7 @@
 #include <fstream>
 
 #include "xf_security/crc32.hpp"
-#include "crc32.c"
+#include "zlib.h"
 auto constexpr W = 1;
 auto constexpr HOST_BUFFER_SIZE = 2 * 1024 * 1024;
 

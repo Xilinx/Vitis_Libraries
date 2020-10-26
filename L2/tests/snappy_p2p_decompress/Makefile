@@ -56,7 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
+DEVICE ?= xilinx_samsung_u2x4_201920_2 
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
@@ -88,6 +88,8 @@ EMCONFIG_DIR := $(BUILD_DIR)
 # Setting tools
 VPP := v++
 
+include ./config.mk
+
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/src/host.cpp
@@ -97,8 +99,6 @@ HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/xxhash/xxhash.c
 
-
-CXXFLAGS += -DENABLE_P2P=1
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 

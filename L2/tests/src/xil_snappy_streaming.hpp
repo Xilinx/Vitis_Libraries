@@ -54,6 +54,14 @@
 #endif
 
 /**
+ * Enable/diasble p2p flow
+ * by default disable
+ */
+#ifndef ENABLE_P2P
+#define ENABLE_P2P 0
+#endif
+
+/**
  * Maximum host buffer used to operate per kernel invocation
  */
 #define HOST_BUFFER_SIZE (64 * 1024 * 1024)

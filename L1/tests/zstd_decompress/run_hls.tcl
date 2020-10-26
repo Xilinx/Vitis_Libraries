@@ -42,7 +42,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -argv "-f ${DESIGN_PATH}/sample.txt.zst"
+  csim_design -argv "-f ${DESIGN_PATH}/sample.txt.zst -o ${DESIGN_PATH}/sample.txt"
 }
 
 if {$CSYNTH == 1} {
@@ -50,7 +50,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -argv "-f ${DESIGN_PATH}/sample.txt.zst"
+  cosim_design -argv "-f ${DESIGN_PATH}/sample.txt.zst -o ${DESIGN_PATH}/sample.txt"
 }
 
 if {$VIVADO_SYN == 1} {

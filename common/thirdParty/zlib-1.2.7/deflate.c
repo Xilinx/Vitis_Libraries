@@ -52,7 +52,6 @@
 #include "xlibz.hpp"
 #include "deflate.h"
 using namespace xlibz::driver;
-singleton* sObj;
 const char deflate_copyright[] = " deflate 1.2.7 Copyright 1995-2012 Jean-loup Gailly and Mark Adler ";
 /*
   If you use the zlib library in a product, an acknowledgment is welcome
@@ -200,17 +199,6 @@ struct static_tree_desc_s {
 int ZEXPORT deflateInit_(z_streamp strm, int level, const char* version, int stream_size) {
     int ret =
         deflateInit2_(strm, level, Z_DEFLATED, MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, version, stream_size);
-#ifdef XILINX_CODE
-    // Xilinx Source Code
-    // Initialize Singleton
-    if (ret == Z_OK) {
-        // Ver 1.0: ZLIB Only supported for FPGA Acceleration
-        // s->strm == 2 : GZip flow
-        if (strm->state->wrap == 1) {
-            sObj = singleton::getInstance();
-        }
-    }
-#endif
     return ret;
     /* To do: ignore strm->next_in if we use it as window */
 }
@@ -410,6 +398,12 @@ int ZEXPORT deflateResetKeep(z_streamp strm) {
 
     _tr_init(s);
 
+#ifdef XILINX_CODE
+    singleton::getInstance()->releaseZlibObj(strm);
+
+    singleton::getInstance()->releaseDriverObj(strm);
+#endif
+
     return Z_OK;
 }
 
@@ -603,8 +597,172 @@ local void flush_pending(z_streamp strm) {
     }
 }
 
+int is_fpga_compatible(z_streamp strm) {
+    if (strm->state->wrap == 2) { // Gzip flow
+        return 0;
+    }
+
+    if (strm->state->strategy != Z_DEFAULT_STRATEGY) { // RLE,stored and huffman not supported
+        return 0;
+    }
+
+    xzlib* driver = singleton::getInstance()->getDriverInstance(strm, XILINX_DEFLATE);
+    if (!(driver->getXmode())) { // device not configured
+        return 0;
+    }
+    return 1;
+}
+
+/* ========================================================================= */
+int ZEXPORT deflate_hw(z_streamp strm, int flush) {
+    int old_flush; /* value of flush param for previous deflate call */
+    deflate_state* s;
+
+    if (strm == Z_NULL || strm->state == Z_NULL || flush > Z_BLOCK || flush < 0) {
+        return Z_STREAM_ERROR;
+    }
+    s = strm->state;
+
+    if (strm->next_out == Z_NULL || (strm->next_in == Z_NULL && strm->avail_in != 0) ||
+        (s->status == FINISH_STATE && flush != Z_FINISH)) {
+        ERR_RETURN(strm, Z_STREAM_ERROR);
+    }
+    if (strm->avail_out == 0) ERR_RETURN(strm, Z_BUF_ERROR);
+
+    s->strm = strm; /* just in case */
+    old_flush = s->last_flush;
+    s->last_flush = flush;
+
+    /* Write the header */
+    if (s->status == INIT_STATE) {
+        uInt header = (Z_DEFLATED + ((s->w_bits - 8) << 4)) << 8;
+        uInt level_flags;
+
+        if (s->strategy >= Z_HUFFMAN_ONLY || s->level < 2)
+            level_flags = 0;
+        else if (s->level < 6)
+            level_flags = 1;
+        else if (s->level == 6)
+            level_flags = 2;
+        else
+            level_flags = 3;
+        header |= (level_flags << 6);
+        if (s->strstart != 0) header |= PRESET_DICT;
+        header += 31 - (header % 31);
+
+        s->status = BUSY_STATE;
+        //        putShortMSB(s, header);
+
+        if (s->strm->avail_out < 2) {
+            ERR_RETURN(strm, Z_BUF_ERROR);
+        }
+        s->strm->total_out += 2;
+        s->strm->avail_out = strm->avail_out - 2;
+        s->strm->next_out[0] = (header >> 8);
+        s->strm->next_out[1] = (header & 0xFF);
+        s->strm->next_out += 2;
+    }
+
+    /* Flush as much pending output as possible */
+    if (strm->avail_out == 0) {
+        /* Since avail_out is 0, deflate will be called again with
+         * more output space, but possibly with both pending and
+         * avail_in equal to zero. There won't be anything to do,
+         * but this is not an error situation so make sure we
+         * return OK instead of BUF_ERROR at next call of deflate:
+         */
+        s->last_flush = -1;
+        return Z_OK;
+    }
+
+    /* Make sure there is something to do and avoid duplicate consecutive
+     * flushes. For repeated and useless calls with Z_FINISH, we keep
+     * returning Z_STREAM_END instead of Z_BUF_ERROR.
+     */
+    if (strm->avail_in == 0 && RANK(flush) <= RANK(old_flush) && flush != Z_FINISH) {
+        ERR_RETURN(strm, Z_BUF_ERROR);
+    }
+
+    /* User must not provide more input after the first FINISH: */
+    if (s->status == FINISH_STATE && strm->avail_in != 0) {
+        ERR_RETURN(strm, Z_BUF_ERROR);
+    }
+
+    /* Start a new block or continue the current one.
+     */
+    if (strm->avail_in != 0 || s->lookahead != 0 || (flush != Z_NO_FLUSH && s->status != FINISH_STATE)) {
+        block_state bstate;
+
+        // Driver class
+        xzlib* driver = singleton::getInstance()->getDriverInstance(s->strm, XILINX_DEFLATE);
+
+        // Update structure per every call
+        driver->struct_update(s->strm, XILINX_DEFLATE);
+
+        // Use FPGA deflate
+        bool ret = driver->xilinxHwDeflate(s->strm, flush);
+        bstate = (ret) ? block_done : need_more;
+
+        if (bstate == finish_started || bstate == finish_done) {
+            s->status = FINISH_STATE;
+        }
+        if (bstate == need_more || bstate == finish_started) {
+            if (strm->avail_out == 0) {
+                s->last_flush = -1; /* avoid BUF_ERROR next call, see above */
+            }
+            return Z_OK;
+            /* If flush != Z_NO_FLUSH && avail_out == 0, the next call
+             * of deflate should use the same flush parameter to make sure
+             * that the flush is complete. So we don't have to output an
+             * empty block here, this will be done at next call. This also
+             * ensures that for a very small output buffer, we emit at most
+             * one empty block.
+             */
+        }
+        if (bstate == block_done) {
+            if (flush != Z_BLOCK) { /* FULL_FLUSH or SYNC_FLUSH */
+                                    //                _tr_stored_block(s, (char*)0, 0L, 0);
+                                    //                already sync_flush block is added at the end of each block
+                /* For a full flush, this empty block will be recognized
+                 * as a special marker by inflate_sync().
+                 */
+                if (flush == Z_FULL_FLUSH) {
+                    CLEAR_HASH(s); /* forget history */
+                    if (s->lookahead == 0) {
+                        s->strstart = 0;
+                        s->block_start = 0L;
+                        s->insert = 0;
+                    }
+                }
+            }
+            //            flush_pending(strm);
+            if (strm->avail_out == 0) {
+                s->last_flush = -1; /* avoid BUF_ERROR at next call, see above */
+                return Z_OK;
+            }
+            s->status = FINISH_STATE;
+        }
+    }
+    Assert(strm->avail_out > 0, "bug2");
+
+    if (flush != Z_FINISH) return Z_OK;
+    if (s->wrap <= 0) return Z_STREAM_END;
+
+    //    flush_pending(strm);
+    /* If avail_out is zero, the application will call deflate again
+     * to flush the rest.
+     */
+    if (s->wrap > 0) s->wrap = -s->wrap; /* write the trailer only once! */
+    return Z_STREAM_END;
+}
+
 /* ========================================================================= */
 int ZEXPORT deflate(z_streamp strm, int flush) {
+#ifdef XILINX_CODE
+    if (is_fpga_compatible(strm) == 1) {
+        return deflate_hw(strm, flush);
+    }
+#endif
     int old_flush; /* value of flush param for previous deflate call */
     deflate_state* s;
 
@@ -891,17 +1049,11 @@ int ZEXPORT deflateEnd(z_streamp strm) {
 #ifdef XILINX_CODE
     // Ver 1.0: ZLIB Only supported for FPGA Acceleration
     // s->strm == 2 : GZip flow
-    if (strm->state->wrap == 1) {
-        // Singleton releases the
-        // strm,zlib <key, value> pair
-        sObj->releaseZlibObj(strm);
-        
-        sObj->releaseDriverObj(strm);
-#ifdef ENABLE_XRM
-        // Release XRM CU instance
-        sObj->releaseXrmCuInstance();
-#endif
-    }
+    // Singleton releases the
+    // strm,zlib <key, value> pair
+    singleton::getInstance()->releaseZlibObj(strm);
+
+    singleton::getInstance()->releaseDriverObj(strm);
 #endif
 
     int status;
@@ -1500,26 +1652,6 @@ local block_state deflate_stored(deflate_state* s, int flush) {
  * matches. It is used only for the fast compression options.
  */
 local block_state deflate_fast(deflate_state* s, int flush) {
-#ifdef XILINX_CODE
-    // Ver 1.0: ZLIB Only supported for FPGA Acceleration
-    // s->strm == 2 : GZip flow
-    if (s->wrap == 1) {
-        // Driver class
-        xzlib* driver = sObj->getDriverInstance(s->strm, XILINX_DEFLATE);
-
-        // Update structure per every call
-        driver->struct_update(s->strm, XILINX_DEFLATE);
-
-        // Do prechecks for FPGA Acceleration are successful
-        if (driver->getXmode()) {
-            // Use FPGA deflate
-            bool ret = driver->xilinxHwDeflate(s->strm, flush);
-            return ret ? finish_done : block_done;
-        }
-    }
-#endif
-
-    // Use CPU deflate
     IPos hash_head; /* head of the hash chain */
     int bflush;     /* set if current block must be flushed */
 
@@ -1617,25 +1749,6 @@ local block_state deflate_fast(deflate_state* s, int flush) {
  * no better match at the next window position.
  */
 local block_state deflate_slow(deflate_state* s, int flush) {
-#ifdef XILINX_CODE
-    // Ver 1.0: ZLIB Only supported for FPGA Acceleration
-    // s->strm == 2 : GZip flow
-    if (s->wrap == 1) {
-        // Driver class
-        xzlib* driver = sObj->getDriverInstance(s->strm, XILINX_DEFLATE);
-
-        // Update structure per every call
-        driver->struct_update(s->strm, XILINX_DEFLATE);
-
-        // Do prechecks for FPGA Acceleration are successful
-        if (driver->getXmode()) {
-            // Use FPGA deflate
-            bool ret = driver->xilinxHwDeflate(s->strm, flush);
-            return ret ? finish_done : block_done;
-        }
-    }
-#endif
-
     IPos hash_head; /* head of hash chain */
     int bflush;     /* set if current block must be flushed */
 

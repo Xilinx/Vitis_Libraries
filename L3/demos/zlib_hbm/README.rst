@@ -27,7 +27,7 @@ compression and decompression.
 
    Tested Tool: 2020.1 
    Tested XRT: 2020.1
-   Tested XSA: xilinx_u50_xdma_201920_1 
+   Tested XSA: xilinx_u50_gen3x16_xdma_201920_3 
 
 
 Executable Usage

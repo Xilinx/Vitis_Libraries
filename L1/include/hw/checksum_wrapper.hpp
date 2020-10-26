@@ -193,7 +193,6 @@ void checksum32(hls::stream<ap_uint<32> >& checksumInitStrm,
                 for (int j = 0; j < W; j++) {
                     if (s2 > xf::security::internal::BASE[W - 1 - j]) {
                         s2 -= xf::security::internal::BASE[W - 1 - j];
-                        break;
                     }
                 }
                 s1 += sTmp[W - 1];

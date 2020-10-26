@@ -25,6 +25,7 @@
 #include <string>
 
 #include "snappy_decompress.hpp"
+#include "lz_decompress.hpp"
 
 #define BLOCK_SIZE 65536
 #define MAX_OFFSET 65536

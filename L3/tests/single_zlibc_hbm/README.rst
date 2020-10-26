@@ -1,6 +1,6 @@
-====================
-Zlib HBM Application
-====================
+=====================================================================
+Xilinx FPGA Based ZLIB Compress/Decompress Solution For HBM Platforms
+=====================================================================
 
 This section presents brief introduction about Zlib HBM application and step by step
 guidelines to build and deployment.
@@ -27,13 +27,13 @@ compression and decompression.
 
    Tested Tool: 2020.1 
    Tested XRT: 2020.1
-   Tested XSA: xilinx_u50_xdma_201920_1 
+   Tested XSA: xilinx_u50_gen3x16_xdma_201920_3 
 
 
 Executable Usage
 ----------------
 
-This application is present under ``L3/demos/zlib_hbm/`` directory. Follow build instructions to generate executable and binary.
+This application is present under ``L3/tests/single_zlibc_hbm/`` directory. Follow build instructions to generate executable and binary.
 
 The host executable generated is named as "**xil_zlib_8b**" and it is generated in ``./build`` directory.
 

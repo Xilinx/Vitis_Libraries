@@ -33,23 +33,31 @@
 #include "zstd_decompress.hpp"
 #include "ap_axi_sdata.h"
 
-#define LZ_MAX_OFFSET_LIMIT 32768
-#define HISTORY_SIZE LZ_MAX_OFFSET_LIMIT
+// ZStd Block size and Window Size (lz history size)
+#ifndef ZSTD_BLOCK_SIZE_KB
 #define ZSTD_BLOCK_SIZE_KB 32
+#endif
 
 #ifndef MULTIPLE_BYTES
 #define MULTIPLE_BYTES 4
 #endif
 
 const int c_streamDWidth = 8 * MULTIPLE_BYTES;
+// window size is kept equal to block size in this design
+const int c_windowSize = ZSTD_BLOCK_SIZE_KB * 1024;
 
 extern "C" {
 /**
- * @brief Zstd decompression stream kernel top function.
+ * @brief This is full ZStandard decompression streaming kernel function. It supports all block
+ * sizes and supports window size upto 128KB. It takes entire ZStd compressed file as input
+ * and produces decompressed file at the kernel output stream. This kernel does not use DDR memory,
+ * it uses streams instead. Intermediate data is stored in internal BRAMs and stream FIFOs, which helps
+ * to attain better decompression throughput.
  *
  * @param input_size input size
  * @param inaxistreamd input kernel axi stream
  * @param outaxistreamd output kernel axi stream
+ * @param sizestreamd output size kernel axi stream
  *
  */
 void xilZstdDecompressStream(uint64_t input_size,

@@ -7,7 +7,6 @@
 #define ZLIB_INTERNAL
 #include "xlibz.hpp"
 using namespace xlibz::driver;
-extern singleton* sObj;
 #include "zlib.h"
 /* ===========================================================================
      Compresses the source buffer into the destination buffer. The level
@@ -40,19 +39,6 @@ int ZEXPORT compress2(Bytef* dest, uLongf* destLen, const Bytef* source, uLong s
     err = deflateInit(&stream, level);
     if (err != Z_OK) return err;
 
-#ifdef XILINX_CODE
-    // Driver class
-    xzlib* driver = sObj->getDriverInstance(&stream, XILINX_DEFLATE);
-
-    // Do prechecks for FPGA acceleration are successful
-    if (driver->getXmode()) {
-        // Use FPGA Compress
-        uint64_t enbytes = driver->xilinxHwCompress(&stream, level);
-        *destLen = enbytes;
-        deflateEnd(&stream);
-        return Z_OK;
-    }
-#endif
     err = deflate(&stream, Z_FINISH);
     if (err != Z_STREAM_END) {
         deflateEnd(&stream);
