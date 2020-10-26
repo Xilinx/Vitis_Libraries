@@ -24,6 +24,10 @@
 
 #include "zstd_decompress_stream.hpp"
 
+constexpr int getDataPortWidth(int maxVal) {
+    return (31 - __builtin_clz(maxVal));
+}
+
 extern "C" {
 void xilZstdDecompressStream(uint64_t input_size,
                              hls::stream<ap_axiu<c_streamDWidth, 0, 0, 0> >& inaxistreamd,
@@ -34,8 +38,11 @@ void xilZstdDecompressStream(uint64_t input_size,
 #pragma HLS interface axis port = outaxistreamd
 #pragma HLS interface axis port = sizestreamd
 #pragma HLS INTERFACE s_axilite port = return bundle = control
+    // data width for literal length, match length and offset data
+    const int c_lmoDWidth = 1 + getDataPortWidth(c_windowSize);
+
     // Call for decompression
-    xf::compression::zstdDecompressCore<MULTIPLE_BYTES, ZSTD_BLOCK_SIZE_KB, HISTORY_SIZE>(inaxistreamd, outaxistreamd,
-                                                                                          sizestreamd, input_size);
+    xf::compression::zstdDecompressCore<MULTIPLE_BYTES, ZSTD_BLOCK_SIZE_KB, c_windowSize, c_lmoDWidth>(
+        inaxistreamd, outaxistreamd, sizestreamd, input_size);
 }
 }

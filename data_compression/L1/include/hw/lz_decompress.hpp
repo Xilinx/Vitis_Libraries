@@ -34,14 +34,6 @@
 namespace xf {
 namespace compression {
 
-template <typename T>
-T reg(T d) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS INTERFACE ap_ctrl_none port = return
-#pragma HLS INLINE off
-    return d;
-}
-
 /**
  * @brief This module writes the literals to the output stream as it is
  * and when match length and offset are read, the literals will be read from
@@ -123,6 +115,7 @@ lz_decompress:
  * @tparam PARALLEL_BYTES number of bytes processed in parallel (4, 8)
  * @tparam HISTORY_SIZE history size
  * @tparam SIZE_DT input data type
+ * @tparam SIZE_OFFSET offset data type
  *
  * @param litlenStream literal length stream
  * @param litStream literals only stream
@@ -132,10 +125,10 @@ lz_decompress:
  * @param endOfStream end of stream
  * @param sizeOutStream output size stream
  */
-template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = uint8_t>
+template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = uint8_t, class SIZE_OFFSET = ap_uint<16> >
 void lzMultiByteDecompress(hls::stream<SIZE_DT>& litlenStream,
                            hls::stream<ap_uint<PARALLEL_BYTES * 8> >& litStream,
-                           hls::stream<ap_uint<16> >& offsetStream,
+                           hls::stream<SIZE_OFFSET>& offsetStream,
                            hls::stream<SIZE_DT>& matchlenStream,
                            hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
                            hls::stream<bool>& endOfStream,
@@ -162,10 +155,10 @@ void lzMultiByteDecompress(hls::stream<SIZE_DT>& litlenStream,
     SIZE_DT lit_len = 0;
     SIZE_DT orig_lit_len = 0;
     uint32_t output_cnt = 0;
-    uint16_t match_loc = 0;
+    SIZE_OFFSET match_loc = 0;
     SIZE_DT match_len = 0;
-    uint16_t write_idx = 0;
-    uint16_t output_index = 0;
+    SIZE_OFFSET write_idx = 0;
+    SIZE_OFFSET output_index = 0;
     uint64_t outSize = 0;
 
     ap_uint<c_parallelBit> outValue;
@@ -173,7 +166,7 @@ void lzMultiByteDecompress(hls::stream<SIZE_DT>& litlenStream,
     uint8_t incr_output_index = 0;
     bool outStreamFlag = false;
 
-    ap_uint<16> offset = 0;
+    SIZE_OFFSET offset = 0;
     ap_uint<c_parallelBit> outStreamValue = 0;
     ap_uint<2 * PARALLEL_BYTES * 8> output_window;
     uint8_t parallelBits = 0;
@@ -322,7 +315,6 @@ lz_decompress:
         }
     }
 
-    // output_index:%d\n",lit_len,match_len,incr_output_index,output_index);
     // Write out if there is remaining left over data in output buffer
     // to outStream
     if (output_index) {
@@ -346,7 +338,7 @@ void lzMultiByteDecoder(hls::stream<SIZE_DT>& litlenStream,
                         hls::stream<bool>& endOfStream,
                         hls::stream<uint32_t>& sizeOutStream) {
     const uint8_t c_parallelBit = PARALLEL_BYTES * 8;
-    const uint8_t c_lowOffset = 8 * PARALLEL_BYTES;
+    const uint8_t c_lowOffset = 4 * PARALLEL_BYTES;
     const uint8_t c_veryLowOffset = 2 * PARALLEL_BYTES;
 
     const uint16_t c_ramHistSize = HISTORY_SIZE / PARALLEL_BYTES;
@@ -386,14 +378,21 @@ void lzMultiByteDecoder(hls::stream<SIZE_DT>& litlenStream,
     lit_len = orig_lit_len;
     output_cnt += lit_len;
 
+    if (orig_lit_len == 0) {
+        matchDone = true;
+        match_len = matchlenStream.read();
+        offset = offsetStream.read();
+    }
+
+    uint16_t read_idx = match_loc / PARALLEL_BYTES;
+    uint16_t byte_loc = (match_loc % PARALLEL_BYTES) % PARALLEL_BYTES;
+
     bool outFlag = false;
     uint8_t incr_output_index = 0;
 lz4_decoder:
     for (; matchDone == false;) {
 #pragma HLS PIPELINE II = 1
         bool veryLowOffsetFlag = false, matchLocFlag = false;
-        uint16_t read_idx = match_loc / PARALLEL_BYTES;
-        uint16_t byte_loc = (match_loc % PARALLEL_BYTES) % PARALLEL_BYTES;
         ap_uint<2 * c_parallelBit> localValue;
         ap_uint<c_parallelBit> lowValue, highValue;
 
@@ -413,24 +412,15 @@ lz4_decoder:
 
         localValue.range(c_parallelBit - 1, 0) = lowValue;
         localValue.range(2 * c_parallelBit - 1, c_parallelBit) = highValue;
+        ap_uint<c_parallelBit> matchValue = localValue >> (byte_loc * 8);
 
         if (next_state == WRITE_LITERAL) {
             outFlag = true;
-            bool writeLitState = true;
             // printf("WRITE_LITERAL\n");
             outValue = litStream.read();
-            if (lit_len >= PARALLEL_BYTES) {
-                incr_output_index = PARALLEL_BYTES;
-                lit_len -= PARALLEL_BYTES;
-                writeLitState = lit_len ? true : false;
-            } else {
+            if (lit_len <= PARALLEL_BYTES) {
                 incr_output_index = lit_len;
                 lit_len = 0;
-                writeLitState = false;
-            }
-            if (writeLitState) {
-                next_state = WRITE_LITERAL;
-            } else {
                 offset = offsetStream.read();
                 match_len = matchlenStream.read();
                 match_loc = output_cnt - offset;
@@ -446,24 +436,20 @@ lz4_decoder:
                     parallelBits = PARALLEL_BYTES;
                     next_state = READ_MATCH;
                 }
+            } else {
+                incr_output_index = PARALLEL_BYTES;
+                lit_len -= PARALLEL_BYTES;
+                next_state = WRITE_LITERAL;
             }
         } else if (next_state == READ_MATCH) {
             // printf("READ_MATCH\n");
             outFlag = true;
-            outValue = localValue >> (byte_loc * 8);
+            outValue = matchValue;
 
-            if (match_len >= parallelBits) {
-                incr_output_index = parallelBits;
-                match_loc += parallelBits;
-                match_len -= parallelBits;
-            } else {
+            if (match_len <= parallelBits) {
                 incr_output_index = match_len;
                 match_loc += match_len;
                 match_len = 0;
-            }
-            if (match_len) {
-                next_state = READ_MATCH;
-            } else {
                 orig_lit_len = litlenStream.read();
                 lit_len = orig_lit_len;
                 output_cnt += orig_lit_len;
@@ -473,7 +459,6 @@ lz4_decoder:
                     offset = offsetStream.read();
                     match_len = matchlenStream.read();
                     match_loc = output_cnt - offset;
-                    output_cnt += match_len;
                     if ((offset > 0) & (offset < c_veryLowOffset)) {
                         parallelBits = 1;
                         if (offset < PARALLEL_BYTES) {
@@ -486,6 +471,12 @@ lz4_decoder:
                         next_state = READ_MATCH;
                     }
                 }
+                output_cnt += match_len;
+            } else {
+                incr_output_index = parallelBits;
+                match_loc += parallelBits;
+                match_len -= parallelBits;
+                next_state = READ_MATCH;
             }
         } else if (next_state == NO_OP) {
             outFlag = false;
@@ -500,6 +491,9 @@ lz4_decoder:
         if (orig_lit_len == 0 && match_len == 0) {
             matchDone = true;
         }
+
+        read_idx = match_loc / PARALLEL_BYTES;
+        byte_loc = (match_loc % PARALLEL_BYTES) % PARALLEL_BYTES;
 
         if (outFlag) {
             output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) = outValue;

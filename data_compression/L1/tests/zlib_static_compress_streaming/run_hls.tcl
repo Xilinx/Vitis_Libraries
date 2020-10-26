@@ -15,7 +15,7 @@
 #
 
 source settings.tcl
-set DIR_NAME "zlib_compress_streaming"
+set DIR_NAME "zlib_static_compress_streaming"
 set DESIGN_PATH "${XF_PROJ_ROOT}/L1/tests/${DIR_NAME}"
 set PROJ "zlib_compress_test.prj"
 set SOLN "sol1"

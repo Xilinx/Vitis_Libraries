@@ -35,11 +35,11 @@ void xilChecksumTop(std::string& compress_mod, std::string& compress_bin) {
     ifs.seekg(0, std::ios::end);
     size = ifs.tellg();
     ifs.seekg(0, std::ios::beg);
-    uint8_t in[size];
-    ifs.read(reinterpret_cast<char*>(in), size);
+    std::vector<uint8_t> in(size);
+    ifs.read(reinterpret_cast<char*>(in.data()), size);
 
     unsigned long checksumTmp = 1;
-    uint32_t golden = adler32(checksumTmp, reinterpret_cast<const unsigned char*>(in), size);
+    uint32_t golden = adler32(checksumTmp, reinterpret_cast<const unsigned char*>(in.data()), size);
 
     uint32_t no_blocks = 0;
     if (size > 0) no_blocks = (size - 1) / HOST_BUFFER_SIZE + 1;

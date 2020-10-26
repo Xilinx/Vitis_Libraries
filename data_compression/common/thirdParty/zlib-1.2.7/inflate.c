@@ -83,7 +83,7 @@
 #include "inftrees.h"
 #include "inflate.h"
 #include "inffast.h"
-
+#include <syslog.h>
 #ifdef MAKEFIXED
 #ifndef BUILDFIXED
 #define BUILDFIXED
@@ -1111,8 +1111,8 @@ int ZEXPORT inflate(z_streamp strm, int flush) {
 #endif
                                          ZSWAP32(hold)) != state->check) {
                         strm->msg = (char*)"incorrect data check";
-                        state->mode = BAD;
-                        break;
+                        //state->mode = BAD;
+                        //break;
                     }
                     INITBITS();
                     Tracev((stderr, "inflate:   check matches trailer\n"));

@@ -35,6 +35,14 @@
 namespace xf {
 namespace compression {
 
+template <typename T>
+T reg(T d) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS INTERFACE ap_ctrl_none port = return
+#pragma HLS INLINE off
+    return d;
+}
+
 typedef struct lz4BlockInfo {
     uint32_t compressedSize;
     bool storedBlock;

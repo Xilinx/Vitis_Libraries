@@ -88,7 +88,7 @@ VPP := v++
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/src/host.cpp
-HOST_SRCS += $(XFLIB_DIR)/L3/src/zlib.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/zlib_old.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
@@ -96,7 +96,7 @@ HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
 HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c
 
 
-CXXFLAGS += -DC_COMPUTE_UNIT=8 -DD_COMPUTE_UNIT=8 -DPARALLEL_BLOCK=4 -DUSE_SINGLE_KERNEL_ZLIBC -DENABLE_HW_CHECKSUM
+CXXFLAGS += -DC_COMPUTE_UNIT=8 -DD_COMPUTE_UNIT=7 -DPARALLEL_BLOCK=4 -DUSE_SINGLE_KERNEL_ZLIBC -DENABLE_HW_CHECKSUM
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 

@@ -25,7 +25,7 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/L3/src/zlib.cpp", 
+                "LIB_DIR/L3/src/zlib_old.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp"
@@ -497,7 +497,7 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 540, 
+                    "vitis_hw_build": 1000, 
                     "vitis_hw_emu": 300, 
                     "vitis_sw_emu": 25, 
                     "vitis_hw_run": 10

@@ -498,6 +498,9 @@ uint64_t xfSnappyStreaming::decompress(uint8_t* in, uint8_t* out, uint64_t input
 }
 
 uint32_t xfSnappyStreaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t input_size, bool enable_p2p) {
+#ifdef DISABLE_FREE_RUNNING_KERNEL
+#undef FREE_RUNNING_KERNEL
+#endif
     cl_mem_ext_ptr_t p2pInExt;
     char* p2pPtr = NULL;
 
@@ -533,8 +536,8 @@ uint32_t xfSnappyStreaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t i
         buffer_input = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, input_size, h_buf_in.data());
     }
 
-    buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, outputSize, h_buf_out.data());
-    bufferOutputSize = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t),
+    buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, outputSize, h_buf_out.data());
+    bufferOutputSize = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(uint32_t),
                                       h_buf_decompressSize.data());
 
     // set kernel arguments
@@ -544,11 +547,15 @@ uint32_t xfSnappyStreaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t i
     decompress_data_mover_kernel->setArg(narg++, input_size);
     decompress_data_mover_kernel->setArg(narg, *(bufferOutputSize));
 
+#ifndef FREE_RUNNING_KERNEL
+#ifndef DISABLE_FREE_RUNNING_KERNEL
     decompress_kernel_snappy->setArg(3, input_size);
+#endif
+#endif
 
     if (!enable_p2p) {
         // Migrate Memory - Map host to device buffers
-        m_q->enqueueMigrateMemObjects({*(buffer_input)}, 0);
+        m_q->enqueueMigrateMemObjects({*(buffer_input), *(bufferOutputSize), *(buffer_output)}, 0);
         m_q->finish();
     }
 
@@ -560,7 +567,9 @@ uint32_t xfSnappyStreaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t i
     auto kernel_start = std::chrono::high_resolution_clock::now();
     // enqueue the kernels and wait for them to finish
     m_q->enqueueTask(*decompress_data_mover_kernel);
+#ifndef FREE_RUNNING_KERNEL
     m_q->enqueueTask(*decompress_kernel_snappy);
+#endif
     m_q->finish();
 
     auto kernel_end = std::chrono::high_resolution_clock::now();

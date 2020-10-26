@@ -79,15 +79,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[10]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[10]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[10]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -96,15 +96,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[11]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[11]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[11]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -113,15 +113,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[12]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[12]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[12]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -130,15 +130,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[13]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[13]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[13]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -147,15 +147,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[14]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[14]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[14]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -164,15 +164,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[15]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[15]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[15]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -181,15 +181,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[16]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[16]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[16]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -198,15 +198,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[17]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[17]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[17]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -215,15 +215,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[18]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[18]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[18]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }, 
@@ -232,15 +232,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[19]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[19]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[19]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         },
@@ -249,15 +249,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[20]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[20]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[20]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         },
@@ -266,15 +266,15 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[21]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[21]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[21]"
+                                    "memory": "HBM[0:31]"
                                 }
                             ]
                         }
@@ -332,7 +332,7 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
+                    "vitis_hw_build": 1000, 
                     "vitis_hw_emu": 300, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10

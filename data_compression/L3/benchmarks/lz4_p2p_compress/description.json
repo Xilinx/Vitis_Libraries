@@ -11,10 +11,10 @@
         "vck"
     ], 
     "platform_whitelist": [
+        "samsung_u2",
+        "samsung_U2",
         "u200", 
-        "u250", 
-        "samsung_u2", 
-        "samsung_U2"
+        "u250"     
     ], 
     "launch": [
         {
@@ -92,7 +92,7 @@
                 }, 
                 "max_time_min": {
                     "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 120, 
+                    "vitis_hw_emu": 300, 
                     "vitis_sw_emu": 25, 
                     "vitis_hw_run": 10
                 }

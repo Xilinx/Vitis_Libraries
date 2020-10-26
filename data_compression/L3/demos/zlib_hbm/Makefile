@@ -56,7 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u280_xdma_201920_3
+DEVICE ?= xilinx_u50_gen3x16_xdma_201920_3
 ifeq ($(findstring zc, $(DEVICE)), zc)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
@@ -93,7 +93,7 @@ include ./config.mk
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/src/host.cpp
-HOST_SRCS += $(XFLIB_DIR)/L3/src/zlib.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/zlib_old.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp

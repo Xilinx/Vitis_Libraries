@@ -29,10 +29,17 @@
 #define ZSTD
 
 #define PARALLEL_BYTES_READ 4
-#define LZ_HISTORY 32768
 #define ZSTD_BLOCK_SIZE_KB 32
+#define WINDOW_SIZE (32 * 1024)
+
+// Window size or LZ History size can be modified as required above 128KB
+// Below 128KB it must be equal to block size
 
 #include "zstd_decompress.hpp"
+
+constexpr int getDataPortWidth(int maxVal) {
+    return (31 - __builtin_clz(maxVal));
+}
 
 uint64_t getFileSize(std::ifstream& file) {
     file.seekg(0, file.end);
@@ -46,7 +53,8 @@ void decompressFrame(hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ)> >& inStream,
                      hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ)> >& outStream,
                      hls::stream<bool>& endOfStream,
                      hls::stream<uint64_t>& outSizeStream) {
-    xf::compression::zstdDecompressStream<PARALLEL_BYTES_READ, ZSTD_BLOCK_SIZE_KB, LZ_HISTORY>(
+    const int c_lmoDWidth = 1 + getDataPortWidth(WINDOW_SIZE);
+    xf::compression::zstdDecompressStream<PARALLEL_BYTES_READ, ZSTD_BLOCK_SIZE_KB, WINDOW_SIZE, c_lmoDWidth>(
         inStream, inStrobe, outStream, endOfStream, outSizeStream);
 }
 
@@ -89,6 +97,7 @@ void validateFile(std::string& fileName, std::string& cmpFileName, uint8_t max_c
         inputStream << val;
     }
     inStrobe << 0;
+    inputStream << 0;
     inCmpFile.close();
     decompressFrame(inputStream, inStrobe, outputStream, endOfStream, outSizeStream);
 
@@ -125,12 +134,13 @@ int main(int argc, char* argv[]) {
     uint8_t max_cr = 20;
     sda::utils::CmdLineParser parser;
     parser.addSwitch("--file", "-f", "File to decompress", "");
+    parser.addSwitch("--original_file", "-o", "Original file path", "");
     parser.addSwitch("--max_cr", "-mcr", "Max compression ratio", "");
 
     parser.parse(argc, argv);
 
-    std::string in_file_name;
     std::string inCmpFileName = parser.value("file");
+    std::string originalFileName = parser.value("original_file");
     std::string max_cr_s = parser.value("max_cr");
 
     if (inCmpFileName.empty()) {
@@ -140,9 +150,7 @@ int main(int argc, char* argv[]) {
     if (!max_cr_s.empty()) {
         max_cr = atoi(max_cr_s.c_str());
     }
-    in_file_name.resize(inCmpFileName.size() - 4);
-    in_file_name.assign(inCmpFileName, 0, inCmpFileName.size() - 4);
-    validateFile(in_file_name, inCmpFileName, max_cr);
+    validateFile(originalFileName, inCmpFileName, max_cr);
 
     return 0;
 }

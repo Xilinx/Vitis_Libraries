@@ -49,37 +49,8 @@ void hls_zlibCompressStreaming(hls::stream<in_dT>& inStream,
 #pragma HLS INTERFACE AXIS port = outSizeStream
 
 #pragma HLS DATAFLOW
-    hls::stream<ap_uint<IN_DATAWIDTH> > inHlsStream("inHlsStream");
-    hls::stream<ap_uint<OUT_DATAWIDTH> > outCompressedStream("outCompressedStream");
-    hls::stream<ap_uint<OUT_DATAWIDTH> > outPackedStream("outPackedStream");
-    hls::stream<ap_uint<32> > numBlockStream("numBlockStream");
-    hls::stream<bool> numBlockStreamEos("numBlockStreamEos");
-    hls::stream<uint32_t> zlibBlockSizeStream("zlibBlockSizeStream");
-    hls::stream<uint32_t> blockCompressedSizeStream("blockCompressedSizeStream");
-    hls::stream<uint32_t> totalSizeStream("totalSizeStream");
-    hls::stream<bool> outCompressedStreamEos("outCompressedStreamEos");
-    hls::stream<bool> outFileEos("outFileEos");
-    hls::stream<bool> outPackedStreamEos("outPackedStreamEos");
-
-#pragma HLS STREAM variable = outCompressedStream depth = 256
-#pragma HLS STREAM variable = outCompressedStreamEos depth = 256
-
-    // AXI 2 HLS Stream and Block Maker
-    xf::compression::details::axiu2hlsStreamBlockMaker<IN_DATAWIDTH, BLOCK_SIZE>(
-        inStream, inHlsStream, zlibBlockSizeStream, inSizeStream, numBlockStream);
-
-    // Zlib Compress Stream IO Engine
-    xf::compression::zlibCompress<BLOCK_SIZE>(inHlsStream, outCompressedStream, outCompressedStreamEos, outFileEos,
-                                              blockCompressedSizeStream, zlibBlockSizeStream);
-
-    // Zlib Packer
-    xf::compression::details::zlibCompressStreamingPacker<OUT_DATAWIDTH>(
-        outCompressedStream, outPackedStream, outCompressedStreamEos, outPackedStreamEos, outFileEos,
-        blockCompressedSizeStream, totalSizeStream, numBlockStream, numBlockStreamEos);
-
-    // HLS 2 AXI Stream
-    xf::compression::details::hlsStreamSize2axiu<OUT_DATAWIDTH>(outPackedStream, outPackedStreamEos, outStream,
-                                                                outSizeStream, totalSizeStream, numBlockStreamEos);
+    xf::compression::zlibCompressStreaming<IN_DATAWIDTH, OUT_DATAWIDTH, BLOCK_SIZE>(inStream, outStream, inSizeStream,
+                                                                                    outSizeStream);
 }
 
 int main(int argc, char* argv[]) {

@@ -369,7 +369,8 @@ void createCodeword(ap_uint<4>* symbol_bits,
                     Histogram* length_histogram,
                     Codeword* huffCodes,
                     uint16_t cur_symSize,
-                    uint16_t cur_maxBits) {
+                    uint16_t cur_maxBits,
+                    uint16_t symCnt) {
     //#pragma HLS inline
     typedef ap_uint<MAX_LEN> LCL_Code_t;
     LCL_Code_t first_codeword[MAX_LEN + 1];
@@ -384,8 +385,8 @@ first_codewords:
         first_codeword[i] = (first_codeword[i - 1] + length_histogram[i - 1]) << 1;
     }
 
-assign_codewords:
-    for (int k = 0; k < cur_symSize; ++k) {
+assign_codewords_mm:
+    for (uint16_t k = 0; k < cur_symSize; ++k) {
 #pragma HLS LOOP_TRIPCOUNT max = 286 min = 286 avg = 286
 #pragma HLS PIPELINE II = 1
 
@@ -405,6 +406,9 @@ assign_codewords:
             huffCodes[k].bitlength = 0;
         }
     }
+    if (symCnt == 0) {
+        huffCodes[0].bitlength = 1;
+    }
 }
 
 template <int MAX_LEN>
@@ -412,7 +416,8 @@ void createCodeword(ap_uint<4>* symbol_bits,
                     Histogram* length_histogram,
                     hls::stream<Codeword>& huffCodes,
                     uint16_t cur_symSize,
-                    uint16_t cur_maxBits) {
+                    uint16_t cur_maxBits,
+                    uint16_t symCnt) {
     //#pragma HLS inline
     typedef ap_uint<MAX_LEN> LCL_Code_t;
     LCL_Code_t first_codeword[MAX_LEN + 1];
@@ -427,28 +432,44 @@ first_codewords:
         first_codeword[i] = (first_codeword[i - 1] + length_histogram[i - 1]) << 1;
     }
 
-    Codeword code;
-assign_codewords:
-    for (int k = 0; k < cur_symSize; ++k) {
+    if (symCnt == 0) {
+        Codeword mcode;
+        mcode.codeword = 0;
+        mcode.bitlength = 1;
+
+    assign_zero_codewords_sm:
+        for (uint16_t k = 0; k < cur_symSize; ++k) {
+#pragma HLS LOOP_TRIPCOUNT max = 286 min = 286 avg = 286
+#pragma HLS PIPELINE II = 1
+            huffCodes << mcode;
+            if (k == 0) {
+                mcode.bitlength = 0;
+            }
+        }
+    } else {
+        Codeword code;
+    assign_codewords_sm:
+        for (uint16_t k = 0; k < cur_symSize; ++k) {
 #pragma HLS LOOP_TRIPCOUNT max = 286 min = 286 avg = 286
 #pragma HLS PIPELINE II = 1
 
-        uint8_t length = (uint8_t)symbol_bits[k];
-    // if symbol has 0 bits, it doesn't need to be encoded
-    make_codeword:
-        if (length != 0) {
-            LCL_Code_t out_reversed = first_codeword[length];
-            out_reversed.reverse();
-            out_reversed = out_reversed >> (MAX_LEN - length);
+            uint8_t length = (uint8_t)symbol_bits[k];
+        // if symbol has 0 bits, it doesn't need to be encoded
+        make_codeword:
+            if (length != 0) {
+                LCL_Code_t out_reversed = first_codeword[length];
+                out_reversed.reverse();
+                out_reversed = out_reversed >> (MAX_LEN - length);
 
-            code.codeword = (uint16_t)out_reversed;
-            code.bitlength = length;
-            first_codeword[length]++;
-        } else {
-            code.codeword = 0;
-            code.bitlength = 0;
+                code.codeword = (uint16_t)out_reversed;
+                code.bitlength = length;
+                first_codeword[length]++;
+            } else {
+                code.codeword = 0;
+                code.bitlength = 0;
+            }
+            huffCodes << code;
         }
-        huffCodes << code;
     }
 }
 
@@ -502,7 +523,7 @@ void huffConstructTreeStream_2(hls::stream<Symbol>& heapStream,
             canonizeTree<SYMBOL_BITS>(heap, heapLength, length_histogram, symbol_bits, c_lengthHistogram);
 
             // generate huffman codewords
-            createCodeword<c_tgnMaxBits>(symbol_bits, length_histogram, outCodes, i_symbolSize, i_maxBits);
+            createCodeword<c_tgnMaxBits>(symbol_bits, length_histogram, outCodes, i_symbolSize, i_maxBits, heapLength);
         }
     } while (1);
 }
@@ -603,7 +624,7 @@ init_buffers:
     canonizeTree<SYMBOL_BITS>(heap, heapLength, length_histogram, symbol_bits, LENGTH_SIZE);
 
     // generate huffman codewords
-    createCodeword<c_tgnMaxBits>(symbol_bits, length_histogram, outCodes, i_symbolSize, i_maxBits);
+    createCodeword<c_tgnMaxBits>(symbol_bits, length_histogram, outCodes, i_symbolSize, i_maxBits, heapLength);
 }
 
 void huffConstructTree(Frequency* inFreq, Codeword* outCodes, uint16_t* maxCodes, uint8_t metaIdx) {
@@ -664,7 +685,7 @@ init_buffers:
     canonizeTree<c_tgnSymbolBits>(heap, heapLength, length_histogram, symbol_bits, i_treeDepth);
 
     // generate huffman codewords
-    createCodeword<c_tgnMaxBits>(symbol_bits, length_histogram, outCodes, i_symbolSize, i_maxBits);
+    createCodeword<c_tgnMaxBits>(symbol_bits, length_histogram, outCodes, i_symbolSize, i_maxBits, heapLength);
 }
 void genBitLenFreq(hls::stream<Codeword>& outCodes,
                    hls::stream<Frequency>& freq,

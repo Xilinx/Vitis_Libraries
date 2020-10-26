@@ -57,13 +57,14 @@ then
     do 
         cp -rf $(pwd)/sample_run.txt $(pwd)/$DIR/file_$i
         echo $(pwd)/$DIR/file_$i >> listdir.list
+        echo $(pwd)/$DIR/file_${i}.zlib >> listdir_decomp.list
     done
     
     echo -e "\n\n*********** Compression (cfl) ************\n"
     run_cmd "-cfl listdir.list -v 1 -cm 0" 
     
     echo -e "\n\n*********** DeCompression (dfl) ************\n"
-    run_cmd "-dfl listdir.list -v 1" 
+    run_cmd "-dfl listdir_decomp.list -v 1" 
     
     echo -e "\n\n*********** Deflate (cfl) ************\n"
     run_cmd "-cfl listdir.list -v 1 -cm 1"

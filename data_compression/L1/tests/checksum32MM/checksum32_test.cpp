@@ -27,8 +27,7 @@
 #include <math.h>
 
 #include "checksum_wrapper.hpp"
-#include "crc32.c"
-#include "adler32.c"
+#include "zlib.h"
 auto constexpr ADLER32 = 0;
 auto constexpr CRC32 = 1;
 auto constexpr CHECKSUM_MODE = ADLER32;

@@ -87,7 +87,7 @@ endif
 
 # sw_emu, hw_emu, hw
 TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw),)
+ifeq ($(filter $(TARGET),sw_emu hw hw_emu),)
   $(error TARGET is not sw_emu, hw_emu or hw)
 endif
 
@@ -180,6 +180,9 @@ VPP_FLAGS = -I$(HLS_SRC_DIR) \
 			-I$(KSRC_DIR) \
 			-I$(XFLIB_DIR)/L2/include/
 
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src/
+VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
+
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_FLAGS += --config $(CUR_DIR)/advanced.ini \
 			 -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) \
@@ -196,26 +199,26 @@ VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 
 XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_decompress.xclbin
 
-XO_FILES_C = $(TEMP_DIR)/xf_compress_lz77.xo \
-		   	 $(TEMP_DIR)/xf_huffman.xo 
+XO_FILES_C = $(TEMP_DIR)/xilZlibCompressFull.xo \
+			 $(TEMP_DIR)/xilChecksum32.xo
 		  	 
-XO_FILES_D = $(TEMP_DIR)/xf_zlib_datareader.xo \
-		     $(TEMP_DIR)/xf_zlib_datawriter.xo \
-		     $(TEMP_DIR)/xf_zlib_decompress.xo
+XO_FILES_D = $(TEMP_DIR)/xilZlibDmReader.xo \
+		     $(TEMP_DIR)/xilZlibDmWriter.xo \
+		     $(TEMP_DIR)/xilDecompressFull.xo
 
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
-HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/zlib_huffman_enc_mm.cpp
+COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_compress_multi_engine_mm.cpp
+CHECKSUM_KERNEL_SRCS = $(KSRC_DIR)/checksum_mm.cpp
 DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_rd.cpp
 DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_wr.cpp
 DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_parallelbyte_decompress_full.cpp
 
-COMPRESS_KERNEL_NAME = xilLz77Compress
-HUFFMAN_KERNEL_NAME = xilHuffmanKernel
+COMPRESS_KERNEL_NAME = xilZlibCompressFull
+CHECKSUM_KERNEL_NAME = xilChecksum32
 DATAREADER_KERNEL_NAME = xilZlibDmReader
 DATAWRITER_KERNEL_NAME = xilZlibDmWriter
 DECOMPRESS_KERNEL_NAME = xilDecompressFull
 
-KERNELS += $(COMPRESS_KERNEL_NAME) $(HUFFMAN_KERNEL_NAME)
+KERNELS += $(COMPRESS_KERNEL_NAME) $(CHECKSUM_KERNEL_NAME)
 KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERNEL_NAME)
 
 
@@ -223,31 +226,31 @@ KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERN
 #                      kernel rules
 
 # Building kernel
-$(TEMP_DIR)/xf_compress_lz77.xo: $(COMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilZlibCompressFull.xo: $(COMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling compression kernel..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(COMPRESS_KERNEL_NAME) \
 		-I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xf_huffman.xo: $(HUFFMAN_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilChecksum32.xo: $(CHECKSUM_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling huffman kernel $*..."
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(HUFFMAN_KERNEL_NAME) \
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(CHECKSUM_KERNEL_NAME) \
 		-I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xf_zlib_datareader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilZlibDmReader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling data reader kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAREADER_KERNEL_NAME) \
 	    -I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xf_zlib_datawriter.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilZlibDmWriter.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling data writer kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAWRITER_KERNEL_NAME) \
 	    -I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xf_zlib_decompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilDecompressFull.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling decompression kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMPRESS_KERNEL_NAME) \

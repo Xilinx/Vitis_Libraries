@@ -28,7 +28,7 @@
 #include <math.h>
 
 #include "xf_security/adler32.hpp"
-#include "adler32.c"
+#include "zlib.h"
 #define W 1
 #define HOST_BUFFER_SIZE (2 * 1024 * 1024)
 
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < (inSize - 1) / W + 1; i++) {
             inStrm.write(in[i + offset]);
         }
-        offset += inSize;
+        offset += (inSize - 1) / W + 1;
         inLenStrm.write(inSize);
         endInLenStrm.write(false);
         endInLenStrm.write(true);

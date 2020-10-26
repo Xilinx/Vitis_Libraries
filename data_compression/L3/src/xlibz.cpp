@@ -1,8 +1,5 @@
 #include "xlibz.hpp"
 using namespace xlibz::driver;
-extern singleton* sObj;
-// Initialize the static member of the Singleton
-singleton* singleton::instance = nullptr;
 
 #ifdef ENABLE_XRM
 
@@ -17,21 +14,17 @@ singleton::singleton(void) {}
 // Provide the singleton instance
 // Called in deflateInit2_
 singleton* singleton::getInstance(void) {
-    // If instance is not created
-    // then create it
-    if (instance == NULL) {
-        instance = new singleton();
-    }
-    // Otherwise return the
-    // existing instance
-    return instance;
+    static singleton instance;
+    return &instance;
 }
 
 // Provde Driver object by singleton object
 xzlib* singleton::getDriverInstance(z_streamp strm, uint8_t flow) {
+    lock();
     // Find current z_stream object if it exists in map
     auto iterator = driverMapObj.find(strm);
     if (iterator != driverMapObj.end()) {
+        unlock();
         // If it exists the return
         return iterator->second;
     } else {
@@ -42,40 +35,42 @@ xzlib* singleton::getDriverInstance(z_streamp strm, uint8_t flow) {
 
         // Do prechecks
         driver->xilinxPreChecks();
-
+        unlock();
         // return the object
         return driver;
     }
 }
 
 // Proivde xfZlib object by singleton object
-xfZlib* singleton::getZlibInstance(z_streamp strm, std::string u50_xclbin, int flow) {
+xfZlib* singleton::getZlibInstance(xzlib* driver, z_streamp strm, std::string u50_xclbin, int flow) {
+    lock();
     // Find current z_stream object if it exists in map
     auto iterator = zlibMapObj.find(strm);
     if (iterator != zlibMapObj.end()) {
         // If it exists the return
+        unlock();
         return iterator->second;
     } else {
         // In no-xrm flow by default device ID is 0
         uint8_t deviceId = 0;
 #ifdef ENABLE_XRM
         // Pick Device ID
-        deviceId = getXrmDeviceId();
+        deviceId = driver->deviceId;
 #endif
 
         if (flow == XILINX_DEFLATE) {
             // If not create it
-            xlz = new xfZlib(u50_xclbin.c_str(), 20, COMP_ONLY, deviceId, 0, FULL, XILINX_ZLIB);
+            xlz = new xfZlib(u50_xclbin.c_str(), 0, COMP_ONLY, deviceId, 0, FULL, XILINX_ZLIB);
             if (lz77KernelMap.empty()) {
                 for (int i = 0; i < C_COMPUTE_UNIT; i++) {
                     auto cu_id = std::to_string(i + 1);
-                    std::string lz77_compress_kname = xlz->getCompressKernel(0) + "_" + cu_id;
+                    std::string lz77_compress_kname = xlz->getCompressKernel(1) + "_" + cu_id;
                     lz77KernelMap.insert(std::pair<std::string, int>(lz77_compress_kname, i));
                 }
             }
         } else if (flow == XILINX_INFLATE) {
             // Construct xfZlib object
-            xlz = new xfZlib(u50_xclbin.c_str(), 20, DECOMP_ONLY, deviceId, 0, FULL, XILINX_ZLIB);
+            xlz = new xfZlib(u50_xclbin.c_str(), 0, DECOMP_ONLY, deviceId, 0, FULL, XILINX_ZLIB);
             if (decKernelMap.empty()) {
                 // Use map data structure to track the
                 // Cu instance and CU number combination for
@@ -89,6 +84,7 @@ xfZlib* singleton::getZlibInstance(z_streamp strm, std::string u50_xclbin, int f
         }
         // Insert the strm,xlz key/value pairs in map
         zlibMapObj.insert(std::pair<z_streamp, xfZlib*>(strm, xlz));
+        unlock();
         // return the object
         return xlz;
     }
@@ -96,7 +92,7 @@ xfZlib* singleton::getZlibInstance(z_streamp strm, std::string u50_xclbin, int f
 
 #ifdef ENABLE_XRM
 // Proivde xfZlib object by singleton object
-xrmContext* singleton::getXrmContext(void) {
+xrmContext* singleton::getXrmContext_p(void) {
     if (ctx == NULL) {
         ctx = (xrmContext*)xrmCreateContext(XRM_API_VERSION_1);
         if (ctx == NULL) {
@@ -107,71 +103,74 @@ xrmContext* singleton::getXrmContext(void) {
     return ctx;
 }
 
-// PRovide XRM Device ID
-uint8_t singleton::getXrmDeviceId(void) {
-    return deviceId;
-}
-
 // Provide XRM CU Instance
-std::string singleton::getXrmCuInstance(const std::string& kernel_name) {
-    if (instance_name.empty()) {
+void singleton::getXrmCuInstance(xzlib* driver, const std::string& kernel_name) {
+    lock();
+    if (driver == NULL) {
+        unlock();
+        return;
+    }
+    if (driver->instance_name.empty()) {
         std::string cu_id;
         //// Query XRM
-        memset(&cuProp, 0, sizeof(xrmCuProperty));
-        memset(&cuRes, 0, sizeof(xrmCuResource));
+        memset(&(driver->cuProp), 0, sizeof(xrmCuProperty));
+        memset(&(driver->cuRes), 0, sizeof(xrmCuResource));
 
         // Assign kernel name to look for CU allocation
-        strcpy(cuProp.kernelName, kernel_name.c_str());
-        strcpy(cuProp.kernelAlias, "");
+        strncpy(driver->cuProp.kernelName, kernel_name.c_str(), kernel_name.size() + 1);
+        strcpy(driver->cuProp.kernelAlias, "");
 
         // Open device in exclusive mode
-        cuProp.devExcl = false;
+        driver->cuProp.devExcl = false;
         // % of load
-        cuProp.requestLoad = 100;
-        cuProp.poolId = 0;
+        driver->cuProp.requestLoad = 100;
+        driver->cuProp.poolId = 0;
 
         // Get XRM context
-        xrmContext* lctx = getXrmContext();
+        xrmContext* lctx = getXrmContext_p();
 
         // Block until get exclusive access to the CU
-        int ret = xrmCuBlockingAlloc(lctx, &cuProp, 2, &cuRes);
+        int ret = xrmCuBlockingAlloc(lctx, &(driver->cuProp), 2, &(driver->cuRes));
         if (ret != 0) {
             std::cout << "xrmCuAlloc: Failed to allocate CU \n" << std::endl;
+            unlock();
             exit(EXIT_FAILURE);
         } else {
             // Return instance name
-            cu_id = cuRes.instanceName;
-            deviceId = cuRes.deviceId;
+            cu_id = driver->cuRes.instanceName;
+            driver->deviceId = driver->cuRes.deviceId;
         }
-        instance_name = cu_id;
+        driver->instance_name = cu_id;
     }
-    return instance_name;
-}
-
-void singleton::releaseXrmCuInstance(void) {
-    xrmContext* lctx = getXrmContext();
-    instance_name.clear();
-    xrmCuRelease(lctx, &cuRes);
+    unlock();
+    return;
 }
 
 #endif
 
 // Release the xzlib by singleton object
 void singleton::releaseDriverObj(z_streamp strm) {
+    lock();
     // Find if current z_stream exists in map
     auto iterator = driverMapObj.find(strm);
     if (iterator != driverMapObj.end()) {
-        // If it does then pick the value entry
-        // which is xfZlib object
-        // Delete it
+// If it does then pick the value entry
+// which is xfZlib object
+// Delete it
+#ifdef ENABLE_XRM
+        xrmContext* lctx = getXrmContext_p();
+        if (lctx != NULL) xrmCuRelease(lctx, &(iterator->second->cuRes));
+#endif
         delete iterator->second;
         // Remove <key,value> pair from map
         driverMapObj.erase(iterator);
     }
+    unlock();
 }
 
 // Release the xfZlib object by singleton object
 void singleton::releaseZlibObj(z_streamp strm) {
+    lock();
     // Find if current z_stream exists in map
     auto iterator = zlibMapObj.find(strm);
     if (iterator != zlibMapObj.end()) {
@@ -182,11 +181,28 @@ void singleton::releaseZlibObj(z_streamp strm) {
         // Remove <key,value> pair from map
         zlibMapObj.erase(iterator);
     }
+    unlock();
 }
 
 // Constructor
 xzlib::xzlib(z_streamp strm, uint8_t flow) {
     struct_update(strm, flow);
+
+    m_deflateOutput = new unsigned char[2 * m_bufSize];
+    m_deflateInput = new unsigned char[2 * m_bufSize];
+}
+
+// destructor
+xzlib::~xzlib() {
+    if (m_deflateOutput) {
+        delete m_deflateOutput;
+    }
+
+    if (m_deflateInput) {
+        delete m_deflateInput;
+    }
+
+    instance_name.clear();
 }
 
 // Structure update
@@ -347,7 +363,7 @@ void xzlib::xilinxPreChecks(void) {
             return;
         }
     } else {
-        std::string hpath = "/opt/xilinx/zlib/xrt.ini";
+        std::string hpath = "/opt/xilinx/apps/zlib/scripts/xrt.ini";
         // Ensure the hardcoded path is correct
         std::ifstream xrtinifile(hpath.c_str());
         if (xrtinifile.good()) {
@@ -375,87 +391,97 @@ bool xzlib::xilinxHwDeflate(z_streamp strm, int flush) {
     uint32_t adler32 = 0;
     size_t enbytes = 0;
 
-    bool last_buffer = false;
-    if (flush == Z_FINISH) last_buffer = true;
-
-#ifndef ENABLE_XRM
-    do {
-        // Singleton provides zlib object if its already created
-        // otherwise it will create and return the same
-        xlz = sObj->getZlibInstance(strm, m_info.u50_xclbin);
-        if (xlz->error_code()) {
-            std::cout << "Failed to create object " << std::endl;
-            retry_flag = true;
-            sObj->releaseZlibObj(strm);
-        } else {
-            // Set adler value
-            xlz->set_checksum(strm->adler);
-
-            // Call compression_buffer API
-            enbytes = xlz->compress_buffer(m_info.in_buf, m_info.out_buf, m_info.input_size, last_buffer);
-
-            if (xlz->error_code()) {
-#if (VERBOSE_LEVEL >= 2)
-                std::cout << "Retrying .... " << std::endl;
-#endif
-                retry_flag = true;
-                sObj->releaseZlibObj(strm);
-            } else {
-                retry_flag = false;
-            }
-            adler32 = xlz->get_checksum();
-        }
-
-    } while (retry_flag);
-#else
-    size_t host_buffer_size = HOST_BUFFER_SIZE;
+    bool last_data = false;
 
     // Pick kernel name
     // xilDecompressFull
-    std::string kernel_name = "xilLz77Compress";
+    if (m_instCreated == false) {
+        std::string kernel_name = "xilZlibCompressFull";
+        std::string cu_number = "1";
 
-    // Get XRM CU instance ID
-    std::string cu_id = sObj->getXrmCuInstance(kernel_name);
+        cu_id = kernel_name + "_" + cu_number;
 
-    // Get ZLIB instance
-    xlz = sObj->getZlibInstance(strm, m_info.u50_xclbin);
-
-    auto lz77_iterator = sObj->lz77KernelMap.find(cu_id);
-    int cu = 0;
-    if (lz77_iterator != sObj->lz77KernelMap.end()) cu = lz77_iterator->second;
-
-    // Call to decompress API
-    enbytes = xlz->compress_buffer(m_info.in_buf, m_info.out_buf, m_info.input_size, last_buffer, host_buffer_size, cu);
-    adler32 = xlz->get_checksum();
+#ifdef ENABLE_XRM
+        // Get XRM CU instance ID
+        singleton::getInstance()->getXrmCuInstance(this, kernel_name);
+        cu_id = this->instance_name;
 #endif
-
-    if (last_buffer) {
-        m_info.out_buf[enbytes] = adler32 >> 24;
-        m_info.out_buf[enbytes + 1] = adler32 >> 16;
-        m_info.out_buf[enbytes + 2] = adler32 >> 8;
-        m_info.out_buf[enbytes + 3] = adler32;
-        enbytes += 4;
+        m_instCreated = true;
     }
 
-    strm->total_out += enbytes;
-    strm->avail_out = strm->avail_out - enbytes;
-    strm->avail_in = 0;
-    strm->adler = adler32;
-    strm->next_out += enbytes;
+    xlz = singleton::getInstance()->getZlibInstance(this, strm, m_info.u50_xclbin);
 
-#if (VERBOSE_LEVEL >= 1)
-    static int in = 0;
-    static int out = 0;
-    in += m_info.input_size;
-    out += enbytes;
-    float cr = in / out;
-    openlog("XILINX_DEFLATE", LOG_PID, LOG_USER);
-    syslog(LOG_INFO,
-           "strm_ptr %d Input Chunk %d, Output Chunk %d Total Input %d Total Output %d Compression Ratio %f \n", strm,
-           m_info.input_size, enbytes, in, out, cr);
-    closelog();
-#endif
-    if (flush == Z_FINISH) {
+    while ((m_info.input_size != 0 || flush) && (strm->avail_out != 0)) {
+        bool last_buffer = false;
+        if (m_info.input_size + m_inputSize >= m_bufSize) {
+            std::memcpy(m_deflateInput + m_inputSize, m_info.in_buf, m_bufSize - m_inputSize);
+            m_info.in_buf += (m_bufSize - m_inputSize);
+            m_info.input_size -= (m_bufSize - m_inputSize);
+            m_inputSize += (m_bufSize - m_inputSize);
+        } else if (m_info.input_size != 0) {
+            std::memcpy(m_deflateInput + m_inputSize, m_info.in_buf, m_info.input_size);
+            m_inputSize += m_info.input_size;
+            m_info.input_size = 0;
+        }
+        if (flush != Z_NO_FLUSH && m_info.input_size == 0) last_buffer = true;
+        // Set adler value
+        xlz->set_checksum(strm->adler);
+        size_t inputSize = m_inputSize;
+        // Call compression_buffer API
+        if (last_buffer && (m_outputSize < m_bufSize)) {
+            enbytes = xlz->deflate_buffer(m_deflateInput, m_deflateOutput + m_outputSize, inputSize, last_data,
+                                          last_buffer, cu_id);
+            m_outputSize += enbytes;
+            m_inputSize = inputSize;
+        } else if ((inputSize >= m_bufSize)) {
+            while (inputSize != 0) {
+                enbytes = xlz->deflate_buffer(m_deflateInput, m_deflateOutput + m_outputSize, inputSize, last_data,
+                                              last_buffer, cu_id);
+                m_outputSize += enbytes;
+            }
+            m_inputSize = 0;
+        }
+        adler32 = xlz->get_checksum();
+
+        if (m_outputSize > 0) {
+            if (flush == Z_FINISH && last_data && enbytes > 0) {
+                long int last_block = 0xffff000001;
+                // zlib special block based on Z_SYNC_FLUSH
+                std::memcpy(&(m_deflateOutput[m_outputSize]), &last_block, 5);
+                m_outputSize += 5;
+
+                m_deflateOutput[m_outputSize] = adler32 >> 24;
+                m_deflateOutput[m_outputSize + 1] = adler32 >> 16;
+                m_deflateOutput[m_outputSize + 2] = adler32 >> 8;
+                m_deflateOutput[m_outputSize + 3] = adler32;
+                m_outputSize += 4;
+            }
+            if (m_outputSize > strm->avail_out) {
+                std::memcpy(strm->next_out, m_deflateOutput, strm->avail_out);
+                m_outputSize -= strm->avail_out;
+                std::memmove(m_deflateOutput, m_deflateOutput + strm->avail_out, m_outputSize);
+                strm->total_out += strm->avail_out;
+                strm->next_out += strm->avail_out;
+                strm->avail_out = 0;
+            } else {
+                std::memcpy(strm->next_out, m_deflateOutput, m_outputSize);
+                strm->avail_out = strm->avail_out - m_outputSize;
+                strm->total_out += m_outputSize;
+                strm->next_out += m_outputSize;
+                m_outputSize = 0;
+                if (last_data) break;
+            }
+        }
+        if (m_outputSize == 0) {
+            if (last_data) break;
+        }
+    }
+
+    strm->avail_in = m_info.input_size;
+
+    strm->adler = adler32;
+
+    if (last_data && strm->avail_out != 0) {
         return true;
     } else
         return false;
@@ -463,73 +489,7 @@ bool xzlib::xilinxHwDeflate(z_streamp strm, int flush) {
 
 // Call to HW Compress
 uint64_t xzlib::xilinxHwCompress(z_streamp strm, int val) {
-    // Construct xfZlib object
-    xfZlib* xlz = nullptr;
-    m_info.output_size = 0;
-
-#ifndef ENABLE_XRM
-    // Initialize checksum value
-    bool retry_flag = false;
-    int cu = 0;
-    do {
-        m_info.output_size = 0;
-        // Singleton provides zlib object if its already created
-        // otherwise it will create and return the same
-        xlz = sObj->getZlibInstance(strm, m_info.u50_xclbin);
-        int err_code = xlz->error_code();
-        if (err_code) {
-#if (VERBOSE_LEVEL >= 2)
-            std::cout << "Failed to create object " << std::endl;
-#endif
-            retry_flag = true;
-            sObj->releaseZlibObj(strm);
-        } else {
-            xlz->set_checksum(1);
-            // Call to compress API
-            m_info.output_size = xlz->compress(m_info.in_buf, m_info.out_buf, m_info.input_size, cu, m_info.level,
-                                               m_info.strategy, m_info.window_bits);
-            if (xlz->error_code()) {
-#if (VERBOSE_LEVEL >= 2)
-                std::cout << "Retrying .... " << std::endl;
-#endif
-                cu++;
-                cu = cu % C_COMPUTE_UNIT;
-                retry_flag = true;
-                sObj->releaseZlibObj(strm);
-            } else {
-                retry_flag = false;
-            }
-        }
-    } while (retry_flag);
-#else
-    // Pick kernel name
-    // xilDecompressFull
-    std::string kernel_name = "xilLz77Compress";
-
-    // Get XRM CU instance ID
-    std::string cu_id = sObj->getXrmCuInstance(kernel_name);
-
-    // Get ZLIB instance
-    xlz = sObj->getZlibInstance(strm, m_info.u50_xclbin);
-
-    auto lz77_iterator = sObj->lz77KernelMap.find(cu_id);
-    int cu = 0;
-    if (lz77_iterator != sObj->lz77KernelMap.end()) {
-        cu = lz77_iterator->second;
-    }
-
-    // Call to decompress API
-    m_info.output_size = xlz->compress(m_info.in_buf, m_info.out_buf, m_info.input_size, cu, m_info.level,
-                                       m_info.strategy, m_info.window_bits);
-#endif
-
-#if (VERBOSE_LEVEL >= 1)
-    openlog("XILINX_COMPRESS2", LOG_PID, LOG_USER);
-    syslog(LOG_INFO, "strm_ptr %d Input Size %d, Compress Size %d \n", strm, m_info.input_size, m_info.output_size);
-    closelog();
-#endif
-
-    return m_info.output_size;
+    return this->xilinxHwDeflate(strm, val);
 }
 
 // Call to HW DeCompress
@@ -544,7 +504,7 @@ uint64_t xzlib::xilinxHwDecompress(z_streamp strm) {
     std::uniform_int_distribution<> range(0, (D_COMPUTE_UNIT - 1));
     cu_id = range(rand_hw);
     do {
-        xlz = sObj->getZlibInstance(strm, m_info.u50_xclbin, XILINX_INFLATE);
+        xlz = singleton::getInstance()->getZlibInstance(this, strm, m_info.u50_xclbin, XILINX_INFLATE);
         int err_code = xlz->error_code();
         if (err_code && (err_code != c_clOutOfHostMemory)) {
 #if (VERBOSE_LEVEL >= 2)
@@ -554,7 +514,8 @@ uint64_t xzlib::xilinxHwDecompress(z_streamp strm) {
         }
 
         // Call to decompress API
-        m_info.output_size = xlz->decompress(m_info.in_buf, m_info.out_buf, m_info.input_size, cu_id);
+        m_info.output_size =
+            xlz->decompress(m_info.in_buf, m_info.out_buf, m_info.input_size, m_info.output_size, cu_id);
         if (m_info.output_size == 0) {
 #if (VERBOSE_LEVEL >= 2)
             std::cout << "Failed to create device buffer, retrying ... " << std::endl;
@@ -562,7 +523,7 @@ uint64_t xzlib::xilinxHwDecompress(z_streamp strm) {
             cu_id++;
             cu_id = cu_id % D_COMPUTE_UNIT;
             retry_flag = true;
-            sObj->releaseZlibObj(strm);
+            singleton::getInstance()->releaseZlibObj(strm);
         } else {
             retry_flag = false;
         }
@@ -573,16 +534,21 @@ uint64_t xzlib::xilinxHwDecompress(z_streamp strm) {
     std::string kernel_name = "xilDecompressFull";
 
     // Get XRM CU instance ID
-    std::string cu_id = sObj->getXrmCuInstance(kernel_name);
+    singleton::getInstance()->getXrmCuInstance(this, kernel_name);
 
-    xlz = sObj->getZlibInstance(strm, m_info.u50_xclbin, XILINX_INFLATE);
+    xlz = singleton::getInstance()->getZlibInstance(this, strm, m_info.u50_xclbin, XILINX_INFLATE);
 
     int cu = 0;
-    auto iterator = sObj->decKernelMap.find(cu_id);
-    if (iterator != sObj->decKernelMap.end()) cu = iterator->second;
+    auto iterator = singleton::getInstance()->decKernelMap.find(this->instance_name);
+    if (iterator != singleton::getInstance()->decKernelMap.end()) cu = iterator->second;
 
     // Call to decompress API
-    m_info.output_size = xlz->decompress(m_info.in_buf, m_info.out_buf, m_info.input_size, cu);
+    m_info.output_size = xlz->decompress(m_info.in_buf, m_info.out_buf, m_info.input_size, m_info.output_size, cu);
+    if (m_info.output_size == 0) {
+#if (VERBOSE_LEVEL >= 1)
+        std::cout << "Decompression failed " << std::endl;
+#endif
+    }
 
 #endif
 

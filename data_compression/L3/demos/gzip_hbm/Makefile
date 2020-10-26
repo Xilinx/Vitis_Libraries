@@ -57,16 +57,13 @@ TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
 DEVICE ?= xilinx_u50_gen3x16_xdma_201920_3
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-ifeq ($(findstring vck, $(DEVICE)), vck)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 ifeq ($(findstring u200, $(DEVICE)), u200)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 ifeq ($(findstring u250, $(DEVICE)), u250)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+ifeq ($(findstring vck, $(DEVICE)), vck)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
@@ -88,23 +85,21 @@ EMCONFIG_DIR := $(BUILD_DIR)
 # Setting tools
 VPP := v++
 
-include ./config.mk
-
 ############################## Setting up Host Variables ##############################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/src/host.cpp
-HOST_SRCS += $(XFLIB_DIR)/L3/src/zlib.cpp
+HOST_SRCS += $(XFLIB_DIR)/L3/src/zlib_old.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
-HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib/adler32.c
-HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib/crc32.c
- 
+HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/crc32.c
+HOST_SRCS += $(XFLIB_DIR)/common/thirdParty/zlib-1.2.7/adler32.c
 
-CXXFLAGS += -DC_COMPUTE_UNIT=2 -DH_COMPUTE_UNIT=2 -DD_COMPUTE_UNIT=9 -DPARALLEL_BLOCK=8  -DOVERLAP_HOST_DEVICE
+
+CXXFLAGS += -DC_COMPUTE_UNIT=6 -DD_COMPUTE_UNIT=8 -DPARALLEL_BLOCK=4 -DUSE_SINGLE_KERNEL_ZLIBC -DENABLE_HW_CHECKSUM
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
-CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/zlib
+
 
 
 CXXFLAGS += -I$(XFLIB_DIR)/common/libs/xcl2
@@ -114,15 +109,14 @@ CXXFLAGS += -I$(XFLIB_DIR)/common/thirdParty/xxhash
 
 # Host compiler global settings
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing 
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
 
 
 EXE_NAME := xgzip
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -t $(CUR_DIR)/sample.txt  
-
+HOST_ARGS := -sx $(BUILD_DIR)/compress_decompress.xclbin -t $(CUR_DIR)/sample.txt
 
 ifneq ($(HOST_ARCH), x86)
 	LDFLAGS += --sysroot=$(SYSROOT)
@@ -137,9 +131,10 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src/
+VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
 VPP_FLAGS += --config $(CUR_DIR)/advanced.ini
-VPP_FLAGS += -DPARALLEL_BLOCK=8 -DMULTIPLE_BYTES=8  
+VPP_FLAGS += -DPARALLEL_BLOCK=4 -DMULTIPLE_BYTES=8 
 
 # Kernel linker flags
 LDCLFLAGS_compress_decompress += --kernel_frequency 250 --config $(CUR_DIR)/opts.ini
@@ -148,8 +143,8 @@ LDCLFLAGS_compress_decompress+= --config auto_compress_decompress.ini
 
 ############################## Declaring Binary Containers ##############################
 BINARY_CONTAINERS += $(BUILD_DIR)/compress_decompress.xclbin
-BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilLz77Compress.xo
-BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilHuffmanKernel.xo
+BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilZlibCompressFull.xo
+BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilChecksum32.xo
 BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilZlibDmReader.xo
 BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilZlibDmWriter.xo
 BINARY_CONTAINER_compress_decompress_OBJS += $(TEMP_DIR)/xilDecompressFull.xo
@@ -170,14 +165,14 @@ xclbin: check_vpp | $(BINARY_CONTAINERS)
 build: xclbin
 
 ############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-$(TEMP_DIR)/xilLz77Compress.xo: $(XFLIB_DIR)/L2/src/zlib_lz77_compress_mm.cpp
-	$(ECHO) "Compiling Kernel: xilLz77Compress"
+$(TEMP_DIR)/xilZlibCompressFull.xo: $(XFLIB_DIR)/L2/src/zlib_compress_multi_engine_mm.cpp
+	$(ECHO) "Compiling Kernel: xilZlibCompressFull"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(xilLz77Compress_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilLz77Compress -I'$(<D)' -o'$@' '$<'
-$(TEMP_DIR)/xilHuffmanKernel.xo: $(XFLIB_DIR)/L2/src/zlib_huffman_enc_mm.cpp
-	$(ECHO) "Compiling Kernel: xilHuffmanKernel"
+	$(VPP) $(xilZlibCompressFull_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilZlibCompressFull -I'$(<D)' -o'$@' '$<'
+$(TEMP_DIR)/xilChecksum32.xo: $(XFLIB_DIR)/L2/src/checksum_mm.cpp
+	$(ECHO) "Compiling Kernel: xilChecksum32"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(xilHuffmanKernel_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilHuffmanKernel -I'$(<D)' -o'$@' '$<'
+	$(VPP) $(xilChecksum32_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k xilChecksum32 -I'$(<D)' -o'$@' '$<'
 $(TEMP_DIR)/xilZlibDmReader.xo: $(XFLIB_DIR)/L2/tests/src/zlib_dm_multibyte_rd.cpp
 	$(ECHO) "Compiling Kernel: xilZlibDmReader"
 	mkdir -p $(TEMP_DIR)
@@ -205,16 +200,14 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(XPLATFORM) --od $(EMCONFIG_DIR)
 
 ############################## Setting Essential Checks and Running Rules ##############################
-RUN_ENV = export XILINX_LIBZ_XCLBIN=$(BINARY_CONTAINERS)
-run: all 
-	$(RUN_ENV);\
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress_decompress.xclbin
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BINARY_CONTAINERS)
 else
 	$(EXE_FILE) $(HOST_ARGS)
-	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BUILD_DIR)/compress_decompress.xclbin
+	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(BINARY_CONTAINERS)
 endif
 
 ############################## Cleaning Rules ##############################

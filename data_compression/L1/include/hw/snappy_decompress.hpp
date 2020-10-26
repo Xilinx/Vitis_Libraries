@@ -29,146 +29,22 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "lz_decompress.hpp"
 
 namespace xf {
 namespace compression {
+
+template <typename T>
+T reg(T d) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS INTERFACE ap_ctrl_none port = return
+#pragma HLS INLINE off
+    return d;
+}
 
 typedef struct BlockInfo {
     ap_uint<17> compressSize;
     bool storedBlock;
 } dt_blockInfo;
-
-template <int PARALLEL_BYTES, class SIZE_DT = ap_uint<17> >
-static void snappyHeaderProcessing(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                                   hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
-                                   hls::stream<dt_blockInfo>& blockInfoStream,
-                                   const uint32_t inputSize) {
-    // Snappy Header states
-    enum snappyDecompressHeaderStates { READ_COMP_LEN, WRITE_DATA };
-    enum snappyDecompressHeaderStates nextState = READ_COMP_LEN;
-
-    const int c_parallelBit = PARALLEL_BYTES * 8;
-    ap_uint<8 * c_parallelBit> inputWindow;
-    ap_uint<c_parallelBit> outStreamValue = 0;
-
-    uint32_t readBytes = 0, processedBytes = 0;
-    SIZE_DT origCompLen = 0, compLen = 0;
-    uint8_t inputIdx = 0;
-    bool outFlag = false;
-
-    // process first 10 bytes
-    ap_uint<c_parallelBit> temp1 = inStream.read();
-    readBytes += PARALLEL_BYTES;
-    processedBytes += PARALLEL_BYTES;
-
-    if (PARALLEL_BYTES < 8) {
-        temp1 = inStream.read();
-        readBytes += PARALLEL_BYTES;
-        processedBytes += PARALLEL_BYTES;
-    }
-
-    for (uint8_t i = 0; i < 8; i++) {
-#pragma HLS PIPELINE II = 1
-        inputWindow.range((i + 1) * c_parallelBit - 1, i * c_parallelBit) = inStream.read();
-        readBytes += PARALLEL_BYTES;
-    }
-
-    inputIdx += 2;
-    dt_blockInfo blockInfo;
-    uint8_t incrInputIdx = 0;
-
-    while ((processedBytes + inputIdx) < inputSize) {
-        if (inputIdx >= PARALLEL_BYTES) {
-            inputWindow >>= c_parallelBit;
-            inputIdx = inputIdx - PARALLEL_BYTES;
-            processedBytes += PARALLEL_BYTES;
-            if (readBytes < inputSize) {
-                ap_uint<c_parallelBit> input = inStream.read();
-                inputWindow.range(8 * c_parallelBit - 1, 7 * c_parallelBit) = input;
-                readBytes += PARALLEL_BYTES;
-            }
-        }
-
-        SIZE_DT chunkSize = 0;
-
-        ap_uint<32> inValue = inputWindow >> (inputIdx * 8);
-        SIZE_DT temp = inValue.range(31, 24);
-        temp <<= 16;
-        chunkSize |= temp;
-        temp = 0;
-        temp = inValue.range(23, 16);
-        temp <<= 8;
-        chunkSize |= temp;
-        temp = 0;
-        chunkSize |= inValue.range(15, 8);
-
-        origCompLen = chunkSize - 4;
-        compLen = origCompLen;
-
-        // 4 bytes processed and remaining 4 bytes skipped
-        incrInputIdx = 8;
-
-        uint8_t chunkIdx = inValue.range(7, 0);
-
-        if (chunkIdx == 0x01) {
-            blockInfo.storedBlock = 1;
-        } else {
-            blockInfo.storedBlock = 0;
-            uint8_t blkSizeProcessedBytes = 0;
-            ap_uint<16> value = inputWindow >> ((inputIdx + incrInputIdx) * 8);
-
-            bool c0 = ((value.range(7, 7)) == 1);
-            bool c1 = ((value.range(15, 15)) == 1);
-            if (c0 & c1) {
-                incrInputIdx = 11;
-                blkSizeProcessedBytes = 3;
-            } else if (c0) {
-                incrInputIdx = 10;
-                blkSizeProcessedBytes = 2;
-            } else {
-                incrInputIdx = 9;
-                blkSizeProcessedBytes = 1;
-            }
-            origCompLen = origCompLen - blkSizeProcessedBytes;
-            compLen = origCompLen;
-        }
-
-        inputIdx += incrInputIdx;
-        blockInfo.compressSize = origCompLen;
-        // write blockInfo to stream
-        blockInfoStream << blockInfo;
-
-        SIZE_DT len = compLen;
-        for (uint32_t blockData = 0; blockData < compLen; blockData += PARALLEL_BYTES) {
-#pragma HLS PIPELINE II = 1
-            if (inputIdx >= PARALLEL_BYTES) {
-                inputWindow >>= c_parallelBit;
-                inputIdx = inputIdx - PARALLEL_BYTES;
-                processedBytes += PARALLEL_BYTES;
-                if (readBytes < inputSize) {
-                    ap_uint<c_parallelBit> input = inStream.read();
-                    inputWindow.range(8 * c_parallelBit - 1, 7 * c_parallelBit) = input;
-                    readBytes += PARALLEL_BYTES;
-                }
-            }
-
-            outStreamValue = inputWindow >> (inputIdx * 8);
-            outStream << outStreamValue;
-
-            if (len >= PARALLEL_BYTES) {
-                inputIdx += PARALLEL_BYTES;
-                len -= PARALLEL_BYTES;
-            } else {
-                inputIdx += len;
-                len = 0;
-            }
-        }
-    }
-    blockInfo.compressSize = 0;
-    // writing 0 to indicate end of data
-    blockInfoStream << blockInfo;
-}
 
 /**
  * @brief This module decodes the compressed data based on the snappy decompression format
@@ -428,84 +304,6 @@ static void snappyMultiByteDecompress(hls::stream<ap_uint<PARALLEL_BYTES * 8> >&
     litlenStream << 0;
     matchlenStream << 0;
     offsetStream << 0;
-}
-
-template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = ap_uint<17> >
-void snappyDecompressEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                            hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
-                            hls::stream<bool>& outStreamEoS,
-                            hls::stream<uint32_t>& outSizeStream,
-                            const uint32_t _input_size) {
-    typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
-    typedef ap_uint<16> offset_dt;
-
-    uint32_t input_size1 = _input_size;
-    hls::stream<uintV_t> headerStream("headerStream");
-    hls::stream<SIZE_DT> litlenStream("litlenStream");
-    hls::stream<uintV_t> litStream("litStream");
-    hls::stream<offset_dt> offsetStream("offsetStream");
-    hls::stream<SIZE_DT> matchLenStream("matchLenStream");
-    hls::stream<dt_blockInfo> blockInfoStream("blockInfoStream");
-#pragma HLS STREAM variable = headerStream depth = 32
-#pragma HLS STREAM variable = blockInfoStream depth = 32
-#pragma HLS STREAM variable = litlenStream depth = 32
-#pragma HLS STREAM variable = litStream depth = 32
-#pragma HLS STREAM variable = offsetStream depth = 32
-#pragma HLS STREAM variable = matchLenStream depth = 32
-
-#pragma HLS BIND_STORAGE variable = headerStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = blockInfoStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = litlenStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = matchLenStream type = FIFO impl = SRL
-
-#pragma HLS dataflow
-    snappyHeaderProcessing<PARALLEL_BYTES, SIZE_DT>(inStream, headerStream, blockInfoStream, input_size1);
-    snappyMultiByteDecompress<PARALLEL_BYTES, SIZE_DT>(headerStream, litlenStream, litStream, offsetStream,
-                                                       matchLenStream, blockInfoStream);
-    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, SIZE_DT>(litlenStream, litStream, offsetStream, matchLenStream,
-                                                              outStream, outStreamEoS, outSizeStream);
-}
-
-template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = ap_uint<17> >
-void snappyDecompressCoreEngine(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& inStream,
-                                hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
-                                hls::stream<bool>& outStreamEoS,
-                                hls::stream<uint32_t>& outSizeStream,
-                                hls::stream<uint32_t>& blockSizeStream) {
-    typedef ap_uint<PARALLEL_BYTES * 8> uintV_t;
-    typedef ap_uint<16> offset_dt;
-
-    hls::stream<SIZE_DT> litlenStream("litlenStream");
-    hls::stream<SIZE_DT> matchLenStream("matchLenStream");
-    hls::stream<offset_dt> offsetStream("offsetStream");
-    hls::stream<uintV_t> litStream("litStream");
-    hls::stream<dt_blockInfo> blockInfoStream("blockInfoStream");
-#pragma HLS STREAM variable = litlenStream depth = 32
-#pragma HLS STREAM variable = offsetStream depth = 32
-#pragma HLS STREAM variable = matchLenStream depth = 32
-#pragma HLS STREAM variable = litStream depth = 32
-#pragma HLS STREAM variable = blockInfoStream depth = 32
-
-#pragma HLS BIND_STORAGE variable = litlenStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = matchLenStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = blockInfoStream type = FIFO impl = SRL
-
-    dt_blockInfo blockInfo;
-    for (int i = 0; i < 2; i++) {
-        blockInfo.compressSize = blockSizeStream.read();
-        blockInfo.storedBlock = 0;
-
-        blockInfoStream << blockInfo;
-    }
-#pragma HLS dataflow
-    snappyMultiByteDecompress<PARALLEL_BYTES, SIZE_DT>(inStream, litlenStream, litStream, offsetStream, matchLenStream,
-                                                       blockInfoStream);
-    lzMultiByteDecoder<PARALLEL_BYTES, HISTORY_SIZE, SIZE_DT>(litlenStream, litStream, offsetStream, matchLenStream,
-                                                              outStream, outStreamEoS, outSizeStream);
 }
 
 } // namespace compression

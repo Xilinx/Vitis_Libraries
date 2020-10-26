@@ -37,13 +37,17 @@ Application Usage
 Deployment
 ----------
 
-**#1** ``source setup.csh <absolute path to xclbin>`` --> Setup of XRT, XRM, Environment Variables, XRM Daemon Start done
+**#1** ``source ./scripts/setup.csh <absolute path to xclbin>`` --> Setup of XRT, XRM, Environment Variables, XRM Daemon Start done
 
-**#2**  ``./xrmxclbin.sh <number of devices>`` --> XRM loads XCLBIN to devices as per user input
+**#2**  ``./scripts/xrmxclbin.sh <number of devices>`` --> XRM loads XCLBIN to devices as per user input
  
 **#3** Build libz.so (Shared Object file) - ``make lib ENABLE_XRM=yes`` --> Current directory contains libz.so.1.2.7
 
-**#4** Build xzlib (Host Executable) - ``make host ENABLE_XRM=yes`` --> ./build directory contains ``xzlib`` executable
+**#4.a** Build xzlib (Host Executable for Hadoop (Compress-FPGA, Decompress-CPU) - ``make host ENABLE_XRM=yes HADOOP=yes`` --> ./build directory contains ``xzlib`` executable
+
+**#4.b** Build xzlib (Host Executable (Compress/Decompress - FPGA)) - ``make host ENABLE_XRM=yes`` --> ./build directory contains ``xzlib`` executable
+
+Note: By default host executable is built for both compress/decompress on FPGA.
 
 References
 ----------
