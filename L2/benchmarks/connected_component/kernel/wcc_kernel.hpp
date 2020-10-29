@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,18 @@
 #include <ap_int.h>
 #include <hls_stream.h>
 
+#ifdef HLS_TEST
+// Vertex number
+#define V 80
+// Edge number
+#define E 80
+#else
 // Vertex number
 #define V 80000000
 // Edge number
 #define E 80000000
+#endif
+
 #define N 1
 #define K 16
 #define W 32

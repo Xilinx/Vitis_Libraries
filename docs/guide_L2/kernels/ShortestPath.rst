@@ -83,15 +83,15 @@ The hardware resource utilizations are listed in the following table.
 
 .. image:: /images/ssspResource.png
    :alt: Resource utilization of SingleSourceShortestPath
-   :width: 38%
+   :width: 70%
    :align: center
 
 The performance is shown below.
 
 .. image:: /images/ssspPerformance.png
    :alt: Performance of SingleSourceShortestPath
-   :width: 100%
+   :width: 90%
    :align: center
 
-Note 1: Spark running on platform with Intel(R) Xeon(R) CPU E5-2690 v4 @2.600GHz, 56 threads(2 Sockets, 14 Cores each socket, 2 threads each core).
+Note 1: Tigergraph running on platform with Intel(R) Xeon(R) CPU E5-2640 v3 @2.60GHz.
 

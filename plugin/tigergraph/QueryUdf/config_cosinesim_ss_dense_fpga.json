@@ -1,0 +1,8 @@
+
+{
+    "operationName" : "similarityDense",
+    "kernelName" : "denseSimilarityKernel",
+    "requestLoad" : 100,
+    "xclbinPath" : "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/xclbin/denseSimilarityKernel.xclbin",
+    "deviceNeeded" : 1
+}

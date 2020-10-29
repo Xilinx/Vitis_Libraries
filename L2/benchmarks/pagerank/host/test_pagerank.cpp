@@ -37,8 +37,8 @@
 
 //#define BANCKMARK
 
-typedef double DT;
-// typedef float DT;
+// typedef double DT;
+typedef float DT;
 typedef ap_uint<512> buffType;
 
 #ifndef __SYNTHESIS__
@@ -159,8 +159,8 @@ int main(int argc, const char* argv[]) {
     }
 #ifndef BANCKMARK
     filename = dataSetDir + files + ".txt";
-    filename2_1 = dataSetDir + files + "csr_offsets.txt";
-    filename2_2 = dataSetDir + files + "csr_columns.txt";
+    filename2_1 = dataSetDir + files + "csc_offsets.txt";
+    filename2_2 = dataSetDir + files + "csc_columns.txt";
 #else
     filename = dataSetDir + files + ".mtx";
     filename2_1 = dataSetDir + files + "_csc_r.mtx";

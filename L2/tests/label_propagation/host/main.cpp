@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,14 +194,15 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[8];
-    mext_o[0] = {XCL_MEM_DDR_BANK0, offsetsCSR, 0};
-    mext_o[1] = {XCL_MEM_DDR_BANK0, columnsCSR, 0};
-    mext_o[2] = {XCL_MEM_DDR_BANK0, offsetsCSC, 0};
-    mext_o[3] = {XCL_MEM_DDR_BANK0, rowsCSC, 0};
-    mext_o[4] = {XCL_MEM_DDR_BANK0, bufPing, 0};
-    mext_o[5] = {XCL_MEM_DDR_BANK0, bufPong, 0};
-    mext_o[6] = {XCL_MEM_DDR_BANK0, labelPing, 0};
-    mext_o[7] = {XCL_MEM_DDR_BANK0, labelPong, 0};
+
+    mext_o[0] = {3, offsetsCSR, LPKernel()};
+    mext_o[1] = {4, columnsCSR, LPKernel()};
+    mext_o[2] = {5, offsetsCSC, LPKernel()};
+    mext_o[3] = {6, rowsCSC, LPKernel()};
+    mext_o[4] = {8, bufPing, LPKernel()};
+    mext_o[5] = {9, bufPong, LPKernel()};
+    mext_o[6] = {10, labelPing, LPKernel()};
+    mext_o[7] = {11, labelPong, LPKernel()};
 
     // create device buffer and map dev buf to host buf
     cl::Buffer offsetsCSR_buf, columnsCSR_buf, offsetsCSC_buf, rowsCSC_buf, bufPing_buf, bufPong_buf, labelPing_buf,
@@ -243,6 +244,7 @@ int main(int argc, const char* argv[]) {
 
     // launch kernel and calculate kernel execution time
     std::cout << "kernel start------" << std::endl;
+    std::cout << "vertexNum=" << vertexNum << "   edgeNum=" << edgeNum << std::endl;
     gettimeofday(&start_time, 0);
     int j = 0;
     LPKernel.setArg(j++, vertexNum);

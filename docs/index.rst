@@ -59,6 +59,17 @@ Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
    release.rst
 
 .. toctree::
+   :caption: L1 User Guide
+   :maxdepth: 3
+
+   guide_L1/api.rst
+
+.. toctree::
+   :maxdepth: 2
+
+   guide_L1/internals.rst
+
+.. toctree::
    :caption: L2 User Guide
    :maxdepth: 3
 
@@ -68,6 +79,24 @@ Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
    :maxdepth: 2
 
    guide_L2/internals.rst
+
+.. toctree::
+   :caption: L3 User Guide
+   :maxdepth: 3
+
+   guide_L3/utilization_L3.rst
+
+.. toctree::
+   :maxdepth: 2
+
+   guide_L3/api.rst
+
+.. toctree::
+   :caption: Plugin User Guide
+   :maxdepth: 3
+
+   plugin/tigergraph_integration.rst
+
 
 Indices and tables
 ------------------
