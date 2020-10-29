@@ -947,10 +947,6 @@ void update_pld_elem(
 
             o_max_key_strm.write(max_key);
             o_max_end_strm.write(false);
-#ifndef __SYNTHESIS__
-            std::cout << "key=" << std::dec << i_key(_WPay - 1, 0) << ",max_count=" << max_count
-                      << ",max_key=" << max_key << ",rng=" << i_rng << ",max_rng=" << max_rng << std::endl;
-#endif
         } else if (new_col_agg[i][0] == max_count) {
             if (i_rng > max_rng) {
                 max_count = new_col_agg[i][0];
@@ -959,10 +955,6 @@ void update_pld_elem(
 
                 o_max_key_strm.write(max_key);
                 o_max_end_strm.write(false);
-#ifndef __SYNTHESIS__
-                std::cout << "key=" << std::dec << i_key(_WPay - 1, 0) << ",max_count=" << max_count
-                          << ",max_key=" << max_key << ",rng=" << i_rng << ",max_rng=" << max_rng << std::endl;
-#endif
             }
         }
     }

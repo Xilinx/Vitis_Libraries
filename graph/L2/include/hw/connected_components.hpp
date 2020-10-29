@@ -675,7 +675,9 @@ void forwardBFS(const int vertexNum,
                 ap_uint<512>* result512,
                 ap_uint<32>* result32) {
 #pragma HLS inline off
-    int idxoffset_s[2] = {-1, -1};
+    int idxoffset_s[2];
+    idxoffset_s[0] = -1;
+    idxoffset_s[1] = -1;
 #pragma HLS ARRAY_PARTITION variable = idxoffset_s complete dim = 1
     ap_uint<512> offset_reg[2];
 #pragma HLS ARRAY_PARTITION variable = offset_reg complete dim = 1
