@@ -26,6 +26,8 @@ if {![info exists CLKP]} {
 open_project -reset $PROJ
 
 add_files "checksum32_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -I${XF_PROJ_ROOT}/common/thirdParty/zlib"
+add_files "${XF_PROJ_ROOT}/common/thirdParty/zlib-1.2.7/adler32.c" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -I${XF_PROJ_ROOT}/common/thirdParty/zlib"
+add_files "${XF_PROJ_ROOT}/common/thirdParty/zlib-1.2.7/crc32.c" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -I${XF_PROJ_ROOT}/common/thirdParty/zlib"
 add_files -tb "checksum32_test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -I${XF_PROJ_ROOT}/common/thirdParty/zlib"
 set_top hls_checksum32MM
 

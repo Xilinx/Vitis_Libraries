@@ -22,6 +22,13 @@ extern unsigned long adler32(unsigned long crc, const unsigned char* buf, uint32
 
 using namespace xf::compression;
 
+void xf::compression::event_cb(cl_event event, cl_int cmd_status, void* data) {
+    // callBackMutex.lock();
+    assert(data != NULL);
+    ((xf::compression::buffers*)(data))->finish = true;
+    // callBackMutex.unlock();
+}
+
 uint64_t get_file_size(std::ifstream& file) {
     file.seekg(0, file.end);
     uint64_t file_size = file.tellg();
@@ -56,7 +63,11 @@ void xfZlib::generate_checksum(uint8_t* in, size_t input_size) {
 }
 
 uint32_t xfZlib::get_checksum(void) {
+#ifdef ENABLE_SW_CHECKSUM
     return m_future_checksum.get();
+#elif ENABLE_HW_CHECKSUM
+    return m_checksum;
+#endif
 }
 
 uint64_t xfZlib::compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu) {
@@ -200,60 +211,13 @@ int xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
 
     // Create Command Queue
     // Compress Command Queue & Kernel Setup
+    //    OCL_CHECK(err, m_def_q = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
+    OCL_CHECK(err, m_def_q = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
     if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
-#ifdef USE_SINGLE_KERNEL_ZLIBC
-        for (int i = 0; i < C_COMPUTE_UNIT; i++) {
-            OCL_CHECK(err, m_q[i] = new cl::CommandQueue(
-                               *m_context, m_device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
-                               &err));
-        }
-#else
-        for (int i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
-            OCL_CHECK(err, m_q[i] = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
-        }
-#endif
-
-// Use map data structure to track the
-// Cu instance and CU number combination for
-// xrm generated CU allocation process
-#if USE_SINGLE_KERNEL_ZLIBC
-        for (int i = 0; i < C_COMPUTE_UNIT; i++) {
-            auto cu_id = std::to_string(i + 1);
-            std::string compress_stream_kname = compress_kernel_names[1] + "_" + cu_id;
-            compressKernelMap.insert(std::pair<std::string, int>(compress_stream_kname, i));
-        }
-#else
-#endif
-
         std::string cu_id;
-#ifdef USE_SINGLE_KERNEL_ZLIBC
-        std::string comp_krnl_name = compress_kernel_names[1].c_str();
-#else
-        std::string comp_krnl_name = compress_kernel_names[0].c_str();
-        std::string huffman_krnl_name = huffman_kernel_names[0].c_str();
-#endif
-
 #ifdef ENABLE_HW_CHECKSUM
         std::string checksum_krnl_name = checksum_kernel_names[0].c_str();
-#endif
 
-        // Create Compress Kernels
-        for (uint32_t i = 0; i < C_COMPUTE_UNIT; i++) {
-            cu_id = std::to_string(i + 1);
-            std::string krnl_name_full = comp_krnl_name + ":{" + comp_krnl_name + "_" + cu_id + "}";
-            OCL_CHECK(err, compress_kernel[i] = new cl::Kernel(*m_program, krnl_name_full.c_str(), &err));
-        }
-
-#ifndef USE_SINGLE_KERNEL_ZLIBC
-        // Create Huffman Kernel
-        for (uint32_t i = 0; i < H_COMPUTE_UNIT; i++) {
-            cu_id = std::to_string(i + 1);
-            std::string krnl_name_full = huffman_krnl_name + ":{" + huffman_krnl_name + "_" + cu_id + "}";
-            OCL_CHECK(err, huffman_kernel[i] = new cl::Kernel(*m_program, krnl_name_full.c_str(), &err));
-        }
-#endif
-
-#ifdef ENABLE_HW_CHECKSUM
         // Create Checksum Kernels
         OCL_CHECK(err, checksum_kernel = new cl::Kernel(*m_program, checksum_krnl_name.c_str(), &err));
 #endif
@@ -284,17 +248,6 @@ xfZlib::xfZlib(const std::string& binaryFileName,
                uint8_t profile,
                uint8_t d_type,
                enum design_flow dflow) {
-    for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
-        for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
-            buffer_input[i][j] = nullptr;
-            buffer_lz77_output[i][j] = nullptr;
-            buffer_zlib_output[i][j] = nullptr;
-            buffer_compress_size[i][j] = nullptr;
-            buffer_inblk_size[i][j] = nullptr;
-            buffer_dyn_ltree_freq[i][j] = nullptr;
-            buffer_dyn_dtree_freq[i][j] = nullptr;
-        }
-    }
     // Zlib Compression Binary Name
     m_cdflow = cd_flow;
     m_isProfile = profile;
@@ -302,6 +255,7 @@ xfZlib::xfZlib(const std::string& binaryFileName,
     m_max_cr = max_cr;
     m_zlibFlow = dflow;
     m_kidx = d_type;
+    m_pending = 0;
     if (m_zlibFlow) m_checksum = 1;
 #if (VERBOSE_LEVEL >= 2)
     std::chrono::duration<double, std::milli> device_API_time_ns_1(0);
@@ -325,34 +279,17 @@ xfZlib::xfZlib(const std::string& binaryFileName,
     std::cout << "OpenCL Setup = " << std::fixed << std::setprecision(2) << device_scan << std::endl;
 #endif
 
-    uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
-    uint32_t block_size_in_bytes = block_size_in_kb * 1024;
-    uint32_t host_buffer_size = HOST_BUFFER_SIZE;
-    uint32_t temp_nblocks = (host_buffer_size - 1) / block_size_in_bytes + 1;
-    host_buffer_size = ((host_buffer_size - 1) / block_size_in_kb + 1) * block_size_in_kb;
-
-    const uint16_t c_ltree_size = 1024;
-    const uint16_t c_dtree_size = 64;
+    m_memoryManager = new xf::compression::memoryManager(8, m_context);
 
     if ((cd_flow == BOTH) || (cd_flow == COMP_ONLY)) {
 #if (VERBOSE_LEVEL >= 2)
         std::chrono::duration<double, std::milli> cons_API_time_ns_1(0);
         auto cons_API_start = std::chrono::high_resolution_clock::now();
 #endif
+
 #ifdef ENABLE_HW_CHECKSUM
         MEM_ALLOC_CHECK(h_buf_checksum_data.resize(1), 1, "Checksum Data");
 #endif
-        for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
-            for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
-                // Host Buffer Allocation
-                MEM_ALLOC_CHECK(h_buf_in[i][j].resize(HOST_BUFFER_SIZE), HOST_BUFFER_SIZE, "Input Host Buffer");
-                MEM_ALLOC_CHECK(h_buf_zlibout[i][j].resize(HOST_BUFFER_SIZE * 2), HOST_BUFFER_SIZE * 2,
-                                "Output Host Buffer");
-                MEM_ALLOC_CHECK(h_blksize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS, "BlockSize Host Buffer");
-                MEM_ALLOC_CHECK(h_compressSize[i][j].resize(MAX_NUMBER_BLOCKS), MAX_NUMBER_BLOCKS,
-                                "CompressSize Host Buffer");
-            }
-        }
 
 #if (VERBOSE_LEVEL >= 2)
         auto cons_API_end = std::chrono::high_resolution_clock::now();
@@ -362,42 +299,11 @@ xfZlib::xfZlib(const std::string& binaryFileName,
         std::cout << "Compress Host Buffer Allocation Time = " << std::fixed << std::setprecision(2) << cons_time
                   << std::endl;
 #endif
-        cl_int err;
 #ifdef ENABLE_HW_CHECKSUM
+        cl_int err;
         OCL_CHECK(err, buffer_checksum_data = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                                              sizeof(uint32_t), h_buf_checksum_data.data(), &err));
 #endif
-        for (int i = 0; i < MAX_CCOMP_UNITS; i++) {
-            for (int j = 0; j < OVERLAP_BUF_COUNT; j++) {
-                // Device Buffer Allocation
-                OCL_CHECK(err, buffer_input[i][j] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                                   host_buffer_size, h_buf_in[i][j].data(), &err));
-
-                OCL_CHECK(err,
-                          buffer_lz77_output[i][j] = new cl::Buffer(
-                              *m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS, host_buffer_size * 4, NULL, &err));
-
-                OCL_CHECK(err, buffer_compress_size[i][j] =
-                                   new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                                                  temp_nblocks * sizeof(uint32_t), h_compressSize[i][j].data(), &err));
-
-                OCL_CHECK(err, buffer_zlib_output[i][j] =
-                                   new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                                  host_buffer_size * 2, h_buf_zlibout[i][j].data(), &err));
-
-                OCL_CHECK(err, buffer_inblk_size[i][j] =
-                                   new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                                  temp_nblocks * sizeof(uint32_t), h_blksize[i][j].data(), &err));
-
-                OCL_CHECK(err, buffer_dyn_ltree_freq[i][j] =
-                                   new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
-                                                  PARALLEL_ENGINES * sizeof(uint32_t) * c_ltree_size, NULL, &err));
-
-                OCL_CHECK(err, buffer_dyn_dtree_freq[i][j] =
-                                   new cl::Buffer(*m_context, CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
-                                                  PARALLEL_ENGINES * sizeof(uint32_t) * c_dtree_size, NULL, &err));
-            }
-        }
     }
 
     if ((cd_flow == BOTH) || (cd_flow == DECOMP_ONLY)) {
@@ -450,38 +356,7 @@ void xfZlib::release() {
     DELETE_OBJ(m_context);
 
     if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
-#ifdef USE_SINGLE_KERNEL_ZLIBC
-        for (uint8_t i = 0; i < C_COMPUTE_UNIT; i++) {
-#else
-        for (uint8_t i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
-#endif
-            DELETE_OBJ(m_q[i]);
-        }
-
-        for (int i = 0; i < C_COMPUTE_UNIT; i++) {
-            DELETE_OBJ(compress_kernel[i]);
-        }
-#ifndef USE_SINGLE_KERNEL_ZLIBC
-        for (int i = 0; i < H_COMPUTE_UNIT; i++) {
-            DELETE_OBJ(huffman_kernel[i]);
-        }
-#endif
-#ifdef ENABLE_HW_CHECKSUM
         DELETE_OBJ(checksum_kernel);
-#endif
-
-        uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
-        for (uint32_t cu = 0; cu < C_COMPUTE_UNIT; cu++) {
-            for (uint32_t flag = 0; flag < overlap_buf_count; flag++) {
-                DELETE_OBJ(buffer_input[cu][flag]);
-                DELETE_OBJ(buffer_lz77_output[cu][flag]);
-                DELETE_OBJ(buffer_zlib_output[cu][flag]);
-                DELETE_OBJ(buffer_compress_size[cu][flag]);
-                DELETE_OBJ(buffer_inblk_size[cu][flag]);
-                DELETE_OBJ(buffer_dyn_ltree_freq[cu][flag]);
-                DELETE_OBJ(buffer_dyn_dtree_freq[cu][flag]);
-            }
-        }
     }
 
     // Decompress release
@@ -494,6 +369,18 @@ void xfZlib::release() {
             DELETE_OBJ(m_q_wr[i]);
             DELETE_OBJ(m_q_wrd[i]);
         }
+    }
+
+    if (m_memoryManager) {
+        delete m_memoryManager;
+    }
+
+    if (m_def_q) {
+        delete m_def_q;
+    }
+
+    if (compress_stream_kernel) {
+        delete compress_stream_kernel;
     }
 }
 
@@ -530,7 +417,7 @@ uint32_t xfZlib::decompress_file(std::string& inFile_name, std::string& outFile_
     // printme("Call to zlib_decompress \n");
     // Call decompress
     auto decompress_API_start = std::chrono::high_resolution_clock::now();
-    debytes = decompress(in.data(), out.data(), input_size, cu);
+    debytes = decompress(in.data(), out.data(), input_size, output_buf_size, cu);
     auto decompress_API_end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::nano>(decompress_API_end - decompress_API_start);
     decompress_API_time_ns_1 = duration;
@@ -604,12 +491,15 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
                     --raw_size;
                 }
                 if (raw_size != 0) {
-                    std::memcpy(out + dcmpSize, outP, raw_size);
+                    if (!(m_derr_code) && (dcmpSize + raw_size < max_outbuf_size)) {
+                        std::memcpy(out + dcmpSize, outP, raw_size);
+                    }
                     dcmpSize += raw_size;
                 }
                 if (raw_size != bufSize) done = true;
 
                 if ((dcmpSize > max_outbuf_size) && (max_outbuf_size != 0)) {
+#if (VERBOSE_LEVEL >= 1)
                     std::cout << "\n" << std::endl;
                     std::cout << "\x1B[35mZIP BOMB: Exceeded output buffer size during "
                                  "decompression \033[0m \n"
@@ -618,7 +508,8 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
                                  "compression ratio (Default: 10) \033[0m \n"
                               << std::endl;
                     std::cout << "\x1B[35mAborting .... \033[0m\n" << std::endl;
-                    exit(1);
+#endif
+                    m_derr_code = true;
                 }
                 if ((kernelReadWait[cbf_idx]).size() > 0)
                     kernelReadWait[cbf_idx].pop_back(); // must always have single element
@@ -641,6 +532,7 @@ void xfZlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize
             ++keq_idx;
         }
     } while (!(done && keq_idx == cpy_cnt));
+
     // wait for data transfer queue to finish
     OCL_CHECK(err, err = m_q_rdd[cu]->finish());
     *decompSize = dcmpSize;
@@ -702,7 +594,7 @@ void xfZlib::_enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, 
     OCL_CHECK(err, err = m_q_wr[cu]->finish());
 }
 
-uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int cu) {
+size_t xfZlib::decompress(uint8_t* in, uint8_t* out, size_t input_size, size_t max_outbuf_size, int cu) {
     cl_int err;
     uint8_t hidx = 0;
     if (in[hidx++] == 0x1F && in[hidx++] == 0x8B) {
@@ -782,7 +674,6 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
     // Streaming based solution
     uint32_t inBufferSize = INPUT_BUFFER_SIZE;
     uint32_t outBufferSize = OUTPUT_BUFFER_SIZE;
-    uint32_t max_outbuf_size = input_size * m_max_cr;
 
     for (int i = 0; i < DOUT_BUFFERCOUNT; i++) {
         ZOCL_CHECK_2(err,
@@ -818,7 +709,7 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
     OCL_CHECK(err, cl::Kernel decompress_kernel(*m_program, decompress_kname.c_str(), &err));
 
     // Set Kernel Args
-    OCL_CHECK(err, err = decompress_kernel.setArg(0, input_size));
+    OCL_CHECK(err, err = decompress_kernel.setArg(0, (uint32_t)input_size));
 
     // start parallel reader kernel enqueue thread
     uint32_t decmpSizeIdx = 0;
@@ -838,525 +729,241 @@ uint32_t xfZlib::decompress(uint8_t* in, uint8_t* out, uint32_t input_size, int 
     decompWriter.join();
 
     release_dec_buffers();
-    return decmpSizeIdx;
+
+    if (m_derr_code) {
+        return 0;
+    } else {
+        return decmpSizeIdx;
+    }
+}
+
+size_t xfZlib::deflate_buffer(
+    uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, std::string cu_id) {
+    cl_int err;
+    bool initialize_checksum = false;
+    bool actionDone = false;
+    if (compress_stream_kernel == NULL) {
+        std::string compress_kname = compress_kernel_names[1];
+#ifdef ENABLE_XRM
+        compress_kname = compress_kname + ":{" + cu_id + "}";
+#endif
+        OCL_CHECK(err, compress_stream_kernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
+        initialize_checksum = true;
+    }
+    bool checksum_type = false;
+
+#ifdef ENABLE_HW_CHECKSUM
+    if (m_zlibFlow) {
+        h_buf_checksum_data.data()[0] = 1;
+        checksum_type = false;
+    } else {
+        h_buf_checksum_data.data()[0] = ~0;
+        checksum_type = true;
+    }
+#endif
+    m_lastData = (last_buffer) ? true : false;
+
+    buffers* lastBuffer = m_memoryManager->getLastBuffer();
+    if (input_size) {
+        auto buffer = m_memoryManager->createBuffer(input_size);
+        if (buffer != NULL) {
+#ifdef ENABLE_SW_CHECKSUM
+            // Trigger CRC calculation
+            generate_checksum(in, input_size);
+#endif
+
+            if (lastBuffer == buffer) lastBuffer = NULL;
+            std::memcpy(buffer->h_buf_in, &in[0], input_size);
+            uint32_t inSize = input_size;
+            uint32_t chkSize = input_size;
+            buffer->store_size = 0;
+
+            uint32_t last_buffer_size = inSize % (BLOCK_SIZE_IN_KB * 1024);
+
+            if ((last_buffer_size != 0) && last_buffer_size < MIN_BLOCK_SIZE) {
+                inSize -= last_buffer_size;
+                buffer->store_size = last_buffer_size;
+            }
+
+            int narg = 0;
+            if (inSize >= MIN_BLOCK_SIZE) {
+                // Set kernel arguments
+                compress_stream_kernel->setArg(narg++, *(buffer->buffer_input));
+                compress_stream_kernel->setArg(narg++, *(buffer->buffer_zlib_output));
+                compress_stream_kernel->setArg(narg++, *(buffer->buffer_compress_size));
+                compress_stream_kernel->setArg(narg++, inSize);
+            }
+
+#ifdef ENABLE_HW_CHECKSUM
+            narg = 0;
+
+            checksum_kernel->setArg(narg++, *(buffer->buffer_input));
+            checksum_kernel->setArg(narg++, *buffer_checksum_data);
+            checksum_kernel->setArg(narg++, chkSize);
+            checksum_kernel->setArg(narg++, checksum_type);
+#endif
+
+            // Migrate memory - Map host to device buffers
+            OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer->buffer_input)}, 0 /* 0 means from host*/,
+                                                                   NULL, &(buffer->wr_event)));
+
+            std::vector<cl::Event> wrEvents = {buffer->wr_event};
+#ifdef ENABLE_HW_CHECKSUM
+            std::vector<cl::Event> wrChkEvents = {buffer->wr_event};
+            if (initialize_checksum) {
+                OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects(
+                                   {*(buffer_checksum_data)}, 0 /* 0 means from host*/, NULL, &(buffer->chk_wr_event)));
+                wrChkEvents.push_back(buffer->chk_wr_event);
+            }
+#endif
+
+            std::vector<cl::Event> cmpEvents;
+            if (inSize >= MIN_BLOCK_SIZE) {
+                // kernel write events update
+                // LZ77 Compress Fire Kernel invocation
+                OCL_CHECK(err, err = m_def_q->enqueueTask(*compress_stream_kernel, &(wrEvents), &(buffer->cmp_event)));
+
+                cmpEvents = {buffer->cmp_event};
+            }
+
+#ifdef ENABLE_HW_CHECKSUM
+            if (lastBuffer != NULL) {
+                wrChkEvents.push_back(lastBuffer->chk_event);
+            }
+            // checksum kernel
+            OCL_CHECK(err, err = m_def_q->enqueueTask(*checksum_kernel, &(wrChkEvents), &(buffer->chk_event)));
+#endif
+
+            if (inSize >= MIN_BLOCK_SIZE) {
+                OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects(
+                                   {*(buffer->buffer_compress_size), *(buffer->buffer_zlib_output)},
+                                   CL_MIGRATE_MEM_OBJECT_HOST, &(cmpEvents), &(buffer->rd_event)));
+            }
+
+            cl_int err;
+            if (inSize >= MIN_BLOCK_SIZE) {
+                OCL_CHECK(err,
+                          err = buffer->rd_event.setCallback(CL_COMPLETE, xf::compression::event_cb, (void*)buffer));
+            } else {
+                buffer->finish = true;
+            }
+
+            input_size = 0;
+            actionDone = true;
+        }
+    }
+
+    if ((m_memoryManager->peekBuffer() != NULL) && m_memoryManager->peekBuffer()->finish) {
+        buffers* buffer;
+        uint32_t compSize = 0;
+        auto size = 0;
+        buffer = m_memoryManager->getBuffer();
+        uint32_t block_size_in_bytes = BLOCK_SIZE_IN_KB * 1024;
+        if (buffer != NULL) {
+            actionDone = true;
+            double accelerated_size = buffer->input_size - buffer->store_size;
+            auto n_blocks = (uint8_t)ceil(accelerated_size / block_size_in_bytes);
+            uint32_t bIdx = 0;
+            for (; bIdx < n_blocks; bIdx++) {
+                compSize = (buffer->h_compressSize)[bIdx];
+                if (compSize > block_size_in_bytes) {
+                    uint32_t block_size = block_size_in_bytes;
+                    uint8_t zeroData = 0x00;
+                    uint8_t len_low = (uint8_t)block_size;
+                    uint8_t len_high = (uint8_t)(block_size >> 8);
+                    uint8_t len_low_n = ~len_low;
+                    uint8_t len_high_n = ~len_high;
+                    out[size++] = zeroData;
+                    out[size++] = len_low;
+                    out[size++] = len_high;
+                    out[size++] = len_low_n;
+                    out[size++] = len_high_n;
+                    std::memcpy(out + size, &buffer->h_buf_in[bIdx * block_size_in_bytes], block_size);
+                    size += block_size;
+                } else {
+                    std::memcpy(out + size, &buffer->h_buf_zlibout[bIdx * block_size_in_bytes], compSize);
+                    size += compSize;
+                }
+            }
+
+            if (buffer->store_size > 0) {
+                uint32_t block_size = buffer->store_size;
+                uint8_t zeroData = 0x00;
+                uint8_t len_low = (uint8_t)block_size;
+                uint8_t len_high = (uint8_t)(block_size >> 8);
+                uint8_t len_low_n = ~len_low;
+                uint8_t len_high_n = ~len_high;
+                out[size++] = zeroData;
+                out[size++] = len_low;
+                out[size++] = len_high;
+                out[size++] = len_low_n;
+                out[size++] = len_high_n;
+                std::memcpy(out + size, &buffer->h_buf_in[bIdx * block_size_in_bytes], block_size);
+                size += block_size;
+            }
+        }
+
+        if (m_lastData && (input_size == 0) && (m_memoryManager->isPending() == false))
+            last_data = true;
+        else
+            last_data = false;
+
+#ifdef ENABLE_HW_CHECKSUM
+        if (last_data) {
+            OCL_CHECK(err,
+                      err = m_def_q->enqueueMigrateMemObjects({*(buffer_checksum_data)}, CL_MIGRATE_MEM_OBJECT_HOST));
+            OCL_CHECK(err, err = m_def_q->finish());
+
+            m_checksum = h_buf_checksum_data.data()[0];
+            if (checksum_type) m_checksum = ~m_checksum;
+        }
+#endif
+        return size;
+    }
+
+    if ((actionDone == false) && (m_memoryManager->isPending() == true)) {
+        // wait for a queue to finish to save CPU cycles
+        auto buffer = m_memoryManager->peekBuffer();
+        if (buffer != NULL) {
+            buffer->rd_event.wait();
+        }
+    }
+
+    if (m_lastData && (input_size == 0) && (m_memoryManager->isPending() == false))
+        last_data = true;
+    else
+        last_data = false;
+    return 0;
 }
 
 // This version of compression does overlapped execution between
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
-size_t xfZlib::compress_buffer(
-    uint8_t* in, uint8_t* out, size_t input_size, bool last_buffer, uint32_t host_buffer_size, int cu) {
-#if (VERBOSE_LEVEL >= 1)
-    std::cout << "CU: " << cu << std::endl;
-#endif
-
-#ifdef ENABLE_SW_CHECKSUM
-    // Trigger CRC calculation
-    generate_checksum(in, input_size);
-#endif
-
-    cl_int err;
-
-#ifdef USE_SINGLE_KERNEL_ZLIBC
+size_t xfZlib::compress_buffer(uint8_t* in, uint8_t* out, size_t input_size, uint32_t host_buffer_size, int cu) {
     // Create kernel
     std::string cu_id = std::to_string((cu + 1));
-    std::string compress_kname = compress_kernel_names[1] + ":{" + compress_kernel_names[1] + "_" + cu_id + "}";
-    OCL_CHECK(err, cl::Kernel compress_stream_kernel(*m_program, compress_kname.c_str(), &err));
+    std::string compress_kname = compress_kernel_names[1] + "_" + cu_id;
 
-#else
-    // Create kernel
-    std::string cu_id = std::to_string((cu + 1));
-    std::string lz77_kname = compress_kernel_names[0] + ":{" + compress_kernel_names[0] + "_" + cu_id + "}";
-    OCL_CHECK(err, cl::Kernel lz77_kernel(*m_program, lz77_kname.c_str(), &err));
-
-    std::string huff_kname = huffman_kernel_names[0] + ":{" + huffman_kernel_names[0] + "_" + cu_id + "}";
-    OCL_CHECK(err, cl::Kernel huff_kernel(*m_program, huff_kname.c_str(), &err));
-
-#endif
-
-#ifdef USE_SINGLE_KERNEL_ZLIBC
-    // Read, Write and Kernel events
-    cl::Event comp_write_events[OVERLAP_BUF_COUNT];
-    cl::Event comp_kernel_events[OVERLAP_BUF_COUNT];
-    cl::Event comp_read_events[OVERLAP_BUF_COUNT];
-
-    // Kernel wait events for writing & compute
-    std::vector<cl::Event> compKernelWriteWait[OVERLAP_BUF_COUNT];
-    std::vector<cl::Event> compKernelComputeWait[OVERLAP_BUF_COUNT];
-#endif
-
-#ifdef ENABLE_HW_CHECKSUM
-    cl::Event cs_write_event;
-    cl::Event cs_kernel_event;
-    cl::Event cs_read_event;
-    std::vector<cl::Event> csKernelWriteWait;
-    std::vector<cl::Event> csKernelComputeWait;
-#endif
-
-    uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
-    uint32_t block_size_in_bytes = block_size_in_kb * 1024;
-    uint32_t overlap_buf_count = OVERLAP_BUF_COUNT;
-
-    // For example: Input file size is 12MB and Host buffer size is 2MB
-    // Then we have 12/2 = 6 chunks exists
-    // Calculate the count of total chunks based on input size
-    // This count is used to overlap the execution between chunks and file
-    // operations
-
-    uint32_t total_chunks = (input_size - 1) / host_buffer_size + 1;
-    if (total_chunks < 2) overlap_buf_count = 1;
-
-    // Find out the size of each chunk spanning entire file
-    // For eaxmple: As mentioned in previous example there are 6 chunks
-    // Code below finds out the size of chunk, in general all the chunks holds
-    // HOST_BUFFER_SIZE except for the last chunk
-    uint32_t sizeOfChunk[total_chunks];
-    uint32_t blocksPerChunk[total_chunks];
-    uint32_t idx = 0;
-    for (uint64_t i = 0; i < input_size; i += host_buffer_size, idx++) {
-        uint32_t chunk_size = host_buffer_size;
-        if (chunk_size + i > input_size) {
-            chunk_size = input_size - i;
+    uint64_t compressed_size = 0;
+    uint64_t in_size = input_size;
+    auto in_ptr = in;
+    while (in_size > 0) {
+        size_t chunk_size = (in_size > host_buffer_size) ? host_buffer_size : in_size;
+        size_t chunk_size1 = chunk_size;
+        in_size -= chunk_size;
+        bool last_buffer = (in_size == 0) ? true : false;
+        bool last_data = false;
+        while (chunk_size > 0 || (last_buffer && !last_data)) {
+            compressed_size +=
+                deflate_buffer(in_ptr, out + compressed_size, chunk_size, last_data, last_buffer, compress_kname);
         }
-        // Update size of each chunk buffer
-        sizeOfChunk[idx] = chunk_size;
-        // Calculate sub blocks of size BLOCK_SIZE_IN_KB for each chunk
-        // 2MB(example)
-        // Figure out blocks per chunk
-        uint32_t nblocks = (chunk_size - 1) / block_size_in_bytes + 1;
-        blocksPerChunk[idx] = nblocks;
+        in_ptr += chunk_size1;
     }
 
-    // Counter which helps in tracking
-    // Output buffer index
-    uint32_t outIdx = 0;
-
-    // Track the lags of respective chunks for left over handling
-    int chunk_flags[total_chunks];
-
-#ifdef USE_SINGLE_KERNEL_ZLIBC
-    // Finished bricks
-    int completed_bricks = 0;
-
-    uint8_t buffIdx = 0;
-    bool checksumDataTransfer = false;
-
-#ifdef ENABLE_HW_CHECKSUM
-    checksumDataTransfer = true;
-    bool checksum_type = false;
-
-    if (m_zlibFlow)
-        checksum_type = false;
-    else
-        checksum_type = true;
-
-    h_buf_checksum_data.data()[0] = 1;
-    // if checksum type call crc32
-    if (checksum_type) h_buf_checksum_data.data()[0] = ~0;
-
-#endif
-
-overlap:
-    for (uint32_t brick = 0, itr = 0; brick < total_chunks; itr++, buffIdx = (itr % OVERLAP_BUF_COUNT)) {
-        chunk_flags[brick] = buffIdx;
-
-        if (itr >= OVERLAP_BUF_COUNT) {
-            // Wait for read events
-            comp_read_events[buffIdx].wait();
-
-            // Completed bricks counter
-            completed_bricks++;
-
-            uint32_t index = 0;
-            uint32_t brick_flag_idx = brick - overlap_buf_count;
-
-            // Copy the data from various blocks in concatinated manner
-            for (uint32_t bIdx = 0; bIdx < blocksPerChunk[brick_flag_idx]; bIdx++) {
-                uint32_t compressed_size = h_compressSize[cu][buffIdx].data()[bIdx];
-                if (compressed_size <= block_size_in_bytes) {
-                    std::memcpy(&out[outIdx], &h_buf_zlibout[cu][buffIdx].data()[bIdx * block_size_in_bytes],
-                                compressed_size);
-                    outIdx += compressed_size;
-                } else {
-                    uint8_t zeroData = 0x00;
-                    uint8_t len_low = (uint8_t)block_size_in_bytes;
-                    uint8_t len_high = (uint8_t)(block_size_in_bytes >> 8);
-                    uint8_t len_low_n = ~len_low;
-                    uint8_t len_high_n = ~len_high;
-                    out[outIdx++] = zeroData;
-                    out[outIdx++] = len_low;
-                    out[outIdx++] = len_high;
-                    out[outIdx++] = len_low_n;
-                    out[outIdx++] = len_high_n;
-                    std::memcpy(&out[outIdx], &h_buf_in[cu][buffIdx].data()[bIdx * block_size_in_bytes],
-                                block_size_in_bytes);
-                    outIdx += block_size_in_bytes;
-                }
-            }
-
-        } // If condition which reads compress output for 0 or 1 location
-
-        std::memcpy(h_buf_in[cu][buffIdx].data(), &in[brick * host_buffer_size], sizeOfChunk[brick]);
-
-        // Set compress kernel arguments
-        int narg = 0;
-
-        compress_stream_kernel.setArg(narg++, *buffer_input[cu][buffIdx]);
-        compress_stream_kernel.setArg(narg++, *buffer_zlib_output[cu][buffIdx]);
-        compress_stream_kernel.setArg(narg++, *buffer_compress_size[cu][buffIdx]);
-        compress_stream_kernel.setArg(narg++, sizeOfChunk[brick]);
-
-#ifdef ENABLE_HW_CHECKSUM
-        narg = 0;
-
-        checksum_kernel->setArg(narg++, *buffer_input[cu][buffIdx]);
-        checksum_kernel->setArg(narg++, *buffer_checksum_data);
-        checksum_kernel->setArg(narg++, sizeOfChunk[brick]);
-        checksum_kernel->setArg(narg++, checksum_type);
-#endif
-        // Migrate memory - Map host to device buffers
-        OCL_CHECK(err, err = m_q[cu]->enqueueMigrateMemObjects({*(buffer_input[cu][buffIdx])}, 0, NULL,
-                                                               &comp_write_events[buffIdx]));
-        csKernelWriteWait.push_back(comp_write_events[buffIdx]);
-        compKernelWriteWait[buffIdx].push_back(comp_write_events[buffIdx]);
-
-// Migrate checksum data
-#ifdef ENABLE_HW_CHECKSUM
-        if (checksumDataTransfer) {
-            OCL_CHECK(err,
-                      err = m_q[cu]->enqueueMigrateMemObjects({*(buffer_checksum_data)}, 0, NULL, &cs_write_event));
-            csKernelWriteWait.push_back(cs_write_event);
-
-            // Checksum Fire Kernel invocation
-            OCL_CHECK(err, err = m_q[cu]->enqueueTask(*checksum_kernel, &csKernelWriteWait, &cs_kernel_event));
-            csKernelWriteWait.push_back(cs_kernel_event);
-            checksumDataTransfer = false;
-        } else {
-            // Checksum Fire Kernel invocation
-            OCL_CHECK(err, err = m_q[cu]->enqueueTask(*checksum_kernel, &csKernelWriteWait, &cs_kernel_event));
-            csKernelWriteWait.push_back(cs_kernel_event);
-        }
-#endif
-
-        // Compress Fire Kernel invocation
-        OCL_CHECK(err, err = m_q[cu]->enqueueTask(compress_stream_kernel, &compKernelWriteWait[buffIdx],
-                                                  &comp_kernel_events[buffIdx]));
-
-        // Update kernel events flag on computation
-        compKernelComputeWait[buffIdx].push_back(comp_kernel_events[buffIdx]);
-
-        // Migrate memory - Map device to host buffers
-        OCL_CHECK(err, err = m_q[cu]->enqueueMigrateMemObjects(
-                           {*(buffer_zlib_output[cu][buffIdx]), *(buffer_compress_size[cu][buffIdx])},
-                           CL_MIGRATE_MEM_OBJECT_HOST, &compKernelComputeWait[buffIdx], &comp_read_events[buffIdx]));
-
-        brick++;
-
-    } // Main overlap loop
-
-    OCL_CHECK(err, err = m_q[cu]->finish());
-
-#ifdef ENABLE_HW_CHECKSUM
-    // read back check sum data
-    // Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = m_q[cu]->enqueueMigrateMemObjects({*(buffer_checksum_data)}, CL_MIGRATE_MEM_OBJECT_HOST));
-    OCL_CHECK(err, err = m_q[cu]->finish());
-
-    m_checksum = h_buf_checksum_data.data()[0];
-    if (checksum_type) m_checksum = ~m_checksum;
-#endif
-
-    uint32_t leftover = total_chunks - completed_bricks;
-    uint32_t stride = 0;
-
-    if ((total_chunks < overlap_buf_count))
-        stride = overlap_buf_count;
-    else
-        stride = total_chunks;
-    // Handle leftover bricks
-    for (uint32_t ovr_itr = 0, brick = stride - overlap_buf_count; ovr_itr < leftover; ovr_itr++, brick++) {
-        uint8_t buffIdx = chunk_flags[brick];
-
-        // Run over each block within brick
-        uint32_t brick_flag_idx = brick;
-
-        // Copy the data from various blocks in concatinated manner
-        for (uint32_t bIdx = 0; bIdx < blocksPerChunk[brick_flag_idx]; bIdx++) {
-            uint32_t compressed_size = h_compressSize[cu][buffIdx].data()[bIdx];
-            if (compressed_size <= block_size_in_bytes) {
-                std::memcpy(&out[outIdx], &h_buf_zlibout[cu][buffIdx].data()[bIdx * block_size_in_bytes],
-                            compressed_size);
-                outIdx += compressed_size;
-            } else {
-                uint8_t zeroData = 0x00;
-                uint8_t len_low = (uint8_t)block_size_in_bytes;
-                uint8_t len_high = (uint8_t)(block_size_in_bytes >> 8);
-                uint8_t len_low_n = ~len_low;
-                uint8_t len_high_n = ~len_high;
-                out[outIdx++] = zeroData;
-                out[outIdx++] = len_low;
-                out[outIdx++] = len_high;
-                out[outIdx++] = len_low_n;
-                out[outIdx++] = len_high_n;
-                std::memcpy(&out[outIdx], &h_buf_in[cu][buffIdx].data()[bIdx * block_size_in_bytes],
-                            block_size_in_bytes);
-                outIdx += block_size_in_bytes;
-            }
-        }
-    }
-#else
-    // Track the lags of respective chunks for left over handling
-    int cu_order[total_chunks];
-
-    // Finished bricks
-    int completed_bricks = 0;
-    uint32_t input_index = 0;
-    uint16_t tail_block_size = 0;
-    bool flag_smallblk = false;
-    int flag = 0;
-    uint32_t lcl_cu = 0;
-
-    uint8_t cunits = (uint8_t)C_COMPUTE_UNIT;
-    uint8_t queue_idx = 0;
-    std::chrono::duration<double, std::milli> compress_API_time_ms_1(0);
-overlap:
-    for (uint32_t brick = 0, itr = 0; brick < total_chunks;
-         /*brick += C_COMPUTE_UNIT,*/ itr++, flag = !flag) {
-        if (cunits > 1)
-            queue_idx = flag * OVERLAP_BUF_COUNT;
-        else
-            queue_idx = flag;
-
-        if (total_chunks > 2)
-            lcl_cu = C_COMPUTE_UNIT;
-        else
-            lcl_cu = 1;
-
-        if (brick + lcl_cu > total_chunks) lcl_cu = total_chunks - brick;
-
-        for (uint32_t cu = 0; cu < lcl_cu; cu++) {
-            chunk_flags[brick + cu] = flag;
-            cu_order[brick + cu] = cu;
-
-            // Wait for read events
-            if (itr >= 2) {
-                // Wait on current flag previous operation to finish
-                OCL_CHECK(err, err = m_q[queue_idx + cu]->finish());
-
-                // Completed bricks counter
-                completed_bricks++;
-
-                uint32_t index = 0;
-                uint32_t brick_flag_idx = brick - (C_COMPUTE_UNIT * overlap_buf_count - cu);
-
-                //////printme("blocksPerChunk %d \n", blocksPerChunk[brick]);
-                // Copy the data from various blocks in concatinated manner
-                for (uint32_t bIdx = 0; bIdx < blocksPerChunk[brick_flag_idx]; bIdx++, index += block_size_in_bytes) {
-                    uint32_t block_size = block_size_in_bytes;
-                    if (index + block_size > sizeOfChunk[brick_flag_idx]) {
-                        block_size = sizeOfChunk[brick_flag_idx] - index;
-                    }
-
-                    uint32_t compressed_size = (h_compressSize[cu][flag].data())[bIdx];
-                    OCL_CHECK(err, err = m_q[queue_idx + cu]->enqueueReadBuffer(
-                                       *(buffer_zlib_output[cu][flag]), CL_TRUE, index,
-                                       compressed_size * sizeof(uint8_t), &out[outIdx]));
-                    outIdx += compressed_size;
-                }
-            } // If condition which reads huffman output for 0 or 1 location
-
-            // Figure out block sizes per brick
-            uint32_t idxblk = 0;
-            for (uint32_t i = 0; i < sizeOfChunk[brick + cu]; i += block_size_in_bytes) {
-                uint32_t block_size = block_size_in_bytes;
-
-                if (i + block_size > sizeOfChunk[brick + cu]) {
-                    block_size = sizeOfChunk[brick + cu] - i;
-                }
-                if (block_size < MIN_BLOCK_SIZE) {
-                    input_index = idxblk * block_size_in_bytes;
-                    flag_smallblk = true;
-                    tail_block_size = block_size;
-                    sizeOfChunk[brick + cu] -= block_size;
-                } else {
-                    //////printme("sizeofChunk %d block_size %d cu %d \n",
-                    /// sizeOfChunk[brick+cu], block_size, cu);
-                    (h_blksize[cu][flag]).data()[idxblk++] = block_size;
-                }
-            }
-            if (sizeOfChunk[brick + cu] != 0) {
-                std::memcpy(h_buf_in[cu][flag].data(), &in[(brick + cu) * host_buffer_size], sizeOfChunk[brick + cu]);
-
-                // Set kernel arguments
-                int narg = 0;
-
-                ZOCL_CHECK_2(err, err = lz77_kernel.setArg(narg++, *(buffer_input[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = lz77_kernel.setArg(narg++, *(buffer_lz77_output[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = lz77_kernel.setArg(narg++, *(buffer_compress_size[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = lz77_kernel.setArg(narg++, *(buffer_inblk_size[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = lz77_kernel.setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = lz77_kernel.setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                OCL_CHECK(err, err = lz77_kernel.setArg(narg++, block_size_in_kb));
-
-                OCL_CHECK(err, err = lz77_kernel.setArg(narg++, sizeOfChunk[brick + cu]));
-
-                narg = 0;
-                ZOCL_CHECK_2(err, err = huff_kernel.setArg(narg++, *(buffer_lz77_output[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = huff_kernel.setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = huff_kernel.setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = huff_kernel.setArg(narg++, *(buffer_zlib_output[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = huff_kernel.setArg(narg++, *(buffer_compress_size[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                ZOCL_CHECK_2(err, err = huff_kernel.setArg(narg++, *(buffer_inblk_size[cu][flag])), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-                if (error_code()) return 0;
-
-                OCL_CHECK(err, err = huff_kernel.setArg(narg++, block_size_in_kb));
-                ZOCL_CHECK_2(err, err = huff_kernel.setArg(narg++, sizeOfChunk[brick + cu]), m_err_code,
-                             c_clOutOfResource, c_clOutOfHostMemory);
-
-                // Migrate memory - Map host to device buffers
-                ZOCL_CHECK_2(err,
-                             err = m_q[queue_idx + cu]->enqueueMigrateMemObjects(
-                                 {*(buffer_input[cu][flag]), *(buffer_inblk_size[cu][flag])}, 0 /* 0 means from host*/),
-                             m_err_code, c_clOutOfHostMemory, c_clOutOfResource);
-
-                // kernel write events update
-                // LZ77 Compress Fire Kernel invocation
-                ZOCL_CHECK_2(err, err = m_q[queue_idx + cu]->enqueueTask(lz77_kernel), m_err_code, c_clOutOfResource,
-                             c_clOutOfHostMemory);
-
-                // Huffman Fire Kernel invocation
-                ZOCL_CHECK_2(err, err = m_q[queue_idx + cu]->enqueueTask(huff_kernel), m_err_code, c_clOutOfHostMemory,
-                             c_clOutOfResource);
-
-                ZOCL_CHECK_2(err, err = m_q[queue_idx + cu]->enqueueMigrateMemObjects(
-                                      {*(buffer_compress_size[cu][flag])}, CL_MIGRATE_MEM_OBJECT_HOST),
-                             m_err_code, c_clOutOfResource, c_clOutOfHostMemory);
-            }
-        } // Internal loop runs on compute units
-
-        if (total_chunks > 2)
-            brick += C_COMPUTE_UNIT;
-        else
-            brick++;
-
-    } // Main overlap loop
-
-    for (uint8_t i = 0; i < C_COMPUTE_UNIT * OVERLAP_BUF_COUNT; i++) {
-        OCL_CHECK(err, err = m_q[i]->flush());
-        OCL_CHECK(err, err = m_q[i]->finish());
-    }
-
-    uint32_t leftover = total_chunks - completed_bricks;
-    uint32_t stride = 0;
-
-    if ((total_chunks < overlap_buf_count * C_COMPUTE_UNIT))
-        stride = overlap_buf_count * C_COMPUTE_UNIT;
-    else
-        stride = total_chunks;
-
-    // Handle leftover bricks
-    for (uint32_t ovr_itr = 0, brick = stride - overlap_buf_count * C_COMPUTE_UNIT; ovr_itr < leftover;
-         ovr_itr += C_COMPUTE_UNIT, brick += C_COMPUTE_UNIT) {
-        lcl_cu = C_COMPUTE_UNIT;
-        if (ovr_itr + lcl_cu > leftover) lcl_cu = leftover - ovr_itr;
-
-        // Handle multiple bricks with multiple CUs
-        for (uint32_t j = 0; j < lcl_cu; j++) {
-            int cu = cu_order[brick + j];
-            int flag = chunk_flags[brick + j];
-
-            // Run over each block within brick
-            uint32_t index = 0;
-            uint32_t brick_flag_idx = brick + j;
-
-            //////printme("blocksPerChunk %d \n", blocksPerChunk[brick]);
-            // Copy the data from various blocks in concatinated manner
-            for (uint32_t bIdx = 0; bIdx < blocksPerChunk[brick_flag_idx]; bIdx++, index += block_size_in_bytes) {
-                uint32_t block_size = block_size_in_bytes;
-                if (index + block_size > sizeOfChunk[brick_flag_idx]) {
-                    block_size = sizeOfChunk[brick_flag_idx] - index;
-                }
-
-                uint32_t compressed_size = (h_compressSize[cu][flag].data())[bIdx];
-                if (compressed_size <= block_size_in_bytes) {
-                    m_q[queue_idx + cu]->enqueueReadBuffer(*(buffer_zlib_output[cu][flag]), CL_TRUE, index,
-                                                           compressed_size * sizeof(uint8_t), &out[outIdx]);
-                    outIdx += compressed_size;
-                } else {
-                    uint8_t zeroData = 0x00;
-                    uint8_t len_low = (uint8_t)block_size_in_bytes;
-                    uint8_t len_high = (uint8_t)(block_size_in_bytes >> 8);
-                    uint8_t len_low_n = ~len_low;
-                    uint8_t len_high_n = ~len_high;
-                    out[outIdx++] = zeroData;
-                    out[outIdx++] = len_low;
-                    out[outIdx++] = len_high;
-                    out[outIdx++] = len_low_n;
-                    out[outIdx++] = len_high_n;
-                    std::memcpy(&out[outIdx], &h_buf_in[cu][flag].data()[bIdx * block_size_in_bytes],
-                                block_size_in_bytes);
-                    outIdx += block_size_in_bytes;
-                }
-            }
-        }
-    }
-    if (flag_smallblk) {
-        uint8_t len_low = (uint8_t)tail_block_size;
-        uint8_t len_high = (uint8_t)(tail_block_size >> 8);
-        out[outIdx++] = 0x00;
-        out[outIdx++] = len_low;
-        out[outIdx++] = len_high;
-        out[outIdx++] = ~len_low;
-        out[outIdx++] = ~len_high;
-        for (int i = 0; i < tail_block_size; i++) {
-            out[outIdx++] = in[input_index + i];
-        }
-    }
-#endif
-
-    // Add the last block information
-    if (last_buffer) {
-        long int last_block = 0xffff000001;
-        // zlib special block based on Z_SYNC_FLUSH
-        std::memcpy(&out[outIdx], &last_block, 5);
-        outIdx += 5;
-    }
-
-    return outIdx;
+    long int last_block = 0xffff000001;
+    std::memcpy(&(out[compressed_size]), &last_block, 5);
+    compressed_size += 5;
+    return compressed_size;
 }
 
 // Add zlib header
@@ -1499,10 +1106,174 @@ size_t xfZlib::compress(
     total_size += add_header(out, level, strategy, window_bits);
 
     // Call compress buffer
-    total_size += compress_buffer(in, &out[total_size], input_size, true, host_buffer_size, cu);
+    total_size += compress_buffer(in, &out[total_size], input_size, host_buffer_size, cu);
 
     // Add footer
     total_size = add_footer(out, total_size);
 
     return total_size;
 } // Overlap end
+
+memoryManager::memoryManager(uint8_t max_buffer, cl::Context* context) {
+    maxBufCount = max_buffer;
+    mContext = context;
+    bufCount = 0;
+}
+
+memoryManager::~memoryManager() {
+    release();
+}
+
+buffers* memoryManager::createBuffer(size_t size) {
+    if (!(this->freeBuffers.empty())) {
+        if (this->freeBuffers.front()->allocated_size >= size) {
+            auto buffer = this->freeBuffers.front();
+            this->busyBuffers.push(buffer);
+            this->freeBuffers.pop();
+            lastBuffer = buffer;
+            buffer->input_size = size;
+            buffer->finish = false;
+            return buffer;
+        } else {
+            auto buffer = this->freeBuffers.front();
+            zlib_aligned_allocator<uint8_t> alocator;
+            zlib_aligned_allocator<uint32_t> alocator_1;
+
+            alocator.deallocate(buffer->h_buf_in);
+            alocator.deallocate(buffer->h_buf_zlibout);
+            alocator_1.deallocate(buffer->h_compressSize);
+
+            DELETE_OBJ(buffer->buffer_compress_size);
+            DELETE_OBJ(buffer->buffer_input);
+            DELETE_OBJ(buffer->buffer_zlib_output);
+
+            this->freeBuffers.pop();
+            DELETE_OBJ(buffer);
+            bufCount -= 1;
+        }
+    }
+
+    if (bufCount < maxBufCount) {
+        auto buffer = new buffers();
+        buffer->finish = false;
+        zlib_aligned_allocator<uint8_t> alocator;
+        zlib_aligned_allocator<uint32_t> alocator_1;
+        MEM_ALLOC_CHECK((buffer->h_buf_in = alocator.allocate(size)), size, "Input Host Buffer");
+        MEM_ALLOC_CHECK((buffer->h_buf_zlibout = alocator.allocate(size)), size, "Output Host Buffer");
+        uint16_t max_blocks = (size / BLOCK_SIZE_IN_KB) + 1;
+        MEM_ALLOC_CHECK((buffer->h_compressSize = alocator_1.allocate(max_blocks)), max_blocks,
+                        "CompressSize Host Buffer");
+
+        buffer->buffer_input = this->getBuffer(CL_MEM_READ_ONLY, size, (uint8_t*)(buffer->h_buf_in));
+        if (buffer->buffer_input == NULL) {
+            this->release(buffer);
+            return NULL;
+        }
+
+        buffer->buffer_compress_size =
+            this->getBuffer(CL_MEM_READ_WRITE, max_blocks * sizeof(uint32_t), (uint8_t*)(buffer->h_compressSize));
+        if (buffer->buffer_compress_size == NULL) {
+            this->release(buffer);
+            return NULL;
+        }
+
+        buffer->buffer_zlib_output = this->getBuffer(CL_MEM_WRITE_ONLY, size, (uint8_t*)(buffer->h_buf_zlibout));
+        if (buffer->buffer_zlib_output == NULL) {
+            this->release(buffer);
+            return NULL;
+        }
+
+        buffer->input_size = size;
+        buffer->allocated_size = size;
+        this->busyBuffers.push(buffer);
+        bufCount++;
+        lastBuffer = buffer;
+        return buffer;
+    }
+    return NULL;
+}
+
+cl::Buffer* memoryManager::getBuffer(cl_mem_flags flag, size_t size, uint8_t* host_ptr) {
+    cl_int err;
+    cl::Buffer* clBuffer = NULL;
+#ifdef ENABLE_XRM
+    OCL_CHECK(err, clBuffer = new cl::Buffer(*(this->mContext), CL_MEM_USE_HOST_PTR | flag, size, host_ptr, &err));
+#else
+    if (is_sw_emulation()) {
+        OCL_CHECK(err, clBuffer = new cl::Buffer(*(this->mContext), CL_MEM_USE_HOST_PTR | flag, size, host_ptr, &err));
+        return clBuffer;
+    }
+    cl_mem_ext_ptr_t ext;
+
+    ext.obj = host_ptr;
+    ext.param = 0;
+    auto bank = uint32_t(rand() % 32) | XCL_MEM_TOPOLOGY;
+    ext.flags = bank;
+
+    cl_mem_flags l_flag = (uint32_t)(flag | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX);
+    uint8_t count = 0;
+    do {
+        clBuffer = new cl::Buffer(*(this->mContext), CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                  size, &ext, &err);
+        count++;
+    } while (err != 0 && count < 32);
+#endif
+
+    return clBuffer;
+}
+
+buffers* memoryManager::getBuffer() {
+    if (this->busyBuffers.empty()) return NULL;
+    auto buffer = this->busyBuffers.front();
+    this->freeBuffers.push(buffer);
+    this->busyBuffers.pop();
+    return buffer;
+}
+
+buffers* memoryManager::peekBuffer() {
+    if (this->busyBuffers.empty()) return NULL;
+    auto buffer = this->busyBuffers.front();
+    return buffer;
+}
+
+buffers* memoryManager::getLastBuffer() {
+    return lastBuffer;
+}
+
+void memoryManager::release() {
+    while (!(this->freeBuffers.empty())) {
+        auto buffer = this->freeBuffers.front();
+        zlib_aligned_allocator<uint8_t> alocator;
+        zlib_aligned_allocator<uint32_t> alocator_1;
+
+        alocator.deallocate(buffer->h_buf_in);
+        alocator.deallocate(buffer->h_buf_zlibout);
+        alocator_1.deallocate(buffer->h_compressSize);
+
+        DELETE_OBJ(buffer->buffer_compress_size);
+        DELETE_OBJ(buffer->buffer_input);
+        DELETE_OBJ(buffer->buffer_zlib_output);
+
+        this->freeBuffers.pop();
+        DELETE_OBJ(buffer);
+    }
+}
+
+void memoryManager::release(buffers* buffer) {
+    zlib_aligned_allocator<uint8_t> alocator;
+    zlib_aligned_allocator<uint32_t> alocator_1;
+
+    alocator.deallocate(buffer->h_buf_in);
+    alocator.deallocate(buffer->h_buf_zlibout);
+    alocator_1.deallocate(buffer->h_compressSize);
+
+    DELETE_OBJ(buffer->buffer_compress_size);
+    DELETE_OBJ(buffer->buffer_input);
+    DELETE_OBJ(buffer->buffer_zlib_output);
+
+    DELETE_OBJ(buffer);
+}
+
+bool memoryManager::isPending() {
+    return (this->busyBuffers.empty() == false);
+}

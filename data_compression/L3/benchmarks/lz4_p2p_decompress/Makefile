@@ -56,7 +56,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= sw_emu
 HOST_ARCH := x86
 SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
+DEVICE ?= xilinx_samsung_u2x4_201920_2
 ifeq ($(findstring u50, $(DEVICE)), u50)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif

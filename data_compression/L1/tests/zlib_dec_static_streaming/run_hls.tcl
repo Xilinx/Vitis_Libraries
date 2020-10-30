@@ -15,7 +15,7 @@
 #
 
 source settings.tcl
-set DIR_NAME "zlib_decompress_streaming"
+set DIR_NAME "zlib_dec_static_streaming"
 set DESIGN_PATH "${XF_PROJ_ROOT}/L1/tests/${DIR_NAME}"
 set PROJ "zlib_decompress_test.prj"
 set SOLN "sol1"

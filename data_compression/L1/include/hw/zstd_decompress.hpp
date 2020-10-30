@@ -37,63 +37,74 @@ namespace xf {
 namespace compression {
 namespace details {
 
-template <int PARALLEL_BYTE, class SIZE_DT = uint16_t>
+template <int PARALLEL_BYTE, int LMO_WIDTH>
 void alignLiterals(hls::stream<bool>& litlenValidStream,
                    hls::stream<bool>& newBlockFlagStream,
                    hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inLitStream,
-                   hls::stream<SIZE_DT>& inLitLenStream,
+                   hls::stream<ap_uint<LMO_WIDTH> >& inLitLenStream,
                    hls::stream<ap_uint<8 * PARALLEL_BYTE> >& litStream,
-                   hls::stream<SIZE_DT>& litLenStream) {
-    // align literals to PRALLEL_BYTE boundary as per literal length values
-    const uint16_t kStreamWidth = 8 * PARALLEL_BYTE;
-    const uint16_t kAccRegWidth = kStreamWidth * 2;
+                   hls::stream<ap_uint<LMO_WIDTH> >& litLenStream) {
+    // align literals to PARALLEL_BYTE boundary as per literal length values
+    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint16_t c_accRegWidth = c_streamWidth * 2;
 align_block_lit_output:
     while (newBlockFlagStream.read()) {
-        ap_uint<kAccRegWidth> litbuf = 0;
+        ap_uint<c_accRegWidth> litbuf = 0;
         uint8_t bytesInAcc = 0;
         uint8_t bitsInAcc = 0;
     align_literals:
         while (litlenValidStream.read()) {
-            SIZE_DT litLen = inLitLenStream.read();
+            ap_uint<LMO_WIDTH> litLen = inLitLenStream.read();
             litLenStream << litLen;
-            if (litLen > 0) { // align literals if present
-                              // write literals aligned to PARALLEL_BYTE
-                uint8_t bitsWritten = kStreamWidth;
+            if (litLen > 0) {
+                // if present, write literals aligned to PARALLEL_BYTE
+                uint8_t bytesWritten = 0;
+                uint8_t updBInAcc = bytesInAcc;
+                uint8_t bitsInAcc = bytesInAcc * 8;
             aligned_literal_write:
                 for (int i = 0; i < litLen; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
-                    if (i + bytesInAcc < litLen) {
-                        litbuf.range(bitsInAcc + kStreamWidth - 1, bitsInAcc) = inLitStream.read();
-                        bitsInAcc += kStreamWidth;
+                    if (i < (const int)(litLen - bytesInAcc)) {
+                        litbuf.range(bitsInAcc + c_streamWidth - 1, bitsInAcc) = inLitStream.read();
+                        updBInAcc += PARALLEL_BYTE;
                     }
-                    litStream << litbuf.range(kStreamWidth - 1, 0);
+                    litStream << litbuf.range(c_streamWidth - 1, 0);
 
-                    if (i + PARALLEL_BYTE > litLen) bitsWritten = 8 * (litLen - i);
-                    litbuf >>= bitsWritten;
-                    bitsInAcc -= bitsWritten;
-                    bytesInAcc = bitsInAcc >> 3;
+                    if (i > (const int)(litLen - PARALLEL_BYTE)) {
+                        bytesWritten = litLen - i;
+                        break;
+                    }
+                    litbuf >>= c_streamWidth;
+                    updBInAcc -= PARALLEL_BYTE;
                 }
+                litbuf >>= (bytesWritten * 8);
+                bytesInAcc = updBInAcc - bytesWritten;
             }
         }
     }
     litLenStream << 0;
 }
 
-template <int PARALLEL_BYTE, int BLOCK_SIZE_KB>
+template <int PARALLEL_BYTE, int BLOCK_SIZE_KB, int LMO_WIDTH>
 void decodeSequence(hls::stream<bool>& seqValidStream,
                     hls::stream<uint32_t>& seqMetaStream,
+                    hls::stream<uint32_t>& fseTableStream,
                     hls::stream<ap_uint<8 * PARALLEL_BYTE> >& seqDecodeInStream,
-                    hls::stream<uint16_t>& litLenStream,
-                    hls::stream<ap_uint<16> >& offsetStream,
-                    hls::stream<uint16_t>& matLenStream,
+                    hls::stream<ap_uint<LMO_WIDTH> >& litLenStream,
+                    hls::stream<ap_uint<LMO_WIDTH> >& offsetStream,
+                    hls::stream<ap_uint<LMO_WIDTH> >& matLenStream,
                     hls::stream<bool>& litlenValidStream,
                     hls::stream<bool>& newBlockFlagStream) {
     // decode sequences and output literal lengths, offsets and match lengths
-    const uint16_t kStreamWidth = 8 * PARALLEL_BYTE;
-    const uint16_t kAccRegWidth = kStreamWidth * 2;
-    uint32_t fseTable[1283];
-    uint16_t fseOffsets[3] = {0, 513, 513 + 257};
-    uint16_t prevOffsets[3] = {1, 4, 8}; // list of previous 3 offsets
+    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint16_t c_accRegWidth = c_streamWidth * 2;
+    uint32_t fseTableLL[512];
+#pragma HLS BIND_STORAGE variable = fseTableLL type = ram_t2p impl = bram
+    uint32_t fseTableOF[256];
+#pragma HLS BIND_STORAGE variable = fseTableOF type = ram_t2p impl = bram
+    uint32_t fseTableML[512];
+#pragma HLS BIND_STORAGE variable = fseTableML type = ram_t2p impl = bram
+    ap_uint<LMO_WIDTH> prevOffsets[3] = {1, 4, 8}; // list of previous 3 offsets
 #pragma HLS ARRAY_PARTITION variable = prevOffsets complete
 
 decodeSequence_main_loop:
@@ -115,31 +126,46 @@ decodeSequence_main_loop:
         } else {
             // write sequence meta data
             // Word 0 <blockMeta> ***already decoded
-            // Word 1 <symbolCompressionMode><remBlockSize>
-            //              1 byte              3 bytes
+            // Word 1 <decode_flag> 1 if further decoding needed, else 0
             // Word 2 <literalCount>
-            // Word 3 <seqCnt>
-            // Word 4 <AccuracyLogs> --> <litlen><offset><matlen> 1 byte each lower-higher
-            // Followed by FSE Table 513+257+513=1283 words
+            // Word 3 <symbolCompressionMode><remBlockSize>
+            //              1 byte              3 bytes
+            // Word 4 <seqCnt>
+            // Word 5 <AccuracyLogs> --> <litlen><offset><matlen> 1 byte each lower-higher
             // decode fse bitstream
-            uint32_t smbuf = seqMetaStream.read();
+            uint8_t decode_flag = seqMetaStream.read();
             uint32_t litCount = seqMetaStream.read();
-            if (smbuf) {
-                uint32_t remBlockSize = smbuf >> 8; // skip symbol compression mode for now
-                uint32_t seqCnt = seqMetaStream.read();
-                smbuf = seqMetaStream.read(); // accuracy logs
-                uint8_t accuracyLog[3] = {(uint8_t)smbuf, (uint8_t)(smbuf >> 8), (uint8_t)(smbuf >> 16)};
-
-                // read all fse tables
-                for (uint16_t i = 0; i < 1283; ++i) {
-                    fseTable[i] = seqMetaStream.read();
+            if (decode_flag) {
+            // read all fse tables
+            seqd_read_fse_tables_outer:
+                for (int fti = 0; fti < 3; ++fti) {
+                    uint16_t fseVCnt = fseTableStream.read();
+                    if (fseVCnt != 0xFFFFFFFF) {
+                    seqd_read_fse_tables:
+                        for (uint16_t i = 0; i < fseVCnt; ++i) {
+#pragma HLS PIPELINE II = 1
+                            auto tmpv = fseTableStream.read();
+                            if (fti == 0) {
+                                fseTableLL[i] = tmpv;
+                            } else if (fti == 1) {
+                                fseTableOF[i] = tmpv;
+                            } else {
+                                fseTableML[i] = tmpv;
+                            }
+                        }
+                    }
                 }
+
+                uint32_t smbuf = seqMetaStream.read();
+                uint32_t remBlockSize = smbuf >> 8;
+                uint32_t seqCnt = seqMetaStream.read();
+                uint32_t aclbuf = seqMetaStream.read(); // accuracy logs
+                uint8_t accuracyLog[3] = {(uint8_t)aclbuf, (uint8_t)(aclbuf >> 8), (uint8_t)(aclbuf >> 16)};
                 // Decode the FSE compressed bitstream
                 ap_uint<64> acw = 0;
-                fseDecode<PARALLEL_BYTE, BLOCK_SIZE_KB>(acw, 0, seqDecodeInStream, &(fseTable[fseOffsets[0]]),
-                                                        &(fseTable[fseOffsets[1]]), &(fseTable[fseOffsets[2]]), seqCnt,
-                                                        litCount, remBlockSize, accuracyLog, prevOffsets, litLenStream,
-                                                        offsetStream, matLenStream, litlenValidStream);
+                fseDecode<PARALLEL_BYTE, BLOCK_SIZE_KB, LMO_WIDTH>(
+                    acw, 0, seqDecodeInStream, fseTableLL, fseTableOF, fseTableML, seqCnt, litCount, remBlockSize,
+                    accuracyLog, prevOffsets, litLenStream, offsetStream, matLenStream, litlenValidStream);
             } else {
                 // zero sequence count condition
                 litlenValidStream << 1;
@@ -155,7 +181,7 @@ decodeSequence_main_loop:
         // clear LZ literal buffer
         litlenValidStream << 0;
     }
-    // clear LZ literal buffer
+    // end of file
     newBlockFlagStream << 0;
     matLenStream << 0;
     offsetStream << 0;
@@ -164,41 +190,35 @@ decodeSequence_main_loop:
 template <int PARALLEL_BYTE, int BLOCK_SIZE_KB>
 void decodeLiterals(hls::stream<bool>& litValidStream,
                     hls::stream<uint32_t>& litMetaStream,
-                    hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& litDecodeInStream,
-                    hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& literalStream) {
+                    hls::stream<uint32_t>& fseTableStream,
+                    hls::stream<ap_uint<8 * PARALLEL_BYTE> >& litDecodeInStream,
+                    hls::stream<ap_uint<8 * PARALLEL_BYTE> >& literalStream) {
     // decode literals and forward to literal stream
-    const uint16_t kStreamWidth = (8 * PARALLEL_BYTE);
-    const uint16_t kAccRegWidth = kStreamWidth * 2;
+    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint16_t c_accRegWidth = c_streamWidth * 2;
     uint8_t hufWeights[256];
+    uint32_t litFseTable[256];
 
     uint8_t huffDecoderTableLog = 6;
     uint16_t wCnt = 0;
-    int blkCnt = 0;
+
 decodeLiterals_main_loop:
     while (litValidStream.read()) {
-        blkCnt++;
         // Literal metadata format
         // Word 0 is block metadata Word 0
         uint32_t litMeta = litMetaStream.read();
         xfBlockType_t blockType = (xfBlockType_t)(litMeta & 0x000000FF);
         uint32_t blockSize = litMeta >> 8;
         // for raw and RLE Blocks forward as it is
-        if (blockType == RLE_BLOCK) {
-            // write RLE byte
-            ap_uint<kStreamWidth> tbuf = litDecodeInStream.read();
-            uint8_t rleLit = tbuf;
-        decodelit_prep_rleblock_buff:
-            for (uint8_t i = 1; i < PARALLEL_BYTE; ++i) {
-#pragma HLS UNROLL
-                tbuf.range(((i + 1) * 8) - 1, i * 8) = rleLit;
-            }
-            literalStream << tbuf;
-        } else if (blockType == RAW_BLOCK) {
+        uint32_t lbtWrite = blockSize;
+        if (blockType == RLE_BLOCK) lbtWrite = 1;
+
+        if (blockType == RLE_BLOCK || blockType == RAW_BLOCK) {
         // write complete block data as it is
-        decodelit_write_rawblock_data:
-            for (uint32_t i = 0; i < blockSize; i += PARALLEL_BYTE) {
+        decodelit_write_rawrle_block_data:
+            for (uint32_t i = 0; i < lbtWrite; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
-                ap_uint<kStreamWidth> lit = litDecodeInStream.read();
+                ap_uint<c_streamWidth> lit = litDecodeInStream.read();
                 literalStream << lit;
             }
         } else {
@@ -218,7 +238,7 @@ decodeLiterals_main_loop:
             uint32_t litSize2Write = regeneratedSize;
             if (litBlockType == RLE_LBLOCK) {
                 // pass the RLE literal
-                ap_uint<kStreamWidth> tbuf = litDecodeInStream.read();
+                ap_uint<c_streamWidth> tbuf = litDecodeInStream.read();
                 uint8_t rleLit = tbuf;
             decodelit_prep_rlelit_buff:
                 for (uint8_t i = 1; i < PARALLEL_BYTE; ++i) {
@@ -226,7 +246,7 @@ decodeLiterals_main_loop:
                     tbuf.range(((i + 1) * 8) - 1, i * 8) = rleLit;
                 }
             decodelit_write_rlelit_data:
-                for (uint32_t i = 0; i < regeneratedSize; i += PARALLEL_BYTE) {
+                for (uint32_t i = 0; i < litSize2Write; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
                     literalStream << tbuf;
                 }
@@ -235,7 +255,7 @@ decodeLiterals_main_loop:
             decodelit_write_rawlit_data:
                 for (int i = 0; i < litSize2Write; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
-                    ap_uint<kStreamWidth> lit = litDecodeInStream.read();
+                    ap_uint<c_streamWidth> lit = litDecodeInStream.read();
                     literalStream << lit;
                 }
             } else {
@@ -248,11 +268,10 @@ decodeLiterals_main_loop:
                 compressedSize = litMeta >> 8;
                 litSize2Write = compressedSize;
 
-                ap_uint<kAccRegWidth> accHuff = 0;
+                ap_uint<c_accRegWidth> accHuff = 0;
                 uint8_t bytesInAcc = 0;
                 uint32_t remBytes = 0;
                 if (litBlockType == CMP_LBLOCK) {
-                    uint32_t litFseTable[256];
                     uint8_t accuracyLog = 6;
                     uint16_t fwCnt = 0;
                     // init huffman weights
@@ -260,16 +279,20 @@ decodeLiterals_main_loop:
                         hufWeights[i] = 0;
                         hufWeights[i + 1] = 0;
                     }
-                    if (hufHeader < 128) { /*TODO 2: Parallel FSE and HUffman decoding*/
+                    if (hufHeader < 128) {
+                        // read FSE table
+                        uint32_t tblVCnt = fseTableStream.read();
+                    lit_read_fse_table:
+                        for (int i = 0; i < tblVCnt; ++i) {
+#pragma HLS PIPELINE II = 1
+                            litFseTable[i] = fseTableStream.read();
+                        }
                         // Word 3 <accuracyLog><byteUsedByFSE>
                         //          1 byte          1 byte
                         litMeta = litMetaStream.read();
                         accuracyLog = (uint8_t)litMeta;
                         remBytesInFse = hufHeader - (litMeta >> 8);
-                        // read FSE table
-                        for (int i = 0; i < 256; ++i) {
-                            litFseTable[i] = litMetaStream.read();
-                        }
+                        // decode fse bitstream of huffman weights
                         fseDecodeHuffWeight<PARALLEL_BYTE>(litDecodeInStream, remBytesInFse, accHuff, bytesInAcc,
                                                            accuracyLog, litFseTable, hufWeights, fwCnt,
                                                            huffDecoderTableLog);
@@ -279,11 +302,15 @@ decodeLiterals_main_loop:
                         // 4-bit huffman weights
                         uint16_t hwCnt = hufHeader - 127;
                         uint32_t totalWeights = 0;
+                        if (bytesInAcc == 0) {
+                            accHuff.range(c_streamWidth - 1, 0) = litDecodeInStream.read();
+                            bytesInAcc = PARALLEL_BYTE;
+                        }
                     huffman_decode_weights:
                         for (uint8_t i = 0; i < hwCnt; i += 2) {
 #pragma HLS PIPELINE II = 1
                             if (bytesInAcc == 0) {
-                                accHuff.range(kStreamWidth - 1, 0) = litDecodeInStream.read();
+                                accHuff.range(c_streamWidth - 1, 0) = litDecodeInStream.read();
                                 bytesInAcc = PARALLEL_BYTE;
                             }
                             uint8_t w8t = accHuff;
@@ -305,7 +332,6 @@ decodeLiterals_main_loop:
                         hufWeights[hwCnt++] = 1 + (31 - __builtin_clz(lw));
                         wCnt = hwCnt;
                     }
-
                 } else {
                     remBytes = compressedSize;
                 }
@@ -320,32 +346,29 @@ decodeLiterals_main_loop:
 template <int PARALLEL_BYTE>
 void parseBlockGenFSETable(hls::stream<bool>& blockValidStream,
                            hls::stream<uint32_t>& blockMetaStream,
-                           hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& zstdInStream,
+                           hls::stream<ap_uint<8 * PARALLEL_BYTE> >& zstdInStream,
                            hls::stream<bool>& litValidStream,
                            hls::stream<uint32_t>& litMetaStream,
-                           hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& litDecodeInStream,
+                           hls::stream<uint32_t>& fseTableLitStream,
+                           hls::stream<ap_uint<8 * PARALLEL_BYTE> >& litDecodeInStream,
                            hls::stream<bool>& seqValidStream,
                            hls::stream<uint32_t>& seqMetaStream,
-                           hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& seqDecodeInStream) {
+                           hls::stream<uint32_t>& fseTableSeqStream,
+                           hls::stream<ap_uint<8 * PARALLEL_BYTE> >& seqDecodeInStream) {
     // parse blocks and decompress them
-    const uint16_t kStreamWidth = (8 * PARALLEL_BYTE);
-    const uint16_t kAccRegWidth = kStreamWidth * 2;
-    const uint16_t kAccRegWidthx3 = kStreamWidth * 3;
+    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint16_t c_accRegWidth = c_streamWidth * 2;
+    const uint16_t c_accRegWidthx3 = c_streamWidth * 3;
 
-    uint32_t cmpLitFseTable[256];
-    uint32_t fseTable[513 + 257 + 513];
-    uint16_t fseOffsets[3] = {0, 513, 513 + 257};
-    uint8_t defDistOffsets[3] = {0, kMaxCharLit + 1, kMaxCharLit + kMaxCharDefOffset + 2};
-    uint8_t maxCharLOM[3] = {kMaxCharLit, kMaxCharOffset, kMaxCharMatchlen};
+    uint8_t defDistOffsets[3] = {0, c_maxCharLit + 1, c_maxCharLit + c_maxCharDefOffset + 2};
+    uint8_t maxCharLOM[3] = {c_maxCharLit, c_maxCharOffset, c_maxCharMatchlen};
     int16_t prevDistribution[3 * 64];
     uint8_t prevAccLog[3] = {6, 5, 6};
     xfSymbolCompMode_t prevFseMode[3] = {FSE_COMPRESSED_MODE, FSE_COMPRESSED_MODE, FSE_COMPRESSED_MODE};
-// int blkCnt = 0;
+
 parseBlock_main_loop:
     while (blockValidStream.read()) {
         // parse valid block and generate FSE tables for them
-        // blkCnt++;
-
         xfBlockType_t blockType;
         uint32_t blockMeta = blockMetaStream.read(); // <blockType 8-bits><blockSize 24-bits>
 
@@ -361,15 +384,15 @@ parseBlock_main_loop:
         // write literal data
         if (blockType == RLE_BLOCK) {
             // write RLE byte
-            ap_uint<kStreamWidth> tbuf = zstdInStream.read();
-            tbuf &= (ap_uint<kStreamWidth>)(((uint64_t)1 << 8) - 1);
+            ap_uint<c_streamWidth> tbuf = zstdInStream.read();
+            tbuf &= (ap_uint<c_streamWidth>)(((uint64_t)1 << 8) - 1);
             litDecodeInStream << tbuf;
         } else if (blockType == RAW_BLOCK) {
         // write complete block data as it is
         block_write_rawblocklit_data:
             for (uint32_t i = 0; i < blockSize; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
-                ap_uint<kStreamWidth> tbuf = zstdInStream.read();
+                ap_uint<c_streamWidth> tbuf = zstdInStream.read();
                 litDecodeInStream << tbuf;
             }
         } else {
@@ -393,9 +416,9 @@ parseBlock_main_loop:
              *          2 bits              1-2 bits         5-20 bits            0-18 bits
              */
             // read a word
-            ap_uint<kAccRegWidth> accRegister = zstdInStream.read();
+            ap_uint<c_accRegWidth> accRegister = zstdInStream.read();
             uint8_t bytesInAcc = PARALLEL_BYTE;
-            uint8_t bitsInAcc = kStreamWidth;
+            uint8_t bitsInAcc = c_streamWidth;
 
             // Get Literals_Block_Type
             xfLitBlockType_t litBlockType = (xfLitBlockType_t)((uint8_t)accRegister & 3);
@@ -408,26 +431,8 @@ parseBlock_main_loop:
             bool getCompSize;
             uint8_t ebn = 0; // extra bytes needed
             // read regenerated and compressed size
-            if (litBlockType == RAW_LBLOCK || litBlockType == RLE_LBLOCK) {
-                // get bits used by Regenerated_Size
-                if ((sizeFormat & 1) == 0) {
-                    regSizeBits = 5;
-                    accRegister >>= 1;
-                    bitsInAcc -= 1;
-                } else {
-                    accRegister >>= 2;
-                    bitsInAcc -= 2;
-                    if (sizeFormat == 1) {
-                        regSizeBits = 12;
-                        ++ebn;
-                    } else { // remaining option is 3
-                        regSizeBits = 20;
-                        ebn += 2;
-                    }
-                }
-                getCompSize = false;
-                quadStream = false;
-            } else {
+            getCompSize = (litBlockType == CMP_LBLOCK || litBlockType == TREELESS_LBLOCK);
+            if (getCompSize) {
                 accRegister >>= 2;
                 bitsInAcc -= 2;
                 ebn = 2;
@@ -451,13 +456,30 @@ parseBlock_main_loop:
                         ebn += 2;
                         break;
                 }
-                getCompSize = true;
+            } else {
+                // get bits used by Regenerated_Size
+                if ((sizeFormat & 1) == 0) {
+                    regSizeBits = 5;
+                    accRegister >>= 1;
+                    bitsInAcc -= 1;
+                } else {
+                    accRegister >>= 2;
+                    bitsInAcc -= 2;
+                    if (sizeFormat == 1) {
+                        regSizeBits = 12;
+                        ++ebn;
+                    } else { // remaining option is 3
+                        regSizeBits = 20;
+                        ebn += 2;
+                    }
+                }
+                quadStream = false;
             }
 
             // Read extra bytes
             if (bitsInAcc < ((1 + ebn) * 8)) { // if less than required bits
-                accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = zstdInStream.read();
-                bitsInAcc += kStreamWidth;
+                accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = zstdInStream.read();
+                bitsInAcc += c_streamWidth;
             }
 
             // read regenerated size
@@ -489,18 +511,17 @@ parseBlock_main_loop:
             // write literals
             uint32_t litSize2Write = regeneratedSize;
             bool noTree = false;
-            assert(litBlockType < 4);
             switch (litBlockType) {
-                case RLE_LBLOCK: { /*TODO: check for 0 bytes in accumulator*/
+                case RLE_LBLOCK: {
                     uint8_t rleLit;
                     if (bytesInAcc == 0) {
-                        accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = zstdInStream.read();
+                        accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = zstdInStream.read();
                         bytesInAcc += PARALLEL_BYTE;
                     }
                     rleLit = ((uint8_t)accRegister & 0XFF);
                     accRegister >>= 8;
                     --bytesInAcc;
-                    ap_uint<kStreamWidth> rlbuf = rleLit;
+                    ap_uint<c_streamWidth> rlbuf = rleLit;
                     litDecodeInStream << rlbuf;
 
                     bitsInAcc = bytesInAcc * 8;
@@ -523,10 +544,8 @@ parseBlock_main_loop:
                         // Word 2 <huffmanHeader><compressedSize>
                         //           1 byte         3 bytes
                         litMetaStream << (compressedSize << 8);
-                        // printf("Previous tree, bytesInAcc: %d\n", bytesInAcc);
                     } else {
                         hufHeader = accRegister;
-                        // printf("FSE/Huff desc Size: %d, accRegister: %u\n", hufHeader, (uint32_t)accRegister);
                         accRegister >>= 8;
                         --bytesInAcc;
                         --litSize2Write;
@@ -540,49 +559,48 @@ parseBlock_main_loop:
                             // FSE table generation and decoding before huffman decoding
                             uint8_t litAccuracyLog = 6; // max is 6 bits, will be modified as per input
                             // create FSE tables
-                            int ret = generateFSETable<PARALLEL_BYTE>(/*TODO: Send table directly*/
-                                                                      cmpLitFseTable, zstdInStream, accRegister,
-                                                                      bytesInAcc, litAccuracyLog, kMaxCharHuffman,
+                            int ret = generateFSETable<PARALLEL_BYTE>(fseTableLitStream, zstdInStream, accRegister,
+                                                                      bytesInAcc, litAccuracyLog, c_maxCharHuffman,
                                                                       FSE_COMPRESSED_MODE, FSE_COMPRESSED_MODE,
-                                                                      defaultDistribution, prevDistribution);
+                                                                      c_defaultDistribution, prevDistribution);
                             litSize2Write -= ret;
                             remBlockSize -= ret;
                             // send relevant metadata
                             // Word 3 <accuracyLog><byteUsedByFSE>
                             //          1 byte          1 byte
                             litMetaStream << litAccuracyLog + ((uint32_t)ret << 8); // write word 3
-                            // write literal FSE table to litMetaStream
-                            for (uint16_t i = 0; i < 256;
-                                 ++i) { /*TODO: optimizes size, do NOT send for repleate table*/
-                                litMetaStream << cmpLitFseTable[i];
-                            }
-                        } else {
-                            // printf("Huffman only, bytesInAcc: %d\n", bytesInAcc);
                         }
                     }
                     bitsInAcc = bytesInAcc * 8;
                 }
                 case RAW_LBLOCK: {
                     // Bigger register needed, because more bytes than PARALLEL_BYTE can be present in the accumulator
-                    ap_uint<kAccRegWidthx3> wbuf = accRegister;
-                    uint8_t bytesWritten = PARALLEL_BYTE;
+                    ap_uint<c_accRegWidthx3> wbuf = accRegister;
+                    uint8_t bytesWritten = 0;
+                    uint8_t updBInAcc = bytesInAcc;
+
+                    bitsInAcc = bytesInAcc * 8;
                 // write block data
-                block_write_cmplit_data:
+                cmplit_write_block:
                     for (int i = 0; i < litSize2Write; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
-                        if (i + bytesInAcc < litSize2Write) {
-                            bitsInAcc = bytesInAcc * 8;
-                            wbuf.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = zstdInStream.read();
-                            bytesInAcc += PARALLEL_BYTE;
+                        if (i < (const int)(litSize2Write - bytesInAcc)) {
+                            wbuf.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = zstdInStream.read();
+                            updBInAcc += PARALLEL_BYTE;
                         }
-                        litDecodeInStream << wbuf.range(kStreamWidth - 1, 0);
+                        ap_uint<c_streamWidth> tmpV = wbuf;
+                        litDecodeInStream << tmpV;
 
-                        if (i + PARALLEL_BYTE > litSize2Write) bytesWritten = litSize2Write - i;
-                        wbuf >>= (bytesWritten * 8);
-                        bytesInAcc -= bytesWritten;
+                        if (i > (const int)(litSize2Write - PARALLEL_BYTE)) {
+                            bytesWritten = litSize2Write - i;
+                            break;
+                        }
+                        wbuf >>= c_streamWidth;
+                        updBInAcc -= PARALLEL_BYTE;
                     }
+                    accRegister = (wbuf >> (bytesWritten * 8));
+                    bytesInAcc = updBInAcc - bytesWritten;
                     bitsInAcc = bytesInAcc * 8;
-                    accRegister = wbuf.range(kAccRegWidth - 1, 0);
                     remBlockSize -= litSize2Write;
                 } break;
                 default:
@@ -598,8 +616,8 @@ parseBlock_main_loop:
              * <Number_of_Sequences><Symbol_Compression_Modes>
              *       1-3 bytes              1 byte
              */
-            if (bytesInAcc < 4) {
-                accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = zstdInStream.read();
+            if (bytesInAcc < remBlockSize && bytesInAcc < 4) {
+                accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = zstdInStream.read();
                 bytesInAcc += PARALLEL_BYTE;
             }
             uint8_t byteCnt = 0;
@@ -620,12 +638,18 @@ parseBlock_main_loop:
                 remBlockSize -= byteCnt;
                 // write sequence meta data
                 // Word 0 <blockMeta> ***already written
-                // Word 1 <symbolCompressionMode><remBlockSize>	// if this is 0, no sequences/further metadata
-                //              1 byte              3 bytes
+                // Word 1 <1> if further decoding needed
                 // Word 2 <literalCount>
                 seqMetaStream << 0;               // Word 1
                 seqMetaStream << regeneratedSize; // Word 2
             } else {
+                // write sequence meta data
+                // Word 0 <blockMeta> ***already written
+                // Word 1 <decode_flag> 1 if further decoding needed, else 0
+                // Word 2 <literalCount>
+                seqMetaStream << 1;               // Word 1
+                seqMetaStream << regeneratedSize; // Word 2
+
                 if (byte_0 > 0 && byte_0 < 128) {
                     // uses one byte
                     seqCnt = byte_0;
@@ -656,89 +680,90 @@ parseBlock_main_loop:
                 literalsLengthMode = (xfSymbolCompMode_t)((byte_0 >> 6) & 3);
 
                 remBlockSize -= byteCnt;
+
                 // generate FSE tables
-                ap_uint<kAccRegWidth> fseAcc = accRegister;
+                ap_uint<c_accRegWidth> fseAcc = accRegister;
                 xfSymbolCompMode_t modeLOM[3] = {literalsLengthMode, offsetsMode, matchLengthsMode};
                 uint8_t accuracyLog[3] = {6, 5, 6}; // for default distribution, overwritten for fse compressed ones
+#pragma HLS ARRAY_PARTITION variable = modeLOM complete
+#pragma HLS ARRAY_PARTITION variable = accuracyLog complete
 
                 if (offsetsMode == PREDEFINED_MODE)
-                    maxCharLOM[1] = kMaxCharDefOffset;
+                    maxCharLOM[1] = c_maxCharDefOffset;
                 else if (offsetsMode == FSE_COMPRESSED_MODE)
-                    maxCharLOM[1] = kMaxCharOffset;
+                    maxCharLOM[1] = c_maxCharOffset;
+
             gen_lom_fse_tables:
-                for (uint8_t i = 0; i < 3; ++i) { /*TODO: Update as per literal fse table generation*/
+                for (uint8_t i = 0; i < 3; ++i) {
                     // Generated FSE tables for literal lengths, offsets and match lengths
                     if (modeLOM[i] == REPEAT_MODE) accuracyLog[i] = prevAccLog[i];
-                    int ret = generateFSETable<PARALLEL_BYTE>(&(fseTable[fseOffsets[i]]), zstdInStream, fseAcc,
-                                                              bytesInAcc, accuracyLog[i], maxCharLOM[i], modeLOM[i],
-                                                              prevFseMode[i], &(defaultDistribution[defDistOffsets[i]]),
-                                                              &(prevDistribution[i * 64]));
+                    int ret = generateFSETable<PARALLEL_BYTE>(
+                        fseTableSeqStream, zstdInStream, fseAcc, bytesInAcc, accuracyLog[i], maxCharLOM[i], modeLOM[i],
+                        prevFseMode[i], &(c_defaultDistribution[defDistOffsets[i]]), &(prevDistribution[i * 64]));
                     prevFseMode[i] = modeLOM[i];
                     prevAccLog[i] = accuracyLog[i];
                     remBlockSize -= ret;
                 }
                 accRegister = fseAcc;
                 bitsInAcc = bytesInAcc * 8;
-                // printf("remBlockSize: %d\n", remBlockSize);
-                // if(ccnt == 13) exit(0);
-                // ccnt++;
-                //------
                 // write sequence meta data
                 // Word 0 <blockMeta> ***already written
-                // Word 1 <symbolCompressionMode><remBlockSize>
-                //              1 byte              3 bytes
+                // Word 1 <decode_flag> 1 if further decoding needed, else 0
                 // Word 2 <literalCount>
-                // Word 3 <seqCnt>
-                // Word 4 <AccuracyLogs> --> <litlen><offset><matlen> 1 byte each lower-higher
-                // Followed by FSE Table 513+257+513=1283 words
+                // Word 3 <symbolCompressionMode><remBlockSize>
+                //              1 byte              3 bytes
+                // Word 4 <seqCnt>
+                // Word 5 <AccuracyLogs> --> <litlen><offset><matlen> 1 byte each lower-higher
                 uint32_t sqmbuf = (remBlockSize << 8) + byte_0;
-                seqMetaStream << sqmbuf;          // Word 1
-                seqMetaStream << regeneratedSize; // Word 2
-                seqMetaStream << seqCnt;          // Word 3
+                seqMetaStream << sqmbuf; // Word 3
+                seqMetaStream << seqCnt; // Word 4
                 sqmbuf = (((uint32_t)accuracyLog[2] << 16) + ((uint32_t)accuracyLog[1] << 8) + accuracyLog[0]);
-                seqMetaStream << sqmbuf;              // Word 4
-                for (uint16_t i = 0; i < 1283; ++i) { /*TODO: to be removed*/
-                    seqMetaStream << fseTable[i];
-                }
+                seqMetaStream << sqmbuf; // Word 5
                 // send the remaining block data, sequence bitstream
-                ap_uint<kAccRegWidthx3> wbuf = accRegister;
-                uint8_t bytesWritten = PARALLEL_BYTE;
+                ap_uint<c_accRegWidthx3> wbuf = accRegister;
+                uint8_t bytesWritten = 0;
+                uint8_t updBInAcc = bytesInAcc;
+
+                bitsInAcc = bytesInAcc * 8;
             // write block data
-            block_write_seq_data:
+            cmpseq_write_block:
                 for (int i = 0; i < remBlockSize; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
-                    if (i + bytesInAcc < remBlockSize) {
-                        bitsInAcc = bytesInAcc * 8;
-                        wbuf.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = zstdInStream.read();
-                        bytesInAcc += PARALLEL_BYTE;
+                    if (i < (const int)(remBlockSize - bytesInAcc)) {
+                        wbuf.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = zstdInStream.read();
+                        updBInAcc += PARALLEL_BYTE;
                     }
-                    seqDecodeInStream << wbuf.range(kStreamWidth - 1, 0);
+                    ap_uint<c_streamWidth> tmpV = wbuf;
+                    seqDecodeInStream << tmpV;
 
-                    if (i + PARALLEL_BYTE > remBlockSize) bytesWritten = remBlockSize - i;
-                    wbuf >>= (bytesWritten * 8);
-                    bytesInAcc -= bytesWritten;
+                    if (i > (const int)(remBlockSize - PARALLEL_BYTE)) {
+                        bytesWritten = remBlockSize - i;
+                        break;
+                    }
+                    wbuf >>= c_streamWidth;
+                    updBInAcc -= PARALLEL_BYTE;
                 }
             }
         }
-        // return;
     }
     litValidStream << 0;
     seqValidStream << 0;
 }
 
 template <int PARALLEL_BYTE>
-void parseFramesAndBlocks(hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& inStream,
+void parseFramesAndBlocks(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
                           hls::stream<ap_uint<4> >& inStrobe,
                           hls::stream<bool>& blockValidStream,
                           hls::stream<uint32_t>& blockMetaStream,
-                          hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& zstdBlockStream) {
+                          hls::stream<ap_uint<8 * PARALLEL_BYTE> >& zstdBlockStream) {
     // decompress all zstd frames
-    const uint16_t kStreamWidth = (8 * PARALLEL_BYTE);
-    const uint16_t kAccRegWidth = kStreamWidth * 3;
+    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
+    const uint16_t c_accRegWidth = c_streamWidth * 3;
 
     bool lastInputWord = false;
-    ap_uint<kAccRegWidth> accRegister = 0;
+    ap_uint<c_accRegWidth> accRegister = 0;
     uint8_t bytesInAcc = 0;
+    ap_uint<4> istb;
 // parse all frames and exit when there is no data to read in inStream
 parseFrames_main_loop:
     while (!lastInputWord) {
@@ -754,15 +779,16 @@ parseFrames_main_loop:
          * <Magic_Number><Frame_Header><Data_Block(s).....><Content_Checksum>
          * 	  4 bytes      2-14 bytes      n bytes....          0-4 bytes
          */
+        // printf("Bytes in Acc: %d\n", bytesInAcc);
         // Read data to accumulator
         if (bytesInAcc < PARALLEL_BYTE) {
-            auto istb = inStrobe.read();
-            if (istb == 0) { // 0 data here means data ends here and there is no more frames to decode
-                lastInputWord = true;
-                break;
-            }
-            accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = inStream.read();
-            bitsInAcc += kStreamWidth;
+            istb = inStrobe.read();
+            accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+            bitsInAcc += c_streamWidth;
+        }
+        if (istb == 0) { // 0 data here means data ends here and there is no more frames to decode
+            lastInputWord = true;
+            break;
         }
         magicNumber = accRegister;
         accRegister >>= 32;
@@ -770,16 +796,20 @@ parseFrames_main_loop:
         bytesInAcc = bitsInAcc >> 3;
 
         // verify magic number
-        if (magicNumber != kMagicNumber) {
-            if ((magicNumber & kSkippableFrameMask) != kSkipFrameMagicNumber) {
-                // printf("Error: Invalid Frame, magic number mismatch !!\n");
+        if (magicNumber != c_magicNumber) {
+            if ((magicNumber & c_skippableFrameMask) != c_skipFrameMagicNumber) {
+                // Error: Invalid Frame, magic number mismatch !!
                 return;
             } else {
                 // skippable frame
                 if (bytesInAcc < 4) {
-                    auto istb = inStrobe.read();
-                    accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = inStream.read();
-                    bitsInAcc += kStreamWidth;
+                    istb = inStrobe.read();
+                    accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+                    bitsInAcc += c_streamWidth;
+                }
+                if (istb == 0) { // end of data stream, erroneous
+                    lastInputWord = true;
+                    break;
                 }
                 uint32_t frameSize = accRegister;
                 accRegister >>= 32;
@@ -795,11 +825,11 @@ parseFrames_main_loop:
                     uint32_t skfRemBytes = frameSize - bytesInAcc;
                     uint32_t iterLim = 1 + ((skfRemBytes - 1) / PARALLEL_BYTE);
                     // skip this frame
-                    ap_uint<kStreamWidth> tmp = 0;
+                    ap_uint<c_streamWidth> tmp = 0;
                 skip_frame_loop:
                     for (uint32_t i = 0; i < iterLim; ++i) {
 #pragma HLS PIPELINE II = 1
-                        auto istb = inStrobe.read();
+                        istb = inStrobe.read();
                         tmp = inStream.read();
                     }
                     // put residual in accumulator register
@@ -818,9 +848,13 @@ parseFrames_main_loop:
          */
         // Read data to accumulator
         if (bytesInAcc < PARALLEL_BYTE) {
-            auto istb = inStrobe.read();
-            accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = inStream.read();
-            bitsInAcc += kStreamWidth;
+            istb = inStrobe.read();
+            accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+            bitsInAcc += c_streamWidth;
+        }
+        if (istb == 0) { // end of data stream, erroneous
+            lastInputWord = true;
+            break;
         }
         uint8_t headerDesc = (uint8_t)accRegister;
         accRegister >>= 8;
@@ -837,12 +871,8 @@ parseFrames_main_loop:
         uint8_t didFieldSize = headerDesc & 3;
         uint8_t fcsFieldSize = headerDesc >> 6;
 
-        if (didFieldSize == 3) ++didFieldSize;
-        if (fcsFieldSize == 0) {
-            fcsFieldSize = (singleSegmentFlag) ? 1 : 0;
-        } else {
-            fcsFieldSize = (uint8_t)(1 << fcsFieldSize);
-        }
+        didFieldSize += (uint8_t)(didFieldSize == 3);
+        fcsFieldSize = fcsFieldSize ? ((uint8_t)1 << fcsFieldSize) : (fcsFieldSize | singleSegmentFlag);
         // Parse window descriptor
         /*
          * Calculate minimum buffer memory size (Window_Size) required for decompression for this frame.
@@ -866,40 +896,28 @@ parseFrames_main_loop:
         // read Dictionary_Id
         // read bytes if needed
         if (bytesInAcc < didFieldSize) {
-            auto istb = inStrobe.read();
-            accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = inStream.read();
-            bitsInAcc += kStreamWidth;
+            istb = inStrobe.read();
+            accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+            bitsInAcc += c_streamWidth;
             bytesInAcc += PARALLEL_BYTE;
         }
-        if (didFieldSize == 1) {
-            dictionaryId = accRegister & 0XFF;
-        } else if (didFieldSize == 2) {
-            dictionaryId = accRegister & 0XFFFF;
-        } else if (didFieldSize == 4) {
-            dictionaryId = accRegister;
-        }
+        dictionaryId = (didFieldSize > 0) ? accRegister.range((8 * didFieldSize) - 1, 0) : 0;
         accRegister >>= (didFieldSize * 8);
         bytesInAcc -= didFieldSize;
         bitsInAcc = bytesInAcc << 3;
 
-        // read Frame_Content_Size
-        // read bytes if needed
+    // read Frame_Content_Size
+    // read bytes if needed
+    read_fss_bytes:
         while (bytesInAcc < fcsFieldSize) {
-            auto istb = inStrobe.read();
-            accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = inStream.read();
-            bitsInAcc += kStreamWidth;
+#pragma HLS PIPELINE II = 1
+            istb = inStrobe.read();
+            accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+            bitsInAcc += c_streamWidth;
             bytesInAcc += PARALLEL_BYTE;
         }
-
-        if (fcsFieldSize == 1) {
-            frameContentSize = accRegister & 0XFF;
-        } else if (fcsFieldSize == 2) {
-            frameContentSize = (accRegister & 0XFFFF) + 256;
-        } else if (fcsFieldSize == 4) {
-            frameContentSize = accRegister & 0XFFFFFFFF;
-        } else if (fcsFieldSize == 8) {
-            frameContentSize = accRegister;
-        }
+        frameContentSize = (fcsFieldSize > 0) ? accRegister.range((8 * fcsFieldSize) - 1, 0) : 0;
+        frameContentSize += ((fcsFieldSize == 2) ? 256 : 0);
         accRegister >>= (fcsFieldSize * 8);
         bytesInAcc -= fcsFieldSize;
         bitsInAcc = bytesInAcc << 3;
@@ -916,12 +934,13 @@ parseFrames_main_loop:
 
         // parse Blocks in this Frame and pass block data to block decompression unit
         bool isLastBlock = false;
+    // int blkcnt = 0;
     parse_block_in_frame:
         while (!isLastBlock) {
             if (bytesInAcc < PARALLEL_BYTE) {
-                auto istb = inStrobe.read();
-                accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = inStream.read();
-                bitsInAcc += kStreamWidth;
+                istb = inStrobe.read();
+                accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+                bitsInAcc += c_streamWidth;
                 bytesInAcc += PARALLEL_BYTE;
             }
             // Parse block header
@@ -941,7 +960,7 @@ parseFrames_main_loop:
 
             // write data to zstdStream
             // data transfer register
-            ap_uint<kAccRegWidth> dtRegister = 0;
+            ap_uint<c_accRegWidth> dtRegister = 0;
             uint8_t bytesUnused = 0;
 
             // enable processing for this block
@@ -951,91 +970,100 @@ parseFrames_main_loop:
             uint32_t metabuf = (blockSize << 8) + ((uint8_t)blockType);
             blockMetaStream << metabuf;
             // copy blockSize data
+            uint32_t bs2Write = blockSize;
             if (blockType == RLE_BLOCK) {
-                if (bytesInAcc == 0) {
-                    // read inStream once
-                    auto istb = inStrobe.read();
-                    accRegister.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = inStream.read();
-                    bitsInAcc += kStreamWidth;
-                    bytesInAcc += PARALLEL_BYTE;
-                }
-                ap_uint<kStreamWidth> tbuf = (uint8_t)(accRegister & 0xFF);
-                accRegister >>= 8;
-                bitsInAcc -= 8;
-                --bytesInAcc;
-                // write data to block stream
-                zstdBlockStream << tbuf;
-            } else {
-                /*
-                 * Use bytes from accumulator. Number of bytes in accumulator will always be less than PARALLEL_BYTE.
-                 * Number of bytes available in accumulator won't change during the iterations, but at last.
-                 */
-                ap_uint<kAccRegWidth> wbuf = accRegister;
-            // write block data
-            parser_write_block_data:
-                for (int i = 0; i < blockSize; i += PARALLEL_BYTE) {
-#pragma HLS PIPELINE II = 1
-                    if (i + bytesInAcc < blockSize) {
-                        auto istb = inStrobe.read();
-                        wbuf.range((bitsInAcc + kStreamWidth - 1), bitsInAcc) = inStream.read();
-                        bitsInAcc += kStreamWidth;
-                        bytesInAcc += PARALLEL_BYTE;
-                    }
-                    zstdBlockStream << wbuf.range(kStreamWidth - 1, 0);
-
-                    uint8_t bytesWritten = PARALLEL_BYTE;
-                    if (i + PARALLEL_BYTE > blockSize) bytesWritten = blockSize - i;
-                    wbuf >>= (bytesWritten * 8);
-                    bytesInAcc -= bytesWritten;
-                    bitsInAcc = bytesInAcc * 8;
-                }
-                accRegister = wbuf;
+                bs2Write = 1;
             }
+            /*
+             * Use bytes from accumulator. Number of bytes in accumulator will always be less than PARALLEL_BYTE.
+             * Number of bytes available in accumulator won't change during the iterations, but at last.
+             */
+            ap_uint<c_accRegWidth> wbuf = accRegister;
+            uint8_t bytesWritten = 0;
+            uint8_t updBInAcc = bytesInAcc;
+        // write block data
+        parser_write_block_data:
+            for (int i = 0; i < bs2Write; i += PARALLEL_BYTE) {
+#pragma HLS PIPELINE II = 1
+                if (i < (const int)(bs2Write - bytesInAcc)) {
+                    istb = inStrobe.read();
+                    wbuf.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+                    updBInAcc += PARALLEL_BYTE;
+                }
+                ap_uint<c_streamWidth> tmpV = wbuf;
+                zstdBlockStream << tmpV;
+
+                if (i > (const int)(bs2Write - PARALLEL_BYTE)) {
+                    bytesWritten = bs2Write - i;
+                    break;
+                }
+                wbuf >>= c_streamWidth;
+                updBInAcc -= PARALLEL_BYTE;
+            }
+            bytesInAcc = updBInAcc - bytesWritten;
+            accRegister = wbuf >> (bytesWritten * 8);
+            bitsInAcc = bytesInAcc * 8;
         }
         // check for checksum flag
         if (checksumFlag) {
-            auto istb = inStrobe.read();
-            inStream.read();
+            if (bytesInAcc < 4) {
+                istb = inStrobe.read();
+                accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+                bytesInAcc += PARALLEL_BYTE;
+            }
+            bytesInAcc -= 4;
+            accRegister >>= 32;
         }
     }
     blockValidStream << 0;
 }
 
-template <int PARALLEL_BYTE, int BLOCK_SIZE_KB>
-void decompressMultiFrames(hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& inStream,
+template <int PARALLEL_BYTE, int BLOCK_SIZE_KB, int LMO_WIDTH>
+void decompressMultiFrames(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
                            hls::stream<ap_uint<4> >& inStrobe,
-                           hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& literalStream,
-                           hls::stream<uint16_t>& litLenStream,
-                           hls::stream<ap_uint<16> >& offsetStream,
-                           hls::stream<uint16_t>& matLenStream,
+                           hls::stream<ap_uint<8 * PARALLEL_BYTE> >& literalStream,
+                           hls::stream<ap_uint<LMO_WIDTH> >& litLenStream,
+                           hls::stream<ap_uint<LMO_WIDTH> >& offsetStream,
+                           hls::stream<ap_uint<LMO_WIDTH> >& matLenStream,
                            hls::stream<bool>& litlenValidStream,
                            hls::stream<bool>& newBlockFlagStream) {
     // Decompress all zstd frames in a file
+    // const values
+    const uint32_t c_litInStreamDepth = (BLOCK_SIZE_KB * 1024) / PARALLEL_BYTE;
+    const uint32_t c_inStreamDepth = (4 * 1024) / PARALLEL_BYTE;
+    const uint16_t c_metaStreamDepth = 1024;
+    const uint16_t c_seqMetaStreamDepth = 2 * 1024;
+    const uint8_t c_minStreamDepth = 8;
     // Internal data streams
-    hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > zstdInStream("zstdInStream");
-    hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > litDecodeInStream("litDecodeInStream");
-    hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > seqDecodeInStream("seqDecodeInStream");
+    hls::stream<ap_uint<8 * PARALLEL_BYTE> > zstdInStream("zstdInStream");
+    hls::stream<ap_uint<8 * PARALLEL_BYTE> > litDecodeInStream("litDecodeInStream");
+    hls::stream<ap_uint<8 * PARALLEL_BYTE> > seqDecodeInStream("seqDecodeInStream");
 
     hls::stream<uint32_t> blockMetaStream("blockMetaStream");
     hls::stream<uint32_t> litMetaStream("litMetaStream");
     hls::stream<uint32_t> seqMetaStream("seqMetaStream");
 
+    hls::stream<uint32_t> fseTableLitStream("fseTableLitStream");
+    hls::stream<uint32_t> fseTableSeqStream("fseTableSeqStream");
+
     hls::stream<bool> blockValidStream("blockValidStream");
     hls::stream<bool> litValidStream("litValidStream");
     hls::stream<bool> seqValidStream("seqValidStream");
 
-#pragma HLS STREAM variable = zstdInStream depth = 1024      /*Reduced depth to 32 from 32K*/
-#pragma HLS STREAM variable = litDecodeInStream depth = 8192 /*TODO: Depth proportional to latency to produce \
-                                                                metadata*/
-#pragma HLS STREAM variable = seqDecodeInStream depth = 1024
+#pragma HLS STREAM variable = zstdInStream depth = c_inStreamDepth
+#pragma HLS STREAM variable = litDecodeInStream depth = c_litInStreamDepth
+#pragma HLS STREAM variable = seqDecodeInStream depth = c_inStreamDepth
 
-#pragma HLS STREAM variable = blockMetaStream depth = 8
-#pragma HLS STREAM variable = litMetaStream depth = 1024
-#pragma HLS STREAM variable = seqMetaStream depth = 1024
+#pragma HLS STREAM variable = blockMetaStream depth = c_minStreamDepth
+#pragma HLS STREAM variable = litMetaStream depth = c_metaStreamDepth
+#pragma HLS STREAM variable = seqMetaStream depth = c_metaStreamDepth
 
-#pragma HLS STREAM variable = blockValidStream depth = 4
-#pragma HLS STREAM variable = litValidStream depth = 4
-#pragma HLS STREAM variable = seqValidStream depth = 4
+#pragma HLS STREAM variable = fseTableLitStream depth = c_metaStreamDepth
+#pragma HLS STREAM variable = fseTableSeqStream depth = c_seqMetaStreamDepth
+
+#pragma HLS STREAM variable = blockValidStream depth = c_minStreamDepth
+#pragma HLS STREAM variable = litValidStream depth = c_minStreamDepth
+#pragma HLS STREAM variable = seqValidStream depth = c_minStreamDepth
 
 #pragma HLS dataflow
 
@@ -1044,14 +1072,17 @@ void decompressMultiFrames(hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& inStream,
 
     // parse blocks and decompress them
     parseBlockGenFSETable<PARALLEL_BYTE>(blockValidStream, blockMetaStream, zstdInStream, litValidStream, litMetaStream,
-                                         litDecodeInStream, seqValidStream, seqMetaStream, seqDecodeInStream);
+                                         fseTableLitStream, litDecodeInStream, seqValidStream, seqMetaStream,
+                                         fseTableSeqStream, seqDecodeInStream);
 
     // decode literals and forward to literal stream
-    decodeLiterals<PARALLEL_BYTE, BLOCK_SIZE_KB>(litValidStream, litMetaStream, litDecodeInStream, literalStream);
+    decodeLiterals<PARALLEL_BYTE, BLOCK_SIZE_KB>(litValidStream, litMetaStream, fseTableLitStream, litDecodeInStream,
+                                                 literalStream);
 
     // decode sequences and output literal lengths, offsets and match lengths
-    decodeSequence<PARALLEL_BYTE, BLOCK_SIZE_KB>(seqValidStream, seqMetaStream, seqDecodeInStream, litLenStream,
-                                                 offsetStream, matLenStream, litlenValidStream, newBlockFlagStream);
+    decodeSequence<PARALLEL_BYTE, BLOCK_SIZE_KB>(seqValidStream, seqMetaStream, fseTableSeqStream, seqDecodeInStream,
+                                                 litLenStream, offsetStream, matLenStream, litlenValidStream,
+                                                 newBlockFlagStream);
 }
 
 template <int PARALLEL_BYTE>
@@ -1060,10 +1091,10 @@ void kStreamReadZstdDecomp(hls::stream<ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> >& in
                            hls::stream<ap_uint<4> >& inStrobe,
                            uint64_t inputSize) {
     // write input data to core module from kernel axi stream
-    const uint16_t kStreamWidth = 8 * PARALLEL_BYTE;
+    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
     uint8_t lbWidth = inputSize % PARALLEL_BYTE;
     ap_uint<4> strb = PARALLEL_BYTE;
-    ap_axiu<kStreamWidth, 0, 0, 0> tmp;
+    ap_axiu<c_streamWidth, 0, 0, 0> tmp;
 ksReadZstIn:
     for (int i = 0; i < inputSize; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
@@ -1074,6 +1105,7 @@ ksReadZstIn:
     }
     // last strobe
     inStrobe << 0;
+    zstdCoreInStream << 0;
 }
 
 template <int STREAM_WIDTH>
@@ -1117,70 +1149,111 @@ ksWriteOut:
 
 } // details
 
-template <int PARALLEL_BYTE, int BLOCK_SIZE_KB, int LZ_MAX_OFFSET>
-void zstdDecompressStream(hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& inStream,
+/**
+ * @brief This module decompresses the ZStd compressed file read from input stream. It reads the
+ * input stream till valid strobe input is provided. It produces the decompressed data at the
+ * output stream.
+ *
+ * @tparam PARALLEL_BYTE Data stream width in bytes
+ * @tparam BLOCK_SIZE_KB ZStd block size
+ * @tparam LZ_MAX_OFFSET LZ history size or Window size
+ * @tparam LMO_WIDTH data width for offset data
+ *
+ * @param inStream input stream
+ * @param inStrobe valid input strobe stream
+ * @param outStream output stream
+ * @param endOfStream end of output stream flag stream
+ * @param sizeOutStream output data size
+ */
+template <int PARALLEL_BYTE, int BLOCK_SIZE_KB, int LZ_MAX_OFFSET, int LMO_WIDTH>
+void zstdDecompressStream(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
                           hls::stream<ap_uint<4> >& inStrobe,
-                          hls::stream<ap_uint<(8 * PARALLEL_BYTE)> >& outStream,
+                          hls::stream<ap_uint<8 * PARALLEL_BYTE> >& outStream,
                           hls::stream<bool>& endOfStream,
                           hls::stream<uint64_t>& sizeOutStream) {
-    // take compressed bitstream as input and generate a zstd decompressed output stream
-    hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > intlLiteralStream("intlLiteralStream");
-    hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > literalStream("literalStream");
-    hls::stream<uint16_t> intlLitLenStream("intlLitLenStream");
-    hls::stream<uint16_t> litLenStream("litLenStream");
-    hls::stream<ap_uint<16> > offsetStream("offsetStream");
-    hls::stream<uint16_t> matLenStream("matLenStream");
+    // take zstd compressed bitstream as input and generate a zstd decompressed output stream
+    // const values
+    const uint32_t c_intlLiteralStreamDepth = (BLOCK_SIZE_KB * 1024) / PARALLEL_BYTE;
+    const uint32_t c_literalStreamDepth = (36 * 1024) / (8 * PARALLEL_BYTE);
+    const uint16_t c_lmoStreamDepth = 1024;
+    const uint16_t c_litlenStreamDepth = 8 * 1024;
+    const uint8_t c_minStreamDepth = 4;
+    // internal streams
+    hls::stream<ap_uint<8 * PARALLEL_BYTE> > intlLiteralStream("intlLiteralStream");
+    hls::stream<ap_uint<8 * PARALLEL_BYTE> > literalStream("literalStream");
+    hls::stream<ap_uint<LMO_WIDTH> > intlLitLenStream("intlLitLenStream");
+    hls::stream<ap_uint<LMO_WIDTH> > litLenStream("litLenStream");
+    hls::stream<ap_uint<LMO_WIDTH> > offsetStream("offsetStream");
+    hls::stream<ap_uint<LMO_WIDTH> > matLenStream("matLenStream");
     hls::stream<bool> litlenValidStream("litlenValidStream");
     hls::stream<bool> newBlockFlagStream("newBlockFlagStream");
 
-#pragma HLS STREAM variable = intlLiteralStream depth = 8192
-#pragma HLS STREAM variable = intlLitLenStream depth = 8192
-#pragma HLS STREAM variable = litlenValidStream depth = 8192
-#pragma HLS STREAM variable = literalStream depth = 1024
-#pragma HLS STREAM variable = litLenStream depth = 1024
-#pragma HLS STREAM variable = offsetStream depth = 1024
-#pragma HLS STREAM variable = matLenStream depth = 1024
-#pragma HLS STREAM variable = newBlockFlagStream depth = 4
+#pragma HLS STREAM variable = intlLiteralStream depth = c_intlLiteralStreamDepth
+#pragma HLS STREAM variable = intlLitLenStream depth = c_litlenStreamDepth
+#pragma HLS STREAM variable = litlenValidStream depth = c_litlenStreamDepth
+#pragma HLS STREAM variable = literalStream depth = c_literalStreamDepth
+#pragma HLS STREAM variable = litLenStream depth = c_lmoStreamDepth
+#pragma HLS STREAM variable = offsetStream depth = c_lmoStreamDepth
+#pragma HLS STREAM variable = matLenStream depth = c_lmoStreamDepth
+#pragma HLS STREAM variable = newBlockFlagStream depth = c_minStreamDepth
 
 #pragma HLS dataflow
 
     // decode blocks in frames and generate steady stream of literals, literal lengths, offsets and match lengths
-    details::decompressMultiFrames<PARALLEL_BYTE, BLOCK_SIZE_KB>(inStream, inStrobe, intlLiteralStream,
-                                                                 intlLitLenStream, offsetStream, matLenStream,
-                                                                 litlenValidStream, newBlockFlagStream);
+    details::decompressMultiFrames<PARALLEL_BYTE, BLOCK_SIZE_KB, LMO_WIDTH>(
+        inStream, inStrobe, intlLiteralStream, intlLitLenStream, offsetStream, matLenStream, litlenValidStream,
+        newBlockFlagStream);
 
-    details::alignLiterals<PARALLEL_BYTE, uint16_t>(litlenValidStream, newBlockFlagStream, intlLiteralStream,
-                                                    intlLitLenStream, literalStream, litLenStream);
+    details::alignLiterals<PARALLEL_BYTE, LMO_WIDTH>(litlenValidStream, newBlockFlagStream, intlLiteralStream,
+                                                     intlLitLenStream, literalStream, litLenStream);
 
     // lz decompress for the aligned (to PARALLEL_BYTE bytes) stream of input
-    lzMultiByteDecompress<PARALLEL_BYTE, LZ_MAX_OFFSET, uint16_t>(litLenStream, literalStream, offsetStream,
-                                                                  matLenStream, outStream, endOfStream, sizeOutStream);
+    lzMultiByteDecompress<PARALLEL_BYTE, LZ_MAX_OFFSET, ap_uint<LMO_WIDTH>, ap_uint<LMO_WIDTH> >(
+        litLenStream, literalStream, offsetStream, matLenStream, outStream, endOfStream, sizeOutStream);
 }
 
-template <int PARALLEL_BYTE, int BLOCK_SIZE_KB, int LZ_MAX_OFFSET>
+/**
+ * @brief This module decompresses the ZStd compressed file read from input stream. It reads the
+ * input stream till the given input size. It produces the decompressed data at the output stream.
+ *
+ * @tparam PARALLEL_BYTE Data stream width in bytes
+ * @tparam BLOCK_SIZE_KB ZStd block size
+ * @tparam LZ_MAX_OFFSET LZ history size or Window size
+ * @tparam LMO_WIDTH data width for offset data
+ *
+ * @param inStream input stream
+ * @param outStream output stream
+ * @param outSizeStream output data size
+ * @param inputSize size of input data
+ */
+template <int PARALLEL_BYTE, int BLOCK_SIZE_KB, int LZ_MAX_OFFSET, int LMO_WIDTH = 15>
 void zstdDecompressCore(hls::stream<ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> >& inStream,
                         hls::stream<ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> >& outStream,
                         hls::stream<ap_axiu<64, 0, 0, 0> >& outSizeStream,
                         uint64_t inputSize) {
-    // Core function to use zstdDecompressStream module
+    // Core function to use zstdDecompressStream module with zlib data movers
+    // const values
+    const uint16_t c_inStreamDepth = 128 / PARALLEL_BYTE; // 32 for PARALLEL_BYTE=4 and 16 for PARALLEL_BYTE=8
+    const uint8_t c_minStreamDepth = 4;
+    // internal streams
     hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > zstdCoreInStream("zstdCoreInStream");
     hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > outputStream("outputStream");
     hls::stream<ap_uint<4> > inStrobe("inStrobe");
     hls::stream<bool> endOfStream("endOfStream");
     hls::stream<uint64_t> sizeOutStream("sizeOutStream");
 
-#pragma HLS STREAM variable = zstdCoreInStream depth = 32
-#pragma HLS STREAM variable = outputStream depth = 32
-#pragma HLS STREAM variable = inStrobe depth = 32
-#pragma HLS STREAM variable = sizeOutStream depth = 4
-#pragma HLS STREAM variable = endOfStream depth = 32
+#pragma HLS STREAM variable = zstdCoreInStream depth = c_inStreamDepth
+#pragma HLS STREAM variable = outputStream depth = c_inStreamDepth
+#pragma HLS STREAM variable = inStrobe depth = c_inStreamDepth
+#pragma HLS STREAM variable = sizeOutStream depth = c_minStreamDepth
+#pragma HLS STREAM variable = endOfStream depth = c_inStreamDepth
 
 #pragma HLS dataflow
 
     details::kStreamReadZstdDecomp<PARALLEL_BYTE>(inStream, zstdCoreInStream, inStrobe, inputSize);
 
-    zstdDecompressStream<PARALLEL_BYTE, BLOCK_SIZE_KB, LZ_MAX_OFFSET>(zstdCoreInStream, inStrobe, outputStream,
-                                                                      endOfStream, sizeOutStream);
+    zstdDecompressStream<PARALLEL_BYTE, BLOCK_SIZE_KB, LZ_MAX_OFFSET, LMO_WIDTH>(
+        zstdCoreInStream, inStrobe, outputStream, endOfStream, sizeOutStream);
 
     details::kStreamWriteZstdDecomp<8 * PARALLEL_BYTE>(outStream, outSizeStream, outputStream, endOfStream,
                                                        sizeOutStream);
@@ -1188,4 +1261,4 @@ void zstdDecompressCore(hls::stream<ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> >& inStr
 
 } // compression
 } // xf
-#endif
+#endif // _XFCOMPRESSION_ZSTD_DECOMPRESS_HPP_

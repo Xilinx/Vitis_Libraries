@@ -8,7 +8,6 @@
 #define ZLIB_INTERNAL
 #include "xlibz.hpp"
 using namespace xlibz::driver;
-extern singleton* sObj;
 #include "zlib.h"
 #include <stdio.h>
 /* ===========================================================================
@@ -44,7 +43,7 @@ int ZEXPORT uncompress(Bytef* dest, uLongf* destLen, const Bytef* source, uLong 
 
 #ifdef XILINX_CODE
     // Create Singleton instance
-    sObj = singleton::getInstance();
+    auto sObj = singleton::getInstance();
 
     // Driver class
     xzlib* driver = sObj->getDriverInstance(&stream, XILINX_INFLATE);
@@ -59,13 +58,14 @@ int ZEXPORT uncompress(Bytef* dest, uLongf* destLen, const Bytef* source, uLong 
 
         // strm, driver <key, value> pair
         sObj->releaseDriverObj(&stream);
-#ifdef ENABLE_XRM    
-        // Release XRM CU instance
-        sObj->releaseXrmCuInstance(); 
-#endif
         // End inflate stream
-        inflateEnd(&stream);
-        return Z_OK;
+        err = inflateEnd(&stream);
+
+        if (debytes == 0) {
+            return Z_BUF_ERROR;
+        } else {
+            return Z_OK;
+        }
     } else {
         // strm, driver <key, value> pair
         sObj->releaseDriverObj(&stream);

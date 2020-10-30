@@ -42,32 +42,32 @@ enum xfBlockType_t { RAW_BLOCK = 0, RLE_BLOCK, CMP_BLOCK, INVALID_BLOCK };
 enum xfLitBlockType_t { RAW_LBLOCK = 0, RLE_LBLOCK, CMP_LBLOCK, TREELESS_LBLOCK };
 enum xfSymbolCompMode_t { PREDEFINED_MODE = 0, RLE_MODE, FSE_COMPRESSED_MODE, REPEAT_MODE };
 
-const uint32_t kMagicNumber = 0xFD2FB528;
-const uint32_t kSkipFrameMagicNumber = 0x184D2A50; // till +15 values
-const uint32_t kSkippableFrameMask = 0xFFFFFFF0;
+const uint32_t c_magicNumber = 0xFD2FB528;
+const uint32_t c_skipFrameMagicNumber = 0x184D2A50; // till +15 values
+const uint32_t c_skippableFrameMask = 0xFFFFFFF0;
 
-const uint16_t kMaxCharLit = 35;
-const uint16_t kMaxCharDefOffset = 28;
-const uint16_t kMaxCharOffset = 31;
-const uint16_t kMaxCharMatchlen = 52;
-const uint16_t kMaxCharHuffman = 255;
+const uint16_t c_maxCharLit = 35;
+const uint16_t c_maxCharDefOffset = 28;
+const uint16_t c_maxCharOffset = 31;
+const uint16_t c_maxCharMatchlen = 52;
+const uint16_t c_maxCharHuffman = 255;
 
-const uint32_t kLLBase[kMaxCharLit + 1] = {0,  1,  2,   3,   4,   5,    6,    7,    8,    9,     10,    11,
-                                           12, 13, 14,  15,  16,  18,   20,   22,   24,   28,    32,    40,
-                                           48, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
-const uint32_t kMLBase[kMaxCharMatchlen + 1] = {
+const uint32_t c_baseLL[c_maxCharLit + 1] = {0,  1,  2,   3,   4,   5,    6,    7,    8,    9,     10,    11,
+                                             12, 13, 14,  15,  16,  18,   20,   22,   24,   28,    32,    40,
+                                             48, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
+const uint32_t c_baseML[c_maxCharMatchlen + 1] = {
     3,  4,  5,  6,  7,  8,  9,  10,  11,  12,  13,   14,   15,   16,   17,    18,    19,   20,
     21, 22, 23, 24, 25, 26, 27, 28,  29,  30,  31,   32,   33,   34,   35,    37,    39,   41,
     43, 47, 51, 59, 67, 83, 99, 131, 259, 515, 1027, 2051, 4099, 8195, 16387, 32771, 65539};
 
-const uint8_t kLLExtraBits[kMaxCharLit + 1] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  1,  1,
-                                               1, 1, 2, 2, 3, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-const uint8_t kMLExtraBits[kMaxCharMatchlen + 1] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0, 0,
-                                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  1,  1,  1, 1,
-                                                    2, 2, 3, 3, 4, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+const uint8_t c_extraBitsLL[c_maxCharLit + 1] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  1,  1,
+                                                 1, 1, 2, 2, 3, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+const uint8_t c_extraBitsML[c_maxCharMatchlen + 1] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0, 0,
+                                                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  1,  1,  1, 1,
+                                                      2, 2, 3, 3, 4, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
 // [litlen, offset, matlen]
-const int16_t defaultDistribution[kMaxCharLit + kMaxCharDefOffset + kMaxCharMatchlen + 3] = { // litlen
+const int16_t c_defaultDistribution[c_maxCharLit + c_maxCharDefOffset + c_maxCharMatchlen + 3] = { // litlen
     4, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 1, 1, 1, 1, 1, -1, -1, -1, -1,
     // offsets
     1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1,

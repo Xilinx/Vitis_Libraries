@@ -33,7 +33,7 @@
 #include "kernel_stream_utils.hpp"
 #include "lz_decompress.hpp"
 #include "lz_optional.hpp"
-#include "snappy_decompress.hpp"
+#include "snappy_decompress_details.hpp"
 
 #define MAX_OFFSET 65536
 #define HISTORY_SIZE MAX_OFFSET

@@ -27,7 +27,7 @@
 #include <math.h>
 
 #include "checksum_wrapper.hpp"
-#include "adler32.c"
+#include "zlib.h"
 auto constexpr PARALLEL_BYTES = 16;
 auto constexpr CONST_SIZE = 0x8000;
 auto constexpr HOST_BUFFER_SIZE = 10 * 1024;

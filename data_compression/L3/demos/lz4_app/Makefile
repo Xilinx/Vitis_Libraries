@@ -69,12 +69,6 @@ endif
 ifeq ($(findstring u280, $(DEVICE)), u280)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-ifeq ($(findstring vck, $(DEVICE)), vck)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 
 ifneq ($(findstring u200, $(DEVICE)), u200)
 ifneq ($(findstring u250, $(DEVICE)), u250)
@@ -124,7 +118,7 @@ CXXFLAGS +=-I$(CUR_DIR)/src/
 
 EXE_NAME := xil_lz4
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -cx $(BUILD_DIR)/compress.xclbin -c $(CUR_DIR)/sample.txt
+HOST_ARGS := -cx $(BUILD_DIR)/compress.xclbin -dx $(BUILD_DIR)/decompress.xclbin -v $(CUR_DIR)/sample.txt
 
 ifneq ($(HOST_ARCH), x86)
 	LDFLAGS += --sysroot=$(SYSROOT)

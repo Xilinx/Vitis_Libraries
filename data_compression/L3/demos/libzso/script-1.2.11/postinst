@@ -1,6 +1,0 @@
-#!/bin/sh -e
-link_org=$(ls -l /lib/x86_64-linux-gnu/libz.so.1 | egrep -o "(libz\.so\.[0-9]*\.[0-9]*\..*)")
-export link_file=${link_org}
-echo "libz.so.1 originally link to ${link_file}"
-ln -fs /opt/xilinx/zlib/libzxilinx.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1
-chmod 0755 /opt/xilinx/zlib/xzlib

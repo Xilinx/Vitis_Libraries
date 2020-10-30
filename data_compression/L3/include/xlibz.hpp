@@ -2,7 +2,9 @@
 #include "deflate.h"
 using namespace xf::compression;
 enum flow { XILINX_DEFLATE = 1, XILINX_INFLATE };
-
+#ifndef DEFLATE_BUFFER
+#define DEFLATE_BUFFER 1024 * 1024
+#endif
 namespace xlibz {
 namespace driver {
 class xzlib {
@@ -12,16 +14,30 @@ class xzlib {
     uint64_t xilinxHwCompress(z_streamp s, int level);
     uint64_t xilinxHwDecompress(z_streamp s);
     xzlib(z_streamp s, uint8_t flow);
+    ~xzlib();
     bool getXmode();
     bool getStatus();
     void struct_update(z_streamp s, int flow);
+#ifdef ENABLE_XRM
+    xrmCuProperty cuProp;
+    xrmCuResource cuRes;
+#endif
+    std::string instance_name;
+    uint8_t deviceId;
 
    private:
     xlibData m_info;
     bool m_xMode = false;
     bool m_status = false;
     uint8_t m_flow = 0;
-    uint32_t m_minInSize = 256 * 1024;
+    uint32_t m_minInSize = 32 * 1024;
+    unsigned char* m_deflateOutput;
+    unsigned char* m_deflateInput;
+    uint32_t m_outputSize = 0;
+    uint32_t m_inputSize = 0;
+    const uint32_t m_bufSize = DEFLATE_BUFFER;
+    bool m_instCreated = false;
+    std::string cu_id;
 };
 
 class singleton {
@@ -32,20 +48,22 @@ class singleton {
     static singleton* getInstance();
 
     // Zlib instance
-    xfZlib* getZlibInstance(z_streamp strm, std::string xclbin, int flow = XILINX_DEFLATE);
+    xfZlib* getZlibInstance(xzlib* driver, z_streamp strm, std::string xclbin, int flow = XILINX_DEFLATE);
 
 #ifdef ENABLE_XRM
     // XRM instance
-    xrmContext* getXrmContext(void);
+    xrmContext* getXrmContext(void) {
+        lock();
+        auto var = getXrmContext_p();
+        unlock();
+        return var;
+    }
 
     // XRM CU Instance
-    std::string getXrmCuInstance(const std::string& kernel_name);
+    void getXrmCuInstance(xzlib* driver, const std::string& kernel_name);
 
     // XRM Device ID
     uint8_t getXrmDeviceId();
-
-    // Release CU Instance
-    void releaseXrmCuInstance(void);
 #endif
     // Return current size of
     // Map data structure used to store ZLIB objects
@@ -71,11 +89,6 @@ class singleton {
     // Private constructor
     singleton();
 
-    // Single Object instance of Singleton
-    // Class, accessed by various clients within the
-    // same process
-    static singleton* instance;
-
     // Xilinx Zlib Object
     xfZlib* xlz;
 
@@ -84,10 +97,6 @@ class singleton {
 
 #ifdef ENABLE_XRM
     static xrmContext* ctx;
-    xrmCuProperty cuProp;
-    xrmCuResource cuRes;
-    std::string instance_name;
-    uint8_t deviceId;
 #endif
     // std::map container to hold
     // zstream structure pointers and xfZlib Class Object
@@ -98,6 +107,12 @@ class singleton {
     // zstream structure pointers and xzlib Class Object
     // Mapping (Driver Class)
     std::map<z_streamp, xzlib*> driverMapObj;
+    std::mutex m_mutex;
+    void lock() { m_mutex.lock(); }
+    void unlock() { m_mutex.unlock(); }
+#ifdef ENABLE_XRM
+    xrmContext* getXrmContext_p(void);
+#endif
 };
 }
 }

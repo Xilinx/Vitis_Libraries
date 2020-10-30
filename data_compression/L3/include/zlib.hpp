@@ -35,6 +35,8 @@
 #include <new>
 #include <map>
 #include <future>
+#include <queue>
+#include <assert.h>
 #ifdef ENABLE_XRM
 #include <xrm.h>
 #endif
@@ -60,11 +62,7 @@ const int gz_max_literal_count = 4096;
 #define MAX_DDCOMP_UNITS D_COMPUTE_UNIT
 
 // Default block size
-#ifdef USE_SINGLE_KERNEL_ZLIBC
 #define BLOCK_SIZE_IN_KB 32
-#else
-#define BLOCK_SIZE_IN_KB 1024
-#endif
 
 // Input and output buffer size
 #define INPUT_BUFFER_SIZE (8 * MEGA_BYTE)
@@ -79,26 +77,8 @@ const int gz_max_literal_count = 4096;
 
 // Maximum host buffer used to operate
 // per kernel invocation
-#ifdef USE_SINGLE_KERNEL_ZLIBC
 #define MAX_HOST_BUFFER_SIZE (2 * 1024 * 1024)
 #define HOST_BUFFER_SIZE (1024 * 1024)
-#else
-#define HOST_BUFFER_SIZE (PARALLEL_ENGINES * BLOCK_SIZE_IN_KB * 1024)
-#endif
-
-// Value below is used to associate with
-// Overlapped buffers, ideally overlapped
-// execution requires 2 resources per invocation
-#ifdef USE_SINGLE_KERNEL_ZLIBC
-#ifndef OVERLAP_BUF_COUNT
-#define OVERLAP_BUF_COUNT (2 * (MAX_HOST_BUFFER_SIZE / HOST_BUFFER_SIZE))
-#endif
-#else
-#define OVERLAP_BUF_COUNT 2
-#endif
-
-// Maximum number of blocks based on host buffer size
-#define MAX_NUMBER_BLOCKS (HOST_BUFFER_SIZE / (BLOCK_SIZE_IN_KB * 1024))
 
 #define DECOMP_OUT_SIZE 170
 
@@ -121,7 +101,7 @@ constexpr auto c_clinvalidbin = -42;
 constexpr auto c_clinvalidvalue = -30;
 constexpr auto c_clOutOfHostMemory = -6;
 constexpr auto c_headermismatch = 404;
-constexpr auto c_hardXclbinPath = "/opt/xilinx/zlib/u50_gen3x16_xdma_201920_3.xclbin";
+constexpr auto c_hardXclbinPath = "/opt/xilinx/apps/zlib/xclbin/u50_gen3x16_xdma_201920_3.xclbin";
 
 // Structure to hold
 // libzso - deflate/inflate info
@@ -251,11 +231,15 @@ struct zlib_aligned_allocator {
     }
 
     void deallocate(T* p, std::size_t num) { free(p); }
+
+    void deallocate(T* p) { free(p); }
 };
 
 namespace xf {
 namespace compression {
 
+void event_cb(cl_event event, cl_int cmd_status, void* data);
+class memoryManager;
 /**
  *  xfZlib class. Class containing methods for Zlib
  * compression and decompression to be executed on host side.
@@ -268,17 +252,26 @@ class xfZlib {
      *
      * @param in input byte sequence
      * @param out output byte sequence
-     * @param actual_size input size
-     * @param last_buffer
-     * @param host_buffer_size host buffer size
+     * @param input_size input size
+     * @param host_buffer_size buffer size for kernel
+     * @param cu comput unit name
      */
+    size_t compress_buffer(
+        uint8_t* in, uint8_t* out, size_t input_size, uint32_t host_buffer_size = HOST_BUFFER_SIZE, int cu = 0);
 
-    size_t compress_buffer(uint8_t* in,
-                           uint8_t* out,
-                           size_t actual_size,
-                           bool last_buffer = true,
-                           uint32_t host_buffer_size = HOST_BUFFER_SIZE,
-                           int cu = 0);
+    /**
+     * @brief This method does the overlapped execution of decompression
+     * where data transfers and kernel computation are overlapped
+     *
+     * @param in input byte sequence
+     * @param out output byte sequence
+     * @param input_size input size
+     * @param last_data last compressed output buffer
+     * @param last_buffer last input buffer
+     * @param cu comput unit name
+     */
+    size_t deflate_buffer(
+        uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, std::string cu);
 
     /**
      * @brief This method does serial execution of decompression
@@ -290,7 +283,7 @@ class xfZlib {
      * @param cu_run compute unit number
      */
 
-    uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run);
+    size_t decompress(uint8_t* in, uint8_t* out, size_t actual_size, size_t max_outbuf_size, int cu_run = 0);
 
     /**
      * @brief This API does end to end compression in a single call
@@ -389,6 +382,7 @@ class xfZlib {
     std::string getDeCompressKernel(int index);
 
    private:
+    friend void xf::compression::event_cb(cl_event event, cl_int cmd_status, void* data);
     void _enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, int cu);
     void _enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, int cu, uint32_t max_outbuf);
     size_t add_header(uint8_t* out, int level, int strategy, int window_bits);
@@ -400,6 +394,7 @@ class xfZlib {
     uint32_t m_checksum = 0;
     m_threadStatus m_checksumStatus = IDLE;
     std::thread* m_thread_checksum;
+    bool m_lastData = false;
 
     void gzip_headers(std::string& inFile, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes);
     void zlib_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes);
@@ -415,17 +410,16 @@ class xfZlib {
     uint8_t m_deviceid = 0;
     uint8_t m_max_cr = MAX_CR;
     int m_err_code = 0;
+    int m_derr_code = false;
     std::string m_infile;
     uint32_t m_kidx;
+    xf::compression::memoryManager* m_memoryManager;
+    uint8_t m_pending = 0;
 
     cl::Device m_device;
     cl::Context* m_context = nullptr;
     cl::Program* m_program = nullptr;
-#ifdef USE_SINGLE_KERNEL_ZLIBC
-    cl::CommandQueue* m_q[C_COMPUTE_UNIT] = {nullptr};
-#else
-    cl::CommandQueue* m_q[C_COMPUTE_UNIT * OVERLAP_BUF_COUNT] = {nullptr};
-#endif
+    cl::CommandQueue* m_def_q = nullptr;
     cl::CommandQueue* m_q_dec[D_COMPUTE_UNIT] = {nullptr};
     cl::CommandQueue* m_q_rd[D_COMPUTE_UNIT] = {nullptr};
     cl::CommandQueue* m_q_rdd[D_COMPUTE_UNIT] = {nullptr};
@@ -433,19 +427,11 @@ class xfZlib {
     cl::CommandQueue* m_q_wrd[D_COMPUTE_UNIT] = {nullptr};
 
     // Kernel declaration
-    cl::Kernel* checksum_kernel = {nullptr};
-    cl::Kernel* compress_kernel[C_COMPUTE_UNIT] = {nullptr};
-    cl::Kernel* huffman_kernel[H_COMPUTE_UNIT] = {nullptr};
+    cl::Kernel* checksum_kernel = nullptr;
+    cl::Kernel* compress_stream_kernel = nullptr;
     cl::Kernel* decompress_kernel[D_COMPUTE_UNIT] = {nullptr};
     cl::Kernel* data_writer_kernel[D_COMPUTE_UNIT] = {nullptr};
     cl::Kernel* data_reader_kernel[D_COMPUTE_UNIT] = {nullptr};
-
-    // Compression related
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_buf_in[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_buf_out[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_buf_zlibout[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_blksize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_compressSize[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
 #ifdef ENABLE_HW_CHECKSUM
     // Checksum related
@@ -460,16 +446,6 @@ class xfZlib {
     std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > h_dbufstream_zlibout[DOUT_BUFFERCOUNT + 1];
     std::vector<uint32_t, zlib_aligned_allocator<uint32_t> > h_dcompressSize_stream[DOUT_BUFFERCOUNT];
     std::vector<uint32_t, aligned_allocator<uint32_t> > h_dcompressStatus;
-
-    // Compress Device buffers
-    cl::Buffer* buffer_input[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_lz77_output[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_zlib_output[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_compress_size[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_inblk_size[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-
-    cl::Buffer* buffer_dyn_ltree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
-    cl::Buffer* buffer_dyn_dtree_freq[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
 #ifdef ENABLE_HW_CHECKSUM
     // Checksum Device buffers
@@ -495,6 +471,56 @@ class xfZlib {
     std::map<std::string, int> decKernelMap;
     std::map<std::string, int> lz77KernelMap;
     std::map<std::string, int> huffKernelMap;
+    std::mutex callBackMutex;
+};
+
+struct buffers {
+    uint8_t* h_buf_in;
+    uint8_t* h_buf_zlibout;
+    uint32_t* h_compressSize;
+    cl::Buffer* buffer_input;
+    cl::Buffer* buffer_zlib_output;
+    cl::Buffer* buffer_compress_size;
+    uint32_t input_size;
+    uint32_t store_size;
+    uint32_t allocated_size;
+    cl::Event wr_event;
+    cl::Event rd_event;
+    cl::Event cmp_event;
+    cl::Event chk_wr_event;
+    cl::Event chk_event;
+    bool finish;
+};
+
+class memoryManager {
+   public:
+    memoryManager(uint8_t max_buffers, cl::Context* context);
+    ~memoryManager();
+    buffers* createBuffer(size_t size);
+    buffers* getBuffer();
+    buffers* peekBuffer();
+    buffers* getLastBuffer();
+    bool isPending();
+
+   private:
+    void release();
+    std::queue<buffers*> freeBuffers;
+    std::queue<buffers*> busyBuffers;
+    uint8_t bufCount;
+    uint8_t maxBufCount;
+    cl::Context* mContext;
+    buffers* lastBuffer = NULL;
+
+    cl::Buffer* getBuffer(cl_mem_flags flag, size_t size, uint8_t* host_ptr);
+    void release(buffers* buffer);
+    bool is_sw_emulation() {
+        bool ret = false;
+        char* xcl_mode = getenv("XCL_EMULATION_MODE");
+        if ((xcl_mode != NULL) && !strcmp(xcl_mode, "sw_emu")) {
+            ret = true;
+        }
+        return ret;
+    }
 };
 }
 }

@@ -1,3 +1,0 @@
-#!/bin/sh -e
-echo "libz.so relink back to  ${link_file}"
-ln -fs  /lib/x86_64-linux-gnu/${link_file} /lib/x86_64-linux-gnu/libz.so.1
