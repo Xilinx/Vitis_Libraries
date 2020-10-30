@@ -1,0 +1,8 @@
+
+{
+    "operationName" : "pagerank",
+    "kernelName" : "kernel_pagerank_0",
+    "requestLoad" : 100,
+    "xclbinPath" : "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/xclbin/kernel_pagerank_0.xclbin",
+    "deviceNeeded" : 1
+}

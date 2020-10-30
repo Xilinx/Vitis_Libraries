@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <vector>
+
 #define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
 
 #define XCL_BANK0 XCL_BANK(0)
@@ -170,13 +171,14 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[7];
-    mext_o[0] = {XCL_MEM_DDR_BANK0, offsets, 0};
-    mext_o[1] = {XCL_MEM_DDR_BANK0, rows, 0};
-    mext_o[2] = {XCL_MEM_DDR_BANK0, NULL, 0};
-    mext_o[3] = {XCL_MEM_DDR_BANK0, rows, 0};
-    mext_o[4] = {XCL_MEM_DDR_BANK0, TC, 0};
-    mext_o[5] = {XCL_MEM_DDR_BANK0, offsets, 0};
-    mext_o[6] = {XCL_MEM_DDR_BANK0, rows, 0};
+
+    mext_o[0] = {2, offsets, TCkernel()};
+    mext_o[1] = {3, rows, TCkernel()};
+    mext_o[5] = {4, offsets, TCkernel()};
+    mext_o[6] = {5, rows, TCkernel()};
+    mext_o[2] = {6, NULL, TCkernel()};
+    mext_o[3] = {7, rows, TCkernel()};
+    mext_o[4] = {8, TC, TCkernel()};
 
     // create device buffer and map dev buf to host buf
     cl::Buffer offset1d_buf, row1d_buf, offset1_buf, row1_buf, offset2_buf, row2_buf, TC_buf;

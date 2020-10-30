@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,7 @@ int main(int argc, const char* argv[]) {
     int index = 0;
 
     int numVertices;
+    int maxVertexId;
     int numEdges;
 
     std::fstream offsetfstream(offsetfile.c_str(), std::ios::in);
@@ -123,6 +124,7 @@ int main(int argc, const char* argv[]) {
     offsetfstream.getline(line, sizeof(line));
     std::stringstream numOdata(line);
     numOdata >> numVertices;
+    numOdata >> maxVertexId;
 
     ap_uint<32>* offset32 = aligned_alloc<ap_uint<32> >(numVertices + 1);
     while (offsetfstream.getline(line, sizeof(line))) {
@@ -177,13 +179,13 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[7];
-    mext_o[0] = {XCL_MEM_DDR_BANK0, column32, 0};
-    mext_o[1] = {XCL_MEM_DDR_BANK0, offset32, 0};
-    mext_o[2] = {XCL_MEM_DDR_BANK0, queue, 0};
-    mext_o[3] = {XCL_MEM_DDR_BANK0, result32_dt, 0};
-    mext_o[4] = {XCL_MEM_DDR_BANK0, result32_ft, 0};
-    mext_o[5] = {XCL_MEM_DDR_BANK0, result32_pt, 0};
-    mext_o[6] = {XCL_MEM_DDR_BANK0, result32_lt, 0};
+    mext_o[0] = {2, column32, bfs()};
+    mext_o[1] = {3, offset32, bfs()};
+    mext_o[2] = {4, queue, bfs()};
+    mext_o[3] = {6, result32_dt, bfs()};
+    mext_o[4] = {8, result32_ft, bfs()};
+    mext_o[5] = {9, result32_pt, bfs()};
+    mext_o[6] = {10, result32_lt, bfs()};
 
     // create device buffer and map dev buf to host buf
     cl::Buffer column_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
@@ -221,6 +223,7 @@ int main(int argc, const char* argv[]) {
 
     // launch kernel and calculate kernel execution time
     std::cout << "kernel start------" << std::endl;
+    std::cout << "Input: numVertex=" << numVertices << ", numEdges=" << numEdges << std::endl;
     gettimeofday(&start_time, 0);
     int j = 0;
     bfs.setArg(j++, srcNodeID);

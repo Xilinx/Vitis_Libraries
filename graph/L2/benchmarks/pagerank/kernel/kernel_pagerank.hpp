@@ -16,8 +16,8 @@
 
 #include "xf_graph_L2.hpp"
 
-typedef double DT;
-// typedef float DT;
+// typedef double DT;
+typedef float DT;
 #define BITS_IN_BYTE (8)
 #define SIZE_OF_DOUBLE (8)
 #define doubleUnrollBin (3)

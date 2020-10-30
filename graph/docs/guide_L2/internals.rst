@@ -28,6 +28,10 @@ Design Internals
    kernels/TriangleCount.rst
    kernels/LabelPropagation.rst
    kernels/PageRank.rst
+   kernels/PageRankMultiChannels.rst
    kernels/CalcuDgree.rst
    kernels/ConvertCscCsr.rst
+   ../guide_L1/primitives/generalSimilarity.rst
+   ../guide_L1/primitives/sparseSimilarity.rst
+   ../guide_L1/primitives/denseSimilarity.rst
 
