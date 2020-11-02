@@ -57,6 +57,11 @@ DEVICE ?= xilinx_u50_gen3x16_xdma_201920_3
 # ###################### Setting up default value of HOST_ARCH ####################### 
 HOST_ARCH ?= x86
 
+# #################### Checking if DEVICE in blacklist #############################
+ifeq ($(findstring zc, $(DEVICE)), zc)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+
 # #################### Checking if DEVICE in whitelist ############################
 ifneq ($(findstring u50, $(DEVICE)), u50)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
@@ -64,7 +69,7 @@ endif
 
 # ######################## Setting up Project Variables #################################
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L3/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
@@ -81,12 +86,13 @@ export XCL_BINDIR = $(XCLBIN_DIR)
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L3/tests/cosineSimilaritySSDenseInt/test_cosineSimilaritySSDense.cpp
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/dense_similarity_multi_kernel/host/test_similarity.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
-CXXFLAGS += -I$(XFLIB_DIR)/L3/include
-LDFLAGS += -L$(XFLIB_DIR)/L3/lib
-LDFLAGS += -lgraphL3
-LDFLAGS += -L$(XILINX_XRM)/lib -lxrm 
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include/hw
+CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/dense_similarity_multi_kernel/host
+CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/dense_similarity_multi_kernel/kernel
+CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/../database/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/../quantitative_finance/L1/include
@@ -104,21 +110,20 @@ endif
 # ######################### Host compiler global settings ############################
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
-CXXFLAGS += -fmessage-length=0 -O3 -I$(XILINX_XRM)/include
+CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
-#ifeq ($(HOST_ARCH), x86)
-#LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
-#endif
+ifeq ($(HOST_ARCH), x86)
+LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+endif
 
 # ################### Setting package and image directory #######################
 PKG_OUT_DIR := package_$(TARGET)
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -weight $(CUR_DIR)/data/cosine_dense_weight.csr -golden $(CUR_DIR)/data/cosine_dense.mtx -topK 32 
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/denseSimilarityKernel.xclbin -weight $(XFLIB_DIR)/L2/tests/dense_similarity_multi_kernel/data/cosine_dense_weight.csr -golden $(XFLIB_DIR)/L2/tests/dense_similarity_multi_kernel/data/cosine_dense.mtx -similarityType 1 -dataType 0 -graphType 1 -sourceID 3 -topK 32 -v 120 -e 208
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
-LIBRARY_PATH =$(CUR_DIR)/../../lib:$(XILINX_XRT)/lib:$(XILINX_XRM)/lib:$(LD_LIBRARY_PATH)
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
@@ -153,6 +158,7 @@ endif
 BINARY_CONTAINER_denseSimilarityKernel_OBJS += $(TEMP_DIR)/denseSimilarityKernel.xo
 
 # ######################### Setting Targets of Makefile ################################
+DATA_DIR += $(CUR_DIR)/data
 
 .PHONY: all clean cleanall docs emconfig
 all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
@@ -192,9 +198,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	LD_LIBRARY_PATH=$(LIBRARY_PATH) XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 else
-	LD_LIBRARY_PATH=$(LIBRARY_PATH) $(EXE_FILE) $(HOST_ARGS)
+	$(EXE_FILE) $(HOST_ARGS)
 endif
 
 # ################################# Cleaning Rules ##################################

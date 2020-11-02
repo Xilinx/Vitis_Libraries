@@ -335,10 +335,16 @@ int cosineSimilaritySSDenseMultiCard(std::shared_ptr<xf::graph::L3::Handle>& han
         ret += eventQueue[i].wait();
     }
     for (int i = 0; i < topK; ++i) {
-        for (int j = 0; j < deviceNm; ++j) {
+        similarity[i] = similarity0[0][counter[0]];
+        int32_t prev = 0;
+        resultID[i] = resultID0[0][counter[0]];
+        counter[0]++;
+        for (int j = 1; j < deviceNm; ++j) {
             if (similarity[i] < similarity0[j][counter[j]]) {
                 similarity[i] = similarity0[j][counter[j]];
                 resultID[i] = resultID0[j][counter[j]];
+                counter[prev]--;
+                prev = j;
                 counter[j]++;
             }
         }
@@ -691,7 +697,9 @@ extern "C" void cosine_nbor_ss_fpga(uint32_t topK,
     // g.freeBuffers();
 }
 
-extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, xf::graph::Graph<int32_t, int32_t>** g) {
+extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
+                                                  uint32_t cuNm,
+                                                  xf::graph::Graph<int32_t, int32_t>** g) {
     //----------------- Text Parser --------------------------
     std::string opName;
     std::string kernelName;
@@ -746,13 +754,13 @@ extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, xf::gra
     handle0->setUp();
 
     //---------------- Run Load Graph -----------------------------------
-    for (int i = 0; i < deviceNeeded; ++i) {
-        (handle0->opsimdense)->loadGraphMultiCardNonBlocking(i, g[i][0]);
+    for (int i = 0; i < deviceNeeded * cuNm; ++i) {
+        (handle0->opsimdense)->loadGraphMultiCardNonBlocking(i / cuNm, i % cuNm, g[i][0]);
     }
 
     //--------------- Free and delete -----------------------------------
 
-    for (int i = 0; i < deviceNeeded; ++i) {
+    for (int i = 0; i < deviceNeeded * cuNm; ++i) {
         g[i]->freeBuffers();
         delete[] g[i]->numEdgesPU;
         delete[] g[i]->numVerticesPU;

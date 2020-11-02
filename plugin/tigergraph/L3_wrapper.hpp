@@ -172,6 +172,7 @@ int cosineSimilaritySSDenseMultiCard(std::shared_ptr<xf::graph::L3::Handle>& han
                                      float* similarity);
 int loadGraphMultiCard(std::shared_ptr<xf::graph::L3::Handle>& handle,
                        int32_t deviceNm,
+                       int32_t cuNm,
                        xf::graph::Graph<int32_t, int32_t>** g);
 } // L3
 } // graph

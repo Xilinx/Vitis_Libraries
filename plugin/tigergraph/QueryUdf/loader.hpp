@@ -55,7 +55,7 @@ int cosine_nbor_ss_fpga_wrapper(uint32_t topK,
                                 uint32_t* resultID,
                                 float* similarity);
 
-int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, xf::graph::Graph<int32_t, int32_t>** g);
+int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, uint32_t cuNm, xf::graph::Graph<int32_t, int32_t>** g);
 
 int cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
                             int32_t sourceLen,

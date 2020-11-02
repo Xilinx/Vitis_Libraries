@@ -207,10 +207,16 @@ int cosineSimilaritySSDenseMultiCard(xf::graph::L3::Handle& handle,
         ret += eventQueue[i].wait();
     }
     for (int i = 0; i < topK; ++i) {
-        for (int j = 0; j < deviceNm; ++j) {
+        similarity[i] = similarity0[0][counter[0]];
+        int32_t prev = 0;
+        resultID[i] = resultID0[0][counter[0]];
+        counter[0]++;
+        for (int j = 1; j < deviceNm; ++j) {
             if (similarity[i] < similarity0[j][counter[j]]) {
                 similarity[i] = similarity0[j][counter[j]];
                 resultID[i] = resultID0[j][counter[j]];
+                counter[prev]--;
+                prev = j;
                 counter[j]++;
             }
         }

@@ -252,30 +252,48 @@ inline double udf_loadgraph_cosinesim_ss_fpga(int64_t numVertices,
     xai::IDMap.clear();
     ListAccum<testResults> result;
     int32_t numEdges = vecLength - 3;
-    const int splitNm = 4; // kernel has 4 PUs, the input data should be splitted into 4 parts
-    const int channelNmPU = 4;
-    uint32_t deviceNeeded = 1;
 
-    int32_t* numVerticesPU = new int32_t[splitNm]; // vertex numbers in each PU
-    int32_t* numEdgesPU = new int32_t[splitNm];    // edge numbers in each PU
+    const int splitNm = 3;    // kernel has 4 PUs, the input data should be splitted into 4 parts
+    const int channelsPU = 4; // each PU has 4 HBM channels
+    const int cuNm = 2;
+    int deviceNeeded = 1;
+    const int channelW = 16;
+    int32_t nullVal = xai::NullVecValue;
 
-    int32_t number = (numVertices + splitNm - 1) / splitNm;
-    for (int i = 0; i < splitNm - 1; ++i) {
-        numVerticesPU[i] = number;
+    int32_t edgeAlign8 = ((numEdges + channelW - 1) / channelW) * channelW;
+    int general = ((numVertices + deviceNeeded * cuNm * splitNm * channelsPU - 1) /
+                   (deviceNeeded * cuNm * splitNm * channelsPU)) *
+                  channelsPU;
+    int rest = numVertices - general * (deviceNeeded * cuNm * splitNm - 1);
+    if (rest < 0) {
+        exit(1);
     }
-    numVerticesPU[splitNm - 1] = numVertices - number * (splitNm - 1);
+    int32_t** numVerticesPU = new int32_t*[deviceNeeded * cuNm]; // vertex numbers in each PU
+    int32_t** numEdgesPU = new int32_t*[deviceNeeded * cuNm];    // edge numbers in each PU
 
-    int32_t* numElementsPU;
-    numElementsPU = new int32_t[splitNm];
-    for (int i = 0; i < splitNm; i++) {
-        numEdgesPU[i] = numEdges;
-        numElementsPU[i] = numEdges * numVerticesPU[i];
+    int tmpID[deviceNeeded * cuNm * channelsPU * splitNm];
+    for (int i = 0; i < deviceNeeded * cuNm; ++i) {
+        numVerticesPU[i] = new int32_t[splitNm];
+        numEdgesPU[i] = new int32_t[splitNm];
+        for (int j = 0; j < splitNm; ++j) {
+            numEdgesPU[i][j] = numEdges;
+            for (int k = 0; k < channelsPU; ++k) {
+                tmpID[i * splitNm * channelsPU + j * channelsPU + k] = 0;
+            }
+        }
     }
+    //---------------- setup number of vertices in each PU ---------
+    for (int i = 0; i < deviceNeeded * cuNm; ++i) {
+        for (int j = 0; j < splitNm; ++j) {
+            numVerticesPU[i][j] = general;
+        }
+    }
+    numVerticesPU[deviceNeeded * cuNm - 1][splitNm - 1] = rest;
 
-    xf::graph::Graph<int32_t, int32_t>** g = new xf::graph::Graph<int32_t, int32_t>*[deviceNeeded];
+    xf::graph::Graph<int32_t, int32_t>** g = new xf::graph::Graph<int32_t, int32_t>*[deviceNeeded * cuNm];
     int fpgaNodeNm = 0;
-    for (int i = 0; i < deviceNeeded; ++i) {
-        g[i] = new xf::graph::Graph<int32_t, int32_t>("Dense", 4 * splitNm, numEdges, numVerticesPU);
+    for (int i = 0; i < deviceNeeded * cuNm; ++i) {
+        g[i] = new xf::graph::Graph<int32_t, int32_t>("Dense", 4 * splitNm, numEdges, numVerticesPU[i]);
         g[i][0].numEdgesPU = new int32_t[splitNm];
         g[i][0].numVerticesPU = new int32_t[splitNm];
         g[i][0].edgeNum = numEdges;
@@ -283,52 +301,39 @@ inline double udf_loadgraph_cosinesim_ss_fpga(int64_t numVertices,
         g[i][0].splitNum = splitNm;
         g[i][0].refID = fpgaNodeNm;
         for (int j = 0; j < splitNm; ++j) {
-            fpgaNodeNm += numVerticesPU[j];
-            g[i][0].numVerticesPU[j] = numVerticesPU[j];
-            g[i][0].numEdgesPU[j] = numEdgesPU[j] * numVerticesPU[j];
-        }
-    }
-
-    int32_t edgeAlign8 = ((numEdges + 7) / 8) * 8;
-    int32_t nullVal = xai::NullVecValue;
-    std::cout << nullVal << std::endl;
-    //    f_cast<float> tmpRead;
-
-    for (int i = 0; i < splitNm; ++i) {
-        int depth = ((numVerticesPU[i] + channelNmPU - 1) / channelNmPU) * edgeAlign8;
-        for (int j = 0; j < channelNmPU; ++j) {
-            for (int k = 0; k < depth; ++k) {
-                g[0][0].weightsDense[i * channelNmPU + j][k] = nullVal;
+            fpgaNodeNm += numVerticesPU[i][j];
+            int depth = ((numVerticesPU[i][j] + channelsPU - 1) / channelsPU) * edgeAlign8;
+            g[i][0].numVerticesPU[j] = numVerticesPU[i][j];
+            g[i][0].numEdgesPU[j] = depth;
+            for (int l = 0; l < channelsPU; ++l) {
+                for (int k = 0; k < depth; ++k) {
+                    g[i][0].weightsDense[j * channelsPU + l][k] = nullVal;
+                }
             }
         }
     }
-
-    int id = 0;
-    int total = 0;
-    int counter = 0;
-    int tmpID[channelNmPU * splitNm] = {0};
-    int row = 0;
-    int splitID = 0;
 
     int offset = 0;
-    for (int i = 0; i < splitNm; ++i) {
-        int cnt[channelNmPU] = {0};
-        int subChNm = (numVerticesPU[i] + channelNmPU - 1) / channelNmPU;
-        for (int j = 0; j < numVerticesPU[i]; ++j) {
-            int64_t lsb32 = oldVectors.get(offset).get(1);
-            int64_t msb32 = oldVectors.get(offset).get(2);
-            uint64_t fullID = ((msb32 << 32) & 0xFFFFFFF00000000) | (lsb32 & 0x00000000FFFFFFFF);
-            xai::IDMap.push_back(fullID);
-            for (int k = 3; k < vecLength; ++k) {
-                g[0][0].weightsDense[i * channelNmPU + j / subChNm][cnt[j / subChNm] * edgeAlign8 + k - 3] =
-                    oldVectors.get(offset).get(k);
+    for (int m = 0; m < deviceNeeded * cuNm; ++m) {
+        for (int i = 0; i < splitNm; ++i) {
+            int cnt[channelsPU] = {0};
+            int subChNm = (numVerticesPU[m][i] + channelsPU - 1) / channelsPU;
+            for (int j = 0; j < numVerticesPU[m][i]; ++j) {
+                int64_t lsb32 = oldVectors.get(offset).get(1);
+                int64_t msb32 = oldVectors.get(offset).get(2);
+                uint64_t fullID = ((msb32 << 32) & 0xFFFFFFF00000000) | (lsb32 & 0x00000000FFFFFFFF);
+                xai::IDMap.push_back(fullID);
+                for (int k = 3; k < vecLength; ++k) {
+                    g[m][0].weightsDense[i * channelsPU + j / subChNm][cnt[j / subChNm] * edgeAlign8 + k - 3] =
+                        oldVectors.get(offset).get(k);
+                }
+                cnt[j / subChNm] += 1;
+                offset++;
             }
-            cnt[j / subChNm] += 1;
-            offset++;
         }
     }
 
-    int ret = loadgraph_cosinesim_ss_dense_fpga(deviceNeeded, g);
+    int ret = loadgraph_cosinesim_ss_dense_fpga(deviceNeeded, cuNm, g);
     return ret;
 }
 
@@ -338,30 +343,47 @@ inline ListAccum<testResults> udf_cosinesim_ss_fpga(int64_t topK,
                                                     ListAccum<int64_t>& newVector) {
     ListAccum<testResults> result;
     int32_t numEdges = vecLength - 3;
-    const int splitNm = 4; // kernel has 4 PUs, the input data should be splitted into 4 parts
-    const int channelNmPU = 4;
-    uint32_t deviceNeeded = 1;
+    const int splitNm = 3;    // kernel has 4 PUs, the input data should be splitted into 4 parts
+    const int channelsPU = 4; // each PU has 4 HBM channels
+    const int cuNm = 2;
+    int deviceNeeded = 1;
+    const int channelW = 16;
+    int32_t nullVal = xai::NullVecValue;
 
-    int32_t* numVerticesPU = new int32_t[splitNm]; // vertex numbers in each PU
-    int32_t* numEdgesPU = new int32_t[splitNm];    // edge numbers in each PU
-
-    int32_t number = (numVertices + splitNm - 1) / splitNm;
-    for (int i = 0; i < splitNm - 1; ++i) {
-        numVerticesPU[i] = number;
+    int32_t edgeAlign8 = ((numEdges + channelW - 1) / channelW) * channelW;
+    int general = ((numVertices + deviceNeeded * cuNm * splitNm * channelsPU - 1) /
+                   (deviceNeeded * cuNm * splitNm * channelsPU)) *
+                  channelsPU;
+    int rest = numVertices - general * (deviceNeeded * cuNm * splitNm - 1);
+    if (rest < 0) {
+        exit(1);
     }
-    numVerticesPU[splitNm - 1] = numVertices - number * (splitNm - 1);
+    int32_t** numVerticesPU = new int32_t*[deviceNeeded * cuNm]; // vertex numbers in each PU
+    int32_t** numEdgesPU = new int32_t*[deviceNeeded * cuNm];    // edge numbers in each PU
 
-    int32_t* numElementsPU;
-    numElementsPU = new int32_t[splitNm];
-    for (int i = 0; i < splitNm; i++) {
-        numEdgesPU[i] = numEdges;
-        numElementsPU[i] = numEdges * numVerticesPU[i];
+    int tmpID[deviceNeeded * cuNm * channelsPU * splitNm];
+    for (int i = 0; i < deviceNeeded * cuNm; ++i) {
+        numVerticesPU[i] = new int32_t[splitNm];
+        numEdgesPU[i] = new int32_t[splitNm];
+        for (int j = 0; j < splitNm; ++j) {
+            numEdgesPU[i][j] = numEdges;
+            for (int k = 0; k < channelsPU; ++k) {
+                tmpID[i * splitNm * channelsPU + j * channelsPU + k] = 0;
+            }
+        }
     }
+    //---------------- setup number of vertices in each PU ---------
+    for (int i = 0; i < deviceNeeded * cuNm; ++i) {
+        for (int j = 0; j < splitNm; ++j) {
+            numVerticesPU[i][j] = general;
+        }
+    }
+    numVerticesPU[deviceNeeded * cuNm - 1][splitNm - 1] = rest;
 
-    xf::graph::Graph<int32_t, int32_t>** g = new xf::graph::Graph<int32_t, int32_t>*[deviceNeeded];
+    xf::graph::Graph<int32_t, int32_t>** g = new xf::graph::Graph<int32_t, int32_t>*[deviceNeeded * cuNm];
     int fpgaNodeNm = 0;
-    for (int i = 0; i < deviceNeeded; ++i) {
-        g[i] = new xf::graph::Graph<int32_t, int32_t>("Dense", 4 * splitNm, numEdges, numVerticesPU);
+    for (int i = 0; i < deviceNeeded * cuNm; ++i) {
+        g[i] = new xf::graph::Graph<int32_t, int32_t>("Dense", 4 * splitNm, numEdges, numVerticesPU[i]);
         g[i][0].numEdgesPU = new int32_t[splitNm];
         g[i][0].numVerticesPU = new int32_t[splitNm];
         g[i][0].edgeNum = numEdges;
@@ -369,15 +391,12 @@ inline ListAccum<testResults> udf_cosinesim_ss_fpga(int64_t topK,
         g[i][0].splitNum = splitNm;
         g[i][0].refID = fpgaNodeNm;
         for (int j = 0; j < splitNm; ++j) {
-            fpgaNodeNm += numVerticesPU[j];
-            g[i][0].numVerticesPU[j] = numVerticesPU[j];
-            g[i][0].numEdgesPU[j] = numEdgesPU[j] * numVerticesPU[j];
+            fpgaNodeNm += numVerticesPU[i][j];
+            int depth = ((numVerticesPU[i][j] + channelsPU - 1) / channelsPU) * edgeAlign8;
+            g[i][0].numVerticesPU[j] = numVerticesPU[i][j];
+            g[i][0].numEdgesPU[j] = depth;
         }
     }
-
-    int32_t edgeAlign8 = ((numEdges + 7) / 8) * 8;
-    int32_t nullVal = xai::NullVecValue;
-
     //---------------- Generate Source Indice and Weight Array -------
     unsigned int sourceLen = edgeAlign8; // sourceIndice array length
     int32_t* sourceWeight =
@@ -396,7 +415,7 @@ inline ListAccum<testResults> udf_cosinesim_ss_fpga(int64_t topK,
     memset(similarity, 0, topK * sizeof(float));
 
     //---------------- Run L3 API -----------------------------------
-    int ret = cosinesim_ss_dense_fpga(deviceNeeded, sourceLen, sourceWeight, topK, g, resultID, similarity);
+    int ret = cosinesim_ss_dense_fpga(deviceNeeded * cuNm, sourceLen, sourceWeight, topK, g, resultID, similarity);
 
     for (unsigned int k = 0; k < topK; k++) {
         result += testResults(VERTEX(xai::IDMap[resultID[k]]), similarity[k]);
