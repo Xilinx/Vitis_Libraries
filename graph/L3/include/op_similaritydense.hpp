@@ -49,9 +49,9 @@ class opSimilarityDense : public opBase {
 
     void loadGraph(xf::graph::Graph<uint32_t, float> g); // loadGraph only support loading of CSR format graph
 
-    void loadGraphMultiCardNonBlocking(int deviceID, xf::graph::Graph<int32_t, int32_t> g);
+    void loadGraphMultiCardNonBlocking(int deviceID, int cuID, xf::graph::Graph<int32_t, int32_t> g);
 
-    void loadGraphMultiCardBlocking(int deviceID, xf::graph::Graph<int32_t, int32_t> g);
+    void loadGraphMultiCardBlocking(int deviceID, int cuID, xf::graph::Graph<int32_t, int32_t> g);
 
     static int compute(unsigned int deviceID,
                        unsigned int cuID,
@@ -199,6 +199,7 @@ class opSimilarityDense : public opBase {
     static void bufferInitInt(clHandle* hds,
                               std::string instanceName0,
                               xf::graph::Graph<int32_t, int32_t> g,
+                              int cuID,
                               int similarityType,
                               int dataType,
                               int32_t topK,
