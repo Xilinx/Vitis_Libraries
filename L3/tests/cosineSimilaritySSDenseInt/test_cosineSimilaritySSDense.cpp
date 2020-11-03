@@ -175,16 +175,15 @@ int main(int argc, const char* argv[]) {
     int counter = 0;
     int row = 0;
     int splitID = 0;
-    line[1024] = {0};
+    char line2[1024] = {0};
     int32_t VidChannel = (numVerticesPU[0][0] + channelsPU - 1) / channelsPU;
-    int32_t prev = 0;
     int32_t cntG = 0;
     int32_t cntSrc = 0;
     int32_t srcBegin = (sourceID - 1) * numEdges;
     int32_t srcEnd = sourceID * numEdges - 1;
-    uint32_t currentNode = 0;
-    while (weightfstream.getline(line, sizeof(line))) {
-        std::stringstream data(line);
+    int32_t currentNode = 0;
+    while (weightfstream.getline(line2, sizeof(line2))) {
+        std::stringstream data(line2);
         int32_t tmp;
         data >> tmp;
         g[cntG][0].weightsDense[row][tmpID[cntG * channelsPU * splitNm + row] * edgeAlign8 + id] = tmp;
