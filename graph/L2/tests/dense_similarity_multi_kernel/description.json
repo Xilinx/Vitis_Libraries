@@ -1,12 +1,14 @@
 {
-    "gui": false, 
-    "name": "Xilinx Int Type Single Source Dense Matrix Cosine Similarity ", 
+    "gui": true, 
+    "name": "Xilinx Integer Dense Similarity Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
         "u50"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [
+        "zc"
+    ], 
     "platform_properties": {
         "u50": {
             "v++": {
@@ -18,13 +20,12 @@
             }
         }
     }, 
+    "data": [
+        "./data"
+    ], 
     "launch": [
         {
-            "cmd_args": "-weight PROJECT/data/cosine_dense_weight.csr -golden PROJECT/data/cosine_dense.mtx -topK 32 ", 
-            "ld_library_path": ["PROJECT/../../lib",
-                                "$(XILINX_XRT)/lib",
-                                "$(XILINX_XRM)/lib"
-                                ],
+            "cmd_args": " -xclbin BUILD/denseSimilarityKernel.xclbin -weight LIB_DIR/L2/tests/dense_similarity_multi_kernel/data/cosine_dense_weight.csr -golden LIB_DIR/L2/tests/dense_similarity_multi_kernel/data/cosine_dense.mtx -similarityType 1 -dataType 0 -graphType 1 -sourceID 3 -topK 32 -v 120 -e 208", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -32,22 +33,17 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L3/tests/cosineSimilaritySSDenseInt/test_cosineSimilaritySSDense.cpp", 
+                "LIB_DIR/L2/tests/dense_similarity_multi_kernel/host/test_similarity.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/include"
+                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L2/include/hw", 
+                "LIB_DIR/L2/tests/dense_similarity_multi_kernel/host", 
+                "LIB_DIR/L2/tests/dense_similarity_multi_kernel/kernel", 
+                "LIB_DIR/ext/xcl2"
             ], 
-            "options": "-O3 -I$(XILINX_XRM)/include"
-        }, 
-        "linker": {
-            "librarypaths": [
-                "LIB_DIR/L3/lib"
-            ], 
-            "libraries": [
-                "graphL3"
-            ], 
-            "options": "-L$(XILINX_XRM)/lib -lxrm "
+            "options": "-O3 "
         }
     }, 
     "v++": {
@@ -224,7 +220,7 @@
         }
     ], 
     "testinfo": {
-        "disable": true, 
+        "disable": false, 
         "jobs": [
             {
                 "index": 0, 
@@ -238,14 +234,17 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
+                    "vitis_hw_build": 800, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10
                 }
             }
         ], 
         "targets": [
-            "vitis_hw_build", 
-            "vitis_hw_run"
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
         ], 
         "category": "canary"
     }

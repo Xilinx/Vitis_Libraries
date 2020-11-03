@@ -392,8 +392,8 @@ std::vector<CosineVecValue> makeCosineVector(SnomedConcept concept,
 }
 }
 
-int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, xf::graph::Graph<int32_t, int32_t>** g) {
-    std::cout << "INFO: Running Loaf Graph for Single Source Cosine Similarity Dense API\n\n";
+int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, uint32_t cuNm, xf::graph::Graph<int32_t, int32_t>** g) {
+    std::cout << "INFO: Running Load Graph for Single Source Cosine Similarity Dense API\n\n";
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
@@ -409,7 +409,7 @@ int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, xf::graph::Graph<in
 
     // load the symbol
     std::cout << "INFO: Loading symbol loadgraph_cosinesim_ss_dense_fpga...\n";
-    typedef void (*load_t)(uint32_t, xf::graph::Graph<int32_t, int32_t>**);
+    typedef void (*load_t)(uint32_t, uint32_t, xf::graph::Graph<int32_t, int32_t>**);
 
     // reset errors
     dlerror();
@@ -424,7 +424,7 @@ int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, xf::graph::Graph<in
 
     // use it to do the calculation
     std::cout << "INFO: Calling 'loadgraph_cosinesim_ss_dense_fpga'...\n";
-    runT(deviceNeeded, g);
+    runT(deviceNeeded, cuNm, g);
 
     // close the library
     std::cout << "INFO: Closing library...\n";

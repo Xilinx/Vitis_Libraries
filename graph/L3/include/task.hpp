@@ -380,8 +380,6 @@ inline void worker(
         unsigned int channelID = resR.channelId;
         std::string instanceName = resR.instanceName;
 
-        std::cout << "INFO: Allocated deviceID = " << deviceID << "\t cuID = " << cuID << "\t channelID = " << channelID
-                  << "\t instance name = " << instanceName.c_str() << std::endl;
 #ifdef __DEBUG__
         std::cout << "INFO: Allocated deviceID = " << deviceID << "\t cuID = " << cuID << "\t channelID = " << channelID
                   << "\t instance name = " << instanceName.c_str() << std::endl;

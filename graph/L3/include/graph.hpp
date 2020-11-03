@@ -134,10 +134,11 @@ class Graph {
     */
 
     Graph(std::string type, ID_T axis, ID_T numEdges, ID_T* numVerticesPU) {
+        ID_T channelsW = 16;
         if (type == "Dense") {
             axiNm = axis;
             weightsDense = new VALUE_T*[axiNm];
-            int edgeAlign8 = ((numEdges + 7) / 8) * 8;
+            int edgeAlign8 = ((numEdges + channelsW - 1) / channelsW) * channelsW;
             for (int i = 0; i < axiNm / 4; ++i) {
                 int depth = (numVerticesPU[i] + 3) / 4 * edgeAlign8;
                 for (int j = 0; j < 4; ++j) {
@@ -489,8 +490,10 @@ class Graph {
             delete[] offsetsSplitted;
             delete[] indicesSplitted;
             delete[] weightsSplitted;
+            splitted = 0;
         }
     }
+
 }; // end class Graph;
 
 } // end of graph
