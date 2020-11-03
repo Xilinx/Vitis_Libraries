@@ -62,7 +62,7 @@ CPP_PATH += $(XFLIB_DIR)/L3/src/xf_graph_L3_handle.cpp
 CPP_PATH += $(XFLIB_DIR)/L3/src/xf_graph_L3.cpp
 
 $(libGRAPHL3): ${CPP_PATH}
-	/usr/bin/g++ -fPIC $(CXXFLAGS) -rdynamic -shared -o $@ $^ $(LDFLAGS) -Wl,--export-dynamic
+	/usr/bin/g++ -fPIC $(CXXFLAGS) -rdynamic -shared -o $@ $^ $(LDFLAGS) -w -Wl,--export-dynamic
 
 ############################## Cleaning Rules ##############################
 clean:

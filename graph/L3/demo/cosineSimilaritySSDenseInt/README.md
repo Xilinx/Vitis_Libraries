@@ -1,10 +1,11 @@
 # Xilinx Single Source Cosine Similarity Demo
 
-## Build xclbin
+This is a demo of running Graph L3 library. It has two main steps, firstly `Build dynamic library and xclbin`, it may take several hours. Once the xclbin is ready, users should follow steps in the `Run demo`.
+
+## Build dynamic library and xclbin
     ./build.sh
 
 ## Run demo
-    vim ../../tests/cosineSimilaritySSDenseInt/config.json
-    change PROJECTPATH in config.json to graph library's absolute path 
+    change PROJECTPATH in ../../tests/cosineSimilaritySSDenseInt/config.json to graph library's absolute path 
     ./run.sh
 
