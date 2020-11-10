@@ -60,9 +60,10 @@ void opSimilaritySparse::freeSimSparse() {
     delete[] handles;
 };
 
-void opSimilaritySparse::cuRelease(xrmContext* ctx, xrmCuResource resR) {
-    while (!xrmCuRelease(ctx, &resR)) {
+void opSimilaritySparse::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
+    while (!xrmCuRelease(ctx, resR)) {
     };
+    free(resR);
 };
 
 void opSimilaritySparse::init(
@@ -338,7 +339,7 @@ int opSimilaritySparse::compute(unsigned int deviceID,
                                 unsigned int cuID,
                                 unsigned int channelID,
                                 xrmContext* ctx,
-                                xrmCuResource resR,
+                                xrmCuResource* resR,
                                 std::string instanceName,
                                 clHandle* handles,
                                 uint32_t similarityType,
@@ -386,7 +387,7 @@ int opSimilaritySparse::computeKNN(unsigned int deviceID,
                                    unsigned int cuID,
                                    unsigned int channelID,
                                    xrmContext* ctx,
-                                   xrmCuResource resR,
+                                   xrmCuResource* resR,
                                    std::string instanceName,
                                    clHandle* handles,
                                    uint32_t similarityType,
@@ -440,7 +441,7 @@ int opSimilaritySparse::computeAP(unsigned int deviceID,
                                   unsigned int cuID,
                                   unsigned int channelID,
                                   xrmContext* ctx,
-                                  xrmCuResource resR,
+                                  xrmCuResource* resR,
                                   std::string instanceName,
                                   clHandle* handles,
                                   uint32_t similarityType,
@@ -513,7 +514,7 @@ int opSimilaritySparse::computeAPKNN(unsigned int deviceID,
                                      unsigned int cuID,
                                      unsigned int channelID,
                                      xrmContext* ctx,
-                                     xrmCuResource resR,
+                                     xrmCuResource* resR,
                                      std::string instanceName,
                                      clHandle* handles,
                                      uint32_t similarityType,

@@ -47,7 +47,7 @@ class opBFS : public opBase {
                        unsigned int cuID,
                        unsigned int channelID,
                        xrmContext* ctx,
-                       xrmCuResource resR,
+                       xrmCuResource* resR,
                        std::string instanceName,
                        clHandle* handles,
                        uint32_t sourceID,
@@ -90,7 +90,7 @@ class opBFS : public opBase {
                               std::vector<cl::Event>* evIn,
                               cl::Event* evOut);
 
-    static void cuRelease(xrmContext* ctx, xrmCuResource resR);
+    static void cuRelease(xrmContext* ctx, xrmCuResource* resR);
 };
 } // L3
 } // graph

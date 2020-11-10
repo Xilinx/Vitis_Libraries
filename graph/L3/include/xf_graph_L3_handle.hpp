@@ -60,6 +60,7 @@ class Handle {
         unsigned int requestLoad = 100;
         char* xclbinFile;                    // xclbin full path
         unsigned int deviceNeeded = 0;       // requested FPGA device number
+        unsigned int cuPerBoard = 1;         // requested FPGA device number
         std::vector<unsigned int> deviceIDs; // deviceID
         void setKernelName(char* input) {
             std::string tmp = "";
@@ -166,25 +167,75 @@ class Handle {
 
     std::thread loadXclbinNonBlock(unsigned int deviceId, char* xclbinName);
 
-    void initOpPageRank(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpPageRank(const char* kernelName,
+                        char* xclbinFile,
+                        char* kernelAlias,
+                        unsigned int requestLoad,
+                        unsigned int deviceNeeded,
+                        unsigned int cuPerBoard);
 
-    void initOpSP(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpSP(const char* kernelName,
+                  char* xclbinFile,
+                  char* kernelAlias,
+                  unsigned int requestLoad,
+                  unsigned int deviceNeeded,
+                  unsigned int cuPerBoard);
 
-    void initOpTriangleCount(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpTriangleCount(const char* kernelName,
+                             char* xclbinFile,
+                             char* kernelAlias,
+                             unsigned int requestLoad,
+                             unsigned int deviceNeeded,
+                             unsigned int cuPerBoard);
 
-    void initOpLabelPropagation(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpLabelPropagation(const char* kernelName,
+                                char* xclbinFile,
+                                char* kernelAlias,
+                                unsigned int requestLoad,
+                                unsigned int deviceNeeded,
+                                unsigned int cuPerBoard);
 
-    void initOpBFS(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpBFS(const char* kernelName,
+                   char* xclbinFile,
+                   char* kernelAlias,
+                   unsigned int requestLoad,
+                   unsigned int deviceNeeded,
+                   unsigned int cuPerBoard);
 
-    void initOpWCC(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpWCC(const char* kernelName,
+                   char* xclbinFile,
+                   char* kernelAlias,
+                   unsigned int requestLoad,
+                   unsigned int deviceNeeded,
+                   unsigned int cuPerBoard);
 
-    void initOpSCC(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpSCC(const char* kernelName,
+                   char* xclbinFile,
+                   char* kernelAlias,
+                   unsigned int requestLoad,
+                   unsigned int deviceNeeded,
+                   unsigned int cuPerBoard);
 
-    void initOpConvertCsrCsc(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpConvertCsrCsc(const char* kernelName,
+                             char* xclbinFile,
+                             char* kernelAlias,
+                             unsigned int requestLoad,
+                             unsigned int deviceNeeded,
+                             unsigned int cuPerBoard);
 
-    void initOpSimSparse(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpSimSparse(const char* kernelName,
+                         char* xclbinFile,
+                         char* kernelAlias,
+                         unsigned int requestLoad,
+                         unsigned int deviceNeeded,
+                         unsigned int cuPerBoard);
 
-    void initOpSimDense(const char* kernelName, char* xclbinFile, char* kernelAlias, unsigned int requestLoad);
+    void initOpSimDense(const char* kernelName,
+                        char* xclbinFile,
+                        char* kernelAlias,
+                        unsigned int requestLoad,
+                        unsigned int deviceNeeded,
+                        unsigned int cuPerBoard);
 };
 } // L3
 } // graph

@@ -58,9 +58,10 @@ void opPageRank::freePG() {
     delete[] handles;
 };
 
-void opPageRank::cuRelease(xrmContext* ctx, xrmCuResource resR) {
-    while (!xrmCuRelease(ctx, &resR)) {
+void opPageRank::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
+    while (!xrmCuRelease(ctx, resR)) {
     };
+    free(resR);
 };
 
 void opPageRank::init(
@@ -354,7 +355,7 @@ int opPageRank::compute(unsigned int deviceID,
                         unsigned int cuID,
                         unsigned int channelID,
                         xrmContext* ctx,
-                        xrmCuResource resR,
+                        xrmCuResource* resR,
                         std::string instanceName,
                         clHandle* handles,
                         float alpha,
