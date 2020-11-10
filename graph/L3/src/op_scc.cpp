@@ -27,16 +27,9 @@ namespace L3 {
 
 void createHandleSCC(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
     // Platform related operations
-    TimePointType l_tp_start_time4 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time4;
-    TimePointType l_tp_start_time = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
     handle.context = cl::Context(handle.device);
-    double compute_times = showTimeData("context Time", l_tp_start_time, l_tp_calculation_time);
-    TimePointType l_tp_start_time3 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time3;
     handle.q = cl::CommandQueue(handle.context, handle.device,
                                 CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
@@ -44,12 +37,7 @@ void createHandleSCC(clHandle& handle, const char* kernelName, const char* pXclb
     handle.xclBins = xcl::import_binary_file(pXclbin);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    double compute_times3 = showTimeData("middle Time", l_tp_start_time3, l_tp_calculation_time3);
-    TimePointType l_tp_start_time5 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time5;
     handle.program = cl::Program(handle.context, devices2, handle.xclBins);
-    double compute_times5 = showTimeData("cl::program Time", l_tp_start_time5, l_tp_calculation_time5);
-    double compute_times4 = showTimeData("single handle create Time", l_tp_start_time4, l_tp_calculation_time4);
 }
 
 uint32_t opSCC::cuPerBoardSCC;
@@ -70,14 +58,13 @@ void opSCC::freeSCC() {
     delete[] handles;
 };
 
-void opSCC::cuRelease(xrmContext* ctx, xrmCuResource resR) {
-    while (!xrmCuRelease(ctx, &resR)) {
+void opSCC::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
+    while (!xrmCuRelease(ctx, resR)) {
     };
+    free(resR);
 };
 
 void opSCC::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad) {
-    TimePointType l_tp_start_time4 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time4;
     dupNmSCC = 100 / requestLoad;
     cuPerBoardSCC /= dupNmSCC;
     uint32_t bufferNm = 10;
@@ -89,18 +76,12 @@ void opSCC::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32
     handles[0].cuID = cuIDs[0];
     handles[0].dupID = 0;
     std::thread th[maxCU];
-    double compute_times4 = showTimeData("opencl pre Time", l_tp_start_time4, l_tp_calculation_time4);
     // th[0] = std::thread(&createHandleSCC, std::ref(handles[cnt]), kernelName, xclbinFile, deviceIDs[cnt]);
     createHandleSCC(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
-    TimePointType l_tp_start_time5 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time5;
     handles[cnt].buffer = new cl::Buffer[bufferNm];
-    double compute_times5 = showTimeData("opencl buffer Time", l_tp_start_time5, l_tp_calculation_time5);
     unsigned int prev = deviceIDs[0];
     unsigned int prevCU = cuIDs[0];
     deviceOffset.push_back(0);
-    TimePointType l_tp_start_time6 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time6;
     for (int i = 1; i < maxCU; ++i) {
         handles[i].deviceID = deviceIDs[i];
         handles[i].cuID = cuIDs[i];
@@ -113,10 +94,6 @@ void opSCC::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32
             deviceOffset.push_back(i);
         }
     }
-    double compute_times6 = showTimeData("single Time", l_tp_start_time6, l_tp_calculation_time6);
-    // for (int j = 0; j < maxCU; ++j) {
-    //     th[j].join();
-    // }
     delete[] handleID;
 }
 
@@ -241,7 +218,7 @@ int opSCC::compute(unsigned int deviceID,
                    unsigned int cuID,
                    unsigned int channelID,
                    xrmContext* ctx,
-                   xrmCuResource resR,
+                   xrmCuResource* resR,
                    std::string instanceName,
                    clHandle* handles,
                    xf::graph::Graph<uint32_t, uint32_t> g,

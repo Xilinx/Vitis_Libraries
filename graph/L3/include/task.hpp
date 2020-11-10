@@ -32,6 +32,7 @@
 #include <xrm.h>
 
 #include <thread>
+#include <unistd.h>
 namespace xf {
 namespace graph {
 namespace L3 {
@@ -54,27 +55,51 @@ class openXRM {
     std::thread loadXclbinNonBlock(unsigned int deviceId, char* xclbinName) {
         return std::thread(xrmLoadOneDevice, ctx, deviceId, xclbinName);
     }
-    xrmCuResource allocCU(const char* kernelName, const char* kernelAlias, int requestLoad) {
+
+    void allocCU(xrmCuResource* resR, const char* kernelName, const char* kernelAlias, int requestLoad) {
         xrmCuProperty propR;
-        xrmCuResource resR;
         memset(&propR, 0, sizeof(xrmCuProperty));
-        memset(&resR, 0, sizeof(xrmCuResource));
         strcpy(propR.kernelName, kernelName);
         strcpy(propR.kernelAlias, kernelAlias);
         propR.devExcl = false;
         propR.requestLoad = requestLoad;
         propR.poolId = 0;
-        uint64_t interval = 1;
+        uint64_t interval = 30000;
 
-        uint32_t ret = xrmCuBlockingAlloc(ctx, &propR, interval, &resR);
+        uint32_t ret = xrmCuBlockingAlloc(ctx, &propR, interval, resR);
 
         if (ret != 0) {
             printf("Error: Fail to alloc cu (xrmCuBlockingAlloc) \n");
-            memset(&resR, 0, sizeof(xrmCuResource));
+        };
+    }
+
+    xrmCuListResource allocMultiCU(
+        const char* kernelName, const char* kernelAlias, int requestLoad, int deviceNumber, int cuNumber) {
+        xrmCuListProperty CuListProp;
+        xrmCuListResource CuListRes;
+
+        memset(&CuListProp, 0, sizeof(xrmCuListProperty));
+        memset(&CuListRes, 0, sizeof(xrmCuListResource));
+
+        std::cout << "request cu number = " << cuNumber << std::endl;
+        CuListProp.cuNum = cuNumber * deviceNumber;
+        for (int i = 0; i < CuListProp.cuNum; ++i) {
+            strcpy(CuListProp.cuProps[i].kernelName, kernelName);
+            strcpy(CuListProp.cuProps[i].kernelAlias, kernelAlias);
+            CuListProp.cuProps[i].devExcl = false;
+            CuListProp.cuProps[i].requestLoad = requestLoad;
+            CuListProp.cuProps[i].poolId = 0;
+        }
+        uint64_t interval = 1;
+        uint32_t ret = xrmCuListBlockingAlloc(ctx, &CuListProp, interval, &CuListRes);
+        if (ret != 0) {
+            printf("Error: Fail to alloc cu (xrmCuListBlockingAlloc) \n");
+            memset(&CuListRes, 0, sizeof(xrmCuListResource));
         };
 
-        return resR;
+        return CuListRes;
     }
+
     unsigned int fetchCuInfo(const char* kernelName,
                              const char* kernelAlias,
                              int requestLoad,
@@ -189,7 +214,7 @@ class task {
                              unsigned int ID2,
                              unsigned int ID3,
                              class openXRM* xrm,
-                             xrmCuResource resR,
+                             xrmCuResource* resR,
                              std::string instance) = 0;
     };
 
@@ -201,7 +226,7 @@ class task {
                      unsigned int ID2,
                      unsigned int ID3,
                      class openXRM* xrm,
-                     xrmCuResource resR,
+                     xrmCuResource* resR,
                      std::string instance) {
             std::thread w1(std::move(held), ID, ID2, ID3, xrm->ctx, resR, instance);
             w1.detach();
@@ -229,7 +254,7 @@ class task {
                  unsigned int ID2,
                  unsigned int ID3,
                  class openXRM* xrm,
-                 xrmCuResource resR,
+                 xrmCuResource* resR,
                  std::string instance) {
         content->execute(ID, ID2, ID3, xrm, resR, instance);
     }
@@ -339,7 +364,7 @@ class event {
 
 template <typename Q, typename F, typename... Args>
 auto createL3(Q& q, F&& f, Args&&... args) -> event<int> {
-    typedef std::packaged_task<int(int, int, int, xrmContext*, xrmCuResource, std::string)> task_type;
+    typedef std::packaged_task<int(int, int, int, xrmContext*, xrmCuResource*, std::string)> task_type;
     task_type t(std::bind(std::forward<F>(f), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                           std::placeholders::_4, std::placeholders::_5, std::placeholders::_6,
                           std::forward<Args>(args)...));
@@ -348,16 +373,32 @@ auto createL3(Q& q, F&& f, Args&&... args) -> event<int> {
     return e;
 }
 
-inline void worker(
-    queue& q, class openXRM* xrm, std::string kernelName, std::string kernelAlias, unsigned int requestLoad) {
+inline void worker(queue& q,
+                   class openXRM* xrm,
+                   std::string kernelName,
+                   std::string kernelAlias,
+                   unsigned int requestLoad,
+                   unsigned int deviceNm,
+                   unsigned int cuNm) {
+    int requestNm = deviceNm * cuNm;
+    xrmCuResource* resR[requestNm];
+#ifdef __DEBUG__
+    int requestCnt = 0;
+#endif
     while (true) {
 #ifdef __DEBUG__
         std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_start_compute =
             std::chrono::high_resolution_clock::now();
 #endif
-
-        auto t = q.getWork();
-
+        class task t[requestNm];
+        for (int i = 0; i < requestNm; ++i) {
+            t[i] = q.getWork();
+            resR[i] = (xrmCuResource*)malloc(sizeof(xrmCuResource));
+            memset(resR[i], 0, sizeof(xrmCuResource));
+        }
+        for (int i = 0; i < requestNm; ++i) {
+            if (!t[i].valid()) exit(1);
+        }
 #ifdef __DEBUG__
         std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_compute_time =
             std::chrono::high_resolution_clock::now();
@@ -367,25 +408,37 @@ inline void worker(
         std::cout << "-----------------------------------------------" << std::endl;
 #endif
 
-        if (!t.valid()) break;
-
 #ifdef __DEBUG__
         std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_start_compute2 =
             std::chrono::high_resolution_clock::now();
 #endif
-        xrmCuResource resR = xrm->allocCU(kernelName.c_str(), kernelAlias.c_str(), requestLoad);
-
-        unsigned int deviceID = resR.deviceId;
-        unsigned int cuID = resR.cuId;
-        unsigned int channelID = resR.channelId;
-        std::string instanceName = resR.instanceName;
+        for (int i = 0; i < requestNm; ++i) {
+            xrm->allocCU(resR[i], kernelName.c_str(), kernelAlias.c_str(), requestLoad);
+        }
 
 #ifdef __DEBUG__
-        std::cout << "INFO: Allocated deviceID = " << deviceID << "\t cuID = " << cuID << "\t channelID = " << channelID
-                  << "\t instance name = " << instanceName.c_str() << std::endl;
+        std::cout << "INFO: Allocated deviceID = " << resR[i]->deviceId << "\t cuID = " << resR[i]->cuId
+                  << "\t channelID = " << resR[i]->channelId << "\t instance name = " << resR[i]->instanceName
+                  << "\t request ID = " << requestCnt << "\t number per while " << requestNm << std::endl;
 #endif
 
-        t.execute(deviceID, cuID, channelID, xrm, resR, instanceName);
+        for (int i = 0; i < requestNm; i++) {
+            unsigned int deviceID = i / cuNm;
+            unsigned int cuID = i % cuNm;
+            unsigned int ID;
+            for (int j = 0; j < requestNm; ++j) {
+                if ((deviceID == resR[j][0].deviceId) && (cuID == resR[j][0].cuId)) {
+                    ID = j;
+                }
+            }
+            unsigned int channelID = resR[ID][0].channelId;
+            std::string instanceName = resR[ID][0].instanceName;
+            t[i].execute(deviceID, cuID, channelID, xrm, resR[ID], instanceName);
+        }
+        usleep(1000);
+#ifdef __DEBUG__
+        requestCnt++;
+#endif
 
 #ifdef __DEBUG__
         std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_compute_time2 =

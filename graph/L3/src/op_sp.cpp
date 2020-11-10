@@ -27,16 +27,9 @@ namespace L3 {
 
 void createHandleSP(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
     // Platform related operations
-    TimePointType l_tp_start_time4 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time4;
-    TimePointType l_tp_start_time = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
     handle.context = cl::Context(handle.device);
-    double compute_times = showTimeData("context Time", l_tp_start_time, l_tp_calculation_time);
-    TimePointType l_tp_start_time3 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time3;
     handle.q = cl::CommandQueue(handle.context, handle.device,
                                 CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
@@ -44,12 +37,7 @@ void createHandleSP(clHandle& handle, const char* kernelName, const char* pXclbi
     handle.xclBins = xcl::import_binary_file(pXclbin);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    double compute_times3 = showTimeData("middle Time", l_tp_start_time3, l_tp_calculation_time3);
-    TimePointType l_tp_start_time5 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time5;
     handle.program = cl::Program(handle.context, devices2, handle.xclBins);
-    double compute_times5 = showTimeData("cl::program Time", l_tp_start_time5, l_tp_calculation_time5);
-    double compute_times4 = showTimeData("single handle create Time", l_tp_start_time4, l_tp_calculation_time4);
 }
 
 uint32_t opSP::cuPerBoardSP;
@@ -71,14 +59,13 @@ void opSP::freeSP() {
     delete[] handles;
 };
 
-void opSP::cuRelease(xrmContext* ctx, xrmCuResource resR) {
-    while (!xrmCuRelease(ctx, &resR)) {
+void opSP::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
+    while (!xrmCuRelease(ctx, resR)) {
     };
+    free(resR);
 };
 
 void opSP::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad) {
-    TimePointType l_tp_start_time4 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time4;
     dupNmSP = 100 / requestLoad;
     cuPerBoardSP /= dupNmSP;
     uint32_t bufferNm = 8;
@@ -90,25 +77,15 @@ void opSP::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_
     handles[0].cuID = cuIDs[0];
     handles[0].dupID = 0;
     std::thread th[maxCU];
-    double compute_times4 = showTimeData("opencl pre Time", l_tp_start_time4, l_tp_calculation_time4);
-    // th[0] = std::thread(&createHandleSP, std::ref(handles[cnt]), kernelName,
-    // xclbinFile, deviceIDs[cnt]);
     createHandleSP(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
-    TimePointType l_tp_start_time5 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time5;
     handles[cnt].buffer = new cl::Buffer[bufferNm];
-    double compute_times5 = showTimeData("opencl buffer Time", l_tp_start_time5, l_tp_calculation_time5);
     unsigned int prev = deviceIDs[0];
     unsigned int prevCU = cuIDs[0];
     deviceOffset.push_back(0);
-    TimePointType l_tp_start_time6 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time6;
     for (int i = 1; i < maxCU; ++i) {
         handles[i].deviceID = deviceIDs[i];
         handles[i].cuID = cuIDs[i];
         handles[i].dupID = i % dupNmSP;
-        // th[i] = std::thread(&createHandleSP, std::ref(handles[i]), kernelName,
-        // xclbinFile, deviceIDs[i]);
         createHandleSP(handles[i], kernelName, xclbinFile, deviceIDs[i]);
         handles[i].buffer = new cl::Buffer[bufferNm];
         if (deviceIDs[i] != prev) {
@@ -116,10 +93,6 @@ void opSP::init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_
             deviceOffset.push_back(i);
         }
     }
-    double compute_times6 = showTimeData("single Time", l_tp_start_time6, l_tp_calculation_time6);
-    // for (int j = 0; j < maxCU; ++j) {
-    //     th[j].join();
-    // }
     delete[] handleID;
 }
 
@@ -137,20 +110,14 @@ void opSP::migrateMemObj(clHandle* hds,
 void runF(std::future<void> fut) {
     fut.get();
 }
+
 void loadGraphCoreSP(clHandle* hds, int nrows, int nnz, xf::graph::Graph<uint32_t, float> g) {
-    TimePointType l_tp_start_time0 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time0;
-    TimePointType l_tp_start_time2 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time2;
     cl::Device device = hds[0].device;
     cl::Context context = hds[0].context;
     cl::CommandQueue q = hds[0].q;
     uint32_t* ddrQue;
     ddrQue = aligned_alloc<uint32_t>(10 * 300 * 4096);
-    double compute_times2 = showTimeData("Vide buffer Time", l_tp_start_time2, l_tp_calculation_time2);
 
-    TimePointType l_tp_start_time3 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time3;
     std::vector<cl_mem_ext_ptr_t> mext_in = std::vector<cl_mem_ext_ptr_t>(4);
 #ifndef USE_HBM
     // DDR Settings
@@ -175,7 +142,6 @@ void loadGraphCoreSP(clHandle* hds, int nrows, int nnz, xf::graph::Graph<uint32_
                                   sizeof(float) * nnz, &mext_in[2]); // weight
     hds[0].buffer[5] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                   sizeof(uint32_t) * 10 * 300 * 4096, &mext_in[3]); // ddrQue
-    double compute_times3 = showTimeData("create clbuffer Time", l_tp_start_time3, l_tp_calculation_time3);
 
     // add buffers to migrate
     std::vector<cl::Event> eventSecond(1);
@@ -186,13 +152,9 @@ void loadGraphCoreSP(clHandle* hds, int nrows, int nnz, xf::graph::Graph<uint32_
     ob_in.push_back(hds[0].buffer[2]);
     ob_in.push_back(hds[0].buffer[5]);
 
-    TimePointType l_tp_start_time4 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time4;
     q.enqueueMigrateMemObjects(ob_in, 0, nullptr, &eventSecond[0]); // 0 : migrate from host to dev
 
     eventSecond[0].wait();
-    double compute_times4 = showTimeData("migrate Time", l_tp_start_time4, l_tp_calculation_time4);
-    double compute_times0 = showTimeData("single load Time", l_tp_start_time0, l_tp_calculation_time0);
 };
 
 void opSP::loadGraph(xf::graph::Graph<uint32_t, float> g) {
@@ -210,15 +172,12 @@ void opSP::loadGraph(xf::graph::Graph<uint32_t, float> g) {
             th[j] = std::thread(std::move(t), &handles[j], nrows, nnz, g);
         }
     }
-    TimePointType l_tp_start_time2 = std::chrono::high_resolution_clock::now();
-    TimePointType l_tp_calculation_time2;
     for (int j = 0; j < maxCU; ++j) {
         if ((handles[j].cuID == 0) && (handles[j].dupID == 0)) {
             fut[j].get();
             th[j].join();
         }
     }
-    double compute_times2 = showTimeData("Fut get Time", l_tp_start_time2, l_tp_calculation_time2);
     cnt = 0;
     for (int j = 0; j < maxCU; ++j) {
         if (!((handles[j].cuID == 0) && (handles[j].dupID == 0))) {
@@ -341,7 +300,7 @@ int opSP::compute(unsigned int deviceID,
                   unsigned int cuID,
                   unsigned int channelID,
                   xrmContext* ctx,
-                  xrmCuResource resR,
+                  xrmCuResource* resR,
                   std::string instanceName,
                   clHandle* handles,
                   uint32_t nSource,

@@ -16,9 +16,8 @@
 
 source /opt/xilinx/xrt/setup.sh
 source /opt/xilinx/xrm/setup.sh
-source /opt/xilinx/Vitis/2020.1/settings64.sh
-export DEVICE=/opt/xilinx/platforms/xilinx_u50_gen3x16_xdma_201920_3/xilinx_u50_gen3x16_xdma_201920_3.xpfm
 cd ../../lib/
 ./build_so.sh
-cd ../tests/cosineSimilaritySSDenseInt
-make build TARGET=hw
+cd ../tests/cosineSimilaritySSDenseIntBench
+make host TARGET=hw
+LD_LIBRARY_PATH=../../lib:/opt/xilinx/xrm/lib:/opt/xilinx/xrt/lib:$LD_LIBRARY_PATH  build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/host.exe -weight ./data/cosine_dense_weight.csr -golden ./data/cosine_dense.mtx -topK 100

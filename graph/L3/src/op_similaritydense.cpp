@@ -58,9 +58,11 @@ void opSimilarityDense::freeSimDense() {
     delete[] handles;
 };
 
-void opSimilarityDense::cuRelease(xrmContext* ctx, xrmCuResource resR) {
-    while (!xrmCuRelease(ctx, &resR)) {
+void opSimilarityDense::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
+    // while (!xrmCuRelease(ctx, &resR)) {
+    while (!xrmCuRelease(ctx, resR)) {
     };
+    free(resR);
 };
 
 void opSimilarityDense::init(
@@ -432,6 +434,11 @@ void opSimilarityDense::bufferInitInt(clHandle* hds,
     cl::Device device = hds[0].device;
 
     instanceName0 = "denseSimilarityKernel:{" + instanceName0 + "}";
+    //    if (cuID == 0) {
+    //        instanceName0 = "denseSimilarityKernel_0:{" + instanceName0 + "}";
+    //    } else {
+    //        instanceName0 = "denseSimilarityKernel_1:{" + instanceName0 + "}";
+    //    }
     const char* instanceName = instanceName0.c_str();
     // Creating Context and Command Queue for selected Device
     cl::Context context = hds[0].context;
@@ -545,7 +552,7 @@ int opSimilarityDense::compute(unsigned int deviceID,
                                unsigned int cuID,
                                unsigned int channelID,
                                xrmContext* ctx,
-                               xrmCuResource resR,
+                               xrmCuResource* resR,
                                std::string instanceName,
                                clHandle* handles,
                                uint32_t similarityType,
@@ -592,7 +599,7 @@ int opSimilarityDense::computeInt(unsigned int deviceID,
                                   unsigned int cuID,
                                   unsigned int channelID,
                                   xrmContext* ctx,
-                                  xrmCuResource resR,
+                                  xrmCuResource* resR,
                                   std::string instanceName,
                                   clHandle* handles,
                                   int32_t similarityType,
@@ -639,7 +646,7 @@ int opSimilarityDense::computeKNN(unsigned int deviceID,
                                   unsigned int cuID,
                                   unsigned int channelID,
                                   xrmContext* ctx,
-                                  xrmCuResource resR,
+                                  xrmCuResource* resR,
                                   std::string instanceName,
                                   clHandle* handles,
                                   uint32_t similarityType,
@@ -692,7 +699,7 @@ int opSimilarityDense::computeAP(unsigned int deviceID,
                                  unsigned int cuID,
                                  unsigned int channelID,
                                  xrmContext* ctx,
-                                 xrmCuResource resR,
+                                 xrmCuResource* resR,
                                  std::string instanceName,
                                  clHandle* handles,
                                  uint32_t similarityType,
@@ -757,7 +764,7 @@ int opSimilarityDense::computeAPKNN(unsigned int deviceID,
                                     unsigned int cuID,
                                     unsigned int channelID,
                                     xrmContext* ctx,
-                                    xrmCuResource resR,
+                                    xrmCuResource* resR,
                                     std::string instanceName,
                                     clHandle* handles,
                                     uint32_t similarityType,

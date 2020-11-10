@@ -39,8 +39,8 @@ int main(int argc, const char* argv[]) {
     int deviceNeeded = 1;
     const int channelW = 16;
 
-    int numVertices = 1580; // total number of vertex read from file
-    int numEdges = 200;     // total number of edge read from file
+    int numVertices = 1024 * 14 * cuNm * deviceNeeded; // total number of vertex read from file
+    int numEdges = 200;                                // total number of edge read from file
     int32_t edgeAlign8 = ((numEdges + channelW - 1) / channelW) * channelW;
     int general = ((numVertices + deviceNeeded * cuNm * splitNm * channelsPU - 1) /
                    (deviceNeeded * cuNm * splitNm * channelsPU)) *
@@ -84,7 +84,7 @@ int main(int argc, const char* argv[]) {
 
     if (!parser.getCmdOption("-topK", tmpStr)) { // topK
         topK = 100;
-        std::cout << "INFO: topK is not set, use 32 by default" << std::endl;
+        std::cout << "INFO: topK is not set, use 100 by default" << std::endl;
     } else {
         topK = std::stoi(tmpStr);
     }
@@ -168,63 +168,39 @@ int main(int argc, const char* argv[]) {
             g[i][0].numEdgesPU[j] = depth;
         }
     }
-    std::fstream weightfstream(filenameWeight.c_str(), std::ios::in);
-    if (!weightfstream) {
-        std::cout << "Error: " << filenameWeight << "weight file doesn't exist !" << std::endl;
-        exit(1);
+
+    int32_t requestNm = 10;
+    int sourceLen = edgeAlign8; // sourceIndice array length
+    int32_t** sourceWeight = new int32_t*[requestNm];
+    for (int i = 0; i < requestNm; ++i) {
+        sourceWeight[i] = xf::graph::L3::aligned_alloc<int32_t>(sourceLen); // weights of source vertex's out members
+        memset(sourceWeight[i], 0, sourceLen * sizeof(int32_t));
     }
 
-    int sourceLen = edgeAlign8;                                               // sourceIndice array length
-    int32_t* sourceWeight = xf::graph::L3::aligned_alloc<int32_t>(sourceLen); // weights of source vertex's out members
-    memset(sourceWeight, 0, sourceLen * sizeof(int32_t));
+    int minVal = -2 ^ 11;
+    int maxVal = 2 ^ 11;
+    srand(1);
 
-    int id = 0;
-    int counter = 0;
-    int row = 0;
-    int splitID = 0;
-    char line2[1024] = {0};
-    int32_t VidChannel = (numVerticesPU[0][0] + channelsPU - 1) / channelsPU;
-    int32_t cntG = 0;
-    int32_t cntSrc = 0;
-    int32_t srcBegin = (sourceID - 1) * numEdges;
-    int32_t srcEnd = sourceID * numEdges - 1;
-    int32_t currentNode = 0;
-    while (weightfstream.getline(line2, sizeof(line2))) {
-        std::stringstream data(line2);
-        int32_t tmp;
-        data >> tmp;
-        g[cntG][0].weightsDense[row][tmpID[cntG * channelsPU * splitNm + row] * edgeAlign8 + id] = tmp;
-        if ((currentNode >= srcBegin) && (currentNode <= srcEnd)) {
-            sourceWeight[cntSrc] = tmp;
-            cntSrc++;
-        }
-        currentNode++;
-        id++;
-        counter++;
-        if (counter == (numVerticesPU[cntG][splitID] * numEdges)) {
-            splitID++;
-            counter = 0;
-            row++;
-            if (splitID < splitNm) {
-                VidChannel = (numVerticesPU[cntG][splitID] + channelsPU - 1) / channelsPU;
-            } else {
-                cntG++;
-                splitID = 0;
-                row = 0;
-                if (cntG < deviceNeeded * cuNm) {
-                    VidChannel = (numVerticesPU[cntG][splitID] + channelsPU - 1) / channelsPU;
+    std::cout << "INFO: Begin generating random data" << std::endl;
+    for (int k = 0; k < deviceNeeded * cuNm; ++k) {
+        for (int i = 0; i < splitNm; ++i) {
+            int ID0 = (numVerticesPU[k][i] + channelsPU - 1) / channelsPU;
+            for (int j = 0; j < channelsPU; ++j) {
+                for (int l = 0; l < ID0; ++l) {
+                    for (int n = 0; n < numEdges; ++n) {
+                        g[k][0].weightsDense[i * channelsPU + j][l * edgeAlign8 + n] =
+                            (rand() % (maxVal - minVal + 1)) + minVal;
+                        if ((k == 0) && (i == 0) && (j == 0) && (l == 0)) {
+                            for (int m = 0; m < requestNm; ++m) {
+                                sourceWeight[m][n] = g[k][0].weightsDense[i * channelsPU + j][l * edgeAlign8 + n];
+                            }
+                        }
+                    }
                 }
             }
-            id = 0;
-        } else if ((tmpID[cntG * channelsPU * splitNm + row] == (VidChannel - 1)) && (id >= numEdges)) {
-            id = 0;
-            row++;
-        } else if (id >= numEdges) {
-            id = 0;
-            tmpID[cntG * channelsPU * splitNm + row]++;
         }
     }
-    weightfstream.close();
+    std::cout << "INFO: Finish generating random data" << std::endl;
 
     //---------------- Load Graph -----------------------------------
     for (int i = 0; i < deviceNeeded * cuNm; ++i) {
@@ -232,13 +208,12 @@ int main(int argc, const char* argv[]) {
     }
 
     int32_t hwNm = deviceNeeded * cuNm;
-    int32_t requestNm = 10;
     std::vector<xf::graph::L3::event<int> > eventQueue[requestNm];
     float* similarity[requestNm];
     int32_t* resultID[requestNm];
     float** similarity0[requestNm];
     int32_t** resultID0[requestNm];
-    int counter0[requestNm][hwNm];
+    int counter[requestNm][hwNm];
     for (int m = 0; m < requestNm; ++m) {
         similarity[m] = xf::graph::L3::aligned_alloc<float>(topK);
         resultID[m] = xf::graph::L3::aligned_alloc<int32_t>(topK);
@@ -248,7 +223,7 @@ int main(int argc, const char* argv[]) {
         similarity0[m] = new float*[hwNm];
         resultID0[m] = new int32_t*[hwNm];
         for (int i = 0; i < hwNm; ++i) {
-            counter0[m][i] = 0;
+            counter[m][i] = 0;
             similarity0[m][i] = aligned_alloc<float>(topK);
             resultID0[m][i] = aligned_alloc<int32_t>(topK);
             memset(resultID0[m][i], 0, topK * sizeof(int32_t));
@@ -256,38 +231,36 @@ int main(int argc, const char* argv[]) {
         }
     }
     //---------------- Run L3 API -----------------------------------
+    TimePointType startTime = std::chrono::high_resolution_clock::now();
+    TimePointType endTime;
     for (int m = 0; m < requestNm; ++m) {
-        eventQueue[m] = xf::graph::L3::cosineSimilaritySSDenseMultiCard(handle0, hwNm, sourceLen, sourceWeight, topK, g,
-                                                                        resultID0[m], similarity0[m]);
+        eventQueue[m] = xf::graph::L3::cosineSimilaritySSDenseMultiCard(handle0, hwNm, sourceLen, sourceWeight[m], topK,
+                                                                        g, resultID0[m], similarity0[m]);
     }
 
     int ret = 0;
     for (int m = 0; m < requestNm; ++m) {
-        for (int i = 0; i < (int)eventQueue[m].size(); ++i) {
+        for (int i = 0; i < eventQueue[m].size(); ++i) {
             ret += eventQueue[m][i].wait();
         }
     }
+    double computeTime = xf::graph::L3::showTimeData("INFO: Single run time: ", startTime, endTime);
     for (int m = 0; m < requestNm; ++m) {
         for (int i = 0; i < topK; ++i) {
-            similarity[m][i] = similarity0[m][0][counter0[m][0]];
+            similarity[m][i] = similarity0[m][0][counter[m][0]];
             int32_t prev = 0;
-            resultID[m][i] = resultID0[m][0][counter0[m][0]];
-            counter0[m][0]++;
+            resultID[m][i] = resultID0[m][0][counter[m][0]];
+            counter[m][0]++;
             for (int j = 1; j < hwNm; ++j) {
-                if (similarity[m][i] < similarity0[m][j][counter0[m][j]]) {
-                    similarity[m][i] = similarity0[m][j][counter0[m][j]];
-                    resultID[m][i] = resultID0[m][j][counter0[m][j]];
-                    counter0[m][prev]--;
+                if (similarity[m][i] < similarity0[m][j][counter[m][j]]) {
+                    similarity[m][i] = similarity0[m][j][counter[m][j]];
+                    resultID[m][i] = resultID0[m][j][counter[m][j]];
+                    counter[m][prev]--;
                     prev = j;
-                    counter0[m][j]++;
+                    counter[m][j]++;
                 }
             }
         }
-    }
-    //---------------- Check Result ---------------------------------
-    int err = 0;
-    for (int m = 0; m < requestNm; ++m) {
-        err += checkData<splitNm>(goldenFile, resultID[m], similarity[m]);
     }
 
     for (int m = 0; m < requestNm; ++m) {
@@ -306,17 +279,24 @@ int main(int argc, const char* argv[]) {
         delete[] g[i]->numVerticesPU;
     }
     delete[] g;
+    //---------------- Check Result ---------------------------------
+    int err = 0;
+    for (int m = 0; m < requestNm; ++m) {
+        err += checkData<splitNm>(goldenFile, resultID[m], similarity[m]);
+    }
+
     for (int i = 0; i < deviceNeeded * cuNm; ++i) {
         delete[] numVerticesPU[i];
         delete[] numEdgesPU[i];
     }
-    free(sourceWeight);
     delete[] numVerticesPU;
     delete[] numEdgesPU;
     for (int m = 0; m < requestNm; ++m) {
         free(similarity[m]);
         free(resultID[m]);
+        free(sourceWeight[m]);
     }
+    delete[] sourceWeight;
     if (err == 0) {
         std::cout << "INFO: Results are correct" << std::endl;
         return 0;

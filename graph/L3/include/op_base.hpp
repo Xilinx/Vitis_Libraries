@@ -32,9 +32,14 @@ class opBase {
 
     opBase(){};
 
-    void initThread(class openXRM* xrm, std::string kernelName, std::string kernelAlias, unsigned int requestLoad) {
-        task_workers.emplace_back(
-            std::thread(worker, std::ref(task_queue[0]), xrm, kernelName, kernelAlias, requestLoad));
+    void initThread(class openXRM* xrm,
+                    std::string kernelName,
+                    std::string kernelAlias,
+                    unsigned int requestLoad,
+                    unsigned int deviceNeeded,
+                    unsigned int cuNumber) {
+        task_workers.emplace_back(std::thread(worker, std::ref(task_queue[0]), xrm, kernelName, kernelAlias,
+                                              requestLoad, deviceNeeded, cuNumber));
     };
 
     void join() {

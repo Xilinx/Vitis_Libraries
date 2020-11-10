@@ -47,7 +47,7 @@ class opLabelPropagation : public opBase {
                        unsigned int cuID,
                        unsigned int channelID,
                        xrmContext* ctx,
-                       xrmCuResource resR,
+                       xrmCuResource* resR,
                        std::string instanceName,
                        clHandle* handles,
                        uint32_t maxIter,
@@ -85,7 +85,7 @@ class opLabelPropagation : public opBase {
                               std::vector<cl::Event>* evIn,
                               cl::Event* evOut);
 
-    static void cuRelease(xrmContext* ctx, xrmCuResource resR);
+    static void cuRelease(xrmContext* ctx, xrmCuResource* resR);
 };
 } // L3
 } // graph
