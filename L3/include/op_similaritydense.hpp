@@ -57,7 +57,7 @@ class opSimilarityDense : public opBase {
                        unsigned int cuID,
                        unsigned int channelID,
                        xrmContext* ctx,
-                       xrmCuResource resR,
+                       xrmCuResource* resR,
                        std::string instanceName,
                        clHandle* handles,
                        uint32_t similarityType,
@@ -73,7 +73,7 @@ class opSimilarityDense : public opBase {
                           unsigned int cuID,
                           unsigned int channelID,
                           xrmContext* ctx,
-                          xrmCuResource resR,
+                          xrmCuResource* resR,
                           std::string instanceName,
                           clHandle* handles,
                           int32_t similarityType,
@@ -107,7 +107,7 @@ class opSimilarityDense : public opBase {
                           unsigned int cuID,
                           unsigned int channelID,
                           xrmContext* ctx,
-                          xrmCuResource resR,
+                          xrmCuResource* resR,
                           std::string instanceName,
                           clHandle* handles,
                           uint32_t similarityType,
@@ -132,7 +132,7 @@ class opSimilarityDense : public opBase {
                          unsigned int cuID,
                          unsigned int channelID,
                          xrmContext* ctx,
-                         xrmCuResource resR,
+                         xrmCuResource* resR,
                          std::string instanceName,
                          clHandle* handles,
                          uint32_t similarityType,
@@ -155,7 +155,7 @@ class opSimilarityDense : public opBase {
                             unsigned int cuID,
                             unsigned int channelID,
                             xrmContext* ctx,
-                            xrmCuResource resR,
+                            xrmCuResource* resR,
                             std::string instanceName,
                             clHandle* handles,
                             uint32_t similarityType,
@@ -222,7 +222,7 @@ class opSimilarityDense : public opBase {
                               std::vector<cl::Event>* evIn,
                               cl::Event* evOut);
 
-    static void cuRelease(xrmContext* ctx, xrmCuResource resR);
+    static void cuRelease(xrmContext* ctx, xrmCuResource* resR);
 
     static void postProcessKNN(
         uint32_t topK, std::string* knownLabels, uint32_t* resultID, float* similarity, std::string* label);

@@ -49,7 +49,7 @@ class opPageRank : public opBase {
                        unsigned int cuID,
                        unsigned int channelID,
                        xrmContext* ctx,
-                       xrmCuResource resR,
+                       xrmCuResource* resR,
                        std::string instanceName,
                        clHandle* handles,
                        float alpha,
@@ -97,7 +97,7 @@ class opPageRank : public opBase {
 
     static void postProcess(int nrows, int* resultInfo, uint32_t* buffPing, uint32_t* buffPong, float* pagerank);
 
-    static void cuRelease(xrmContext* ctx, xrmCuResource resR);
+    static void cuRelease(xrmContext* ctx, xrmCuResource* resR);
 };
 } // L3
 } // graph

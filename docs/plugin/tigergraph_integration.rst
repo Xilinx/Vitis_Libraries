@@ -30,8 +30,8 @@ TigerGraph is a complete, distributed, parallel graph computing platform support
 Software Requirements
 ~~~~~~~~~~~~~~~~~~~~~
 * Ubuntu 16.04 LTS
-* `Xilinx RunTime (XRT) <https://github.com/Xilinx/XRT>`_ 2020.2
-* `Xilinx FPGA Resource Manager (XRM) <https://github.com/Xilinx/XRM>`_ 2020.2
+* `Xilinx RunTime (XRT) <https://github.com/Xilinx/XRT>`_ 2020.1
+* `Xilinx FPGA Resource Manager (XRM) <https://github.com/Xilinx/XRM>`_ 2020.1
 
 TigerGraph integration needs static boost version XRT. Please follow the steps:
 

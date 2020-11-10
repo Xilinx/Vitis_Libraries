@@ -47,7 +47,7 @@ class opSCC : public opBase {
                        unsigned int cuID,
                        unsigned int channelID,
                        xrmContext* ctx,
-                       xrmCuResource resR,
+                       xrmCuResource* resR,
                        std::string instanceName,
                        clHandle* handles,
                        xf::graph::Graph<uint32_t, uint32_t> g,
@@ -87,7 +87,7 @@ class opSCC : public opBase {
                               std::vector<cl::Event>* evIn,
                               cl::Event* evOut);
 
-    static void cuRelease(xrmContext* ctx, xrmCuResource resR);
+    static void cuRelease(xrmContext* ctx, xrmCuResource* resR);
 };
 } // L3
 } // graph

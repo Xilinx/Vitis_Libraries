@@ -178,14 +178,30 @@ event<int> cosineSimilaritySSDense(xf::graph::L3::Handle& handle,
     return event<int>(std::forward<std::future<int> >(f0));
 };
 
-int cosineSimilaritySSDenseMultiCard(xf::graph::L3::Handle& handle,
-                                     int32_t deviceNm,
-                                     int32_t sourceNUM,
-                                     int32_t* sourceWeights,
-                                     int32_t topK,
-                                     xf::graph::Graph<int32_t, int32_t>** g,
-                                     int32_t* resultID,
-                                     float* similarity) {
+std::vector<event<int> > cosineSimilaritySSDenseMultiCard(xf::graph::L3::Handle& handle,
+                                                          int32_t deviceNm,
+                                                          int32_t sourceNUM,
+                                                          int32_t* sourceWeights,
+                                                          int32_t topK,
+                                                          xf::graph::Graph<int32_t, int32_t>** g,
+                                                          int32_t** resultID,
+                                                          float** similarity) {
+    std::vector<event<int> > eventQueue;
+    for (int i = 0; i < deviceNm; ++i) {
+        eventQueue.push_back(
+            (handle.opsimdense)->addworkInt(1, 0, sourceNUM, sourceWeights, topK, g[i][0], resultID[i], similarity[i]));
+    }
+    return eventQueue;
+};
+
+int cosineSimilaritySSDenseMultiCardBlocking(xf::graph::L3::Handle& handle,
+                                             int32_t deviceNm,
+                                             int32_t sourceNUM,
+                                             int32_t* sourceWeights,
+                                             int32_t topK,
+                                             xf::graph::Graph<int32_t, int32_t>** g,
+                                             int32_t* resultID,
+                                             float* similarity) {
     std::vector<event<int> > eventQueue;
     float** similarity0 = new float*[deviceNm];
     int32_t** resultID0 = new int32_t*[deviceNm];

@@ -173,14 +173,36 @@ event<int> cosineSimilaritySSDense(xf::graph::L3::Handle& handle,
  * @param similarity Output, similarity values corresponding to theirs IDs
  *
  */
-int cosineSimilaritySSDenseMultiCard(xf::graph::L3::Handle& handle,
-                                     int32_t deviceNm,
-                                     int32_t sourceNUM,
-                                     int32_t* sourceWeights,
-                                     int32_t topK,
-                                     xf::graph::Graph<int32_t, int32_t>** gr,
-                                     int32_t* resultID,
-                                     float* similarity);
+int cosineSimilaritySSDenseMultiCardBlocking(xf::graph::L3::Handle& handle,
+                                             int32_t deviceNm,
+                                             int32_t sourceNUM,
+                                             int32_t* sourceWeights,
+                                             int32_t topK,
+                                             xf::graph::Graph<int32_t, int32_t>** gr,
+                                             int32_t* resultID,
+                                             float* similarity);
+
+/**
+ * @brief The Non-blocking Multi-cards' single source cosine similarity API for dense graph.
+ *
+ * @param handle Graph library L3 handle
+ * @param deviceNm FPGA card ID
+ * @param sourceNUM Input, sourceWeights buffer length of source vertex
+ * @param sourceWeights Input, weights of the source vertex's out members
+ * @param topK Input, the output similarity buffer length
+ * @param gr Input, CSR graph of IDs' type of int32_t and weights' type of int32_t
+ * @param resultID Output, the topK highest similarity IDs
+ * @param similarity Output, similarity values corresponding to theirs IDs
+ *
+ */
+std::vector<event<int> > cosineSimilaritySSDenseMultiCard(xf::graph::L3::Handle& handle,
+                                                          int32_t deviceNm,
+                                                          int32_t sourceNUM,
+                                                          int32_t* sourceWeights,
+                                                          int32_t topK,
+                                                          xf::graph::Graph<int32_t, int32_t>** g,
+                                                          int32_t** resultID,
+                                                          float** similarity);
 
 /**
  * @brief The single source jaccard similarity API for dense graph.
