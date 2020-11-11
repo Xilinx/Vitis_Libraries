@@ -56,10 +56,6 @@ class XFpga {
             return;
         }
         m_handle = xclOpen(deviceIndex, NULL, XCL_INFO);
-        if (xclLockDevice(m_handle)) {
-            *p_err = 1;
-            return;
-        }
         ifstream l_stream(p_xclbin);
         l_stream.seekg(0, l_stream.end);
         int l_size = l_stream.tellg();

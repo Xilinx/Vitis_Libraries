@@ -64,8 +64,10 @@ endif
 # -----------------------------------------------------------------------------
 # BEGIN_XF_MK_USER_SECTION
 # -----------------------------------------------------------------------------
+# XF_PROJ_ROOT ?= $(CUR_DIR)/../../../..
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L3/*}')
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
+
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 XCLBIN_FILE :=
