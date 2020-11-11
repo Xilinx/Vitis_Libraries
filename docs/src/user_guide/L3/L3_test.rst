@@ -15,7 +15,7 @@
 
 .. meta::
    :keywords: BLAS, Library, Vitis BLAS Library, Vitis BLAS, level 3, test
-   :description: Vitis BLAS library level 3 provides an automatic test flow that could be run by simple one line command.
+   :description: Vitis BLAS level 3 provides test cases could build xclbin and run it.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -25,32 +25,20 @@
 =====================
 L3 API test
 =====================
-Vitis BLAS level 3 provides an automatic test flow that could be run by simple one line command:
+Vitis BLAS level 3 provides test cases could build xclbin and run it.
+
+**1. Vitis BLAS L3 compilation**
+
+All tests provided here could be built with compilation steps similar to the following, target could be either hw or hw_emu(for testing hw emulation)
 
 .. code-block:: bash
 
-  python run_test.py --shell SHELL_NAME --operator OPERATOR_NAME1 ...
+  make host TARGET=hw
   
-The whole test flow includes 3 parts: 1) build the executable 2) generate input files and golden reference using python numpy library and save in bin files 3) run hw and compare with the golden reference.
-  
-For each operator that is available in level 3, profile json file could be found in test/xf_blas/OPERATOR_NAME/profile.json. Users could modify values in that file to run tests with different data types, different matrix sizes, different value range and so on.
+**2. Vitis BLAS L3 run**
 
-Following is an example json file for operator gemm:
+Tests could be run with the following steps, target could be either hw or hw_emu(for testing hw emulation)
 
-.. code-block:: json
+.. code-block:: bash
 
-  {
-    "dataTypes": [
-      "int16",
-      "float32"
-    ],
-    "op": "gemm",
-    "matrixDims": [
-      [128, 128, 128],
-      [1024, 256, 256]
-    ],
-    "valueRange": [
-      -1024,
-      1024
-    ]
-  }
+  make run TARGET=hw PLATFORM_REPO_PATHS=LOCAL_PLATFORM_PATH

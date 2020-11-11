@@ -175,11 +175,13 @@ The run-script runs the GEMM benchmark with a number of threads, data type, and 
 
 
 2. Benchmarking xfblasGemm - Xilinx's Vitis BLAS library
-=====================================================
+==========================================================
 
-Before benchmarking xfblashGemm, please download `xf blas xclbin files`_, unzip the file with "tar -xvzf" command, and copy the folder u250_xdma_201830_2 to directory L3/overlay.
+Before benchmarking xfblashGemm, please run the following command to build hw xclbin
 
-.. _xf blas xclbin files: https://www.xilinx.com/bin/public/openDownload?filename=vitis_BLAS_library_r1.0_xclbin.tar
+.. code-block:: bash
+
+  make build TARGET=hw PLATFORM_REPO_PATHS=LOCAL_PLATFORM_PATH
 
 2.1 Benchmarking Steps 
 ------------------------
@@ -187,17 +189,12 @@ Before benchmarking xfblashGemm, please download `xf blas xclbin files`_, unzip 
 2.1.1 Generate test inputs and golden reference
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Follow the MKL_benchmark_ steps to run MKL benchmarks, for float and short data type to generate test inputs and golden reference. To generate test inputs and golden reference for float data type, please run the following command.
+Follow the MKL_benchmark_ steps to run MKL benchmarks to generate test inputs and golden reference. To generate test inputs and golden reference for float data type, please run the following command.
 
 .. code-block:: bash
 
   ./run_gemm_mkl.sh 16 float a
 
-To generate test inputs and golden reference for short data type, please run the following command.
-
-.. code-block:: bash
-
-  ./run_gemm_mkl.sh 16 short a
 
 2.1.2 Build benchmark application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -206,7 +203,7 @@ Before benchmark the xfblasGemm, please build the host executable for the corres
 
 .. code-block:: bash
 
-  ./build_gemm_bench.sh confi_info_file
+  ./build_gemm_bench.sh config_info_file
 
 2.1.3 Run benchmark
 ^^^^^^^^^^^^^^^^^^^^
@@ -219,7 +216,7 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. It will explor
   
 .. rubric:: where:
 
-- **xclbin_fuke** refers to the gemx.xclbin file, including the path.
+- **xclbin_file** refers to the blas.xclbin file, including the path.
 - **config_info_file** refers to config_info.dat file, including the path.
   
 2.2 Performance Results on Nimbix Cloud
@@ -232,74 +229,36 @@ The run-script runs the GEMM benchmark with xclbin and cfg files. It will explor
 
 	*
 		- fpga_model
-		- Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)
+		- Xilinx Alveo U250 FPGA
 	*
 		- Frequency
-		- 150 Mhz
+		- 242 Mhz
 	*
 		- data_type
 		- float
 	*
 		- build command 
-		- ./build_gemm_bench.sh ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/config_info.dat
+		- ./build_gemm_bench.sh config_info.dat
 	*
 		- benchmark command
-		- ./run_gemm_bench.sh ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/gemx.xclbin ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/confi_info.dat
+		- ./run_gemm_bench.sh blas.xclbin config_info.dat
 		
 .. rubric:: Performance Result:
 
 +--------------------+-------------------------------------+--------------+-------------+
 | Square Matrix Size | matrix paris running simultaneously | API time(ms) | TFlops/sec  |
 +====================+=====================================+==============+=============+
-| 256                | 4                                   |  2.715       |      0.049  |
+| 256                | 4                                   |  2.348       |      0.057  |
 +--------------------+-------------------------------------+--------------+-------------+
-| 512                | 4                                   |  7.223       |      0.149  |
+| 512                | 4                                   |  6.422       |      0.167  |
 +--------------------+-------------------------------------+--------------+-------------+
-| 1024               | 4                                   |  40.020      |      0.214  |
+| 1024               | 4                                   |  33.366      |      0.257  |
 +--------------------+-------------------------------------+--------------+-------------+
-| 2048               | 4                                   |  292.971     |      0.234  |
+| 2048               | 4                                   |  217.949     |      0.316  |
 +--------------------+-------------------------------------+--------------+-------------+
-| 4096               | 4                                   |  1990.240    |      0.276  |
+| 4096               | 4                                   |  1595.487    |      0.344  |
 +--------------------+-------------------------------------+--------------+-------------+
-| 8192               | 4                                   |  15317.589   |      0.287  |
-+--------------------+-------------------------------------+--------------+-------------+
-
-.. rubric:: Configuration:
-
-.. list-table::
-	:widths: 20 80
-	
-	*
-		- fpga_model
-		- Xilinx Alveo U250 FPGA (nx6u_xdma_201830_2_2_3)
-	*
-		- Frequency
-		- 231 Mhz
-	*
-		- data_type
-		- short
-	*
-		- build command 
-		- ./build_gemm_bench.sh ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/config_info.dat
-	*
-		- benchmark command
-		- ./run_gemm_bench.sh ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/gemx.xclbin ../../overlay/u250_xdma_201830_2/gemm_float_4kernel/confi_info.dat
-		
-.. rubric:: Performance Result:
-
-+--------------------+-------------------------------------+--------------+-------------+
-| Square Matrix Size | matrix paris running simultaneously | API time(ms) | Tops/sec    |
-+====================+=====================================+==============+=============+
-| 256                | 4                                   |  1.436       |      0.093  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 512                | 4                                   |  2.589       |      0.415  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 1024               | 4                                   |  13.885      |      0.619  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 2048               | 4                                   |  61.879      |      1.111  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 4096               | 4                                   |  416.086     |      1.321  |
-+--------------------+-------------------------------------+--------------+-------------+
-| 8192               | 4                                   |  3443.76     |      1.277  |
+| 8192               | 4                                   |  12587.950   |      0.349  |
 +--------------------+-------------------------------------+--------------+-------------+
 
+Please notice that we used OpenMP library for multi-kernel support in host side, so for smaller sizes, total API times include OpenMP initialization time.

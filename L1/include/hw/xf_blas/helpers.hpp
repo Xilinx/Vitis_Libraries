@@ -35,6 +35,7 @@
 #include "helpers/dataMover/transpMatB2.hpp"
 #include "helpers/dataMover/symMatMoverB2.hpp"
 #include "helpers/dataMover/trmMatMoverB2.hpp"
+#include "helpers/dataMover/gemmMatMover.hpp"
 
 /*        HELPER FUNCTIONS             */
 #include "helpers/funcs/padding.hpp"

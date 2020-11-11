@@ -799,6 +799,7 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ../L1/include/hw/xf_blas \
+                         ../L2/include/hw/xf_blas \
                          ../L3/include/sw/xf_blas
 
 # This tag can be used to specify the character encoding of the source files

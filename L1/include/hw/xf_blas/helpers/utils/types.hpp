@@ -28,10 +28,11 @@
 #include <ostream>
 #include <iomanip>
 #include <iostream>
-#include "hls_math.h"
-#include "hls_stream.h"
+#include <cassert>
 #include "ap_int.h"
 #include "ap_shift_reg.h"
+
+#define BLAS_FLOAT_WIDTH 7
 
 namespace xf {
 
@@ -84,7 +85,7 @@ class WideType {
     }
 
     void constructor(const WideType& wt) {
-        for (int i = 0; i < t_Width; i++)
+        for (unsigned int i = 0; i < t_Width; i++)
 #pragma HLS UNROLL
             m_Val[i] = wt[i];
     }
@@ -125,7 +126,16 @@ class WideType {
         return l_fVal;
     }
 
+    bool operator==(const WideType& p_w) const {
+        bool l_com = true;
+        for (int i = 0; i < t_Width; ++i) {
+            l_com = l_com && (m_Val[i] == p_w[i]);
+        }
+        return l_com;
+    }
+
     T shift(T p_ValIn) {
+#pragma HLS INLINE
         T l_valOut = m_Val[t_Width - 1];
     WIDE_TYPE_SHIFT:
         for (int i = t_Width - 1; i > 0; --i) {
@@ -138,6 +148,7 @@ class WideType {
     }
 
     T shift() {
+#pragma HLS INLINE
         T l_valOut = m_Val[t_Width - 1];
         for (int i = t_Width - 1; i > 0; --i) {
 #pragma HLS UNROLL
@@ -148,6 +159,7 @@ class WideType {
     }
 
     T unshift() {
+#pragma HLS INLINE
         T l_valOut = m_Val[0];
         for (int i = 0; i < t_Width - 1; ++i) {
 #pragma HLS UNROLL
@@ -158,6 +170,7 @@ class WideType {
     }
 
     T unshift(const T p_val) {
+#pragma HLS INLINE
         T l_valOut = m_Val[0];
         for (int i = 0; i < t_Width - 1; ++i) {
 #pragma HLS UNROLL
@@ -452,7 +465,9 @@ class WideConv {
     inline TD convert(TS p_Src) {
         TD l_dst;
         ConvSType l_convS;
+#ifndef __SYNTHESIS__
         assert(t_wd * t_bd == l_numBits);
+#endif
         for (int ws = 0; ws < t_ws; ++ws) {
             l_bits.range(t_bs * (ws + 1) - 1, t_bs * ws) = l_convS.toBits(p_Src[ws]);
         }
@@ -465,7 +480,247 @@ class WideConv {
     }
 };
 
-} // namespace blas
+//////////////// From GEMX////////////////////////////
 
+template <typename t_FloatType, unsigned int t_DataWidth = sizeof(t_FloatType) * 8>
+class TaggedFloat {
+   private:
+    t_FloatType m_Val;
+    bool m_Flush;
+
+   public:
+    static const int t_TypeWidth = t_DataWidth + 1;
+    typedef ap_uint<t_TypeWidth> t_TypeInt;
+
+    TaggedFloat(const t_TypeInt& p_val) {
+        ap_uint<t_DataWidth> l_val = p_val.range(t_TypeWidth - 1, 1);
+        m_Val = *reinterpret_cast<t_FloatType*>(&l_val);
+        m_Flush = p_val[0];
+    }
+    operator const t_TypeInt() {
+        t_TypeInt l_val;
+        l_val[0] = m_Flush;
+        l_val.range(t_TypeWidth - 1, 1) = *reinterpret_cast<ap_uint<t_DataWidth>*>(&m_Val);
+        return l_val;
+    }
+    TaggedFloat() {}
+    TaggedFloat(t_FloatType p_Val, bool p_Flush) : m_Val(p_Val), m_Flush(p_Flush) {}
+    TaggedFloat(t_FloatType p_Val) : m_Val(p_Val), m_Flush(false) {}
+    t_FloatType& getVal() { return (m_Val); }
+    bool& getFlush() { return (m_Flush); }
+    TaggedFloat& operator=(t_FloatType p_Val) {
+        m_Val = p_Val;
+        m_Flush = false;
+        return (*this);
+    }
+    t_FloatType& operator()() { return (m_Val); }
+    void print(std::ostream& os) { os << std::setw(BLAS_FLOAT_WIDTH) << m_Val << "f" << m_Flush; }
+    friend std::ostream& operator<<(std::ostream& os, TaggedFloat& p_Val) {
+        p_Val.print(os);
+        return (os);
+    }
+};
+
+template <typename T, unsigned int t_Width>
+class TaggedWideType {
+   private:
+    WideType<T, t_Width> m_Val;
+    bool m_Flush;
+    bool m_Exit;
+
+    static const int t_TypeWidth = WideType<T, t_Width>::t_TypeWidth + 2;
+
+   public:
+    typedef ap_uint<t_TypeWidth> t_TypeInt;
+
+    TaggedWideType(const t_TypeInt& p_val) {
+        m_Val = (typename WideType<T, t_Width>::t_TypeInt)p_val.range(t_TypeWidth - 1, 2);
+        m_Flush = p_val[1];
+        m_Exit = p_val[0];
+    }
+    operator const t_TypeInt() {
+        t_TypeInt l_val;
+        l_val[0] = m_Exit;
+        l_val[1] = m_Flush;
+        l_val.range(t_TypeWidth - 1, 2) = (typename WideType<T, t_Width>::t_TypeInt)m_Val;
+        return l_val;
+    }
+
+    TaggedWideType(WideType<T, t_Width> p_Val, bool p_Flush, bool p_Exit)
+        : m_Val(p_Val), m_Flush(p_Flush), m_Exit(p_Exit) {}
+    TaggedWideType() {}
+    WideType<T, t_Width>& getVal() { return m_Val; }
+    T& operator[](unsigned int p_Idx) { return (m_Val[p_Idx]); }
+
+    bool getFlush() { return (m_Flush); }
+    bool getExit() { return (m_Exit); }
+    WideType<TaggedFloat<T>, t_Width> getVectOfTaggedValues() {
+#pragma HLS INLINE
+        WideType<TaggedFloat<T>, t_Width> l_vect;
+    TWT_FORW:
+        for (unsigned int i = 0; i < t_Width; ++i) {
+            l_vect.getVal(i) = TaggedFloat<T>(m_Val.getVal(i), m_Flush);
+        }
+        return (l_vect);
+    }
+    // void setVal(T p_Val, unsigned int i) {m_Val[i] = p_Val;}
+    // void setFlush(bool p_Flush) {m_Flush = p_Flush;}
+    // void setExit() {return(m_Exit);}
+    void print(std::ostream& os) {
+        m_Val.print(os);
+        os << " f" << m_Flush << " e" << m_Exit;
+    }
+    friend std::ostream& operator<<(std::ostream& os, TaggedWideType& p_Val) {
+        p_Val.print(os);
+        return (os);
+    }
+};
+
+template <typename T, unsigned int t_Width>
+class TriangSrl {
+   private:
+    ap_shift_reg<T, t_Width> m_Sreg[t_Width];
+
+   public:
+    TriangSrl() {
+#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable = m_Sreg dim = 1 complete
+    }
+    WideType<T, t_Width> shift(WideType<T, t_Width> p_DiagIn) {
+#pragma HLS INLINE
+        WideType<T, t_Width> l_edgeOut;
+    TRIANGSRL_SHIFT:
+        for (unsigned int i = 0; i < t_Width; ++i) {
+#pragma HLS unroll
+            l_edgeOut[i] = m_Sreg[i].shift(p_DiagIn[i], i);
+        }
+        return (l_edgeOut);
+    }
+    void clear() {
+#pragma HLS inline
+        for (unsigned int row = 0; row < t_Width; ++row) {
+            for (unsigned int col = 0; col < t_Width; ++col) {
+#pragma HLS PIPELINE
+                (void)m_Sreg[row].shift(0, 0);
+            }
+        }
+    }
+    void print(std::ostream& os) {
+        for (unsigned int row = 0; row < t_Width; ++row) {
+            for (unsigned int col = 0; col < t_Width; ++col) {
+                if (col > row) {
+                    os << std::setw(BLAS_FLOAT_WIDTH + 2) << "- ";
+                } else {
+                    T l_val = m_Sreg[row].read(col);
+                    os << std::setw(BLAS_FLOAT_WIDTH) << l_val;
+                }
+            }
+            os << "\n";
+        }
+    }
+    friend std::ostream& operator<<(std::ostream& os, TriangSrl& p_Val) {
+        p_Val.print(os);
+        return (os);
+    }
+};
+
+// Row-major window
+template <typename T, unsigned int t_Rows, unsigned int t_Cols>
+class WindowRm {
+   private:
+    WideType<WideType<T, t_Cols>, t_Rows> m_Val;
+
+   public:
+    WindowRm() {
+#pragma HLS INLINE
+    }
+    T& getval(unsigned int p_Row, unsigned int p_Col) { return m_Val.getVal(p_Row).getVal(p_Col); }
+    WideType<T, t_Cols>& operator[](unsigned int p_Idx) { return (m_Val[p_Idx]); }
+    void clear() {
+    WINDOWRM_ROW:
+        for (unsigned int row = 0; row < t_Rows; ++row) {
+#pragma HLS UNROLL
+        WINDOWRM_COL:
+            for (unsigned int col = 0; col < t_Cols; ++col) {
+#pragma HLS UNROLL
+                getval(row, col) = -999;
+            }
+        }
+    }
+    // DOWN (0th row in, the last row out)
+    WideType<T, t_Cols> shift(WideType<T, t_Cols> p_EdgeIn) {
+#pragma HLS INLINE
+        return (m_Val.shift(p_EdgeIn));
+    }
+    // DOWN no input
+    WideType<T, t_Cols> shift() {
+#pragma HLS INLINE
+        return (m_Val.shift());
+    }
+    // UP no input
+    WideType<T, t_Cols> unshift() {
+#pragma HLS INLINE
+        return (m_Val.unshift());
+    }
+    // RIGHT
+    WideType<T, t_Rows> shift_right(WideType<T, t_Rows> p_EdgeIn) {
+        WideType<T, t_Cols> l_edgeOut;
+    // Shift each row
+    WINDOWRM_SHIFT_R1:
+        for (unsigned int row = 0; row < t_Rows; ++row) {
+            l_edgeOut[row] = m_Val[row].shift(p_EdgeIn[row]);
+        }
+        return (l_edgeOut);
+    }
+    void print(std::ostream& os) {
+        for (int i = 0; i < t_Rows; ++i) {
+            os << m_Val.getVal(i) << "\n";
+        }
+    }
+    friend std::ostream& operator<<(std::ostream& os, WindowRm& p_Val) {
+        p_Val.print(os);
+        return (os);
+    }
+};
+
+template <typename t_DataType, unsigned int t_DataWidth = sizeof(t_DataType) * 8>
+class DualTaggedType {
+   public:
+    t_DataType m_val;
+    bool m_flush;
+    bool m_exit;
+
+    static const unsigned int t_TypeWidth = t_DataWidth + 2;
+    typedef ap_uint<t_TypeWidth> t_TypeInt;
+
+    DualTaggedType() {}
+
+    DualTaggedType(const DualTaggedType& p_dt) {
+        m_val = p_dt.m_val;
+        m_flush = p_dt.m_flush;
+        m_exit = p_dt.m_exit;
+    }
+
+    DualTaggedType(const t_TypeInt& p_val) {
+        ap_uint<t_DataWidth> l_a;
+        l_a = p_val.range(t_TypeWidth - 1, t_TypeWidth - t_DataWidth);
+        m_val = *reinterpret_cast<t_DataType*>(&l_a);
+        m_flush = p_val[1];
+        m_exit = p_val[0];
+    }
+
+    operator const t_TypeInt() {
+        t_TypeInt l_val;
+        ap_uint<t_DataWidth> l_a;
+        l_a = *reinterpret_cast<ap_uint<t_DataWidth>*>(&m_val);
+
+        l_val.range(t_TypeWidth - 1, t_TypeWidth - t_DataWidth) = l_a;
+        l_val[1] = m_flush;
+        l_val[0] = m_exit;
+        return l_val;
+    }
+};
+
+} // namespace blas
 } // namespace xf
 #endif

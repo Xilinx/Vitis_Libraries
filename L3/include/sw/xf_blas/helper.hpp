@@ -27,7 +27,7 @@ namespace xf {
 
 namespace blas {
 
-typedef enum { OpControl, OpGemv, OpGemm, OpTransp, OpSpmv, OpUspmv, OpResult, OpFail, OpFcn } OpType;
+typedef enum { OpControl, OpGemv, OpGemm, OpTransp, OpResult, OpFail, OpFcn } OpType;
 
 class BLASArgs {
    public:
@@ -63,11 +63,11 @@ xfblasStatus_t buildConfigDict(string p_configFile,
 
     // Additional limit for different engines
     if (p_engineName == XFBLAS_ENGINE_GEMM) {
-        if (l_configDict.find("GEMX_gemmMBlocks") != l_configDict.end()) {
-            int l_mBlock = stoi(l_configDict["GEMX_gemmMBlocks"]);
-            int l_kBlock = stoi(l_configDict["GEMX_gemmKBlocks"]);
-            int l_nBlock = stoi(l_configDict["GEMX_gemmNBlocks"]);
-            int l_ddrWidth = stoi(l_configDict["GEMX_ddrWidth"]);
+        if (l_configDict.find("BLAS_gemmMBlocks") != l_configDict.end()) {
+            int l_mBlock = stoi(l_configDict["BLAS_gemmMBlocks"]);
+            int l_kBlock = stoi(l_configDict["BLAS_gemmKBlocks"]);
+            int l_nBlock = stoi(l_configDict["BLAS_gemmNBlocks"]);
+            int l_ddrWidth = stoi(l_configDict["BLAS_ddrWidth"]);
             int l_maxBlock = max(l_mBlock, max(l_kBlock, l_nBlock));
             int l_minSize = l_ddrWidth * l_maxBlock;
             l_configDict["minSize"] = to_string(l_minSize);
@@ -77,10 +77,10 @@ xfblasStatus_t buildConfigDict(string p_configFile,
     }
 
     if (p_engineName == XFBLAS_ENGINE_GEMV) {
-        if (l_configDict.find("GEMX_gemvmGroups") != l_configDict.end()) {
-            int l_mBlock = stoi(l_configDict["GEMX_gemvmGroups"]);
-            int l_nBlock = stoi(l_configDict["GEMX_transpBlocks"]);
-            int l_ddrWidth = stoi(l_configDict["GEMX_ddrWidth"]);
+        if (l_configDict.find("BLAS_gemvmGroups") != l_configDict.end()) {
+            int l_mBlock = stoi(l_configDict["BLAS_gemvmGroups"]);
+            int l_nBlock = stoi(l_configDict["BLAS_transpBlocks"]);
+            int l_ddrWidth = stoi(l_configDict["BLAS_ddrWidth"]);
             int l_maxBlock = max(l_mBlock, l_nBlock);
             int l_minSize = l_ddrWidth * l_maxBlock;
             l_configDict["minSize"] = to_string(l_minSize);

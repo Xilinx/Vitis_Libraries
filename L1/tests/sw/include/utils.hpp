@@ -52,13 +52,13 @@ bool compare(unsigned int n, T* x, T* ref) {
     try {
         if (ref == nullptr) {
             if (x == nullptr) return true;
-            for (int i = 0; i < n; i++) l_ret = l_ret && compare(x[i], (T)0);
+            for (unsigned int i = 0; i < n; i++) l_ret = l_ret && compare(x[i], (T)0);
         } else {
-            for (int i = 0; i < n; i++) {
+            for (unsigned int i = 0; i < n; i++) {
                 l_ret = l_ret && compare(x[i], ref[i]);
             }
         }
-    } catch (exception& e) {
+    } catch (std::exception& e) {
         std::cout << "Exception happend: " << e.what() << std::endl;
         return false;
     }
@@ -71,21 +71,21 @@ bool compare(unsigned int n, T* x, T* ref, int& err) {
     try {
         if (ref == nullptr) {
             if (x == nullptr) return true;
-            for (int i = 0; i < n; i++) {
+            for (unsigned int i = 0; i < n; i++) {
                 if (!compare(x[i], (T)0)) {
                     err++;
                     l_ret = false;
                 }
             }
         } else {
-            for (int i = 0; i < n; i++) {
+            for (unsigned int i = 0; i < n; i++) {
                 if (!compare(x[i], ref[i])) {
                     l_ret = false;
                     err++;
                 }
             }
         }
-    } catch (exception& e) {
+    } catch (std::exception& e) {
         std::cout << "Exception happend: " << e.what() << std::endl;
         return false;
     }

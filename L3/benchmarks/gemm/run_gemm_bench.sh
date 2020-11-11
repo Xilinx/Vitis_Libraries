@@ -21,14 +21,14 @@ elif [ "$1" == "" ]; then
   echo "Usage: `basename $0` path_to_xclbin path_to_config_info"
   exit 0
 else
-  dataType=$(grep GEMX_dataType $2 | sed 's/^GEMX_dataType=//')
-  numKernels=$(grep GEMX_numKernels $2 | sed 's/^GEMX_numKernels=//')
+  dataType=$(grep BLAS_dataType $2 | sed 's/^BLAS_dataType=//')
+  numKernels=$(grep BLAS_numKernels $2 | sed 's/^BLAS_numKernels=//')
   n=256
   logs=()
   while [  $n -le 8192 ]; do
     date
     echo "#############  $n ################"
-    nice ./bin/gemm_bench.exe $1 $2 $n $n $n ./data/$dataType/ $numKernels | tee log-$n.txt
+    nice ./build_dir.hw.xilinx_u250_xdma_201830_2/gemm_bench.exe $1 $2 $n $n $n ./data/$dataType/ $numKernels | tee log-$n.txt
     logs="$logs log-$n.txt"
     n=`expr $n \* 2`
   done

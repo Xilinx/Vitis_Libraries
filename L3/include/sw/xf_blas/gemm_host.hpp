@@ -5,6 +5,21 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -84,19 +99,12 @@ class GEMMHost : public BLASHost {
             this->m_bufHandle.find(p_bias) == this->m_bufHandle.end()) {
             return XFBLAS_STATUS_ALLOC_FAILED;
         }
-        unsigned int handle_A, handle_B, handle_C, handle_bias;
         auto& l_devPtr = this->m_bufHandle;
 
-        handle_A = l_devPtr[p_a];
-        handle_B = l_devPtr[p_b];
-        handle_C = l_devPtr[p_c];
-        handle_bias = l_devPtr[p_bias];
-
-        xclBOProperties p;
-        uint64_t address_A = !xclGetBOProperties(this->m_fpga->m_handle, handle_A, &p) ? p.paddr : -1;
-        uint64_t address_B = !xclGetBOProperties(this->m_fpga->m_handle, handle_B, &p) ? p.paddr : -1;
-        uint64_t address_C = !xclGetBOProperties(this->m_fpga->m_handle, handle_C, &p) ? p.paddr : -1;
-        uint64_t address_bias = !xclGetBOProperties(this->m_fpga->m_handle, handle_bias, &p) ? p.paddr : -1;
+        uint64_t address_A = l_devPtr[p_a].address();
+        uint64_t address_B = l_devPtr[p_b].address();
+        uint64_t address_C = l_devPtr[p_c].address();
+        uint64_t address_bias = l_devPtr[p_bias].address();
 
         unsigned long long l_aOff, l_bOff, l_cOff, l_xOff;
         l_aOff = (unsigned long long)address_A;
@@ -104,10 +112,10 @@ class GEMMHost : public BLASHost {
         l_cOff = (unsigned long long)address_C;
         l_xOff = (unsigned long long)address_bias;
 
-        l_aOff -= this->m_fpga->m_baseAddress[this->m_cuIndex];
-        l_bOff -= this->m_fpga->m_baseAddress[this->m_cuIndex];
-        l_cOff -= this->m_fpga->m_baseAddress[this->m_cuIndex];
-        l_xOff -= this->m_fpga->m_baseAddress[this->m_cuIndex];
+        l_aOff -= this->m_baseAddress;
+        l_bOff -= this->m_baseAddress;
+        l_cOff -= this->m_baseAddress;
+        l_xOff -= this->m_baseAddress;
 
         l_aOff /= this->PAGE_SIZE;
         l_bOff /= this->PAGE_SIZE;
@@ -117,6 +125,27 @@ class GEMMHost : public BLASHost {
         GemmArgs l_gargs(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_k, p_n, p_lda, p_ldb, p_ldc, p_ldx, p_postScale,
                          p_postShift);
         this->addInstr(&l_gargs);
+        this->enableRun();
+
+        return XFBLAS_STATUS_SUCCESS;
+    }
+
+    virtual xfblasStatus_t addGEMMOpByAddress(unsigned int l_aOff,
+                                              unsigned int l_bOff,
+                                              unsigned int l_cOff,
+                                              unsigned int l_xOff,
+                                              unsigned int p_m,
+                                              unsigned int p_n,
+                                              unsigned int p_k,
+                                              unsigned int p_lda,
+                                              unsigned int p_ldb,
+                                              unsigned int p_ldc,
+                                              unsigned int p_ldx,
+                                              int p_postScale,
+                                              int p_postShift) {
+        GemmArgs args(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_k, p_n, p_lda, p_ldb, p_ldc, p_ldx, p_postScale,
+                      p_postShift);
+        this->addInstr(&args);
         this->enableRun();
 
         return XFBLAS_STATUS_SUCCESS;
