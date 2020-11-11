@@ -22,13 +22,13 @@ elif [ "$1" == "" ]; then
   echo "Usage: `basename $0` path_to_config_info"
   exit 0
 else
-  dataType=$(grep GEMX_dataType $1 | sed 's/^GEMX_dataType=//')
-  numKernels=$(grep GEMX_numKernels $1 | sed 's/^GEMX_numKernels=//')
+  dataType=$(grep BLAS_dataType $1 | sed 's/^BLAS_dataType=//')
+  numKernels=$(grep BLAS_numKernels $1 | sed 's/^BLAS_numKernels=//')
   make cleanall
   echo ================================================
   echo Now build benchmark with $dataType type
   echo ================================================
-  make host XFBLAS_dataType=${dataType} XFBLAS_numKernels=${numKernels}
+  make host BLAS_dataType=${dataType} BLAS_numKernels=${numKernels}
 fi
 
 

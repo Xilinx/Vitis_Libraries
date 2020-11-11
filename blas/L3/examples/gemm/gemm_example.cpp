@@ -30,12 +30,12 @@
 
 using namespace std;
 
-XFBLAS_dataType* getGoldenMat(XFBLAS_dataType* a, XFBLAS_dataType* b, XFBLAS_dataType* c) {
-    XFBLAS_dataType* goldenC;
-    goldenC = (XFBLAS_dataType*)malloc(m * n * sizeof(XFBLAS_dataType));
+BLAS_dataType* getGoldenMat(BLAS_dataType* a, BLAS_dataType* b, BLAS_dataType* c) {
+    BLAS_dataType* goldenC;
+    goldenC = (BLAS_dataType*)malloc(m * n * sizeof(BLAS_dataType));
     for (int row = 0; row < m; row++) {
         for (int col = 0; col < n; col++) {
-            XFBLAS_dataType l_val = 0;
+            BLAS_dataType l_val = 0;
             for (int i = 0; i < k; i++) {
                 l_val += a[IDX2R(row, i, k)] * b[IDX2R(i, col, n)];
             }
@@ -45,12 +45,12 @@ XFBLAS_dataType* getGoldenMat(XFBLAS_dataType* a, XFBLAS_dataType* b, XFBLAS_dat
     return goldenC;
 }
 
-bool compareGemm(XFBLAS_dataType* c, XFBLAS_dataType* goldenC, float p_TolRel = 1e-3, float p_TolAbs = 1e-5) {
+bool compareGemm(BLAS_dataType* c, BLAS_dataType* goldenC, float p_TolRel = 1e-3, float p_TolAbs = 1e-5) {
     bool l_check = true;
     for (int row = 0; row < m; row++) {
         for (int col = 0; col < n; col++) {
-            XFBLAS_dataType l_ref = goldenC[IDX2R(row, col, n)];
-            XFBLAS_dataType l_result = c[IDX2R(row, col, n)];
+            BLAS_dataType l_ref = goldenC[IDX2R(row, col, n)];
+            BLAS_dataType l_result = c[IDX2R(row, col, n)];
             float l_diffAbs = abs(l_ref - l_result);
             float l_diffRel = l_diffAbs;
             if (goldenC[IDX2R(row, col, n)] != 0) {
@@ -92,22 +92,22 @@ int main(int argc, char** argv) {
     }
 
     int i, j; // i-row l_numKernel -1 ,j- column l_numKernel -1
-    XFBLAS_dataType *a, *b, *c;
+    BLAS_dataType *a, *b, *c;
 
-    posix_memalign((void**)&a, 4096, m * k * sizeof(XFBLAS_dataType));
-    posix_memalign((void**)&b, 4096, k * n * sizeof(XFBLAS_dataType));
-    posix_memalign((void**)&c, 4096, m * n * sizeof(XFBLAS_dataType));
+    posix_memalign((void**)&a, 4096, m * k * sizeof(BLAS_dataType));
+    posix_memalign((void**)&b, 4096, k * n * sizeof(BLAS_dataType));
+    posix_memalign((void**)&c, 4096, m * n * sizeof(BLAS_dataType));
 
     int ind = 1;
     for (i = 0; i < m; i++) {
         for (j = 0; j < k; j++) {
-            a[IDX2R(i, j, k)] = (XFBLAS_dataType)ind++;
+            a[IDX2R(i, j, k)] = (BLAS_dataType)ind++;
         }
     }
     ind = 1;
     for (i = 0; i < k; i++) {
         for (j = 0; j < n; j++) {
-            b[IDX2R(i, j, n)] = (XFBLAS_dataType)ind++;
+            b[IDX2R(i, j, n)] = (BLAS_dataType)ind++;
         }
     }
 
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    XFBLAS_dataType* goldenC = getGoldenMat(a, b, c);
+    BLAS_dataType* goldenC = getGoldenMat(a, b, c);
 
     status = xfblasMallocRestricted(m, k, sizeof(*a), a, k, l_numKernel - 1);
     if (status != XFBLAS_STATUS_SUCCESS) {
