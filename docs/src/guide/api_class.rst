@@ -26,3 +26,15 @@ API Class of ``xf::common::utils_hw``
 
 .. include:: ../rst/class_xf_common_utils_hw_cache.rst
 
+.. include:: ../rst/class_xf_common_utils_hw_Multiplexer.rst
+
+
+********************************************
+API Class of ``xf::common::utils_sw``
+********************************************
+
+.. toctree::
+   :maxdepth: 4
+
+.. include:: ../rst/class_xf_common_utils_sw_ArgParser.rst
+
