@@ -106,8 +106,8 @@ int test_dut0() {
                 if (!rd_success) {
                     nerr++;
                     std::cout << "\n error: data loss\n";
-                }
-                if (glddata[i * NUM_COPY + k][j] != outdata) nerr++;
+                } else if (glddata[i * NUM_COPY + k][j] != outdata)
+                    nerr++;
             }
         }
     }
@@ -119,8 +119,8 @@ int test_dut0() {
             if (!rd_success) {
                 nerr++;
                 std::cout << "\n error: data loss\n";
-            }
-            if (testdata[i][j] != outdata) nerr++;
+            } else if (testdata[i][j] != outdata)
+                nerr++;
         }
     }
 
@@ -132,15 +132,15 @@ int test_dut0() {
                 if (!rd_success) {
                     nerr++;
                     std::cout << "\n error: end flag loss\n";
-                }
-                if (e) nerr++;
+                } else if (e)
+                    nerr++;
             }
             rd_success = e_ostrms[i][k].read_nb(e);
             if (!rd_success) {
                 nerr++;
                 std::cout << "\n error: end flag loss\n";
-            }
-            if (!e) nerr++;
+            } else if (!e)
+                nerr++;
         }
     }
 
@@ -151,16 +151,15 @@ int test_dut0() {
             if (!rd_success) {
                 nerr++;
                 std::cout << "\n error: end flag loss\n";
-            }
-            if (e) nerr++;
+            } else if (e)
+                nerr++;
         }
         rd_success = e_istrm[i].read_nb(e);
         if (!rd_success) {
             nerr++;
             std::cout << "\n error: end flag loss\n";
-        }
-        if (!e) nerr++;
-        ;
+        } else if (!e)
+            nerr++;
     }
 
     return nerr;
@@ -222,8 +221,8 @@ int test_dut1() {
                 if (!rd_success) {
                     nerr++;
                     std::cout << "\n error: data loss\n";
-                }
-                if (glddata[i * NUM_COPY + k][j] != outdata) nerr++;
+                } else if (glddata[i * NUM_COPY + k][j] != outdata)
+                    nerr++;
             }
         }
     }
@@ -235,8 +234,8 @@ int test_dut1() {
             if (!rd_success) {
                 nerr++;
                 std::cout << "\n error: data loss\n";
-            }
-            if (testdata[i][j] != outdata) nerr++;
+            } else if (testdata[i][j] != outdata)
+                nerr++;
         }
     }
 
@@ -246,15 +245,15 @@ int test_dut1() {
         if (!rd_success) {
             nerr++;
             std::cout << "\n error: end flag loss\n";
-        }
-        if (e) nerr++;
+        } else if (e)
+            nerr++;
     }
     rd_success = e_ostrms.read_nb(e);
     if (!rd_success) {
         nerr++;
         std::cout << "\n error: end flag loss\n";
-    }
-    if (!e) nerr++;
+    } else if (!e)
+        nerr++;
 
     return nerr;
 }

@@ -102,13 +102,12 @@ int main() {
     for (int i = 0; i < NUM_OUTPUT; i++) {
         for (int j = 0; j < STRM_LEN; j++) {
             rd_success = ostrms[i].read_nb(test_data);
-            if (test_data != gld_output[i][j]) {
-                nerror++;
-                std::cout << "error: test data = " << test_data << " gold data = " << gld_output[i][j] << std::endl;
-            }
             if (!rd_success) {
                 nerror++;
                 std::cout << "error: data loss" << std::endl;
+            } else if (test_data != gld_output[i][j]) {
+                nerror++;
+                std::cout << "error: test data = " << test_data << " gold data = " << gld_output[i][j] << std::endl;
             }
         }
     }
