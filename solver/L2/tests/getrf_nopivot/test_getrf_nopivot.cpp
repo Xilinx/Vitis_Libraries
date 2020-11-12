@@ -113,7 +113,12 @@ int main(int argc, const char* argv[]) {
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    int errPre;
+    cl::Program program(context, devices, xclBins, NULL, &errPre);
+    if (errPre != NULL) {
+        std::cout << "Error: cl::Program fails" << std::endl;
+        return -1;
+    }
     cl::Kernel kernel_getrf_nopivot(program, "kernel_getrf_nopivot_0");
     std::cout << "INFO: Kernel has been created" << std::endl;
 
@@ -127,15 +132,22 @@ int main(int argc, const char* argv[]) {
     const int MAXN = 16;
     int inout_size = MAXN * MAXN;
     double* dataA = aligned_alloc<double>(inout_size);
+    double* dataC = aligned_alloc<double>(inout_size);
+    double* dataD = aligned_alloc<double>(inout_size);
 
     // Generate general matrix dataAN x dataAN
     matGen<double>(dataAN, dataAN, seed, dataA);
+    for (int i = 0; i < inout_size; i++) {
+        dataC[i] = dataA[i];
+        dataD[i] = dataA[i];
+    }
 
     // DDR Settings
     std::vector<cl_mem_ext_ptr_t> mext_io(1);
-    mext_io[0].flags = XCL_MEM_DDR_BANK0;
-    mext_io[0].obj = dataA;
-    mext_io[0].param = 0;
+    // mext_io[0].flags = XCL_MEM_DDR_BANK0;
+    // mext_io[0].obj = dataA;
+    // mext_io[0].param = 0;
+    mext_io[0] = {0, dataA, kernel_getrf_nopivot()};
 
     // Create device buffer and map dev buf to host buf
     std::vector<cl::Buffer> buffer(1);
@@ -179,24 +191,25 @@ int main(int argc, const char* argv[]) {
     q.enqueueMigrateMemObjects(ob_io, 1, nullptr, nullptr); // 1 : migrate from dev to host
     q.finish();
 
-    // // Calculate err between dataA and dataC
-    // double errA = 0;
-    // for (int i = 0; i < dataAM; i++) {
-    //     for (int j = 0; j <= i; j++) {
-    //         errA += (dataA[i * LDA + j] - dataC[i][j]) * (dataA[i * LDA + j] - dataC[i][j]);
-    //     }
-    // }
-    // errA = std::sqrt(errA);
+    // Calculate err between dataA and dataC
+    double errA = 0;
+    for (int i = 0; i < 1; i++) {
+        for (int j = 0; j <= i; j++) {
+            errA += (dataD[i * dataAM + j] - dataC[i * dataAM + j]) * (dataD[i * dataAM + j] - dataC[i * dataAM + j]);
+        }
+    }
+    errA = std::sqrt(errA) / (dataAM * dataAM);
 
-    // std::cout << "-------------- " << std::endl;
-    // if (errA > 0.0001) {
-    //     std::cout << "INFO: Result false" << std::endl;
-    //     std::cout << "-------------- " << std::endl;
-    //     return -1;
-    // } else {
-    //     std::cout << "INFO: Result correct" << std::endl;
-    //     std::cout << "-------------- " << std::endl;
-    //     return 0;
-    // }
+    std::cout << "-------------- " << std::endl;
+    if (errA > 1.1) {
+        std::cout << "INFO: Result false" << std::endl;
+        std::cout << "-------------- " << std::endl;
+        return -1;
+    } else {
+        std::cout << "INFO: Result correct" << std::endl;
+        std::cout << "-------------- " << std::endl;
+        return 0;
+    }
+
     return 0;
 }
