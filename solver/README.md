@@ -20,5 +20,5 @@ Currently this includes the following operations for dense matrix
 
 ## Software and Hardware requirements
   - CentOS/RHEL 7.4, 7.5 or Ubuntu 16.04.4 LTS, 18.04.1 LTS
-  - Vitis 2020.1
+  - Vitis 2020.2
   - Alveo U200, U250

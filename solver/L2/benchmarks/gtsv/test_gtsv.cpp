@@ -97,7 +97,12 @@ int main(int argc, const char* argv[]) {
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    int errPre;
+    cl::Program program(context, devices, xclBins, NULL, &errPre);
+    if (errPre != NULL) {
+        std::cout << "Error: cl::Program fails" << std::endl;
+        return -1;
+    }
     cl::Kernel kernel_gtsv_0(program, "kernel_gtsv_0");
     std::cout << "INFO: Kernel has been created" << std::endl;
 
@@ -124,19 +129,24 @@ int main(int argc, const char* argv[]) {
 
     // DDR Settings
     std::vector<cl_mem_ext_ptr_t> mext_io(4);
-    mext_io[0].flags = XCL_MEM_DDR_BANK0;
-    mext_io[1].flags = XCL_MEM_DDR_BANK0;
-    mext_io[2].flags = XCL_MEM_DDR_BANK0;
-    mext_io[3].flags = XCL_MEM_DDR_BANK0;
+    // mext_io[0].flags = XCL_MEM_DDR_BANK0;
+    // mext_io[1].flags = XCL_MEM_DDR_BANK0;
+    // mext_io[2].flags = XCL_MEM_DDR_BANK0;
+    // mext_io[3].flags = XCL_MEM_DDR_BANK0;
 
-    mext_io[0].obj = matDiagLow;
-    mext_io[0].param = 0;
-    mext_io[1].obj = matDiag;
-    mext_io[1].param = 0;
-    mext_io[2].obj = matDiagUp;
-    mext_io[2].param = 0;
-    mext_io[3].obj = rhs;
-    mext_io[3].param = 0;
+    // mext_io[0].obj = matDiagLow;
+    // mext_io[0].param = 0;
+    // mext_io[1].obj = matDiag;
+    // mext_io[1].param = 0;
+    // mext_io[2].obj = matDiagUp;
+    // mext_io[2].param = 0;
+    // mext_io[3].obj = rhs;
+    // mext_io[3].param = 0;
+
+    mext_io[0] = {1, matDiagLow, kernel_gtsv_0()};
+    mext_io[1] = {2, matDiag, kernel_gtsv_0()};
+    mext_io[2] = {3, matDiagUp, kernel_gtsv_0()};
+    mext_io[3] = {4, rhs, kernel_gtsv_0()};
 
     // Create device buffer and map dev buf to host buf
     cl::Buffer matdiaglow_buffer = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
@@ -192,6 +202,20 @@ int main(int argc, const char* argv[]) {
     // Data transfer from device buffer to host buffer
     q.enqueueMigrateMemObjects(ob_out, 1, nullptr, nullptr); // 1 : migrate from dev to host
     q.finish();
+
+    int rtl = 0;
+    for (int i = 0; i < dataAM; i++) {
+        if (std::abs(rhs[i] - 1.0) > 1e-7) rtl = 1;
+    }
+    if (rtl == 1) {
+        std::cout << "INFO: Result false" << std::endl;
+        std::cout << "-------------- " << std::endl;
+        return -1;
+    } else {
+        std::cout << "INFO: Result correct" << std::endl;
+        std::cout << "-------------- " << std::endl;
+        return 0;
+    }
 
     return 0;
 }
