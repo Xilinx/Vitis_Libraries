@@ -1,9 +1,10 @@
 {
     "name": "Xilinx GTSV", 
-    "description": "", 
+    "description": "Tri-diagonal linear solver by using Parallel Cyclic Reduction method", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
+        "u50", 
         "u250", 
         "u200"
     ], 
@@ -39,6 +40,22 @@
                 "compiler": {
                     "cflags": [
                         "--config PROJECT/conn_u200.ini"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_HBM"
+                    ]
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
                     ]
                 }
             }
@@ -119,14 +136,25 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 120
+                "max_memory_MB": {
+                    "vitis_hw_build": 65536, 
+                    "vitis_hw_emu": 24576, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 120, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }, 
