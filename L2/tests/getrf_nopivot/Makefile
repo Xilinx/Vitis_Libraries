@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# makefile-generator v1.0.2
 #
-############################## Help Section ##############################
+
+# ####################################### Help Section #####################################
 .PHONY: help
 
 help::
@@ -28,199 +30,209 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make sd_card TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to prepare sd_card files."
+	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
 	$(ECHO) ""
 
-############################## Setting up Project Variables ##############################
+# ##################### Setting up default value of TARGET ##########################
+TARGET ?= sw_emu
+
+# ################### Setting up default value of DEVICE ##############################
+DEVICE ?= xilinx_u50_gen3x16_xdma_201920_3
+
+# ###################### Setting up default value of HOST_ARCH ####################### 
+HOST_ARCH ?= x86
+
+# #################### Checking if DEVICE in blacklist #############################
+ifeq ($(findstring zc, $(DEVICE)), zc)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+
+# #################### Checking if DEVICE in whitelist ############################
+ifneq ($(findstring u50, $(DEVICE)), u50)
+ifneq ($(findstring u250, $(DEVICE)), u250)
+ifneq ($(findstring u200, $(DEVICE)), u200)
+$(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
+endif
+endif
+
+# ######################## Setting up Project Variables #################################
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L2/tests/getrf_nopivot/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-TARGET ?= sw_emu
-HOST_ARCH := x86
-SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
-
+# ######################### Include environment variables in utils.mk ####################
 include ./utils.mk
-
 XDEVICE := $(call device2xsa, $(DEVICE))
 TEMP_DIR := _x_temp.$(TARGET).$(XDEVICE)
 TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XDEVICE)
 BUILD_DIR := build_dir.$(TARGET).$(XDEVICE)
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
+XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
+export XCL_BINDIR = $(XCLBIN_DIR)
 
-# Setting tools
-VPP := v++
-SDCARD := sd_card
-EMU_DIR := $(SDCARD)/data/emulation
-
-############################## Setting up Host Variables ##############################
+# ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/getrf_nopivot/test_getrf_nopivot.cpp
+HOST_SRCS += $(CUR_DIR)/test_getrf_nopivot.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
-
-CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/getrf_nopivot
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/ext/MatrixGen
-
-
-
-# Host compiler global settings
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14  -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread 
-LDFLAGS += -L$(XILINX_XRT)/lib -lxilinxopencl -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE 
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
-CXXFLAGS += -fmessage-length=0 -O3 
-CXXFLAGS +=-I$(CUR_DIR)/src/ 
-
-
-EXE_FILE := test_getrf_nopivot.exe
-SOC_HOST_ARGS :=  -xclbin $(BUILD_DIR)/kernel_getrf_nopivot.xclbin
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/kernel_getrf_nopivot.xclbin
-
-ifneq ($(HOST_ARCH), x86)
-	LDFLAGS += --sysroot=$(SYSROOT)
-endif
-
-############################## Setting up Kernel Variables ##############################
-# Kernel compiler global settings
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
-LDCLFLAGS += --optimize 2 --jobs 8
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
-# U280
-VPP_FLAGS += --config conn_u280.ini
-CXXFLAGS += -DUSE_HBM
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-# U250
-VPP_FLAGS += --config conn_u250.ini
-CXXFLAGS += -DUSE_DDR
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-# U200
-VPP_FLAGS += --config conn_u200.ini
-CXXFLAGS += -DUSE_DDR
-else ifneq (,$(XPLATFORM))
-$(warning Unsupported platform $(XPLATFORM))
-endif
+CXXFLAGS += -I$(XFLIB_DIR)/L1/include
+CXXFLAGS += -I$(XFLIB_DIR)/L2/include
+CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 
 ifeq ($(TARGET),sw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
+CXXFLAGS += -D SW_EMU_TEST
 endif
+
 ifeq ($(TARGET),hw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
+CXXFLAGS += -D HW_EMU_TEST
 endif
-VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/getrf_nopivot
+
+# ######################### Host compiler global settings ############################
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
+CXXFLAGS += -fmessage-length=0 -O3 
+CXXFLAGS += -I$(CUR_DIR)/src/ 
+
+ifeq ($(HOST_ARCH), x86)
+LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+endif
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+CXXFLAGS += -D USE_DDR
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+CXXFLAGS += -D USE_DDR
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+CXXFLAGS += -D USE_HBM
+endif
+
+# ################### Setting package and image directory #######################
+PKG_OUT_DIR := package_$(TARGET)
+ifneq (,$(findstring zc706, $(XDEVICE)))
+K_IMAGE := $(SYSROOT)/../../uImage
+else
+K_IMAGE := $(SYSROOT)/../../Image
+endif
+
+EXE_NAME := test_getrf_nopivot.exe
+EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/kernel_getrf_nopivot.xclbin
+PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
+
+# ##################### Kernel compiler global settings ##########################
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
+VPP_FLAGS += --jobs 8
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u250.cfg
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u200.cfg
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50.cfg
+endif
+
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
+
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/ext
 
+kernel_getrf_nopivot_0_VPP_FLAGS +=  -D KERNEL_NAME=kernel_getrf_nopivot_0
+kernel_getrf_nopivot_0_VPP_FLAGS += --hls.clock 300000000:kernel_getrf_nopivot_0
+VPP_LDFLAGS_kernel_getrf_nopivot += --kernel_frequency 300
 
-############################## Declaring Binary Containers ##############################
+
+# ############################ Declaring Binary Containers ##########################
+
+ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel_getrf_nopivot.xclbin
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel_getrf_nopivot.xclbin
+else
+BINARY_CONTAINERS += $(BUILD_DIR)/kernel_getrf_nopivot_xo.xclbin
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel_getrf_nopivot.xclbin
+endif
 BINARY_CONTAINER_kernel_getrf_nopivot_OBJS += $(TEMP_DIR)/kernel_getrf_nopivot_0.xo
 
-############################## Setting Targets ##############################
-CP = cp -rf
+# ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
+all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: host
-host: $(EXE_FILE) | check_xrt
+host: check_xrt check_sysroot $(EXE_FILE)
 
 .PHONY: xclbin
-xclbin: check_vpp | $(BINARY_CONTAINERS)
+xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
 
-############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-$(TEMP_DIR)/kernel_getrf_nopivot_0.xo: $(XFLIB_DIR)/L2/tests/getrf_nopivot/kernel_getrf_nopivot.cpp
+.PHONY: build
+build: xclbin
+
+# ################ Setting Rules for Binary Containers (Building Kernels) ################
+$(TEMP_DIR)/kernel_getrf_nopivot_0.xo: $(CUR_DIR)/kernel_getrf_nopivot.cpp
 	$(ECHO) "Compiling Kernel: kernel_getrf_nopivot_0"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(kernel_getrf_nopivot_0_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k kernel_getrf_nopivot_0 -I'$(<D)' -o $@ $^
+	$(VPP) -c $(kernel_getrf_nopivot_0_VPP_FLAGS) $(VPP_FLAGS) -k kernel_getrf_nopivot_0 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
 
-$(BUILD_DIR)/kernel_getrf_nopivot.xclbin: $(BINARY_CONTAINER_kernel_getrf_nopivot_OBJS)
+
+$(BINARY_CONTAINERS): $(BINARY_CONTAINER_kernel_getrf_nopivot_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_getrf_nopivot -l $(LDCLFLAGS) $(LDCLFLAGS_kernel_getrf_nopivot) -o'$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_getrf_nopivot $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel_getrf_nopivot) -o '$@' $(+)
 
-############################## Setting Rules for Host (Building Host Executable) ##############################
+
+# ################# Setting Rules for Host (Building Host Executable) ################
 $(EXE_FILE): $(HOST_SRCS) | check_xrt
+	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(XPLATFORM) --od $(EMCONFIG_DIR)
 
-############################## Setting Essential Checks and Running Rules ##############################
+
+# ###############Setting Essential Checks And Running Rules For Vitis Flow #############
 run: all
-ifeq ($(findstring zc*, $(DEVICE)), zc*)
-$(error This example is not supported for $(DEVICE))
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-ifeq ($(HOST_ARCH), x86)
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 else
-	mkdir -p $(EMU_DIR)
-	$(CP) $(XILINX_VITIS)/data/emulation/unified $(EMU_DIR)
-	mkfatimg $(SDCARD) $(SDCARD).img 500000
-	launch_emulator -no-reboot -runtime ocl -t $(TARGET) -sd-card-image $(SDCARD).img -device-family $(DEV_FAM)
-endif
-else
-ifeq ($(HOST_ARCH), x86)
-	./$(EXE_FILE) $(HOST_ARGS)
-else
-	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
-endif
+	$(EXE_FILE) $(HOST_ARGS)
 endif
 
-############################## Preparing sdcard folder ##############################
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-ifneq ($(HOST_ARCH), x86)
-	mkdir -p $(SDCARD)/$(BUILD_DIR)
-	mkdir -p $(SDCARD)/data
-	$(CP) $(B_NAME)/sw/$(XDEVICE)/boot/generic.readme $(B_NAME)/sw/$(XDEVICE)/xrt/image/* xrt.ini $(EXE_FILE) $(SDCARD)
-	$(CP) $(BUILD_DIR)/*.xclbin $(SDCARD)/$(BUILD_DIR)/
-ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-	$(ECHO) 'cd /mnt/' >> $(SDCARD)/init.sh
-	$(ECHO) 'export XILINX_VITIS=$$PWD' >> $(SDCARD)/init.sh
-	$(ECHO) 'export XCL_EMULATION_MODE=$(TARGET)' >> $(SDCARD)/init.sh
-	$(ECHO) './$(EXE_FILE) $(SOC_HOST_ARGS)' >> $(SDCARD)/init.sh
-	$(ECHO) 'reboot' >> $(SDCARD)/init.sh
-else
-	[ -f $(SDCARD)/BOOT.BIN ] && echo "INFO: BOOT.BIN already exists" || $(CP) $(BUILD_DIR)/sd_card/BOOT.BIN $(SDCARD)/
-	$(ECHO) './$(EXE_FILE) $(SOC_HOST_ARGS)' >> $(SDCARD)/init.sh
-endif
-endif
-
-############################## Cleaning Rules ##############################
+# ################################# Cleaning Rules ##################################
 cleanh:
 	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* sample_* 
+	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) *.txt.* $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw
+	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
 
+	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

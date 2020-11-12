@@ -109,7 +109,12 @@ int main(int argc, const char* argv[]) {
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    int errPre;
+    cl::Program program(context, devices, xclBins, NULL, &errPre);
+    if (errPre != NULL) {
+        std::cout << "Error: cl::Program fails" << std::endl;
+        return -1;
+    }
     cl::Kernel kernel_geqrf_0(program, "kernel_geqrf_0");
     std::cout << "INFO: Kernel has been created" << std::endl;
 
@@ -137,12 +142,14 @@ int main(int argc, const char* argv[]) {
     // DDR Settings
     std::vector<cl_mem_ext_ptr_t> mext_i(1);
     std::vector<cl_mem_ext_ptr_t> mext_o(1);
-    mext_i[0].flags = XCL_MEM_DDR_BANK0;
-    mext_o[0].flags = XCL_MEM_DDR_BANK0;
-    mext_i[0].obj = dataA_qrd;
-    mext_i[0].param = 0;
-    mext_o[0].obj = tau_qrd;
-    mext_o[0].param = 0;
+    // mext_i[0].flags = XCL_MEM_DDR_BANK0;
+    // mext_o[0].flags = XCL_MEM_DDR_BANK0;
+    // mext_i[0].obj = dataA_qrd;
+    // mext_i[0].param = 0;
+    // mext_o[0].obj = tau_qrd;
+    // mext_o[0].param = 0;
+    mext_i[0] = {0, dataA_qrd, kernel_geqrf_0()};
+    mext_o[0] = {1, tau_qrd, kernel_geqrf_0()};
 
     // Create device buffer and map dev buf to host buf
     std::vector<cl::Buffer> input_buffer(1), output_buffer(1);
