@@ -205,14 +205,14 @@ int main() {
     hj_begin_status[10] = 0; // join_num
 
     // allocate internal buffer
-    ap_uint<64>* pu_ht[PU_NM];
-    ap_uint<64>* pu_s[PU_NM];
+    ap_uint<256>* pu_ht[PU_NM];
+    ap_uint<256>* pu_s[PU_NM];
     ap_uint<512>* j_res0;
     ap_uint<512>* j_res1;
 
     for (int i = 0; i < PU_NM; i++) {
-        pu_ht[i] = (ap_uint<64>*)malloc(PU_HT_DEPTH * sizeof(ap_uint<64>));
-        pu_s[i] = (ap_uint<64>*)malloc(PU_S_DEPTH * sizeof(ap_uint<64>));
+        pu_ht[i] = (ap_uint<256>*)malloc(PU_HT_DEPTH * sizeof(ap_uint<256>));
+        pu_s[i] = (ap_uint<256>*)malloc(PU_S_DEPTH * sizeof(ap_uint<256>));
     }
 
     j_res0 = (ap_uint<512>*)malloc(J_MAX_DEPTH * sizeof(ap_uint<512>));

@@ -1,7 +1,5 @@
 # L3 Overlay APIs
 
-This directory contains pure-software APIs for
-
-* generating configuration bits for run-time-configurable primitives.
-
-* accessing the GQE overlay (TBD).
+APIs in L3 layer is build upon GQE kernels in L2, and it hides the complexity of creating
+execution pipeline with both software and FPGA components, and ships with strategies to
+divide problem into multiple FPGA kernel calls.

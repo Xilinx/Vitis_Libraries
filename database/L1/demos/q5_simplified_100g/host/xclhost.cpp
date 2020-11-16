@@ -61,10 +61,7 @@ cl_int init_hardware(cl_context* context,
         for (did = 0; did < device_count; ++did) {
             err = clGetDeviceInfo(devices[did], CL_DEVICE_NAME, 256, device_name, 0);
             printf("INFO: found device %d: %s\n", did, device_name);
-            if (!strcmp(device_name, shell_name)) {
-                printf("INFO: selected device %s\n", device_name);
-                break;
-            }
+            break;
         }
         if (did == device_count) {
             fprintf(stderr, "ERROR: target device %s not found\n.", shell_name);

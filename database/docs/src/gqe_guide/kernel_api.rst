@@ -26,15 +26,16 @@
 GQE Kernel APIs
 *******************
 
+These APIs are implemented as OpenCL kernels:
+
 .. toctree::
    :maxdepth: 1
+
+.. include:: ../rst_2/global.rst
+   :start-after: FunctionSection
 
 .. NOTE::
    GQE has been tested on Alveo U280 card, and makes use of both HBM and DDR.
    While other cards like U250 and U200 are not supported out-of-box,
    porting and gaining acceleration is surely possible, with tailoring and tuning.
-
-.. _cid-gqeaggr:
-.. include:: ../rst/global.rst
-   :start-after: _cid-gqeaggr:
 

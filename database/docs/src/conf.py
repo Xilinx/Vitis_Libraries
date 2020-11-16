@@ -44,10 +44,19 @@ copyright = '2020, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2020.1'
+version = '2020.2'
 # The full version, including alpha/beta/rc tags
-release = 'v2020.1'
+release = 'v2020.2'
 
+# For bottom-left nav
+try:
+    html_context
+except NameError:
+    html_context = dict()
+
+#html_context['display_lower_left'] = True
+html_context['current_version'] = version
+html_context['versions'] = ['2020.2', '2020.1', '2019.2']
 
 # -- General configuration ---------------------------------------------------
 
@@ -125,7 +134,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'xilinx_2020_1'
+html_theme = 'xilinx'
 html_theme_path = [os.path.join(tools_dir, 'share/themes')]
 
 html_last_updated_fmt = '%B %d, %Y'

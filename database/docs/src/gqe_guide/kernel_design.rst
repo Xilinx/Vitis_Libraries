@@ -32,6 +32,8 @@ GQE Kernel Design
 
 .. _gqe_join_kernel_design:
 
+.. CAUTION::
+    There is *NO* long-term-support to current version GQE kernels. The kernel APIs are subject to be changed for practicality in the comimg release.
 
 Join Kernel
 ===========
@@ -41,33 +43,25 @@ and can execute not only hash-join but also a number of primitives often found a
 prologue or epilogue of join operations. With its bypass design in data path,
 it can even perform execution without a join.
 
-.. image:: /images/gqe_join_kernel.png
+.. image:: /images/hashjoin_bp_structure.png
    :alt: GQE Join Kernel
-   :scale: 60%
+   :scale: 70%
    :align: center
 
 The internal of this kernel is illustrated in the figure above. Internal multi-join supports
-three reconfigurable modes, namely inner join, anti-join and semi-join.
-This kernel works with three input buffers, two for data and one for configuration,
-and it emits result to one output buffer, with same data structure as its data input buffers.
+three reconfigurable modes, namely inner join, anti-join and semi-join. To join efficiently at different data scale, the join process is divided into two phases: build and probe. Build phase takes Table A as input to build the hash table, while Probe phase takes Table B as input and probes the conflicting rows from built hash table. By calling Table B multiple iterations, any sized Table B can be joined. On the other hand, By spliting Table A into multiple slice and running mutli-(build + Nx probe), Table A with any size can be employed as the left table. 
 
-The uniformed buffer content structure design allows this kernel to be seamlessly scheduled,
-using one's output as successor's input. Basically, a buffer contains an input table
-or an intermediate result table, and each table has a list of data columns,
-placed one after another and aligned to 512b boundaries.
+This kernel works with three types of input buffers, 1x kernel configuration buffer, 1x meta info buffer and 8x column data buffers. The result buffers are 1x result data meta and 8x output column data. 
 
-Each column's data structure is essentially a 512-bit header, followed by raw data.
+The 8x input / output data columns saves all raw column data. The statistic information, e.g., row number, column number, is recorded in meta input / output buffer. The internal structure of meta info is shown in the figure below. The first 8 rows are valid for Join kernel. Each row represents the info of one data column.
+
+.. image:: /images/meta_layout.png
+   :alt: meta info layout 
+   :scale: 70%
+   :align: center
 
 .. NOTE::
-   In the current release, all columns are expected to have the same number of elements of same type,
-   so only the first columns header is used by kernel. This will likely change in future release.
-
-The buffer and column's data structure is shown in the figure below.
-
-.. image:: /images/gqe_2.0_data.png
-   :alt: GQE 2.0 Data Buffer Content
-   :scale: 60%
-   :align: center
+   In the current release, all columns are expected to have the same number of elements of same type.
 
 The configuration buffer basically programs the kernel at runtime. It toggles execution step
 primitives on or off, and defines the filter and/or evaluation expressions.
@@ -95,15 +89,10 @@ The details are documented in the following table:
 | (padding at MSB) filter Tab B config (cont')                                                             |
 +----------------------------------------------------------------------------------------------------------+
 
-Both input table A and B can support up to 8 columns.
+Both input table A and B can support up to 8 columns, which may consist of 1-2 key columns and 6-7 payload columns.
 The selection and order of columns in pipeline is appointed via the column index.
 Within each buffer, the columns are indexed starting from 0.
 ``-1`` is used as a special value to instruct the table scanner to feed zero for that column.
-
-For example, suppose Table A's column indices are ``[3,2,1,-1,-1]``.
-Then Column 3 will be the first in data path, and Column 2 the second and Column 1 the third.
-Column 0 and other columns if exists are ignored.
-The last two slots in data path will be filled with zeros.
 
 The filter config is aligned to lower bits, and each filter's config fully covers the first two
 512-bit slots, and partially use the third one.
@@ -120,65 +109,51 @@ The ``join sel`` option indicates the work mode of multi-join, 0 for normal hash
 The ``append`` option toggles whether the append mode is enabled during writing out consecutive joined table.
 This option would be usually used when it joins two sub-tables after hash partition.
 
-The eval config is for the :ref:`cid-xf::database::dynamicEval` primitive,
-and aligns to the lower bits of the 512-bit allocated for it.
-
-The aggregation always performs the calculation of min, max, sum and count for each of its input column.
-When ``aggr_on`` is set, aggregation values will write instead of the original rows.
-
-.. CAUTION::
-   To support large sum and count, the output data width of these two fields are doubled.
-   So that the aggregation value for each column is ``min, max, sum LSB, sum MSB, count LSB, count MSB``.
-
 The write option is basically a bit mask for 8 slots in data path.
 Only when the corresponding one-hot bit is asserted, the column is written to the output buffer.
 
 .. CAUTION::
-   Due to limitation in current ``write_out``, the output buffer must always
-   provide 8 column slots, even not all used.
+   The 8-columns input data are scanned in via 4x 256-bit AXI ports by default, each AXI responds for 2 columns data scanning, e.g., AXI0 for col0 and col4, AXI1 for col1 and col5. Thus, when the input column number is more than 4, scan performance drop will appear. Moreover, when input column number is less than 4, it is not recommend to use same AXI served columns. e.g, 3cols input, using 0,1,2 is more efficient than 0,1,4.   
 
-The hardware resource utilization of join kernel is shown in the table below (work as 182MHz).
+.. NOTE::
+   Directly bypass is supported by configuring the join kernel to probe mode. Then the kernel works as a filtering kernel. All data will go through the "channel merge" path in the kernel structure figure shown on the top.
+  
 
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-| Primitive      | Quantity |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Scan         |    1     | 12814 |    4758       |    8056      |  18968   |   0    |  0   |  2  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Filter       |    4     |  2155 |      13       |    2142      |  1776    |   0.5  |  0   |  0  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|  Hash join     |    1     | 118625|    30396      |    88229     |  171852  |  254.5 | 192  | 80  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Eval         |    2     |  2362 |     315       |   2047       |    2325  |   0    |  0   | 21  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-| Direct aggr    |    1     |  1958 |      0        |   1958       |    3307  |   0    |  0   |  0  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Write        |    1     | 20604 |    5693       |   14911      |    30275 |   0    |  0   |  0  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   AXI DDR      |    1     |  6803 |    1370       |   5433       |    15045 |  60    |  0   |  0  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   AXI HBM      |    1     | 25734 |    3321       |   22413      |    31290 |  32    |  0   |  0  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Total        |          | 236692|   63384       |   173608     |  330108  |  348.5 | 192  | 124 |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
+The hardware resource utilization of join kernel is shown in the table below (work as 180MHz).
+
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+| Primitive      |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   Scan         | 12814 |    4758       |    8056      |  18968   |   0    |  0   |  0  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   Filter       |  2155 |      13       |    2142      |  1776    |   0.5  |  0   |  0  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|  Hash join     | 118625|    36990      |    900005    |  141015  |  276   | 192  | 96  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   Write        | 20604 |    5693       |   14911      |    30275 |   0    |  0   |  0  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   AXI DDR      |  6803 |    1370       |   5433       |    15045 |  60    |  0   |  0  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   AXI HBM      | 25734 |    3321       |   22413      |    31290 |  32    |  0   |  0  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   Total        | 235621|   66324       |   169279     |  284784  |  472   | 192  | 96  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
 
 Aggregate Kernel
 ================
 
-The GQE Aggregate kernel is another key kernel of General Query Engine (GQE),
-and supports both grouping and non-grouping aggregate operations.
+The Aggregate kernel is another key kernel of General Query Engine (GQE) which supports both grouping and non-grouping aggregate operations.
 
 .. image:: /images/gqe_aggr_kernel.png
    :alt: GQE Aggregate Kernel
    :scale: 60%
    :align: center
 
-The internal structure of this kernel is shown in the figure above. It consists of one scan and write,
-two evaluations, one filter, hash group aggregate as well as one aggregate primitive. Raw input table is
-scanned in or write out by column. Before entering into hash group aggregate module, each element in each
+The internal structure of this kernel is shown in the figure above. Same to join kernel, 8-cols data buffer, 1x kernel config buffer and 1x meta info buffer are employecd as the kernel input. Due to the diversity of output data types, e.g., aggregate max, min, raw data, etc., 16x output column buffers are used as the output buffer. As shown in above figure, before entering into hash group aggregate module, each element in each
 row will be evaluated and filtered. Thus, some new elements can be generated and some rows will be
-discarded behind. Moreover, two cascaded evaluation modules are added to support more complex expression.
+discarded. Moreover, two cascaded evaluation modules are added to support more complex expression.
 
-Hash group aggregate is the key module in this kernel, which is a multi-PU implementation and given
+The core module of aggregate kernel is hash group aggregate, which is a multi-PU implementation and given
 in the following diagram. Each PU requires 2 HBM banks and some URAM memory blocks to buffer distinct
 keys as well as payloads after aggregate operations. And one internal loop is implemented to consume
 all input rows with each iteration. Furthermore, all PUs are working in parallel to achieve higher
@@ -189,8 +164,7 @@ performance.
    :scale: 60%
    :align: center
 
-Also, the data structure of input and output tables is same as join kernel. The whole configuration is
-composed of 128 32-bit slot. And the details of configuration buffers are listed in the table:
+The data structure of input and output meta and raw data are same as join kernel. The configuration buffer is composed of 128x 32-bit slots. The details of configuration buffers are listed in the table:
 
 +-------------+----------------------+------------------------+
 | Module      |  Module Config Width |      Position          |
@@ -222,7 +196,7 @@ composed of 128 32-bit slot. And the details of configuration buffers are listed
 | Reserved    |          -           | config[83]~config[127] |
 +-------------+----------------------+------------------------+
 
-The hardware resource utilization of hash group aggregate is shown in the table below (work as 193MHz).
+The hardware resource utilization of hash group aggregate is shown in the table below (work as 180MHz).
 
 +----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
 | Primitive      | Quantity |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |
@@ -253,47 +227,36 @@ The GQE partition kernel can partition one table's rows into corresponding clust
 key columns. This kernel is designed to scale the problem size that can be handled by the GQE Join or Aggregate kernel.
 To reduce the size of intermediate data, it is equipped with dynamic filter like other kernels.
 
-.. image:: /images/gqe_part_kernel.png
+.. image:: /images/partition_kernel_structure.png
    :alt: GQE Part Kernel
-   :scale: 70%
+   :scale: 80%
    :align: center
 
-The internal of this kernel is illustrated in the figure above. It consists of two input buffers and one output buffer.
-Firstly, the kernel scans the input tables into multiple columns and then it filters them (if the related condition is
-given in configuration buffer). After that, each row will be dispatched into various buckets based on the hash value of
-primary key. Finally, every full hash bucket will trigger on one burst write into output buffer.
+The internal of this kernel is illustrated in the figure above. It scans kernel config buffer, metainfo buffer and 8x cols input raw data in and passes to a filter. The filter condition is configured in kernel config buffer. After filtering, each row data will be dispatched into one of 4 PUs to calculate hash value of the primary key. Based on the hash value, the key and payload data are saved to the accroding bucket / partition. Once one bucket is full, the full bucket will trigger one time burst write which writes data from bucket to resulting buffer.
 
-The details for hash partition is shown in the following figure. One URAM array is used to buffer one burst length rows
-for each hash part. And the following module behind build PU will spilt each row into multiple columns for compatible
-output format with other kernels.
+In the kernel structure, URAM array that connected to "build PU" is drawn. Here maximum 256 buckets are created in URAM array, each bucket saves one time burst write to resulting buffer. The output of partition kernel is 8x cols output data and 1x meta info buffer.  
 
-.. image:: /images/gqe_part_detail.png
-   :alt: Detais Diagram of Hash Partition
-   :scale: 70%
-   :align: center
-
-To simplify the design, GQE partition kernel can reuse the scan and filter configuration with GQE join kernel. Also,
-as mentioned above, the data structure of input and output tables is the same as join kernel.
+To simplify the design, GQE partition kernel can reuse the scan and filter configuration with GQE join kernel. Also, as mentioned above, the data structure of input and output tables is the same as join kernel.
 
 The hardware resource utilization of single hash partition is shown in the table below (work as 200MHz).
 
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-| Primitive      | Quantity |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Scan         |    1     | 12032 |    4752       |    7280      |  19383   |   0    |  0   |  2  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Filter       |    4     |  3551 |     809       |    2742      |  3809    |   0.5  |  0   |  0  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|  Hash partition|    1     | 26363 |    1521       |    27496     |  45762   |  20    | 256  |  5  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Write        |    1     | 26083 |    5082       |   21286      |    33202 |   1    |  0   |  3  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   AXI DDR      |    1     |  5046 |    1010       |   4036       |    11303 |  59.5  |  0   |  0  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
-|   Total        |          | 76091 |   14102       |   61989      |  116884  |  81    | 256  | 10  |
-+----------------+----------+-------+---------------+--------------+----------+--------+------+-----+
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+| Primitive      |  LUT  | LUT as memory | LUT as logic | Register | BRAM36 | URAM | DSP |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   Scan         | 17109 |      5400     |    11709     |  20538   |   0    |  0   |  0  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   Filter       | 12853 |      3300     |     9553     |   8106   |   0    |  0   |  0  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|  Hash partition| 64336 |      5424     |    59912     |  50573   |   122  | 208  |  20 |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   Write        | 22385 |      5082     |     4816     |  29608   |   9    |  0   |  3  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   AXI DDR      | 37917 |      3461     |    34456     |  42380   |   51   |  0   |  6  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
+|   Total        | 134818|     26553     |    108220    |  116884  |   240  | 256  | 29  |
++----------------+-------+---------------+--------------+----------+--------+------+-----+
 
 .. ATTENTION::
-    To use the GQE Partition kernel, host must pass the number of partitions through a kernel argument,
-    create corresponding number of sub-buffers on Partition kernel's output,
-    and invoke GQE Join or Aggregate kernel multiple times accordingly.
+    For gqeJoin and gqeAggr kernel, only first 8 rows are valid. However, all 24 rows are valid in gqePart kernel. The row number of each output partition is given in the output meta, from row 8 to 23. Due to the supported maximum partition number is 256, each row number takes 32 bit in meta buffer, 256/(512/32) = 16 lines are employed to save these row number info.
+    Besides, The partition size should be provided for gqePart input meta.
+

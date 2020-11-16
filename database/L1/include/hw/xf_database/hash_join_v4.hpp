@@ -81,7 +81,250 @@ namespace database {
 namespace details {
 namespace join_v4 {
 
+// TODO update to use 256-bit port.
+namespace sc_tmp {
+
+// generate addr for read/write stb
+template <int RW, int ARW>
+void stb_addr_gen(hls::stream<ap_uint<ARW> >& i_addr_strm,
+                  hls::stream<bool>& i_e_strm,
+
+                  hls::stream<ap_uint<ARW> >& o_addr_strm,
+                  hls::stream<bool>& o_e_strm) {
+#pragma HLS INLINE off
+
+    const int number_of_element_per_row = (RW % 64 == 0) ? RW / 64 : RW / 64 + 1; // number of output based on 64 bit
+
+    bool last = i_e_strm.read();
+    while (!last) {
+#pragma HLS PIPELINE II = number_of_element_per_row
+
+        ap_uint<ARW> addr_in = i_addr_strm.read();
+        last = i_e_strm.read();
+        ap_uint<ARW> addr_base = addr_in * number_of_element_per_row;
+
+        for (int i = 0; i < number_of_element_per_row; i++) {
+            o_addr_strm.write(addr_base++);
+            o_e_strm.write(false);
+        }
+    }
+
+    o_e_strm.write(true);
+}
+
+// split row into several 64 bit element
+template <int RW, int ARW>
+void split_row(hls::stream<ap_uint<RW> >& i_row_strm,
+               hls::stream<bool>& i_e_strm,
+
+               hls::stream<ap_uint<64> >& o_row_strm,
+               hls::stream<bool>& o_e_strm) {
+#pragma HLS INLINE off
+
+#ifndef __SYNTHESIS__
+    unsigned int cnt = 0;
+#endif
+
+    const int number_of_element_per_row = (RW % 64 == 0) ? RW / 64 : RW / 64 + 1; // number of output based on 64 bit
+
+    bool last = i_e_strm.read();
+    ap_uint<64 * number_of_element_per_row> row_temp = 0;
+
+    while (!last) {
+#pragma HLS PIPELINE II = number_of_element_per_row
+        row_temp = i_row_strm.read();
+        last = i_e_strm.read();
+        ap_uint<4> mux = 0;
+
+        for (int i = 0; i < number_of_element_per_row; i++) {
+            ap_uint<64> element = row_temp((mux + 1) * 64 - 1, mux * 64);
+            mux++;
+
+            o_row_strm.write(element);
+            o_e_strm.write(false);
+        }
+#ifndef __SYNTHESIS__
+        cnt++;
+#endif
+    }
+    o_e_strm.write(true);
+
+#ifndef __SYNTHESIS__
+#ifdef DEBUG_HBM
+    std::cout << std::dec << "RW= " << RW << " II=" << number_of_element_per_row << std::endl;
+    std::cout << std::dec << "STB write " << cnt << " rows" << std::endl;
+#endif
+#endif
+}
+
+// write row to HBM/DDR
+template <int RW, int ARW>
+void write_row(ap_uint<64>* stb_buf,
+               hls::stream<ap_uint<ARW> >& i_addr_strm,
+               hls::stream<ap_uint<64> >& i_row_strm,
+               hls::stream<bool>& i_e_strm) {
+#pragma HLS INLINE off
+
+    bool last = i_e_strm.read();
+    while (!last) {
+#pragma HLS PIPELINE II = 1
+        ap_uint<ARW> addr = i_addr_strm.read();
+        ap_uint<64> row = i_row_strm.read();
+        last = i_e_strm.read();
+
+        stb_buf[addr] = row;
+    }
+}
+
+/// @brief Write s-table to HBM/DDR
+template <int ARW, int RW>
+void write_stb(ap_uint<64>* stb_buf,
+
+               hls::stream<ap_uint<ARW> >& i_addr_strm,
+               hls::stream<ap_uint<RW> >& i_row_strm,
+               hls::stream<bool>& i_e_strm) {
+#pragma HLS INLINE off
+#pragma HLS DATAFLOW
+
+    hls::stream<bool> e0_strm;
+#pragma HLS STREAM variable = e0_strm depth = 8
+#pragma HLS resource variable = e0_strm core = FIFO_SRL
+    hls::stream<bool> e1_strm;
+#pragma HLS STREAM variable = e1_strm depth = 8
+#pragma HLS resource variable = e1_strm core = FIFO_SRL
+
+    hls::stream<ap_uint<ARW> > addr_strm;
+#pragma HLS STREAM variable = addr_strm depth = 512
+#pragma HLS resource variable = addr_strm core = FIFO_BRAM
+    hls::stream<bool> e2_strm;
+#pragma HLS STREAM variable = e2_strm depth = 512
+#pragma HLS resource variable = e2_strm core = FIFO_SRL
+
+    hls::stream<ap_uint<64> > row_strm;
+#pragma HLS STREAM variable = row_strm depth = 512
+#pragma HLS resource variable = row_strm core = FIFO_BRAM
+    hls::stream<bool> e3_strm;
+#pragma HLS STREAM variable = e3_strm depth = 512
+#pragma HLS resource variable = e3_strm core = FIFO_SRL
+
+    join_v3::sc::duplicate_strm_end<bool>(i_e_strm, e0_strm, e1_strm);
+
+    stb_addr_gen<RW, ARW>(i_addr_strm, e0_strm, addr_strm, e2_strm);
+
+    split_row<RW, ARW>(i_row_strm, e1_strm, row_strm, e3_strm);
+
+    write_row<RW, ARW>(stb_buf, addr_strm, row_strm, e3_strm);
+
+    join_v3::sc::eliminate_strm_end<bool>(e2_strm);
+}
+
+// read row from HBM/DDR
+template <int RW, int ARW>
+void read_row(ap_uint<64>* stb_buf,
+              hls::stream<ap_uint<ARW> >& i_addr_strm,
+              hls::stream<bool>& i_e_strm,
+
+              hls::stream<ap_uint<64> >& o_row_strm,
+              hls::stream<bool>& o_e_strm) {
+#pragma HLS INLINE off
+
+    bool last = i_e_strm.read();
+    while (!last) {
+#pragma HLS PIPELINE II = 1
+        ap_uint<ARW> addr = i_addr_strm.read();
+        last = i_e_strm.read();
+
+        ap_uint<64> element = stb_buf[addr];
+        o_row_strm.write(element);
+        o_e_strm.write(false);
+    }
+    o_e_strm.write(true);
+}
+
+// combine several 64 bit stream into one row
+template <int RW, int ARW>
+void combine_row(hls::stream<ap_uint<64> >& i_row_strm,
+                 hls::stream<bool>& i_e_strm,
+
+                 hls::stream<ap_uint<RW> >& o_row_strm,
+                 hls::stream<bool>& o_e_strm) {
+#pragma HLS INLINE off
+
+#ifndef __SYNTHESIS__
+    unsigned int cnt = 0;
+#endif
+
+    const int number_of_element_per_row = (RW % 64 == 0) ? RW / 64 : RW / 64 + 1; // number of output based on 64 bit
+
+    bool last = i_e_strm.read();
+    ap_uint<64 * number_of_element_per_row> row_temp = 0;
+    ap_uint<4> mux = 0;
+
+    while (!last) {
+#pragma HLS PIPELINE II = 1
+        ap_uint<64> element = i_row_strm.read();
+        last = i_e_strm.read();
+        row_temp((mux + 1) * 64 - 1, mux * 64) = element;
+
+        if (mux == number_of_element_per_row - 1) {
+            ap_uint<RW> row = row_temp(RW - 1, 0);
+            o_row_strm.write(row);
+            o_e_strm.write(false);
+
+            mux = 0;
+        } else {
+            mux++;
+        }
+
+#ifndef __SYNTHESIS__
+        cnt++;
+#endif
+    }
+    o_e_strm.write(true);
+
+#ifndef __SYNTHESIS__
+#ifdef DEBUG_HBM
+    std::cout << std::dec << "RW= " << RW << " II=" << number_of_element_per_row << std::endl;
+    std::cout << std::dec << "STB read " << cnt / number_of_element_per_row << " rows" << std::endl;
+#endif
+#endif
+}
+
+template <int ARW, int RW>
+void read_stb(ap_uint<64>* stb_buf,
+
+              hls::stream<ap_uint<ARW> >& i_addr_strm,
+              hls::stream<bool>& i_e_strm,
+
+              hls::stream<ap_uint<RW> >& o_row_strm,
+              hls::stream<bool>& o_e_strm) {
+#pragma HLS INLINE off
+#pragma HLS DATAFLOW
+
+    hls::stream<ap_uint<ARW> > addr_strm;
+#pragma HLS STREAM variable = addr_strm depth = 512
+#pragma HLS resource variable = addr_strm core = FIFO_BRAM
+    hls::stream<bool> e0_strm;
+#pragma HLS STREAM variable = e0_strm depth = 512
+#pragma HLS resource variable = e0_strm core = FIFO_SRL
+
+    hls::stream<ap_uint<64> > row_strm;
+#pragma HLS STREAM variable = row_strm depth = 8
+#pragma HLS resource variable = row_strm core = FIFO_SRL
+    hls::stream<bool> e1_strm;
+#pragma HLS STREAM variable = e1_strm depth = 8
+#pragma HLS resource variable = e1_strm core = FIFO_SRL
+
+    stb_addr_gen<RW, ARW>(i_addr_strm, i_e_strm, addr_strm, e0_strm);
+
+    read_row<RW, ARW>(stb_buf, addr_strm, e0_strm, row_strm, e1_strm);
+
+    combine_row<RW, ARW>(row_strm, e1_strm, o_row_strm, o_e_strm);
+}
+} // namespace sc_tmp
+
 namespace sc {
+
 // ------------------------------------Read Write HBM------------------------------------
 
 // read hash table from HBM/DDR
@@ -863,9 +1106,9 @@ void build_wrapper(
 
                                  bf_vector0, bf_vector1, bf_vector2);
 
-    join_v3::sc::write_stb<ARW, KEYW + S_PW>(stb_buf, base_addr_strm, base_row_strm, e2_strm);
+    sc_tmp::write_stb<ARW, KEYW + S_PW>(stb_buf, base_addr_strm, base_row_strm, e2_strm);
 
-    join_v3::sc::write_stb<ARW, KEYW + S_PW>(htb_buf, overflow_addr_strm, overflow_row_strm, e3_strm);
+    sc_tmp::write_stb<ARW, KEYW + S_PW>(htb_buf, overflow_addr_strm, overflow_row_strm, e3_strm);
 }
 
 //---------------------------------------------------probe------------------------------------------------
@@ -2422,7 +2665,7 @@ void build_wrapper(
 
                                  bf_vector0, bf_vector1, bf_vector2);
 
-    join_v3::sc::write_stb<ARW, KEYW + PW>(stb_buf, addr_strm, row_strm, e2_strm);
+    sc_tmp::write_stb<ARW, KEYW + PW>(stb_buf, addr_strm, row_strm, e2_strm);
 }
 
 //---------------------------------------------------merge hash table------------------------------------------------
@@ -2700,7 +2943,7 @@ void merge_htb(ap_uint<64>* htb_buf,
                                                         bf_vector0, bf_vector1);
 
     // write merged htb to htb_buf
-    join_v3::sc::write_stb<ARW, 64>(htb_buf, write_addr_strm, bitmap_strm, e_strm);
+    sc_tmp::write_stb<ARW, 64>(htb_buf, write_addr_strm, bitmap_strm, e_strm);
 }
 
 // merge overflow srow
@@ -2908,11 +3151,11 @@ void merge_stb(ap_uint<32> depth,
                        read_addr_strm, e0_strm);
 
     // read srow in htb_buf
-    join_v3::sc::read_stb<ARW, KEYW + PW>(stb_buf,
+    sc_tmp::read_stb<ARW, KEYW + PW>(stb_buf,
 
-                                          read_addr_strm, e0_strm,
+                                     read_addr_strm, e0_strm,
 
-                                          row0_strm, e1_strm);
+                                     row0_strm, e1_strm);
 
     // split row to hash and key
     database::splitCol<KEYW + PW, PW, KEYW>(row0_strm, e1_strm,
@@ -2931,7 +3174,7 @@ void merge_stb(ap_uint<32> depth,
                                               bf_vector0, bf_vector1);
 
     // write srow to stb_buf
-    join_v3::sc::write_stb<ARW, KEYW + PW>(htb_buf, write_addr_strm, row1_strm, e4_strm);
+    sc_tmp::write_stb<ARW, KEYW + PW>(htb_buf, write_addr_strm, row1_strm, e4_strm);
 }
 
 template <int HASHWH, int HASHWL, int HASHO, int BF_HASH_NM, int BFW, int KEYW, int PW, int ARW>
@@ -3436,7 +3679,7 @@ void probe_base_stb(
                         read_addr_strm, e0_strm);
 
     // read HBM to get base stb
-    join_v3::sc::read_stb<ARW, KEYW + S_PW>(stb_buf, read_addr_strm, e0_strm, row_strm, e1_strm);
+    sc_tmp::read_stb<ARW, KEYW + S_PW>(stb_buf, read_addr_strm, e0_strm, row_strm, e1_strm);
 
     // split base stb to key and pld
     database::splitCol<KEYW + S_PW, S_PW, KEYW>(row_strm, e1_strm, o_base_s_pld_strm, o_base_s_key_strm, e2_strm);
@@ -3488,7 +3731,7 @@ void read_overflow_stb(
                        read_addr_strm, e0_strm);
 
     // read HBM to get base stb
-    join_v3::sc::read_stb<ARW, KEYW + S_PW>(htb_buf, read_addr_strm, e0_strm, row_strm, e1_strm);
+    sc_tmp::read_stb<ARW, KEYW + S_PW>(htb_buf, read_addr_strm, e0_strm, row_strm, e1_strm);
 
     // split base stb to key and pld
     database::splitCol<KEYW + S_PW, S_PW, KEYW>(row_strm, e1_strm, o_overflow_s_pld_strm, o_overflow_s_key_strm,

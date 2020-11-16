@@ -263,41 +263,41 @@ extern "C" void hash_aggr_kernel(ap_uint<8 * KEY_SZ * VEC_LEN> buf_l_orderkey[L_
   max_write_burst_length = 8 max_read_burst_length = 8 bundle=gmem0_3 port=result_info
 #pragma HLS INTERFACE s_axilite port = result_info bundle = control
 
-#pragma HLS INTERFACE m_axi port=ping_buf0 bundle=gmem1_0 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=ping_buf0 bundle=gmem1_0 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length = 8 latency=125
 #pragma HLS INTERFACE s_axilite port = ping_buf0 bundle = control
 
-#pragma HLS INTERFACE m_axi port=ping_buf1 bundle=gmem1_1 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=ping_buf1 bundle=gmem1_1 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length = 8 latency=125
 #pragma HLS INTERFACE s_axilite port = ping_buf1 bundle = control
 
-#pragma HLS INTERFACE m_axi port=ping_buf2 bundle=gmem1_2 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=ping_buf2 bundle=gmem1_2 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length = 8 latency=125
 #pragma HLS INTERFACE s_axilite port = ping_buf2 bundle = control
 
-#pragma HLS INTERFACE m_axi port=ping_buf3 bundle=gmem1_3 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=ping_buf3 bundle=gmem1_3 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length = 8 latency=125
 #pragma HLS INTERFACE s_axilite port = ping_buf3 bundle = control
 
 
-#pragma HLS INTERFACE m_axi port=pong_buf0 bundle=gmem2_0 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=pong_buf0 bundle=gmem2_0 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length = 8 latency=125
 #pragma HLS INTERFACE s_axilite port = pong_buf0 bundle = control
 
-#pragma HLS INTERFACE m_axi port=pong_buf1 bundle=gmem2_1 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=pong_buf1 bundle=gmem2_1 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length = 8 latency=125
 #pragma HLS INTERFACE s_axilite port = pong_buf1 bundle = control
 
-#pragma HLS INTERFACE m_axi port=pong_buf2 bundle=gmem2_2 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=pong_buf2 bundle=gmem2_2 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length = 8 latency=125
 #pragma HLS INTERFACE s_axilite port = pong_buf2 bundle = control
 
-#pragma HLS INTERFACE m_axi port=pong_buf3 bundle=gmem2_3 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=pong_buf3 bundle=gmem2_3 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length = 8 latency=125
 #pragma HLS INTERFACE s_axilite port = pong_buf3 bundle = control
 
 
-#pragma HLS INTERFACE m_axi port=result bundle=gmem3_0 num_write_outstanding=16 num_read_outstanding=16 \
+#pragma HLS INTERFACE m_axi offset=slave port=result bundle=gmem3_0 num_write_outstanding=16 num_read_outstanding=16 \
   max_write_burst_length = 8 max_read_burst_length=8 latency=125
 #pragma HLS INTERFACE s_axilite port = result bundle = control
 

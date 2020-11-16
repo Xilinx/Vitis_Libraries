@@ -16,6 +16,7 @@
 
 // clang-format off
 #include "table_dt.hpp"
+#include "prepare.hpp"
 #include "filter_test.hpp"
 #include "filter_kernel.hpp"
 #include "utils.hpp"
@@ -37,6 +38,8 @@
 #include "CL/cl_ext_xilinx.h"
 #include "cl_errcode.hpp"
 #define XBANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
+
+int err = 0;
 
 enum flt_debug_level { FLT_ERROR, FLT_WARNING, FLT_INFO, FLT_DEBUG, FLT_ALL };
 
@@ -62,6 +65,7 @@ int load_dat(void* data, const std::string& name, const std::string& dir, size_t
 }
 
 int create_buffers(cl_context ctx,
+                   cl_kernel kernel,
                    int i,
                    //
                    uint32_t* raw_filter_cfg,     //
@@ -83,25 +87,15 @@ int create_buffers(cl_context ctx,
                    int l_depth) {
     // prepare extended attribute for all buffers
     ;
-#ifdef USE_DDR
-    cl_mem_ext_ptr_t mext_filter_cfg = {XBANK(0), raw_filter_cfg, 0};
-    cl_mem_ext_ptr_t mext_l_shipdate = {XBANK(0), col_l_shipdate, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XBANK(0), col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_l_quantity = {XBANK(0), col_l_quantity, 0};
-    cl_mem_ext_ptr_t mext_l_commitdate = {XBANK(0), col_l_commitdate, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XBANK(0), col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_revenue = {XBANK(0), col_revenue, 0};
-#else
-    cl_mem_ext_ptr_t mext_filter_cfg = {XBANK(0), raw_filter_cfg, 0};
-    cl_mem_ext_ptr_t mext_l_shipdate = {XBANK(1), col_l_shipdate, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XBANK(2), col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_l_quantity = {XBANK(3), col_l_quantity, 0};
-    cl_mem_ext_ptr_t mext_l_commitdate = {XBANK(4), col_l_commitdate, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XBANK(5), col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_revenue = {XBANK(6), col_revenue, 0};
-#endif
+    cl_mem_ext_ptr_t mext_filter_cfg = {0, raw_filter_cfg, kernel};
+    cl_mem_ext_ptr_t mext_l_shipdate = {1, col_l_shipdate, kernel};
+    cl_mem_ext_ptr_t mext_l_discount = {2, col_l_discount, kernel};
+    cl_mem_ext_ptr_t mext_l_quantity = {3, col_l_quantity, kernel};
+    cl_mem_ext_ptr_t mext_l_commitdate = {4, col_l_commitdate, kernel};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {5, col_l_extendedprice, kernel};
+    cl_mem_ext_ptr_t mext_revenue = {7, col_revenue, kernel};
 
-    cl_int err;
+    // cl_int err;
 
     *buf_filter_cfg = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                                      (sizeof(uint32_t) * BUF_CFG_DEPTH), &mext_filter_cfg, &err);
@@ -158,6 +152,7 @@ void CL_CALLBACK update_buffer(cl_event ev, cl_int st, void* d) {
 
 typedef struct print_revenue_data_ {
     MONEY_T* col_revenue;
+    int row;
     int i;
 } print_revenue_data_t;
 
@@ -166,6 +161,22 @@ void CL_CALLBACK print_buffer(cl_event ev, cl_int st, void* d) {
     MONEY_T* col_revenue = t->col_revenue;
     long long rv = *((long long*)col_revenue);
     printf("FPGA result %d: %lld.%lld\n", t->i, rv / 10000, rv % 10000);
+
+    // compare FPGA results with CPU ref results
+    if (t->row == 1000) {
+        std::cout << "First 1000 rows from 1G data, reference value: 16575.2594\n";
+        err = (rv == 165752594) ? 0 : 1;
+    } else if (t->row == L_MAX_ROW) {
+        std::cout << "All rows from 1G data, reference value: 62102819.2435\n";
+        err = (rv == 621028192435) ? 0 : 1;
+    }
+
+    if (err)
+        std::cout << "FAIL: " << err << " error(s) detected!" << std::endl;
+    else if (t->row == 1000 || t->row == L_MAX_ROW)
+        std::cout << "PASS!" << std::endl;
+    else
+        std::cout << "WARNING: unknown test size, result is not checked with provisioned golden data." << std::endl;
 }
 
 using xclhost::aligned_alloc;
@@ -182,7 +193,7 @@ int main(int argc, const char* argv[]) {
         std::cout << "Arguments:\n"
                      "   -h            show this help\n"
                      "   -xclbin FILE  path to xclbin\n"
-                     "   -in  DIR      path to dat file directory\n"
+                     "   -data DATADIR path to data folder\n"
                      "   -rep N        continously run for N times\n"
                      "   -mini M       load only M lines from input\n"
                      "------------------------------------------------------\n\n";
@@ -195,11 +206,16 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    std::string in_dir;
-    if (!parser.getCmdOption("-in", in_dir) || !is_dir(in_dir)) {
-        std::cout << "ERROR: input dir is not specified or not valid.\n";
+    std::string work_dir;
+    if (!parser.getCmdOption("-data", work_dir)) {
+        std::cout << "ERROR: data dir is not set!\n";
         return 1;
     }
+
+    int sf = 1;
+
+    // call data generator
+    std::string in_dir = prepare(work_dir, sf);
 
 #ifdef HLS_TEST
     int num_rep = 1;
@@ -368,7 +384,7 @@ int main(int argc, const char* argv[]) {
     cl_program prog;
 
     err = xclhost::init_hardware(&ctx, &dev_id, &cq, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
-                                 MSTR(XDEVICE)); // XXX platform name, eg: "xilinx_vcu1525_dynamic_5_1"
+                                 "");
     if (clCheckError(err) != CL_SUCCESS) {
         return err;
     }
@@ -376,6 +392,13 @@ int main(int argc, const char* argv[]) {
     err = xclhost::load_binary(&prog, ctx, dev_id, xclbin_path.c_str());
     if (clCheckError(err) != CL_SUCCESS) {
         return err;
+    }
+    // kernel
+    cl_kernel kernel;
+
+    kernel = clCreateKernel(prog, "filter_kernel", &err);
+    if (err != CL_SUCCESS) {
+        printf("ERROR: fail to create kernel: %s.\n", clGetErrorString(err));
     }
 
     // two step ping-pang.
@@ -403,7 +426,7 @@ int main(int argc, const char* argv[]) {
     for (int i = 0; i < step; ++i) {
         // XXX use the same host buffer for different cl mem obj.
         if (create_buffers(
-                ctx, i,
+                ctx, kernel, i,
                 //
                 config_bits, col_l_shipdate, col_l_discount, col_l_quantity, col_l_commitdate, col_l_extendedprice,
                 //
@@ -419,14 +442,6 @@ int main(int argc, const char* argv[]) {
         } else {
             if (debug_level >= FLT_DEBUG) printf("DEBUG: input buffer array %d has been created.\n", i);
         }
-    }
-
-    // kernel
-    cl_kernel kernel;
-
-    kernel = clCreateKernel(prog, "filter_kernel", &err);
-    if (err != CL_SUCCESS) {
-        printf("ERROR: fail to create kernel: %s.\n", clGetErrorString(err));
     }
 
     // events
@@ -490,6 +505,7 @@ int main(int argc, const char* argv[]) {
         clEnqueueMigrateMemObjects(cq, 1, &buf_output[pingpong], CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[i],
                                    &read_events[i]);
         pcbd[i].i = i;
+        pcbd[i].row = l_nrow;
         pcbd[i].col_revenue = col_revenue[pingpong];
         clSetEventCallback(read_events[i], CL_COMPLETE, print_buffer, &pcbd[i]);
     }
@@ -557,11 +573,6 @@ int main(int argc, const char* argv[]) {
     free(col_l_commitdate);
     free(col_l_extendedprice);
 
-    if (l_nrow == 1000) {
-        std::cout << "First 1000 rows from 1G data, reference value: 16575.2594\n";
-    } else if (l_nrow == L_MAX_ROW) {
-        std::cout << "All rows from 1G data, reference value: 62102819.2435\n";
-    }
     std::cout << "------------------------------------------------------\n\n";
-    return 0;
+    return err;
 }

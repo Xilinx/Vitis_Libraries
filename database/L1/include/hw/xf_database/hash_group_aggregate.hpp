@@ -1138,6 +1138,7 @@ void update_pld_elem(
 
     ap_uint<_PayNM> pld_status;
     ap_uint<4> op[_PayNM];
+    ap_uint<4> op_r[_PayNM];
 
     // generate enable signal from bit_idx
     if (max_col == 1) {
@@ -1192,14 +1193,25 @@ void update_pld_elem(
         } else {
             pld[i] = i_pld((i + 1) * _WPay - 1, i * _WPay);
         }
+
+        op[i] = op_type((i + 1) * 4 - 1, i * 4);
     }
 
     // calculate aggr
     for (int i = 0; i < _PayNM; i++) {
 #pragma HLS unroll
 
+        if (max_col == 1) {
+            op_r[i] = op[0];
+        } else if (max_col == 2) {
+            op_r[i] = op[i % 2];
+        } else if (max_col > 2 && max_col <= 4) {
+            op_r[i] = op[i % 4];
+        } else {
+            op_r[i] = op[i];
+        }
+
         bool enable = pld_status[i] == 1;
-        op[i] = op_type((i + 1) * 4 - 1, i * 4);
         col_agg[i][0] = i_pld_uram[0]((i + 1) * _WPay - 1, i * _WPay);
         col_agg[i][1] = i_pld_uram[1]((i + 1) * _WPay - 1, i * _WPay);
         col_agg[i][2] = i_pld_uram[2]((i + 1) * _WPay - 1, i * _WPay);
@@ -1208,13 +1220,13 @@ void update_pld_elem(
         // col1: sum_l avg_l default:sum
         // col2: sum_h avg_h default:sum
 
-        if (op[i] == enums::AOP_COUNT || op[i] == enums::AOP_COUNTNONZEROS || op[i] == enums::AOP_SUM ||
-            op[i] == enums::AOP_MEAN) {
+        if (op_r[i] == enums::AOP_COUNT || op_r[i] == enums::AOP_COUNTNONZEROS || op_r[i] == enums::AOP_SUM ||
+            op_r[i] == enums::AOP_MEAN) {
             // cnt-cnt_nz
-            new_col_agg[i][0] = aggr_cnt_nz(pld[i], col_agg[i][0], op[i] == enums::AOP_COUNTNONZEROS, enable);
+            new_col_agg[i][0] = aggr_cnt_nz(pld[i], col_agg[i][0], op_r[i] == enums::AOP_COUNTNONZEROS, enable);
         } else {
             // min-max
-            new_col_agg[i][0] = aggr_min_max(pld[i], col_agg[i][0], op[i] == enums::AOP_MIN, enable);
+            new_col_agg[i][0] = aggr_min_max(pld[i], col_agg[i][0], op_r[i] == enums::AOP_MIN, enable);
         }
 
         // sum
@@ -1227,7 +1239,7 @@ void update_pld_elem(
 #ifndef __SYNTHESIS__
 #ifdef DEBUG_UPDATE_PLD
         if (i == 0) {
-            std::cout << std::hex << "Update_pld_elem: enable=" << enable << " op=" << op[i]
+            std::cout << std::hex << "Update_pld_elem: i=" << i << " enable=" << enable << " op_r=" << op_r[i]
                       << " pld_status=" << pld_status << " pld_col=" << max_col << std::endl;
             std::cout << std::hex << "Update_pld_elem: accum_old=" << accum_old << " accum_new=" << accum_new
                       << std::endl;
@@ -2666,7 +2678,9 @@ void hashGroupAggregate(
 #endif
 
     do {
-#pragma HLS ALLOCATION instances = hash_aggr_top limit = 1 function
+// clang-format off
+#pragma HLS ALLOCATION function instances = hash_aggr_top<_WKey, _KeyNM, _WPay, _PayNM, _HashMode, _WHashHigh,  _WHashLow, _CHNM, _Wcnt, _WBuffer, _BurstLenW, _BurstLenR> limit = 1
+// clang-format on
 
 #ifndef __SYNTHESIS__
         std::cout << std::hex << "hash_aggr_top: op=" << op << " key_column=" << key_column
