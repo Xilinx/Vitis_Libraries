@@ -45,8 +45,8 @@ typedef TPCH_INT KEY_T;
 
 #define BUFF_DEPTH (O_MAX_ROW / 8 * 2)
 
-#define HT_BUFF_DEPTH (1 << 25)  // 30M
-#define S_BUFF_DEPTH (1 << 25)   // 30M
-#define HBM_BUFF_DEPTH (1 << 25) // 30M
+#define HT_BUFF_DEPTH (1 << 20)  // 30M
+#define S_BUFF_DEPTH (1 << 20)   // 30M
+#define HBM_BUFF_DEPTH (1 << 20) // 30M
 
 #endif // TABLE_DT_H

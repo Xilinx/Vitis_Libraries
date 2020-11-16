@@ -56,6 +56,11 @@ void direct_aggr_max(hls::stream<ap_uint<DATINW> >& vin_strm,
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2;
     addr_r0 = addr_r1 = addr_r2 = -1; // The 0x7ff should never be accessed
 
+    state_c = 0;
+    state_r0 = 0;
+    state_r1 = 0;
+    state_r2 = 0;
+    addr_c = 0;
     ///   @warning : the DIRECTW >= KINW in the dirt_aggr
     //    ap_uint<32> direct_key;
 
@@ -144,6 +149,13 @@ void direct_aggr_min(hls::stream<ap_uint<DATINW> >& vin_strm,
     ap_int<DATOUTW> state_c, state_r0, state_r1, state_r2, state_fst;
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2, addr_fst;
     addr_r0 = addr_r1 = addr_r2 = -1; // The 0x7ff should never be accessed
+    state_c = 0;
+    state_r0 = 0;
+    state_r1 = 0;
+    state_r2 = 0;
+    state_fst = 0;
+    addr_c = 0;
+    addr_fst = 0;
 
     ///   @warning : the DIRECTW >= KINW in the dirt_aggr
     //    ap_uint<32> direct_key;
@@ -233,6 +245,11 @@ void direct_aggr_sum(hls::stream<ap_uint<DATINW> >& vin_strm,
     ap_int<DATOUTW> state_c, state_r0, state_r1, state_r2;
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2;
     addr_r0 = addr_r1 = addr_r2 = -1; // The 0x7ff should never be accessed
+    state_c = 0;
+    state_r0 = 0;
+    state_r1 = 0;
+    state_r2 = 0;
+    addr_c = 0;
 
     bool i_isFinal = in_e_strm.read();
     o_isFinal = i_isFinal;
@@ -316,6 +333,13 @@ void direct_aggr_countone(hls::stream<ap_uint<DATINW> >& vin_strm,
     ap_int<DATOUTW> state_c, state_r0, state_r1, state_r2, state_fst;
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2, addr_fst;
     addr_r0 = addr_r1 = addr_r2 = -1; // The 0x7ff should never be accessed
+    state_c = 0;
+    state_r0 = 0;
+    state_r1 = 0;
+    state_r2 = 0;
+    state_fst = 0;
+    addr_c = 0;
+    addr_fst = 0;
 
     bool i_isFinal = in_e_strm.read();
     o_isFinal = i_isFinal;
@@ -399,6 +423,9 @@ void direct_aggr_avg(hls::stream<ap_uint<DATINW> >& vin_strm,
     ap_int<DATOUTW> agsum_c, agsum_r0, agsum_r1, agsum_r2;
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2;
     addr_r0 = addr_r1 = addr_r2 = -1; // The 0x7ff should never be accessed
+    state_c = state_r0 = state_r1 = state_r2 = 0;
+    agsum_c = agsum_r0 = agsum_r1 = agsum_r2 = 0;
+    addr_c = 0;
 
     bool i_isFinal = in_e_strm.read();
     o_isFinal = i_isFinal;
@@ -496,6 +523,11 @@ void direct_aggr_variance(hls::stream<ap_uint<DATINW> >& vin_strm,
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2;
     ap_int<DATOUTW> variance;
     addr_r0 = addr_r1 = addr_r2 = -1; // The 0x7ff should never be accessed
+    state_c = state_r0 = state_r1 = state_r2 = 0;
+    agsum_c = agsum_r0 = agsum_r1 = agsum_r2 = 0;
+    agtow_c = agtow_r0 = agtow_r1 = agtow_r2 = 0;
+    variance = 0;
+    addr_c = 0;
 
     bool i_isFinal = in_e_strm.read();
     o_isFinal = i_isFinal;
@@ -602,6 +634,8 @@ void direct_aggr_normL1(hls::stream<ap_uint<DATINW> >& vin_strm,
     ap_int<DATOUTW> state_c, state_r0, state_r1, state_r2;
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2;
     addr_r0 = addr_r1 = addr_r2 = -1; // The 0x7ff should never be accessed
+    state_c = state_r0 = state_r1 = state_r2 = 0;
+    addr_c = 0;
 
     bool i_isFinal = in_e_strm.read();
     o_isFinal = i_isFinal;
@@ -687,6 +721,8 @@ void direct_aggr_normL2(hls::stream<ap_uint<DATINW> >& vin_strm,
     ap_int<DATOUTW> state_c, state_r0, state_r1, state_r2;
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2;
     addr_r0 = addr_r1 = addr_r2 = -1; // The 0x7ff should never be accessed
+    state_c = state_r0 = state_r1 = state_r2 = 0;
+    addr_c = 0;
 
     bool i_isFinal = in_e_strm.read();
     o_isFinal = i_isFinal;
@@ -759,7 +795,7 @@ template <int DATINW, int DATOUTW, int DIRECTW>
 void initialize_ram(ap_uint<32> op, ap_int<DATOUTW> sum[(1 << DIRECTW)], ap_int<DATOUTW + 1> cnt[(1 << DIRECTW)]) {
 #pragma HLS inline off
 
-    ap_uint<DATOUTW> value;
+    ap_uint<DATOUTW> value = 0;
     if (op == AOP_MAX) {
         if (DATOUTW == 32)
             value = 0x080000000;
@@ -800,10 +836,15 @@ void direct_aggr_min_max(ap_uint<32> op,
     ap_uint<DIRECTW> addr_c, addr_r0, addr_r1, addr_r2, addr_r3, addr_r4, addr_r5;
     addr_r0 = addr_r1 = addr_r2 = 1 << DIRECTW; // The 0x7ff should never be accessed
     addr_c = 0;
+    state_n = 0;
     state_c = 0;
     state_r0 = 0;
     state_r1 = 0;
     state_r2 = 0;
+    state_r3 = 0;
+    state_r4 = 0;
+    state_r5 = 0;
+    addr_r3 = addr_r4 = addr_r5 = 0;
 
     ///   @warning : the DIRECTW >= KINW in the dirt_aggr
     bool isFinal = in_e_strm.read();
@@ -895,15 +936,9 @@ void direct_aggr_sum_cnt_mean_norm(ap_uint<32> op,
     addr_r0 = addr_r1 = addr_r2 = 1 << DIRECTW; // The 0x7ff should never be accessed
     addr_c = 0;
 
-    state_s = 0;
-    state_s0 = 0;
-    state_s1 = 0;
-    state_s2 = 0;
-
-    state_c = 0;
-    state_c0 = 0;
-    state_c1 = 0;
-    state_c2 = 0;
+    state_sn = state_s = state_s0 = state_s1 = state_s2 = state_s3 = state_s4 = state_s5 = 0;
+    state_cn = state_c = state_c0 = state_c1 = state_c2 = state_c3 = state_c4 = state_c5 = 0;
+    addr_r3 = addr_r4 = addr_r5 = 0;
 
     ///   @warning : the DIRECTW >= KINW in the dirt_aggr
     bool isFinal = in_e_strm.read();

@@ -47,24 +47,24 @@ extern "C" void ajkernel(
     ap_uint<(WKEY + WPAY) * VEC_LEN> t_unit[T_MAX_DEPTH], // input, 4 row per vec. DDR
 
     // input hash-table
-    ap_uint<64> pu0_ht[PU_HT_DEPTH], // PU0 hash-tables
-    ap_uint<64> pu1_ht[PU_HT_DEPTH], // PU0 hash-tables
-    ap_uint<64> pu2_ht[PU_HT_DEPTH], // PU0 hash-tables
-    ap_uint<64> pu3_ht[PU_HT_DEPTH], // PU0 hash-tables
-    ap_uint<64> pu4_ht[PU_HT_DEPTH], // PU0 hash-tables
-    ap_uint<64> pu5_ht[PU_HT_DEPTH], // PU0 hash-tables
-    ap_uint<64> pu6_ht[PU_HT_DEPTH], // PU0 hash-tables
-    ap_uint<64> pu7_ht[PU_HT_DEPTH], // PU0 hash-tables
+    ap_uint<256> pu0_ht[PU_HT_DEPTH], // PU0 hash-tables
+    ap_uint<256> pu1_ht[PU_HT_DEPTH], // PU0 hash-tables
+    ap_uint<256> pu2_ht[PU_HT_DEPTH], // PU0 hash-tables
+    ap_uint<256> pu3_ht[PU_HT_DEPTH], // PU0 hash-tables
+    ap_uint<256> pu4_ht[PU_HT_DEPTH], // PU0 hash-tables
+    ap_uint<256> pu5_ht[PU_HT_DEPTH], // PU0 hash-tables
+    ap_uint<256> pu6_ht[PU_HT_DEPTH], // PU0 hash-tables
+    ap_uint<256> pu7_ht[PU_HT_DEPTH], // PU0 hash-tables
 
     // input S units
-    ap_uint<64> pu0_s[PU_S_DEPTH], // PU0 S units
-    ap_uint<64> pu1_s[PU_S_DEPTH], // PU0 S units
-    ap_uint<64> pu2_s[PU_S_DEPTH], // PU0 S units
-    ap_uint<64> pu3_s[PU_S_DEPTH], // PU0 S units
-    ap_uint<64> pu4_s[PU_S_DEPTH], // PU0 S units
-    ap_uint<64> pu5_s[PU_S_DEPTH], // PU0 S units
-    ap_uint<64> pu6_s[PU_S_DEPTH], // PU0 S units
-    ap_uint<64> pu7_s[PU_S_DEPTH], // PU0 S units
+    ap_uint<256> pu0_s[PU_S_DEPTH], // PU0 S units
+    ap_uint<256> pu1_s[PU_S_DEPTH], // PU0 S units
+    ap_uint<256> pu2_s[PU_S_DEPTH], // PU0 S units
+    ap_uint<256> pu3_s[PU_S_DEPTH], // PU0 S units
+    ap_uint<256> pu4_s[PU_S_DEPTH], // PU0 S units
+    ap_uint<256> pu5_s[PU_S_DEPTH], // PU0 S units
+    ap_uint<256> pu6_s[PU_S_DEPTH], // PU0 S units
+    ap_uint<256> pu7_s[PU_S_DEPTH], // PU0 S units
 
     // output join result
     ap_uint<32> hj_begin_status[BUILD_CFG_DEPTH], // status. DDR

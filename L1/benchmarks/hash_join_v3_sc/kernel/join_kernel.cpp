@@ -288,23 +288,23 @@ extern "C" void join_kernel(ap_uint<W_TPCH_INT * VEC_LEN> buf_o_orderkey[O_DEPTH
                             // tune
                             const int k_bucket,
                             //
-                            ap_uint<64> pu0_ht[PU_HT_DEPTH], // PU0 hash-tables
-                            ap_uint<64> pu1_ht[PU_HT_DEPTH], // PU0 hash-tables
-                            ap_uint<64> pu2_ht[PU_HT_DEPTH], // PU0 hash-tables
-                            ap_uint<64> pu3_ht[PU_HT_DEPTH], // PU0 hash-tables
-                            ap_uint<64> pu4_ht[PU_HT_DEPTH], // PU0 hash-tables
-                            ap_uint<64> pu5_ht[PU_HT_DEPTH], // PU0 hash-tables
-                            ap_uint<64> pu6_ht[PU_HT_DEPTH], // PU0 hash-tables
-                            ap_uint<64> pu7_ht[PU_HT_DEPTH], // PU0 hash-tables
+                            ap_uint<256> pu0_ht[PU_HT_DEPTH], // PU0 hash-tables
+                            ap_uint<256> pu1_ht[PU_HT_DEPTH], // PU0 hash-tables
+                            ap_uint<256> pu2_ht[PU_HT_DEPTH], // PU0 hash-tables
+                            ap_uint<256> pu3_ht[PU_HT_DEPTH], // PU0 hash-tables
+                            ap_uint<256> pu4_ht[PU_HT_DEPTH], // PU0 hash-tables
+                            ap_uint<256> pu5_ht[PU_HT_DEPTH], // PU0 hash-tables
+                            ap_uint<256> pu6_ht[PU_HT_DEPTH], // PU0 hash-tables
+                            ap_uint<256> pu7_ht[PU_HT_DEPTH], // PU0 hash-tables
 
-                            ap_uint<64> pu0_s[PU_S_DEPTH], // PU0 S units
-                            ap_uint<64> pu1_s[PU_S_DEPTH], // PU0 S units
-                            ap_uint<64> pu2_s[PU_S_DEPTH], // PU0 S units
-                            ap_uint<64> pu3_s[PU_S_DEPTH], // PU0 S units
-                            ap_uint<64> pu4_s[PU_S_DEPTH], // PU0 S units
-                            ap_uint<64> pu5_s[PU_S_DEPTH], // PU0 S units
-                            ap_uint<64> pu6_s[PU_S_DEPTH], // PU0 S units
-                            ap_uint<64> pu7_s[PU_S_DEPTH], // PU0 S units
+                            ap_uint<256> pu0_s[PU_S_DEPTH], // PU0 S units
+                            ap_uint<256> pu1_s[PU_S_DEPTH], // PU0 S units
+                            ap_uint<256> pu2_s[PU_S_DEPTH], // PU0 S units
+                            ap_uint<256> pu3_s[PU_S_DEPTH], // PU0 S units
+                            ap_uint<256> pu4_s[PU_S_DEPTH], // PU0 S units
+                            ap_uint<256> pu5_s[PU_S_DEPTH], // PU0 S units
+                            ap_uint<256> pu6_s[PU_S_DEPTH], // PU0 S units
+                            ap_uint<256> pu7_s[PU_S_DEPTH], // PU0 S units
                             // output
                             ap_uint<W_TPCH_INT * 2> buf_result[1]) {
     // clang-format off

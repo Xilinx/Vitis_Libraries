@@ -15,6 +15,7 @@
  */
 #include "table_dt.hpp"
 #include "utils.hpp"
+#include "prepare.hpp"
 
 #include <algorithm>
 #include <iomanip>
@@ -64,6 +65,7 @@ struct rlt_pair {
     TPCH_INT nationkey;
     long long group_result;
 };
+std::vector<rlt_pair> query_result;
 typedef struct print_buf_result_data_ {
     int i;
     TPCH_INT* v;
@@ -106,6 +108,9 @@ void CL_CALLBACK print_buf_result(cl_event event, cl_int cmd_exec_status, void* 
     for (int i = 0; i < 5; i++) {
         printf("Name %s: %lld.%lld\n", rows[i].name.c_str(), rows[i].group_result / 10000,
                rows[i].group_result % 10000);
+        if (d->i == 0) {
+            query_result.push_back(rows[i]);
+        }
     }
 }
 #endif
@@ -136,17 +141,20 @@ int main(int argc, const char* argv[]) {
     ArgParser parser(argc, argv);
 
     std::string xclbin_path; // eg. q5kernel_VCU1525_hw.xclbin
-
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "ERROR: xclbin path is not set!\n";
         return 1;
     }
 
-    std::string in_dir;
-    if (!parser.getCmdOption("-in", in_dir) || !is_dir(in_dir)) {
-        std::cout << "ERROR: input dir is not specified or not valid.\n";
+    std::string work_dir;
+    if (!parser.getCmdOption("-work", work_dir)) {
+        std::cout << "ERROR: work dir is not set!\n";
         return 1;
     }
+
+    // call data generator
+    const int sf = 1;
+    std::string in_dir = prepare(work_dir, sf);
 
 #ifdef HLS_TEST
     int num_rep = 1;
@@ -446,99 +454,44 @@ int main(int argc, const char* argv[]) {
     cl::Program program(context, devices, xclBins);
     cl::Kernel kernel0(program, "q5_hash_join"); // XXX must match
     std::cout << "Kernel has been created\n";
-#ifdef USE_DDR
-    cl_mem_ext_ptr_t mext_n_out_k = {XCL_MEM_DDR_BANK0, n_out_k, 0};
-    cl_mem_ext_ptr_t mext_c_nationkey = {XCL_MEM_DDR_BANK0, col_c_nationkey, 0};
-    cl_mem_ext_ptr_t mext_c_custkey = {XCL_MEM_DDR_BANK0, col_c_custkey, 0};
 
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_MEM_DDR_BANK0, col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_o_custkey = {XCL_MEM_DDR_BANK0, col_o_custkey, 0};
-    cl_mem_ext_ptr_t mext_o_orderdate = {XCL_MEM_DDR_BANK0, col_o_orderdate, 0};
+    cl_mem_ext_ptr_t mext_n_out_k = {0, n_out_k, kernel0()};
 
-    cl_mem_ext_ptr_t mext_l_suppkey = {XCL_MEM_DDR_BANK0, col_l_suppkey, 0};
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_MEM_DDR_BANK0, col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_MEM_DDR_BANK0, col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_MEM_DDR_BANK0, col_l_extendedprice, 0};
+    cl_mem_ext_ptr_t mext_c_nationkey = {2, col_c_nationkey, kernel0()};
+    cl_mem_ext_ptr_t mext_c_custkey = {3, col_c_custkey, kernel0()};
 
-    cl_mem_ext_ptr_t mext_s_suppkey = {XCL_MEM_DDR_BANK0, col_s_suppkey, 0};
-    cl_mem_ext_ptr_t mext_s_nationkey = {XCL_MEM_DDR_BANK0, col_s_nationkey, 0};
+    cl_mem_ext_ptr_t mext_o_custkey = {2, col_o_custkey, kernel0()};
+    cl_mem_ext_ptr_t mext_o_orderkey = {3, col_o_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_o_orderdate = {4, col_o_orderdate, kernel0()};
 
-    cl_mem_ext_ptr_t mext_out1_k = {XCL_MEM_DDR_BANK0, out1_k, 0};
-    cl_mem_ext_ptr_t mext_out1_p1 = {XCL_MEM_DDR_BANK0, out1_p1, 0};
-    cl_mem_ext_ptr_t mext_out1_p2 = {XCL_MEM_DDR_BANK0, out1_p2, 0};
-    cl_mem_ext_ptr_t mext_out1_p3 = {XCL_MEM_DDR_BANK0, out1_p3, 0};
+    cl_mem_ext_ptr_t mext_l_orderkey = {2, col_l_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_suppkey = {3, col_l_suppkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {4, col_l_extendedprice, kernel0()};
+    cl_mem_ext_ptr_t mext_l_discount = {5, col_l_discount, kernel0()};
 
-    cl_mem_ext_ptr_t mext_out2_k = {XCL_MEM_DDR_BANK0, out2_k, 0};
-    cl_mem_ext_ptr_t mext_out2_p1 = {XCL_MEM_DDR_BANK0, out2_p1, 0};
-    cl_mem_ext_ptr_t mext_out2_p2 = {XCL_MEM_DDR_BANK0, out2_p2, 0};
-    cl_mem_ext_ptr_t mext_out2_p3 = {XCL_MEM_DDR_BANK0, out2_p3, 0};
+    cl_mem_ext_ptr_t mext_s_suppkey = {0, col_s_suppkey, kernel0()};
+    cl_mem_ext_ptr_t mext_s_nationkey = {1, col_s_nationkey, kernel0()};
 
-    cl_mem_ext_ptr_t mext_dummy1 = {XCL_MEM_DDR_BANK0, in_dummy_1, 0};
-    cl_mem_ext_ptr_t mext_dummy2 = {XCL_MEM_DDR_BANK0, in_dummy_2, 0};
-    cl_mem_ext_ptr_t mext_dummy3 = {XCL_MEM_DDR_BANK0, in_dummy_3, 0};
+    cl_mem_ext_ptr_t mext_out1_k = {6, out1_k, kernel0()};
+    cl_mem_ext_ptr_t mext_out1_p1 = {7, out1_p1, kernel0()};
+    cl_mem_ext_ptr_t mext_out1_p2 = {8, out1_p2, kernel0()};
+    cl_mem_ext_ptr_t mext_out1_p3 = {9, out1_p3, kernel0()};
 
-    cl_mem_ext_ptr_t memExt[PU_NM];
-#else
-    cl_mem_ext_ptr_t mext_n_out_k = {XCL_BANK0, n_out_k, 0};
+    cl_mem_ext_ptr_t mext_out2_k = {6, out2_k, kernel0()};
+    cl_mem_ext_ptr_t mext_out2_p1 = {7, out2_p1, kernel0()};
+    cl_mem_ext_ptr_t mext_out2_p2 = {8, out2_p2, kernel0()};
+    cl_mem_ext_ptr_t mext_out2_p3 = {9, out2_p3, kernel0()};
 
-    cl_mem_ext_ptr_t mext_c_nationkey = {XCL_BANK0, col_c_nationkey, 0};
-    cl_mem_ext_ptr_t mext_c_custkey = {XCL_BANK1, col_c_custkey, 0};
-
-    cl_mem_ext_ptr_t mext_o_custkey = {XCL_BANK0, col_o_custkey, 0};
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_BANK1, col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_o_orderdate = {XCL_BANK2, col_o_orderdate, 0};
-
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_BANK0, col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_suppkey = {XCL_BANK1, col_l_suppkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_BANK2, col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_BANK3, col_l_discount, 0};
-
-    cl_mem_ext_ptr_t mext_s_suppkey = {XCL_BANK0, col_s_suppkey, 0};
-    cl_mem_ext_ptr_t mext_s_nationkey = {XCL_BANK1, col_s_nationkey, 0};
-
-    cl_mem_ext_ptr_t mext_out1_k = {XCL_BANK0, out1_k, 0};
-    cl_mem_ext_ptr_t mext_out1_p1 = {XCL_BANK1, out1_p1, 0};
-    cl_mem_ext_ptr_t mext_out1_p2 = {XCL_BANK2, out1_p2, 0};
-    cl_mem_ext_ptr_t mext_out1_p3 = {XCL_BANK3, out1_p3, 0};
-
-    cl_mem_ext_ptr_t mext_out2_k = {XCL_BANK0, out2_k, 0};
-    cl_mem_ext_ptr_t mext_out2_p1 = {XCL_BANK1, out2_p1, 0};
-    cl_mem_ext_ptr_t mext_out2_p2 = {XCL_BANK2, out2_p2, 0};
-    cl_mem_ext_ptr_t mext_out2_p3 = {XCL_BANK3, out2_p3, 0};
-
-    cl_mem_ext_ptr_t mext_dummy1 = {XCL_BANK1, in_dummy_1, 0};
-    cl_mem_ext_ptr_t mext_dummy2 = {XCL_BANK2, in_dummy_2, 0};
-    cl_mem_ext_ptr_t mext_dummy3 = {XCL_BANK3, in_dummy_3, 0};
+    cl_mem_ext_ptr_t mext_dummy1 = {1, in_dummy_1, kernel0()};
+    cl_mem_ext_ptr_t mext_dummy2 = {4, in_dummy_2, kernel0()};
+    cl_mem_ext_ptr_t mext_dummy3 = {5, in_dummy_3, kernel0()};
 
     cl_mem_ext_ptr_t memExt[PU_NM];
-#endif
-
-#ifdef USE_DDR
-    for (int i = 0; i < PU_NM; ++i) {
-        if (i % 4 == 0)
-            memExt[i].flags = XCL_MEM_DDR_BANK1;
-        else if (i % 4 == 1)
-            memExt[i].flags = XCL_MEM_DDR_BANK1;
-        else if (i % 4 == 2)
-            memExt[i].flags = XCL_MEM_DDR_BANK2;
-        else
-            memExt[i].flags = XCL_MEM_DDR_BANK3;
-    }
-#else
-    memExt[0].flags = XCL_BANK6;
-    memExt[1].flags = XCL_BANK7;
-    memExt[2].flags = XCL_BANK8;
-    memExt[3].flags = XCL_BANK9;
-    memExt[4].flags = XCL_BANK10;
-    memExt[5].flags = XCL_BANK11;
-    memExt[6].flags = XCL_BANK12;
-    memExt[7].flags = XCL_BANK13;
-#endif
 
     for (int i = 0; i < PU_NM; ++i) {
-        memExt[i].param = 0;
-        memExt[i].obj = stb_buf[i];
+        memExt[i] = {10 + i, stb_buf[i], kernel0()};
     }
+
     // Map buffers
     // a
 
@@ -928,7 +881,29 @@ int main(int argc, const char* argv[]) {
               << "Average execution per run: " << exec_us / num_rep / 1000 << " ms\n";
 
 #endif // HLS_TEST
+    std::cout << "---------------------------------------------\n\n";
+
+    // golden compare
+    if (l_nrow == 6001215 && o_nrow == 1500000 && r_nrow == 5 && n_nrow == 25 && c_nrow == 150000 && s_nrow == 10000) {
+        err = strcmp(query_result[0].name.c_str(), "IRAQ");
+        err += strcmp(query_result[1].name.c_str(), "SAUDI ARABIA");
+        err += strcmp(query_result[2].name.c_str(), "EGYPT");
+        err += strcmp(query_result[3].name.c_str(), "IRAN");
+        err += strcmp(query_result[4].name.c_str(), "JORDAN");
+
+        err += query_result[0].group_result == 582325532776 ? 0 : 1;
+        err += query_result[1].group_result == 533350133675 ? 0 : 1;
+        err += query_result[2].group_result == 532934636888 ? 0 : 1;
+        err += query_result[3].group_result == 504877781438 ? 0 : 1;
+        err += query_result[4].group_result == 488014573985 ? 0 : 1;
+        if (err)
+            std::cout << "FAIL: " << err << " error(s) detected!" << std::endl;
+        else
+            std::cout << "PASS!" << std::endl;
+    } else {
+        std::cout << "WARNING: unknown test size, result is not checked with provisioned golden data." << std::endl;
+    }
 
     std::cout << "---------------------------------------------\n\n";
-    return 0;
+    return err;
 }

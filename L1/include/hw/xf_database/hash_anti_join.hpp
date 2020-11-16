@@ -263,8 +263,8 @@ void anti_probe_wrapper(ap_uint<32>& depth,
                         hls::stream<ap_uint<KEYW> >& o_overflow_s_key_strm,
                         hls::stream<ap_uint<S_PW> >& o_overflow_s_pld_strm,
 
-                        ap_uint<64>* htb_buf,
-                        ap_uint<64>* stb_buf,
+                        ap_uint<256>* htb_buf,
+                        ap_uint<256>* stb_buf,
                         ap_uint<72>* bit_vector0,
                         ap_uint<72>* bit_vector1) {
 #pragma HLS INLINE off
@@ -337,8 +337,8 @@ void build_merge_anti_probe_wrapper(
     hls::stream<ap_uint<KEYW> >& o_overflow_s_key_strm,
     hls::stream<ap_uint<S_PW> >& o_overflow_s_pld_strm,
 
-    ap_uint<64>* htb_buf,
-    ap_uint<64>* stb_buf) {
+    ap_uint<256>* htb_buf,
+    ap_uint<256>* stb_buf) {
 #pragma HLS INLINE off
 
     const int PW = (S_PW > T_PW) ? S_PW : T_PW;
@@ -809,24 +809,24 @@ void hashAntiJoin(
     hls::stream<bool> e0_strm_arry[CH_NM],
 
     // output hash table
-    ap_uint<64>* htb0_buf,
-    ap_uint<64>* htb1_buf,
-    ap_uint<64>* htb2_buf,
-    ap_uint<64>* htb3_buf,
-    ap_uint<64>* htb4_buf,
-    ap_uint<64>* htb5_buf,
-    ap_uint<64>* htb6_buf,
-    ap_uint<64>* htb7_buf,
+    ap_uint<256>* htb0_buf,
+    ap_uint<256>* htb1_buf,
+    ap_uint<256>* htb2_buf,
+    ap_uint<256>* htb3_buf,
+    ap_uint<256>* htb4_buf,
+    ap_uint<256>* htb5_buf,
+    ap_uint<256>* htb6_buf,
+    ap_uint<256>* htb7_buf,
 
     // output
-    ap_uint<64>* stb0_buf,
-    ap_uint<64>* stb1_buf,
-    ap_uint<64>* stb2_buf,
-    ap_uint<64>* stb3_buf,
-    ap_uint<64>* stb4_buf,
-    ap_uint<64>* stb5_buf,
-    ap_uint<64>* stb6_buf,
-    ap_uint<64>* stb7_buf,
+    ap_uint<256>* stb0_buf,
+    ap_uint<256>* stb1_buf,
+    ap_uint<256>* stb2_buf,
+    ap_uint<256>* stb3_buf,
+    ap_uint<256>* stb4_buf,
+    ap_uint<256>* stb5_buf,
+    ap_uint<256>* stb6_buf,
+    ap_uint<256>* stb7_buf,
 
     hls::stream<ap_uint<32> >& pu_begin_status_strms,
     hls::stream<ap_uint<32> >& pu_end_status_strms,

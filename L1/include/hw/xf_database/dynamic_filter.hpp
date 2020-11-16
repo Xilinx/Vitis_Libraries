@@ -99,7 +99,6 @@ struct var_const_cmp_info {
 
 template <int W>
 bool var_const_cmp(typename var_const_cmp_info<W>::cfg_type cfg, ap_uint<W> xu) {
-#pragma HLS data_pack variable = cfg
     ap_int<W> x;
     x.range(W - 1, 0) = xu.range(W - 1, 0);
     ap_int<W> l;
@@ -164,7 +163,6 @@ struct var_var_cmp_info {
 
 template <int W>
 bool var_var_cmp(typename var_var_cmp_info<W>::cfg_type cfg, ap_uint<W> xu, ap_uint<W> yu) {
-#pragma HLS data_pack variable = cfg
     ap_int<W> x;
     x.range(W - 1, 0) = xu.range(W - 1, 0);
     ap_int<W> y;
@@ -222,18 +220,6 @@ void compare_ops(hls::stream<typename var_const_cmp_info<W>::cfg_type>& cmpv0c_c
                  //
                  hls::stream<ap_uint<4 + 6> >& addr_strm,
                  hls::stream<bool>& e_addr_strm) {
-#pragma HLS data_pack variable = cmpv0c_cfg_strm
-#pragma HLS data_pack variable = cmpv1c_cfg_strm
-#pragma HLS data_pack variable = cmpv2c_cfg_strm
-#pragma HLS data_pack variable = cmpv3c_cfg_strm
-
-#pragma HLS data_pack variable = cmpv0v1_cfg_strm
-#pragma HLS data_pack variable = cmpv0v2_cfg_strm
-#pragma HLS data_pack variable = cmpv0v3_cfg_strm
-#pragma HLS data_pack variable = cmpv1v2_cfg_strm
-#pragma HLS data_pack variable = cmpv1v3_cfg_strm
-#pragma HLS data_pack variable = cmpv2v3_cfg_strm
-
     typename var_const_cmp_info<W>::cfg_type cmpv0c = cmpv0c_cfg_strm.read();
     typename var_const_cmp_info<W>::cfg_type cmpv1c = cmpv1c_cfg_strm.read();
     typename var_const_cmp_info<W>::cfg_type cmpv2c = cmpv2c_cfg_strm.read();
@@ -245,18 +231,6 @@ void compare_ops(hls::stream<typename var_const_cmp_info<W>::cfg_type>& cmpv0c_c
     typename var_var_cmp_info<W>::cfg_type cmpv1v2 = cmpv1v2_cfg_strm.read();
     typename var_var_cmp_info<W>::cfg_type cmpv1v3 = cmpv1v3_cfg_strm.read();
     typename var_var_cmp_info<W>::cfg_type cmpv2v3 = cmpv2v3_cfg_strm.read();
-
-#pragma HLS data_pack variable = cmpv0c
-#pragma HLS data_pack variable = cmpv1c
-#pragma HLS data_pack variable = cmpv2c
-#pragma HLS data_pack variable = cmpv3c
-
-#pragma HLS data_pack variable = cmpv0v1
-#pragma HLS data_pack variable = cmpv0v2
-#pragma HLS data_pack variable = cmpv0v3
-#pragma HLS data_pack variable = cmpv1v2
-#pragma HLS data_pack variable = cmpv1v3
-#pragma HLS data_pack variable = cmpv2v3
 
 #if !defined(__SYNTHESIS__) && _XFDB_DYN_FILTER_DEBUG == 1
     int cnt = 0;
@@ -543,10 +517,6 @@ void dynamicFilter(hls::stream<ap_uint<32> >& filter_cfg_strm,
     hls::stream<typename details::var_var_cmp_info<W>::cfg_type> cmpvv_cfg_strms[DynamicFilterInfo<4>::var_var_cmp_num];
 
     hls::stream<typename details::true_table_info<4>::cfg_type> tt_cfg_strm;
-
-#pragma HLS data_pack variable = cmpvc_cfg_strms
-#pragma HLS data_pack variable = cmpvv_cfg_strms
-#pragma HLS data_pack variable = tt_cfg_strm
 
 #pragma HLS array_partition variable = cmpvc_cfg_strms
 #pragma HLS array_partition variable = cmpvv_cfg_strms

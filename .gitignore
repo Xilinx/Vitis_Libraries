@@ -1,3 +1,7 @@
+*.o
+*.obj
+*.so
+*.exe
 *.swp
 *.swo
 *.wdb

@@ -1,11 +1,12 @@
 {
-    "name": "Xilinx GqeJoin Test",
-    "description": "Xilinx GqeJoin Test",
+    "name": "Xilinx gqeJoin Kernel Test",
+    "description": "Xilinx gqeJoin Kernel Test",
     "flow": "vitis",
-    "gui": true,
+    "gui": false,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280"
+        "xilinx_u280_xdma_201920_3",
+        "xilinx_u50_gen3x16_xdma_201920_3"
     ],
     "platform_blacklist": [
         "other"
@@ -20,7 +21,21 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u280.ini"
+                        "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt_u280.tcl"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt_u50.tcl"
                     ]
                 }
             }
@@ -30,144 +45,62 @@
         {
             "name": "generic launch for sw_emu flows",
             "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_join.xclbin -scale 10"
+            "cmd_args": " -xclbin BUILD/gqe_join_v2.xclbin -scale 10"
         },
         {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_join.xclbin -scale 10000"
+            "cmd_args": " -xclbin BUILD/gqe_join_v2.xclbin -scale 10000"
         },
         {
             "name": "generic launch for hw flows",
             "target": "hw",
-            "cmd_args": " -xclbin BUILD/gqe_join.xclbin"
+            "cmd_args": " -xclbin BUILD/gqe_join_v2.xclbin"
         }
     ],
     "host": {
         "host_exe": "test_gqeJoin.exe",
         "compiler": {
             "sources": [
-                "host/test_q5simple.cpp",
-                "LIB_DIR/ext/xcl2/xcl2.cpp"
+                "host/test_q5s.cpp",
+                "LIB_DIR/L2/tests/common/xclhost.cpp"
             ],
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/L3/include/sw",
-                "host",
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/L1/include/sw",
+                "LIB_DIR/L2/include/sw",
+                "LIB_DIR/L2/tests/common",
+                "host"
             ],
-            "options": "-O3 "
+            "options": "-O3 -D XDEVICE=$(XDEVICE)"
         }
     },
     "v++": {
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/include/hw",
                 "LIB_DIR/../utils/L1/include"
-            ]
+            ],
+            "hls_jobs": 16
+        },
+        "linker": {
+            "synth_jobs": 16,
+            "impl_jobs": 16
         }
     },
     "containers": [
         {
+            "name": "gqe_join_v2",
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/src/gqe_join.cpp",
-                    "frequency": 200,
                     "name": "gqeJoin",
-                    "num_compute_units": 1,
-                    "compute_units": [
-                        {
-                            "name": "join_kernel",
-                            "slr": "SLR0",
-                            "arguments": [
-                                {
-                                    "name": "buf_A",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_B",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_C",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_D",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "htb_buf0",
-                                    "memory": "HBM[2]"
-                                },
-                                {
-                                    "name": "htb_buf1",
-                                    "memory": "HBM[3]"
-                                },
-                                {
-                                    "name": "htb_buf2",
-                                    "memory": "HBM[10]"
-                                },
-                                {
-                                    "name": "htb_buf3",
-                                    "memory": "HBM[11]"
-                                },
-                                {
-                                    "name": "htb_buf4",
-                                    "memory": "HBM[18]"
-                                },
-                                {
-                                    "name": "htb_buf5",
-                                    "memory": "HBM[19]"
-                                },
-                                {
-                                    "name": "htb_buf6",
-                                    "memory": "HBM[26]"
-                                },
-                                {
-                                    "name": "htb_buf7",
-                                    "memory": "HBM[27]"
-                                },
-                                {
-                                    "name": "stb_buf0",
-                                    "memory": "HBM[6]"
-                                },
-                                {
-                                    "name": "stb_buf1",
-                                    "memory": "HBM[7]"
-                                },
-                                {
-                                    "name": "stb_buf2",
-                                    "memory": "HBM[14]"
-                                },
-                                {
-                                    "name": "stb_buf3",
-                                    "memory": "HBM[15]"
-                                },
-                                {
-                                    "name": "stb_buf4",
-                                    "memory": "HBM[22]"
-                                },
-                                {
-                                    "name": "stb_buf5",
-                                    "memory": "HBM[23]"
-                                },
-                                {
-                                    "name": "stb_buf6",
-                                    "memory": "HBM[30]"
-                                },
-                                {
-                                    "name": "stb_buf7",
-                                    "memory": "HBM[31]"
-                                }
-                            ]
-                        }
-                    ]
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_join_v2.cpp",
+                    "frequency": 250,
+                    "num_compute_units": 1
                 }
             ],
-            "frequency": 200,
-            "name": "gqe_join"
+            "frequency": 180
         }
     ],
     "testinfo": {
@@ -178,14 +111,25 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 520
+                "max_memory_MB": {
+                    "vitis_hw_build": 81920,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
+                    "vitis_hw_run": 10240
+                },
+                "max_time_min": {
+                    "vitis_hw_build": 1200,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
+                    "vitis_hw_run": 10
+                }
             }
         ],
         "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu",
-            "vitis_hw"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }

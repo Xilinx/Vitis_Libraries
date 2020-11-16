@@ -37,8 +37,10 @@ endif
 		 _build/html/ $(HTML_DEST_DIR) 1>/dev/null
 
 .stamp/doxygen: | check_tools
-	rm -rf xml
+	rm -rf xml xml_2 xml_3
 	doxygen Doxyfile
+	doxygen Doxyfile.2
+	doxygen Doxyfile.3
 	mkdir -p .stamp
 	touch .stamp/doxygen
 
@@ -48,6 +50,10 @@ DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 	rm -rf rst
 	mkdir rst
 	doxyrest xml/index.xml -o rst/index.rst \
+		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	doxyrest xml_2/index.xml -o rst_2/index.rst \
+		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	doxyrest xml_3/index.xml -o rst_3/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 	touch .stamp/doxyrest
 
@@ -74,4 +80,4 @@ cleanhtml:
 	rm -rf .stamp/sphinx _build/html _build/doctrees
 
 cleanall:
-	rm -rf .stamp xml rst _build/html _build/doctrees
+	rm -rf .stamp xml xml_2 xml_3 rst rst_2 rst_3 _build/html _build/doctrees

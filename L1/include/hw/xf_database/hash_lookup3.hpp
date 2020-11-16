@@ -73,7 +73,6 @@ namespace details {
 /// @param hash_val output hash value.
 template <int W>
 inline void hashlookup3_core(ap_uint<W> key_val, ap_uint<32>& hash_val) {
-    const int key32blen = W / 32;
     const int key96blen = W / 96;
 
     // key8blen is the BYTE len of the key.
@@ -213,7 +212,6 @@ LOOP_lookup3_MAIN:
 /// @param hash_val output, hash value.
 template <int W>
 inline void hashlookup3_core(ap_uint<W> key_val, ap_uint<64>& hash_val) {
-    const int key32blen = W / 32;
     const int key96blen = W / 96;
 
     // key8blen is the BYTE len of the key.
@@ -363,7 +361,6 @@ LOOP_lookup3_MAIN:
 /// @param hash_val output, hash value
 template <int W>
 inline void hashlookup3_seed_core(ap_uint<W> key_val, ap_uint<32> seed, ap_uint<64>& hash_val) {
-    const int key32blen = W / 32;
     const int key96blen = W / 96;
 
     // key8blen is the BYTE len of the key.

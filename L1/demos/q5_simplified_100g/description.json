@@ -1,11 +1,10 @@
 {
-    "gui": false,
     "name": "Xilinx Q5 Simplified 100g Demo",
     "description": "Xilinx Q5 Simplified 100g Demo",
     "flow": "vitis",
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280",
+        "xilinx_u280_xdma_201920_3",
         "u250",
         "u200"
     ],
@@ -24,7 +23,7 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u280.ini"
+                        "--config PROJECT/conn_u280.cfg"
                     ]
                 }
             }
@@ -40,7 +39,7 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u250.ini"
+                        "--config PROJECT/conn_u250.cfg"
                     ]
                 }
             }
@@ -56,7 +55,7 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u200.ini"
+                        "--config PROJECT/conn_u200.cfg"
                     ]
                 }
             }
@@ -65,12 +64,17 @@
     "launch": [
         {
             "name": "generic launch for all flows",
-            "cmd_args": " -xclbin BUILD/q5simplified.xclbin -in PROJECT/db_data/dat"
-        }
-    ],
-    "pre_launch": [
+            "cmd_args": " -xclbin BUILD/q5simplified.xclbin -work PROJECT/db_data -sf 1"
+        },
         {
-            "launch_cmd": "make -C PROJECT/db_data"
+            "name": "generic launch for hw_emu flows",
+            "target": "hw_emu",
+            "cmd_args": " -xclbin BUILD/q5simplified.xclbin -work PROJECT/db_data -sf 1"
+        },
+        {
+            "name": "generic launch for hw flows",
+            "target": "hw",
+            "cmd_args": " -xclbin BUILD/q5simplified.xclbin -work PROJECT/db_data -sf 100"
         }
     ],
     "host": {
@@ -84,7 +88,7 @@
                 "host",
                 "kernel"
             ],
-            "options": "-O3 "
+            "options": "-O3 -std=c++11"
         }
     },
     "v++": {
@@ -117,13 +121,24 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 520
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
+                    "vitis_hw_run": 10240
+                },
+                "max_time_min": {
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
+                    "vitis_hw_run": 10
+                }
             }
         ],
         "targets": [
             "vitis_sw_emu",
-            "vitis_hw"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }

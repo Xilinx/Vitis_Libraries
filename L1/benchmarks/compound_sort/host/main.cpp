@@ -114,6 +114,12 @@ int main(int argc, const char* argv[]) {
             err++;
         }
     }
+
+    if (err)
+        std::cout << "FAIL: " << err << " error(s) detected!" << std::endl;
+    else
+        std::cout << "PASS!" << std::endl;
+
     unsigned long time1, time2, total_time;
     events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
     events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);

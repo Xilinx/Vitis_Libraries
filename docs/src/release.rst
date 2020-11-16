@@ -28,6 +28,26 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2020.2
+------
+
+The 2020.2 release brings a major update to the GQE kernel design, and brand new L3 APIs for JOIN and GROUP-BY
+AGGREGATE.
+
+* The GQE kernels now take each column as an input buffer, which can greatly simplify the data preparation on the
+  host-code side.
+  Also, allocating multiple buffers on host side turns should cause less out-of-memory issues comparing to a big
+  contiguous one, especially when the server is under heavy load.
+* The L2 layer now provides command classes to generate the configuration bits for GQE kernels.
+  Developers no longer have to dive into the bitmap table to understand which bit(s) to toggle to enable or disable a
+  function in GQE pipeline. Thus the host code can be less error-prone and more sustainable.
+* The all-new experimental L3 APIs are built with our experiments and insights into scaling the problem size that GQE
+  can handle.
+  They can breakdown the tables into parts based on hash, and call the GQE kernels multiple rounds in a well-schedule
+  fashion.
+  The strategy of execution is separated from execution, so database gurus can fine-tune the execution based on table
+  statistics, without messing with the OpenCL execution part.
+
 
 2020.1
 ------
