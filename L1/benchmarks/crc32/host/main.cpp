@@ -105,12 +105,14 @@ int main(int argc, const char* argv[]) {
     int size_w = (size + W - 1) / W;
 
     ap_uint<32>* len = aligned_alloc<ap_uint<32> >(num);
+    ap_uint<32>* crcInit = aligned_alloc<ap_uint<32> >(num);
     ap_uint<32>* crc32_out = aligned_alloc<ap_uint<32> >(num);
     ap_uint<8 * W>* data = aligned_alloc<ap_uint<8 * W> >(size_w * num);
 
     int offset = 0;
     for (int i = 0; i < num; i++) {
         len[i] = size;
+        crcInit[i] = ~0;
         for (int j = 0; j < size_w; j++) {
             data[j + offset] = in[j % size_w1];
         }
@@ -138,13 +140,16 @@ int main(int argc, const char* argv[]) {
     cl_mem_ext_ptr_t mext_o[5];
     int j = 0;
     mext_o[j++] = {2, len, kernel()};
-    mext_o[j++] = {3, data, kernel()};
-    mext_o[j++] = {4, crc32_out, kernel()};
+    mext_o[j++] = {3, crcInit, kernel()};
+    mext_o[j++] = {4, data, kernel()};
+    mext_o[j++] = {5, crc32_out, kernel()};
 
     j = 0;
     // create device buffer and map dev buf to host buf
     cl::Buffer len_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                     sizeof(ap_uint<32>) * num, &mext_o[j++]);
+    cl::Buffer crcInit_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                        sizeof(ap_uint<32>) * num, &mext_o[j++]);
     cl::Buffer data_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                      sizeof(ap_uint<8 * W>) * size_w * num, &mext_o[j++]);
     cl::Buffer crc32_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
@@ -158,6 +163,7 @@ int main(int argc, const char* argv[]) {
     std::vector<cl::Event> events_read(1);
 
     ob_in.push_back(len_buf);
+    ob_in.push_back(crcInit_buf);
     ob_in.push_back(data_buf);
     ob_out.push_back(crc32_buf);
 
@@ -168,6 +174,7 @@ int main(int argc, const char* argv[]) {
     kernel.setArg(j++, num);
     kernel.setArg(j++, offset);
     kernel.setArg(j++, len_buf);
+    kernel.setArg(j++, crcInit_buf);
     kernel.setArg(j++, data_buf);
     kernel.setArg(j++, crc32_buf);
 
@@ -196,7 +203,7 @@ int main(int argc, const char* argv[]) {
     events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
     total_time = time2 - time1;
     std::cout << "Total Execution time " << total_time / 1000000.0 << " ms" << std::endl;
-    // CRC32Kernel(num, len, data, crc32_out);
+    // CRC32Kernel(num, len, crcInit, data, crc32_out);
 
     for (int i = 0; i < num; i++) {
         ap_uint<32> crc_out = crc32_out[i];

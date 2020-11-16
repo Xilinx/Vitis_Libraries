@@ -33,6 +33,8 @@ It generate 512-bit keystream in each iteration to encrypt a 512-bit bolck of pl
 When the rest of plain text is less 512 bits after many times encryption, please  padding to the left with 0s(MSB) in the last input data and remove the same bits unuseful data from the last output data.
 Its encryption and decryption are same as long as input same initial key, counter and nonce.
 
+XChacha20 is a variant of original Chacha20 to support Longer nonce of 192bits. Its implementation is similar to Chacha20.
+
 .. image:: /images/chacha.png
    :alt: Initial state of chacha20
    :width: 30%

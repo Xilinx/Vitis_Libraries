@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,9 +64,10 @@ $(error HOST_ARCH variable not set, please set correctly and rerun)
 endif
 
 #Checks for SYSROOT
+check_sysroot:
 ifneq ($(HOST_ARCH), x86)
 ifndef SYSROOT
-$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
+	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
 endif
 endif
 
@@ -86,6 +87,11 @@ CXX := $(XILINX_VITIS)/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++
 else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
 endif
+
+#Setting VPP
+VPP := v++
+
+#Cheks for aiecompiler
 
 .PHONY: check_vivado
 check_vivado:
@@ -115,7 +121,7 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
-# sw_emu, hw_emu, hw
+# check target
 ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
 $(error TARGET is not sw_emu, hw_emu or hw)
 endif
@@ -125,32 +131,48 @@ ifneq (,$(wildcard $(DEVICE)))
 XPLATFORM := $(DEVICE)
 else
 # Use DEVICE as a file name pattern
-DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
+# 1. search paths specified by variable
 ifneq (,$(PLATFORM_REPO_PATHS))
+# 1.1 as exact name
+XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(DEVICE)/$(DEVICE).xpfm)))
+# 1.2 as a pattern
+ifeq (,$(XPLATFORM))
 XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE)/')))
+endif # 1.2
+endif # 1
+# 2. search Vitis installation
+ifeq (,$(XPLATFORM))
+# 2.1 as exact name
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(DEVICE)/$(DEVICE).xpfm))
+# 2.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE)/')))
+endif # 2.2
+endif # 2
+# 3. search default locations
+ifeq (,$(XPLATFORM))
+# 3.1 as exact name
+XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(DEVICE)/$(DEVICE).xpfm))
+# 3.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE)/')))
+endif # 3.2
+endif # 3
 endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
 Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
+To add more platform directories, set the PLATFORM_REPO_PATHS variable or point DEVICE variable to the full path of platform .xpfm file.
 endef
 export MSG_PLATFORM
 
 define MSG_DEVICE
 More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
+Please set DEVICE variable more accurately to select only one platform file, or set DEVICE variable to the full path of the platform .xpfm file.
 endef
 export MSG_DEVICE
 
@@ -172,4 +194,6 @@ device2xsa = $(strip $(patsubst %.xpfm, % , $(shell basename $(DEVICE))))
 RM = rm -f
 RMDIR = rm -rf
 
+MV = mv -f
+CP = cp -rf
 ECHO:= @echo
