@@ -29,14 +29,17 @@ struct SuperSampleContainer {
     T_elemType& getVal(unsigned int i) { return (superSample[i]); }
     T_elemType& operator[](unsigned int p_Idx) { return (superSample[p_Idx]); }
     T_elemType* getValAddr() { return (&superSample[0]); }
-    SuperSampleContainer() {}
+    SuperSampleContainer() {
+#pragma HLS inline
+#pragma HLS array_partition variable = superSample dim = 0
+    }
     SuperSampleContainer(T_elemType p_initScalar) {
         for (int i = 0; i < t_R; ++i) {
             getVal(i) = p_initScalar;
         }
     }
     T_elemType shift(T_elemType p_ValIn) {
-#pragma HLS inline self
+#pragma HLS inline
 #pragma HLS data_pack variable = p_ValIn
         T_elemType l_valOut = superSample[t_R - 1];
     WIDE_TYPE_SHIFT:
@@ -49,7 +52,7 @@ struct SuperSampleContainer {
         return (l_valOut);
     }
     T_elemType shift() {
-#pragma HLS inline self
+#pragma HLS inline
         T_elemType l_valOut = superSample[t_R - 1];
     WIDE_TYPE_SHIFT:
         for (int i = t_R - 1; i > 0; --i) {
@@ -60,7 +63,7 @@ struct SuperSampleContainer {
         return (l_valOut);
     }
     T_elemType unshift() {
-#pragma HLS inline self
+#pragma HLS inline
         T_elemType l_valOut = superSample[0];
     WIDE_TYPE_SHIFT:
         for (int i = 0; i < t_R - 1; ++i) {

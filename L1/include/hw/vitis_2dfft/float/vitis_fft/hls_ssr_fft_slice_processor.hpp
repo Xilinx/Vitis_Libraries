@@ -56,16 +56,16 @@ class FFTMemWideSliceProcessor {
 
     static const unsigned int k_numOfKernels = t_memWidth / t_ssrFFTParams::R;
     void sliceProcessor(MemWideIFStreamTypeIn& p_wideMemWideStreamIn, MemWideIFStreamTypeOut& p_wideMemWideStreamOut) {
-#pragma HLS INLINE
-        //#pragma HLS DATAFLOW
+//#pragma HLS INLINE
+#pragma HLS DATAFLOW
         MemWideIFStreamTypeIn demuxStreamArrayOut[t_numKernels];
-#pragma HLS DATA_PACK variable = demuxStreamArrayOut
-#pragma HLS STREAM variable = demuxStreamArrayOut depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = demuxStreamArrayOut
+#pragma HLS STREAM variable = demuxStreamArrayOut depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = demuxStreamArrayOut core = FIFO_LUTRAM
 
         MemWideIFStreamTypeOut sliceProcesorStreamArrayOut[t_numKernels];
-#pragma HLS DATA_PACK variable = sliceProcesorStreamArrayOut
-#pragma HLS STREAM variable = sliceProcesorStreamArrayOut depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = sliceProcesorStreamArrayOut
+#pragma HLS STREAM variable = sliceProcesorStreamArrayOut depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = sliceProcesorStreamArrayOut core = FIFO_LUTRAM
 
         demuxWideStreaming<t_numKernels, t_numRows, t_numCols, t_memWidth, T_elemType>(p_wideMemWideStreamIn,

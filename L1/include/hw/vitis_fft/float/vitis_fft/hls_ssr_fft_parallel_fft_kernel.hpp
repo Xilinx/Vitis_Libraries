@@ -1367,7 +1367,7 @@ L_CALC_R_BUTTERFLY_SAMPLE:
         sop = 0;
         T_productType product_vector[t_R];
 #pragma HLS ARRAY_PARTITION variable = product_vector complete dim = 1
-#pragma HLS DATA_PACK variable = product_vector
+#pragma HLS data_pack variable = product_vector
 
     L_CALC_ONE_BUTTERFLY_SAMPLE:
         for (int r1 = 0; r1 < t_R; r1++) {

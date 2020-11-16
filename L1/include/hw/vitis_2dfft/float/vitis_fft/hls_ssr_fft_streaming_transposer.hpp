@@ -116,7 +116,7 @@ void InputTransposeChainStreaming<t_instanceID, t_stage, t_subStage, t_forkNumbe
 #pragma HLS INLINE // The swap is p_in-lined p_in a data-flow region to expose dataCommutor to become a process.
     // Recursion will create a chain of processes....
     T_dtype temp[t_R][t_L / t_R];
-#pragma HLS DATA_PACK variable = temp
+#pragma HLS data_pack variable = temp
 #pragma HLS STREAM variable = temp depth = 8 dim = 2
 #pragma HLS RESOURCE variable = temp core = FIFO_LUTRAM
 #ifdef SSR_FFT_PARTITION_INTERFACE_ARRAYS
@@ -161,7 +161,7 @@ void InputTransposeChainStreaming<t_instanceID,
 #pragma HLS STREAM variable = temp depth = 8 dim = 2
 #pragma HLS RESOURCE variable = temp core = FIFO_LUTRAM
 #pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
-#pragma HLS DATA_PACK variable = temp
+#pragma HLS data_pack variable = temp
     static const int t_isLargeMemFlag = (((t_PF * t_R) > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
 
     streamingDataCommutations<t_instanceID, t_stage, t_subStage, t_forkNumber, t_L, t_R, t_PF, t_isLargeMemFlag>
@@ -256,11 +256,12 @@ template <int t_instanceID, int t_stage, int t_subStage, int t_forkNumber, int t
 template <typename T_dtype>
 void InputTransposeChainStreamingS2S<t_instanceID, t_stage, t_subStage, t_forkNumber, t_L, t_R, t_PF, 1>::swap(
     hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_in, hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_out) {
-#pragma HLS INLINE // The swap is p_in-lined p_in a data-flow region to expose dataCommutor to become a process.
+#pragma HLS dataflow
+    //#pragma HLS INLINE // The swap is p_in-lined p_in a data-flow region to expose dataCommutor to become a process.
     // Recursion will create a chain of processes....
     static const int t_isLargeMemFlag = (((t_PF * t_R) > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
     hls::stream<SuperSampleContainer<t_R, T_dtype> > temp;
-#pragma HLS DATA_PACK variable = temp
+//#pragma HLS data_pack variable = temp
 #pragma HLS RESOURCE variable = temp core = FIFO_LUTRAM
 #pragma HLS STREAM variable = temp depth = 8
 
@@ -271,6 +272,36 @@ void InputTransposeChainStreamingS2S<t_instanceID, t_stage, t_subStage, t_forkNu
     InputTransposeChainStreamingS2S<t_instanceID, t_stage - 1, t_subStage, t_forkNumber, t_L, t_R, (t_PF * t_R), 1>
         nextStage;
     nextStage.template swap<T_dtype>(temp, p_out); // Supply Next t_stage PF = PF*t_R
+}
+
+////////////////////////////////////////////////////////////////////////
+template <int t_instanceID, int t_subStage, int t_forkNumber, int t_L, int t_R, int t_PF, int t_outputForkingFactor>
+
+template <typename T_dtype>
+void InputTransposeChainStreamingS2S<t_instanceID, 1, t_subStage, t_forkNumber, t_L, t_R, t_PF, t_outputForkingFactor>::
+    swap(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_in,
+         hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_out) {
+#pragma HLS INLINE off
+#pragma HLS dataflow disable_start_propagation
+
+    hls::stream<SuperSampleContainer<t_R / t_outputForkingFactor, T_dtype> > temp[t_outputForkingFactor];
+//#pragma HLS data_pack variable = temp
+#pragma HLS RESOURCE variable = temp core = FIFO_LUTRAM
+//#pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
+#pragma HLS STREAM variable = temp depth = 8
+    hls::stream<SuperSampleContainer<t_R / t_outputForkingFactor, T_dtype> > temp2[t_outputForkingFactor];
+//#pragma HLS data_pack variable = temp2
+#pragma HLS RESOURCE variable = temp2 core = FIFO_LUTRAM
+//#pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
+#pragma HLS STREAM variable = temp2 depth = 8
+
+    forkSuperSampleStream<t_L, t_R, t_forkNumber, t_outputForkingFactor, T_dtype>(p_in, temp);
+    StreamingDataCommutorForkS2S<t_instanceID, 1, t_subStage, t_outputForkingFactor, t_L, t_R, t_PF,
+                                 t_outputForkingFactor>
+        StreamingDataCommutorFork_obj;
+    StreamingDataCommutorFork_obj.template forkedCompute<T_dtype>(temp, temp2);
+
+    mergeSuperSampleStream<t_L, t_R, t_forkNumber, t_outputForkingFactor, T_dtype>(temp2, p_out);
 }
 
 // Base Case Implementation where L is integer power of radix ///END
@@ -295,10 +326,12 @@ void InputTransposeChainStreamingS2S<
     t_PF,
     t_outputForkingFactor>::swap(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_in,
                                  hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_out) {
-#pragma HLS INLINE // The swap is p_in-lined p_in a data-flow region to expose dataCommutor to become a process.
+#pragma HLS dataflow disable_start_propagation
+    //#pragma HLS INLINE // The swap is p_in-lined p_in a data-flow region to expose dataCommutor to become a process.
     // Recursion will create a chain of processes....
     hls::stream<SuperSampleContainer<t_R, T_dtype> > temp;
-#pragma HLS DATA_PACK variable = temp
+//#pragma HLS array_partition variable = temp.superSample dim = 0
+//#pragma HLS data_pack variable = temp
 #pragma HLS RESOURCE variable = temp core = FIFO_LUTRAM
 #pragma HLS STREAM variable = temp depth = 8
 
@@ -312,34 +345,6 @@ void InputTransposeChainStreamingS2S<
                                     t_outputForkingFactor>
         nextStage;
     nextStage.template swap<T_dtype>(temp, p_out); // Supply Next t_stage PF = PF*t_R
-}
-
-////////////////////////////////////////////////////////////////////////
-template <int t_instanceID, int t_subStage, int t_forkNumber, int t_L, int t_R, int t_PF, int t_outputForkingFactor>
-
-template <typename T_dtype>
-void InputTransposeChainStreamingS2S<t_instanceID, 1, t_subStage, t_forkNumber, t_L, t_R, t_PF, t_outputForkingFactor>::
-    swap(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_in,
-         hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_out) {
-#pragma HLS INLINE
-    hls::stream<SuperSampleContainer<t_R / t_outputForkingFactor, T_dtype> > temp[t_outputForkingFactor];
-#pragma HLS DATA_PACK variable = temp
-#pragma HLS RESOURCE variable = temp core = FIFO_LUTRAM
-#pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
-#pragma HLS STREAM variable = temp depth = 8
-    hls::stream<SuperSampleContainer<t_R / t_outputForkingFactor, T_dtype> > temp2[t_outputForkingFactor];
-#pragma HLS DATA_PACK variable = temp2
-#pragma HLS RESOURCE variable = temp2 core = FIFO_LUTRAM
-#pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
-#pragma HLS STREAM variable = temp2 depth = 8
-
-    forkSuperSampleStream<t_L, t_R, t_forkNumber, t_outputForkingFactor, T_dtype>(p_in, temp);
-    StreamingDataCommutorForkS2S<t_instanceID, 1, t_subStage, t_outputForkingFactor, t_L, t_R, t_PF,
-                                 t_outputForkingFactor>
-        StreamingDataCommutorFork_obj;
-    StreamingDataCommutorFork_obj.template forkedCompute<T_dtype>(temp, temp2);
-
-    mergeSuperSampleStream<t_L, t_R, t_forkNumber, t_outputForkingFactor, T_dtype>(temp2, p_out);
 }
 
 #endif

@@ -41,9 +41,9 @@ void muxWideStreaming(
     typename WideTypeDefs<t_memReadWidth, T_elemType>::WideIFStreamType p_inWideStream[t_numOfKernels],
     typename WideTypeDefs<t_memReadWidth, T_elemType>::WideIFStreamType& p_outWideStream) {
 #pragma HLS INLINE off
-#pragma HLS DATA_PACK variable = p_inWideStream
-#pragma HLS DATA_PACK variable = p_outWideStream
-#pragma HLS ARRAY_PARTITION variable = p_inWideStream complete dim = 1
+    //#pragma HLS DATA_PACK variable = p_inWideStream
+    //#pragma HLS DATA_PACK variable = p_outWideStream
+    //#pragma HLS ARRAY_PARTITION variable = p_inWideStream complete dim = 1
 
     static const unsigned int k_rowIterations = t_numRows / t_memReadWidth;
     static const unsigned int k_colIterations = t_numCols;

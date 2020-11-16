@@ -17,11 +17,7 @@
 // File Name : hls_ssr_fft_super_sample.hpp
 #ifndef HLS_SSR_FFT_SUPER_SAMPLE_H_
 #define HLS_SSR_FFT_SUPER_SAMPLE_H_
-
-#ifndef __SYNTHESIS__
 #include <iostream>
-#endif
-
 template <typename T_T>
 struct tagged_sample {
     T_T sample;
@@ -33,14 +29,17 @@ struct SuperSampleContainer {
     T_elemType& getVal(unsigned int i) { return (superSample[i]); }
     T_elemType& operator[](unsigned int p_Idx) { return (superSample[p_Idx]); }
     T_elemType* getValAddr() { return (&superSample[0]); }
-    SuperSampleContainer() {}
+    SuperSampleContainer() {
+#pragma HLS inline
+#pragma HLS array_partition variable = superSample complete
+    }
     SuperSampleContainer(T_elemType p_initScalar) {
         for (int i = 0; i < t_R; ++i) {
             getVal(i) = p_initScalar;
         }
     }
     T_elemType shift(T_elemType p_ValIn) {
-#pragma HLS inline self
+#pragma HLS inline
 #pragma HLS data_pack variable = p_ValIn
         T_elemType l_valOut = superSample[t_R - 1];
     WIDE_TYPE_SHIFT:
@@ -53,7 +52,7 @@ struct SuperSampleContainer {
         return (l_valOut);
     }
     T_elemType shift() {
-#pragma HLS inline self
+#pragma HLS inline
         T_elemType l_valOut = superSample[t_R - 1];
     WIDE_TYPE_SHIFT:
         for (int i = t_R - 1; i > 0; --i) {
@@ -64,7 +63,7 @@ struct SuperSampleContainer {
         return (l_valOut);
     }
     T_elemType unshift() {
-#pragma HLS inline self
+#pragma HLS inline
         T_elemType l_valOut = superSample[0];
     WIDE_TYPE_SHIFT:
         for (int i = 0; i < t_R - 1; ++i) {
@@ -82,14 +81,11 @@ struct SuperSampleContainer {
         }
         return (l_zero);
     }
-#ifndef __SYNTHESIS__
-
     void print(std::ostream& os) {
         for (int i = 0; i < t_R; ++i) {
             os << getVal(i) << ", ";
         }
     }
-#endif
     bool operator==(const SuperSampleContainer& rhs_in) const {
         for (int i = 0; i < t_R; ++i) {
             if (superSample[i] != rhs_in.superSample[i]) return false;
@@ -104,12 +100,9 @@ struct SuperSampleContainer {
         return false;
     }
 };
-#ifndef __SYNTHESIS__
-
 template <typename T2, int T1>
 std::ostream& operator<<(std::ostream& os, SuperSampleContainer<T1, T2>& p_Val) {
     p_Val.print(os);
     return (os);
 }
-#endif
 #endif // HLS_SSR_FFT_SUPER_SAMPLE_H_
