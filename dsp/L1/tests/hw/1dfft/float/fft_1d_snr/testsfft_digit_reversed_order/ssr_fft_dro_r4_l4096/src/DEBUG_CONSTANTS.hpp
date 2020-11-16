@@ -22,7 +22,7 @@
  * NO_DATA_FRAMES_TO_SIMULATE : is number of times
  * FFT is simulated.
  *********************************************************************/
-#define NO_DATA_FRAMES_TO_SIMULATE 5
+#define NO_DATA_FRAMES_TO_SIMULATE 1
 
 /*********************************************************************
  * MAX_PERCENT_ERROR_IN_SAMPLE is the maximum allowed error in percent

@@ -40,12 +40,12 @@ class FFTStreamingKernelClass {
     typedef typename WideTypeDefs<ssr_fft_param_struct::R, T_outType>::WideIFStreamType WideIFStreamTypeOut;
     typedef typename WideTypeDefs<ssr_fft_param_struct::R, T_in>::WideIFStreamType WideIFStreamTypeIn;
 
-    void fftStreamingKernel(WideIFStreamTypeIn& p_wideStreamIn, WideIFStreamTypeOut& p_wideStreamOut) {
-#pragma HLS INLINE
-#pragma HLS DATA_PACK variable = p_wideStreamIn
-#pragma HLS DATA_PACK variable = p_wideStreamOut
+    void fftStreamingKernelBody(WideIFStreamTypeIn& p_wideStreamIn, WideIFStreamTypeOut& p_wideStreamOut) {
+#pragma HLS dataflow
         T_in p_inDataArray[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R];
+#pragma HLS array_partition variable = p_inDataArray complete dim = 1
         T_outType p_outDataArray[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R];
+#pragma HLS array_partition variable = p_outDataArray complete dim = 1
         convertSuperStreamToArray<-1, t_instanceID, ssr_fft_param_struct::N, ssr_fft_param_struct::R>(p_wideStreamIn,
                                                                                                       p_inDataArray);
 #ifdef DEBUG_FFT_STREAMING_KERNEL
@@ -74,6 +74,51 @@ class FFTStreamingKernelClass {
         convertArrayToSuperStream<-1, t_instanceID, ssr_fft_param_struct::N, ssr_fft_param_struct::R, T_outType>(
             p_outDataArray, p_wideStreamOut);
     }
+
+    void fftStreamingKernel(unsigned int nFFT,
+                            WideIFStreamTypeIn& p_wideStreamIn,
+                            WideIFStreamTypeOut& p_wideStreamOut) {
+        for (int fftn = 0; fftn < nFFT; ++fftn) {
+            fftStreamingKernelBody(p_wideStreamIn, p_wideStreamOut);
+        }
+    }
+    /*
+void fftStreamingKernel(WideIFStreamTypeIn& p_wideStreamIn, WideIFStreamTypeOut& p_wideStreamOut) {
+#pragma HLS dataflow
+    //#pragma HLS INLINE
+    //#pragma HLS DATA_PACK variable = p_wideStreamIn
+    //#pragma HLS DATA_PACK variable = p_wideStreamOut
+    T_in p_inDataArray[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R];
+    T_outType p_outDataArray[ssr_fft_param_struct::R][ssr_fft_param_struct::N / ssr_fft_param_struct::R];
+    convertSuperStreamToArray<-1, t_instanceID, ssr_fft_param_struct::N, ssr_fft_param_struct::R>(p_wideStreamIn,
+                                                                                                  p_inDataArray);
+#ifdef DEBUG_FFT_STREAMING_KERNEL
+#ifndef __SYNTHESIS__
+    std::cout << "The input data for kernel : " << t_instanceID << std::endl;
+    for (int t = 0; t < (ssr_fft_param_struct::N / ssr_fft_param_struct::R); ++t) {
+        for (int r = 0; r < ssr_fft_param_struct::R; ++r) {
+            std::cout << p_inDataArray[r][t] << "   ";
+        }
+        std::cout << std::endl;
+    }
+#endif
+#endif
+    fft<ssr_fft_param_struct, t_instanceID, T_in>(p_inDataArray, p_outDataArray);
+#ifdef DEBUG_FFT_STREAMING_KERNEL
+#ifndef __SYNTHESIS__
+    std::cout << "The output data for kernel : " << t_instanceID << std::endl;
+    for (int t = 0; t < (ssr_fft_param_struct::N / ssr_fft_param_struct::R); ++t) {
+        for (int r = 0; r < ssr_fft_param_struct::R; ++r) {
+            std::cout << p_outDataArray[r][t] << "   ";
+        }
+        std::cout << std::endl;
+    }
+#endif
+#endif
+    convertArrayToSuperStream<-1, t_instanceID, ssr_fft_param_struct::N, ssr_fft_param_struct::R, T_outType>(
+        p_outDataArray, p_wideStreamOut);
+}
+    */
 };
 
 template <unsigned int t_kernelIndex,
@@ -91,7 +136,7 @@ class FFTStreamingKernel1DArray {
                                   WideIFStreamTypeOut p_outWideStreamArray[t_numOfKernels]) {
 #pragma HLS INLINE
         FFTStreamingKernelClass<ssr_fft_param_struct, this_instace_id, T_in> obj;
-        obj.fftStreamingKernel(p_inWideStreamArray[t_kernelIndex - 1], p_outWideStreamArray[t_kernelIndex - 1]);
+        obj.fftStreamingKernel(1, p_inWideStreamArray[t_kernelIndex - 1], p_outWideStreamArray[t_kernelIndex - 1]);
         FFTStreamingKernel1DArray<t_kernelIndex - 1, t_numOfKernels, ssr_fft_param_struct, t_instanceIDOffset,
                                   T_in>::generateFFTKernel(p_inWideStreamArray, p_outWideStreamArray);
     }
@@ -109,7 +154,7 @@ class FFTStreamingKernel1DArray<1, t_numOfKernels, ssr_fft_param_struct, t_insta
                                   WideIFStreamTypeOut p_outWideStreamArray[t_numOfKernels]) {
 #pragma HLS INLINE
         FFTStreamingKernelClass<ssr_fft_param_struct, this_instace_id, T_in> obj;
-        obj.fftStreamingKernel(p_inWideStreamArray[kernelIndex - 1], p_outWideStreamArray[kernelIndex - 1]);
+        obj.fftStreamingKernel(1, p_inWideStreamArray[kernelIndex - 1], p_outWideStreamArray[kernelIndex - 1]);
     }
 };
 
@@ -141,8 +186,8 @@ class FFTMemWideKernel1DArray {
     static const unsigned int this_instace_id = t_instanceIDOffset + t_kernelIndex;
     static void genMemWideFFTKernel1DArray(MemWideIFStreamTypeIn p_inMemWideStreamArray[k_numOfKernels],
                                            MemWideIFStreamTypeOut p_outMemWideStreamArray[k_numOfKernels]) {
-#pragma HLS INLINE
-//#pragma HLS DATAFLOW
+//#pragma HLS INLINE
+#pragma HLS DATAFLOW
 
 #ifndef __SYNTHESIS__
         assert((t_memWidth % ssr_fft_param_struct::R) == 0); // Memory bandwidth should be enough for kernels
@@ -153,13 +198,13 @@ class FFTMemWideKernel1DArray {
 #endif
         // streams for connecting input/output data stream to kernel
         KernelWideIFStreamTypeIn ssrWideStream4kernelIn;
-#pragma HLS DATA_PACK variable = ssrWideStream4kernelIn
-#pragma HLS STREAM variable = ssrWideStream4kernelIn depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = ssrWideStream4kernelIn
+#pragma HLS STREAM variable = ssrWideStream4kernelIn depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = ssrWideStream4kernelIn core = FIFO_LUTRAM
 
         KernelWideIFStreamTypeOut ssrWideStream4kernelOut;
-#pragma HLS DATA_PACK variable = ssrWideStream4kernelOut
-#pragma HLS STREAM variable = ssrWideStream4kernelOut depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = ssrWideStream4kernelOut
+#pragma HLS STREAM variable = ssrWideStream4kernelOut depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = ssrWideStream4kernelOut core = FIFO_LUTRAM
 
         // create instance of wide2ssr utility function
@@ -167,14 +212,14 @@ class FFTMemWideKernel1DArray {
             p_inMemWideStreamArray[t_kernelIndex - 1], ssrWideStream4kernelIn);
 
         FFTStreamingKernelClass<ssr_fft_param_struct, this_instace_id, T_in> obj;
-#ifndef __SYNTHESIS__
-        for (int fftn = 0; fftn < t_numRows / k_numOfKernels; ++fftn) {
-#pragma HLS DATAFLOW disable_start_propagation
-#endif
-            obj.fftStreamingKernel(ssrWideStream4kernelIn, ssrWideStream4kernelOut);
-#ifndef __SYNTHESIS__
-        }
-#endif
+        //#ifndef __SYNTHESIS__
+        // for (int fftn = 0; fftn < t_numRows / k_numOfKernels; ++fftn) {
+        //#pragma HLS DATAFLOW disable_start_propagation
+        //#endif
+        obj.fftStreamingKernel(t_numRows / k_numOfKernels, ssrWideStream4kernelIn, ssrWideStream4kernelOut);
+        //#ifndef __SYNTHESIS__
+        //}
+        //#endif
         // utility function for converting ssrWide stream to memWide stream
         narrowToWideConverter<ssr_fft_param_struct::R, t_memWidth, k_totalWideSamplePerKernel, T_outType>(
             ssrWideStream4kernelOut, p_outMemWideStreamArray[t_kernelIndex - 1]);
@@ -210,8 +255,8 @@ class FFTMemWideKernel1DArray<1, t_memWidth, t_numRows, t_numCols, ssr_fft_param
     static const unsigned int this_instace_id = t_instanceIDOffset + t_kernelIndex;
     static void genMemWideFFTKernel1DArray(MemWideIFStreamTypeIn p_inMemWideStreamArray[k_numOfKernels],
                                            MemWideIFStreamTypeOut p_outMemWideStreamArray[k_numOfKernels]) {
-#pragma HLS INLINE
-//#pragma HLS DATAFLOW
+//#pragma HLS INLINE
+#pragma HLS DATAFLOW
 
 #ifndef __SYNTHESIS__
         assert((t_memWidth % ssr_fft_param_struct::R) == 0); // Memory bandwidth should be enough for kernels
@@ -223,27 +268,27 @@ class FFTMemWideKernel1DArray<1, t_memWidth, t_numRows, t_numCols, ssr_fft_param
         // streams for connecting input/output data stream to kernel
 
         KernelWideIFStreamTypeIn ssrWideStream4kernelIn;
-#pragma HLS DATA_PACK variable = ssrWideStream4kernelIn
-#pragma HLS STREAM variable = ssrWideStream4kernelIn depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = ssrWideStream4kernelIn
+#pragma HLS STREAM variable = ssrWideStream4kernelIn depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = ssrWideStream4kernelIn core = FIFO_LUTRAM
 
         KernelWideIFStreamTypeOut ssrWideStream4kernelOut;
-#pragma HLS DATA_PACK variable = ssrWideStream4kernelOut
-#pragma HLS STREAM variable = ssrWideStream4kernelOut depth = 2 dim = 1
+//#pragma HLS DATA_PACK variable = ssrWideStream4kernelOut
+#pragma HLS STREAM variable = ssrWideStream4kernelOut depth = 2 // dim = 1
 #pragma HLS RESOURCE variable = ssrWideStream4kernelOut core = FIFO_LUTRAM
         // create instance of wide2ssr utility function
         wideToNarrowConverter<t_memWidth, ssr_fft_param_struct::R, k_totalWideSamplePerKernel, T_in>(
             p_inMemWideStreamArray[t_kernelIndex - 1], ssrWideStream4kernelIn);
 
         FFTStreamingKernelClass<ssr_fft_param_struct, this_instace_id, T_in> obj;
-#ifndef __SYNTHESIS__
-        for (int fftn = 0; fftn < t_numRows / k_numOfKernels; ++fftn) {
-#pragma HLS DATAFLOW disable_start_propagation
-#endif
-            obj.fftStreamingKernel(ssrWideStream4kernelIn, ssrWideStream4kernelOut);
-#ifndef __SYNTHESIS__
-        }
-#endif
+        //#ifndef __SYNTHESIS__
+        //        for (int fftn = 0; fftn < t_numRows / k_numOfKernels; ++fftn) {
+        //#pragma HLS DATAFLOW disable_start_propagation
+        //#endif
+        obj.fftStreamingKernel(t_numRows / k_numOfKernels, ssrWideStream4kernelIn, ssrWideStream4kernelOut);
+        //#ifndef __SYNTHESIS__
+        //        }
+        //#endif
         // utility function for converting ssrWide stream to memWide stream
         narrowToWideConverter<ssr_fft_param_struct::R, t_memWidth, k_totalWideSamplePerKernel, T_outType>(
             ssrWideStream4kernelOut, p_outMemWideStreamArray[t_kernelIndex - 1]);

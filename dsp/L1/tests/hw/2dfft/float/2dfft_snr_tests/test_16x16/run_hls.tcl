@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ set_top top_fft2d
 
 open_solution -reset $SOLN
 
+
+
+
 set_part $XPART
 create_clock -period $CLKP
 set_clock_uncertainty 0.10
@@ -53,10 +56,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

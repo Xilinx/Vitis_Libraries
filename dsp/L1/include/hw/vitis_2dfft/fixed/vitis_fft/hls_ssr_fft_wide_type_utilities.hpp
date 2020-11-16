@@ -44,8 +44,8 @@ void wideToNarrowConverter(
     typename WideTypeDefs<t_wideStreamWidth, T_elemType>::WideIFStreamType& p_wideStreamIn,
     typename WideTypeDefs<t_narrowStreamWidth, T_elemType>::WideIFStreamType& p_narrowStreamOut) {
 #pragma HLS INLINE off
-#pragma HLS DATA_PACK variable = p_narrowStreamOut
-#pragma HLS DATA_PACK variable = p_wideStreamIn
+    //#pragma HLS DATA_PACK variable = p_narrowStreamOut
+    //#pragma HLS DATA_PACK variable = p_wideStreamIn
 
     const int k_wide2NarrowRatio = t_wideStreamWidth / t_narrowStreamWidth;
     const int k_ratioLog2 = ssrFFTLog2<k_wide2NarrowRatio>::val;
@@ -60,9 +60,9 @@ void wideToNarrowConverter(
     assert(k_wide2NarrowRatio == k_ratioLog2Pow2);
 #endif
     T_wideSampleType wideSample;
-#pragma HLS ARRAY_RESHAPE variable = wideSample.superSample complete dim = 1
+    //#pragma HLS ARRAY_RESHAPE variable = wideSample.superSample complete dim = 1
     T_narrowSampleType narrowSample;
-#pragma HLS ARRAY_RESHAPE variable = narrowSample.superSample complete dim = 1
+    //#pragma HLS ARRAY_RESHAPE variable = narrowSample.superSample complete dim = 1
 
     unsigned int wideReadIndex = 0;
 wideToNarrowConverter_LOOP:
@@ -75,7 +75,7 @@ wideToNarrowConverter_LOOP:
 #endif
 #endif
         for (int ns = 0; ns < t_narrowStreamWidth; ns++) {
-            narrowSample[ns] = wideSample[ns + wideReadIndex];
+            narrowSample.superSample[ns] = wideSample.superSample[ns + wideReadIndex];
         }
         p_narrowStreamOut.write(narrowSample);
         wideReadIndex = (wideReadIndex + t_narrowStreamWidth) % t_wideStreamWidth;
@@ -89,8 +89,8 @@ template <unsigned int t_narrowStreamWidth,
 void narrowToWideConverter(typename WideTypeDefs<t_narrowStreamWidth, T_elemType>::WideIFStreamType& p_narrowStreamIn,
                            typename WideTypeDefs<t_wideStreamWidth, T_elemType>::WideIFStreamType& p_wideStreamOut) {
 #pragma HLS INLINE off
-#pragma HLS DATA_PACK variable = p_wideStreamOut
-#pragma HLS DATA_PACK variable = p_narrowStreamIn
+    //#pragma HLS DATA_PACK variable = p_wideStreamOut
+    //#pragma HLS DATA_PACK variable = p_narrowStreamIn
     const int k_wide2NarrowRatio = t_wideStreamWidth / t_narrowStreamWidth;
     const int k_ratioLog2 = ssrFFTLog2<k_wide2NarrowRatio>::val;
     const int k_ratioLog2Pow2 = ssrFFTPow<2, k_ratioLog2>::val;
@@ -105,9 +105,9 @@ void narrowToWideConverter(typename WideTypeDefs<t_narrowStreamWidth, T_elemType
     assert(k_wide2NarrowRatio == k_ratioLog2Pow2);
 #endif
     T_wideSampleType wideSample;
-#pragma HLS ARRAY_RESHAPE variable = wideSample.superSample complete dim = 1
+    //#pragma HLS ARRAY_RESHAPE variable = wideSample.superSample complete dim = 1
     T_narrowSampleType narrowSample;
-#pragma HLS ARRAY_RESHAPE variable = narrowSample.superSample complete dim = 1
+    //#pragma HLS ARRAY_RESHAPE variable = narrowSample.superSample complete dim = 1
     unsigned int wideWriteIndex = 0;
 narroToWideConverter_LOOP:
     for (int i = 0; i < t_numOfWideSamples * k_wide2NarrowRatio; i++) {

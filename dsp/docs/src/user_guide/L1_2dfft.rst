@@ -15,18 +15,18 @@ Overview
 
 Vitis DSP library provides a fully synthesizable 2-Dimensional Fast Fourier Transform(FFT) as an L1 primitive. 
 This L1 primitive is designed to be easily transformed into an L2 Vitis kernel by adding memory adapters. 
-The L1 primitive is designed to have a very wide streaming interface, as wide as device DDR memory  
+The L1 primitive is designed to have an array of stream interface, as wide as device DDR memory  
 widths on boards like Xilinx U200, U250 and U280. Adding memory adapters requires a plugin at the FFT input 
 side which has AXI interface for connection with DDR memory on one side and other sides need to have 
 memory wide streaming interface to connect with the 2-D FFT L1 primitive. A second memory plugin is required 
-at the output side of the FFT, which reads in a stream of wide data and connects it to the output AXI interface 
+at the output side of the FFT, which reads in an array of stream data and connects it to the output AXI interface 
 for DDR memory connection.
 
 Block Level Interface
 =====================
 
-The figure below shows the block level interface for 2-D FFT. Essentially it is a wide 
-streaming interface at the input and the output.
+The figure below shows the block level interface for 2-D FFT. Essentially it is an array of 
+stream interface at the input and the output.
 
 .. image:: /images/2-2d_fft_if.jpg
     :alt: doc tool flow
@@ -60,18 +60,19 @@ is specified as described in :ref:`Configuration Parameter Structure for Floatin
 Supported Data Types
 ====================
 
-2-D FFT currently supports complex<float> type for simulation and synthesis. However, 
-only complex<float> is tested and verified to work. Also currently Vitis FFT library doesn't support
-standard std::complex<float> instead a complex_wrapper class in shipped with the Vitis FFT library that
-can be used for simulation and synthesis.
+2-D FFT currently supports **complex<float>** and **complex<ap_fixed<>>** type for simulation and synthesis.
+Also currently Vitis FFT library doesn't support standard std::complex<float> instead a complex_wrapper class 
+in shipped with the Vitis FFT library that can be used for simulation and synthesis.
 
-+------------------------+-------------------------+--------------------------+
-|                        |                         |                          |
-| Type                   | Supported for Synthesis | Supported for Simulation |
-|                        |                         |                          |
-+========================+=========================+==========================+
-| complex_wrapper<float> | YES                     | YES                      |
-+------------------------+-------------------------+--------------------------+
++-----------------------------+-------------------------+--------------------------+
+|                             |                         |                          |
+| Type                        | Supported for Synthesis | Supported for Simulation |
+|                             |                         |                          |
++=============================+=========================+==========================+
+| complex_wrapper<float>      | YES                     | YES                      |
++-----------------------------+-------------------------+--------------------------+
+| complex_wrapper<ap_fixed<>> | YES                     | YES                      |
++-----------------------------+-------------------------+--------------------------+
 
 .. _2D_FFT_TEMPLATE_PARAMS_LABEL:
 
@@ -692,7 +693,7 @@ change the setting of environment variable **TA_PATH** to point to the installat
    source ${XILINX_VIVADO}/settings64.sh
 
 The example discussed above is also provided as an example test and available at the following path : ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` it can be simulated, synthesized or co-simulated as follows:
-Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` and simulat,build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target
+Simply go to the directory ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse`` and simulat, build and co-simulate project using : ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1`` you can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0 choose what to build and run with make target.
 
 2-D FFT Tests 
 ----------------------------------------------------------
@@ -714,7 +715,7 @@ Once the environment settings are done an idividual test can be launched by goin
 
 Launching all the Tests Collectivey
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the test inside the repo. These scripts will try to find all the tests with this ``test``  folder and launh them one by one and print the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that setup up Vitis HLS compiler paths and should look something like this:
+Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the tests inside the repo. These scripts will try to find all the tests within this ``test``  folder and launch them one by one, printing the summary of tests passed. To launch this script first create a file called ``set_env.sh`` that sets up Vitis HLS compiler paths and should look something like this:
 
 .. code-block:: bash
 
@@ -723,7 +724,7 @@ Scripts are provided in ``REPO_PATH/dsp/L1/test/`` to find and launch all the te
    export XILINX_VIVADO=${TA_PATH}/Vivado/2019.2
    source ${XILINX_VIVADO}/settings64.sh
 
-Once the install paths are setup launch the bash script named "run_all_cosim_tests.sh" to run all the tests.
+Once the install paths are setup, launch the bash script named "run_all_cosim_tests.sh" to run all the tests.
 
 
 L1 Performance Benchmarks and QoR
