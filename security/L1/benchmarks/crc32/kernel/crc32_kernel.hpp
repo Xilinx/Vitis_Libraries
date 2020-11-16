@@ -24,6 +24,7 @@
 #define W 16
 #define K (512 / 8 / W)
 
-extern "C" void CRC32Kernel(int num, int size, ap_uint<32>* len, ap_uint<512>* inData, ap_uint<32>* crc32Result);
+extern "C" void CRC32Kernel(
+    int num, int size, ap_uint<32>* len, ap_uint<32>* crcInit, ap_uint<512>* inData, ap_uint<32>* crc32Result);
 
 #endif // __CRC32_KERNEL_HPP_

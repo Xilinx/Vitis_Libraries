@@ -36,6 +36,7 @@ int main() {
     std::vector<ap_uint<W * 8> > in(size);
     ifs.read(reinterpret_cast<char*>(in.data()), size);
 
+    hls::stream<ap_uint<32> > crcInitStrm;
     hls::stream<ap_uint<W * 8> > inStrm;
     hls::stream<ap_uint<32> > inLenStrm;
     hls::stream<bool> endInStrm;
@@ -46,12 +47,13 @@ int main() {
         for (int i = 0; i < (size + W - 1) / W; i++) {
             inStrm.write(in[i]);
         }
+        crcInitStrm.write(~0);
         inLenStrm.write(size);
         endInStrm.write(false);
     }
     endInStrm.write(true);
 
-    dut(inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
+    dut(crcInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
 
     for (int t = 0; t < 1; t++) {
         ap_uint<32> crc_out = outStrm.read();

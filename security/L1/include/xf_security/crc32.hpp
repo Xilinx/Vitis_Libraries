@@ -506,6 +506,7 @@ const ap_uint<32> table[16][256] = {
 /**
  * @brief crc32 computes the CRC32 check value of an input data.
  * @tparam W byte number of input data, the value of W includes 1, 2, 4, 8, 16.
+ * @param crcInitStrm initialize crc32 value
  * @param inStrm input messages to be checked
  * @param inLenStrm lengths of input message
  * @param endInStrm end flag of inLenStrm
@@ -513,7 +514,8 @@ const ap_uint<32> table[16][256] = {
  * @param endOutStrm end flag of outStrm
  */
 template <int W>
-void crc32(hls::stream<ap_uint<8 * W> >& inStrm,
+void crc32(hls::stream<ap_uint<32> >& crcInitStrm,
+           hls::stream<ap_uint<8 * W> >& inStrm,
            hls::stream<ap_uint<32> >& inLenStrm,
            hls::stream<bool>& endInStrm,
            hls::stream<ap_uint<32> >& outStrm,
@@ -524,7 +526,7 @@ void crc32(hls::stream<ap_uint<8 * W> >& inStrm,
         ap_uint<32> len = inLenStrm.read();
         e = endInStrm.read();
 
-        ap_uint<32> crc = ~0;
+        ap_uint<32> crc = crcInitStrm.read();
         ap_uint<8 * W> in_data;
         if (W == 1) {
             for (uint64_t i = 0; i < len; i++) {
