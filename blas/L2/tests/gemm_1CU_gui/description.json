@@ -99,7 +99,6 @@
                     "name": "blasKernel", 
                     "location": "LIB_DIR/L2/src/hw/kernel.cpp", 
                     "frequency": 200,
-                    "cflags": "--config PROJECT/opts.cfg --kernel_frequency 200 ", 
                     "num_compute_units": 0
                 }
             ]
