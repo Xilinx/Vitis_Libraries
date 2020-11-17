@@ -222,12 +222,12 @@ int main(int argc, const char* argv[]) {
     cl::Kernel kernel0(program, "join_kernel"); // XXX must match
     std::cout << "Kernel has been created\n";
 
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_BANK(32), col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_BANK(32), col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_BANK(32), col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_BANK(32), col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_result_a = {XCL_BANK(33), row_result_a, 0};
-    cl_mem_ext_ptr_t mext_result_b = {XCL_BANK(33), row_result_b, 0};
+    cl_mem_ext_ptr_t mext_o_orderkey = {0, col_o_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_orderkey = {2, col_l_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {3, col_l_extendedprice, kernel0()};
+    cl_mem_ext_ptr_t mext_l_discount = {4, col_l_discount, kernel0()};
+    cl_mem_ext_ptr_t mext_result_a = {23, row_result_a, kernel0()};
+    cl_mem_ext_ptr_t mext_result_b = {23, row_result_b, kernel0()};
 
     // Map buffers
     // a
@@ -265,16 +265,19 @@ int main(int argc, const char* argv[]) {
     cl::Buffer buf_ht[PU_NM];
     cl::Buffer buf_s[PU_NM];
     std::vector<cl::Memory> tb;
+
+    cl_mem_ext_ptr_t me_ht[PU_NM];
+    cl_mem_ext_ptr_t me_s[PU_NM];
+    for (int i = 0; i < PU_NM; i++) {
+        me_ht[i] = {7 + i, NULL, kernel0()};
+        me_s[i] = {15 + i, NULL, kernel0()};
+    }
     for (int i = 0; i < PU_NM; i++) {
         // even
-        cl_mem_ext_ptr_t me_ht = {0};
-        me_ht.banks = XCL_BANK(i * 4);
-        buf_ht[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, (size_t)ht_hbm_size, &me_ht);
+        buf_ht[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, (size_t)ht_hbm_size, &me_ht[i]);
         tb.push_back(buf_ht[i]);
         // odd
-        cl_mem_ext_ptr_t me_s = {0};
-        me_s.banks = XCL_BANK(i * 4 + 2);
-        buf_s[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, (size_t)s_hbm_size, &me_s);
+        buf_s[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, (size_t)s_hbm_size, &me_s[i]);
         tb.push_back(buf_s[i]);
     }
     q.enqueueMigrateMemObjects(tb, CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED, nullptr, nullptr);

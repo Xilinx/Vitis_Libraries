@@ -13,11 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// OpenCL C API utils
+#include "xclhost.hpp"
+#include "x_utils.hpp"
+// L1
 #include "xf_database/hash_lookup3.hpp"
+// GQE L2
+#include "xf_database/meta_table.hpp"
+#include "xf_database/join_command.hpp"
+// HLS
+#include "ap_int.h"
+
 #include "table_dt.hpp"
-#include "utils.hpp"
-#include "test_cfg.hpp"
-#include "tpch_read_2.hpp"
 
 #include <sys/time.h>
 #include <algorithm>
@@ -26,76 +34,17 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-
-#include <ap_int.h>
-
-#define COL_NUM 8
-
-const int HASHWH = 0;
+#include <cstdio>
+#include <thread>
+#include <unistd.h>
+const int HASHWH = 2;
 const int HASHWL = 8;
-const int PU = (1 << HASHWH);
 
-#ifdef HLS_TEST
-extern "C" void gqePart(const int k_depth,
-                        const int col_index,
-                        const int bit_num,
-                        ap_uint<512> buf_A[],
-                        ap_uint<512> buf_B[],
-                        ap_uint<512> buf_D[]);
-#else
-#include <CL/cl_ext_xilinx.h>
-#include <xcl2.hpp>
+const int PU_NM = 8;
+const int VEC_SCAN = 8; // 256-bit column.
 
-#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
-
-#define XCL_BANK0 XCL_BANK(0)
-#define XCL_BANK1 XCL_BANK(1)
-#define XCL_BANK2 XCL_BANK(2)
-#define XCL_BANK3 XCL_BANK(3)
-#define XCL_BANK4 XCL_BANK(4)
-#define XCL_BANK5 XCL_BANK(5)
-#define XCL_BANK6 XCL_BANK(6)
-#define XCL_BANK7 XCL_BANK(7)
-#define XCL_BANK8 XCL_BANK(8)
-#define XCL_BANK9 XCL_BANK(9)
-#define XCL_BANK10 XCL_BANK(10)
-#define XCL_BANK11 XCL_BANK(11)
-#define XCL_BANK12 XCL_BANK(12)
-#define XCL_BANK13 XCL_BANK(13)
-#define XCL_BANK14 XCL_BANK(14)
-#define XCL_BANK15 XCL_BANK(15)
-
-#endif // HLS_TEST
-
-struct rlt_pair {
-    std::string name;
-    TPCH_INT nationkey;
-    long long group_result;
-};
-
-typedef struct print_buf_result_data_ {
-    int i;
-    TPCH_INT* nrow;
-} print_buf_result_data_t;
-
-#ifdef HLS_TEST
-void print_buf_result(void* user_data)
-#else
-void CL_CALLBACK print_buf_result(cl_event event, cl_int cmd_exec_status, void* user_data)
-#endif // HLS_TEST
-{
-    print_buf_result_data_t* d = (print_buf_result_data_t*)user_data;
-
-    // header
-    int nm = *(d->nrow);
-    printf("FPGA result of run %d:\n", d->i);
-    printf("  %d\n", nm);
-}
-
-void compload(int* a, int* b, int n) {
-    for (int i = 0; i < n; i++) {
-        if (a[i] != b[i]) std::cout << i << " :  " << a[i] << " " << b[i] << std::endl;
-    }
+inline int tvdiff(const timeval& tv0, const timeval& tv1) {
+    return (tv1.tv_sec - tv0.tv_sec) * 1000000 + (tv1.tv_usec - tv0.tv_usec);
 }
 
 template <typename T>
@@ -111,288 +60,347 @@ int generate_data(T* data, int range, size_t n) {
     return 0;
 }
 
-ap_uint<512> get_table_header(int n512b, int nrow) {
-    ap_uint<512> th = 0;
-    th.range(31, 0) = nrow;
-    th.range(63, 32) = n512b;
-    return th;
-}
+class MM {
+   private:
+    size_t _total;
+    std::vector<void*> _pvec;
 
-ap_uint<512> get_table_header(int hp_size, int blk_size, int nrow) {
-    ap_uint<512> th = 0;
-    th.range(31, 0) = nrow;
-    th.range(63, 32) = blk_size;
-    th.range(95, 64) = hp_size;
-    return th;
+   public:
+    MM() : _total(0) {}
+    ~MM() {
+        for (void* p : _pvec) {
+            if (p) free(p);
+        }
+    }
+    size_t size() const { return _total; }
+    template <typename T>
+    T* aligned_alloc(std::size_t num) {
+        void* ptr = nullptr;
+        size_t sz = num * sizeof(T);
+        if (posix_memalign(&ptr, 4096, sz)) throw std::bad_alloc();
+        _pvec.push_back(ptr);
+        _total += sz;
+        //  printf("align_alloc %lu Bytes\n", sz);
+        return reinterpret_cast<T*>(ptr);
+    }
+    void total_mem() {
+        std::cout << "+++++++++++++++++++++++++++++++++++++++" << std::endl;
+        std::cout << "++ total host mem used: " << (double)_total / 1024 / 1024 / 1024 << " GB" << std::endl;
+        std::cout << "+++++++++++++++++++++++++++++++++++++++" << std::endl;
+    }
+};
+
+template <typename T>
+int load_dat(void* data, const std::string& name, const std::string& dir, const int sf, const size_t n) {
+    if (!data) {
+        return -1;
+    }
+    std::string fn = dir + "/dat" + std::to_string(sf) + "/" + name + ".dat";
+    FILE* f = fopen(fn.c_str(), "rb");
+    if (!f) {
+        std::cerr << "ERROR: " << fn << " cannot be opened for binary read." << std::endl;
+    }
+    size_t cnt = fread(data, sizeof(T), n, f);
+    fclose(f);
+    if (cnt != n) {
+        std::cerr << "ERROR: " << cnt << " entries read from " << fn << ", " << n << " entries required." << std::endl;
+        return -1;
+    }
+    return 0;
 }
 
 int main(int argc, const char* argv[]) {
-    std::cout << "\n------------ HASH PARTITION Beta Test with TPC-H (SF = 100) "
-                 "-------------\n";
-
     // cmd arg parser.
-    ArgParser parser(argc, argv);
+    x_utils::ArgParser parser(argc, argv);
 
-#ifndef HLS_TEST
-    std::string xclbin_path; // eg. q5kernel_VCU1525_hw.xclbin
+    std::string xclbin_path;
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "ERROR: xclbin path is not set!\n";
-        return 0;
+        return 1;
     }
-#endif
-
-    int num_rep = 1;
-#ifndef HLS_TEST
-    std::string num_str;
-    if (parser.getCmdOption("-rep", num_str)) {
+    std::string scale;
+    int sim_scale = 1;
+    if (parser.getCmdOption("-scale", scale)) {
         try {
-            num_rep = std::stoi(num_str);
+            sim_scale = std::stoi(scale);
         } catch (...) {
-            num_rep = 1;
+            sim_scale = 10000;
         }
     }
-    if (num_rep > 20) {
-        num_rep = 20;
-        std::cout << "WARNING: limited repeat to " << num_rep << " times\n.";
-    }
-#endif
 
-    std::vector<std::string> tb2load; // table to load
-    tb2load.push_back("Lineitem");
-
-    int k_depth = 512;
-    int l_nrow = L_MAX_ROW;
-
+    // int l_nrow = 1000;
+    int l_nrow = L_MAX_ROW / sim_scale;
     std::cout << "Lineitem " << l_nrow << " rows\n";
 
-    const size_t l_depth = L_MAX_ROW + VEC_LEN * 2 - 1;
-    ap_uint<512>* table_l;
-    size_t size_table_l;
-    const size_t table_l_int_depth = size_t((sizeof(TPCH_INT) * l_depth + 64 - 1) / 64);
+    // setup OpenCL related
+    cl_context ctx;
+    cl_device_id dev_id;
+    cl_command_queue cmq;
+    cl_program prg;
+    int err = xclhost::init_hardware(&ctx, &dev_id, &cmq,
+                                     CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, MSTR(XDEVICE));
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "ERROR: fail to init OpenCL with " MSTR(XDEVICE) "\n");
+        return err;
+    }
+    err = xclhost::load_binary(&prg, ctx, dev_id, xclbin_path.c_str());
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "ERROR: fail to program PL\n");
+        return err;
+    }
+    // partition kernel
+    cl_kernel partkernel;
+    partkernel = clCreateKernel(prg, "gqePart", &err);
 
-    int err;
-    if (std::find(tb2load.begin(), tb2load.end(), "Lineitem") != tb2load.end()) {
-        std::vector<std::string> column_names;
-        column_names.push_back("l_orderkey");
-        column_names.push_back("l_orderkey");
-        column_names.push_back("l_suppkey");
-        column_names.push_back("l_extendedprice");
-        column_names.push_back("l_quantity");
-        column_names.push_back("l_tax");
-        column_names.push_back("l_discount");
-        column_names.push_back("l_discount");
-        size_table_l = (table_l_int_depth + 1) * COL_NUM; // 8 columns
-        table_l = aligned_alloc<ap_uint<512> >(size_table_l);
-        std::cout << "Malloced memory size for table_l in 512b: " << size_table_l << std::endl;
+    // ------------------------------------------
+    // --------- partitioning Table L ----------
+    // partition setups
+    const int k_depth = 512;
+    const int log_partition_num = 3;
+    const int partition_num = 1 << log_partition_num;
 
-        for (int c = 0; c < COL_NUM; c++) {
-            table_l[table_l_int_depth * c] = get_table_header(table_l_int_depth, l_nrow);
-            err = generate_data<TPCH_INT>((int*)(table_l + table_l_int_depth * c + 1), 1000000, l_nrow);
-            if (err) return err;
+    // the col nrow of each section
+    int tab_part_sec_nrow_each = l_nrow;
+    int tab_part_sec_size = tab_part_sec_nrow_each * sizeof(TPCH_INT);
+
+    MM mm;
+
+    // data load from disk. due to table size, data read into several sections
+    // L host side pinned buffers for partition kernel
+    TPCH_INT* tab_part_in_col[8];
+    for (int i = 0; i < 8; i++) {
+        tab_part_in_col[i] = mm.aligned_alloc<TPCH_INT>(tab_part_sec_nrow_each);
+        err += generate_data<TPCH_INT>((int*)(tab_part_in_col[i]), 1000, l_nrow);
+    }
+
+    if (err) {
+        fprintf(stderr, "ERROR: failed to load dat/gen file.\n");
+        return 1;
+    }
+    std::cout << "finished dat loading/generating" << std::endl;
+
+    // partition output data
+    int tab_part_out_col_nrow_512_init = tab_part_sec_nrow_each * 1.3 / VEC_LEN;
+    assert(tab_part_out_col_nrow_512_init > 0 && "Error: table output col size must > 0");
+    // the depth of each partition in each col
+    int tab_part_out_col_eachpart_nrow_512 = (tab_part_out_col_nrow_512_init + partition_num - 1) / partition_num;
+    // pool.l_partition_out_col_part_nrow_max = tab_part_out_col_eachpart_nrow_512 * 16;
+    int tab_part_out_col_nrow_512 = partition_num * tab_part_out_col_eachpart_nrow_512;
+    int tab_part_out_col_size = tab_part_out_col_nrow_512 * sizeof(TPCH_INT) * VEC_LEN;
+
+    // partition_output data
+    ap_uint<512>* tab_part_out_col[8];
+    for (int i = 0; i < 8; i++) {
+        tab_part_out_col[i] = mm.aligned_alloc<ap_uint<512> >(tab_part_out_col_nrow_512);
+    }
+
+    using jcmdclass = xf::database::gqe::JoinCommand;
+    jcmdclass jcmd = jcmdclass();
+
+    jcmd.setJoinType(xf::database::INNER_JOIN);
+
+    jcmd.Scan(0, {0, 1, 2, 3, 4, 5, 6});
+    // jcmd.setDualKeyOn();
+    ap_uint<512>* cfg_part = jcmd.getConfigBits();
+
+    //--------------- metabuffer setup L -----------------
+    xf::database::gqe::MetaTable meta_part_in;
+    xf::database::gqe::MetaTable meta_part_out;
+    meta_part_in.setColNum(7);
+    meta_part_in.setCol(0, 0, tab_part_sec_nrow_each);
+    meta_part_in.setCol(1, 1, tab_part_sec_nrow_each);
+    meta_part_in.setCol(2, 2, tab_part_sec_nrow_each);
+    meta_part_in.setCol(3, 3, tab_part_sec_nrow_each);
+    meta_part_in.setCol(4, 4, tab_part_sec_nrow_each);
+    meta_part_in.setCol(5, 5, tab_part_sec_nrow_each);
+    meta_part_in.setCol(6, 6, tab_part_sec_nrow_each);
+    meta_part_in.meta();
+
+    // setup partition kernel used meta output
+    meta_part_out.setColNum(7);
+    meta_part_out.setPartition(partition_num, tab_part_out_col_eachpart_nrow_512);
+    meta_part_out.setCol(0, 0, tab_part_out_col_nrow_512);
+    meta_part_out.setCol(1, 1, tab_part_out_col_nrow_512);
+    meta_part_out.setCol(2, 2, tab_part_out_col_nrow_512);
+    meta_part_out.setCol(3, 3, tab_part_out_col_nrow_512);
+    meta_part_out.setCol(4, 4, tab_part_out_col_nrow_512);
+    meta_part_out.setCol(5, 5, tab_part_out_col_nrow_512);
+    meta_part_out.setCol(6, 6, tab_part_out_col_nrow_512);
+    meta_part_out.meta();
+
+    cl_mem_ext_ptr_t mext_tab_part_in_col[8];
+    for (int i = 0; i < 8; ++i) {
+        mext_tab_part_in_col[i] = {(3 + i), tab_part_in_col[i], partkernel};
+    }
+
+    cl_mem_ext_ptr_t mext_tab_part_out_col[8];
+    for (int i = 0; i < 8; ++i) {
+        mext_tab_part_out_col[i] = {(13 + i), tab_part_out_col[i], partkernel};
+    }
+    cl_mem_ext_ptr_t mext_cfg_part = {21, cfg_part, partkernel};
+
+    // dev buffers, part in
+    cl_mem buf_tab_part_in_col[8];
+    for (int c = 0; c < 8; c++) {
+        if (c < 7) {
+            buf_tab_part_in_col[c] = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                    tab_part_sec_size, &mext_tab_part_in_col[c], &err);
+        } else {
+            buf_tab_part_in_col[c] = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                    16 * sizeof(TPCH_INT), &mext_tab_part_in_col[c], &err);
         }
-        std::cout << "Lineitem table has been read from disk\n\n";
     }
 
-    ap_uint<512>* table_cfg = aligned_alloc<ap_uint<512> >(9);
-    get_q5simple_cfg(table_cfg);
-
-    const int bit_num = 3;
-    const int BK = 1 << bit_num;
-    const int total_bucket = BK * PU;
-    const float F = 2.0; // overflow size ratio
-
-    const size_t result_depth = l_depth;
-    const size_t table_result_depth = size_t((result_depth * sizeof(TPCH_INT) + 64 - 1) / 64); // base & overflow area
-    const int BLOCK_SIZE = (F * table_result_depth + total_bucket - 1) / total_bucket;
-    const size_t table_result_size =
-        BLOCK_SIZE * COL_NUM * total_bucket + total_bucket; // 8 column, and heading area for each bucket
-    const int PARTITION_SIZE = table_result_size / total_bucket;
-    ap_uint<512>* table_out = aligned_alloc<ap_uint<512> >(table_result_size);
-    table_out[0] = get_table_header(PARTITION_SIZE, BLOCK_SIZE, 0);
-
-    std::cout << "Total size for each column in 512b: " << table_result_depth
-              << "\nTotal malloced memory size in 512b: " << table_result_size << std::endl;
-    std::cout << "BLOCK SIZE: " << BLOCK_SIZE << "\nPARTITION SIZE: " << PARTITION_SIZE << std::endl;
-    std::cout << "Host map buffer has been allocated.\n\n";
-
-#ifdef HLS_TEST
-    hls::stream<ap_uint<64> > key_in;
-    hls::stream<ap_uint<64> > key_out;
-    gqePart(k_depth, 0, bit_num, (ap_uint<512>*)table_l, (ap_uint<512>*)table_out, (ap_uint<512>*)table_cfg);
-    {
-        std::cout << "------------------------HLS Csim Result "
-                     "Checking-------------------------\n";
-        for (int j = 0; j < PU; j++) {
-            for (int i = 0; i < BK; i++) {
-                int loc = j * BK + i;
-                int prow = (int32_t)table_out[loc * PARTITION_SIZE];
-                const int nread = (prow + 15) / 16;
-                int abc = 0;
-                ap_uint<HASHWH + HASHWL> golden = 0;
-                for (int n = 0; n < nread; n++) {
-                    const int len = (abc + VEC_LEN) > prow ? (prow - abc) : VEC_LEN;
-                    // std::cout << "loc:" << loc << ",nread:" << nread << ",n:" << n
-                    // << std::endl;
-                    for (int m = 0; m < len; m++) {
-                        ap_uint<64> k1 =
-                            (table_out[PARTITION_SIZE * loc + n + BLOCK_SIZE + 1](32 * (m + 1) - 1, 32 * m),
-                             table_out[PARTITION_SIZE * loc + n + 1](32 * (m + 1) - 1, 32 * m));
-                        key_in.write(k1);
-                        xf::database::hashLookup3<64>(13, key_in, key_out);
-                        ap_uint<64> k_g = key_out.read();
-                        if ((n == 0) && (m == 0)) {
-                            golden = k_g(bit_num - 1, 0);
-                            // std::cout << std::hex << "Golden hash: " << golden <<
-                            // std::endl;
-                        }
-                        if (golden != k_g(bit_num - 1, 0)) {
-                            std::cout << std::hex << "golden:" << golden << ",bad:" << k_g << ",offset:" << n
-                                      << ",vrow:" << m << std::endl;
-                            return 1;
-                        } else {
-                            if (loc == 1) {
-                                ap_uint<128> pdata =
-                                    (table_out[PARTITION_SIZE * loc + n + BLOCK_SIZE * 3 + 1](32 * (m + 1) - 1, 32 * m),
-                                     table_out[PARTITION_SIZE * loc + n + BLOCK_SIZE * 2 + 1](32 * (m + 1) - 1, 32 * m),
-                                     table_out[PARTITION_SIZE * loc + n + BLOCK_SIZE * 1 + 1](32 * (m + 1) - 1, 32 * m),
-                                     table_out[PARTITION_SIZE * loc + n + BLOCK_SIZE + 1](32 * (m + 1) - 1, 32 * m));
-                            }
-                        }
-                    }
-                    abc += len;
-                }
-                std::cout << "Hash partition " << loc << " is verified.\n";
-            }
+    // dev buffers, part out
+    std::cout << "Input device buffer has been created" << std::endl;
+    cl_mem buf_tab_part_out_col[8];
+    for (int c = 0; c < 8; c++) {
+        if (c < 7) {
+            buf_tab_part_out_col[c] =
+                clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                               tab_part_out_col_size, &mext_tab_part_out_col[c], &err);
+        } else {
+            buf_tab_part_out_col[c] =
+                clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                               16 * sizeof(TPCH_INT), &mext_tab_part_out_col[c], &err);
         }
     }
-#else
-    // Get CL devices.
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    std::cout << "Output device buffer has been created" << std::endl;
 
-    // Create context and command queue for selected device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
-    std::string devName = device.getInfo<CL_DEVICE_NAME>();
-    std::cout << "Selected Device " << devName << "\n";
+    cl_mem buf_cfg_part = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                         (sizeof(ap_uint<512>) * 9), &mext_cfg_part, &err);
 
-    cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
-    devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl_mem_ext_ptr_t mext_meta_part_in, mext_meta_part_out;
 
-    // 2 for ping-pong, 4 for four joins.
-    cl::Kernel kernel0table = cl::Kernel(program, "gqePart");
+    mext_meta_part_in = {11, meta_part_in.meta(), partkernel};
+    mext_meta_part_out = {12, meta_part_out.meta(), partkernel};
 
-    std::cout << "Kernel has been created\n";
+    cl_mem buf_meta_part_in;
+    buf_meta_part_in = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                      (sizeof(ap_uint<512>) * 8), &mext_meta_part_in, &err);
+    cl_mem buf_meta_part_out;
+    buf_meta_part_out = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                       (sizeof(ap_uint<512>) * 24), &mext_meta_part_out, &err);
 
-    cl_mem_ext_ptr_t mext_table_l, mext_table_out, mext_cfg;
-    mext_table_l = {XCL_BANK(33), table_l, 0};
-    mext_table_out = {XCL_BANK(32), table_out, 0};
-    mext_cfg = {XCL_BANK(32), table_cfg, 0};
-
-    // Map buffers
-    cl::Buffer buf_table_l(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                           (size_t)(sizeof(ap_uint<512>) * size_table_l), &mext_table_l);
-    cl::Buffer buf_table_out(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                             (size_t)(sizeof(ap_uint<512>) * table_result_size), &mext_table_out);
-    cl::Buffer buf_cfg(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                       (size_t)(sizeof(ap_uint<512>) * 9), &mext_cfg);
-
-    std::cout << "DDR buffers have been mapped/copy-and-mapped\n";
-
-    std::vector<std::vector<cl::Event> > write_events(num_rep);
-    std::vector<std::vector<cl::Event> > kernel_events_l(num_rep);
-    std::vector<std::vector<cl::Event> > read_events(num_rep);
-    for (int i = 0; i < num_rep; ++i) {
-        write_events[i].resize(1);
-        kernel_events_l[i].resize(1);
-        read_events[i].resize(1);
-    }
-
-    std::vector<print_buf_result_data_t> cbd(num_rep);
-    std::vector<print_buf_result_data_t>::iterator it = cbd.begin();
-    print_buf_result_data_t* cbd_ptr = &(*it);
-
-    std::vector<cl::Memory> ibtable;
-    ibtable.push_back(buf_table_l);
-    ibtable.push_back(buf_cfg);
-
-    // set args and enqueue kernel
+    //----------------------partition L run-----------------------------
+    std::cout << "------------------- Partitioning L table -----------------" << std::endl;
+    const int idx = 0;
     int j = 0;
-    kernel0table.setArg(j++, k_depth);
-    kernel0table.setArg(j++, 0);
-    kernel0table.setArg(j++, bit_num);
-    kernel0table.setArg(j++, buf_table_l);
-    kernel0table.setArg(j++, buf_table_out);
-    kernel0table.setArg(j++, buf_cfg);
+    clSetKernelArg(partkernel, j++, sizeof(int), &k_depth);
+    clSetKernelArg(partkernel, j++, sizeof(int), &idx);
+    clSetKernelArg(partkernel, j++, sizeof(int), &log_partition_num);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[0]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[1]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[2]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[3]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[4]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[5]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[6]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_in_col[7]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_meta_part_in);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_meta_part_out);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_out_col[0]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_out_col[1]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_out_col[2]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_out_col[3]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_out_col[4]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_out_col[5]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_out_col[6]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_tab_part_out_col[7]);
+    clSetKernelArg(partkernel, j++, sizeof(cl_mem), &buf_cfg_part);
 
-    struct timeval tv0;
-    int exec_us;
-    gettimeofday(&tv0, 0);
-    for (int i = 0; i < num_rep; ++i) {
-        // write data to DDR
-        q.enqueueMigrateMemObjects(ibtable, 0, nullptr, &write_events[i][0]);
+    // partition h2d
+    std::vector<cl_mem> part_in_vec;
+    part_in_vec.push_back(buf_tab_part_in_col[0]);
+    part_in_vec.push_back(buf_tab_part_in_col[1]);
+    part_in_vec.push_back(buf_tab_part_in_col[2]);
+    part_in_vec.push_back(buf_tab_part_in_col[3]);
+    part_in_vec.push_back(buf_tab_part_in_col[4]);
+    part_in_vec.push_back(buf_tab_part_in_col[5]);
+    part_in_vec.push_back(buf_tab_part_in_col[6]);
+    part_in_vec.push_back(buf_meta_part_in);
+    part_in_vec.push_back(buf_cfg_part);
 
-        // enqueue kernel
-        q.enqueueTask(kernel0table, &write_events[i], &kernel_events_l[i][0]);
+    // partition d2h
+    std::vector<cl_mem> part_out_vec;
+    part_out_vec.push_back(buf_tab_part_out_col[0]);
+    part_out_vec.push_back(buf_tab_part_out_col[1]);
+    part_out_vec.push_back(buf_tab_part_out_col[2]);
+    part_out_vec.push_back(buf_tab_part_out_col[3]);
+    part_out_vec.push_back(buf_tab_part_out_col[4]);
+    part_out_vec.push_back(buf_tab_part_out_col[5]);
+    part_out_vec.push_back(buf_tab_part_out_col[6]);
+    part_out_vec.push_back(buf_meta_part_out);
+    clEnqueueMigrateMemObjects(cmq, 1, &buf_meta_part_out, 0, 0, nullptr, nullptr);
 
-        // read data from DDR
-        std::vector<cl::Memory> obtable;
-        obtable.push_back(buf_table_out);
+    clEnqueueMigrateMemObjects(cmq, part_in_vec.size(), part_in_vec.data(), CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED, 0,
+                               nullptr, nullptr);
+    clEnqueueMigrateMemObjects(cmq, part_out_vec.size(), part_out_vec.data(), CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED,
+                               0, nullptr, nullptr);
 
-        q.enqueueMigrateMemObjects(obtable, CL_MIGRATE_MEM_OBJECT_HOST, &kernel_events_l[i], &read_events[i][0]);
+    cl_event evt_part_h2d, evt_part_krn, evt_part_d2h;
 
-        cbd_ptr[i].i = i;
-        cbd_ptr[i].nrow = (TPCH_INT*)(table_out);
-        read_events[i][0].setCallback(CL_COMPLETE, print_buf_result, cbd_ptr + i);
-    }
+    std::vector<cl_event> evt_part_h2d_dep;
+    std::vector<cl_event> evt_part_krn_dep;
+    std::vector<cl_event> evt_part_d2h_dep;
 
-    // wait all to finish.
-    q.flush();
-    q.finish();
+    timeval tv_part_start, tv_part_end;
+    gettimeofday(&tv_part_start, 0);
+    clEnqueueMigrateMemObjects(cmq, part_in_vec.size(), part_in_vec.data(), 0, 0, nullptr, &evt_part_h2d);
+    clEnqueueTask(cmq, partkernel, 1, &evt_part_h2d, &evt_part_krn);
+    clEnqueueMigrateMemObjects(cmq, part_out_vec.size(), part_out_vec.data(), 1, 1, &evt_part_krn, &evt_part_d2h);
 
-    struct timeval tv3;
-    gettimeofday(&tv3, 0);
-    exec_us = tvdiff(&tv0, &tv3);
-    std::cout << "FPGA execution time of " << num_rep << " runs: " << exec_us / 1000 << " ms\n"
-              << "Average execution per run: " << exec_us / num_rep / 1000 << " ms\n";
-
+    clFlush(cmq);
+    clFinish(cmq);
+    gettimeofday(&tv_part_end, 0);
+    std::cout << "Checking result...." << std::endl;
     hls::stream<ap_uint<64> > key_in;
     hls::stream<ap_uint<64> > key_out;
-    std::cout << "------------------------Result Checking-------------------------\n";
-    for (int j = 0; j < PU; j++) {
-        for (int i = 0; i < BK; i++) {
-            int loc = j * BK + i;
-            int prow = (int32_t)table_out[loc * PARTITION_SIZE];
-            const int nread = (prow + 15) / 16;
-            int abc = 0;
-            ap_uint<HASHWH + HASHWL> golden = 0;
-            for (int n = 0; n < nread; n++) {
-                const int len = (abc + VEC_LEN) > prow ? (prow - abc) : VEC_LEN;
-                for (int m = 0; m < len; m++) {
-                    // ap_uint<64> k1 = (table_out[PARTITION_SIZE * loc + n + BLOCK_SIZE + 1](32 * (m + 1) - 1, 32 * m),
-                    //                   table_out[PARTITION_SIZE * loc + n + 1](32 * (m + 1) - 1, 32 * m));
-                    ap_uint<64> k1 =
-                        (ap_uint<32>(0), table_out[PARTITION_SIZE * loc + n + 1](32 * (m + 1) - 1, 32 * m));
-                    key_in.write(k1);
-                    xf::database::hashLookup3<64>(13, key_in, key_out);
-                    ap_uint<64> k_g = key_out.read();
-                    if ((n == 0) && (m == 0)) {
-                        golden = k_g(bit_num - 1, 0);
+    std::map<int, int> key_part_map;
+    int* nrow_per_part = meta_part_out.getPartLen();
+    for (int i = 0; i < partition_num; i++) {
+        int offset = tab_part_out_col_eachpart_nrow_512 * i;
+        int prow = nrow_per_part[i];
+        std::cout << "Part " << i << " nrow: " << prow << std::endl;
+        const int nread = (prow + 15) / 16;
+        int abc = 0;
+        ap_uint<HASHWH + HASHWL> golden = 0;
+        for (int n = 0; n < nread; n++) {
+            const int len = (abc + VEC_LEN) > prow ? (prow - abc) : VEC_LEN;
+            for (int m = 0; m < len; m++) {
+                ap_uint<32> key = tab_part_out_col[0][offset + n](m * 32 + 31, m * 32);
+                // pre-check whether same key are in the same partition
+                if (key_part_map.find(key) != key_part_map.end()) {
+                    if (i != key_part_map[key]) {
+                        std::cout << "Find Error, Error key is " << key << std::endl;
                     }
-                    if (golden != k_g(bit_num - 1, 0)) {
-                        std::cout << std::dec << "Partition: " << loc << std::hex << " <--> golden:" << golden
-                                  << ",bad:" << k_g << std::endl;
-                        return 1;
-                    }
+                } else {
+                    key_part_map.insert(std::make_pair(key, i));
                 }
-                abc += len;
+                ap_uint<64> k1 = (ap_uint<32>(0), key);
+                key_in.write(k1);
+                // check if the valid bits of key hash are in the same partition
+                xf::database::hashLookup3<64>(13, key_in, key_out);
+                ap_uint<64> k_g = key_out.read();
+                ap_uint<log_partition_num> key_out_hashpart = 0;
+                int low_part_nm = log_partition_num - 2;
+                // the actually used hash bits for different partition in each PU: (log_part-2, 0)
+                key_out_hashpart(low_part_nm - 1, 0) = k_g(low_part_nm - 1, 0);
+                // 4 PUs used in partition kernel. The hash (HASHWH+HASHWL-1, HASHWL) bits
+                // are used for dispatching to different PUs.
+                key_out_hashpart(low_part_nm + 1, low_part_nm) = k_g(HASHWH + HASHWL - 1, HASHWL);
+                if ((n == 0) && (m == 0)) {
+                    golden = key_out_hashpart;
+                }
+                if (golden != key_out_hashpart) {
+                    std::cout << "Error in " << i << ", " << n << ", " << m << std::endl;
+                    return 1;
+                }
             }
-            // std::cout << "Hash partition " << loc << " is verified.\n";
+            abc += len;
         }
     }
-    std::cout << "All partitions are checked.\nSuccessfully";
-#endif
+    std::cout << "All partitions are checked.\nPASS!" << std::endl;
 
     return 0;
 }

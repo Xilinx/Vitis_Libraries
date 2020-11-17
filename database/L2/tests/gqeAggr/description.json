@@ -1,11 +1,12 @@
 {
-    "name": "Xilinx GqeAggr Test",
-    "description": "Xilinx GqeAggr Test",
+    "name": "Xilinx gqeAggr Kernel Test",
+    "description": "Xilinx gqeAggr Kernel Test",
     "flow": "vitis",
-    "gui": true,
+    "gui": false,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280"
+        "xilinx_u280_xdma_201920_3",
+        "xilinx_u50_gen3x16_xdma_201920_3"
     ],
     "platform_blacklist": [
         "other"
@@ -20,7 +21,21 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u280.ini"
+                        "--config PROJECT/conn_u280.cfg"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             }
@@ -30,112 +45,58 @@
         {
             "name": "generic launch for sw_emu flows",
             "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin -scale 10000"
+            "cmd_args": " -xclbin BUILD/gqe_aggr_v2.xclbin -scale 10000"
         },
         {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin -scale 10000"
+            "cmd_args": " -xclbin BUILD/gqe_aggr_v2.xclbin -scale 10000"
         },
         {
             "name": "generic launch for hw flows",
             "target": "hw",
-            "cmd_args": " -xclbin BUILD/gqe_aggr.xclbin"
+            "cmd_args": " -xclbin BUILD/gqe_aggr_v2.xclbin"
         }
     ],
     "host": {
-        "host_exe": "test_gqeJoin.exe",
+        "host_exe": "test_gqeAggr.exe",
         "compiler": {
             "sources": [
                 "host/test_q1.cpp",
-                "LIB_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L2/tests/common/xclhost.cpp"
             ],
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/L3/include/sw",
-                "host",
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/L1/include/sw",
+                "LIB_DIR/L2/include/sw",
+                "LIB_DIR/L2/tests/common",
+                "host"
             ],
-            "options": "-O3 "
+            "options": "-O3 -D XDEVICE=$(XDEVICE)"
         }
     },
     "v++": {
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/include/hw",
                 "LIB_DIR/../utils/L1/include"
-            ]
-        }
+	    ]
+	}
     },
     "containers": [
         {
+            "name": "gqe_aggr_v2",
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/src/gqe_aggr.cpp",
-                    "frequency": 200,
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_aggr_v2.cpp",
+                    "frequency": 250,
                     "name": "gqeAggr",
-                    "num_compute_units": 1,
-                    "compute_units": [
-                        {
-                            "name": "gqe_aggr",
-                            "slr": "SLR0",
-                            "arguments": [
-                                {
-                                    "name": "buf_in",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_out",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "buf_cfg",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_result_info",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "ping_buf0",
-                                    "memory": "HBM[8]"
-                                },
-                                {
-                                    "name": "ping_buf1",
-                                    "memory": "HBM[12]"
-                                },
-                                {
-                                    "name": "ping_buf2",
-                                    "memory": "HBM[16]"
-                                },
-                                {
-                                    "name": "ping_buf3",
-                                    "memory": "HBM[20]"
-                                },
-                                {
-                                    "name": "pong_buf0",
-                                    "memory": "HBM[10]"
-                                },
-                                {
-                                    "name": "pong_buf1",
-                                    "memory": "HBM[14]"
-                                },
-                                {
-                                    "name": "pong_buf2",
-                                    "memory": "HBM[18]"
-                                },
-                                {
-                                    "name": "pong_buf3",
-                                    "memory": "HBM[22]"
-                                }
-                            ]
-                        }
-                    ]
+                    "num_compute_units": 1
                 }
             ],
-            "frequency": 200,
-            "name": "gqe_aggr"
+            "frequency": 180,
+            "ldclflags": "--config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
         }
     ],
     "testinfo": {
@@ -146,14 +107,25 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 520
+                "max_memory_MB": {
+                    "vitis_hw_build": 81920,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
+                    "vitis_hw_run": 10240
+                },
+                "max_time_min": {
+                    "vitis_hw_build": 800,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
+                    "vitis_hw_run": 10
+                }
             }
         ],
         "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu",
-            "vitis_hw"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }

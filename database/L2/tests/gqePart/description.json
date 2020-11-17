@@ -1,11 +1,12 @@
 {
-    "name": "Xilinx GqePart Test",
-    "description": "Xilinx GqePart Test",
+    "name": "Xilinx gqePart Kernel Test",
+    "description": "Xilinx gqePart Kernel Test",
     "flow": "vitis",
-    "gui": true,
+    "gui": false,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280"
+        "xilinx_u280_xdma_201920_3",
+        "xilinx_u50_gen3x16_xdma_201920_3"
     ],
     "platform_blacklist": [
         "other"
@@ -20,7 +21,21 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u280.ini"
+                        "--config PROJECT/conn_u280.cfg"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             }
@@ -30,17 +45,17 @@
         {
             "name": "generic launch for sw_emu flows",
             "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_part.xclbin"
+            "cmd_args": " -xclbin BUILD/gqe_part_v2.xclbin -scale 100"
         },
         {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_part.xclbin"
+            "cmd_args": " -xclbin BUILD/gqe_part_v2.xclbin -scale 1000"
         },
         {
             "name": "generic launch for hw flows",
             "target": "hw",
-            "cmd_args": " -xclbin BUILD/gqe_part.xclbin"
+            "cmd_args": " -xclbin BUILD/gqe_part_v2.xclbin"
         }
     ],
     "host": {
@@ -48,58 +63,45 @@
         "compiler": {
             "sources": [
                 "host/test_hash_partition.cpp",
-                "LIB_DIR/ext/xcl2/xcl2.cpp"
+                "LIB_DIR/L2/tests/common/xclhost.cpp"
             ],
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/L3/include/sw",
-                "host",
-                "LIB_DIR/ext/xcl2"
+                "LIB_DIR/L1/include/sw",
+                "LIB_DIR/L2/include/sw",
+                "LIB_DIR/L2/tests/common",
+                "host"
             ],
-            "options": "-O3 "
+            "options": "-O3 -D XDEVICE=$(XDEVICE)"
         }
     },
     "v++": {
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/include/hw",
                 "LIB_DIR/../utils/L1/include"
-            ]
+            ],
+            "hls_jobs": 16
+        },
+        "linker": {
+            "synth_jobs": 16,
+            "impl_jobs": 16
         }
     },
     "containers": [
         {
+            "name": "gqe_part_v2",
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/src/gqe_part.cpp",
-                    "frequency": 200,
                     "name": "gqePart",
-                    "num_compute_units": 1,
-                    "compute_units": [
-                        {
-                            "name": "part_kernel",
-                            "slr": "SLR0",
-                            "arguments": [
-                                {
-                                    "name": "buf_A",
-                                    "memory": "DDR[1]"
-                                },
-                                {
-                                    "name": "buf_B",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "buf_D",
-                                    "memory": "DDR[0]"
-                                }
-                            ]
-                        }
-                    ]
+                    "location": "LIB_DIR/L2/src/hw/gqe_kernel_part_v2.cpp",
+                    "frequency": 200,
+                    "num_compute_units": 1
                 }
             ],
             "frequency": 200,
-            "name": "gqe_part"
+            "ldclflags": "--config PROJECT/opts.cfg"
         }
     ],
     "testinfo": {
@@ -110,14 +112,25 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 520
+                "max_memory_MB": {
+                    "vitis_hw_build": 81920,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
+                    "vitis_hw_run": 10240
+                },
+                "max_time_min": {
+                    "vitis_hw_build": 800,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
+                    "vitis_hw_run": 10
+                }
             }
         ],
         "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu",
-            "vitis_hw"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }

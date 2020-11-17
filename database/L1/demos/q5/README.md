@@ -46,5 +46,5 @@ Change `sw_emu` to `hw_emu` or `hw` to run RTL simulation or board test correspo
 ## Dataset
 
 We used the TPC-H dataset generated with ssb-dbgen tool.
-The makefile will download the tool and create data files when processing the `data` target.
+The host binary will download the tool and create data files in the same folder as itself.
 

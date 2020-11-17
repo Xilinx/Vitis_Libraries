@@ -69,7 +69,7 @@ ap_uint<64> get_golden_sum(int l_row,
     ap_uint<64> sum = 0;
     int cnt = 0;
 
-    std::unordered_multimap<uint32_t, uint32_t> ht1;
+    std::unordered_map<uint32_t, uint32_t> ht1;
 
     {
         for (int i = 0; i < o_row; ++i) {
@@ -88,8 +88,7 @@ ap_uint<64> get_golden_sum(int l_row,
         uint32_t p = col_l_extendedprice[i];
         uint32_t d = col_l_discount[i];
         // check hash table
-        auto its = ht1.equal_range(k);
-        for (auto it = its.first; it != its.second; ++it) {
+        if (ht1.find(k) != ht1.end()) {
             sum += (p * (100 - d));
             ++cnt;
         }
@@ -214,25 +213,15 @@ int main(int argc, const char* argv[]) {
     cl::Program program(context, devices, xclBins);
     cl::Kernel kernel0(program, "join_kernel"); // XXX must match
     std::cout << "Kernel has been created\n";
-#ifdef USE_DDR
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_MEM_DDR_BANK0, col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_MEM_DDR_BANK0, col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_MEM_DDR_BANK0, col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_MEM_DDR_BANK0, col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_o_orderdate = {XCL_MEM_DDR_BANK0, col_o_orderdate, 0};
-    cl_mem_ext_ptr_t mext_result_a = {XCL_MEM_DDR_BANK0, row_result_a, 0};
-    cl_mem_ext_ptr_t mext_result_b = {XCL_MEM_DDR_BANK0, row_result_b, 0};
+
+    cl_mem_ext_ptr_t mext_l_orderkey = {0, col_l_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {1, col_l_extendedprice, kernel0()};
+    cl_mem_ext_ptr_t mext_l_discount = {2, col_l_discount, kernel0()};
+    cl_mem_ext_ptr_t mext_o_orderkey = {4, col_o_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_o_orderdate = {5, col_o_orderdate, kernel0()};
+    cl_mem_ext_ptr_t mext_result_a = {15, row_result_a, kernel0()};
+    cl_mem_ext_ptr_t mext_result_b = {15, row_result_b, kernel0()};
     cl_mem_ext_ptr_t memExt[PU_NM];
-#else
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_BANK(0), col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_BANK(1), col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_BANK(2), col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_BANK(3), col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_o_orderdate = {XCL_BANK(4), col_o_orderdate, 0};
-    cl_mem_ext_ptr_t mext_result_a = {XCL_BANK(5), row_result_a, 0};
-    cl_mem_ext_ptr_t mext_result_b = {XCL_BANK(5), row_result_b, 0};
-    cl_mem_ext_ptr_t memExt[PU_NM];
-#endif
 
 #ifdef USE_DDR
     for (int i = 0; i < PU_NM; ++i) {

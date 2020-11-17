@@ -100,36 +100,36 @@ void write_status(hls::stream<ap_uint<32> >& pu_end_status_strms, ap_uint<32> de
 
 // --------------------------read write HBM------------------------------------
 
-// read 64bit hash table from HBM/DDR
+// read 256bit hash table from HBM/DDR
 template <int HASHW>
-void read_bitmap(ap_uint<64>* htb_buf,
+void read_bitmap(ap_uint<256>* htb_buf,
                  ap_uint<64> addr_shift,
 
-                 hls::stream<ap_uint<64> >& o_bitmap_strm,
+                 hls::stream<ap_uint<256> >& o_bitmap_strm,
                  hls::stream<bool>& o_e_strm) {
 #pragma HLS INLINE off
 
     const int HASH_DEPTH = (1 << HASHW) / 3 + 1;
 
     ap_uint<64> bit_vector_addr = 0;
-    ap_uint<64> htb_start_addr = addr_shift << 1;
-    ap_uint<64> htb_end_addr = (addr_shift + HASH_DEPTH) << 1;
+    ap_uint<64> htb_start_addr = addr_shift;
+    ap_uint<64> htb_end_addr = addr_shift + HASH_DEPTH;
 
 READ_BUFF_LOOP:
     for (int i = htb_start_addr; i < htb_end_addr; i++) {
 #pragma HLS pipeline II = 1
 
-        // read based on width of ap_uint<64>
-        ap_uint<64> bitmap_temp = htb_buf[i];
+        // read based on width of ap_uint<256>
+        ap_uint<256> bitmap_temp = htb_buf[i];
         o_bitmap_strm.write(bitmap_temp);
         o_e_strm.write(false);
     }
     o_e_strm.write(true);
 }
 
-// combine two 64bit hash table into 72bit
+// load 256bit hash table into 72bit
 template <int ARW>
-void combine_bitmap(hls::stream<ap_uint<64> >& i_bitmap_strm,
+void combine_bitmap(hls::stream<ap_uint<256> >& i_bitmap_strm,
                     hls::stream<bool>& i_e_strm,
 
                     hls::stream<ap_uint<72> >& o_bitmap_strm,
@@ -144,34 +144,25 @@ void combine_bitmap(hls::stream<ap_uint<64> >& i_bitmap_strm,
     ap_uint<72> bitmap = 0;
     ap_uint<64> bitmap_temp0 = 0;
     ap_uint<64> bitmap_temp1 = 0;
+    ap_uint<256> bitmap_temp = 0;
 
     bool last = i_e_strm.read();
 COMBINE_BITMAP_LOOP:
     while (!last) {
 #pragma HLS pipeline II = 1
 
-        // read based on width of ap_uint<64>
-        if (status == false) {
-            bitmap_temp0 = i_bitmap_strm.read();
-        } else {
-            bitmap_temp1 = i_bitmap_strm.read();
-        }
+        // read based on width of ap_uint<256>
+        bitmap_temp = i_bitmap_strm.read();
         last = i_e_strm.read();
 
-        // combine
-        bitmap(63, 0) = bitmap_temp0(63, 0);
-        bitmap(71, 64) = bitmap_temp1(7, 0);
+        bitmap(71, 0) = bitmap_temp(71, 0);
 
-        // write
-        if (status == true) {
-            o_bitmap_strm.write(bitmap);
-            o_e_strm.write(false);
+        o_bitmap_strm.write(bitmap);
+        o_e_strm.write(false);
 
 #ifndef __SYNTHESIS__
-            cnt++;
+        cnt++;
 #endif
-        }
-        status = !status;
     }
     o_e_strm.write(true);
 
@@ -245,11 +236,11 @@ WRITE_URAM_LOOP:
 
 /// @brief Read hash table from HBM/DDR to URAM
 template <int HASHW, int ARW>
-void read_htb(ap_uint<64>* htb_buf, ap_uint<64> addr_shift, ap_uint<72>* bit_vector) {
+void read_htb(ap_uint<256>* htb_buf, ap_uint<64> addr_shift, ap_uint<72>* bit_vector) {
 #pragma HLS INLINE off
 #pragma HLS DATAFLOW
 
-    hls::stream<ap_uint<64> > bitmap0_strm;
+    hls::stream<ap_uint<256> > bitmap0_strm;
 #pragma HLS STREAM variable = bitmap0_strm depth = 512
 #pragma HLS resource variable = bitmap0_strm core = FIFO_BRAM
     hls::stream<bool> e0_strm;
@@ -319,22 +310,19 @@ READ_URAM_LOOP:
 #endif
 }
 
-// split 72bit hash table into two 64bit hash table
+// load 72bit hash table into two 256bit hash table
 template <int HASHW, int ARW>
 void split_bitmap(hls::stream<ap_uint<72> >& i_bitmap_strm,
                   hls::stream<bool>& i_e_strm,
 
-                  hls::stream<ap_uint<64> >& o_bitmap_strm,
+                  hls::stream<ap_uint<256> >& o_bitmap_strm,
                   hls::stream<bool>& o_e_strm) {
 #pragma HLS INLINE off
 
     const int HASH_DEPTH = (1 << HASHW) / 3 + 1;
 
-    bool status = false;
     ap_uint<72> bitmap = 0;
-    ap_uint<64> bitmap_temp = 0;
-    ap_uint<64> bitmap_temp0 = 0;
-    ap_uint<64> bitmap_temp1 = 0;
+    ap_uint<256> bitmap_temp = 0;
 
     bool last = i_e_strm.read();
 SPLIT_BITMAP_LOOP:
@@ -342,22 +330,10 @@ SPLIT_BITMAP_LOOP:
 #pragma HLS pipeline II = 1
 
         // read
-        if (status == false) {
-            bitmap = i_bitmap_strm.read();
-            last = i_e_strm.read();
-        }
+        bitmap = i_bitmap_strm.read();
+        last = i_e_strm.read();
 
-        // split 72bit to 64bit
-        bitmap_temp0(63, 0) = bitmap(63, 0);
-        bitmap_temp1(7, 0) = bitmap(71, 64);
-
-        if (status == false) {
-            bitmap_temp = bitmap_temp0;
-        } else {
-            bitmap_temp = bitmap_temp1;
-        }
-
-        status = !status;
+        bitmap_temp(71, 0) = bitmap(71, 0);
 
         // write strm
         o_bitmap_strm.write(bitmap_temp);
@@ -369,21 +345,21 @@ SPLIT_BITMAP_LOOP:
 
 // write hash table strm to HBM/DDR
 template <int HASHW, int ARW>
-void write_bitmap(hls::stream<ap_uint<64> >& i_bitmap_strm,
+void write_bitmap(hls::stream<ap_uint<256> >& i_bitmap_strm,
                   hls::stream<bool>& i_e_strm,
 
                   ap_uint<64> addr_shift,
-                  ap_uint<64>* htb_buf) {
+                  ap_uint<256>* htb_buf) {
 #pragma HLS INLINE off
 
-    ap_uint<64> htb_addr = addr_shift << 1;
+    ap_uint<64> htb_addr = addr_shift;
 
     bool last = i_e_strm.read();
 WRITE_BUFF_LOOP:
     while (!last) {
 #pragma HLS pipeline II = 1
 
-        ap_uint<64> bitmap_temp = i_bitmap_strm.read();
+        ap_uint<256> bitmap_temp = i_bitmap_strm.read();
         last = i_e_strm.read();
 
         htb_buf[htb_addr] = bitmap_temp;
@@ -393,7 +369,7 @@ WRITE_BUFF_LOOP:
 
 /// @brief Write hash table from URAM to HBM/DDR
 template <int HASHW, int ARW>
-void write_htb(ap_uint<64>* htb_buf, ap_uint<64> addr_shift, ap_uint<72>* bit_vector) {
+void write_htb(ap_uint<256>* htb_buf, ap_uint<64> addr_shift, ap_uint<72>* bit_vector) {
 #pragma HLS INLINE off
 #pragma HLS DATAFLOW
 
@@ -403,7 +379,7 @@ void write_htb(ap_uint<64>* htb_buf, ap_uint<64> addr_shift, ap_uint<72>* bit_ve
     hls::stream<bool> e0_strm;
 #pragma HLS STREAM variable = e0_strm depth = 8
 
-    hls::stream<ap_uint<64> > bitmap1_strm;
+    hls::stream<ap_uint<256> > bitmap1_strm;
 #pragma HLS STREAM variable = bitmap1_strm depth = 512
 #pragma HLS resource variable = bitmap1_strm core = FIFO_BRAM
     hls::stream<bool> e1_strm;
@@ -426,7 +402,8 @@ void stb_addr_gen(hls::stream<ap_uint<ARW> >& i_addr_strm,
                   hls::stream<bool>& o_e_strm) {
 #pragma HLS INLINE off
 
-    const int number_of_element_per_row = (RW % 64 == 0) ? RW / 64 : RW / 64 + 1; // number of output based on 64 bit
+    const int number_of_element_per_row =
+        (RW % 256 == 0) ? RW / 256 : RW / 256 + 1; // number of output based on 256 bit
 
     bool last = i_e_strm.read();
     while (!last) {
@@ -447,11 +424,11 @@ void stb_addr_gen(hls::stream<ap_uint<ARW> >& i_addr_strm,
 
 // read row from HBM/DDR
 template <int RW, int ARW>
-void read_row(ap_uint<64>* stb_buf,
+void read_row(ap_uint<256>* stb_buf,
               hls::stream<ap_uint<ARW> >& i_addr_strm,
               hls::stream<bool>& i_e_strm,
 
-              hls::stream<ap_uint<64> >& o_row_strm,
+              hls::stream<ap_uint<256> >& o_row_strm,
               hls::stream<bool>& o_e_strm) {
 #pragma HLS INLINE off
 
@@ -461,16 +438,16 @@ void read_row(ap_uint<64>* stb_buf,
         ap_uint<ARW> addr = i_addr_strm.read();
         last = i_e_strm.read();
 
-        ap_uint<64> element = stb_buf[addr];
+        ap_uint<256> element = stb_buf[addr];
         o_row_strm.write(element);
         o_e_strm.write(false);
     }
     o_e_strm.write(true);
 }
 
-// combine several 64 bit stream into one row
+// combine several 256 bit stream into one row
 template <int RW, int ARW>
-void combine_row(hls::stream<ap_uint<64> >& i_row_strm,
+void combine_row(hls::stream<ap_uint<256> >& i_row_strm,
                  hls::stream<bool>& i_e_strm,
 
                  hls::stream<ap_uint<RW> >& o_row_strm,
@@ -481,17 +458,18 @@ void combine_row(hls::stream<ap_uint<64> >& i_row_strm,
     unsigned int cnt = 0;
 #endif
 
-    const int number_of_element_per_row = (RW % 64 == 0) ? RW / 64 : RW / 64 + 1; // number of output based on 64 bit
+    const int number_of_element_per_row =
+        (RW % 256 == 0) ? RW / 256 : RW / 256 + 1; // number of output based on 256 bit
 
     bool last = i_e_strm.read();
-    ap_uint<64 * number_of_element_per_row> row_temp = 0;
+    ap_uint<256 * number_of_element_per_row> row_temp = 0;
     ap_uint<4> mux = 0;
 
     while (!last) {
 #pragma HLS PIPELINE II = 1
-        ap_uint<64> element = i_row_strm.read();
+        ap_uint<256> element = i_row_strm.read();
         last = i_e_strm.read();
-        row_temp((mux + 1) * 64 - 1, mux * 64) = element;
+        row_temp((mux + 1) * 256 - 1, mux * 256) = element;
 
         if (mux == number_of_element_per_row - 1) {
             ap_uint<RW> row = row_temp(RW - 1, 0);
@@ -519,7 +497,7 @@ void combine_row(hls::stream<ap_uint<64> >& i_row_strm,
 
 /// @brief Read s-table from HBM/DDR
 template <int ARW, int RW>
-void read_stb(ap_uint<64>* stb_buf,
+void read_stb(ap_uint<256>* stb_buf,
 
               hls::stream<ap_uint<ARW> >& i_addr_strm,
               hls::stream<bool>& i_e_strm,
@@ -536,7 +514,7 @@ void read_stb(ap_uint<64>* stb_buf,
 #pragma HLS STREAM variable = e0_strm depth = 512
 #pragma HLS resource variable = e0_strm core = FIFO_SRL
 
-    hls::stream<ap_uint<64> > row_strm;
+    hls::stream<ap_uint<256> > row_strm;
 #pragma HLS STREAM variable = row_strm depth = 8
 #pragma HLS resource variable = row_strm core = FIFO_SRL
     hls::stream<bool> e1_strm;
@@ -586,9 +564,9 @@ void eliminate_strm_end(hls::stream<type_t>& strm_end) {
 
 // write row to HBM/DDR
 template <int RW, int ARW>
-void write_row(ap_uint<64>* stb_buf,
+void write_row(ap_uint<256>* stb_buf,
                hls::stream<ap_uint<ARW> >& i_addr_strm,
-               hls::stream<ap_uint<64> >& i_row_strm,
+               hls::stream<ap_uint<256> >& i_row_strm,
                hls::stream<bool>& i_e_strm) {
 #pragma HLS INLINE off
 
@@ -596,19 +574,19 @@ void write_row(ap_uint<64>* stb_buf,
     while (!last) {
 #pragma HLS PIPELINE II = 1
         ap_uint<ARW> addr = i_addr_strm.read();
-        ap_uint<64> row = i_row_strm.read();
+        ap_uint<256> row = i_row_strm.read();
         last = i_e_strm.read();
 
         stb_buf[addr] = row;
     }
 }
 
-// split row into several 64 bit element
+// split row into several 256 bit element
 template <int RW, int ARW>
 void split_row(hls::stream<ap_uint<RW> >& i_row_strm,
                hls::stream<bool>& i_e_strm,
 
-               hls::stream<ap_uint<64> >& o_row_strm,
+               hls::stream<ap_uint<256> >& o_row_strm,
                hls::stream<bool>& o_e_strm) {
 #pragma HLS INLINE off
 
@@ -616,10 +594,11 @@ void split_row(hls::stream<ap_uint<RW> >& i_row_strm,
     unsigned int cnt = 0;
 #endif
 
-    const int number_of_element_per_row = (RW % 64 == 0) ? RW / 64 : RW / 64 + 1; // number of output based on 64 bit
+    const int number_of_element_per_row =
+        (RW % 256 == 0) ? RW / 256 : RW / 256 + 1; // number of output based on 256 bit
 
     bool last = i_e_strm.read();
-    ap_uint<64 * number_of_element_per_row> row_temp = 0;
+    ap_uint<256 * number_of_element_per_row> row_temp = 0;
 
     while (!last) {
 #pragma HLS PIPELINE II = number_of_element_per_row
@@ -628,7 +607,7 @@ void split_row(hls::stream<ap_uint<RW> >& i_row_strm,
         ap_uint<4> mux = 0;
 
         for (int i = 0; i < number_of_element_per_row; i++) {
-            ap_uint<64> element = row_temp((mux + 1) * 64 - 1, mux * 64);
+            ap_uint<256> element = row_temp((mux + 1) * 256 - 1, mux * 256);
             mux++;
 
             o_row_strm.write(element);
@@ -650,7 +629,7 @@ void split_row(hls::stream<ap_uint<RW> >& i_row_strm,
 
 /// @brief Write s-table to HBM/DDR
 template <int ARW, int RW>
-void write_stb(ap_uint<64>* stb_buf,
+void write_stb(ap_uint<256>* stb_buf,
 
                hls::stream<ap_uint<ARW> >& i_addr_strm,
                hls::stream<ap_uint<RW> >& i_row_strm,
@@ -672,7 +651,7 @@ void write_stb(ap_uint<64>* stb_buf,
 #pragma HLS STREAM variable = e2_strm depth = 512
 #pragma HLS resource variable = e2_strm core = FIFO_SRL
 
-    hls::stream<ap_uint<64> > row_strm;
+    hls::stream<ap_uint<256> > row_strm;
 #pragma HLS STREAM variable = row_strm depth = 512
 #pragma HLS resource variable = row_strm core = FIFO_BRAM
     hls::stream<bool> e3_strm;
@@ -1170,7 +1149,7 @@ void build_wrapper(ap_uint<32>& depth,
                    hls::stream<ap_uint<PW> >& i_pld_strm,
                    hls::stream<bool>& i_e_strm,
 
-                   ap_uint<64>* stb_buf,
+                   ap_uint<256>* stb_buf,
                    ap_uint<72>* bit_vector0,
                    ap_uint<72>* bit_vector1) {
 #pragma HLS INLINE off
@@ -1293,7 +1272,7 @@ void merge_unit(hls::stream<ap_uint<HASHWH + HASHWL> >& i_hash_strm,
     unsigned int cnt = 0;
 #endif
 
-    const int number_of_stb_per_row = (KEYW + PW) / 64; // number of output based on 64 bit
+    const int number_of_stb_per_row = (KEYW + PW) / 256; // number of output based on 256 bit
 
     ap_uint<72> elem = 0;
     ap_uint<72> new_elem = 0;
@@ -1394,8 +1373,8 @@ LOOP_BUILD_UNIT:
 template <int HASH_MODE, int HASHWH, int HASHWL, int KEYW, int PW, int ARW>
 void merge_stb(ap_uint<32>& depth,
                ap_uint<32>& overflow_length,
-               ap_uint<64>* htb_buf,
-               ap_uint<64>* stb_buf,
+               ap_uint<256>* htb_buf,
+               ap_uint<256>* stb_buf,
                ap_uint<72>* bit_vector) {
 #pragma HLS INLINE off
 #pragma HLS DATAFLOW
@@ -1480,8 +1459,8 @@ void merge_wrapper(
     ap_uint<32>& depth,
     ap_uint<32>& overflow_length,
 
-    ap_uint<64>* htb_buf,
-    ap_uint<64>* stb_buf,
+    ap_uint<256>* htb_buf,
+    ap_uint<256>* stb_buf,
     ap_uint<72>* bit_vector) {
 #pragma HLS INLINE off
 
@@ -1719,7 +1698,7 @@ void probe_base_stb(
     hls::stream<ap_uint<S_PW> >& o_base_s_pld_strm,
 
     // HBM
-    ap_uint<64>* stb_buf) {
+    ap_uint<256>* stb_buf) {
 #pragma HLS INLINE off
 #pragma HLS DATAFLOW
 
@@ -1795,7 +1774,7 @@ void read_overflow_stb(
     hls::stream<ap_uint<S_PW> >& o_overflow_s_pld_strm,
 
     // HBM
-    ap_uint<64>* htb_buf) {
+    ap_uint<256>* htb_buf) {
 #pragma HLS INLINE off
 #pragma HLS DATAFLOW
 
@@ -1848,7 +1827,7 @@ void probe_overflow_stb(
     hls::stream<ap_uint<S_PW> >& o_overflow_s_pld_strm,
 
     // HBM
-    ap_uint<64>* htb_buf) {
+    ap_uint<256>* htb_buf) {
 #pragma HLS INLINE off
 
     ap_uint<ARW> overflow_addr, nm;
@@ -1887,8 +1866,8 @@ void probe_wrapper(ap_uint<32>& depth,
                    hls::stream<ap_uint<KEYW> >& o_overflow_s_key_strm,
                    hls::stream<ap_uint<S_PW> >& o_overflow_s_pld_strm,
 
-                   ap_uint<64>* htb_buf,
-                   ap_uint<64>* stb_buf,
+                   ap_uint<256>* htb_buf,
+                   ap_uint<256>* stb_buf,
                    ap_uint<72>* bit_vector0,
                    ap_uint<72>* bit_vector1) {
 #pragma HLS INLINE off
@@ -1980,8 +1959,8 @@ void build_merge_probe_wrapper(
     hls::stream<ap_uint<KEYW> >& o_overflow_s_key_strm,
     hls::stream<ap_uint<S_PW> >& o_overflow_s_pld_strm,
 
-    ap_uint<64>* htb_buf,
-    ap_uint<64>* stb_buf) {
+    ap_uint<256>* htb_buf,
+    ap_uint<256>* stb_buf) {
 #pragma HLS INLINE off
 
     const int PW = (S_PW > T_PW) ? S_PW : T_PW;
@@ -2565,8 +2544,8 @@ void build_stb(
     hls::stream<ap_uint<PW> >& i_pld_strm,
     hls::stream<bool>& i_e_strm,
 
-    ap_uint<64>* htb_buf,
-    ap_uint<64>* stb_buf,
+    ap_uint<256>* htb_buf,
+    ap_uint<256>* stb_buf,
     ap_uint<72>* bit_vector0,
     ap_uint<72>* bit_vector1) {
 #pragma HLS INLINE off
@@ -2617,8 +2596,8 @@ void build_wrapper(
     hls::stream<ap_uint<PW> >& i_pld_strm,
     hls::stream<bool>& i_e_strm,
 
-    ap_uint<64>* htb_buf,
-    ap_uint<64>* stb_buf,
+    ap_uint<256>* htb_buf,
+    ap_uint<256>* stb_buf,
     ap_uint<72>* bit_vector0,
     ap_uint<72>* bit_vector1) {
 #pragma HLS INLINE off
@@ -2651,7 +2630,7 @@ void bitmap_addr_gen(
 
     // output
     hls::stream<ap_uint<ARW> >& o_addr_strm,
-    hls::stream<ap_uint<128> >& o_bitmap_strm,
+    hls::stream<ap_uint<256> >& o_bitmap_strm,
     hls::stream<bool>& o_e_etrm,
 
     ap_uint<72>* bit_vector1) {
@@ -2702,7 +2681,7 @@ BITMAP_ADDR_LOOP:
 
         // write bitmap addr to URAM for fully build
         write_bit_vector1(i, head);
-        ap_uint<128> bitmap = head;
+        ap_uint<256> bitmap = head;
 
         o_addr_strm.write(base_addr1);
         o_bitmap_strm.write(bitmap);
@@ -2718,12 +2697,12 @@ template <int HASHW, int ARW>
 void merge_htb(ap_uint<32>& depth,
                ap_uint<32>& pu_start_addr,
 
-               ap_uint<64>* htb_buf,
+               ap_uint<256>* htb_buf,
                ap_uint<72>* bit_vector) {
 #pragma HLS INLINE off
 #pragma HLS DATAFLOW
 
-    hls::stream<ap_uint<128> > bitmap_strm;
+    hls::stream<ap_uint<256> > bitmap_strm;
 #pragma HLS stream variable = bitmap_strm depth = 8
 #pragma HLS resource variable = bitmap_strm core = FIFO_SRL
     hls::stream<ap_uint<ARW> > write_addr_strm;
@@ -2736,7 +2715,7 @@ void merge_htb(ap_uint<32>& depth,
     bitmap_addr_gen<HASHW, ARW>(depth, pu_start_addr, write_addr_strm, bitmap_strm, e_strm, bit_vector);
 
     // write merged overflow bitmap to HBM
-    join_v3::sc::write_stb<ARW, 128>(htb_buf, write_addr_strm, bitmap_strm, e_strm);
+    join_v3::sc::write_stb<ARW, 256>(htb_buf, write_addr_strm, bitmap_strm, e_strm);
 }
 
 // generate read addr for reading overflwo stb row
@@ -2783,7 +2762,7 @@ void merge_unit(hls::stream<ap_uint<HASHWH + HASHWL> >& i_hash_strm,
     unsigned int cnt = 0;
 #endif
 
-    const int number_of_stb_per_row = (KEYW + PW) / 64; // number of output based on 64 bit
+    const int number_of_stb_per_row = (KEYW + PW) / 256; // number of output based on 256 bit
 
     ap_uint<72> elem = 0;
     ap_uint<72> new_elem = 0;
@@ -2878,8 +2857,8 @@ template <int HASH_MODE, int HASHWH, int HASHWL, int KEYW, int PW, int ARW>
 void merge_stb(
     // input status
     ap_uint<32>& pu_start_addr,
-    ap_uint<64>* htb_buf,
-    ap_uint<64>* stb_buf,
+    ap_uint<256>* htb_buf,
+    ap_uint<256>* stb_buf,
     ap_uint<72>* bit_vector) {
 #pragma HLS INLINE off
 #pragma HLS DATAFLOW
@@ -2961,8 +2940,8 @@ void merge_wrapper(
     ap_uint<32> depth,
     ap_uint<32>& pu_start_addr,
 
-    ap_uint<64>* htb_buf,
-    ap_uint<64>* stb_buf,
+    ap_uint<256>* htb_buf,
+    ap_uint<256>* stb_buf,
     ap_uint<72>* bit_vector) {
 #pragma HLS INLINE off
 
@@ -3225,7 +3204,7 @@ void probe_wrapper(
     hls::stream<ap_uint<S_PW> >& o_s_pld_strm,
     hls::stream<bool>& o_e1_strm,
 
-    ap_uint<64>* stb_buf,
+    ap_uint<256>* stb_buf,
     ap_uint<72>* bit_vector0,
     ap_uint<72>* bit_vector1) {
 #pragma HLS INLINE off
@@ -3293,7 +3272,7 @@ template <int HASHW, int ARW>
 void initiate_uram(
     // input
     ap_uint<32> id,
-    ap_uint<64>* htb_buf,
+    ap_uint<256>* htb_buf,
     ap_uint<72>* bit_vector0,
     ap_uint<72>* bit_vector1) {
 #pragma HLS INLINE
@@ -3345,8 +3324,8 @@ void build_merge_probe_wrapper(
     hls::stream<ap_uint<S_PW> >& o_s_pld_strm,
     hls::stream<bool>& o_e1_strm,
 
-    ap_uint<64>* htb_buf,
-    ap_uint<64>* stb_buf) {
+    ap_uint<256>* htb_buf,
+    ap_uint<256>* stb_buf) {
 #pragma HLS INLINE off
 
     // alllocate uram storage
@@ -3568,8 +3547,8 @@ void collect_unit(bool& build_probe_flag,
 
 #ifndef __SYNTHESIS__
     std::cout << std::dec << "PU=" << PU << std::endl;
+    std::cout << "build_probe_flag" << build_probe_flag << std::endl;
 #endif
-
     if (build_probe_flag) {
         // do collect if it is probe
         do {
@@ -3677,24 +3656,24 @@ void hashJoinV3(
     hls::stream<bool> e0_strm_arry[CH_NM],
 
     // output hash table
-    ap_uint<64>* htb0_buf,
-    ap_uint<64>* htb1_buf,
-    ap_uint<64>* htb2_buf,
-    ap_uint<64>* htb3_buf,
-    ap_uint<64>* htb4_buf,
-    ap_uint<64>* htb5_buf,
-    ap_uint<64>* htb6_buf,
-    ap_uint<64>* htb7_buf,
+    ap_uint<256>* htb0_buf,
+    ap_uint<256>* htb1_buf,
+    ap_uint<256>* htb2_buf,
+    ap_uint<256>* htb3_buf,
+    ap_uint<256>* htb4_buf,
+    ap_uint<256>* htb5_buf,
+    ap_uint<256>* htb6_buf,
+    ap_uint<256>* htb7_buf,
 
     // output
-    ap_uint<64>* stb0_buf,
-    ap_uint<64>* stb1_buf,
-    ap_uint<64>* stb2_buf,
-    ap_uint<64>* stb3_buf,
-    ap_uint<64>* stb4_buf,
-    ap_uint<64>* stb5_buf,
-    ap_uint<64>* stb6_buf,
-    ap_uint<64>* stb7_buf,
+    ap_uint<256>* stb0_buf,
+    ap_uint<256>* stb1_buf,
+    ap_uint<256>* stb2_buf,
+    ap_uint<256>* stb3_buf,
+    ap_uint<256>* stb4_buf,
+    ap_uint<256>* stb5_buf,
+    ap_uint<256>* stb6_buf,
+    ap_uint<256>* stb7_buf,
 
     hls::stream<ap_uint<32> >& pu_begin_status_strms,
     hls::stream<ap_uint<32> >& pu_end_status_strms,
@@ -4171,24 +4150,24 @@ static void hashBuildProbeV3(
     hls::stream<bool> e0_strm_arry[CH_NM],
 
     // output hash table
-    ap_uint<64>* htb0_buf,
-    ap_uint<64>* htb1_buf,
-    ap_uint<64>* htb2_buf,
-    ap_uint<64>* htb3_buf,
-    ap_uint<64>* htb4_buf,
-    ap_uint<64>* htb5_buf,
-    ap_uint<64>* htb6_buf,
-    ap_uint<64>* htb7_buf,
+    ap_uint<256>* htb0_buf,
+    ap_uint<256>* htb1_buf,
+    ap_uint<256>* htb2_buf,
+    ap_uint<256>* htb3_buf,
+    ap_uint<256>* htb4_buf,
+    ap_uint<256>* htb5_buf,
+    ap_uint<256>* htb6_buf,
+    ap_uint<256>* htb7_buf,
 
     // output
-    ap_uint<64>* stb0_buf,
-    ap_uint<64>* stb1_buf,
-    ap_uint<64>* stb2_buf,
-    ap_uint<64>* stb3_buf,
-    ap_uint<64>* stb4_buf,
-    ap_uint<64>* stb5_buf,
-    ap_uint<64>* stb6_buf,
-    ap_uint<64>* stb7_buf,
+    ap_uint<256>* stb0_buf,
+    ap_uint<256>* stb1_buf,
+    ap_uint<256>* stb2_buf,
+    ap_uint<256>* stb3_buf,
+    ap_uint<256>* stb4_buf,
+    ap_uint<256>* stb5_buf,
+    ap_uint<256>* stb6_buf,
+    ap_uint<256>* stb7_buf,
 
     hls::stream<ap_uint<32> >& pu_begin_status_strms,
     hls::stream<ap_uint<32> >& pu_end_status_strms,

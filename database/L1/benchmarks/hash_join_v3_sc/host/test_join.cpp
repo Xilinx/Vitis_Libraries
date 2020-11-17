@@ -46,6 +46,8 @@ void CL_CALLBACK print_buf_result(cl_event event, cl_int cmd_exec_status, void* 
     if ((*(d->g)) != (*(d->v))) {
         (*(d->r))++;
         printf("Golden result %d: %lld.%lld\n", d->i, *(d->g) / 10000, *(d->g) % 10000);
+    } else {
+        std::cout << "Test Pass" << std::endl;
     }
 }
 #endif
@@ -188,19 +190,19 @@ int main(int argc, const char* argv[]) {
     const int PU_NM = 8;
 
 #ifdef HLS_TEST
-    ap_uint<64>* tb_ht[PU_NM];
-    ap_uint<64>* tb_s[PU_NM];
+    ap_uint<256>* tb_ht[PU_NM];
+    ap_uint<256>* tb_s[PU_NM];
     for (int i = 0; i < PU_NM; i++) {
-        tb_ht[i] = aligned_alloc<ap_uint<64> >(PU_HT_DEPTH);
-        tb_s[i] = aligned_alloc<ap_uint<64> >(PU_S_DEPTH);
+        tb_ht[i] = aligned_alloc<ap_uint<256> >(PU_HT_DEPTH);
+        tb_s[i] = aligned_alloc<ap_uint<256> >(PU_S_DEPTH);
     }
     join_kernel((ap_uint<W_TPCH_INT * VEC_LEN>*)col_o_orderkey, o_nrow, (ap_uint<W_TPCH_INT * VEC_LEN>*)col_l_orderkey,
                 (ap_uint<W_TPCH_INT * VEC_LEN>*)col_l_extendedprice, (ap_uint<W_TPCH_INT * VEC_LEN>*)col_l_discount,
-                l_nrow, k_bucket, (ap_uint<64>*)tb_ht[0], (ap_uint<64>*)tb_ht[1], (ap_uint<64>*)tb_ht[2],
-                (ap_uint<64>*)tb_ht[3], (ap_uint<64>*)tb_ht[4], (ap_uint<64>*)tb_ht[5], (ap_uint<64>*)tb_ht[6],
-                (ap_uint<64>*)tb_ht[7], (ap_uint<64>*)tb_s[0], (ap_uint<64>*)tb_s[1], (ap_uint<64>*)tb_s[2],
-                (ap_uint<64>*)tb_s[3], (ap_uint<64>*)tb_s[4], (ap_uint<64>*)tb_s[5], (ap_uint<64>*)tb_s[6],
-                (ap_uint<64>*)tb_s[7], (ap_uint<W_TPCH_INT * 2>*)row_result_a);
+                l_nrow, k_bucket, (ap_uint<256>*)tb_ht[0], (ap_uint<256>*)tb_ht[1], (ap_uint<256>*)tb_ht[2],
+                (ap_uint<256>*)tb_ht[3], (ap_uint<256>*)tb_ht[4], (ap_uint<256>*)tb_ht[5], (ap_uint<256>*)tb_ht[6],
+                (ap_uint<256>*)tb_ht[7], (ap_uint<256>*)tb_s[0], (ap_uint<256>*)tb_s[1], (ap_uint<256>*)tb_s[2],
+                (ap_uint<256>*)tb_s[3], (ap_uint<256>*)tb_s[4], (ap_uint<256>*)tb_s[5], (ap_uint<256>*)tb_s[6],
+                (ap_uint<256>*)tb_s[7], (ap_uint<W_TPCH_INT * 2>*)row_result_a);
     long long* rv = (long long*)row_result_a;
     printf("FPGA result: %lld.%lld\n", *rv / 10000, *rv % 10000);
 #else
@@ -222,12 +224,12 @@ int main(int argc, const char* argv[]) {
     cl::Kernel kernel0(program, "join_kernel"); // XXX must match
     std::cout << "Kernel has been created\n";
 
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_BANK(32), col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_BANK(32), col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_BANK(32), col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_BANK(32), col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_result_a = {XCL_BANK(33), row_result_a, 0};
-    cl_mem_ext_ptr_t mext_result_b = {XCL_BANK(33), row_result_b, 0};
+    cl_mem_ext_ptr_t mext_o_orderkey = {0, col_o_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_orderkey = {2, col_l_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {3, col_l_extendedprice, kernel0()};
+    cl_mem_ext_ptr_t mext_l_discount = {4, col_l_discount, kernel0()};
+    cl_mem_ext_ptr_t mext_result_a = {23, row_result_a, kernel0()};
+    cl_mem_ext_ptr_t mext_result_b = {23, row_result_b, kernel0()};
 
     // Map buffers
     // a
@@ -267,13 +269,11 @@ int main(int argc, const char* argv[]) {
     std::vector<cl::Memory> tb;
     for (int i = 0; i < PU_NM; i++) {
         // even
-        cl_mem_ext_ptr_t me_ht = {0};
-        me_ht.banks = XCL_BANK(i * 4);
+        cl_mem_ext_ptr_t me_ht = {7 + i, nullptr, kernel0()};
         buf_ht[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, (size_t)ht_hbm_size, &me_ht);
         tb.push_back(buf_ht[i]);
         // odd
-        cl_mem_ext_ptr_t me_s = {0};
-        me_s.banks = XCL_BANK(i * 4 + 2);
+        cl_mem_ext_ptr_t me_s = {15 + i, nullptr, kernel0()};
         buf_s[i] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, (size_t)s_hbm_size, &me_s);
         tb.push_back(buf_s[i]);
     }

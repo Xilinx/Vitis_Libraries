@@ -16,6 +16,7 @@
 
 // clang-format off
 #include "table_dt.hpp"
+#include "prepare.hpp"
 #include "q5simplified.hpp"
 #include "utils.hpp"
 #include "test_q5s.hpp"
@@ -73,8 +74,44 @@ FILE* fo(std::string fn) {
     }
     return f;
 }
+int64_t get_golden_sum(int l_row,
+                       int* col_l_orderkey,
+                       int* col_l_extendedprice,
+                       int* col_l_discount,
+                       int o_row,
+                       int* col_o_orderkey,
+                       int* col_o_orderdate) {
+    int64_t sum = 0;
+    int cnt = 0;
+    std::unordered_multimap<uint32_t, uint32_t> ht1;
+    {
+        for (int i = 0; i < o_row; ++i) {
+            int32_t k = col_o_orderkey[i];
+            int32_t date = col_o_orderdate[i];
+            // insert into hash table
+            if (date >= 19940101 && date < 19950101) {
+                ht1.insert(std::make_pair(k, date));
+            }
+        }
+    }
+    // read t once
+    for (int i = 0; i < l_row; ++i) {
+        int32_t k = col_l_orderkey[i];
+        int32_t p = col_l_extendedprice[i];
+        int32_t d = col_l_discount[i];
+        // check hash table
+        auto its = ht1.equal_range(k);
+        for (auto it = its.first; it != its.second; ++it) {
+            // std::cout << p << ", " << d << std::endl;
+            sum += (p * (100 - d));
+            ++cnt;
+        }
+    }
+    return sum;
+}
 
 int create_buffers(cl_context ctx,
+                   cl_kernel kernel,
                    int i, //
                    KEY_T* col_l_orderkey,
                    MONEY_T* col_l_extendedprice, //
@@ -88,21 +125,13 @@ int create_buffers(cl_context ctx,
                    cl_mem* buf_o_orderdate, //
                    int l_depth = BUF_L_DEPTH,
                    int o_depth = BUF_O_DEPTH) {
-// prepare extended attribute for all buffers
+    // prepare extended attribute for all buffers
 
-#ifdef USE_DDR
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_MEM_DDR_BANK0, col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_MEM_DDR_BANK0, col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_MEM_DDR_BANK0, col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_MEM_DDR_BANK0, col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_o_orderdate = {XCL_MEM_DDR_BANK0, col_o_orderdate, 0};
-#else
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_BANK0, col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_BANK1, col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_l_discount = {XCL_BANK2, col_l_discount, 0};
-    cl_mem_ext_ptr_t mext_o_orderkey = {XCL_BANK3, col_o_orderkey, 0};
-    cl_mem_ext_ptr_t mext_o_orderdate = {XCL_BANK4, col_o_orderdate, 0};
-#endif
+    cl_mem_ext_ptr_t mext_l_orderkey = {0, col_l_orderkey, kernel};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {1, col_l_extendedprice, kernel};
+    cl_mem_ext_ptr_t mext_l_discount = {2, col_l_discount, kernel};
+    cl_mem_ext_ptr_t mext_o_orderkey = {4, col_o_orderkey, kernel};
+    cl_mem_ext_ptr_t mext_o_orderdate = {5, col_o_orderdate, kernel};
 
     cl_int err;
 
@@ -173,19 +202,30 @@ int main(int argc, const char* argv[]) {
     // cmd arg parser.
     ArgParser parser(argc, argv);
 
-    std::string mode;
     std::string xclbin_path; // eg. q5kernel_VCU1525_hw.xclbin
-
     if (!parser.getCmdOption("-xclbin", xclbin_path)) {
         std::cout << "ERROR: xclbin path is not set!\n";
         return 1;
     }
 
-    std::string in_dir;
-    if (!parser.getCmdOption("-in", in_dir) || !is_dir(in_dir)) {
-        std::cout << "ERROR: input dir is not specified or not valid.\n";
+    std::string work_dir;
+    if (!parser.getCmdOption("-work", work_dir)) {
+        std::cout << "ERROR: work dir is not set!\n";
         return 1;
     }
+
+    int sf = 1;
+    std::string sf_s;
+    if (parser.getCmdOption("-sf", sf_s)) {
+        try {
+            sf = std::stoi(sf_s);
+        } catch (...) {
+            sf = 1;
+        }
+    }
+
+    // call data generator
+    std::string in_dir = prepare(work_dir, sf);
 
     KEY_T* col_l_orderkey[HORIZ_PART];
     MONEY_T* col_l_extendedprice[HORIZ_PART];
@@ -344,8 +384,7 @@ int main(int argc, const char* argv[]) {
     cl_command_queue cq;
     cl_program prog;
 
-    err = init_hardware(&ctx, &dev_id, &cq, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
-                        MSTR(XDEVICE)); // XXX platform name, eg: "xilinx_vcu1525_dynamic_5_1"
+    err = init_hardware(&ctx, &dev_id, &cq, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, "");
     if (clCheckError(err) != CL_SUCCESS) {
         return err;
     }
@@ -354,37 +393,22 @@ int main(int argc, const char* argv[]) {
     if (clCheckError(err) != CL_SUCCESS) {
         return err;
     }
+    // kernel
+    cl_kernel kernel;
 
-    // start working here.
+    kernel = clCreateKernel(prog, "q5simplified", &err);
+    if (err != CL_SUCCESS) {
+        printf("ERROR: fail to create kernel: %s.\n", clGetErrorString(err));
+    }
 
     // temp buffers.
 
     cl_mem buf_table[PU_NM];
 
     cl_mem_ext_ptr_t memExt[PU_NM];
-#ifdef USE_DDR
-    memExt[0].flags = XCL_MEM_DDR_BANK1;
-    memExt[1].flags = XCL_MEM_DDR_BANK1;
-    memExt[2].flags = XCL_MEM_DDR_BANK2;
-    memExt[3].flags = XCL_MEM_DDR_BANK3;
-    memExt[4].flags = XCL_MEM_DDR_BANK1;
-    memExt[5].flags = XCL_MEM_DDR_BANK1;
-    memExt[6].flags = XCL_MEM_DDR_BANK2;
-    memExt[7].flags = XCL_MEM_DDR_BANK3;
-#else
-    memExt[0].flags = XCL_BANK6;
-    memExt[1].flags = XCL_BANK7;
-    memExt[2].flags = XCL_BANK8;
-    memExt[3].flags = XCL_BANK9;
-    memExt[4].flags = XCL_BANK10;
-    memExt[5].flags = XCL_BANK11;
-    memExt[6].flags = XCL_BANK12;
-    memExt[7].flags = XCL_BANK13;
-#endif
 
     for (int j = 0; j < PU_NM; ++j) {
-        memExt[j].obj = NULL;
-        memExt[j].param = 0;
+        memExt[j] = {7 + j, NULL, kernel};
         buf_table[j] = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
                                       (size_t)(KEY_SZ * BUFF_DEPTH), &memExt[j], &err);
         if (err != CL_SUCCESS) {
@@ -397,11 +421,8 @@ int main(int argc, const char* argv[]) {
     cl_mem buf_result[HORIZ_PART];
 
     for (int i = 0; i < HORIZ_PART; ++i) {
-#ifdef USE_DDR
-        cl_mem_ext_ptr_t mext_result = {XCL_MEM_DDR_BANK0, part_result[i], 0};
-#else
-        cl_mem_ext_ptr_t mext_result = {XCL_BANK5, part_result[i], 0};
-#endif
+        cl_mem_ext_ptr_t mext_result = {15, part_result[i], kernel};
+
         buf_result[i] = clCreateBuffer(ctx, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                                        (size_t)(MONEY_SZ * 2), &mext_result, &err);
         if (clCheckError(err) != CL_SUCCESS) return err;
@@ -416,24 +437,17 @@ int main(int argc, const char* argv[]) {
     for (int i = 0; i < step; ++i) {
         int l_depth = fit_in_one ? l_nrow_part[0] : BUF_L_DEPTH;
         int o_depth = fit_in_one ? o_nrow_part[0] : BUF_O_DEPTH;
-        if (create_buffers(ctx, i, col_l_orderkey[i], col_l_extendedprice[i], col_l_discount[i], col_o_orderkey[i],
-                           col_o_orderdate[i], &buf_input[i][idx_l_orderkey], &buf_input[i][idx_l_extendedprice],
-                           &buf_input[i][idx_l_discount], &buf_input[i][idx_o_orderkey], &buf_input[i][idx_o_orderdate],
-                           l_depth, o_depth)) {
+        if (create_buffers(ctx, kernel, i, col_l_orderkey[i], col_l_extendedprice[i], col_l_discount[i],
+                           col_o_orderkey[i], col_o_orderdate[i], &buf_input[i][idx_l_orderkey],
+                           &buf_input[i][idx_l_extendedprice], &buf_input[i][idx_l_discount],
+                           &buf_input[i][idx_o_orderkey], &buf_input[i][idx_o_orderdate], l_depth, o_depth)) {
             printf("ERROR: input buffer[%d] failed to be created.\n", i);
         } else {
             if (debug_level >= Q5_DEBUG) printf("DEBUG: input buffer[%d] has been created.\n", i);
         }
     }
 
-    // kernel
-    cl_kernel kernel;
-
-    kernel = clCreateKernel(prog, "q5simplified", &err);
-    if (err != CL_SUCCESS) {
-        printf("ERROR: fail to create kernel: %s.\n", clGetErrorString(err));
-    }
-
+    // start working here.
     // events
     cl_event event_write[HORIZ_PART], event_kernel[HORIZ_PART], event_read[HORIZ_PART];
 
@@ -550,14 +564,7 @@ int main(int argc, const char* argv[]) {
             printf("Result of part %d: %lld.%04lld\n", i, pv / 10000, pv % 10000);
         v += pv;
     }
-    printf("Result: %lld.%04lld (end-to-end time %d ms)\n", v / 10000, v % 10000, exec_us / 1000);
-
-    // some known result
-    if (l_nrow == 6001215 && o_nrow == 1500000) {
-        printf("PostgreSQL ref result: 33093172473.7938\n");
-    } else if (l_nrow == 600037902l && o_nrow == 150000000l) {
-        printf("CPU ref result: 3307080716042.5466\n");
-    }
+    printf("FPGA Result: %lld.%04lld (end-to-end time %d ms)\n", v / 10000, v % 10000, exec_us / 1000);
 
     // free resources
     for (int i = 0; i < step; ++i) {
@@ -597,6 +604,21 @@ int main(int argc, const char* argv[]) {
 
     // OPENCL HOST CODE AREA END
 
+    // compare golden result
+    int64_t golden_sum = 0;
+    for (int i = 0; i < HORIZ_PART; ++i) {
+        golden_sum += get_golden_sum(l_nrow_part[i], col_l_orderkey[i], col_l_extendedprice[i], col_l_discount[i],
+                                     o_nrow_part[i], col_o_orderkey[i], col_o_orderdate[i]);
+    }
+    printf("Golden: %lld.%04lld\n", golden_sum / 10000, golden_sum % 10000);
+
+    err += (v == golden_sum) ? 0 : 1;
+
+    if (err)
+        std::cout << "FAIL: " << err << " error(s) detected!" << std::endl;
+    else
+        std::cout << "PASS!" << std::endl;
+
     std::cout << "-----------------------------------------------------------\n\n";
-    return 0;
+    return err;
 }

@@ -28,8 +28,7 @@ L2 GQE Kernel User Guide
 .. toctree::
    :maxdepth: 2
 
-   gqe_overview.rst
    kernel_design.rst
    kernel_api.rst
-   kernel_demo.rst
+   kernel_config.rst
 

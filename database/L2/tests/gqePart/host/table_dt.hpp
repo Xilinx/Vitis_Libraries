@@ -27,16 +27,26 @@ typedef TPCH_INT KEY_T;
 #define MONEY_SZ sizeof(TPCH_INT)
 #define DATE_SZ sizeof(TPCH_INT)
 #define KEY_SZ sizeof(TPCH_INT)
+#define REGION_LEN 25
 
 #define TPCH_INT_SZ sizeof(TPCH_INT)
 
 // every cycle, 4 input rows.
 #define VEC_LEN 16
 
+//
 // ensure when kernel read in vec, won't over read
 #define C_MAX_ROW (150000)
 #define S_MAX_ROW (10000)
-#define L_MAX_ROW (1000)
+#define L_MAX_ROW (6001215)
 #define O_MAX_ROW (1500000)
+#define R_MAX_ROW (5)
+#define N_MAX_ROW (25)
+
+#define BUFF_DEPTH (O_MAX_ROW / 8 * 2)
+
+#define HT_BUFF_DEPTH (1 << 25)  // 30M
+#define S_BUFF_DEPTH (1 << 25)   // 30M
+#define HBM_BUFF_DEPTH (1 << 25) // 30M
 
 #endif // TABLE_DT_H

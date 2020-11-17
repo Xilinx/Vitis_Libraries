@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright 2020 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,5 +27,86 @@ L3 GQE Overlay User Guide
 
 .. toctree::
    :hidden:
+   :maxdepth: 2
 
-.. NOTE:: Coming soon!
+For processing dataset with TB level scale, we develop L3 API. In this layer, we provide "hash partition + hash joini/aggregate" solution to eliminate DDR size limitation.
+In both join and aggregation L3 APIs, we set three stategies for different scaled datasets. In current release, user can set strategy manually according to dataset entries.
+Below, we will elaborate reference for strategy setting.
+..Note: Test datasets below are based on TPC-H different scale factor.
+
+..
+   Join L3 API
+
+.. include:: ../rst_3/class_xf_database_gqe_Joiner.rst
+
+GQE Join L3 layer targets to processing datasets with big left/right table, all solutions are listed below:
+
+1. solution 0: Hash Join (Build for left table + Probe for right table), only for testing small dataset. 
+2. solution 1: Build + Pipelined Probes 
+3. solution 2: Hash Partition + Hash Join (Build + Probe(s))
+
+In solution 1, build once, then do pipelined probes. This solution targets to datasets that left table is relatively small. In its processing, right table is cutted horizontay into many slices without extra overhead.
+When left table size is getting larger, we swith to solution 2, in which partition kernel will join working to distribute each row into its corresponding hash partition, thus making many small hash joins.
+Comparing the two methonds, although hash partition kernel introduces extra overhead in solution 2, it also decreases each slice/partition join time duo to reducing unique key ratio.
+
+Considering current DDR size in U280, the experienced left table size for solution transition is about TPC-H SF20.
+That is to say, when dataset scale is smaller than TPC-H SF20, we recommend using solution 1, and cutting right table into small slices with scale close to TCP-H SF1.
+when dataset scale is bigger than TPC-H SF20, user can refer to the table below to determine solution 1 or solution 2.
+
+
++------------+--------------+------------+--------------+----------+
+|        Left Table         |       Right Table         |          |     
++------------+--------------+------------+--------------+ solution +
+| column num | scale factor | column num | scale factor |          |
++------------+--------------+------------+--------------+----------+
+|     2      |     <=8      |     3      |      >20     |     1    |
++------------+--------------+------------+--------------+----------+
+|     2      |     > 8      |     3      |      >20     |     2    |
++------------+--------------+------------+--------------+----------+
+|     4      |     <20      |     4      |      >20     |     1    |
++------------+--------------+------------+--------------+----------+
+|     4      |     >20      |     4      |      >20     |     2    |
++------------+--------------+------------+--------------+----------+
+|     5      |     <20      |     5      |      >20     |     1    |
++------------+--------------+------------+--------------+----------+
+|     5      |     >20      |     5      |      >20     |     2    |
++------------+--------------+------------+--------------+----------+
+|     7      |     <20      |     7      |      >20     |     1    |
++------------+--------------+------------+--------------+----------+
+|     7      |     >20      |     7      |      >20     |     2    |
++------------+--------------+------------+--------------+----------+
+
+We test some cases with different input entries. After profiling performance under both solutions, 
+Please note that all the testing cases pay attention to dataset with right table having a large scale (>=SF20).
+When left/right table in different columns, kernel will show different throughputs.
+
+
+..
+   Group-By Aggregate API
+
+.. include:: ../rst_3/class_xf_database_gqe_Aggregator.rst
+
+In GQE Aggregation L3 layer, all solutions are listed below:
+
+1. solution 0: Hash Aggregate, only for testing small datasets. 
+2. solution 1: Horizontally Cut + Pipelined Hash Aggregation 
+3. solution 2: Hash Partition + Pipelined Hash aggregation
+
+In solution 1, first input table is horizontally cut into many slices, then do aggregation for each slice, finally merge results together.
+In solution 2, first input table is hash partitioned into many hash partitions, then do aggregation for each partition (no merge in last).
+Comparing the two solutions, solution 1 introduces extra overhead for CPU merging, while solution 2 added one more kernel(hash partition) execution time. 
+In summary, when input table has a high unique-ratio, solution 2 will be more beneficial than solution 1.
+After profiling performance using inputs with different unique key ratio, we get the turning point. 
+
+.. image:: /images/L3_aggr_strategy.png
+   :alt: Performance for different L3 strategies
+   :scale: 80%
+   :align: center
+
+In this figure, it shows when unique key number is more than `180K~240K`, we can switch from `solution 2` to `soluiton 3`.
+
+Others:
+1) Hash Partition only support max 2 keys, when grouping by more keys, use `solution 2`
+2) In solution 1, make one slice scale close to TPC-H SF1.
+3) In solution 2, make one partition scale close to TPC-H SF1.
+

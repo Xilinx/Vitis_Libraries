@@ -59,6 +59,7 @@ int check_result(ap_uint<1024>* data,
             pld = p(3 * 8 * MONEY_SZ - 1, 8 * MONEY_SZ);
         } else {
             // not supported yet
+            pld = 0;
         }
 
         std::cout << std::hex << "Checking: idx=" << i << " key:" << key << " pld:" << pld << std::endl;
@@ -147,7 +148,6 @@ TPCH_INT group_cnt(
     std::unordered_map<TPCH_INT, TPCH_INT>& ref_map) {
     for (int i = 0; i < num; ++i) {
         TPCH_INT k = key[i];
-        TPCH_INT p = pay[i];
         auto it = ref_map.find(k);
         if (it != ref_map.end()) {
             TPCH_INT s = it->second + 1;
@@ -172,25 +172,21 @@ TPCH_INT group_mean(
         TPCH_INT k = key[i];
         TPCH_INT p = pay[i];
 
-        TPCH_INT s;
-        TPCH_INT c;
-        TPCH_INT m;
-
         auto sum = map_sum.find(k);
         auto cnt = map_cnt.find(k);
-        auto mean = map_mean.find(k);
-        if (sum != map_cnt.end()) {
-            s = sum->second + p;
-            c = cnt->second + 1;
-            m = s / c;
+        if (sum != map_cnt.end() && cnt != map_cnt.end()) {
+            TPCH_INT s = sum->second + p;
+            TPCH_INT c = cnt->second + 1;
+            TPCH_INT m = s / c;
 
             map_sum[k] = s; // update
             map_cnt[k] = c;
             map_mean[k] = m;
         } else {
+            // not in hash table, create
             map_sum.insert(std::make_pair(k, p));
             map_cnt.insert(std::make_pair(k, 1));
-            map_mean.insert(std::make_pair(k, m));
+            map_mean.insert(std::make_pair(k, p));
         }
     }
 
@@ -337,6 +333,7 @@ int main(int argc, const char* argv[]) {
 
     const size_t hbm_size = 32 << 20; // 256MB
     const size_t hbm_depth = 4 << 20; // 4M * 512b
+    (void)hbm_depth;
     const size_t l_depth = L_MAX_ROW;
     KEY_T* col_l_orderkey = aligned_alloc<KEY_T>(l_depth);
     MONEY_T* col_l_extendedprice = aligned_alloc<MONEY_T>(l_depth);
@@ -347,7 +344,7 @@ int main(int argc, const char* argv[]) {
     std::cout << "Lineitem " << l_nrow << " rows\n";
 
     int err;
-    err = generate_data<TPCH_INT>(col_l_orderkey, 100000, l_nrow);
+    err = generate_data<TPCH_INT>(col_l_orderkey, 1000, l_nrow);
     if (err) return err;
 
     err = generate_data<TPCH_INT>(col_l_extendedprice, 10000000, l_nrow);
@@ -369,8 +366,11 @@ int main(int argc, const char* argv[]) {
         result_cnt = group_cnt_nz(col_l_orderkey, col_l_extendedprice, l_nrow, map0);
     else if (op == xf::database::enums::AOP_MEAN)
         result_cnt = group_mean(col_l_orderkey, col_l_extendedprice, l_nrow, map1, map2, map0);
+    else
+        result_cnt = 0;
 
-    const size_t r_depth = R_MAX_ROW;
+    size_t r_depth = L_MAX_ROW / (1024 / 32) / sim_scale;
+    if (r_depth < 1000) r_depth = l_nrow;
 
     ap_uint<1024>* aggr_result_buf_a; // result
     aggr_result_buf_a = aligned_alloc<ap_uint<1024> >(r_depth);
@@ -473,14 +473,14 @@ int main(int argc, const char* argv[]) {
     cl::Kernel kernel0(program, "hash_aggr_kernel"); // XXX must match
     std::cout << "Kernel has been created\n";
 
-    cl_mem_ext_ptr_t mext_l_orderkey = {XCL_BANK(32), col_l_orderkey, 0};
-    cl_mem_ext_ptr_t mext_l_extendedprice = {XCL_BANK(32), col_l_extendedprice, 0};
-    cl_mem_ext_ptr_t mext_result_a = {XCL_BANK(33), aggr_result_buf_a, 0};
-    cl_mem_ext_ptr_t mext_result_b = {XCL_BANK(33), aggr_result_buf_b, 0};
-    cl_mem_ext_ptr_t mext_begin_status_a = {XCL_BANK(32), pu_begin_status_a, 0};
-    cl_mem_ext_ptr_t mext_begin_status_b = {XCL_BANK(32), pu_begin_status_b, 0};
-    cl_mem_ext_ptr_t mext_end_status_a = {XCL_BANK(33), pu_end_status_a, 0};
-    cl_mem_ext_ptr_t mext_end_status_b = {XCL_BANK(33), pu_end_status_b, 0};
+    cl_mem_ext_ptr_t mext_l_orderkey = {0, col_l_orderkey, kernel0()};
+    cl_mem_ext_ptr_t mext_l_extendedprice = {1, col_l_extendedprice, kernel0()};
+    cl_mem_ext_ptr_t mext_result_a = {13, aggr_result_buf_a, kernel0()};
+    cl_mem_ext_ptr_t mext_result_b = {13, aggr_result_buf_b, kernel0()};
+    cl_mem_ext_ptr_t mext_begin_status_a = {3, pu_begin_status_a, kernel0()};
+    cl_mem_ext_ptr_t mext_begin_status_b = {3, pu_begin_status_b, kernel0()};
+    cl_mem_ext_ptr_t mext_end_status_a = {4, pu_end_status_a, kernel0()};
+    cl_mem_ext_ptr_t mext_end_status_b = {4, pu_end_status_b, kernel0()};
 
     // Map buffers
     // a
@@ -680,7 +680,12 @@ int main(int argc, const char* argv[]) {
     free(aggr_result_buf_a);
     free(aggr_result_buf_b);
 
-    std::cout << "---------------------------------------------\n\n";
+    std::cout << "---------------------------------------------\n";
+    if (!ret) {
+        std::cout << "PASS!" << std::endl;
+    } else {
+        std::cout << "FAIL!" << std::endl;
+    }
     return ret;
 
 #endif

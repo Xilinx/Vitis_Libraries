@@ -25,6 +25,11 @@
 **********************
 TPC-H Queries with GQE
 **********************
+.. NOTE::
+   Source code reference: https://github.com/Xilinx/Vitis_Libraries/tree/2019.2/database/L2/demos
+
+   TPC-H queries have been obsolete in GQE 2020.2, because GQE 2020.2 has been re-designed with 
+   non-compatible APIs for better integration with SQL engines.
 
 GQE acceleration on TPC-H queries is introduced in Section :ref:`gqe_kernel_demo`.
 Current experiment only involes the GQE kernels, and dedicated host C++ code is developed for each query.

@@ -5,9 +5,10 @@
     "gui": true,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280",
+        "xilinx_u280_xdma_201920_3",
         "u250",
-        "u200"
+        "u200",
+        "xilinx_u50_gen3x16_xdma_201920_3"
     ],
     "platform_blacklist": [
         "zc"
@@ -17,7 +18,7 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u280.ini"
+                        "--config PROJECT/conn_u280.cfg"
                     ]
                 }
             }
@@ -26,7 +27,7 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u250.ini"
+                        "--config PROJECT/conn_u250.cfg"
                     ]
                 }
             }
@@ -35,7 +36,16 @@
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u200.ini"
+                        "--config PROJECT/conn_u200.cfg"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             }
@@ -81,24 +91,7 @@
                     "location": "kernel/kernel_sort_top.cpp",
                     "frequency": 300,
                     "clflags": " -D KERNEL_NAME=SortKernel",
-                    "name": "SortKernel",
-                    "num_compute_units": 1,
-                    "compute_units": [
-                        {
-                            "name": "SortKernel",
-                            "slr": "SLR0",
-                            "arguments": [
-                                {
-                                    "name": "inKey",
-                                    "memory": "DDR[0]"
-                                },
-                                {
-                                    "name": "outKey",
-                                    "memory": "DDR[0]"
-                                }
-                            ]
-                        }
-                    ]
+                    "name": "SortKernel"
                 }
             ],
             "frequency": 300,
@@ -113,14 +106,25 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 520
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
+                    "vitis_hw_run": 10240
+                },
+                "max_time_min": {
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
+                    "vitis_hw_run": 10
+                }
             }
         ],
         "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu",
-            "vitis_hw"
+            "vitis_hw_build",
+            "vitis_hw_run"
         ],
         "category": "canary"
     }
