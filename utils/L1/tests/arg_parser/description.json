@@ -1,6 +1,6 @@
 {
-    "name": "Xilinx Axi To Stream HLS Test",
-    "description": "Xilinx Axi To Stream HLS Test",
+    "name": "Xilinx ArgParser HLS Test",
+    "description": "Xilinx ArgParser HLS Test",
     "flow": "hls",
     "platform_whitelist": [
         "u200"
@@ -11,20 +11,22 @@
     "project": "test",
     "solution": "solution1",
     "clock": "2.5",
-    "topfunction": "top_axi_to_stream",
+    "topfunction": "dut",
     "top": {
         "source": [
-            "axi_to_stream_tb.cpp"
+            "test.cpp"
         ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -std=c++0x"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include"
     },
     "testbench": {
         "source": [
-            "axi_to_stream_tb.cpp"
+            "test.cpp"
         ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -std=c++0x",
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include",
         "ldflags": "",
-        "argv": {},
+        "argv": {
+            "hls_csim": "--xclbin vadd.xclbin -q 0 -v -i 2"
+        },
         "stdmath": false
     },
     "testinfo": {
@@ -52,11 +54,7 @@
             }
         ],
         "targets": [
-            "hls_csim",
-            "hls_csynth",
-            "hls_cosim",
-            "hls_vivado_syn",
-            "hls_vivado_impl"
+            "hls_csim"
         ],
         "category": "canary"
     }

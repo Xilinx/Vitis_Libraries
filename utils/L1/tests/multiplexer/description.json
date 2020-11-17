@@ -1,6 +1,6 @@
 {
-    "name": "Xilinx Axi To Stream HLS Test",
-    "description": "Xilinx Axi To Stream HLS Test",
+    "name": "Xilinx FIFO Multiplexer HLS Test",
+    "description": "Xilinx FIFO Multiplexer HLS Test",
     "flow": "hls",
     "platform_whitelist": [
         "u200"
@@ -8,21 +8,21 @@
     "platform_blacklist": [],
     "part_whitelist": [],
     "part_blacklist": [],
-    "project": "test",
+    "project": "dut",
     "solution": "solution1",
-    "clock": "2.5",
-    "topfunction": "top_axi_to_stream",
+    "clock": 3,
+    "topfunction": "dut",
     "top": {
         "source": [
-            "axi_to_stream_tb.cpp"
+            "test.cpp"
         ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -std=c++0x"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include"
     },
     "testbench": {
         "source": [
-            "axi_to_stream_tb.cpp"
+            "test.cpp"
         ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -std=c++0x",
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include",
         "ldflags": "",
         "argv": {},
         "stdmath": false

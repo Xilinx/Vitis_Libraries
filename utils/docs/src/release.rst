@@ -22,6 +22,19 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2020.2
+------
+
+In the 2020.2 release the following APIs has been added
+
+* **Argument parser**: this (experimental) implementation parses the options and flags passed from command line,
+  and offers automatic help information generation. It should help the developers to create unified experience on test
+  cases and user applications.
+* **FIFO multiplexer**: this module wraps around a FIFO (implemented through hls::stream) to enable passing data
+  of different type through the same hardware resource. When the data is too wide, it will automatically be transferred
+  using multiple cycles. This module is expected to make the dataflow code more compact and readable.
+
+
 2020.1
 ------
 

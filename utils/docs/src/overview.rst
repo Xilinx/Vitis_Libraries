@@ -18,71 +18,53 @@
 .. toctree::
    :hidden:
 
-Requirements
+=====================
+Vitis Utility Library
+=====================
+
+Introduction
 ------------
 
-Software Platform
-~~~~~~~~~~~~~~~~~
+Vitis Utility Library is an open-sourced Vitis library of common patterns of streaming and storage access.
+It aims to assist developers to efficiently access memory in DDR, HBM or URAM, and perform data distribution,
+collection, reordering, insertion, and discarding along stream-based transfer.
 
-This library is designed to work with Vitis 2020.1 and later, and therefore inherits the system requirements of Vitis and XRT.
+**Memory Access**
 
-Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
-With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
-`devtoolset-6 <https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/>`_.
+* **AXI Burst Read and Write**:
+  Reading data from AXI master port, and emit to stream (of possibly different width).
+  Padding and vectoring could be removed in reading and added in writing.
 
-PCIE Accelerator Card
-~~~~~~~~~~~~~~~~~~~~~
+* **Low Initiation Interval Access to URAM Array**:
+  URAMs are 72 bit fixed, and currently very large buffers needs extra registers and forwarding-paths to be read/written every cycle.
+  By providing an API for this, users can focus on the function design and avoid mixing challenge of different level in the same code.
 
-Hardware modules and kernels are designed to work with all Alveo cards.
+**Dynamic Routing within Streams**
 
-* `Alveo U280 <https://www.xilinx.com/products/boards-and-kits/alveo/u280.html#gettingStarted>`_
-* `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted>`_
-* `Alveo U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html#gettingStarted>`_
+* **Distribution and Collection**:
+  Three different algorithms are supported:
 
+  * **Round-robin**: Data will be send/received through as many streams as possible in round-robin order.
+  * **Load-balancing**: Data will be send to or received from PU based on load, the result will be out of order. The assumption here is a PU has lower rate than the input, while the cluster of PUs has statistically matching rate with the input.
+  * **Tag-select**: Basically it implements the ``if-then-else`` or ``switch-case`` semantic, using a tag from input. This module can be used to pass different type/category of data to heterogeneous PUs.
 
-Shell Environment
-~~~~~~~~~~~~~~~~~
+* **Discarding Data**:
+  Consumes all the data from input and discard it. With some post-bitstream configuration, we may have some data generated but not used,
+  this module ensures such data can be discarded without blocking the execution.
 
-Setup the build environment using the Vitis and XRT scripts.
+* **Stream Synchronization**:
+  We have made end flag driven pipeline a common practice in our libraries,
+  and it is often necessary to synchronize two streams into one flag signal.
 
-.. ref-code-block:: bash
-	:class: overview-code-block
+**Data Reshaping**
 
-        source /opt/xilinx/Vitis/2020.1/settings64.sh
-        export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+* **Stream Combine**:
+  Fuse multiple streams into one. For example, fuse three synchronized R, G, B streams into one (R,G,B) tuple stream.
+  The dynamic version allows some streams to be skipped(discarded) while allowing two static directions (align to LSB or MSB).
 
-Setting ``PLATFORM_REPO_PATHS`` to the installation folder of platform files can enable makefiles
-in this library to use ``DEVICE`` variable as a pattern.
-Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
-
-
-Design Flows
-------------
-
-The common tool and library pre-requisites that apply across all design flows are documented in the requirements section above.
-
-Recommended design flow is shown as follows:
-
-L1 provides the modules to work distribution and result collection in different algorithms, manipulate streams: including combination, duplication, synchronization, and shuffle, updates URAM array in tighter initiation internal (II).
-
-The recommend flow to evaluate and test L1 components is described as follows using Vivado HLS tool.
-A top level C/C++ testbench (typically ``algorithm_name.cpp```) prepares the input data, passes them to the design under test, then performs any output data post processing and validation checks.
-
-A Makefile is used to drive this flow with available steps including ``CSIM`` (high level simulation),
-``CSYNTH`` (high level synthesis to RTL) and ``COSIM`` (cosimulation between software testbench and generated RTL),
-``VIVADO_SYN`` (synthesis by Vivado), ``VIVADO_IMPL`` (implementation by Vivado).
-The flow is launched from the shell by calling ``make`` with variables set as in the example below:
-
-.. ref-code-block:: bash
-	:class: overview-code-block
-        
-        cd L1/tests/specific_algorithm/
-        make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-                 DEVICE=/path/to/xilinx_u200_xdma_201830_2.xpfm
-
-To enable more than C++ simulation, just switch other steps to `1` in `make` command line.
-
-As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization, timing performance, latency and throughput. The output files of interest can be located at the location of the test project where the path name is "test.prj".
+* **Stream Shuffle**:
+  Shuffle synchronized streams with dynamic configuration.
+  For example, synchronized R, G, B streams can be dynamically shuffle to R, B, G or B, G, R.
 
 
 License
@@ -109,6 +91,8 @@ Trademark Notice
 
     Xilinx, the Xilinx logo, Artix, ISE, Kintex, Spartan, Virtex, Zynq, and
     other designated brands included herein are trademarks of Xilinx in the
-    United States and other countries.  All other trademarks are the property
-    of their respective owners.
+    United States and other countries.
+    
+    All other trademarks are the property of their respective owners.
+
 

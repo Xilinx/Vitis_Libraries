@@ -163,19 +163,13 @@ namespace details {
 template <int _WAxi, int _BurstLen>
 void read_to_vec(ap_uint<_WAxi>* vec_ptr, const int nrow, const int scal_vec, hls::stream<ap_uint<_WAxi> >& vec_strm) {
     const int nread = (nrow + scal_vec - 1) / scal_vec;
-
 READ_TO_VEC:
-    for (int i = 0; i < nread; i += _BurstLen) {
+    for (int i = 0; i < nread; ++i) {
 #pragma HLS loop_tripcount min = 1 max = 1
-        //#pragma HLS PIPELINE II = _BurstLen
-        int len = ((i + _BurstLen) > nread) ? (nread - i) : _BurstLen;
-    READ_VEC0:
-        for (int j = 0; j < len; ++j) {
 #pragma HLS PIPELINE II = 1
-            vec_strm.write(vec_ptr[i + j]);
-        } // This pipeline must be no judgment, otherwise the tool will not be able
-        // to derive the correct burst_len
-    }
+        vec_strm.write(vec_ptr[i]);
+    } // This pipeline must be no judgment, otherwise the tool will not be able
+      // to derive the correct burst_len
 }
 
 template <int _WAxi, typename _TStrm, int scal_vec>
@@ -262,18 +256,12 @@ void read_to_vec(ap_uint<_WAxi>* vec_ptr,
     const int nread = (len + offset + scal_char - 1) / scal_char;
 
 READ_TO_VEC:
-    for (int i = 0; i < nread; i += _BurstLen) {
+    for (int i = 0; i < nread; ++i) {
 #pragma HLS loop_tripcount min = 1 max = 1
-        //#pragma HLS PIPELINE II = _BurstLen
-        int len = ((i + _BurstLen) > nread) ? (nread - i) : _BurstLen;
-
-    READ_VEC0:
-        for (int j = 0; j < len; ++j) {
 #pragma HLS PIPELINE II = 1
-            vec_strm.write(vec_ptr[i + j]);
-        } // This pipeline must be no judgment, otherwise the tool will not be able
-        // to derive the correct burst_len
-    }
+        vec_strm.write(vec_ptr[i]);
+    } // This pipeline must be no judgment, otherwise the tool will not be able
+      // to derive the correct burst_len
 }
 
 template <int _WAxi, typename _TStrm, int scal_vec>

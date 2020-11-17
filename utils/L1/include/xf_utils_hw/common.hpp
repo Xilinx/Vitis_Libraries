@@ -222,4 +222,15 @@ inline ap_uint<64> countOnes(ap_uint<64> y) {
 #define XF_UTILS_HW_MACRO_QUOTE(s) #s
 #define XF_UTILS_HW_MACRO_STR(s) XF_UTILS_HW_MACRO_QUOTE(s)
 
+#if !defined(__SYNTHESIS__) && XF_UTILS_HW_DEBUG == 1
+#define XF_UTILS_HW_PRINT(...)               \
+    do {                                     \
+        fprintf(stderr, "TX: " __VA_ARGS__); \
+        fprintf(stderr, "\n");               \
+    } while (0)
+
+#else
+#define XF_UTILS_HW_PRINT(...) ((void)(0))
+#endif
+
 #endif // XF_UTILS_HW_COMMON_H
