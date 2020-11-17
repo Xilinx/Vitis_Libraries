@@ -38,13 +38,13 @@ namespace security {
  * @brif evaluate evalute function of verifiable delay function
  * @tparam L bit width
  * @tparam N bit width
- * @param g
- * @param l
- * @param modulus
- * @param r2Mod
- * @param t
- * @param y
- * @param pi
+ * @param g is the base element given as input to the VDF evaluator
+ * @param l is a random prime
+ * @param modulus is a security parameter
+ * @param r2Mod Pre-calculated Montgomery parameter
+ * @param t is a time bound
+ * @param y is output of evaluate
+ * @param pi is a proof
  */
 template <int L, int N>
 void evaluate(
@@ -86,6 +86,19 @@ void evaluate(
 #endif
 }
 
+/**
+ * @brif verifyWesolowski verify function of verifiable delay function
+ * @tparam L bit width
+ * @tparam N bit width
+ * @param g is the base element given as input to the VDF evaluator
+ * @param l is a random prime
+ * @param modulus is a security parameter
+ * @param r2Mod Pre-calculated Montgomery parameter
+ * @param tMod is a time bound's Pre-calculation value
+ * @param t is a time bound
+ * @param y is output of evaluate
+ * @param pi is a proof
+ */
 template <int L, int N>
 bool verifyWesolowski(ap_uint<L> g,
                       ap_uint<L> l,
@@ -124,13 +137,20 @@ bool verifyWesolowski(ap_uint<L> g,
 }
 
 /**
- * @brief verifyPietrzak
- * algorithm: if T is even, return (N, x, T/2, y) = (N, x^(r+2^(T/2)), T/2, x^(r*2^(T/2)+2^T)), if T is odd, return (N,
+ * @brief verifyPietrzak verify function of verifiable delay function, its algorithm: if T is even, return (N, x, T/2,
+ * y) = (N, x^(r+2^(T/2)), T/2, x^(r*2^(T/2)+2^T)), if T is odd, return (N,
  * x, (T+1)/2, y) = (N, x^(r+2^((T-1)/2)), T/2, x^(r*2^((T+1)/2)+2^T))
+ * @tparam L bit width
+ * @tparam N bit width
+ * @param g is the base element given as input to the VDF evaluator
+ * @param modulus is a security parameter
+ * @param r2Mod Pre-calculated Montgomery parameter
+ * @param T is a time bound
+ * @param y is output of evaluate
  */
 template <int L, int N>
-bool verifyPietrzak(ap_uint<L> x, ap_uint<L> modulus, ap_uint<L> r2Mod, ap_uint<N> T, ap_uint<L> y) {
-    ap_uint<L> x_tmp = xf::security::internal::monProduct<L>(x, r2Mod, modulus);
+bool verifyPietrzak(ap_uint<L> g, ap_uint<L> modulus, ap_uint<L> r2Mod, ap_uint<N> T, ap_uint<L> y) {
+    ap_uint<L> x_tmp = xf::security::internal::monProduct<L>(g, r2Mod, modulus);
     ap_uint<L> y_tmp = xf::security::internal::monProduct<L>(y, r2Mod, modulus);
     int r = 15; // random from verifier
     while (T > 1) {

@@ -27,16 +27,19 @@ Design Internals
 .. toctree::
    :maxdepth: 1
 
+   internals/adler32.rst
    internals/aes.rst
    internals/blake2b.rst
    internals/cbc.rst
    internals/ccm.rst
    internals/cfb.rst
    internals/chacha20.rst
+   internals/crc32.rst
    internals/ctr.rst
    internals/des.rst
    internals/dsa.rst
    internals/ecb.rst
+   internals/ecc.rst
    internals/gcm.rst
    internals/gmac.rst
    internals/hmac.rst
@@ -49,5 +52,7 @@ Design Internals
    internals/sha1.rst
    internals/sha2.rst
    internals/sha3.rst
+   internals/sm234.rst
+   internals/vdf.rst
    internals/xts.rst
 

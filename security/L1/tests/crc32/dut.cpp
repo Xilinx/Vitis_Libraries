@@ -22,10 +22,11 @@
 
 #include "dut.hpp"
 
-void dut(hls::stream<ap_uint<8 * W> >& inStrm,
+void dut(hls::stream<ap_uint<32> >& crcInitStrm,
+         hls::stream<ap_uint<8 * W> >& inStrm,
          hls::stream<ap_uint<32> >& inLenStrm,
          hls::stream<bool>& endInStrm,
          hls::stream<ap_uint<32> >& outStrm,
          hls::stream<bool>& endOutStrm) {
-    xf::security::crc32<W>(inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
+    xf::security::crc32<W>(crcInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
 }

@@ -22,22 +22,37 @@
 #ifndef _XF_SECURITY_L1_HPP_
 #define _XF_SECURITY_L1_HPP_
 
+#include "xf_security/adler32.hpp"
 #include "xf_security/aes.hpp"
+#include "xf_security/asymmetric.hpp"
+#include "xf_security/blake2b.hpp"
 #include "xf_security/cbc.hpp"
+#include "xf_security/ccm.hpp"
 #include "xf_security/cfb.hpp"
+#include "xf_security/chacha20.hpp"
+#include "xf_security/crc32.hpp"
 #include "xf_security/ctr.hpp"
+#include "xf_security/des.hpp"
+#include "xf_security/dsa.hpp"
 #include "xf_security/ecb.hpp"
+#include "xf_security/ecc.hpp"
+#include "xf_security/ecdsa.hpp"
+#include "xf_security/eddsa.hpp"
 #include "xf_security/gcm.hpp"
-#include "xf_security/ofb.hpp"
-#include "xf_security/xts.hpp"
-
+#include "xf_security/gmac.hpp"
+#include "xf_security/hmac.hpp"
 #include "xf_security/md4.hpp"
 #include "xf_security/md5.hpp"
-
+#include "xf_security/modular.hpp"
+#include "xf_security/ofb.hpp"
+#include "xf_security/poly1305.hpp"
+#include "xf_security/rc4.hpp"
 #include "xf_security/sha1.hpp"
 #include "xf_security/sha224_256.hpp"
+#include "xf_security/sha3.hpp"
 #include "xf_security/sha512_t.hpp"
-
-#include "xf_security/blake2b.hpp"
+#include "xf_security/sm234.hpp"
+#include "xf_security/vdf.hpp"
+#include "xf_security/xts.hpp"
 
 #endif
