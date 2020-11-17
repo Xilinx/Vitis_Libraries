@@ -65,7 +65,10 @@ endif
 # BEGIN_XF_MK_USER_SECTION
 # -----------------------------------------------------------------------------
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
+# XF_PROJ_ROOT ?= $(CUR_DIR)/../../../..
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L3/*}')
+
+
 XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
 
 XCLBIN_FILE :=
@@ -119,7 +122,7 @@ EXE_FILE ?= $(BUILD_DIR)/$(EXE_NAME)
 
 $(EXE_FILE): $(SRCS) | check_xrt
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CC) -D XFBLAS_dataType=$(XFBLAS_dataType) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 .PHONY: host
 host: check_xrt $(EXE_FILE)
