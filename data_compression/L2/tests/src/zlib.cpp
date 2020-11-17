@@ -430,7 +430,7 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
     cl::Buffer* buffer_status; // single common buffer to capture the decompression status by kernel
     for (int i = 0; i < BUFCNT; i++) {
         buffer_out[i] =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, bufSize, h_dbuf_zlibout[i].data());
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize, h_dbuf_zlibout[i].data());
 
         buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 2 * sizeof(uint32_t),
                                         h_dcompressSize[i].data());
@@ -677,7 +677,7 @@ uint32_t xil_zlib::decompressSeq(uint8_t* in, uint8_t* out, uint32_t input_size,
     cl::Buffer* buffer_dec_input =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, inBufferSize, dbuf_in.data());
     cl::Buffer* buffer_dec_output =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, outBufferSize, dbuf_out.data());
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, outBufferSize, dbuf_out.data());
 
     cl::Buffer* buffer_size =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t), dbuf_outSize.data());

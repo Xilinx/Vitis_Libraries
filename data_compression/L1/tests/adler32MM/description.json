@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Adler32 Memory Mapped", 
+    "name": "Xilinx Adler32 Memory Mapped HLS Test", 
     "description": "Test Design to validate Xilinx Adler32 module", 
     "flow": "hls", 
     "platform_whitelist": [

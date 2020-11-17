@@ -42,7 +42,6 @@ SFLAGS += -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) -DC_COMPUTE_UNIT=$(C_COMPUTE_UNITS)
 CXXFLAGS += -DVERBOSE_LEVEL=$(VERBOSE)
 CFLAGS += -DVERBOSE_LEVEL=$(VERBOSE)
 SFLAGS += -DVERBOSE_LEVEL=$(VERBOSE)
-
 CXXFLAGS += -DUSE_SINGLE_KERNEL_ZLIBC
 
 # Hadoop flow (Compress only)
@@ -97,9 +96,11 @@ lib: $(LIBZLIB_NAME)
 	cp $(ZLIBDIR)/ . -rf
 	cp $(XFLIB_DIR)/L3/demos/libzso/config.mk $(PWD)/$(ZLIBVER)/
 	cp $(XFLIB_DIR)/L3/src/zlib.cpp $(PWD)/$(ZLIBVER)/
-	cp $(XFLIB_DIR)/L3/src/xlibz.cpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/L3/src/zlibDriver.cpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/L3/src/zlibFactory.cpp $(PWD)/$(ZLIBVER)/
 	cp $(XFLIB_DIR)/L3/include/zlib.hpp $(PWD)/$(ZLIBVER)/
-	cp $(XFLIB_DIR)/L3/include/xlibz.hpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/L3/include/zlibDriver.hpp $(PWD)/$(ZLIBVER)/
+	cp $(XFLIB_DIR)/L3/include/zlibFactory.hpp $(PWD)/$(ZLIBVER)/
 	cp $(XFLIB_DIR)/common/libs/cmdparser/* $(PWD)/$(ZLIBVER)/ 
 	cp $(XFLIB_DIR)/common/libs/logger/* $(PWD)/$(ZLIBVER)/ 
 	cp $(XFLIB_DIR)/common/libs/xcl2/* $(PWD)/$(ZLIBVER)/ 

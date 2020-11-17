@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Snappy Streaming Dualcore Decompress", 
+    "name": "Xilinx Snappy Dualcore Decompress", 
     "description": [
         "Snappy-Streaming Dualcore Decompression"
     ], 
@@ -12,7 +12,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/dualcore_decompress_streaming.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/dualcore_decompress_streaming.xclbin"
+             ]
         }
     ], 
     "config_make": "./config.mk",
@@ -38,7 +40,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/src/"
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
                 "NUM_CORES=2", 

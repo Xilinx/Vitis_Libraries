@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ZLIB Decompress Memory Mapped 4 Parallel Bytes", 
+    "name": "Xilinx ZLIB Decompress Memory Mapped 4 Parallel Bytes HLS Test", 
     "description": "Test Design to validate Zlib multibyte decompress memory mapped module", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Zlib Block Decompress AXI Streaming HLS Test", 
+    "name": "Xilinx Zlib Decompress Static Streaming HLS Test", 
     "description": "Test Design to validate zlib block-based decompress module with AXI streams", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -29,8 +29,8 @@
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser", 
         "ldflags": "", 
         "argv": {
-            "hls_csim": "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.zlib.raw ${DESIGN_PATH}/sampleDup.txt.zlib.raw", 
-            "hls_cosim": "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.zlib.raw ${DESIGN_PATH}/sampleDup.txt.zlib.raw"
+            "hls_csim": "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.zlib.raw", 
+            "hls_cosim": "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.zlib.raw"
         }
     }, 
     "testinfo": {
@@ -58,7 +58,6 @@
             }
         ], 
         "targets": [
-            "hls_csim", 
             "hls_csynth", 
             "hls_cosim", 
             "hls_vivado_syn", 

@@ -22,7 +22,7 @@ level as pure software APIs working with pre-defined hardware overlays.
 -  **L1**: Module level, it provides optimized hardware implementation of
    the core LZ based and data compression specific modules like lz4
    compress and snappy compress.
--  **L2**: Kernel level, a demo on lz4, snappy and zlib data compression
+-  **L2**: Kernel level, a demo on lz4, snappy, zlib and zstd data compression
    algorithms are shown via kernel which internally uses the optimized
    hardware modules.
 -  **L3**: The software API level will wrap the details of offloading

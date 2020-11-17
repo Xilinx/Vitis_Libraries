@@ -25,8 +25,16 @@
 #define _XFCOMPRESSION_ZLIB_COMPRESS_HPP_
 
 #include <cassert>
-#include "xcl2.hpp"
 #include <iomanip>
+#include <iostream>
+#include <stdint.h>
+#include <vector>
+#include <math.h>
+#include <time.h>
+#include <string>
+#include <fstream>
+#include "xcl2.hpp"
+#include <thread>
 
 /**
  * Maximum host buffer used to operate per kernel invocation

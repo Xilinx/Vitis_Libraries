@@ -154,7 +154,7 @@ uint64_t xil_zstd::decompressSeq(uint8_t* in, uint8_t* out, uint64_t input_size)
     cl::Buffer* buffer_dec_input =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, inBufferSize, dbuf_in.data());
     cl::Buffer* buffer_dec_output =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, outBufferSize, dbuf_out.data());
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, outBufferSize, dbuf_out.data());
 
     cl::Buffer* buffer_size =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t), dbuf_outSize.data());

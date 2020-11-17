@@ -7,6 +7,7 @@
         "includepaths": [
             "LIB_DIR/L1/include/hw",
             "LIB_DIR/L2/include",
+            "LIB_DIR/../security/L1/include",
             "LIB_DIR/L2/src"
         ]
     },
@@ -15,8 +16,7 @@
             "includepaths": [
                 "LIB_DIR/common/libs/xcl2",
                 "LIB_DIR/common/libs/cmdparser",
-                "LIB_DIR/common/libs/logger",
-                "LIB_DIR/common/thirdParty/xxhash"
+                "LIB_DIR/common/libs/logger"
             ]
         }
     }

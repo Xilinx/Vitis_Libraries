@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Snappy MultiByte-4 Decompress", 
+    "name": "Xilinx Snappy Decompress 4 Parallel Bytes", 
     "description": [
         "Xilinx Snappy MultiByte Decompress:4 parallel bytes processed at a time"
     ], 
@@ -12,7 +12,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/decompress.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/decompress.xclbin"
+             ]
         }
     ], 
     "platform_blacklist": [
@@ -36,7 +38,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/src/"
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
                 "PARALLEL_BLOCK=1"

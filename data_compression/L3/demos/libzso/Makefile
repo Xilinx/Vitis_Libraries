@@ -184,7 +184,7 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src/
 VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
-VPP_FLAGS += --config $(CUR_DIR)/advanced.ini \
+VPP_FLAGS += --config $(CUR_DIR)/advanced.cfg \
 			 -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) \
 			 -DMULTIPLE_BYTES=$(MULTIPLE_BYTES)
 
@@ -192,7 +192,7 @@ VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
 		--report_dir $(CUR_DIR)/reports/_x.$(TARGET)
 
 # Linking flags
-VPP_LINK_FLAGS = --kernel_frequency 250 --optimize 2 --config $(CUR_DIR)/opts.ini
+VPP_LINK_FLAGS = --kernel_frequency 250 --optimize 2 --config $(CUR_DIR)/opts.cfg
 
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				--report_dir $(CUR_DIR)/reports/_build.$(TARGET)/

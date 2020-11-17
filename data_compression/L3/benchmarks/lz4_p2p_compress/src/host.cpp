@@ -75,15 +75,14 @@ int validateFile(std::string& inFile_name, std::string& origFile_name) {
 void xil_compress_file_list(std::string& file_list, uint32_t block_size, std::string& compress_bin, bool enable_p2p) {
     std::ifstream infilelist_comp(file_list.c_str());
     std::string line_comp;
-    std::string ext1 = ".xe2sd";
 
     std::vector<std::string> inFileList;
     std::vector<std::string> outFileList;
     std::vector<std::string> origFileList;
 
     while (std::getline(infilelist_comp, line_comp)) {
-        std::string orig_file = line_comp + ext1;
-        std::string out_file = line_comp + ext1 + ".lz4";
+        std::string orig_file = line_comp;
+        std::string out_file = line_comp + ".lz4";
         inFileList.push_back(line_comp);
         origFileList.push_back(orig_file);
         outFileList.push_back(out_file);
@@ -94,14 +93,13 @@ void xil_compress_file_list(std::string& file_list, uint32_t block_size, std::st
 
 void xil_compress_file(std::string& file, uint32_t block_size, std::string& compress_bin, bool enable_p2p) {
     std::string line_comp = file.c_str();
-    std::string ext1 = ".xe2sd";
 
     std::vector<std::string> inFileList;
     std::vector<std::string> outFileList;
     std::vector<std::string> origFileList;
 
-    std::string orig_file = line_comp + ext1;
-    std::string out_file = line_comp + ext1 + ".lz4";
+    std::string orig_file = line_comp;
+    std::string out_file = line_comp + ".lz4";
     inFileList.push_back(line_comp);
     origFileList.push_back(orig_file);
     outFileList.push_back(out_file);

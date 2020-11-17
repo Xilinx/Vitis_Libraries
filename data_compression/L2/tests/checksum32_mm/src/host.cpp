@@ -19,11 +19,10 @@
 #include <vector>
 #include "xcl2.hpp"
 #include "cmdlineparser.h"
-#include "adler32.c"
-#include "crc32.c"
+#include "zlib.h"
 #include "ap_int.h"
 
-auto constexpr HOST_BUFFER_SIZE = 128 * 1024 * 1024;
+auto constexpr HOST_BUFFER_SIZE = 2 * 1024 * 1024;
 
 void xilChecksumTop(std::string& compress_mod, bool checksum_type, std::string& compress_bin) {
     std::ifstream ifs;

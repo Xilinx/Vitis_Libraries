@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx CRC 32 Memory Mapped", 
+    "name": "Xilinx CRC32 Memory Mapped HLS Test", 
     "description": "Test Design to validate Xilinx CRC32 module", 
     "flow": "hls", 
     "platform_whitelist": [

@@ -381,7 +381,7 @@ uint64_t xfLz4::decompressSequential(
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, buf_size, h_buf_in.data());
 
             buffer_output =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, buf_size, h_buf_out.data());
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, buf_size, h_buf_out.data());
 
             buffer_block_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                                                sizeof(uint32_t) * bufblocks, h_blksize.data());
@@ -547,7 +547,7 @@ uint64_t xfLz4::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_siz
             new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize_in_bytes_cu, h_buf_in.data());
 
         buffer_output =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, bufSize_in_bytes_cu, h_buf_out.data());
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize_in_bytes_cu, h_buf_out.data());
 
         buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                                                 sizeof(uint32_t) * total_blocks_cu, h_compressSize.data());

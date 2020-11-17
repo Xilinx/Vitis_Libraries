@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Zlib Compress 32 KB 4PE", 
+    "name": "Xilinx Zlib Compress 4PE", 
     "description": [
         "Xilinx Zlib Compress using 32 KB block size and 4 Parallel Engines"
     ], 
@@ -27,8 +27,7 @@
                 "LIB_DIR/L2/tests/src/zlib_compress.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
-                "LIB_DIR/common/libs/logger/logger.cpp", 
-                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
+                "LIB_DIR/common/libs/logger/logger.cpp" 
             ], 
             "includepaths": [
                 "LIB_DIR/L2/tests/src/"

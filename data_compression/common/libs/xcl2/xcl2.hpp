@@ -145,6 +145,7 @@ struct aligned_allocator {
         return reinterpret_cast<T*>(ptr);
     }
     void deallocate(T* p, std::size_t num) { free(p); }
+    void deallocate(T* p) { free(p); }
 };
 
 namespace xcl {

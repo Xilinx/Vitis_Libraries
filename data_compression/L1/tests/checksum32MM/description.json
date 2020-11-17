@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Checksum32 Memory Mapped", 
+    "name": "Xilinx Checksum32 Memory Mapped HLS Test", 
     "description": "Test Design to validate Xilinx Checksum32 module", 
     "flow": "hls", 
     "platform_whitelist": [

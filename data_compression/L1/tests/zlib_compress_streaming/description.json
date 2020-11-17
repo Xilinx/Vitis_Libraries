@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Zlib Block Compress AXI Streaming HLS Test", 
+    "name": "Xilinx Zlib Compress Streaming HLS Test", 
     "description": "Test Design to validate zlib compress module with AXI streams", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -29,8 +29,8 @@
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger", 
         "ldflags": "", 
         "argv": {
-            "hls_csim": "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sampleDup.txt.zlib", 
-            "hls_cosim": "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sampleDup.txt.zlib"
+            "hls_csim": "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.zlib", 
+            "hls_cosim": "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.zlib"
         }
     }, 
     "testinfo": {

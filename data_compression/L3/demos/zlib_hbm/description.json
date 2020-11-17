@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx ZLIB Application For HBM Platforms", 
+    "name": "Xilinx ZLIB HBM Application", 
     "description": [
-        "ZLIB application for HBM resides in `L3/tests/zlib_hbm` directory."
+        "ZLIB application for HBM platforms resides in `L3/tests/zlib_hbm` directory."
     ], 
     "flow": "vitis", 
     "platform_blacklist": [
@@ -50,7 +50,7 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.ini"
+            "PROJECT/advanced.cfg"
         ], 
         "compiler": {
             "includepaths": [
@@ -61,14 +61,14 @@
                 "MULTIPLE_BYTES=8"
             ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
     }, 
     "containers": [
         {
             "name": "compress_decompress", 
-            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.ini", 
+            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.cfg", 
             "accelerators": [
                 {
                     "name": "xilLz77Compress", 

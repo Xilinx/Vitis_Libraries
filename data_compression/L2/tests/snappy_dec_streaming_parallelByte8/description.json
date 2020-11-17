@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Snappy Streaming 8 Multibytes Decompress", 
+    "name": "Xilinx Snappy Decompress Streaming 8 Parallel Bytes", 
     "description": [
         "Snappy-Streaming Decompression ParallelByte8"
     ], 
@@ -12,7 +12,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/decompress_streaming.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/decompress_streaming.xclbin"
+             ]
         }
     ], 
     "platform_blacklist": [
@@ -37,7 +39,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/src/"
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
                 "PARALLEL_BLOCK=1", 

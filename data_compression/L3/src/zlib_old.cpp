@@ -790,7 +790,7 @@ size_t xfZlib::decompress(uint8_t* in, uint8_t* out, size_t input_size, size_t m
 
     for (int i = 0; i < DOUT_BUFFERCOUNT; i++) {
         ZOCL_CHECK_2(err,
-                     buffer_dec_zlib_output[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                     buffer_dec_zlib_output[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                                                 outBufferSize, h_dbufstream_zlibout[i].data(), &err),
                      m_err_code, c_clOutOfHostMemory, c_clOutOfResource);
         if (error_code()) {
