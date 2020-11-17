@@ -88,11 +88,11 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/src/gqe_part.cpp",
-                    "frequency": 200,
+                    "frequency": 180,
                     "name": "gqePart"
                 }
             ],
-            "frequency": 200,
+            "frequency": 180,
             "name": "gqe_part"
         }
     ],
