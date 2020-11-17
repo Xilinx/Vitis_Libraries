@@ -18,9 +18,7 @@
 
 #include "xf_sparse.hpp"
 
-void uut_top(hls::stream<ap_uint<32> >& p_paramStr,
-             hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& p_datStr,
-             hls::stream<ap_uint<32> > p_paramOutStr[SPARSE_hbmChannels],
+void uut_top(hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& p_datStr,
              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> > p_datOutStr[SPARSE_hbmChannels]);
 
 #endif

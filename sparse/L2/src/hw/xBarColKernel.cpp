@@ -23,18 +23,40 @@
 
 #include "xBarColKernel.hpp"
 
-extern "C" void xBarColKernel(const unsigned int p_colPtrBlocks,
-                              const unsigned int p_nnzBlocks,
-                              hls::stream<SPARSE_parDataPktType>& in1,
-                              hls::stream<SPARSE_parIndexPktType>& in2,
-                              hls::stream<SPARSE_parDataPktType>& out) {
-#pragma HLS INTERFACE axis port = in1
-#pragma HLS INTERFACE axis port = in2
-#pragma HLS INTERFACE axis port = out
-#pragma HLS INTERFACE s_axilite port = p_colPtrBlocks bundle = control
-#pragma HLS INTERFACE s_axilite port = p_nnzBlocks bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
+extern "C" void xBarColKernel(hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& in0,
+                              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& in1,
+                              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& out
+#if DEBUG_dumpData
+                              ,
+                              unsigned int p_cuId
+#endif
+                              ) {
 
-    xf::sparse::xBarColPkt<SPARSE_logParEntries, SPARSE_dataType, SPARSE_indexType, SPARSE_dataBits, SPARSE_indexBits,
-                           SPARSE_parDataPktType, SPARSE_parIndexPktType>(p_colPtrBlocks, p_nnzBlocks, in1, in2, out);
+#pragma HLS INTERFACE axis port = in0
+#pragma HLS INTERFACE axis port = in1
+#pragma HLS INTERFACE axis port = out
+
+#if DEBUG_dumpData
+#pragma HLS INTERFACE s_axilite port = return bundle = control
+#else
+#pragma HLS INTERFACE ap_ctrl_none port = return
+#endif
+
+    const static unsigned int t_numParams = SPARSE_dataBits * SPARSE_parEntries / 32;
+
+    WideType<unsigned int, t_numParams> l_param0Val = in0.read();
+    WideType<unsigned int, t_numParams> l_param1Val = in1.read();
+    unsigned int l_colPtrBlocks = l_param0Val[1];
+    unsigned int l_nnzBlocks = l_param1Val[1];
+
+    if (l_nnzBlocks == 0) {
+        return;
+    }
+    xf::sparse::xBarColUnit<SPARSE_logParEntries, SPARSE_dataType, SPARSE_indexType, SPARSE_dataBits, SPARSE_indexBits>(
+        l_colPtrBlocks, l_nnzBlocks, in0, in1, out
+#if DEBUG_dumpData
+        ,
+        p_cuId
+#endif
+        );
 }

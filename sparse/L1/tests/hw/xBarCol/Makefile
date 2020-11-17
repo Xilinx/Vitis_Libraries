@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,13 +51,6 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-TOOL_VERSION ?= 2020.1
-
-ifeq (,$(XILINX_VIVADO))
-XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
-endif
-export XILINX_VIVADO
-
 .PHONY: check_vivado
 check_vivado:
 ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
@@ -72,27 +65,14 @@ DEVICE ?= u280
 
 # MK_INC_BEGIN vitis_set_part.mk
 
-.PHONY: check_part
-
-ifeq (,$(XPART))
 # MK_INC_BEGIN vitis.mk
 
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VITIS))
-XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
-endif
-export XILINX_VITIS
 .PHONY: check_vpp
 check_vpp:
 ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
 	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
 endif
 
-ifeq (,$(XILINX_XRT))
-XILINX_XRT = /opt/xilinx/xrt
-endif
-export XILINX_XRT
 .PHONY: check_xrt
 check_xrt:
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
@@ -111,6 +91,10 @@ export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITI
 endif
 
 # MK_INC_END vitis.mk
+
+.PHONY: check_part
+
+ifeq (,$(XPART))
 # MK_INC_BEGIN vitis_set_platform.mk
 
 ifneq (,$(wildcard $(DEVICE)))
@@ -154,13 +138,13 @@ endif
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
 Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
+To add more platform directories, set the PLATFORM_REPO_PATHS variable or point DEVICE variable to the full path of platform .xpfm file.
 endef
 export MSG_PLATFORM
 
 define MSG_DEVICE
 More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
+Please set DEVICE variable more accurately to select only one platform file, or set DEVICE variable to the full path of the platform .xpfm file.
 endef
 export MSG_DEVICE
 

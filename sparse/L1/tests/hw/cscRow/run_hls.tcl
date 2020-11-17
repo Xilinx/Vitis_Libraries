@@ -25,8 +25,8 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/tests/hw/cscRow/uut_top.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxRowBlocks=128 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=3 -DSPARSE_parGroups=8 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6"
-add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/cscRow/test.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxRowBlocks=128 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=3 -DSPARSE_parGroups=8 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6 -I ${XF_PROJ_ROOT}/L1/include/sw"
+add_files "${XF_PROJ_ROOT}/L1/tests/hw/cscRow/uut_top.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxRowBlocks=256 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=0 -DSPARSE_parGroups=1 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6"
+add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/cscRow/test.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxRowBlocks=256 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=0 -DSPARSE_parGroups=1 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6 -I ${XF_PROJ_ROOT}/L1/include/sw"
 set_top uut_top
 
 open_solution -reset $SOLN
@@ -37,6 +37,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
+  #csim_design -argv "${CUR_DIR}/toCscRow.dat"
   csim_design
 }
 
@@ -45,6 +46,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
+  #cosim_design -trace_level all -argv "${CUR_DIR}/toCscRow.dat"
   cosim_design
 }
 

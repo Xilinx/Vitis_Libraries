@@ -23,31 +23,34 @@
 #ifndef XF_SPARSE_L2_UTILS_HPP
 #define XF_SPARSE_L2_UTILS_HPP
 
+#include <chrono>
 #include <iostream>
 using namespace std;
 
 namespace xf {
 namespace sparse {
+typedef chrono::time_point<chrono::high_resolution_clock> TimePointType;
 
-// When creating a buffer with user pointer (CL_MEM_USE_HOST_PTR), under the hood
-// User ptr is used if and only if it is properly aligned (page aligned). When not
-// aligned, runtime has no choice but to create its own host side buffer that backs
-// user ptr. This in turn implies that all operations that move data to and from
-// device incur an extra memcpy to move data to/from runtime's own host buffer
-// from/to user pointer. So it is recommended to use this allocator if user wish to
-// Create Buffer/Memory Object with CL_MEM_USE_HOST_PTR to align user buffer to the
-// page boundary. It will ensure that user buffer will be used when user create
-// Buffer/Mem Object with CL_MEM_USE_HOST_PTR.
-template <typename T>
-struct aligned_allocator {
-    using value_type = T;
-    T* allocate(std::size_t num) {
-        void* ptr = nullptr;
-        if (posix_memalign(&ptr, 4096, num * sizeof(T))) throw std::bad_alloc();
-        return reinterpret_cast<T*>(ptr);
-    }
-    void deallocate(T* p, std::size_t num) { free(p); }
-};
+double showTimeData(string p_Task, TimePointType& t1, TimePointType& t2) {
+    t2 = chrono::high_resolution_clock::now();
+    chrono::duration<double> l_durationSec = t2 - t1;
+    double l_mSecs = l_durationSec.count() * 1e3;
+    cout << "  DATA: time " << p_Task << "  " << fixed << setprecision(6) << l_mSecs << " msec\n";
+    return l_mSecs;
+}
+
+ifstream::pos_type getFileSize(string p_fileName) {
+    ifstream l_f(p_fileName.c_str(), ifstream::ate | ifstream::binary);
+    return l_f.tellg();
+}
+unsigned int alignedNum(unsigned int p_val, unsigned int p_blockSize) {
+    unsigned int l_blocks = (p_val + p_blockSize - 1) / p_blockSize;
+    return (l_blocks * p_blockSize);
+}
+unsigned int alignedBlock(unsigned int p_val, unsigned int p_blockSize) {
+    unsigned int l_blocks = (p_val + p_blockSize - 1) / p_blockSize;
+    return (l_blocks);
+}
 
 } // end namespace sparse
 } // end namespace xf

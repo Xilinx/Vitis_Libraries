@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,11 +25,12 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/tests/hw/rowAcc/test.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxRowBlocks=1024 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=3 -DSPARSE_parGroups=8 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6"
-add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/rowAcc/test.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxRowBlocks=1024 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=3 -DSPARSE_parGroups=8 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6 -I ${XF_PROJ_ROOT}/L1/include/sw"
+add_files "${XF_PROJ_ROOT}/L1/tests/hw/rowAcc/test.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxRowBlocks=1024 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=0 -DSPARSE_parGroups=1 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6"
+add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/rowAcc/test.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxRowBlocks=1024 -DSPARSE_dataType=float -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_logParGroups=0 -DSPARSE_parGroups=1 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6 -I ${XF_PROJ_ROOT}/L1/include/sw"
 set_top uut_top
 
 open_solution -reset $SOLN
+
 
 
 

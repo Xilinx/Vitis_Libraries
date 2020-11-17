@@ -24,7 +24,7 @@ CSCMV Kernel APIs
       :maxdepth: 1
 
 .. NOTE::
-   CSCMV implementation only uses one HBM channel on U280 card. In future releases, multiple (up to 32) HBM channels may be used to achieve the maximum performance.
+   The CSCMV implementation in the current release uses 16 HBM channels on U280 card. In future releases, 32 (the maximum number of) HBM channels may be used to achieve the best performance possible.
 
 .. include:: ../../rst/global.rst
-      :start-after: _cid-cscrowpktkernel:
+      :start-after: _cid-buftranscolveckernel:

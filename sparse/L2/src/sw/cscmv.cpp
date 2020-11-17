@@ -15,7 +15,7 @@
  */
 
 /**
- * @file cscmv.cpp
+ * @file parallelCscmv.cpp
  * @brief main function for cscmv kernel host code
  *
  * This file is part of Vitis SPARSE Library.
@@ -35,52 +35,31 @@
 using namespace std;
 using namespace xf::sparse;
 int main(int argc, char** argv) {
-    if (argc < 5) {
-        cout << "ERROR: passed %d arguments, expected at least 5 arguments." << endl;
-        cout << "  Usage: cscmv.exe cscmv.xclbin Rows Cols NNZs [mtxFile]" << endl;
+    if (argc < 3) {
+        cout << "ERROR: passed " << argc << " arguments, expected at least 3 arguments." << endl;
+        cout << "  Usage: cscmv.exe cscmv.xclbin kernel_config_binary_file [num_iterations]" << endl;
         return EXIT_FAILURE;
     }
 
     string l_xclbinFile = argv[1];
-    unsigned int l_rows = atoi(argv[2]);
-    unsigned int l_cols = atoi(argv[3]);
-    unsigned int l_nnzs = atoi(argv[4]);
-    string l_mxtFile = (argc == 6) ? argv[5] : "";
-
-    CscMatType l_a;
-    ColVecType l_x;
-    ColVecType l_y;
-
-    ProgramType l_program;
-    GenCscMatType l_genCscMat;
-    GenVecType l_genColVec;
-
-    assert(l_cols % ColVecType::t_MemWords == 0);
-
-    if (!l_genCscMat.genCscMatFromRnd(l_rows, l_cols, l_nnzs, 10, 3 / 2, l_program, l_a)) {
-        cout << "ERROR: failed to generate sparse matrix A" << endl;
-        return EXIT_FAILURE;
-    }
-    if (!l_genColVec.genColVecFromRnd(l_cols, 10, 3 / 2, l_program, l_x)) {
-        cout << "ERROR: failed to generate input vector x" << endl;
-        return EXIT_FAILURE;
-    }
-    if (!l_genColVec.genEmptyColVec(l_rows, l_program, l_y)) {
-        cout << "ERROR: failed to generate output vector y" << endl;
-        return EXIT_FAILURE;
+    string l_binFile = argv[2];
+    unsigned int l_iterations = 1;
+    if (argc == 4) {
+        l_iterations = atoi(argv[3]);
     }
 
-    l_rows = l_a.getRows();
-    l_cols = l_a.getCols();
-    l_nnzs = l_a.getNnzs();
-    assert(l_cols == l_x.getEntries());
-    assert(l_rows == l_y.getEntries());
+    // read and interpret kernel config file
+    ifstream l_if(l_binFile.c_str(), ios::binary);
+    if (!l_if.is_open()) {
+        cout << "ERROR: failed to open file " << l_binFile << endl;
+        return EXIT_FAILURE;
+    }
+    cout << "INFO: loading " << l_binFile << endl;
+    ProgramType l_prog;
+    RunConfigType l_runConfig;
 
-    unsigned int l_colVecMemBlocks = l_cols / ColVecType::t_MemWords;
-    unsigned int l_colPtrBlocks = l_cols / SPARSE_parEntries;
-    unsigned int l_nnzBlocks = l_nnzs / SPARSE_parEntries;
-    unsigned int l_rowCompBlocks = l_rows / SPARSE_parEntries / SPARSE_parGroups;
-    unsigned int l_rowMemBlocks = l_a.getRows() / ColVecType::t_MemWords;
+    l_runConfig.readBinFile(l_if, l_prog);
+    l_if.close();
 
     // OpenCL host code begins
     cl_int l_err;
@@ -88,129 +67,131 @@ int main(int argc, char** argv) {
     cl::Context l_context;
     cl::CommandQueue l_cmdQueue;
     cl::Program l_clProgram;
-    cl::Kernel l_krnlLoad;
-    cl::Kernel l_krnlXbarCol;
-    cl::Kernel l_krnlCscRow;
-    cl::Kernel l_krnlStore;
 
     auto l_devices = xcl::get_xil_devices();
     l_device = l_devices[0];
 
-    // create context
     OCL_CHECK(l_err, l_context = cl::Context(l_device, NULL, NULL, NULL, &l_err));
-
-    // create command queue
     OCL_CHECK(l_err,
               l_cmdQueue = cl::CommandQueue(l_context, l_device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &l_err));
-
-    // read_binary_file() is a utility API which will load the binaryFile
-    // and will return the pointer to file buffer.
     auto l_fileBuf = xcl::read_binary_file(l_xclbinFile);
-
     cl::Program::Binaries l_bins{{l_fileBuf.data(), l_fileBuf.size()}};
     l_devices.resize(1);
 
-    // Creating OpenCL Program
     OCL_CHECK(l_err, l_clProgram = cl::Program(l_context, l_devices, l_bins, NULL, &l_err));
 
-    // Creating CUs
-    OCL_CHECK(l_err, l_krnlLoad = cl::Kernel(l_clProgram, "loadColPtrValKernel", &l_err));
-    OCL_CHECK(l_err, l_krnlXbarCol = cl::Kernel(l_clProgram, "xBarColKernel", &l_err));
-    OCL_CHECK(l_err, l_krnlCscRow = cl::Kernel(l_clProgram, "cscRowPktKernel", &l_err));
-    OCL_CHECK(l_err, l_krnlStore = cl::Kernel(l_clProgram, "storeDatPktKernel", &l_err));
+    cl::Kernel l_loadColKernel;
+    cl::Kernel l_readWriteHbmKernel[SPARSE_hbmChannels / 8];
 
-    unsigned long long l_aColPtrBytes = l_program.getBufSz(l_a.getColPtrAddr());
-    unsigned long long l_aNnzRowIdxBytes = l_program.getBufSz(l_a.getValRowIdxAddr());
-    unsigned long long l_xBytes = l_program.getBufSz(l_x.getValAddr());
-    unsigned long long l_yBytes = l_program.getBufSz(l_y.getValAddr());
-
-    // Allocate device buffers in Global Memory
-    OCL_CHECK(l_err, cl::Buffer l_aColPtrDevBuf(l_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, l_aColPtrBytes,
-                                                l_a.getColPtrAddr(), &l_err));
-    OCL_CHECK(l_err, cl::Buffer l_aNnzRowIdxDevBuf(l_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, l_aNnzRowIdxBytes,
-                                                   l_a.getValRowIdxAddr(), &l_err));
-    OCL_CHECK(l_err, cl::Buffer l_xDevBuf(l_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, l_xBytes, l_x.getValAddr(),
-                                          &l_err));
-    OCL_CHECK(l_err, cl::Buffer l_yDevBuf(l_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, l_yBytes,
-                                          l_y.getValAddr(), &l_err));
-
-    // Setting Kernel Arguments
-    OCL_CHECK(l_err, l_err = l_krnlLoad.setArg(0, l_xDevBuf));
-    OCL_CHECK(l_err, l_err = l_krnlLoad.setArg(1, l_aColPtrDevBuf));
-    OCL_CHECK(l_err, l_err = l_krnlLoad.setArg(2, l_colVecMemBlocks));
-    OCL_CHECK(l_err, l_err = l_krnlLoad.setArg(3, 1));
-
-    OCL_CHECK(l_err, l_err = l_krnlXbarCol.setArg(0, l_colPtrBlocks));
-    OCL_CHECK(l_err, l_err = l_krnlXbarCol.setArg(1, l_nnzBlocks));
-
-    OCL_CHECK(l_err, l_err = l_krnlCscRow.setArg(0, l_aNnzRowIdxDevBuf));
-    OCL_CHECK(l_err, l_err = l_krnlCscRow.setArg(1, l_nnzBlocks));
-    OCL_CHECK(l_err, l_err = l_krnlCscRow.setArg(2, l_nnzBlocks));
-    OCL_CHECK(l_err, l_err = l_krnlCscRow.setArg(3, l_rowCompBlocks));
-
-    OCL_CHECK(l_err, l_err = l_krnlStore.setArg(1, l_yDevBuf));
-    OCL_CHECK(l_err, l_err = l_krnlStore.setArg(2, l_rowMemBlocks));
-
-    // Copy input data to device memory
-    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueMigrateMemObjects({l_aColPtrDevBuf, l_xDevBuf, l_aNnzRowIdxDevBuf},
-                                                                 0 /* 0 means from host*/));
-
-    // Launch the kernel
-    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueTask(l_krnlLoad));
-    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueTask(l_krnlXbarCol));
-    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueTask(l_krnlCscRow));
-    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueTask(l_krnlStore));
-    l_cmdQueue.finish();
-
-    // COpy results from device to host
-    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueMigrateMemObjects({l_yDevBuf}, CL_MIGRATE_MEM_OBJECT_HOST));
-    l_cmdQueue.finish();
-
-    // compute the golden reference and compare with the kernel outputs
-    vector<SPARSE_dataType> l_yVecOut;
-    vector<SPARSE_dataType> l_yVecRef;
-    vector<SPARSE_dataType> l_xVec;
-    vector<NnzUnitType> l_aMat;
-    vector<SPARSE_indexType> l_aColPtr;
-    l_a.loadValRowIdx(l_aMat);
-    l_a.loadColPtr(l_aColPtr);
-    l_x.loadVal(l_xVec);
-    l_y.loadVal(l_yVecOut);
-
-    assert(l_xVec.size() == l_cols);
-    assert(l_yVecOut.size() == l_rows);
-    assert(l_aColPtr.size() == l_cols);
-
-    for (unsigned int i = 0; i < l_rows; ++i) {
-        l_yVecRef.push_back(0);
+    OCL_CHECK(l_err, l_loadColKernel = cl::Kernel(l_clProgram, "loadColKernel:{loadColKernel_0}", &l_err));
+    for (unsigned int i = 0; i < SPARSE_hbmChannels / 8; ++i) {
+        string l_extName = "_" + to_string(i) + "}";
+        string l_kName = "readWriteHbmKernel:{readWriteHbmKernel";
+        l_kName += l_extName;
+        OCL_CHECK(l_err, l_readWriteHbmKernel[i] = cl::Kernel(l_clProgram, l_kName.c_str(), &l_err));
     }
+    // trigger all CUs to run kernel configs;
+    TimePointType l_tp[10];
+    unsigned int l_tpIdx = 0;
+    double l_krnApiTime = 0;
+    double l_totalTime = 0;
 
-    SPARSE_indexType l_prePtr = 0;
-    unsigned int l_nnzIdx = 0;
-    for (unsigned int i = 0; i < l_cols; ++i) {
-        SPARSE_indexType l_colPtr = l_aColPtr[i] - l_prePtr;
-        l_prePtr = l_aColPtr[i];
-        for (unsigned int j = 0; j < l_colPtr; ++j) {
-            unsigned int l_rowIdx = l_aMat[l_nnzIdx].getRow();
-            l_yVecRef[l_rowIdx] += l_aMat[l_nnzIdx].getVal() * l_xVec[i];
-            l_nnzIdx++;
+    void* l_loadColValPtr = l_runConfig.getColVecAddr();
+    memcpy((reinterpret_cast<char*>(l_loadColValPtr)) + 4, &l_iterations, sizeof(unsigned int));
+    unsigned long long l_loadColValSz = l_prog.getBufSz(l_loadColValPtr);
+    cl::Buffer l_loadColValBuf;
+    OCL_CHECK(l_err, l_loadColValBuf = cl::Buffer(l_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, l_loadColValSz,
+                                                  l_loadColValPtr, &l_err));
+    OCL_CHECK(l_err, l_err = l_loadColKernel.setArg(0, l_loadColValBuf));
+    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueMigrateMemObjects({l_loadColValBuf}, 0));
+
+    void* l_loadColPtrPtr = l_runConfig.getColPtrAddr();
+    memcpy((reinterpret_cast<char*>(l_loadColPtrPtr)) + 4, &l_iterations, sizeof(unsigned int));
+    unsigned long long l_loadColPtrSz = l_prog.getBufSz(l_loadColPtrPtr);
+    cl::Buffer l_loadColPtrBuf;
+    OCL_CHECK(l_err, l_loadColPtrBuf = cl::Buffer(l_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, l_loadColPtrSz,
+                                                  l_loadColPtrPtr, &l_err));
+    OCL_CHECK(l_err, l_err = l_loadColKernel.setArg(1, l_loadColPtrBuf));
+    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueMigrateMemObjects({l_loadColPtrBuf}, 0));
+
+    void* l_readHbmPtr[SPARSE_hbmChannels];
+    unsigned long long l_readHbmSz[SPARSE_hbmChannels];
+    cl::Buffer l_readHbmBuf[SPARSE_hbmChannels];
+    void* l_rowResPtr[SPARSE_hbmChannels];
+    unsigned long long l_rowResSz[SPARSE_hbmChannels];
+    cl::Buffer l_rowResBuf[SPARSE_hbmChannels];
+    for (unsigned int ch = 0; ch < SPARSE_hbmChannels; ++ch) {
+        l_readHbmPtr[ch] = l_runConfig.getRdHbmAddr(ch);
+        memcpy(reinterpret_cast<char*>(l_readHbmPtr[ch]) + 4, &l_iterations, sizeof(unsigned int));
+        l_readHbmSz[ch] = l_prog.getBufSz(l_readHbmPtr[ch]);
+        OCL_CHECK(l_err, l_readHbmBuf[ch] = cl::Buffer(l_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                                       l_readHbmSz[ch], l_readHbmPtr[ch], &l_err));
+        unsigned int l_argIdx = ch % 8;
+        OCL_CHECK(l_err, l_err = l_readWriteHbmKernel[ch / 8].setArg(l_argIdx * 2, l_readHbmBuf[ch]));
+        OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueMigrateMemObjects({l_readHbmBuf[ch]}, 0));
+
+        l_rowResPtr[ch] = l_runConfig.getWrHbmAddr(ch);
+        l_rowResSz[ch] = l_prog.getBufSz(l_rowResPtr[ch]);
+        if (l_rowResSz[ch] != 0) {
+            OCL_CHECK(l_err, l_rowResBuf[ch] = cl::Buffer(l_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                                          l_rowResSz[ch], l_rowResPtr[ch], &l_err));
+            OCL_CHECK(l_err, l_err = l_readWriteHbmKernel[ch / 8].setArg(l_argIdx * 2 + 1, l_rowResBuf[ch]));
+        } else {
+            OCL_CHECK(l_err, l_err = l_readWriteHbmKernel[ch / 8].setArg(l_argIdx * 2 + 1, l_readHbmBuf[ch]));
         }
     }
 
-    unsigned int l_errs = 0;
-    for (unsigned int i = 0; i < l_rows; ++i) {
-        if (!compare<SPARSE_dataType>(l_yVecOut[i], l_yVecRef[i])) {
-            cout << "ERROR: out[" << i << "] != ref[" << i << "] ";
-            cout << "out[" << i << "] = " << l_yVecOut[i] << " ";
-            cout << "ref[" << i << "] = " << l_yVecRef[i] << endl;
-            l_errs++;
-        }
+    l_cmdQueue.finish();
+
+    // finishing transfer data from host to device, kick off kernels
+    OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueTask(l_loadColKernel));
+    for (unsigned int kr = 0; kr < SPARSE_hbmChannels / 8; ++kr) {
+        OCL_CHECK(l_err, l_err = l_cmdQueue.enqueueTask(l_readWriteHbmKernel[kr]));
     }
 
-    if (l_errs == 0) {
+    l_tp[l_tpIdx] = std::chrono::high_resolution_clock::now();
+    l_cmdQueue.finish();
+    l_krnApiTime += showTimeData("Kernel run time: ", l_tp[l_tpIdx], l_tp[l_tpIdx + 1]);
+    l_totalTime += l_krnApiTime;
+    l_tpIdx++;
+
+    // read data back to host meory
+    for (unsigned int ch = 0; ch < SPARSE_hbmChannels; ++ch) {
+        if (l_rowResSz[ch] != 0) {
+            OCL_CHECK(l_err,
+                      l_err = l_cmdQueue.enqueueMigrateMemObjects({l_rowResBuf[ch]}, CL_MIGRATE_MEM_OBJECT_HOST));
+        }
+    }
+    l_cmdQueue.finish();
+    l_totalTime += showTimeData("Data read back time: ", l_tp[l_tpIdx], l_tp[l_tpIdx + 1]);
+    l_tpIdx++;
+
+    unsigned int l_matNnzs = l_runConfig.nnzs();
+    unsigned int l_matRows = l_runConfig.rows();
+    unsigned int l_matCols = l_runConfig.cols();
+    double l_krnPerf = (l_matNnzs * 2) * l_iterations / l_krnApiTime / 1e6;
+    // double l_krnApiPerf = (l_krnApiTime == 0)? 0:  l_matNnzs * 2 / l_krnApiTime / 1e6;
+    double l_apiPerf = (l_totalTime == 0) ? 0 : l_matNnzs * 2 * l_iterations / l_totalTime / 1e6;
+    size_t l_sepLoc = l_binFile.rfind('/', l_binFile.length());
+    string l_matName = (l_sepLoc != string::npos) ? l_binFile.substr(l_sepLoc + 1, l_binFile.length() - l_sepLoc) : "";
+    size_t l_extLoc = l_matName.find_last_of(".");
+    l_matName = l_matName.substr(0, l_extLoc);
+    cout << "DATA_CSV:, matrix, row, cols, nnzs, KernelRunTime(ms), TotalRunTime(ms),KernelPerf(GFlops/Sec), "
+            "API_Perf(GFlops/Sec)"
+         << endl;
+    cout << "DATA_CSV:," << l_matName << "," << l_matRows << "," << l_matCols << "," << l_matNnzs << "," << l_krnApiTime
+         << "," << l_totalTime << "," << l_krnPerf << "," << l_apiPerf << endl;
+
+    // compare l_yOut against l_y
+
+    unsigned int l_checkErrs = 0;
+    l_checkErrs = l_runConfig.checkRowRes();
+    if (l_checkErrs != 0) {
+        cout << "ERROR: there are total " << l_checkErrs << " mismatches between outputs and golden references."
+             << endl;
+        return EXIT_FAILURE;
+    } else {
         cout << "Test Pass!" << endl;
         return EXIT_SUCCESS;
-    } else {
-        return EXIT_FAILURE;
     }
 }

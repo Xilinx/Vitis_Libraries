@@ -23,8 +23,9 @@
 
 #ifndef XF_SPARSE_PROGRAM_HPP
 #define XF_SPARSE_PROGRAM_HPP
-
+#include <stdlib.h>
 #include <unordered_map>
+#include "L2_utils.hpp"
 using namespace std;
 namespace xf {
 namespace sparse {
@@ -41,8 +42,11 @@ class Program {
         }
     }
     void* allocMem(unsigned long long p_bytes) {
-        void* l_memPtr = nullptr;
-        if (posix_memalign(&l_memPtr, t_PageSize, p_bytes)) {
+        if (p_bytes == 0) {
+            return nullptr;
+        }
+        void* l_memPtr = aligned_alloc(t_PageSize, alignedNum(p_bytes, t_PageSize));
+        if (l_memPtr == nullptr) {
             throw bad_alloc();
         } else {
             m_hostBufSz[l_memPtr] = p_bytes;

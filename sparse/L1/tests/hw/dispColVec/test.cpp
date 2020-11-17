@@ -28,12 +28,12 @@ using namespace std;
 
 int main() {
     const unsigned int t_MaxCols = SPARSE_parEntries * SPARSE_maxColParBlocks;
+    const unsigned int t_IntsPerColParam = 2 + SPARSE_hbmChannels * 2;
+    const unsigned int t_ParamsPerPar = SPARSE_dataBits * SPARSE_parEntries / 32;
+    const unsigned int t_ParBlocks4Param = (t_IntsPerColParam + t_ParamsPerPar - 1) / t_ParamsPerPar;
 
-    hls::stream<ap_uint<32> > l_paramStr;
     hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> > l_datStr;
-    hls::stream<ap_uint<32> > l_paramFwdStr;
     hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> > l_datFwdStr;
-    hls::stream<ap_uint<32> > l_paramOutStr;
     hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> > l_datOutStr;
 
     SPARSE_dataType l_vecStore[t_MaxCols];
@@ -64,6 +64,14 @@ int main() {
         if (l_maxIdx[i] >= t_MaxCols) {
             l_maxIdx[i] = t_MaxCols - 1;
         }
+        l_chBlocks[i] = (l_maxIdx[i] - l_minIdx[i] + SPARSE_parEntries) / SPARSE_parEntries;
+    }
+
+    ap_uint<32> l_params[t_ParBlocks4Param * t_ParamsPerPar];
+    l_params[1] = l_vecBlocks;
+    for (unsigned int i = 0; i < SPARSE_hbmChannels; ++i) {
+        l_params[2 + i] = l_minIdx[i];
+        l_params[2 + SPARSE_hbmChannels + i] = l_maxIdx[i];
     }
 
     cout << "Inputs:" << endl;
@@ -77,11 +85,12 @@ int main() {
     }
 
     // send inputs to the stream
-    l_paramStr.write(l_vecBlocks);
-    for (unsigned int i = 0; i < SPARSE_hbmChannels; ++i) {
-        l_paramStr.write(l_chBlocks[i]);
-        l_paramStr.write(l_minIdx[i]);
-        l_paramStr.write(l_maxIdx[i]);
+    for (unsigned int i = 0; i < t_ParBlocks4Param; ++i) {
+        WideType<ap_uint<32>, t_ParamsPerPar> l_paramVal;
+        for (unsigned int j = 0; j < t_ParamsPerPar; ++j) {
+            l_paramVal[j] = l_params[i * t_ParamsPerPar + j];
+        }
+        l_datStr.write(l_paramVal);
     }
     for (unsigned int i = 0; i < l_vecBlocks; ++i) {
         ap_uint<SPARSE_dataBits * SPARSE_parEntries> l_valVecBits;
@@ -93,25 +102,24 @@ int main() {
         l_datStr.write(l_valVecBits);
     }
 
-    uut_top(t_chId, l_paramStr, l_datStr, l_paramFwdStr, l_datFwdStr, l_paramOutStr, l_datOutStr);
+    uut_top(t_chId, l_datStr, l_datFwdStr, l_datOutStr);
 
     unsigned int l_errs = 0;
-    ap_uint<32> l_vecBlocksOut = l_paramFwdStr.read();
-    if (l_vecBlocksOut != l_vecBlocks) {
+    for (unsigned int i = 0; i < t_ParBlocks4Param; ++i) {
+        WideType<ap_uint<32>, t_ParamsPerPar> l_paramVal = l_datFwdStr.read();
+        for (unsigned int j = 0; j < t_ParamsPerPar; ++j) {
+            l_params[i * t_ParamsPerPar + j] = l_paramVal[j];
+        }
+    }
+    if (l_params[1] != l_vecBlocks) {
         cout << "ERROR: fwd vecBlocks not equal to original one";
-        cout << "    fwd vecBlocs = " << l_vecBlocksOut;
+        cout << "    fwd vecBlocs = " << l_params[1];
         cout << "    original vecBlocks = " << l_vecBlocks << endl;
         l_errs++;
     }
-    for (unsigned int i = t_chId + 1; i < SPARSE_hbmChannels; ++i) {
-        ap_uint<32> l_chBlocksOut = l_paramFwdStr.read();
-        ap_uint<32> l_minIdxOut = l_paramFwdStr.read();
-        ap_uint<32> l_maxIdxOut = l_paramFwdStr.read();
-        if (l_chBlocksOut != l_chBlocks[i]) {
-            cout << "ERROR: l_chBlocks at channel " << i << endl;
-            cout << "       output is: " << l_chBlocksOut << " original value is: " << l_chBlocks[i] << endl;
-            l_errs++;
-        }
+    for (unsigned int i = 0; i < SPARSE_hbmChannels; ++i) {
+        ap_uint<32> l_minIdxOut = l_params[2 + i];
+        ap_uint<32> l_maxIdxOut = l_params[2 + SPARSE_hbmChannels + i];
         if (l_minIdxOut != l_minIdx[i]) {
             cout << "ERROR: l_minIdx at channel " << i << endl;
             cout << "       output is: " << l_minIdxOut << " original value is: " << l_minIdx[i] << endl;
@@ -136,11 +144,17 @@ int main() {
             }
         }
     }
-    l_vecBlocksOut = l_paramOutStr.read();
-    if (l_vecBlocksOut != l_chBlocks[t_chId]) {
-        cout << "ERROR: output vecBlocks not equal to original one";
-        cout << "    output vecBlocs = " << l_vecBlocksOut;
-        cout << "    original vecBlocks = " << l_chBlocks[t_chId] << endl;
+    WideType<ap_uint<32>, t_ParamsPerPar> l_datOutParam = l_datOutStr.read();
+    if (l_datOutParam[0] != l_chBlocks[t_chId]) {
+        cout << "ERROR: output chBlocks not equal to original one";
+        cout << "    output chBlocks = " << l_datOutParam[0];
+        cout << "    original chBlocks = " << l_chBlocks[t_chId] << endl;
+        l_errs++;
+    }
+    if (l_datOutParam[1] != l_chBlocks[t_chId]) {
+        cout << "ERROR: output chBlocks not equal to original one";
+        cout << "    output chBlocks = " << l_datOutParam[0];
+        cout << "    original chBlocks = " << l_chBlocks[t_chId] << endl;
         l_errs++;
     }
     for (unsigned int i = 0; i < l_chBlocks[t_chId]; ++i) {
