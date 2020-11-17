@@ -2,7 +2,7 @@
 
 Vitis SPARSE Library accelerates basic linear algebra functions for handling sparse matrices.
 
-[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/sparse/)
+[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/sparse/2020.2/)
 
 Copyright 2020 Xilinx, Inc.
 

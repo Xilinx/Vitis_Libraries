@@ -25,7 +25,7 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/tests/hw/xBarCol/test.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_dataType=int32_t -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6"
+add_files "${XF_PROJ_ROOT}/L1/tests/hw/xBarCol/uut_top.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_dataType=int32_t -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6"
 add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/xBarCol/test.cpp" -cflags "-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_dataType=int32_t -DSPARSE_indexType=uint32_t -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_dataBits=32 -DSPARSE_indexBits=32 -DSPARSE_printWidth=6 -I ${XF_PROJ_ROOT}/L1/include/sw"
 set_top uut_top
 
@@ -37,6 +37,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
+  #csim_design -argv "${CUR_DIR}/toXBarCol.dat"
   csim_design
 }
 
@@ -45,6 +46,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
+  #cosim_design -trace_level all -argv "${CUR_DIR}/toXBarCol.dat"
   cosim_design
 }
 

@@ -51,7 +51,7 @@ bool compare<float>(float x, float ref) {
 }
 
 void uut_top(const unsigned int p_rowBlocks,
-             hls::stream<ap_uint<SPARSE_dataBits> > p_rowValStr[SPARSE_parEntries][SPARSE_parGroups],
+             hls::stream<ap_uint<SPARSE_dataBits> > p_rowValStr[SPARSE_parEntries],
              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& p_rowAggStr) {
     rowAgg<SPARSE_parEntries, SPARSE_parGroups, SPARSE_dataType, SPARSE_indexType, SPARSE_dataBits>(
         p_rowBlocks, p_rowValStr, p_rowAggStr);
@@ -61,7 +61,7 @@ int main() {
     const unsigned int t_RowOffsetBits = SPARSE_indexBits - SPARSE_logParEntries - SPARSE_logParGroups;
 
     unsigned int l_rowBlocks = 0;
-    hls::stream<ap_uint<SPARSE_dataBits> > l_rowValStr[SPARSE_parEntries][SPARSE_parGroups];
+    hls::stream<ap_uint<SPARSE_dataBits> > l_rowValStr[SPARSE_parEntries];
     hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> > l_rowAggStr;
 
     BitConv<SPARSE_dataType> l_conv;
@@ -76,12 +76,10 @@ int main() {
         for (unsigned int b = 0; b < SPARSE_parEntries; ++b) {
             cout << "      BANK " << b << endl;
             cout << "           ";
-            for (unsigned int g = 0; g < SPARSE_parGroups; ++g) {
-                cout << "val = " << l_inVal << " ";
-                ap_uint<SPARSE_dataBits> l_valBits = l_conv.toBits(l_inVal);
-                l_rowValStr[b][g].write(l_valBits);
-                l_inVal++;
-            }
+            cout << "val = " << l_inVal << " ";
+            ap_uint<SPARSE_dataBits> l_valBits = l_conv.toBits(l_inVal);
+            l_rowValStr[b].write(l_valBits);
+            l_inVal++;
             cout << endl;
         }
     }
@@ -91,23 +89,19 @@ int main() {
     cout << "INFO: output blocks" << endl;
     for (unsigned int i = 0; i < l_rowBlocks; ++i) {
         cout << "      block " << i << endl;
-        for (unsigned int g = 0; g < SPARSE_parGroups; ++g) {
-            ap_uint<SPARSE_dataBits* SPARSE_parEntries> l_val = l_rowAggStr.read();
-            cout << "      word " << g << endl;
-            cout << "           ";
-            for (unsigned int b = 0; b < SPARSE_parEntries; ++b) {
-                ap_uint<SPARSE_dataBits> l_entryBits = l_val.range((b + 1) * SPARSE_dataBits - 1, b * SPARSE_dataBits);
-                SPARSE_dataType l_entryVal = l_conv.toType(l_entryBits);
-                SPARSE_dataType l_entryRef = i * SPARSE_parEntries * SPARSE_parGroups + b * SPARSE_parGroups + g;
-                if (!compare(l_entryVal, l_entryRef)) {
-                    cout << "ERROR: at block " << i << " bank " << b << " group " << g;
-                    cout << "       output = " << l_entryVal << " refVal = " << l_entryRef << endl;
-                    l_errs++;
-                }
-                cout << "val = " << l_entryVal << " ";
+        ap_uint<SPARSE_dataBits* SPARSE_parEntries> l_val = l_rowAggStr.read();
+        for (unsigned int b = 0; b < SPARSE_parEntries; ++b) {
+            ap_uint<SPARSE_dataBits> l_entryBits = l_val.range((b + 1) * SPARSE_dataBits - 1, b * SPARSE_dataBits);
+            SPARSE_dataType l_entryVal = l_conv.toType(l_entryBits);
+            SPARSE_dataType l_entryRef = i * SPARSE_parEntries + b;
+            if (!compare(l_entryVal, l_entryRef)) {
+                cout << "ERROR: at block " << i << " bank " << b;
+                cout << "       output = " << l_entryVal << " refVal = " << l_entryRef << endl;
+                l_errs++;
             }
-            cout << endl;
+            cout << "val = " << l_entryVal << " ";
         }
+        cout << endl;
     }
 
     cout << "Total errors: " << l_errs << endl;

@@ -15,10 +15,12 @@
  */
 #include "uut_top.hpp"
 
-void uut_top(hls::stream<ap_uint<32> >& p_paramStr,
-             hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& p_datStr,
-             hls::stream<ap_uint<32> > p_paramOutStr[SPARSE_hbmChannels],
+void uut_top(hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& p_datStr,
              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> > p_datOutStr[SPARSE_hbmChannels]) {
-    xf::sparse::dispCol<SPARSE_maxColParBlocks, SPARSE_hbmChannels, SPARSE_parEntries, SPARSE_dataBits>(
-        p_paramStr, p_datStr, p_paramOutStr, p_datOutStr);
+    static const unsigned int t_IntsPerColParam = 2 + SPARSE_hbmChannels * 2;
+    static const unsigned int t_ParamsPerPar = SPARSE_dataBits * SPARSE_parEntries / 32;
+    static const unsigned int t_ParBlocks4Param = (t_IntsPerColParam + t_ParamsPerPar - 1) / t_ParamsPerPar;
+
+    xf::sparse::dispCol<SPARSE_maxColParBlocks, t_ParBlocks4Param, SPARSE_hbmChannels, SPARSE_parEntries,
+                        SPARSE_dataBits>(p_datStr, p_datOutStr);
 }

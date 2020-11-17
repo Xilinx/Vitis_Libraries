@@ -16,7 +16,7 @@
 
 /**
  * @file cscmv.hpp
- * @brief SPARSE Level 2 cscmv template function implementation.
+ * @brief SPARSE Level 1 cscmv template function implementation.
  *
  * This file is part of Vitis SPARSE Library.
  */
@@ -143,14 +143,6 @@ ap_uint<t_LogParEntries> getRowBank(t_IndexType p_row) {
     return (p_row % t_ParEntries);
 }
 
-template <unsigned int t_LogParEntries, unsigned int t_LogParGroups, typename t_IndexType = unsigned int>
-ap_uint<t_LogParGroups> getRowGroup(t_IndexType p_row) {
-#pragma HLS inline
-    const unsigned int t_ParEntries = 1 << t_LogParEntries;
-    const unsigned int t_ParGroups = 1 << t_LogParGroups;
-    return ((p_row / t_ParEntries) % t_ParGroups);
-}
-
 template <unsigned int t_LogParEntries,
           unsigned int t_LogParGroups,
           typename t_IndexType = unsigned int,
@@ -241,6 +233,13 @@ void getColPtrPairDist(
             l_colPtrPairArr[j].getEnd() = l_colPtrArr[j];
         }
         for (unsigned int j = 0; j < t_ParEntries; ++j) {
+#ifndef __SYNTHESIS__
+            if (l_colPtrPairArr[j].getEnd() < l_colPtrPairArr[j].getStart()) {
+                std::cout << "ERROR: colPtr at " << i * t_ParEntries + j << " start=" << l_colPtrPairArr[j].getStart()
+                          << " end=" << l_colPtrPairArr[j].getEnd() << std::endl;
+            }
+            assert(l_colPtrPairArr[j].getEnd() >= l_colPtrPairArr[j].getStart());
+#endif
             t_IndexType l_dist = l_colPtrPairArr[j].getEnd() - l_colPtrPairArr[j].getStart();
             ap_uint<t_LogParEntries> l_startMod = l_colPtrPairArr[j].getStart() % t_ParEntries;
             ap_uint<t_LogParEntries> l_endMod = l_colPtrPairArr[j].getEnd() % t_ParEntries;
@@ -334,7 +333,7 @@ template <unsigned int t_LogParEntries,
           unsigned int t_IndexBits = 32>
 void selColVal(hls::stream<ColPtrPairDist<t_LogParEntries, t_IndexType, t_IndexBits> >& p_colPtrPairDistStr,
                hls::stream<t_DataType>& p_colValStr,
-               hls::stream<t_DataType> p_colValSplitStr[t_LogParEntries]) {
+               hls::stream<t_DataType> p_colValSplitStr[1 << t_LogParEntries]) {
     const unsigned int t_ParEntries = 1 << t_LogParEntries;
     const unsigned int t_BlockBits = t_IndexBits - t_LogParEntries;
 
@@ -420,16 +419,17 @@ void xBarMergeCol(hls::stream<BoolArr<t_ParEntries> > p_colSelStr[t_ParEntries],
 }
 
 /**
- * @brief xBarCol function that distribute input col values to the dedicated banks according to their col index pointers
+ * @brief xBarCol function that distributes input col values to the dedicated banks according to their col index
+ * pointers
  *
- * @tparam t_LogParEntries log2 of the number of entries in the input/output vector stream
+ * @tparam t_LogParEntries log2 of the parallelly processed entries in the input/output vector stream
  * @tparam t_DataType the data type of the matrix and vector entries
  * @tparam t_IndexType the data type of the indicies
  * @tparam t_DataBits the number of bits for storing the data
  * @tparam t_IndexBits the number of bits for storing the indices
  *
- * @param p_colPtrBlocks the number of col index pointer vectors
- * @param p_nnzBlocks the number of NNZ vector blocks
+ * @param p_colPtrBlocks the number of col index pointer blocks
+ * @param p_nnzBlocks the number of NNZ blocks
  * @param p_colPtrStr the input col pointer vector stream
  * @param p_colValStr the input col value vector stream
  * @param p_nnzColValStr the output banked col value vector stream
@@ -453,6 +453,12 @@ void xBarCol(const unsigned int p_colPtrBlocks,
     hls::stream<t_DataType> l_colValStr[t_ParEntries];
     hls::stream<t_DataType> l_colValSplitStr[t_ParEntries][t_ParEntries];
 #pragma HLS ARRAY_PARTITION variable = l_colValSplitStr complete dim = 0
+#pragma HLS STREAM variable = l_colPtrStr depth = 4
+#pragma HLS STREAM variable = l_colPtrPairStr depth = 4
+#pragma HLS STREAM variable = l_colPtrPairDistStr depth = 4
+#pragma HLS STREAM variable = l_colSelStr depth = 4
+#pragma HLS STREAM variable = l_colValStr depth = 4
+#pragma HLS STREAM variable = l_colValSplitStr depth = 16
 #pragma HLS DATAFLOW
     duplicateStream<t_ParEntries, t_IndexType, t_IndexBits, 2>(p_colPtrBlocks, p_colPtrStr, l_colPtrStr);
     getColPtrPair<t_LogParEntries, t_IndexType, t_IndexBits>(p_colPtrBlocks, l_colPtrStr[0], l_colPtrPairStr);
@@ -527,11 +533,14 @@ void formRowEntries(const unsigned int p_nnzBlocks,
         for (unsigned int j = 0; j < t_ParEntries; ++j) {
             l_rowEntry[j].getVal() = l_nnzVal[j] * l_nnzColVal[j];
             l_rowEntry[j].getRow() = l_rowIndex[j];
-            p_rowEntryStr[j].write(l_rowEntry[j].toBits());
-            p_isEndStr[j].write(0);
+            if (l_rowEntry[j].getVal() != 0) {
+                p_rowEntryStr[j].write(l_rowEntry[j].toBits());
+                p_isEndStr[j].write(0);
+            }
         }
     }
     for (unsigned int j = 0; j < t_ParEntries; ++j) {
+#pragma HLS UNROLL
         p_isEndStr[j].write(1);
     }
 }
@@ -556,9 +565,9 @@ void xBarRowSplit(hls::stream<ap_uint<t_DataBits + t_IndexBits> >& p_rowEntryStr
         ap_uint<t_LogParEntries> l_bank = getRowBank<t_LogParEntries, t_IndexType>(l_rowEntry.getRow());
         p_splittedRowEntryStr[l_bank].write(l_rowEntryBits);
     }
-    for (unsigned int i = 0; i < t_ParEntries; ++i) {
-        p_isEndOutStr.write(1);
-    }
+    // for (unsigned int i = 0; i < t_ParEntries; ++i) {
+    p_isEndOutStr.write(1);
+    //}
 }
 
 template <unsigned int t_LogParEntries,
@@ -572,23 +581,22 @@ void xBarRowMerge(
     hls::stream<ap_uint<t_DataBits + t_IndexBits> > p_rowEntryStr[1 << t_LogParEntries],
     hls::stream<ap_uint<1> > p_isEndOutStr[1 << t_LogParEntries]) {
     const unsigned int t_ParEntries = 1 << t_LogParEntries;
-    ap_uint<t_ParEntries> l_preDone = 0;
-    ap_uint<t_ParEntries> l_activity = 0;
-    l_activity.b_not();
-    ap_uint<1> l_exit = 0;
+    BoolArr<t_ParEntries> l_preDone(false);
+    BoolArr<t_ParEntries> l_activity(false);
+    bool l_exit = false;
 
     while (!l_exit) {
 #pragma HLS PIPELINE
-        if (l_preDone.and_reduce() && !l_activity.or_reduce()) {
-            l_exit = 1;
+        if (l_preDone.And() && !l_activity.Or()) {
+            l_exit = true;
         }
         for (unsigned int i = 0; i < t_ParEntries; ++i) {
             ap_uint<1> l_unused;
             if (p_isEndStr[i].read_nb(l_unused)) {
-                l_preDone[i] = 1;
+                l_preDone[i] = true;
             }
         }
-        l_activity = 0;
+        l_activity.Reset();
 
         for (unsigned int b = 0; b < t_ParEntries; ++b) {
 #pragma HLS UNROLL
@@ -598,13 +606,13 @@ void xBarRowMerge(
                 ap_uint<t_LogParEntries> l_bank = (b + c) % t_ParEntries;
                 if (!p_splittedRowEntryStr[l_bank][b].empty()) {
                     l_ch = l_bank;
+                    l_activity[b] = true;
                     break;
                 }
             }
             ap_uint<t_DataBits + t_IndexBits> l_valBits;
             if (p_splittedRowEntryStr[l_ch][b].read_nb(l_valBits)) {
                 p_rowEntryStr[b].write(l_valBits);
-                l_activity[b] = 1;
             }
         }
     }
@@ -616,18 +624,18 @@ void xBarRowMerge(
 
 /**
  * @brief xBarRow function that multiplies input NNZs' values with input vectors and distributes the results to the
- * dedicated banks according to their row index pointers
+ * dedicated banks according to their row indices
  *
- * @tparam t_LogParEntries log2 of the number of entries in the input/output vector stream
+ * @tparam t_LogParEntries log2 of the parallelly processed entries in the input/output vector stream
  * @tparam t_DataType the data type of the matrix and vector entries
  * @tparam t_IndexType the data type of the indicies
  * @tparam t_DataBits the number of bits for storing the data
  * @tparam t_IndexBits the number of bits for storing the indices
  *
- * @param p_nnzBlocks the number of NNZ vector blocks
- * @param p_nnzValStr the input NNZ value  vector stream
- * @param p_nnzColValStr the input col value vector stream
- * @param p_rowIndexStr the inpuut NNZ row index vector stream
+ * @param p_nnzBlocks the number of NNZ blocks
+ * @param p_nnzValStr the input NNZ value stream
+ * @param p_nnzColValStr the input col value stream
+ * @param p_rowIndexStr the inpuut NNZ row index stream
  * @param p_rowEntryStr the output banked multiplication results stream array
  * @param p_isEndStr the output control stream
  */
@@ -644,8 +652,9 @@ void xBarRow(const unsigned int p_nnzBlocks,
              hls::stream<ap_uint<1> > p_isEndStr[1 << t_LogParEntries]) {
     const unsigned int t_ParEntries = 1 << t_LogParEntries;
     hls::stream<ap_uint<t_DataBits + t_IndexBits> > l_rowEntryStr[t_ParEntries];
-#pragma HLS STREAM variable = l_rowEntryStr depth = 4
+#pragma HLS STREAM variable = l_rowEntryStr depth = 16
     hls::stream<ap_uint<1> > l_isEndStr[t_ParEntries];
+#pragma HLS STREAM variable = l_isEndStr depth = 16
     hls::stream<ap_uint<t_DataBits + t_IndexBits> > l_splittedRowEntryStr[t_ParEntries][t_ParEntries];
     hls::stream<ap_uint<1> > l_isEndSplitStr[t_ParEntries];
 #pragma HLS DATAFLOW
@@ -660,150 +669,8 @@ void xBarRow(const unsigned int p_nnzBlocks,
         l_splittedRowEntryStr, l_isEndSplitStr, p_rowEntryStr, p_isEndStr);
 }
 
-/**
- * @brief rowInterleave function that interleave the row entries to parallel accumulators
- *
- * @tparam t_LogParEntries log2 of the number of entries in the input/output vector stream
- * @tparam t_LogParGroups log2 of the number of parallel accumulation paths
- * @tparam t_DataType the data type of the matrix and vector entries
- * @tparam t_IndexType the data type of the indicies
- * @tparam t_DataBits the number of bits for storing the data
- * @tparam t_IndexBits the number of bits for storing the indices
- *
- * @param p_rowEntryStr the input row entry stream
- * @param p_isEndStr the input control stream
- * @param p_rowInterleaveStr the output interleaved row entry stream array
- * @param p_isEndOutStr the output control stream
- */
-template <unsigned int t_LogParEntries,
-          unsigned int t_LogParGroups,
-          typename t_DataType,
-          typename t_IndexType = unsigned int,
-          unsigned int t_DataBits = 32,
-          unsigned int t_IndexBits = 32>
-void rowInterleave(hls::stream<ap_uint<t_DataBits + t_IndexBits> >& p_rowEntryStr,
-                   hls::stream<ap_uint<1> >& p_isEndStr,
-                   hls::stream<ap_uint<t_DataBits + t_IndexBits - t_LogParEntries - t_LogParGroups> >
-                       p_rowInterleaveStr[1 << t_LogParGroups],
-                   hls::stream<ap_uint<1> > p_isEndOutStr[1 << t_LogParGroups]) {
-    const unsigned int t_ParEntries = 1 << t_LogParEntries;
-    const unsigned int t_ParGroups = 1 << t_LogParGroups;
-    const unsigned int t_RowOffsetBits = t_IndexBits - t_LogParEntries - t_LogParGroups;
-
-    ap_uint<1> l_exit = 0;
-    ap_uint<1> l_preDone = 0;
-    ap_uint<1> l_activity = 1;
-
-    while (!l_exit) {
-#pragma HLS PIPELINE
-        if (l_preDone && !l_activity && p_rowEntryStr.empty()) {
-            l_exit = 1;
-        }
-
-        ap_uint<1> l_unused = 0;
-        if (p_isEndStr.read_nb(l_unused)) {
-            l_preDone = 1;
-        }
-
-        l_activity = 0;
-
-        ap_uint<t_DataBits + t_IndexBits> l_val;
-        if (p_rowEntryStr.read_nb(l_val)) {
-            RowEntry<t_DataType, t_IndexType, t_DataBits, t_IndexBits> l_rowEntry;
-            l_rowEntry.toVal(l_val);
-            ap_uint<t_LogParGroups> l_rowGroup =
-                getRowGroup<t_LogParEntries, t_LogParGroups, t_IndexType>(l_rowEntry.getRow());
-            ap_uint<t_RowOffsetBits> l_rowOffset =
-                getRowOffset<t_LogParEntries, t_LogParGroups, t_IndexType, t_IndexBits>(l_rowEntry.getRow());
-            ap_uint<t_DataBits + t_RowOffsetBits> l_rowEntryOutBits;
-            l_rowEntryOutBits.range(t_DataBits + t_RowOffsetBits - 1, t_RowOffsetBits) =
-                l_val.range(t_DataBits + t_IndexBits - 1, t_IndexBits);
-            l_rowEntryOutBits.range(t_RowOffsetBits - 1, 0) = l_rowOffset;
-            p_rowInterleaveStr[l_rowGroup].write(l_rowEntryOutBits);
-            l_activity = 1;
-        }
-    }
-
-    for (unsigned int i = 0; i < t_ParGroups; ++i) {
-#pragma HLS UNROLL
-        p_isEndOutStr[i].write(1);
-    }
-}
-
-/**
- * @brief rowRegAcc function that returns the accumulated results in the register
- *
- * @tparam t_LogParEntries log2 of the number of entries in the input/output vector stream
- * @tparam t_DataType the data type of the matrix and vector entries
- * @tparam t_IndexType the data type of the indicies
- * @tparam t_DataBits the number of bits for storing the data
- * @tparam t_RowOffsetBits the number of bits for storing the row offsets
- *
- * @param p_rowEntryStr the input row entry stream
- * @param p_isEndStr the input control stream
- * @param p_rowValStr the output accumulated row entry stream
- * @param p_isEndOutStr the output control stream
- */
-template <unsigned int t_LogParEntriess,
-          typename t_DataType,
-          typename t_IndexType = unsigned int,
-          unsigned int t_DataBits = 32,
-          unsigned int t_RowOffsetBits = 32>
-void rowRegAcc(hls::stream<ap_uint<t_DataBits + t_RowOffsetBits> >& p_rowEntryStr,
-               hls::stream<ap_uint<1> >& p_isEndStr,
-               hls::stream<ap_uint<t_DataBits + t_RowOffsetBits> >& p_rowRegAccStr,
-               hls::stream<ap_uint<1> >& p_isEndOutStr) {
-    const unsigned int t_ParEntriess = 1 << t_LogParEntriess;
-
-    ap_uint<1> l_exit = 0;
-    ap_uint<1> l_preDone = 0;
-    ap_uint<1> l_activity = 1;
-    ap_uint<t_RowOffsetBits> l_rowOffset = 0;
-    WideType<t_DataType, t_ParEntriess> l_sumArr(0);
-#pragma HLS ARRAY_PARTITION variable = l_sumArr complete
-    ap_uint<t_LogParEntriess> l_sumCounter = 0;
-    RowEntry<t_DataType, t_IndexType, t_DataBits, t_RowOffsetBits> l_rowEntryOut;
-
-    while (!l_exit) {
-#pragma HLS PIPELINE
-        if (l_preDone && !l_activity && p_rowEntryStr.empty()) {
-            l_exit = 1;
-        }
-        ap_uint<1> l_unused;
-        if (p_isEndStr.read_nb(l_unused)) {
-            l_preDone = 1;
-        }
-        l_activity = 0;
-
-        ap_uint<t_DataBits + t_RowOffsetBits> l_val;
-        if (p_rowEntryStr.read_nb(l_val)) {
-            l_activity = 1;
-            RowEntry<t_DataType, t_IndexType, t_DataBits, t_RowOffsetBits> l_rowEntry(0, 0);
-            l_rowEntry.toVal(l_val);
-            if ((l_rowEntry.getRow() != l_rowOffset) || !l_sumCounter.or_reduce()) {
-                l_rowEntryOut.getRow() = l_rowOffset;
-                l_rowEntryOut.getVal() = BinarySum<t_DataType, t_ParEntriess>::sum(l_sumArr.getValAddr());
-                p_rowRegAccStr.write(l_rowEntryOut.toBits());
-                l_rowOffset = l_rowEntry.getRow();
-                l_sumCounter = 1;
-                l_sumArr[0] = l_rowEntry.getVal();
-                for (unsigned int i = 1; i < t_ParEntriess; ++i) {
-                    l_sumArr[i] = 0;
-                }
-            } else {
-                l_sumCounter++;
-                (void)l_sumArr.shift(l_rowEntry.getVal());
-            }
-        }
-    }
-    l_rowEntryOut.getVal() = BinarySum<t_DataType, t_ParEntriess>::sum(l_sumArr.getValAddr());
-    l_rowEntryOut.getRow() = l_rowOffset;
-    p_rowRegAccStr.write(l_rowEntryOut.toBits());
-    p_isEndOutStr.write(1);
-}
-
 template <unsigned int t_MaxRowBlocks,
-          unsigned int t_LogParGroups,
+          unsigned int t_ParEntries,
           typename t_DataType,
           typename t_IndexType = unsigned int,
           unsigned int t_DataBits = 32,
@@ -812,22 +679,32 @@ void rowMemAcc(const unsigned int p_rowBlocks,
                hls::stream<ap_uint<t_DataBits + t_RowOffsetBits> >& p_rowEntryStr,
                hls::stream<ap_uint<1> >& p_isEndStr,
                hls::stream<ap_uint<t_DataBits> >& p_rowValStr) {
-    const unsigned int t_ParGroups = 1 << t_LogParGroups;
+    static const unsigned int t_Latency = 6;
 
-    t_DataType l_rowStore[t_MaxRowBlocks];
+    t_DataType l_rowStore[t_MaxRowBlocks][t_Latency];
+#pragma HLS RESOURCE variable = l_rowStore core = RAM_T2P
+#pragma HLS ARRAY_PARTITION variable = l_rowStore complete dim = 2
 
+init_mem:
     for (unsigned int i = 0; i < p_rowBlocks; ++i) {
-        l_rowStore[i] = 0;
+#pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT max = t_MaxRowBlocks
+        for (unsigned int j = 0; j < t_Latency; j++) {
+            l_rowStore[i][j] = 0;
+        }
     }
 
     ap_uint<1> l_exit = 0;
     ap_uint<1> l_preDone = 0;
-    ap_uint<1> l_activity = 1;
+    BoolArr<t_Latency> l_activity(true);
+#pragma HLS ARRAY_PARTITION variable = l_activity complete dim = 1
 
+accumulate:
     while (!l_exit) {
-#pragma HLS PIPELINE II = t_ParGroups
+#pragma HLS PIPELINE II = t_Latency
+        //#pragma HLS DEPENDENCE variable = l_rowStore array inter false
 
-        if (l_preDone && !l_activity && p_rowEntryStr.empty()) {
+        if (l_preDone && !l_activity.Or() && p_rowEntryStr.empty()) {
             l_exit = 1;
         }
         ap_uint<1> l_unused;
@@ -835,83 +712,54 @@ void rowMemAcc(const unsigned int p_rowBlocks,
             l_preDone = 1;
         }
 
-        l_activity = 0;
-
         ap_uint<t_DataBits + t_RowOffsetBits> l_val;
-        if (p_rowEntryStr.read_nb(l_val)) {
-            t_DataType l_rowVal;
-            //#pragma HLS RESOURCE variable=l_rowVal latency=5
-            l_activity = 1;
+        for (unsigned int l_mod = 0; l_mod < t_Latency; ++l_mod) {
+            l_activity[l_mod] = p_rowEntryStr.read_nb(l_val);
             RowEntry<t_DataType, t_IndexType, t_DataBits, t_RowOffsetBits> l_rowEntry;
             l_rowEntry.toVal(l_val);
-            t_IndexType l_rowIndex = l_rowEntry.getRow();
-            l_rowVal = l_rowStore[l_rowIndex];
-            l_rowVal += l_rowEntry.getVal();
-            l_rowStore[l_rowIndex] = l_rowVal;
+            t_IndexType l_rowIndex = (l_activity[l_mod]) ? l_rowEntry.getRow() / t_ParEntries : 0;
+#ifndef __SYNTHESIS__
+            assert(l_rowIndex < t_MaxRowBlocks);
+#endif
+            t_DataType l_rowVal = l_rowStore[l_rowIndex][l_mod];
+            l_rowVal += (l_activity[l_mod]) ? l_rowEntry.getVal() : 0;
+            l_rowStore[l_rowIndex][l_mod] = l_rowVal;
         }
     }
 
     for (unsigned int i = 0; i < p_rowBlocks; ++i) {
-#pragma HLS PIPELINE
-        t_DataType l_rowVal = l_rowStore[i];
+#pragma HLS PIPELINE II = 1
+        t_DataType l_addRegs[t_Latency];
+#pragma HLS ARRAY_PARTITION variable = l_addRegs complete dim = 1
+#pragma HLS LOOP_TRIPCOUNT max = t_MaxRowBlocks
+        for (unsigned int b = 0; b < t_Latency; ++b) {
+#pragma HLS UNROLL
+            l_addRegs[b] = l_rowStore[i][b];
+        }
+        t_DataType l_sum = 0;
+        //#pragma HLS BIND_OP variable = l_sum op = fadd impl = fabric
+        for (unsigned int b = 0; b < t_Latency; ++b) {
+#pragma HLS UNROLL
+            l_sum += l_addRegs[b];
+        }
         BitConv<t_DataType> l_conVal;
-        ap_uint<t_DataBits> l_rowBits = l_conVal.toBits(l_rowVal);
+        ap_uint<t_DataBits> l_rowBits = l_conVal.toBits(l_sum);
         p_rowValStr.write(l_rowBits);
     }
 }
 
 /**
- * @brief rowAcc function that returns the accumulated results
+ * @brief rowAgg function that aggregates multiple row entry streams into one row entry stream
  *
- * @tparam t_MaxRowBlocks the maximum number of row entries buffered onchip per PE
- * @tparam t_LogParEntries log2 of the number of entries in the input/output vector stream
- * @tparam t_LogParGroups log2 of the number of parallel accumulation paths
- * @tparam t_DataType the data type of the matrix and vector entries
- * @tparam t_IndexType the data type of the indicies
- * @tparam t_DataBits the number of bits for storing the data
- * @tparam t_IndexBits the number of bits for storing the indices
- * @tparam t_RowOffsetBits the number of bits for storing the row offsets
- *
- * @param p_rowBlocks the number of row vectors
- * @param p_isEndStr the input control stream
- * @param p_nnzColValStr the input col vector stream
- * @param p_rowIndexStr the input NNZ index vector stream
- * @param p_rowValStr the output row entry stream
- */
-template <unsigned int t_MaxRowBlocks,
-          unsigned int t_LogParEntries,
-          unsigned int t_LogParGroups,
-          typename t_DataType,
-          typename t_IndexType = unsigned int,
-          unsigned int t_DataBits = 32,
-          unsigned int t_RowOffsetBits = 32>
-void rowAcc(const unsigned int p_rowBlocks,
-            hls::stream<ap_uint<t_DataBits + t_RowOffsetBits> >& p_rowEntryStr,
-            hls::stream<ap_uint<1> >& p_isEndStr,
-            hls::stream<ap_uint<t_DataBits> >& p_rowValStr) {
-    hls::stream<ap_uint<t_DataBits + t_RowOffsetBits> > l_rowRegAccStr;
-    hls::stream<ap_uint<1> > l_isEndStr;
-
-#pragma HLS DATAFLOW
-    rowRegAcc<t_LogParEntries, t_DataType, t_IndexType, t_DataBits, t_RowOffsetBits>(p_rowEntryStr, p_isEndStr,
-                                                                                     l_rowRegAccStr, l_isEndStr);
-
-    rowMemAcc<t_MaxRowBlocks, t_LogParGroups, t_DataType, t_IndexType, t_DataBits, t_RowOffsetBits>(
-        p_rowBlocks, l_rowRegAccStr, l_isEndStr, p_rowValStr);
-}
-
-/**
- * @brief rowAgg function that aggregates multiple row entry streams into one row vector stream
- *
- * @tparam t_ParEntries the number of entries in the input/output vector stream
+ * @tparam t_ParEntries the parallelly processed entries in the input/output vector stream
  * @tparam t_ParGroups  the number of parallel accumulation paths
  * @tparam t_DataType the data type of the matrix and vector entries
  * @tparam t_IndexType the data type of the indicies
  * @tparam t_DataBits the number of bits for storing the data
  *
- * @param p_rowBlocks the number of row vectors
+ * @param p_rowBlocks the number of row blocks
  * @param p_rowValStr the iutput row entry stream array
- * @param p_rowAggStr the output aggregated row vector stream
+ * @param p_rowAggStr the output aggregated row entry stream
  */
 template <unsigned int t_ParEntries,
           unsigned int t_ParGroups,
@@ -919,34 +767,32 @@ template <unsigned int t_ParEntries,
           typename t_IndexType,
           unsigned int t_DataBits = 32>
 void rowAgg(const unsigned int p_rowBlocks,
-            hls::stream<ap_uint<t_DataBits> > p_rowValStr[t_ParEntries][t_ParGroups],
+            hls::stream<ap_uint<t_DataBits> > p_rowValStr[t_ParEntries],
             hls::stream<ap_uint<t_DataBits * t_ParEntries> >& p_rowAggStr) {
     for (unsigned int i = 0; i < p_rowBlocks; ++i) {
-        for (unsigned int g = 0; g < t_ParGroups; ++g) {
 #pragma HLS PIPELINE
-            ap_uint<t_DataBits * t_ParEntries> l_valOut;
-            for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                ap_uint<t_DataBits> l_val = p_rowValStr[b][g].read();
-                l_valOut.range((b + 1) * t_DataBits - 1, b * t_DataBits) = l_val;
-            }
-            p_rowAggStr.write(l_valOut);
+        ap_uint<t_DataBits * t_ParEntries> l_valOut;
+        for (unsigned int b = 0; b < t_ParEntries; ++b) {
+            ap_uint<t_DataBits> l_val = p_rowValStr[b].read();
+            l_valOut.range((b + 1) * t_DataBits - 1, b * t_DataBits) = l_val;
         }
+        p_rowAggStr.write(l_valOut);
     }
 }
 
 /**
  * @brief cscRow function that returns the multiplication results of a sparse matrix and a dense vector
  *
- * @tparam t_MaxRowBlocks the maximum number of row entries buffered onchip per PE
- * @tparam t_LogParEntries log2 of the number of entries in the input/output vector stream
+ * @tparam t_MaxRowBlocks the maximum number of row entrie blocks buffered onchip per PE
+ * @tparam t_LogParEntries log2 of the parallelly processed entries in the input/output vector stream
  * @tparam t_LogParGroups log2 of the number of parallel accumulation paths
  * @tparam t_DataType the data type of the matrix and vector entries
  * @tparam t_IndexType the data type of the indicies
  * @tparam t_DataBits the number of bits for storing the data
  * @tparam t_IndexBits the number of bits for storing the indices
  *
- * @param p_nnzBlocks the number of NNZ vectors
- * @param p_rowBlocks the number of row vectors
+ * @param p_nnzBlocks the number of NNZ vector blocks
+ * @param p_rowBlocks the number of result row vector blocks
  * @param p_nnzValStr the input NNZ value vector stream
  * @param p_nnzColValStr the input col vector stream
  * @param p_rowIndexStr the input NNZ index vector stream
@@ -967,28 +813,20 @@ void cscRow(const unsigned int p_nnzBlocks,
             hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_rowAggStr) {
     const unsigned int t_ParEntries = 1 << t_LogParEntries;
     const unsigned int t_ParGroups = 1 << t_LogParGroups;
-    const unsigned int t_RowOffsetBits = t_IndexBits - t_LogParEntries - t_LogParGroups;
+    const unsigned int t_RowOffsetBits = t_IndexBits;
 
     hls::stream<ap_uint<t_DataBits + t_IndexBits> > l_xBarRowDatStr[t_ParEntries];
+#pragma HLS STREAM variable = l_xBarRowDatStr depth = 16
     hls::stream<ap_uint<1> > l_xBarRowContStr[t_ParEntries];
-    hls::stream<ap_uint<t_DataBits + t_RowOffsetBits> > l_rowIntDatStr[t_ParEntries][t_ParGroups];
-    hls::stream<ap_uint<1> > l_rowIntContStr[t_ParEntries][t_ParGroups];
-    hls::stream<ap_uint<t_DataBits> > l_rowValStr[t_ParEntries][t_ParGroups];
+    hls::stream<ap_uint<t_DataBits> > l_rowValStr[t_ParEntries];
 
 #pragma HLS DATAFLOW
     xBarRow<t_LogParEntries, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(
         p_nnzBlocks, p_nnzValStr, p_nnzColValStr, p_rowIndexStr, l_xBarRowDatStr, l_xBarRowContStr);
-
     for (unsigned int i = 0; i < t_ParEntries; ++i) {
 #pragma HLS UNROLL
-        rowInterleave<t_LogParEntries, t_LogParGroups, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(
-            l_xBarRowDatStr[i], l_xBarRowContStr[i], l_rowIntDatStr[i], l_rowIntContStr[i]);
-
-        for (unsigned int j = 0; j < t_ParGroups; ++j) {
-#pragma HLS UNROLL
-            rowAcc<t_MaxRowBlocks, 1, t_LogParGroups, t_DataType, t_IndexType, t_DataBits, t_RowOffsetBits>(
-                p_rowBlocks, l_rowIntDatStr[i][j], l_rowIntContStr[i][j], l_rowValStr[i][j]);
-        }
+        rowMemAcc<t_MaxRowBlocks, t_ParEntries, t_DataType, t_IndexType, t_DataBits, t_RowOffsetBits>(
+            p_rowBlocks, l_xBarRowDatStr[i], l_xBarRowContStr[i], l_rowValStr[i]);
     }
 
     rowAgg<t_ParEntries, t_ParGroups, t_DataType, t_IndexType, t_DataBits>(p_rowBlocks, l_rowValStr, p_rowAggStr);

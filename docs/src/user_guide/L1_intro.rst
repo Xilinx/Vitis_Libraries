@@ -36,7 +36,7 @@ The Scatter-gather logic for selecting input dense vector entries is implmented 
 2. Row-wise accumulator
 -----------------------
 
-The row-wise accumulator is implemened by the L1 primitive ``cscRow``. This primitive basically multiplies the values of multiple NNZ entries with their correponding dense column vector values, and accumulates the results according to the row indices. The basic functions used by this primitive include ``rowInterleave`` and ``rowAcc``. The ``rowAcc`` primitive includes ``rowRegAcc`` and rowMemAcc to accumulate the intermediate results in the register and memory to avoid pipeline bubbles. The ``rowAgg`` module collects the results from all accumulators and outputs the results in sequence.
+The row-wise accumulator is implemened by the L1 primitive ``cscRow``. This primitive basically multiplies the values of multiple NNZ entries with their correponding dense column vector values, and accumulates the results according to the row indices. The basic functions used by this primitive include ``xBarRow``, ``rowMemAcc`` and ``rowAgg``. The ``xBarRow`` primitive includes ``formRowEntry`` logic for multiplying the NNZ values with the corresponding input column vector entries and the ``split``, ``merge`` logic for distributing the multiplication results to the corresponding row banks.  The ``rowMemAcc`` primitives accumulates the intermediate results in on-chip memories. Multiple on-chip memory buffers are provided to remove the floating pointer accumulation bubbles. The ``rowAgg`` primitive collects the results from all accumulators and outputs the results in sequence.
 
 For more information, see :ref:`L1_cscRow`.
 

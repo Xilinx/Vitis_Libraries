@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ add_files -tb "${XF_PROJ_ROOT}/L1/tests/hw/dispColVec/test.cpp" -cflags "-I ${XF
 set_top uut_top
 
 open_solution -reset $SOLN
+
 
 
 

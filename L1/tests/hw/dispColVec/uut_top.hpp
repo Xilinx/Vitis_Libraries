@@ -19,11 +19,8 @@
 #include "xf_sparse.hpp"
 
 void uut_top(const unsigned int t_chId,
-             hls::stream<ap_uint<32> >& p_paramStr,
              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& p_datStr,
-             hls::stream<ap_uint<32> >& p_paramFwdStr,
              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& p_datFwdStr,
-             hls::stream<ap_uint<32> >& p_paramOutStr,
              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& p_datOutStr);
 
 #endif

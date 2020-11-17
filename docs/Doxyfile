@@ -799,10 +799,12 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ../L1/include/hw/xf_sparse \
-                         ../L2/include/hw/loadColPtrValKernel.hpp \
+                         ../L2/include/hw/loadColKernel.hpp \
+                         ../L2/include/hw/bufTransColVecKernel.hpp \
+                         ../L2/include/hw/bufTransNnzColKernel.hpp \
                          ../L2/include/hw/xBarColKernel.hpp \
-                         ../L2/include/hw/cscRowPktKernel.hpp \
-                         ../L2/include/hw/storeDatPktKernel.hpp
+                         ../L2/include/hw/cscRowKernel.hpp \
+                         ../L2/include/hw/readWriteHbmKernel.cpp
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

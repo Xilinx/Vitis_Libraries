@@ -26,7 +26,7 @@ using namespace std;
 using namespace xf::sparse;
 int main(int argc, char** argv) {
     if (argc < 2) {
-        cout << "ERROR: passed %d arguments, expected at least i2 arguments." << endl;
+        cout << "ERROR: passed " << argc << " arguments, expected at least 2 arguments." << endl;
         cout << "  Usage: gen_partition.exe mtxFile" << endl;
         return EXIT_FAILURE;
     }

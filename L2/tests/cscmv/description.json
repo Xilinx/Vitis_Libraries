@@ -1,33 +1,35 @@
 {
-    "gui": true,
-    "name": "Xilinx Single CSCMV Unit", 
+    "gui": false, 
+    "name": "Xilinx CSCMV Unit", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
-        "u280"
+        "u280", 
+        "u50"
     ], 
-    "platform_blacklist": [],
+    "platform_blacklist": [
+        "other"
+    ], 
     "platform_properties": {
         "u280": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                    ]
+                    "symbols": []
                 }
             }, 
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/compile_opts.ini"
+                        "--config PROJECT/compile_opts.cfg"
                     ]
                 }
             }
-        } 
-    },  
+        }
+    }, 
     "launch": [
         {
-        "name": "generic launch for all flows",
+            "name": "generic launch for all flows", 
             "cmd_args": " BUILD/cscmv.xclbin 32 16 64"
         }
     ], 
@@ -46,25 +48,25 @@
             "includepaths": [
                 "LIB_DIR/L2/include/sw", 
                 "LIB_DIR/L1/include/sw"
-            ],
+            ], 
             "symbols": [
-                "SPARSE_maxColMemBlocks=64",
-                "SPARSE_maxRowBlocks=128",
-                "SPARSE_dataType=float",
-                "SPARSE_indexType=uint32_t",
-                "SPARSE_logParEntries=2",
-                "SPARSE_parEntries=4",
+                "SPARSE_maxColMemBlocks=64", 
+                "SPARSE_maxRowBlocks=128", 
+                "SPARSE_dataType=float", 
+                "SPARSE_indexType=uint32_t", 
+                "SPARSE_logParEntries=2", 
+                "SPARSE_parEntries=4", 
                 "SPARSE_logParGroups=1", 
-                "SPARSE_parGroups=2",
-                "SPARSE_dataBits=32",
-                "SPARSE_indexBits=32",
-                "SPARSE_hbmMemBits=256",
-                "SPARSE_hbmChannels=4",
-                "SPARSE_hbmChannelMegaBytes=256",
-                "SPARSE_ddrMemBits=512",
-                "SPARSE_printWidth=6",
+                "SPARSE_parGroups=2", 
+                "SPARSE_dataBits=32", 
+                "SPARSE_indexBits=32", 
+                "SPARSE_hbmMemBits=256", 
+                "SPARSE_hbmChannels=4", 
+                "SPARSE_hbmChannelMegaBytes=256", 
+                "SPARSE_ddrMemBits=512", 
+                "SPARSE_printWidth=6", 
                 "SPARSE_pageSize=4096"
-            ],
+            ], 
             "options": "-O0 "
         }
     }, 
@@ -74,29 +76,29 @@
                 "LIB_DIR/L1/include/hw", 
                 "LIB_DIR/L2/include/hw", 
                 "LIB_DIR/../blas/L1/include/hw"
-            ],
+            ], 
             "symbols": [
-                "SPARSE_maxColMemBlocks=64",
-                "SPARSE_maxRowBlocks=128",
-                "SPARSE_dataType=float",
-                "SPARSE_indexType=uint32_t",
-                "SPARSE_logParEntries=2",
-                "SPARSE_parEntries=4",
+                "SPARSE_maxColMemBlocks=64", 
+                "SPARSE_maxRowBlocks=128", 
+                "SPARSE_dataType=float", 
+                "SPARSE_indexType=uint32_t", 
+                "SPARSE_logParEntries=2", 
+                "SPARSE_parEntries=4", 
                 "SPARSE_logParGroups=1", 
-                "SPARSE_parGroups=2",
-                "SPARSE_dataBits=32",
-                "SPARSE_indexBits=32",
-                "SPARSE_hbmMemBits=256",
-                "SPARSE_hbmChannels=4",
-                "SPARSE_hbmChannelMegaBytes=256",
-                "SPARSE_ddrMemBits=512",
-                "SPARSE_printWidth=6",
+                "SPARSE_parGroups=2", 
+                "SPARSE_dataBits=32", 
+                "SPARSE_indexBits=32", 
+                "SPARSE_hbmMemBits=256", 
+                "SPARSE_hbmChannels=4", 
+                "SPARSE_hbmChannelMegaBytes=256", 
+                "SPARSE_ddrMemBits=512", 
+                "SPARSE_printWidth=6", 
                 "SPARSE_pageSize=4096"
             ]
         }, 
         "linker": {
             "ldclflags": [
-                "--config PROJECT/conn_u280.ini"
+                "--config PROJECT/conn_u280.cfg"
             ]
         }
     }, 
@@ -106,67 +108,66 @@
                 {
                     "location": "LIB_DIR/L2/src/hw/loadColPtrValKernel.cpp", 
                     "frequency": 300, 
-                    "name": "loadColPtrValKernel",
-                    "num_compute_units": 1,
+                    "name": "loadColPtrValKernel", 
+                    "num_compute_units": 1, 
                     "compute_units": [
                         {
-                            "name": "loadColPtrValKernel_1",
-                            "slr": "SLR1",
+                            "name": "loadColPtrValKernel_1", 
+                            "slr": "SLR1", 
                             "arguments": [
                                 {
-                                    "name": "p_memColVal",
+                                    "name": "p_memColVal", 
                                     "memory": "DDR[1]"
-                                },
+                                }, 
                                 {
-                                    "name": "p_memColPtr",
+                                    "name": "p_memColPtr", 
                                     "memory": "DDR[1]"
                                 }
                             ]
                         }
                     ]
-                },
+                }, 
                 {
                     "location": "LIB_DIR/L2/src/hw/xBarColKernel.cpp", 
                     "frequency": 300, 
                     "name": "xBarColKernel"
-                },
+                }, 
                 {
                     "location": "LIB_DIR/L2/src/hw/cscRowPktKernel.cpp", 
                     "frequency": 300, 
-                    "name": "cscRowPktKernel",
-                    "num_compute_units": 1,
+                    "name": "cscRowPktKernel", 
+                    "num_compute_units": 1, 
                     "compute_units": [
                         {
-                            "name": "cscRowPktKernel_1",
-                            "slr": "SLR0",
+                            "name": "cscRowPktKernel_1", 
+                            "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "p_aNnzIdx",
+                                    "name": "p_aNnzIdx", 
                                     "memory": "HBM[0]"
                                 }
                             ]
                         }
                     ]
-                },
+                }, 
                 {
                     "location": "LIB_DIR/L2/src/hw/storeDatPktKernel.cpp", 
                     "frequency": 300, 
-                    "name": "storeDatPktKernel",
-                    "num_compute_units": 1,
+                    "name": "storeDatPktKernel", 
+                    "num_compute_units": 1, 
                     "compute_units": [
                         {
-                            "name": "storeDatPktKernel_1",
-                            "slr": "SLR1",
+                            "name": "storeDatPktKernel_1", 
+                            "slr": "SLR1", 
                             "arguments": [
                                 {
-                                    "name": "p_memPtr",
+                                    "name": "p_memPtr", 
                                     "memory": "DDR[1]"
                                 }
                             ]
                         }
                     ]
                 }
-                
             ], 
             "frequency": 300, 
             "name": "cscmv"
@@ -180,15 +181,26 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 520
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 470, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
-            "vitis_sw_emu",
-            "vitis_hw_emu",
-            "vitis_hw"
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }
-} 
+}
