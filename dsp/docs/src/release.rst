@@ -22,7 +22,12 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-1.0
-----
+2020.2
+------
+
+Revised the APIs to fully support Vitis HLS.
+
+2020.1
+------
 
 The 1.0 release introduces L1 HLS primitives for Discrete Fourier Transform for 1-D and 2-D input data. 

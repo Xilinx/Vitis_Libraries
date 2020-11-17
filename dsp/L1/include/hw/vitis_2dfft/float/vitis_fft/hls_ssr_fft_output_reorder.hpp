@@ -26,12 +26,12 @@
 
 /*
  =========================================================================================
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
  -_-
 
  The digitReversedDataReOrder  defined in other file function is used to
@@ -56,14 +56,14 @@
  deals with it through different specializations. is defined
  in this file
 
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
- -_-                                                                                   -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
+ -_- -_-
  ========================================================================================
  */
 
@@ -87,13 +87,44 @@ TIME_LOOP:
         outputTimeIndex = digitReversalFractionIsLSB<t_L / t_R, t_R>(inputTimeIndex);
         T_dtype sampleShufflingBuffer[t_R];
 #pragma HLS ARRAY_PARTITION variable = sampleShufflingBuffer complete dim = 1
-#pragma HLS DATA_PACK variable = sampleShufflingBuffer
+#pragma HLS data_pack variable = sampleShufflingBuffer
 
     SSR_READ_LOOP:
         for (unsigned int r = 0; r < t_R; r++) {
 #pragma HLS UNROLL
             sampleShufflingBuffer[(r + outputTimeIndex) & (ssrFFTLog2BitwiseAndModMask<t_R>::val)] =
                 p_inData[r][inputTimeIndex];
+        }
+    SSR_WRITE_LOOP:
+        for (unsigned int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            p_pingPongBuffOut[r][outputTimeIndex] = sampleShufflingBuffer[r]; // digit reversal write to the memory
+        }
+    }
+}
+template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
+void crissCrossAndTimeDigitSwap(hls::stream<T_dtype> p_inData[t_R], T_dtype2 p_pingPongBuffOut[t_R][t_L / t_R]) {
+#pragma HLS INLINE off
+
+    unsigned int inputTimeIndex;
+    unsigned int outputTimeIndex;
+    const unsigned int F = ((t_R * t_R) / t_L) > 1 ? ((t_R * t_R) / t_L) : 1;
+
+///////////////////////////////////// Shuffle the Data and Write to PingPong Buffer ////////////////////////////////////
+TIME_LOOP:
+    for (unsigned int t = 0; t < t_L / t_R; t++) {
+#pragma HLS PIPELINE II = 1 // rewind
+        inputTimeIndex = t;
+        outputTimeIndex = digitReversalFractionIsLSB<t_L / t_R, t_R>(inputTimeIndex);
+        T_dtype sampleShufflingBuffer[t_R];
+#pragma HLS ARRAY_PARTITION variable = sampleShufflingBuffer complete dim = 1
+    //#pragma HLS data_pack variable = sampleShufflingBuffer
+
+    SSR_READ_LOOP:
+        for (unsigned int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            sampleShufflingBuffer[(r + outputTimeIndex) & (ssrFFTLog2BitwiseAndModMask<t_R>::val)] = p_inData[r].read();
+            //                p_inData[r][inputTimeIndex];
         }
     SSR_WRITE_LOOP:
         for (unsigned int r = 0; r < t_R; r++) {
@@ -122,7 +153,7 @@ TIME_LOOP:
             (ssrFFTLog2BitwiseAndModMask<t_R>::val); //   minOf_R_and_L_over_R; // can be converted to masking
         T_dtype sampleShufflingBuffer[t_R];
 #pragma HLS ARRAY_PARTITION variable = sampleShufflingBuffer complete dim = 1
-#pragma HLS DATA_PACK variable = sampleShufflingBuffer
+#pragma HLS data_pack variable = sampleShufflingBuffer
 
     SSR_READ_LOOP:
         for (unsigned int r = 0; r < t_R; r++) {
@@ -130,6 +161,45 @@ TIME_LOOP:
             // replaced//sampleShufflingBuffer[(r + InputShuffleAmount) % t_R] = p_inData[r][inputTimeIndex];
             sampleShufflingBuffer[(r + InputShuffleAmount) & (ssrFFTLog2BitwiseAndModMask<t_R>::val)] =
                 p_inData[r][inputTimeIndex];
+            // sampleShufflingBuffer[(outputTimeIndex) % t_R] = p_inData[inputTimeIndex][r];
+        }
+    SSR_WRITE_LOOP:
+        for (unsigned int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            p_pingPongBuffOut[r][outputTimeIndex] = sampleShufflingBuffer[r]; // digit reversal write to the memory
+        }
+    }
+}
+template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
+void crissCrossAndTimeDigitSwapSpecial(hls::stream<T_dtype> p_inData[t_R], T_dtype2 p_pingPongBuffOut[t_R][t_L / t_R]) {
+#pragma HLS INLINE off
+
+    unsigned int inputTimeIndex;
+    unsigned int outputTimeIndex;
+    const unsigned int F = ((t_R * t_R) / t_L) > 1 ? ((t_R * t_R) / t_L) : 1;
+///////////////////////////////////// Shuffle the Data and Write to Buffer ////////////////////////////////////
+TIME_LOOP:
+    for (unsigned int t = 0; t < t_L / t_R; t++) {
+#pragma HLS PIPELINE II = 1 // rewind enable_flush
+        inputTimeIndex = t;
+        outputTimeIndex = digitReversal_m<t_L / t_R, t_R>(inputTimeIndex);
+        // replaced//unsigned int InputShuffleAmount = (t*F) % t_R;//   minOf_R_and_L_over_R; // can be converted to
+        // masking
+        unsigned int InputShuffleAmount =
+            (t << (ssrFFTLog2<F>::val)) &
+            (ssrFFTLog2BitwiseAndModMask<t_R>::val); //   minOf_R_and_L_over_R; // can be converted to masking
+        T_dtype sampleShufflingBuffer[t_R];
+#pragma HLS ARRAY_PARTITION variable = sampleShufflingBuffer complete dim = 1
+#pragma HLS data_pack variable = sampleShufflingBuffer
+
+    SSR_READ_LOOP:
+        for (unsigned int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            //#pragma HLS latency max = 1 min = 1
+            // replaced//sampleShufflingBuffer[(r + InputShuffleAmount) % t_R] = p_inData[r][inputTimeIndex];
+            sampleShufflingBuffer[(r + InputShuffleAmount) & (ssrFFTLog2BitwiseAndModMask<t_R>::val)] =
+                p_inData[r].read();
+            //                p_inData[r][inputTimeIndex];
             // sampleShufflingBuffer[(outputTimeIndex) % t_R] = p_inData[inputTimeIndex][r];
         }
     SSR_WRITE_LOOP:
@@ -153,7 +223,7 @@ TIME_LOOP:
     for (unsigned int t = 0; t < t_L / t_R; t++) {
         T_dtype2 temp[t_R];
 #pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
-#pragma HLS DATA_PACK variable = temp
+#pragma HLS data_pack variable = temp
 
 #pragma HLS PIPELINE II = 1 // rewind      // This loop has a rewind issue.
 
@@ -179,6 +249,45 @@ TIME_LOOP:
     }
 }
 template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
+void diagonalWrapIndexReadFromPIPOAndStreamOut(T_dtype p_pingPongBuffOut[t_R][t_L / t_R],
+                                               hls::stream<T_dtype2> p_outData[t_R]) {
+#pragma HLS INLINE off
+
+    const unsigned int F = ((t_R * t_R) / t_L) > 1 ? ((t_R * t_R) / t_L) : 1;
+    const unsigned int outputShuffleAmount = ssrFFTLog2<F>::val;
+    unsigned int pingPongTimeIndex;
+    unsigned int pingPongSuperSampleIndex;
+TIME_LOOP:
+    for (unsigned int t = 0; t < t_L / t_R; t++) {
+        T_dtype2 temp[t_R];
+#pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
+//#pragma HLS data_pack variable = temp
+
+#pragma HLS PIPELINE II = 1 // rewind      // This loop has a rewind issue.
+
+        // replced// int ssrDimensionAddressOffset = ( t /(  t_L/(t_R*t_R)) ) % t_R;
+        int ssrDimensionAddressOffset =
+            (t >> (ssrFFTLog2<t_L / (t_R * t_R)>::val)) & (ssrFFTLog2BitwiseAndModMask<t_R>::val);
+        int timeIndexAddressOffset = (t & (ssrFFTLog2BitwiseAndModMask<(t_L / (t_R * t_R))>::val))
+                                     << (ssrFFTLog2<t_R>::val);
+    // int timeIndexAddressOffset = (t % (t_L/(t_R*t_R)))*t_R;
+    SSR_LOOP0:
+        for (unsigned int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            /*This expression is replaced below*/ // int pingPongSuperSampleIndex = ((stage-1) + r) % t_R;
+            int pingPongSuperSampleIndex = ((ssrDimensionAddressOffset) + r) & ssrFFTLog2BitwiseAndModMask<t_R>::val;
+            int pingPongTimeIndex = ((t_R + r - ssrDimensionAddressOffset) % t_R) + timeIndexAddressOffset;
+            temp[(t_R + r - ssrDimensionAddressOffset) % t_R] = p_pingPongBuffOut[r][pingPongTimeIndex];
+        }
+    SSR_LOOP:
+        for (unsigned int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            p_outData[r].write(temp[r]);
+        }
+    }
+}
+
+template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
 void diagonalWrapIndexReadFromPIPOAndStreamOutSpecial(T_dtype p_pingPongBuffOut[t_R][t_L / t_R],
                                                       T_dtype2 p_outData[t_R][t_L / t_R]) {
 #pragma HLS INLINE off
@@ -192,7 +301,7 @@ TIME_LOOP:
 #pragma HLS PIPELINE II = 1 // rewind    // This loop has a reqind issue
         T_dtype2 temp[t_R];
 #pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
-#pragma HLS DATA_PACK variable = temp
+#pragma HLS data_pack variable = temp
 
         // replaced//int ssrDimensionAddressOffset =( F*t ) % t_R;
         int ssrDimensionAddressOffset = (t << (ssrFFTLog2<F>::val)) & (ssrFFTLog2BitwiseAndModMask<t_R>::val);
@@ -224,6 +333,52 @@ TIME_LOOP:
         }
     }
 }
+template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
+void diagonalWrapIndexReadFromPIPOAndStreamOutSpecial(T_dtype p_pingPongBuffOut[t_R][t_L / t_R],
+                                                      hls::stream<T_dtype2> p_outData[t_R]) {
+#pragma HLS INLINE off
+    ///////////////////////////////////// Shuffle the Data and Write to Buffer ////////////////////////////////////
+    const unsigned int F = ((t_R * t_R) / t_L) > 1 ? ((t_R * t_R) / t_L) : 1; // t_R is always greater than F
+    unsigned int pingPongTimeIndex;
+    unsigned int pingPongSuperSampleIndex;
+    const unsigned int outputShuffleAmount = ssrFFTLog2<F>::val;
+TIME_LOOP:
+    for (unsigned int t = 0; t < t_L / t_R; t++) {
+#pragma HLS PIPELINE II = 1 // rewind    // This loop has a reqind issue
+        T_dtype2 temp[t_R];
+#pragma HLS ARRAY_PARTITION variable = temp complete dim = 1
+#pragma HLS data_pack variable = temp
+
+        // replaced//int ssrDimensionAddressOffset =( F*t ) % t_R;
+        int ssrDimensionAddressOffset = (t << (ssrFFTLog2<F>::val)) & (ssrFFTLog2BitwiseAndModMask<t_R>::val);
+
+        // replaced//	int timeIndexAddressOffset = ( t_R * (t / t_R) ) % (t_L/t_R);
+        int timeIndexAddressOffset =
+            ((t >> (ssrFFTLog2<t_R>::val)) << (ssrFFTLog2<t_R>::val)) & (ssrFFTLog2BitwiseAndModMask<t_L / t_R>::val);
+    SSR_LOOP0:
+        for (unsigned int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            ap_uint<ssrFFTLog2<t_R>::val> rotated_r = r;
+            rotated_r.lrotate(outputShuffleAmount);
+            // replaced//int pingPongSuperSampleIndex = ((stage-1) + rotated_r) % t_R;
+            int pingPongSuperSampleIndex =
+                r; // ((ssrDimensionAddressOffset) + rotated_r) & (ssrFFTLog2BitwiseAndModMask<t_R>::val);
+
+            // replaced//int pingPongTimeIndex=(r+timeIndexAddressOffset)%(t_L/t_R);
+            ap_uint<ssrFFTLog2<t_R>::val> rev_rotated_r = (t_R + r - ssrDimensionAddressOffset) % t_R;
+            rev_rotated_r.rrotate(outputShuffleAmount);
+            int pingPongTimeIndex =
+                (rev_rotated_r + timeIndexAddressOffset) & (ssrFFTLog2BitwiseAndModMask<t_L / t_R>::val);
+            temp[rev_rotated_r] = p_pingPongBuffOut[r][pingPongTimeIndex];
+            // CHECK_COVEARAGE;
+        }
+    SSR_LOOP:
+        for (unsigned int r = 0; r < t_R; r++) {
+#pragma HLS UNROLL
+            p_outData[r].write(temp[r]);
+        }
+    }
+}
 
 //// OutputDataReOrder<skew>::digitReversal2Phase : is used for output data re-ordering for the case when the length of
 /// the SSR FFT is not integer power of length, It has also a specialization
@@ -232,6 +387,9 @@ struct OutputDataReOrder {
     template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
     void digitReversal2Phase(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_inData,
                              T_dtype2 p_outData[t_R][t_L / t_R]);
+    template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
+    void digitReversal2Phase(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_inData,
+                             hls::stream<T_dtype2> p_outData[t_R]);
 };
 
 #if 1
@@ -242,17 +400,44 @@ void OutputDataReOrder<t_skew>::digitReversal2Phase(hls::stream<SuperSampleConta
 #pragma HLS INLINE
 
     ///////////////////additions for adding a reshaping module.
-    T_dtype inDatac_reshaped[t_R][t_L / t_R];
-#pragma HLS DATA_PACK variable = inDatac_reshaped
-#pragma HLS STREAM variable = inDatac_reshaped depth = 8 dim = 2
+    // T_dtype inDatac_reshaped[t_R][t_L / t_R];
+    hls::stream<T_dtype> inDatac_reshaped[t_R];
+//#pragma HLS data_pack variable = inDatac_reshaped
+#pragma HLS STREAM variable = inDatac_reshaped depth = 8 // dim = 2
 #pragma HLS RESOURCE variable = inDatac_reshaped core = FIFO_LUTRAM
-#pragma HLS ARRAY_RESHAPE variable = inDatac_reshaped complete dim = 1
+    //#pragma HLS ARRAY_RESHAPE variable = inDatac_reshaped complete dim = 1
     streamJoinUtilitySISO<t_L, t_R, T_dtype>(p_inData, inDatac_reshaped);
 
     T_dtype2 pingPongBuff[t_R][t_L / t_R];
 #pragma HLS ARRAY_PARTITION variable = pingPongBuff complete dim = 1
+#pragma HLS data_pack variable = pingPongBuff
 
-#pragma HLS DATA_PACK variable = pingPongBuff
+    // Process:1:Create a Process for buffering streaming data in digit swapped order also do the
+    // criss cross from different memories
+    crissCrossAndTimeDigitSwap<t_L, t_R>(inDatac_reshaped, pingPongBuff);
+
+    // Process:2:Create 2nd process that connect to process-1 through PIPO and generates an output stream
+    diagonalWrapIndexReadFromPIPOAndStreamOut<t_L, t_R>(pingPongBuff, p_outData);
+}
+template <int t_skew>
+template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
+void OutputDataReOrder<t_skew>::digitReversal2Phase(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_inData,
+                                                    hls::stream<T_dtype2> p_outData[t_R]) {
+#pragma HLS INLINE
+
+    ///////////////////additions for adding a reshaping module.
+    // T_dtype inDatac_reshaped[t_R][t_L / t_R];
+    hls::stream<T_dtype> inDatac_reshaped[t_R];
+//#pragma HLS data_pack variable = inDatac_reshaped
+#pragma HLS STREAM variable = inDatac_reshaped depth = 8 // dim = 2
+#pragma HLS RESOURCE variable = inDatac_reshaped core = FIFO_LUTRAM
+    //#pragma HLS ARRAY_RESHAPE variable = inDatac_reshaped complete dim = 1
+    streamJoinUtilitySISO<t_L, t_R, T_dtype>(p_inData, inDatac_reshaped);
+
+    T_dtype2 pingPongBuff[t_R][t_L / t_R];
+#pragma HLS ARRAY_PARTITION variable = pingPongBuff complete dim = 1
+    //#pragma HLS data_pack variable = pingPongBuff
+
     // Process:1:Create a Process for buffering streaming data in digit swapped order also do the
     // criss cross from different memories
     crissCrossAndTimeDigitSwap<t_L, t_R>(inDatac_reshaped, pingPongBuff);
@@ -269,15 +454,44 @@ void OutputDataReOrder<0>::digitReversal2Phase(hls::stream<SuperSampleContainer<
 #pragma HLS INLINE
 
     ///////////////////additions to adding a reshaping module.
-    T_dtype inDatac_reshaped[t_R][t_L / t_R];
-#pragma HLS DATA_PACK variable = inDatac_reshaped
-#pragma HLS STREAM variable = inDatac_reshaped depth = 8 dim = 2
+    // T_dtype inDatac_reshaped[t_R][t_L / t_R];
+    hls::stream<T_dtype> inDatac_reshaped[t_R];
+//#pragma HLS data_pack variable = inDatac_reshaped
+#pragma HLS STREAM variable = inDatac_reshaped depth = 8
 #pragma HLS RESOURCE variable = inDatac_reshaped core = FIFO_LUTRAM
-#pragma HLS ARRAY_RESHAPE variable = inDatac_reshaped complete dim = 1
+    //#pragma HLS ARRAY_RESHAPE variable = inDatac_reshaped complete dim = 1
     streamJoinUtilitySISO<t_L, t_R, T_dtype>(p_inData, inDatac_reshaped);
+
     T_dtype2 pingPongBuff[t_R][t_L / t_R];
 #pragma HLS ARRAY_PARTITION variable = pingPongBuff complete dim = 1
-#pragma HLS DATA_PACK variable = pingPongBuff
+#pragma HLS data_pack variable = pingPongBuff
+
+    ///////////////////////////////////// Shuffle the Data and Write to Buffer ////////////////////////////////////
+    // recursivelyProcess:1:Create a Process for buffering streaming data in digit swapped order
+    // also do the criss cross from different memories %%%%%%%%%%%%%%
+    crissCrossAndTimeDigitSwapSpecial<t_L, t_R>(inDatac_reshaped, pingPongBuff);
+
+    // Process:2:Create 2nd process that connect to process-1 through PIPO and generates an output stream
+    diagonalWrapIndexReadFromPIPOAndStreamOutSpecial<t_L, t_R>(pingPongBuff, p_outData);
+}
+template <>
+template <int t_L, int t_R, typename T_dtype, typename T_dtype2>
+void OutputDataReOrder<0>::digitReversal2Phase(hls::stream<SuperSampleContainer<t_R, T_dtype> >& p_inData,
+                                               hls::stream<T_dtype2> p_outData[t_R]) {
+#pragma HLS INLINE
+
+    ///////////////////additions to adding a reshaping module.
+    // T_dtype inDatac_reshaped[t_R][t_L / t_R];
+    hls::stream<T_dtype> inDatac_reshaped[t_R];
+//#pragma HLS data_pack variable = inDatac_reshaped
+#pragma HLS STREAM variable = inDatac_reshaped depth = 8
+#pragma HLS RESOURCE variable = inDatac_reshaped core = FIFO_LUTRAM
+    //#pragma HLS ARRAY_RESHAPE variable = inDatac_reshaped complete dim = 1
+    streamJoinUtilitySISO<t_L, t_R, T_dtype>(p_inData, inDatac_reshaped);
+
+    T_dtype2 pingPongBuff[t_R][t_L / t_R];
+#pragma HLS ARRAY_PARTITION variable = pingPongBuff complete dim = 1
+#pragma HLS data_pack variable = pingPongBuff
 
     ///////////////////////////////////// Shuffle the Data and Write to Buffer ////////////////////////////////////
     // recursivelyProcess:1:Create a Process for buffering streaming data in digit swapped order

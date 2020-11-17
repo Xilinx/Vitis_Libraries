@@ -303,7 +303,8 @@ struct StreamingDataCommutorForkS2S {
     template <typename T_dtype>
     void forkedCompute(hls::stream<SuperSampleContainer<t_R / t_forkingFactor, T_dtype> > p_in[t_forkingFactor],
                        hls::stream<SuperSampleContainer<t_R / t_forkingFactor, T_dtype> > p_out[t_forkingFactor]) {
-#pragma HLS INLINE
+//#pragma HLS INLINE
+#pragma HLS dataflow
 
         static const int t_isLargeMemFlag =
             ((t_PF * (t_R / t_forkingFactor) > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
@@ -325,7 +326,8 @@ struct StreamingDataCommutorForkS2S<t_instanceID, t_stage, t_subStage, 1, t_L, t
     template <typename T_dtype>
     void forkedCompute(hls::stream<SuperSampleContainer<t_R / t_forkingFactor, T_dtype> > p_in[t_forkingFactor],
                        hls::stream<SuperSampleContainer<t_R / t_forkingFactor, T_dtype> > p_out[t_forkingFactor]) {
-#pragma HLS INLINE
+#pragma HLS dataflow
+        //#pragma HLS INLINE
         static const int t_isLargeMemFlag =
             ((t_PF * (t_R / t_forkingFactor) > SSR_FFT_URAM_SELECTION_THRESHHOLD) && SSR_FFT_USE_URAMS);
 

@@ -30,8 +30,16 @@ void complexMultiply(std::complex<T_op1> p_complexOp1,
                      std::complex<T_op2> p_complexOp2,
                      std::complex<T_prd>& p_product) {
 #pragma HLS INLINE // recursive
-    p_product.real(p_complexOp1.real() * p_complexOp2.real() - p_complexOp1.imag() * p_complexOp2.imag());
-    p_product.imag(p_complexOp1.real() * p_complexOp2.imag() + p_complexOp1.imag() * p_complexOp2.real());
+    // p_product.real(p_complexOp1.real() * p_complexOp2.real() - p_complexOp1.imag() * p_complexOp2.imag());
+    // p_product.imag(p_complexOp1.real() * p_complexOp2.imag() + p_complexOp1.imag() * p_complexOp2.real());
+    T_op1 real1 = p_complexOp1.real() * p_complexOp2.real();
+    T_op1 real2 = p_complexOp1.imag() * p_complexOp2.imag();
+    T_op1 real_out = real1 - real2;
+    p_product.real(real_out);
+    T_op1 imag1 = p_complexOp1.real() * p_complexOp2.imag();
+    T_op1 imag2 = p_complexOp1.imag() * p_complexOp2.real();
+    T_op1 imag_out = imag1 + imag2;
+    p_product.imag(imag_out);
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
