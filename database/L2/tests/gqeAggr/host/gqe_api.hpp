@@ -667,14 +667,14 @@ class AggrBufferTmp {
         memExt[6].flags = XCL_MEM_DDR_BANK3;
         memExt[7].flags = XCL_MEM_DDR_BANK3;
 #else
-        memExt[0].flags = (unsigned int)(8) | XCL_MEM_TOPOLOGY;
-        memExt[1].flags = (unsigned int)(12) | XCL_MEM_TOPOLOGY;
-        memExt[2].flags = (unsigned int)(16) | XCL_MEM_TOPOLOGY;
-        memExt[3].flags = (unsigned int)(20) | XCL_MEM_TOPOLOGY;
-        memExt[4].flags = (unsigned int)(10) | XCL_MEM_TOPOLOGY;
-        memExt[5].flags = (unsigned int)(14) | XCL_MEM_TOPOLOGY;
-        memExt[6].flags = (unsigned int)(18) | XCL_MEM_TOPOLOGY;
-        memExt[7].flags = (unsigned int)(22) | XCL_MEM_TOPOLOGY;
+        memExt[0].flags = (unsigned int)(0) | XCL_MEM_TOPOLOGY;
+        memExt[1].flags = (unsigned int)(8) | XCL_MEM_TOPOLOGY;
+        memExt[2].flags = (unsigned int)(20) | XCL_MEM_TOPOLOGY;
+        memExt[3].flags = (unsigned int)(28) | XCL_MEM_TOPOLOGY;
+        memExt[4].flags = (unsigned int)(4) | XCL_MEM_TOPOLOGY;
+        memExt[5].flags = (unsigned int)(12) | XCL_MEM_TOPOLOGY;
+        memExt[6].flags = (unsigned int)(24) | XCL_MEM_TOPOLOGY;
+        memExt[7].flags = (unsigned int)(30) | XCL_MEM_TOPOLOGY;
 #endif
 
         for (int i = 0; i < 8; i++) {
