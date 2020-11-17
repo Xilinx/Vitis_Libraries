@@ -38,11 +38,10 @@ set_top uut_top
 add_files $TESTDIR/$opt(path)/uut_top.cpp -cflags "$CFLAGS_K"
 add_files -tb $TESTDIR/sw/src/test.cpp -cflags "$CFLAGS_H"
 open_solution sol -reset
-config_compile -ignore_long_run_time
 
 source $TESTDIR/$DIRECTIVE_FILE
 
-set_part $opt(part) -tool vivado
+set_part $opt(part)
 
 create_clock -period 3.333333 -name default
 

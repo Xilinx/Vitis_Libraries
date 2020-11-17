@@ -28,19 +28,19 @@ For example code references please follow the link below.
 
 **1. Vitis BLAS L3 compilation**
 
-All examples provided here could be built with compilation steps similar to the following:
+All examples provided here could be built with compilation steps similar to the following, target could be either hw or hw_emu(for testing hw emulation)
 
 .. code-block:: bash
 
-  g++ -O0 -std=c++11 -fPIC -Wextra -Wall -Wno-ignored-attributes -Wno-unused-parameter -Wno-unused-variable -I$(XILINX_XRT)/include -I/include/sw -o example.exe example.cpp -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
-
+  make host TARGET=hw
+  
 **2. Vitis BLAS L3 run**
 
-Most of the examples could be run with steps similar to the following in machine with HW device installed. Detailed usages are also provided in each section.
+Examples could be run with the following steps, target could be either hw or hw_emu(for testing hw emulation)
 
 .. code-block:: bash
 
-  ./example.exe PATH_TO_XCLBIN/example.xclbin PATH_TO_XCLBIN/config_info.dat
+  make run TARGET=hw PLATFORM_REPO_PATHS=LOCAL_PLATFORM_PATH
 
 
 **3. Vitis BLAS L3 code example**
@@ -62,39 +62,29 @@ The following is an example of how to use Vitis BLAS API. Users always need to i
     
     if (argc < 3){
       cerr << " usage: \n"
-           << " gemx_example.exe gemx.xclbin config_info.dat log.txt\n"
            << " gemx_example.exe gemx.xclbin config_info.dat\n";
       return EXIT_FAILURE; 
     }
     unsigned int l_argIdx = 1;
     string l_xclbinFile(argv[l_argIdx++]);
     string l_configFile(argv[l_argIdx++]);  
-    string l_logFile;
-    
-    if (argc == 3){
-      ofstream logFile("log.txt");
-      logFile.close();
-      l_logFile = "log.txt";
-    } else {
-      l_logFile = argv[l_argIdx++];
-    }
     
     int i, j; // i-row index ,j- column index
-    short * a, * b, * c;
-    a = ( short *) malloc (m*k* sizeof ( short )); 
-    b = ( short *) malloc (k*n* sizeof ( short )); 
-    c = ( short *) malloc (m*n* sizeof ( short )); 
+    float * a, * b, * c;
+    a = ( float *) malloc (m*k* sizeof ( float )); 
+    b = ( float *) malloc (k*n* sizeof ( float )); 
+    c = ( float *) malloc (m*n* sizeof ( float )); 
   
     int ind = 1;
     for( i = 0; i<  m; i ++){ 
       for( j = 0; j < k; j ++){ 
-        a[ IDX2R (i,j,k )]= (short) ind++; 
+        a[ IDX2R (i,j,k )]= (float) ind++; 
       } 
     } 
     ind = 1;
     for( i = 0; i<  k; i ++){ 
       for( j = 0; j < n; j ++){ 
-        b[ IDX2R (i,j,n )]= (short) ind++; 
+        b[ IDX2R (i,j,n )]= (float) ind++; 
       } 
     } 
   
@@ -105,7 +95,7 @@ The following is an example of how to use Vitis BLAS API. Users always need to i
     } 
   
     xfblasEngine_t engineName = XFBLAS_ENGINE_GEMM;
-    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), engineName);
+    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, engineName);
     status = xfblasMallocRestricted(m,k,sizeof(*a),a,k);
     status = xfblasMallocRestricted(k,n,sizeof(*b),b,n);
     status = xfblasMallocRestricted(m,n,sizeof(*c),c,n);
@@ -139,7 +129,7 @@ These API functions run on the first kernel by default, but they could support m
 
 .. code-block:: c++
    
-    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, l_logFile.c_str(), XFBLAS_ENGINE_GEMM, 2);
+    xfblasStatus_t status = xfblasCreate(l_xclbinFile.c_str(), l_configFile, XFBLAS_ENGINE_GEMM, 2);
     status = xfblasMallocRestricted(m,k,sizeof(*a),a,k, 1);
     status = xfblasMallocRestricted(k,n,sizeof(*b),b,n, 1);
     status = xfblasMallocRestricted(m,n,sizeof(*c),c,n, 1);
@@ -149,14 +139,3 @@ These API functions run on the first kernel by default, but they could support m
     status = xfblasGemm(XFBLAS_OP_N, XFBLAS_OP_N, m, k, n, 1, a, k, b, n, 1, c, n, 1);
     status = xfblasGetMatrixRestricted(c, 1);
   
-  
-**4. Vitis BLAS L3 example**
-
-Please see L3 example folder for more example cases. 
-
-
-.. toctree::
-   :maxdepth: 2
-   
-   L3_example_gemm.rst
-   L3_example_gemv.rst

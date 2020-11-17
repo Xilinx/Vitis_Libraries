@@ -5,20 +5,19 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 #include <omp.h>
 #include "handle.hpp"
 #include "gemm_host.hpp"
 #include "gemv_host.hpp"
-#include "helpers/funcs/fcn_host.hpp"
 #include "api.hpp"
 
 using namespace xf::blas;
@@ -43,12 +42,6 @@ bool xfblasCreate(char* xclbin, char* engineName, unsigned int kernelNumber, uns
         for (unsigned int i = 0; i < kernelNumber; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
                 shared_ptr<BLASHost>(new GEMVHost(xclbin, &l_status, i, deviceIndex)));
-        }
-        return true;
-    } else if (strcmp(engineName, "Fcn") == 0) {
-        for (unsigned int i = 0; i < kernelNumber; i++) {
-            BLASHostHandle::instance().m_handlePtr[deviceIndex].push_back(
-                shared_ptr<BLASHost>(new FCNHost(xclbin, &l_status, i, deviceIndex)));
         }
         return true;
     } else {
@@ -106,7 +99,7 @@ void xfblasExecuteAsync(unsigned int numkernels, unsigned int deviceIndex) {
         omp_set_dynamic(0);
         omp_set_num_threads(numkernels);
 #pragma omp for
-        for (int i = 0; i < numkernels; i++) {
+        for (unsigned int i = 0; i < numkernels; i++) {
             BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->execute();
         }
     }
@@ -125,7 +118,6 @@ void xfblasDestroy(unsigned int kernelNumber, unsigned int deviceIndex) {
         BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->clearInstrBuf();
         BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->closeContext(i);
     }
-    BLASHostHandle::instance().m_handlePtr[deviceIndex][0]->closeDevice();
     XFpgaHold::instance().m_xFpgaPtr.clear();
     BLASHostHandle::instance().m_handlePtr.clear();
 }
@@ -179,61 +171,4 @@ bool xfblasGemv(int m,
     } else {
         return false;
     }
-}
-
-bool xfblasFcn(int m,
-               int n,
-               int k,
-               int alpha,
-               void* A,
-               int lda,
-               void* B,
-               int ldb,
-               int beta,
-               void* C,
-               int ldc,
-               void* X,
-               int ldx,
-               int p_postScale,
-               int p_postShift,
-               short p_preluScale,
-               short p_preluAlpha,
-               unsigned int kernelIndex,
-               unsigned int deviceIndex) {
-    if (alpha == 1 && beta == 1) {
-        FCNHost* l_fcnPtr =
-            static_cast<FCNHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
-        xfblasStatus_t l_status = l_fcnPtr->addFCNOp(A, B, C, X, m, n, k, lda, ldb, ldc, ldx, p_postScale, p_postShift,
-                                                     p_preluScale, p_preluAlpha);
-        if (l_status != XFBLAS_STATUS_SUCCESS) {
-            return false;
-        }
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool xfblasFcnByAddress(unsigned int l_aOff,
-                        unsigned int l_bOff,
-                        unsigned int l_cOff,
-                        unsigned int l_xOff,
-                        unsigned int p_m,
-                        unsigned int p_n,
-                        unsigned int p_k,
-                        unsigned int p_lda,
-                        unsigned int p_ldb,
-                        unsigned int p_ldc,
-                        unsigned int p_ldx,
-                        int p_postScale,
-                        int p_postShift,
-                        short p_preluScale,
-                        short p_preluAlpha,
-                        unsigned int kernelIndex,
-                        unsigned int deviceIndex) {
-    FCNHost* l_fcnPtr = static_cast<FCNHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
-    xfblasStatus_t l_status =
-        l_fcnPtr->addFCNOpByAddress(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_n, p_k, p_lda, p_ldb, p_ldc, p_ldx,
-                                    p_postScale, p_postShift, p_preluScale, p_preluAlpha);
-    return true;
 }

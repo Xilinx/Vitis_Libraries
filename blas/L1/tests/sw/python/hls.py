@@ -62,7 +62,7 @@ class HLS:
 
     def execution(self, binFile, logFile, workDir='.', b_print=False):
         testDir = os.getcwd()
-        commandLine = 'vivado_hls -f %s %s %s %s %s' % (
+        commandLine = 'vitis_hls -f %s %s %s %s %s' % (
             os.path.abspath(self.tcl),
             os.path.abspath(testDir),
             self.paramFile,

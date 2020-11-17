@@ -5,6 +5,21 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+/*
+ * Copyright 2019 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -20,6 +35,7 @@
 #include "handle.hpp"
 #include "gemm_host.hpp"
 #include "gemv_host.hpp"
+#include <future>
 
 namespace xf {
 
@@ -58,7 +74,7 @@ xfblasStatus_t xfblasCreate(const char* xclbin,
     }
 
     if (engineName == XFBLAS_ENGINE_GEMM) {
-        if (ConfigDict::instance().m_dict["GEMX_runGemm"] != "1") {
+        if (ConfigDict::instance().m_dict["BLAS_runGemm"] != "1") {
             return XFBLAS_STATUS_INVALID_VALUE;
         }
 
@@ -68,7 +84,7 @@ xfblasStatus_t xfblasCreate(const char* xclbin,
         }
         return l_status;
     } else if (engineName == XFBLAS_ENGINE_GEMV) {
-        if (ConfigDict::instance().m_dict["GEMX_runGemv"] != "1") {
+        if (ConfigDict::instance().m_dict["BLAS_runGemv"] != "1") {
             return XFBLAS_STATUS_INVALID_VALUE;
         }
 
@@ -77,7 +93,6 @@ xfblasStatus_t xfblasCreate(const char* xclbin,
                 shared_ptr<BLASHost>(new GEMVHost(xclbin, &l_status, i, deviceIndex)));
         }
         return l_status;
-
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
@@ -106,11 +121,11 @@ xfblasStatus_t xfblasMalloc(
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "short") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "short") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
         if (rows % l_minSize != 0 || lda % l_minSize != 0) {
@@ -125,7 +140,7 @@ xfblasStatus_t xfblasMalloc(
                 BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMat<short*>(devPtr, l_bufSize);
         }
         return l_status;
-    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int l_paddedRows, l_paddedLda;
@@ -155,11 +170,11 @@ xfblasStatus_t xfblasMalloc(
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "float") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "float") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
         if (rows % l_minSize != 0 || lda % l_minSize != 0) {
@@ -175,7 +190,7 @@ xfblasStatus_t xfblasMalloc(
         }
         return l_status;
 
-    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int l_paddedRows, l_paddedLda;
@@ -220,11 +235,11 @@ xfblasStatus_t xfblasMallocRestricted(
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (getTypeSize(ConfigDict::instance().m_dict["GEMX_dataType"]) != elemSize) {
+    if (getTypeSize(ConfigDict::instance().m_dict["BLAS_dataType"]) != elemSize) {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         if (rows % l_minSize != 0 || cols % l_minSize != 0 || lda % l_minSize != 0) {
             return XFBLAS_STATUS_NOT_PADDED;
@@ -235,7 +250,7 @@ xfblasStatus_t xfblasMallocRestricted(
             return l_status;
         }
 
-    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         if (lda == 1) {
             if (rows % l_minSize != 0) {
@@ -292,11 +307,11 @@ xfblasStatus_t xfblasMallocManaged(short** devPtr,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "short") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "short") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
         if (rows % l_minSize != 0 || lda % l_minSize != 0) {
@@ -314,7 +329,7 @@ xfblasStatus_t xfblasMallocManaged(short** devPtr,
         }
         return l_status;
 
-    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int l_paddedRows, l_paddedLda;
@@ -350,11 +365,11 @@ xfblasStatus_t xfblasMallocManaged(float** devPtr,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "float") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "float") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
         if (rows % l_minSize != 0 || lda % l_minSize != 0) {
@@ -371,7 +386,7 @@ xfblasStatus_t xfblasMallocManaged(float** devPtr,
                 BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->allocMat<float*>(devPtr, l_bufSize);
         }
         return l_status;
-    } else if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    } else if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         xfblasStatus_t l_status = XFBLAS_STATUS_SUCCESS;
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int l_paddedRows, l_paddedLda;
@@ -425,11 +440,11 @@ xfblasStatus_t xfblasSetMatrix(int rows,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "short") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "short") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1" || ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1" || ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status =
@@ -456,11 +471,11 @@ xfblasStatus_t xfblasSetMatrix(int rows,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "float") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "float") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1" || ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1" || ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status =
@@ -497,11 +512,11 @@ xfblasStatus_t xfblasSetVector(
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "short") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "short") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         xfblasStatus_t l_status =
             BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->setMatToFPGA<short*>(d_x, n, 1, 1, x,
                                                                                                    d_x);
@@ -520,11 +535,11 @@ xfblasStatus_t xfblasSetVector(
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "float") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "float") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         xfblasStatus_t l_status =
             BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->setMatToFPGA<float*>(d_x, n, 1, 1, x,
                                                                                                    d_x);
@@ -622,11 +637,11 @@ xfblasStatus_t xfblasGetMatrix(int rows,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "short") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "short") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1" || ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1" || ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
@@ -653,11 +668,11 @@ xfblasStatus_t xfblasGetMatrix(int rows,
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "float") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "float") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1" || ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1" || ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
         int paddedLda = getPaddedSize(lda, l_minSize);
         xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
@@ -691,11 +706,11 @@ xfblasStatus_t xfblasGetVector(
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "short") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "short") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
         l_status =
             BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMat<short*>(d_x, n, 1, 1, x, d_x);
@@ -714,11 +729,11 @@ xfblasStatus_t xfblasGetVector(
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_dataType"] != "float") {
+    if (ConfigDict::instance().m_dict["BLAS_dataType"] != "float") {
         return XFBLAS_STATUS_INVALID_VALUE;
     }
 
-    if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
         l_status =
             BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMat<float*>(d_x, n, 1, 1, x, d_x);
@@ -812,7 +827,7 @@ xfblasStatus_t xfblasDestroy(unsigned int kernelNumber = 1, unsigned int deviceI
         BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->clearInstrBuf();
         l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][i]->closeContext(i);
     }
-    BLASHostHandle::instance().m_handlePtr[deviceIndex][0]->closeDevice();
+    // BLASHostHandle::instance().m_handlePtr[deviceIndex][0]->closeDevice();
     XFpgaHold::instance().m_xFpgaPtr.clear();
     BLASHostHandle::instance().m_handlePtr.clear();
     ConfigDict::instance().m_dict.clear();
@@ -859,7 +874,7 @@ xfblasStatus_t xfblasGemm(xfblasOperation_t transa,
     if (ConfigDict::instance().m_dict.empty()) {
         return XFBLAS_STATUS_NOT_INITIALIZED;
     }
-    if (ConfigDict::instance().m_dict["GEMX_runGemm"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
         if (transa == XFBLAS_OP_N && transb == XFBLAS_OP_N && alpha == 1 && beta == 1) {
             GEMMHost* l_gemmPtr =
                 static_cast<GEMMHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
@@ -884,6 +899,74 @@ xfblasStatus_t xfblasGemm(xfblasOperation_t transa,
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
     }
+}
+
+xfblasStatus_t xfblasGemm(xfblasOperation_t transa,
+                          xfblasOperation_t transb,
+                          int m,
+                          int n,
+                          int k,
+                          int alpha,
+                          void* A,
+                          int lda,
+                          void* B,
+                          int ldb,
+                          int beta,
+                          void* C,
+                          int ldc,
+                          void* X,
+                          int ldx,
+                          unsigned int kernelIndex = 0,
+                          unsigned int deviceIndex = 0) {
+    if (ConfigDict::instance().m_dict.empty()) {
+        return XFBLAS_STATUS_NOT_INITIALIZED;
+    }
+    if (ConfigDict::instance().m_dict["BLAS_runGemm"] == "1") {
+        if (transa == XFBLAS_OP_N && transb == XFBLAS_OP_N && alpha == 1 && beta == 1) {
+            GEMMHost* l_gemmPtr =
+                static_cast<GEMMHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
+            xfblasStatus_t l_status;
+            int l_minSize = stoi(ConfigDict::instance().m_dict["minSize"]);
+            if (m % l_minSize != 0 || n % l_minSize != 0 || k % l_minSize != 0) {
+                int padded_m = getPaddedSize(m, l_minSize);
+                int padded_n = getPaddedSize(n, l_minSize);
+                int padded_k = getPaddedSize(k, l_minSize);
+                int paddedLda = getPaddedSize(lda, l_minSize);
+                int paddedLdb = getPaddedSize(ldb, l_minSize);
+                int paddedLdc = getPaddedSize(ldc, l_minSize);
+                int paddedLdx = getPaddedSize(ldx, l_minSize);
+                l_status = l_gemmPtr->addGEMMOp(A, B, C, X, padded_m, padded_n, padded_k, paddedLda, paddedLdb,
+                                                paddedLdc, paddedLdx, 1, 0);
+            } else {
+                l_status = l_gemmPtr->addGEMMOp(A, B, C, X, m, n, k, lda, ldb, ldc, ldx, 1, 0);
+            }
+            return l_status;
+        } else {
+            return XFBLAS_STATUS_NOT_SUPPORTED;
+        }
+    } else {
+        return XFBLAS_STATUS_NOT_SUPPORTED;
+    }
+}
+
+xfblasStatus_t xfblasGemmByAddress(unsigned int l_aOff,
+                                   unsigned int l_bOff,
+                                   unsigned int l_cOff,
+                                   unsigned int l_xOff,
+                                   unsigned int p_m,
+                                   unsigned int p_n,
+                                   unsigned int p_k,
+                                   unsigned int p_lda,
+                                   unsigned int p_ldb,
+                                   unsigned int p_ldc,
+                                   unsigned int p_ldx,
+                                   unsigned int kernelIndex = 0,
+                                   unsigned int deviceIndex = 0) {
+    GEMMHost* l_gemmPtr =
+        static_cast<GEMMHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
+    xfblasStatus_t l_status =
+        l_gemmPtr->addGEMMOpByAddress(l_aOff, l_bOff, l_cOff, l_xOff, p_m, p_n, p_k, p_lda, p_ldb, p_ldc, p_ldx, 1, 0);
+    return l_status;
 }
 
 /**
@@ -922,7 +1005,7 @@ xfblasStatus_t xfblasGemv(xfblasOperation_t trans,
     if (ConfigDict::instance().m_dict.empty()) {
         return XFBLAS_STATUS_NOT_INITIALIZED;
     }
-    if (ConfigDict::instance().m_dict["GEMX_runGemv"] == "1") {
+    if (ConfigDict::instance().m_dict["BLAS_runGemv"] == "1") {
         if (trans == XFBLAS_OP_N && alpha == 1 && beta == 1 && incx == 1 && incy == 1) {
             GEMVHost* l_gemvPtr =
                 static_cast<GEMVHost*>(BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex].get());
@@ -942,6 +1025,78 @@ xfblasStatus_t xfblasGemv(xfblasOperation_t trans,
         }
     } else {
         return XFBLAS_STATUS_NOT_SUPPORTED;
+    }
+}
+
+/**
+ * @brief This function copies a matrix in FPGA device memory to host memory by pointer
+ * @param A pointer to matrix A in the host memory
+ * @param kernelIndex index of kernel that is being used, default is 0
+ * @param deviceIndex index of device that is being used, default is 0
+ * @retval xfblasStatus_t 0 if the operation completed successfully
+ * @retval xfblasStatus_t 1 if the library was not initialized
+ * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
+ */
+xfblasStatus_t xfblasGetByPointer(void* A, unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) {
+    if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()) {
+        return XFBLAS_STATUS_NOT_INITIALIZED;
+    }
+    xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatRestricted(A, A);
+    return l_status;
+}
+
+/**
+ * @brief This function copies a matrix in FPGA device memory to host memory by its address in device memory
+ * @param A pointer to matrix A in the host memory
+ * @param p_bufSize size of matrix A
+ * @param offset A's address in device memory
+ * @param kernelIndex index of kernel that is being used, default is 0
+ * @param deviceIndex index of device that is being used, default is 0
+ * @retval xfblasStatus_t 0 if the operation completed successfully
+ * @retval xfblasStatus_t 1 if the library was not initialized
+ * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
+ */
+xfblasStatus_t xfblasGetByAddress(void* A,
+                                  unsigned long long p_bufSize,
+                                  unsigned int offset,
+                                  unsigned int kernelIndex = 0,
+                                  unsigned int deviceIndex = 0) {
+    if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()) {
+        return XFBLAS_STATUS_NOT_INITIALIZED;
+    }
+    xfblasStatus_t l_status =
+        BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatByAddress(A, p_bufSize, offset);
+    return l_status;
+}
+
+/**
+ * @brief This function starts the kernel and wait until it finishes
+ * @param kernelIndex index of kernel that is being used, default is 0
+ * @param deviceIndex index of device that is being used, default is 0
+ * @retval xfblasStatus_t 0 if the operation completed successfully
+ * @retval xfblasStatus_t 1 if the library was not initialized
+ * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for instrution
+ */
+xfblasStatus_t xfblasExecute(unsigned int kernelIndex = 0, unsigned int deviceIndex = 0) {
+    if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()) {
+        return XFBLAS_STATUS_NOT_INITIALIZED;
+    }
+    xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
+    return l_status;
+}
+
+/**
+ * @brief This asynchronous function starts all kernels and wait until them finish
+ * @param numKernels number of kernels that is being used, default is 1
+ * @param deviceIndex index of device that is being used, default is 0
+ */
+void xfblasExecuteAsync(unsigned int numKernels = 1, unsigned int deviceIndex = 0) {
+    vector<future<xfblasStatus_t> > fuStatus;
+    for (unsigned int i = 0; i < numKernels; i++) {
+        fuStatus.push_back(async(launch::async, xfblasExecute, i, deviceIndex));
+    }
+    for (auto& fu : fuStatus) {
+        fu.wait();
     }
 }
 

@@ -32,18 +32,20 @@ import recommonmark
 from recommonmark.transform import AutoStructify
 import shutil
 # sys.path.insert(0, os.path.abspath('.'))
-tools_dir = os.path.abspath(os.path.join(os.path.dirname(shutil.which('doxyrest')), '..'))
-sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
+tools_dir = os.path.abspath(os.path.join(os.path.dirname(shutil.which('doxyrest')), '..'))
+
+sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
+
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis BLAS Library'
-copyright = '2019, Xilinx Inc.'
+copyright = '2020, Xilinx Inc.'
 author = 'Xilinx Inc.'
 
 # The short X.Y version
-version = '2020.1'
+version = '2020.2'
 # The full version, including alpha/beta/rc tags
-release = 'v2020.1'
+release = 'v2020.2'
 
 
 # -- General configuration ---------------------------------------------------
@@ -120,7 +122,8 @@ pygments_style = None
 # a list of builtin themes.
 #
 html_theme = 'xilinx'
-html_theme_path = [os.path.join(tools_dir, 'share/themes')]
+html_theme_path = [os.path.join(tools_dir, 'share/themes')]
+
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

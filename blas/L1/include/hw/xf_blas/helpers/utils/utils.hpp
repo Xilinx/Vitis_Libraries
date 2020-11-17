@@ -53,6 +53,40 @@ class BinarySum<t_DataType, 1, t_SumType> {
     }
 };
 
+template <typename t_StreamType, unsigned int t_Entries>
+class Merge {
+   public:
+    static void merge(t_StreamType& p_left, t_StreamType& p_right, t_StreamType& p_str, int p_n) {
+        const unsigned int l_halfEntries = t_Entries >> 1;
+        for (int i = 0; i < p_n; i++) {
+            for (int j = 0; j < l_halfEntries; j++) p_str.write(p_left.read());
+            for (int j = 0; j < l_halfEntries; j++) p_str.write(p_right.read());
+        }
+    }
+    static void merge(t_StreamType p_strs[t_Entries], t_StreamType& p_str, int p_n) {
+        const unsigned int l_halfEntries = t_Entries >> 1;
+        t_StreamType l_left, l_right;
+#pragma HLS stream variable = l_left depth = t_Entries / 2
+#pragma HLS stream variable = l_right depth = t_Entries / 2
+
+#pragma HLS DATAFLOW
+        Merge<t_StreamType, l_halfEntries>::merge(p_strs, l_left, p_n);
+        Merge<t_StreamType, l_halfEntries>::merge(p_strs + l_halfEntries, l_right, p_n);
+        merge(l_left, l_right, p_str, p_n);
+    }
+};
+
+template <typename t_StreamType>
+class Merge<t_StreamType, 2> {
+   public:
+    static void merge(t_StreamType p_strs[2], t_StreamType& p_str, int p_n) {
+        for (int i = 0; i < p_n; i++) {
+            p_str.write(p_strs[0].read());
+            p_str.write(p_strs[1].read());
+        }
+    }
+};
+
 template <typename t_DataType>
 class AdderDelay {
    public:

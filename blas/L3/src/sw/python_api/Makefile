@@ -1,6 +1,5 @@
- 
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,20 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-
-# -----------------------------------------------------------------------------
-#                          project common settings
-
-MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-
-.SECONDEXPANSION:
-
-# -----------------------------------------------------------------------------
-#                            common tool setup
 
 
+# ####################################### Help Section #####################################
 .PHONY: help
 
 help::
@@ -43,10 +31,12 @@ help::
 	@echo "      Command to remove all the generated files."
 	@echo ""
 
-ifeq (,$(XILINX_XRT))
-XILINX_XRT = /opt/xilinx/xrt
+	
+ifndef XILINX_XRT
+  XILINX_XRT = /opt/xilinx/xrt
+  export XILINX_XRT
 endif
-export XILINX_XRT
+
 .PHONY: check_xrt
 check_xrt:
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
@@ -61,92 +51,65 @@ else
 LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
 
-# -----------------------------------------------------------------------------
-# BEGIN_XF_MK_USER_SECTION
-# -----------------------------------------------------------------------------
+CXX := g++
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../../..
-XFLIB_DIR := $(abspath $(XF_PROJ_ROOT))
+# ##################### Setting up default value of TARGET ##########################
+TARGET ?= hw
 
-XCLBIN_FILE :=
-KERNELS :=
-
-# -----------------------------------------------------------------------------
-
-SRC_DIR = $(CUR_DIR)
+# ######################## Setting up Project Variables #################################
+MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L3/*}')
+CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+XFLIB_DIR = $(XF_PROJ_ROOT)
 
 EXE_NAME = 
+EXE_FILE =
 HOST_ARGS =
 
-SRCS = $(XFLIB_DIR)/L3/src/sw/api.cpp
+OBJ_DIR := obj
+BUILD_DIR := lib
+OBJ_FILES = $(OBJ_DIR)/api.o
+API_OUT = xfblas.so
 
+# ######################### Host compiler global settings ############################
+HOST_SRCS = $(XFLIB_DIR)/L3/src/sw/api.cpp
 CXXFLAGS += -g -I$(XILINX_XRT)/include -I $(XFLIB_DIR)/L3/include/sw/xf_blas
+CXXFLAGS += -O3 -std=c++14 -fPIC -fopenmp -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-unused-result
+CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -lxrt_coreutil -ldl -luuid -lgomp
 
-# -----------------------------------------------------------------------------
-# END_XF_MK_USER_SECTION
-# -----------------------------------------------------------------------------
+# ######################### Setting Targets of Makefile ################################
 
 .PHONY: all
 all: host 
 
-OBJ_DIR_BASE ?= obj
-BIN_DIR_BASE ?= bin
-
-
-OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
-BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
-
-RUN_ENV =
-OBJ_FILES = $(CUR_DIR)/$(OBJ_DIR_BASE)/api.o
-EXTRA_OBJS = 
-
-CXX := /usr/bin/gcc
-CC := /urs/bin/gcc
-
-CXXFLAGS += -O3 -std=c++11 -fPIC -fopenmp -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-unused-result
-CFLAGS +=
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -lxilinxopencl
-LDFLAGS += -L$(XILINX_XRT)/lib -lz -lstdc++ -lrt -pthread -lxrt_core -ldl -luuid
-
-EXE_EXT ?= exe
-EXE_FILE =
-
-API_OUT = xfblas.so
-
 .PHONY: host
-
 host: api
 
 api: check_xrt $(API_OUT)
 
-$(OBJ_FILES):  $(SRCS)
-	mkdir -p $(OBJ_DIR_BASE)
+$(OBJ_FILES):  $(HOST_SRCS)
+	mkdir -p $(OBJ_DIR)
 	$(CXX) -shared -c -o $@ $< $(CXXFLAGS)
 	
 $(API_OUT): $(OBJ_FILES)
-	mkdir -p lib
-	$(CXX) -shared -o lib/$@ $(OBJ_FILES) $(LDFLAGS)
+	mkdir -p $(BUILD_DIR)
+	$(CXX) -shared -o $(BUILD_DIR)/$@ $(OBJ_FILES) $(LDFLAGS)
 	chmod a+rx lib
 
+run: api 
+check: api
+build: api
 
-# -----------------------------------------------------------------------------
-#                                clean up
+# ################################# Cleaning Rules ##################################
 
 clean:
-ifneq (,$(OBJ_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(OBJ_DIR_BASE)*
+ifneq (,$(OBJ_DIR))
+	rm -rf $(CUR_DIR)/$(OBJ_DIR)*
 endif
-ifneq (,$(BIN_DIR_BASE))
-	rm -rf $(CUR_DIR)/$(BIN_DIR_BASE)*
-endif
-	rm -rf lib
+	rm -rf $(BUILD_DIR)
 
 cleanall: clean 
 
-.PHONY: run 
-
-run: api 
-
-check: run
 
 
