@@ -12,7 +12,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+             ]
         }
     ], 
     "platform_blacklist": [
@@ -36,7 +38,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/src/"
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
                 "PARALLEL_BLOCK=8"

@@ -49,9 +49,8 @@
 
 /* @(#) $Id$ */
 
-#include "xlibz.hpp"
+#include "zlibFactory.hpp"
 #include "deflate.h"
-using namespace xlibz::driver;
 const char deflate_copyright[] = " deflate 1.2.7 Copyright 1995-2012 Jean-loup Gailly and Mark Adler ";
 /*
   If you use the zlib library in a product, an acknowledgment is welcome
@@ -399,9 +398,7 @@ int ZEXPORT deflateResetKeep(z_streamp strm) {
     _tr_init(s);
 
 #ifdef XILINX_CODE
-    singleton::getInstance()->releaseZlibObj(strm);
-
-    singleton::getInstance()->releaseDriverObj(strm);
+    zlibFactory::getInstance()->releaseDriverObj(strm);
 #endif
 
     return Z_OK;
@@ -605,11 +602,23 @@ int is_fpga_compatible(z_streamp strm) {
     if (strm->state->strategy != Z_DEFAULT_STRATEGY) { // RLE,stored and huffman not supported
         return 0;
     }
+   
+    zlibFactory *zfactObj = zlibFactory::getInstance(); 
+    if (zfactObj == NULL) {
+        return 0;
+    }   
 
-    xzlib* driver = singleton::getInstance()->getDriverInstance(strm, XILINX_DEFLATE);
-    if (!(driver->getXmode())) { // device not configured
+    // Check precheck to evaluate if FPGA device is usable or not
+    zfactObj->xilinxPreChecks();
+    if (!(zfactObj->getXmode())) { // device not configured
         return 0;
     }
+
+    // Create driver object for current stream pointer
+    zlibDriver* driver = zfactObj->getDriverInstance(strm, XILINX_DEFLATE);
+    if (driver == NULL) {
+        return 0; 
+    } 
     return 1;
 }
 
@@ -694,7 +703,7 @@ int ZEXPORT deflate_hw(z_streamp strm, int flush) {
         block_state bstate;
 
         // Driver class
-        xzlib* driver = singleton::getInstance()->getDriverInstance(s->strm, XILINX_DEFLATE);
+        zlibDriver* driver = zlibFactory::getInstance()->getDriverInstance(s->strm, XILINX_DEFLATE);
 
         // Update structure per every call
         driver->struct_update(s->strm, XILINX_DEFLATE);
@@ -1051,9 +1060,7 @@ int ZEXPORT deflateEnd(z_streamp strm) {
     // s->strm == 2 : GZip flow
     // Singleton releases the
     // strm,zlib <key, value> pair
-    singleton::getInstance()->releaseZlibObj(strm);
-
-    singleton::getInstance()->releaseDriverObj(strm);
+    zlibFactory::getInstance()->releaseDriverObj(strm);
 #endif
 
     int status;

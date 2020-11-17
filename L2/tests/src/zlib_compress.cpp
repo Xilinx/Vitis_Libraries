@@ -14,8 +14,131 @@
  * limitations under the License.
  *
  */
+#include "zlib.h"
 #include "zlib_compress.hpp"
-#include "xxhash.h"
+#include <fcntl.h>  /* For O_RDWR */
+#include <unistd.h> /* For open(), creat() */
+#include <sys/stat.h>
+auto crc = 0; // CRC32 value
+#ifdef GZIP_MODE
+extern unsigned long crc32(unsigned long crc, const unsigned char* buf, uint32_t len);
+#endif
+
+void gzip_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
+    const uint16_t c_format_0 = 31;
+    const uint16_t c_format_1 = 139;
+    const uint16_t c_variant = 8;
+    const uint16_t c_real_code = 8;
+    const uint16_t c_opcode = 3;
+
+    // 2 bytes of magic header
+    outFile.put(c_format_0);
+    outFile.put(c_format_1);
+
+    // 1 byte Compression method
+    outFile.put(c_variant);
+
+    // 1 byte flags
+    uint8_t flags = 0;
+    flags |= c_real_code;
+    outFile.put(flags);
+
+    // 4 bytes file modification time in unit format
+    unsigned long time_stamp = 0;
+    struct stat istat;
+    stat(inFile_name.c_str(), &istat);
+    time_stamp = istat.st_mtime;
+    // put_long(time_stamp, outFile);
+    uint8_t time_byte = 0;
+    time_byte = time_stamp;
+    outFile.put(time_byte);
+    time_byte = time_stamp >> 8;
+    outFile.put(time_byte);
+    time_byte = time_stamp >> 16;
+    outFile.put(time_byte);
+    time_byte = time_stamp >> 24;
+    outFile.put(time_byte);
+
+    // 1 byte extra flag (depend on compression method)
+    uint8_t deflate_flags = 0;
+    outFile.put(deflate_flags);
+
+    // 1 byte OPCODE - 0x03 for Unix
+    outFile.put(c_opcode);
+
+    // Dump file name
+    for (int i = 0; inFile_name[i] != '\0'; i++) {
+        outFile.put(inFile_name[i]);
+    }
+
+    outFile.put(0);
+    outFile.write((char*)zip_out, enbytes);
+
+    // Last Block
+    outFile.put(1);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(255);
+    outFile.put(255);
+
+    unsigned long ifile_size = istat.st_size;
+    uint8_t crc_byte = 0;
+    long crc_val = crc;
+    crc_byte = crc_val;
+    outFile.put(crc_byte);
+    crc_byte = crc_val >> 8;
+    outFile.put(crc_byte);
+    crc_byte = crc_val >> 16;
+    outFile.put(crc_byte);
+    crc_byte = crc_val >> 24;
+    outFile.put(crc_byte);
+
+    uint8_t len_byte = 0;
+    len_byte = ifile_size;
+    outFile.put(len_byte);
+    len_byte = ifile_size >> 8;
+    outFile.put(len_byte);
+    len_byte = ifile_size >> 16;
+    outFile.put(len_byte);
+    len_byte = ifile_size >> 24;
+    outFile.put(len_byte);
+
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+}
+
+#ifdef GZIP_MODE
+void gzip_crc32(uint8_t* in, uint32_t input_size) {
+    crc = crc32(crc, in, input_size);
+}
+#endif
+
+void zlib_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
+    outFile.put(120);
+    outFile.put(1);
+    outFile.write((char*)zip_out, enbytes);
+    // Last Block
+    outFile.put(1);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(255);
+    outFile.put(255);
+
+    outFile.put(1);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(255);
+    outFile.put(255);
+
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+    outFile.put(0);
+}
 
 uint64_t xfZlib::compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t input_size) {
     std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
@@ -31,9 +154,9 @@ uint64_t xfZlib::compressFile(std::string& inFile_name, std::string& outFile_nam
 
     inFile.read((char*)in.data(), input_size);
 
-    // Zlib header
-    outFile.put(120);
-    outFile.put(1);
+#ifdef GZIP_MODE
+    std::thread gzipCrc(gzip_crc32, in.data(), input_size);
+#endif
 
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
@@ -41,26 +164,16 @@ uint64_t xfZlib::compressFile(std::string& inFile_name, std::string& outFile_nam
 
     // Zlib multiple/single cu sequential version
     enbytes = compressSequential(in.data(), out.data(), input_size, host_buffer_size);
-    // Writing compressed data
-    outFile.write((char*)out.data(), enbytes);
-
-    // Last Block
-    outFile.put(1);
-    outFile.put(0);
-    outFile.put(0);
-    outFile.put(255);
-    outFile.put(255);
-
-    outFile.put(1);
-    outFile.put(0);
-    outFile.put(0);
-    outFile.put(255);
-    outFile.put(255);
-    outFile.put(0);
-    outFile.put(0);
-    outFile.put(0);
-    outFile.put(0);
-    outFile.put(0);
+    if (enbytes > 0) {
+#ifdef GZIP_MODE
+        gzipCrc.join();
+        // Pack gzip encoded stream .gz file
+        gzip_headers(inFile_name, outFile, out.data(), enbytes);
+#else
+        // Pack zlib encoded stream .zlib file
+        zlib_headers(inFile_name, outFile, out.data(), enbytes);
+#endif
+    }
 
     // Close file
     inFile.close();
@@ -160,7 +273,7 @@ uint64_t xfZlib::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_si
             new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, hostChunk_cu, h_buf_in.data());
 
         buffer_output =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, hostChunk_cu, h_buf_out.data());
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, hostChunk_cu, h_buf_out.data());
 
         buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                                                 sizeof(uint32_t) * max_num_blks, h_compressSize.data());

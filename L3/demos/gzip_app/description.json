@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx GZIP Application for u200 and u250 Platforms", 
+    "name": "Xilinx GZIP Application", 
     "description": [
         "GZip application for DDR resides in `L3/demos/gzip_app` directory."
     ], 
@@ -21,7 +21,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
+             ]
         }
     ], 
     "match_ini": "false", 
@@ -34,11 +36,14 @@
                 "LIB_DIR/L3/src/zlib_old.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
-                "LIB_DIR/common/libs/logger/logger.cpp"
+                "LIB_DIR/common/libs/logger/logger.cpp",
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c",
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/adler32.c"
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include", 
-                "LIB_DIR/L1/include/hw"
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/thirdParty/zlib-1.2.7"
             ], 
             "options": "-O3 ", 
             "symbols": [
@@ -53,7 +58,7 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.ini", 
+            "PROJECT/advanced.cfg", 
             "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
@@ -66,14 +71,14 @@
                 "GZIP_MODE"
             ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
     }, 
     "containers": [
         {
             "name": "compress_decompress", 
-            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.ini", 
+            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.cfg", 
             "accelerators": [
                 {
                     "name": "xilLz77Compress", 

@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx FPGA Based ZLIB Single Compress Streaming Design For HBM Platforms", 
+    "name": "Xilinx FPGA Based ZLIB Compress HBM Design",
     "description": [
         "ZLIB Compress application for HBM resides in `L3/tests/zlib_compress_hbm` directory."
     ], 
@@ -34,7 +34,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include", 
-                "LIB_DIR/L1/include/hw"
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/thirdParty/zlib-1.2.7"
             ], 
             "options": "-O3 ", 
             "symbols": [
@@ -48,7 +49,7 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.ini", 
+            "PROJECT/advanced.cfg", 
             "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
@@ -60,7 +61,7 @@
                 "PARALLEL_BLOCK=4"
             ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
     }, 

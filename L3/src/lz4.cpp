@@ -394,7 +394,7 @@ uint64_t xfLz4::decompress(uint8_t* in,
                                                     host_buffer_size, h_buf_in[cu][flag].data());
 
             // Output:- This buffer contains compressed data written by device
-            buffer_output[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            buffer_output[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                                      host_buffer_size, h_buf_out[cu][flag].data());
 
             // Ouput:- This buffer contains compressed block sizes
@@ -808,7 +808,7 @@ uint64_t xfLz4::compress(
                                                     host_buffer_size, h_buf_in[cu][flag].data());
 
             // Output:- This buffer contains compressed data written by device
-            buffer_output[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            buffer_output[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                                      host_buffer_size, h_buf_out[cu][flag].data());
 
             // Ouput:- This buffer contains compressed block sizes

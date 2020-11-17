@@ -371,78 +371,146 @@ void zlibCompressMultiEngineMM(const ap_uint<DWIDTH>* in,
         outStream, outStreamEos, outFileEos, compressedSize, inBaseIdx, out, outBlockSize);
 }
 
-template <int IN_DWIDTH, int OUT_DWIDTH, int BLOCK_SIZE>
+template <int IN_DWIDTH, int OUT_DWIDTH, int BLOCK_SIZE, int STRATEGY = 0, int MIN_BLCK_SIZE = 1024> // STRATEGY: 0:
+// GZIP; 1: ZLIB
 void zlibCompressStreaming(hls::stream<ap_axiu<IN_DWIDTH, 0, 0, 0> >& inStream,
                            hls::stream<ap_axiu<OUT_DWIDTH, 0, 0, 0> >& outStream,
                            hls::stream<ap_axiu<32, 0, 0, 0> >& inSizeStream,
                            hls::stream<ap_axiu<32, 0, 0, 0> >& outSizeStream) {
+    constexpr int c_no_slaves = 3;
 #pragma HLS DATAFLOW
     hls::stream<ap_uint<IN_DWIDTH> > inHlsStream("inHlsStream");
-    hls::stream<ap_uint<OUT_DWIDTH> > outCompressedStream("outCompressedStream");
-    hls::stream<ap_uint<OUT_DWIDTH> > outPackedStream("outPackedStream");
-    hls::stream<ap_uint<32> > numBlockStream("numBlockStream");
-    hls::stream<bool> numBlockStreamEos("numBlockStreamEos");
+    hls::stream<bool> inHlsStreamEos("inHlsStreamEos");
+    hls::stream<uint32_t> inHlsSizeStream("inHlsSizeStream");
+    hls::stream<ap_uint<IN_DWIDTH> > inDataStream1("inDataStream1");
+    hls::stream<ap_uint<IN_DWIDTH> > inDataStream2("inDataStream2");
+    hls::stream<ap_uint<IN_DWIDTH> > inZlibStream("inZlibStream");
+    hls::stream<ap_uint<IN_DWIDTH> > inStoredStream("inStoredStream");
+    hls::stream<uint32_t> storedBlckSize("storedBlckSize");
     hls::stream<uint32_t> zlibBlockSizeStream("zlibBlockSizeStream");
-    hls::stream<uint32_t> blockCompressedSizeStream("blockCompressedSizeStream");
-    hls::stream<uint32_t> totalSizeStream("totalSizeStream");
+    hls::stream<ap_uint<32> > checksumResult("checksumResult");
+    hls::stream<ap_uint<OUT_DWIDTH> > outCompressedStream("outCompressedStream");
     hls::stream<bool> outCompressedStreamEos("outCompressedStreamEos");
     hls::stream<bool> outFileEos("outFileEos");
+    hls::stream<uint32_t> blockCompressedSizeStream("blockCompressedSizeStream");
+    hls::stream<ap_uint<OUT_DWIDTH> > outPackedStream("outPackedStream");
     hls::stream<bool> outPackedStreamEos("outPackedStreamEos");
+    hls::stream<uint32_t> totalSizeStream("totalSizeStream");
+    hls::stream<bool> numBlockStreamEos("numBlockStreamEos");
+    hls::stream<uint32_t> inHlsSizeStreamVec[c_no_slaves];
 
-#pragma HLS STREAM variable = outCompressedStream depth = 256
-#pragma HLS STREAM variable = outCompressedStreamEos depth = 256
+#pragma HLS STREAM variable = inHlsSizeStream depth = 4
+#pragma HLS STREAM variable = inHlsSizeStreamVec depth = 4
+#pragma HLS STREAM variable = zlibBlockSizeStream depth = 4
+#pragma HLS STREAM variable = blockCompressedSizeStream depth = 4
+#pragma HLS STREAM variable = storedBlckSize depth = 4
+#pragma HLS STREAM variable = inStoredStream depth = 4
+#pragma HLS STREAM variable = totalSizeStream depth = 4
+#pragma HLS STREAM variable = inHlsStream depth = 4
+#pragma HLS STREAM variable = inHlsStreamEos depth = 4
+#pragma HLS STREAM variable = outCompressedStream depth = 4
+#pragma HLS STREAM variable = outCompressedStreamEos depth = 4
 
-    // AXI 2 HLS Stream and Block Maker
-    xf::compression::details::axiu2hlsStreamBlockMaker<IN_DWIDTH, BLOCK_SIZE>(
-        inStream, inHlsStream, zlibBlockSizeStream, inSizeStream, numBlockStream);
+    // AXI 2 HLS Stream
+    xf::compression::details::axiu2hlsStreamSizeEos<IN_DWIDTH>(inStream, inHlsStream, inHlsStreamEos, inHlsSizeStream,
+                                                               inSizeStream);
+
+    // Size Distributor
+    xf::compression::details::streamSizeDistributor<c_no_slaves>(inHlsSizeStream, inHlsSizeStreamVec);
+
+    // Data Stream Duplicator
+    xf::compression::details::streamDuplicator<IN_DWIDTH>(inHlsStream, inHlsStreamEos, inDataStream1, inDataStream2);
+
+    // Zlib/Gzip Block Maker
+    xf::compression::details::streamBlockMaker<IN_DWIDTH, BLOCK_SIZE, MIN_BLCK_SIZE>(
+        inDataStream1, inZlibStream, inStoredStream, storedBlckSize, zlibBlockSizeStream, inHlsSizeStreamVec[0]);
+
+    // Checksum
+    xf::compression::details::checksumWrapper<IN_DWIDTH, STRATEGY>(inDataStream2, inHlsSizeStreamVec[1],
+                                                                   checksumResult);
 
     // Zlib Compress Stream IO Engine
-    xf::compression::zlibCompress<BLOCK_SIZE>(inHlsStream, outCompressedStream, outCompressedStreamEos, outFileEos,
+    xf::compression::zlibCompress<BLOCK_SIZE>(inZlibStream, outCompressedStream, outCompressedStreamEos, outFileEos,
                                               blockCompressedSizeStream, zlibBlockSizeStream);
 
-    // Zlib Packer
-    xf::compression::details::zlibCompressStreamingPacker<OUT_DWIDTH>(
-        outCompressedStream, outPackedStream, outCompressedStreamEos, outPackedStreamEos, outFileEos,
-        blockCompressedSizeStream, totalSizeStream, numBlockStream, numBlockStreamEos);
+    // Packer
+    xf::compression::details::zlibCompressStreamingPacker<IN_DWIDTH, OUT_DWIDTH, BLOCK_SIZE, STRATEGY>(
+        inStoredStream, outCompressedStream, outPackedStream, outCompressedStreamEos, outPackedStreamEos,
+        storedBlckSize, outFileEos, blockCompressedSizeStream, totalSizeStream, inHlsSizeStreamVec[2], checksumResult,
+        numBlockStreamEos);
 
     // HLS 2 AXI Stream
     xf::compression::details::hlsStreamSize2axiu<OUT_DWIDTH>(outPackedStream, outPackedStreamEos, outStream,
                                                              outSizeStream, totalSizeStream, numBlockStreamEos);
 }
 
-template <int IN_DWIDTH, int OUT_DWIDTH, int BLOCK_SIZE>
+template <int IN_DWIDTH, int OUT_DWIDTH, int BLOCK_SIZE, int STRATEGY = 0, int MIN_BLCK_SIZE = 1024> // STRATEGY: 0:
+// GZIP; 1: ZLIB
 void zlibCompressStaticStreaming(hls::stream<ap_axiu<IN_DWIDTH, 0, 0, 0> >& inStream,
                                  hls::stream<ap_axiu<OUT_DWIDTH, 0, 0, 0> >& outStream,
                                  hls::stream<ap_axiu<32, 0, 0, 0> >& inSizeStream,
                                  hls::stream<ap_axiu<32, 0, 0, 0> >& outSizeStream) {
+    constexpr int c_no_slaves = 3;
 #pragma HLS DATAFLOW
     hls::stream<ap_uint<IN_DWIDTH> > inHlsStream("inHlsStream");
-    hls::stream<ap_uint<OUT_DWIDTH> > outCompressedStream("outCompressedStream");
-    hls::stream<ap_uint<OUT_DWIDTH> > outPackedStream("outPackedStream");
-    hls::stream<ap_uint<32> > numBlockStream("numBlockStream");
-    hls::stream<bool> numBlockStreamEos("numBlockStreamEos");
+    hls::stream<bool> inHlsStreamEos("inHlsStreamEos");
+    hls::stream<uint32_t> inHlsSizeStream("inHlsSizeStream");
+    hls::stream<ap_uint<IN_DWIDTH> > inDataStream1("inDataStream1");
+    hls::stream<ap_uint<IN_DWIDTH> > inDataStream2("inDataStream2");
+    hls::stream<ap_uint<IN_DWIDTH> > inZlibStream("inZlibStream");
+    hls::stream<ap_uint<IN_DWIDTH> > inStoredStream("inStoredStream");
+    hls::stream<uint32_t> storedBlckSize("storedBlckSize");
     hls::stream<uint32_t> zlibBlockSizeStream("zlibBlockSizeStream");
-    hls::stream<uint32_t> blockCompressedSizeStream("blockCompressedSizeStream");
-    hls::stream<uint32_t> totalSizeStream("totalSizeStream");
+    hls::stream<ap_uint<32> > checksumResult("checksumResult");
+    hls::stream<ap_uint<OUT_DWIDTH> > outCompressedStream("outCompressedStream");
     hls::stream<bool> outCompressedStreamEos("outCompressedStreamEos");
     hls::stream<bool> outFileEos("outFileEos");
+    hls::stream<uint32_t> blockCompressedSizeStream("blockCompressedSizeStream");
+    hls::stream<ap_uint<OUT_DWIDTH> > outPackedStream("outPackedStream");
     hls::stream<bool> outPackedStreamEos("outPackedStreamEos");
+    hls::stream<uint32_t> totalSizeStream("totalSizeStream");
+    hls::stream<bool> numBlockStreamEos("numBlockStreamEos");
+    hls::stream<uint32_t> inHlsSizeStreamVec[c_no_slaves];
 
-#pragma HLS STREAM variable = outCompressedStream depth = 256
-#pragma HLS STREAM variable = outCompressedStreamEos depth = 256
+#pragma HLS STREAM variable = inHlsSizeStream depth = 4
+#pragma HLS STREAM variable = inHlsSizeStreamVec depth = 4
+#pragma HLS STREAM variable = zlibBlockSizeStream depth = 4
+#pragma HLS STREAM variable = blockCompressedSizeStream depth = 4
+#pragma HLS STREAM variable = storedBlckSize depth = 4
+#pragma HLS STREAM variable = inStoredStream depth = 4
+#pragma HLS STREAM variable = totalSizeStream depth = 4
+#pragma HLS STREAM variable = inHlsStream depth = 4
+#pragma HLS STREAM variable = inHlsStreamEos depth = 4
+#pragma HLS STREAM variable = outCompressedStream depth = 4
+#pragma HLS STREAM variable = outCompressedStreamEos depth = 4
 
-    // AXI 2 HLS Stream and Block Maker
-    xf::compression::details::axiu2hlsStreamBlockMaker<IN_DWIDTH, BLOCK_SIZE>(
-        inStream, inHlsStream, zlibBlockSizeStream, inSizeStream, numBlockStream);
+    // AXI 2 HLS Stream
+    xf::compression::details::axiu2hlsStreamSizeEos<IN_DWIDTH>(inStream, inHlsStream, inHlsStreamEos, inHlsSizeStream,
+                                                               inSizeStream);
+
+    // Size Distributor
+    xf::compression::details::streamSizeDistributor<c_no_slaves>(inHlsSizeStream, inHlsSizeStreamVec);
+
+    // Data Stream Duplicator
+    xf::compression::details::streamDuplicator<IN_DWIDTH>(inHlsStream, inHlsStreamEos, inDataStream1, inDataStream2);
+
+    // Zlib/Gzip Block Maker
+    xf::compression::details::streamBlockMaker<IN_DWIDTH, BLOCK_SIZE, MIN_BLCK_SIZE>(
+        inDataStream1, inZlibStream, inStoredStream, storedBlckSize, zlibBlockSizeStream, inHlsSizeStreamVec[0]);
+
+    // Checksum
+    xf::compression::details::checksumWrapper<IN_DWIDTH, STRATEGY>(inDataStream2, inHlsSizeStreamVec[1],
+                                                                   checksumResult);
 
     // Zlib Compress Stream IO Engine
-    xf::compression::zlibCompressStatic<BLOCK_SIZE>(inHlsStream, outCompressedStream, outCompressedStreamEos,
+    xf::compression::zlibCompressStatic<BLOCK_SIZE>(inZlibStream, outCompressedStream, outCompressedStreamEos,
                                                     outFileEos, blockCompressedSizeStream, zlibBlockSizeStream);
 
-    // Zlib Packer
-    xf::compression::details::zlibCompressStreamingPacker<OUT_DWIDTH>(
-        outCompressedStream, outPackedStream, outCompressedStreamEos, outPackedStreamEos, outFileEos,
-        blockCompressedSizeStream, totalSizeStream, numBlockStream, numBlockStreamEos);
+    // Packer
+    xf::compression::details::zlibCompressStreamingPacker<IN_DWIDTH, OUT_DWIDTH, BLOCK_SIZE, STRATEGY>(
+        inStoredStream, outCompressedStream, outPackedStream, outCompressedStreamEos, outPackedStreamEos,
+        storedBlckSize, outFileEos, blockCompressedSizeStream, totalSizeStream, inHlsSizeStreamVec[2], checksumResult,
+        numBlockStreamEos);
 
     // HLS 2 AXI Stream
     xf::compression::details::hlsStreamSize2axiu<OUT_DWIDTH>(outPackedStream, outPackedStreamEos, outStream,

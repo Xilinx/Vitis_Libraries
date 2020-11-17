@@ -64,9 +64,10 @@ $(error HOST_ARCH variable not set, please set correctly and rerun)
 endif
 
 #Checks for SYSROOT
+check_sysroot:
 ifneq ($(HOST_ARCH), x86)
 ifndef SYSROOT
-$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
+	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
 endif
 endif
 
@@ -86,6 +87,11 @@ CXX := $(XILINX_VITIS)/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++
 else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
 endif
+
+#Setting VPP
+VPP := v++
+
+#Cheks for aiecompiler
 
 .PHONY: check_vivado
 check_vivado:
@@ -115,7 +121,7 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
-# sw_emu, hw_emu, hw
+# check target
 ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
 $(error TARGET is not sw_emu, hw_emu or hw)
 endif
@@ -188,4 +194,6 @@ device2xsa = $(strip $(patsubst %.xpfm, % , $(shell basename $(DEVICE))))
 RM = rm -f
 RMDIR = rm -rf
 
+MV = mv -f
+CP = cp -rf
 ECHO:= @echo

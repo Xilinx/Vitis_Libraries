@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx LZ4 Streaming Compression", 
+    "name": "Xilinx LZ4 Compress Streaming", 
     "description": [
         "Xilinx LZ4-Streaming Compression"
     ], 
@@ -12,7 +12,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_streaming.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress_streaming.xclbin"
+             ]
         }
     ], 
     "platform_blacklist": [
@@ -36,7 +38,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/src/"
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
                 "PARALLEL_BLOCK=8"

@@ -70,7 +70,8 @@ void kStreamDataRead(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& inKStream,
      *
      */
     ap_axiu<32, 0, 0, 0> tmpSize;
-    for (tmpSize = inKStreamSize.read(); tmpSize.data != 0; tmpSize = inKStreamSize.read()) {
+    do {
+        tmpSize = inKStreamSize.read();
         readStreamSize << tmpSize.data;
         uint32_t input_size = tmpSize.data;
         ap_axiu<DATAWIDTH, 0, 0, 0> tmp;
@@ -81,7 +82,7 @@ void kStreamDataRead(hls::stream<ap_axiu<DATAWIDTH, 0, 0, 0> >& inKStream,
             tmp = inKStream.read();
             readStream << tmp.data;
         }
-    }
+    } while (!tmpSize.last);
     readStreamSize << 0;
 }
 

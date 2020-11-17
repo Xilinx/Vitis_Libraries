@@ -64,11 +64,11 @@ mandir =${prefix}/share/man
 man3dir = ${mandir}/man3
 pkgconfigdir = ${libdir}/pkgconfig
 
-OBJZ = adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o cmdlineparser.o logger.o xlibz.o zlib.o zpipe.o
+OBJZ = adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o cmdlineparser.o logger.o zlibDriver.o zlibFactory.o zlib.o zpipe.o
 OBJG = compress.o uncompr.o gzclose.o gzlib.o gzread.o gzwrite.o
 OBJC = $(OBJZ) $(OBJG)
 
-PIC_OBJZ = adler32.lo crc32.lo deflate.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo zutil.lo cmdlineparser.lo logger.lo xlibz.lo zlib.lo zpipe.lo
+PIC_OBJZ = adler32.lo crc32.lo deflate.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo zutil.lo cmdlineparser.lo logger.lo zlibDriver.lo zlibFactory.lo zlib.lo zpipe.lo
 PIC_OBJG = compress.lo uncompr.lo gzclose.lo gzlib.lo gzread.lo gzwrite.lo
 PIC_OBJC = $(PIC_OBJZ) $(PIC_OBJG)
 
@@ -294,7 +294,8 @@ inffast.o: zutil.h zlib.h zconf.h inftrees.h inflate.h inffast.h
 inftrees.o: zutil.h zlib.h zconf.h inftrees.h
 trees.o: deflate.h zutil.h zlib.h zconf.h trees.h
 cmdlineparser.o logger.o: cmdlineparser.h logger.h
-xlibz.o zlib.o: xlibz.hpp zlib.hpp
+zlibDriver.o zlib.o: zlibDriver.hpp zlib.hpp
+zlibFactory.o zlib.o: zlibFactory.hpp zlib.hpp
 zpipe.o: 
 
 adler32.lo zutil.lo: zutil.h zlib.h zconf.h
@@ -307,5 +308,6 @@ inffast.lo: zutil.h zlib.h zconf.h inftrees.h inflate.h inffast.h
 inftrees.lo: zutil.h zlib.h zconf.h inftrees.h
 trees.lo: deflate.h zutil.h zlib.h zconf.h trees.h
 cmdlineparser.lo logger.lo: cmdlineparser.h logger.h 
-xlibz.lo zlib.lo: xlibz.hpp zlib.hpp
+zlibDriver.lo zlib.lo: zlibDriver.hpp zlib.hpp
+zlibFactory.lo zlib.lo: zlibFactory.hpp zlib.hpp
 zpipe.lo:

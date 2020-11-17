@@ -1,6 +1,6 @@
 {
-    "name": "Xilinx Snappy Multibyte Decompress HLS Test", 
-    "description": "Test Design to validate Snappy MultiByte Decompress module", 
+    "name": "Xilinx Snappy Dualcore Decompress HLS Test", 
+    "description": "Test Design to validate Snappy Dualcore Decompress module", 
     "flow": "hls", 
     "project": "snappy_decompress_test", 
     "solution": "sol1", 

@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx CRC32", 
+    "name": "Xilinx CRC32 HLS Test", 
     "description": "Test Design to validate Xilinx CRC32 module", 
     "flow": "hls", 
     "platform_whitelist": [

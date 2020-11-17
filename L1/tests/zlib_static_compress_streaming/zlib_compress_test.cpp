@@ -30,8 +30,9 @@
 
 #define IN_DATAWIDTH 8
 #define OUT_DATAWIDTH 16
-#define BLOCK_LENGTH 64
+#define BLOCK_LENGTH 32
 #define BLOCK_SIZE (BLOCK_LENGTH * 1024)
+#define STRATEGY 1
 
 typedef ap_axiu<IN_DATAWIDTH, 0, 0, 0> in_dT;
 typedef ap_axiu<OUT_DATAWIDTH, 0, 0, 0> out_dT;
@@ -50,14 +51,13 @@ void hls_zlibCompressStreaming(hls::stream<in_dT>& inStream,
 #pragma HLS INTERFACE ap_ctrl_none port = return
 
 #pragma HLS DATAFLOW
-    xf::compression::zlibCompressStaticStreaming<IN_DATAWIDTH, OUT_DATAWIDTH, BLOCK_SIZE>(inStream, outStream,
-                                                                                          inSizeStream, outSizeStream);
+    xf::compression::zlibCompressStaticStreaming<IN_DATAWIDTH, OUT_DATAWIDTH, BLOCK_SIZE, STRATEGY>(
+        inStream, outStream, inSizeStream, outSizeStream);
 }
 
 int main(int argc, char* argv[]) {
     std::string inputFileName = argv[1];
     std::string outputFileName = argv[2];
-    std::string outputFileNameDup = argv[3];
 
     // File Handling
     std::fstream inFile;
@@ -68,9 +68,6 @@ int main(int argc, char* argv[]) {
     }
     std::ofstream outFile;
     outFile.open(outputFileName.c_str(), std::fstream::binary | std::fstream::out);
-
-    std::ofstream outFileDup;
-    outFileDup.open(outputFileNameDup.c_str(), std::fstream::binary | std::fstream::out);
 
     hls::stream<in_dT> inStream("inStream");
     hls::stream<out_dT> outStream("outStream");
@@ -83,23 +80,11 @@ int main(int argc, char* argv[]) {
     const uint32_t no_blocks = (inFileSize - 1) / BLOCK_SIZE + 1;
     inSize.data = inFileSize;
     inSizeStream << inSize;
-    inSize.data = inFileSize;
-    inSizeStream << inSize;
     inSize.data = 0;
     inSizeStream << inSize;
     inFile.seekg(0, std::ios::beg);
 
     // Input 1st File
-    for (uint32_t i = 0; i < inFileSize; i++) {
-        ap_uint<IN_DATAWIDTH> v;
-        inFile.read((char*)&v, 1);
-        in_dT inData;
-        inData.data = v;
-        inStream << inData;
-    }
-
-    // Input 2nd File
-    inFile.seekg(0, std::ios::beg);
     for (uint32_t i = 0; i < inFileSize; i++) {
         ap_uint<IN_DATAWIDTH> v;
         inFile.read((char*)&v, 1);
@@ -121,17 +106,6 @@ int main(int argc, char* argv[]) {
     size_dT axiSizeVBytes = outSizeStream.read();
     ap_uint<32> sizeVBytes = axiSizeVBytes.data;
 
-    // 2nd File
-    for (out_dT val = outStream.read(); val.last != true; val = outStream.read()) {
-        ap_uint<OUT_DATAWIDTH> o = val.data;
-        byteCounter += c_size;
-        outFileDup.write((char*)&o, c_size);
-    }
-
-    axiSizeVBytes = outSizeStream.read();
-    sizeVBytes = axiSizeVBytes.data;
-
     inFile.close();
     outFile.close();
-    outFileDup.close();
 }

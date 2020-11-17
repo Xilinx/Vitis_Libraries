@@ -394,7 +394,7 @@ static void snappyCompress(hls::stream<ap_uint<32> >& inStream,
     hls::stream<uint8_t> lit_outStream("lit_outStream");
     hls::stream<ap_uint<64> > lenOffset_Stream("lenOffset_Stream");
 
-#pragma HLS STREAM variable = lit_outStream depth = MAX_LIT_COUNT
+#pragma HLS STREAM variable = lit_outStream depth = MAX_LIT_STREAM_SIZE
 #pragma HLS STREAM variable = lenOffset_Stream depth = c_gmemBurstSize
 
 #pragma HLS BIND_STORAGE variable = lit_outStream type = FIFO impl = SRL

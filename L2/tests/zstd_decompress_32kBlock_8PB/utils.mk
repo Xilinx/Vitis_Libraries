@@ -88,6 +88,9 @@ else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
 endif
 
+#Setting VPP
+VPP := v++
+
 #Cheks for aiecompiler
 
 .PHONY: check_vivado
@@ -192,4 +195,5 @@ RM = rm -f
 RMDIR = rm -rf
 
 MV = mv -f
+CP = cp -rf
 ECHO:= @echo

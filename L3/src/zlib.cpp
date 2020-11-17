@@ -22,10 +22,17 @@ extern unsigned long adler32(unsigned long crc, const unsigned char* buf, uint32
 
 using namespace xf::compression;
 
-void xf::compression::event_cb(cl_event event, cl_int cmd_status, void* data) {
+void xf::compression::event_compress_cb(cl_event event, cl_int cmd_status, void* data) {
     // callBackMutex.lock();
     assert(data != NULL);
-    ((xf::compression::buffers*)(data))->finish = true;
+    ((xf::compression::buffers*)(data))->compress_finish = true;
+    // callBackMutex.unlock();
+}
+
+void xf::compression::event_checksum_cb(cl_event event, cl_int cmd_status, void* data) {
+    // callBackMutex.lock();
+    assert(data != NULL);
+    ((xf::compression::buffers*)(data))->checksum_finish = true;
     // callBackMutex.unlock();
 }
 
@@ -81,8 +88,8 @@ uint64_t xfZlib::compress_file(std::string& inFile_name, std::string& outFile_na
         exit(1);
     }
 
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > zlib_in(input_size);
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > zlib_out(input_size * 2);
+    std::vector<uint8_t, aligned_allocator<uint8_t> > zlib_in(input_size);
+    std::vector<uint8_t, aligned_allocator<uint8_t> > zlib_out(input_size * 2);
 
     MEM_ALLOC_CHECK(zlib_in.resize(input_size), input_size, "Input Buffer");
     MEM_ALLOC_CHECK(zlib_out.resize(input_size * 2), input_size * 2, "Output Buffer");
@@ -116,63 +123,74 @@ int validate(std::string& inFile_name, std::string& outFile_name) {
 }
 
 // OpenCL setup initialization
-int xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
+int xfZlib::init(const std::string& binaryFileName, uint8_t kidx, bool skipPlatformCheck) {
     // Error handling in OpenCL is performed using the cl_int specifier. OpenCL
     // functions either return or accept pointers to cl_int types to indicate if
     // an error occurred.
     cl_int err;
 
-    // Look for platform
-    std::vector<cl::Platform> platforms;
-    OCL_CHECK(err, err = cl::Platform::get(&platforms));
-    auto num_platforms = platforms.size();
-    if (num_platforms == 0) {
-        std::cerr << "No Platforms were found this could be cased because of the OpenCL \
-                      ICD not installed at /etc/OpenCL/vendors directory"
-                  << std::endl;
-        m_err_code = -32;
-        return -32;
-    }
-
-    std::string platformName;
-    cl::Platform platform;
-    bool foundFlag = false;
-    for (size_t i = 0; i < platforms.size(); i++) {
-        platform = platforms[i];
-        OCL_CHECK(err, platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
-        if (platformName == "Xilinx") {
-            foundFlag = true;
-#if (VERBOSE_LEVEL >= 2)
-            std::cout << "Found Platform" << std::endl;
-            std::cout << "Platform Name: " << platformName.c_str() << std::endl;
-#endif
-            break;
+    if (!skipPlatformCheck) {
+        // Look for platform
+        std::vector<cl::Platform> platforms;
+        OCL_CHECK(err, err = cl::Platform::get(&platforms));
+        auto num_platforms = platforms.size();
+        if (num_platforms == 0) {
+            std::cerr << "No Platforms were found this could be cased because of the OpenCL \
+                          ICD not installed at /etc/OpenCL/vendors directory"
+                      << std::endl;
+            m_err_code = -32;
+            return -32;
         }
-    }
-    if (foundFlag == false) {
-        std::cerr << "Error: Failed to find Xilinx platform" << std::endl;
-        m_err_code = 1;
-        return 1;
-    }
-    // Getting ACCELERATOR Devices and selecting 1st such device
-    std::vector<cl::Device> devices;
-    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
-    m_device = devices[m_deviceid];
 
-    // OpenCL Setup Start
-    // Creating Context and Command Queue for selected Device
-    cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
-    OCL_CHECK(err, m_context = new cl::Context(m_device, props, NULL, NULL, &err));
-    if (err) {
-        std::cerr << "Context creation Failed " << std::endl;
-        m_err_code = 1;
-        return 1;
+        std::string platformName;
+        cl::Platform platform;
+        bool foundFlag = false;
+        for (size_t i = 0; i < platforms.size(); i++) {
+            platform = platforms[i];
+            OCL_CHECK(err, platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
+            if (platformName == "Xilinx") {
+                foundFlag = true;
+#if (VERBOSE_LEVEL >= 2)
+                std::cout << "Found Platform" << std::endl;
+                std::cout << "Platform Name: " << platformName.c_str() << std::endl;
+#endif
+                break;
+            }
+        }
+        if (foundFlag == false) {
+            std::cerr << "Error: Failed to find Xilinx platform" << std::endl;
+            m_err_code = 1;
+            return 1;
+        }
+        // Getting ACCELERATOR Devices and selecting 1st such device
+        std::vector<cl::Device> devices;
+        OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
+        m_device = devices[m_deviceid];
+
+        // OpenCL Setup Start
+        // Creating Context and Command Queue for selected Device
+        cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
+        OCL_CHECK(err, m_context = new cl::Context(m_device, props, NULL, NULL, &err));
+        if (err) {
+            std::cerr << "Context creation Failed " << std::endl;
+            m_err_code = 1;
+            return 1;
+        }
+    } else {
+        // Platforms & devices already created
+        // Use them to create context
+        cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, m_platform, 0};
+        OCL_CHECK(err, m_context = new cl::Context(m_device, props, NULL, NULL, &err));
+        if (err) {
+            std::cerr << "Context creation Failed " << std::endl;
+            m_err_code = 1;
+            return 1;
+        }
     }
 // Import_binary() command will find the OpenCL binary file created using the
 // v++ compiler load into OpenCL Binary and return as Binaries
 // OpenCL and it can contain many functions which can be executed on the
 // device.
-// auto fileBuf = xcl::read_binary_file(binaryFileName);
 #if (VERBOSE_LEVEL >= 2)
     std::cout << "INFO: Reading " << binaryFileName << std::endl;
 #endif
@@ -197,16 +215,37 @@ int xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
     auto nb = bin_file.tellg();
     bin_file.seekg(0, bin_file.beg);
 
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > buf;
+    std::vector<uint8_t> buf;
     MEM_ALLOC_CHECK(buf.resize(nb), nb, "XCLBIN Buffer");
     bin_file.read(reinterpret_cast<char*>(buf.data()), nb);
 
     cl::Program::Binaries bins{{buf.data(), buf.size()}};
     ZOCL_CHECK_2(err, m_program = new cl::Program(*m_context, {m_device}, bins, NULL, &err), m_err_code, c_clinvalidbin,
-                 c_clinvalidvalue);
+                 c_clinvalidprogram);
     if (error_code()) {
-        std::cerr << "Failed to program the device " << std::endl;
-        return m_err_code;
+        m_err_code = 0;
+        std::ifstream bin_file((std::string(c_installRootDir) + c_hardFullXclbinPath), std::ifstream::binary);
+        if (bin_file.fail()) {
+            std::cerr << "Unable to open binary file" << std::endl;
+            m_err_code = 1;
+            return 1;
+        }
+
+        bin_file.seekg(0, bin_file.end);
+        auto nb = bin_file.tellg();
+        bin_file.seekg(0, bin_file.beg);
+
+        buf.clear();
+        MEM_ALLOC_CHECK(buf.resize(nb), nb, "XCLBIN Buffer");
+        bin_file.read(reinterpret_cast<char*>(buf.data()), nb);
+
+        cl::Program::Binaries bins{{buf.data(), buf.size()}};
+        ZOCL_CHECK_2(err, m_program = new cl::Program(*m_context, {m_device}, bins, NULL, &err), m_err_code,
+                     c_clinvalidbin, c_clinvalidvalue);
+        if (error_code()) {
+            std::cerr << "Failed to program the device " << std::endl;
+            return m_err_code;
+        }
     }
 
     // Create Command Queue
@@ -216,10 +255,10 @@ int xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
     if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
         std::string cu_id;
 #ifdef ENABLE_HW_CHECKSUM
-        std::string checksum_krnl_name = checksum_kernel_names[0].c_str();
+        std::string checksum_krnl_name = m_checksumKernel_names[0].c_str();
 
         // Create Checksum Kernels
-        OCL_CHECK(err, checksum_kernel = new cl::Kernel(*m_program, checksum_krnl_name.c_str(), &err));
+        OCL_CHECK(err, m_checksumKernel = new cl::Kernel(*m_program, checksum_krnl_name.c_str(), &err));
 #endif
     }
 
@@ -240,6 +279,53 @@ int xfZlib::init(const std::string& binaryFileName, uint8_t kidx) {
     return 0;
 }
 
+xfZlib::xfZlib(const std::string& binaryFileName,
+               uint8_t cd_flow,
+               const cl::Device& device,
+               const cl_context_properties& platform,
+               enum design_flow dflow) {
+    m_device = device;
+    m_platform = platform;
+    m_cdflow = cd_flow;
+    m_pending = 0;
+    if (m_zlibFlow) m_checksum = 1;
+    if (m_cdflow == COMP_ONLY)
+        m_kidx = 1;
+    else
+        m_kidx = 2;
+    bool skipPlatformCheck = true;
+
+    // OpenCL setup
+    int err = init(binaryFileName, m_kidx, skipPlatformCheck);
+    if (err) {
+        std::cerr << "\nOpenCL Setup Failed" << std::endl;
+        release();
+        return;
+    }
+
+    m_memoryManager = new xf::compression::memoryManager(8, m_context);
+
+#ifdef ENABLE_HW_CHECKSUM
+    MEM_ALLOC_CHECK(h_buf_checksum_data.resize(1), 1, "Checksum Data");
+    OCL_CHECK(err, buffer_checksum_data = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                                         sizeof(uint32_t), h_buf_checksum_data.data(), &err));
+#endif
+
+    if ((cd_flow == BOTH) || (cd_flow == DECOMP_ONLY)) {
+        // Decompression host buffer allocation
+        for (int j = 0; j < DIN_BUFFERCOUNT; ++j)
+            MEM_ALLOC_CHECK(h_dbufstream_in[j].resize(INPUT_BUFFER_SIZE), INPUT_BUFFER_SIZE, "Input Buffer");
+
+        for (int j = 0; j < DOUT_BUFFERCOUNT; ++j) {
+            MEM_ALLOC_CHECK(h_dbufstream_zlibout[j].resize(OUTPUT_BUFFER_SIZE), OUTPUT_BUFFER_SIZE,
+                            "Output Host Buffer");
+            MEM_ALLOC_CHECK(h_dcompressSize_stream[j].resize(sizeof(uint32_t)), sizeof(uint32_t),
+                            "DecompressSize Host Buffer");
+        }
+        MEM_ALLOC_CHECK(h_dcompressStatus.resize(sizeof(uint32_t)), sizeof(uint32_t), "DecompressStatus Host Buffer");
+    }
+}
+
 // Constructor
 xfZlib::xfZlib(const std::string& binaryFileName,
                uint8_t max_cr,
@@ -257,10 +343,6 @@ xfZlib::xfZlib(const std::string& binaryFileName,
     m_kidx = d_type;
     m_pending = 0;
     if (m_zlibFlow) m_checksum = 1;
-#if (VERBOSE_LEVEL >= 2)
-    std::chrono::duration<double, std::milli> device_API_time_ns_1(0);
-    auto device_API_start = std::chrono::high_resolution_clock::now();
-#endif
     uint8_t kidx = d_type;
 
     // OpenCL setup
@@ -271,35 +353,11 @@ xfZlib::xfZlib(const std::string& binaryFileName,
         return;
     }
 
-#if (VERBOSE_LEVEL >= 2)
-    auto device_API_end = std::chrono::high_resolution_clock::now();
-    auto duration_devscan = std::chrono::duration<double, std::milli>(device_API_end - device_API_start);
-    device_API_time_ns_1 = duration_devscan;
-    float device_scan = device_API_time_ns_1.count();
-    std::cout << "OpenCL Setup = " << std::fixed << std::setprecision(2) << device_scan << std::endl;
-#endif
-
     m_memoryManager = new xf::compression::memoryManager(8, m_context);
 
     if ((cd_flow == BOTH) || (cd_flow == COMP_ONLY)) {
-#if (VERBOSE_LEVEL >= 2)
-        std::chrono::duration<double, std::milli> cons_API_time_ns_1(0);
-        auto cons_API_start = std::chrono::high_resolution_clock::now();
-#endif
-
 #ifdef ENABLE_HW_CHECKSUM
         MEM_ALLOC_CHECK(h_buf_checksum_data.resize(1), 1, "Checksum Data");
-#endif
-
-#if (VERBOSE_LEVEL >= 2)
-        auto cons_API_end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration<double, std::milli>(cons_API_end - cons_API_start);
-        cons_API_time_ns_1 = duration;
-        float cons_time = cons_API_time_ns_1.count();
-        std::cout << "Compress Host Buffer Allocation Time = " << std::fixed << std::setprecision(2) << cons_time
-                  << std::endl;
-#endif
-#ifdef ENABLE_HW_CHECKSUM
         cl_int err;
         OCL_CHECK(err, buffer_checksum_data = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                                              sizeof(uint32_t), h_buf_checksum_data.data(), &err));
@@ -307,10 +365,6 @@ xfZlib::xfZlib(const std::string& binaryFileName,
     }
 
     if ((cd_flow == BOTH) || (cd_flow == DECOMP_ONLY)) {
-#if (VERBOSE_LEVEL >= 2)
-        std::chrono::duration<double, std::milli> cons_API_time_ns_1(0);
-        auto cons_API_start = std::chrono::high_resolution_clock::now();
-#endif
         // Decompression host buffer allocation
         for (int j = 0; j < DIN_BUFFERCOUNT; ++j)
             MEM_ALLOC_CHECK(h_dbufstream_in[j].resize(INPUT_BUFFER_SIZE), INPUT_BUFFER_SIZE, "Input Buffer");
@@ -322,16 +376,6 @@ xfZlib::xfZlib(const std::string& binaryFileName,
                             "DecompressSize Host Buffer");
         }
         MEM_ALLOC_CHECK(h_dcompressStatus.resize(sizeof(uint32_t)), sizeof(uint32_t), "DecompressStatus Host Buffer");
-
-#if (VERBOSE_LEVEL >= 2)
-        std::cout << "Found Platform" << std::endl;
-        auto cons_API_end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration<double, std::milli>(cons_API_end - cons_API_start);
-        cons_API_time_ns_1 = duration;
-        float cons_time = cons_API_time_ns_1.count();
-        std::cout << "DeCompress Host Buffer Allocation Time = " << std::fixed << std::setprecision(2) << cons_time
-                  << std::endl;
-#endif
     }
     // OpenCL Host / Device Buffer Setup End
 }
@@ -356,7 +400,7 @@ void xfZlib::release() {
     DELETE_OBJ(m_context);
 
     if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
-        DELETE_OBJ(checksum_kernel);
+        DELETE_OBJ(m_checksumKernel);
     }
 
     // Decompress release
@@ -379,8 +423,8 @@ void xfZlib::release() {
         delete m_def_q;
     }
 
-    if (compress_stream_kernel) {
-        delete compress_stream_kernel;
+    if (m_compressFullKernel) {
+        delete m_compressFullKernel;
     }
 }
 
@@ -402,11 +446,11 @@ uint32_t xfZlib::decompress_file(std::string& inFile_name, std::string& outFile_
 
     uint32_t output_buf_size = input_size * m_max_cr;
 
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > in;
+    std::vector<uint8_t, aligned_allocator<uint8_t> > in;
     // Allocat output size
     // 8 - Max CR per file expected, if this size is big
     // Decompression crashes
-    std::vector<uint8_t, zlib_aligned_allocator<uint8_t> > out(output_buf_size);
+    std::vector<uint8_t, aligned_allocator<uint8_t> > out(output_buf_size);
 
     MEM_ALLOC_CHECK(in.resize(input_size), input_size, "Input Buffer");
     MEM_ALLOC_CHECK(in.resize(output_buf_size), output_buf_size, "Output Buffer");
@@ -677,7 +721,7 @@ size_t xfZlib::decompress(uint8_t* in, uint8_t* out, size_t input_size, size_t m
 
     for (int i = 0; i < DOUT_BUFFERCOUNT; i++) {
         ZOCL_CHECK_2(err,
-                     buffer_dec_zlib_output[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                     buffer_dec_zlib_output[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                                                 outBufferSize, h_dbufstream_zlibout[i].data(), &err),
                      m_err_code, c_clOutOfHostMemory, c_clOutOfResource);
         if (error_code()) {
@@ -738,18 +782,25 @@ size_t xfZlib::decompress(uint8_t* in, uint8_t* out, size_t input_size, size_t m
 }
 
 size_t xfZlib::deflate_buffer(
-    uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, std::string cu_id) {
+    uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, const std::string& cu_id) {
     cl_int err;
     bool initialize_checksum = false;
     bool actionDone = false;
-    if (compress_stream_kernel == NULL) {
-        std::string compress_kname = compress_kernel_names[1];
+    std::string compress_kname;
+
+    if (m_compressFullKernel == NULL) {
 #ifdef ENABLE_XRM
-        compress_kname = compress_kname + ":{" + cu_id + "}";
+        // XRM: Use the CU instance id and create compress kernel
+        compress_kname = compress_kernel_names[1] + ":{" + cu_id + "}";
+#else
+        // Random: Use kernel name directly and let XRT
+        // decide the CU connection based on HBM bank
+        compress_kname = compress_kernel_names[1];
 #endif
-        OCL_CHECK(err, compress_stream_kernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
+        OCL_CHECK(err, m_compressFullKernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
         initialize_checksum = true;
     }
+
     bool checksum_type = false;
 
 #ifdef ENABLE_HW_CHECKSUM
@@ -788,21 +839,20 @@ size_t xfZlib::deflate_buffer(
             int narg = 0;
             if (inSize >= MIN_BLOCK_SIZE) {
                 // Set kernel arguments
-                compress_stream_kernel->setArg(narg++, *(buffer->buffer_input));
-                compress_stream_kernel->setArg(narg++, *(buffer->buffer_zlib_output));
-                compress_stream_kernel->setArg(narg++, *(buffer->buffer_compress_size));
-                compress_stream_kernel->setArg(narg++, inSize);
+                m_compressFullKernel->setArg(narg++, *(buffer->buffer_input));
+                m_compressFullKernel->setArg(narg++, *(buffer->buffer_zlib_output));
+                m_compressFullKernel->setArg(narg++, *(buffer->buffer_compress_size));
+                m_compressFullKernel->setArg(narg++, inSize);
             }
 
 #ifdef ENABLE_HW_CHECKSUM
             narg = 0;
 
-            checksum_kernel->setArg(narg++, *(buffer->buffer_input));
-            checksum_kernel->setArg(narg++, *buffer_checksum_data);
-            checksum_kernel->setArg(narg++, chkSize);
-            checksum_kernel->setArg(narg++, checksum_type);
+            m_checksumKernel->setArg(narg++, *(buffer->buffer_input));
+            m_checksumKernel->setArg(narg++, *buffer_checksum_data);
+            m_checksumKernel->setArg(narg++, chkSize);
+            m_checksumKernel->setArg(narg++, checksum_type);
 #endif
-
             // Migrate memory - Map host to device buffers
             OCL_CHECK(err, err = m_def_q->enqueueMigrateMemObjects({*(buffer->buffer_input)}, 0 /* 0 means from host*/,
                                                                    NULL, &(buffer->wr_event)));
@@ -821,17 +871,21 @@ size_t xfZlib::deflate_buffer(
             if (inSize >= MIN_BLOCK_SIZE) {
                 // kernel write events update
                 // LZ77 Compress Fire Kernel invocation
-                OCL_CHECK(err, err = m_def_q->enqueueTask(*compress_stream_kernel, &(wrEvents), &(buffer->cmp_event)));
+                OCL_CHECK(err, err = m_def_q->enqueueTask(*m_compressFullKernel, &(wrEvents), &(buffer->cmp_event)));
 
                 cmpEvents = {buffer->cmp_event};
             }
 
 #ifdef ENABLE_HW_CHECKSUM
             if (lastBuffer != NULL) {
-                wrChkEvents.push_back(lastBuffer->chk_event);
+                int status = -1;
+                cl_int ret = lastBuffer->chk_event.getInfo<int>(CL_EVENT_COMMAND_EXECUTION_STATUS, &status);
+                if (ret == 0 && status != 0) {
+                    wrChkEvents.push_back(lastBuffer->chk_event);
+                }
             }
             // checksum kernel
-            OCL_CHECK(err, err = m_def_q->enqueueTask(*checksum_kernel, &(wrChkEvents), &(buffer->chk_event)));
+            OCL_CHECK(err, err = m_def_q->enqueueTask(*m_checksumKernel, &(wrChkEvents), &(buffer->chk_event)));
 #endif
 
             if (inSize >= MIN_BLOCK_SIZE) {
@@ -842,18 +896,25 @@ size_t xfZlib::deflate_buffer(
 
             cl_int err;
             if (inSize >= MIN_BLOCK_SIZE) {
-                OCL_CHECK(err,
-                          err = buffer->rd_event.setCallback(CL_COMPLETE, xf::compression::event_cb, (void*)buffer));
+                OCL_CHECK(err, err = buffer->rd_event.setCallback(CL_COMPLETE, xf::compression::event_compress_cb,
+                                                                  (void*)buffer));
             } else {
-                buffer->finish = true;
+                buffer->compress_finish = true;
             }
+
+#ifdef ENABLE_HW_CHECKSUM
+            OCL_CHECK(err, err = buffer->chk_event.setCallback(CL_COMPLETE, xf::compression::event_checksum_cb,
+                                                               (void*)buffer));
+#else
+            buffer->checksum_finish = true;
+#endif
 
             input_size = 0;
             actionDone = true;
         }
     }
 
-    if ((m_memoryManager->peekBuffer() != NULL) && m_memoryManager->peekBuffer()->finish) {
+    if ((m_memoryManager->peekBuffer() != NULL) && (m_memoryManager->peekBuffer()->is_finish())) {
         buffers* buffer;
         uint32_t compSize = 0;
         auto size = 0;
@@ -920,7 +981,6 @@ size_t xfZlib::deflate_buffer(
 #endif
         return size;
     }
-
     if ((actionDone == false) && (m_memoryManager->isPending() == true)) {
         // wait for a queue to finish to save CPU cycles
         auto buffer = m_memoryManager->peekBuffer();
@@ -1131,13 +1191,13 @@ buffers* memoryManager::createBuffer(size_t size) {
             this->busyBuffers.push(buffer);
             this->freeBuffers.pop();
             lastBuffer = buffer;
+            buffer->reset();
             buffer->input_size = size;
-            buffer->finish = false;
             return buffer;
         } else {
             auto buffer = this->freeBuffers.front();
-            zlib_aligned_allocator<uint8_t> alocator;
-            zlib_aligned_allocator<uint32_t> alocator_1;
+            aligned_allocator<uint8_t> alocator;
+            aligned_allocator<uint32_t> alocator_1;
 
             alocator.deallocate(buffer->h_buf_in);
             alocator.deallocate(buffer->h_buf_zlibout);
@@ -1155,9 +1215,8 @@ buffers* memoryManager::createBuffer(size_t size) {
 
     if (bufCount < maxBufCount) {
         auto buffer = new buffers();
-        buffer->finish = false;
-        zlib_aligned_allocator<uint8_t> alocator;
-        zlib_aligned_allocator<uint32_t> alocator_1;
+        aligned_allocator<uint8_t> alocator;
+        aligned_allocator<uint32_t> alocator_1;
         MEM_ALLOC_CHECK((buffer->h_buf_in = alocator.allocate(size)), size, "Input Host Buffer");
         MEM_ALLOC_CHECK((buffer->h_buf_zlibout = alocator.allocate(size)), size, "Output Host Buffer");
         uint16_t max_blocks = (size / BLOCK_SIZE_IN_KB) + 1;
@@ -1213,8 +1272,7 @@ cl::Buffer* memoryManager::getBuffer(cl_mem_flags flag, size_t size, uint8_t* ho
     cl_mem_flags l_flag = (uint32_t)(flag | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX);
     uint8_t count = 0;
     do {
-        clBuffer = new cl::Buffer(*(this->mContext), CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                                  size, &ext, &err);
+        clBuffer = new cl::Buffer(*(this->mContext), l_flag, size, &ext, &err);
         count++;
     } while (err != 0 && count < 32);
 #endif
@@ -1243,8 +1301,8 @@ buffers* memoryManager::getLastBuffer() {
 void memoryManager::release() {
     while (!(this->freeBuffers.empty())) {
         auto buffer = this->freeBuffers.front();
-        zlib_aligned_allocator<uint8_t> alocator;
-        zlib_aligned_allocator<uint32_t> alocator_1;
+        aligned_allocator<uint8_t> alocator;
+        aligned_allocator<uint32_t> alocator_1;
 
         alocator.deallocate(buffer->h_buf_in);
         alocator.deallocate(buffer->h_buf_zlibout);
@@ -1260,8 +1318,8 @@ void memoryManager::release() {
 }
 
 void memoryManager::release(buffers* buffer) {
-    zlib_aligned_allocator<uint8_t> alocator;
-    zlib_aligned_allocator<uint32_t> alocator_1;
+    aligned_allocator<uint8_t> alocator;
+    aligned_allocator<uint32_t> alocator_1;
 
     alocator.deallocate(buffer->h_buf_in);
     alocator.deallocate(buffer->h_buf_zlibout);

@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx GZIP P2P 8 Parallel Bytes with Loop II=1", 
+    "name": "Xilinx GZIP P2P Decompress", 
     "description": [
         "Xilinx GZip P2P Decompression Parallel Byte 8_II1"
     ], 
@@ -31,7 +31,6 @@
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp", 
-                "LIB_DIR/common/thirdParty/xxhash/xxhash.c", 
                 "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c"
             ], 
             "includepaths": [
@@ -48,7 +47,7 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.ini"
+            "PROJECT/advanced.cfg"
         ], 
         "compiler": {
             "symbols": [
@@ -57,14 +56,14 @@
                 "GZIP_MODE=1"
             ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
     }, 
     "containers": [
         {
             "name": "decompress_stream", 
-            "ldclflags": "--config PROJECT/opts.ini", 
+            "ldclflags": "--config PROJECT/opts.cfg", 
             "accelerators": [
                 {
                     "name": "xilZlibDmReader", 

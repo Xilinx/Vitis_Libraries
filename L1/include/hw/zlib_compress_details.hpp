@@ -42,6 +42,8 @@
 #include "s2mm.hpp"
 #include "stream_downsizer.hpp"
 #include "stream_upsizer.hpp"
+#include "xf_security/adler32.hpp"
+#include "xf_security/crc32.hpp"
 
 namespace xf {
 namespace compression {
@@ -63,6 +65,88 @@ void streamSizeDistributor(hls::stream<uint32_t>& inStream, hls::stream<uint32_t
         for (int n = 0; n < SLAVES; n++) outStream[n] << i;
         if (i == 0) break;
     } while (1);
+}
+
+template <int DWIDTH>
+void streamDuplicator(hls::stream<ap_uint<DWIDTH> >& inHlsStream,
+                      hls::stream<bool>& inHlsStreamEos,
+                      hls::stream<ap_uint<DWIDTH> >& outZlibStream,
+                      hls::stream<ap_uint<DWIDTH> >& outChecksumStream) {
+    for (bool eos = inHlsStreamEos.read(); eos == false; eos = inHlsStreamEos.read()) {
+        ap_uint<DWIDTH> tempVal = inHlsStream.read();
+        outZlibStream << tempVal;
+        outChecksumStream << tempVal;
+    }
+}
+
+template <int DWIDTH, int STRATEGY = 0> // STRATEGY: 0: GZIP; 1: ZLIB
+void checksumWrapper(hls::stream<ap_uint<DWIDTH> >& inStream,
+                     hls::stream<uint32_t>& inSizeStream,
+                     hls::stream<ap_uint<32> >& checksum) {
+    constexpr int c_parallel_byte = DWIDTH / 8;
+    hls::stream<ap_uint<32> > inLenStrm;
+    hls::stream<ap_uint<32> > checkStrm;
+    hls::stream<bool> endInLenStrm;
+    hls::stream<bool> endOutStrm;
+
+#pragma HLS STREAM variable = inLenStrm depth = 4
+#pragma HLS STREAM variable = endInLenStrm depth = 4
+#pragma HLS STREAM variable = endOutStrm depth = 4
+
+    for (ap_uint<32> size = inSizeStream.read(); size != 0; size = inSizeStream.read()) {
+        if (STRATEGY == 0)
+            checkStrm << ~0;
+        else
+            checkStrm << 0;
+        inLenStrm << size;
+        endInLenStrm << 0;
+        endInLenStrm << 1;
+        if (STRATEGY == 0) {
+            xf::security::crc32<c_parallel_byte>(checkStrm, inStream, inLenStrm, endInLenStrm, checksum, endOutStrm);
+        } else {
+            xf::security::adler32<c_parallel_byte>(checkStrm, inStream, inLenStrm, endInLenStrm, checksum, endOutStrm);
+        }
+        endOutStrm.read();
+        endOutStrm.read();
+    }
+}
+
+template <int IN_DWIDTH, int BLCK_SIZE, int MIN_BLCK_SIZE = 1024>
+void streamBlockMaker(hls::stream<ap_uint<IN_DWIDTH> >& inStream,
+                      hls::stream<ap_uint<IN_DWIDTH> >& outputStream,
+                      hls::stream<ap_uint<IN_DWIDTH> >& outStoredData,
+                      hls::stream<uint32_t>& outStoredBlckSize,
+                      hls::stream<uint32_t>& outputBlockSizeStream,
+                      hls::stream<uint32_t>& inSizeStream) {
+    constexpr int c_parallelByte = IN_DWIDTH / 8;
+    for (uint32_t inputSize = inSizeStream.read(); inputSize != 0; inputSize = inSizeStream.read()) {
+        ap_uint<32> no_blocks = (inputSize - 1) / BLCK_SIZE + 1;
+        uint32_t readSize = 0;
+
+        for (uint32_t i = 0; i < no_blocks; i++) {
+            uint32_t block_length = BLCK_SIZE;
+            if (readSize + BLCK_SIZE > inputSize) block_length = inputSize - readSize;
+
+            // Very Small Block Handling
+            if (block_length < MIN_BLCK_SIZE)
+                outStoredBlckSize << block_length;
+            else
+                outputBlockSizeStream << block_length;
+
+            for (uint32_t j = 0; j < block_length; j += c_parallelByte) {
+#pragma HLS PIPELINE II = 1
+                ap_uint<IN_DWIDTH> tmpOut = inStream.read();
+                if (block_length < MIN_BLCK_SIZE) {
+                    outStoredData << tmpOut;
+                } else {
+                    outputStream << tmpOut;
+                }
+            }
+            readSize += BLCK_SIZE;
+        }
+    }
+
+    outputBlockSizeStream << 0;
 }
 
 template <int DATAWIDTH = 512, int BURST_SIZE = 16, int MAX_BLOCK_SIZE = 64 * 1024>
@@ -210,39 +294,84 @@ void s2mmZlib(ap_uint<DATAWIDTH>* out,
     }
 }
 
-template <int OUT_DWIDTH>
-void zlibCompressStreamingPacker(hls::stream<ap_uint<OUT_DWIDTH> >& inStream,
+template <int IN_DWIDTH, int OUT_DWIDTH, int BLCK_LEN, int STRATEGY = 0>
+void zlibCompressStreamingPacker(hls::stream<ap_uint<IN_DWIDTH> >& inStoredStream,
+                                 hls::stream<ap_uint<OUT_DWIDTH> >& inStream,
                                  hls::stream<ap_uint<OUT_DWIDTH> >& outStream,
                                  hls::stream<bool>& inStreamEos,
                                  hls::stream<bool>& outStreamEos,
+                                 hls::stream<uint32_t>& storedBlckSize,
                                  hls::stream<bool>& inFileEos,
                                  hls::stream<uint32_t>& inputCmpBlockSizeStream,
                                  hls::stream<uint32_t>& outputTotalSizeStream,
-                                 hls::stream<ap_uint<32> >& inNumBlockStream,
+                                 hls::stream<uint32_t>& inSizeStream,
+                                 hls::stream<ap_uint<32> >& checksumStream,
                                  hls::stream<bool>& outNumBlockStreamEos) {
-    const int c_parallelByte = OUT_DWIDTH / 8;
-    for (ap_uint<32> no_blocks = inNumBlockStream.read(); no_blocks != 0; no_blocks = inNumBlockStream.read()) {
+    constexpr int c_parallelByte = OUT_DWIDTH / 8;
+    constexpr int c_format = 0x8B1F;
+    constexpr int c_variant_realcode = 0x0808;
+    for (ap_uint<32> inSize = inSizeStream.read(); inSize != 0; inSize = inSizeStream.read()) {
         uint32_t size = 0, lbuf_idx = 0, prodLbuf = 0;
+        bool onlyOnce = true;
+        ap_uint<32> no_blocks = (inSize - 1) / BLCK_LEN + 1;
         outNumBlockStreamEos << 0;
-        outStream << 0x0178;
-        outStreamEos << 0;
-        size += 2;
-        ap_uint<3 * OUT_DWIDTH> lcl_buffer = 0;
+        // Gzip
+        if (STRATEGY == 0) {
+            outStream << c_format;
+            outStreamEos << 0;
+            outStream << c_variant_realcode;
+            outStreamEos << 0;
+            outStream << 0x0;
+            outStreamEos << 0;
+            outStream << 0x0;
+            outStreamEos << 0;
+            outStream << 0x0300;
+            outStreamEos << 0;
+            outStream << 0x0078;
+            outStreamEos << 0;
+            size += 12;
+        }
+        // Zlib
+        else {
+            outStream << 0x0178;
+            outStreamEos << 0;
+            size += 2;
+        }
+        ap_uint<2 * OUT_DWIDTH> lcl_buffer = 0;
         for (uint32_t i = 0; i < no_blocks; i++) {
-            inFileEos.read();
-            uint32_t size_read = 0;
             // One-time multiplication calculation for index
             prodLbuf = lbuf_idx * 8;
-            if (i == no_blocks - 1) {
-                ap_uint<OUT_DWIDTH> val = inStream.read();
-                if (inStreamEos.read()) {
-                    continue;
-                }
-                val |= (ap_uint<OUT_DWIDTH>)1;
-                size_read += 2;
-                lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = val;
-                lbuf_idx += 2;
+            uint32_t size_read = 0;
+            // Stored Block Handling
+            if (i == no_blocks - 1 && !storedBlckSize.empty()) {
+                uint32_t sizeStrdBlck = storedBlckSize.read();
+                // Stored Block Headers
+                lcl_buffer.range(prodLbuf + IN_DWIDTH - 1, prodLbuf) = 0x0;
+                lbuf_idx++;
                 prodLbuf = lbuf_idx * 8;
+                lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = sizeStrdBlck;
+                outStream << lcl_buffer;
+                outStreamEos << 0;
+                lcl_buffer >>= OUT_DWIDTH;
+                lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = ~sizeStrdBlck;
+                outStream << lcl_buffer;
+                outStreamEos << 0;
+                lcl_buffer >>= OUT_DWIDTH;
+
+                for (uint32_t sz = 0; sz < sizeStrdBlck; sz++) {
+#pragma HLS PIPELINE II = 1
+                    // Check for PARALLEL BYTE data and write to output stream
+                    if (lbuf_idx >= c_parallelByte) {
+                        outStream << lcl_buffer.range(OUT_DWIDTH - 1, 0);
+                        outStreamEos << 0;
+                        lcl_buffer >>= OUT_DWIDTH;
+                        lbuf_idx -= c_parallelByte;
+                    }
+                    lcl_buffer.range((lbuf_idx * 8) + IN_DWIDTH - 1, lbuf_idx * 8) = inStoredStream.read();
+                    lbuf_idx++;
+                }
+                size += (sizeStrdBlck + 5);
+                continue;
             }
 
         loop_aligned:
@@ -250,14 +379,13 @@ void zlibCompressStreamingPacker(hls::stream<ap_uint<OUT_DWIDTH> >& inStream,
 #pragma HLS PIPELINE II = 1
                 // Reading Input Data
                 lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = inStream.read();
-                //                bool tempEos = inStreamEos.read();
 
                 // Writing output into memory
                 outStream << lcl_buffer.range(OUT_DWIDTH - 1, 0);
                 outStreamEos << 0;
                 // Shifting by Global datawidth
                 lcl_buffer >>= OUT_DWIDTH;
-                size_read += 2;
+                size_read += c_parallelByte;
             }
 
             uint32_t blockSize = inputCmpBlockSizeStream.read();
@@ -277,29 +405,78 @@ void zlibCompressStreamingPacker(hls::stream<ap_uint<OUT_DWIDTH> >& inStream,
                 lcl_buffer >>= OUT_DWIDTH;
                 lbuf_idx -= c_parallelByte;
             }
+            inFileEos.read();
         }
 
         // Left Over Data Handling
-        if (lbuf_idx) {
-            lcl_buffer.range(OUT_DWIDTH - 1, (lbuf_idx * 8)) = 0;
+        if (lbuf_idx && onlyOnce) {
+            if (lbuf_idx < c_parallelByte) {
+                lcl_buffer.range(OUT_DWIDTH - 1, (lbuf_idx * 8)) = 1;
+                size++;
+                onlyOnce = false;
+            }
             outStream << lcl_buffer.range(OUT_DWIDTH - 1, 0);
             outStreamEos << 0;
+            lcl_buffer >>= OUT_DWIDTH;
             lbuf_idx = 0;
         }
 
-        outStream << 0x0001;
+        // Last Block Processing
+        if (lbuf_idx == 0 && onlyOnce) {
+            lcl_buffer.range(IN_DWIDTH - 1, 0) = 1;
+            lbuf_idx++;
+            onlyOnce = false;
+            size++;
+        }
+
+        prodLbuf = lbuf_idx * 8;
+        lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = 0x0;
+        outStream << lcl_buffer;
         outStreamEos << 0;
-        outStream << 0xff00;
+        lcl_buffer >>= OUT_DWIDTH;
+        lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = 0xFFFF;
+        outStream << lcl_buffer;
         outStreamEos << 0;
-        outStream << 0x00ff;
+        lcl_buffer >>= OUT_DWIDTH;
+        size += 4;
+
+        // CRC Processing
+        ap_uint<32> checksum = checksumStream.read();
+        lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = checksum;
+        outStream << lcl_buffer;
         outStreamEos << 0;
-        outStream << 0;
+        checksum >>= OUT_DWIDTH;
+        lcl_buffer >>= OUT_DWIDTH;
+        lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = checksum;
+        outStream << lcl_buffer;
         outStreamEos << 0;
-        outStream << 0;
-        outStreamEos << 0;
-        outStream << 0;
+        lcl_buffer >>= OUT_DWIDTH;
+        size += 4;
+
+        // Input Size for Gzip
+        if (STRATEGY == 0) {
+            lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = inSize;
+            outStream << lcl_buffer;
+            outStreamEos << 0;
+            inSize >>= OUT_DWIDTH;
+            lcl_buffer >>= OUT_DWIDTH;
+            lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = inSize;
+            outStream << lcl_buffer;
+            outStreamEos << 0;
+            lcl_buffer >>= OUT_DWIDTH;
+            size += 4;
+        }
+
+        // Leftover Bytes
+        lcl_buffer.range(prodLbuf + OUT_DWIDTH - 1, prodLbuf) = 0;
+        outStream << lcl_buffer;
+        lcl_buffer >>= OUT_DWIDTH;
+        if (lbuf_idx) {
+            outStream << lcl_buffer;
+            outStreamEos << 0;
+        }
         outStreamEos << 1;
-        size += 12;
+
         outputTotalSizeStream << size;
     }
     inFileEos.read();
