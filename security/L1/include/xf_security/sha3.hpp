@@ -48,6 +48,9 @@ namespace internal {
 // @brief 1600-bit Processing block
 struct blockType {
     ap_uint<64> M[25];
+    blockType() {
+#pragma HLS array_partition variable = M dim = 1
+    }
 };
 
 /**
@@ -96,21 +99,9 @@ static void KECCAK_f(
                                         0x8000000080008081, 0x8000000000008080, 0x0000000080000001, 0x8000000080008008};
 #pragma HLS resource variable = roundIndex core = ROM_2P_LUTRAM
 
-    // number of bits to be shifted of rho
-    const ap_uint<6> offsetRho[24] = {1,  3,  6,  10, 15, 21, 28, 36, 45, 55, 2,  14,
-                                      27, 41, 56, 8,  25, 43, 62, 18, 39, 61, 20, 44};
-#pragma HLS resource variable = offsetRho core = ROM_2P_LUTRAM
-
-    // number of bits to be shifted of pi
-    const ap_uint<5> offsetPi[24] = {10, 7,  11, 17, 18, 3, 5,  16, 8,  21, 24, 4,
-                                     15, 23, 19, 13, 12, 2, 20, 14, 22, 9,  6,  1};
-#pragma HLS resource variable = offsetPi core = ROM_2P_LUTRAM
-
 LOOP_5_STEP_MAPPING:
     for (ap_uint<5> rnd = 0; rnd < 24; rnd++) {
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_SHA3_DEBUG__ == 1
-        std::cout << "Round" << std::dec << rnd << std::endl;
-#endif
+#pragma HLS pipeline II = 1
         // 1st step theta
         ap_uint<64> rowReg[5];
 #pragma HLS array_partition variable = rowReg complete
@@ -120,15 +111,10 @@ LOOP_5_STEP_MAPPING:
             rowReg[i] =
                 stateArray[i] ^ stateArray[i + 5] ^ stateArray[i + 10] ^ stateArray[i + 15] ^ stateArray[i + 20];
         }
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_SHA3_DEBUG__ == 1
-        for (ap_uint<5> i = 0; i < 5; i++) {
-            std::cout << "row[" << std::dec << i << "] = " << std::hex << rowReg[i] << std::endl;
-        }
-#endif
 
     LOOP_THETA_2:
         for (ap_uint<3> i = 0; i < 5; i++) {
-#pragma HLS pipeline II = 1
+#pragma HLS unroll
             ap_uint<64> tmp = rowReg[(i + 4) % 5] ^ ROTL<64>(rowReg[(i + 1) % 5], 1);
         LOOP_CALCULATE_THETA:
             for (ap_uint<5> j = 0; j < 25; j += 5) {
@@ -136,29 +122,70 @@ LOOP_5_STEP_MAPPING:
                 stateArray[i + j] ^= tmp;
             }
         }
-#if !defined(__SYNTHESIS__) && __XF_SECURITY_SHA3_DEBUG__ == 1
-        for (ap_uint<5> i = 0; i < 25; i++) {
-            std::cout << "stateArray[" << std::dec << i << "] = " << std::hex << stateArray[i] << std::endl;
-        }
-#endif
 
         // 2nd step rho, and 3rd step pi
-        ap_uint<64> tmp1 = stateArray[1];
-    LOOP_RHO_PI:
-        for (ap_uint<5> i = 0; i < 24; i++) {
-#pragma HLS pipeline II = 1
-            ap_uint<5> index = offsetPi[i];
-            ap_uint<64> stateArrayReg = stateArray[index];
-            stateArray[index] = ROTL<64>(tmp1, offsetRho[i]);
-            tmp1 = stateArrayReg;
+        ap_uint<64> tmpStateArray[24];
+#pragma HLS array_partition variable = tmpStateArray dim = 1
+        {
+            tmpStateArray[0] = ROTL<64>(stateArray[1], 1);
+            tmpStateArray[1] = ROTL<64>(stateArray[10], 3);
+            tmpStateArray[2] = ROTL<64>(stateArray[7], 6);
+            tmpStateArray[3] = ROTL<64>(stateArray[11], 10);
+            tmpStateArray[4] = ROTL<64>(stateArray[17], 15);
+            tmpStateArray[5] = ROTL<64>(stateArray[18], 21);
+            tmpStateArray[6] = ROTL<64>(stateArray[3], 28);
+            tmpStateArray[7] = ROTL<64>(stateArray[5], 36);
+            tmpStateArray[8] = ROTL<64>(stateArray[16], 45);
+            tmpStateArray[9] = ROTL<64>(stateArray[8], 55);
+            tmpStateArray[10] = ROTL<64>(stateArray[21], 2);
+            tmpStateArray[11] = ROTL<64>(stateArray[24], 14);
+            tmpStateArray[12] = ROTL<64>(stateArray[4], 27);
+            tmpStateArray[13] = ROTL<64>(stateArray[15], 41);
+            tmpStateArray[14] = ROTL<64>(stateArray[23], 56);
+            tmpStateArray[15] = ROTL<64>(stateArray[19], 8);
+            tmpStateArray[16] = ROTL<64>(stateArray[13], 25);
+            tmpStateArray[17] = ROTL<64>(stateArray[12], 43);
+            tmpStateArray[18] = ROTL<64>(stateArray[2], 62);
+            tmpStateArray[19] = ROTL<64>(stateArray[20], 18);
+            tmpStateArray[20] = ROTL<64>(stateArray[14], 39);
+            tmpStateArray[21] = ROTL<64>(stateArray[22], 61);
+            tmpStateArray[22] = ROTL<64>(stateArray[9], 20);
+            tmpStateArray[23] = ROTL<64>(stateArray[6], 44);
         }
 
-        // 4th step chi
-        ap_uint<64> stateReg[5];
-#pragma HLS array_partition variable = stateReg complete
+        {
+            stateArray[10] = tmpStateArray[0];
+            stateArray[7] = tmpStateArray[1];
+            stateArray[11] = tmpStateArray[2];
+            stateArray[17] = tmpStateArray[3];
+            stateArray[18] = tmpStateArray[4];
+            stateArray[3] = tmpStateArray[5];
+            stateArray[5] = tmpStateArray[6];
+            stateArray[16] = tmpStateArray[7];
+            stateArray[8] = tmpStateArray[8];
+            stateArray[21] = tmpStateArray[9];
+            stateArray[24] = tmpStateArray[10];
+            stateArray[4] = tmpStateArray[11];
+            stateArray[15] = tmpStateArray[12];
+            stateArray[23] = tmpStateArray[13];
+            stateArray[19] = tmpStateArray[14];
+            stateArray[13] = tmpStateArray[15];
+            stateArray[12] = tmpStateArray[16];
+            stateArray[2] = tmpStateArray[17];
+            stateArray[20] = tmpStateArray[18];
+            stateArray[14] = tmpStateArray[19];
+            stateArray[22] = tmpStateArray[20];
+            stateArray[9] = tmpStateArray[21];
+            stateArray[6] = tmpStateArray[22];
+            stateArray[1] = tmpStateArray[23];
+        }
+
+    // 4th step chi
     LOOP_CHI:
         for (ap_uint<5> j = 0; j < 25; j += 5) {
-#pragma HLS pipeline II = 1
+#pragma HLS unroll
+            ap_uint<64> stateReg[5];
+#pragma HLS array_partition variable = stateReg complete
         LOOP_INIT_STATEREG:
             for (ap_uint<3> i = 0; i < 5; i++) {
 #pragma HLS unroll
@@ -176,6 +203,32 @@ LOOP_5_STEP_MAPPING:
     }
 
 } // end KECCAK_f
+
+inline ap_uint<512> sha3_512_40(ap_uint<512> input) {
+    // This is a special version of sha3_512 for ethash, limited on input message size and padding method
+    ap_uint<64> state[25];
+#pragma HLS array_partition variable = state dim = 1
+    for (int i = 0; i < 25; i++) {
+#pragma HLS unroll
+        state[i] = 0;
+    }
+
+    for (int i = 0; i < 5; i++) {
+#pragma HLS unroll
+        state[i] ^= input.range(i * 64 + 63, i * 64);
+    }
+    state[5] ^= 0x0000000000000001UL; // delim is 01 for sha3 in ethereum, and 06 for sha3 in NIST
+    state[8] ^= 0x8000000000000000UL;
+
+    KECCAK_f(state);
+
+    ap_uint<512> digest = 0;
+    for (int i = 0; i < 8; i++) {
+#pragma HLS unroll
+        digest.range(64 * i + 63, 64 * i) = state[i];
+    }
+    return digest;
+}
 
 /**
  *
