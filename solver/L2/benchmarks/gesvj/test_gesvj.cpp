@@ -113,7 +113,12 @@ int main(int argc, const char* argv[]) {
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    int errPre;
+    cl::Program program(context, devices, xclBins, NULL, &errPre);
+    if (errPre != NULL) {
+        std::cout << "Error: cl::Program fails" << std::endl;
+        return -1;
+    }
     cl::Kernel kernel_gesvj_0(program, "kernel_gesvj_0");
     std::cout << "INFO: Kernel has been created" << std::endl;
 
@@ -142,18 +147,22 @@ int main(int argc, const char* argv[]) {
     // DDR Settings
     std::vector<cl_mem_ext_ptr_t> mext_i(1);
     std::vector<cl_mem_ext_ptr_t> mext_o(3);
-    mext_i[0].flags = XCL_MEM_DDR_BANK0;
-    mext_o[0].flags = XCL_MEM_DDR_BANK0;
-    mext_o[1].flags = XCL_MEM_DDR_BANK0;
-    mext_o[2].flags = XCL_MEM_DDR_BANK0;
-    mext_i[0].obj = dataA_svd;
-    mext_i[0].param = 0;
-    mext_o[0].obj = sigma_svd;
-    mext_o[0].param = 0;
-    mext_o[1].obj = dataU_svd;
-    mext_o[1].param = 0;
-    mext_o[2].obj = dataV_svd;
-    mext_o[2].param = 0;
+    // mext_i[0].flags = XCL_MEM_DDR_BANK0;
+    // mext_o[0].flags = XCL_MEM_DDR_BANK0;
+    // mext_o[1].flags = XCL_MEM_DDR_BANK0;
+    // mext_o[2].flags = XCL_MEM_DDR_BANK0;
+    // mext_i[0].obj = dataA_svd;
+    // mext_i[0].param = 0;
+    // mext_o[0].obj = sigma_svd;
+    // mext_o[0].param = 0;
+    // mext_o[1].obj = dataU_svd;
+    // mext_o[1].param = 0;
+    // mext_o[2].obj = dataV_svd;
+    // mext_o[2].param = 0;
+    mext_i[0] = {2, dataA_svd, kernel_gesvj_0()};
+    mext_o[0] = {3, sigma_svd, kernel_gesvj_0()};
+    mext_o[1] = {4, dataU_svd, kernel_gesvj_0()};
+    mext_o[2] = {5, dataV_svd, kernel_gesvj_0()};
 
     // Create device buffer and map dev buf to host buf
     std::vector<cl::Buffer> input_buffer(1), output_buffer(3);

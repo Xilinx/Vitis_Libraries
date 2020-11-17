@@ -114,7 +114,12 @@ int main(int argc, const char* argv[]) {
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    int errPre;
+    cl::Program program(context, devices, xclBins, NULL, &errPre);
+    if (errPre != NULL) {
+        std::cout << "Error: cl::Program fails" << std::endl;
+        return -1;
+    }
     cl::Kernel kernel_potrf_0(program, "kernel_potrf_0");
     std::cout << "INFO: Kernel has been created" << std::endl;
 
@@ -151,9 +156,10 @@ int main(int argc, const char* argv[]) {
 
     // DDR Settings
     std::vector<cl_mem_ext_ptr_t> mext_io(1);
-    mext_io[0].flags = XCL_MEM_DDR_BANK0;
-    mext_io[0].obj = dataA;
-    mext_io[0].param = 0;
+    // mext_io[0].flags = XCL_MEM_DDR_BANK0;
+    // mext_io[0].obj = dataA;
+    // mext_io[0].param = 0;
+    mext_io[0] = {1, dataA, kernel_potrf_0()};
 
     // Create device buffer and map dev buf to host buf
     std::vector<cl::Buffer> buffer(1);
