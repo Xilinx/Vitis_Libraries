@@ -1,35 +1,45 @@
 {
-    "gui": true,
+    "gui": true, 
     "name": "Xilinx Breadth First Search Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u200",
+        "u50", 
+        "u200", 
         "u250"
     ], 
     "platform_blacklist": [
         "zc"
-    ],
+    ], 
     "platform_properties": {
         "u200": {
-	    "v++": {
-	        "compiler": {
-		    "cflags": [
-		        "--config PROJECT/conn_u200_u250.ini"
-		    ]
-		}
-	    }
-	},
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200_u250.cfg"
+                    ]
+                }
+            }
+        }, 
         "u250": {
-	    "v++": {
-	        "compiler": {
-		    "cflags": [
-		        "--config PROJECT/conn_u200_u250.ini"
-		    ]
-		}
-	    }
-	}
-    },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200_u250.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/bfs_kernel.xclbin -o PROJECT/data/test_offset.csr -c PROJECT/data/test_column.csr -g PROJECT/data/test_golden.mtx -i 0", 
@@ -46,10 +56,7 @@
             "includepaths": [
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L2/tests/bfs/host", 
-                "LIB_DIR/L2/tests/bfs/kernel",
-                "LIB_DIR/../database/L1/include/hw",
-                "LIB_DIR/../quantitative_finance/L1/include",
-		        "LIB_DIR/../utils/L1/include",
+                "LIB_DIR/L2/tests/bfs/kernel", 
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 "
@@ -59,10 +66,7 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/bfs/kernel",
-                "LIB_DIR/../database/L1/include/hw",
-                "LIB_DIR/../quantitative_finance/L1/include",
-		        "LIB_DIR/../utils/L1/include"
+                "LIB_DIR/L2/tests/bfs/kernel"
             ]
         }
     }, 
@@ -73,47 +77,47 @@
                     "location": "kernel/bfs_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=bfs_kernel", 
-                    "name": "bfs_kernel",
-		    "num_compute_units": 1,
-		    "compute_units": [
+                    "name": "bfs_kernel", 
+                    "num_compute_units": 1, 
+                    "compute_units": [
                         {
-                            "name": "bfs_kernel",
-                            "slr": "SLR0",
+                            "name": "bfs_kernel", 
+                            "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "column",
+                                    "name": "column", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "offset",
+                                }, 
+                                {
+                                    "name": "offset", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "queue512",
+                                }, 
+                                {
+                                    "name": "queue512", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "queue",
+                                }, 
+                                {
+                                    "name": "queue", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "color512",
+                                }, 
+                                {
+                                    "name": "color512", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "result_dt",
+                                }, 
+                                {
+                                    "name": "result_dt", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "result_ft",
+                                }, 
+                                {
+                                    "name": "result_ft", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "result_pt",
+                                }, 
+                                {
+                                    "name": "result_pt", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "result_lv",
+                                }, 
+                                {
+                                    "name": "result_lv", 
                                     "memory": "DDR[0]"
                                 }
                             ]
@@ -133,14 +137,25 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

@@ -675,7 +675,9 @@ void forwardBFS(const int vertexNum,
                 ap_uint<512>* result512,
                 ap_uint<32>* result32) {
 #pragma HLS inline off
-    int idxoffset_s[2] = {-1, -1};
+    int idxoffset_s[2];
+    idxoffset_s[0] = -1;
+    idxoffset_s[1] = -1;
 #pragma HLS ARRAY_PARTITION variable = idxoffset_s complete dim = 1
     ap_uint<512> offset_reg[2];
 #pragma HLS ARRAY_PARTITION variable = offset_reg complete dim = 1
@@ -782,6 +784,7 @@ void connectedComponentImpl(const int vertexNum,
  * @param offsetCSCTmp1 temp row offset for CSR2CSC convert
  * @param offsetCSCTmp2 temp row offset of CSR2CSC convert
  * @param queue32 intermediate queue32 used during the internal BFS
+ * @param queue512 intermediate queue512 used during the internal BFS
  * @param component512 Same as component32 but in 512bit, which shoude be shared the same buffer with component32 in
  * host
  * @param component32 return result buffer with the vertex label containing the lowest vertex id in the connnected

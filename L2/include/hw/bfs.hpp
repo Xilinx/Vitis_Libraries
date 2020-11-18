@@ -614,6 +614,7 @@ void bfsImpl(const int srcID,
  * @param offsetCSR row offset of CSR format
  * @param color512 intermediate color map which should be shared with dtime, pred or distance in host.
  * @param queue32 intermediate queue32 used during the BFS
+ * @param queue512 intermediate queue512 used during the BFS
  * @param dtime the result of discovery time stamp for each vertex
  * @param ftime the result of finish time stamp for each vertex
  * @param pred the result of parent index of each vertex

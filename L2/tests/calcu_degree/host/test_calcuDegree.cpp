@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,12 +201,8 @@ int main(int argc, const char* argv[]) {
 
     // DDR Settings
     std::vector<cl_mem_ext_ptr_t> mext_in(2);
-    mext_in[0].flags = XCL_MEM_DDR_BANK0;
-    mext_in[0].obj = degreeCSR;
-    mext_in[0].param = 0;
-    mext_in[1].flags = XCL_MEM_DDR_BANK0;
-    mext_in[1].obj = indiceArr;
-    mext_in[1].param = 0;
+    mext_in[0] = {2, degreeCSR, kernel_calcuDegree()};
+    mext_in[1] = {3, indiceArr, kernel_calcuDegree()};
 
     // Create device buffer and map dev buf to host buf
     std::vector<cl::Buffer> buffer(2);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,16 +175,17 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[10];
-    mext_o[0] = {XCL_MEM_DDR_BANK0, column32G1, 0};
-    mext_o[1] = {XCL_MEM_DDR_BANK0, offset32G1, 0};
-    mext_o[2] = {XCL_MEM_DDR_BANK1, column32G2, 0};
-    mext_o[3] = {XCL_MEM_DDR_BANK1, offset32G2, 0};
-    mext_o[4] = {XCL_MEM_DDR_BANK1, offset32Tmp1G2, 0};
-    mext_o[5] = {XCL_MEM_DDR_BANK1, offset32Tmp2G2, 0};
-    mext_o[6] = {XCL_MEM_DDR_BANK0, colorMap32, 0};
-    mext_o[7] = {XCL_MEM_DDR_BANK0, queueG1, 0};
-    mext_o[8] = {XCL_MEM_DDR_BANK0, queueG2, 0};
-    mext_o[9] = {XCL_MEM_DDR_BANK0, result, 0};
+
+    mext_o[0] = {2, column32G1, scc()};
+    mext_o[1] = {3, offset32G1, scc()};
+    mext_o[2] = {5, column32G2, scc()};
+    mext_o[3] = {6, offset32G2, scc()};
+    mext_o[4] = {9, offset32Tmp1G2, scc()};
+    mext_o[5] = {10, offset32Tmp2G2, scc()};
+    mext_o[6] = {12, colorMap32, scc()};
+    mext_o[7] = {13, queueG1, scc()};
+    mext_o[8] = {16, queueG2, scc()};
+    mext_o[9] = {18, result, scc()};
 
     cl::Buffer columnG1_buf = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                          sizeof(ap_uint<32>) * numEdges, &mext_o[0]);
@@ -226,6 +227,7 @@ int main(int argc, const char* argv[]) {
 
     // launch kernel and calculate kernel execution time
     std::cout << "kernel start------" << std::endl;
+    std::cout << "Input: numVertex=" << numVertices << ", numEdges=" << numEdges << std::endl;
     gettimeofday(&start_time, 0);
     int j = 0;
     scc.setArg(j++, numEdges);

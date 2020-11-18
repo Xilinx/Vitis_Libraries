@@ -37,8 +37,8 @@
 
 //#define BANCKMARK
 
-typedef double DT;
-// typedef float DT;
+// typedef double DT;
+typedef float DT;
 typedef ap_uint<512> buffType;
 
 #ifndef __SYNTHESIS__
@@ -159,8 +159,8 @@ int main(int argc, const char* argv[]) {
     }
 #ifndef BANCKMARK
     filename = dataSetDir + files + ".txt";
-    filename2_1 = dataSetDir + files + "csr_offsets.txt";
-    filename2_2 = dataSetDir + files + "csr_columns.txt";
+    filename2_1 = dataSetDir + files + "csc_offsets.txt";
+    filename2_2 = dataSetDir + files + "csc_columns.txt";
 #else
     filename = dataSetDir + files + ".mtx";
     filename2_1 = dataSetDir + files + "_csc_r.mtx";
@@ -370,39 +370,37 @@ int main(int argc, const char* argv[]) {
     mext_in[8].param = 0;
 #endif
 
+    // clang-format off
     // Create device buffer and map dev buf to host buf
     std::vector<cl::Buffer> buffer(9);
 
-    buffer[0] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                           sizeof(ap_uint<32>) * (nrows + 1), &mext_in[0]); // offset// for band to one axi
-    buffer[1] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                           sizeof(ap_uint<32>) * nnz, &mext_in[1]); // indice
-    buffer[2] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(float) * nnz,
-                           &mext_in[2]); // weight
-    buffer[3] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                           sizeof(ap_uint<32>) * nrows, &mext_in[3]); // degree
+    buffer[0] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                           sizeof(ap_uint<32>) * (nrows + 1), offsetArr); // offset// for band to one axi
+    buffer[1] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                           sizeof(ap_uint<32>) * nnz, indiceArr); // indice
+    buffer[2] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(float) * nnz,
+                           weightArr); // weight
+    buffer[3] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                           sizeof(ap_uint<32>) * nrows, degreeCSR); // degree
 
-    buffer[4] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                           sizeof(buffType) * iteration2, &mext_in[4]); // const
-    buffer[5] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                           sizeof(buffType) * iteration2, &mext_in[5]); // buffp
-    buffer[6] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                           sizeof(buffType) * iteration2, &mext_in[6]); // buffq
+    buffer[4] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                           sizeof(buffType) * iteration2, cntValFull); // const
+    buffer[5] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                           sizeof(buffType) * iteration2, buffPing); // buffp
+    buffer[6] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                           sizeof(buffType) * iteration2, buffPong); // buffq
 
-    buffer[7] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(int) * (2),
-                           &mext_in[7]); // resultInfo
-    buffer[8] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
-                           sizeof(ap_uint<32>) * (nrows + 16), &mext_in[8]); // order
+    buffer[7] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, sizeof(int) * (2),
+                           resultInfo); // resultInfo
+    buffer[8] = cl::Buffer(context,  CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                           sizeof(ap_uint<32>) * (nrows + 16), orderUnroll); // order
+    // clang-format on
 
     // add buffers to migrate
     std::vector<cl::Memory> init;
     for (int i = 0; i < 9; i++) {
         init.push_back(buffer[i]);
     }
-
-    // migrate data from host to device
-    q.enqueueMigrateMemObjects(init, CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED, nullptr, nullptr);
-    q.finish();
 
     // Data transfer from host buffer to device buffer
     std::vector<cl::Memory> ob_in;
@@ -434,6 +432,10 @@ int main(int argc, const char* argv[]) {
     kernel_pagerank.setArg(11, buffer[6]);
     kernel_pagerank.setArg(12, buffer[7]);
     kernel_pagerank.setArg(13, buffer[8]);
+
+    // migrate data from host to device
+    q.enqueueMigrateMemObjects(init, CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED, nullptr, nullptr);
+    q.finish();
 
     // Setup kernel
     std::cout << "INFO: Finish kernel setup" << std::endl;

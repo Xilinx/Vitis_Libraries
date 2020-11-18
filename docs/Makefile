@@ -36,18 +36,27 @@ install: .stamp/sphinx
 	rsync -av _build/html/ $(HTML_DEST_DIR)
 
 .stamp/doxygen:
-	rm -rf xml
+	rm -rf xml_L2 xml_L3
 	doxygen Doxyfile_L2
+	doxygen Doxyfile_L3
 	mkdir -p .stamp
 	touch .stamp/doxygen
 
 DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 
 .stamp/doxyrest: .stamp/doxygen
-	rm -rf rst
-	mkdir rst
-	doxyrest xml/index.xml -o rst/index.rst \
+	rm -rf rst_L2
+	mkdir rst_L2
+	echo "marc0"
+	doxyrest xml_L2/index.xml -o rst_L2/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	echo "marc"
+	rm -f rst_L2/index.rst rst_L2/global.rst
+	rm -rf rst_L3
+	mkdir rst_L3
+	doxyrest xml_L3/index.xml -o rst_L3/index.rst \
+		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	rm -f rst_L3/index.rst rst_L3/global.rst
 	touch .stamp/doxyrest
 
 .stamp/sphinx: .stamp/doxyrest Makefile.sphinx
@@ -73,4 +82,4 @@ cleanhtml:
 	rm -rf .stamp/sphinx _build/html _build/doctrees
 
 ultraclean:
-	rm -rf .stamp xml rst _build/html _build/doctrees
+	rm -rf .stamp xml_L2 xml_L3 rst_L2 rst_L3 _build/html _build/doctrees

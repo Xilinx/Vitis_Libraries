@@ -1,0 +1,8 @@
+
+{
+    "operationName" : "similaritySparse",
+    "kernelName" : "sparseSimilarityKernel",
+    "requestLoad" : 100,
+    "xclbinPath" : "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/xclbin/sparseSimilarityKernel.xclbin",
+    "deviceNeeded" : 1
+}

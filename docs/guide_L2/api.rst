@@ -21,5 +21,5 @@ API Document
 .. toctree::
    :maxdepth: 2
 
-   ../rst/namespace_xf_graph.rst
+   ../rst_L2/namespace_xf_graph.rst
    :start-after: FunctionSection
