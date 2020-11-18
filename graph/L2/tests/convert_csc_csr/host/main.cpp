@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,12 +215,13 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[6];
-    mext_o[0] = {XCL_MEM_DDR_BANK0, offsetsCSR, 0};
-    mext_o[1] = {XCL_MEM_DDR_BANK0, columnsCSR, 0};
-    mext_o[2] = {XCL_MEM_DDR_BANK0, offsetsCSC, 0};
-    mext_o[3] = {XCL_MEM_DDR_BANK0, rowsCSC, 0};
-    mext_o[4] = {XCL_MEM_DDR_BANK0, degree, 0};
-    mext_o[5] = {XCL_MEM_DDR_BANK0, offsetsCSC2, 0};
+
+    mext_o[0] = {2, offsetsCSR, Ckernel()};
+    mext_o[1] = {3, columnsCSR, Ckernel()};
+    mext_o[2] = {4, offsetsCSC, Ckernel()};
+    mext_o[3] = {5, rowsCSC, Ckernel()};
+    mext_o[4] = {6, degree, Ckernel()};
+    mext_o[5] = {7, offsetsCSC2, Ckernel()};
 
     // create device buffer and map dev buf to host buf
     cl::Buffer offsetsCSR_buf, columnsCSR_buf, offsetsCSC_buf, rowsCSC_buf, degree_buf, offsetsCSC_buf2;

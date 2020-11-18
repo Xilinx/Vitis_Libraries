@@ -28,6 +28,7 @@
 #include "hw/L2_utils.hpp"
 #include "hw/label_propagation.hpp"
 #include "hw/pagerank.hpp"
+#include "hw/pagerank_multi_channels.hpp"
 #include "hw/shortest_path.hpp"
 #include "hw/strongly_connected_components.hpp"
 #include "hw/triangle_count.hpp"

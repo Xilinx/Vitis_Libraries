@@ -372,7 +372,7 @@ void readInWeightedDirectedGraphRow(std::string filename, CscMatrix<ID_T, VALUE_
             for (int i = 0; i < nrows; i++) {
                 std::getline(fin, line);
                 std::stringstream istr(line);
-                VALUE_T tmp;
+                ID_T tmp;
                 istr >> tmp;
                 cscMat.columnOffset.push_back(tmp);
             }
@@ -424,10 +424,11 @@ void readInWeightedDirectedGraphCV(std::string filename, CscMatrix<ID_T, VALUE_T
             std::stringstream istr(line);
             istr >> tmpNm;
             nnz = tmpNm;
+            int j = 0;
             for (int i = 0; i < nnz; i++) {
                 std::getline(fin, line);
                 std::stringstream istr(line);
-                int j = 0;
+                j = 0;
                 VALUE_T tmp;
                 ID_T col;
                 while (istr >> tmp) {
@@ -442,6 +443,7 @@ void readInWeightedDirectedGraphCV(std::string filename, CscMatrix<ID_T, VALUE_T
                 cscMat.row.push_back(col);
                 cscMat.value.push_back(tmp);
             }
+            if (j == 1) std::cout << "Warning : Weight doesn't exist ! Will use 1.0 for each vertex" << std::endl;
             break;
         };
     }

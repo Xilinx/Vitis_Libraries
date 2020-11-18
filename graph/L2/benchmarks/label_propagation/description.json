@@ -1,35 +1,45 @@
 {
-    "gui": true,
+    "gui": true, 
     "name": "Xilinx Label Propagation Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u200",
-	"u250"
+        "u50", 
+        "u200", 
+        "u250"
     ], 
     "platform_blacklist": [
         "zc"
-    ],
+    ], 
     "platform_properties": {
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
+                    ]
+                }
+            }
+        }, 
         "u200": {
-	    "v++": {
-	        "compiler": {
-		    "cflags": [
-		        "--config PROJECT/conn_u200_u250.ini"
-		    ]
-		}
-	    }
-	},
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200_u250.cfg"
+                    ]
+                }
+            }
+        }, 
         "u250": {
-	    "v++": {
-	        "compiler": {
-		    "cflags": [
-		        "--config PROJECT/conn_u200_u250.ini"
-		    ]
-		}
-	    }
-	}
-    },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200_u250.cfg"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/LPKernel.xclbin -o PROJECT/data/csr_offsets.txt -i PROJECT/data/csr_columns.txt -label PROJECT/data/label.txt", 
@@ -47,10 +57,7 @@
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L2/benchmarks/label_propagation/host", 
                 "LIB_DIR/L2/benchmarks/label_propagation/kernel", 
-                "LIB_DIR/ext/xcl2",
-                "LIB_DIR/../database/L1/include/hw",
-                "LIB_DIR/../quantitative_finance/L1/include",
-		        "LIB_DIR/../utils/L1/include"
+                "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 "
         }
@@ -59,10 +66,7 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/benchmarks/label_propagation/kernel",
-                "LIB_DIR/../database/L1/include/hw",
-                "LIB_DIR/../quantitative_finance/L1/include",
-		        "LIB_DIR/../utils/L1/include"
+                "LIB_DIR/L2/benchmarks/label_propagation/kernel"
             ]
         }
     }, 
@@ -73,47 +77,47 @@
                     "location": "LIB_DIR/L2/benchmarks/label_propagation/kernel/label_propagation_top.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=LPKernel", 
-                    "name": "LPKernel",
-		    "num_compute_units": 1,
+                    "name": "LPKernel", 
+                    "num_compute_units": 1, 
                     "compute_units": [
                         {
-                            "name": "LPKernel",
-                            "slr": "SLR0",
+                            "name": "LPKernel", 
+                            "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "offsetCSR",
+                                    "name": "offsetCSR", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "indexCSR",
+                                }, 
+                                {
+                                    "name": "indexCSR", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "offsetCSC",
+                                }, 
+                                {
+                                    "name": "offsetCSC", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "indexCSC",
+                                }, 
+                                {
+                                    "name": "indexCSC", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "indexCSC2",
+                                }, 
+                                {
+                                    "name": "indexCSC2", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "pingHashBuf",
+                                }, 
+                                {
+                                    "name": "pingHashBuf", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "pongHashBuf",
+                                }, 
+                                {
+                                    "name": "pongHashBuf", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "labelPing",
+                                }, 
+                                {
+                                    "name": "labelPing", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "labelPong",
+                                }, 
+                                {
+                                    "name": "labelPong", 
                                     "memory": "DDR[0]"
                                 }
                             ]
@@ -133,14 +137,25 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }
