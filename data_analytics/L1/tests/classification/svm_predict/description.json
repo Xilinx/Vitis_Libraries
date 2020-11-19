@@ -16,14 +16,14 @@
         "source": [
             "test.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I./"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I./"
     }, 
     "testbench": {
         "source": [
             "test.cpp", 
             "1000.csv"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw", 
         "ldflags": "", 
         "argv": {}
     }, 
@@ -35,8 +35,20 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 16384, 
-                "max_time_min": 420
+                "max_memory_MB": {
+                    "hls_vivado_syn": 16384, 
+                    "hls_csim": 10240, 
+                    "hls_cosim": 16384, 
+                    "hls_vivado_impl": 16384, 
+                    "hls_csynth": 10240
+                }, 
+                "max_time_min": {
+                    "hls_vivado_syn": 420, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 420, 
+                    "hls_vivado_impl": 420, 
+                    "hls_csynth": 60
+                }
             }
         ], 
         "targets": [

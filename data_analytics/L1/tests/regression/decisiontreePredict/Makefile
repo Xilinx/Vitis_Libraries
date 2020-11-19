@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/tests/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # MK_INC_BEGIN hls_common.mk
 
@@ -51,13 +51,6 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VIVADO))
-XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
-endif
-export XILINX_VIVADO
-
 .PHONY: check_vivado
 check_vivado:
 ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
@@ -68,30 +61,18 @@ export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 
 # MK_INC_END vivado.mk
 
-DEVICE ?= u200
+DEVICE ?= u250
+
 # MK_INC_BEGIN vitis_set_part.mk
 
-.PHONY: check_part
-
-ifeq (,$(XPART))
 # MK_INC_BEGIN vitis.mk
 
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VITIS))
-XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
-endif
-export XILINX_VITIS
 .PHONY: check_vpp
 check_vpp:
 ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
 	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
 endif
 
-ifeq (,$(XILINX_XRT))
-XILINX_XRT = /opt/xilinx/xrt
-endif
-export XILINX_XRT
 .PHONY: check_xrt
 check_xrt:
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
@@ -110,6 +91,10 @@ export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITI
 endif
 
 # MK_INC_END vitis.mk
+
+.PHONY: check_part
+
+ifeq (,$(XPART))
 # MK_INC_BEGIN vitis_set_platform.mk
 
 ifneq (,$(wildcard $(DEVICE)))
@@ -118,31 +103,48 @@ XPLATFORM := $(DEVICE)
 else
 # Use DEVICE as a file name pattern
 DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
-# Match the name
+# 1. search paths specified by variable
 ifneq (,$(PLATFORM_REPO_PATHS))
+# 1.1 as exact name
+XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(DEVICE_L)/$(DEVICE_L).xpfm)))
+# 1.2 as a pattern
+ifeq (,$(XPLATFORM))
 XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 1.2
+endif # 1
+# 2. search Vitis installation
+ifeq (,$(XPLATFORM))
+# 2.1 as exact name
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 2.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 2.2
+endif # 2
+# 3. search default locations
+ifeq (,$(XPLATFORM))
+# 3.1 as exact name
+XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 3.2 as a pattern
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
-endif
+endif # 3.2
+endif # 3
 endif
 
 define MSG_PLATFORM
 No platform matched pattern '$(DEVICE)'.
 Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
+To add more platform directories, set the PLATFORM_REPO_PATHS variable or point DEVICE variable to the full path of platform .xpfm file.
 endef
 export MSG_PLATFORM
 
 define MSG_DEVICE
 More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
+Please set DEVICE variable more accurately to select only one platform file, or set DEVICE variable to the full path of the platform .xpfm file.
 endef
 export MSG_DEVICE
 
@@ -178,7 +180,10 @@ endif # XPART
 # MK_INC_BEGIN hls_test_rules.mk
 
 
-.PHONY: run setup runhls clean
+.PHONY: run setup runhls clean cleanall check
+
+# Alias to run, for legacy test script
+check: run
 
 CSIM ?= 0
 CSYNTH ?= 0
@@ -186,7 +191,6 @@ COSIM ?= 0
 VIVADO_SYN ?= 0
 VIVADO_IMPL ?= 0
 QOR_CHECK ?= 0
-
 
 # at least RTL synthesis before check QoR
 ifeq (1,$(QOR_CHECK))
@@ -208,7 +212,11 @@ ifeq (1,$(COSIM))
 override CSYNTH := 1
 endif
 
-run: setup runhls
+# From testbench.data_recipe of description.json
+data:
+	@true
+
+run: data setup runhls
 
 setup: | check_part
 	@rm -f ./settings.tcl
@@ -219,21 +227,21 @@ setup: | check_part
 	@echo 'set COSIM $(COSIM)' >> ./settings.tcl
 	@echo 'set VIVADO_SYN $(VIVADO_SYN)' >> ./settings.tcl
 	@echo 'set VIVADO_IMPL $(VIVADO_IMPL)' >> ./settings.tcl
-	@echo 'set QOR_CHECK $(QOR_CHECK)' >> ./settings.tcl
 	@echo 'set XF_PROJ_ROOT "$(XF_PROJ_ROOT)"' >> ./settings.tcl
+	@echo 'set CUR_DIR "$(CUR_DIR)"' >> ./settings.tcl
 	@echo "Configured: settings.tcl"
 	@echo "----"
 	@cat ./settings.tcl
 	@echo "----"
 
-HLS ?= vivado_hls
-runhls: setup | check_vivado
+HLS ?= vitis_hls
+runhls: data setup | check_vivado check_vpp
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf *.prj *_hls.log settings.tcl
+	rm -rf settings.tcl *_hls.log decision_tree_regression_predict_test.prj
 
-.PHONY: check
-check: run
+# Used by Jenkins test
+cleanall: clean
 
 # MK_INC_END hls_test_rules.mk

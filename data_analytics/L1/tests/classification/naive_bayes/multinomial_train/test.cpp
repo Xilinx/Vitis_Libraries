@@ -120,7 +120,7 @@ int main() {
 
     std::vector<ap_uint<64> > dataset;
 
-    // load_dat(dataset, "/wrk/xsjhdnobkup5/xingw/xf_DataAnalytics/L1/benchmarks/naive_bayes/dat");
+    // load_dat(dataset, "/wrk/xsjhdnobkup5/xingw/xf_data_analytics/L1/benchmarks/naive_bayes/dat");
     load_dat(dataset, "../../../../");
     int fnum = dataset.size();
     if (fnum % 8 != 0) {

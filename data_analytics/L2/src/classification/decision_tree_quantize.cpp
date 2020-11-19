@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "xf_DataAnalytics/classification/decision_tree_quantize.hpp"
-#include "xf_DataAnalytics/classification/decision_tree_train.hpp"
-#include "xf_DataAnalytics/common/utils.hpp"
+#include "xf_data_analytics/classification/decision_tree_quantize.hpp"
+#include "xf_data_analytics/classification/decision_tree_train.hpp"
+#include "xf_data_analytics/common/utils.hpp"
 #include "xf_utils_hw/axi_to_stream.hpp"
 const int data_header_len = 1024;
 

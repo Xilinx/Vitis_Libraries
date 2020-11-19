@@ -23,17 +23,15 @@ endif
 ifeq (, $(shell which sphinx-build 2>/dev/null))
 $(error "No sphinx-build in PATH.")
 endif
-ifeq (, $(HTML_DEST_DIR))
-$(error "HTML_DEST_DIR is not set.")
-endif
 
 .PHONY: all install xml rst html clean cleanhtml cleanall
 
 all: install
 
 install: .stamp/sphinx
-	rm -rf $(HTML_DEST_DIR)/*
-#	make cleanall
+ifeq (, $(HTML_DEST_DIR))
+	@echo "ERROR: HTML_DEST_DIR is not set." && false
+endif
 	rsync -av --delete --exclude .git --exclude .nojekyll --exclude .buildinfo \
 		 _build/html/ $(HTML_DEST_DIR) 1>/dev/null
 
@@ -60,7 +58,7 @@ endif
 	mkdir rst_L1
 	doxyrest xml_L1/index.xml -o rst_L1/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	rm -f rst_L1/index.rst rst_L1/global.rst
+#rm -f rst_L1/index.rst rst_L1/global.rst
 	rm -rf rst_L2
 	mkdir rst_L2
 	doxyrest xml_L2/index.xml -o rst_L2/index.rst \
