@@ -21,5 +21,6 @@ L1 Module User Guide
 .. toctree::
    :maxdepth: 2
 
+   l1_class.rst
+   l1_func.rst
    internals.rst
-   hw_api.rst

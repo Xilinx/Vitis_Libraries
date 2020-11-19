@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "xf_DataAnalytics/common/stream_local_processing.hpp"
-#include "xf_DataAnalytics/common/table_sample.hpp"
-#include "xf_DataAnalytics/classification/logisticRegression.hpp"
+#include "xf_data_analytics/common/stream_local_processing.hpp"
+#include "xf_data_analytics/common/table_sample.hpp"
+#include "xf_data_analytics/classification/logisticRegression.hpp"
 #ifndef __SYNTHESIS__
 #include <iostream>
 #endif

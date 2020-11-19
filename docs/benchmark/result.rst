@@ -19,8 +19,26 @@
 Benchmark Result
 *****************
 
-Performance Data
+Text Performance
 ================
+
+Log Analyzer
+~~~~~~~~~~~~
+
+The case `L2/demos/text/log_analyzer` is an integration frame included 3 part: Grok, GeoIP and JsonWriter. 
+It supports software and hardware emulation as well as running hardware accelerators on the Alveo U200.
+
+- Input log: http://www.almhuette-raith.at/apache-log/access.log (1.2GB)
+- logAnalyzer Demo execute time: 0.99 s, throughput: 1.2 GB/s
+- Baseline `ref_result/ref_result.cpp` execute time: 53.1 s, throughput: 22.6 MB/s
+- Accelaration Ratio: 53X
+
+.. note::
+    | 1. The baseline version run on Intel(R) Xeon(R) CPU E5-2690 v4, clocked at 2.60GHz.
+    | 2. The baseline version is a single thread program.
+
+ML Performance
+==============
 
 The performance of FPGA accelerated query execution is compared against Spark running time in local mode.
 The result is summarized in the table below.

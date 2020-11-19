@@ -44,10 +44,19 @@ copyright = '2020, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2020.1'
+version = '2020.2'
 # The full version, including alpha/beta/rc tags
-release = 'v2020.1'
+release = 'v2020.2'
 
+# For bottom-left nav
+try:
+    html_context
+except NameError:
+    html_context = dict()
+
+html_context['display_lower_left'] = True
+html_context['current_version'] = version
+html_context['versions'] = ['2020.2', '2020.1']
 
 # -- General configuration ---------------------------------------------------
 
@@ -137,7 +146,7 @@ html_theme_path = [os.path.join(tools_dir, 'share/themes')]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

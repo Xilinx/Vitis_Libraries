@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,29 +16,26 @@
 
 source settings.tcl
 
-set PROJ "decisiontree.prj"
-set SOLN "solution_decisiontree_predict"
-set CLKP 300MHz
+set PROJ "decisiontree_predict_test.prj"
+set SOLN "solution1"
+
+if {![info exists CLKP]} {
+  set CLKP 3.33
+}
 
 open_project -reset $PROJ
-config_debug
 
-add_files test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include -I./"
-add_files -tb test.cpp -cflags "-I${XF_PROJ_ROOT}/L1/include"
-add_files -tb tree.data
-add_files -tb test_ss.csv
-
+add_files "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I./"
+add_files -tb "test.cpp tree.data test_ss.csv" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top dut
 
 open_solution -reset $SOLN
 
-set_part $XPART
-create_clock -period $CLKP -name default
 
-#config_rtl -register_reset
-#config_rtl -stall_sig_gen
-#config_interface -m_axi_addr64
-#config_compile -name_max_length 256
+
+
+set_part $XPART
+create_clock -period $CLKP
 
 if {$CSIM == 1} {
   csim_design
@@ -49,8 +46,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-#  cosim_design -wave_debug -trace_level all
-  cosim_design -trace_level all
+  cosim_design
 }
 
 if {$VIVADO_SYN == 1} {
@@ -59,10 +55,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

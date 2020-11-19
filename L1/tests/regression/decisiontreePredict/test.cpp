@@ -15,7 +15,7 @@
  */
 //#include "decision_tree.hpp"
 #define INCLUDE_IN_L1_HOST
-#include "xf_DataAnalytics/regression/decision_tree_predict.hpp"
+#include "xf_data_analytics/regression/decision_tree_predict.hpp"
 typedef double DataType;
 const int dw = sizeof(DataType) * 8;
 #define MAX_FEA_NUM_ 64

@@ -28,4 +28,7 @@ The profiling in this documentation is based on U250, and the tool version is Vi
    internals/logisticRegression.rst
    internals/naive_bayes.rst
    internals/svm_predict.rst
+   internals/regex_vm.rst
+   internals/writeToDataFrame.rst
+   internals/readFromDataFrame.rst
 

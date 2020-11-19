@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_DataAnalytics/regression/linearRegressionTrain.hpp"
+#include "xf_data_analytics/regression/linearRegressionTrain.hpp"
 
 extern "C" void LASSORegressionTrain(ap_uint<512>* input, ap_uint<512>* output) {
 // clang-format off
@@ -26,11 +26,11 @@ extern "C" void LASSORegressionTrain(ap_uint<512>* input, ap_uint<512>* output) 
 #pragma HLS INTERFACE m_axi offset slave latency = 64 \
     num_write_outstanding = 32 num_read_outstanding = 2 \
     max_write_burst_length = 32 max_read_burst_length = 2 \
-    bundle = gmem0_1 port = output
+    bundle = gmem0_0 port = output
 
 #pragma HLS INTERFACE s_axilite port = input bundle = control
 #pragma HLS INTERFACE s_axilite port = output bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
     // clang-format on
-    xf::data_analytics::regression::LASSORegressionSGDTrain<512, 8, 25, 64>(input, output);
+    xf::data_analytics::regression::LASSORegressionSGDTrain<512, 8, 5, 64>(input, output);
 }
