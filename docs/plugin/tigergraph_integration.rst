@@ -31,14 +31,21 @@ Software Requirements
 ~~~~~~~~~~~~~~~~~~~~~
 * Ubuntu 16.04 LTS
 * `Xilinx RunTime (XRT) <https://github.com/Xilinx/XRT>`_ 2020.1
-* `Xilinx FPGA Resource Manager (XRM) <https://github.com/Xilinx/XRM>`_ 2020.1
+* `Xilinx FPGA Resource Manager (XRM) <https://github.com/Xilinx/XRM>`_ 2020.2
 
 TigerGraph integration needs static boost version XRT. Please follow the steps:
 
 * Download `Xilinx RunTime (XRT) <https://github.com/Xilinx/XRT>`_ release version source code 
+* sudo apt install libboost-program-options-dev
+* sudo apt-get update
+* sudo apt install libcurl4-gnutls-dev
+* sudo apt-get update
 * source PATH_XRT/src/runtime_src/tools/scripts/xrtdeps.sh
+* mkdir PATH_XRT/boost
 * source PATH_XRT/src/runtime_src/tools/scripts/boost.sh -prefix PATH_XRT/boost
 * source PATH_XRT/build/build.sh -clean
+* sudo apt intall cmake
+* sudo apt-get update
 * env XRT_BOOST_INSTALL=PATH_XRT/boost/xrt PATH_XRT/build/build.sh
 * cd PATH_XRT/build/Debug and PATH_XRT/build/Release
 * make packages
@@ -51,9 +58,12 @@ Integration Flow
 ~~~~~~~~~~~~~~~~
 In order to simplify the integration of graph L3 and TigerGraph, a shell script is written. Please follow the following steps: 
 
-* Download `TigerGraph <https://www.tigergraph.com/>`_ 2.5.3
+* Download `TigerGraph <https://www.tigergraph.com/>`_ 2.4.0
 * Install TigerGraph
-* cd PATH_GRAPH_LIB/plugin and ./install.sh
+* cd PATH_GRAPH_LIB/plugin
+* Change `TigerGraphPath` in install.sh, Makefile and tigergraph/MakeUdf to the path of TigerGraph installed
+* Change TigerGraph path related parameters in tigergraph/bash_tigergraph
+* ./install.sh
 
 Running Flow
 ~~~~~~~~~~~~~

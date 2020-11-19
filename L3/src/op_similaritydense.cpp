@@ -62,7 +62,9 @@ void opSimilarityDense::cuRelease(xrmContext* ctx, xrmCuResource* resR) {
     // while (!xrmCuRelease(ctx, &resR)) {
     while (!xrmCuRelease(ctx, resR)) {
     };
-    free(resR);
+    // std::cout<<"before free cuResource"<<std::endl;
+    // free(resR);
+    // std::cout<<"after free cuResource"<<std::endl;
 };
 
 void opSimilarityDense::init(
@@ -86,6 +88,44 @@ void opSimilarityDense::init(
         handles[i].cuID = cuIDs[i];
         handles[i].dupID = i % dupNmSimDense;
         createHandleSimDense(handles[i], kernelName, xclbinFile, deviceIDs[i]);
+        handles[i].buffer = new cl::Buffer[bufferNm];
+        if (deviceIDs[i] != prev) {
+            prev = deviceIDs[i];
+            deviceOffset.push_back(i);
+        }
+    }
+    delete[] handleID;
+}
+
+void opSimilarityDense::initInt(char* kernelName,
+                                char* xclbinFile,
+                                char* xclbinFile2,
+                                uint32_t* deviceIDs,
+                                uint32_t* cuIDs,
+                                unsigned int requestLoad) {
+    dupNmSimDense = 100 / requestLoad;
+    cuPerBoardSimDense /= dupNmSimDense;
+    uint32_t bufferNm = 20;
+    unsigned int cnt = 0;
+    unsigned int* handleID = new unsigned int[maxCU];
+    handleID[0] = cnt;
+    handles[0].deviceID = deviceIDs[0];
+    handles[0].cuID = cuIDs[0];
+    handles[0].dupID = 0;
+    std::thread th[maxCU];
+    createHandleSimDense(handles[cnt], kernelName, xclbinFile, deviceIDs[cnt]);
+    handles[cnt].buffer = new cl::Buffer[bufferNm];
+    unsigned int prev = deviceIDs[0];
+    deviceOffset.push_back(0);
+    for (unsigned int i = 1; i < maxCU; ++i) {
+        handles[i].deviceID = deviceIDs[i];
+        handles[i].cuID = cuIDs[i];
+        handles[i].dupID = i % dupNmSimDense;
+        if (deviceIDs[i] == 1) {
+            createHandleSimDense(handles[i], kernelName, xclbinFile2, deviceIDs[i]);
+        } else {
+            createHandleSimDense(handles[i], kernelName, xclbinFile, deviceIDs[i]);
+        }
         handles[i].buffer = new cl::Buffer[bufferNm];
         if (deviceIDs[i] != prev) {
             prev = deviceIDs[i];

@@ -39,11 +39,118 @@ namespace L3 {
 
 class openXRM {
    public:
+    xrmCuGroupResource** resR;
+    char** udfCuGroupName;
     openXRM() {
         ctx = (xrmContext*)xrmCreateContext(XRM_API_VERSION_1);
         bool isRight = !(ctx == NULL);
         assert(isRight);
     };
+
+    //  void freeCuGroup(unsigned int deviceNm){
+    //      int ret = 0;
+    //      for(int i = 0; i< deviceNm; ++i){
+    //          ret = xrmUdfCuGroupUndeclare(ctx, udfCuGroupName[i]);
+    //          if (ret == XRM_SUCCESS){
+    //              printf("INFO: User defined cu group from same device undeclaration success\n");
+    //          }else{
+    //              printf("ERROR: User defined cu group from same device undeclaration fail\n");
+    //              exit(1);
+    //          }
+    //          delete[] udfCuGroupName[i];
+    //      }
+    //      delete[] resR;
+    //      delete[] udfCuGroupName;
+    //  }
+
+    //  void setUpCuGroup(unsigned int deviceNm, unsigned int cuNm, std::string kernelName, std::string kernelAlias,
+    //  unsigned int requestLoad){
+    //      resR = new xrmCuGroupResource*[deviceNm];
+    //      udfCuGroupName = new char* [deviceNm];
+    //     // xrmCuGroupResource* resR[deviceNm];
+    //     // char udfCuGroupName[deviceNm][XRM_MAX_NAME_LEN];
+    //      xrmUdfCuGroupProperty* udfCuGroupProp[deviceNm];
+    //      std::string baseName = "udfCuGroupSameDevice";
+    //      xrmUdfCuListProperty* udfCuListProp;
+    //      xrmUdfCuProperty* udfCuProp;
+    //      for(int i = 0; i < deviceNm; ++i){
+    //          udfCuGroupName[i] = new char [XRM_MAX_NAME_LEN];
+    //          udfCuGroupProp[i] = (xrmUdfCuGroupProperty*)malloc(sizeof(xrmUdfCuGroupProperty));
+    //          memset(udfCuGroupProp[i], 0, sizeof(xrmUdfCuGroupProperty));
+    //          strcpy(udfCuGroupName[i], (baseName+std::to_string(i)).c_str());
+    //          udfCuGroupProp[i]->optionUdfCuListNum = 1;
+    //          udfCuListProp = &udfCuGroupProp[i]->optionUdfCuListProps[0];
+    //          udfCuListProp->cuNum = cuNm;
+    //          udfCuListProp->sameDevice = true;
+    //          for (int32_t cuIdx = 0; cuIdx < udfCuListProp->cuNum; cuIdx++) {
+    //              std::string cuName0 = kernelName + ":" + kernelName + "_" + std::to_string(i*udfCuListProp->cuNum +
+    //              cuIdx);
+    //              //std::string cuName0 = kernelName + ":" + kernelName + "_" + std::to_string(cuIdx);
+    //              udfCuProp = &udfCuListProp->udfCuProps[cuIdx];
+    //              strcpy(udfCuProp->cuName, cuName0.c_str());
+    //              udfCuProp->devExcl = false;
+    //              udfCuProp->requestLoad = requestLoad;
+    //          }
+    //          int ret = xrmUdfCuGroupDeclare(ctx, udfCuGroupProp[i], udfCuGroupName[i]);
+    //          if (ret == XRM_SUCCESS){
+    //              printf("INFO: User defined cu group from same device undeclaration success\n");
+    //          }else{
+    //              printf("ERROR: User defined cu group from same device undeclaration fail\n");
+    //              exit(1);
+    //          }
+    //          free(udfCuGroupProp[i]);
+    //      }
+    //  }
+    void freeCuGroup(unsigned int deviceNm) {
+        int ret = 0;
+        for (int i = 0; i < 1; ++i) {
+            ret = xrmUdfCuGroupUndeclare(ctx, udfCuGroupName[i]);
+            if (ret == XRM_SUCCESS) {
+                printf("INFO: User defined cu group from same device undeclaration success\n");
+            } else {
+                printf("ERROR: User defined cu group from same device undeclaration fail\n");
+                exit(1);
+            }
+            delete[] udfCuGroupName[i];
+        }
+        delete[] udfCuGroupName;
+    }
+    void setUpCuGroup(unsigned int deviceNm,
+                      unsigned int cuNm,
+                      std::string kernelName,
+                      std::string kernelAlias,
+                      unsigned int requestLoad) {
+        udfCuGroupName = new char*[1];
+        xrmUdfCuGroupProperty* udfCuGroupProp[1];
+        std::string baseName = "udfCuGroupSameDevice";
+        xrmUdfCuListProperty* udfCuListProp;
+        xrmUdfCuProperty* udfCuProp;
+        udfCuGroupName[0] = new char[XRM_MAX_NAME_LEN];
+        udfCuGroupProp[0] = (xrmUdfCuGroupProperty*)malloc(sizeof(xrmUdfCuGroupProperty));
+        memset(udfCuGroupProp[0], 0, sizeof(xrmUdfCuGroupProperty));
+        strcpy(udfCuGroupName[0], baseName.c_str());
+        udfCuGroupProp[0]->optionUdfCuListNum = 1;
+        udfCuListProp = &udfCuGroupProp[0]->optionUdfCuListProps[0];
+        udfCuListProp->cuNum = cuNm * deviceNm;
+        udfCuListProp->sameDevice = false;
+        for (int32_t cuIdx = 0; cuIdx < udfCuListProp->cuNum; cuIdx++) {
+            std::string cuName0 = kernelName + ":" + kernelName + "_" + std::to_string(cuIdx);
+            // std::string cuName0 = kernelName + ":" + kernelName + "_" + std::to_string(cuIdx);
+            udfCuProp = &udfCuListProp->udfCuProps[cuIdx];
+            strcpy(udfCuProp->cuName, cuName0.c_str());
+            udfCuProp->devExcl = false;
+            udfCuProp->requestLoad = requestLoad;
+        }
+        int ret = xrmUdfCuGroupDeclare(ctx, udfCuGroupProp[0], udfCuGroupName[0]);
+        if (ret == XRM_SUCCESS) {
+            printf("INFO: User defined cu group from same device undeclaration success\n");
+        } else {
+            printf("ERROR: User defined cu group from same device undeclaration fail\n");
+            exit(1);
+        }
+        free(udfCuGroupProp[0]);
+    }
+
     // void unloadXclbin(unsigned int deviceId) { int ret = xrmUnloadOneDevice(ctx, deviceId); }
     void unloadXclbin(unsigned int deviceId) { xrmUnloadOneDevice(ctx, deviceId); }
     void loadXclbin(unsigned int deviceId, char* xclbinName) {
@@ -64,13 +171,25 @@ class openXRM {
         propR.devExcl = false;
         propR.requestLoad = requestLoad;
         propR.poolId = 0;
-        uint64_t interval = 30000;
+        uint64_t interval = 1;
 
         uint32_t ret = xrmCuBlockingAlloc(ctx, &propR, interval, resR);
 
         if (ret != 0) {
             printf("Error: Fail to alloc cu (xrmCuBlockingAlloc) \n");
         };
+    }
+
+    void allocGroupCU(xrmCuGroupResource* resR, std::string groupName) {
+        xrmCuGroupProperty cuGroupProp;
+        memset(&cuGroupProp, 0, sizeof(xrmCuGroupProperty));
+        strcpy(cuGroupProp.udfCuGroupName, groupName.c_str());
+        cuGroupProp.poolId = 0;
+
+        // uint64_t interval = 0; // to use the XRM default interval
+        uint64_t interval = 4000; // to use the XRM default interval
+
+        int ret = xrmCuGroupBlockingAlloc(ctx, &cuGroupProp, interval, resR);
     }
 
     xrmCuListResource allocMultiCU(
@@ -180,7 +299,7 @@ class openXRM {
         std::cout << "INFO: Available CU number = " << maxCU << std::endl;
     }
 
-    void free() {
+    void freeXRM() {
         if (xrmDestroyContext(ctx) != XRM_SUCCESS)
             printf("INFO: Destroy context failed\n");
         else
@@ -417,9 +536,9 @@ inline void worker(queue& q,
         }
 
 #ifdef __DEBUG__
-        std::cout << "INFO: Allocated deviceID = " << resR[i]->deviceId << "\t cuID = " << resR[i]->cuId
-                  << "\t channelID = " << resR[i]->channelId << "\t instance name = " << resR[i]->instanceName
-                  << "\t request ID = " << requestCnt << "\t number per while " << requestNm << std::endl;
+        std::cout << "INFO: Allocated deviceID = " << deviceID << "\t cuID = " << cuID << "\t channelID = " << channelID
+                  << "\t instance name = " << instanceName << "\t request ID = " << requestCnt << "\t number per while "
+                  << requestNm << std::endl;
 #endif
 
         for (int i = 0; i < requestNm; i++) {
@@ -435,12 +554,86 @@ inline void worker(queue& q,
             std::string instanceName = resR[ID][0].instanceName;
             t[i].execute(deviceID, cuID, channelID, xrm, resR[ID], instanceName);
         }
-        usleep(1000);
 #ifdef __DEBUG__
         requestCnt++;
 #endif
 
 #ifdef __DEBUG__
+        std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_compute_time2 =
+            std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> l_durationSec2 = l_tp_compute_time2 - l_tp_start_compute2;
+        double l_timeMs2 = l_durationSec2.count() * 1e3;
+        std::cout << "INFO: Cu allocation time =  " << std::fixed << std::setprecision(6) << l_timeMs2 << " msec"
+                  << std::endl;
+        std::cout << "-----------------------------------------------" << std::endl;
+#endif
+    }
+}
+
+inline void worker2(queue& q,
+                    class openXRM* xrm,
+                    std::string kernelName,
+                    std::string kernelAlias,
+                    unsigned int requestLoad,
+                    unsigned int deviceNm,
+                    unsigned int cuNm) {
+    int requestNm = deviceNm * cuNm;
+    xrm->setUpCuGroup(deviceNm, cuNm, kernelName, kernelAlias, requestLoad);
+
+    int requestCnt = 0;
+    int iteration = 100;
+    xrmCuGroupResource* resR[iteration][1];
+    for (int i = 0; i < iteration; ++i) {
+        for (int j = 0; j < 1; ++j) {
+            resR[i][j] = (xrmCuGroupResource*)malloc(sizeof(xrmCuGroupResource));
+            memset(resR[i][j], 0, sizeof(xrmCuGroupResource));
+        }
+    }
+    xrmCuResource* cuRes[requestNm];
+    while (true) {
+#ifdef __DEBUG__
+        std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_start_compute =
+            std::chrono::high_resolution_clock::now();
+#endif
+        class task t[requestNm];
+        for (int i = 0; i < requestNm; ++i) {
+            t[i] = q.getWork();
+        }
+        for (int i = 0; i < requestNm; ++i) {
+            if (!t[i].valid()) exit(1);
+        }
+#ifdef __DEBUG__
+        std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_compute_time =
+            std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> l_durationSec = l_tp_compute_time - l_tp_start_compute;
+        double l_timeMs = l_durationSec.count() * 1e3;
+        std::cout << "INFO: getwork time =  " << std::fixed << std::setprecision(6) << l_timeMs << " msec" << std::endl;
+        std::cout << "-----------------------------------------------" << std::endl;
+#endif
+
+#ifdef __DEBUG__
+        std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_start_compute2 =
+            std::chrono::high_resolution_clock::now();
+#endif
+        for (int i = 0; i < 1; ++i) {
+            xrm->allocGroupCU(resR[requestCnt % iteration][i], xrm->udfCuGroupName[0]);
+        }
+
+        for (int i = 0; i < 1; ++i) {
+            for (int j = 0; j < cuNm * deviceNm; ++j) {
+                cuRes[j + i * cuNm] = &(resR[requestCnt % iteration][i]->cuResources[j]);
+                unsigned int deviceID = cuRes[j + i * cuNm]->deviceId;
+                unsigned int cuID = cuRes[j + i * cuNm]->cuId;
+                unsigned int channelID = cuRes[j + i * cuNm]->channelId;
+                std::string instanceName = cuRes[j + i * cuNm]->instanceName;
+                t[i * cuNm + j].execute(deviceID, cuID, channelID, xrm, cuRes[j + i * cuNm], instanceName);
+            }
+        }
+        requestCnt++;
+#ifdef __DEBUG__
+        std::cout << "INFO: Allocated deviceID = " << deviceID << "\t cuID = " << cuID << "\t channelID = " << channelID
+                  << "\t instance name = " << instanceName << "\t request ID = " << requestCnt << "\t number per while "
+                  << requestNm << std::endl;
         std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_compute_time2 =
             std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> l_durationSec2 = l_tp_compute_time2 - l_tp_start_compute2;

@@ -3,6 +3,7 @@
     "operationName" : "similarityDense",
     "kernelName" : "denseSimilarityKernel",
     "requestLoad" : 100,
-    "xclbinPath" : "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/xclbin/denseSimilarityKernel.xclbin",
+    "xclbinPath" : "/dev/gdk/gsql/src/QueryUdf/xclbin/denseSimilarityKernel.xclbin",
+    "xclbinPath2" : "/dev/gdk/gsql/src/QueryUdf/xclbin/denseSimilarityKernel2.xclbin",
     "deviceNeeded" : 1
 }
