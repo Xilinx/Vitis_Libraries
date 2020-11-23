@@ -1,3 +1,5 @@
+TigerGraphPath=/home/tigergraph/tigergraph
+
 rm -rf tigergraph/QueryUdf/tgFunctions.hpp
 
 rm -rf tigergraph/QueryUdf/ExprFunctions.hpp
@@ -6,9 +8,15 @@ rm -rf tigergraph/QueryUdf/ExprUtil.hpp
 
 rm -rf tigergraph/QueryUdf/graph.hpp
 
-sudo cp /home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/ExprFunctions.hpp tigergraph/QueryUdf/tgFunctions.hpp
+sudo cp -rf $TigerGraphPath/dev/gdk/gsql/src/QueryUdf $TigerGraphPath/dev/gdk/gsql/src/bck_QueryUdf
 
-sudo cp /home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/ExprUtil.hpp tigergraph/QueryUdf
+sudo cp -rf $TigerGraphPath/dev/gdk/MakeUdf $TigerGraphPath/dev/gdk/bck_MakeUdf
+
+sudo cp -rf $TigerGraphPath/../.bash_tigergraph $TigerGraphPath/../.bck_bash_tigergraph
+
+sudo cp $TigerGraphPath/dev/gdk/gsql/src/QueryUdf/ExprFunctions.hpp tigergraph/QueryUdf/tgFunctions.hpp
+
+sudo cp $TigerGraphPath/dev/gdk/gsql/src/QueryUdf/ExprUtil.hpp tigergraph/QueryUdf
 
 cp tigergraph/QueryUdf/xilinxUdf.hpp tigergraph/QueryUdf/ExprFunctions.hpp
 
@@ -45,12 +53,12 @@ make libgraphL3wrapper
 
 sudo chmod 777 -R tigergraph
 
-sudo rm -rf /home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf
+sudo rm -rf $TigerGraphPath/dev/gdk/gsql/src/QueryUdf
 
-sudo cp -rf tigergraph/QueryUdf /home/tigergraph/tigergraph/dev/gdk/gsql/src/
+sudo cp -rf tigergraph/QueryUdf $TigerGraphPath/dev/gdk/gsql/src/
 
-sudo cp -rf tigergraph/MakeUdf /home/tigergraph/tigergraph/dev/gdk/
+sudo cp -rf tigergraph/MakeUdf $TigerGraphPath/dev/gdk/
 
-sudo cp -rf tigergraph/bash_tigergraph /home/tigergraph/.bash_tigergraph
+sudo cp -rf tigergraph/bash_tigergraph $TigerGraphPath/../.bash_tigergraph
 
-sudo chmod 777 -R /home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf
+sudo chmod 777 -R $TigerGraphPath/dev/gdk/gsql/src/QueryUdf

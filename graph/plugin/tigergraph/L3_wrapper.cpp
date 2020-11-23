@@ -320,8 +320,8 @@ int cosineSimilaritySSDenseMultiCard(std::shared_ptr<xf::graph::L3::Handle>& han
     int counter[deviceNm];
     for (int i = 0; i < deviceNm; ++i) {
         counter[i] = 0;
-        similarity0[i] = aligned_alloc<float>(topK);
-        resultID0[i] = aligned_alloc<int32_t>(topK);
+        similarity0[i] = xf::graph::internal::aligned_alloc<float>(topK);
+        resultID0[i] = xf::graph::internal::aligned_alloc<int32_t>(topK);
         memset(resultID0[i], 0, topK * sizeof(int32_t));
         memset(similarity0[i], 0, topK * sizeof(float));
     }
@@ -356,6 +356,23 @@ int cosineSimilaritySSDenseMultiCard(std::shared_ptr<xf::graph::L3::Handle>& han
     delete[] similarity0;
     delete[] resultID0;
     return ret;
+};
+
+std::vector<event<int> > cosineSimilaritySSDenseMultiCard(std::shared_ptr<xf::graph::L3::Handle>& handle,
+                                                          int32_t deviceNm,
+                                                          int32_t sourceNUM,
+                                                          int32_t* sourceWeights,
+                                                          int32_t topK,
+                                                          xf::graph::Graph<int32_t, int32_t>** g,
+                                                          int32_t** resultID,
+                                                          float** similarity) {
+    std::vector<event<int> > eventQueue;
+    for (int i = 0; i < deviceNm; ++i) {
+        eventQueue.push_back(
+            (handle->opsimdense)
+                ->addworkInt(1, 0, sourceNUM, sourceWeights, topK, g[i][0], resultID[i], similarity[i]));
+    }
+    return eventQueue;
 };
 } // L3
 } // graph
@@ -398,8 +415,9 @@ extern "C" void bfs_fpga(uint32_t numVertices,
     int requestLoad;
     std::string xclbinPath;
     int deviceNeeded;
-
-    std::fstream userInput("/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/config.json", std::ios::in);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config.json";
+    std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
         std::cout << "Error : config file doesn't exist !" << std::endl;
         exit(1);
@@ -420,7 +438,8 @@ extern "C" void bfs_fpga(uint32_t numVertices,
                 requestLoad = std::atoi(token);
             } else if (!std::strcmp(token, "xclbinPath")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
+                std::string tmpStr = token;
+                xclbinPath = basePath + tmpStr;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 deviceNeeded = std::atoi(token);
@@ -463,8 +482,9 @@ extern "C" void load_xgraph_fpga(uint32_t numVertices, uint32_t numEdges, xf::gr
     std::string xclbinPath;
     int deviceNeeded;
 
-    std::fstream userInput("/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/config_shortest_path.json",
-                           std::ios::in);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config_shortest_path.json";
+    std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
         std::cout << "Error : config file doesn't exist !" << std::endl;
         exit(1);
@@ -485,7 +505,8 @@ extern "C" void load_xgraph_fpga(uint32_t numVertices, uint32_t numEdges, xf::gr
                 requestLoad = std::atoi(token);
             } else if (!std::strcmp(token, "xclbinPath")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
+                std::string tmpStr = token;
+                xclbinPath = basePath + tmpStr;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 deviceNeeded = std::atoi(token);
@@ -545,7 +566,9 @@ extern "C" void load_xgraph_pageRank_wt_fpga(uint32_t numVertices,
     std::string xclbinPath;
     int deviceNeeded;
 
-    std::fstream userInput("/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/config_pagerank.json", std::ios::in);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config_pagerank.json";
+    std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
         std::cout << "Error : config file doesn't exist !" << std::endl;
         exit(1);
@@ -566,7 +589,8 @@ extern "C" void load_xgraph_pageRank_wt_fpga(uint32_t numVertices,
                 requestLoad = std::atoi(token);
             } else if (!std::strcmp(token, "xclbinPath")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
+                std::string tmpStr = token;
+                xclbinPath = basePath + tmpStr;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 deviceNeeded = std::atoi(token);
@@ -623,8 +647,9 @@ extern "C" void load_xgraph_cosine_nbor_ss_fpga(uint32_t numVertices,
     std::string xclbinPath;
     int deviceNeeded;
 
-    std::fstream userInput("/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/config_cosine_nbor_ss.json",
-                           std::ios::in);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config_cosine_nbor_ss.json";
+    std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
         std::cout << "Error : config file doesn't exist !" << std::endl;
         exit(1);
@@ -645,7 +670,8 @@ extern "C" void load_xgraph_cosine_nbor_ss_fpga(uint32_t numVertices,
                 requestLoad = std::atoi(token);
             } else if (!std::strcmp(token, "xclbinPath")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
+                std::string tmpStr = token;
+                xclbinPath = basePath + tmpStr;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 deviceNeeded = std::atoi(token);
@@ -705,9 +731,11 @@ extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
     std::string kernelName;
     int requestLoad;
     std::string xclbinPath;
+    std::string xclbinPath2;
 
-    std::fstream userInput("/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/config_cosinesim_ss_dense_fpga.json",
-                           std::ios::in);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config_cosinesim_ss_dense_fpga.json";
+    std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
         std::cout << "Error : config file doesn't exist !" << std::endl;
         exit(1);
@@ -728,7 +756,12 @@ extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
                 requestLoad = std::atoi(token);
             } else if (!std::strcmp(token, "xclbinPath")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
-                xclbinPath = token;
+                std::string tmpStr = token;
+                xclbinPath = basePath + tmpStr;
+            } else if (!std::strcmp(token, "xclbinPath2")) {
+                token = strtok(NULL, "\"\t ,}:{\n");
+                std::string tmpStr2 = token;
+                xclbinPath2 = basePath + tmpStr2;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 //             deviceNeeded = std::atoi(token);
@@ -744,7 +777,9 @@ extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
     op0.setKernelName((char*)kernelName.c_str());
     op0.requestLoad = requestLoad;
     op0.xclbinFile = (char*)xclbinPath.c_str();
+    op0.xclbinFile2 = (char*)xclbinPath2.c_str();
     op0.deviceNeeded = deviceNeeded;
+    op0.cuPerBoard = cuNm;
 
     std::shared_ptr<xf::graph::L3::Handle> handleInstance(new xf::graph::L3::Handle);
     sharedHandlesCosSimDense::instance().handlesMap[0] = handleInstance;
@@ -777,11 +812,65 @@ extern "C" void cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
                                         float* similarity) {
     //---------------- Run Load Graph -----------------------------------
     std::shared_ptr<xf::graph::L3::Handle> handle0 = sharedHandlesCosSimDense::instance().handlesMap[0];
-    int ret = xf::graph::L3::cosineSimilaritySSDenseMultiCard(handle0, deviceNeeded, sourceLen, sourceWeight, topK, g,
-                                                              resultID, similarity);
+    int32_t requestNm = 1;
+    //    int ret = xf::graph::L3::cosineSimilaritySSDenseMultiCard(handle0, deviceNeeded, sourceLen, sourceWeight,
+    //    topK, g,
+    //                                                              resultID, similarity);
+    int32_t hwNm = deviceNeeded;
+    std::cout << "hwNm = " << hwNm << std::endl;
+    std::vector<xf::graph::L3::event<int> > eventQueue[requestNm];
+    float** similarity0[requestNm];
+    int32_t** resultID0[requestNm];
+    int counter[requestNm][hwNm];
+    for (int m = 0; m < requestNm; ++m) {
+        similarity0[m] = new float*[hwNm];
+        resultID0[m] = new int32_t*[hwNm];
+        for (int i = 0; i < hwNm; ++i) {
+            counter[m][i] = 0;
+            similarity0[m][i] = xf::graph::internal::aligned_alloc<float>(topK);
+            resultID0[m][i] = xf::graph::internal::aligned_alloc<int32_t>(topK);
+            memset(resultID0[m][i], 0, topK * sizeof(int32_t));
+            memset(similarity0[m][i], 0, topK * sizeof(float));
+        }
+    }
+    //---------------- Run L3 API -----------------------------------
+    for (int m = 0; m < requestNm; ++m) {
+        eventQueue[m] = xf::graph::L3::cosineSimilaritySSDenseMultiCard(handle0, hwNm, sourceLen, sourceWeight, topK, g,
+                                                                        resultID0[m], similarity0[m]);
+    }
 
-    // (handle0->opsimdense)->join();
-    // handle0->free();
+    int ret = 0;
+    for (int m = 0; m < requestNm; ++m) {
+        for (int i = 0; i < eventQueue[m].size(); ++i) {
+            ret += eventQueue[m][i].wait();
+        }
+    }
+    for (int m = 0; m < requestNm; ++m) {
+        for (int i = 0; i < topK; ++i) {
+            similarity[i] = similarity0[m][0][counter[m][0]];
+            int32_t prev = 0;
+            resultID[i] = resultID0[m][0][counter[m][0]];
+            counter[m][0]++;
+            for (int j = 1; j < hwNm; ++j) {
+                if (similarity[i] < similarity0[m][j][counter[m][j]]) {
+                    similarity[i] = similarity0[m][j][counter[m][j]];
+                    resultID[i] = resultID0[m][j][counter[m][j]];
+                    counter[m][prev]--;
+                    prev = j;
+                    counter[m][j]++;
+                }
+            }
+        }
+    }
+
+    for (int m = 0; m < requestNm; ++m) {
+        for (int i = 0; i < hwNm; ++i) {
+            free(similarity0[m][i]);
+            free(resultID0[m][i]);
+        }
+        delete[] similarity0[m];
+        delete[] resultID0[m];
+    }
 }
 
 extern "C" void close_fpga() {

@@ -53,13 +53,6 @@
                 "LIB_DIR/L2/include/hw", 
                 "LIB_DIR/L2/tests/dense_similarity_multi_kernel/kernel"
             ]
-        }, 
-        "linker": {
-            "includepaths": [
-                "LIB_DIR/L1/include/hw", 
-                "LIB_DIR/L2/include/hw", 
-                "LIB_DIR/L2/tests/dense_similarity_multi_kernel/kernel"
-            ]
         }
     }, 
     "containers": [
