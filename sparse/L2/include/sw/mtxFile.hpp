@@ -78,14 +78,30 @@ class MtxFile {
             l_bs.push(l_fs);
             m_good = l_bs.good();
             if (m_good) {
-                while (l_bs.peek() == '%') l_bs.ignore(2048, '\n');
+                bool l_isSym = false;
+                while (l_bs.peek() == '%') {
+                    string l_line;
+                    getline(l_bs, l_line);
+                    if ((l_line.find("SYMMETRIC") != string::npos) || (l_line.find("symmetric") != string::npos)) {
+                        l_isSym = true;
+                    }
+                    // l_bs.ignore(2048, '\n');
+                }
                 l_bs >> m_rows >> m_cols >> m_nnzs;
+                unsigned l_symNnzs = 0;
                 for (unsigned int i = 0; i < m_nnzs; ++i) {
                     t_NnzUnitType l_nnzUnit;
                     l_nnzUnit.scan(l_bs);
                     m_nnzUnits.push_back(l_nnzUnit);
+                    if (l_isSym && (l_nnzUnit.getRow() != l_nnzUnit.getCol())) {
+                        t_NnzUnitType l_dupNnz(l_nnzUnit.getCol(), l_nnzUnit.getRow(), l_nnzUnit.getVal());
+                        m_nnzUnits.push_back(l_dupNnz);
+                        l_symNnzs++;
+                    }
                 }
+                m_nnzs += l_symNnzs;
                 boost::iostreams::close(l_bs);
+                assert(m_nnzs == m_nnzUnits.size());
                 cout << "INFO: loaded mtx file"
                      << "  rows " << rows() << "  cols " << cols() << "  Nnzs " << nnzs() << endl;
             }

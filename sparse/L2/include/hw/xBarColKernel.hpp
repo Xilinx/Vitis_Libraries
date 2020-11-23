@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef XF_SPARSE_XBARCOL_HPP
-#define XF_SPARSE_XBARCOL_HPP
+#ifndef XF_SPARSE_XBARCOLKERNEL_HPP
+#define XF_SPARSE_XBARCOLKERNEL_HPP
 /**
  * @file xBarColKernel.hpp
  * @brief xBarColKernel definition.
@@ -24,20 +24,19 @@
 
 #include "cscKernel.hpp"
 
-typedef ap_axiu<SPARSE_dataBits * SPARSE_parEntries, 0, 0, 0> SPARSE_parDataPktType;
-typedef ap_axiu<SPARSE_indexBits * SPARSE_parEntries, 0, 0, 0> SPARSE_parIndexPktType;
-
 /**
- * @brief xBarCol Kernel
- * @param p_colPtrBlocks number of parallel column pointer entries in the axi stream input in2
- * @param p_nnzBlocks number of parallel NNZ entries in the input axi stream in1 and output axi stream out
- * @param in1 input axi stream of parallel column vector entries
- * @param in2 input axi stream of parallel column pointer entries
- * @param out output axi stream of parallel column vector entries selected for the NNZs
+ * @brief xBarColKernel is used to select input column vector entries according to the input column pointers
+ * @param in0 input axis stream of parallelly processed column vector entries
+ * @param in1 input axis stream of parallelly processed column pointer entries
+ * @param out output axis stream of parallelly column vector entries for the NNZs
  */
-extern "C" void xBarColKernel(const unsigned int p_colPtrBlocks,
-                              const unsigned int p_nnzBlocks,
-                              hls::stream<SPARSE_parDataPktType>& in1,
-                              hls::stream<SPARSE_parIndexPktType>& in2,
-                              hls::stream<SPARSE_parDataPktType>& out);
+extern "C" void xBarColKernel(hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& in0,
+                              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& in1,
+                              hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> >& out
+#if DEBUG_dumpData
+                              ,
+                              unsigned int p_cuId
+#endif
+                              );
+
 #endif

@@ -34,6 +34,8 @@
 #include "hls_stream.h"
 #ifndef __SYNTHESIS__
 #include <iostream>
+#include <fstream>
+#include <cstring>
 #endif
 #include "xf_sparse.hpp"
 #include "cscMatMoverL2.hpp"
@@ -42,203 +44,93 @@ namespace xf {
 namespace sparse {
 using namespace xf::blas;
 
-template <unsigned int t_ParEntries, unsigned int t_MemBits, unsigned int t_DataBits, typename t_PktType>
-void memStr2DatPktStr(hls::stream<ap_uint<t_MemBits> >& p_memStr,
-                      const unsigned int p_memBlocks,
-                      hls::stream<t_PktType>& p_datPktStr) {
-#ifndef __SYNTHESIS__
-    assert(t_MemBits >= (t_DataBits * t_ParEntries));
-    assert(t_MemBits % (t_DataBits * t_ParEntries) == 0);
+#if DEBUG_dumpData
+template <typename Func>
+void openOutputFile(const std::string& p_filename, const Func& func) {
+    std::ofstream l_of(p_filename.c_str(), std::ios::binary);
+    if (!l_of.is_open()) {
+        std::cout << "ERROR: Open " << p_filename << std::endl;
+    }
+    func(l_of);
+    l_of.close();
+}
+
+template <int t_Bits>
+void saveStream(hls::stream<ap_uint<t_Bits> >& p_stream, std::ofstream& p_of) {
+    hls::stream<ap_uint<t_Bits> > l_stream;
+
+    size_t l_size = 0;
+
+    while (!p_stream.empty()) {
+        auto l_dat = p_stream.read();
+        l_stream.write(l_dat);
+        l_size++;
+    }
+
+    p_of.write(reinterpret_cast<char*>(&l_size), sizeof(size_t));
+
+    while (!l_stream.empty()) {
+        auto l_dat = l_stream.read();
+        p_stream.write(l_dat);
+        p_of.write(reinterpret_cast<char*>(&l_dat), (t_Bits + 7) / 8);
+    }
+}
 #endif
 
-    const unsigned int t_DataWords = t_MemBits / (t_DataBits * t_ParEntries);
-    const unsigned int t_DataWordBits = t_DataBits * t_ParEntries;
-
-    for (unsigned int i = 0; i < p_memBlocks; ++i) {
-#pragma HLS PIPELINE II = t_DataWords
-        ap_uint<t_MemBits> l_memVal = p_memStr.read();
-        for (unsigned int j = 0; j < t_DataWords; ++j) {
-            ap_uint<t_DataWordBits> l_datVal = l_memVal.range((j + 1) * t_DataWordBits - 1, j * t_DataWordBits);
-            t_PktType l_pkt;
-            l_pkt.data = l_datVal;
-            p_datPktStr.write(l_pkt);
-        }
-    }
-}
-
-template <unsigned int t_LogParEntries,
-          typename t_PktType,
-          typename t_DataType,
-          typename t_IndexType = unsigned int,
-          unsigned int t_DataBits = 32,
-          unsigned int t_IndexBits = 32>
-void formRowEntriesPkt(const unsigned int p_nnzBlocks,
-                       hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_nnzValStr,
-                       hls::stream<t_PktType>& p_nnzColValPktStr,
-                       hls::stream<ap_uint<t_IndexBits*(1 << t_LogParEntries)> >& p_rowIndexStr,
-                       hls::stream<ap_uint<t_DataBits + t_IndexBits> > p_rowEntryStr[1 << t_LogParEntries],
-                       hls::stream<ap_uint<1> > p_isEndStr[1 << t_LogParEntries]) {
-    const unsigned int t_ParEntries = 1 << t_LogParEntries;
-    for (unsigned int i = 0; i < p_nnzBlocks; ++i) {
-#pragma HLS PIPELINE
-        ap_uint<t_DataBits * t_ParEntries> l_nnzBits;
-        ap_uint<t_DataBits * t_ParEntries> l_nnzColBits;
-        ap_uint<t_DataBits * t_ParEntries> l_rowIndexBits;
-
-        RowEntry<t_DataType, t_IndexType> l_rowEntry[t_ParEntries];
-        l_nnzBits = p_nnzValStr.read();
-        t_PktType l_nnzColBitsPkt = p_nnzColValPktStr.read();
-        l_nnzColBits = l_nnzColBitsPkt.data;
-        l_rowIndexBits = p_rowIndexStr.read();
-        WideType<t_DataType, t_ParEntries> l_nnzVal(l_nnzBits);
-        WideType<t_DataType, t_ParEntries> l_nnzColVal(l_nnzColBits);
-        WideType<t_IndexType, t_ParEntries> l_rowIndex(l_rowIndexBits);
-#pragma HLS ARRAY_PARTITION variable = l_nnzVal complete
-#pragma HLS ARRAY_PARTITION variable = l_nnzColVal complete
-#pragma HLS ARRAY_PARTITION variable = l_rowIndex complete
-#pragma HLS ARRAY_PARTITION variable = l_rowEntry complete
-
-        for (unsigned int j = 0; j < t_ParEntries; ++j) {
-            l_rowEntry[j].getVal() = l_nnzVal[j] * l_nnzColVal[j];
-            l_rowEntry[j].getRow() = l_rowIndex[j];
-            p_rowEntryStr[j].write(l_rowEntry[j].toBits());
-            p_isEndStr[j].write(0);
-        }
-    }
-    for (unsigned int j = 0; j < t_ParEntries; ++j) {
-        p_isEndStr[j].write(1);
-    }
-}
-
-template <unsigned int t_LogParEntries,
-          typename t_PktType,
-          typename t_DataType,
-          typename t_IndexType = unsigned int,
-          unsigned int t_DataBits = 32,
-          unsigned int t_IndexBits = 32>
-void xBarRowPkt(const unsigned int p_nnzBlocks,
-                hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_nnzValStr,
-                hls::stream<t_PktType>& p_nnzColValPktStr,
-                hls::stream<ap_uint<t_IndexBits*(1 << t_LogParEntries)> >& p_rowIndexStr,
-                hls::stream<ap_uint<t_DataBits + t_IndexBits> > p_rowEntryStr[1 << t_LogParEntries],
-                hls::stream<ap_uint<1> > p_isEndStr[1 << t_LogParEntries]) {
-    const unsigned int t_ParEntries = 1 << t_LogParEntries;
-    hls::stream<ap_uint<t_DataBits + t_IndexBits> > l_rowEntryStr[t_ParEntries];
-#pragma HLS STREAM variable = l_rowEntryStr depth = 4
-    hls::stream<ap_uint<1> > l_isEndStr[t_ParEntries];
-    hls::stream<ap_uint<t_DataBits + t_IndexBits> > l_splittedRowEntryStr[t_ParEntries][t_ParEntries];
-    hls::stream<ap_uint<1> > l_isEndSplitStr[t_ParEntries];
-#pragma HLS DATAFLOW
-    formRowEntriesPkt<t_LogParEntries, t_PktType, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(
-        p_nnzBlocks, p_nnzValStr, p_nnzColValPktStr, p_rowIndexStr, l_rowEntryStr, l_isEndStr);
-    for (unsigned int i = 0; i < t_ParEntries; ++i) {
-#pragma HLS UNROLL
-        xBarRowSplit<t_LogParEntries, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(
-            l_rowEntryStr[i], l_isEndStr[i], l_splittedRowEntryStr[i], l_isEndSplitStr[i]);
-    }
-    xBarRowMerge<t_LogParEntries, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(
-        l_splittedRowEntryStr, l_isEndSplitStr, p_rowEntryStr, p_isEndStr);
-}
-
-template <unsigned int t_ParEntries,
-          unsigned int t_ParGroups,
-          typename t_PktType,
-          typename t_DataType,
-          typename t_IndexType,
-          unsigned int t_DataBits = 32>
-void rowAggPkt(const unsigned int p_rowBlocks,
-               hls::stream<ap_uint<t_DataBits> > p_rowValStr[t_ParEntries][t_ParGroups],
-               hls::stream<t_PktType>& p_rowAggPktStr) {
-    for (unsigned int i = 0; i < p_rowBlocks; ++i) {
-        for (unsigned int g = 0; g < t_ParGroups; ++g) {
-#pragma HLS PIPELINE
-            ap_uint<t_DataBits * t_ParEntries> l_valOut;
-            for (unsigned int b = 0; b < t_ParEntries; ++b) {
-                ap_uint<t_DataBits> l_val = p_rowValStr[b][g].read();
-                l_valOut.range((b + 1) * t_DataBits - 1, b * t_DataBits) = l_val;
-            }
-            t_PktType l_pktOut;
-            l_pktOut.data = l_valOut;
-            p_rowAggPktStr.write(l_pktOut);
-        }
-    }
-}
-template <unsigned int t_MaxRowBlocks,
-          unsigned int t_LogParEntries,
-          unsigned int t_LogParGroups,
-          typename t_PktType,
-          typename t_DataType,
-          typename t_IndexType = unsigned int,
-          unsigned int t_DataBits = 32,
-          unsigned int t_IndexBits = 32>
-void cscRowPkt(const unsigned int p_nnzBlocks,
-               const unsigned int p_rowBlocks,
-               hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_nnzValStr,
-               hls::stream<t_PktType>& p_nnzColPktStr,
-               hls::stream<ap_uint<t_IndexBits*(1 << t_LogParEntries)> >& p_rowIndexStr,
-               hls::stream<t_PktType>& p_rowAggPktStr) {
-    const unsigned int t_ParEntries = 1 << t_LogParEntries;
-    const unsigned int t_ParGroups = 1 << t_LogParGroups;
-    const unsigned int t_RowOffsetBits = t_IndexBits - t_LogParEntries - t_LogParGroups;
-
-    hls::stream<ap_uint<t_DataBits + t_IndexBits> > l_xBarRowDatStr[t_ParEntries];
-    hls::stream<ap_uint<1> > l_xBarRowContStr[t_ParEntries];
-    hls::stream<ap_uint<t_DataBits + t_RowOffsetBits> > l_rowIntDatStr[t_ParEntries][t_ParGroups];
-    hls::stream<ap_uint<1> > l_rowIntContStr[t_ParEntries][t_ParGroups];
-    hls::stream<ap_uint<t_DataBits> > l_rowValStr[t_ParEntries][t_ParGroups];
-
-#pragma HLS DATAFLOW
-    xBarRowPkt<t_LogParEntries, t_PktType, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(
-        p_nnzBlocks, p_nnzValStr, p_nnzColPktStr, p_rowIndexStr, l_xBarRowDatStr, l_xBarRowContStr);
-
-    for (unsigned int i = 0; i < t_ParEntries; ++i) {
-#pragma HLS UNROLL
-        rowInterleave<t_LogParEntries, t_LogParGroups, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(
-            l_xBarRowDatStr[i], l_xBarRowContStr[i], l_rowIntDatStr[i], l_rowIntContStr[i]);
-
-        for (unsigned int j = 0; j < t_ParGroups; ++j) {
-#pragma HLS UNROLL
-            rowAcc<t_MaxRowBlocks, 1, t_LogParGroups, t_DataType, t_IndexType, t_DataBits, t_RowOffsetBits>(
-                p_rowBlocks, l_rowIntDatStr[i][j], l_rowIntContStr[i][j], l_rowValStr[i][j]);
-        }
-    }
-
-    rowAggPkt<t_ParEntries, t_ParGroups, t_PktType, t_DataType, t_IndexType, t_DataBits>(p_rowBlocks, l_rowValStr,
-                                                                                         p_rowAggPktStr);
-}
-
-template <unsigned int t_ParEntries, unsigned int t_MemBits, unsigned int t_DataBits, typename t_PktType>
-void datPktStr2MemStr(hls::stream<t_PktType>& p_datPktStr,
-                      const unsigned int p_memBlocks,
-                      hls::stream<ap_uint<t_MemBits> >& p_memStr) {
-#ifndef __SYNTHESIS__
-    assert(t_MemBits >= (t_DataBits * t_ParEntries));
-    assert(t_MemBits % (t_DataBits * t_ParEntries) == 0);
-#endif
-
-    const unsigned int t_DataWords = t_MemBits / (t_DataBits * t_ParEntries);
-    const unsigned int t_DataWordBits = t_DataBits * t_ParEntries;
-
-    for (unsigned int i = 0; i < p_memBlocks; ++i) {
-#pragma HLS PIPELINE II = t_DataWords
-        ap_uint<t_MemBits> l_memVal;
-        for (unsigned int j = 0; j < t_DataWords; ++j) {
-            t_PktType l_datPkt = p_datPktStr.read();
-            ap_uint<t_DataWordBits> l_datVal = l_datPkt.data;
-            l_memVal.range((j + 1) * t_DataWordBits - 1, j * t_DataWordBits) = l_datVal;
-        }
+template <unsigned int t_MemBits>
+void readMem(ap_uint<t_MemBits>* p_memRdPtr, unsigned int p_memRdBlocks, hls::stream<ap_uint<t_MemBits> >& p_memStr) {
+#pragma HLS INLINE
+    for (unsigned int i = 0; i < p_memRdBlocks; ++i) {
+#pragma HLS PIPELINE rewind
+        ap_uint<t_MemBits> l_memVal = p_memRdPtr[i];
         p_memStr.write(l_memVal);
     }
 }
 
-template <unsigned int t_MemBits, unsigned int t_ParEntries, unsigned int t_DataBits, typename t_PktType>
-void loadDat2PktStr(const ap_uint<t_MemBits>* p_memPtr,
-                    const unsigned int p_memBlocks,
-                    hls::stream<t_PktType>& p_datPktStr) {
+template <typename t_DataType,
+          typename t_IndexType,
+          unsigned int t_ParEntries,
+          unsigned int t_MemBits,
+          unsigned int t_DataBits,
+          unsigned int t_IndexBits>
+void nnzIdx2DatStr(hls::stream<ap_uint<t_MemBits> >& p_memStr,
+                   const unsigned int p_blocks,
+                   hls::stream<ap_uint<t_DataBits * t_ParEntries> >& p_nnzStr,
+#if DEBUG_dumpData
+                   hls::stream<ap_uint<t_IndexBits * t_ParEntries> >& p_idxStr,
+                   std::ofstream& p_of) {
+#else
+                   hls::stream<ap_uint<t_IndexBits * t_ParEntries> >& p_idxStr) {
+#endif
+#ifndef __SYNTHESIS__
+    assert(t_MemBits / 2 == t_DataBits * t_ParEntries);
+    assert(t_MemBits / 2 == t_IndexBits * t_ParEntries);
+#endif
+
+    for (unsigned int i = 0; i < p_blocks; ++i) {
+#pragma HLS PIPELINE
+        ap_uint<t_MemBits> l_memVal = p_memStr.read();
+        ap_uint<t_DataBits* t_ParEntries> l_datVal = l_memVal.range(t_MemBits - 1, t_MemBits / 2);
+        ap_uint<t_IndexBits* t_ParEntries> l_idxVal = l_memVal.range(t_MemBits / 2 - 1, 0);
+        p_nnzStr.write(l_datVal);
+        p_idxStr.write(l_idxVal);
+#if DEBUG_dumpData
+        WideType<t_DataType, t_ParEntries> l_valDump(l_datVal);
+        WideType<t_IndexType, t_ParEntries> l_idxDump(l_idxVal);
+        l_idxDump.write(p_of);
+        l_valDump.write(p_of);
+#endif
+    }
+}
+
+template <unsigned int t_MemBits, unsigned int t_ParEntries, unsigned int t_DataBits>
+void loadDat2Str(const ap_uint<t_MemBits>* p_memPtr,
+                 const unsigned int p_memBlocks,
+                 hls::stream<ap_uint<t_DataBits * t_ParEntries> >& p_datStr) {
     hls::stream<ap_uint<t_MemBits> > l_memStr;
 #pragma HLS DATAFLOW
     loadMemBlocks<t_MemBits>(p_memPtr, p_memBlocks, l_memStr);
-    memStr2DatPktStr<t_ParEntries, t_MemBits, t_DataBits, t_PktType>(l_memStr, p_memBlocks, p_datPktStr);
+    memStr2DatStr<t_ParEntries, t_MemBits, t_DataBits>(l_memStr, p_memBlocks, p_datStr);
 }
 
 template <unsigned int t_MaxRowBlocks,
@@ -248,48 +140,243 @@ template <unsigned int t_MaxRowBlocks,
           typename t_IndexType,
           unsigned int t_DataBits,
           unsigned int t_IndexBits,
-          unsigned int t_MemBits,
-          typename t_PktType>
-void cscRowPkt(const ap_uint<t_MemBits>* p_aNnzIdx,
-               const unsigned int p_memBlocks,
-               const unsigned int p_nnzBlocks,
-               const unsigned int p_rowBlocks,
-               hls::stream<t_PktType>& p_nnzColValPktStr,
-               hls::stream<t_PktType>& p_rowAggPktStr) {
-    const unsigned int t_ParEntries = 1 << t_LogParEntries;
+          unsigned int t_MemBits>
+void cscRowUnit(hls::stream<ap_uint<t_MemBits> >& p_aNnzIdxStr,
+                hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_nnzColValStr,
+                unsigned int p_nnzBlocks,
+                unsigned int p_rowBlocks,
+#if DEBUG_dumpData
+                hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_rowAggStr,
+                unsigned int p_cuId) {
+#else
+                hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_rowAggStr) {
+#endif
+    static const unsigned int t_ParEntries = 1 << t_LogParEntries;
+    static const unsigned int t_ParGroups = 1 << t_LogParGroups;
     hls::stream<ap_uint<t_DataBits * t_ParEntries> > l_nnzStr;
     hls::stream<ap_uint<t_IndexBits * t_ParEntries> > l_idxStr;
+    hls::stream<ap_uint<t_DataBits * t_ParEntries> > l_colValStr;
+    hls::stream<ap_uint<t_DataBits * t_ParEntries> > l_rowAggStr;
 #pragma HLS DATAFLOW
 
-    loadNnzIdx<1 << t_LogParEntries, t_MemBits, t_DataBits, t_IndexBits>(p_aNnzIdx, p_memBlocks, l_nnzStr, l_idxStr);
-
-    cscRowPkt<t_MaxRowBlocks, t_LogParEntries, t_LogParGroups, t_PktType, t_DataType, t_IndexType, t_DataBits,
-              t_IndexBits>(p_nnzBlocks, p_rowBlocks, l_nnzStr, p_nnzColValPktStr, l_idxStr, p_rowAggPktStr);
+#if DEBUG_dumpData
+    std::string l_toCscRowFileName = "toCscRow_" + std::to_string(p_cuId) + ".dat";
+    std::ofstream l_of2CscRow(l_toCscRowFileName.c_str(), std::ios::binary);
+    if (!l_of2CscRow.is_open()) {
+        std::cout << "ERROR: Open " << l_toCscRowFileName << std::endl;
+    }
+    l_of2CscRow.write(reinterpret_cast<char*>(&p_nnzBlocks), sizeof(uint32_t));
+    l_of2CscRow.write(reinterpret_cast<char*>(&p_rowBlocks), sizeof(uint32_t));
+    nnzIdx2DatStr<t_DataType, t_IndexType, t_ParEntries, t_MemBits, t_DataBits, t_IndexBits>(
+        p_aNnzIdxStr, p_nnzBlocks, l_nnzStr, l_idxStr, l_of2CscRow);
+    l_of2CscRow.close();
+#else
+    nnzIdx2DatStr<t_DataType, t_IndexType, t_ParEntries, t_MemBits, t_DataBits, t_IndexBits>(p_aNnzIdxStr, p_nnzBlocks,
+                                                                                             l_nnzStr, l_idxStr);
+#endif
+    cscRow<t_MaxRowBlocks, t_LogParEntries, t_LogParGroups, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(
+        p_nnzBlocks, p_rowBlocks, l_nnzStr, p_nnzColValStr, l_idxStr, p_rowAggStr);
 }
 
-template <unsigned int t_ParEntries, unsigned int t_MemBits, unsigned int t_DataBits, typename t_PktType>
-void storeDatPkt(hls::stream<t_PktType>& p_datPktStr, const unsigned int p_memBlocks, ap_uint<t_MemBits>* p_memPtr) {
+template <unsigned int t_ParEntries, unsigned int t_MemBits, unsigned int t_DataBits>
+void storeDa(hls::stream<ap_uint<t_DataBits * t_ParEntries> >& p_datStr,
+             const unsigned int p_memBlocks,
+             ap_uint<t_MemBits>* p_memPtr) {
     hls::stream<ap_uint<t_MemBits> > l_memStr;
 
 #pragma HLS DATAFLOW
 
-    datPktStr2MemStr<t_ParEntries, t_MemBits, t_DataBits, t_PktType>(p_datPktStr, p_memBlocks, l_memStr);
-
+    datStr2MemStr<t_ParEntries, t_MemBits, t_DataBits>(p_datStr, p_memBlocks, l_memStr);
     storeMemBlocks<t_MemBits>(l_memStr, p_memBlocks, p_memPtr);
+}
+
+template <unsigned int t_MaxParamMemBlocks, unsigned int t_ParamsPerMem, unsigned int t_MemBlocks4Param>
+void getHbmParam(uint32_t p_paramStore[t_MaxParamMemBlocks][t_ParamsPerMem],
+                 unsigned int p_blockId,
+                 uint32_t& p_rdOffset,
+                 uint32_t& p_wrOffset,
+                 uint32_t& p_nnzBlocks,
+                 uint32_t& p_rowBlocks) {
+    static const unsigned int t_Width = t_MemBlocks4Param * t_ParamsPerMem;
+#pragma HLS INLINE
+    WideType<uint32_t, t_Width> l_param;
+#pragma HLS ARRAY_PARTITION variable = l_param complete dim = 1
+
+    for (unsigned int i = 0; i < t_MemBlocks4Param; ++i) {
+#pragma HLS PIPELINE
+        for (unsigned int j = 0; j < t_ParamsPerMem; ++j) {
+            l_param[i * t_ParamsPerMem + j] = p_paramStore[p_blockId + i][j];
+        }
+    }
+    p_rdOffset = l_param[0];
+    p_wrOffset = l_param[1];
+    p_nnzBlocks = l_param[2];
+    p_rowBlocks = l_param[3];
+}
+
+template <unsigned int t_MaxParamMemBlocks,
+          unsigned int t_ParamsPerMem,
+          unsigned int t_MemBits,
+          unsigned int t_ParamMemOffset>
+void readMemParamBlocks(ap_uint<t_MemBits>* p_ptr,
+                        unsigned int& p_paramBlocks,
+                        unsigned int& p_iterations,
+                        uint32_t p_paramStore[t_MaxParamMemBlocks][t_ParamsPerMem]) {
+#pragma HLS INLINE
+    ap_uint<t_MemBits>* l_ptr = p_ptr;
+    ap_uint<t_MemBits> l_val = l_ptr[0];
+    WideType<uint32_t, t_ParamsPerMem> l_param(l_val);
+    p_paramBlocks = l_param[0];
+    p_iterations = l_param[1];
+    l_ptr += t_ParamMemOffset;
+    for (unsigned int i = 0; i < p_paramBlocks; ++i) {
+#pragma HLS PIPELINE
+        l_val = l_ptr[i];
+        l_param = l_val;
+        for (unsigned int j = 0; j < t_ParamsPerMem; ++j) {
+            p_paramStore[i][j] = l_param[j];
+        }
+    }
+}
+
+template <unsigned int t_MaxParamHbmBlocks, unsigned int t_MemBits, unsigned int t_ParamOffset>
+void readHbm(ap_uint<t_MemBits>* p_memRdPtr,
+             hls::stream<uint32_t>& p_paramStr,
+             hls::stream<ap_uint<t_MemBits> >& p_memStr) {
+    static const unsigned int t_ParamsPerHbm = t_MemBits / 32;
+    static const unsigned int t_ParamMemOffset = t_ParamOffset * 8 / t_MemBits;
+    static const unsigned int t_HbmBlocks4Param = (4 + t_ParamsPerHbm - 1) / t_ParamsPerHbm;
+
+    uint32_t l_paramStore[t_MaxParamHbmBlocks][t_ParamsPerHbm];
+#pragma HLS ARRAY_PARTITION variable = l_paramStore complete dim = 2
+
+    unsigned int l_iterations = 0;
+    unsigned int l_totalParamBlocks = 0;
+    readMemParamBlocks<t_MaxParamHbmBlocks, t_ParamsPerHbm, t_MemBits, t_ParamMemOffset>(p_memRdPtr, l_totalParamBlocks,
+                                                                                         l_iterations, l_paramStore);
+
+    unsigned int l_totalParams = l_totalParamBlocks / t_HbmBlocks4Param;
+    p_paramStr.write(l_totalParams * l_iterations);
+
+    unsigned int l_paramBlockId = 0;
+    WideType<uint32_t, t_ParamsPerHbm> l_param;
+    while (l_iterations > 0) {
+        if (l_paramBlockId == 0) {
+            l_param[0] = l_totalParams;
+            p_memStr.write(l_param);
+        }
+        uint32_t l_rdOffset;
+        uint32_t l_wrOffset;
+        uint32_t l_nnzBlocks;
+        uint32_t l_rowBlocks;
+
+        getHbmParam<t_MaxParamHbmBlocks, t_ParamsPerHbm, t_HbmBlocks4Param>(l_paramStore, l_paramBlockId, l_rdOffset,
+                                                                            l_wrOffset, l_nnzBlocks, l_rowBlocks);
+        p_paramStr.write(l_wrOffset);
+        p_paramStr.write(l_rowBlocks);
+
+        l_param[0] = l_nnzBlocks;
+        l_param[1] = l_rowBlocks;
+        p_memStr.write(l_param);
+
+        ap_uint<t_MemBits>* l_datPtr = p_memRdPtr + l_rdOffset;
+        readMem<t_MemBits>(l_datPtr, l_nnzBlocks, p_memStr);
+        l_paramBlockId += t_HbmBlocks4Param;
+        if (l_paramBlockId == l_totalParamBlocks) {
+            l_paramBlockId = 0;
+            l_iterations--;
+        }
+    }
+}
+template <unsigned int t_MaxRowBlocks,
+          unsigned int t_ParEntries,
+          unsigned int t_ParGroups,
+          unsigned int t_MemBits,
+          unsigned int t_DataBits>
+void writeHbm(hls::stream<uint32_t>& p_paramStr,
+              hls::stream<ap_uint<t_DataBits * t_ParEntries> >& p_datStr,
+              ap_uint<t_MemBits>* p_memPtr) {
+    static const unsigned int t_ParDataBits = t_DataBits * t_ParEntries;
+    static const unsigned int t_DataWords = t_MemBits / t_ParDataBits;
+
+    ap_uint<t_MemBits> l_rowStore[t_MaxRowBlocks][t_DataWords];
+#pragma HLS ARRAY_PARTITION variable = l_rowStore complete dim = 2
+#pragma HLS RESOURCE variable = l_rowStore core = RAM_1P_URAM uram
+
+    hls::stream<ap_uint<t_MemBits> > l_memStr;
+    ap_uint<t_MemBits>* l_wrPtr;
+#ifndef __SYNTHESIS__
+    assert(t_MemBits >= t_ParDataBits);
+    assert(t_MemBits % t_ParDataBits == 0);
+#endif
+
+    uint32_t l_totalParams = p_paramStr.read();
+    for (unsigned int r = 0; r < l_totalParams; ++r) {
+        uint32_t l_wrOffset = p_paramStr.read();
+        uint32_t l_rowBlocks = p_paramStr.read();
+        uint32_t l_rowResBlocks = l_rowBlocks * t_ParGroups;
+        l_wrPtr = p_memPtr + l_wrOffset;
+
+        unsigned int l_memBlocks = l_rowResBlocks / t_DataWords;
+        for (unsigned int i = 0; i < l_memBlocks; ++i) {
+            for (unsigned int j = 0; j < t_DataWords; ++j) {
+#pragma HLS PIPELINE II = 1
+                ap_uint<t_MemBits> l_dat = p_datStr.read();
+                l_rowStore[i][j] = l_dat;
+            }
+        }
+
+        if ((l_rowResBlocks % t_DataWords) != 0) {
+            ap_uint<t_MemBits> l_dat = p_datStr.read();
+            l_rowStore[l_memBlocks][0] = l_dat;
+            l_memBlocks++;
+        }
+
+        for (unsigned int i = 0; i < l_memBlocks; ++i) {
+#pragma HLS PIPELINE II = 1
+            ap_uint<t_MemBits> l_memVal;
+            for (unsigned int j = 0; j < t_DataWords; ++j) {
+                l_memVal.range((j + 1) * t_ParDataBits - 1, j * t_ParDataBits) = l_rowStore[i][j];
+            }
+            l_wrPtr[i] = l_memVal;
+        }
+    }
+}
+
+template <unsigned int t_MaxParamHbmBlocks,
+          unsigned int t_MaxRowBlocks,
+          unsigned int t_ParEntries,
+          unsigned int t_ParGroups,
+          unsigned int t_DataBits,
+          unsigned int t_HbmMemBits,
+          unsigned int t_ParamOffset>
+void rdWrHbmChannel(ap_uint<t_HbmMemBits>* p_rdPtr,
+                    hls::stream<ap_uint<t_DataBits * t_ParEntries> >& p_inStr,
+                    ap_uint<t_HbmMemBits>* p_wrPtr,
+                    hls::stream<ap_uint<t_HbmMemBits> >& p_outStr) {
+    hls::stream<uint32_t> l_paramStr;
+#pragma HLS STREAM variable = l_paramStr depth = 4
+
+#pragma HLS DATAFLOW
+    readHbm<t_MaxParamHbmBlocks, t_HbmMemBits, t_ParamOffset>(p_rdPtr, l_paramStr, p_outStr);
+    writeHbm<t_MaxRowBlocks, t_ParEntries, t_ParGroups, t_HbmMemBits, t_DataBits>(l_paramStr, p_inStr, p_wrPtr);
 }
 
 template <unsigned int t_LogParEntries,
           typename t_DataType,
           typename t_IndexType,
           unsigned int t_DataBits,
-          unsigned int t_IndexBits,
-          typename t_DataPktType,
-          typename t_IndexPktType>
-void xBarColPkt(const unsigned int p_colPtrBlocks,
-                const unsigned int p_nnzBlocks,
-                hls::stream<t_DataPktType>& p_colValStr,
-                hls::stream<t_IndexPktType>& p_colPtrStr,
-                hls::stream<t_DataPktType>& p_nnzColValStr) {
+          unsigned int t_IndexBits>
+void xBarColUnit(const unsigned int p_colPtrBlocks,
+                 const unsigned int p_nnzBlocks,
+                 hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_colValStr,
+                 hls::stream<ap_uint<t_IndexBits*(1 << t_LogParEntries)> >& p_colPtrStr,
+                 hls::stream<ap_uint<t_DataBits*(1 << t_LogParEntries)> >& p_nnzColValStr
+#if DEBUG_dumpData
+                 ,
+                 unsigned int p_cuId
+#endif
+                 ) {
     const unsigned int t_ParEntries = 1 << t_LogParEntries;
     const unsigned int t_IndexBusBits = t_IndexBits * t_ParEntries;
     const unsigned int t_DataBusBits = t_DataBits * t_ParEntries;
@@ -299,154 +386,240 @@ void xBarColPkt(const unsigned int p_colPtrBlocks,
     hls::stream<ap_uint<t_DataBusBits> > l_nnzColValStr;
 
 #pragma HLS DATAFLOW
-    datPktStr2MemStr<t_ParEntries, t_IndexBusBits, t_IndexBits, t_IndexPktType>(p_colPtrStr, p_colPtrBlocks,
-                                                                                l_colPtrStr);
 
-    datPktStr2MemStr<t_ParEntries, t_DataBusBits, t_DataBits, t_DataPktType>(p_colValStr, p_colPtrBlocks, l_colValStr);
-
-    xBarCol<t_LogParEntries, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(p_colPtrBlocks, p_nnzBlocks, l_colPtrStr,
-                                                                               l_colValStr, l_nnzColValStr);
-
-    memStr2DatPktStr<t_ParEntries, t_DataBusBits, t_DataBits, t_DataPktType>(l_nnzColValStr, p_nnzBlocks,
-                                                                             p_nnzColValStr);
+#if DEBUG_dumpData
+    openOutputFile("toXBarCol_" + std::to_string(p_cuId) + ".dat", [&](std::ofstream& of) {
+        of.write(reinterpret_cast<const char*>(&p_colPtrBlocks), sizeof(unsigned int));
+        of.write(reinterpret_cast<const char*>(&p_nnzBlocks), sizeof(unsigned int));
+        saveStream(p_colPtrStr, of);
+        saveStream(p_colValStr, of);
+    });
+#endif
+    xBarCol<t_LogParEntries, t_DataType, t_IndexType, t_DataBits, t_IndexBits>(p_colPtrBlocks, p_nnzBlocks, p_colPtrStr,
+                                                                               p_colValStr, p_nnzColValStr);
 }
 
-template <unsigned int t_MemBits,
-          unsigned int t_ParEntries,
-          unsigned int t_DataBits,
-          unsigned int t_IndexBits,
-          typename t_DataPktType,
-          typename t_IndexPktType>
-void loadColPtrVal2PktStr(const ap_uint<t_MemBits>* p_memPtr,
-                          const unsigned int p_memBlocks,
-                          hls::stream<t_DataPktType>& p_datPktStr,
-                          hls::stream<t_IndexPktType>& p_idxPktStr) {
-    hls::stream<ap_uint<t_MemBits> > l_memStr;
-#pragma HLS DATAFLOW
-    loadMemBlocks<t_MemBits>(p_memPtr, p_memBlocks, l_memStr);
-    memStr2ColPtrValStr<t_MemBits, t_ParEntries, t_DataBits, t_IndexBits, t_DataPktType, t_IndexPktType>(
-        l_memStr, p_memBlocks, p_datPktStr, p_idxPktStr);
-}
+template <unsigned int t_MaxParamDdrBlocks,
+          unsigned int t_ParamsPerDdr,
+          unsigned int t_DdrBlocks4Param,
+          unsigned int t_HbmChannels>
+void getColParam(uint32_t p_paramStore[t_MaxParamDdrBlocks][t_ParamsPerDdr],
+                 unsigned int p_id,
+                 uint32_t& p_offset,
+                 uint32_t& p_memBlocks,
+                 uint32_t p_param1Hbm[t_HbmChannels],
+                 uint32_t p_param2Hbm[t_HbmChannels]) {
+    static const unsigned int t_Width = t_DdrBlocks4Param * t_ParamsPerDdr;
+#pragma HLS INLINE
+    WideType<uint32_t, t_Width> l_param;
+#pragma HLS ARRAY_PARTITION variable = l_param complete dim = 1
 
-template <unsigned int t_MaxColMemBlocks,
-          unsigned int t_MemBits,
-          unsigned int t_ParEntries,
-          unsigned int t_DataBits,
-          unsigned int t_IndexBits,
-          typename t_DataPktType,
-          typename t_IndexPktType>
-void loadCol2PktStrStep(const ap_uint<t_MemBits>* p_memColVal,
-                        const ap_uint<t_MemBits>* p_memColPtr,
-                        const unsigned int p_memBlocks,
-                        const unsigned int p_numTrans,
-                        hls::stream<t_DataPktType>& p_datPktStr,
-                        hls::stream<t_IndexPktType>& p_idxPktStr) {
-    hls::stream<ap_uint<t_MemBits> > l_memStr;
-    hls::stream<ap_uint<t_MemBits> > l_valPtrStr;
-#pragma HLS DATAFLOW
-    loadColValPtrBlocks<t_MemBits>(p_memColVal, p_memColPtr, p_memBlocks, l_memStr);
-    bufferTransCols<t_MaxColMemBlocks, t_MemBits>(p_memBlocks, p_numTrans, l_memStr, l_valPtrStr);
-    memStr2ColPtrValStr<t_MemBits, t_ParEntries, t_DataBits, t_IndexBits, t_DataPktType, t_IndexPktType>(
-        l_valPtrStr, p_memBlocks * 2, p_datPktStr, p_idxPktStr);
-}
-
-template <typename t_ParamPktType, typename t_DataPktType, unsigned int t_HbmChannels, unsigned int t_MemBits>
-void loadCol(ap_uint<32>* p_paramPtr,
-             ap_uint<t_MemBits>* p_colValPtr,
-             ap_uint<t_MemBits>* p_nnzColPtr,
-             hls::stream<t_ParamPktType>& p_colVecParamPktStr,
-             hls::stream<t_DataPktType>& p_colVecPktStr,
-             hls::stream<t_ParamPktType>& p_nnzColParamPktStr,
-             hls::stream<t_DataPktType>& p_nnzColPktStr) {
-    ap_uint<32> l_vecBlocks;
-    ap_uint<32> l_chBlocks[t_HbmChannels];
-
-    ap_uint<32>* l_paramPtr = p_paramPtr;
-    l_vecBlocks = l_paramPtr[0];
-    t_ParamPktType l_paramPkt;
-    l_paramPkt.data = l_vecBlocks;
-    p_colVecParamPktStr.write(l_paramPkt);
-    l_paramPtr++;
-    for (unsigned int i = 0; i < t_HbmChannels; ++i) {
-        for (unsigned int j = 0; j < 3; ++j) {
-            // write l_vecBlocks and chBlocks, minColIdx, maxColIdx for each channel
-            l_paramPkt.data = l_paramPtr[j];
-            p_colVecParamPktStr.write(l_paramPkt);
-            l_chBlocks[j] = (j == 0) ? l_paramPkt.data : 0;
+    for (unsigned int i = 0; i < t_DdrBlocks4Param; ++i) {
+#pragma HLS PIPELINE rewind
+        for (unsigned int j = 0; j < t_ParamsPerDdr; ++j) {
+            l_param[i * t_ParamsPerDdr + j] = p_paramStore[p_id + i][j];
         }
-        l_paramPtr += 3;
     }
-
+    p_offset = l_param[0];
+    p_memBlocks = l_param[1];
     for (unsigned int i = 0; i < t_HbmChannels; ++i) {
-        l_paramPkt.data = l_chBlocks[i];
-        p_nnzColParamPktStr.write(l_paramPkt);
-    }
-
-    for (unsigned int i = 0; i < l_vecBlocks; ++i) {
-#pragma HLS PIPELINE
-        t_DataPktType l_datPkt;
-        l_datPkt.data = p_colValPtr[i];
-        p_colVecPktStr.write(l_datPkt);
-    }
-
-    unsigned int l_nnzColBlocks = 0;
-    for (unsigned int i = 0; i < t_HbmChannels; ++i) {
-        l_nnzColBlocks += l_chBlocks[i];
-    }
-    for (unsigned int i = 0; i < l_nnzColBlocks; ++i) {
-#pragma HLS PIPELINE
-        t_DataPktType l_datPkt;
-        l_datPkt.data = p_nnzColPtr[i];
-        p_nnzColPktStr.write(l_datPkt);
+#pragma HLS UNROLL
+        p_param1Hbm[i] = l_param[2 + i];
+        p_param2Hbm[i] = l_param[2 + t_HbmChannels + i];
     }
 }
 
-template <typename t_ParamPktType,
-          typename t_MemPktType,
-          unsigned int t_MaxColBlocks,
+template <unsigned int t_ParamsPerDdr, unsigned int t_DdrBlocks4Param, unsigned int t_HbmChannels>
+void colParam2Str(uint32_t p_offset,
+                  uint32_t p_memBlocks,
+                  uint32_t p_param1Hbm[t_HbmChannels],
+                  uint32_t p_param2Hbm[t_HbmChannels],
+                  hls::stream<ap_uint<32 * t_ParamsPerDdr> >& p_datStr) {
+    static const unsigned int t_Width = t_DdrBlocks4Param * t_ParamsPerDdr;
+#pragma HLS INLINE
+    WideType<uint32_t, t_Width> l_param;
+#pragma HLS ARRAY_PARTITION variable = l_param complete dim = 1
+
+    l_param[0] = p_offset;
+    l_param[1] = p_memBlocks;
+    for (unsigned int i = 0; i < t_HbmChannels; ++i) {
+#pragma HLS UNROLL
+        l_param[2 + i] = p_param1Hbm[i];
+        l_param[2 + t_HbmChannels + i] = p_param2Hbm[i];
+    }
+    WideType<uint32_t, t_ParamsPerDdr> l_outParam;
+#pragma HLS ARRAY_PARTITION variable = l_outParam complete dim = 1
+
+    for (unsigned int i = 0; i < t_DdrBlocks4Param; ++i) {
+#pragma HLS PIPELINE rewind
+        for (unsigned int j = 0; j < t_ParamsPerDdr; ++j) {
+            l_outParam[j] = l_param[i * t_ParamsPerDdr + j];
+        }
+        p_datStr.write(l_outParam);
+    }
+}
+
+template <unsigned int t_MaxParamDdrBlocks,
+          unsigned int t_HbmChannels,
+          unsigned int t_MemBits,
+          unsigned int t_DataBits,
+          unsigned int t_ParEntries,
+          unsigned int t_ParamOffset>
+void loadColVec(ap_uint<t_MemBits>* p_colValPtr, hls::stream<ap_uint<t_MemBits> >& p_colVecStr) {
+    static const unsigned int t_ParamsPerDdr = t_MemBits / 32;
+    static const unsigned int t_ParamDdrOffset = t_ParamOffset * 8 / t_MemBits;
+    static const unsigned int t_IntsPerDdr = t_MemBits / (8 * sizeof(uint32_t));
+    static const unsigned int t_IntsPerColParam = 2 + t_HbmChannels * 2;
+    static const unsigned int t_DdrBlocks4Param = (t_IntsPerColParam + t_IntsPerDdr - 1) / t_IntsPerDdr;
+
+    uint32_t l_paramStore[t_MaxParamDdrBlocks][t_ParamsPerDdr];
+#pragma HLS ARRAY_PARTITION variable = l_paramStore complete dim = 2
+    unsigned int l_iterations = 0;
+    unsigned int l_paramBlocks = 0;
+    readMemParamBlocks<t_MaxParamDdrBlocks, t_ParamsPerDdr, t_MemBits, t_ParamDdrOffset>(p_colValPtr, l_paramBlocks,
+                                                                                         l_iterations, l_paramStore);
+
+    uint32_t l_offset, l_memBlocks;
+    uint32_t l_minColId[t_HbmChannels];
+#pragma HLS ARRAY_PARTITION variable = l_minColId complete dim = 1
+    uint32_t l_maxColId[t_HbmChannels];
+#pragma HLS ARRAY_PARTITION variable = l_maxColId complete dim = 1
+    ap_uint<t_MemBits>* l_datPtr;
+
+    uint32_t l_totalParams = l_paramBlocks / t_DdrBlocks4Param;
+    WideType<uint32_t, t_ParamsPerDdr> l_param;
+#if SEQ_KERNEL
+    l_param[0] = l_totalParams;
+    l_param[1] = l_iterations;
+    p_colVecStr.write(l_param);
+#endif
+
+    unsigned int l_i = 0;
+    while (l_iterations > 0) {
+        getColParam<t_MaxParamDdrBlocks, t_ParamsPerDdr, t_DdrBlocks4Param, t_HbmChannels>(
+            l_paramStore, l_i, l_offset, l_memBlocks, l_minColId, l_maxColId);
+        colParam2Str<t_ParamsPerDdr, t_DdrBlocks4Param, t_HbmChannels>(l_offset, l_memBlocks, l_minColId, l_maxColId,
+                                                                       p_colVecStr);
+        l_datPtr = p_colValPtr + l_offset;
+        readMem<t_MemBits>(l_datPtr, l_memBlocks, p_colVecStr);
+        l_i += t_DdrBlocks4Param;
+        if (l_i == l_paramBlocks) {
+            l_i = 0;
+            l_iterations--;
+        }
+    }
+}
+
+template <unsigned int t_MaxParamDdrBlocks,
+          unsigned int t_HbmChannels,
+          unsigned int t_MemBits,
+          unsigned int t_DataBits,
+          unsigned int t_ParEntries,
+          unsigned int t_ParamOffset>
+void loadColPtr(ap_uint<t_MemBits>* p_nnzColPtr, hls::stream<ap_uint<t_MemBits> >& p_nnzColStr) {
+    static const unsigned int t_ParamsPerDdr = t_MemBits / 32;
+    static const unsigned int t_ParamDdrOffset = t_ParamOffset * 8 / t_MemBits;
+    static const unsigned int t_IntsPerDdr = t_MemBits / (8 * sizeof(uint32_t));
+    static const unsigned int t_IntsPerColParam = 2 + t_HbmChannels * 2;
+    static const unsigned int t_DdrBlocks4Param = (t_IntsPerColParam + t_IntsPerDdr - 1) / t_IntsPerDdr;
+
+    uint32_t l_paramStore[t_MaxParamDdrBlocks][t_ParamsPerDdr];
+#pragma HLS ARRAY_PARTITION variable = l_paramStore complete dim = 2
+    unsigned int l_iterations = 0;
+    unsigned int l_paramBlocks = 0;
+    readMemParamBlocks<t_MaxParamDdrBlocks, t_ParamsPerDdr, t_MemBits, t_ParamDdrOffset>(p_nnzColPtr, l_paramBlocks,
+                                                                                         l_iterations, l_paramStore);
+
+    uint32_t l_offset, l_memBlocks;
+    uint32_t l_parBlocks[t_HbmChannels];
+#pragma HLS ARRAY_PARTITION variable = l_parBlocks complete dim = 1
+    uint32_t l_nnzBlocks[t_HbmChannels];
+#pragma HLS ARRAY_PARTITION variable = l_nnzBlocks complete dim = 1
+    ap_uint<t_MemBits>* l_datPtr;
+
+    uint32_t l_totalParams = l_paramBlocks / t_DdrBlocks4Param;
+    WideType<uint32_t, t_ParamsPerDdr> l_param;
+#if SEQ_KERNEL
+    l_param[0] = l_totalParams;
+    l_param[1] = l_iterations;
+    p_nnzColStr.write(l_param);
+#endif
+
+    unsigned int l_i = 0;
+    while (l_iterations > 0) {
+        getColParam<t_MaxParamDdrBlocks, t_ParamsPerDdr, t_DdrBlocks4Param, t_HbmChannels>(
+            l_paramStore, l_i, l_offset, l_memBlocks, l_parBlocks, l_nnzBlocks);
+        colParam2Str<t_ParamsPerDdr, t_DdrBlocks4Param, t_HbmChannels>(l_offset, l_memBlocks, l_parBlocks, l_nnzBlocks,
+                                                                       p_nnzColStr);
+        l_datPtr = p_nnzColPtr + l_offset;
+        readMem<t_MemBits>(l_datPtr, l_memBlocks, p_nnzColStr);
+        l_i += t_DdrBlocks4Param;
+        if (l_i == l_paramBlocks) {
+            l_i = 0;
+            l_iterations--;
+        }
+    }
+}
+template <unsigned int t_MaxParamDdrBlocks,
+          unsigned int t_HbmChannels,
+          unsigned int t_MemBits,
+          unsigned int t_DataBits,
+          unsigned int t_ParEntries,
+          unsigned int t_ParamOffset>
+void loadCol(ap_uint<t_MemBits>* p_colValPtr,
+             ap_uint<t_MemBits>* p_nnzColPtr,
+             hls::stream<ap_uint<t_MemBits> >& p_colVecStr,
+             hls::stream<ap_uint<t_MemBits> >& p_nnzColStr) {
+#pragma HLS DATAFLOW
+    loadColVec<t_MaxParamDdrBlocks, t_HbmChannels, t_MemBits, t_DataBits, t_ParEntries, t_ParamOffset>(p_colValPtr,
+                                                                                                       p_colVecStr);
+
+    loadColPtr<t_MaxParamDdrBlocks, t_HbmChannels, t_MemBits, t_DataBits, t_ParEntries, t_ParamOffset>(p_nnzColPtr,
+                                                                                                       p_nnzColStr);
+}
+
+template <unsigned int t_MaxColBlocks,
           unsigned int t_HbmChannels,
           unsigned int t_ParEntries,
           unsigned int t_MemBits,
           unsigned int t_DataBits>
-void bufTransColVec(hls::stream<t_ParamPktType>& p_colVecParamPktStr,
-                    hls::stream<t_MemPktType>& p_colVecPktStr,
-                    hls::stream<ap_uint<32> > p_paramOutStr[t_HbmChannels],
+void bufTransColVec(hls::stream<ap_uint<t_MemBits> >& p_colVecStr,
                     hls::stream<ap_uint<t_DataBits * t_ParEntries> > p_datOutStr[t_HbmChannels]) {
-    const unsigned int t_ParWords = t_MemBits / (t_DataBits * t_ParEntries);
-    const unsigned int t_MaxColParBlocks = t_MaxColBlocks * t_ParWords;
+    static const unsigned int t_ParWords = t_MemBits / (t_DataBits * t_ParEntries);
+    static const unsigned int t_MaxColParBlocks = t_MaxColBlocks * t_ParWords;
+    static const unsigned int t_IntsPerColParam = 2 + t_HbmChannels * 2;
+    static const unsigned int t_ParamsPerPar = t_DataBits * t_ParEntries / 32;
+    static const unsigned int t_ParBlocks4Param = (t_IntsPerColParam + t_ParamsPerPar - 1) / t_ParamsPerPar;
 
-    hls::stream<ap_uint<32> > l_paramStr;
     hls::stream<ap_uint<t_DataBits * t_ParEntries> > l_datStr;
+#pragma HLS STREAM variable = l_datStr depth = t_MaxColParBlocks
 #pragma HLS DATAFLOW
-    readColVecPkt<t_ParamPktType, t_MemPktType, t_HbmChannels, t_ParEntries, t_MemBits, t_DataBits>(
-        p_colVecParamPktStr, p_colVecPktStr, l_paramStr, l_datStr);
+    readCol<t_HbmChannels, t_ParEntries, t_MemBits, t_DataBits>(p_colVecStr, l_datStr);
 
-    dispCol<t_MaxColParBlocks, t_HbmChannels, t_ParEntries, t_DataBits>(l_paramStr, l_datStr, p_paramOutStr,
-                                                                        p_datOutStr);
+    dispCol<t_MaxColParBlocks, t_ParBlocks4Param, t_HbmChannels, t_ParEntries, t_DataBits>(l_datStr, p_datOutStr);
 }
 
-template <typename t_ParamPktType,
-          typename t_MemPktType,
-          unsigned int t_MaxColBlocks,
+template <unsigned int t_MaxColBlocks,
           unsigned int t_HbmChannels,
           unsigned int t_ParEntries,
           unsigned int t_MemBits,
           unsigned int t_DataBits>
-void bufTransNnzCol(hls::stream<t_ParamPktType>& p_nnzColParamPktStr,
-                    hls::stream<t_MemPktType>& p_nnzColPktStr,
-                    hls::stream<ap_uint<32> > p_paramOutStr[t_HbmChannels],
+void bufTransNnzCol(hls::stream<ap_uint<t_MemBits> >& p_nnzColStr,
                     hls::stream<ap_uint<t_DataBits * t_ParEntries> > p_datOutStr[t_HbmChannels]) {
-    const unsigned int t_ParWords = t_MemBits / (t_DataBits * t_ParEntries);
-    const unsigned int t_MaxColParBlocks = t_MaxColBlocks * t_ParWords;
+    static const unsigned int t_ParWords = t_MemBits / (t_DataBits * t_ParEntries);
+    static const unsigned int t_MaxColParBlocks = t_MaxColBlocks * t_ParWords;
+    static const unsigned int t_IntsPerColParam = 2 + t_HbmChannels * 2;
+    static const unsigned int t_ParamsPerPar = t_DataBits * t_ParEntries / 32;
+    static const unsigned int t_ParBlocks4Param = (t_IntsPerColParam + t_ParamsPerPar - 1) / t_ParamsPerPar;
+    static const unsigned int t_DatStreamDepth = t_MaxColParBlocks * t_HbmChannels;
 
-    hls::stream<ap_uint<32> > l_paramStr;
     hls::stream<ap_uint<t_DataBits * t_ParEntries> > l_datStr;
-#pragma HLS DATAFLOW
-    readNnzColPkt<t_ParamPktType, t_MemPktType, t_HbmChannels, t_ParEntries, t_MemBits, t_DataBits>(
-        p_nnzColParamPktStr, p_nnzColPktStr, l_paramStr, l_datStr);
+#pragma HLS STREAM variable = l_datStr depth = t_DatStreamDepth
 
-    dispNnzCol<t_MaxColParBlocks, t_HbmChannels, t_ParEntries, t_DataBits>(l_paramStr, l_datStr, p_paramOutStr,
-                                                                           p_datOutStr);
+#pragma HLS DATAFLOW
+    readCol<t_HbmChannels, t_ParEntries, t_MemBits, t_DataBits>(p_nnzColStr, l_datStr);
+
+    dispNnzCol<t_MaxColParBlocks, t_ParBlocks4Param, t_HbmChannels, t_ParEntries, t_DataBits>(l_datStr, p_datOutStr);
 }
 } // end namespace sparse
 } // end namespace xf

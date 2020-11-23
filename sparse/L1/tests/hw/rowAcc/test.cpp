@@ -49,17 +49,15 @@ bool compare<float>(float x, float ref) {
 }
 
 void uut_top(const unsigned int p_rowBlocks,
-             hls::stream<ap_uint<SPARSE_dataBits + SPARSE_indexBits - SPARSE_logParEntries - SPARSE_logParGroups> >&
-                 p_rowEntryStr,
+             hls::stream<ap_uint<SPARSE_dataBits + SPARSE_indexBits> >& p_rowEntryStr,
              hls::stream<ap_uint<1> >& p_isEndStr,
              hls::stream<ap_uint<SPARSE_dataBits> >& p_rowValStr) {
-    rowAcc<SPARSE_maxRowBlocks, SPARSE_logParEntries, SPARSE_logParGroups, SPARSE_dataType, SPARSE_indexType,
-           SPARSE_dataBits, SPARSE_indexBits - SPARSE_logParEntries - SPARSE_logParGroups>(p_rowBlocks, p_rowEntryStr,
-                                                                                           p_isEndStr, p_rowValStr);
+    rowMemAcc<SPARSE_maxRowBlocks, SPARSE_parEntries, SPARSE_dataType, SPARSE_indexType, SPARSE_dataBits,
+              SPARSE_indexBits>(p_rowBlocks, p_rowEntryStr, p_isEndStr, p_rowValStr);
 }
 
 int main() {
-    const unsigned int t_RowOffsetBits = SPARSE_indexBits - SPARSE_logParEntries - SPARSE_logParGroups;
+    const unsigned int t_RowOffsetBits = SPARSE_indexBits;
 
     unsigned int l_rowBlocks = 0;
     hls::stream<ap_uint<SPARSE_dataBits + t_RowOffsetBits> > l_rowEntryStr;
@@ -85,14 +83,14 @@ int main() {
             if (l_row > l_rowBlocks) {
                 l_rowBlocks = l_row;
             }
-            l_rowEntry.getRow() = l_row;
+            l_rowEntry.getRow() = l_row * SPARSE_parEntries;
             l_rowEntryStr.write(l_rowEntry.toBits());
             cout << "Nnz " << l_nnzGroupEntries << ": " << l_rowEntry << endl;
-            if (l_goldenArr.find(l_rowEntry.getRow()) == l_goldenArr.end()) {
-                l_goldenArr[l_rowEntry.getRow()] = l_rowEntry.getVal();
+            if (l_goldenArr.find(l_row) == l_goldenArr.end()) {
+                l_goldenArr[l_row] = l_rowEntry.getVal();
                 l_nnzRows++;
             } else {
-                l_goldenArr[l_rowEntry.getRow()] += l_rowEntry.getVal();
+                l_goldenArr[l_row] += l_rowEntry.getVal();
             }
             l_numSameRows++;
             l_nnzGroupEntries++;

@@ -27,10 +27,11 @@ using namespace std;
 
 int main() {
     const unsigned int t_MaxCols = SPARSE_parEntries * SPARSE_maxColParBlocks;
+    const unsigned int t_IntsPerColParam = 2 + SPARSE_hbmChannels * 2;
+    const unsigned int t_ParamsPerPar = SPARSE_dataBits * SPARSE_parEntries / 32;
+    const unsigned int t_ParBlocks4Param = (t_IntsPerColParam + t_ParamsPerPar - 1) / t_ParamsPerPar;
 
-    hls::stream<ap_uint<32> > l_paramStr;
     hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> > l_datStr;
-    hls::stream<ap_uint<32> > l_paramOutStr[SPARSE_hbmChannels];
     hls::stream<ap_uint<SPARSE_dataBits * SPARSE_parEntries> > l_datOutStr[SPARSE_hbmChannels];
 
     SPARSE_dataType l_vecStore[t_MaxCols];
@@ -61,6 +62,14 @@ int main() {
         if (l_maxIdx[i] >= t_MaxCols) {
             l_maxIdx[i] = t_MaxCols - 1;
         }
+        l_chBlocks[i] = (l_maxIdx[i] - l_minIdx[i] + SPARSE_parEntries) / SPARSE_parEntries;
+    }
+
+    ap_uint<32> l_params[t_ParBlocks4Param * t_ParamsPerPar];
+    l_params[1] = l_vecBlocks;
+    for (unsigned int i = 0; i < SPARSE_hbmChannels; ++i) {
+        l_params[2 + i] = l_minIdx[i];
+        l_params[2 + SPARSE_hbmChannels + i] = l_maxIdx[i];
     }
 
     cout << "Inputs:" << endl;
@@ -73,11 +82,12 @@ int main() {
     }
 
     // send inputs to the stream
-    l_paramStr.write(l_vecBlocks);
-    for (unsigned int i = 0; i < SPARSE_hbmChannels; ++i) {
-        l_paramStr.write(l_chBlocks[i]);
-        l_paramStr.write(l_minIdx[i]);
-        l_paramStr.write(l_maxIdx[i]);
+    for (unsigned int i = 0; i < t_ParBlocks4Param; ++i) {
+        WideType<ap_uint<32>, t_ParamsPerPar> l_paramVal;
+        for (unsigned int j = 0; j < t_ParamsPerPar; ++j) {
+            l_paramVal[j] = l_params[i * t_ParamsPerPar + j];
+        }
+        l_datStr.write(l_paramVal);
     }
     for (unsigned int i = 0; i < l_vecBlocks; ++i) {
         ap_uint<SPARSE_dataBits * SPARSE_parEntries> l_valVecBits;
@@ -89,18 +99,25 @@ int main() {
         l_datStr.write(l_valVecBits);
     }
 
-    uut_top(l_paramStr, l_datStr, l_paramOutStr, l_datOutStr);
+    uut_top(l_datStr, l_datOutStr);
 
     unsigned int l_errs = 0;
     for (unsigned int t_chId = 0; t_chId < SPARSE_hbmChannels; ++t_chId) {
         cout << "INFO: channel id = " << t_chId << endl;
-        unsigned int l_blocks = l_chBlocks[t_chId];
-        unsigned int l_outBlocks = l_paramOutStr[t_chId].read();
-        if (l_blocks != l_outBlocks) {
-            cout << "ERROR: l_outBlocks " << l_outBlocks << " != " << l_blocks << "(original value)" << endl;
+        WideType<ap_uint<32>, t_ParamsPerPar> l_datOutParam = l_datOutStr[t_chId].read();
+        if (l_datOutParam[0] != l_chBlocks[t_chId]) {
+            cout << "ERROR: output chBlocks not equal to original one";
+            cout << "    output chBlocks = " << l_datOutParam[0];
+            cout << "    original chBlocks = " << l_chBlocks[t_chId] << endl;
             l_errs++;
         }
-        for (unsigned int i = 0; i < l_blocks; ++i) {
+        if (l_datOutParam[1] != l_chBlocks[t_chId]) {
+            cout << "ERROR: output chBlocks not equal to original one";
+            cout << "    output chBlocks = " << l_datOutParam[0];
+            cout << "    original chBlocks = " << l_chBlocks[t_chId] << endl;
+            l_errs++;
+        }
+        for (unsigned int i = 0; i < l_chBlocks[t_chId]; ++i) {
             ap_uint<SPARSE_dataBits * SPARSE_parEntries> l_vecOutBits;
             l_vecOutBits = l_datOutStr[t_chId].read();
             WideType<ap_uint<SPARSE_dataBits>, SPARSE_parEntries> l_vecOut(l_vecOutBits);

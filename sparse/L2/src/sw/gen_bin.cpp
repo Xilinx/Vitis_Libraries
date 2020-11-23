@@ -21,121 +21,136 @@
  * This file is part of Vitis SPARSE Library.
  */
 #include "L2_definitions.hpp"
+#include "gen_bin.hpp"
 
 using namespace std;
 using namespace xf::sparse;
+
+void writeNumPars2BinFile(ofstream& p_of, uint32_t p_numPars) {
+    p_of.seekp(0);
+    p_of.write(reinterpret_cast<char*>(&p_numPars), sizeof(p_numPars));
+}
+
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        cout << "ERROR: passed %d arguments, expected at least i2 arguments." << endl;
-        cout << "  Usage: gen_bin.exe mtxFile" << endl;
+    if (argc < 3) {
+        cout << "ERROR: passed " << argc << " arguments, expected at least 3 arguments." << endl;
+        cout << "  Usage:\n    gen_bin.exe  <-write | -read | -config-write | -config-read> app.bin [mtxFile] "
+             << "    Examples:\n"
+             << "      gen_bin.exe -write app.bin bcsstm01.mtx     generate partitions from .mtx file\n"
+             << "      gen_bin.exe -write app_val.bin app_row.bin app_colPtr.bin bccstm01.mtx    generate CSC Format "
+                "files from .mtx file \n"
+             << "      gen_bin.exe -read app.bin    interpret a partition file\n"
+             << "      gen_bin.exe -read app.bin bccstm01.mtx    interpret and verify a partition file against .mtx "
+                "file\n"
+             << "      gen_bin.exe -read app_val.bin app_row.bin app_colPtr.bin   interpreset CSC format files\n"
+             << "      gen_bin.exe -read app_val.bin app_row.bin app_colPtr.bin bccstm01.mtx   interpret and verify  "
+                "CSC format files against .mtx file\n"
+             << "      gen_bin.exe -read app.bin    interpret a kernel config file\n"
+             << "      gen_bin.exe -read app.bin bccstm01.mtx    interpret and verify a kernel config file against "
+                ".mtx file\n"
+             << "      gen_bin.exe -config-write app.bin bcsstm01.mtx     generate kernel config from .mtx file\n"
+             << "      gen_bin.exe -config-read app.bin interprete a configuration file\n"
+             << "      gen_bin.exe -inter-cscRow app2CscRow.bin appFromCscRow.bin  interpreter  .bin files for "
+                "debugging cscRow\n"
+             << "\n";
         return EXIT_FAILURE;
     }
 
-    string l_mtxFileName = argv[1];
-    MtxFileType l_mtxFile;
-    l_mtxFile.loadFile(l_mtxFileName);
-    vector<NnzUnitType> l_a;
-    if (l_mtxFile.good()) {
-        l_a = l_mtxFile.getNnzUnits();
+    string l_mode(argv[1]);
+    bool l_write = (l_mode == "-write");
+    bool l_read = (l_mode == "-read");
+    bool l_writeConf = (l_mode == "-config-write");
+    bool l_readConf = (l_mode == "-config-read");
+    bool l_interCscRow = (l_mode == "-inter-cscRow");
+
+    string l_binFileName[3];
+    string l_mtxFileName;
+
+    bool l_writePar = l_write && (argc == 4);
+    bool l_writeCsc = l_write && (argc == 6);
+    bool l_readPar = l_read && (argc == 3);
+    bool l_readCheckPar = l_read && (argc == 4);
+    bool l_readCsc = l_read && (argc == 5);
+    bool l_readCheckCsc = l_read && (argc == 6);
+    l_writeConf = l_writeConf && (argc == 6);
+    bool l_readCheckConf = l_readConf && (argc == 6);
+    l_readConf = l_readConf && (argc == 3);
+
+    l_mtxFileName = (l_writePar || l_readCheckPar)
+                        ? argv[3]
+                        : (l_writeCsc || l_writeConf || l_readCheckConf || l_readCheckCsc) ? argv[5] : "";
+    l_binFileName[0] = argv[2]; // valFileName
+    l_binFileName[1] = (l_writeCsc || l_writeConf || l_readCheckConf || l_readCsc || l_readCheckCsc || l_interCscRow)
+                           ? argv[3]
+                           : ""; // rowFileName
+    l_binFileName[2] =
+        (l_writeCsc || l_writeConf || l_readCheckConf || l_readCsc || l_readCheckCsc) ? argv[4] : ""; // colPtrFileName
+
+    bool l_res = true;
+    if (l_writeCsc) {
+        l_res = writeCsc<SPARSE_dataType, SPARSE_indexType, SPARSE_pageSize>(l_mtxFileName, l_binFileName[0],
+                                                                             l_binFileName[1], l_binFileName[2]);
     }
-
-    unsigned int l_nnzs = l_mtxFile.nnzs();
-    unsigned int l_rows = l_mtxFile.rows();
-    unsigned int l_cols = l_mtxFile.cols();
-
-    vector<SPARSE_dataType> l_x;
-    ProgramType l_program;
-    GenVecType l_genColVec;
-    GenCscPartitionType l_genCscPartition;
-
-    l_genColVec.genEntVecFromRnd(l_cols, 10, 3 / 2, l_x);
-
-    // sor l_a along cols
-    sort(l_a.begin(), l_a.end());
-    // duplicate the input Nnz Vector
-    vector<NnzUnitType> l_aRef;
-    for (unsigned int i = 0; i < l_nnzs; ++i) {
-        if (l_a[i].getVal() != 0) {
-            l_aRef.push_back(l_a[i]);
+    if (l_readCsc) {
+        l_res = readCsc<SPARSE_dataType, SPARSE_indexType, SPARSE_pageSize>(l_binFileName[0], l_binFileName[1],
+                                                                            l_binFileName[2]);
+    }
+    if (l_readCheckCsc) {
+        l_res = readCheckCsc<SPARSE_dataType, SPARSE_indexType, SPARSE_pageSize>(l_mtxFileName, l_binFileName[0],
+                                                                                 l_binFileName[1], l_binFileName[2]);
+        if (l_res) {
+            cout << "Pass CSC format check for mtx file " << l_mtxFileName << endl;
+        } else {
+            cout << "ERROR: failed CSC format check for mtx file " << l_mtxFileName << endl;
         }
     }
-    // print out original matrix info
-    cout << "INFO: input sparse matrix has:" << endl
-         << "     " << l_rows << " rows" << endl
-         << "     " << l_cols << " cols" << endl
-         << "     " << l_nnzs << " nnzs" << endl
-         << "     " << (l_a.front()).getRow() << " rowMinIdx" << endl
-         << "     " << (l_a.front()).getCol() << " colMinIdx" << endl
-         << "     " << (l_a.back()).getRow() << " rowMaxIdx" << endl
-         << "     " << (l_a.back()).getCol() << " colMaxIdx" << endl;
-    // generate partitions
-    unsigned int l_rowsPerKernel[SPARSE_hbmChannels];
-    unsigned int l_rowIdxBase[SPARSE_hbmChannels];
-    unsigned int l_colsPerKernel;
-    unsigned int l_colIdxBase;
-    for (unsigned int i = 0; i < SPARSE_hbmChannels; ++i) {
-        l_rowsPerKernel[i] = 0;
-        l_rowIdxBase[i] = 0;
+    if (l_writePar) {
+        l_res = writePar<SPARSE_dataType, SPARSE_indexType, SPARSE_maxRows, SPARSE_maxCols, SPARSE_parEntries,
+                         SPARSE_parGroups, SPARSE_ddrMemBits, SPARSE_hbmChannels>(l_binFileName[0], l_mtxFileName);
     }
-    l_colsPerKernel = 0;
-    l_colIdxBase = 0;
-    bool l_genRes = true;
-    unsigned int l_par = 0;
-    CscPartitionType l_cscPartition;
-    vector<NnzUnitType> l_aOut;
-    while (l_genRes && l_nnzs != 0) {
-        l_genRes = l_genCscPartition.genPartition(l_rows, l_cols, l_rowsPerKernel, l_rowIdxBase, l_colsPerKernel,
-                                                  l_colIdxBase, l_a, l_x, l_program, l_cscPartition);
-        if (!l_genRes) {
-            cout << "ERROR: failed to generate parition" << endl;
-            return EXIT_FAILURE;
+    if (l_readPar) {
+        l_res = readPar<SPARSE_dataType, SPARSE_indexType, SPARSE_maxRows, SPARSE_maxCols, SPARSE_hbmChannels>(
+            l_binFileName[0]);
+    }
+    if (l_readCheckPar) {
+        l_res = readCheckPar<SPARSE_dataType, SPARSE_indexType, SPARSE_maxRows, SPARSE_maxCols, SPARSE_hbmChannels>(
+            l_binFileName[0], l_mtxFileName);
+    }
+    if (l_writeConf) {
+        l_res = writeConfig<SPARSE_dataType, SPARSE_indexType, SPARSE_maxRows, SPARSE_maxCols, SPARSE_maxParamDdrBlocks,
+                            SPARSE_maxParamHbmBlocks, SPARSE_parEntries, SPARSE_parGroups, SPARSE_ddrMemBits,
+                            SPARSE_hbmMemBits, SPARSE_hbmChannels, SPARSE_paramOffset, SPARSE_pageSize>(
+            l_binFileName[0], l_binFileName[1], l_binFileName[2], l_mtxFileName);
+    }
+    if (l_readConf) {
+        l_res =
+            readConfig<SPARSE_dataType, SPARSE_indexType, SPARSE_parEntries, SPARSE_parGroups, SPARSE_ddrMemBits,
+                       SPARSE_hbmMemBits, SPARSE_hbmChannels, SPARSE_paramOffset, SPARSE_pageSize>(l_binFileName[0]);
+    }
+    if (l_readCheckConf) {
+        l_res = readCheckConfig<SPARSE_dataType, SPARSE_indexType, SPARSE_maxRows, SPARSE_maxCols, SPARSE_parEntries,
+                                SPARSE_parGroups, SPARSE_ddrMemBits, SPARSE_hbmMemBits, SPARSE_hbmChannels,
+                                SPARSE_paramOffset, SPARSE_pageSize>(l_binFileName[0], l_binFileName[1],
+                                                                     l_binFileName[2], l_mtxFileName);
+        if (l_res) {
+            cout << "Config Test Pass!" << endl;
+        } else {
+            cout << "Config Test Failed!" << endl;
         }
-        l_nnzs = l_a.size();
-        // output row, col ranges in the partition
-        cout << "INFO: partition " << l_par << endl;
-        ColVecType l_colVec;
-        l_colVec = l_cscPartition.getVec();
-        cout << "    ColVec has: " << l_colVec.getEntries() << " entries." << endl;
-        for (unsigned int i = 0; i < SPARSE_hbmChannels; ++i) {
-            CscMatType l_cscMat;
-            l_cscMat = l_cscPartition.getMat(i);
-            cout << "    CscMat[" << i << "] has:" << endl
-                 << "        " << l_cscMat.getRows() << " rows" << endl
-                 << "        " << l_cscMat.getCols() << " cols" << endl
-                 << "        " << l_cscMat.getNnzs() << " nnzs" << endl
-                 << "        " << l_cscMat.getRowMinIdx() << " rowMinIdx" << endl
-                 << "        " << l_cscMat.getColMinIdx() << " colMinIdx" << endl
-                 << "        " << l_cscMat.getRowMaxIdx() << " rowMaxIdx" << endl
-                 << "        " << l_cscMat.getColMaxIdx() << " colMaxIdx" << endl;
-            vector<NnzUnitType> l_nnzUnits;
-            l_cscMat.loadNnzUnits(l_nnzUnits);
-            for (unsigned int j = 0; j < l_cscMat.getNnzs(); ++j) {
-                if (l_nnzUnits[j].getVal() != 0) {
-                    l_aOut.push_back(l_nnzUnits[j]);
-                }
-            }
+    }
+    if (l_interCscRow) {
+        CscRowIntType l_cscRowInt;
+        l_res = l_res && l_cscRowInt.interToCscRowFile(l_binFileName[0]);
+        if (l_res) {
+            cout << l_cscRowInt << endl;
         }
-        l_par++;
-    }
-
-    sort(l_aOut.begin(), l_aOut.end());
-    if (l_aOut.size() != l_aRef.size()) {
-        cout << "ERROR: sum of partitioned matrix has different size";
-        return EXIT_FAILURE;
-    }
-    unsigned int l_errs = 0;
-    for (unsigned int i = 0; i < l_aRef.size(); ++i) {
-        bool l_sameRow = (l_aRef[i].getRow() == l_aOut[i].getRow());
-        bool l_sameCol = (l_aRef[i].getCol() == l_aOut[i].getCol());
-        bool l_sameVal = (l_aRef[i].getVal() == l_aOut[i].getVal());
-        if (!l_sameRow || !l_sameCol || !l_sameVal) {
-            l_errs++;
-            cout << "ERROR: at nnz entry " << i << endl;
+        l_res = l_res && l_cscRowInt.interFromCscRowFile(l_binFileName[1]);
+        if (l_res) {
+            cout << l_cscRowInt << endl;
         }
     }
 
-    if (l_errs == 0) {
-        cout << "TEST PASS" << endl;
+    if (l_res) {
         return EXIT_SUCCESS;
     } else {
         return EXIT_FAILURE;
