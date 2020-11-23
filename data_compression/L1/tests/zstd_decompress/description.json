@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ZSTD decompress HLS Test", 
+    "name": "Xilinx ZSTD Decompress HLS Test", 
     "description": "Test Design to validate ZSTD decompression", 
     "flow": "hls", 
     "platform_whitelist": [

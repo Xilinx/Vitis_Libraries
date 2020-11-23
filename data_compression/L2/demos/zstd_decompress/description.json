@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ZSTD Decompression for 32KB Block Size with 4 Byte IO data width", 
+    "name": "Xilinx ZSTD Decompression", 
     "description": [
         "Xilinx ZSTD Decompression for 32KB block since with 4 Byte data width"
     ], 
@@ -20,7 +20,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/xilZstdDecompressStream.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/xilZstdDecompressStream.xclbin"
+             ]
         }
     ], 
     "host": {
@@ -31,14 +33,13 @@
                 "LIB_DIR/L2/tests/src/zstd.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
-                "LIB_DIR/common/libs/logger/logger.cpp", 
-                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
+                "LIB_DIR/common/libs/logger/logger.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L1/include/hw", 
                 "LIB_DIR/L2/tests/src"
-            ], 
+             ], 
             "symbols": [
                 "MULTIPLE_BYTES=4", 
                 "ZSTD_BLOCK_SIZE_KB=32" 
@@ -46,9 +47,6 @@
         }
     }, 
     "v++": {
-        "build_datafiles": [
-            "PROJECT/hls_directives.tcl"
-        ], 
         "compiler": {
             "symbols": [
                 "INZSTD=1", 
@@ -60,7 +58,7 @@
     "containers": [
         {
             "name": "xilZstdDecompressStream", 
-            "ldclflags": "--config PROJECT/opts.ini", 
+            "ldclflags": "--config PROJECT/opts.cfg", 
             "accelerators": [
                 {
                     "name": "xilZlibDmReader", 

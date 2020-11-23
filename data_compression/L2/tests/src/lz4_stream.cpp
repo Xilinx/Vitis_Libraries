@@ -201,7 +201,7 @@ uint64_t xfLz4Streaming::compressStream(uint8_t* in, uint8_t* out, uint64_t inpu
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, host_buffer_size, h_buf_in.data());
 
     buffer_output =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, host_buffer_size, h_buf_out.data());
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, host_buffer_size, h_buf_out.data());
 
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
 
@@ -474,7 +474,7 @@ uint64_t xfLz4Streaming::decompressStream(uint8_t* in, uint8_t* out, uint64_t in
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, compressedSize, h_buf_in.data());
 
             buffer_output =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, dBlockSize, h_buf_out.data());
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, dBlockSize, h_buf_out.data());
 
             // set kernel arguments
             int narg = 0;
@@ -563,7 +563,7 @@ uint32_t xfLz4Streaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t inpu
     } else {
         buffer_input = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, input_size, h_buf_in.data());
     }
-    buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, outputSize, h_buf_out.data());
+    buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, outputSize, h_buf_out.data());
     bufferOutputSize = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t),
                                       h_buf_decompressSize.data());
 

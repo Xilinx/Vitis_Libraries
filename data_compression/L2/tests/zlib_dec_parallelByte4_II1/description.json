@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx ZLIB 4 Parallel Bytes Decompress with Loop II=1", 
+    "name": "Xilinx ZLIB Decompress 4 Parallel Bytes II=1", 
     "description": [
-        "Xilinx ZLIB Decompression Parallel Byte 4_II1"
+        "Xilinx ZLIB Decompression using 4 Parallel Bytes with Loop II=1"
     ], 
     "flow": "vitis", 
     "platform_blacklist": [
@@ -21,7 +21,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/decompress_stream.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/decompress_stream.xclbin"
+             ]
         }
     ], 
     "host": {
@@ -33,7 +35,6 @@
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp", 
-                "LIB_DIR/common/thirdParty/xxhash/xxhash.c", 
                 "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c"
             ], 
             "includepaths": [
@@ -50,7 +51,7 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.ini", 
+            "PROJECT/advanced.cfg", 
             "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
@@ -59,14 +60,14 @@
                 "MULTIPLE_BYTES=4"
             ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
     }, 
     "containers": [
         {
             "name": "decompress_stream", 
-            "ldclflags": "--config PROJECT/opts.ini --vivado.prop run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST=PROJECT/post_route.tcl", 
+            "ldclflags": "--config PROJECT/opts.cfg", 
             "accelerators": [
                 {
                     "name": "xilZlibDmReader", 

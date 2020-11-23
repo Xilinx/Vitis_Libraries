@@ -5,8 +5,7 @@
 
 /* @(#) $Id$ */
 #define ZLIB_INTERNAL
-#include "xlibz.hpp"
-using namespace xlibz::driver;
+#include "zlibFactory.hpp"
 #include "zlib.h"
 /* ===========================================================================
      Compresses the source buffer into the destination buffer. The level

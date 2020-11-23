@@ -180,7 +180,7 @@ uint64_t xfSnappyStreaming::compress(uint8_t* in, uint8_t* out, uint64_t input_s
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, host_buffer_size, h_buf_in.data());
 
     buffer_output =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, host_buffer_size, h_buf_out.data());
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, host_buffer_size, h_buf_out.data());
 
     buffer_compressed_size =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t), h_compressSize.data());
@@ -449,7 +449,7 @@ uint64_t xfSnappyStreaming::decompress(uint8_t* in, uint8_t* out, uint64_t input
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, compSize, h_buf_in.data());
 
             buffer_output =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, decompSize, h_buf_out.data());
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, decompSize, h_buf_out.data());
 
             // set kernel arguments
             int narg = 0;

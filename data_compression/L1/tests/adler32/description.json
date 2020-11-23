@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Adler32", 
+    "name": "Xilinx Adler32 HLS Test", 
     "description": "Test Design to validate Xilinx Adler32 module", 
     "flow": "hls", 
     "platform_whitelist": [

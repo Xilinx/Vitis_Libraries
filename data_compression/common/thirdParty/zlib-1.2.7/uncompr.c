@@ -6,8 +6,7 @@
 /* @(#) $Id$ */
 
 #define ZLIB_INTERNAL
-#include "xlibz.hpp"
-using namespace xlibz::driver;
+#include "zlibFactory.hpp"
 #include "zlib.h"
 #include <stdio.h>
 /* ===========================================================================
@@ -42,33 +41,34 @@ int ZEXPORT uncompress(Bytef* dest, uLongf* destLen, const Bytef* source, uLong 
     if (err != Z_OK) return err;
 
 #ifdef XILINX_CODE
-    // Create Singleton instance
-    auto sObj = singleton::getInstance();
+    // Create factory class
+    auto sObj = zlibFactory::getInstance();
+    auto cflow = true;
+    sObj->xilinxPreChecks();
+    if (!(sObj->getXmode())) {
+        cflow = false;
+    }
+    char* noaccel = getenv("XILINX_NO_ACCEL");
+    if (noaccel && (std::stoi(noaccel) == 0)){ 
+        cflow = false;
+    }    
 
-    // Driver class
-    xzlib* driver = sObj->getDriverInstance(&stream, XILINX_INFLATE);
+    if (cflow) {
+        // Driver class
+        zlibDriver* driver = sObj->getDriverInstance(&stream, XILINX_INFLATE);
+        if (driver == NULL) {
+            cflow = false;
+        }
 
-    if (driver->getXmode()) {
-        // Use FPGA DeCompress
-        uint64_t debytes = driver->xilinxHwDecompress(&stream);
+        uint64_t debytes = driver->xilinxHwUncompress(&stream, 0);
         *destLen = debytes;
-
-        // Singleton releases the strm, zlib <key, value> pair
-        sObj->releaseZlibObj(&stream);
-
-        // strm, driver <key, value> pair
         sObj->releaseDriverObj(&stream);
-        // End inflate stream
         err = inflateEnd(&stream);
-
         if (debytes == 0) {
             return Z_BUF_ERROR;
         } else {
             return Z_OK;
         }
-    } else {
-        // strm, driver <key, value> pair
-        sObj->releaseDriverObj(&stream);
     }
 #endif
 

@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx FPGA Based GZIP Single Compress Streaming, Decompress and  Checksum Design", 
+    "name": "Xilinx GZIP Test", 
     "description": [
         "GZIP test application resides in `L3/tests/gzip_test` directory."
     ], 
@@ -23,7 +23,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR $(BINARY_CONTAINERS)"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR $(BINARY_CONTAINERS)"
+             ]
         }
     ], 
     "match_ini": "false", 
@@ -41,7 +43,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include", 
-                "LIB_DIR/L1/include/hw"
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/thirdParty/zlib-1.2.7"
             ], 
             "options": "-O3 ", 
             "symbols": [
@@ -53,7 +56,7 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.ini", 
+            "PROJECT/advanced.cfg", 
             "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
@@ -66,14 +69,14 @@
                 "MULTIPLE_BYTES=8"
             ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
     }, 
     "containers": [
         {
             "name": "xgzip", 
-            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.ini", 
+            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.cfg", 
             "accelerators": [
                 {
                     "name": "xilZlibCompressFull", 

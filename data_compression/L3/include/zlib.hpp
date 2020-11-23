@@ -37,9 +37,6 @@
 #include <future>
 #include <queue>
 #include <assert.h>
-#ifdef ENABLE_XRM
-#include <xrm.h>
-#endif
 #include <syslog.h>
 
 const int gz_max_literal_count = 4096;
@@ -99,9 +96,15 @@ enum design_flow { XILINX_GZIP, XILINX_ZLIB };
 constexpr auto c_clOutOfResource = -5;
 constexpr auto c_clinvalidbin = -42;
 constexpr auto c_clinvalidvalue = -30;
+constexpr auto c_clinvalidprogram = -44;
 constexpr auto c_clOutOfHostMemory = -6;
 constexpr auto c_headermismatch = 404;
-constexpr auto c_hardXclbinPath = "/opt/xilinx/apps/zlib/xclbin/u50_gen3x16_xdma_201920_3.xclbin";
+constexpr auto c_installRootDir = "/opt/xilinx/apps/";
+constexpr auto c_hardXclbinPath = "zlib/xclbin/u50_gen3x16_xdma_201920_3.xclbin";
+constexpr auto c_hardFullXclbinPath = "zlib/xclbin/u50_gen3x16_xdma_201920_3_full.xclbin";
+const std::vector<std::string> compress_kernel_names = {"xilLz77Compress", "xilZlibCompressFull"};
+const std::vector<std::string> stream_decompress_kernel_name = {"xilDecompressStream", "xilDecompressFixed",
+                                                                "xilDecompressFull"};
 
 // Structure to hold
 // libzso - deflate/inflate info
@@ -238,7 +241,8 @@ struct zlib_aligned_allocator {
 namespace xf {
 namespace compression {
 
-void event_cb(cl_event event, cl_int cmd_status, void* data);
+void event_compress_cb(cl_event event, cl_int cmd_status, void* data);
+void event_checksum_cb(cl_event event, cl_int cmd_status, void* data);
 class memoryManager;
 /**
  *  xfZlib class. Class containing methods for Zlib
@@ -271,7 +275,7 @@ class xfZlib {
      * @param cu comput unit name
      */
     size_t deflate_buffer(
-        uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, std::string cu);
+        uint8_t* in, uint8_t* out, size_t& input_size, bool& last_data, bool last_buffer, const std::string& cu);
 
     /**
      * @brief This method does serial execution of decompression
@@ -328,6 +332,17 @@ class xfZlib {
 
     /**
      * @brief Constructor responsible for creating various host/device buffers.
+     * This skips the creation of platform and device steps
+     *
+     */
+    xfZlib(const std::string& binaryFile,
+           uint8_t cd_flow,
+           const cl::Device& device,
+           const cl_context_properties& platform,
+           enum design_flow dflow = XILINX_GZIP);
+
+    /**
+     * @brief Constructor responsible for creating various host/device buffers.
      *
      */
     xfZlib(const std::string& binaryFile,
@@ -343,7 +358,7 @@ class xfZlib {
      * @param binaryFile
      *
      */
-    int init(const std::string& binaryFile, uint8_t dtype);
+    int init(const std::string& binaryFile, uint8_t dtype, bool skipPlatformCheck = false);
 
     /**
      * @brief OpenCL setup release
@@ -382,7 +397,6 @@ class xfZlib {
     std::string getDeCompressKernel(int index);
 
    private:
-    friend void xf::compression::event_cb(cl_event event, cl_int cmd_status, void* data);
     void _enqueue_writes(uint32_t bufSize, uint8_t* in, uint32_t inputSize, int cu);
     void _enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSize, int cu, uint32_t max_outbuf);
     size_t add_header(uint8_t* out, int level, int strategy, int window_bits);
@@ -406,7 +420,7 @@ class xfZlib {
     enum design_flow m_zlibFlow;
 
     uint8_t m_cdflow;
-    bool m_isProfile;
+    bool m_isProfile = 0;
     uint8_t m_deviceid = 0;
     uint8_t m_max_cr = MAX_CR;
     int m_err_code = 0;
@@ -417,6 +431,7 @@ class xfZlib {
     uint8_t m_pending = 0;
 
     cl::Device m_device;
+    cl_context_properties m_platform;
     cl::Context* m_context = nullptr;
     cl::Program* m_program = nullptr;
     cl::CommandQueue* m_def_q = nullptr;
@@ -427,8 +442,8 @@ class xfZlib {
     cl::CommandQueue* m_q_wrd[D_COMPUTE_UNIT] = {nullptr};
 
     // Kernel declaration
-    cl::Kernel* checksum_kernel = nullptr;
-    cl::Kernel* compress_stream_kernel = nullptr;
+    cl::Kernel* m_checksumKernel = nullptr;
+    cl::Kernel* m_compressFullKernel = nullptr;
     cl::Kernel* decompress_kernel[D_COMPUTE_UNIT] = {nullptr};
     cl::Kernel* data_writer_kernel[D_COMPUTE_UNIT] = {nullptr};
     cl::Kernel* data_reader_kernel[D_COMPUTE_UNIT] = {nullptr};
@@ -458,13 +473,10 @@ class xfZlib {
     cl::Buffer* buffer_dec_compress_size[MAX_DDCOMP_UNITS];
 
     // Kernel names
-    std::vector<std::string> compress_kernel_names = {"xilLz77Compress", "xilZlibCompressFull"};
     std::vector<std::string> huffman_kernel_names = {"xilHuffmanKernel"};
 #ifdef ENABLE_HW_CHECKSUM
-    std::vector<std::string> checksum_kernel_names = {"xilChecksum32"};
+    std::vector<std::string> m_checksumKernel_names = {"xilChecksum32"};
 #endif
-    std::vector<std::string> stream_decompress_kernel_name = {"xilDecompressStream", "xilDecompressFixed",
-                                                              "xilDecompressFull"};
     std::string data_writer_kernel_name = "xilZlibDmWriter";
     std::string data_reader_kernel_name = "xilZlibDmReader";
     std::map<std::string, int> compressKernelMap;
@@ -489,7 +501,19 @@ struct buffers {
     cl::Event cmp_event;
     cl::Event chk_wr_event;
     cl::Event chk_event;
-    bool finish;
+    bool compress_finish;
+    bool checksum_finish;
+    bool is_finish() { return compress_finish && checksum_finish; }
+    void reset() {
+        compress_finish = false;
+        checksum_finish = false;
+    }
+    buffers() {
+        reset();
+        input_size = 0;
+        store_size = 0;
+        allocated_size = 0;
+    }
 };
 
 class memoryManager {

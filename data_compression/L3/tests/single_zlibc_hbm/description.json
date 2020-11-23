@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx FPGA Based ZLIB Compress/Decompress Solution For HBM Platforms", 
+    "name": "Xilinx FPGA Based Single ZLIB Compress Decompress HBM Solution", 
     "description": [
         "ZLIB application for HBM resides in `L3/tests/single_zlibc_hbm` directory."
     ], 
@@ -34,7 +34,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include", 
-                "LIB_DIR/L1/include/hw"
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/thirdParty/zlib-1.2.7"
             ], 
             "options": "-O3 ", 
             "symbols": [
@@ -48,7 +49,7 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.ini", 
+            "PROJECT/advanced.cfg", 
             "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
@@ -61,14 +62,14 @@
                 "MULTIPLE_BYTES=8"
             ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
     }, 
     "containers": [
         {
             "name": "compress_decompress", 
-            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.ini", 
+            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.cfg", 
             "accelerators": [
                 {
                     "name": "xilZlibCompressFull", 

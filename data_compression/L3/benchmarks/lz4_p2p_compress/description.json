@@ -24,7 +24,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+             ]
         }
     ], 
     "config_make": "./config.mk", 
@@ -41,7 +43,8 @@
             ], 
             "includepaths": [
                 "LIB_DIR/L3/include", 
-                "LIB_DIR/L1/include/hw"
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/common/thirdParty/xxhash"
             ], 
             "symbols": [
                 "PARALLEL_BLOCK=8", 

@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx GZIP Application For HBM Platforms", 
+    "name": "Xilinx GZIP HBM Application", 
     "description": [
-        "GZip application for HBM resides in `L3/demos/gzip_hbm` directory, it also supports Zlib refer the CLI options."
+        "GZip application for HBM platforms resides in `L3/demos/gzip_hbm` directory, it also supports Zlib refer the CLI options."
    ],
     "flow": "vitis",
     "platform_blacklist": [
@@ -21,7 +21,9 @@
     ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR $(BINARY_CONTAINERS)"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR $(BINARY_CONTAINERS)"
+             ]
         }
     ], 
     "match_ini": "false", 
@@ -53,7 +55,7 @@
     }, 
     "v++": {
         "build_datafiles": [
-            "PROJECT/advanced.ini", 
+            "PROJECT/advanced.cfg", 
             "PROJECT/hls_directives.tcl"
         ], 
         "compiler": {
@@ -66,14 +68,14 @@
                 "MULTIPLE_BYTES=8"
             ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
     }, 
     "containers": [
         {
             "name": "compress_decompress", 
-            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.ini", 
+            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.cfg", 
             "accelerators": [
                 {
                     "name": "xilZlibCompressFull", 

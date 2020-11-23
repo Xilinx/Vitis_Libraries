@@ -19,7 +19,7 @@
 #include <vector>
 #include "xcl2.hpp"
 #include "cmdlineparser.h"
-#include "adler32.c"
+#include "zlib.h"
 
 auto constexpr HOST_BUFFER_SIZE = 2 * 1024 * 1024;
 

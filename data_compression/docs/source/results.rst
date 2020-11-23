@@ -60,11 +60,12 @@ kernel clock frequency met and resource utilization when executed on Alveo U200.
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Snappy Memory Mapped (8 Engines with Data Movers)                    |     1.8  GB/s     |  300MHz  |  31.1K  |  146  |  0   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| ZStd Streaming (Single Engine and Datawidth: 32bit)                  |     783  MB/s     |  231MHz  |  18K    |  52   |  4   |
+| ZStd Streaming (Single Engine and Datawidth: 32bit)                  |     783  MB/s     |  232MHz  |  18K    |  52   |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| ZStd Full File Streaming (Single Engine with Datawidth: 32bit)       |     783  MB/s     |  231MHz  |  22K    |  52   |  4   |
+| ZStd Full File Streaming (Single Engine with Datawidth: 32bit)       |     783  MB/s     |  232MHz  |  22K    |  52   |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 
 .. [*] The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
-.. [*] Zlib Streaming: Dynamic Huffman and Single Engine performance is provided   
-.. [*] GZip Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported)
+.. [*] Zlib Streaming: Dynamic Huffman and Single Engine performance is provided.
+.. [*] GZip Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
+.. [*] ZStd Streaming: Full Standard support with limited Window Size upto 128KB.

@@ -122,98 +122,14 @@ void checksum32(hls::stream<ap_uint<32> >& checksumInitStrm,
                 hls::stream<ap_uint<32> >& outStrm,
                 hls::stream<bool>& endOutStrm,
                 bool checksumType) {
-#pragma HLS array_partition variable = details::table dim = 1 block factor = W
-    bool e = endInStrm.read();
-    while (!e) {
-        ap_uint<32> checksum = checksumInitStrm.read();
-        ap_uint<32> len = inLenStrm.read();
-        e = endInStrm.read();
-        ap_uint<8 * W> inData;
-
-        // CRC
-        if (checksumType == true) {
-            for (uint64_t i = 0; i < len / W; i++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = 100 min = 100
-                inData = inStrm.read();
-                const int NUM = W / 4;
-                ap_uint<32> inTmp[NUM];
-                for (int j = 0; j < NUM; j++) {
-                    if (j == 0)
-                        inTmp[j] = inData(31 + 32 * j, 32 * j) ^ checksum;
-                    else
-                        inTmp[j] = inData(31 + 32 * j, 32 * j);
-                }
-                checksum = xf::security::internal::table[0][inTmp[W / 4 - 1](31, 24)];
-                for (int j = 1; j < W; j++) {
-                    int index = j / 4;
-                    int offset = j % 4;
-                    checksum ^=
-                        xf::security::internal::table[j][inTmp[W / 4 - 1 - index](31 - offset * 8, 24 - offset * 8)];
-                }
-            }
-            for (uint64_t i = 0; i < len - (len / W) * W; i++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = W min = W
-                if (i == 0) inData = inStrm.read();
-                checksum =
-                    (checksum >> 8) ^ xf::security::internal::table[0][checksum(7, 0) ^ inData.range(7 + 8 * i, 8 * i)];
-            }
-        }
-        // ADLER
-        else {
-            ap_uint<32> s1 = checksum & 0xffff;
-            ap_uint<32> s2 = ((checksum >> 16) & 0xffff);
-            for (ap_uint<32> i = 0; i < len / W; i++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = 100 min = 100
-                inData = inStrm.read();
-                ap_uint<12> sTmp[W];
-#pragma HLS array_partition variable = sTmp dim = 1
-                for (int i = 0; i < W; i++) {
-#pragma HLS unroll
-                    sTmp[i] = 0;
-                    for (int j = 0; j <= i; j++) {
-                        sTmp[i] += inData(j * 8 + 7, j * 8);
-                    }
-                }
-                s2 += s1 * W;
-                if (W == 16) {
-                    s2 += xf::security::internal::treeAdd<12, 4>::f(sTmp);
-                } else if (W == 8) {
-                    s2 += xf::security::internal::treeAdd<12, 3>::f(sTmp);
-                } else if (W == 4) {
-                    s2 += xf::security::internal::treeAdd<12, 2>::f(sTmp);
-                } else if (W == 2) {
-                    s2 += xf::security::internal::treeAdd<12, 1>::f(sTmp);
-                } else if (W == 1) {
-                    s2 += xf::security::internal::treeAdd<12, 0>::f(sTmp);
-                }
-
-                for (int j = 0; j < W; j++) {
-                    if (s2 > xf::security::internal::BASE[W - 1 - j]) {
-                        s2 -= xf::security::internal::BASE[W - 1 - j];
-                    }
-                }
-                s1 += sTmp[W - 1];
-                if (s1 > xf::security::internal::BASE[0]) s1 -= xf::security::internal::BASE[0];
-            }
-            for (int j = 0; j < len - (len / W) * W; j++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS loop_tripcount max = W min = W
-                if (j == 0) inData = inStrm.read();
-                s1 += inData(j * 8 + 7, j * 8);
-                if (s1 > xf::security::internal::BASE[0]) s1 -= xf::security::internal::BASE[0];
-                s2 += s1;
-                if (s2 > xf::security::internal::BASE[0]) s2 -= xf::security::internal::BASE[0];
-            }
-            checksum = (s2 << 16) + s1;
-        }
-
-        outStrm.write(checksum);
-        endOutStrm.write(false);
+    // CRC
+    if (checksumType == true) {
+        xf::security::crc32<W>(checksumInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
     }
-    endOutStrm.write(true);
+    // ADLER
+    else {
+        xf::security::adler32<W>(checksumInitStrm, inStrm, inLenStrm, endInStrm, outStrm, endOutStrm);
+    }
 }
 
 template <int PARALLEL_BYTE>

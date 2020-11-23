@@ -31,7 +31,7 @@
 
 #define IN_DATAWIDTH 8
 #define OUT_DATAWIDTH 16
-#define BLOCK_LENGTH 64
+#define BLOCK_LENGTH 32
 #define BLOCK_SIZE (BLOCK_LENGTH * 1024)
 
 #define D_LOW_OFFSET 1
@@ -163,7 +163,6 @@ void validate(std::string& original, std::string& generated) {
 int main(int argc, char* argv[]) {
     std::string inputFileName = argv[1];
     std::string outputFileName = argv[2];
-    std::string outputFileNameDup = argv[3];
 
     // File Handling
     std::fstream inFile;
@@ -174,9 +173,6 @@ int main(int argc, char* argv[]) {
     }
     std::ofstream outFile;
     outFile.open(outputFileName.c_str(), std::fstream::binary | std::fstream::out);
-
-    std::ofstream outFileDup;
-    outFileDup.open(outputFileNameDup.c_str(), std::fstream::binary | std::fstream::out);
 
     hls::stream<in_dT> inStream("inStream");
     hls::stream<in_dT> outDecStream("outDecStream");
@@ -191,23 +187,11 @@ int main(int argc, char* argv[]) {
     const uint32_t no_blocks = (inFileSize - 1) / BLOCK_SIZE + 1;
     inSize.data = inFileSize;
     inSizeStream << inSize;
-    inSize.data = inFileSize;
-    inSizeStream << inSize;
     inSize.data = 0;
     inSizeStream << inSize;
     inFile.seekg(0, std::ios::beg);
 
     // Input 1st File
-    for (uint32_t i = 0; i < inFileSize; i++) {
-        ap_uint<IN_DATAWIDTH> v;
-        inFile.read((char*)&v, 1);
-        in_dT inData;
-        inData.data = v;
-        inStream << inData;
-    }
-
-    // Input 2nd File
-    inFile.seekg(0, std::ios::beg);
     for (uint32_t i = 0; i < inFileSize; i++) {
         ap_uint<IN_DATAWIDTH> v;
         inFile.read((char*)&v, 1);
@@ -236,18 +220,7 @@ int main(int argc, char* argv[]) {
     size_dT axiSizeVBytes = outDecSizeStream.read();
     ap_uint<32> sizeVBytes = axiSizeVBytes.data;
 
-    // 2nd File
-    for (in_dT val = outDecStream.read(); val.last != true; val = outDecStream.read()) {
-        ap_uint<IN_DATAWIDTH> o = val.data;
-        byteCounter++;
-        outFileDup.write((char*)&o, 1);
-    }
-
-    axiSizeVBytes = outDecSizeStream.read();
-    sizeVBytes = axiSizeVBytes.data;
-
     inFile.close();
     outFile.close();
-    outFileDup.close();
     validate(inputFileName, outputFileName);
 }

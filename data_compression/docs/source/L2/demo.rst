@@ -1,6 +1,6 @@
 
 .. meta::
-   :keywords: Vitis, Library, Data Compression, Xilinx, FPGA OpenCL Kernels, LZ4 Demo, Snappy Demo, ZLIB Demo, GZip Demo
+   :keywords: Vitis, Library, Data Compression, Xilinx, FPGA OpenCL Kernels, LZ4 Demo, Snappy Demo, ZLIB Demo, GZip Demo, ZSTD Demo
    :description: This section provides various application demos
    :xlnxdocumentclass: Document
    :xlnxdocumenttypes: Tutorials
@@ -9,7 +9,7 @@
 Demos
 =====
 
-Demo examples for **lz4**, **snappy**, **lz4_streaming**, **zlib** and **gzip** kernels are available in the ``L2/demos/`` directory.
+Demo examples for **lz4**, **snappy**, **lz4_streaming**, **zlib**, **gzip** and **zstd** kernels are available in the ``L2/demos/`` directory.
 
 .. toctree::
    :maxdepth: 1
@@ -22,6 +22,7 @@ Demo examples for **lz4**, **snappy**, **lz4_streaming**, **zlib** and **gzip** 
    snappy_streaming.rst
    zlib.rst
    zlib_streaming.rst
+   zstd_decompress.rst
 
 .. note::
 Execute the following commands before building any of the examples:
