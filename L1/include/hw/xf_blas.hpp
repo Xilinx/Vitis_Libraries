@@ -24,6 +24,8 @@
 #define XF_BLAS_HPP
 
 // shared modules
+#include "ap_int.h"
+#include "hls_stream.h"
 #include "xf_blas/helpers.hpp"
 
 // BLAS L1 function modules
