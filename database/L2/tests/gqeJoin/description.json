@@ -88,11 +88,11 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/src/gqe_join.cpp",
-                    "frequency": 200,
+                    "frequency": 180,
                     "name": "gqeJoin"
                 }
             ],
-            "frequency": 200,
+            "frequency": 180,
             "name": "gqe_join"
         }
     ],
@@ -106,7 +106,7 @@
                 "cmd": "",
                 "max_memory_MB": 32768,
                 "max_time_min": {
-                    "vitis_hw_build": 470,
+                    "vitis_hw_build": 600,
                     "vitis_hw_emu": 470,
                     "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
