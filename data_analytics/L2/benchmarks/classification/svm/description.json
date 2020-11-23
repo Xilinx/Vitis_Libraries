@@ -1,0 +1,88 @@
+{
+    "name": "Xilinx SVM Kernel Benchmark", 
+    "description": "", 
+    "flow": "vitis", 
+    "gui": false,
+    "platform_whitelist": [
+        "u250"
+    ], 
+    "platform_blacklist": [
+        "other"
+    ], 
+    "launch": [
+        {
+            "cmd_args": " -xclbin BUILD/svm_4krnl.xclbin -in PROJECT/ml_datasets/1000.csv -trn 999 -ten 100 -fn 64 -itrn 1 -bn 10", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "test_svm.exe", 
+        "compiler": {
+            "sources": [
+                "host/host.cpp", 
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L2/include/hw",
+                "host", 
+                "kernel", 
+                "LIB_DIR/ext/xcl2"
+            ], 
+            "options": "-O3 "
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/L2/include/hw",
+                "kernel"
+            ]
+        },
+	"linker": {
+	}
+    },
+    "containers": [
+        {
+            "name": "svm_4krnl", 
+            "accelerators": [
+                {
+                    "location": "kernel/svm_0.cpp", 
+                    "name": "SVM"
+                }
+            ], 
+            "ldclflags": "--config PROJECT/conn_u250.cfg", 
+            "frequency": 300.0
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }
+}

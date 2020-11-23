@@ -15,7 +15,7 @@
  */
 
 #include "dut.hpp"
-#include "xf_DataAnalytics/classification/naive_bayes.hpp"
+#include "xf_data_analytics/classification/naive_bayes.hpp"
 
 void multinomialNB(const int num_of_class,
                    const int num_of_terms,

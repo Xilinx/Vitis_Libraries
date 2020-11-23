@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_DataAnalytics/regression/linearRegressionTrain.hpp"
+#include "xf_data_analytics/regression/linearRegressionTrain.hpp"
 
 extern "C" void linearLeastSquareSGDTrain(ap_uint<512>* input, ap_uint<512>* output) {
 // clang-format off

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "xf_DataAnalytics/classification/svm_predict.hpp"
-#include "xf_DataAnalytics/common/table_sample.hpp"
+#include "xf_data_analytics/classification/svm_predict.hpp"
+#include "xf_data_analytics/common/table_sample.hpp"
 typedef double DataType;
 const int dw = sizeof(DataType) * 8;
 const int streamN = 8;

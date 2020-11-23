@@ -35,7 +35,7 @@ Additive Laplace smoothing would be used in real applicaton for features not pre
 
 
 Implemention
-===========
+============
 
 The naive bayes training is one general primitive to acclerate multinomial naive bayes utilizing the advantage of high bandwidth in Xilinx FPGA.
 The top diagram is shown as below. Workload is distributed based on LSBs of feature value of one sample to processing data path, so that each path can work independently. 

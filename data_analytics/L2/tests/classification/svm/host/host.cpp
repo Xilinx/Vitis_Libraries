@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "xf_DataAnalytics/classification/svm_train.hpp"
-#include "xf_DataAnalytics/common/utils.hpp"
+#include "xf_data_analytics/classification/svm_train.hpp"
+#include "xf_data_analytics/common/utils.hpp"
 #include "utils.hpp"
 #include <CL/cl_ext_xilinx.h>
 #include <xcl2.hpp>
@@ -192,10 +192,13 @@ int main(int argc, const char* argv[]) {
         w.f = init_weight[i];
         weight[i / 8](i % 8 * 64 + 63, i % 8 * 64) = w.i;
     }
-
+#ifdef USE_DDR
     cl_mem_ext_ptr_t mext_data = {XCL_BANK0, data, 0};
     cl_mem_ext_ptr_t mext_weight = {XCL_BANK0, weight, 0};
-
+#else
+    cl_mem_ext_ptr_t mext_data = {(unsigned int)(0), data, 0};
+    cl_mem_ext_ptr_t mext_weight = {(unsigned int)(1), weight, 0};
+#endif
     // Map buffers
     int datasize = samples_num * (features_num / 8 + 1);
     int weightsize = (features_num / 8 + 1);
@@ -262,5 +265,12 @@ int main(int argc, const char* argv[]) {
     }
     free(datasets);
     free(datasets_D);
+
+    if (ret != 0) {
+        std::cout << ret << " feature training result is beyond error interval" << std::endl;
+    } else {
+        std::cout << "check pass!" << std::endl;
+    }
+
     return ret;
 }

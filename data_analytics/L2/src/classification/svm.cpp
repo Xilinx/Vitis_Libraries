@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_DataAnalytics/classification/svm_train.hpp"
+#include "xf_data_analytics/classification/svm_train.hpp"
 
 namespace xf {
 namespace data_analytics {

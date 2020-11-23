@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "xf_DataAnalytics/regression/linearRegression.hpp"
-#include "xf_DataAnalytics/common/table_sample.hpp"
-#include "xf_DataAnalytics/common/enums.hpp"
+#include "xf_data_analytics/regression/linearRegression.hpp"
+#include "xf_data_analytics/common/table_sample.hpp"
+#include "xf_data_analytics/common/enums.hpp"
 
 extern void dut(ap_uint<32> cols,
                 double weight[8][25],
