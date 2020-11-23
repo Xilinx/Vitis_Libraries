@@ -1,35 +1,45 @@
 {
-    "gui": true,
+    "gui": true, 
     "name": "Xilinx Connected Component Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u200",
+        "u50", 
+        "u200", 
         "u250"
     ], 
     "platform_blacklist": [
         "zc"
-    ],
+    ], 
     "platform_properties": {
+        "u50": {
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
+                    ]
+                }
+            }
+        }, 
         "u200": {
-	    "v++": {
-	        "compiler": {
-		    "cflags": [
-		        "--config PROJECT/conn_u200_u250.ini"
-		    ]
-		}
-	    }
-	},
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200_u250.cfg"
+                    ]
+                }
+            }
+        }, 
         "u250": {
-	    "v++": {
-	        "compiler": {
-		    "cflags": [
-		        "--config PROJECT/conn_u200_u250.ini"
-		    ]
-		}
-	    }
-	}
-    },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200_u250.cfg"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/wcc_kernel.xclbin -o PROJECT/data/test_offset.csr -c PROJECT/data/test_column.csr -g PROJECT/data/test_golden.mtx", 
@@ -40,17 +50,14 @@
         "host_exe": "host.exe", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/benchmarks/connected_component/host/main.cpp", 
+                "host/main.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L2/include", 
                 "LIB_DIR/L2/benchmarks/connected_component/host", 
                 "LIB_DIR/L2/benchmarks/connected_component/kernel", 
-                "LIB_DIR/ext/xcl2",
-                "LIB_DIR/../database/L1/include/hw",
-                "LIB_DIR/../quantitative_finance/L1/include",
-		        "LIB_DIR/../utils/L1/include"
+                "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 "
         }
@@ -59,10 +66,7 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/benchmarks/connected_component/kernel",
-                "LIB_DIR/../database/L1/include/hw",
-                "LIB_DIR/../quantitative_finance/L1/include",
-		        "LIB_DIR/../utils/L1/include"
+                "LIB_DIR/L2/benchmarks/connected_component/kernel"
             ]
         }
     }, 
@@ -70,58 +74,58 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/benchmarks/connected_component/kernel/wcc_kernel.cpp", 
+                    "location": "kernel/wcc_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=wcc_kernel", 
-                    "name": "wcc_kernel",
-		    "num_compute_units": 1,
+                    "name": "wcc_kernel", 
+                    "num_compute_units": 1, 
                     "compute_units": [
                         {
-                            "name": "wcc_kernel",
-                            "slr": "SLR0",
+                            "name": "wcc_kernel", 
+                            "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "columnG1",
+                                    "name": "columnG1", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "offsetG1",
+                                }, 
+                                {
+                                    "name": "offsetG1", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "column512G2",
+                                }, 
+                                {
+                                    "name": "column512G2", 
                                     "memory": "DDR[1]"
-                                },
-				{
-                                    "name": "column32G2",
+                                }, 
+                                {
+                                    "name": "column32G2", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "offsetG2",
+                                }, 
+                                {
+                                    "name": "offsetG2", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "offsetG2Tmp1",
+                                }, 
+                                {
+                                    "name": "offsetG2Tmp1", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "offsetG2Tmp2",
+                                }, 
+                                {
+                                    "name": "offsetG2Tmp2", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "queue512",
+                                }, 
+                                {
+                                    "name": "queue512", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "queue",
+                                }, 
+                                {
+                                    "name": "queue", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "result512",
+                                }, 
+                                {
+                                    "name": "result512", 
                                     "memory": "DDR[0]"
-                                },
-				{
-                                    "name": "result32",
+                                }, 
+                                {
+                                    "name": "result32", 
                                     "memory": "DDR[0]"
                                 }
                             ]
@@ -141,14 +145,25 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

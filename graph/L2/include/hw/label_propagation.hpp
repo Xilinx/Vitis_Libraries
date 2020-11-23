@@ -78,9 +78,6 @@ void mostFreqLabel(int vertex,
 #pragma HLS pipeline
         maxLabel = labelOrderStrm.read();
     }
-#ifndef __SYNTHESIS__
-    std::cout << "vertex=" << vertex << ",maxLabel=" << maxLabel << std::endl;
-#endif
     mostLabelStrm.write(maxLabel);
 }
 
@@ -96,9 +93,6 @@ void sortImpl(int vertexNum,
     hls::stream<DT> outDataStrm;
     for (int i = 0; i < vertexNum; i++) {
 #pragma HLS loop_tripcount max = 10 min = 10
-#ifndef __SYNTHESIS__
-        std::cout << "hashGroupAggregate ing " << i << std::endl;
-#endif
         hashGroupAggregate<32, 11, 512, 32, 32>(labelStrm, rngStrm, labelEndStrm, pingHashBuf, pongHashBuf,
                                                 labelOrderStrm, labelOrderEndStrm);
     }
@@ -268,6 +262,8 @@ void labelInit(int vertexNum, uint512* labelArr) {
  * @param offsetCSR row offset of CSR format
  * @param indexCSC row index of CSC format
  * @param offsetCSC column of CSC format
+ * @param pingHashBuf hash ping buffer
+ * @param pongHashBuf hash pong buffer
  * @param labelPing label ping buffer
  * @param labelPong label pong buffer
  */
@@ -290,9 +286,6 @@ inline void labelPropagation(int numEdge,
 loop_numIter:
     for (int i = 0; i < numIter; i++) {
 #pragma HLS loop_tripcount max = 10 min = 10
-#ifndef __SYNTHESIS__
-        std::cout << "\n============== i = " << i << std::endl;
-#endif
         if (i % 2 == 0)
             internal::label_propagation::lpCoreImpl<ap_uint<32>, ap_uint<512>, 16, 32, xf::fintech::XoShiRo128PlusPlus>(
                 numEdge, numVertex, indexCSR, offsetCSR, indexCSC, offsetCSC, pingHashBuf, pongHashBuf, labelPing,

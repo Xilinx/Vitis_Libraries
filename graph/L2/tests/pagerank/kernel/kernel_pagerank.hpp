@@ -16,8 +16,8 @@
 
 #include "xf_graph_L2.hpp"
 
-typedef double DT;
-// typedef float DT;
+// typedef double DT;
+typedef float DT;
 #define BITS_IN_BYTE (8)
 #define SIZE_OF_DOUBLE (8)
 #define doubleUnrollBin (3)
@@ -35,11 +35,12 @@ typedef double DT;
 typedef ap_uint<512> buffType;
 
 // just for cosim
-#define testVertex 20
+#define testVertex 10
 #define testEdge 20
-#define depOffset (testVertex / floatUnrollNm) // offsetCSC, degreeCSR buffer depth of 512 bits
-#define depVertex (testVertex / unrollNm)      // pagerank, cntValFull, buffPing, buffPong buffers depth of 512 bits
-#define depEdge (testEdge / unrollNm)          // indiceCSC buffer depth of 512 bits
+#define depOffset ((testVertex + floatUnrollNm - 1) / floatUnrollNm) // offsetCSC, degreeCSR buffer depth of 512 bits
+#define depVertex \
+    ((testVertex + unrollNm - 1) / unrollNm) // pagerank, cntValFull, buffPing, buffPong buffers depth of 512 bits
+#define depEdge ((testEdge + unrollNm - 1) / unrollNm) // indiceCSC buffer depth of 512 bits
 
 extern "C" void kernel_pagerank_0(int nrows,
                                   int nnz,
