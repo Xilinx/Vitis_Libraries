@@ -108,7 +108,7 @@ class GemmKernel {
             for (int l_bColBlock = 0; l_bColBlock < l_bColBlocks; ++l_bColBlock) {
                 for (int l_aColBlock = 0; l_aColBlock < l_aColBlocks; ++l_aColBlock) {
                     for (int i = 0; i < t_aMH; ++i) {
-//#pragma HLS PIPELINE II = t_aColMemWords
+                        //#pragma HLS PIPELINE II = t_aColMemWords
                         for (int j = 0; j < t_aColMemWords; ++j) {
 #pragma HLS PIPELINE
                             unsigned int l_aSrcOffset =
