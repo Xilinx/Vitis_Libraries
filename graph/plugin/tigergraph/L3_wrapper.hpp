@@ -174,6 +174,14 @@ int loadGraphMultiCard(std::shared_ptr<xf::graph::L3::Handle>& handle,
                        int32_t deviceNm,
                        int32_t cuNm,
                        xf::graph::Graph<int32_t, int32_t>** g);
+std::vector<event<int> > cosineSimilaritySSDenseMultiCard(xf::graph::L3::Handle& handle,
+                                                          int32_t deviceNm,
+                                                          int32_t sourceNUM,
+                                                          int32_t* sourceWeights,
+                                                          int32_t topK,
+                                                          xf::graph::Graph<int32_t, int32_t>** g,
+                                                          int32_t** resultID,
+                                                          float** similarity);
 } // L3
 } // graph
 } // xf

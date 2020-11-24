@@ -1,7 +1,7 @@
 #ifndef CFLAGS
 #$(error CFLAGS is not set. Please run "make gpe" instead)
 #endif
-
+TigerGraphPath=/home/tigergraph/tigergraph/
 EXECUTABLE=bin/release/libudf.so
 SOURCE_MAIN_DIR = src/customer/core_impl/gpe_impl
 SOURCE_OTHER_DIR = src/customer/core_impl
@@ -58,7 +58,7 @@ $(ODIR)/%.o: $(SOURCE_OTHER_DIR)/%.cpp
 	$(CC) -o $@ $< $(CFLAGS)
 
 $(ODIR)/core.o: gsql/src/QueryUdf/core.cpp
-	$(CC) -o $@ $< $(CFLAGS)
+	$(CC) -o $@ $< $(CFLAGS) -D TIGERGRAPH_PATH=\"$(TigerGraphPath)\"
 
 all: $(SOURCES) $(EXECUTABLE)
 

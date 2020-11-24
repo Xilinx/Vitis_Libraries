@@ -3,6 +3,6 @@
     "operationName" : "BFS",
     "kernelName" : "bfs_kernel",
     "requestLoad" : 100,
-    "xclbinPath" : "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/xclbin/bfs_kernel.xclbin",
+    "xclbinPath" : "/dev/gdk/gsql/src/QueryUdf/xclbin/bfs_kernel.xclbin",
     "deviceNeeded" : 1
 }
