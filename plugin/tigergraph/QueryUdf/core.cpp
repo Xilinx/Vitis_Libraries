@@ -29,10 +29,9 @@ int bfs_fpga_wrapper(int numVertices,
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -70,10 +69,9 @@ int load_xgraph_fpga_wrapper(uint32_t numVertices, uint32_t numEdges, xf::graph:
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -115,10 +113,9 @@ int shortest_ss_pos_wt_fpga_wrapper(uint32_t numVertices,
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -155,10 +152,9 @@ int load_xgraph_pageRank_wt_fpga_wrapper(uint32_t numVertices, uint32_t numEdges
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -196,10 +192,9 @@ int pageRank_wt_fpga_wrapper(
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -223,7 +218,6 @@ int pageRank_wt_fpga_wrapper(
 
     // use it to do the calculation
     std::cout << "INFO: Calling 'pageRank_wt_fpga'...\n";
-    std::cout << "alpha2 = " << alpha << "\t tol = " << tolerance << "\t iter = " << maxIter << std::endl;
     runT(alpha, tolerance, maxIter, g, rank);
 
     // close the library
@@ -239,10 +233,9 @@ int load_xgraph_cosine_nbor_ss_fpga_wrapper(uint32_t numVertices,
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -285,10 +278,9 @@ int cosine_nbor_ss_fpga_wrapper(uint32_t topK,
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -397,10 +389,9 @@ int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, uint32_t cuNm, xf::
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -443,10 +434,9 @@ int cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
@@ -484,10 +474,9 @@ int close_fpga() {
 
     // open the library
     std::cout << "INFO: Opening libgraphL3wrapper.so...\n";
-    void* handle = dlopen(
-        "/home/tigergraph/tigergraph/dev/gdk/gsql/src/QueryUdf/"
-        "libgraphL3wrapper.so",
-        RTLD_LAZY | RTLD_GLOBAL);
+    std::string basePath = TIGERGRAPH_PATH;
+    std::string SOFILEPATH = basePath + "/dev/gdk/gsql/src/QueryUdf/libgraphL3wrapper.so";
+    void* handle = dlopen(SOFILEPATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';

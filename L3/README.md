@@ -6,7 +6,7 @@ In order to use Graph L3, the sofware and hardware requirements should be met an
 ### Software Requirements
 - CentOS/RHEL 7.8 and Ubuntu 16.04 LTS
 - [Xilinx RunTime (XRT) 2020.1](https://github.com/Xilinx/XRT)
-- [Xilinx FPGA Resource Manager (XRM) 2020.1](https://github.com/Xilinx/XRM)
+- [Xilinx FPGA Resource Manager (XRM) 2020.2](https://github.com/Xilinx/XRM)
 
 
 ### Hardware Requirements

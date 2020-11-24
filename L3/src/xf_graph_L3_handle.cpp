@@ -169,6 +169,23 @@ void Handle::initOpSimDense(const char* kernelName,
     delete[] deviceID;
 };
 
+void Handle::initOpSimDenseInt(const char* kernelName,
+                               char* xclbinFile,
+                               char* xclbinFile2,
+                               char* kernelAlias,
+                               unsigned int requestLoad,
+                               unsigned int deviceNeeded,
+                               unsigned int cuPerBoard) {
+    uint32_t* deviceID;
+    uint32_t* cuID;
+    xrm->fetchCuInfo(kernelName, kernelAlias, requestLoad, deviceNm, maxChannelSize, maxCU, &deviceID, &cuID);
+    opsimdense->setHWInfo(deviceNm, maxCU);
+    opsimdense->initInt((char*)kernelName, xclbinFile, xclbinFile2, deviceID, cuID, requestLoad);
+    opsimdense->initThreadInt(xrm, kernelName, kernelAlias, requestLoad, deviceNeeded, cuPerBoard);
+    delete[] cuID;
+    delete[] deviceID;
+};
+
 void Handle::initOpSimSparse(const char* kernelName,
                              char* xclbinFile,
                              char* kernelAlias,
@@ -264,6 +281,33 @@ void Handle::setUp() {
             deviceCounter += boardNm;
             initOpSimDense(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
                            ops[i].deviceNeeded, ops[i].cuPerBoard);
+        } else if (strcmp(ops[i].operationName, "similarityDenseInt") == 0) {
+            unsigned int boardNm = ops[i].deviceNeeded;
+            if (deviceCounter + boardNm > numDevices) {
+                std::cout << "Error: Need more devices" << std::endl;
+                exit(1);
+            }
+            std::thread thUn[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j].join();
+            }
+            std::thread th[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                if (j > 0) {
+                    th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile2);
+                } else {
+                    th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                }
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                th[j].join();
+            }
+            deviceCounter += boardNm;
+            initOpSimDenseInt(ops[i].kernelName, ops[i].xclbinFile, ops[i].xclbinFile2, ops[i].kernelAlias,
+                              ops[i].requestLoad, ops[i].deviceNeeded, ops[i].cuPerBoard);
         } else if (strcmp(ops[i].operationName, "similaritySparse") == 0) {
             unsigned int boardNm = ops[i].deviceNeeded;
             if (deviceCounter + boardNm > numDevices) {
@@ -512,6 +556,18 @@ void Handle::free() {
             }
             deviceCounter += boardNm;
             opsimdense->freeSimDense();
+        } else if (strcmp(ops[i].operationName, "similarityDenseInt") == 0) {
+            unsigned int boardNm = ops[i].deviceNeeded;
+            std::thread thUn[boardNm];
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j] = xrm->unloadXclbinNonBlock(deviceCounter + j);
+            }
+            for (int j = 0; j < boardNm; ++j) {
+                thUn[j].join();
+            }
+            deviceCounter += boardNm;
+            opsimdense->freeSimDense();
+            xrm->freeCuGroup(boardNm);
         } else if (strcmp(ops[i].operationName, "similaritySparse") == 0) {
             unsigned int boardNm = ops[i].deviceNeeded;
             std::thread thUn[boardNm];
@@ -591,7 +647,7 @@ void Handle::free() {
             opconvertcsrcsc->freeConvertCsrCsc();
         }
     }
-    xrm->free();
+    xrm->freeXRM();
 };
 
 void Handle::loadXclbin(unsigned int deviceId, char* xclbinName) {

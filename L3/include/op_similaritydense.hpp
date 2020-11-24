@@ -47,6 +47,13 @@ class opSimilarityDense : public opBase {
 
     void init(char* kernelName, char* xclbinFile, uint32_t* deviceIDs, uint32_t* cuIDs, unsigned int requestLoad);
 
+    void initInt(char* kernelName,
+                 char* xclbinFile,
+                 char* xclbinFile2,
+                 uint32_t* deviceIDs,
+                 uint32_t* cuIDs,
+                 unsigned int requestLoad);
+
     void loadGraph(xf::graph::Graph<uint32_t, float> g); // loadGraph only support loading of CSR format graph
 
     void loadGraphMultiCardNonBlocking(int deviceID, int cuID, xf::graph::Graph<int32_t, int32_t> g);
