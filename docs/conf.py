@@ -48,8 +48,8 @@ copyright = '2020, Xilinx'
 author = 'Xilinx'
 
 # The full version, including alpha/beta/rc tags
-version = '2020.1'
-release = 'v2020.1'
+version = '2020.2'
+release = 'v2020.2'
 
 
 # -- General configuration ---------------------------------------------------

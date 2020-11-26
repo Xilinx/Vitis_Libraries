@@ -76,8 +76,8 @@ void lz77Compress(hls::stream<ap_uint<8> >& inStream,
 #pragma HLS STREAM variable = compressdStream depth = 16
 #pragma HLS STREAM variable = boosterStream depth = 16
 
-#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = compressdStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = boosterStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::lzCompress<MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(inStream, compressdStream, input_size);
@@ -124,8 +124,8 @@ void zlibHuffmanEncoder(hls::stream<ap_uint<32> >& inStream,
     hls::stream<uint8_t> bitLen("bitLen");
 #pragma HLS STREAM variable = bitVals depth = 32
 #pragma HLS STREAM variable = bitLen depth = 32
-#pragma HLS RESOURCE variable = bitVals core = FIFO_SRL
-#pragma HLS RESOURCE variable = bitLen core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = bitVals type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = bitLen type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::huffmanEncoder(inStream, bitVals, bitLen, input_size, StreamCode, StreamSize);

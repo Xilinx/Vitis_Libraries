@@ -16,6 +16,8 @@
  */
 #include "lz4_stream.hpp"
 #include "xxhash.h"
+#include <fcntl.h>  /* For O_RDWR */
+#include <unistd.h> /* For open(), creat() */
 
 #define BLOCK_SIZE 64
 #define KB 1024
@@ -26,10 +28,17 @@
 #define MAGIC_BYTE_4 24
 #define FLG_BYTE 104
 
+int fd_p2p_c_in = 0;
+const int RESIDUE_4K = 4096;
+
 int validate(std::string& inFile_name, std::string& outFile_name) {
     std::string command = "cmp " + inFile_name + " " + outFile_name;
     int ret = system(command.c_str());
     return ret;
+}
+
+constexpr uint32_t roundoff(uint32_t x, uint32_t y) {
+    return ((x - 1) / (y) + 1);
 }
 
 // Constructor
@@ -192,7 +201,7 @@ uint64_t xfLz4Streaming::compressStream(uint8_t* in, uint8_t* out, uint64_t inpu
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, host_buffer_size, h_buf_in.data());
 
     buffer_output =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, host_buffer_size, h_buf_out.data());
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, host_buffer_size, h_buf_out.data());
 
     std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
 
@@ -370,7 +379,49 @@ uint64_t xfLz4Streaming::decompressFile(std::string& inFile_name,
         outFile.close();
         return debytes;
     } else {
-        std::string command = "lz4 --content-size -f -q -d " + inFile_name;
+        std::string command = "lz4 --content-size -f -q -d" + inFile_name;
+        system(command.c_str());
+        return 0;
+    }
+}
+
+uint32_t xfLz4Streaming::decompressFileFull(
+    std::string& inFile_name, std::string& outFile_name, uint32_t input_size, bool m_flow, bool enable_p2p) {
+    m_SwitchFlow = m_flow;
+    std::vector<uint8_t, aligned_allocator<uint8_t> > in(input_size);
+    std::vector<uint8_t, aligned_allocator<uint8_t> > out(6 * input_size);
+
+    if (m_SwitchFlow == 0) {
+        if (enable_p2p) {
+            fd_p2p_c_in = open(inFile_name.c_str(), O_RDONLY | O_DIRECT);
+            if (fd_p2p_c_in <= 0) {
+                std::cout << "P2P: Unable to open input file, fd: %d\n" << fd_p2p_c_in << std::endl;
+                exit(1);
+            }
+        } else {
+            std::ifstream inFile(inFile_name.c_str(), std::ifstream::binary);
+            if (!inFile) {
+                std::cout << "Unable to open file";
+                exit(1);
+            }
+            // Read block data from compressed stream .snappy
+            inFile.read((char*)in.data(), input_size);
+            inFile.close();
+        }
+
+        // Decompression Sequential multiple cus.
+        uint32_t debytes = decompressFull(in.data(), out.data(), input_size, enable_p2p);
+
+        std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
+        outFile.write((char*)out.data(), debytes);
+
+        // Close file
+        outFile.close();
+
+        return debytes;
+    } else {
+        // Use standard lz4 decompress below
+        std::string command = "lz4 -B4" + inFile_name;
         system(command.c_str());
         return 0;
     }
@@ -423,7 +474,7 @@ uint64_t xfLz4Streaming::decompressStream(uint8_t* in, uint8_t* out, uint64_t in
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, compressedSize, h_buf_in.data());
 
             buffer_output =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, dBlockSize, h_buf_out.data());
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, dBlockSize, h_buf_out.data());
 
             // set kernel arguments
             int narg = 0;
@@ -476,3 +527,92 @@ uint64_t xfLz4Streaming::decompressStream(uint8_t* in, uint8_t* out, uint64_t in
 
     return original_size;
 } // End of decompress
+
+uint32_t xfLz4Streaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t input_size, bool enable_p2p) {
+    cl_mem_ext_ptr_t p2pInExt;
+    char* p2pPtr = NULL;
+
+    uint32_t inputSize4KMultiple = 0;
+    if (enable_p2p) {
+        // roundoff inputSize to 4K
+        inputSize4KMultiple = roundoff(input_size, RESIDUE_4K) * RESIDUE_4K;
+
+        // DDR buffer exyensions
+        p2pInExt.flags = XCL_MEM_EXT_P2P_BUFFER;
+        p2pInExt.obj = nullptr;
+        p2pInExt.param = NULL;
+    }
+
+    std::vector<uint32_t, aligned_allocator<uint32_t> > decompressSize;
+    uint32_t outputSize = (input_size * 6) + 16;
+    cl::Buffer* bufferOutputSize;
+    // Index calculation
+    h_buf_in.resize(input_size);
+    h_buf_out.resize(outputSize);
+    h_buf_decompressSize.resize(sizeof(uint32_t));
+
+    std::chrono::duration<double, std::nano> kernel_time_ns_1(0);
+
+    if (!enable_p2p) std::memcpy(h_buf_in.data(), in, input_size);
+
+    // Device buffer allocation
+    if (enable_p2p) {
+        buffer_input =
+            new cl::Buffer(*m_context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX, inputSize4KMultiple, &p2pInExt);
+        p2pPtr = (char*)m_q->enqueueMapBuffer(*(buffer_input), CL_TRUE, CL_MAP_READ, 0, inputSize4KMultiple);
+    } else {
+        buffer_input = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, input_size, h_buf_in.data());
+    }
+    buffer_output = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, outputSize, h_buf_out.data());
+    bufferOutputSize = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t),
+                                      h_buf_decompressSize.data());
+
+    // set kernel arguments
+    int narg = 0;
+    decompress_data_mover_kernel->setArg(narg++, *(buffer_input));
+    decompress_data_mover_kernel->setArg(narg++, *(buffer_output));
+    decompress_data_mover_kernel->setArg(narg++, input_size);
+    decompress_data_mover_kernel->setArg(narg, *(bufferOutputSize));
+
+    decompress_kernel_lz4->setArg(3, input_size);
+
+    // Migrate Memory - Map host to device buffers
+    if (!enable_p2p) {
+        m_q->enqueueMigrateMemObjects({*(buffer_input)}, 0);
+        m_q->finish();
+    }
+
+    if (enable_p2p) {
+        int ret = read(fd_p2p_c_in, p2pPtr, inputSize4KMultiple);
+        if (ret == -1)
+            std::cout << "P2P: compress(): read() failed, err: " << ret << ", line: " << __LINE__ << std::endl;
+    }
+    auto kernel_start = std::chrono::high_resolution_clock::now();
+    // enqueue the kernels and wait for them to finish
+    m_q->enqueueTask(*decompress_data_mover_kernel);
+    m_q->enqueueTask(*decompress_kernel_lz4);
+    m_q->finish();
+
+    auto kernel_end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double, std::nano>(kernel_end - kernel_start);
+    kernel_time_ns_1 += duration;
+
+    // Migrate memory - Map device to host buffers
+    m_q->enqueueMigrateMemObjects({*(buffer_output), *(bufferOutputSize)}, CL_MIGRATE_MEM_OBJECT_HOST);
+    m_q->finish();
+
+    uint32_t uncompressedSize = h_buf_decompressSize[0];
+    std::memcpy(out, h_buf_out.data(), uncompressedSize);
+
+    float throughput_in_mbps_1 = (float)uncompressedSize * 1000 / kernel_time_ns_1.count();
+    std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
+
+    delete buffer_input;
+    buffer_input = nullptr;
+    delete buffer_output;
+    buffer_output = nullptr;
+    h_buf_in.clear();
+    h_buf_out.clear();
+
+    return uncompressedSize;
+}

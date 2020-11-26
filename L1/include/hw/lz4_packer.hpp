@@ -146,8 +146,8 @@ void lz4PackerMM(ap_uint<DATAWIDTH>* orig_input_data,
 #pragma HLS STREAM variable = outStreamV depth = 32
 #pragma HLS STREAM variable = outStreamVEos depth = 32
 
-#pragma HLS RESOURCE variable = inStreamV core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamV core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = inStreamV type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStreamV type = FIFO impl = SRL
 
     xf::compression::mm2slz4Packer<DATAWIDTH, BURST_SIZE>(in, orig_input_data, inStreamV, inStreamVSize, compressd_size,
                                                           in_block_size, no_blocks, block_length, xxhashVal,

@@ -47,9 +47,9 @@ void snappyCoreDec(hls::stream<xf::compression::uintMemWidth_t>& inStreamMemWidt
 #pragma HLS STREAM variable = instreamV depth = 8
 #pragma HLS STREAM variable = decompressd_stream depth = 8
 #pragma HLS STREAM variable = decompressed_stream depth = 8
-#pragma HLS RESOURCE variable = instreamV core = FIFO_SRL
-#pragma HLS RESOURCE variable = decompressd_stream core = FIFO_SRL
-#pragma HLS RESOURCE variable = decompressed_stream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = instreamV type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = decompressd_stream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = decompressed_stream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::details::streamDownsizer<uint32_t, GMEM_DWIDTH, 8>(inStreamMemWidth, instreamV, input_size);
@@ -71,8 +71,8 @@ void snappyDec(const xf::compression::uintMemWidth_t* in,
 
 #pragma HLS STREAM variable = inStreamMemWidth depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStreamMemWidth depth = c_gmemBurstSize
-#pragma HLS RESOURCE variable = inStreamMemWidth core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamMemWidth core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = inStreamMemWidth type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStreamMemWidth type = FIFO impl = SRL
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel

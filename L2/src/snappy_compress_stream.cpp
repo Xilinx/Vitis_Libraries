@@ -58,11 +58,11 @@ void xilSnappyCompressStream(hls::stream<ap_axiu<8, 0, 0, 0> >& inaxistream,
 #pragma HLS STREAM variable = boosterStream depth = 8
 #pragma HLS STREAM variable = snappyOutEos depth = 8
 
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = snappyOutEos core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = compressdStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = boosterStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = snappyOutEos type = FIFO impl = SRL
 
 #pragma HLS dataflow
     uint32_t litLimit[1];

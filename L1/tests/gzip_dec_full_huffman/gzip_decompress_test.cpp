@@ -35,7 +35,6 @@
 
 #define IN_BITWIDTH 16
 #define OUT_BITWIDTH 8
-#define USE_GZIP 1
 const uint32_t sizeof_in = (IN_BITWIDTH / 8);
 const uint32_t sizeof_out = (OUT_BITWIDTH / 8);
 
@@ -51,8 +50,8 @@ void gzipDecompressEngineRun(hls::stream<in_t>& inStream,
 {
     const int c_decoderType = (int)HUFFMAN_TYPE;
 
-    xf::compression::details::inflateCore<c_decoderType, HISTORY_SIZE, LOW_OFFSET, USE_GZIP>(
-        inStream, outStream, outStreamEoS, outSizeStream, input_size);
+    xf::compression::details::inflateCore<c_decoderType, HISTORY_SIZE, LOW_OFFSET>(inStream, outStream, outStreamEoS,
+                                                                                   outSizeStream, input_size);
 }
 
 void validateFile(std::string& fileName, std::string& originalFileName) {

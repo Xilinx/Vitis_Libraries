@@ -49,7 +49,6 @@ xfLz4::xfLz4(const std::string& binaryFile) {
     cl_int error;
     m_device = 0;
     cl_platform_id platform;
-    cl_uint platforms, devices;
     cl_uint num_platforms;
     err = clGetPlatformIDs(0, NULL, &num_platforms);
     cl_platform_id* platform_ids = (cl_platform_id*)malloc(sizeof(cl_platform_id) * num_platforms);
@@ -128,13 +127,11 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
     uint64_t total_in_size = 0;
     std::chrono::duration<double, std::nano> total_ssd_time_ns(0);
 
-    int ret = 0, err;
+    int ret = 0;
     cl_int error;
 
     cl_mem buffer_input, buffer_chunk_info;
-    uint32_t fid = 0;
     for (uint32_t fid = 0; fid < inFileVec.size(); fid++) {
-        uint64_t debytes;
         uint64_t original_size = 0;
         uint32_t block_size_in_bytes = BLOCK_SIZE_IN_KB * 1024;
         uint32_t m_BlockSizeInKb = BLOCK_SIZE_IN_KB;
@@ -142,7 +139,6 @@ void xfLz4::decompress_in_line_multiple_files(const std::vector<std::string>& in
         total_size += original_size;
 
         uint32_t num_blocks = (original_size - 1) / block_size_in_bytes + 1;
-        uint64_t inIdx = 0;
         uint8_t total_no_cu = 1;
         uint8_t first_chunk = 1;
         std::string up_kname = unpacker_kernel_names[0];

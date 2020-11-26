@@ -39,7 +39,6 @@ help::
 #						Build Environment Setup
 
 include ./utils.mk
-include ./config.mk
 
 TOOL_VERSION ?= 2019.2
 
@@ -88,9 +87,15 @@ endif
 
 # sw_emu, hw_emu, hw
 TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw_emu hw),)
+ifeq ($(filter $(TARGET),sw_emu hw hw_emu),)
   $(error TARGET is not sw_emu, hw_emu or hw)
 endif
+
+# ZLIB Version
+ZLIBVER ?= zlib-1.2.7
+ifeq ($(filter $(ZLIBVER), zlib zlib-1.2.7 zlib-1.2.11),)
+	$(error ZLIBVER is not zlib, zlib-1.2.7 or zlib-1.2.11)
+endif 
 
 # Target device
 DEVICE ?= xilinx_u200_xdma_201920_1
@@ -146,8 +151,8 @@ $(info ${XILINX_XRT})
 # ------------------------------------------------------------
 #						Directory Setup
 
-XF_PROJ_ROOT ?= $(CUR_DIR)/../../..
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L3/demos/libzso/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 
 XFLIB_DIR := $(shell readlink -f $(XF_PROJ_ROOT))
@@ -156,6 +161,9 @@ BUILD_DIR := $(CUR_DIR)/build
 TEMP_DIR := $(CUR_DIR)/_x_temp.$(TARGET).$(XDEVICE)
 SRC_DIR := $(XFLIB_DIR)/L3/demos/libzso/src
 TB_DIR := $(XFLIB_DIR)/L2/tests/src/
+ZLIBDIR := $(XFLIB_DIR)/common/thirdParty/$(ZLIBVER)/
+
+include ./config.mk
 
 # ------------------------------------------------------------
 #                      kernel setup
@@ -172,8 +180,11 @@ VPP_FLAGS = -I$(HLS_SRC_DIR) \
 			-I$(KSRC_DIR) \
 			-I$(XFLIB_DIR)/L2/include/
 
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/src/
+VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
+
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
-VPP_FLAGS += --config $(CUR_DIR)/advanced.ini \
+VPP_FLAGS += --config $(CUR_DIR)/advanced.cfg \
 			 -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) \
 			 -DMULTIPLE_BYTES=$(MULTIPLE_BYTES)
 
@@ -181,33 +192,33 @@ VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
 		--report_dir $(CUR_DIR)/reports/_x.$(TARGET)
 
 # Linking flags
-VPP_LINK_FLAGS = --kernel_frequency 250 --optimize 2 --config $(CUR_DIR)/opts.ini
+VPP_LINK_FLAGS = --kernel_frequency 250 --optimize 2 --config $(CUR_DIR)/opts.cfg
 
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				--report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
 
 XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_decompress.xclbin
 
-XO_FILES_C = $(TEMP_DIR)/xf_compress_lz77.xo \
-		   	 $(TEMP_DIR)/xf_huffman.xo 
+XO_FILES_C = $(TEMP_DIR)/xilZlibCompressFull.xo \
+			 $(TEMP_DIR)/xilChecksum32.xo
 		  	 
-XO_FILES_D = $(TEMP_DIR)/xf_zlib_datareader.xo \
-		     $(TEMP_DIR)/xf_zlib_datawriter.xo \
-		     $(TEMP_DIR)/xf_zlib_decompress.xo
+XO_FILES_D = $(TEMP_DIR)/xilZlibDmReader.xo \
+		     $(TEMP_DIR)/xilZlibDmWriter.xo \
+		     $(TEMP_DIR)/xilDecompressFull.xo
 
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_lz77_compress_mm.cpp
-HUFFMAN_KERNEL_SRCS = $(KSRC_DIR)/zlib_huffman_enc_mm.cpp
+COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_compress_multi_engine_mm.cpp
+CHECKSUM_KERNEL_SRCS = $(KSRC_DIR)/checksum_mm.cpp
 DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_rd.cpp
 DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_wr.cpp
 DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_parallelbyte_decompress_full.cpp
 
-COMPRESS_KERNEL_NAME = xilLz77Compress
-HUFFMAN_KERNEL_NAME = xilHuffmanKernel
+COMPRESS_KERNEL_NAME = xilZlibCompressFull
+CHECKSUM_KERNEL_NAME = xilChecksum32
 DATAREADER_KERNEL_NAME = xilZlibDmReader
 DATAWRITER_KERNEL_NAME = xilZlibDmWriter
 DECOMPRESS_KERNEL_NAME = xilDecompressFull
 
-KERNELS += $(COMPRESS_KERNEL_NAME) $(HUFFMAN_KERNEL_NAME)
+KERNELS += $(COMPRESS_KERNEL_NAME) $(CHECKSUM_KERNEL_NAME)
 KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERNEL_NAME)
 
 
@@ -215,31 +226,31 @@ KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERN
 #                      kernel rules
 
 # Building kernel
-$(TEMP_DIR)/xf_compress_lz77.xo: $(COMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilZlibCompressFull.xo: $(COMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling compression kernel..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(COMPRESS_KERNEL_NAME) \
 		-I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xf_huffman.xo: $(HUFFMAN_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilChecksum32.xo: $(CHECKSUM_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling huffman kernel $*..."
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(HUFFMAN_KERNEL_NAME) \
+	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(CHECKSUM_KERNEL_NAME) \
 		-I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xf_zlib_datareader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilZlibDmReader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling data reader kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAREADER_KERNEL_NAME) \
 	    -I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xf_zlib_datawriter.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilZlibDmWriter.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling data writer kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAWRITER_KERNEL_NAME) \
 	    -I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xf_zlib_decompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilDecompressFull.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling decompression kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMPRESS_KERNEL_NAME) \
@@ -263,9 +274,24 @@ BIN_DIR_SUFFIX ?= _$(XDEVICE)
 
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 
+#Checks for g++
 CXX := g++
+ifeq ($(HOST_ARCH), x86)
+ifneq ($(shell expr $(shell g++ -dumpversion) \>= 5), 1)
+ifndef XILINX_VIVADO
+$(error [ERROR]: g++ version older. Please use 5.0 or above)
+else
+CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
+$(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
+endif
+endif
+endif
+
 EXE_NAME := xzlib 
-LIBZLIB_NAME := libz.so
+ifeq ($(ZLIBVER),zlib-1.2.7)
+LIBZLIB_NAME := libz.so.1.2.7
+endif
+
 #EXE_EXT = exe
 
 CXXFLAGS +=-I$(CUR_DIR)/src/
@@ -278,38 +304,57 @@ CXXFLAGS +=-I$(XFLIB_DIR)/common/libs/logger/
 #CXXFLAGS +=-I$(XFLIB_DIR)/L3/demos/zlib_app/hadoop/
 
 #Host and Common sources
-SRCS += host.cpp
-EXTRA_OBJS += xil_zlib xcl2 cmdlineparser logger adler32 crc32 deflate zutil trees compress uncompr inflate inftrees inffast
+#SRCS += host.cpp
+EXTRA_OBJS += xil_zlib xcl2 cmdlineparser logger adler32 crc32 deflate zutil trees compress uncompr inflate inftrees inffast zpipe xlibz
+EXTRA_OBJS += infback gzclose gzlib gzread gzwrite 
 xil_zlib_SRCS = $(XFLIB_DIR)/L3/src/zlib.cpp
 xcl2_SRCS = $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 cmdlineparser_SRCS = $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 logger_SRCS = $(XFLIB_DIR)/common/libs/logger/logger.cpp
-adler32_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/adler32.c
-crc32_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/crc32.c
-deflate_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/deflate.c
-zutil_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/zutil.c
-trees_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/trees.c
-compress_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/compress.c
-uncompr_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/uncompr.c
-inflate_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/inflate.c
-inftrees_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/inftrees.c
-inffast_SRCS = $(XFLIB_DIR)/common/thirdParty/zlib/inffast.c
 
-CXXFLAGS += -std=c++0x -fmessage-length=0 \
+# ThirdParty ZLIB Source Files
+adler32_SRCS = $(ZLIBDIR)/adler32.c
+crc32_SRCS = $(ZLIBDIR)/crc32.c
+deflate_SRCS = $(ZLIBDIR)/deflate.c
+zutil_SRCS = $(ZLIBDIR)/zutil.c
+trees_SRCS = $(ZLIBDIR)/trees.c
+compress_SRCS = $(ZLIBDIR)/compress.c
+uncompr_SRCS = $(ZLIBDIR)/uncompr.c
+inflate_SRCS = $(ZLIBDIR)/inflate.c
+inftrees_SRCS = $(ZLIBDIR)/inftrees.c
+inffast_SRCS = $(ZLIBDIR)/inffast.c
+infback_SRCS = $(ZLIBDIR)/infback.c
+gzclose_SRCS = $(ZLIBDIR)/gzclose.c
+gzlib_SRCS = $(ZLIBDIR)/gzlib.c
+gzread_SRCS = $(ZLIBDIR)/gzread.c
+gzwrite_SRCS = $(ZLIBDIR)/gzwrite.c
+zpipe_SRCS = $(ZLIBDIR)/examples/zpipe.c
+xlibz_SRCS = $(ZLIBDIR)/xlibz.cpp
+
+CXXFLAGS += -std=c++11 -fmessage-length=0 \
 		-DXDEVICE=$(XDEVICE) \
 	    -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread \
 		-Wno-unused-function
-	    
-CXXFLAGS += -O3
+CXXFLAGS += -O3	   
+
+ifeq ($(ENABLE_XRM), yes) 
+CXXFLAGS += -I/opt/xilinx/xrm/include
+endif
+
 LDFLAGS += -L$(XILINX_XRT)/lib/ -lOpenCL -pthread
 LDFLAGS += -lrt -Wno-unused-label -Wno-narrowing
 LDFLAGS += -Wno-unused-function
-LDFLAGS += -O3
+
+ifeq ($(ENABLE_XRM), yes)
+LDFLAGS += -L/opt/xilinx/xrm/lib/
+LDFLAGS += -lxrm
+endif
+
 EXE_FILE = $(BUILD_DIR)/$(EXE_NAME)
 LIBZLIB = $(BUILD_DIR)/$(LIBZLIB_NAME)
 
 # ------------------------------------------------------------
-#                       host rules
+#                       libz rules
 OBJ_FILES = $(foreach s,$(SRCS),$(OBJ_DIR)/$(basename $(s)).o)
 
 $(OBJ_DIR)/%.o: CXXFLAGS += $($(*)_CXXFLAGS)
@@ -317,38 +362,41 @@ $(OBJ_DIR)/%.o: CXXFLAGS += $($(*)_CXXFLAGS)
 $(OBJ_FILES): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo -e "----\nCompiling object $*..."
 	mkdir -p $(@D) 
-	$(CXX) -fPIC -o $@ -c $< $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -DPIC -o $@ -c $< $(CXXFLAGS) $(LDFLAGS)
 
 EXTRA_OBJ_FILES = $(foreach f,$(EXTRA_OBJS),$(OBJ_DIR)/$(f).o)
 
 $(EXTRA_OBJ_FILES): $(OBJ_DIR)/%.o: $$($$(*)_SRCS) $$($$(*)_HDRS)
 	@echo -e "----\nCompiling extra object $@..."
 	mkdir -p $(@D)
-	$(CXX) -fPIC -o $@ -c $< $(CXXFLAGS)
-$(LIBZLIB): $(OBJ_FILES) $(EXTRA_OBJ_FILES)
-	@echo -e "----\nCompiling libz.so $(notdir $@)..."
-	mkdir -p $(BUILD_DIR)
-	$(CXX) -shared -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ $(CXXFLAGS) $(LDFLAGS) -lc
-	cp $(BUILD_DIR)/libz.so .
+	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -DPIC -o $@ -c $< $(CXXFLAGS)
 
-$(EXE_FILE): $(OBJ_FILES)
-	@echo -e "----\nCompiling libz.so $(notdir $@)..."
+#------------------------------------------------------------
+#                      host rules
+CXX = g++
+HOST_SRCS += host.cpp
+HOST_OBJ_FILES = $(OBJ_DIR)/host.o
+
+$(HOST_OBJ_FILES): $(OBJ_DIR)/host.o $(SRC_DIR)/host.cpp 
+	@echo -e "----\nCompiling object host.cpp..."
+	mkdir -p $(@D) 
+	$(CXX) -fPIC -o $@ -c $< $(CXXFLAGS) $(LDFLAGS)
+
+$(EXE_FILE): $(HOST_OBJ_FILES)
+	@echo -e "----\nCompiling host executable..."
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ -L. libz.so 
-	
+	$(CXX) -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -o $@ $^ -L. $(LIBZLIB_NAME) $(LDXRM) -lboost_system -lboost_filesystem -lOpenCL
+
 # ------------------------------------------------------------
 #                      build rules
 
 .PHONY: all help host xclbin cleanh cleank cleanall clean lib 
-#.PHONY: all help host xclbin cleanh cleank cleanall clean
 
 all: host xclbin
 
 host: $(EXE_FILE)
 
 xclbin: $(XCLBIN_FILE)
-
-lib: $(LIBZLIB)
 
 cleank:
 	rm -f _x_temp*/*.xo
@@ -358,8 +406,15 @@ cleank:
 	
 cleanh:
 	rm -rf $(EXE_FILE)
-	rm -rf *.xclbin
+	rm -rf $(EXE_NAME)
+	rm -rf $(LIBZLIB_NAME)
+	rm -rf $(ZLIBVER)
 	rm -rf *.so
+	rm -rf *.so.1
+	rm -rf *.zlib
+	rm -rf *.orig
+	rm -rf obj_/
+	rm -rf listdir*
 	-$(RMDIR) $(EXE_FILE)
 	-$(RMDIR) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
 	-$(RMDIR) src/*.ll _vxx_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
@@ -377,7 +432,7 @@ clean: cleanh
 $(BUILD_DIR)/emconfig.json :
 		emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-HOST_ARGS = -v ./sample.txt -cu 1 
+HOST_ARGS = -t ./sample.txt
 
 ifeq ($(TARGET),sw_emu)
   RUN_ENV = export XCL_EMULATION_MODE=sw_emu
@@ -392,8 +447,14 @@ endif
 
 RUN_ENV += export LD_LIBRARY_PATH=$(PWD):$(LD_LIBRARY_PATH)
 RUN_ENV += export XILINX_LIBZ_XCLBIN=$(XCLBIN_FILE)
-RUN_ENV += export MIN_INPUT_SIZE=0
+RUN_ENV += export XILINX_LIBZ_DEFLATE_BUFFER_SIZE=0
+RUN_ENV += export XILINX_LIBZ_INFLATE_BUFFER_SIZE=0
+RUN_ENV += export XRT_INI_PATH=$(PWD)/xrt.ini
 
 run: xclbin lib host $(EMU_CONFIG)
-	$(RUN_ENV); \
-	$(EXE_FILE) $(HOST_ARGS)
+	$(RUN_ENV);  
+ifeq ($(TARGET), $(filter $(TARGET), sw_emu hw_emu))
+	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(XCLBIN_FILE)
+else 
+	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(XCLBIN_DIR)
+endif

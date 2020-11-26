@@ -1,0 +1,93 @@
+{
+    "name": "Xilinx Zlib Compress 2PE 256MAXI", 
+    "description": [
+        "Xilinx Zlib Compress using 32 KB block size and 2 Parallel Engines"
+    ], 
+    "flow": "vitis", 
+    "launch": [
+        {
+            "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "platform_blacklist": [
+        "zc", 
+        "vck"
+    ], 
+    "platform_whitelist": [
+        "u200", 
+        "u250", 
+        "u50"
+    ], 
+    "host": {
+        "host_exe": "xil_zlib", 
+        "compiler": {
+            "sources": [
+                "./src/host.cpp", 
+                "LIB_DIR/L2/tests/src/zlib_compress.cpp", 
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
+                "LIB_DIR/common/libs/logger/logger.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L2/tests/src/"
+            ], 
+            "symbols": [
+                "PARALLEL_BLOCK=2"
+            ]
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "symbols": [
+                "PARALLEL_BLOCK=2", 
+                "GMEM_DWIDTH=256", 
+                "GMEM_BURST_SIZE=32"
+            ],
+            "includepaths":[
+                 "LIB_DIR/../security/L1/include"
+             ]
+        }
+    }, 
+    "containers": [
+        {
+            "name": "compress", 
+            "accelerators": [
+                {
+                    "name": "xilZlibCompressFull", 
+                    "location": "LIB_DIR/L2/src/zlib_compress_multi_engine_mm.cpp"
+                }
+            ]
+        }
+    ], 
+    "output_files": "sample.txt.*", 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 25, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw"
+        ], 
+        "category": "canary"
+    }
+}

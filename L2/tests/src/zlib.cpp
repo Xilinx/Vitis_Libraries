@@ -18,7 +18,9 @@
 #include <fcntl.h>  /* For O_RDWR */
 #include <unistd.h> /* For open(), creat() */
 #include <sys/stat.h>
-
+#include "zlib.h"
+auto crc = 0; // CRC32 value
+extern unsigned long crc32(unsigned long crc, const unsigned char* buf, uint32_t len);
 int fd_p2p_c_in = 0;
 const int RESIDUE_4K = 4096;
 
@@ -85,7 +87,7 @@ void gzip_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip
 
     unsigned long ifile_size = istat.st_size;
     uint8_t crc_byte = 0;
-    long crc_val = 0;
+    long crc_val = crc;
     crc_byte = crc_val;
     outFile.put(crc_byte);
     crc_byte = crc_val >> 8;
@@ -112,6 +114,9 @@ void gzip_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip
     outFile.put(0);
 }
 
+void gzip_crc32(uint8_t* in, uint32_t input_size) {
+    crc = crc32(crc, in, input_size);
+}
 void zlib_headers(std::string& inFile_name, std::ofstream& outFile, uint8_t* zip_out, uint32_t enbytes) {
     outFile.put(120);
     outFile.put(1);
@@ -143,11 +148,18 @@ uint32_t xil_zlib::compress_file(std::string& inFile_name, std::string& outFile_
 
     uint32_t host_buffer_size = HOST_BUFFER_SIZE;
 
+#ifdef GZIP_MODE
+    std::thread gzipCrc(gzip_crc32, zlib_in.data(), input_size);
+#else
+// Space for zlib CRC
+#endif
+
     // zlib Compress
     uint32_t enbytes = compress(zlib_in.data(), zlib_out.data(), input_size, host_buffer_size);
 
     if (enbytes > 0) {
 #ifdef GZIP_MODE
+        gzipCrc.join();
         // Pack gzip encoded stream .gz file
         gzip_headers(inFile_name, outFile, zlib_out.data(), enbytes);
 #else
@@ -155,7 +167,6 @@ uint32_t xil_zlib::compress_file(std::string& inFile_name, std::string& outFile_
         zlib_headers(inFile_name, outFile, zlib_out.data(), enbytes);
 #endif
     }
-
     // Close file
     inFile.close();
     outFile.close();
@@ -419,7 +430,7 @@ void xil_zlib::_enqueue_reads(uint32_t bufSize, uint8_t* out, uint32_t* decompSi
     cl::Buffer* buffer_status; // single common buffer to capture the decompression status by kernel
     for (int i = 0; i < BUFCNT; i++) {
         buffer_out[i] =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, bufSize, h_dbuf_zlibout[i].data());
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize, h_dbuf_zlibout[i].data());
 
         buffer_size[i] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 2 * sizeof(uint32_t),
                                         h_dcompressSize[i].data());
@@ -666,7 +677,7 @@ uint32_t xil_zlib::decompressSeq(uint8_t* in, uint8_t* out, uint32_t input_size,
     cl::Buffer* buffer_dec_input =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, inBufferSize, dbuf_in.data());
     cl::Buffer* buffer_dec_output =
-        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, outBufferSize, dbuf_out.data());
+        new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, outBufferSize, dbuf_out.data());
 
     cl::Buffer* buffer_size =
         new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(uint32_t), dbuf_outSize.data());
@@ -736,13 +747,6 @@ uint32_t xil_zlib::decompressSeq(uint8_t* in, uint8_t* out, uint32_t input_size,
 // Kernel and Host. I/O operations between Host and Device are
 // overlapped with Kernel execution between multiple compute units
 uint32_t xil_zlib::compress(uint8_t* in, uint8_t* out, uint64_t input_size, uint32_t host_buffer_size) {
-    if (input_size < m_minfilesize) {
-        std::cout << "\n";
-        std::cout << "File Size must be greater than " << (uint32_t)m_minfilesize << " Bytes" << std::endl;
-        std::cout << "\n";
-        return 0;
-    }
-
     //////printme("In compress \n");
     uint32_t block_size_in_kb = BLOCK_SIZE_IN_KB;
     uint32_t block_size_in_bytes = block_size_in_kb * 1024;
@@ -863,58 +867,61 @@ overlap:
                 }
             }
 
-            std::memcpy(h_buf_in[cu][flag].data(), &in[(brick + cu) * host_buffer_size], sizeOfChunk[brick + cu]);
+            if (sizeOfChunk[brick + cu] != 0) {
+                std::memcpy(h_buf_in[cu][flag].data(), &in[(brick + cu) * host_buffer_size], sizeOfChunk[brick + cu]);
 
-            // Set kernel arguments
-            int narg = 0;
+                // Set kernel arguments
+                int narg = 0;
 
-            (compress_kernel)->setArg(narg++, *(buffer_input[cu][flag]));
-            (compress_kernel)->setArg(narg++, *(buffer_lz77_output[cu][flag]));
-            (compress_kernel)->setArg(narg++, *(buffer_compress_size[cu][flag]));
-            (compress_kernel)->setArg(narg++, *(buffer_inblk_size[cu][flag]));
-            (compress_kernel)->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag]));
-            (compress_kernel)->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag]));
-            (compress_kernel)->setArg(narg++, block_size_in_kb);
-            (compress_kernel)->setArg(narg++, sizeOfChunk[brick + cu]);
+                (compress_kernel)->setArg(narg++, *(buffer_input[cu][flag]));
+                (compress_kernel)->setArg(narg++, *(buffer_lz77_output[cu][flag]));
+                (compress_kernel)->setArg(narg++, *(buffer_compress_size[cu][flag]));
+                (compress_kernel)->setArg(narg++, *(buffer_inblk_size[cu][flag]));
+                (compress_kernel)->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag]));
+                (compress_kernel)->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag]));
+                (compress_kernel)->setArg(narg++, block_size_in_kb);
+                (compress_kernel)->setArg(narg++, sizeOfChunk[brick + cu]);
 
-            narg = 0;
-            (huffman_kernel)->setArg(narg++, *(buffer_lz77_output[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_zlib_output[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_compress_size[cu][flag]));
-            (huffman_kernel)->setArg(narg++, *(buffer_inblk_size[cu][flag]));
-            (huffman_kernel)->setArg(narg++, block_size_in_kb);
-            (huffman_kernel)->setArg(narg++, sizeOfChunk[brick + cu]);
+                narg = 0;
+                (huffman_kernel)->setArg(narg++, *(buffer_lz77_output[cu][flag]));
+                (huffman_kernel)->setArg(narg++, *(buffer_dyn_ltree_freq[cu][flag]));
+                (huffman_kernel)->setArg(narg++, *(buffer_dyn_dtree_freq[cu][flag]));
+                (huffman_kernel)->setArg(narg++, *(buffer_zlib_output[cu][flag]));
+                (huffman_kernel)->setArg(narg++, *(buffer_compress_size[cu][flag]));
+                (huffman_kernel)->setArg(narg++, *(buffer_inblk_size[cu][flag]));
+                (huffman_kernel)->setArg(narg++, block_size_in_kb);
+                (huffman_kernel)->setArg(narg++, sizeOfChunk[brick + cu]);
 
-            // Migrate memory - Map host to device buffers
-            m_q[queue_idx + cu]->enqueueMigrateMemObjects({*(buffer_input[cu][flag]), *(buffer_inblk_size[cu][flag])},
-                                                          0 /* 0 means from host*/);
-            m_q[queue_idx + cu]->finish();
+                // Migrate memory - Map host to device buffers
+                m_q[queue_idx + cu]->enqueueMigrateMemObjects(
+                    {*(buffer_input[cu][flag]), *(buffer_inblk_size[cu][flag])}, 0 /* 0 means from host*/);
+                m_q[queue_idx + cu]->finish();
 
-            auto lz77_kernel_start = std::chrono::high_resolution_clock::now();
-            // kernel write events update
-            // LZ77 Compress Fire Kernel invocation
-            m_q[queue_idx + cu]->enqueueTask(*compress_kernel);
-            m_q[queue_idx + cu]->finish();
+                auto lz77_kernel_start = std::chrono::high_resolution_clock::now();
+                // kernel write events update
+                // LZ77 Compress Fire Kernel invocation
+                m_q[queue_idx + cu]->enqueueTask(*compress_kernel);
+                m_q[queue_idx + cu]->finish();
 
-            auto lz77_kernel_end = std::chrono::high_resolution_clock::now();
-            auto lz77_duration = std::chrono::duration<double, std::nano>(lz77_kernel_end - lz77_kernel_start);
-            lz77_kernel_time_ns_1 += lz77_duration;
+                auto lz77_kernel_end = std::chrono::high_resolution_clock::now();
+                auto lz77_duration = std::chrono::duration<double, std::nano>(lz77_kernel_end - lz77_kernel_start);
+                lz77_kernel_time_ns_1 += lz77_duration;
 
-            auto huffman_kernel_start = std::chrono::high_resolution_clock::now();
+                auto huffman_kernel_start = std::chrono::high_resolution_clock::now();
 
-            // Huffman Fire Kernel invocation
-            m_q[queue_idx + cu]->enqueueTask(*huffman_kernel);
-            m_q[queue_idx + cu]->finish();
+                // Huffman Fire Kernel invocation
+                m_q[queue_idx + cu]->enqueueTask(*huffman_kernel);
+                m_q[queue_idx + cu]->finish();
 
-            auto huffman_kernel_end = std::chrono::high_resolution_clock::now();
-            auto huffman_duration = std::chrono::duration<double, std::nano>(huffman_kernel_end - huffman_kernel_start);
-            huffman_kernel_time_ns_1 += huffman_duration;
+                auto huffman_kernel_end = std::chrono::high_resolution_clock::now();
+                auto huffman_duration =
+                    std::chrono::duration<double, std::nano>(huffman_kernel_end - huffman_kernel_start);
+                huffman_kernel_time_ns_1 += huffman_duration;
 
-            m_q[queue_idx + cu]->enqueueMigrateMemObjects(
-                {*(buffer_zlib_output[cu][flag]), *(buffer_compress_size[cu][flag])}, CL_MIGRATE_MEM_OBJECT_HOST);
-            m_q[queue_idx + cu]->finish();
+                m_q[queue_idx + cu]->enqueueMigrateMemObjects(
+                    {*(buffer_zlib_output[cu][flag]), *(buffer_compress_size[cu][flag])}, CL_MIGRATE_MEM_OBJECT_HOST);
+                m_q[queue_idx + cu]->finish();
+            }
         } // Internal loop runs on compute units
 
         if (total_chunks > 2)
@@ -972,8 +979,8 @@ overlap:
         out[outIdx++] = 0x00;
         out[outIdx++] = len_low;
         out[outIdx++] = len_high;
-        out[outIdx++] = ~len_high;
         out[outIdx++] = ~len_low;
+        out[outIdx++] = ~len_high;
         for (int i = 0; i < tail_block_size; i++) {
             out[outIdx++] = in[input_index + i];
         }

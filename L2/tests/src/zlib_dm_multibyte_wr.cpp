@@ -25,7 +25,7 @@
 
 const int kGMemBurstSize = 16;
 
-template <uint16_t STREAMDWIDTH>
+template <int STREAMDWIDTH>
 void streamDataDm2kSync(hls::stream<ap_uint<STREAMDWIDTH> >& in,
                         hls::stream<ap_axiu<STREAMDWIDTH, 0, 0, 0> >& inStream_dm,
                         uint32_t inputSize) {
@@ -41,21 +41,28 @@ streamDataDm2kSync:
     }
 }
 
-void zlib_dm_wr(uintMemWidth_t* in, uint32_t input_size, hls::stream<ap_axiu<16, 0, 0, 0> >& inAxiStream) {
+void zlib_dm_wr(uintMemWidth_t* in,
+                uint32_t input_size,
+                hls::stream<ap_axiu<c_inStreamDwidth, 0, 0, 0> >& inAxiStream) {
     hls::stream<uintMemWidth_t> inHlsStream("inputStream");
-    hls::stream<ap_uint<16> > outdownstream("outDownStream");
+    hls::stream<ap_uint<c_inStreamDwidth> > outdownstream("outDownStream");
 #pragma HLS STREAM variable = inHlsStream depth = 512
 #pragma HLS STREAM variable = outdownstream depth = 32
-#pragma HLS RESOURCE variable = outdownstream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = outdownstream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::details::mm2sSimple<MULTIPLE_BYTES * 8, 64>(in, inHlsStream, input_size);
-    xf::compression::details::streamDownsizer<uint32_t, MULTIPLE_BYTES * 8, 16>(inHlsStream, outdownstream, input_size);
-    streamDataDm2kSync<16>(outdownstream, inAxiStream, input_size);
+
+    xf::compression::details::streamDownsizer<uint32_t, MULTIPLE_BYTES * 8, c_inStreamDwidth>(
+        inHlsStream, outdownstream, input_size);
+
+    streamDataDm2kSync<c_inStreamDwidth>(outdownstream, inAxiStream, input_size);
 }
 
 extern "C" {
-void xilZlibDmWriter(uintMemWidth_t* in, uint32_t inputSize, hls::stream<ap_axiu<16, 0, 0, 0> >& instreamk) {
+void xilZlibDmWriter(uintMemWidth_t* in,
+                     uint32_t inputSize,
+                     hls::stream<ap_axiu<c_inStreamDwidth, 0, 0, 0> >& instreamk) {
 #pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem0 max_read_burst_length = \
     64 max_write_burst_length = 2 num_read_outstanding = 16 num_write_outstanding = 1
 #pragma HLS interface axis port = instreamk

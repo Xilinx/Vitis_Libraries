@@ -25,6 +25,7 @@
 #include <string>
 
 #include "snappy_decompress.hpp"
+#include "lz_decompress.hpp"
 
 #define BLOCK_SIZE 65536
 #define MAX_OFFSET 65536
@@ -41,7 +42,7 @@ void snappyDecompressEngineRun(hls::stream<uintV_t>& inStream,
     uint32_t output_size = _output_size;
     hls::stream<compressd_dt> decompressd_stream("decompressd_stream");
 #pragma HLS STREAM variable = decompressd_stream depth = 8
-#pragma HLS RESOURCE variable = decompressd_stream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = decompressd_stream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::snappyDecompress(inStream, decompressd_stream, input_size);
