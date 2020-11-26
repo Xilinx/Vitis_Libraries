@@ -1,16 +1,36 @@
 #!/usr/bin/env python3
 
+# argument checking and help
+import argparse
+parser = argparse.ArgumentParser(
+    description='Example of the Heston Equation Finite Difference financial model running on a FPGA.')
+required = parser.add_argument_group("required arguments")
+required.add_argument("-x","--xclbin_file", dest="xclbin_filename", type=str, required=True,
+    help="The model hardware bitstream xclbin filename. Build instructions for which are in '/<path to xf_fintech>/L2/tests/FDBlackScholesLocalVolatilityEngine'")
+required.add_argument("-c","--card",dest="card_type", type=str,required=True,
+    help='Current supported Alveo cards are u200 and u250')
+args = parser.parse_args()
+# State financial model and args entered
+print("+----------------------------------------------------------------------------------")
+print(parser.description)
+print(args)
+print("+----------------------------------------------------------------------------------")
+
 # Ensure environmental variables i.e. paths are set to used the modules
-from xf_fintech_python import DeviceManager, fdbslv
 import sys
+# Check not using python 2
+if sys.version.startswith("2"):
+    sys.exit("Seem to be running with the no longer supported python 2 - require version 3")
+from os.path import exists
+from xf_fintech_python import DeviceManager, fdbslv
 
-# Basic checking that the number of arguments are correct
-if len(sys.argv) != 2:
-    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. fdbslv.xclbin")
+# Basic checking that arguments are correct
+if not (args.card_type == "u250" or args.card_type == "u200"):
+    sys.exit("This version executes on either card type u200 or u250")
+if not exists(args.xclbin_filename):
+    sys.exit("Please check the supplied FPGA load filename - program does not see it")
 
-
-# State test financial model
-print("\nThe fdbslv financial model\n==============================\n")
+# State test financial model detail
 print("This example follows the C++ Vanilla European test case called case0\n")
 
 # Variables - these are a copy of the configuration parameters and financial data, as stored in csv format in the L2 example
@@ -126,7 +146,11 @@ boundaryUpper = parameters[6]
 outputResultList = []
 
 
-deviceList = DeviceManager.getDeviceList("u250")
+deviceList = DeviceManager.getDeviceList(args.card_type) # Pass in the card type from the command line
+
+if len(deviceList) == 0 : # Check at least one card found
+    sys.exit(("Please check that you have a "+args.card_type+" card present and ready for use"))
+
 # Identify which cards installed and choose the first available U200 card, alter above value to match your card type
 print("Found these {0} device(s):".format(len(deviceList)))
 for x in deviceList:
@@ -135,7 +159,7 @@ chosenDevice = deviceList[0]
 print("Choosing the first, ",str(chosenDevice),"\n")
 
 # Select and claim the chosen card with the financial model to be used
-fdbslv = fdbslv(solverN,solverM, sys.argv[1])
+fdbslv = fdbslv(solverN,solverM, args.xclbin_filename)
 fdbslv.claimDevice(chosenDevice)
 
 # Run the test
@@ -147,7 +171,4 @@ for i in range(len(outputResultList[0])): # Output from code includes an encompa
 
 fdbslv.releaseDevice()
 
-
-
-
-
+sys.exit(0)

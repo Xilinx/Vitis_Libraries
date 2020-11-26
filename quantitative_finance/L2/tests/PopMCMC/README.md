@@ -43,6 +43,10 @@ Assuming an Alveo U200 card with the XRT configured the hardware build is run in
             unset XCL_EMULATION_MODE
             ./bin_xilinx_u250_xdma_201830_2/mcmc_test.exe xclbin_xilinx_u250_xdma_201830_2_hw/mcmc_kernel.xclbin 500 50
 
+The hardware build can be run in similar way. Here it's just another way of building and running an application with just a one line command:
+
+            make run TARGET=hw DEVICE=xilinx_u250_xdma_201830_2
+
 ## Example Output
 This is an example output from the demonstration using a sw_emu target.
 

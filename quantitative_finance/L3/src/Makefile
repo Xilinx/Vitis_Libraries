@@ -24,71 +24,58 @@ ifndef XILINX_XCL2_DIR
 $(error "XILINX_XCL2_DIR should be set to the directory containing xcl2")
 endif
 
-
-EXE_NAME = libxilinxfintech
-EXE_EXT ?= so
-EXE_FILE ?= $(EXE_NAME)$(if $(EXE_EXT),.,)$(EXE_EXT)
-
+TARGET =
+XF_PROJ_ROOT =
 SRC_DIR = .
 HOST_ARGS =
 RUN_ENV =
 INCLUDE_DIR = ../include
 L2_INCLUDE_DIR = ../../L2/include/
-OUTPUT_DIR = ./output
+BUILD_DIR = ./output
 
-SRCS := $(shell find $(SRC_DIR) -maxdepth 4 -name '*.cpp')
-SRCS += $(shell find $(XILINX_XCL2_DIR) -maxdepth 1 -name '*.cpp')
-OBJ_FILES := $(addsuffix .o, $(basename $(SRCS)))
-EXTRA_OBJS :=
+HOST_SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
+HOST_SRCS += $(shell find $(XILINX_XCL2_DIR) -name '*.cpp')
 
-
-CPPFLAGS = -DVITIS_PLATFORM=$(VITIS_PLATFORM) \
-			-std=c++11 -O3 -g -Wall -Wno-unknown-pragmas -c -fPIC \
-			-I$(L2_INCLUDE_DIR) \
-			-I$(INCLUDE_DIR) \
-			-Imodels/cf_black_scholes/include \
-			-Imodels/cf_black_scholes_merton/include \
-			-Imodels/cf_garman_kohlhagen/include \
-			-Imodels/hcf/include \
-			-Imodels/m76/include \
-			-Imodels/heston_fd/include \
-			-Imodels/mc_american/include \
-			-Imodels/mc_european/include \
-			-Imodels/binomial_tree/include \
-			-Imodels/mc_european_dje/include \
-			-Imodels/binomial_tree/include \
-			-Imodels/pop_mcmc/include \
-			-Imodels/hjm/include \
-			-Imodels/lmm/include \
-			-Imodels/cds/include \
-			-Imodels/hullwhite/include \
-			-Iutils/linear_interpolation/include \
-			-I$(XILINX_XCL2_DIR) \
-			-I$(XILINX_XRT)/include
+CXXFLAGS = -std=c++11 -O3 -g -Wall -Wno-unknown-pragmas -Wno-unused-label -fPIC
+CXXFLAGS += -I$(L2_INCLUDE_DIR)
+CXXFLAGS += -I$(INCLUDE_DIR)
+CXXFLAGS += -Imodels/cf_black_scholes/include
+CXXFLAGS += -Imodels/cf_black_scholes_merton/include
+CXXFLAGS += -Imodels/cf_garman_kohlhagen/include
+CXXFLAGS += -Imodels/hcf/include
+CXXFLAGS += -Imodels/m76/include
+CXXFLAGS += -Imodels/heston_fd/include
+CXXFLAGS += -Imodels/mc_american/include
+CXXFLAGS += -Imodels/mc_european/include
+CXXFLAGS += -Imodels/binomial_tree/include
+CXXFLAGS += -Imodels/mc_european_dje/include
+CXXFLAGS += -Imodels/binomial_tree/include
+CXXFLAGS += -Imodels/pop_mcmc/include
+CXXFLAGS += -Imodels/hjm/include
+CXXFLAGS += -Imodels/lmm/include
+CXXFLAGS += -Imodels/cds/include
+CXXFLAGS += -Imodels/hullwhite/include
+CXXFLAGS += -Iutils/linear_interpolation/include
+CXXFLAGS += -I$(XILINX_XCL2_DIR)
+CXXFLAGS += -I$(XILINX_XRT)/include
 
 LDFLAGS = -shared -lxilinxopencl -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib
 
+EXE_NAME := libxilinxfintech.so
+EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 
 
-.PHONY: output all clean cleanall rnn
+.PHONY: all clean cleanall run
 
-all: output $(EXE_FILE)
-
-output:
-	@mkdir -p ${OUTPUT_DIR}
+all: $(EXE_FILE)
 
 clean:
-	@$(RM) -rf $(OUTPUT_DIR)
+	rm -Rf $(EXE_FILE)
 
 cleanall: clean
 
-run:
-	@echo "library not executable"
+run: all
 
-
-%.o:%.cpp
-	@echo $(notdir $(@))
-	$(CXX) $(CPPFLAGS) -o ${OUTPUT_DIR}/$(notdir $(@)) -c $<
-
-$(EXE_FILE): $(OBJ_FILES)
-	$(CXX) $(addprefix ${OUTPUT_DIR}/,$(notdir $(OBJ_FILES))) -o ${OUTPUT_DIR}/$@ $(LDFLAGS)
+$(EXE_FILE): $(HOST_SRCS)
+	mkdir -p $(BUILD_DIR)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)

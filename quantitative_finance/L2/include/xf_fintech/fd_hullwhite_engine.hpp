@@ -193,7 +193,7 @@ class FdHullWhiteEngine {
         // outputs
         DT* cost,
         DT* profit) {
-#pragma HLS allocation instances = discountBond limit = 1 function
+#pragma HLS allocation function instances = discountBond limit = 1
 
     LOOP_NPV:
         for (unsigned int leg = 0; leg < _legPSizeMax + _legRSizeMax; leg++) {
@@ -393,7 +393,7 @@ class FdHullWhiteEngine {
 
     // @brief Calculate the average rate at a specific time
     DT setTime(DT t1, DT t2) {
-#pragma HLS allocation instances = HullWhite_shortRate limit = 1 function
+#pragma HLS allocation function instances = HullWhite_shortRate limit = 1
 
         DT t[2] = {t1, t2};
         DT shortRate[2];
@@ -436,7 +436,7 @@ class FdHullWhiteEngine {
         hls::stream<DT>& lower_sd_strm,
         hls::stream<DT>& diag_sd_strm,
         hls::stream<DT>& upper_sd_strm) {
-#pragma HLS allocation instances = dmul limit = 1 operation
+#pragma HLS allocation operation instances = dmul limit = 1
         // pre-fetch & register x(i-1), x, and x(i+1)
         DT xminus = locations_[0];
         DT x = locations_[1];

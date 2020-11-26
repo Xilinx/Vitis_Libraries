@@ -24,19 +24,8 @@
 #include "xf_fintech/stochastic_process.hpp"
 using namespace xf::fintech;
 
-#ifdef HW_EMU_TEST
-#define N 1
-#define K 1
-#define K2 1
-#else
 #define N 1000
 #define K 3
-#ifndef U200
-#define K2 3
-#else
-#define K2 1
-#endif
-#endif
 
 #define DIM 1
 #define LEN 1024
@@ -72,11 +61,6 @@ struct ScanInputParam1 {
     int fixedCnt[FixedLen];
 };
 
-void scanTreeKernels(int len, ScanInputParam0 inputParam0[1], ScanInputParam1 inputParam1[1], DT NPV[N]);
-
-extern "C" void scanTreeKernel1(int len, ScanInputParam0 inputParam0[1], ScanInputParam1 inputParam1[1], DT NPV[N]);
-extern "C" void scanTreeKernel2(int len, ScanInputParam0 inputParam0[1], ScanInputParam1 inputParam1[1], DT NPV[N]);
-extern "C" void scanTreeKernel3(int len, ScanInputParam0 inputParam0[1], ScanInputParam1 inputParam1[1], DT NPV[N]);
-extern "C" void scanTreeKernel4(int len, ScanInputParam0 inputParam0[1], ScanInputParam1 inputParam1[1], DT NPV[N]);
+extern "C" void scanTreeKernel(int len, ScanInputParam0 inputParam0[1], ScanInputParam1 inputParam1[1], DT NPV[N]);
 
 #endif

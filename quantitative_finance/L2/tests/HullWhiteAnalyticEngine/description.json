@@ -1,16 +1,60 @@
 {
-    "gui": false,
     "name": "Xilinx Hull White Analytic Engine", 
     "description": "L2 Hull White Layer 2 Analytic Engine", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
         "u250", 
-        "u200"
+        "u200", 
+        "u50"
     ], 
     "platform_blacklist": [
         "zc"
     ], 
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
+                    ]
+                }
+            }
+        }
+    }, 
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/hwa_engine.xclbin", 
@@ -34,8 +78,7 @@
             ], 
             "options": "-O3 ", 
             "symbols": [
-                "TEST_DT=double", 
-                "DEVICE_PART=u250"
+                "TEST_DT=double"
             ]
         }
     }, 
@@ -61,7 +104,6 @@
                     "name": "HWA_k2"
                 }
             ], 
-            "ldclflags": " --nk HWA_k0:1:HWA_k0 --nk HWA_k1:1:HWA_k1 --nk HWA_k2:1:HWA_k2", 
             "frequency": 300.0, 
             "name": "hwa_engine"
         }
@@ -74,13 +116,25 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 720, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
-            "vitis_hw"
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

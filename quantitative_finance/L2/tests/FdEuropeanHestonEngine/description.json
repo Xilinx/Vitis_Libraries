@@ -8,21 +8,22 @@
         "u200"
     ], 
     "platform_blacklist": [
-        "zc"
+        "zc", 
+        "u50"
     ], 
     "launch": [
         {
-            "target": "sw_emu",
+            "target": "sw_emu", 
             "cmd_args": " BUILD/fd_heston_kernel_u250_sw_emu_m8192_double.xclbin PROJECT/data 128 64 200", 
             "name": "sw_emu-launch"
-        },
+        }, 
         {
-            "target": "hw_emu",
+            "target": "hw_emu", 
             "cmd_args": " BUILD/fd_heston_kernel_u250_sw_emu_m8192_double.xclbin PROJECT/data 16 8 2", 
             "name": "hw_emu-launch"
-        },
+        }, 
         {
-            "target": "hw",
+            "target": "hw", 
             "cmd_args": " BUILD/fd_heston_kernel_u250_sw_emu_m8192_double.xclbin PROJECT/data 128 64 200", 
             "name": "hw-launch"
         }
@@ -41,12 +42,12 @@
                 "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/L2/tests/FdEuropeanHestonEngine/src/kernel"
             ], 
-            "options": "-O3 ",
+            "options": "-O3 ", 
             "symbols": [
-                "FD_DATA_TYPE=double",
+                "FD_DATA_TYPE=double", 
                 "FD_DATA_EQ_TYPE=int64_t", 
-                "FD_M_SIZE=8192",
-                "FD_DATA_WORDS_IN_DDR=8",
+                "FD_M_SIZE=8192", 
+                "FD_DATA_WORDS_IN_DDR=8", 
                 "FD_NUM_PCR=2"
             ]
         }
@@ -73,14 +74,25 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 720, 
+                    "vitis_hw_emu": 540, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

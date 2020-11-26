@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# makefile-generator v1.0.0
 #
-############################## Help Section ##############################
+
+# ####################################### Help Section #####################################
 .PHONY: help
 
 help::
@@ -28,8 +30,7 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make sd_card TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to prepare sd_card files."
+	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
@@ -40,50 +41,63 @@ help::
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
 	$(ECHO) ""
 
-############################## Setting up Project Variables ##############################
+# ##################### Setting up default value of TARGET ##########################
+TARGET ?= sw_emu
+
+# ################### Setting up default value of DEVICE ##############################
+DEVICE ?= xilinx_u250_xdma_201830_2
+
+# ###################### Setting up default value of HOST_ARCH ####################### 
+HOST_ARCH ?= x86
+
+# #################### Checking if DEVICE in blacklist #############################
+ifeq ($(findstring zc, $(DEVICE)), zc)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+
+# #################### Checking if DEVICE in whitelist ############################
+ifneq ($(findstring u250, $(DEVICE)), u250)
+ifneq ($(findstring u200, $(DEVICE)), u200)
+ifneq ($(findstring u50, $(DEVICE)), u50)
+$(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
+endif
+endif
+endif
+
+# ######################## Setting up Project Variables #################################
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/benchmarks/SVD/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-TARGET ?= sw_emu
-HOST_ARCH := x86
-SYSROOT := ${SYSROOT}
-DEVICE ?= xilinx_u200_xdma_201830_2
-
+# ######################### Include environment variables in utils.mk ####################
 include ./utils.mk
-
 XDEVICE := $(call device2xsa, $(DEVICE))
 TEMP_DIR := _x_temp.$(TARGET).$(XDEVICE)
 TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XDEVICE)
 BUILD_DIR := build_dir.$(TARGET).$(XDEVICE)
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
+XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
+export XCL_BINDIR = $(XCLBIN_DIR)
 
-# Setting tools
-VPP := v++
-
-############################## Setting up Host Variables ##############################
+# ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L1/benchmarks/SVD/src/main.cpp
-HOST_SRCS += $(XFLIB_DIR)/L1/benchmarks/SVD/src/svd.cpp
-HOST_SRCS += $(XFLIB_DIR)/L1/benchmarks/SVD/src/util.cpp
+HOST_SRCS += $(CUR_DIR)/host/main.cpp
+HOST_SRCS += $(CUR_DIR)/host/svd.cpp
+HOST_SRCS += $(CUR_DIR)/host/util.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
-
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/L1/benchmarks/SVD/kernel
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include
-CXXFLAGS += -I$(XFLIB_DIR)/L1/benchmarks/SVD/src
-
-
-
+CXXFLAGS += -I$(XFLIB_DIR)/L1/benchmarks/SVD/host
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/ext/quantlib
 CXXFLAGS += -I$(XFLIB_DIR)/ext/rng
@@ -94,86 +108,97 @@ ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
 endif
 
-# Host compiler global settings
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE 
-LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
-CXXFLAGS += -fmessage-length=0 -O3 
-CXXFLAGS +=-I$(CUR_DIR)/src/ 
+ifeq ($(TARGET),hw_emu)
+CXXFLAGS += -D HW_EMU_TEST
+endif
 
+# ######################### Host compiler global settings ############################
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
+CXXFLAGS += -fmessage-length=0 -O3 
+CXXFLAGS += -I$(CUR_DIR)/src/ 
+
+ifeq ($(HOST_ARCH), x86)
+LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+endif
+
+# ################### Setting package and image directory #######################
+PKG_OUT_DIR := package_$(TARGET)
+ifneq (,$(findstring zc706, $(XDEVICE)))
+K_IMAGE := $(SYSROOT)/../../uImage
+else
+K_IMAGE := $(SYSROOT)/../../Image
+endif
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/kernel_svd.xclbin
+PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 
-ifneq ($(HOST_ARCH), x86)
-	LDFLAGS += --sysroot=$(SYSROOT)
-endif
-
-############################## Setting up Kernel Variables ##############################
-# Kernel compiler global settings
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
-LDCLFLAGS += --optimize 2 --jobs 8
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-CXXFLAGS += -D USE_DDR
-VPP_FLAGS += --config $(CUR_DIR)/conn_u250.ini
-else ifneq (,$(XPLATFORM))
-$(warning WARNING: Unsupported platform $(XPLATFORM))
-endif
-
+# ##################### Kernel compiler global settings ##########################
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
+VPP_FLAGS += --hls.jobs 8
+VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-CXXFLAGS += -D USE_DDR
-VPP_FLAGS += --config $(CUR_DIR)/conn_u200.ini
-else ifneq (,$(XPLATFORM))
-$(warning WARNING: Unsupported platform $(XPLATFORM))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u200.cfg
 endif
 
-ifeq ($(TARGET),sw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u250.cfg
 endif
-ifeq ($(TARGET),hw_emu)
-VPP_CFLAGS += -D VIVADO_HLS_SIM
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+VPP_FLAGS += --config $(CUR_DIR)/conn_u50.cfg
 endif
-VPP_FLAGS +=-I$(XFLIB_DIR)/L1/include
-VPP_FLAGS +=-I$(XFLIB_DIR)/L2/include
+
+VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
+VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/benchmarks/SVD/kernel
 
-kernel_svd_0_VPP_FLAGS +=  -D KERNEL_0 -D KERNEL_NAME=kernel_svd_0
+kernel_svd_0_VPP_FLAGS += --hls.clock 300000000:kernel_svd_0
+VPP_LDFLAGS_kernel_svd += --kernel_frequency 300
 
-# Kernel linker flags
-LDCLFLAGS_kernel_svd +=  --nk kernel_svd_0:1:kernel_svd_0
 
-############################## Declaring Binary Containers ##############################
+# ############################ Declaring Binary Containers ##########################
+
+ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel_svd.xclbin
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel_svd.xclbin
+else
+BINARY_CONTAINERS += $(BUILD_DIR)/kernel_svd_xo.xclbin
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel_svd.xclbin
+endif
 BINARY_CONTAINER_kernel_svd_OBJS += $(TEMP_DIR)/kernel_svd_0.xo
 
-############################## Setting Targets ##############################
-CP = cp -rf
+# ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform | $(EXE_FILE) $(BINARY_CONTAINERS) emconfig 
+all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+
 .PHONY: host
-host: $(EXE_FILE) | check_xrt
+host: check_xrt check_sysroot $(EXE_FILE)
 
 .PHONY: xclbin
-xclbin: check_vpp | $(BINARY_CONTAINERS)
+xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
 
 .PHONY: build
 build: xclbin
 
-############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-$(TEMP_DIR)/kernel_svd_0.xo: $(XFLIB_DIR)/L1/benchmarks/SVD/kernel/kernel_svd.cpp
+# ################ Setting Rules for Binary Containers (Building Kernels) ################
+$(TEMP_DIR)/kernel_svd_0.xo: $(CUR_DIR)/kernel/kernel_svd.cpp
 	$(ECHO) "Compiling Kernel: kernel_svd_0"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(kernel_svd_0_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k kernel_svd_0 -I'$(<D)' -o $@ $^
+	$(VPP) -c $(kernel_svd_0_VPP_FLAGS) $(VPP_FLAGS) -k kernel_svd_0 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
 
-$(BUILD_DIR)/kernel_svd.xclbin: $(BINARY_CONTAINER_kernel_svd_OBJS)
+
+$(BINARY_CONTAINERS): $(BINARY_CONTAINER_kernel_svd_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_svd -l $(LDCLFLAGS) $(LDCLFLAGS_kernel_svd) -o'$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_svd $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel_svd) -o '$@' $(+)
 
-############################## Setting Rules for Host (Building Host Executable) ##############################
+
+# ################# Setting Rules for Host (Building Host Executable) ################
 $(EXE_FILE): $(HOST_SRCS) | check_xrt
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
@@ -182,18 +207,9 @@ emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(XPLATFORM) --od $(EMCONFIG_DIR)
 
-############################## Setting Essential Checks and Running Rules ##############################
+
+# ###############Setting Essential Checks And Running Rules For Vitis Flow #############
 run: all
-ifneq ($(findstring u250, $(DEVICE)), u250)
-ifneq ($(findstring u200, $(DEVICE)), u200)
-$(error This example is not supported for $(DEVICE))
-endif
-endif
-
-ifeq ($(findstring zc, $(DEVICE)), zc)
-$(error This example is not supported for $(DEVICE))
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
@@ -201,20 +217,20 @@ else
 	$(EXE_FILE) $(HOST_ARGS)
 endif
 
-############################## Cleaning Rules ##############################
+# ################################# Cleaning Rules ##################################
 cleanh:
 	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl* start_simulation.sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* 
+	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
 	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log 
 	-$(RMDIR) _x_temp.* 
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw
+	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-
+	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

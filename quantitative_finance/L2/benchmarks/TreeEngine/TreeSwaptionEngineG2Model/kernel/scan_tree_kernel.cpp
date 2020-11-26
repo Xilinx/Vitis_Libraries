@@ -218,11 +218,22 @@ static void scanWrapper(int len,
                    nominalStrm, spreadStrm, initTimeStrm, exerciseCntStrm, floatingCntStrm, fixedCntStrm, NPVStrm);
 }
 
-void
-#ifndef __SYNTHESIS__
-    __attribute__((weak))
-#endif
-    scanTreeKernels(int len, ScanInputParam0 inputParam0[1], ScanInputParam1 inputParam1[1], DT NPV[N]) {
+extern "C" void scanTreeKernel(int len, ScanInputParam0 inputParam0[1], ScanInputParam1 inputParam1[1], DT NPV[N]) {
+#pragma HLS INTERFACE m_axi port = inputParam0 latency = 64 num_write_outstanding = 16 num_read_outstanding = \
+    16 max_write_burst_length = 64 max_read_burst_length = 64 bundle = gmem0 offset = slave
+#pragma HLS INTERFACE m_axi port = inputParam1 latency = 64 num_write_outstanding = 16 num_read_outstanding = \
+    16 max_write_burst_length = 64 max_read_burst_length = 64 bundle = gmem1 offset = slave
+#pragma HLS INTERFACE m_axi port = NPV latency = 64 num_write_outstanding = 16 num_read_outstanding = \
+    16 max_write_burst_length = 64 max_read_burst_length = 64 bundle = gmem2 offset = slave
+
+#pragma HLS INTERFACE s_axilite port = len bundle = control
+#pragma HLS INTERFACE s_axilite port = inputParam0 bundle = control
+#pragma HLS INTERFACE s_axilite port = inputParam1 bundle = control
+#pragma HLS INTERFACE s_axilite port = NPV bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
+
+#pragma HLS data_pack variable = inputParam0
+#pragma HLS data_pack variable = inputParam1
 
     hls::stream<DT> NPVStrm[K];
     hls::stream<bool> NPVFlagStrm;

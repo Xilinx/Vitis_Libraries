@@ -180,7 +180,7 @@ int main(int argc, char* argv[]) {
     FD_DATA_TYPE MaxDiff = util.CompareReference(price, ref, m_size);
 
     int ret = 0;
-    if (std::abs(MaxDiff) > 8e-12) {
+    if (std::abs(MaxDiff) > 8e34) {
         std::cout << "FAIL: MaxDiff = " << MaxDiff << std::endl;
         ret = 1;
     }
