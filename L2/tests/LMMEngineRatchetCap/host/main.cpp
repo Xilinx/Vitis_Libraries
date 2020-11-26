@@ -172,10 +172,10 @@ int main(int argc, char** argv) {
         double diff = std::abs((double)((price - EXPECTED) / EXPECTED));
         std::cout << "Expected price = " << EXPECTED << " (diff = " << (diff * 100) << "%)" << std::endl;
         if (diff > epsilon) {
-            std::cerr << "TEST FAILED!" << std::endl;
+            std::cout << "Fail with 1 errors." << std::endl;
             return 1;
         } else {
-            std::cout << "TEST SUCCEDED!" << std::endl;
+            std::cout << "Pass validation." << std::endl;
             return 0;
         }
     }

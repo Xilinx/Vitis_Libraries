@@ -1,14 +1,58 @@
 #!/use/bin/env python3
+from __future__ import print_function # this is solely to trap python2 without it the syntax error checks prevent execution
+
+# argument checking and help
+import argparse
+parser = argparse.ArgumentParser(
+    description="Example of the Heston Equation Finite Difference financial model running on a FPGA.\n\
+Variables as detailed below are passed in so to run type \n\
+'./fd_heston_test.py 1.5 0.04 0.3 -0.9 0.025 1 100 200 1 200 128 64 fd_heston,xclbin u250' \n\
+Build instructions for the model hardware bitstream (xclbin) are in \n\
+'/<path to xf_fintech>/L2/tests/FdEuropeanHestonEngine'",formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument('kappa', type=float, help='mean reversion rate')
+parser.add_argument('eta', type=float, help='long run average price')
+parser.add_argument('sigma', type=float, help='volatility of volatility')
+parser.add_argument('rho', type=float, help='correlation coefficient')
+parser.add_argument('rd', type=float, help='risk free domestic interest rate')
+parser.add_argument('T', type=float, help='expiration time')
+parser.add_argument('K', type=float, help='strike price')
+parser.add_argument('S', type=float, help='stock price')
+parser.add_argument('V', type=float, help='volatility')
+parser.add_argument('N', type=int, help='number of time steps')
+parser.add_argument('m1', type=int, help='grid size for the Sdirection - m1')
+parser.add_argument('m2', type=int, help='grid size for the Sdirectioni - m2')
+parser.add_argument('load', type=str, help='filename of xlcbin load, e.g. fd_heston.xclbin')
+parser.add_argument('card', type=str, help='type of the card - currently u200 or u250')
+args = parser.parse_args()
+# State financial model and args entered
+print("+--------------------------------------------------------------------")
+print(parser.description)
+print(args)
+print("+--------------------------------------------------------------------")
+
 
 # Ensure environmental variables i.e. paths are set to used the modules
-from xf_fintech_python import DeviceManager, FDHeston
 import sys
+# Check not using python 2
+if sys.version.startswith("2"):
+    sys.exit("Seem to be running with the no longer supported python 2 - require version 3")
+from os.path import exists
+from xf_fintech_python import DeviceManager, FDHeston
 
-# State test financial model
-print("\nThe Heston FD financial model\n========================================\n")
+# Basic checking that the card and load arguments are correct
+if not (args.card == "u250" or args.card == "u200"):
+    sys.exit("This version executes on either card type u200 or u250")
+if not exists(args.load):
+    print("Bitstream load specified is ",args.load)
+    sys.exit("Please check the supplied FPGA load filename - program does not see it")
+
 
 # Declaring Variables
-deviceList = DeviceManager.getDeviceList("u250")   # This should could be either u200 or u250, possibly others t.b.c.
+deviceList = DeviceManager.getDeviceList(args.card) # Pass in the card type from the command line
+
+if len(deviceList) == 0 : # Check at least one card found
+    sys.exit(("Please check that you have a "+args.card+" card present and ready for use"))
+
 sGridOutput = []
 vGridOutput = []
 priceGridOutput = []
@@ -17,26 +61,22 @@ lastruntime = 0
 
 
 # In this example financial data to test the module is fed in via the command line. Below is an example
-# ./heston_fd_test.py 1.5 0.04 0.3 -0.9 0.025 1 100 200 1 200 128 64 fd_heston,xclbin
+# ./heston_fd_test.py 1.5 0.04 0.3 -0.9 0.025 1 100 200 1 200 128 64 fd_heston,xclbin u200
 # and the expected value output for NPV is 111.832977
 
-# Basic checking that the number of arguments are correct
-if len(sys.argv) != 14:
-    sys.exit("Incorrect number of arguments supplied - 13 expected")
-
 #Take each suffixed value and give it a meaningful name and convert from arv string format to numerical
-meanReversionRate_kappa = float(sys.argv[1])
-longRunAveragePrice_eta = float(sys.argv[2])
-volatilityOfVolatility_sigma = float(sys.argv[3])
-correlationCoefficient_rho = float(sys.argv[4])
-riskFreeDomesticInterestRate_rd = float(sys.argv[5])
-expirationtime_T = float(sys.argv[6])
-strikePrice_K = float(sys.argv[7])
-stockPrice_S = float(sys.argv[8])
-volatility_V = float(sys.argv[9])
-numberOfTimesteps_N = int(sys.argv[10])
-gridSizeForTheSdirection_m1 = int(sys.argv[11])
-gridSizeForTheSdirection_m2 = int(sys.argv[12])
+meanReversionRate_kappa = args.kappa
+longRunAveragePrice_eta = args.eta
+volatilityOfVolatility_sigma = args.sigma
+correlationCoefficient_rho = args.rho
+riskFreeDomesticInterestRate_rd = args.rd
+expirationtime_T = args.T
+strikePrice_K = args.K
+stockPrice_S = args.S
+volatility_V = args.V
+numberOfTimesteps_N = args.N
+gridSizeForTheSdirection_m1 = args.m1
+gridSizeForTheSdirection_m2 = args.m2
 #Repeat back those values, the last three are integers.
 print("So meanReversionRate_kappa is ",type(meanReversionRate_kappa)," and value is ",meanReversionRate_kappa)
 print("and longRunAveragePrice_eta is ",type(longRunAveragePrice_eta)," and value is ",longRunAveragePrice_eta)
@@ -61,7 +101,7 @@ print("Choosing the first suitable card\n")
 chosenDevice = deviceList[0]
 
 # Selecting and loading into FPGA on chosen card the financial model to be used
-hestonFD = FDHeston(gridSizeForTheSdirection_m1, gridSizeForTheSdirection_m2, sys.argv[13])
+hestonFD = FDHeston(gridSizeForTheSdirection_m1, gridSizeForTheSdirection_m2, args.load)
 hestonFD.claimDevice(chosenDevice)
 
 

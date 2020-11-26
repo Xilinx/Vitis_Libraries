@@ -93,17 +93,23 @@ int main(int argc, const char* argv[]) {
 
     // list of test vectors, should be a mulitple of N_k0 etc...
     static const int maxOutputBuffer = 131072;
-    static const int maxk0 = maxOutputBuffer / N_k0;
-    static const int maxk1 = maxOutputBuffer / N_k1;
-    static const int maxk2 = maxOutputBuffer / N_k2;
+    static int maxk0 = maxOutputBuffer / N_k0;
+    static int maxk1 = maxOutputBuffer / N_k1;
+    static int maxk2 = maxOutputBuffer / N_k2;
 
     std::vector<int> testCases{16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
     if (mode_emu == "hw_emu") {
         // limit test vectors for hardware emulation
         testCases.resize(1);
+        maxk0 = 16;
+        maxk1 = 16;
+        maxk2 = 16;
     } else if (mode_emu == "sw_emu") {
         // limit test vectors for software emulation
         testCases.resize(5);
+        maxk0 = 256;
+        maxk1 = 256;
+        maxk2 = 256;
     }
 
     // -------------setup k0 params---------------
@@ -136,17 +142,24 @@ int main(int argc, const char* argv[]) {
     TEST_DT K1[N_k1];
     int types1[N_k1];
     for (int i = 0; i < N_k1; i++) {
-        t1[i] = static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 10.0));
-        T1[i] = t1[i] + 1.0 + static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 10.0));
-        S1[i] = T1[i] + 1.0 + static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 10.0));
-
-        // call or put
-        types1[i] = rand() % 2;
-
-        if (types1[i] == 0) {
-            K1[i] = 0.01 + static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 10.0));
+        // limit testcase for hardware emulation
+        if (mode_emu == "hw_emu") {
+            t1[i] = 0;
+            T1[i] = 1;
+            S1[i] = 2;
+            types1[i] = 0;
+            K1[i] = 4;
         } else {
-            K1[i] = 0.01 + static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 1.0));
+            t1[i] = static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 10.0));
+            T1[i] = t1[i] + 1.0 + static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 10.0));
+            S1[i] = T1[i] + 1.0 + static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 10.0));
+            // call or put
+            types1[i] = rand() % 2;
+            if (types1[i] == 0) {
+                K1[i] = 0.01 + static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 10.0));
+            } else {
+                K1[i] = 0.01 + static_cast<TEST_DT>(rand()) / (static_cast<TEST_DT>(RAND_MAX / 1.0));
+            }
         }
     }
 
@@ -249,6 +262,11 @@ int main(int argc, const char* argv[]) {
     std::cout << "hwa k2 kernel has been created" << std::endl;
 #endif
 
+    for (int i = 0; i < LEN; i++) {
+        rates_alloc[i] = rates[i];
+        times_alloc[i] = times[i];
+    }
+
     // kernel 0
     for (int i = 0; i < N_k0; i++) {
         t0_alloc[i] = t0[i];
@@ -264,12 +282,6 @@ int main(int argc, const char* argv[]) {
         K1_alloc[i] = K1[i];
     }
 
-    cl_mem_ext_ptr_t mextIn0[4];
-    mextIn0[0] = {XCL_MEM_DDR_BANK0, times_alloc, 0};
-    mextIn0[1] = {XCL_MEM_DDR_BANK0, rates_alloc, 0};
-    mextIn0[2] = {XCL_MEM_DDR_BANK0, t0_alloc, 0};
-    mextIn0[3] = {XCL_MEM_DDR_BANK0, T0_alloc, 0};
-
     // kernel 2
     for (int i = 0; i < N_k2; i++) {
         startY2_alloc[i] = startY2[i];
@@ -280,41 +292,42 @@ int main(int argc, const char* argv[]) {
         types2_alloc[i] = types2[i];
     }
 
-    cl_mem_ext_ptr_t mextIn1[7];
-    mextIn1[0] = {XCL_MEM_DDR_BANK1, times_alloc, 0};
-    mextIn1[1] = {XCL_MEM_DDR_BANK1, rates_alloc, 0};
-    mextIn1[2] = {XCL_MEM_DDR_BANK1, types1_alloc, 0};
-    mextIn1[3] = {XCL_MEM_DDR_BANK1, t1_alloc, 0};
-    mextIn1[4] = {XCL_MEM_DDR_BANK1, T1_alloc, 0};
-    mextIn1[5] = {XCL_MEM_DDR_BANK1, S1_alloc, 0};
-    mextIn1[6] = {XCL_MEM_DDR_BANK1, K1_alloc, 0};
+    cl_mem_ext_ptr_t mextIn0[4];
+    mextIn0[0] = {2, times_alloc, kernel_hwa_k0()};
+    mextIn0[1] = {3, rates_alloc, kernel_hwa_k0()};
+    mextIn0[2] = {4, t0_alloc, kernel_hwa_k0()};
+    mextIn0[3] = {5, T0_alloc, kernel_hwa_k0()};
 
-    for (int i = 0; i < LEN; i++) {
-        rates_alloc[i] = rates[i];
-        times_alloc[i] = times[i];
-    }
+    cl_mem_ext_ptr_t mextIn1[7];
+    mextIn1[0] = {2, times_alloc, kernel_hwa_k1()};
+    mextIn1[1] = {3, rates_alloc, kernel_hwa_k1()};
+    mextIn1[2] = {4, types1_alloc, kernel_hwa_k1()};
+    mextIn1[3] = {5, t1_alloc, kernel_hwa_k1()};
+    mextIn1[4] = {6, T1_alloc, kernel_hwa_k1()};
+    mextIn1[5] = {7, S1_alloc, kernel_hwa_k1()};
+    mextIn1[6] = {8, K1_alloc, kernel_hwa_k1()};
 
     cl_mem_ext_ptr_t mextIn2[8];
-    mextIn2[0] = {XCL_MEM_DDR_BANK2, times_alloc, 0};
-    mextIn2[1] = {XCL_MEM_DDR_BANK2, rates_alloc, 0};
-    mextIn2[2] = {XCL_MEM_DDR_BANK2, types2_alloc, 0};
-    mextIn2[3] = {XCL_MEM_DDR_BANK2, startY2_alloc, 0};
-    mextIn2[4] = {XCL_MEM_DDR_BANK2, endY2_alloc, 0};
-    mextIn2[5] = {XCL_MEM_DDR_BANK2, settleFreq2_alloc, 0};
-    mextIn2[6] = {XCL_MEM_DDR_BANK2, N2_alloc, 0};
-    mextIn2[7] = {XCL_MEM_DDR_BANK2, X2_alloc, 0};
+    mextIn2[0] = {2, times_alloc, kernel_hwa_k2()};
+    mextIn2[1] = {3, rates_alloc, kernel_hwa_k2()};
+    mextIn2[2] = {4, types2_alloc, kernel_hwa_k2()};
+    mextIn2[3] = {5, startY2_alloc, kernel_hwa_k2()};
+    mextIn2[4] = {6, endY2_alloc, kernel_hwa_k2()};
+    mextIn2[5] = {7, settleFreq2_alloc, kernel_hwa_k2()};
+    mextIn2[6] = {8, N2_alloc, kernel_hwa_k2()};
+    mextIn2[7] = {9, X2_alloc, kernel_hwa_k2()};
 
     cl_mem_ext_ptr_t mextOut0[maxk0];
     for (int i = 0; i < maxk0; i++) {
-        mextOut0[i] = {XCL_MEM_DDR_BANK0, outputP0[i], 0};
+        mextOut0[i] = {6, outputP0[i], kernel_hwa_k0()};
     }
     cl_mem_ext_ptr_t mextOut1[maxk1];
     for (int i = 0; i < maxk1; i++) {
-        mextOut1[i] = {XCL_MEM_DDR_BANK1, outputP1[i], 0};
+        mextOut1[i] = {9, outputP1[i], kernel_hwa_k1()};
     }
     cl_mem_ext_ptr_t mextOut2[maxk2];
     for (int i = 0; i < maxk2; i++) {
-        mextOut2[i] = {XCL_MEM_DDR_BANK2, outputP2[i], 0};
+        mextOut2[i] = {10, outputP2[i], kernel_hwa_k2()};
     }
 
 #ifdef TEST_KRNL_0
@@ -331,13 +344,13 @@ int main(int argc, const char* argv[]) {
     }
 
     cl::Buffer inputBuf0[4];
-    inputBuf0[0] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf0[0] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * LEN, &mextIn0[0]);
-    inputBuf0[1] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf0[1] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * LEN, &mextIn0[1]);
-    inputBuf0[2] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf0[2] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * N_k0, &mextIn0[2]);
-    inputBuf0[3] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf0[3] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * N_k0, &mextIn0[3]);
 
     std::vector<cl::Memory> obIn0;
@@ -516,21 +529,21 @@ int main(int argc, const char* argv[]) {
     }
 
     cl::Buffer inputBuf2[8];
-    inputBuf2[0] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf2[0] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * LEN, &mextIn2[0]); // times
-    inputBuf2[1] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf2[1] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * LEN, &mextIn2[1]); // rates
-    inputBuf2[2] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf2[2] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(int) * N_k2, &mextIn2[2]); // types
-    inputBuf2[3] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf2[3] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * N_k2, &mextIn2[3]); // start year
-    inputBuf2[4] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf2[4] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * N_k2, &mextIn2[4]); // end year
-    inputBuf2[5] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf2[5] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(int) * N_k2, &mextIn2[5]); // settlement freq
-    inputBuf2[6] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf2[6] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * N_k2, &mextIn2[6]); // N
-    inputBuf2[7] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+    inputBuf2[7] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                               sizeof(TEST_DT) * N_k2, &mextIn2[7]); // X
 
     std::vector<cl::Memory> obIn2;

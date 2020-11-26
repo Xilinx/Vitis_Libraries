@@ -3,7 +3,8 @@
     "description": "", 
     "flow": "hls", 
     "platform_whitelist": [
-        "u250"
+        "u250", 
+        "u50"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
@@ -13,11 +14,15 @@
     "clock": "300MHz", 
     "topfunction": "dut", 
     "top": {
-        "source": ["dut.cpp"], 
+        "source": [
+            "dut.cpp"
+        ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/xf_fintech -I${XF_PROJ_ROOT}/../solver/L2/include"
     }, 
     "testbench": {
-        "source": ["main.cpp"], 
+        "source": [
+            "main.cpp"
+        ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/xf_fintech", 
         "ldflags": "", 
         "argv": {}
@@ -30,8 +35,20 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 16384, 
-                "max_time_min": 300
+                "max_memory_MB": {
+                    "hls_vivado_syn": 16384, 
+                    "hls_csim": 10240, 
+                    "hls_cosim": 16384, 
+                    "hls_vivado_impl": 16384, 
+                    "hls_csynth": 10240
+                }, 
+                "max_time_min": {
+                    "hls_vivado_syn": 300, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 300, 
+                    "hls_vivado_impl": 300, 
+                    "hls_csynth": 60
+                }
             }
         ], 
         "targets": [

@@ -40,8 +40,8 @@ namespace internal {
 
 template <typename DT>
 DT errorFunction(DT x) {
-#pragma HLS allocation instances = dmul limit = 1 operation
-#pragma HLS allocation instances = fmul limit = 1 operation
+#pragma HLS allocation operation instances = dmul limit = 1
+#pragma HLS allocation operation instances = fmul limit = 1
 
     DT tiny = 2.2204460492503131e-16;
     DT one = 1.00000000000000000000e+00;

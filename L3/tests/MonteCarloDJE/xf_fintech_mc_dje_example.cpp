@@ -71,7 +71,7 @@ double riskFreeRates[NUM_ASSETS];
 double volatility[NUM_ASSETS];
 double dividendYields[NUM_ASSETS];
 double timeToMaturity[NUM_ASSETS];
-double tolerance = 0.02;
+double tolerance = 0.05;
 double requiredTolerance[NUM_ASSETS];
 
 double DJIA;
@@ -148,6 +148,7 @@ int main(int argc, char** argv) {
         }
     }
 
+    double expected_value = 261.9595;
     if (retval == XLNX_OK) {
         printf("[XLNX] Running MCEuropeanDJE...\n");
 
@@ -161,6 +162,7 @@ int main(int argc, char** argv) {
             // emulation limit to single asset and limited number of samples
             unsigned int numAssets = 1;
             double requiredSamples = 256;
+            expected_value = 11.4370;
 
             retval = mcEuropeanDJE.run(optionTypes, STOCK_PRICES, strikePrices, riskFreeRates, dividendYields,
                                        volatility, timeToMaturity, &requiredSamples, numAssets, DOW_DIVISOR, &DJIA);
@@ -179,7 +181,7 @@ int main(int argc, char** argv) {
 
     // quick fix to get pass/fail criteria
     int ret = 0; // assume pass
-    if (std::abs(DJIA - 11.4370) > tolerance) {
+    if (std::abs(DJIA - expected_value) > tolerance) {
         printf("FAIL\n");
         ret = 1;
     } else {

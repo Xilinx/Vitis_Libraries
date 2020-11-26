@@ -1,12 +1,13 @@
 {
-    "gui": false,
+    "gui": false, 
     "name": "Xilinx MC Multi Asset European Heston Engine Test", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
         "u250", 
-        "u200"
+        "u200", 
+        "u50"
     ], 
     "platform_blacklist": [
         "zc"
@@ -15,15 +16,13 @@
         "u200": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
+                    "symbols": []
                 }
             }, 
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u200.ini"
+                        "--config PROJECT/conn_u200.cfg"
                     ]
                 }
             }
@@ -31,15 +30,27 @@
         "u250": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
+                    "symbols": []
                 }
             }, 
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u250.ini"
+                        "--config PROJECT/conn_u250.cfg"
+                    ]
+                }
+            }
+        }, 
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": []
+                }
+            }, 
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             }
@@ -55,13 +66,13 @@
         "host_exe": "test.exe", 
         "compiler": {
             "sources": [
-                "src/test.cpp", 
+                "host/test.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/MCMultiAssetEuropeanHestonEngine/src", 
+                "LIB_DIR/L2/tests/MCMultiAssetEuropeanHestonEngine/host", 
                 "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/L2/tests/MCMultiAssetEuropeanHestonEngine/kernel"
             ], 
@@ -82,13 +93,53 @@
             "accelerators": [
                 {
                     "location": "kernel/kernel_mceuropeanengine.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0", 
-                    "name": "kernel_mc_0"
+                    "frequency": 300, 
+                    "clflags": " -D DPRAGMA", 
+                    "name": "kernel_mc_0", 
+                    "num_compute_units": 1, 
+                    "compute_units": [
+                        {
+                            "name": "kernel_mc_0_1", 
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "m_axi_gmem0", 
+                                    "memory": "DDR[0]"
+                                }, 
+                                {
+                                    "name": "m_axi_gmem1", 
+                                    "memory": "DDR[0]"
+                                }, 
+                                {
+                                    "name": "m_axi_gmem2", 
+                                    "memory": "DDR[0]"
+                                }, 
+                                {
+                                    "name": "m_axi_gmem3", 
+                                    "memory": "DDR[0]"
+                                }, 
+                                {
+                                    "name": "m_axi_gmem4", 
+                                    "memory": "DDR[0]"
+                                }, 
+                                {
+                                    "name": "m_axi_gmem5", 
+                                    "memory": "DDR[0]"
+                                }, 
+                                {
+                                    "name": "m_axi_gmem6", 
+                                    "memory": "DDR[0]"
+                                }, 
+                                {
+                                    "name": "m_axi_gmem7", 
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
-            "ldclflags": " --nk kernel_mc_0:1:kernel_mc_0", 
-            "frequency": 300.0, 
+            "frequency": 300, 
             "name": "kernel_mc"
         }
     ], 
@@ -100,14 +151,25 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 480
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 960, 
+                    "vitis_hw_emu": 470, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

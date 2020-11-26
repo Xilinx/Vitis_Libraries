@@ -100,9 +100,9 @@ loop_linear1D:
  */
 template <typename DT>
 inline DT linearInterpolation2D(DT x, DT y, int xLen, int yLen, DT* arrX, DT* arrY, DT* arrZ) {
-#pragma HLS ALLOCATION instances = divideOperation limit = 1 function
-#pragma HLS ALLOCATION instances = addOperation limit = 2 function
-#pragma HLS ALLOCATION instances = multOperation limit = 1 function
+#pragma HLS ALLOCATION function instances = divideOperation < DT > limit = 1
+#pragma HLS ALLOCATION function instances = addOperation < DT > limit = 2
+#pragma HLS ALLOCATION function instances = multOperation < DT > limit = 1
     int i, j;
 loopx_linear2D:
     for (i = 0; i < xLen; i++) {
