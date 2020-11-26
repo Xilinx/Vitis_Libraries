@@ -30,14 +30,8 @@ void xilDecompressFull(uint32_t input_size,
 #pragma HLS interface axis port = sizestreamd
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#ifdef GZIP_MODE
-    const bool gzip_mode = 1;
     // Call for decompression
-    xf::compression::inflateMultiByte<DECODER_TYPE, MULTIPLE_BYTES, HIGH_FMAX_II, c_historySize, gzip_mode>(
-        inaxistreamd, outaxistreamd, sizestreamd, input_size);
-#else
     xf::compression::inflateMultiByte<DECODER_TYPE, MULTIPLE_BYTES, HIGH_FMAX_II, c_historySize>(
         inaxistreamd, outaxistreamd, sizestreamd, input_size);
-#endif
 }
 }

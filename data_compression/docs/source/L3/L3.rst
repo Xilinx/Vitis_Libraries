@@ -17,6 +17,7 @@ L3 Overlay User Guide
    :maxdepth: 2
    
    overview.rst
+   design.rst
    api_reference.rst
    demo.rst
 

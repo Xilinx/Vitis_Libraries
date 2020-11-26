@@ -1,0 +1,44 @@
+{
+	"vitis" : "2020.2",
+	"device_name" : "xilinx_u200_xdma_201830_2",
+	"containers": [
+	{
+		"name": "compress",
+		"meet_system_timing": "true",
+		"accelerators": [
+		{
+			"name": "xilHuffmanKernel",
+			"check_timing": "true",
+			"PipelineType": "none",
+			"check_latency": "true",
+			"check_warning": "true",
+			"FMax" : "299 MHz",
+			"Resources" : {
+				"LUT" : "41577",
+				"LUTAsMem" : "10926",
+				"REG" : "38073",
+				"BRAM" : "35",
+				"URAM" : "0",
+				"DSP" : "1"
+			}
+		},
+		{
+			"name": "xilLz77Compress",
+			"check_timing": "true",
+			"PipelineType": "none",
+			"check_latency": "true",
+			"check_warning": "true",
+			"FMax" : "299 MHz",
+			"Resources" : {
+				"LUT" : "43795",
+				"LUTAsMem" : "10923",
+				"REG" : "43833",
+				"BRAM" : "57",
+				"URAM" : "48",
+				"DSP" : "1"
+			}
+		}
+		]
+	}
+	]
+}

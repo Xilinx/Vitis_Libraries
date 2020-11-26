@@ -57,7 +57,7 @@ const auto FLG_BYTE = 104;
  * 4th byte is always set to below
  * and placed as uncompressed byte
  */
-const int NO_COMPRESS_BIT = 128;
+const auto NO_COMPRESS_BIT = 128;
 
 /**
  * In case of uncompressed block

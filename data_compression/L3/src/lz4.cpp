@@ -394,7 +394,7 @@ uint64_t xfLz4::decompress(uint8_t* in,
                                                     host_buffer_size, h_buf_in[cu][flag].data());
 
             // Output:- This buffer contains compressed data written by device
-            buffer_output[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            buffer_output[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                                      host_buffer_size, h_buf_out[cu][flag].data());
 
             // Ouput:- This buffer contains compressed block sizes
@@ -703,18 +703,15 @@ uint64_t xfLz4::decompress(uint8_t* in,
     auto total_end = std::chrono::high_resolution_clock::now();
     auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
     float throughput_in_mbps_1 = (float)original_size * 1000 / total_time_ns.count();
-    float kernel_throughput_in_mbps_1 = (float)original_size * 1000 / total_kernel_time;
 #ifdef EVENT_PROFILE
     std::cout << "Total Kernel Time " << total_kernel_time << std::endl;
     std::cout << "Total Write Time " << total_write_time << std::endl;
     std::cout << "Total Read Time " << total_read_time << std::endl;
 #endif
     if (file_list_flag == 0) {
-        std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl
-                  << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+        std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl;
     } else {
-        std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1 << "\t\t";
-        std::cout << std::fixed << std::setprecision(2) << kernel_throughput_in_mbps_1;
+        std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
     }
 
     for (uint32_t dBuf = 0; dBuf < D_COMPUTE_UNIT; dBuf++) {
@@ -811,7 +808,7 @@ uint64_t xfLz4::compress(
                                                     host_buffer_size, h_buf_in[cu][flag].data());
 
             // Output:- This buffer contains compressed data written by device
-            buffer_output[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            buffer_output[cu][flag] = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                                      host_buffer_size, h_buf_out[cu][flag].data());
 
             // Ouput:- This buffer contains compressed block sizes
@@ -1048,18 +1045,15 @@ uint64_t xfLz4::compress(
     auto total_end = std::chrono::high_resolution_clock::now();
     auto total_time_ns = std::chrono::duration<double, std::nano>(total_end - total_start);
     float throughput_in_mbps_1 = (float)input_size * 1000 / total_time_ns.count();
-    float kernel_throughput_in_mbps_1 = (float)input_size * 1000 / total_kernel_time;
 #ifdef EVENT_PROFILE
     std::cout << "Total Kernel Time " << total_kernel_time << std::endl;
     std::cout << "Total Write Time " << total_write_time << std::endl;
     std::cout << "Total Read Time " << total_read_time << std::endl;
 #endif
     if (file_list_flag == 0) {
-        std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl
-                  << "KT(MBps)\t\t:" << kernel_throughput_in_mbps_1 << std::endl;
+        std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:" << throughput_in_mbps_1 << std::endl;
     } else {
-        std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1 << "\t\t";
-        std::cout << std::fixed << std::setprecision(2) << kernel_throughput_in_mbps_1;
+        std::cout << std::fixed << std::setprecision(2) << throughput_in_mbps_1;
     }
 
     for (uint32_t cu = 0; cu < C_COMPUTE_UNIT; cu++) {

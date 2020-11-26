@@ -92,8 +92,6 @@ size_t xflz4::create_header(uint8_t* h_header, uint32_t inSize) {
     uint32_t xxhash_val = (xxh >> 8);
     m_xxhashVal = xxhash_val;
 
-    uint32_t block_size_in_bytes = m_BlockSizeInKb * 1024;
-
     // Header information
     uint32_t head_size = 0;
 
@@ -175,8 +173,6 @@ void xflz4::compress_in_line_multiple_files(std::vector<char*>& inVec,
 
     int ret = 0;
 
-    uint64_t total_kernel_time = 0;
-    uint64_t total_packer_kernel_time = 0;
     std::chrono::duration<double, std::nano> total_ssd_time_ns(0);
 
     // Pre Processing

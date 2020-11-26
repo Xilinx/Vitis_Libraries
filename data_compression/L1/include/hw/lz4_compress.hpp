@@ -40,10 +40,6 @@
 #include "stream_downsizer.hpp"
 #include "stream_upsizer.hpp"
 
-typedef ap_uint<64> lz4_compressd_dt;
-typedef ap_uint<32> compressd_dt;
-typedef ap_uint<8> encodedData_t;
-
 const int c_gmemBurstSize = 32;
 
 namespace xf {
@@ -51,9 +47,9 @@ namespace compression {
 namespace details {
 
 template <int MAX_LIT_COUNT, int PARALLEL_UNITS>
-static void lz4CompressPart1(hls::stream<compressd_dt>& inStream,
+static void lz4CompressPart1(hls::stream<ap_uint<32> >& inStream,
                              hls::stream<uint8_t>& lit_outStream,
-                             hls::stream<lz4_compressd_dt>& lenOffset_Stream,
+                             hls::stream<ap_uint<64> >& lenOffset_Stream,
                              uint32_t input_size,
                              uint32_t max_lit_limit[PARALLEL_UNITS],
                              uint32_t index) {
@@ -63,11 +59,11 @@ static void lz4CompressPart1(hls::stream<compressd_dt>& inStream,
     uint32_t lit_count = 0;
     uint32_t lit_count_flag = 0;
 
-    compressd_dt nextEncodedValue = inStream.read();
+    ap_uint<32> nextEncodedValue = inStream.read();
 lz4_divide:
     for (uint32_t i = 0; i < input_size;) {
 #pragma HLS PIPELINE II = 1
-        compressd_dt tmpEncodedValue = nextEncodedValue;
+        ap_uint<32> tmpEncodedValue = nextEncodedValue;
         if (i < (input_size - 1)) nextEncodedValue = inStream.read();
         uint8_t tCh = tmpEncodedValue.range(7, 0);
         uint8_t tLen = tmpEncodedValue.range(15, 8);
@@ -78,7 +74,7 @@ lz4_divide:
             lit_count_flag = 1;
         } else if (tLen) {
             uint8_t match_len = tLen - 4; // LZ4 standard
-            lz4_compressd_dt tmpValue;
+            ap_uint<64> tmpValue;
             tmpValue.range(63, 32) = lit_count;
             tmpValue.range(15, 0) = match_len;
             tmpValue.range(31, 16) = match_offset;
@@ -95,7 +91,7 @@ lz4_divide:
             i += 1;
     }
     if (lit_count) {
-        lz4_compressd_dt tmpValue;
+        ap_uint<64> tmpValue;
         tmpValue.range(63, 32) = lit_count;
         if (lit_count == MAX_LIT_COUNT) {
             lit_count_flag = 1;
@@ -111,7 +107,7 @@ lz4_divide:
 }
 
 static void lz4CompressPart2(hls::stream<uint8_t>& in_lit_inStream,
-                             hls::stream<lz4_compressd_dt>& in_lenOffset_Stream,
+                             hls::stream<ap_uint<64> >& in_lenOffset_Stream,
                              hls::stream<ap_uint<8> >& outStream,
                              hls::stream<bool>& endOfStream,
                              hls::stream<uint32_t>& compressdSizeStream,
@@ -128,16 +124,23 @@ static void lz4CompressPart2(hls::stream<uint8_t>& in_lit_inStream,
     ap_uint<16> match_offset = 0;
     bool lit_ending = false;
     bool extra_match_len = false;
+    bool readOffsetFlag = true;
 
 lz4_compress:
-    for (uint32_t inIdx = 0; (inIdx < input_size) || (next_state != WRITE_TOKEN);) {
+    for (uint32_t inIdx = 0; (inIdx < input_size) || (!readOffsetFlag);) {
 #pragma HLS PIPELINE II = 1
         ap_uint<8> outValue;
+        ap_uint<64> nextLenOffsetValue;
+
+        if (readOffsetFlag) {
+            nextLenOffsetValue = in_lenOffset_Stream.read();
+            readOffsetFlag = false;
+        }
+
         if (next_state == WRITE_TOKEN) {
-            lz4_compressd_dt tmpValue = in_lenOffset_Stream.read();
-            lit_length = tmpValue.range(63, 32);
-            match_length = tmpValue.range(15, 0);
-            match_offset = tmpValue.range(31, 16);
+            lit_length = nextLenOffsetValue.range(63, 32);
+            match_length = nextLenOffsetValue.range(15, 0);
+            match_offset = nextLenOffsetValue.range(31, 16);
             inIdx += match_length + lit_length + 4;
 
             if (match_length == 777 && match_offset == 777) {
@@ -154,13 +157,16 @@ lz4_compress:
                 outValue.range(7, 4) = 15;
                 lit_length -= 15;
                 next_state = WRITE_LIT_LEN;
+                readOffsetFlag = false;
             } else if (lit_length) {
                 outValue.range(7, 4) = lit_length;
                 lit_length = 0;
                 next_state = WRITE_LITERAL;
+                readOffsetFlag = false;
             } else {
                 outValue.range(7, 4) = 0;
                 next_state = WRITE_OFFSET0;
+                readOffsetFlag = false;
             }
             if (match_length >= 15) {
                 outValue.range(3, 0) = 15;
@@ -178,6 +184,7 @@ lz4_compress:
             } else {
                 outValue = lit_length;
                 next_state = WRITE_LITERAL;
+                readOffsetFlag = false;
             }
         } else if (next_state == WRITE_LITERAL) {
             outValue = in_lit_inStream.read();
@@ -185,20 +192,25 @@ lz4_compress:
             if (write_lit_length == 0) {
                 if (lit_ending) {
                     next_state = WRITE_TOKEN;
+                    readOffsetFlag = true;
                 } else {
                     next_state = WRITE_OFFSET0;
+                    readOffsetFlag = false;
                 }
             }
         } else if (next_state == WRITE_OFFSET0) {
             match_offset++; // LZ4 standard
             outValue = match_offset.range(7, 0);
             next_state = WRITE_OFFSET1;
+            readOffsetFlag = false;
         } else if (next_state == WRITE_OFFSET1) {
             outValue = match_offset.range(15, 8);
             if (extra_match_len) {
                 next_state = WRITE_MATCH_LEN;
+                readOffsetFlag = false;
             } else {
                 next_state = WRITE_TOKEN;
+                readOffsetFlag = true;
             }
         } else if (next_state == WRITE_MATCH_LEN) {
             if (match_length >= 255) {
@@ -207,6 +219,7 @@ lz4_compress:
             } else {
                 outValue = match_length;
                 next_state = WRITE_TOKEN;
+                readOffsetFlag = true;
             }
         }
         if (compressedSize < input_size) {
@@ -243,7 +256,7 @@ namespace compression {
  *
  */
 template <int MAX_LIT_COUNT, int PARALLEL_UNITS>
-static void lz4Compress(hls::stream<compressd_dt>& inStream,
+static void lz4Compress(hls::stream<ap_uint<32> >& inStream,
                         hls::stream<ap_uint<8> >& outStream,
                         uint32_t max_lit_limit[PARALLEL_UNITS],
                         uint32_t input_size,
@@ -251,12 +264,12 @@ static void lz4Compress(hls::stream<compressd_dt>& inStream,
                         hls::stream<uint32_t>& compressdSizeStream,
                         uint32_t index) {
     hls::stream<uint8_t> lit_outStream("lit_outStream");
-    hls::stream<lz4_compressd_dt> lenOffset_Stream("lenOffset_Stream");
+    hls::stream<ap_uint<64> > lenOffset_Stream("lenOffset_Stream");
 
 #pragma HLS STREAM variable = lit_outStream depth = MAX_LIT_COUNT
 #pragma HLS STREAM variable = lenOffset_Stream depth = c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = lenOffset_Stream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = lenOffset_Stream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     details::lz4CompressPart1<MAX_LIT_COUNT, PARALLEL_UNITS>(inStream, lit_outStream, lenOffset_Stream, input_size,
@@ -282,15 +295,15 @@ void hlsLz4Core(hls::stream<data_t>& inStream,
                 uint32_t max_lit_limit[NUM_BLOCK],
                 uint32_t input_size,
                 uint32_t core_idx) {
-    hls::stream<xf::compression::compressd_dt> compressdStream("compressdStream");
-    hls::stream<xf::compression::compressd_dt> bestMatchStream("bestMatchStream");
-    hls::stream<xf::compression::compressd_dt> boosterStream("boosterStream");
+    hls::stream<ap_uint<32> > compressdStream("compressdStream");
+    hls::stream<ap_uint<32> > bestMatchStream("bestMatchStream");
+    hls::stream<ap_uint<32> > boosterStream("boosterStream");
 #pragma HLS STREAM variable = compressdStream depth = 8
 #pragma HLS STREAM variable = bestMatchStream depth = 8
 #pragma HLS STREAM variable = boosterStream depth = 8
 
-#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = compressdStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = boosterStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::lzCompress<M_LEN, MIN_MAT, LZ_MAX_OFFSET_LIM>(inStream, compressdStream, input_size);
@@ -318,16 +331,16 @@ void hlsLz4(const data_t* in,
             const uint32_t input_size[NUM_BLOCK],
             uint32_t output_size[NUM_BLOCK],
             uint32_t max_lit_limit[NUM_BLOCK]) {
-    hls::stream<encodedData_t> inStream[NUM_BLOCK];
+    hls::stream<ap_uint<8> > inStream[NUM_BLOCK];
     hls::stream<bool> outStreamEos[NUM_BLOCK];
-    hls::stream<encodedData_t> outStream[NUM_BLOCK];
+    hls::stream<ap_uint<8> > outStream[NUM_BLOCK];
 #pragma HLS STREAM variable = outStreamEos depth = 2
 #pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStream depth = c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = outStreamEos core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = outStreamEos type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStream type = FIFO impl = SRL
 
     hls::stream<uint32_t> compressedSize[NUM_BLOCK];
 
@@ -338,8 +351,8 @@ void hlsLz4(const data_t* in,
     for (uint8_t i = 0; i < NUM_BLOCK; i++) {
 #pragma HLS UNROLL
         // lz4Core is instantiated based on the NUM_BLOCK
-        hlsLz4Core<encodedData_t, DATAWIDTH, BURST_SIZE, NUM_BLOCK>(inStream[i], outStream[i], outStreamEos[i],
-                                                                    compressedSize[i], max_lit_limit, input_size[i], i);
+        hlsLz4Core<ap_uint<8>, DATAWIDTH, BURST_SIZE, NUM_BLOCK>(inStream[i], outStream[i], outStreamEos[i],
+                                                                 compressedSize[i], max_lit_limit, input_size[i], i);
     }
 
     xf::compression::details::multStream2MM<8, NUM_BLOCK, DATAWIDTH, BURST_SIZE>(

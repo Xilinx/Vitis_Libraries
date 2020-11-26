@@ -1,0 +1,28 @@
+{
+	"vitis" : "2020.2",
+	"device_name" : "xilinx_u200_xdma_201830_2",
+	"containers": [
+	{
+		"name": "decompress",
+		"meet_system_timing": "true",
+		"accelerators": [
+		{
+			"name": "xilSnappyDecompress",
+			"check_timing": "true",
+			"PipelineType": "none",
+			"check_latency": "true",
+			"check_warning": "true",
+			"FMax" : "300 MHz",
+			"Resources" : {
+				"LUT" : "34685",
+				"LUTAsMem" : "14533",
+				"REG" : "48918",
+				"BRAM" : "146",
+				"URAM" : "0",
+				"DSP" : "1"
+			}
+		}
+		]
+	}
+	]
+}

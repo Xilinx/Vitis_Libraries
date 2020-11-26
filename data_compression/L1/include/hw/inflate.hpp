@@ -75,14 +75,14 @@ lzLiteralUpsizer:
 }
 
 template <class SIZE_DT = uint8_t>
-void lzProcessingUnit(hls::stream<xf::compression::compressd_dt>& inStream,
+void lzProcessingUnit(hls::stream<ap_uint<32> >& inStream,
                       hls::stream<bool>& inEndOfStream,
                       hls::stream<SIZE_DT>& litLenStream,
                       hls::stream<uint8_t>& lenStream,
                       hls::stream<SIZE_DT>& matchLenStream,
                       hls::stream<ap_uint<16> >& offsetStream,
                       hls::stream<ap_uint<8> >& outStream) {
-    xf::compression::compressd_dt inValue, nextValue;
+    ap_uint<32> inValue, nextValue;
     const int c_maxLitLen = 128;
     uint16_t offset = 0;
     uint16_t matchLen = 0;
@@ -211,7 +211,33 @@ void kStreamWriteZlibDecomp(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& outKSt
     sizestreamd << pcksize;
 }
 
-template <int DECODER, int HISTORY_SIZE = (32 * 1024), int LOW_OFFSET = 8, bool USE_GZIP = 0>
+template <int DECODER, int HISTORY_SIZE = (32 * 1024), int LOW_OFFSET = 8>
+void inflateCoreStream(hls::stream<ap_uint<16> >& inStream,
+                       hls::stream<ap_uint<8> >& outStream,
+                       hls::stream<bool>& outStreamEoS,
+                       hls::stream<uint32_t>& outStreamSize,
+                       hls::stream<uint32_t>& inSize) {
+    const int c_byteGenLoopII = 1;
+    const eHuffmanType c_decoderType = (eHuffmanType)DECODER;
+
+    hls::stream<ap_uint<32> > bitunpackstream("bitUnPackStream");
+    hls::stream<bool> bitendofstream("bitEndOfStream");
+    hls::stream<uint32_t> sizeTrans("sizeTrans");
+
+#pragma HLS STREAM variable = bitunpackstream depth = 32
+#pragma HLS STREAM variable = bitendofstream depth = 32
+#pragma HLS STREAM variable = sizeTrans depth = 3
+
+#pragma HLS dataflow
+
+    xf::compression::huffmanDecoderStream<c_decoderType, c_byteGenLoopII>(inStream, bitunpackstream, bitendofstream,
+                                                                          inSize, sizeTrans);
+
+    xf::compression::lzDecompressZlibEosStream<HISTORY_SIZE>(bitunpackstream, bitendofstream, outStream, outStreamEoS,
+                                                             outStreamSize, sizeTrans);
+}
+
+template <int DECODER, int HISTORY_SIZE = (32 * 1024), int LOW_OFFSET = 8>
 void inflateCore(hls::stream<ap_uint<16> >& inStream,
                  hls::stream<ap_uint<8> >& outStream,
                  hls::stream<bool>& outStreamEoS,
@@ -220,7 +246,7 @@ void inflateCore(hls::stream<ap_uint<16> >& inStream,
     const int c_byteGenLoopII = 1;
     const eHuffmanType c_decoderType = (eHuffmanType)DECODER;
 
-    hls::stream<xf::compression::compressd_dt> bitunpackstream("bitUnPackStream");
+    hls::stream<ap_uint<32> > bitunpackstream("bitUnPackStream");
     hls::stream<bool> bitendofstream("bitEndOfStream");
 
 #pragma HLS STREAM variable = bitunpackstream depth = 32
@@ -228,14 +254,14 @@ void inflateCore(hls::stream<ap_uint<16> >& inStream,
 
 #pragma HLS dataflow
 
-    xf::compression::huffmanDecoder<c_decoderType, c_byteGenLoopII, USE_GZIP>(inStream, bitunpackstream, bitendofstream,
-                                                                              input_size);
+    xf::compression::huffmanDecoder<c_decoderType, c_byteGenLoopII>(inStream, bitunpackstream, bitendofstream,
+                                                                    input_size);
 
     xf::compression::lzDecompressZlibEos<HISTORY_SIZE>(bitunpackstream, bitendofstream, outStream, outStreamEoS,
                                                        outStreamSize);
 }
 
-template <int DECODER, int PARALLEL_BYTES, int HUFF_LOOP_II = 1, int HISTORY_SIZE = (32 * 1024), bool USE_GZIP = 0>
+template <int DECODER, int PARALLEL_BYTES, int HUFF_LOOP_II = 1, int HISTORY_SIZE = (32 * 1024)>
 void inflateMultiByteCore(hls::stream<ap_uint<16> >& inStream,
                           hls::stream<ap_uint<PARALLEL_BYTES * 8> >& outStream,
                           hls::stream<bool>& outStreamEoS,
@@ -247,7 +273,7 @@ void inflateMultiByteCore(hls::stream<ap_uint<16> >& inStream,
     const int c_byteGenLoopII = HUFF_LOOP_II;
     const eHuffmanType c_decoderType = (eHuffmanType)DECODER;
 
-    hls::stream<xf::compression::compressd_dt> bitunpackstream("bitUnPackStream");
+    hls::stream<ap_uint<32> > bitunpackstream("bitUnPackStream");
     hls::stream<bool> bitendofstream("bitEndOfStream");
     hls::stream<ap_uint<c_parallelBit> > litStream("litStream");
     hls::stream<ap_uint<9> > litLenStream("litLenStream");
@@ -265,19 +291,19 @@ void inflateMultiByteCore(hls::stream<ap_uint<16> >& inStream,
 #pragma HLS STREAM variable = matchLenStream depth = 16
 #pragma HLS STREAM variable = offsetStream depth = 16
 
-#pragma HLS RESOURCE variable = bitunpackstream core = FIFO_SRL
-#pragma HLS RESOURCE variable = bitunpackstream core = FIFO_SRL
-#pragma HLS RESOURCE variable = interLenStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = litStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = litLenStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = matchLenStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = offsetStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = lzProcOutStream core = RAM_2P_BRAM
+#pragma HLS BIND_STORAGE variable = bitunpackstream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = bitunpackstream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = interLenStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = litStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = litLenStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = matchLenStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = offsetStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = lzProcOutStream type = RAM_2P impl = BRAM
 
 #pragma HLS dataflow
 
-    xf::compression::huffmanDecoder<c_decoderType, c_byteGenLoopII, USE_GZIP>(inStream, bitunpackstream, bitendofstream,
-                                                                              inputSize);
+    xf::compression::huffmanDecoder<c_decoderType, c_byteGenLoopII>(inStream, bitunpackstream, bitendofstream,
+                                                                    inputSize);
 
     xf::compression::details::lzProcessingUnit<ap_uint<9> >(
         bitunpackstream, bitendofstream, litLenStream, interLenStream, matchLenStream, offsetStream, lzProcOutStream);
@@ -325,7 +351,7 @@ void inflate(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& inaxistream,
                                                   outsize_val);
 }
 
-template <int DECODER, int PARALLEL_BYTES, int HUFF_LOOP_II = 1, int HISTORY_SIZE = (32 * 1024), bool USE_GZIP = 0>
+template <int DECODER, int PARALLEL_BYTES, int HUFF_LOOP_II = 1, int HISTORY_SIZE = (32 * 1024)>
 void inflateMultiByte(hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistream,
                       hls::stream<ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> >& outaxistream,
                       hls::stream<ap_axiu<64, 0, 0, 0> >& sizestreamd,
@@ -345,15 +371,15 @@ void inflateMultiByte(hls::stream<ap_axiu<16, 0, 0, 0> >& inaxistream,
 #pragma HLS STREAM variable = outStreamEos depth = 32
 #pragma HLS STREAM variable = outSizeStream depth = 3
 
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamEos core = FIFO_SRL
-#pragma HLS RESOURCE variable = outSizeStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStreamEos type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outSizeStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     details::kStreamReadZlibDecomp<16>(inaxistream, inStream, inputSize);
 
-    details::inflateMultiByteCore<DECODER, PARALLEL_BYTES, c_byteGenLoopII, HISTORY_SIZE, USE_GZIP>(
+    details::inflateMultiByteCore<DECODER, PARALLEL_BYTES, c_byteGenLoopII, HISTORY_SIZE>(
         inStream, outStream, outStreamEos, outSizeStream, inputSize);
 
     details::kStreamWriteZlibDecomp<c_parallelBit>(outaxistream, sizestreamd, outStream, outStreamEos, outSizeStream);

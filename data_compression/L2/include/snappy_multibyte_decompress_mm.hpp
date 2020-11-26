@@ -36,7 +36,7 @@
 #include "stream_downsizer.hpp"
 #include "stream_upsizer.hpp"
 
-#include "snappy_decompress.hpp"
+#include "snappy_decompress_details.hpp"
 
 #define GMEM_DWIDTH 512
 #define GMEM_BURST_SIZE 16

@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ZLIB Decompress Memory Mapped 4 Parallel Bytes", 
+    "name": "Xilinx ZLIB Decompress Memory Mapped 4 Parallel Bytes HLS Test", 
     "description": "Test Design to validate Zlib multibyte decompress memory mapped module", 
     "flow": "hls", 
     "platform_whitelist": [
@@ -25,7 +25,7 @@
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DPARALLEL_BLOCK=8", 
         "ldflags": "", 
         "argv": {
-	    "hls_csim": "${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt", 
+            "hls_csim": "${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt", 
             "hls_cosim": "${DESIGN_PATH}/sample.txt.zlib ${DESIGN_PATH}/sample.txt.zlib.out ${DESIGN_PATH}/sample.txt"
         }
     }, 
@@ -37,8 +37,20 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_memory_MB": {
+                    "hls_vivado_syn": 16384, 
+                    "hls_csim": 10240, 
+                    "hls_cosim": 16384, 
+                    "hls_vivado_impl": 16384, 
+                    "hls_csynth": 10240
+                }, 
+                "max_time_min": {
+                    "hls_vivado_syn": 300, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 300, 
+                    "hls_vivado_impl": 300, 
+                    "hls_csynth": 60
+                }
             }
         ], 
         "targets": [

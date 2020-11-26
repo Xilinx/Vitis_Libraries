@@ -38,6 +38,12 @@
 
 typedef ap_uint<MULTIPLE_BYTES * 8> uintMemWidth_t;
 
+#ifdef INZSTD
+const int c_inStreamDwidth = (MULTIPLE_BYTES * 8);
+#else
+const int c_inStreamDwidth = 16;
+#endif
+
 extern "C" {
 /**
  * @brief Zlib data mover:Writer kernel top function. It reads data from memory and streams it
@@ -49,6 +55,8 @@ extern "C" {
  *
  */
 
-void xilZlibDmWriter(uintMemWidth_t* in, uint32_t inputSize, hls::stream<ap_axiu<16, 0, 0, 0> >& instreamk);
+void xilZlibDmWriter(uintMemWidth_t* in,
+                     uint32_t inputSize,
+                     hls::stream<ap_axiu<c_inStreamDwidth, 0, 0, 0> >& instreamk);
 }
 #endif // _XFCOMPRESSION_ZLIB_DM_WR_HPP_

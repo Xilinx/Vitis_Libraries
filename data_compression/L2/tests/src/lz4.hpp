@@ -31,7 +31,7 @@
 /**
  * Maximum host buffer used to operate per kernel invocation
  */
-#define HOST_BUFFER_SIZE (128 * 1024 * 1024)
+#define HOST_BUFFER_SIZE (32 * 1024 * 1024)
 
 /**
  * Default block size
@@ -145,7 +145,7 @@ class xfLz4 {
      * @param host_buffer_size host buffer size
      */
     uint64_t decompressSequential(
-        uint8_t* in, uint8_t* out, uint64_t actual_size, uint64_t original_size, uint32_t host_buffer_size);
+        uint8_t* in, uint8_t* out, uint64_t actual_size, uint64_t original_size, uint64_t host_buffer_size);
 
     uint64_t getEventDurationNs(const cl::Event& event);
 
