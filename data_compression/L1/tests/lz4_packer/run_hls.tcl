@@ -46,7 +46,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -disable_depchk -O -argv "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.lz4"
+  cosim_design -argv "${DESIGN_PATH}/sample.txt ${DESIGN_PATH}/sample.txt.lz4"
 }
 
 if {$VIVADO_SYN == 1} {

@@ -1,102 +1,117 @@
 {
-    "name": "Xilinx LZ4 Streaming Compression and Decompression",
+    "name": "Xilinx LZ4 Streaming Compression and Decompression", 
     "description": [
         "LZ4-Streaming Compression and Decompression"
-    ],
-    "flow": "vitis",
+    ], 
+    "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-cx BUILD/compress_streaming.xclbin -dx BUILD/decompress_streaming.xclbin -v PROJECT/sample.txt",
+            "cmd_args": "-cx BUILD/compress_streaming.xclbin -dx BUILD/decompress_streaming.xclbin -v PROJECT/sample.txt", 
             "name": "generic launch for all flows"
         }
-    ],
+    ], 
     "post_launch": [
         {
-            "launch_cmd": "./run.sh HOST_EXE LIB_DIR BUILD/compress_streaming.xclbin BUILD/decompress_streaming.xclbin"
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress_streaming.xclbin BUILD/decompress_streaming.xclbin"
+             ]
         }
-    ],
+    ], 
     "platform_blacklist": [
-        "u280"
-    ],
+        "zc", 
+        "vck"
+    ], 
     "platform_whitelist": [
-        "u200",
-        "u250"
-    ],
-
+        "u200", 
+        "u250", 
+        "u50"
+    ], 
     "host": {
-        "host_exe": "xil_lz4_streaming",
+        "host_exe": "xil_lz4_streaming", 
         "compiler": {
             "sources": [
-                "./src/host.cpp",
-                "LIB_DIR/L2/tests/src/lz4_stream.cpp",
-                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
-                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
-                "LIB_DIR/common/libs/logger/logger.cpp",
+                "./src/host.cpp", 
+                "LIB_DIR/L2/tests/src/lz4_stream.cpp", 
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
+                "LIB_DIR/common/libs/logger/logger.cpp", 
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
-            ],
+            ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/src/"
-            ],
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/common/thirdParty/xxhash"
+            ], 
             "symbols": [
                 "PARALLEL_BLOCK=8"
             ]
         }
-    },
+    }, 
     "v++": {
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=8"
             ]
         }
-    },
+    }, 
     "containers": [
         {
-            "name": "compress_streaming",
-            "ldclflags": "--config PROJECT/compress.ini",
+            "name": "compress_streaming", 
+            "ldclflags": "--config PROJECT/compress.ini", 
             "accelerators": [
                 {
-                    "name": "xilLz4CompressStream",
+                    "name": "xilLz4CompressStream", 
                     "location": "LIB_DIR/L2/src/lz4_compress_stream.cpp"
-                },
+                }, 
                 {
-                    "name": "xilCompDatamover",
+                    "name": "xilCompDatamover", 
                     "location": "LIB_DIR/L2/tests/src/block_comp_dm.cpp"
                 }
             ]
-        },
+        }, 
         {
-            "name": "decompress_streaming",
-            "ldclflags": "--config PROJECT/decompress.ini",
+            "name": "decompress_streaming", 
+            "ldclflags": "--config PROJECT/decompress.ini", 
             "accelerators": [
                 {
-                    "name": "xilLz4DecompressStream",
+                    "name": "xilLz4DecompressStream", 
                     "location": "LIB_DIR/L2/src/lz4_decompress_stream.cpp"
-                },
+                }, 
                 {
-                    "name": "xilDecompDatamover",
+                    "name": "xilDecompDatamover", 
                     "location": "LIB_DIR/L2/tests/src/block_decomp_dm.cpp"
                 }
             ]
         }
-    ],
-    "output_files" : "sample.txt.* sample_run.* test.list",
+    ], 
+    "output_files": "sample.txt.* sample_run.* test.list", 
     "testinfo": {
-        "disable": false,
+        "disable": false, 
         "jobs": [
             {
-                "index": 0,
-                "dependency": [],
-                "env": "",
-                "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 300
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 25, 
+                    "vitis_hw_run": 10
+                }
             }
-        ],
+        ], 
         "targets": [
-            "vitis_sw_emu",
-            "vitis_hw_emu",
-            "vitis_hw"
-        ],
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
         "category": "canary"
     }
 }

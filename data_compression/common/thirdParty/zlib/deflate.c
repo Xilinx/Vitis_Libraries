@@ -807,38 +807,43 @@ int ZEXPORT deflate (strm, flush)
 int ZEXPORT deflate(z_streamp strm, int flush)
 #endif
 {
+    std::string u50_xclbin("/opt/xilinx/zlib/u50_gen3x16_xdma_201920_3.xclbin");
+    std::string xrt_ini("/opt/xilinx/zlib/xrt.ini");
     const uint8_t c_max_cr = 0;
     bool use_cpu_sol = false;
     bool use_fpga_sol = false;
-    char *xclbin = getenv("XILINX_LIBZ_XCLBIN");
-    std::string u50_xclbin = xclbin;
-
-    if (u50_xclbin.c_str() == NULL) {
-        u50_xclbin = "/opt/Xilinx/zlib/u50_gen3x16_xdma_201920_3.xclbin";
-        std::ifstream bin_file(u50_xclbin.c_str(), std::ifstream::binary);
-        if (bin_file.fail()) {
-#ifdef VERBOSE
-            std::cout << "Unable to open binary file " << std::endl;
-#endif
-            use_cpu_sol = true;
-        } else {
-            use_fpga_sol = true;
-        }
-    } else {
-        use_fpga_sol = true;
+    char* xclbin = getenv("XILINX_LIBZ_XCLBIN");
+    char* xrtent = getenv("XRT_INI_PATH");
+    if (xclbin && *xclbin) u50_xclbin = xclbin;
+    if (xrtent && *xrtent) xrt_ini = xrtent;
+    std::ifstream xrt_ini_file(xrt_ini.c_str(), std::ifstream::binary);
+    if (xrt_ini_file.is_open()) {
+        // Path to XRT ini file
+        setenv("XRT_INI_PATH", xrt_ini.c_str(), 1);
+        xrt_ini_file.close();
     }
-    
-    char *min_size = getenv("MIN_INPUT_SIZE");
+
+    std::ifstream bin_file(u50_xclbin.c_str(), std::ifstream::binary);
+    if (bin_file.is_open()) {
+        use_fpga_sol = true;
+        bin_file.close();
+    } else {
+#if (VERBOSE_LEVEL >= 1)
+        std::cout << "Unable to open binary file " << std::endl;
+#endif
+        use_cpu_sol = true;
+    }
+
+    char* min_size = getenv("MIN_INPUT_SIZE");
     uint32_t small_size = MIN_INPUT_SIZE;
     if (min_size != NULL) {
         small_size = atoi(min_size);
     }
-
     // Check input size if its less than
     // MIN_INPUT_SIZE use SW flow
     uint64_t input_size = strm->avail_in;
     if (input_size < small_size) {
-#ifdef VERBOSE
+#if (VERBOSE_LEVEL >= 1)
         std::cout << "Input Size is less than MIN_INPUT_SIZE";
         std::cout << " Falling back to SW Solution " << std::endl;
 #endif
@@ -848,15 +853,15 @@ int ZEXPORT deflate(z_streamp strm, int flush)
 
     if (use_fpga_sol) {
         // Arg 1: xclbin
-        // Xilinx ZLIB object
-        xfZlib *xlz = nullptr;
+        // xilinx ZLIB object
+        xfZlib* xlz = nullptr;
         bool flag = false;
         do {
             xlz = new xfZlib(u50_xclbin.c_str(), c_max_cr, COMP_ONLY);
             int err_code = xlz->error_code();
             if (err_code && (err_code != c_clOutOfResource)) {
-#ifdef VERBOSE
-                std::cout << "Failed to use FPGA for compression, "; 
+#if (VERBOSE_LEVEL >= 1)
+                std::cout << "Failed to use FPGA for compression, ";
                 std::cout << " switching to SW solution \n" << std::endl;
 #endif
                 use_cpu_sol = true;
@@ -867,7 +872,7 @@ int ZEXPORT deflate(z_streamp strm, int flush)
                 uint64_t enbytes = xlz->compress_buffer((uint8_t*)input, (uint8_t*)output, input_size);
                 delete xlz;
                 if (enbytes == 0) {
-#ifdef VERBOSE
+#if (VERBOSE_LEVEL >= 1)
                     std::cout << "Failed to create device buffer, Retrying . . ." << std::endl;
 #endif
                     flag = true;
@@ -877,10 +882,10 @@ int ZEXPORT deflate(z_streamp strm, int flush)
                     return 1;
                 }
             }
-       } while(flag);
-    } 
+        } while (flag);
+    }
     if (use_cpu_sol) {
-#ifdef VERBOSE
+#if (VERBOSE_LEVEL >= 1)
         printf("CPU Solution \n");
 #endif
         // printf("Not in CPU deflate \n");
@@ -903,22 +908,22 @@ int ZEXPORT deflate(z_streamp strm, int flush)
 
         /* Flush as much pending output as possible */
         if (s->pending != 0) {
-        flush_pending(strm);
-        if (strm->avail_out == 0) {
-            /* Since avail_out is 0, deflate will be called again with
-             * more output space, but possibly with both pending and
-             * avail_in equal to zero. There won't be anything to do,
-             * but this is not an error situation so make sure we
-             * return OK instead of BUF_ERROR at next call of deflate:
-             */
-            s->last_flush = -1;
-            return Z_OK;
-        }
+            flush_pending(strm);
+            if (strm->avail_out == 0) {
+                /* Since avail_out is 0, deflate will be called again with
+                 * more output space, but possibly with both pending and
+                 * avail_in equal to zero. There won't be anything to do,
+                 * but this is not an error situation so make sure we
+                 * return OK instead of BUF_ERROR at next call of deflate:
+                 */
+                s->last_flush = -1;
+                return Z_OK;
+            }
 
-        /* Make sure there is something to do and avoid duplicate consecutive
-         * flushes. For repeated and useless calls with Z_FINISH, we keep
-         * returning Z_STREAM_END instead of Z_BUF_ERROR.
-         */
+            /* Make sure there is something to do and avoid duplicate consecutive
+             * flushes. For repeated and useless calls with Z_FINISH, we keep
+             * returning Z_STREAM_END instead of Z_BUF_ERROR.
+             */
         } else if (strm->avail_in == 0 && RANK(flush) <= RANK(old_flush) && flush != Z_FINISH) {
             ERR_RETURN(strm, Z_BUF_ERROR);
         }
@@ -1000,18 +1005,18 @@ int ZEXPORT deflate(z_streamp strm, int flush)
                     _tr_align(s);
                 } else if (flush != Z_BLOCK) { /* FULL_FLUSH or SYNC_FLUSH */
                     _tr_stored_block(s, (char*)0, 0L, 0);
-                /* For a full flush, this empty block will be recognized
-                 * as a special marker by inflate_sync().
-                 */
-                if (flush == Z_FULL_FLUSH) {
-                    CLEAR_HASH(s); /* forget history */
-                    if (s->lookahead == 0) {
-                        s->strstart = 0;
-                        s->block_start = 0L;
-                        s->insert = 0;
+                    /* For a full flush, this empty block will be recognized
+                     * as a special marker by inflate_sync().
+                     */
+                    if (flush == Z_FULL_FLUSH) {
+                        CLEAR_HASH(s); /* forget history */
+                        if (s->lookahead == 0) {
+                            s->strstart = 0;
+                            s->block_start = 0L;
+                            s->insert = 0;
+                        }
                     }
                 }
-            }
                 flush_pending(strm);
                 if (strm->avail_out == 0) {
                     s->last_flush = -1; /* avoid BUF_ERROR at next call, see above */

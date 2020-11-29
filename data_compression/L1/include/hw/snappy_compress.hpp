@@ -37,9 +37,6 @@
 #define INSIZE_RANGE_14BIT (1 << 14) // 16384
 #define INSIZE_RANGE_21BIT (1 << 21) // 2097152
 
-typedef ap_uint<64> snappy_compressd_dt;
-typedef ap_uint<32> compressd_dt;
-
 const int c_gmemBurstSize = 32;
 
 namespace xf {
@@ -48,9 +45,9 @@ namespace details {
 
 // Seperates the input stream into two output streams
 template <int MAX_LIT_COUNT, int MAX_LIT_STREAM_SIZE, int PARALLEL_UNITS>
-inline void snappyCompressPart1(hls::stream<compressd_dt>& inStream,
+inline void snappyCompressPart1(hls::stream<ap_uint<32> >& inStream,
                                 hls::stream<uint8_t>& lit_outStream,
-                                hls::stream<snappy_compressd_dt>& lenOffset_Stream,
+                                hls::stream<ap_uint<64> >& lenOffset_Stream,
                                 uint32_t input_size,
                                 uint32_t max_lit_limit[PARALLEL_UNITS],
                                 uint32_t index) {
@@ -63,11 +60,11 @@ inline void snappyCompressPart1(hls::stream<compressd_dt>& inStream,
     uint32_t lit_count = 0;
     uint32_t lit_count_flag = 0;
 
-    compressd_dt nextEncodedValue = inStream.read();
+    ap_uint<32> nextEncodedValue = inStream.read();
 snappy_divide:
     for (uint32_t i = 0; i < input_size; i++) {
 #pragma HLS PIPELINE II = 1
-        compressd_dt tmpEncodedValue = nextEncodedValue;
+        ap_uint<32> tmpEncodedValue = nextEncodedValue;
         if (i < (input_size - 1)) nextEncodedValue = inStream.read();
         uint8_t tCh = tmpEncodedValue.range(7, 0);
         uint8_t tLen = tmpEncodedValue.range(15, 8);
@@ -76,7 +73,7 @@ snappy_divide:
 
         if (tLen > 0) {
             uint8_t match_len = tLen; // Snappy standard
-            snappy_compressd_dt tmpValue;
+            ap_uint<64> tmpValue;
             tmpValue.range(63, 32) = lit_count;
             tmpValue.range(15, 0) = match_len;
             tmpValue.range(31, 16) = match_offset;
@@ -88,7 +85,7 @@ snappy_divide:
             lit_outStream << tCh;
             lit_count++;
             if (lit_count == MAX_LIT_COUNT) {
-                snappy_compressd_dt tmpValue;
+                ap_uint<64> tmpValue;
                 tmpValue.range(63, 32) = lit_count;
                 tmpValue.range(15, 0) = 0;
                 tmpValue.range(31, 16) = 0;
@@ -99,7 +96,7 @@ snappy_divide:
     }
 
     if (lit_count) {
-        snappy_compressd_dt tmpValue;
+        ap_uint<64> tmpValue;
         tmpValue.range(63, 32) = lit_count;
 
         if (lit_count == MAX_LIT_COUNT) {
@@ -118,7 +115,7 @@ snappy_divide:
 
 // Snappy encoding algorithm
 static void snappyCompressPart2(hls::stream<uint8_t>& in_lit_inStream,
-                                hls::stream<snappy_compressd_dt>& in_lenOffset_Stream,
+                                hls::stream<ap_uint<64> >& in_lenOffset_Stream,
                                 hls::stream<ap_uint<8> >& outStream,
                                 hls::stream<bool>& endOfStream,
                                 hls::stream<uint32_t>& compressdSizeStream,
@@ -205,7 +202,7 @@ static void snappyCompressPart2(hls::stream<uint8_t>& in_lit_inStream,
     }
 
     // Read lenOffset stream to begin processing literal and sequence sections
-    snappy_compressd_dt tmpValue = in_lenOffset_Stream.read();
+    ap_uint<64> tmpValue = in_lenOffset_Stream.read();
 
 // Main loop which process the lz_compress data
 // does the encoding based on compress format specificaiton of Snappy
@@ -387,7 +384,7 @@ namespace compression {
  * @param compressdSizeStream Gives the compressed size for each 64K block
  */
 template <int MAX_LIT_COUNT, int MAX_LIT_STREAM_SIZE, int PARALLEL_UNITS>
-static void snappyCompress(hls::stream<compressd_dt>& inStream,
+static void snappyCompress(hls::stream<ap_uint<32> >& inStream,
                            hls::stream<ap_uint<8> >& outStream,
                            uint32_t max_lit_limit[PARALLEL_UNITS],
                            uint32_t input_size,
@@ -395,13 +392,13 @@ static void snappyCompress(hls::stream<compressd_dt>& inStream,
                            hls::stream<uint32_t>& compressdSizeStream,
                            uint32_t index) {
     hls::stream<uint8_t> lit_outStream("lit_outStream");
-    hls::stream<snappy_compressd_dt> lenOffset_Stream("lenOffset_Stream");
+    hls::stream<ap_uint<64> > lenOffset_Stream("lenOffset_Stream");
 
-#pragma HLS STREAM variable = lit_outStream depth = MAX_LIT_COUNT
+#pragma HLS STREAM variable = lit_outStream depth = MAX_LIT_STREAM_SIZE
 #pragma HLS STREAM variable = lenOffset_Stream depth = c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = lit_outStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = lenOffset_Stream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = lit_outStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = lenOffset_Stream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     details::snappyCompressPart1<MAX_LIT_COUNT, MAX_LIT_STREAM_SIZE, PARALLEL_UNITS>(

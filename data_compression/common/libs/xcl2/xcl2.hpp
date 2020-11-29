@@ -34,7 +34,7 @@
         return #err;    \
         break
 
-static const char* error_string(cl_int error_code) {
+inline static const char* error_string(cl_int error_code) {
     switch (error_code) {
         ERROR_CASE(CL_SUCCESS);
         ERROR_CASE(CL_DEVICE_NOT_FOUND);
@@ -145,6 +145,7 @@ struct aligned_allocator {
         return reinterpret_cast<T*>(ptr);
     }
     void deallocate(T* p, std::size_t num) { free(p); }
+    void deallocate(T* p) { free(p); }
 };
 
 namespace xcl {

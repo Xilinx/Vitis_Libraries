@@ -37,11 +37,10 @@
 #define C_COMPUTE_UNIT 1
 #define D_COMPUTE_UNIT 1
 #define H_COMPUTE_UNIT 1
-#define T_COMPUTE_UNIT 1
 #define MAX_CCOMP_UNITS C_COMPUTE_UNIT
 #define MAX_DDCOMP_UNITS D_COMPUTE_UNIT
 
-#define MIN_BLOCK_SIZE 200
+#define MIN_BLOCK_SIZE 1024
 // Default block size
 #define BLOCK_SIZE_IN_KB 1024
 
@@ -82,11 +81,11 @@ class xil_zlib {
     int init(const std::string& binaryFile, uint8_t flow, uint8_t d_type);
     int release();
     uint32_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
-    uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run, bool enable_p2p = 0);
+    uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run = 0, bool enable_p2p = 0);
     uint32_t decompressSeq(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run);
     uint32_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
     uint32_t decompress_file(
-        std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run, bool enable_p2p = 0);
+        std::string& inFile_name, std::string& outFile_name, uint64_t input_size, int cu_run = 0, bool enable_p2p = 0);
     uint64_t get_event_duration_ns(const cl::Event& event);
     // Binary flow compress/decompress
     xil_zlib(const std::string& binaryFile,

@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "stream_upsizer.hpp"
 
 #define GET_DIFF_IF_BIG(x, y) (x > y) ? (x - y) : 0
 
@@ -62,6 +63,107 @@
 namespace xf {
 namespace compression {
 namespace details {
+
+template <int NUM_BLOCK = 4, int DATAWIDTH = 512, int BURST_SIZE = 16, int BLOCK_SIZE = 32768>
+void multStream2MMNB(hls::stream<ap_uint<DATAWIDTH> > inStream[NUM_BLOCK],
+                     hls::stream<bool> inStreamEos[NUM_BLOCK],
+                     hls::stream<uint32_t> inSizeStream[NUM_BLOCK],
+                     hls::stream<uint32_t> inCmpBlkSizeStream[NUM_BLOCK],
+                     hls::stream<uint32_t> inBaseIdx[NUM_BLOCK],
+                     ap_uint<DATAWIDTH>* out,
+                     uint32_t* compressedSize) {
+    constexpr int c_byteSize = 8;
+    constexpr int c_wordSize = DATAWIDTH / c_byteSize;
+    constexpr int c_idx_fctr = BLOCK_SIZE / c_wordSize;
+
+    ap_uint<NUM_BLOCK> is_pending;
+    uint32_t write_size[NUM_BLOCK];
+    uint32_t base_addr[NUM_BLOCK];
+    uint8_t tmpVal[NUM_BLOCK];
+#pragma HLS ARRAY_PARTITION variable = write_size dim = 0 complete
+#pragma HLS ARRAY_PARTITION variable = base_addr dim = 0 complete
+#pragma HLS ARRAY_PARTITION variable = tmpVal dim = 0 complete
+
+    for (uint8_t i = 0; i < NUM_BLOCK; i++) {
+#pragma HLS UNROLL
+        is_pending.range(i, i) = 1;
+        write_size[i] = 0;
+        base_addr[i] = inBaseIdx[i].read();
+        tmpVal[i] = 0;
+    }
+
+    while (is_pending) {
+        for (int i = 0; i < NUM_BLOCK; i++) {
+            uint32_t readSizeBytes = 0;
+            if (!inSizeStream[i].empty()) {
+                readSizeBytes = inSizeStream[i].read();
+                is_pending.range(i, i) = (readSizeBytes > 0) ? 1 : 0;
+            }
+            if (readSizeBytes > 0) {
+                uint32_t readSize = (readSizeBytes - 1) / c_wordSize + 1;
+                uint32_t base_idx = base_addr[i] + write_size[i];
+                bool eos = false;
+                if (write_size[i] + readSize <= c_idx_fctr) {
+                gmem_write:
+                    for (int j = 0; j < readSize; j++) {
+#pragma HLS PIPELINE II = 1
+                        out[base_idx + j] = inStream[i].read();
+                        eos = inStreamEos[i].read();
+                    }
+                } else {
+                leftover_read:
+                    for (int j = 0; j < readSize; j++) {
+#pragma HLS PIPELINE II = 1
+                        ap_uint<DATAWIDTH> tmp = inStream[i].read();
+                        eos = inStreamEos[i].read();
+                    }
+                }
+                write_size[i] += readSize;
+                if (eos) {
+                    base_addr[i] += c_idx_fctr;
+                    tmpVal[i]++;
+                    write_size[i] = 0;
+                }
+            }
+        }
+    }
+
+    uint32_t idx = 0;
+    for (uint8_t i = 0; i < NUM_BLOCK; i++) {
+        for (uint8_t j = 0; j < tmpVal[i]; j++) {
+#pragma HLS PIPELINE
+            if (!inCmpBlkSizeStream[i].empty()) compressedSize[idx++] = inCmpBlkSizeStream[i].read();
+        }
+    }
+}
+
+template <int IN_DATAWIDTH, int NUM_BLOCK = 4, int GMEM_DATAWIDTH = 512, int BURST_SIZE = 16, int BLOCK_SIZE = 32768>
+void multStream2MMBlockReceiver(hls::stream<ap_uint<IN_DATAWIDTH> > inStream[NUM_BLOCK],
+                                hls::stream<bool> inStreamEos[NUM_BLOCK],
+                                hls::stream<bool> inFileEos[NUM_BLOCK],
+                                hls::stream<uint32_t> totalOutSizeStream[NUM_BLOCK],
+                                hls::stream<uint32_t> inBaseIdx[NUM_BLOCK],
+                                ap_uint<GMEM_DATAWIDTH>* out,
+                                uint32_t* outSize) {
+#pragma HLS DATAFLOW
+    constexpr int c_depthOutStreamV = 2 * BURST_SIZE;
+
+    hls::stream<ap_uint<GMEM_DATAWIDTH> > outStreamV[NUM_BLOCK];
+    hls::stream<bool> outStreamVEos[NUM_BLOCK];
+    hls::stream<uint32_t> outStreamVSize[NUM_BLOCK];
+#pragma HLS STREAM variable = outStreamV depth = c_depthOutStreamV
+#pragma HLS STREAM variable = outStreamVEos depth = c_depthOutStreamV
+
+parallel_upsizer:
+    for (uint8_t i = 0; i < NUM_BLOCK; i++) {
+#pragma HLS UNROLL
+        xf::compression::details::simpleUpsizer<IN_DATAWIDTH, GMEM_DATAWIDTH, BURST_SIZE>(
+            inStream[i], inStreamEos[i], inFileEos[i], outStreamV[i], outStreamVEos[i], outStreamVSize[i]);
+    }
+
+    multStream2MMNB<NUM_BLOCK, GMEM_DATAWIDTH, BURST_SIZE, BLOCK_SIZE>(outStreamV, outStreamVEos, outStreamVSize,
+                                                                       totalOutSizeStream, inBaseIdx, out, outSize);
+}
 
 template <int IN_WIDTH, int OUT_WIDTH, int BURST_SIZE>
 void stream2mmUpsizer(hls::stream<ap_uint<IN_WIDTH> >& inStream,
@@ -179,7 +281,7 @@ void stream2MM(hls::stream<ap_uint<IN_DATAWIDTH> >& inStream,
     hls::stream<uint16_t> outStreamVSize;
 #pragma HLS STREAM variable = outStreamV depth = c_depthOutStreamV
 #pragma HLS STREAM variable = outStreamVSize depth = 2
-#pragma HLS RESOURCE variable = outStreamV core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = outStreamV type = FIFO impl = SRL
 
 #pragma HLS DATAFLOW
     xf::compression::details::stream2mmUpsizer<IN_DATAWIDTH, GMEM_DATAWIDTH, BURST_SIZE>(inStream, inStreamEos,
@@ -283,7 +385,7 @@ void multStream2MM(hls::stream<ap_uint<IN_DATAWIDTH> > inStream[NUM_BLOCK],
     hls::stream<uint16_t> outStreamVSize[NUM_BLOCK];
 #pragma HLS STREAM variable = outStreamV depth = c_depthOutStreamV
 #pragma HLS STREAM variable = outStreamVSize depth = 2
-#pragma HLS RESOURCE variable = outStreamV core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = outStreamV type = FIFO impl = SRL
 
 #pragma HLS DATAFLOW
 parallel_upsizer:
@@ -342,7 +444,7 @@ void multStream2MMFreq(hls::stream<ap_uint<IN_DATAWIDTH> > inStream[NUM_BLOCK],
 
 #pragma HLS STREAM variable = outStreamV depth = c_depthOutStreamV
 #pragma HLS STREAM variable = outStreamVSize depth = 2
-#pragma HLS RESOURCE variable = outStreamV core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = outStreamV type = FIFO impl = SRL
 
 #pragma HLS DATAFLOW
 parallel_upsizer:
@@ -430,7 +532,7 @@ void s2mm_compress(ap_uint<DATAWIDTH>* out,
     ap_uint<PARALLEL_BLOCK> is_pending = 1;
     ap_uint<DATAWIDTH> local_buffer[PARALLEL_BLOCK][BURST_SIZE];
 #pragma HLS ARRAY_PARTITION variable = local_buffer dim = 1 complete
-#pragma HLS RESOURCE variable = local_buffer core = RAM_2P_LUTRAM
+#pragma HLS BIND_STORAGE variable = local_buffer type = RAM_2P impl = LUTRAM
 
     // printme("%s:Started\n", __FUNCTION__);
     for (int i = 0; i < PARALLEL_BLOCK; i++) {
@@ -544,7 +646,7 @@ void s2mmNb(ap_uint<DATAWIDTH>* out,
     ap_uint<NUM_BLOCKS> is_pending = 1;
     ap_uint<DATAWIDTH> local_buffer[NUM_BLOCKS][BURST_SIZE];
 #pragma HLS ARRAY_PARTITION variable = local_buffer dim = 1 complete
-#pragma HLS RESOURCE variable = local_buffer core = RAM_2P_LUTRAM
+#pragma HLS BIND_STORAGE variable = local_buffer type = RAM_2P impl = LUTRAM
 
     // printme("%s:Started\n", __FUNCTION__);
     for (int i = 0; i < NUM_BLOCKS; i++) {
@@ -649,7 +751,7 @@ void s2mmNb(ap_uint<DATAWIDTH>* out,
     ap_uint<NUM_BLOCKS> is_pending = 1;
     ap_uint<DATAWIDTH> local_buffer[NUM_BLOCKS][BURST_SIZE];
 #pragma HLS ARRAY_PARTITION variable = local_buffer dim = 1 complete
-#pragma HLS RESOURCE variable = local_buffer core = RAM_2P_LUTRAM
+#pragma HLS BIND_STORAGE variable = local_buffer type = RAM_2P impl = LUTRAM
 
     // printme("%s:Started\n", __FUNCTION__);
     for (int i = 0; i < NUM_BLOCKS; i++) {
@@ -749,12 +851,12 @@ s2mm_eos_simple:
     }
 }
 
-template <int DATAWIDTH, int BURST_SIZE>
+template <int DATAWIDTH, int BURST_SIZE, class OUTSIZE_DT = uint32_t>
 void s2mmEosSimple(ap_uint<DATAWIDTH>* out,
                    hls::stream<ap_uint<DATAWIDTH> >& inStream,
                    hls::stream<bool>& endOfStream,
-                   hls::stream<uint32_t>& outSize,
-                   uint32_t* output_size) {
+                   hls::stream<OUTSIZE_DT>& outSize,
+                   OUTSIZE_DT* output_size) {
     /**
      * @brief This module reads DATAWIDTH data from stream based on
      * size stream and writes the data to DDR.

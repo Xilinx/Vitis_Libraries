@@ -42,7 +42,7 @@ void lz4DecompressEngineRun(hls::stream<uintV_t>& inStream,
     uint32_t output_size = _output_size;
     hls::stream<compressd_dt> decompressd_stream("decompressd_stream");
 #pragma HLS STREAM variable = decompressd_stream depth = 8
-#pragma HLS RESOURCE variable = decompressd_stream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = decompressd_stream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     xf::compression::lz4Decompress(inStream, decompressd_stream, input_size);

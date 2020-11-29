@@ -238,7 +238,8 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
         // Read block data from compressed stream .lz4
         inFile.read((char*)in.data(), (input_size - 15));
 
-        uint32_t host_buffer_size = (m_BlockSizeInKb * 1024) * MAX_NUMBER_BLOCKS;
+        uint32_t maxNumBlks = (HOST_BUFFER_SIZE) / (m_BlockSizeInKb * 1024);
+        uint64_t host_buffer_size = (m_BlockSizeInKb * 1024) * maxNumBlks;
 
         if ((m_BlockSizeInKb * 1024) > original_size) host_buffer_size = m_BlockSizeInKb * 1024;
 
@@ -260,7 +261,7 @@ uint64_t xfLz4::decompressFile(std::string& inFile_name, std::string& outFile_na
 // Note: Various block sizes supported by LZ4 standard are not applicable to
 // this function. It just supports Block Size 64KB
 uint64_t xfLz4::decompressSequential(
-    uint8_t* in, uint8_t* out, uint64_t input_size, uint64_t original_size, uint32_t host_buffer_size) {
+    uint8_t* in, uint8_t* out, uint64_t input_size, uint64_t original_size, uint64_t host_buffer_size) {
     uint32_t max_num_blks = (host_buffer_size) / (m_BlockSizeInKb * 1024);
 
     h_buf_in.resize(host_buffer_size);
@@ -283,7 +284,7 @@ uint64_t xfLz4::decompressSequential(
     uint64_t inIdx = 0;
     uint64_t total_decomression_size = 0;
 
-    uint32_t hostChunk_cu;
+    uint64_t hostChunk_cu;
     uint32_t compute_cu;
     uint64_t output_idx = 0;
 
@@ -292,7 +293,7 @@ uint64_t xfLz4::decompressSequential(
 
     for (uint64_t outIdx = 0; outIdx < original_size; outIdx += host_buffer_size) {
         compute_cu = 0;
-        uint32_t chunk_size = host_buffer_size;
+        uint64_t chunk_size = host_buffer_size;
 
         // Figure out the chunk size for each compute unit
         hostChunk_cu = 0;
@@ -306,8 +307,8 @@ uint64_t xfLz4::decompressSequential(
 
         uint32_t nblocks;
         uint32_t bufblocks;
-        uint32_t total_size;
-        uint32_t buf_size;
+        uint64_t total_size;
+        uint64_t buf_size;
         uint32_t block_size = 0;
         uint32_t compressed_size = 0;
 
@@ -315,7 +316,7 @@ uint64_t xfLz4::decompressSequential(
         buf_size = 0;
         bufblocks = 0;
         total_size = 0;
-        for (uint32_t cIdx = 0; cIdx < hostChunk_cu; cIdx += block_size_in_bytes, nblocks++, total_size += block_size) {
+        for (uint64_t cIdx = 0; cIdx < hostChunk_cu; cIdx += block_size_in_bytes, nblocks++, total_size += block_size) {
             if (block_cntr == (total_block_cnt - 1)) {
                 block_size = original_size - done_block_cntr * block_size_in_bytes;
             } else {
@@ -380,7 +381,7 @@ uint64_t xfLz4::decompressSequential(
                 new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, buf_size, h_buf_in.data());
 
             buffer_output =
-                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, buf_size, h_buf_out.data());
+                new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, buf_size, h_buf_out.data());
 
             buffer_block_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                                                sizeof(uint32_t) * bufblocks, h_blksize.data());
@@ -546,7 +547,7 @@ uint64_t xfLz4::compressSequential(uint8_t* in, uint8_t* out, uint64_t input_siz
             new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, bufSize_in_bytes_cu, h_buf_in.data());
 
         buffer_output =
-            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, bufSize_in_bytes_cu, h_buf_out.data());
+            new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, bufSize_in_bytes_cu, h_buf_out.data());
 
         buffer_compressed_size = new cl::Buffer(*m_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                                                 sizeof(uint32_t) * total_blocks_cu, h_compressSize.data());

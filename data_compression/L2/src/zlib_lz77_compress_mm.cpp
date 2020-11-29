@@ -37,20 +37,24 @@ void lz77Core(hls::stream<ap_uint<8> >& inStream,
               hls::stream<uint32_t>& compressedSize,
               uint32_t input_size) {
     hls::stream<compressd_dt> compressdStream("compressdStream");
+    hls::stream<compressd_dt> compressdStream_1("compressdStream_1");
     hls::stream<compressd_dt> boosterStream("boosterStream");
     hls::stream<compressd_dt> boosterStream_freq("boosterStream");
     hls::stream<lz77_compressd_dt> lenOffsetOut("lenOffsetOut");
 #pragma HLS STREAM variable = compressdStream depth = c_gmemBurstSize
+#pragma HLS STREAM variable = compressdStream_1 depth = c_gmemBurstSize
 #pragma HLS STREAM variable = boosterStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = lenOffsetOut depth = c_gmemBurstSize
 
-#pragma HLS RESOURCE variable = compressdStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = boosterStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = lenOffsetOut core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = compressdStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = compressdStream_1 core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = boosterStream core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = lenOffsetOut core = FIFO_SRL
 
 #pragma HLS dataflow
     xf::compression::lzCompress<MATCH_LEN, MIN_MATCH, LZ_MAX_OFFSET_LIMIT>(inStream, compressdStream, input_size);
-    xf::compression::lzBooster<MAX_MATCH_LEN>(compressdStream, boosterStream, input_size);
+    xf::compression::lzBestMatchFilter<MATCH_LEN, 0>(compressdStream, compressdStream_1, input_size);
+    xf::compression::lzBooster<MAX_MATCH_LEN>(compressdStream_1, boosterStream, input_size);
     xf::compression::lz77Divide(boosterStream, outStreamVec, outStreamVecEos, outStreamTree, compressedSize,
                                 input_size);
 }
@@ -74,10 +78,10 @@ void lz77(const uintMemWidth_t* in,
 #pragma HLS STREAM variable = outStreamVec depth = c_gmemBSize
 #pragma HLS STREAM variable = outStreamTreeData depth = c_gmemBSize
 
-#pragma HLS RESOURCE variable = outStreamVecEos core = FIFO_SRL
-#pragma HLS RESOURCE variable = inStream core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamVec core = FIFO_SRL
-#pragma HLS RESOURCE variable = outStreamTreeData core = FIFO_SRL
+#pragma HLS BIND_STORAGE variable = outStreamVecEos type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStreamVec type = FIFO impl = SRL
+#pragma HLS BIND_STORAGE variable = outStreamTreeData type = FIFO impl = SRL
 
     hls::stream<uint32_t> compressedSize[PARALLEL_BLOCK];
 #pragma HLS STREAM variable = compressedSize depth = 2

@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 .. meta::
-   :keywords: Vitis, Library, Data Compression, Xilinx, Zlib, LZ4, Snappy, ZLIB, FPGA Benchmark, Compression Benchmark
+   :keywords: Vitis, Library, Data Compression, Xilinx, Zlib, LZ4, Snappy, ZLIB, Zstd, FPGA Benchmark, Compression Benchmark
    :description: This page provides benchmarking results of various Vitis Data Compression Applications. Results include throughput and FPGA resources.
 
 =================
@@ -22,9 +22,9 @@ Reported compression ratio is measured on Silesia Corpus compression benchmark.
 +-----------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 | Architecture                                                    |  Compression Ratio   |  Best Throughput  |  FMax    |  LUT    |  BRAM |  URAM |
 +=================================================================+======================+===================+==========+=========+=======+=======+
-| LZ4 Streaming (Single Engine)                                   |        2.13          |      287 MB/s     |  300MHz  |  4.1K   |  4    |  6    |
+| LZ4 Streaming (Single Engine and Datawidth: 8bit)               |        2.13          |      290 MB/s     |  300MHz  |  3.2K   |  5    |  6    |
 +-----------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| Snappy Streaming (Single Engine)                                |        2.13          |      260 MB/s     |  300MHz  |  2.9K   |  4    |  6    |
+| Snappy Streaming (Single Engine and Datawidth: 8bit)            |        2.13          |      290 MB/s     |  300MHz  |  3.1K   |  4    |  6    |
 +-----------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 | LZ4 Memory Mapped (8 Engines with Data Movers)                  |        2.13          |      2.2 GB/s     |  295MHz  |  47K    |  56   |  48   |
 +-----------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
@@ -48,9 +48,9 @@ kernel clock frequency met and resource utilization when executed on Alveo U200.
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Architecture                                                         |  Best Throughput  |  FMax    |  LUT    |  BRAM | URAM |           
 +======================================================================+===================+==========+=========+=======+======+
-| LZ4 Streaming (Single Engine and Datawidth: 64bit)                   |     1.42 GB/s     |  253MHz  |  6.2K   |  0    |  4   |
+| LZ4 Streaming (Single Engine and Datawidth: 64bit)                   |     1.8  GB/s     |  300MHz  |  7.2K   |  0    |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| Snappy Streaming (Single Engine and Datawidth: 64bit)                |     1.58 GB/s     |  300MHz  |  7.8K   |  0    |  4   |
+| Snappy Streaming (Single Engine and Datawidth: 64bit)                |     1.97 GB/s     |  300MHz  |  8.8K   |  0    |  4   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Zlib Streaming (High Throughput, Datawidth: 64bit)                   |     1.18 GB/s     |  227MHz  |  11.6K  |  3    |  2   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
@@ -60,7 +60,12 @@ kernel clock frequency met and resource utilization when executed on Alveo U200.
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Snappy Memory Mapped (8 Engines with Data Movers)                    |     1.8  GB/s     |  300MHz  |  31.1K  |  146  |  0   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| ZStd Streaming (Single Engine and Datawidth: 32bit)                  |     783  MB/s     |  232MHz  |  18K    |  52   |  4   |
++----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+| ZStd Full File Streaming (Single Engine with Datawidth: 32bit)       |     783  MB/s     |  232MHz  |  22K    |  52   |  4   |
++----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 
 .. [*] The amount of resources used indicate that we still have room on Alveo U200 to go for more compute units which can further improve the throughput.
-.. [*] Zlib Streaming: Dynamic Huffman and Single Engine performance is provided   
-.. [*] GZip Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported)
+.. [*] Zlib Streaming: Dynamic Huffman and Single Engine performance is provided.
+.. [*] GZip Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
+.. [*] ZStd Streaming: Full Standard support with limited Window Size upto 128KB.

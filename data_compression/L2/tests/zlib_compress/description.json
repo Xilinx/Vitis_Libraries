@@ -1,88 +1,109 @@
 {
-    "name": "Xilinx ZLIB Compress",
+    "name": "Xilinx ZLIB Compress", 
     "description": [
         "Xilinx ZLIB Compression"
-    ],
-    "flow": "vitis",
+    ], 
+    "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt",
+            "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt", 
             "name": "generic launch for all flows"
         }
-    ],
+    ], 
+    "post_launch": [
+        {
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin"
+             ]
+        }
+    ], 
     "platform_blacklist": [
-        "u280"
-    ],
-     "platform_whitelist": [
-        "u200",
-        "u250"
-   ],
+        "zc", 
+        "vck"
+    ], 
+    "platform_whitelist": [
+        "u200", 
+        "u250", 
+        "u50"
+    ], 
     "host": {
-        "host_exe": "xil_zlib",
+        "host_exe": "xil_zlib", 
         "compiler": {
             "sources": [
-                "./src/host.cpp",
-                "LIB_DIR/L2/tests/src/zlib.cpp",
-                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
-                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
-                "LIB_DIR/common/libs/logger/logger.cpp",
-                "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
-            ],
+                "./src/host.cpp", 
+                "LIB_DIR/L2/tests/src/zlib.cpp", 
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
+                "LIB_DIR/common/libs/logger/logger.cpp",  
+                "LIB_DIR/common/thirdParty/zlib-1.2.7/crc32.c"
+            ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/src/",
-                "LIB_DIR/L1/include/hw"
-            ],
+                "LIB_DIR/L2/tests/src/", 
+                "LIB_DIR/L1/include/hw", 
+                "LIB_DIR/common/thirdParty/zlib-1.2.7"
+            ], 
             "symbols": [
                 "PARALLEL_BLOCK=8"
             ]
         }
-    },
+    }, 
     "v++": {
-        "build_datafiles" : [
-            "PROJECT/advanced.ini"
-        ],
+        "build_datafiles": [
+            "PROJECT/advanced.cfg"
+        ], 
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=8"
-            ],
+            ], 
             "clflags": [
-                "--config PROJECT/advanced.ini"
+                "--config PROJECT/advanced.cfg"
             ]
         }
-    },
+    }, 
     "containers": [
         {
-            "name": "compress",
+            "name": "compress", 
             "accelerators": [
                 {
-                    "name": "xilLz77Compress",
+                    "name": "xilLz77Compress", 
                     "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp"
-                },
+                }, 
                 {
-                    "name": "xilHuffmanKernel",
+                    "name": "xilHuffmanKernel", 
                     "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp"
                 }
             ]
         }
-    ],
-    "output_files" : "sample.txt.*",
+    ], 
+    "output_files": "sample.txt.*", 
     "testinfo": {
-        "disable": false,
+        "disable": false, 
         "jobs": [
             {
-                "index": 0,
-                "dependency": [],
-                "env": "",
-                "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 300
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 25, 
+                    "vitis_hw_run": 10
+                }
             }
-        ],
+        ], 
         "targets": [
-            "vitis_sw_emu",
-            "vitis_hw_emu",
-            "vitis_hw"
-        ],
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
         "category": "canary"
     }
 }

@@ -1,78 +1,99 @@
 {
-    "name": "Xilinx Snappy MultiByte-8 Decompress",
+    "name": "Xilinx Snappy Decompress 8 Parallel Bytes", 
     "description": [
         "Xilinx Snappy MultiByte Decompress: 8 parallel bytes processed at a time"
-    ],
-    "flow": "vitis",
+    ], 
+    "flow": "vitis", 
     "launch": [
         {
-            "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt.snappy",
+            "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt.snappy", 
             "name": "generic launch for all flows"
         }
-    ],
+    ], 
+    "post_launch": [
+        {
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/decompress.xclbin"
+             ]
+        }
+    ], 
     "platform_blacklist": [
-        "u280"
-    ],
-     "platform_whitelist": [
-        "u200",
-        "u250"
-    ],
+        "zc", 
+        "vck"
+    ], 
+    "platform_whitelist": [
+        "u200", 
+        "u250", 
+        "u50"
+    ], 
     "host": {
-        "host_exe": "xil_snappy",
+        "host_exe": "xil_snappy", 
         "compiler": {
             "sources": [
-                "./src/host.cpp",
-                "LIB_DIR/L2/tests/src/snappy.cpp",
-                "LIB_DIR/common/libs/xcl2/xcl2.cpp",
-                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp",
-                "LIB_DIR/common/libs/logger/logger.cpp",
+                "./src/host.cpp", 
+                "LIB_DIR/L2/tests/src/snappy.cpp", 
+                "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
+                "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
+                "LIB_DIR/common/libs/logger/logger.cpp", 
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
-            ],
+            ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/src/"
-            ],
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/common/thirdParty/xxhash"
+            ], 
             "symbols": [
                 "PARALLEL_BLOCK=1"
             ]
         }
-    },
+    }, 
     "v++": {
         "compiler": {
             "symbols": [
-                "PARALLEL_BLOCK=1",
+                "PARALLEL_BLOCK=1", 
                 "PARALLEL_BYTE=8"
             ]
         }
-    },
+    }, 
     "containers": [
         {
-            "name": "decompress",
+            "name": "decompress", 
             "accelerators": [
                 {
-                    "name": "xilSnappyDecompress",
+                    "name": "xilSnappyDecompress", 
                     "location": "LIB_DIR/L2/src/snappy_multibyte_decompress_mm.cpp"
                 }
             ]
         }
-    ],
-    "output_files" : "sample.txt.snappy.*",
+    ], 
+    "output_files": "sample.txt.snappy.*", 
     "testinfo": {
-        "disable": false,
+        "disable": false, 
         "jobs": [
             {
-                "index": 0,
-                "dependency": [],
-                "env": "",
-                "cmd": "",
-                "max_memory_MB": 32768,
-                "max_time_min": 300
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 28672, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 25, 
+                    "vitis_hw_run": 10
+                }
             }
-        ],
+        ], 
         "targets": [
-            "vitis_sw_emu",
-            "vitis_hw_emu",
-            "vitis_hw"
-        ],
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
         "category": "canary"
     }
 }
