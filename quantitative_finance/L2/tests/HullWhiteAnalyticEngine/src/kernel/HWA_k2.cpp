@@ -47,15 +47,15 @@ extern "C" void HWA_k2(TEST_DT a,
                        TEST_DT X[N_k2],
                        TEST_DT P[N_k2]) {
 #ifndef HLS_TEST
-#pragma HLS INTERFACE m_axi port = P offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = times offset = slave bundle = gmem1
+#pragma HLS INTERFACE m_axi port = times offset = slave bundle = gmem2
 #pragma HLS INTERFACE m_axi port = rates offset = slave bundle = gmem2
-#pragma HLS INTERFACE m_axi port = capfloorType offset = slave bundle = gmem3
-#pragma HLS INTERFACE m_axi port = startYear offset = slave bundle = gmem4
-#pragma HLS INTERFACE m_axi port = endYear offset = slave bundle = gmem5
-#pragma HLS INTERFACE m_axi port = settlementFreq offset = slave bundle = gmem6
-#pragma HLS INTERFACE m_axi port = N offset = slave bundle = gmem7
-#pragma HLS INTERFACE m_axi port = X offset = slave bundle = gmem8
+#pragma HLS INTERFACE m_axi port = capfloorType offset = slave bundle = gmem2
+#pragma HLS INTERFACE m_axi port = startYear offset = slave bundle = gmem2
+#pragma HLS INTERFACE m_axi port = endYear offset = slave bundle = gmem2
+#pragma HLS INTERFACE m_axi port = settlementFreq offset = slave bundle = gmem2
+#pragma HLS INTERFACE m_axi port = N offset = slave bundle = gmem2
+#pragma HLS INTERFACE m_axi port = X offset = slave bundle = gmem2
+#pragma HLS INTERFACE m_axi port = P offset = slave bundle = gmem2
 
 #pragma HLS INTERFACE s_axilite port = a bundle = control
 #pragma HLS INTERFACE s_axilite port = sigma bundle = control
@@ -73,10 +73,10 @@ extern "C" void HWA_k2(TEST_DT a,
 
     TEST_DT local_times[LEN];
     TEST_DT local_rates[LEN];
-    TEST_DT local_capfloorType[N_k2];
+    int local_capfloorType[N_k2];
     TEST_DT local_startYear[N_k2];
     TEST_DT local_endYear[N_k2];
-    TEST_DT local_settlementFreq[N_k2];
+    int local_settlementFreq[N_k2];
     TEST_DT local_N[N_k2];
     TEST_DT local_X[N_k2];
 #pragma HLS array_partition variable = local_times complete dim = 1

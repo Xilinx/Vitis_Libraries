@@ -151,7 +151,7 @@ DT OrnsteinUhlenbeckProcess<DT>::variance(DT t0, DT x0, DT dt) const {
 template <typename DT>
 DT OrnsteinUhlenbeckProcess<DT>::evolve(DT dt, DT dw) const {
     DT exps, std, square_exps, tmp;
-#pragma HLS allocation instances = dmul limit = 1 operation
+#pragma HLS allocation operation instances = dmul limit = 1
 #pragma HLS resource variable = tmp core = DAddSub_nodsp
 
 #ifndef __SYNTHESIS__

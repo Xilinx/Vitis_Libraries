@@ -66,9 +66,6 @@ class Fdm1dMesher {
         unsigned int size,
         // ouput
         DT _locations[_sizeMax]) {
-#pragma HLS allocation instances = evolve limit = 1 function
-#pragma HLS allocation instances = InverseCumulativeNormalAcklam limit = 1 function
-
         DT x0 = process._x0;
         DT p = eps;
 
@@ -151,7 +148,7 @@ class Fdm1dMesher {
         mType t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
         mType t11, t12, t13, t14, t15, t16, t17, t18, t19;
 
-#pragma HLS allocation instances = dmul limit = 1 operation
+#pragma HLS allocation operation instances = dmul limit = 1
 
         if (input < x_low || x_high < input) {
             if (input < x_low) {

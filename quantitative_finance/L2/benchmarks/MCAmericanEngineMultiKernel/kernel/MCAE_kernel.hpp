@@ -56,7 +56,8 @@ extern "C" void MCAE_k1(TEST_DT timeLength,
                         unsigned int calibSamples,
                         unsigned int timeSteps);
 
-extern "C" void MCAE_k2(TEST_DT underlying,
+extern "C" void MCAE_k2(unsigned int seed,
+                        TEST_DT underlying,
                         TEST_DT volatility,
                         TEST_DT dividendYield,
                         TEST_DT riskFreeRate,
@@ -69,16 +70,4 @@ extern "C" void MCAE_k2(TEST_DT underlying,
                         unsigned int requiredSamples,
                         unsigned int timeSteps);
 
-extern "C" void MCAE_k3(TEST_DT underlying,
-                        TEST_DT volatility,
-                        TEST_DT dividendYield,
-                        TEST_DT riskFreeRate,
-                        TEST_DT timeLength,
-                        TEST_DT strike,
-                        int optionType,
-                        ap_uint<8 * sizeof(TEST_DT) * COEF> coefIn[COEF_DEPTH],
-                        TEST_DT outputs[1],
-                        TEST_DT requiredTolerance,
-                        unsigned int requiredSamples,
-                        unsigned int timeSteps);
 #endif

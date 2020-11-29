@@ -1,16 +1,39 @@
 #!/usr/bin/env python3
 
+# argument checking and help
+import argparse
+parser = argparse.ArgumentParser(
+    description='Example of the Merton76 financial model running on a FPGA.')
+#formatter_class=RawTextHelpFormatter)
+
+required = parser.add_argument_group("required arguments")
+required.add_argument("-x","--xclbin_file", dest="xclbin_filename", type=str, required=True,
+    help="The model hardware bitstream xclbin filename. Build instructions for which are in '/<path to xf_fintech>/L2/tests/M76Engine'")
+required.add_argument("-c","--card",dest="card_type", type=str,required=True,
+    help='Current supported Alveo cards are u200 and u250')
+args = parser.parse_args()
+# State test financial model and args entered
+print("+--------------------------------------------------------------------")
+print(parser.description)
+print(args)
+print("+--------------------------------------------------------------------")
+
 # Ensure environmental variables i.e. paths are set to used the modules
-from xf_fintech_python import DeviceManager, m76_input_data, m76
 import sys
+# Check not using python 2
+if sys.version.startswith("2"):
+    sys.exit("Seem to be running with the no longer supported python 2 - require version 3")
+from xf_fintech_python import DeviceManager, m76_input_data, m76
+from os.path import exists
 
-# Basic checking that the number of arguments are correct
-if len(sys.argv) != 2:
-    sys.exit("Incorrect number of arguments supplied - 1 expected - the name of the FPGA load - e.g. m76.xclbin")
-
+# Basic checking that the supplied arguments are correct
+if not (args.card_type == "u250" or args.card_type == "u200"):
+    sys.exit("This version executes on either card type u200 or u250")
+if not exists(args.xclbin_filename):
+    sys.exit("Please check the supplied FPGA load filename - program does not see it")
 
 # State test financial model
-print("\nThe Merton76 financial model\n============================\n")
+#print("\nThe Merton76 financial model\n============================\n")
 
 # Declaring Variables
 
@@ -83,18 +106,18 @@ for loop in range(0, numberOptions) :
     inputDataList[loop].K = test_data_list[loop][1]
     inputDataList[loop].r = test_data_list[loop][2]
     inputDataList[loop].T = test_data_list[loop][4]
-    inputDataList[loop].lamb = test_data_list[loop][5] # Warning : cannot use lambda as it is a python keyword
+    inputDataList[loop].lamb = test_data_list[loop][5] # Not using lambda as it is a python keyword
     inputDataList[loop].kappa = test_data_list[loop][6]
     inputDataList[loop].delta = test_data_list[loop][7]
     #The final field is not passed to the FPGA. It was used to compare the result, as per the C++ example
     #This has now been determined to be of questionable accuracy. Please use your own methodology.
-
 print("Example data placed into input data list\n")
 
+deviceList = DeviceManager.getDeviceList(args.card_type) # Pass in the card type from the command line
 
-deviceList = DeviceManager.getDeviceList("u250") # Look for U250 cards
-lastruntime = 0  # Query this implementation
-
+if len(deviceList) == 0 : # Check at least one card found
+    sys.exit(("Please check that you have a "+args.card_type+" card present and ready for use"))
+          
 print("Found these {0} device(s):".format(len(deviceList)))
 for x in deviceList:
     print(x.getName())
@@ -103,7 +126,7 @@ print("Choosing the first suitable card\n")
 chosenDevice = deviceList[0]
 
 
-merton76 = m76(sys.argv[1])
+merton76 = m76(args.xclbin_filename) # This sets the xclbin file to load from the name supplied in the command line
 merton76.claimDevice(chosenDevice)
 
 merton76.run(inputDataList, outputList, numberOptions) #This is the call to process contents of dataList
@@ -121,5 +144,6 @@ print("+-----+-----------+----------+-----------+---------+---------+---------+-
 
 print("End of example.")
 
-
 merton76.releaseDevice()
+
+sys.exit(0)

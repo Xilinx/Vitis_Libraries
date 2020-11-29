@@ -1,47 +1,26 @@
 {
-    "gui": true,
+    "gui": true, 
     "name": "Xilinx MC European Engine Benchmark", 
     "description": "", 
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_whitelist": [
-        "u250", 
-        "u200"
+        "u250"
     ], 
     "platform_blacklist": [
         "zc"
     ], 
     "platform_properties": {
-        "u200": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR", 
-                        "KN=2"
-                    ]
-                }
-            }, 
-            "v++": {
-                "compiler": {
-                    "cflags": [
-                        "--config PROJECT/conn_u200.ini"
-                    ]
-                }
-            }
-        }, 
         "u250": {
             "host": {
                 "compiler": {
-                    "symbols": [
-                        "USE_DDR", 
-                        "KN=4"
-                    ]
+                    "symbols": []
                 }
             }, 
             "v++": {
                 "compiler": {
                     "cflags": [
-                        "--config PROJECT/conn_u250.ini"
+                        "--config PROJECT/conn_u250.cfg"
                     ]
                 }
             }
@@ -57,20 +36,18 @@
         "host_exe": "test.exe", 
         "compiler": {
             "sources": [
-                "src/test.cpp", 
+                "host/test.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/benchmarks/MCEuropeanEngine/src", 
+                "LIB_DIR/L2/benchmarks/MCEuropeanEngine/host", 
                 "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
             ], 
             "options": "-O3 ", 
-            "symbols": [
-                "SW_EMU_TEST"
-            ]
+            "symbols": []
         }
     }, 
     "v++": {
@@ -86,31 +63,56 @@
         {
             "accelerators": [
                 {
-                    "location": "kernel/kernel_mc_0.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA -D KN_0 -D KERNEL_NMAE=kernel_mc_0", 
-                    "name": "kernel_mc_0"
-                }, 
-                {
-                    "location": "kernel/kernel_mc_1.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA -D KN_1 -D KERNEL_NMAE=kernel_mc_1", 
-                    "name": "kernel_mc_1"
-                }, 
-                {
-                    "location": "kernel/kernel_mc_2.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA -D KN_2 -D KERNEL_NMAE=kernel_mc_2", 
-                    "name": "kernel_mc_2"
-                }, 
-                {
-                    "location": "kernel/kernel_mc_3.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA -D KN_3 -D KERNEL_NMAE=kernel_mc_3", 
-                    "name": "kernel_mc_3"
+                    "location": "kernel/kernel_mc.cpp", 
+                    "frequency": 300, 
+                    "clflags": " -D DPRAGMA", 
+                    "name": "kernel_mc", 
+                    "num_compute_units": 4, 
+                    "compute_units": [
+                        {
+                            "name": "kernel_mc_1", 
+                            "slr": "SLR0", 
+                            "arguments": [
+                                {
+                                    "name": "m_axi_gmem", 
+                                    "memory": "DDR[0]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "name": "kernel_mc_2", 
+                            "slr": "SLR1", 
+                            "arguments": [
+                                {
+                                    "name": "m_axi_gmem", 
+                                    "memory": "DDR[1]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "name": "kernel_mc_3", 
+                            "slr": "SLR2", 
+                            "arguments": [
+                                {
+                                    "name": "m_axi_gmem", 
+                                    "memory": "DDR[2]"
+                                }
+                            ]
+                        }, 
+                        {
+                            "name": "kernel_mc_4", 
+                            "slr": "SLR3", 
+                            "arguments": [
+                                {
+                                    "name": "m_axi_gmem", 
+                                    "memory": "DDR[3]"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ], 
-            "frequency": 300.0, 
+            "frequency": 300, 
             "name": "kernel_mc"
         }
     ], 
@@ -122,14 +124,24 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960, 
+                    "vitis_hw_emu": 30370, 
+                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_run": 10240
+                }, 
+                "max_time_min": {
+                    "vitis_hw_build": 1200, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

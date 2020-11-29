@@ -266,10 +266,10 @@ int main(int argc, char* argv[]) {
         cerr << "Unhandled exception caught!" << endl;
     }
 
-    if (ret == 0) {
-        std::cout << "PASS" << std::endl;
+    if (ret != 0) {
+        std::cout << "Fail with " << ret << " errors." << std::endl;
     } else {
-        std::cout << "FAIL" << std::endl;
+        std::cout << "Pass validation." << std::endl;
     }
 
     return ret;

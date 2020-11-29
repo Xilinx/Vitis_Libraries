@@ -4,6 +4,8 @@
 from xf_fintech_python import DeviceManager, HJM
 import numpy as np
 import argparse
+import sys
+from os.path import exists
 
 def zcbAnalytical(rawData, maturity, tau = 0.5):
     # Take last row 
@@ -32,10 +34,34 @@ def zcbExample(hjm, hist_data, maturity, paths):
 
 
 parser = argparse.ArgumentParser(description='Example of Heath-Jarrow-Morton framework running on a FPGA')
-parser.add_argument('data_in', type=str, help='Path to csv with historical rates data')
-parser.add_argument('load', type=str, help='filename of xlcbin load, e.g. hjm.xclbin')
-
+required = parser.add_argument_group("required arguments")		
+required.add_argument("-x","--xclbin_file", dest="xclbin_filename", type=str, required=True,		
+    help="The model hardware bitstream xclbin filename. Build instructions for which are in '/<path to xf_fintech>/L2/tests/HeathJarrowMorton'")		
+required.add_argument("-c","--card",dest="card_type", type=str,required=True,		
+    help="Current supported Alveo cards are u200 and u250")		
+required.add_argument("-d","--data_in",dest="data_in", type=str, required=True,
+    help="Path to csv with historical rates data")
 args = parser.parse_args()
+
+# State test financial model and args entered
+print("+----------------------------------------------------------------------------")
+print(parser.description)
+print(args)
+print("+----------------------------------------------------------------------------")
+
+# Check not using python 2
+if sys.version.startswith("2"):
+    sys.exit("Seem to be running with the no longer supported python 2 - require version 3")
+#from os.path import exists
+
+# Basic checking that the number of arguments are correct
+if not (args.card_type == "u250" or args.card_type == "u200"):
+    sys.exit("This version executes on either card type u200 or u250")
+if not exists(args.xclbin_filename):
+    sys.exit("Please check the supplied FPGA load filename - program does not see it")
+if not exists(args.data_in):
+    sys.exit("Please check the historical rates data filename - program does not see it")
+
 
 N_FACTORS = 3
 MC_UN = 4
@@ -44,12 +70,14 @@ hist_data = np.loadtxt(args.data_in, delimiter=',')
 tenors = hist_data.shape[1]
 curves = hist_data.shape[0]
 
-xclbin_load = (args.load)
-
-print("\nThe Heath-Jarrow-Morton model\n=================================\n")
+xclbin_load = (args.xclbin_filename)
 
 # Program variables
-deviceList = DeviceManager.getDeviceList("u200")
+deviceList = DeviceManager.getDeviceList(args.card_type)
+
+if len(deviceList) == 0 : # Check at least one card found
+    sys.exit(("Please check that you have a "+args.card_type+" card present and ready for use"))
+
 lastruntime = 0
 runtime = 0
 
@@ -77,3 +105,5 @@ zcbExample(hjm, hist_data, 10.0, 400)
 
 hjm.releaseDevice()
 print("End of example/test.\n")
+
+sys.exit(0)

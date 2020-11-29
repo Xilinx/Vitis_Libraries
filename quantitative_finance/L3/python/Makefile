@@ -41,7 +41,8 @@ HOST_ARGS =
 RUN_ENV =
 INCLUDE_DIR = ../include
 OUTPUT_DIR = ./output
-PYTHON_INC_FLAGS = $(shell python3-config --includes)
+PYTHON_INC_FLAGS = $(shell python3-config --includes) \
+                         -I/usr/local/include/python3.6m/
 
 SRCS := $(shell find $(SRC_DIR) -maxdepth 4 -name '*.cpp')
 OBJ_FILES := $(addsuffix .o, $(basename $(SRCS)))

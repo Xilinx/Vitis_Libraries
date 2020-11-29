@@ -39,11 +39,11 @@ extern "C" void HWA_k0(TEST_DT a,
                        TEST_DT T[N_k0],
                        TEST_DT P[N_k0]) {
 #ifndef HLS_TEST
+#pragma HLS INTERFACE m_axi port = times offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = rates offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = t offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = T offset = slave bundle = gmem0
 #pragma HLS INTERFACE m_axi port = P offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = times offset = slave bundle = gmem1
-#pragma HLS INTERFACE m_axi port = rates offset = slave bundle = gmem2
-#pragma HLS INTERFACE m_axi port = t offset = slave bundle = gmem3
-#pragma HLS INTERFACE m_axi port = T offset = slave bundle = gmem4
 
 #pragma HLS INTERFACE s_axilite port = a bundle = control
 #pragma HLS INTERFACE s_axilite port = sigma bundle = control

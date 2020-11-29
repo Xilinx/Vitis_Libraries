@@ -21,6 +21,8 @@ The `Heath-Jarrow-Morton` (HJM) framework is a general framework to model the ev
 is solved by Monte-Carlo simulation. We provide a multi-factor Monte-Carlo implementation of the HJM framework, where the volatilities can be calculated by performing a Principal Component Analysis of historical
 interest rate curves.
 
+Note that calculations based on the HJM Framework are by nature a long-running process and hardware emulation of an HJM-based kernel may take several days to complete.
+
 Design Structure
 ================
 For a given tenor structure :math:`T_0,T_1,...,T_n` evenly spaced with :math:`\tau = T_{i+1} - T_{i}, \forall i=1,...,n` we need to calculate the calibrated drift and volatilities for the simulation of future

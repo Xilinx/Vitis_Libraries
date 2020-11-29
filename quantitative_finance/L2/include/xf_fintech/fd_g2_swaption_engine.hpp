@@ -413,7 +413,7 @@ DT FdG2SwaptionEngine<DT, _exSize, _xGridMax, _yGridMax, _layoutSizeMax>::FPTwoM
 template <typename DT, Size _exSize, Size _xGridMax, Size _yGridMax, Size _layoutSizeMax>
 void FdG2SwaptionEngine<DT, _exSize, _xGridMax, _yGridMax, _layoutSizeMax>::derivative(
     DT d, DT uFd, DT uSd, DT hm, DT hp, Size iter, TripleBandLinear& map) {
-#pragma HLS allocation instances = FPTwoMul limit = 1 function
+#pragma HLS allocation function instances = FPTwoMul limit = 1
     //#pragma HLS inline
     DT tmpLower1, tmpDiag1, tmpUpper1;
     DT tmpLower2, tmpDiag2, tmpUpper2;
@@ -521,7 +521,7 @@ void FdG2SwaptionEngine<DT, _exSize, _xGridMax, _yGridMax, _layoutSizeMax>::mixe
                                                                                               DT d1[_yGridMax],
                                                                                               DT u) {
 //#pragma HLS inline
-#pragma HLS allocation instances = FPTwoMul limit = 1 function
+#pragma HLS allocation function instances = FPTwoMul limit = 1
     DT hm_d0, hp_d0, hm_d1, hp_d1;
     DT zetam1, zeta0, zetap1, phim1, phi0, phip1;
     DT tmpa00, tmpa01, tmpa02, tmpa10, tmpa20, tmpa11, tmpa22, tmpa12, tmpa21;
@@ -734,7 +734,8 @@ void FdG2SwaptionEngine<DT, _exSize, _xGridMax, _yGridMax, _layoutSizeMax>::getS
 
 template <typename DT, Size _exSize, Size _xGridMax, Size _yGridMax, Size _layoutSizeMax>
 void FdG2SwaptionEngine<DT, _exSize, _xGridMax, _yGridMax, _layoutSizeMax>::applyTo(DT a[_layoutSizeMax], DT t) {
-#pragma HLS allocation instances = discountBond limit = 1 function
+    // because discountBond is already inlined, allocaiton doesn't work.
+    //#pragma HLS allocation function instances = &G2Model<DT, void, 0>::discountBond limit = 1
     DT iterExerciseTime = t;
     DT disRate[2], fwdRate[2];
     DT npv[_layoutSizeMax] = {0.0};

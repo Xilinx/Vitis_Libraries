@@ -26,24 +26,6 @@
 #include "utils.hpp"
 #include "tree_engine_kernel.hpp"
 
-#define XCL_BANK(n) (((unsigned int)(n)) | XCL_MEM_TOPOLOGY)
-
-#define XCL_BANK0 XCL_BANK(0)
-#define XCL_BANK1 XCL_BANK(1)
-#define XCL_BANK2 XCL_BANK(2)
-#define XCL_BANK3 XCL_BANK(3)
-#define XCL_BANK4 XCL_BANK(4)
-#define XCL_BANK5 XCL_BANK(5)
-#define XCL_BANK6 XCL_BANK(6)
-#define XCL_BANK7 XCL_BANK(7)
-#define XCL_BANK8 XCL_BANK(8)
-#define XCL_BANK9 XCL_BANK(9)
-#define XCL_BANK10 XCL_BANK(10)
-#define XCL_BANK11 XCL_BANK(11)
-#define XCL_BANK12 XCL_BANK(12)
-#define XCL_BANK13 XCL_BANK(13)
-#define XCL_BANK14 XCL_BANK(14)
-#define XCL_BANK15 XCL_BANK(15)
 class ArgParser {
    public:
     ArgParser(int& argc, const char** argv) {
@@ -81,12 +63,6 @@ int main(int argc, const char* argv[]) {
     }
     std::cout << "[INFO]Running in " << run_mode << " mode" << std::endl;
 #endif
-
-    // Allocate Memory in Host Memory
-    DT* output[4];
-    for (int i = 0; i < 4; i++) {
-        output[i] = aligned_alloc<DT>(N * K);
-    }
 
     ScanInputParam0* inputParam0_alloc = aligned_alloc<ScanInputParam0>(1);
     ScanInputParam1* inputParam1_alloc = aligned_alloc<ScanInputParam1>(1);
@@ -165,7 +141,7 @@ int main(int argc, const char* argv[]) {
     // Creating Context and Command Queue for selected Device
     cl::Context context(device);
 #ifdef SW_EMU_TEST
-    cl::CommandQueue q(context, device); //, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE); // | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #else
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 #endif
@@ -176,62 +152,42 @@ int main(int argc, const char* argv[]) {
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
     cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel1_TreeEngine(program, "scanTreeKernel1");
-    cl::Kernel kernel2_TreeEngine(program, "scanTreeKernel2");
-#if KN > 2
-    cl::Kernel kernel3_TreeEngine(program, "scanTreeKernel3");
-#endif
-#if KN > 3
-    cl::Kernel kernel4_TreeEngine(program, "scanTreeKernel4");
-#endif
+
+    std::string krnl_name = "scanTreeKernel";
+    cl_uint cu_number;
+    {
+        cl::Kernel k(program, krnl_name.c_str());
+        k.getInfo(CL_KERNEL_COMPUTE_UNIT_COUNT, &cu_number);
+    }
+
+    std::vector<cl::Kernel> krnl_TreeEngine(cu_number);
+    for (cl_uint i = 0; i < cu_number; ++i) {
+        std::string krnl_full_name = krnl_name + ":{" + krnl_name + "_" + std::to_string(i + 1) + "}";
+        krnl_TreeEngine[i] = cl::Kernel(program, krnl_full_name.c_str());
+    }
+
     std::cout << "kernel has been created" << std::endl;
 
-    cl_mem_ext_ptr_t mext_in0[4];
-    cl_mem_ext_ptr_t mext_in1[4];
-    cl_mem_ext_ptr_t mext_out[4];
+    std::vector<cl_mem_ext_ptr_t> mext_in0(cu_number);
+    std::vector<cl_mem_ext_ptr_t> mext_in1(cu_number);
+    std::vector<cl_mem_ext_ptr_t> mext_out(cu_number);
 
-#ifdef USE_HBM
-    mext_in0[0] = {XCL_BANK0, inputParam0_alloc, 0};
-    mext_in0[1] = {XCL_BANK1, inputParam0_alloc, 0};
+    std::vector<DT*> output(cu_number);
+    for (int i = 0; i < cu_number; i++) {
+        output[i] = aligned_alloc<DT>(N * K);
+    }
 
-    mext_in1[0] = {XCL_BANK0, inputParam1_alloc, 0};
-    mext_in1[1] = {XCL_BANK1, inputParam1_alloc, 0};
-
-    mext_out[0] = {XCL_BANK0, output[0], 0};
-    mext_out[1] = {XCL_BANK1, output[1], 0};
-#else
-#if KN < 3
-    mext_in0[0] = {XCL_MEM_DDR_BANK0, inputParam0_alloc, 0};
-    mext_in0[1] = {XCL_MEM_DDR_BANK2, inputParam0_alloc, 0};
-
-    mext_in1[0] = {XCL_MEM_DDR_BANK0, inputParam1_alloc, 0};
-    mext_in1[1] = {XCL_MEM_DDR_BANK2, inputParam1_alloc, 0};
-
-    mext_out[0] = {XCL_MEM_DDR_BANK0, output[0], 0};
-    mext_out[1] = {XCL_MEM_DDR_BANK2, output[1], 0};
-#else
-    mext_in0[0] = {XCL_MEM_DDR_BANK0, inputParam0_alloc, 0};
-    mext_in0[1] = {XCL_MEM_DDR_BANK1, inputParam0_alloc, 0};
-    mext_in0[2] = {XCL_MEM_DDR_BANK2, inputParam0_alloc, 0};
-
-    mext_in1[0] = {XCL_MEM_DDR_BANK0, inputParam1_alloc, 0};
-    mext_in1[1] = {XCL_MEM_DDR_BANK1, inputParam1_alloc, 0};
-    mext_in1[2] = {XCL_MEM_DDR_BANK2, inputParam1_alloc, 0};
-
-    mext_out[0] = {XCL_MEM_DDR_BANK0, output[0], 0};
-    mext_out[1] = {XCL_MEM_DDR_BANK1, output[1], 0};
-    mext_out[2] = {XCL_MEM_DDR_BANK2, output[2], 0};
-
-    mext_in0[3] = {XCL_MEM_DDR_BANK3, inputParam0_alloc, 0};
-    mext_in1[3] = {XCL_MEM_DDR_BANK3, inputParam1_alloc, 0};
-    mext_out[3] = {XCL_MEM_DDR_BANK3, output[3], 0};
-#endif
-#endif
+    for (int c = 0; c < cu_number; ++c) {
+        mext_in0[c] = {1, inputParam0_alloc, krnl_TreeEngine[c]()};
+        mext_in1[c] = {2, inputParam1_alloc, krnl_TreeEngine[c]()};
+        mext_out[c] = {3, output[c], krnl_TreeEngine[c]()};
+    }
 
     // create device buffer and map dev buf to host buf
-    cl::Buffer output_buf[4];
-    cl::Buffer inputParam0_buf[4], inputParam1_buf[4];
-    for (int i = 0; i < KN; i++) {
+    std::vector<cl::Buffer> output_buf(cu_number);
+    std::vector<cl::Buffer> inputParam0_buf(cu_number);
+    std::vector<cl::Buffer> inputParam1_buf(cu_number);
+    for (int i = 0; i < cu_number; i++) {
         inputParam0_buf[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
                                         sizeof(ScanInputParam0), &mext_in0[i]);
         inputParam1_buf[i] = cl::Buffer(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
@@ -241,7 +197,7 @@ int main(int argc, const char* argv[]) {
     }
 
     std::vector<cl::Memory> ob_in;
-    for (int i = 0; i < KN; i++) {
+    for (int i = 0; i < cu_number; i++) {
         ob_in.push_back(inputParam0_buf[i]);
         ob_in.push_back(inputParam1_buf[i]);
     }
@@ -249,7 +205,7 @@ int main(int argc, const char* argv[]) {
     q.enqueueMigrateMemObjects(ob_in, 0, nullptr, nullptr);
 
     std::vector<cl::Memory> ob_out;
-    for (int i = 0; i < KN; i++) {
+    for (int i = 0; i < cu_number; i++) {
         ob_out.push_back(output_buf[i]);
     }
 
@@ -257,85 +213,38 @@ int main(int argc, const char* argv[]) {
 
     // launch kernel and calculate kernel execution time
     std::cout << "kernel start------" << std::endl;
-    std::vector<cl::Event> events_kernel(4);
+    std::vector<cl::Event> events_kernel(cu_number);
     gettimeofday(&start_time, 0);
 
-    int j = 0;
-    kernel1_TreeEngine.setArg(j++, len);
-    kernel1_TreeEngine.setArg(j++, inputParam0_buf[0]);
-    kernel1_TreeEngine.setArg(j++, inputParam1_buf[0]);
-    kernel1_TreeEngine.setArg(j++, output_buf[0]);
+    for (int c = 0; c < cu_number; ++c) {
+        int j = 0;
+        krnl_TreeEngine[c].setArg(j++, len);
+        krnl_TreeEngine[c].setArg(j++, inputParam0_buf[c]);
+        krnl_TreeEngine[c].setArg(j++, inputParam1_buf[c]);
+        krnl_TreeEngine[c].setArg(j++, output_buf[c]);
+    }
 
-    j = 0;
-    kernel2_TreeEngine.setArg(j++, len);
-    kernel2_TreeEngine.setArg(j++, inputParam0_buf[1]);
-    kernel2_TreeEngine.setArg(j++, inputParam1_buf[1]);
-    kernel2_TreeEngine.setArg(j++, output_buf[1]);
-#if KN > 2
-    j = 0;
-    kernel3_TreeEngine.setArg(j++, len);
-    kernel3_TreeEngine.setArg(j++, inputParam0_buf[2]);
-    kernel3_TreeEngine.setArg(j++, inputParam1_buf[2]);
-    kernel3_TreeEngine.setArg(j++, output_buf[2]);
-#endif
-#if KN > 3
-    j = 0;
-    kernel4_TreeEngine.setArg(j++, len);
-    kernel4_TreeEngine.setArg(j++, inputParam0_buf[3]);
-    kernel4_TreeEngine.setArg(j++, inputParam1_buf[3]);
-    kernel4_TreeEngine.setArg(j++, output_buf[3]);
-#endif
-    for (int i = 0; i < 1; ++i) {
-        q.enqueueTask(kernel1_TreeEngine, nullptr, &events_kernel[0]);
-        q.enqueueTask(kernel2_TreeEngine, nullptr, &events_kernel[1]);
-#if KN > 2
-        q.enqueueTask(kernel3_TreeEngine, nullptr, &events_kernel[2]);
-#endif
-#if KN > 3
-        q.enqueueTask(kernel4_TreeEngine, nullptr, &events_kernel[3]);
-#endif
+    for (int i = 0; i < cu_number; ++i) {
+        q.enqueueTask(krnl_TreeEngine[i], nullptr, &events_kernel[i]);
     }
 
     q.finish();
     gettimeofday(&end_time, 0);
     std::cout << "kernel end------" << std::endl;
+
     unsigned long time_start, time_end;
     unsigned long time1, time2;
-    events_kernel[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
-    events_kernel[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
-    std::cout << "Kernel-1 Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
-    time_start = time1;
-    time_end = time2;
-    events_kernel[1].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
-    events_kernel[1].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
-    std::cout << "Kernel-2 Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
-    if (time_start > time1) time_start = time1;
-    if (time_end < time2) time_end = time2;
-#if KN > 2
-    events_kernel[2].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
-    events_kernel[2].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
-    std::cout << "Kernel-3 Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
-    if (time_start > time1) time_start = time1;
-    if (time_end < time2) time_end = time2;
-#endif
-#if KN > 3
-    events_kernel[3].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
-    events_kernel[3].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
-    std::cout << "Kernel-4 Execution time " << (time2 - time1) / 1000000.0 << "ms" << std::endl;
-    if (time_start > time1) time_start = time1;
-    if (time_end < time2) time_end = time2;
-#endif
+    for (int c = 0; c < cu_number; ++c) {
+        events_kernel[c].getProfilingInfo(CL_PROFILING_COMMAND_START, &time1);
+        events_kernel[c].getProfilingInfo(CL_PROFILING_COMMAND_END, &time2);
+        printf("Kernel-%d Execution time %d ms\n", c, (time2 - time1) / 1000000.0);
+    }
 
-    std::cout << "FPGA Execution time " << (time_end - time_start) / 1000000.0 << "ms" << std::endl;
-
-    std::cout << "CPU Execution time " << tvdiff(&start_time, &end_time) / 1000.0 << "ms" << std::endl;
+    std::cout << "FPGA Execution time " << tvdiff(&start_time, &end_time) / 1000.0 << "ms" << std::endl;
     q.enqueueMigrateMemObjects(ob_out, 1, nullptr, nullptr);
     q.finish();
-#else
-    scanTreeKernel1(len, inputParam0_alloc, inputParam1_alloc, output[0]);
-    scanTreeKernel2(len, inputParam0_alloc, inputParam1_alloc, output[1]);
 #endif
-    for (int i = 0; i < KN; i++) {
+    for (int i = 0; i < cu_number; i++) {
         for (int j = 0; j < len; j++) {
             DT out = output[i][j];
             if (std::fabs(out - golden) > minErr) {
@@ -347,5 +256,9 @@ int main(int argc, const char* argv[]) {
     }
     std::cout << "NPV[" << 0 << "]= " << std::setprecision(15) << output[0][0]
               << " ,diff/NPV= " << (output[0][0] - golden) / golden << std::endl;
+    if (err)
+        std::cout << "Fail with " << err << " errors." << std::endl;
+    else
+        std::cout << "Pass validation." << std::endl;
     return err;
 }

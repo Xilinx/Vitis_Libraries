@@ -141,27 +141,14 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[5];
-    mext_o[0].obj = output;
-    mext_o[0].param = 0;
-
-    mext_o[1].obj = initTime_alloc;
-    mext_o[1].param = 0;
-
-    mext_o[2].obj = exerciseCnt_alloc;
-    mext_o[2].param = 0;
-
-    mext_o[3].obj = fixedCnt_alloc;
-    mext_o[3].param = 0;
-
-    mext_o[4].obj = floatingCnt_alloc;
-    mext_o[4].param = 0;
-    for (int i = 0; i < 5; ++i) {
-#ifndef USE_HBM
-        mext_o[i].flags = XCL_MEM_DDR_BANK0;
-#else
-        mext_o[i].flags = XCL_BANK0;
-#endif
-    }
+    mext_o[0] = {8, output, kernel_TreeBermudanEngine()};
+    mext_o[1] = {3, initTime_alloc, kernel_TreeBermudanEngine()};
+    mext_o[2] = {5, exerciseCnt_alloc, kernel_TreeBermudanEngine()};
+    ;
+    mext_o[3] = {7, fixedCnt_alloc, kernel_TreeBermudanEngine()};
+    ;
+    mext_o[4] = {6, floatingCnt_alloc, kernel_TreeBermudanEngine()};
+    ;
 
     // create device buffer and map dev buf to host buf
     cl::Buffer output_buf;
@@ -210,8 +197,12 @@ int main(int argc, const char* argv[]) {
     TREE_k0(0, fixedRate, timestep, initTime, initSize, exerciseCnt, floatingCnt, fixedCnt, output);
 #endif
     DT out = output[0];
-    // if(std::fabs(out-golden[0])>minErr)err++;
+    if (std::fabs(out - golden) > minErr) err++;
     std::cout << std::setprecision(15) << "NPV= " << out << " ,diff/NPV= " << (out - golden) / golden << std::endl;
+    if (err)
+        std::cout << "Fail with " << err << " errors." << std::endl;
+    else
+        std::cout << "Pass validation." << std::endl;
 
     return err;
 }

@@ -201,10 +201,10 @@ int main(int argc, char** argv) {
         epsilon = 0.01;
     }
     if (diff > epsilon) {
-        std::cerr << "TEST FAILED!" << std::endl;
+        std::cout << "Fail with 1 errors." << std::endl;
         return 1;
     } else {
-        std::cout << "TEST SUCCEDED!" << std::endl;
+        std::cout << "Pass validation." << std::endl;
         return 0;
     }
 }

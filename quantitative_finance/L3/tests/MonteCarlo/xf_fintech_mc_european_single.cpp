@@ -35,7 +35,7 @@ using namespace xf::fintech;
 // Each of the kernels produce an independent output.  These outputs are then
 // averaged to produce a final option price.
 
-static double tolerance = 0.0001;
+static double tolerance = 0.05;
 
 static OptionType optionType = Put;
 
