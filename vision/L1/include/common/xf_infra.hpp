@@ -118,7 +118,7 @@ loop_start_hunt:
 // clang-format off
 #pragma HLS pipeline II=1
 #pragma HLS loop_tripcount avg=1 max=1
-    // clang-format on
+        // clang-format on
 
         AXI_video_strm >> axi;
         start = axi.user.to_bool();
@@ -133,7 +133,7 @@ loop_row_axi2mat:
 // clang-format off
 #pragma HLS loop_flatten off
 #pragma HLS pipeline II=1
-    // clang-format on
+            // clang-format on
 
             if (start || last) {
                 start = false;
@@ -159,7 +159,7 @@ loop_row_axi2mat:
 // clang-format off
 #pragma HLS pipeline II=1
 #pragma HLS loop_tripcount avg=1 max=1
-    // clang-format on
+            // clang-format on
 
             AXI_video_strm >> axi;
             last = axi.last.to_bool();
@@ -198,7 +198,7 @@ loop_row_mat2axi:
 // clang-format off
 #pragma HLS loop_flatten off
 #pragma HLS pipeline II=1
-    // clang-format on
+            // clang-format on
 
             if (sof) {
                 axi.user = 1;
