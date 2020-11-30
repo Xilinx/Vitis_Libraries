@@ -67,7 +67,7 @@ void postProcess(unsigned int p_numElems,
     const unsigned int l_Delays = 1 << t_LogDelays;
     const unsigned int l_numIter = (p_numElems + l_Delays - 1) >> t_LogDelays;
     for (unsigned int r = 0; r < p_mulIters; r++) {
-        t_DataType l_finalSum = 0;
+        WideType<t_DataType, 1> l_finalSum = 0;
         for (t_IndexType i = 0; i < l_numIter; i++) {
 #pragma HLS PIPELINE II = l_Delays
             WideType<t_DataType, l_Delays> l_input;
@@ -75,7 +75,7 @@ void postProcess(unsigned int p_numElems,
 #pragma HLS UNROLL
                 l_input.shift(p_pad.read());
             }
-            l_finalSum += BinarySum<t_DataType, l_Delays>::sum(l_input.getValAddr());
+            l_finalSum[0] += BinarySum<t_DataType, l_Delays>::sum(l_input.getValAddr());
             if (i == l_numIter - 1) p_sum.write(l_finalSum);
         }
     }
