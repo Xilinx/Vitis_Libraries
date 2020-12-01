@@ -9,9 +9,9 @@ Before running testcase,
     source /opt/xilinx/xrm/setup.sh  
     cd testcase 
     make build TARGET=hw 
-    vim config.json and change xclbinPath to full path of xclbin
+    change PROJECTPATH in config.json to graph library's absolute path 
     make run TARGET=hw 
 
-For more details of the testcases, please ref to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2020.1/index.html)
+For more details of the testcases, please ref to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2020.2/index.html)
     
 
