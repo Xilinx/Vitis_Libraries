@@ -16,15 +16,15 @@ The algorithms implemented by Vitis Graph Library include:
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these Kernels are built into xclbins and compared with Spark. For details on running these cases, please refer to the README file in that folder. The benchmark results can be found in [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/).
+In `L2/benchmarks`, these Kernels are built into xclbins and compared with Spark. For details on running these cases, please refer to the README file in that folder. The benchmark results can be found in [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2020.2/index.html).
 
 ## Xilinx TigerGraph Integration
 
-Xilinx TigerGraph Integration is offered in `plugin`. For details on running these cases, please refer to [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/).
+Xilinx TigerGraph Integration is offered in `plugin`. For details on running these cases, please refer to [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2020.2/index.html).
 
 ## Documentations
 
-For more details of the Graph library, please refer to [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/).
+For more details of the Graph library, please refer to [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2020.2/index.html).
 
 ## License
 

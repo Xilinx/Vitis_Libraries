@@ -116,7 +116,7 @@ PKG_OUT_DIR := package_$(TARGET)
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -weight $(CUR_DIR)/data/cosine_dense_weight.csr -golden $(CUR_DIR)/data/cosine_dense.mtx -topK 32 
+HOST_ARGS := -weight $(CUR_DIR)/data/cosine_dense_weight.csr -golden $(CUR_DIR)/data/cosine_dense.mtx -topK 100 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 LIBRARY_PATH =$(CUR_DIR)/../../lib:$(XILINX_XRT)/lib:$(XILINX_XRM)/lib:$(LD_LIBRARY_PATH)
 
@@ -124,7 +124,7 @@ LIBRARY_PATH =$(CUR_DIR)/../../lib:$(XILINX_XRT)/lib:$(XILINX_XRM)/lib:$(LD_LIBR
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
 VPP_FLAGS += --jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-VPP_FLAGS += --config $(CUR_DIR)/conn_u50_u280.cfg
+#VPP_FLAGS += --config $(CUR_DIR)/conn_u50_u280.cfg
 endif
 
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
@@ -137,8 +137,8 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/tests/dense_similarity_multi_kernel/kernel
 
 denseSimilarityKernel_VPP_FLAGS +=  -D KERNEL_NAME=denseSimilarityKernel
-denseSimilarityKernel_VPP_FLAGS += --hls.clock 300000000:denseSimilarityKernel
-VPP_LDFLAGS_denseSimilarityKernel += --kernel_frequency 300
+denseSimilarityKernel_VPP_FLAGS += --hls.clock 130000000:denseSimilarityKernel
+VPP_LDFLAGS_denseSimilarityKernel += --kernel_frequency 130
 
 
 # ############################ Declaring Binary Containers ##########################
@@ -146,22 +146,26 @@ VPP_LDFLAGS_denseSimilarityKernel += --kernel_frequency 300
 ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/denseSimilarityKernel.xclbin
 BINARY_CONTAINERS_PKG += $(BUILD_DIR)/denseSimilarityKernel.xclbin
+BINARY_CONTAINERS2 += $(BUILD_DIR)/denseSimilarityKernel2.xclbin
+BINARY_CONTAINERS2_PKG += $(BUILD_DIR)/denseSimilarityKernel2.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/denseSimilarityKernel_xo.xclbin
 BINARY_CONTAINERS_PKG += $(BUILD_DIR)/denseSimilarityKernel.xclbin
+BINARY_CONTAINERS2 += $(BUILD_DIR)/denseSimilarityKernel2_xo.xclbin
+BINARY_CONTAINERS2_PKG += $(BUILD_DIR)/denseSimilarityKernel2.xclbin
 endif
 BINARY_CONTAINER_denseSimilarityKernel_OBJS += $(TEMP_DIR)/denseSimilarityKernel.xo
 
 # ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) $(BINARY_CONTAINERS2) emconfig
 
 .PHONY: host
 host: check_xrt check_sysroot $(EXE_FILE)
 
 .PHONY: xclbin
-xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
+xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS) $(BINARY_CONTAINERS2)
 
 .PHONY: build
 build: xclbin
@@ -170,13 +174,20 @@ build: xclbin
 $(TEMP_DIR)/denseSimilarityKernel.xo: $(XFLIB_DIR)/L2/tests/dense_similarity_multi_kernel/kernel/denseSimilarityKernel.cpp
 	$(ECHO) "Compiling Kernel: denseSimilarityKernel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(denseSimilarityKernel_VPP_FLAGS) $(VPP_FLAGS) -k denseSimilarityKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(denseSimilarityKernel_VPP_FLAGS) $(VPP_FLAGS) --config $(CUR_DIR)/conn_u50_u280.cfg  -k denseSimilarityKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
 
+$(TEMP_DIR)/denseSimilarityKernel2.xo: $(XFLIB_DIR)/L2/tests/dense_similarity_multi_kernel/kernel/denseSimilarityKernel.cpp
+	$(ECHO) "Compiling Kernel: denseSimilarityKernel"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(denseSimilarityKernel_VPP_FLAGS) $(VPP_FLAGS) --config $(CUR_DIR)/conn_u50_u280_2.cfg  -k denseSimilarityKernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
 
-$(BINARY_CONTAINERS): $(BINARY_CONTAINER_denseSimilarityKernel_OBJS)
+$(BINARY_CONTAINERS): $(TEMP_DIR)/denseSimilarityKernel.xo
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/denseSimilarityKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_denseSimilarityKernel) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --config $(CUR_DIR)/conn_u50_u280.cfg --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/denseSimilarityKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_denseSimilarityKernel) -o '$@' $(+)
 
+$(BINARY_CONTAINERS2): $(TEMP_DIR)/denseSimilarityKernel2.xo
+	mkdir -p $(BUILD_DIR)
+	$(VPP) -l $(VPP_FLAGS) --config $(CUR_DIR)/conn_u50_u280_2.cfg --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/denseSimilarityKernel2 $(VPP_LDFLAGS) $(VPP_LDFLAGS_denseSimilarityKernel) -o '$@' $(+)
 
 # ################# Setting Rules for Host (Building Host Executable) ################
 $(EXE_FILE): $(HOST_SRCS) | check_xrt

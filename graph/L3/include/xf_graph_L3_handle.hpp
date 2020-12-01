@@ -59,6 +59,7 @@ class Handle {
         char* kernelAlias;   // user defined kernel names
         unsigned int requestLoad = 100;
         char* xclbinFile;                    // xclbin full path
+        char* xclbinFile2;                   // xclbin full path
         unsigned int deviceNeeded = 0;       // requested FPGA device number
         unsigned int cuPerBoard = 1;         // requested FPGA device number
         std::vector<unsigned int> deviceIDs; // deviceID
@@ -236,6 +237,14 @@ class Handle {
                         unsigned int requestLoad,
                         unsigned int deviceNeeded,
                         unsigned int cuPerBoard);
+
+    void initOpSimDenseInt(const char* kernelName,
+                           char* xclbinFile,
+                           char* xclbinFile2,
+                           char* kernelAlias,
+                           unsigned int requestLoad,
+                           unsigned int deviceNeeded,
+                           unsigned int cuPerBoard);
 };
 } // L3
 } // graph
