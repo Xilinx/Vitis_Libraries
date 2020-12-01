@@ -68,4 +68,4 @@ In order to build **libgraphL3.so**, please follow the following steps:
 	cd xf_graph/L3/lib
 	./build_so.sh
   
-After the build is complete, **libgraphL3.so** should be available in *xf_graph/L3/lib*
+After the build is complete, **libgraphL3.so** should be available in *Vitis_Libraries/graph/L3/lib*

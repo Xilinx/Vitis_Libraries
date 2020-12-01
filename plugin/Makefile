@@ -26,13 +26,15 @@ ifndef XILINX_XRT
   export XILINX_XRT
 endif
 
+TigerGraphPath=/home/tigergraph/tigergraph/
+
 ############################## Setting up Host Variables ##############################
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include
 
 XILINX_XRM=/opt/xilinx/xrm
 
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label -w
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm
 CXXFLAGS += -fmessage-length=0 -O3
 
@@ -41,6 +43,7 @@ ifneq ($(HOST_ARCH), x86)
 endif
 
 CXXFLAGS += -D USE_HBM
+CXXFLAGS += -D TIGERGRAPH_PATH=\"$(TigerGraphPath)\"
 
 ############################## Setting Rules for so (Building Dynamic Library) ##############################
 libGRAPHL3WRAPPER = $(XFLIB_DIR)/plugin/tigergraph/QueryUdf/libgraphL3wrapper.so

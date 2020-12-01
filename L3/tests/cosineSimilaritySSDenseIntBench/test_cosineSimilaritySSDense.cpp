@@ -35,12 +35,12 @@ int main(int argc, const char* argv[]) {
 
     const int splitNm = 3;    // kernel has 4 PUs, the input data should be splitted into 4 parts
     const int channelsPU = 4; // each PU has 4 HBM channels
-    const int cuNm = 2;
-    int deviceNeeded = 1;
-    const int channelW = 16;
+    const int cuNm = 2;       // equivalent CU numbers in one xclbin
+    int deviceNeeded = 1;     // needed fpga board number
+    const int channelW = 16;  // AXI interface bitwidth is 512bits, which equals to 16 x 32bits
 
-    int numVertices = 1024 * 14 * cuNm * deviceNeeded; // total number of vertex read from file
-    int numEdges = 200;                                // total number of edge read from file
+    int numVertices = 10240 * 14 * cuNm * deviceNeeded; // total number of vertex read from file
+    int numEdges = 200;                                 // total number of edge read from file
     int32_t edgeAlign8 = ((numEdges + channelW - 1) / channelW) * channelW;
     int general = ((numVertices + deviceNeeded * cuNm * splitNm * channelsPU - 1) /
                    (deviceNeeded * cuNm * splitNm * channelsPU)) *
@@ -94,6 +94,7 @@ int main(int argc, const char* argv[]) {
     std::string kernelName;
     int requestLoad = 100;
     std::string xclbinPath;
+    std::string xclbinPath2;
 
     std::fstream userInput("./config.json", std::ios::in);
     if (!userInput) {
@@ -117,6 +118,9 @@ int main(int argc, const char* argv[]) {
             } else if (!std::strcmp(token, "xclbinPath")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 xclbinPath = token;
+            } else if (!std::strcmp(token, "xclbinPath2")) {
+                token = strtok(NULL, "\"\t ,}:{\n");
+                xclbinPath2 = token;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 //    deviceNeeded = std::atoi(token);
@@ -132,6 +136,7 @@ int main(int argc, const char* argv[]) {
     op0.setKernelName((char*)kernelName.c_str());
     op0.requestLoad = requestLoad;
     op0.xclbinFile = (char*)xclbinPath.c_str();
+    op0.xclbinFile2 = (char*)xclbinPath2.c_str();
     op0.deviceNeeded = deviceNeeded;
     op0.cuPerBoard = cuNm;
 
@@ -148,8 +153,6 @@ int main(int argc, const char* argv[]) {
     if (rest != 0) {
         numVerticesPU[deviceNeeded * cuNm - 1][splitNm - 1] = rest;
     }
-
-    int sourceID = 4; // source ID
 
     xf::graph::Graph<int32_t, int32_t>** g = new xf::graph::Graph<int32_t, int32_t>*[deviceNeeded * cuNm];
     int fpgaNodeNm = 0;
@@ -169,7 +172,7 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    int32_t requestNm = 10;
+    int32_t requestNm = 3;
     int sourceLen = edgeAlign8; // sourceIndice array length
     int32_t** sourceWeight = new int32_t*[requestNm];
     for (int i = 0; i < requestNm; ++i) {
@@ -231,8 +234,6 @@ int main(int argc, const char* argv[]) {
         }
     }
     //---------------- Run L3 API -----------------------------------
-    TimePointType startTime = std::chrono::high_resolution_clock::now();
-    TimePointType endTime;
     for (int m = 0; m < requestNm; ++m) {
         eventQueue[m] = xf::graph::L3::cosineSimilaritySSDenseMultiCard(handle0, hwNm, sourceLen, sourceWeight[m], topK,
                                                                         g, resultID0[m], similarity0[m]);
@@ -244,7 +245,6 @@ int main(int argc, const char* argv[]) {
             ret += eventQueue[m][i].wait();
         }
     }
-    double computeTime = xf::graph::L3::showTimeData("INFO: Single run time: ", startTime, endTime);
     for (int m = 0; m < requestNm; ++m) {
         for (int i = 0; i < topK; ++i) {
             similarity[m][i] = similarity0[m][0][counter[m][0]];
