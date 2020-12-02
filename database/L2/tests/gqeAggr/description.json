@@ -5,8 +5,7 @@
     "gui": false,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "xilinx_u280_xdma_201920_3",
-        "xilinx_u50_gen3x16_xdma_201920_3"
+        "xilinx_u280_xdma_201920_3"
     ],
     "platform_blacklist": [
         "other"
