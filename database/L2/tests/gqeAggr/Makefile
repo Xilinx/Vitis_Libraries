@@ -60,9 +60,7 @@ HOST_ARCH ?= x86
 
 # #################### Checking if DEVICE in whitelist ############################
 ifneq ($(findstring xilinx_u280_xdma_201920_3, $(DEVICE)), xilinx_u280_xdma_201920_3)
-ifneq ($(findstring xilinx_u50_gen3x16_xdma_201920_3, $(DEVICE)), xilinx_u50_gen3x16_xdma_201920_3)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
 endif
 
 # ######################## Setting up Project Variables #################################
