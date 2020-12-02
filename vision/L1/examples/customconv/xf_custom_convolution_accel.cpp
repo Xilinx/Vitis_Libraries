@@ -17,7 +17,7 @@
 #include "xf_custom_convolution_config.h"
 
 static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(INTYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
-static constexpr int __XF_DEPTH_FILTER = FILTER_HEIGHT * FILTER_WIDTH ;
+static constexpr int __XF_DEPTH_FILTER = FILTER_HEIGHT * FILTER_WIDTH;
 
 void Filter2d_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                     short int* filter,
