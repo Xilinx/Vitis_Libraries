@@ -25,7 +25,7 @@
             }, 
             "containers": [
                 {
-                    "ldclflags": "--config PROJECT/conn_u200.cfg", 
+                    "ldclflags": "--config PROJECT/conn_u200.cfg --config PROJECT/opts.cfg", 
                     "name": "reEngineKernel"
                 }
             ]

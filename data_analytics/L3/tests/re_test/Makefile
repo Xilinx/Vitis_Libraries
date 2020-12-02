@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.1
+# makefile-generator v1.0.3
 #
 
 # ####################################### Help Section #####################################
@@ -129,23 +129,15 @@ LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr 
 endif
 
 # ################### Setting package and image directory #######################
-PKG_OUT_DIR := package_$(TARGET)
-ifneq (,$(findstring zc706, $(XDEVICE)))
-K_IMAGE := $(SYSROOT)/../../uImage
-else
-K_IMAGE := $(SYSROOT)/../../Image
-endif
 
 EXE_NAME := test.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/reEngineKernel.xclbin -in $(XFLIB_DIR)/L2/tests/text/reEngine/log_data/access_5k.log -out $(CUR_DIR)/check.log
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 LIBRARY_PATH =$(CUR_DIR)/re_compile/lib/lib:$(LD_LIBRARY_PATH)
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
-VPP_FLAGS += --hls.jobs 8
-VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
+VPP_FLAGS += --jobs 8
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include/hw
 
@@ -158,7 +150,7 @@ VPP_LDFLAGS_reEngineKernel += --kernel_frequency 300
 
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-VPP_LDFLAGS_reEngineKernel += --config $(CUR_DIR)/conn_u200.cfg
+VPP_LDFLAGS_reEngineKernel += --config $(CUR_DIR)/conn_u200.cfg --config $(CUR_DIR)/opts.cfg
 endif
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
@@ -171,13 +163,7 @@ endif
 
 # ############################ Declaring Binary Containers ##########################
 
-ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/reEngineKernel.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/reEngineKernel.xclbin
-else
-BINARY_CONTAINERS += $(BUILD_DIR)/reEngineKernel_xo.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/reEngineKernel.xclbin
-endif
 BINARY_CONTAINER_reEngineKernel_OBJS += $(TEMP_DIR)/reEngineKernel.xo
 
 # ######################### Setting Targets of Makefile ################################
@@ -216,7 +202,7 @@ $(BUILD_DIR)/reEngineKernel.xclbin: $(BINARY_CONTAINER_reEngineKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
 else 
-$(BINARY_CONTAINERS): $(BINARY_CONTAINER_reEngineKernel_OBJS)
+$(BUILD_DIR)/reEngineKernel.xclbin: $(BINARY_CONTAINER_reEngineKernel_OBJS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/reEngineKernel $(VPP_LDFLAGS) $(VPP_LDFLAGS_reEngineKernel) -o '$@' $(+)
 endif
@@ -255,6 +241,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh
