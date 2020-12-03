@@ -1,7 +1,9 @@
 #ifndef CFLAGS
 #$(error CFLAGS is not set. Please run "make gpe" instead)
 #endif
-TigerGraphPath=/home/tigergraph/tigergraph/
+# The path below is replaced with the actual TigerGraph root directory 
+# during installation
+TigerGraphPath=TG_ROOT_DIR
 EXECUTABLE=bin/release/libudf.so
 SOURCE_MAIN_DIR = src/customer/core_impl/gpe_impl
 SOURCE_OTHER_DIR = src/customer/core_impl

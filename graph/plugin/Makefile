@@ -35,7 +35,7 @@ CXXFLAGS += -I$(XFLIB_DIR)/L3/include
 XILINX_XRM=/opt/xilinx/xrm
 
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label -w
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm
+LDFLAGS += -L$(XILINX_XRT)/lib -lstdc++ -lxrt_core -ldl -luuid -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm
 CXXFLAGS += -fmessage-length=0 -O3
 
 ifneq ($(HOST_ARCH), x86)
@@ -63,8 +63,11 @@ CPP_PATH += $(XFLIB_DIR)/L3/src/op_pagerank.cpp
 CPP_PATH += $(XFLIB_DIR)/L3/src/xf_graph_L3_handle.cpp
 CPP_PATH += $(XFLIB_DIR)/plugin/tigergraph/L3_wrapper.cpp
 
-$(libGRAPHL3WRAPPER): ${CPP_PATH}
-	/usr/bin/g++ -fPIC $(CXXFLAGS) -rdynamic -shared -o $@ $^ $(LDFLAGS) -Wl,--export-dynamic
+HPP_PATH = $(XFLIB_DIR)/L3/include/task.hpp \
+		   $(XFLIB_DIR)/L3/include/xf_graph_L3_handle.hpp
+
+$(libGRAPHL3WRAPPER): ${CPP_PATH} ${HPP_PATH}
+	/usr/bin/g++ -fPIC $(CXXFLAGS) -rdynamic -shared -o $@ ${CPP_PATH} $(LDFLAGS) -Wl,--export-dynamic
 
 ############################## Cleaning Rules ##############################
 clean:
