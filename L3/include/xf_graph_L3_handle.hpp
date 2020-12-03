@@ -147,7 +147,7 @@ class Handle {
 
     void free();
 
-    void setUp();
+    int setUp();
 
     void getEnv();
 
@@ -167,6 +167,7 @@ class Handle {
     void loadXclbin(unsigned int deviceId, char* xclbinName);
 
     std::thread loadXclbinNonBlock(unsigned int deviceId, char* xclbinName);
+    std::future<int> loadXclbinAsync(unsigned int deviceId, char* xclbinName);
 
     void initOpPageRank(const char* kernelName,
                         char* xclbinFile,

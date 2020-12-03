@@ -259,7 +259,7 @@ create query cosinesim_ss_tigergraph(vertex<patients> source, uint topKID) for g
 	return @@topK;
 }
 
-create query loadgraph_cosinesim_ss_fpga_core() for graph xgraph {
+create query loadgraph_cosinesim_ss_fpga_core() for graph xgraph returns (int) {
 
 	ListAccum<ListAccum<int> > @@patientsAll;
 	int ret;
@@ -270,6 +270,7 @@ create query loadgraph_cosinesim_ss_fpga_core() for graph xgraph {
 
 	ret = udf_loadgraph_cosinesim_ss_fpga(population.size(), 200, @@patientsAll);
 
+    return ret;
 }
 
 create query cosinesim_ss_fpga_core (vertex<patients> source, uint topK) for graph xgraph returns (ListAccum<testResults>) {
