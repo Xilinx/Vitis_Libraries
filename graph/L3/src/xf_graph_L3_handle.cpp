@@ -206,7 +206,7 @@ void Handle::addOp(singleOP op) {
     ops.push_back(op);
 }
 
-void Handle::setUp() {
+int Handle::setUp() {
     getEnv();
     unsigned int opNm = ops.size();
     unsigned int deviceCounter = 0;
@@ -271,12 +271,19 @@ void Handle::setUp() {
             for (int j = 0; j < boardNm; ++j) {
                 thUn[j].join();
             }
-            std::thread th[boardNm];
+            std::future<int> th[boardNm];
             for (int j = 0; j < boardNm; ++j) {
-                th[j] = loadXclbinNonBlock(deviceCounter + j, ops[i].xclbinFile);
+                th[j] = loadXclbinAsync(deviceCounter + j, ops[i].xclbinFile);
             }
             for (int j = 0; j < boardNm; ++j) {
-                th[j].join();
+                auto loadedDevId = th[j].get();
+                if (loadedDevId < 0) {
+                    std::cout << "ERROR: failed to load " << ops[i].xclbinFile << 
+                        "(Status=" << loadedDevId << "). Please check if it is " <<
+                        "created for the Xilinx Acceleration card installed on " <<
+                        "the server." << std::endl;
+                    return loadedDevId;
+                }
             }
             deviceCounter += boardNm;
             initOpSimDense(ops[i].kernelName, ops[i].xclbinFile, ops[i].kernelAlias, ops[i].requestLoad,
@@ -474,6 +481,7 @@ void Handle::setUp() {
             exit(1);
         }
     }
+    return 0;
 }
 
 void Handle::getEnv() {
@@ -656,6 +664,10 @@ void Handle::loadXclbin(unsigned int deviceId, char* xclbinName) {
 
 std::thread Handle::loadXclbinNonBlock(unsigned int deviceId, char* xclbinName) {
     return xrm->loadXclbinNonBlock(deviceId, xclbinName);
+};
+
+std::future<int> Handle::loadXclbinAsync(unsigned int deviceId, char* xclbinName) {
+    return xrm->loadXclbinAsync(deviceId, xclbinName);
 };
 
 } // L3

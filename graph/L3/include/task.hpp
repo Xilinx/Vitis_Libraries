@@ -32,6 +32,7 @@
 #include <xrm.h>
 
 #include <thread>
+#include <future>
 #include <unistd.h>
 namespace xf {
 namespace graph {
@@ -161,6 +162,10 @@ class openXRM {
     std::thread unloadXclbinNonBlock(unsigned int deviceId) { return std::thread(xrmUnloadOneDevice, ctx, deviceId); }
     std::thread loadXclbinNonBlock(unsigned int deviceId, char* xclbinName) {
         return std::thread(xrmLoadOneDevice, ctx, deviceId, xclbinName);
+    }
+    std::future<int> loadXclbinAsync(unsigned int deviceId, char* xclbinName) {
+        std::future<int> ret = std::async(&xrmLoadOneDevice, ctx, deviceId, xclbinName);
+        return ret;
     }
 
     void allocCU(xrmCuResource* resR, const char* kernelName, const char* kernelAlias, int requestLoad) {
