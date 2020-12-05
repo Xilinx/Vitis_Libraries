@@ -28,9 +28,9 @@
 // macros for accel
 #define FUNCT_NUM 7
 
-//#define EXTRA_ARG  0.05
+//#define EXTRA_ARG 0.05
 //#define EXTRA_PARM XF_CONVERT_POLICY_SATURATE
 
 // OpenCV reference macros
 #define CV_FUNCT_NAME bitwise_and
-//#define CV_EXTRA_ARG  0.05
+//#define CV_EXTRA_ARG 0.05

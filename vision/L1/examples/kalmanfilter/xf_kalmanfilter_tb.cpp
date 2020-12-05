@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "common/xf_headers.hpp"
 #include "./xf_kalmanfilter_config.h"
+#include "common/xf_headers.hpp"
 
 void error_check(
     cv::KalmanFilter kf, float* Xout_ptr, float* Uout_ptr, float* Dout_ptr, bool tu_or_mu, float* error_out) {
@@ -46,7 +46,8 @@ void error_check(
 
             if (error > tu_max_error_P || error_int == nan_xf) {
                 tu_max_error_P = error;
-                // std::cout << "ERROR: Difference in results for Pout at (" << i << "," << j << "): " << error <<
+                // std::cout << "ERROR: Difference in results for Pout at (" << i << ","
+                // << j << "): " << error <<
                 // std::endl;
                 cnt++;
             }
@@ -70,12 +71,14 @@ void error_check(
 
         if (error > tu_max_error_X || error_int == nan_xf) {
             tu_max_error_X = error;
-            // std::cout << "ERROR: Difference in results for Xout at " << i << ": " << error << std::endl;
+            // std::cout << "ERROR: Difference in results for Xout at " << i << ": "
+            // << error << std::endl;
             cnt++;
         }
     }
 
-    //  std::cout << "INFO: Percentage of errors = " << (float)cnt * 100 / ((KF_N * KF_N) + KF_N) << "%" << std::endl;
+    //  std::cout << "INFO: Percentage of errors = " << (float)cnt * 100 / ((KF_N
+    //  * KF_N) + KF_N) << "%" << std::endl;
 
     if (tu_max_error_X > tu_max_error_P)
         *error_out = tu_max_error_X;
@@ -313,7 +316,8 @@ int main(int argc, char* argv[]) {
     u_ptr_in = (ap_uint<PTR_WIDTH>*)u_ptr;
     y_ptr_in = (ap_uint<PTR_WIDTH>*)y_ptr;
 
-    // Init + Time Update + Measurement Update: Xilinx Kalman filter in Single Precision
+    // Init + Time Update + Measurement Update: Xilinx Kalman filter in Single
+    // Precision
     kalmanfilter_accel(A_ptr_in,
 #if KF_C != 0
                        B_ptr_in,
@@ -337,7 +341,8 @@ int main(int argc, char* argv[]) {
         std::cout << "INFO: Test Pass" << std::endl;
         return 0;
     } else {
-        std::cout << "ERROR: Test Fail" << std::endl;
+        fprintf(stderr, "ERROR: Test Fail\n ");
+
         return -1;
     }
 }

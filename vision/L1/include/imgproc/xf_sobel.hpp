@@ -21,9 +21,9 @@ typedef unsigned short uint16_t;
 
 typedef unsigned int uint32_t;
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
 
 namespace xf {
 namespace cv {
@@ -140,10 +140,12 @@ void xFSobel3x3(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
 #pragma HLS INLINE off
     // clang-format on
 
-    int STEP;
+    int STEP, STEP_OUT;
     if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
-        STEP = 16;
+        STEP_OUT = 16;
+        STEP = 8;
     } else {
+        STEP_OUT = 8;
         STEP = 8;
     }
 
@@ -153,17 +155,21 @@ Compute_Grad_Loop:
 // clang-format off
 #pragma HLS UNROLL
         // clang-format on
-        for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += 8) {
-            GradientvaluesX[j].range(p + (STEP - 1), p) = xFGradientX3x3<DEPTH_SRC, DEPTH_DST>(
-                src_buf1[j].range(k + 7, k), src_buf1[j + 1].range(k + 7, k), src_buf1[j + 2].range(k + 7, k),
-                src_buf2[j].range(k + 7, k), src_buf2[j + 1].range(k + 7, k), src_buf2[j + 2].range(k + 7, k),
-                src_buf3[j].range(k + 7, k), src_buf3[j + 1].range(k + 7, k), src_buf3[j + 2].range(k + 7, k));
+        for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += STEP) {
+            GradientvaluesX[j].range(p + (STEP_OUT - 1), p) = xFGradientX3x3<DEPTH_SRC, DEPTH_DST>(
+                src_buf1[j].range(k + STEP - 1, k), src_buf1[j + 1].range(k + STEP - 1, k),
+                src_buf1[j + 2].range(k + STEP - 1, k), src_buf2[j].range(k + STEP - 1, k),
+                src_buf2[j + 1].range(k + STEP - 1, k), src_buf2[j + 2].range(k + STEP - 1, k),
+                src_buf3[j].range(k + STEP - 1, k), src_buf3[j + 1].range(k + STEP - 1, k),
+                src_buf3[j + 2].range(k + STEP - 1, k));
 
-            GradientvaluesY[j].range(p + (STEP - 1), p) = xFGradientY3x3<DEPTH_SRC, DEPTH_DST>(
-                src_buf1[j].range(k + 7, k), src_buf1[j + 1].range(k + 7, k), src_buf1[j + 2].range(k + 7, k),
-                src_buf2[j].range(k + 7, k), src_buf2[j + 1].range(k + 7, k), src_buf2[j + 2].range(k + 7, k),
-                src_buf3[j].range(k + 7, k), src_buf3[j + 1].range(k + 7, k), src_buf3[j + 2].range(k + 7, k));
-            p += STEP;
+            GradientvaluesY[j].range(p + (STEP_OUT - 1), p) = xFGradientY3x3<DEPTH_SRC, DEPTH_DST>(
+                src_buf1[j].range(k + STEP - 1, k), src_buf1[j + 1].range(k + STEP - 1, k),
+                src_buf1[j + 2].range(k + STEP - 1, k), src_buf2[j].range(k + STEP - 1, k),
+                src_buf2[j + 1].range(k + STEP - 1, k), src_buf2[j + 2].range(k + STEP - 1, k),
+                src_buf3[j].range(k + STEP - 1, k), src_buf3[j + 1].range(k + STEP - 1, k),
+                src_buf3[j + 2].range(k + STEP - 1, k));
+            p += STEP_OUT;
         }
     }
 }
@@ -304,9 +310,10 @@ void xFSobelFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     int read_index = 0, write_index = 0;
 
     XF_PTNAME(DEPTH_DST)
-    GradientValuesX[XF_NPIXPERCYCLE(NPC)];                      // X-Gradient result buffer
-    XF_PTNAME(DEPTH_DST) GradientValuesY[XF_NPIXPERCYCLE(NPC)]; // Y-Gradient result buffer
-                                                                // clang-format off
+    GradientValuesX[XF_NPIXPERCYCLE(NPC)]; // X-Gradient result buffer
+    XF_PTNAME(DEPTH_DST)
+    GradientValuesY[XF_NPIXPERCYCLE(NPC)]; // Y-Gradient result buffer
+                                           // clang-format off
 #pragma HLS ARRAY_PARTITION variable=GradientValuesX complete dim=1
 #pragma HLS ARRAY_PARTITION variable=GradientValuesY complete dim=1
     // clang-format on
@@ -373,41 +380,59 @@ Row_Loop: // Process complete image
         src_buf2[0] = src_buf2[1] = 0;
         src_buf3[0] = src_buf3[1] = 0;
 
-        /***********		Process complete row			**********/
+        /***********		Process complete row
+         * **********/
         P0 = P1 = 0;
         ProcessSobel3x3<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
             _src_mat, _dst_matx, _dst_maty, buf, src_buf1, src_buf2, src_buf3, GradientValuesX, GradientValuesY, P0, P1,
             img_width, img_height, row_ind, shift_x, shift_y, tp, mid, bottom, row, read_index, write_index);
 
-        /*			Last column border care	for RO & PO Case			*/
+        /*			Last column border care	for RO & PO Case
+         */
         if ((NPC == XF_NPPC8)) {
             //	Compute gradient at last column
-            GradientValuesX[0] = xFGradientX3x3<DEPTH_SRC, DEPTH_DST>(
-                src_buf1[buf_size - 2], src_buf1[buf_size - 1], 0, src_buf2[buf_size - 2], src_buf2[buf_size - 1], 0,
-                src_buf3[buf_size - 2], src_buf3[buf_size - 1], 0);
-
-            GradientValuesY[0] = xFGradientY3x3<DEPTH_SRC, DEPTH_DST>(
-                src_buf1[buf_size - 2], src_buf1[buf_size - 1], 0, src_buf2[buf_size - 2], src_buf2[buf_size - 1], 0,
-                src_buf3[buf_size - 2], src_buf3[buf_size - 1], 0);
-        } else /*			Last column border care	for NO Case			*/
-        {
-            int STEP, q = 0;
+            int STEP, STEP_OUT, p = 0;
             if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
-                STEP = 16;
+                STEP_OUT = 16;
+                STEP = 8;
             } else {
+                STEP_OUT = 8;
                 STEP = 8;
             }
-            for (ap_uint<7> i = 0, k = 0; i < PLANES; i++, k += 8) {
-                GradientValuesX[0].range(q + (STEP - 1), q) = xFGradientX3x3<DEPTH_SRC, DEPTH_DST>(
-                    src_buf1[buf_size - 3].range(k + 7, k), src_buf1[buf_size - 2].range(k + 7, k), 0,
-                    src_buf2[buf_size - 3].range(k + 7, k), src_buf2[buf_size - 2].range(k + 7, k), 0,
-                    src_buf3[buf_size - 3].range(k + 7, k), src_buf3[buf_size - 2].range(k + 7, k), 0);
+            for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += STEP) {
+                GradientValuesX[0].range(p + (STEP_OUT - 1), p) = xFGradientX3x3<DEPTH_SRC, DEPTH_DST>(
+                    src_buf1[buf_size - 2].range(k + STEP - 1, k), src_buf1[buf_size - 1].range(k + STEP - 1, k), 0,
+                    src_buf2[buf_size - 2].range(k + STEP - 1, k), src_buf2[buf_size - 1].range(k + STEP - 1, k), 0,
+                    src_buf3[buf_size - 2].range(k + STEP - 1, k), src_buf3[buf_size - 1].range(k + STEP - 1, k), 0);
 
-                GradientValuesY[0].range(q + (STEP - 1), q) = xFGradientY3x3<DEPTH_SRC, DEPTH_DST>(
-                    src_buf1[buf_size - 3].range(k + 7, k), src_buf1[buf_size - 2].range(k + 7, k), 0,
-                    src_buf2[buf_size - 3].range(k + 7, k), src_buf2[buf_size - 2].range(k + 7, k), 0,
-                    src_buf3[buf_size - 3].range(k + 7, k), src_buf3[buf_size - 2].range(k + 7, k), 0);
-                q += STEP;
+                GradientValuesY[0].range(p + (STEP_OUT - 1), p) = xFGradientY3x3<DEPTH_SRC, DEPTH_DST>(
+                    src_buf1[buf_size - 2].range(k + STEP - 1, k), src_buf1[buf_size - 1].range(k + STEP - 1, k), 0,
+                    src_buf2[buf_size - 2].range(k + STEP - 1, k), src_buf2[buf_size - 1].range(k + STEP - 1, k), 0,
+                    src_buf3[buf_size - 2].range(k + STEP - 1, k), src_buf3[buf_size - 1].range(k + STEP - 1, k), 0);
+                p += STEP_OUT;
+            }
+        } else /*			Last column border care	for NO Case
+         */
+        {
+            int STEP, STEP_OUT, q = 0;
+            if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
+                STEP_OUT = 16;
+                STEP = 8;
+            } else {
+                STEP_OUT = 8;
+                STEP = 8;
+            }
+            for (ap_uint<7> i = 0, k = 0; i < PLANES; i++, k += STEP) {
+                GradientValuesX[0].range(q + (STEP_OUT - 1), q) = xFGradientX3x3<DEPTH_SRC, DEPTH_DST>(
+                    src_buf1[buf_size - 3].range(k + STEP - 1, k), src_buf1[buf_size - 2].range(k + STEP - 1, k), 0,
+                    src_buf2[buf_size - 3].range(k + STEP - 1, k), src_buf2[buf_size - 2].range(k + STEP - 1, k), 0,
+                    src_buf3[buf_size - 3].range(k + STEP - 1, k), src_buf3[buf_size - 2].range(k + STEP - 1, k), 0);
+
+                GradientValuesY[0].range(q + (STEP_OUT - 1), q) = xFGradientY3x3<DEPTH_SRC, DEPTH_DST>(
+                    src_buf1[buf_size - 3].range(k + STEP - 1, k), src_buf1[buf_size - 2].range(k + STEP - 1, k), 0,
+                    src_buf2[buf_size - 3].range(k + STEP - 1, k), src_buf2[buf_size - 2].range(k + STEP - 1, k), 0,
+                    src_buf3[buf_size - 3].range(k + STEP - 1, k), src_buf3[buf_size - 2].range(k + STEP - 1, k), 0);
+                q += STEP_OUT;
             }
         }
 
@@ -460,32 +485,42 @@ xFGradientX5x5(XF_PTNAME(DEPTH_SRC) * src_buf1,
 #pragma HLS INLINE off
     // clang-format on
     XF_PTNAME(DEPTH_DST) g_x = 0, out_val = 0;
-    int STEP, p = 0;
+
+    int STEP, STEP_OUT, p = 0;
     if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
-        STEP = 16;
+        STEP_OUT = 16;
+        STEP = 8;
     } else {
+        STEP_OUT = 8;
         STEP = 8;
     }
 
-    for (int i = 0, k = 0; i < PLANES; i++, k += 8) {
+    for (int i = 0, k = 0; i < PLANES; i++, k += STEP) {
         short int M00 =
-            (short int)(((short int)src_buf1[1].range(k + 7, k) + (short int)src_buf5[1].range(k + 7, k)) << 1);
-        short int M01 = (short int)((short int)src_buf1[4].range(k + 7, k) + (short int)src_buf5[4].range(k + 7, k)) -
-                        ((short int)src_buf1[0].range(k + 7, k) + (short int)src_buf5[0].range(k + 7, k));
+            (short int)(((short int)src_buf1[1].range(k + STEP - 1, k) + (short int)src_buf5[1].range(k + STEP - 1, k))
+                        << 1);
+        short int M01 =
+            (short int)((short int)src_buf1[4].range(k + STEP - 1, k) + (short int)src_buf5[4].range(k + STEP - 1, k)) -
+            ((short int)src_buf1[0].range(k + STEP - 1, k) + (short int)src_buf5[0].range(k + STEP - 1, k));
         short int A00 =
-            (short int)(((short int)src_buf1[3].range(k + 7, k) + (short int)src_buf5[3].range(k + 7, k)) << 1);
+            (short int)(((short int)src_buf1[3].range(k + STEP - 1, k) + (short int)src_buf5[3].range(k + STEP - 1, k))
+                        << 1);
         short int M02 =
-            (short int)(((short int)src_buf2[0].range(k + 7, k) + (short int)src_buf4[0].range(k + 7, k)) << 2);
-        short int M03 = (short int)((short int)src_buf2[1].range(k + 7, k) + (short int)src_buf4[1].range(k + 7, k))
-                        << 3;
-        short int A01 = (short int)((short int)src_buf2[3].range(k + 7, k) + (short int)src_buf4[3].range(k + 7, k))
-                        << 3;
-        short int A02 = (short int)((short int)src_buf2[4].range(k + 7, k) + (short int)src_buf4[4].range(k + 7, k))
-                        << 2;
-        short int M04 = (short int)src_buf3[0].range(k + 7, k) * 6;
-        short int M05 = (short int)src_buf3[1].range(k + 7, k) * 12;
-        short int A03 = (short int)src_buf3[3].range(k + 7, k) * 12;
-        short int A04 = (short int)src_buf3[4].range(k + 7, k) * 6;
+            (short int)(((short int)src_buf2[0].range(k + STEP - 1, k) + (short int)src_buf4[0].range(k + STEP - 1, k))
+                        << 2);
+        short int M03 =
+            (short int)((short int)src_buf2[1].range(k + STEP - 1, k) + (short int)src_buf4[1].range(k + STEP - 1, k))
+            << 3;
+        short int A01 =
+            (short int)((short int)src_buf2[3].range(k + STEP - 1, k) + (short int)src_buf4[3].range(k + STEP - 1, k))
+            << 3;
+        short int A02 =
+            (short int)((short int)src_buf2[4].range(k + STEP - 1, k) + (short int)src_buf4[4].range(k + STEP - 1, k))
+            << 2;
+        short int M04 = (short int)src_buf3[0].range(k + STEP - 1, k) * 6;
+        short int M05 = (short int)src_buf3[1].range(k + STEP - 1, k) * 12;
+        short int A03 = (short int)src_buf3[3].range(k + STEP - 1, k) * 12;
+        short int A04 = (short int)src_buf3[4].range(k + STEP - 1, k) * 6;
         short int S00 = M00 + M02;
         short int S01 = M03 + M04 + M05;
         short int A0 = A00 + A01;
@@ -503,8 +538,8 @@ xFGradientX5x5(XF_PTNAME(DEPTH_SRC) * src_buf1,
             else if (out_x > 255)
                 g_x = 255;
         }
-        out_val.range(p + (STEP - 1), p) = g_x;
-        p += STEP;
+        out_val.range(p + (STEP_OUT - 1), p) = g_x;
+        p += STEP_OUT;
     }
     return out_val;
 }
@@ -535,32 +570,41 @@ xFGradientY5x5(XF_PTNAME(DEPTH_SRC) * src_buf1,
 #pragma HLS INLINE off
     // clang-format on
     XF_PTNAME(DEPTH_DST) g_y = 0, out_val = 0;
-    int STEP, p = 0;
+    int STEP, STEP_OUT, p = 0;
     if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
-        STEP = 16;
+        STEP_OUT = 16;
+        STEP = 8;
     } else {
+        STEP_OUT = 8;
         STEP = 8;
     }
 
-    for (int i = 0, k = 0; i < PLANES; i++, k += 8) {
-        short int M00 = ((short int)src_buf5[0].range(k + 7, k) + (short int)src_buf5[4].range(k + 7, k)) -
-                        ((short int)src_buf1[0].range(k + 7, k) + (short int)src_buf1[4].range(k + 7, k));
+    for (int i = 0, k = 0; i < PLANES; i++, k += STEP) {
+        short int M00 =
+            ((short int)src_buf5[0].range(k + STEP - 1, k) + (short int)src_buf5[4].range(k + STEP - 1, k)) -
+            ((short int)src_buf1[0].range(k + STEP - 1, k) + (short int)src_buf1[4].range(k + STEP - 1, k));
         short int M01 =
-            (short int)(((short int)src_buf1[1].range(k + 7, k) + (short int)src_buf1[3].range(k + 7, k)) << 2);
+            (short int)(((short int)src_buf1[1].range(k + STEP - 1, k) + (short int)src_buf1[3].range(k + STEP - 1, k))
+                        << 2);
         short int A00 =
-            (short int)(((short int)src_buf5[1].range(k + 7, k) + (short int)src_buf5[3].range(k + 7, k)) << 2);
+            (short int)(((short int)src_buf5[1].range(k + STEP - 1, k) + (short int)src_buf5[3].range(k + STEP - 1, k))
+                        << 2);
         short int M02 =
-            (short int)(((short int)src_buf2[0].range(k + 7, k) + (short int)src_buf2[4].range(k + 7, k)) << 1);
+            (short int)(((short int)src_buf2[0].range(k + STEP - 1, k) + (short int)src_buf2[4].range(k + STEP - 1, k))
+                        << 1);
         short int A01 =
-            (short int)(((short int)src_buf4[0].range(k + 7, k) + (short int)src_buf4[4].range(k + 7, k)) << 1);
+            (short int)(((short int)src_buf4[0].range(k + STEP - 1, k) + (short int)src_buf4[4].range(k + STEP - 1, k))
+                        << 1);
         short int M03 =
-            (short int)(((short int)src_buf2[1].range(k + 7, k) + (short int)src_buf2[3].range(k + 7, k)) << 3);
+            (short int)(((short int)src_buf2[1].range(k + STEP - 1, k) + (short int)src_buf2[3].range(k + STEP - 1, k))
+                        << 3);
         short int A02 =
-            (short int)(((short int)src_buf4[1].range(k + 7, k) + (short int)src_buf4[3].range(k + 7, k)) << 3);
-        short int M04 = (short int)(src_buf1[2].range(k + 7, k) * 6);
-        short int M05 = (short int)(src_buf2[2].range(k + 7, k) * 12);
-        short int A03 = (short int)(src_buf4[2].range(k + 7, k) * 12);
-        short int A04 = (short int)(src_buf5[2].range(k + 7, k) * 6);
+            (short int)(((short int)src_buf4[1].range(k + STEP - 1, k) + (short int)src_buf4[3].range(k + STEP - 1, k))
+                        << 3);
+        short int M04 = (short int)(src_buf1[2].range(k + STEP - 1, k) * 6);
+        short int M05 = (short int)(src_buf2[2].range(k + STEP - 1, k) * 12);
+        short int A03 = (short int)(src_buf4[2].range(k + STEP - 1, k) * 12);
+        short int A04 = (short int)(src_buf5[2].range(k + STEP - 1, k) * 6);
         short int S00 = M01 + M02 + M03;
         short int S01 = M04 + M05;
         short int A0 = A00 + A01;
@@ -578,8 +622,8 @@ xFGradientY5x5(XF_PTNAME(DEPTH_SRC) * src_buf1,
             else if (out_y > 255)
                 g_y = 255;
         }
-        out_val.range(p + (STEP - 1), p) = g_y;
-        p += STEP;
+        out_val.range(p + (STEP_OUT - 1), p) = g_y;
+        p += STEP_OUT;
     }
     return out_val;
 }
@@ -913,8 +957,8 @@ Row_Loop:
             _dst_maty.write(write_index++, inter_valy);
         } else {
 // clang-format off
-#pragma HLS ALLOCATION instances=xFGradientX5x5 limit=1 function
-#pragma HLS ALLOCATION instances=xFGradientY5x5 limit=1 function
+#pragma HLS ALLOCATION function instances=xFGradientX5x5<PLANES, DEPTH_SRC, DEPTH_DST> limit=1 
+#pragma HLS ALLOCATION function instances=xFGradientY5x5<PLANES, DEPTH_SRC, DEPTH_DST> limit=1
             // clang-format on
 
             src_buf1[buf_size - 1] = 0;
@@ -1002,98 +1046,149 @@ xFGradientX7x7(XF_PTNAME(DEPTH_SRC) * src_buf1,
 #pragma HLS INLINE off
 #pragma HLS PIPELINE II=1
     // clang-format on
-    int STEP, p = 0;
+
     XF_PTNAME(DEPTH_DST) g_x = 0;
     XF_PTNAME(DEPTH_DST) val = 0;
-
+    int STEP, STEP_OUT, p = 0;
     if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
-        STEP = 16;
+        STEP_OUT = 16;
+        STEP = 8;
     } else if ((DEPTH_DST == XF_32SP)) {
-        STEP = 32;
+        STEP_OUT = 32;
+        STEP = 8;
     } else {
         STEP = 8;
+        STEP_OUT = 8;
     }
-    for (int i = 0, k = 0; i < PLANES; i++, k += 8) {
+
+    for (int i = 0, k = 0; i < PLANES; i++, k += STEP) {
         int Res = 0;
-        ap_int<20> M00 =
-            (ap_int<20>)(((ap_int<20>)src_buf1[6].range(k + 7, k) + (ap_int<20>)src_buf7[6].range(k + 7, k)) -
-                         ((ap_int<20>)src_buf1[0].range(k + 7, k) + (ap_int<20>)src_buf7[0].range(k + 7, k)));
-        ap_int<20> M01 =
-            (ap_int<20>)(((ap_int<20>)src_buf1[1].range(k + 7, k) + (ap_int<20>)src_buf7[1].range(k + 7, k)) << 2);
-        ap_int<20> A00 =
-            (ap_int<20>)(((ap_int<20>)src_buf1[5].range(k + 7, k) + (ap_int<20>)src_buf7[5].range(k + 7, k)) << 2);
+        ap_int<20> M00 = (ap_int<20>)(((ap_int<20>)src_buf1[6].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf7[6].range(k + STEP - 1, k)) -
+                                      ((ap_int<20>)src_buf1[0].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf7[0].range(k + STEP - 1, k)));
+        ap_int<20> M01 = (ap_int<20>)(((ap_int<20>)src_buf1[1].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf7[1].range(k + STEP - 1, k))
+                                      << 2);
+        ap_int<20> A00 = (ap_int<20>)(((ap_int<20>)src_buf1[5].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf7[5].range(k + STEP - 1, k))
+                                      << 2);
         ap_int<20> M02 =
-            (ap_int<20>)(((ap_int<20>)src_buf1[2].range(k + 7, k) + (ap_int<20>)src_buf7[2].range(k + 7, k)) << 2) +
-            (ap_int<20>)((ap_int<20>)src_buf1[2].range(k + 7, k) +
-                         (ap_int<20>)src_buf7[2].range(k + 7, k)); //(src_buf1[2] + src_buf7[2]) * 5;
-        ap_int<20> A01 =
-            (ap_int<20>)(((ap_int<20>)src_buf1[4].range(k + 7, k) + (ap_int<20>)src_buf7[4].range(k + 7, k)) << 2) +
-            (ap_int<20>)src_buf1[4].range(k + 7, k) +
-            (ap_int<20>)src_buf7[4].range(k + 7, k); //(src_buf1[4] + src_buf7[4]) * 5;
-        ap_int<20> M03 =
-            (ap_int<20>)(((ap_int<20>)src_buf2[0].range(k + 7, k) + (ap_int<20>)src_buf6[0].range(k + 7, k)) << 2) +
-            (ap_int<20>)(((ap_int<20>)src_buf2[0].range(k + 7, k) + (ap_int<20>)src_buf6[0].range(k + 7, k))
-                         << 1); //(src_buf2[0] + src_buf6[0]) * 6;
-        ap_int<20> A02 =
-            (ap_int<20>)(((ap_int<20>)src_buf2[6].range(k + 7, k) + (ap_int<20>)src_buf6[6].range(k + 7, k)) << 2) +
-            (ap_int<20>)(((ap_int<20>)src_buf2[6].range(k + 7, k) + (ap_int<20>)src_buf6[6].range(k + 7, k))
-                         << 1); //(src_buf2[6] + src_buf6[6]) * 6;
-        ap_int<20> M04 =
-            (ap_int<20>)(((ap_int<20>)src_buf2[1].range(k + 7, k) + (ap_int<20>)src_buf6[1].range(k + 7, k)) << 4) +
-            (ap_int<20>)(((ap_int<20>)src_buf2[1].range(k + 7, k) + (ap_int<20>)src_buf6[1].range(k + 7, k))
-                         << 3); //(src_buf2[1] + src_buf6[1]) * 24;
-        ap_int<20> A03 =
-            (ap_int<20>)(((ap_int<20>)src_buf2[5].range(k + 7, k) + (ap_int<20>)src_buf6[5].range(k + 7, k)) << 4) +
-            (ap_int<20>)(((ap_int<20>)src_buf2[5].range(k + 7, k) + (ap_int<20>)src_buf6[5].range(k + 7, k))
-                         << 3); //(src_buf2[5] + src_buf6[5]) * 24;
-        ap_int<20> M05 =
-            (ap_int<20>)(((ap_int<20>)src_buf2[2].range(k + 7, k) + (ap_int<20>)src_buf6[2].range(k + 7, k)) << 5) -
-            (ap_int<20>)(((ap_int<20>)src_buf2[2].range(k + 7, k) + (ap_int<20>)src_buf6[2].range(k + 7, k))
-                         << 1); //(src_buf2[2] + src_buf6[2]) * 30;
-        ap_int<20> A04 =
-            (ap_int<20>)(((ap_int<20>)src_buf2[4].range(k + 7, k) + (ap_int<20>)src_buf6[4].range(k + 7, k)) << 5) -
-            (ap_int<20>)(((ap_int<20>)src_buf2[4].range(k + 7, k) + (ap_int<20>)src_buf6[4].range(k + 7, k))
-                         << 1); //(src_buf2[4] + src_buf6[4]) * 30;
+            (ap_int<20>)(((ap_int<20>)src_buf1[2].range(k + STEP - 1, k) +
+                          (ap_int<20>)src_buf7[2].range(k + STEP - 1, k))
+                         << 2) +
+            (ap_int<20>)((ap_int<20>)src_buf1[2].range(k + STEP - 1, k) +
+                         (ap_int<20>)src_buf7[2].range(k + STEP - 1, k)); //(src_buf1[2] + src_buf7[2]) * 5;
+        ap_int<20> A01 = (ap_int<20>)(((ap_int<20>)src_buf1[4].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf7[4].range(k + STEP - 1, k))
+                                      << 2) +
+                         (ap_int<20>)src_buf1[4].range(k + STEP - 1, k) +
+                         (ap_int<20>)src_buf7[4].range(k + STEP - 1,
+                                                       k); //(src_buf1[4] + src_buf7[4]) * 5;
+        ap_int<20> M03 = (ap_int<20>)(((ap_int<20>)src_buf2[0].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[0].range(k + STEP - 1, k))
+                                      << 2) +
+                         (ap_int<20>)(((ap_int<20>)src_buf2[0].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[0].range(k + STEP - 1, k))
+                                      << 1); //(src_buf2[0] + src_buf6[0]) * 6;
+        ap_int<20> A02 = (ap_int<20>)(((ap_int<20>)src_buf2[6].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[6].range(k + STEP - 1, k))
+                                      << 2) +
+                         (ap_int<20>)(((ap_int<20>)src_buf2[6].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[6].range(k + STEP - 1, k))
+                                      << 1); //(src_buf2[6] + src_buf6[6]) * 6;
+        ap_int<20> M04 = (ap_int<20>)(((ap_int<20>)src_buf2[1].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[1].range(k + STEP - 1, k))
+                                      << 4) +
+                         (ap_int<20>)(((ap_int<20>)src_buf2[1].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[1].range(k + STEP - 1, k))
+                                      << 3); //(src_buf2[1] + src_buf6[1]) * 24;
+        ap_int<20> A03 = (ap_int<20>)(((ap_int<20>)src_buf2[5].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[5].range(k + STEP - 1, k))
+                                      << 4) +
+                         (ap_int<20>)(((ap_int<20>)src_buf2[5].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[5].range(k + STEP - 1, k))
+                                      << 3); //(src_buf2[5] + src_buf6[5]) * 24;
+        ap_int<20> M05 = (ap_int<20>)(((ap_int<20>)src_buf2[2].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[2].range(k + STEP - 1, k))
+                                      << 5) -
+                         (ap_int<20>)(((ap_int<20>)src_buf2[2].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[2].range(k + STEP - 1, k))
+                                      << 1); //(src_buf2[2] + src_buf6[2]) * 30;
+        ap_int<20> A04 = (ap_int<20>)(((ap_int<20>)src_buf2[4].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[4].range(k + STEP - 1, k))
+                                      << 5) -
+                         (ap_int<20>)(((ap_int<20>)src_buf2[4].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf6[4].range(k + STEP - 1, k))
+                                      << 1); //(src_buf2[4] + src_buf6[4]) * 30;
         ap_int<20> M06 =
-            (ap_int<20>)(((ap_int<20>)src_buf3[0].range(k + 7, k) + (ap_int<20>)src_buf5[0].range(k + 7, k)) << 4) -
-            (ap_int<20>)((ap_int<20>)src_buf3[0].range(k + 7, k) +
-                         (ap_int<20>)src_buf5[0].range(k + 7, k)); //(src_buf3[0] + src_buf5[0]) * 15;
+            (ap_int<20>)(((ap_int<20>)src_buf3[0].range(k + STEP - 1, k) +
+                          (ap_int<20>)src_buf5[0].range(k + STEP - 1, k))
+                         << 4) -
+            (ap_int<20>)((ap_int<20>)src_buf3[0].range(k + STEP - 1, k) +
+                         (ap_int<20>)src_buf5[0].range(k + STEP - 1, k)); //(src_buf3[0] + src_buf5[0]) * 15;
         ap_int<20> A05 =
-            (ap_int<20>)(((ap_int<20>)src_buf3[6].range(k + 7, k) + (ap_int<20>)src_buf5[6].range(k + 7, k)) << 4) -
-            (ap_int<20>)((ap_int<20>)src_buf3[6].range(k + 7, k) +
-                         (ap_int<20>)src_buf5[6].range(k + 7, k)); //(src_buf3[6] + src_buf5[6]) * 15;
-        ap_int<20> M07 =
-            (ap_int<20>)(((ap_int<20>)src_buf3[1].range(k + 7, k) + (ap_int<20>)src_buf5[1].range(k + 7, k)) << 6) -
-            (ap_int<20>)(((ap_int<20>)src_buf3[1].range(k + 7, k) + (ap_int<20>)src_buf5[1].range(k + 7, k))
-                         << 2); //(src_buf3[1] + src_buf5[1]) * 60;
-        ap_int<20> A06 =
-            (ap_int<20>)(((ap_int<20>)src_buf3[5].range(k + 7, k) + (ap_int<20>)src_buf5[5].range(k + 7, k)) << 6) -
-            (ap_int<20>)(((ap_int<20>)src_buf3[5].range(k + 7, k) + (ap_int<20>)src_buf5[5].range(k + 7, k))
-                         << 2); //(src_buf3[5] + src_buf5[5]) * 60;
+            (ap_int<20>)(((ap_int<20>)src_buf3[6].range(k + STEP - 1, k) +
+                          (ap_int<20>)src_buf5[6].range(k + STEP - 1, k))
+                         << 4) -
+            (ap_int<20>)((ap_int<20>)src_buf3[6].range(k + STEP - 1, k) +
+                         (ap_int<20>)src_buf5[6].range(k + STEP - 1, k)); //(src_buf3[6] + src_buf5[6]) * 15;
+        ap_int<20> M07 = (ap_int<20>)(((ap_int<20>)src_buf3[1].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf5[1].range(k + STEP - 1, k))
+                                      << 6) -
+                         (ap_int<20>)(((ap_int<20>)src_buf3[1].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf5[1].range(k + STEP - 1, k))
+                                      << 2); //(src_buf3[1] + src_buf5[1]) * 60;
+        ap_int<20> A06 = (ap_int<20>)(((ap_int<20>)src_buf3[5].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf5[5].range(k + STEP - 1, k))
+                                      << 6) -
+                         (ap_int<20>)(((ap_int<20>)src_buf3[5].range(k + STEP - 1, k) +
+                                       (ap_int<20>)src_buf5[5].range(k + STEP - 1, k))
+                                      << 2); //(src_buf3[5] + src_buf5[5]) * 60;
         ap_int<20> M08 =
-            (ap_int<20>)(((ap_int<20>)src_buf3[2].range(k + 7, k) + (ap_int<20>)src_buf5[2].range(k + 7, k)) << 6) +
-            (ap_int<20>)(((ap_int<20>)src_buf3[2].range(k + 7, k) + (ap_int<20>)src_buf5[2].range(k + 7, k)) << 3) +
-            (ap_int<20>)((ap_int<20>)src_buf3[2].range(k + 7, k) + (ap_int<20>)src_buf5[2].range(k + 7, k) << 1) +
-            (ap_int<20>)src_buf3[2].range(k + 7, k) +
-            (ap_int<20>)src_buf5[2].range(k + 7, k); //(src_buf3[2] + src_buf5[2]) * 75;
+            (ap_int<20>)(((ap_int<20>)src_buf3[2].range(k + STEP - 1, k) +
+                          (ap_int<20>)src_buf5[2].range(k + STEP - 1, k))
+                         << 6) +
+            (ap_int<20>)(((ap_int<20>)src_buf3[2].range(k + STEP - 1, k) +
+                          (ap_int<20>)src_buf5[2].range(k + STEP - 1, k))
+                         << 3) +
+            (ap_int<20>)((ap_int<20>)src_buf3[2].range(k + STEP - 1, k) + (ap_int<20>)src_buf5[2].range(k + STEP - 1, k)
+                         << 1) +
+            (ap_int<20>)src_buf3[2].range(k + STEP - 1, k) +
+            (ap_int<20>)src_buf5[2].range(k + STEP - 1,
+                                          k); //(src_buf3[2] + src_buf5[2]) * 75;
         ap_int<20> A07 =
-            (ap_int<20>)(((ap_int<20>)src_buf3[4].range(k + 7, k) + (ap_int<20>)src_buf5[4].range(k + 7, k)) << 6) +
-            (ap_int<20>)(((ap_int<20>)src_buf3[4].range(k + 7, k) + (ap_int<20>)src_buf5[4].range(k + 7, k)) << 3) +
-            (ap_int<20>)((ap_int<20>)src_buf3[4].range(k + 7, k) + (ap_int<20>)src_buf5[4].range(k + 7, k) << 1) +
-            (ap_int<20>)src_buf3[4].range(k + 7, k) +
-            (ap_int<20>)src_buf5[4].range(k + 7, k); //(src_buf3[4] + src_buf5[4]) * 75;
-        ap_int<20> M09 =
-            (ap_int<20>)(((ap_int<20>)src_buf4[6].range(k + 7, k) - (ap_int<20>)src_buf4[0].range(k + 7, k)) << 4) +
-            (ap_int<20>)(((ap_int<20>)src_buf4[6].range(k + 7, k) - (ap_int<20>)src_buf4[0].range(k + 7, k))
-                         << 2); //(src_buf4[6] - src_buf4[0]) * 20;
-        ap_int<20> M10 =
-            (ap_int<20>)(((ap_int<20>)src_buf4[5].range(k + 7, k) - (ap_int<20>)src_buf4[1].range(k + 7, k)) << 6) +
-            (ap_int<20>)(((ap_int<20>)src_buf4[5].range(k + 7, k) - (ap_int<20>)src_buf4[1].range(k + 7, k))
-                         << 4); //(src_buf4[5] - src_buf4[1]) * 80;
+            (ap_int<20>)(((ap_int<20>)src_buf3[4].range(k + STEP - 1, k) +
+                          (ap_int<20>)src_buf5[4].range(k + STEP - 1, k))
+                         << 6) +
+            (ap_int<20>)(((ap_int<20>)src_buf3[4].range(k + STEP - 1, k) +
+                          (ap_int<20>)src_buf5[4].range(k + STEP - 1, k))
+                         << 3) +
+            (ap_int<20>)((ap_int<20>)src_buf3[4].range(k + STEP - 1, k) + (ap_int<20>)src_buf5[4].range(k + STEP - 1, k)
+                         << 1) +
+            (ap_int<20>)src_buf3[4].range(k + STEP - 1, k) +
+            (ap_int<20>)src_buf5[4].range(k + STEP - 1,
+                                          k); //(src_buf3[4] + src_buf5[4]) * 75;
+        ap_int<20> M09 = (ap_int<20>)(((ap_int<20>)src_buf4[6].range(k + STEP - 1, k) -
+                                       (ap_int<20>)src_buf4[0].range(k + STEP - 1, k))
+                                      << 4) +
+                         (ap_int<20>)(((ap_int<20>)src_buf4[6].range(k + STEP - 1, k) -
+                                       (ap_int<20>)src_buf4[0].range(k + STEP - 1, k))
+                                      << 2); //(src_buf4[6] - src_buf4[0]) * 20;
+        ap_int<20> M10 = (ap_int<20>)(((ap_int<20>)src_buf4[5].range(k + STEP - 1, k) -
+                                       (ap_int<20>)src_buf4[1].range(k + STEP - 1, k))
+                                      << 6) +
+                         (ap_int<20>)(((ap_int<20>)src_buf4[5].range(k + STEP - 1, k) -
+                                       (ap_int<20>)src_buf4[1].range(k + STEP - 1, k))
+                                      << 4); //(src_buf4[5] - src_buf4[1]) * 80;
         ap_int<20> M11 =
-            (ap_int<20>)(((ap_int<20>)src_buf4[4].range(k + 7, k) - (ap_int<20>)src_buf4[2].range(k + 7, k)) << 6) +
-            (ap_int<20>)(((ap_int<20>)src_buf4[4].range(k + 7, k) - (ap_int<20>)src_buf4[2].range(k + 7, k)) << 5) +
-            (ap_int<20>)((ap_int<20>)src_buf4[4].range(k + 7, k) - (ap_int<20>)src_buf4[2].range(k + 7, k)
+            (ap_int<20>)(((ap_int<20>)src_buf4[4].range(k + STEP - 1, k) -
+                          (ap_int<20>)src_buf4[2].range(k + STEP - 1, k))
+                         << 6) +
+            (ap_int<20>)(((ap_int<20>)src_buf4[4].range(k + STEP - 1, k) -
+                          (ap_int<20>)src_buf4[2].range(k + STEP - 1, k))
+                         << 5) +
+            (ap_int<20>)((ap_int<20>)src_buf4[4].range(k + STEP - 1, k) - (ap_int<20>)src_buf4[2].range(k + STEP - 1, k)
                          << 2); //(src_buf4[4] - src_buf4[2]) * 100;
         ap_int<20> FS00 = M01 + M02 + M03;
         ap_int<20> FS01 = M04 + M05;
@@ -1124,8 +1219,8 @@ xFGradientX7x7(XF_PTNAME(DEPTH_SRC) * src_buf1,
                 g_x = -32768;
         }
 
-        val.range(p + (STEP - 1), p) = g_x;
-        p += STEP;
+        val.range(p + (STEP_OUT - 1), p) = g_x;
+        p += STEP_OUT;
     }
 
     return val;
@@ -1164,76 +1259,84 @@ xFGradientY7x7(XF_PTNAME(DEPTH_SRC) * src_buf1,
 #pragma HLS PIPELINE II=1
     // clang-format on
     XF_PTNAME(DEPTH_DST) g_y = 0, val = 0;
-    int STEP, p = 0;
-
+    int STEP, STEP_OUT, p = 0;
     if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
-        STEP = 16;
+        STEP_OUT = 16;
+        STEP = 8;
     } else if ((DEPTH_DST == XF_32SP)) {
-        STEP = 32;
+        STEP_OUT = 32;
+        STEP = 8;
     } else {
         STEP = 8;
+        STEP_OUT = 8;
     }
 
-    for (int i = 0, k = 0; i < PLANES; i++, k += 8) {
+    for (int i = 0, k = 0; i < PLANES; i++, k += STEP) {
         int Res = 0;
-        ap_int<20> M00 = (src_buf7[0].range(k + 7, k) + src_buf7[6].range(k + 7, k)) -
-                         (src_buf1[0].range(k + 7, k) + src_buf1[6].range(k + 7, k));
-        ap_int<20> M01 = ((ap_int<20>)(src_buf1[1].range(k + 7, k) + src_buf1[5].range(k + 7, k)) << 2) +
-                         ((ap_int<20>)(src_buf1[1].range(k + 7, k) + src_buf1[5].range(k + 7, k))
+        ap_int<20> M00 = (src_buf7[0].range(k + STEP - 1, k) + src_buf7[6].range(k + STEP - 1, k)) -
+                         (src_buf1[0].range(k + STEP - 1, k) + src_buf1[6].range(k + STEP - 1, k));
+        ap_int<20> M01 = ((ap_int<20>)(src_buf1[1].range(k + STEP - 1, k) + src_buf1[5].range(k + STEP - 1, k)) << 2) +
+                         ((ap_int<20>)(src_buf1[1].range(k + STEP - 1, k) + src_buf1[5].range(k + STEP - 1, k))
                           << 1); //(src_buf1[1] + src_buf1[5]) * 6;
-        ap_int<20> A00 = ((ap_int<20>)(src_buf7[1].range(k + 7, k) + src_buf7[5].range(k + 7, k)) << 2) +
-                         ((ap_int<20>)(src_buf7[1].range(k + 7, k) + src_buf7[5].range(k + 7, k))
+        ap_int<20> A00 = ((ap_int<20>)(src_buf7[1].range(k + STEP - 1, k) + src_buf7[5].range(k + STEP - 1, k)) << 2) +
+                         ((ap_int<20>)(src_buf7[1].range(k + STEP - 1, k) + src_buf7[5].range(k + STEP - 1, k))
                           << 1); //(src_buf7[1] + src_buf7[5]) * 6;
-        ap_int<20> M02 =
-            ((ap_int<20>)(src_buf1[2].range(k + 7, k) + src_buf1[4].range(k + 7, k)) << 4) -
-            (src_buf1[2].range(k + 7, k) + src_buf1[4].range(k + 7, k)); // (src_buf1[2] + src_buf1[4]) * 15;
-        ap_int<20> A01 =
-            ((ap_int<20>)(src_buf7[2].range(k + 7, k) + src_buf7[4].range(k + 7, k)) << 4) -
-            (src_buf7[2].range(k + 7, k) + src_buf7[4].range(k + 7, k)); //(src_buf7[2] + src_buf7[4]) * 15;
-        ap_int<20> M03 = (ap_int<20>)(src_buf2[0].range(k + 7, k) + src_buf2[6].range(k + 7, k)) << 2;
-        ap_int<20> A02 = (ap_int<20>)(src_buf6[0].range(k + 7, k) + src_buf6[6].range(k + 7, k)) << 2;
-        ap_int<20> M04 = ((ap_int<20>)(src_buf2[1].range(k + 7, k) + src_buf2[5].range(k + 7, k)) << 4) +
-                         ((ap_int<20>)(src_buf2[1].range(k + 7, k) + src_buf2[5].range(k + 7, k))
+        ap_int<20> M02 = ((ap_int<20>)(src_buf1[2].range(k + STEP - 1, k) + src_buf1[4].range(k + STEP - 1, k)) << 4) -
+                         (src_buf1[2].range(k + STEP - 1, k) +
+                          src_buf1[4].range(k + STEP - 1,
+                                            k)); // (src_buf1[2] + src_buf1[4]) * 15;
+        ap_int<20> A01 = ((ap_int<20>)(src_buf7[2].range(k + STEP - 1, k) + src_buf7[4].range(k + STEP - 1, k)) << 4) -
+                         (src_buf7[2].range(k + STEP - 1, k) +
+                          src_buf7[4].range(k + STEP - 1,
+                                            k)); //(src_buf7[2] + src_buf7[4]) * 15;
+        ap_int<20> M03 = (ap_int<20>)(src_buf2[0].range(k + STEP - 1, k) + src_buf2[6].range(k + STEP - 1, k)) << 2;
+        ap_int<20> A02 = (ap_int<20>)(src_buf6[0].range(k + STEP - 1, k) + src_buf6[6].range(k + STEP - 1, k)) << 2;
+        ap_int<20> M04 = ((ap_int<20>)(src_buf2[1].range(k + STEP - 1, k) + src_buf2[5].range(k + STEP - 1, k)) << 4) +
+                         ((ap_int<20>)(src_buf2[1].range(k + STEP - 1, k) + src_buf2[5].range(k + STEP - 1, k))
                           << 3); //(src_buf2[1] + src_buf2[5]) * 24;
-        ap_int<20> A03 = ((ap_int<20>)(src_buf6[1].range(k + 7, k) + src_buf6[5].range(k + 7, k)) << 4) +
-                         ((ap_int<20>)(src_buf6[1].range(k + 7, k) + src_buf6[5].range(k + 7, k))
+        ap_int<20> A03 = ((ap_int<20>)(src_buf6[1].range(k + STEP - 1, k) + src_buf6[5].range(k + STEP - 1, k)) << 4) +
+                         ((ap_int<20>)(src_buf6[1].range(k + STEP - 1, k) + src_buf6[5].range(k + STEP - 1, k))
                           << 3); //(src_buf6[1] + src_buf6[5]) * 24;
-        ap_int<20> M05 = ((ap_int<20>)(src_buf2[2].range(k + 7, k) + src_buf2[4].range(k + 7, k)) << 6) -
-                         ((ap_int<20>)(src_buf2[2].range(k + 7, k) + src_buf2[4].range(k + 7, k))
+        ap_int<20> M05 = ((ap_int<20>)(src_buf2[2].range(k + STEP - 1, k) + src_buf2[4].range(k + STEP - 1, k)) << 6) -
+                         ((ap_int<20>)(src_buf2[2].range(k + STEP - 1, k) + src_buf2[4].range(k + STEP - 1, k))
                           << 2); //(src_buf2[2] + src_buf2[4]) * 60;
-        ap_int<20> A04 = ((ap_int<20>)(src_buf6[2].range(k + 7, k) + src_buf6[4].range(k + 7, k)) << 6) -
-                         ((ap_int<20>)(src_buf6[2].range(k + 7, k) + src_buf6[4].range(k + 7, k))
+        ap_int<20> A04 = ((ap_int<20>)(src_buf6[2].range(k + STEP - 1, k) + src_buf6[4].range(k + STEP - 1, k)) << 6) -
+                         ((ap_int<20>)(src_buf6[2].range(k + STEP - 1, k) + src_buf6[4].range(k + STEP - 1, k))
                           << 2); //(src_buf6[2] + src_buf6[4]) * 60;
-        ap_int<20> M06 = ((ap_int<20>)(src_buf3[0].range(k + 7, k) + src_buf3[6].range(k + 7, k)) << 2) +
-                         (src_buf3[0].range(k + 7, k) + src_buf3[6].range(k + 7, k)); //(src_buf3[0] + src_buf3[6]) * 5;
-        ap_int<20> A05 = ((ap_int<20>)(src_buf5[0].range(k + 7, k) + src_buf5[6].range(k + 7, k)) << 2) +
-                         (src_buf5[0].range(k + 7, k) + src_buf5[6].range(k + 7, k)); //(src_buf5[0] + src_buf5[6]) * 5;
-        ap_int<20> M07 = ((ap_int<20>)(src_buf3[1].range(k + 7, k) + src_buf3[5].range(k + 7, k)) << 5) -
-                         ((ap_int<20>)(src_buf3[1].range(k + 7, k) + src_buf3[5].range(k + 7, k))
+        ap_int<20> M06 = ((ap_int<20>)(src_buf3[0].range(k + STEP - 1, k) + src_buf3[6].range(k + STEP - 1, k)) << 2) +
+                         (src_buf3[0].range(k + STEP - 1, k) +
+                          src_buf3[6].range(k + STEP - 1, k)); //(src_buf3[0] + src_buf3[6]) * 5;
+        ap_int<20> A05 = ((ap_int<20>)(src_buf5[0].range(k + STEP - 1, k) + src_buf5[6].range(k + STEP - 1, k)) << 2) +
+                         (src_buf5[0].range(k + STEP - 1, k) +
+                          src_buf5[6].range(k + STEP - 1, k)); //(src_buf5[0] + src_buf5[6]) * 5;
+        ap_int<20> M07 = ((ap_int<20>)(src_buf3[1].range(k + STEP - 1, k) + src_buf3[5].range(k + STEP - 1, k)) << 5) -
+                         ((ap_int<20>)(src_buf3[1].range(k + STEP - 1, k) + src_buf3[5].range(k + STEP - 1, k))
                           << 1); //(src_buf3[1] + src_buf3[5]) * 30;
-        ap_int<20> A06 = ((ap_int<20>)(src_buf5[1].range(k + 7, k) + src_buf5[5].range(k + 7, k)) << 5) -
-                         ((ap_int<20>)(src_buf5[1].range(k + 7, k) + src_buf5[5].range(k + 7, k))
+        ap_int<20> A06 = ((ap_int<20>)(src_buf5[1].range(k + STEP - 1, k) + src_buf5[5].range(k + STEP - 1, k)) << 5) -
+                         ((ap_int<20>)(src_buf5[1].range(k + STEP - 1, k) + src_buf5[5].range(k + STEP - 1, k))
                           << 1); //(src_buf5[1] + src_buf5[5]) * 30;
 
-        ap_int<20> M08 =
-            ((ap_int<20>)(src_buf3[2].range(k + 7, k) + src_buf3[4].range(k + 7, k)) << 6) +
-            ((ap_int<20>)(src_buf3[2].range(k + 7, k) + src_buf3[4].range(k + 7, k)) << 3) +
-            ((ap_int<20>)(src_buf3[2].range(k + 7, k) + src_buf3[4].range(k + 7, k)) << 1) +
-            (src_buf3[2].range(k + 7, k) + src_buf3[4].range(k + 7, k)); //(src_buf3[2] + src_buf3[4]) * 75;
-        ap_int<20> A07 =
-            ((ap_int<20>)(src_buf5[2].range(k + 7, k) + src_buf5[4].range(k + 7, k)) << 6) +
-            ((ap_int<20>)(src_buf5[2].range(k + 7, k) + src_buf5[4].range(k + 7, k)) << 3) +
-            ((ap_int<20>)(src_buf5[2].range(k + 7, k) + src_buf5[4].range(k + 7, k)) << 1) +
-            (src_buf5[2].range(k + 7, k) + src_buf5[4].range(k + 7, k)); //(src_buf5[2] + src_buf5[4]) * 75;
-        ap_int<20> M09 = ((ap_int<20>)(src_buf7[3].range(k + 7, k) - src_buf1[3].range(k + 7, k)) << 4) +
-                         ((ap_int<20>)(src_buf7[3].range(k + 7, k) - src_buf1[3].range(k + 7, k))
+        ap_int<20> M08 = ((ap_int<20>)(src_buf3[2].range(k + STEP - 1, k) + src_buf3[4].range(k + STEP - 1, k)) << 6) +
+                         ((ap_int<20>)(src_buf3[2].range(k + STEP - 1, k) + src_buf3[4].range(k + STEP - 1, k)) << 3) +
+                         ((ap_int<20>)(src_buf3[2].range(k + STEP - 1, k) + src_buf3[4].range(k + STEP - 1, k)) << 1) +
+                         (src_buf3[2].range(k + STEP - 1, k) +
+                          src_buf3[4].range(k + STEP - 1,
+                                            k)); //(src_buf3[2] + src_buf3[4]) * 75;
+        ap_int<20> A07 = ((ap_int<20>)(src_buf5[2].range(k + STEP - 1, k) + src_buf5[4].range(k + STEP - 1, k)) << 6) +
+                         ((ap_int<20>)(src_buf5[2].range(k + STEP - 1, k) + src_buf5[4].range(k + STEP - 1, k)) << 3) +
+                         ((ap_int<20>)(src_buf5[2].range(k + STEP - 1, k) + src_buf5[4].range(k + STEP - 1, k)) << 1) +
+                         (src_buf5[2].range(k + STEP - 1, k) +
+                          src_buf5[4].range(k + STEP - 1,
+                                            k)); //(src_buf5[2] + src_buf5[4]) * 75;
+        ap_int<20> M09 = ((ap_int<20>)(src_buf7[3].range(k + STEP - 1, k) - src_buf1[3].range(k + STEP - 1, k)) << 4) +
+                         ((ap_int<20>)(src_buf7[3].range(k + STEP - 1, k) - src_buf1[3].range(k + STEP - 1, k))
                           << 2); //(src_buf7[3] - src_buf1[3]) * 20;
-        ap_int<20> M10 = ((ap_int<20>)(src_buf6[3].range(k + 7, k) - src_buf2[3].range(k + 7, k)) << 6) +
-                         ((ap_int<20>)(src_buf6[3].range(k + 7, k) - src_buf2[3].range(k + 7, k))
+        ap_int<20> M10 = ((ap_int<20>)(src_buf6[3].range(k + STEP - 1, k) - src_buf2[3].range(k + STEP - 1, k)) << 6) +
+                         ((ap_int<20>)(src_buf6[3].range(k + STEP - 1, k) - src_buf2[3].range(k + STEP - 1, k))
                           << 4); //(src_buf6[3] - src_buf2[3]) * 80;
-        ap_int<20> M11 = ((ap_int<20>)(src_buf5[3].range(k + 7, k) - src_buf3[3].range(k + 7, k)) << 6) +
-                         ((ap_int<20>)(src_buf5[3].range(k + 7, k) - src_buf3[3].range(k + 7, k)) << 5) +
-                         ((ap_int<20>)(src_buf5[3].range(k + 7, k) - src_buf3[3].range(k + 7, k))
+        ap_int<20> M11 = ((ap_int<20>)(src_buf5[3].range(k + STEP - 1, k) - src_buf3[3].range(k + STEP - 1, k)) << 6) +
+                         ((ap_int<20>)(src_buf5[3].range(k + STEP - 1, k) - src_buf3[3].range(k + STEP - 1, k)) << 5) +
+                         ((ap_int<20>)(src_buf5[3].range(k + STEP - 1, k) - src_buf3[3].range(k + STEP - 1, k))
                           << 2); //(src_buf5[3] - src_buf3[3]) * 100;
         ap_int<20> FS00 = M01 + M02 + M03;
         ap_int<20> FS01 = M04 + M05;
@@ -1265,8 +1368,8 @@ xFGradientY7x7(XF_PTNAME(DEPTH_SRC) * src_buf1,
 
         // g_y = (XF_PTNAME(DEPTH_DST))Res;
 
-        val.range(p + (STEP - 1), p) = (XF_PTNAME(DEPTH_DST))g_y;
-        p += STEP;
+        val.range(p + (STEP_OUT - 1), p) = (XF_PTNAME(DEPTH_DST))g_y;
+        p += STEP_OUT;
     }
 
     return val;
@@ -1508,8 +1611,8 @@ void RightBorder7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         for (ap_uint<5> k = 0; k < 3; k++) {
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=3 max=3
-#pragma HLS ALLOCATION instances=xFGradientX7x7 limit=1 function
-#pragma HLS ALLOCATION instances=xFGradientY7x7 limit=1 function
+#pragma HLS ALLOCATION function instances=xFGradientX7x7<PLANES, DEPTH_SRC, DEPTH_DST> limit=1 
+#pragma HLS ALLOCATION function instances=xFGradientY7x7<PLANES, DEPTH_SRC, DEPTH_DST> limit=1
             // clang-format on
 
             XF_PTNAME(DEPTH_DST)
@@ -1572,7 +1675,8 @@ void xFSobelFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_PTNAME(DEPTH_SRC)
     src_buf1[XF_NPIXPERCYCLE(NPC) + 6], src_buf2[XF_NPIXPERCYCLE(NPC) + 6], src_buf3[XF_NPIXPERCYCLE(NPC) + 6],
         src_buf4[XF_NPIXPERCYCLE(NPC) + 6], src_buf5[XF_NPIXPERCYCLE(NPC) + 6];
-    XF_PTNAME(DEPTH_SRC) src_buf6[XF_NPIXPERCYCLE(NPC) + 6], src_buf7[XF_NPIXPERCYCLE(NPC) + 6];
+    XF_PTNAME(DEPTH_SRC)
+    src_buf6[XF_NPIXPERCYCLE(NPC) + 6], src_buf7[XF_NPIXPERCYCLE(NPC) + 6];
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable=src_buf1 complete dim=1
 #pragma HLS ARRAY_PARTITION variable=src_buf2 complete dim=1
@@ -1711,7 +1815,8 @@ Row_Loop:
             src_buf7[i] = 0;
         }
         inter_valx = inter_valy = 0;
-        /***********		Process complete row			**********/
+        /***********		Process complete row
+         * **********/
         ProcessSobel7x7<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
             _src_mat, _gradx_mat, _grady_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7,
             GradientValuesX, GradientValuesY, inter_valx, inter_valy, img_width, img_height, row_ind, shiftx, shifty,

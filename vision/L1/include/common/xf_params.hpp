@@ -72,6 +72,22 @@ enum _threshold_type {
 };
 typedef _threshold_type XF_threshold_type_e;
 
+// Thresholding types
+enum _ccm_type {
+    XF_CCM_bt2020_bt709 = 0,
+    XF_CCM_bt709_bt2020 = 1,
+    XF_CCM_rgb_yuv_601 = 2,
+    XF_CCM_rgb_yuv_709 = 3,
+    XF_CCM_rgb_yuv_2020 = 4,
+    XF_CCM_yuv_rgb_601 = 5,
+    XF_CCM_yuv_rgb_709 = 6,
+    XF_CCM_yuv_rgb_2020 = 7,
+    XF_CCM_full_from_16_235 = 8,
+    XF_CCM_full_to_16_235 = 9,
+
+};
+typedef _ccm_type XF_ccm_type_e;
+
 // Comparision types
 enum _comparison_op { XF_CMP_EQ = 0, XF_CMP_GT = 1, XF_CMP_GE = 2, XF_CMP_LT = 3, XF_CMP_LE = 4, XF_CMP_NE = 5 };
 typedef _comparison_op _comparison_op_e;

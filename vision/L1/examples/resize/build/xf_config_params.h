@@ -28,7 +28,7 @@
 #define RGB 0
 #define GRAY 1
 /* Interpolation type*/
-#define INTERPOLATION 2
+#define INTERPOLATION 1
 // 0 - Nearest Neighbor Interpolation
 // 1 - Bilinear Interpolation
 // 2 - AREA Interpolation

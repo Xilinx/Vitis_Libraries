@@ -235,7 +235,7 @@ Row_Loop:
             src_buf[i][4] = 0;
         }
 // clang-format off
-        #pragma HLS ALLOCATION instances=xFComputeTransform5x5 limit=1 function
+        #pragma HLS ALLOCATION function instances=xFComputeTransform5x5<DEPTH_SRC, DEPTH_DST> limit=1
         // clang-format on
         censusVal = xFComputeTransform5x5<DEPTH_SRC, DEPTH_DST>(src_buf);
         _dst_mat.write(censusVal);

@@ -77,7 +77,7 @@ double GetOtsuThresholdFloat(cv::Mat _src) {
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << "<INPUT IMAGE PATH>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
     img = cv::imread(argv[1], 0);
 
     if (img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
               << "\tDifference : " << (int)maxdiff << std::endl;
 
     if (maxdiff > 1) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

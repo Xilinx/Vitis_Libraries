@@ -30,15 +30,25 @@ Level 2 contains the host-callable kernels and engines for various Vitis Vision 
 
 **For embedded devices:**
 
+	Download the platform, and common-image from Xilinx Download Center. Run the sdk.sh script from the common-image directory to install sysroot using the command : "./sdk.sh -y -d ./ -p"
+	
+	Unzip the rootfs file : "gunzip ./rootfs.ext4.gz"
+
     export SYSROOT=< path-to-platform-sysroot >
+    
+    export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
+	
+	export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
 
-    make host xclbin TARGET=< sw_emu|hw_emu|hw > BOARD=Zynq ARCH=< aarch32 | aarch64 >
+    make host xclbin TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 >
 
-    make run TARGET=< sw_emu|hw_emu|hw > BOARD=Zynq ARCH=< aarch32 | aarch64 > #This command will generate the sd_card folder. 
+    make run TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 > #This command will generate only the sd_card folder in case of hardware build. 
 
-**Note**. For hw run on embedded devices, copy the generated sd_card folder content, under package_hw, to an SDCARD and run the following commands on the board:
+**Note**. For hw run on embedded devices, copy the generated sd_card folder content under package_hw, to an SDCARD and run the following commands on the board:
 
     cd /mnt
+	
+	source /opt/xilinx/xrt/setup.sh
 	   
     export XCL_BINDIR=< xclbin-folder-present-in-the-sd_card > #For example, "export XCL_BINDIR=xclbin_zcu102_base_hw"
 	   

@@ -21,7 +21,7 @@
 
 int main(int argc, char** argv) {
     if (argc != 4) {
-        printf("Usage : <executable> <input image> <output image height> <output image width>\n");
+        fprintf(stderr, "Usage : <executable> <input image> <output image height> <output image width>\n");
         return -1;
     }
     cv::Mat img, result_hls, result_ocv, error;
@@ -130,7 +130,8 @@ int main(int argc, char** argv) {
                                        result_hls.data)); // Data will be stored here
 
     q.finish();
-/////////////////////////////////////// end of CL ///////////////////////////////////////
+/////////////////////////////////////// end of CL
+//////////////////////////////////////////
 
 /*OpenCV resize function*/
 #if INTERPOLATION == 0
@@ -148,8 +149,10 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(error, 5, err_per);
 
     if (err_per > 1.0f) {
-        return 1;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
     }
+    std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

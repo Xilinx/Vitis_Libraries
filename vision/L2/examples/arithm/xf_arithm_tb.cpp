@@ -15,18 +15,18 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_arithm_config.h"
 #include "xcl2.hpp"
+#include "xf_arithm_config.h"
 
 int main(int argc, char** argv) {
 #if ARRAY
     if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n", argv[0]);
         return EXIT_FAILURE;
     }
 #else
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> " << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -38,14 +38,14 @@ int main(int argc, char** argv) {
     in_gray1 = cv::imread(argv[1], 0);
 
     if (in_gray1.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 #else
     in_gray1 = cv::imread(argv[1], 1);
 
     if (in_gray1.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 #endif
@@ -54,14 +54,14 @@ int main(int argc, char** argv) {
     in_gray2 = cv::imread(argv[2], 0);
 
     if (in_gray2.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[2]);
         return EXIT_FAILURE;
     }
 #else
     in_gray2 = cv::imread(argv[2], 1);
 
     if (in_gray2.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[2]);
         return EXIT_FAILURE;
     }
 
@@ -77,11 +77,11 @@ int main(int argc, char** argv) {
     in_gray1.convertTo(in_gray1, CV_16SC1);
     in_gray2.convertTo(in_gray2, CV_16SC1);
     out_img.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_16SC1);
+    ocv_ref.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
     diff.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
 #else
     out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_8UC1);
+    ocv_ref.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
     diff.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
 #endif
 #else
@@ -90,11 +90,11 @@ int main(int argc, char** argv) {
     in_gray1.convertTo(in_gray1, CV_16SC3);
     in_gray2.convertTo(in_gray2, CV_16SC3);
     out_img.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_16SC3);
+    ocv_ref.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
     diff.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
 #else
     out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_8UC3);
+    ocv_ref.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
     diff.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
 #endif
 #endif
@@ -287,7 +287,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

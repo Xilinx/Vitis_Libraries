@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
     printf("Difference in Maximum value location: (%d,%d) \n", (cv_maxloc.y - _max_locy), (cv_maxloc.x - _max_locx));
 
     if (((cv_minloc.y - _min_locy) > 1) | ((cv_minloc.x - _min_locx) > 1)) {
-        printf("\nTestcase failed\n");
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return -1;
     }
 

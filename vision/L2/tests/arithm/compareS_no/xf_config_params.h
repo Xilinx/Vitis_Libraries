@@ -27,7 +27,7 @@
 #define SCALAR 1
 // macros for accel
 #define FUNCT_NUM 15
-//#define EXTRA_ARG  0.05
+//#define EXTRA_ARG 0.05
 #define EXTRA_PARM XF_CMP_LE
 
 // OpenCV reference macros

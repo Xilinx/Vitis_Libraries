@@ -306,7 +306,7 @@ void HoughLinesstandardcref(cv::Mat& img,
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << "  <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -317,7 +317,7 @@ int main(int argc, char** argv) {
     in_gray = cv::imread(argv[1], 0);
 
     if (in_gray.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -392,7 +392,7 @@ int main(int argc, char** argv) {
     std::cout << "\tNumber of matched lines = " << count << std::endl;
 
     if (successper < 90) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

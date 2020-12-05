@@ -17,18 +17,46 @@
 #ifndef _XF_GC_HPP_
 #define _XF_GC_HPP_
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
+#include "hls_stream.h"
 
 #ifndef XF_IN_STEP
-#define XF_IN_STEP 8
+#define XF_IN_STEP 16
 #endif
 #ifndef XF_OUT_STEP
-#define XF_OUT_STEP 8
+#define XF_OUT_STEP 16
 #endif
 
-#define R_GAIN 140
+#define R_GAIN 157
 #define B_GAIN 140
+
+/**Utility macros and functions**/
+
+#define MAXVAL(pixeldepth) ((1 << pixeldepth) - 1)
+#define XF_UCHAR_MAX 255
+#define XF_UTENBIT_MAX 1023
+#define XF_UTWELVEBIT_MAX 4095
+#define XF_USHORT_MAX 65535
+
+template <typename T>
+T xf_satcast_gain(int in_val){};
+
+template <>
+inline ap_uint<8> xf_satcast_gain<ap_uint<8> >(int v) {
+    return (v > MAXVAL(8) ? XF_UCHAR_MAX : v);
+};
+template <>
+inline ap_uint<10> xf_satcast_gain<ap_uint<10> >(int v) {
+    return (v > MAXVAL(10) ? XF_UTENBIT_MAX : v);
+};
+template <>
+inline ap_uint<12> xf_satcast_gain<ap_uint<12> >(int v) {
+    return (v > MAXVAL(12) ? XF_UTWELVEBIT_MAX : v);
+};
+template <>
+inline ap_uint<16> xf_satcast_gain<ap_uint<16> >(int v) {
+    return (v > MAXVAL(16) ? XF_USHORT_MAX : v);
+};
 
 namespace xf {
 
@@ -51,28 +79,25 @@ void gaincontrolkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
                        uint16_t width) {
     ap_uint<13> i, j, k, l;
 
-    int STEP = XF_PIXELWIDTH(SRC_T, NPC) / PLANES;
+    const int STEP = XF_PIXELWIDTH(SRC_T, NPC);
 
-    XF_SNAME(WORDWIDTH_DST) pxl_pack_out;
-    XF_SNAME(WORDWIDTH_SRC) pxl_pack1, pxl_pack2;
+    XF_TNAME(SRC_T, NPC) pxl_pack_out;
+    XF_TNAME(SRC_T, NPC) pxl_pack1, pxl_pack2;
 RowLoop:
     for (i = 0; i < height; i++) {
-// clang-format off
-#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
 #pragma HLS LOOP_FLATTEN OFF
-    // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
-// clang-format off
-#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS LOOP_TRIPCOUNT min = TC max = TC
 #pragma HLS pipeline
-            // clang-format on
 
-            pxl_pack1 = (XF_SNAME(WORDWIDTH_SRC))(src1.read(i * width + j)); // reading from 1st input stream
+            pxl_pack1 = (src1.read(i * width + j)); // reading from 1st input stream
 
         ProcLoop:
-            for (k = 0, l = 0; k < ((8 << XF_BITSHIFT(NPC)) * PLANES); k += XF_IN_STEP, l++) {
-                XF_PTNAME(DEPTH_SRC) pxl1 = pxl_pack1.range(k + 7, k); // extracting each pixel in case of 8-pixel mode
+            for (l = 0; l < (XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)); l++) {
+                XF_PTNAME(DEPTH_SRC)
+                pxl1 = pxl_pack1.range(l * STEP + STEP - 1, l * STEP); // extracting each pixel in case of 8-pixel mode
                 XF_PTNAME(DEPTH_SRC) t;
                 bool cond1 = 0, cond2 = 0;
 
@@ -86,70 +111,68 @@ RowLoop:
 
                 if (BFORMAT == XF_BAYER_RG) {
                     if (i % 2 == 0 && cond1) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * R_GAIN) >> 7);
-                        t = (v2 > 255) ? 255 : v2;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * R_GAIN) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond2) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * B_GAIN) >> 7);
-                        t = (v2 > 255) ? 255 : v2;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * B_GAIN) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         t = pxl1;
                     }
                 }
                 if (BFORMAT == XF_BAYER_GR) {
                     if (i % 2 == 0 && cond2) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * R_GAIN) >> 7);
-                        t = (v2 > 255) ? 255 : v2;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * R_GAIN) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond1) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * B_GAIN) >> 7);
-                        t = (v2 > 255) ? 255 : v2;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * B_GAIN) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         t = pxl1;
                     }
                 }
                 if (BFORMAT == XF_BAYER_BG) {
                     if (i % 2 == 0 && cond1) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * B_GAIN) >> 7);
-                        t = (v2 > 255) ? 255 : v2;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * B_GAIN) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 == 0 && cond2) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * R_GAIN) >> 7);
-                        t = (v2 > 255) ? 255 : v2;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * R_GAIN) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         t = pxl1;
                     }
                 }
                 if (BFORMAT == XF_BAYER_GB) {
                     if (i % 2 == 0 && cond2) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * B_GAIN) >> 7);
-                        t = (v2 > 255) ? 255 : v2;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * B_GAIN) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond1) {
-                        XF_PTNAME(DEPTH_SRC) v1 = pxl1;
-                        short v2 = (short)((v1 * R_GAIN) >> 7);
-                        t = (v2 > 255) ? 255 : v2;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * R_GAIN) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         t = pxl1;
                     }
                 }
 
-                pxl_pack_out.range(k + XF_OUT_STEP - 1, k) = t;
+                pxl_pack_out.range(l * STEP + STEP - 1, l * STEP) = t;
             }
 
-            dst.write(i * width + j, (XF_SNAME(WORDWIDTH_DST))pxl_pack_out); // writing into ouput stream
+            dst.write(i * width + j, pxl_pack_out); // writing into ouput stream
         }
     }
 }
 
 template <int BFORMAT, int SRC_T, int ROWS, int COLS, int NPC = 1>
 void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst) {
-// clang-format off
 #pragma HLS INLINE OFF
-// clang-format on
 #ifndef __SYNTHESIS__
     assert(((src1.rows == dst.rows) && (src1.cols == dst.cols)) && "Input and output image should be of same size");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");

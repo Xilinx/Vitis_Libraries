@@ -25,7 +25,7 @@
 // main function
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     img_raw = cv::imread(argv[1], 1); // load as color image through command line argument
 
     if (!img_raw.data) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -268,9 +268,10 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 
     if (max_diff > 0.1f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
+    std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

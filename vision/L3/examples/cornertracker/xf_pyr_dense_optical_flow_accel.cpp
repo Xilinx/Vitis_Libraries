@@ -61,30 +61,18 @@ void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
     const int pNPC1 = XF_NPPC1;
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> current_img_mat;
-// clang-format off
-    #pragma HLS stream variable=current_img_mat.data depth=pCOLS/pNPC1
-    // clang-format on
     current_img_mat.rows = cur_img_rows;
     current_img_mat.cols = cur_img_cols;
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> next_img_mat;
-// clang-format off
-    #pragma HLS stream variable=next_img_mat.data depth=pCOLS/pNPC1
-    // clang-format on
     next_img_mat.rows = next_img_rows;
     next_img_mat.cols = next_img_cols;
 
     xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> streamFlowin_mat;
-// clang-format off
-    #pragma HLS stream variable=streamFlowin_mat.data depth=pCOLS/pNPC1
-    // clang-format on
     streamFlowin_mat.rows = flow_rows;
     streamFlowin_mat.cols = flow_cols;
 
     xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> streamFlowout_mat;
-// clang-format off
-    #pragma HLS stream variable=streamFlowout_mat.data depth=pCOLS/pNPC1
-    // clang-format on
     streamFlowout_mat.rows = flow_iter_rows;
     streamFlowout_mat.cols = flow_iter_cols;
 

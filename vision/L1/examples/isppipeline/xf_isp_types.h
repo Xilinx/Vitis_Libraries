@@ -47,6 +47,14 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "imgproc/xf_gaincontrol.hpp"
 #include "imgproc/xf_autowhitebalance.hpp"
 #include "imgproc/xf_demosaicing.hpp"
+#include "imgproc/xf_ltm.hpp"
+#include "imgproc/xf_quantizationdithering.hpp"
+#include "imgproc/xf_lensshadingcorrection.hpp"
+#include "imgproc/xf_colorcorrectionmatrix.hpp"
+#include "imgproc/xf_black_level.hpp"
+#include "imgproc/xf_aec.hpp"
+
+#define S_DEPTH 4096
 
 // --------------------------------------------------------------------
 // Macros definations
@@ -57,12 +65,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _BYTE_ALIGN_(_N) ((((_N) + 7) / 8) * 8)
 
 #define IN_DATA_WIDTH _DATA_WIDTH_(XF_SRC_T, XF_NPPC)
-#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_DST_T, XF_NPPC)
+//#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_DST_T, XF_NPPC)
+#define OUT_DATA_WIDTH _DATA_WIDTH_(XF_LTM_T, XF_NPPC)
 
 #define AXI_WIDTH_IN _BYTE_ALIGN_(IN_DATA_WIDTH)
 #define AXI_WIDTH_OUT _BYTE_ALIGN_(OUT_DATA_WIDTH)
 
 #define NR_COMPONENTS 3
+static constexpr int BLOCK_HEIGHT = 64;
+static constexpr int BLOCK_WIDTH = 64;
 // --------------------------------------------------------------------
 // Internal types
 // --------------------------------------------------------------------
@@ -73,6 +84,15 @@ typedef ap_axiu<AXI_WIDTH_OUT, 1, 1, 1> OutVideoStrmBus_t;
 // Input/Output AXI video stream
 typedef hls::stream<InVideoStrmBus_t> InVideoStrm_t;
 typedef hls::stream<OutVideoStrmBus_t> OutVideoStrm_t;
+
+#if T_8U
+#define HIST_SIZE 256
+#else
+#define HIST_SIZE 1024
+#endif
+
+#define BLACK_LEVEL 32
+#define MAX_PIX_VAL (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1
 
 // HW Registers
 typedef struct {
@@ -86,6 +106,6 @@ typedef struct {
 // Prototype
 // --------------------------------------------------------------------
 // top level function for HW synthesis
-void ISPPipeline_accel(HW_STRUCT_REG HwReg, InVideoStrm_t& s_axis_video, OutVideoStrm_t& m_axis_video);
-
+void ISPPipeline_accel(
+    uint16_t width, uint16_t height, uint16_t bayer_phase, InVideoStrm_t& s_axis_video, OutVideoStrm_t& m_axis_video);
 #endif //_XF_ISP_TYPES_H_

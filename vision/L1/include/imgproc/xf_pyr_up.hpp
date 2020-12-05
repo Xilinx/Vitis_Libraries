@@ -60,7 +60,7 @@ void xFpyrUpKernel(xf::cv::Mat<DEPTH, ROWS, COLS, NPC>& _src,
         }
     }
     xFPyrUpGaussianBlur<2 * ROWS, 2 * COLS, DEPTH, NPC, 0, 0, 5, 25, PLANES>(
-        _filter_in, _filter_out, 5, XF_BORDER_REPLICATE, output_height, output_width);
+        _filter_in, _filter_out, 5, XF_BORDER_DEFAULT, output_height, output_width);
 
     for (int i = 0; i < output_height; i++) {
 // clang-format off

@@ -251,7 +251,7 @@ class cl_kernel_mgr {
     cl::CommandQueue mCurrQueue;
     std::string mDeviceName;
 
-    std::map<std::string, cl_kernel_wrapper*> mMap;
+    std::vector<cl_kernel_wrapper*> mKernelVec;
     static cl_kernel_mgr* mRegistry;
     static int err;
 
@@ -283,15 +283,10 @@ class cl_kernel_mgr {
             mRegistry = new cl_kernel_mgr();
         }
 
-        auto it = mRegistry->mMap.find(func_name);
-        cl_kernel_wrapper* kernel = nullptr;
-        if (it != mRegistry->mMap.end()) {
-            kernel = it->second;
-        } else {
-            kernel = new cl_kernel_wrapper(mRegistry->mContext, func_name, bin_name, mRegistry->mDeviceName,
-                                           mRegistry->mCurrQueue, mRegistry->mDevices);
-            mRegistry->mMap[func_name] = kernel;
-        }
+        cl_kernel_wrapper* kernel =
+            new cl_kernel_wrapper(mRegistry->mContext, func_name, bin_name, mRegistry->mDeviceName,
+                                  mRegistry->mCurrQueue, mRegistry->mDevices);
+        mRegistry->mKernelVec.push_back(kernel);
         return kernel;
     }
 
@@ -302,116 +297,17 @@ class cl_kernel_mgr {
             mRegistry = new cl_kernel_mgr();
         }
 
-        auto it = mRegistry->mMap.find(func_name);
-        cl_kernel_wrapper* kernel = nullptr;
-        if (it != mRegistry->mMap.end()) {
-            kernel = it->second;
-        } else {
-            kernel = new cl_kernel_wrapper(mRegistry->mContext, func_name, bin_name, mRegistry->mDeviceName,
-                                           mRegistry->mCurrQueue, mRegistry->mDevices);
-            mRegistry->mMap[func_name] = kernel;
-        }
+        cl_kernel_wrapper* kernel =
+            new cl_kernel_wrapper(mRegistry->mContext, func_name, bin_name, mRegistry->mDeviceName,
+                                  mRegistry->mCurrQueue, mRegistry->mDevices);
+        mRegistry->mKernelVec.push_back(kernel);
         kernel->registerArgs(argv...);
         return kernel;
-    }
-
-    static cl_buffer_wrapper* registerInput(std::string& func_name, cl_buffer_wrapper* buffin) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        if (it != mRegistry->mMap.end()) {
-            return it->second->registerInput(buffin);
-        }
-        ASSERT(0);
-        return nullptr;
-    }
-
-    static cl_buffer_wrapper* registerInput(std::string& func_name, void* data, size_t size) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        if (it != mRegistry->mMap.end()) {
-            return it->second->registerInput(data, size);
-        }
-        ASSERT(0);
-        return nullptr;
-    }
-
-    static cl_buffer_wrapper* registerInput(std::string& func_name, cv::Mat& mat) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        if (it != mRegistry->mMap.end()) {
-            return it->second->registerInput(mat);
-        }
-        ASSERT(0);
-        return nullptr;
-    }
-
-    template <typename T>
-    static cl_buffer_wrapper* registerInput(std::string& func_name, T& arg) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        if (it != mRegistry->mMap.end()) {
-            return it->second->registerInput(arg);
-        }
-        ASSERT(0);
-        return nullptr;
-    }
-
-    static cl_buffer_wrapper* registerOutput(std::string& func_name, cl_buffer_wrapper* buffout) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        if (it != mRegistry->mMap.end()) {
-            return it->second->registerOutput(buffout);
-        }
-        ASSERT(0);
-        return nullptr;
-    }
-
-    static cl_buffer_wrapper* registerOutput(std::string& func_name, void* data, size_t size) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        if (it != mRegistry->mMap.end()) {
-            return it->second->registerOutput(data, size);
-        }
-        ASSERT(0);
-        return nullptr;
-    }
-
-    static cl_buffer_wrapper* registerOutput(std::string& func_name, cv::Mat& mat) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        if (it != mRegistry->mMap.end()) {
-            return it->second->registerOutput(mat);
-        }
-        ASSERT(0);
-        return nullptr;
-    }
-
-    template <typename T>
-    static cl_buffer_wrapper* registerOutput(std::string& func_name, T& arg) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        if (it != mRegistry->mMap.end()) {
-            return it->second->registerOutput(arg);
-        }
-        ASSERT(0);
-        return nullptr;
     }
 
     static void exec(cl_kernel_wrapper* kernel) {
         ASSERT(nullptr != mRegistry);
         kernel->exec();
-    }
-
-    static void exec(std::string& func_name) {
-        ASSERT(nullptr != mRegistry);
-        auto it = mRegistry->mMap.find(func_name);
-        cl_kernel_wrapper* kernel = nullptr;
-        if (it != mRegistry->mMap.end()) {
-            kernel = it->second;
-        } else {
-            ASSERT(0);
-        }
-        exec(kernel);
     }
 
     static void finish() {
@@ -424,8 +320,8 @@ class cl_kernel_mgr {
 
     static void exec_all() {
         ASSERT(nullptr != mRegistry);
-        for (auto& it : mRegistry->mMap) {
-            if (it.second->isConsumed() == false) exec(it.second);
+        for (auto& it : mRegistry->mKernelVec) {
+            if (it->isConsumed() == false) exec(it);
         }
         finish();
     }
@@ -486,7 +382,6 @@ inline XclOut<T> XCLOUT(T& var) {
     return XclOut<T>(var);
 }
 
-template <typename T1, typename T2>
 inline XclOut2 XCLOUT(void* var1, size_t var2) {
     return XclOut2(var1, var2);
 }

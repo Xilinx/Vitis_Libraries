@@ -141,9 +141,9 @@ float write_result_to_image_remap_seq(
 
 int main(int argc, char** argv) {
     if (argc != 5) {
-        std::cout << "Usage incorrect! Correct usage: ./exe\n<input video or path to input images>\n<no. of "
-                     "frames>\n<Harris Threshold>\n<No. of frames after which Harris Corners are Reset>"
-                  << std::endl;
+        fprintf(stderr,
+                "Usage incorrect! Correct usage: ./exe\n<input video or path to input images>\n<no. of "
+                "frames>\n<Harris Threshold>\n<No. of frames after which Harris Corners are Reset>\n ");
         return -1;
     }
     char img_name[1000], out_img_name[50], pyr_out_img_name[50], pyr_out_img_name2[50];
@@ -156,9 +156,9 @@ int main(int argc, char** argv) {
     imfile << argv[1];
     if (imfile.str() == "") {
         cap.open(0);
-        std::cout << "Invalid input Video" << std::endl;
+        fprintf(stderr, "Invalid input Video\n ");
         if (!cap.isOpened()) {
-            std::cout << "Could not initialize capturing...\n";
+            fprintf(stderr, "Could not initialize capturing...\n ");
             return 1;
         }
     } else
@@ -169,7 +169,7 @@ int main(int argc, char** argv) {
 #else
     cv::Mat frame;
     sprintf(img_name, "%s/im%d.png", path, 0);
-    fprintf(stderr, "path is %s", img_name);
+    std::cout << "path is" << img_name << std::endl;
     frame = cv::imread(img_name, 1);
     unsigned int imageWidth = frame.cols;
     unsigned int imageHeight = frame.rows;
@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
     for (int readn = 0; readn < 1; readn++) {
         cap >> readVideoImage;
         if (readVideoImage.empty()) {
-            std::cout << "im1 is empty" << std::endl;
+            fprintf(stderr, "im1 is empty\n ");
             break;
         }
     }
@@ -258,7 +258,7 @@ int main(int argc, char** argv) {
 #if VIDEO_INPUT
         cap >> readVideoImage;
         if (readVideoImage.empty()) {
-            std::cout << "im1 is empty" << std::endl;
+            fprintf(stderr, "im1 is empty\n ");
             break;
         } else {
             std::cout << "Read frame no. " << i + 1 << std::endl;
@@ -311,8 +311,7 @@ int main(int argc, char** argv) {
 
         std::vector<cl::Memory> inBufVec1, outBufVec1, inBufVec2, outBufVec2;
         std::vector<cl::Memory> pyr_inBufVec1, pyr_outBufVec1, pyr_inBufVec2, pyr_outBufVec2;
-
-        fprintf(stderr, "\n Harris Execution\n");
+        std::cout << "\n Harris Execution" << std::endl;
 
         cl::Buffer imageToDevice1(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                                   (inHarris.rows * inHarris.cols * CH_TYPE), (ap_uint<INPUT_PTR_WIDTH>*)inHarris.data);
@@ -320,7 +319,7 @@ int main(int argc, char** argv) {
                                   ((MAXCORNERS) * sizeof(unsigned int)), (unsigned int*)list);
         cl::Buffer params_buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, ((3) * sizeof(unsigned int)),
                               (unsigned int*)params);
-        fprintf(stderr, "\n Harris: Buffers created\n");
+        std::cout << "\n Harris: Buffers created" << std::endl;
         inBufVec1.push_back(imageToDevice1);
         outBufVec1.push_back(listfromdevice);
         inBufVec2.push_back(params_buf);
@@ -328,14 +327,14 @@ int main(int argc, char** argv) {
         // Copy input vectors to memory
         q.enqueueMigrateMemObjects(inBufVec1, 0);
         q.enqueueMigrateMemObjects(inBufVec2, 0);
-        fprintf(stderr, "\n Harris: data copied to device\n");
+        std::cout << "\n Harris: data copied to device" << std::endl;
         // Set the kernel arguments
         krnl.setArg(0, imageToDevice1);
         krnl.setArg(1, listfromdevice);
         krnl.setArg(2, params_buf);
         krnl.setArg(3, inHarris.rows);
         krnl.setArg(4, inHarris.cols);
-        fprintf(stderr, "\n Harris: args set\n");
+        std::cout << "\n Harris: args set" << std::endl;
 
         // Profiling Objects
         cl_ulong start = 0;
@@ -344,7 +343,7 @@ int main(int argc, char** argv) {
         cl::Event event_sp;
 
         // Launch the kernel
-        fprintf(stderr, "\n Harris kernel called\n");
+        std::cout << "\n Harris kernel called" << std::endl;
         q.enqueueTask(krnl, NULL, &event_sp);
         clWaitForEvents(1, (const cl_event*)&event_sp);
 
@@ -355,10 +354,8 @@ int main(int argc, char** argv) {
 
         // q.enqueueMigrateMemObjects(outBufVec1,CL_MIGRATE_MEM_OBJECT_HOST);
         q.enqueueMigrateMemObjects(inBufVec2, CL_MIGRATE_MEM_OBJECT_HOST);
-
-        fprintf(stderr, "\n Harris Done\n");
-
-        fprintf(stderr, "\n Pyrdown Execution\n");
+        std::cout << "\n Harris Done" << std::endl;
+        std::cout << "\n Pyrdown Execution" << std::endl;
 
         for (int lvl = 0; lvl < NUM_LEVELS - 1; lvl++) {
             cl::Buffer pyr_imageToDevice1(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
@@ -373,7 +370,7 @@ int main(int argc, char** argv) {
             cl::Buffer pyr_imageFromDevice2(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                                             (pyr_h[lvl + 1] * pyr_w[lvl + 1] * CH_TYPE),
                                             (ap_uint<OUTPUT_PTR_WIDTH>*)imagepyr2[lvl + 1].data);
-            fprintf(stderr, "\n Pyrdown: Buffers craeted\n");
+            std::cout << "\n Pyrdown: Buffers created" << std::endl;
             pyr_inBufVec1.push_back(pyr_imageToDevice1);
             pyr_outBufVec1.push_back(pyr_imageFromDevice1);
             pyr_inBufVec2.push_back(pyr_imageToDevice2);
@@ -382,7 +379,7 @@ int main(int argc, char** argv) {
             // Copy input vectors to memory
             q.enqueueMigrateMemObjects(pyr_inBufVec1, 0);
             q.enqueueMigrateMemObjects(pyr_inBufVec2, 0);
-            fprintf(stderr, "\n Pyrdown: data copied to device\n");
+            std::cout << "\n Pyrdown: data copied to device" << std::endl;
             // Set the kernel arguments
             pyr_krnl.setArg(0, pyr_imageToDevice1);
             pyr_krnl.setArg(1, pyr_imageFromDevice1);
@@ -392,10 +389,9 @@ int main(int argc, char** argv) {
             pyr_krnl.setArg(5, pyr_w[lvl]);
             pyr_krnl.setArg(6, pyr_h[lvl + 1]);
             pyr_krnl.setArg(7, pyr_w[lvl + 1]);
-            fprintf(stderr, "\n Pyrdown Args set\n");
-
-            fprintf(stderr, "\n pyr in ht = %d pyr in wd = %d pyr out ht = %d pyr out wd = %d", pyr_h[lvl], pyr_w[lvl],
-                    pyr_h[lvl + 1], pyr_w[lvl + 1]);
+            std::cout << "\n Pyrdown Args set" << std::endl;
+            std::cout << "\n pyr in ht = " << pyr_h[lvl] << "\n pyr in wd = " << pyr_w[lvl]
+                      << "\n pyr out ht = " << pyr_h[lvl + 1] << "\n pyr out wd = " << pyr_w[lvl + 1] << std::endl;
 
             // Profiling Objects
             cl_ulong pyr_start = 0;
@@ -404,7 +400,7 @@ int main(int argc, char** argv) {
             cl::Event pyr_event_sp;
 
             // Launch the kernel
-            fprintf(stderr, "\n Pyrdown kernel called\n");
+            std::cout << "\n Pyrdown kernel called" << std::endl;
             q.enqueueTask(pyr_krnl, NULL, &pyr_event_sp);
             clWaitForEvents(1, (const cl_event*)&pyr_event_sp);
 
@@ -415,14 +411,14 @@ int main(int argc, char** argv) {
 
             q.enqueueMigrateMemObjects(pyr_outBufVec1, CL_MIGRATE_MEM_OBJECT_HOST);
             q.enqueueMigrateMemObjects(pyr_outBufVec2, CL_MIGRATE_MEM_OBJECT_HOST);
-            fprintf(stderr, "\n Pyrdown data copied to host\n");
+            std::cout << "\n Pyrdown data copied to host" << std::endl;
             q.finish();
-            fprintf(stderr, "\n Pyrdown Execution done\n");
+            std::cout << "\n Pyrdown Execution done" << std::endl;
         }
 
         // Optical Flow
 
-        fprintf(stderr, "\n**********Optical Flow Computation*******************");
+        std::cout << "\n **********Optical Flow Computation*******************" << std::endl;
         cl::Kernel of_krnl(program, "pyr_dense_optical_flow_accel");
         char name[50], name1[50];
         char in_name[50], in_name1[50];
@@ -456,14 +452,13 @@ int main(int argc, char** argv) {
             flow_buf = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, (pyr_h[l] * pyr_w[l] * 4),
                                   (ap_uint<OUTPUT_PTR_WIDTH>*)flow.data);
 
-            fprintf(stderr, "\nBuffers created\n");
-
+            std::cout << "\n Buffers created" << std::endl;
             // compute the flow vectors for the current pyramid level iteratively
-            fprintf(stderr, "\n *********OF Computation Level = %d*********\n", l);
+            std::cout << "\n  *********OF Computation Level =" << l << "*********" << std::endl;
             flow.init(pyr_h[l], pyr_w[l], 0);
             flow_in.init(pyr_h[l], pyr_w[l], 0);
             for (int iterations = 0; iterations < NUM_ITERATIONS; iterations++) {
-                fprintf(stderr, "\n *********OF Computation iteration = %d*********\n", iterations);
+                std::cout << "\n  *********OF Computation iteration =" << iterations << "*********" << std::endl;
 
                 bool scale_up_flag = (iterations == 0) && (l != NUM_LEVELS - 1);
                 int next_height = (scale_up_flag == 1) ? pyr_h[l + 1] : pyr_h[l];
@@ -475,8 +470,7 @@ int main(int argc, char** argv) {
                     flow_in.init(pyr_h[l + 1], pyr_w[l + 1], 0);
                 else
                     flow_in.init(pyr_h[l], pyr_w[l], 0);
-
-                fprintf(stderr, "\nData copied from host to device\n");
+                std::cout << "\n Data copied from host to device" << std::endl;
 
                 // New way of setting args
                 of_krnl.setArg(0, in_img_py1_buf);
@@ -495,16 +489,16 @@ int main(int argc, char** argv) {
                 of_krnl.setArg(13, flow_in.cols);
                 of_krnl.setArg(14, flow.rows);
                 of_krnl.setArg(15, flow.cols);
-                fprintf(stderr, "\nkernel args set\n");
-                fprintf(stderr, "\n flow_rows = %d flow_cols=%d flow_in_rows = %d flow_in_cols = %d", flow.rows,
-                        flow.cols, flow_in.rows, flow_in.cols);
+                std::cout << "\n kernel args set" << std::endl;
+                std::cout << "\n flow_rows =" << flow.rows << "flow_cols=" << flow.cols
+                          << "flow_in_rows =" << flow_in.rows << "flow_in_cols =" << flow_in.cols << std::endl;
 
                 cl::Event event_of_sp;
 
                 // Launch the kernel
                 q.enqueueTask(of_krnl, NULL, &event_of_sp);
                 clWaitForEvents(1, (const cl_event*)&event_of_sp);
-                fprintf(stderr, "\n%d level %d calls done\n", l, iterations);
+                std::cout << "\n level" << l << "calls done" << iterations << std::endl;
 
                 flow_in_buf = flow_buf;
 
@@ -513,9 +507,9 @@ int main(int argc, char** argv) {
         } // end pyramidal iterative optical flow HLS computation
 
         q.finish();
-        fprintf(stderr, "\n OF done\n");
+        std::cout << "\n OF done" << std::endl;
 
-        fprintf(stderr, "\n**********Corner Update Computation*******************");
+        std::cout << "\n **********Corner Update Computation*******************" << std::endl;
         cl::Kernel cu_krnl(program, "cornerupdate_accel");
 
         std::vector<cl::Memory> list_in_Vec, list_fix_Vec;
@@ -533,14 +527,14 @@ int main(int argc, char** argv) {
         cu_krnl.setArg(4, (bool)params[2]);
         cu_krnl.setArg(5, flow.rows);
         cu_krnl.setArg(6, flow.cols);
-        fprintf(stderr, "\nkernel args set\n");
-        fprintf(stderr, "\n flow_rows = %d flow_cols=%d num of corners=%d harris_flag=%d", flow.rows, flow.cols,
-                params[0], params[2]);
+        std::cout << "\n kernel args set" << std::endl;
+        std::cout << "\n flow_rows =" << flow.rows << "flow_cols=" << flow.cols << "num of corners=" << params[0]
+                  << "harris_flag=" << params[2] << std::endl;
 
         cl::Event cu_event_sp;
 
         // Launch the kernel
-        fprintf(stderr, "\n Corner Update called\n");
+        std::cout << "\n Corner Update called" << std::endl;
         q.enqueueTask(cu_krnl, NULL, &cu_event_sp);
         clWaitForEvents(1, (const cl_event*)&cu_event_sp);
 
@@ -549,7 +543,7 @@ int main(int argc, char** argv) {
         q.enqueueMigrateMemObjects(outBufVec1, CL_MIGRATE_MEM_OBJECT_HOST);
 
         q.finish();
-        fprintf(stderr, "\n Corner Update done\n");
+        std::cout << "\n Corner Update done" << std::endl;
 
         if (harris_flag == true) harris_flag = false;
 
@@ -559,7 +553,8 @@ int main(int argc, char** argv) {
 
         cv::Mat outputimage; //(im0.rows, im0.cols, CV_8UC3, im1.data);
         cv::cvtColor(im1, outputimage, cv::COLOR_GRAY2BGR);
-        fprintf(stderr, "\n Num of corners = %d\n", params[0]);
+        std::cout << "\n OF done" << std::endl;
+        std::cout << "\n Num of corners = " << params[0] << std::endl;
         for (int li = 0; li < params[0]; li++) {
             unsigned int point = list[li];
             unsigned short row_num = 0;

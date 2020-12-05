@@ -662,7 +662,7 @@ Row_Loop:
             _dst_mat.write(wr_ind++, inter_val);
         } else {
 // clang-format off
-            #pragma HLS ALLOCATION instances=xFGradient5x5 limit=1 function
+            #pragma HLS ALLOCATION function instances=xFGradient5x5<DEPTH, WORDWIDTH_AP> limit=1
             // clang-format on
             GradientValues[0] = xFGradient5x5<DEPTH, WORDWIDTH_AP>(
                 src_buf1[buf_size - 5], src_buf1[buf_size - 4], src_buf1[buf_size - 3], src_buf1[buf_size - 2], 0,
@@ -1025,7 +1025,7 @@ void RightBorderBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
             for (i = 0; i < 3; i++) {
 // clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=3
-                #pragma HLS ALLOCATION instances=xFGradient7x7 limit=1 function
+                #pragma HLS ALLOCATION function instances=xFGradient7x7<DEPTH, WORDWIDTH_AP> limit=1
                 // clang-format on
 
                 GradientValues[0] = xFGradient7x7<DEPTH, WORDWIDTH_AP>(

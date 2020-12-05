@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 #ifndef _XF_UTILITY_H_
 #define _XF_UTILITY_H_
 
-#include <string.h>
-#include <assert.h>
-#include "common/xf_common.hpp"
 #include "ap_axi_sdata.h"
+#include "common/xf_common.hpp"
+#include <assert.h>
+#include <string.h>
 
 namespace xf {
 namespace cv {
@@ -138,7 +138,8 @@ void xFCopyBlockMemoryOut1(XF_SNAME(WORDWIDTH) * _src, unsigned long long int* _
 }
 
 /**
- * CopyMemoryIn: Copies memory from DDR to BRAM if y_offset and x_offset is provided
+ * CopyMemoryIn: Copies memory from DDR to BRAM if y_offset and x_offset is
+ * provided
  */
 template <int SIZE, int WORDWIDTH>
 void xFCopyBlockMemoryIn1(unsigned long long int* _src, XF_SNAME(WORDWIDTH) * _dst, int nbytes) {
@@ -150,7 +151,8 @@ void xFCopyBlockMemoryIn1(unsigned long long int* _src, XF_SNAME(WORDWIDTH) * _d
 }
 
 /**
- * CopyMemoryIn: Copies memory from DDR to BRAM if y_offset and x_offset is provided
+ * CopyMemoryIn: Copies memory from DDR to BRAM if y_offset and x_offset is
+ * provided
  */
 template <int SIZE, int WORDWIDTH>
 void xFCopyBlockMemoryIn(XF_SNAME(WORDWIDTH) * _src, XF_SNAME(WORDWIDTH) * _dst, int nbytes) {
@@ -294,15 +296,16 @@ class accel_utils {
     }
 
     template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-    void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
+    void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat, int stride = -1) {
 #if !defined(__XF_USE_OLD_IMPL__)
-        MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::Array2xfMat(srcPtr, dstMat);
+        MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::Array2xfMat(srcPtr, dstMat, stride);
 #else
 // clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
-               "The PTR_WIDTH must be always greater than or equal to the minimum width for the corresponding "
+               "The PTR_WIDTH must be always greater than or equal to the minimum "
+               "width for the corresponding "
                "configuration");
         const int ch_width = XF_DTPIXELDEPTH(MAT_T, NPC);
 
@@ -340,7 +343,8 @@ class accel_utils {
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
-               "The PTR_WIDTH must be always greater than or equal to the minimum width for the corresponding "
+               "The PTR_WIDTH must be always greater than or equal to the minimum "
+               "width for the corresponding "
                "configuration");
         const int ch_width = XF_DTPIXELDEPTH(MAT_T, NPC);
 
@@ -438,16 +442,17 @@ class accel_utils {
         }
     }
 
-    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-    void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
+    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int FILLZERO = 1>
+    void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr, int stride = -1) {
 #if !defined(__XF_USE_OLD_IMPL__)
-        MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::xfMat2Array(srcMat, dstPtr);
+        MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, FILLZERO>::xfMat2Array(srcMat, dstPtr, stride);
 #else
 // clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
-               "The PTR_WIDTH must be always greater than or equal to the minimum width for the corresponding "
+               "The PTR_WIDTH must be always greater than or equal to the minimum "
+               "width for the corresponding "
                "configuration");
         const int ch_width = XF_DTPIXELDEPTH(MAT_T, NPC);
 
@@ -488,7 +493,8 @@ class accel_utils {
         #pragma HLS DATAFLOW
         // clang-format on
         assert((PTR_WIDTH >= XF_WORDDEPTH(XF_WORDWIDTH(MAT_T, NPC))) &&
-               "The PTR_WIDTH must be always greater than or equal to the minimum width for the corresponding "
+               "The PTR_WIDTH must be always greater than or equal to the minimum "
+               "width for the corresponding "
                "configuration");
         const int ch_width = XF_DTPIXELDEPTH(MAT_T, NPC);
 
@@ -504,10 +510,10 @@ class accel_utils {
     }
 };
 
-template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
+template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int FILLZERO = 1>
+void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr, int stride = -1) {
 #if !defined(__XF_USE_OLD_IMPL__)
-    MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::xfMat2Array(srcMat, dstPtr);
+    MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, FILLZERO>::xfMat2Array(srcMat, dstPtr, stride);
 #else
     accel_utils au;
     au.xfMat2Array<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcMat, dstPtr);
@@ -515,9 +521,9 @@ void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>
 }
 
 template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
+void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat, int stride = -1) {
 #if !defined(__XF_USE_OLD_IMPL__)
-    MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::Array2xfMat(srcPtr, dstMat);
+    MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::Array2xfMat(srcPtr, dstMat, stride);
 #else
     accel_utils au;
     au.Array2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcPtr, dstMat);

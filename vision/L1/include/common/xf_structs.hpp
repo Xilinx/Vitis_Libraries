@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2020 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@
 #ifndef __SYNTHESIS__
 #include <iostream>
 #endif
+#include "ap_axi_sdata.h"
+#include "hls_stream.h"
+#include "xf_types.hpp"
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
-#include <assert.h>
-#include "xf_types.hpp"
-#include "hls_stream.h"
-#include "ap_axi_sdata.h"
 
 namespace xf {
 namespace cv {
@@ -55,7 +55,8 @@ class xFSBMState {
     // pre-filtering (normalization of input images)
     int preFilterType; // =HLS_STEREO_BM_XSOBEL_TEST
     int preFilterSize; // averaging window size: ~5x5..21x21
-    int preFilterCap;  // the output of pre-filtering is clipped by [-preFilterCap,preFilterCap]
+    int preFilterCap;  // the output of pre-filtering is clipped by
+                       // [-preFilterCap,preFilterCap]
 
     // correspondence using Sum of Absolute Difference (SAD)
     int SADWindowSize;       // ~5x5..21x21 // defined in macro
@@ -229,23 +230,23 @@ class Scalar {
    public:
     Scalar() {
 // clang-format off
-	#pragma HLS INLINE
-        #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
+#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable=val dim=1 complete
         // clang-format on
         assert(N > 0);
     }
     Scalar(T v0) {
 // clang-format off
-	#pragma HLS INLINE
-        #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
+#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable=val dim=1 complete
         // clang-format on
         assert(N >= 1 && "Scalar must have enough channels for constructor.");
         val[0] = v0;
     }
     Scalar(T v0, T v1) {
 // clang-format off
-        #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
-	#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable=val dim=1 complete
+#pragma HLS INLINE
         // clang-format on
         assert(N >= 2 && "Scalar must have enough channels for constructor.");
         val[0] = v0;
@@ -253,8 +254,8 @@ class Scalar {
     }
     Scalar(T v0, T v1, T v2) {
 // clang-format off
-        #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
-	#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable=val dim=1 complete
+#pragma HLS INLINE
         // clang-format on
         assert(N >= 3 && "Scalar must have enough channels for constructor.");
         val[0] = v0;
@@ -263,8 +264,8 @@ class Scalar {
     }
     Scalar(T v0, T v1, T v2, T v3) {
 // clang-format off
-        #pragma HLS ARRAY_PARTITION variable=val dim=1 complete
-	#pragma HLS INLINE
+#pragma HLS ARRAY_PARTITION variable=val dim=1 complete
+#pragma HLS INLINE
         // clang-format on
         assert(N >= 4 && "Scalar must have enough channels for constructor.");
         val[0] = v0;
@@ -289,11 +290,11 @@ class Scalar {
 template <int N, typename T>
 void Scalar<N, T>::operator=(T value) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         val[k] = value;
     }
@@ -302,12 +303,12 @@ void Scalar<N, T>::operator=(T value) {
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator+(T value) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] + value;
     }
@@ -317,12 +318,12 @@ Scalar<N, T> Scalar<N, T>::operator+(T value) {
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator+(Scalar<N, T> s) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] + s.val[k];
     }
@@ -332,12 +333,12 @@ Scalar<N, T> Scalar<N, T>::operator+(Scalar<N, T> s) {
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator-(T value) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] - value;
     }
@@ -347,12 +348,12 @@ Scalar<N, T> Scalar<N, T>::operator-(T value) {
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator-(Scalar<N, T> s) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] - s.val[k];
     }
@@ -362,12 +363,12 @@ Scalar<N, T> Scalar<N, T>::operator-(Scalar<N, T> s) {
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator*(T value) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] * value;
     }
@@ -377,12 +378,12 @@ Scalar<N, T> Scalar<N, T>::operator*(T value) {
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator*(Scalar<N, T> s) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] * s.val[k];
     }
@@ -392,12 +393,12 @@ Scalar<N, T> Scalar<N, T>::operator*(Scalar<N, T> s) {
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator/(T value) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] / value;
     }
@@ -407,12 +408,12 @@ Scalar<N, T> Scalar<N, T>::operator/(T value) {
 template <int N, typename T>
 Scalar<N, T> Scalar<N, T>::operator/(Scalar<N, T> s) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     Scalar<N, T> res;
     for (int k = 0; k < N; k++) {
 // clang-format off
-        #pragma HLS unroll
+#pragma HLS unroll
         // clang-format on
         res.val[k] = val[k] / s.val[k];
     }
@@ -428,7 +429,10 @@ class Mat {
    public:
     unsigned char allocatedFlag; // flag to mark memory allocation in this class
     int rows, cols, size;        // actual image size
-                                 //	int cols_align_npc;						// cols multiple of NPC
+    //	int cols_align_npc;						// cols
+    // multiple
+    // of
+    // NPC
 
     typedef XF_TNAME(T, NPC) DATATYPE;
 
@@ -449,7 +453,8 @@ class Mat {
 
     Mat& operator=(const Mat&); // Assignment operator
     //  XF_TNAME(T, XF_NPPC1) operator() (unsigned int r, unsigned int c);
-    //  XF_CTUNAME(T, NPC) operator() (unsigned int r, unsigned int c, unsigned int ch);
+    //  XF_CTUNAME(T, NPC) operator() (unsigned int r, unsigned int c, unsigned
+    //  int ch);
     XF_TNAME(T, NPC) read(int index);
     float read_float(int index);
     void write(int index, XF_TNAME(T, NPC) val);
@@ -470,7 +475,7 @@ class Mat {
 template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH>
 const int Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::type() const {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     return (T);
 }
@@ -478,14 +483,14 @@ const int Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::type() const {
 template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH>
 const int Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::depth() const {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     return XF_DTPIXELDEPTH(T, NPC);
 }
 template <int T, int ROWS, int COLS, int NPC, int XFCVDEPTH>
 const int Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::channels() const {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
     return XF_CHANNELS(T, NPC);
 }
@@ -493,11 +498,12 @@ const int Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::channels() const {
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::init(int _rows, int _cols, bool allocate) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
 
     assert((_rows > 0) && (_rows <= ROWS) && (_cols > 0) && (_cols <= COLS) &&
-           "The number of rows and columns must be less than the template arguments.");
+           "The number of rows and columns must be less than the template "
+           "arguments.");
 
     rows = _rows;
     cols = _cols;
@@ -518,7 +524,8 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::init(int _rows, int _cols, bool
 
 /*
 template <int T, int ROWS, int COLS, int NPC>
-inline XF_TNAME(T, XF_NPPC1) Mat<T, ROWS, COLS, NPC>::operator() (unsigned int r, unsigned int c) {
+inline XF_TNAME(T, XF_NPPC1) Mat<T, ROWS, COLS, NPC>::operator() (unsigned int
+r, unsigned int c) {
 
     XF_TNAME(T, XF_NPPC1) pix_val;
 
@@ -530,7 +537,8 @@ inline XF_TNAME(T, XF_NPPC1) Mat<T, ROWS, COLS, NPC>::operator() (unsigned int r
 #ifdef __SDSVHLS__
     unsigned int bit_width= XF_DTPIXELDEPTH(T, NPC);
 
-    pix_val = data[(r*npc_cols) + npc_c].range((pix_idx+1)*bit_width-1, pix_idx*bit_width);
+    pix_val = data[(r*npc_cols) + npc_c].range((pix_idx+1)*bit_width-1,
+pix_idx*bit_width);
 #else
     unsigned int pix_depth = XF_DTPIXELDEPTH(T, NPC) / XF_CHANNELS(T,NPC);
 
@@ -544,7 +552,8 @@ npc_c].chnl[ch].range((pix_idx+1)*pix_depth-1, pix_idx*pix_depth);
 }
 
 template <int T, int ROWS, int COLS, int NPC>
-inline XF_CTUNAME(T, NPC) Mat<T, ROWS, COLS, NPC>::operator() (unsigned int r, unsigned int c, unsigned int ch) {
+inline XF_CTUNAME(T, NPC) Mat<T, ROWS, COLS, NPC>::operator() (unsigned int r,
+unsigned int c, unsigned int ch) {
 
     XF_CTUNAME(T, NPC) pix_val;
 
@@ -557,10 +566,13 @@ inline XF_CTUNAME(T, NPC) Mat<T, ROWS, COLS, NPC>::operator() (unsigned int r, u
     unsigned int bit_width = XF_DTPIXELDEPTH(T, NPC);
     unsigned int pix_depth = XF_DTPIXELDEPTH(T, NPC) / XF_CHANNELS(T, NPC);
 
-    pix_val = data[(r*npc_cols) + npc_c].range(pix_idx*bit_width + (ch+1)*pix_depth - 1, pix_idx*bit_width +
-ch*pix_depth); #else unsigned int pix_depth = XF_DTPIXELDEPTH(T, NPC) / XF_CHANNELS(T, NPC);
+    pix_val = data[(r*npc_cols) + npc_c].range(pix_idx*bit_width +
+(ch+1)*pix_depth - 1, pix_idx*bit_width +
+ch*pix_depth); #else unsigned int pix_depth = XF_DTPIXELDEPTH(T, NPC) /
+XF_CHANNELS(T, NPC);
 
-    pix_val = data[r*npc_cols + npc_c].chnl[ch].range((pix_idx+1)*pix_depth-1, pix_idx*pix_depth);
+    pix_val = data[r*npc_cols + npc_c].chnl[ch].range((pix_idx+1)*pix_depth-1,
+pix_idx*pix_depth);
 #endif
 
     return pix_val;
@@ -612,7 +624,7 @@ inline Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::o
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat() {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
 
     init(ROWS, COLS);
@@ -621,7 +633,7 @@ inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat() {
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat(int _rows, int _cols, void* _data) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
 // clang-format on
 
 #if defined __SDA_MEM_MAP__ //(__SDSCC__)  && defined (__SYNTHESIS__)
@@ -636,7 +648,7 @@ inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat(int _rows, int _cols, void* _dat
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat(int _rows, int _cols) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
 
     init(_rows, _cols);
@@ -645,7 +657,7 @@ inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat(int _rows, int _cols) {
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::Mat(Size _sz) {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
 
     init(_sz.height, _sz.width);
@@ -694,9 +706,14 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::write_float(int index, float fl
 //    XF_PTSNAME(T, NPPC)* input = (XF_PTSNAME(T, NPPC)*)_input;
 //    XF_CTUNAME(T, NPPC) in_val;
 //
-//    //	int packcols  = cols >> XF_BITSHIFT(NPPC); 		//Total columns after considering parallelism
-//    int pixdepth = XF_PIXELWIDTH(T, NPPC);          // Total bits that make up the pixel
-//    int bitdepth = pixdepth / XF_CHANNELS(T, NPPC); // Total bits that make up each channel of the pixel
+//    //	int packcols  = cols >> XF_BITSHIFT(NPPC); 		//Total
+//    columns
+//    after
+//    considering parallelism
+//    int pixdepth = XF_PIXELWIDTH(T, NPPC);          // Total bits that make up
+//    the pixel
+//    int bitdepth = pixdepth / XF_CHANNELS(T, NPPC); // Total bits that make up
+//    each channel of the pixel
 //    int nppc = XF_NPIXPERCYCLE(NPPC);
 //
 //    /*	for (int r=0; r < rows; r++) {
@@ -705,12 +722,15 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::write_float(int index, float fl
 //                            for (int ch=0; ch < XF_CHANNELS(T,NPPC); ch++) {
 //
 //                                    if (T == XF_32FC1) {
-//                                            in_val = float2ap_uint< ap_uint<32> >(input[XF_CHANNELS(T,
-// NPPC)*((r*packcols + c)*nppc + p) + ch]); } else { in_val = input[XF_CHANNELS(T, NPPC)*((r*packcols + c)*nppc + p) +
+//                                            in_val = float2ap_uint<
+//                                            ap_uint<32> >(input[XF_CHANNELS(T,
+// NPPC)*((r*packcols + c)*nppc + p) + ch]); } else { in_val =
+// input[XF_CHANNELS(T, NPPC)*((r*packcols + c)*nppc + p) +
 // ch];
 //                                    }
 //#ifdef __SDSVHLS__
-//                                    data[r*packcols + c].range((p*pixdepth)+(ch+1)*bitdepth-1,
+//                                    data[r*packcols +
+//                                    c].range((p*pixdepth)+(ch+1)*bitdepth-1,
 //                                    (p*pixdepth)+ch*bitdepth)
 //= in_val; #else data[r*packcols + c].chnl[p][ch] = in_val; #endif
 //                            }
@@ -726,16 +746,19 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::write_float(int index, float fl
 //                    if ((c << XF_BITSHIFT(NPPC) + p) < cols) {
 //                        if (T == XF_32FC1) {
 //                            in_val = float2ap_uint<ap_uint<32> >(
-//                                input[XF_CHANNELS(T, NPPC) * ((r * cols + c) * nppc + p) + ch]);
+//                                input[XF_CHANNELS(T, NPPC) * ((r * cols + c) *
+//                                nppc + p) + ch]);
 //                        } else {
-//                            in_val = input[XF_CHANNELS(T, NPPC) * ((r * cols + c) * nppc + p) + ch];
+//                            in_val = input[XF_CHANNELS(T, NPPC) * ((r * cols +
+//                            c) * nppc + p) + ch];
 //                        }
 //                    } else {
 //                        in_val = 0;
 //                    }
 //
 //#ifdef __SDSVHLS__
-//                    data[r * ncpr + c].range((p * pixdepth) + (ch + 1) * bitdepth - 1, (p * pixdepth) + ch * bitdepth)
+//                    data[r * ncpr + c].range((p * pixdepth) + (ch + 1) *
+//                    bitdepth - 1, (p * pixdepth) + ch * bitdepth)
 //                    =
 //                        in_val;
 //#else
@@ -771,12 +794,9 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::copyTo(void* _input) {
                     } else {
                         in_val = input[XF_CHANNELS(T, NPPC) * ((r * packcols + c) * nppc + p) + ch];
                     }
-#ifdef __SDSVHLS__
+
                     data[r * packcols + c].range((p * pixdepth) + (ch + 1) * bitdepth - 1,
                                                  (p * pixdepth) + ch * bitdepth) = in_val;
-#else
-                    data[r * packcols + c].chnl[p][ch] = in_val;
-#endif
                 }
             }
         }
@@ -786,10 +806,11 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::copyTo(void* _input) {
 template <int T, int ROWS, int COLS, int NPPC, int XFCVDEPTH>
 inline unsigned char* Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::copyFrom() {
 // clang-format off
-    #pragma HLS inline
+#pragma HLS inline
     // clang-format on
 
-    //	int packcols  = cols >> XF_BITSHIFT(NPPC); //Total columns after considering parallelism
+    //	int packcols  = cols >> XF_BITSHIFT(NPPC); //Total columns after
+    // considering parallelism
     int pixdepth = XF_PIXELWIDTH(T, NPPC);          // Total bits that make up the pixel
     int bitdepth = pixdepth / XF_CHANNELS(T, NPPC); // Total bits that make up each channel of the pixel
     int nppc = XF_NPIXPERCYCLE(NPPC);
@@ -808,12 +829,8 @@ inline unsigned char* Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::copyFrom() {
         for (int c = 0; c < cols; c++) {
             for (int ch = 0; ch < XF_CHANNELS(T, NPPC); ch++) {
                 for (int b = 0; b < cv_nbytes; ++b) {
-#ifdef __SDSVHLS__
                     value[cv_ptr++] = data[xf_ptr].range((xf_npc_idx * pixdepth) + (ch * bitdepth) + (b + 1) * 8 - 1,
                                                          (xf_npc_idx * pixdepth) + (ch * bitdepth) + b * 8);
-#else
-                    value[cv_ptr++] = data[xf_ptr].chnl[xf_npc_idx][ch].range((b + 1) * 8 - 1, b * 8);
-#endif
                 }
             }
             if (xf_npc_idx == nppc - 1) {
@@ -858,7 +875,9 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::convertTo(Mat<DST_T, ROWS, COLS
         min = -2147483648;
         max = 2147483647;
     } else {
-        assert(1 && "Output image type not supoorted. XF_8UC1, XF_16UC1, XF_16SC1 and XF_32SC1 are valid");
+        assert(1 &&
+               "Output image type not supoorted. XF_8UC1, XF_16UC1, XF_16SC1 "
+               "and XF_32SC1 are valid");
     }
 
 #define __SATCAST(X) (X >= max ? max : (X < 0 ? 0 : lround(X)))
@@ -939,10 +958,12 @@ struct log2<1> {
 //]]
 
 /*
- * The purpose of this class is to provide an interator over ap_uint<PTR_WIDTH> object array such
- * that at each iter step one can get data bits corresponding to data to be processed per cycle.
+ * The purpose of this class is to provide an interator over ap_uint<PTR_WIDTH>
+ * object array such
+ * that at each iter step one can get data bits corresponding to data to be
+ * processed per cycle.
  *
-*/
+ */
 template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = 2>
 class MMIter : public Mat<T, ROWS, COLS, NPC, XFCVDEPTH> {
    public:
@@ -1002,8 +1023,8 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
     MMIterInLoop1:
         for (i = 0; i < addrbound; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
+#pragma HLS PIPELINE
             // clang-format on
             dout.write(din[i]);
         }
@@ -1016,8 +1037,8 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
     MMIterInLoop3:
         for (i = 0; i < addrbound; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
+#pragma HLS PIPELINE
             // clang-format on
             ap_axiu<PTR_WIDTH, 0, 0, 0> v = din.read();
             dout.write(v.data);
@@ -1028,22 +1049,36 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
                                     hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& dout,
                                     int rows,
                                     int cols_bound_per_npc,
-                                    int last_blk_width) {
+                                    int last_blk_width,
+                                    int stride = -1) {
+        int stride_bound_per_npc, strideBased_last_blk_width;
+
+        if (stride == -1) {
+            stride_bound_per_npc = cols_bound_per_npc;
+            strideBased_last_blk_width = last_blk_width;
+        } else {
+            stride_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(stride);
+            strideBased_last_blk_width =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(stride, stride_bound_per_npc);
+        }
+
+        int rd_cnt = 0;
+
         int rem = 0;
         ap_uint<PTR_WIDTH> val = 0;
         int i;
         int j = 0;
-        int bound = rows * cols_bound_per_npc;
+        int bound = rows * stride_bound_per_npc;
     MMIterInLoopRow:
         for (i = 0; i < bound; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
+#pragma HLS PIPELINE
             // clang-format on
-            bool bLast = (j == (cols_bound_per_npc - 1));
-            int xf_bits_per_clock = bLast ? last_blk_width : XF_BITS_PER_CLOCK;
-            int ptr_width_minus = bLast ? (PTR_WIDTH - last_blk_width) : (PTR_WIDTH - XF_BITS_PER_CLOCK);
-            int ptr_width_plus = bLast ? (PTR_WIDTH + last_blk_width) : (PTR_WIDTH + XF_BITS_PER_CLOCK);
+            bool bLast = (j == (stride_bound_per_npc - 1));
+            int xf_bits_per_clock = bLast ? strideBased_last_blk_width : XF_BITS_PER_CLOCK;
+            int ptr_width_minus = bLast ? (PTR_WIDTH - strideBased_last_blk_width) : (PTR_WIDTH - XF_BITS_PER_CLOCK);
+            int ptr_width_plus = bLast ? (PTR_WIDTH + strideBased_last_blk_width) : (PTR_WIDTH + XF_BITS_PER_CLOCK);
 
             ap_uint<XF_BITS_PER_CLOCK> localbuffer = 0;
             if (rem < xf_bits_per_clock) {
@@ -1051,13 +1086,22 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
                     localbuffer.range(rem - 1, 0) = val.range(PTR_WIDTH - 1, (PTR_WIDTH - rem));
                 }
                 val = din.read();
+                rd_cnt++;
                 localbuffer.range((xf_bits_per_clock - 1), rem) = val.range(((xf_bits_per_clock - 1) - rem), 0);
                 rem = ptr_width_minus + rem;
             } else {
                 localbuffer = val.range(((ptr_width_plus - 1) - rem), (PTR_WIDTH - rem));
                 rem = rem - xf_bits_per_clock;
             }
-            dout.write(localbuffer);
+
+            bool bLast_width = (j == (cols_bound_per_npc - 1));
+            ap_uint<XF_BITS_PER_CLOCK> localbuffer2 = 0;
+            if (bLast_width == 0)
+                localbuffer2 = localbuffer;
+            else
+                localbuffer2 = localbuffer.range(last_blk_width - 1, 0);
+
+            if (j < cols_bound_per_npc) dout.write(localbuffer2);
             j = (bLast) ? 0 : (j + 1);
         }
     }
@@ -1071,8 +1115,8 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
     MMIterInLoop2:
         for (i = 0; i < bound; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
+#pragma HLS PIPELINE
             // clang-format on
             dout[i] = din.read();
         }
@@ -1083,7 +1127,7 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
                               int rows = ROWS,
                               int cols = COLS) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
         int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
@@ -1093,55 +1137,83 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
     static void AxiStream2Mat(hls::stream<ap_uint<PTR_WIDTH> >& din,
                               ap_uint<XF_BITS_PER_CLOCK>* dout,
                               int rows = ROWS,
-                              int cols = COLS) {
+                              int cols = COLS,
+                              int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH> ldata;
         int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
         int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
-        AxiStream2MatStream(din, ldata, rows, cols_bound_per_npc, last_blk_width);
+        AxiStream2MatStream(din, ldata, rows, cols_bound_per_npc, last_blk_width, stride);
         MatStream2Mat(ldata, dout, rows, cols_bound_per_npc);
     }
 
     static void Axi2Mat(ap_uint<PTR_WIDTH>* din,
                         hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& dout,
                         int rows = ROWS,
-                        int cols = COLS) {
+                        int cols = COLS,
+                        int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
         int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
         int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+
+        int cols_tmp;
+        if (stride == -1)
+            cols_tmp = cols;
+        else
+            cols_tmp = stride;
+
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
+            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
         Axi2AxiStream(din, ldata, axibound);
-        AxiStream2MatStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width);
+        AxiStream2MatStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width, stride);
     }
 
     static void Axi2Mat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& din,
                         hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& dout,
                         int rows = ROWS,
-                        int cols = COLS) {
+                        int cols = COLS,
+                        int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
         int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
         int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+
+        int cols_tmp;
+        if (stride == -1)
+            cols_tmp = cols;
+        else
+            cols_tmp = stride;
+
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
+            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
         Axi2AxiStream(din, ldata, axibound);
         AxiStream2MatStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width);
     }
 
-    static void Axi2Mat(ap_uint<PTR_WIDTH>* din, ap_uint<XF_BITS_PER_CLOCK>* dout, int rows = ROWS, int cols = COLS) {
+    static void Axi2Mat(
+        ap_uint<PTR_WIDTH>* din, ap_uint<XF_BITS_PER_CLOCK>* dout, int rows = ROWS, int cols = COLS, int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
+
+        int cols_tmp;
+        if (stride == -1)
+            cols_tmp = cols;
+        else
+            cols_tmp = stride;
+
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
+            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
         Axi2AxiStream(din, ldata, axibound);
-        AxiStream2Mat(ldata, dout, rows, cols);
+        AxiStream2Mat(ldata, dout, rows, cols, stride);
     }
 
     static void Axi2Mat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& din,
@@ -1149,7 +1221,7 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
                         int rows = ROWS,
                         int cols = COLS) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
         ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
@@ -1188,8 +1260,10 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
 
     ap_uint<XF_BITS_PER_CLOCK> read(int index) { return read(data, index); }
 
-    static void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& dstMat) {
-        Axi2Mat(srcPtr, dstMat.data, dstMat.rows, dstMat.cols);
+    static void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr,
+                            xf::cv::Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& dstMat,
+                            int stride = -1) {
+        Axi2Mat(srcPtr, dstMat.data, dstMat.rows, dstMat.cols, stride);
     }
 
     static void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr,
@@ -1198,7 +1272,7 @@ class MMIterIn : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC, XFCVDEPTH> {
     }
 };
 
-template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int XFCVDEPTH = 2>
+template <int PTR_WIDTH, int T, int ROWS, int COLS, int NPC, int FILLZERO = 1, int XFCVDEPTH = 2>
 class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
    public:
     using Mat<T, ROWS, COLS, NPC, XFCVDEPTH>::data;
@@ -1221,8 +1295,8 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
     MMIterOutLoop1:
         for (i = 0; i < bound; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPBOUND
+#pragma HLS PIPELINE
             // clang-format on
             dout.write(din[i]);
         }
@@ -1232,36 +1306,56 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
                                     hls::stream<ap_uint<PTR_WIDTH> >& dout,
                                     int rows,
                                     int cols_bound_per_npc,
-                                    int last_blk_width) {
+                                    int last_blk_width,
+                                    int stride = -1) {
+        int strideBased_cols_bound_per_npc;
+        if (stride == -1 || FILLZERO == 0) {
+            strideBased_cols_bound_per_npc = cols_bound_per_npc;
+        } else {
+            strideBased_cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(stride);
+        }
+
         ap_uint<log2<PTR_WIDTH>::cvalue + 1> filled = 0; // valid bits remaining in current buffer
         ap_uint<PTR_WIDTH> localbuffer = 0;
         int i;
         int j;
+
     MMIterOutRow:
         for (i = 0; i < rows; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
         // clang-format on
         MMIterOutCol:
-            for (j = 0; j < cols_bound_per_npc; j++) {
+            for (j = 0; j < strideBased_cols_bound_per_npc; j++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS_BOUND_PER_NPC
-                #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=1 max=COLS_BOUND_PER_NPC
+#pragma HLS PIPELINE
                 // clang-format on
 
                 bool bLast = (j == (cols_bound_per_npc - 1));
                 int xf_bits_per_clock = bLast ? last_blk_width : XF_BITS_PER_CLOCK;
-                ap_uint<PTR_WIDTH> val = din.read();
+                ap_uint<PTR_WIDTH> val;
+                if (j < cols_bound_per_npc || FILLZERO == 0)
+                    val = din.read();
+                else
+                    val = 0;
+
                 ap_uint<PTR_WIDTH> tempval = (val << filled);
                 localbuffer = (localbuffer | tempval);
                 ap_uint<log2<PTR_WIDTH>::cvalue + 1> filled_next;
+
                 if (filled < (PTR_WIDTH - xf_bits_per_clock)) {
                     filled_next = filled + xf_bits_per_clock;
+                } else if (j == cols_bound_per_npc - 1 && FILLZERO == 0) {
+                    dout.write(localbuffer);
+                    localbuffer = 0;
+                    filled_next = 0;
                 } else {
                     dout.write(localbuffer);
                     localbuffer = (val >> (PTR_WIDTH - filled));
                     filled_next = filled + (xf_bits_per_clock - PTR_WIDTH);
                 }
+
                 filled = filled_next;
             }
         }
@@ -1274,38 +1368,41 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
     static void Mat2AxiStream(hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& din,
                               hls::stream<ap_uint<PTR_WIDTH> >& dout,
                               int rows = ROWS,
-                              int cols = COLS) {
+                              int cols = COLS,
+                              int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
         int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
-        MatStream2AxiStream(din, dout, rows, cols_bound_per_npc, last_blk_width);
+        MatStream2AxiStream(din, dout, rows, cols_bound_per_npc, last_blk_width, stride);
     }
 
     static void Mat2AxiStream(ap_uint<XF_BITS_PER_CLOCK>* din,
                               hls::stream<ap_uint<PTR_WIDTH> >& dout,
                               int rows = ROWS,
-                              int cols = COLS) {
+                              int cols = COLS,
+                              int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH> ldata;
         int cols_bound_per_npc = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::cols_npc_aligned(cols);
         int last_blk_width = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::last_blk_pxl_width(cols, cols_bound_per_npc);
         Mat2MatStream(din, ldata, rows, cols_bound_per_npc);
-        MatStream2AxiStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width);
+        MatStream2AxiStream(ldata, dout, rows, cols_bound_per_npc, last_blk_width, stride);
     }
 
     static void AxiStream2Axi(hls::stream<ap_uint<PTR_WIDTH> >& din,
                               ap_uint<PTR_WIDTH>* dout,
                               ap_uint<log2<ADDRBOUND>::cvalue + 1>& addrbound) {
         ap_uint<log2<ADDRBOUND>::cvalue + 1> i;
+
     MMIterOutLoop2:
         for (i = 0; i < addrbound; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
+#pragma HLS PIPELINE
             // clang-format on
             dout[i] = din.read();
         }
@@ -1315,11 +1412,12 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
                               hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dout,
                               ap_uint<log2<ADDRBOUND>::cvalue + 1>& addrbound) {
         ap_uint<log2<ADDRBOUND>::cvalue + 1> i;
+
     MMIterOutLoop3:
         for (i = 0; i < addrbound; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ADDRBOUND
+#pragma HLS PIPELINE
             // clang-format on
             ap_axiu<PTR_WIDTH, 0, 0, 0> v;
             v.data = din.read();
@@ -1330,50 +1428,131 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
     static void Mat2Axi(hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& din,
                         ap_uint<PTR_WIDTH>* dout,
                         int rows = ROWS,
-                        int cols = COLS) {
+                        int cols = COLS,
+                        int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
+
+        int cols_tmp;
+        if (stride == -1)
+            cols_tmp = cols;
+        else
+            cols_tmp = stride;
+
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
-        Mat2AxiStream(din, ldata, rows, cols);
-        AxiStream2Axi(ldata, dout, axibound);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
+            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+
+        Mat2AxiStream(din, ldata, rows, cols, stride);
+        if (FILLZERO == 1)
+            AxiStream2Axi(ldata, dout, axibound);
+        else {
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, cols);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, stride);
+            for (int rowIdx = 0, offset = 0; rowIdx < rows; rowIdx++, offset += offset_1row) {
+                AxiStream2Axi(ldata, dout + offset, axibound_1row);
+            }
+        }
     }
 
-    static void Mat2Axi(ap_uint<XF_BITS_PER_CLOCK>* din, ap_uint<PTR_WIDTH>* dout, int rows = ROWS, int cols = COLS) {
+    static void Mat2Axi(
+        ap_uint<XF_BITS_PER_CLOCK>* din, ap_uint<PTR_WIDTH>* dout, int rows = ROWS, int cols = COLS, int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
+
+        int cols_tmp;
+        if (stride == -1)
+            cols_tmp = cols;
+        else
+            cols_tmp = stride;
+
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
-        Mat2AxiStream(din, ldata, rows, cols);
-        AxiStream2Axi(ldata, dout, axibound);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
+            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+
+        Mat2AxiStream(din, ldata, rows, cols, stride);
+        if (FILLZERO == 1)
+            AxiStream2Axi(ldata, dout, axibound);
+        else {
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, cols);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, stride);
+
+            for (int rowIdx = 0, offset = 0; rowIdx < rows; rowIdx++, offset += offset_1row) {
+                AxiStream2Axi(ldata, dout + offset, axibound_1row);
+            }
+        }
     }
 
     static void Mat2Axi(hls::stream<ap_uint<XF_BITS_PER_CLOCK>, XFCVDEPTH>& din,
                         hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dout,
                         int rows = ROWS,
-                        int cols = COLS) {
+                        int cols = COLS,
+                        int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
+
+        int cols_tmp;
+        if (stride == -1)
+            cols_tmp = cols;
+        else
+            cols_tmp = stride;
+
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
-        Mat2AxiStream(din, ldata, rows, cols);
-        AxiStream2Axi(ldata, dout, axibound);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
+            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+
+        Mat2AxiStream(din, ldata, rows, cols, stride);
+        if (FILLZERO == 1)
+            AxiStream2Axi(ldata, dout, axibound);
+        else {
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, cols);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, stride);
+            for (int rowIdx = 0, offset = 0; rowIdx < rows; rowIdx++, offset += offset_1row) {
+                AxiStream2Axi(ldata, dout + offset, axibound_1row);
+            }
+        }
     }
 
     static void Mat2Axi(ap_uint<XF_BITS_PER_CLOCK>* din,
                         hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dout,
                         int rows = ROWS,
-                        int cols = COLS) {
+                        int cols = COLS,
+                        int stride = -1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
+
+        int cols_tmp;
+        if (stride == -1)
+            cols_tmp = cols;
+        else
+            cols_tmp = stride;
+
         hls::stream<ap_uint<PTR_WIDTH> > ldata;
-        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound = MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols);
-        Mat2AxiStream(din, ldata, rows, cols);
-        AxiStream2Axi(ldata, dout, axibound);
+        ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound =
+            MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(rows, cols_tmp);
+        Mat2AxiStream(din, ldata, rows, cols, stride);
+
+        if (FILLZERO == 1)
+            AxiStream2Axi(ldata, dout, axibound);
+        else {
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> axibound_1row =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, cols);
+            ap_uint<log2<ADDRBOUND>::cvalue + 1> offset_1row =
+                MMIter<PTR_WIDTH, T, ROWS, COLS, NPC>::addrbound(1, stride);
+            for (int rowIdx = 0, offset = 0; rowIdx < rows; rowIdx++, offset += offset_1row) {
+                AxiStream2Axi(ldata, dout + offset, axibound_1row);
+            }
+        }
     }
 
    public:
@@ -1407,8 +1586,10 @@ class MMIterOut : public MMIter<PTR_WIDTH, T, ROWS, COLS, NPC> {
 
     void transfer(hls::stream<ap_uint<PTR_WIDTH> >& dout, int rows, int cols) { Mat2AxiStream(data, dout, rows, cols); }
 
-    static void xfMat2Array(xf::cv::Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& srcMat, ap_uint<PTR_WIDTH>* dstPtr) {
-        Mat2Axi(srcMat.data, dstPtr, srcMat.rows, srcMat.cols);
+    static void xfMat2Array(xf::cv::Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& srcMat,
+                            ap_uint<PTR_WIDTH>* dstPtr,
+                            int stride = -1) {
+        Mat2Axi(srcMat.data, dstPtr, srcMat.rows, srcMat.cols, stride);
     }
 
     static void xfMat2axiStrm(xf::cv::Mat<T, ROWS, COLS, NPC, XFCVDEPTH>& srcMat,

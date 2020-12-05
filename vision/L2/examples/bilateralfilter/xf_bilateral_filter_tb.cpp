@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     uchar error_threshold = 0;
 
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 #endif
 
     if (!in_img.data) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 

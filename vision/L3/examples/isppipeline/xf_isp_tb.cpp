@@ -44,15 +44,27 @@ int main(int argc, char** argv) {
 
     unsigned short in_width, in_height;
 
-    /*  reading in the color image  */
-    in_img = cv::imread(argv[1], 0);
+/*  reading in the color image  */
+#if T_8U
+    in_img = cv::imread(argv[1], 0); // read image
+#else
+    in_img = cv::imread(argv[1], -1); // read image
+#endif
 
     if (in_img.data == NULL) {
         fprintf(stderr, "Cannot open image at %s\n", argv[1]);
         return 0;
     }
 
+#if T_8U
     out_img.create(in_img.rows, in_img.cols, CV_8UC3);
+    size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
+    size_t image_out_size_bytes = in_img.rows * in_img.cols * 3 * sizeof(unsigned char);
+#else
+    out_img.create(in_img.rows, in_img.cols, CV_8UC3);
+    size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned short);
+    size_t image_out_size_bytes = in_img.rows * in_img.cols * 3 * sizeof(unsigned char);
+#endif
 
     // Write input image
     imwrite("input.png", in_img);
@@ -82,8 +94,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Kernel kernel(program, "ISPPipeline_accel", &err));
 
     std::vector<cl::Memory> inBufVec, outBufVec;
-    OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width), NULL, &err));
-    OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width * 3), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
 
     // Set the kernel arguments
     OCL_CHECK(err, err = kernel.setArg(0, imageToDevice));
@@ -92,7 +104,7 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(3, width));
 
     for (int i = 0; i < 2; i++) {
-        OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width), in_img.data));
+        OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, image_in_size_bytes, in_img.data));
 
         // Profiling Objects
         cl_ulong start = 0;
@@ -110,7 +122,7 @@ int main(int argc, char** argv) {
         std::cout << (diff_prof / 1000000) << "ms" << std::endl;
 
         // Copying Device result data to Host memory
-        q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width * 3), out_img.data);
+        q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, image_out_size_bytes, out_img.data);
     }
 
     q.finish();

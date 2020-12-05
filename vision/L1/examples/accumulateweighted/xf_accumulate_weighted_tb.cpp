@@ -21,7 +21,7 @@
 
 int main(int argc, char** argv) {
     if (argc != 3) {
-        std::cout << "Usage: <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+        fprintf(stderr, "Usage: <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n");
         return EXIT_FAILURE;
     }
 
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

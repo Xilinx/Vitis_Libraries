@@ -128,11 +128,9 @@ int main(int argc, char** argv) {
     }
     float err_per = 100.0 * (float)cnt / (in_src.rows * in_src.cols);
 
-    fprintf(stderr,
-            "Minimum error in intensity = %f\n"
-            "Maximum error in intensity = %f\n"
-            "Percentage of pixels above error threshold = %f\n",
-            minval, maxval, err_per);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) return -1;
 

@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     cv::Mat img, out_img, result_ocv, error;
 
     if (argc != 2) {
-        printf("Usage : <executable> <input image> \n");
+        fprintf(stderr, "Usage: <executable> <input image>\n");
         return -1;
     }
 
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
     cv::imwrite("error.png", error);
 
     if (err_per > 0.0f) {
-        printf("\nTest Failed\n");
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return -1;
     }
 

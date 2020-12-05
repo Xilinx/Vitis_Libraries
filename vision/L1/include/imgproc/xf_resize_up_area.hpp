@@ -224,7 +224,7 @@ void xFResizeAreaUpScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_in,
 //	inv_Yscale_float = out_height/(float)height;
 
 // clang-format off
-    #pragma HLS ALLOCATION instances=xFUDivAreaUp limit=1 function
+    #pragma HLS ALLOCATION function instances=xFUDivAreaUp limit=1
     // clang-format on
     Xscale = xFUDivAreaUp((uint64_t)(width)*POW32, out_width);
     Yscale = xFUDivAreaUp((uint64_t)height * POW32, out_height);

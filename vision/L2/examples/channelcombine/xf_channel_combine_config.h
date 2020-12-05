@@ -34,12 +34,6 @@
 #define PTR_OUT_WIDTH 32
 #endif
 
-#if RO
-#define NPC1 XF_NPPC8
-#define PTR_IN_WIDTH 64
-#define PTR_OUT_WIDTH 256
-#endif
-
 // Set the input and output pixel depth:
 #if FOUR_INPUT
 #define IN_TYPE XF_8UC1
@@ -56,6 +50,7 @@
 #if TWO_INPUT
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC2
+#define CV_TYPE CV_8UC2
 #endif
 
 #endif //_XF_CHANNEL_COMBINE_CONFIG_H_

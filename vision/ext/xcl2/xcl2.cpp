@@ -64,7 +64,7 @@ cl::Program::Binaries import_binary_file(std::string xclbin_file_name) {
     std::cout << "INFO: Importing " << xclbin_file_name << std::endl;
 
     if (access(xclbin_file_name.c_str(), R_OK) != 0) {
-        printf("ERROR: %s xclbin not available please build\n", xclbin_file_name.c_str());
+        fprintf(stderr, "ERROR: %s xclbin not available please build\n", xclbin_file_name.c_str());
         exit(EXIT_FAILURE);
     }
     // Loading XCL Bin into char buffer
@@ -86,7 +86,7 @@ char* read_binary_file(const std::string& xclbin_file_name, unsigned& nb) {
     std::cout << "INFO: Reading " << xclbin_file_name << std::endl;
 
     if (access(xclbin_file_name.c_str(), R_OK) != 0) {
-        printf("ERROR: %s xclbin not available please build\n", xclbin_file_name.c_str());
+        fprintf(stderr, "ERROR: %s xclbin not available please build\n", xclbin_file_name.c_str());
         exit(EXIT_FAILURE);
     }
     // Loading XCL Bin into char buffer
@@ -141,7 +141,7 @@ std::string find_binary_file(const std::string& _device_name, const std::string&
 
     char* device_name = strdup(_device_name.c_str());
     if (device_name == NULL) {
-        printf("Error: Out of Memory\n");
+        fprintf(stderr, "Error: Out of Memory\n");
         exit(EXIT_FAILURE);
     }
 
@@ -155,7 +155,7 @@ std::string find_binary_file(const std::string& _device_name, const std::string&
 
     char* device_name_versionless = strdup(_device_name.c_str());
     if (device_name_versionless == NULL) {
-        printf("Error: Out of Memory\n");
+        fprintf(stderr, "Error: Out of Memory\n");
         exit(EXIT_FAILURE);
     }
 
@@ -205,11 +205,12 @@ std::string find_binary_file(const std::string& _device_name, const std::string&
                 if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
                     char* bindir = strdup(*dir);
                     if (bindir == NULL) {
-                        printf("Error: Out of Memory\n");
+                        fprintf(stderr, "Error: Out of Memory\n");
                         exit(EXIT_FAILURE);
                     }
                     if (*xclbin_file_name && sb.st_ino != aws_ino) {
-                        printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+                        fprintf(stderr, "Error: multiple xclbin files discovered:\n %s\n %s\n", file_name,
+                                xclbin_file_name);
                         exit(EXIT_FAILURE);
                     }
                     aws_ino = sb.st_ino;
@@ -232,11 +233,12 @@ std::string find_binary_file(const std::string& _device_name, const std::string&
                     if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
                         char* bindir = strdup(*dir);
                         if (bindir == NULL) {
-                            printf("Error: Out of Memory\n");
+                            fprintf(stderr, "Error: Out of Memory\n");
                             exit(EXIT_FAILURE);
                         }
                         if (*xclbin_file_name && sb.st_ino != ino) {
-                            printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+                            fprintf(stderr, "Error: multiple xclbin files discovered:\n %s\n %s\n", file_name,
+                                    xclbin_file_name);
                             exit(EXIT_FAILURE);
                         }
                         ino = sb.st_ino;
