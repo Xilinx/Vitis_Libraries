@@ -21,9 +21,9 @@
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        printf(
-            "Missed input arguments. Usage: <executable> <path to input video file or image path> <Number of objects "
-            "to be tracked> \n");
+        fprintf(stderr,
+                "Missed input arguments. Usage: <executable> <path to input video file or image path> <Number of "
+                "objects to be tracked>\n");
         return -1;
     }
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     cv::VideoCapture cap(path);
     if (!cap.isOpened()) // check if we succeeded
     {
-        std::cout << "ERROR: Cannot open the video file" << std::endl;
+        fprintf(stderr, "ERROR: Cannot open the video file");
         return -1;
     }
 #endif
@@ -91,11 +91,12 @@ int main(int argc, char* argv[]) {
         image.create(frame.size(), frame.type());
 
         if (frame.empty()) {
-            printf("no image!\n");
+            fprintf(stderr, "no image!\n ");
             break;
         }
 
-        // convert to four channels with a dummy alpha channel for 32-bit data transfer
+        // convert to four channels with a dummy alpha channel for 32-bit data
+        // transfer
         cvtColor(frame, image, cv::COLOR_BGR2RGBA);
 
         uint16_t rows = image.rows;

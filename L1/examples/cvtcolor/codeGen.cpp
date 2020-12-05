@@ -32,13 +32,13 @@ const std::string gBenchFooter = R"INLINE_CODE(
 xf::cv::analyzeDiff(errImg0, ERROR_THRESHOLD, err_per);
 
 if (err_per > 3.0f) {
-    printf("\n1st Image Test Failed\n");
+    fprintf(stderr, "\n1st Image Test Failed\n");
 }
 #if (IYUV2NV12 || RGBA2NV12 || RGBA2NV21 || UYVY2NV12 || YUYV2NV12 || NV122IYUV || NV212IYUV || IYUV2YUV4 || \
      NV122YUV4 || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV || YUYV2IYUV || NV122NV21 || NV212NV12)
 xf::cv::analyzeDiff(errImg1, ERROR_THRESHOLD, err_per);
 if (err_per > 3.0f) {
-    printf("\n2nd Image Test Failed\n");
+    fprintf(stderr, "\n2nd Image Test Failed\n");
     return 1;
 }
 
@@ -46,7 +46,7 @@ if (err_per > 3.0f) {
 #if (IYUV2YUV4 || NV122IYUV || NV122YUV4 || NV212IYUV || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV || YUYV2IYUV)
 xf::cv::analyzeDiff(errImg2, ERROR_THRESHOLD, err_per);
 if (err_per > 3.0f) {
-    printf("\n3rd Image Test Failed\n");
+    fprintf(stderr, "\n3rd Image Test Failed\n");
     return 1;
 }
 #endif
@@ -475,9 +475,9 @@ void printInputOrRefImageInBench(int& i, const std::string name, PortType port, 
 
     gnIndent = 8;
     printIndent(ofs);
-    ofs << "std::cout << \"Can't open image \" << argv[" << i << "] << \" !!.\"<< std::endl;" << std::endl;
+    ofs << "fprintf(stderr, " Can't open image %s\n", argv[i]);" << std::endl;
 
-    printIndent(ofs);
+        printIndent(ofs);
     ofs << "return -1;" << std::endl;
 
     gnIndent = 4;
@@ -671,12 +671,12 @@ int genBench(std::string& from, std::string& to, std::ofstream& ofs) {
 
     bool bErr = false;
     if (it_from == ports.end()) {
-        std::cout << "Unrecognozed from target " << from << std::endl;
+        fprintf(stderr, "Unrecognozed from target %s\n", from);
         bErr = true;
     }
 
     if (it_to == ports.end()) {
-        std::cout << "Unrecognozed to target " << from << std::endl;
+        fprintf(stderr, "Unrecognozed from target %s\n", from);
         bErr = true;
     }
     if (bErr) return -1;
@@ -714,12 +714,12 @@ int genCode(std::string& from, std::string& to, std::ofstream& ofs, std::ofstrea
 
     bool bErr = false;
     if (it_from == ports.end()) {
-        std::cout << "Unrecognozed from target " << from << std::endl;
+        fprintf(stderr, "Unrecognozed from target %s\n", from);
         bErr = true;
     }
 
     if (it_to == ports.end()) {
-        std::cout << "Unrecognozed to target " << from << std::endl;
+        fprintf(stderr, "Unrecognozed from target %s\n", from);
         bErr = true;
     }
     if (bErr) return -1;
@@ -833,7 +833,7 @@ int main() {
 #endif
     std::ifstream ifs("convConfigs", std::ifstream::in);
     if (!ifs.is_open()) {
-        std::cout << "Unable to open file convConfigs. Exiting ..." << std::endl;
+        fprintf(stderr, "Unable to open file convConfigs. Exiting ...\n ");
         return -1;
     }
 

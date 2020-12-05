@@ -172,10 +172,9 @@ int main(int argc, char** argv) {
 #endif
 
     float err_per = 100.0 * (float)cnt / (in_img.rows * in_img.cols);
-    fprintf(stderr,
-            "Minimum error in intensity = %f\nMaximum error in intensity = %f\nPercentage of pixels above error "
-            "threshold = %f\n",
-            minval, maxval, err_per);
+    std::cout << "Minimum error in intensity =" << minval << "\n"
+              << "Maximum error in intensity = " << maxval << "\n"
+              << "Percentage of pixels above error" << err_per << std::endl;
 
     in_img.~Mat();
     in_gray.~Mat();

@@ -31,7 +31,7 @@ xf::cv::Mat<_PTYPE, _ROWS, _COLS, _NPC> imread(char* img, int type) {
     xf::cv::Mat<_PTYPE, _ROWS, _COLS, _NPC> input(img_load.rows, img_load.cols);
 
     if (img_load.data == NULL) {
-        std::cout << "\nError : Couldn't open the image at " << img << "\n" << std::endl;
+        fprintf(stderr, "\nError : Couldn't open the image at %s\n ", img);
         exit(-1);
     }
 
@@ -71,7 +71,7 @@ void absDiff(::cv::Mat& cv_img, xf::cv::Mat<_PTYPE, _ROWS, _COLS, _NPC>& xf_img,
     } else if (cv_img.depth() == CV_32S || cv_img.depth() == CV_32F) {
         cv_bitdepth = 32;
     } else {
-        printf("OpenCV image's depth not supported");
+        fprintf(stderr, "OpenCV image's depth not supported\n ");
         return;
     }
 
@@ -135,7 +135,7 @@ void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
     } else if (diff_img.depth() == CV_32S || diff_img.depth() == CV_32F) {
         cv_bitdepth = 32;
     } else {
-        printf("OpenCV image's depth not supported for this function");
+        fprintf(stderr, "OpenCV image's depth not supported for this function\n ");
         return;
     }
 
@@ -146,7 +146,7 @@ void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
         for (int j = 0; j < diff_img.cols; j++) {
             int v = 0;
             for (int k = 0; k < diff_img.channels(); k++) {
-                int v_tmp;
+                int v_tmp = 0;
                 if (diff_img.channels() == 1) {
                     if (cv_bitdepth == 8)
                         v_tmp = (int)diff_img.at<unsigned char>(i, j);
@@ -179,10 +179,9 @@ void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
         }
     }
     err_per = 100.0 * (float)cnt / (diff_img.rows * diff_img.cols);
-    fprintf(stderr,
-            "Minimum error in intensity = %f\nMaximum error in intensity = %f\nPercentage of pixels above error "
-            "threshold = %f\n",
-            minval, maxval, err_per);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 }
 } // namespace cv
 } // namespace xf

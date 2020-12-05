@@ -389,6 +389,18 @@ struct PixelType<XF_24UP> {
     static const int bitdepth = 24;
 };
 
+template <>
+struct PixelType<XF_10UP> {
+    typedef ap_uint<10> name;
+    typedef ap_uint<10> uname;
+    static const int bitdepth = 10;
+};
+template <>
+struct PixelType<XF_12UP> {
+    typedef ap_uint<12> name;
+    typedef ap_uint<12> uname;
+    static const int bitdepth = 12;
+};
 #define XF_NPIXPERCYCLE(flags) xfNPixelsPerCycle<flags>::nppc
 
 #define XF_BITSHIFT(flags) xfNPixelsPerCycle<flags>::datashift

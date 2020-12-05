@@ -808,7 +808,7 @@ Row_Loop:
 
         } else {
 // clang-format off
-            #pragma HLS ALLOCATION instances=xfapplygaussian5x5 limit=1
+            #pragma HLS ALLOCATION function instances=xfapplygaussian5x5<PLANES, DEPTH, FOR_IMAGE_PYRAMID> limit=1
             // clang-format on
             src_buf1[buf_size - 1] = 0;
             src_buf2[buf_size - 1] = 0;
@@ -1186,7 +1186,7 @@ Row_Loop:
 // clang-format off
                 #pragma HLS LOOP_TRIPCOUNT min=3 max=3
                 #pragma HLS unroll
-                #pragma HLS ALLOCATION instances=xfapplygaussian7x7 limit=1
+                #pragma HLS ALLOCATION function instances=xfapplygaussian7x7<PLANES, DEPTH> limit=1
                 // clang-format on
 
                 OutputValues[0] =

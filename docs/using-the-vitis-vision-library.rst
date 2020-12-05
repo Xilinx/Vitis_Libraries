@@ -69,7 +69,13 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::autowhitebalance                  | imgproc/xf_autowhitebalance.hpp   |
    +-------------------------------------------+-----------------------------------+
-   | xf::cv::bilateralFilter                   | imgproc/xf_histogram.hpp          |
+   | xf::cv::autoexposurecorrection            | imgproc/xf_aec.hpp                |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::bilateralFilter                   | imgproc/xf_bilaterealfilter.hpp   |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::blackLevelCorrection              | imgproc/xf_black_level.hpp        |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::bfmatcher                         | imgproc/xf_bfmatcher.hpp          |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::boxFilter                         | imgproc/xf_box_filter.hpp         |
    +-------------------------------------------+-----------------------------------+
@@ -78,6 +84,9 @@ folder name, which contains the library function.
    | xf::cv::badpixelcorrection                | imgproc/xf_bpc.hpp                |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::Canny                             | imgproc/xf_canny.hpp              |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::colorcorrectionmatrix             | imgproc/xf_colorcorrectionmatrix. |
+   |                                           | hpp                               |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::Colordetect                       | imgproc/xf_colorthresholding.hpp, |
    |                                           | imgproc/xf_bgr2hsv.hpp,           |
@@ -92,7 +101,7 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::crop                              | imgproc/xf_crop.hpp               |
    +-------------------------------------------+-----------------------------------+
-   | xf::cv::filter2D                          | imgproc/xf_custom_convolution.hpp |
+   | xf::cv::distanceTransform                 | imgproc/xf_distancetransform.hpp  |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::nv122iyuv, xf::cv::nv122rgba,     | imgproc/xf_cvt_color.hpp          |
    | xf::cv::nv122yuv4, xf::cv::nv212iyuv,     |                                   |
@@ -121,6 +130,12 @@ folder name, which contains the library function.
    | xf::cv::gray2rgb, xf::cv::gray2bgr,       |                                   |
    | xf::cv::rgb2xyz, xf::cv::bgr2xyz...       |                                   |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::densePyrOpticalFlow               | video/xf_pyr_dense_optical_flow.h |
+   |                                           | pp                                |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::DenseNonPyrLKOpticalFlow          | video/xf_dense_npyr_optical_flow. |
+   |                                           | hpp                               |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::dilate                            | imgproc/xf_dilation.hpp           |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::demosaicing                       | imgproc/xf_demosaicing.hpp        |
@@ -128,6 +143,8 @@ folder name, which contains the library function.
    | xf::cv::erode                             | imgproc/xf_erosion.hpp            |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::fast                              | features/xf_fast.hpp              |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::filter2D                          | imgproc/xf_custom_convolution.hpp |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::GaussianBlur                      | imgproc/xf_gaussian_filter.hpp    |
    +-------------------------------------------+-----------------------------------+
@@ -149,15 +166,14 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::integralImage                     | imgproc/xf_integral_image.hpp     |
    +-------------------------------------------+-----------------------------------+
-   | xf::cv::densePyrOpticalFlow               | video/xf_pyr_dense_optical_flow.h |
-   |                                           | pp                                |
+   | xf::cv::KalmanFilter                      | video/xf_kalmanfilter.hpp         |
    +-------------------------------------------+-----------------------------------+
-   | xf::cv::DenseNonPyrLKOpticalFlow          | video/xf_dense_npyr_optical_flow. |
-   |                                           | hpp                               |
+   | xf::cv::Lscdistancebased                  | imgproc/xf_lensshadingcorrection  |
+   |                                           | .hpp                              |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::LTM::process                      | imgproc/xf_ltm.hpp                |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::LUT                               | imgproc/xf_lut.hpp                |
-   +-------------------------------------------+-----------------------------------+
-   | xf::cv::KalmanFilter                      | video/xf_kalmanfilter.hpp         |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::magnitude                         | core/xf_magnitude.hpp             |
    +-------------------------------------------+-----------------------------------+
@@ -168,6 +184,8 @@ folder name, which contains the library function.
    | xf::cv::medianBlur                        | imgproc/xf_median_blur.hpp        |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::minMaxLoc                         | core/xf_min_max_loc.hpp           |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::modefilter                        | imgproc/xf_modefilter.hpp         |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::OtsuThreshold                     | imgproc/xf_otsuthreshold.hpp      |
    +-------------------------------------------+-----------------------------------+
@@ -180,6 +198,9 @@ folder name, which contains the library function.
    | xf::cv::pyrDown                           | imgproc/xf_pyr_down.hpp           |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::pyrUp                             | imgproc/xf_pyr_up.hpp             |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::xf_QuatizationDithering           | imgproc/xf_quantizationdithering  |
+   |                                           | .hpp                              |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::reduce                            | imgrpoc/xf_reduce.hpp             |
    +-------------------------------------------+-----------------------------------+
@@ -214,10 +235,9 @@ folder name, which contains the library function.
 Changing the Hardware Kernel Configuration
 ------------------------------------------
 
-   Update the <path to vitis vision git
-   folder>/vision/L1/examples/<function>/build/xf_config_params.h file.
-
-
+   To modify the configuration of any function, update the following file:
+   
+   <path to vitis vision git folder>/vision/L1/examples/<function>/build/xf_config_params.h .
 
 
 Using the Vitis vision Library Functions on Hardware
@@ -258,12 +278,21 @@ design is completely built and the board has booted up correctly.
    |              |                           | <path to input image 1>  |
    |              |                           | <path to input image 2>  |
    +--------------+---------------------------+--------------------------+
+   | Autoexposure | xf::cv::autoexposurecorr  | ./<executable name>.elf  |
+   | correction   | ection                    | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
    | Autowhite    | xf::cv::autowhitebalance  | ./<executable name>.elf  |
    | balance      |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
    | Bilateralfil | xf::cv::bilateralFilter   | ./<executable name>.elf  |
    | ter          |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
+   | BlackLevel   | xf::cv::blackLevel        | ./<executable name>.elf  |
+   | Correction   | Correction                | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | BruteForce   | xf::cv::bfmatcher         | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |  
+   +--------------+---------------------------+--------------------------+   
    | Boxfilter    | xf::cv::boxFilter         | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
@@ -290,6 +319,10 @@ design is completely built and the board has booted up correctly.
    |              | xf::cv::colorthresholding,| <path to input image>    |
    |              | xf::cv:: erode, xf::cv::  |                          |
    |              | dilate                    |                          |
+   +--------------+---------------------------+--------------------------+
+   | color        | xf::cv::colorcorrection   | ./<executable name>.elf  |
+   | correction   | matrix                    | <path to input image>    |
+   | matrix       |                           |                          |
    +--------------+---------------------------+--------------------------+
    | compare      | xf::cv::compare           | ./<executable name>.elf  |
    |              |                           | <path to input image 1>  |
@@ -400,6 +433,9 @@ design is completely built and the board has booted up correctly.
    | Dilation     | xf::cv::dilate            | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
+   | Distance     | xf::cv::distanceTransform | ./<executable name>.elf  |
+   | Transform    |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
    | Erosion      | xf::cv::erode             | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
@@ -436,6 +472,9 @@ design is completely built and the board has booted up correctly.
    | Integralimg  | xf::cv::integralImage     | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
+   | Laplacian    | xf::cv::filter2d          | ./<executable name>.elf  |
+   | Filter       |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
    | Lkdensepyrof | xf::cv::densePyrOpticalFlo| ./<executable name>.elf  |
    |              | w                         | <path to input image 1>  |
    |              |                           | <path to input image 2>  |
@@ -444,8 +483,14 @@ design is completely built and the board has booted up correctly.
    |              | LKOpticalFlow             | <path to input image 1>  |
    |              |                           | <path to input image 2>  |
    +--------------+---------------------------+--------------------------+
+   | lensshading  | xf::cv::Lscdistancebased  | ./<executable name>.elf  |
+   | correction   |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
    | Lut          | xf::cv::LUT               | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Local tone   | xf::cv::LTM::process      | ./<executable name>.elf  |
+   | mapping      |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
    | Kalman       | xf::cv::KalmanFilter      | ./<executable name>.elf  |
    | Filter       |                           |                          |
@@ -482,6 +527,9 @@ design is completely built and the board has booted up correctly.
    | Minmaxloc    | xf::cv::minMaxLoc         | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
+   | Mode filter  | xf::cv::modefilter        | ./<executable name>.elf  |
+   |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
    | otsuthreshol | xf::cv::OtsuThreshold     | ./<executable name>.elf  |
    | d            |                           | <path to input image>    |
    +--------------+---------------------------+--------------------------+
@@ -496,6 +544,9 @@ design is completely built and the board has booted up correctly.
    +--------------+---------------------------+--------------------------+
    | Pyrup        | xf::cv::pyrUp             | ./<executable name>.elf  |
    |              |                           | <path to input image>    |
+   +--------------+---------------------------+--------------------------+
+   | Quantization | xf::cv::xf_Quatization    | ./<executable name>.elf  |
+   | Dithering    | Dithering                 | <path to input image>    |
    +--------------+---------------------------+--------------------------+
    | reduce       | xf::cv::reduce            | ./<executable name>.elf  |
    |              |                           | <path to input image>    |

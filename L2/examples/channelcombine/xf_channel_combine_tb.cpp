@@ -23,14 +23,17 @@ int main(int argc, char** argv) {
     if (argc != 5) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
         fprintf(stderr,
-                "<Executable Name> <input image1 path> <input image2 path> <input image3 path> <input image4 path>\n");
+                "<Executable Name> <input image1 path> <input image2 path> "
+                "<input image3 path> <input image4 path>\n");
         return -1;
     }
 #endif
 #if THREE_INPUT
     if (argc != 4) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr, "<Executable Name> <input image1 path> <input image2 path> <input image3 path> \n");
+        fprintf(stderr,
+                "<Executable Name> <input image1 path> <input image2 path> "
+                "<input image3 path> \n");
         return -1;
     }
 #endif
@@ -57,9 +60,9 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Cannot open input images \n");
         return 0;
     }
+#endif
     // creating memory for diff image
     diff.create(in_gray1.rows, in_gray1.cols, CV_TYPE);
-#endif
 
 #if FOUR_INPUT
 
@@ -77,7 +80,7 @@ int main(int argc, char** argv) {
     int width = in_gray1.cols;
 
     // Allocate memory for the output images:
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC4);
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_TYPE);
 
     // OpenCL section:
     size_t image_in_size_bytes = in_gray1.rows * in_gray1.cols * in_gray1.channels() * sizeof(unsigned char);
@@ -226,15 +229,21 @@ int main(int argc, char** argv) {
             if (v[0] > 0) cnt++;
             if (v[1] > 0) cnt++;
             if (v[2] > 0) cnt++;
+#if FOUR_INPUT
             if (v[3] > 0) cnt++;
+#endif
             if (minval > v[0]) minval = v[0];
             if (minval > v[1]) minval = v[1];
             if (minval > v[2]) minval = v[2];
+#if FOUR_INPUT
             if (minval > v[3]) minval = v[3];
+#endif
             if (maxval < v[0]) maxval = v[0];
             if (maxval < v[1]) maxval = v[1];
             if (maxval < v[2]) maxval = v[2];
+#if FOUR_INPUT
             if (maxval < v[3]) maxval = v[3];
+#endif
         }
     }
 
@@ -246,7 +255,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << "%" << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 #endif

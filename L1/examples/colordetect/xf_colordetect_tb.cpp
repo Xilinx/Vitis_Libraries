@@ -53,7 +53,7 @@ void colordetect_ref(cv::Mat& _src, cv::Mat& _dst, unsigned char* nLowThresh, un
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     // Open input image:
     in_img = cv::imread(argv[1], 1);
     if (!in_img.data) {
-        std::cout << "ERROR: Could not open the input image." << std::endl;
+        fprintf(stderr, "ERROR: Could not open the input image.\n ");
         return -1;
     }
 
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << "%" << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

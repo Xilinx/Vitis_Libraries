@@ -62,17 +62,17 @@ int main(int argc, char** argv) {
 
     inputimg0 = cv::imread(argv[1], 0);
     if (!inputimg0.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
     inputimg1 = cv::imread(argv[2], 0);
     if (!inputimg1.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
     inputimg2 = cv::imread(argv[3], 0);
     if (!inputimg2.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
 
@@ -166,13 +166,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[4], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[5], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -185,17 +185,17 @@ int main(int argc, char** argv) {
 
     inputimg0 = cv::imread(argv[1], 0);
     if (!inputimg0.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
     inputimg1 = cv::imread(argv[2], 0);
     if (!inputimg1.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
     inputimg2 = cv::imread(argv[3], 0);
     if (!inputimg2.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
 
@@ -290,17 +290,17 @@ int main(int argc, char** argv) {
 
     inputimg0 = cv::imread(argv[1], 0);
     if (!inputimg0.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
     inputimg1 = cv::imread(argv[2], 0);
     if (!inputimg1.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
     inputimg2 = cv::imread(argv[3], 0);
     if (!inputimg2.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
 
@@ -394,17 +394,17 @@ int main(int argc, char** argv) {
 
     inputimg0 = cv::imread(argv[1], 0);
     if (!inputimg0.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
     inputimg1 = cv::imread(argv[2], 0);
     if (!inputimg1.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
     inputimg2 = cv::imread(argv[3], 0);
     if (!inputimg2.data) {
-        std::cout << "Can't open image !!" << std::endl;
+        fprintf(stderr, "Can't open image !!\n ");
         return -1;
     }
 
@@ -499,17 +499,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[4], 0);
     if (!refimage0.data) {
-        printf("unable to open image \n");
+        fprintf(stderr, "unable to open image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[5], 0);
     if (!refimage1.data) {
-        printf("unable to open image \n");
+        fprintf(stderr, "unable to open image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[6], 0);
     if (!refimage2.data) {
-        printf("unable to open image \n");
+        fprintf(stderr, "unable to open image\n ");
         return (1);
     }
 
@@ -625,17 +625,17 @@ int main(int argc, char** argv) {
 
     refimg0 = cv::imread(argv[3], 0);
     if (!refimg0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimg1 = cv::imread(argv[4], 0);
     if (!refimg1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimg2 = cv::imread(argv[5], 0);
     if (!refimg2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
 
@@ -1174,12 +1174,12 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[3], 0);
     if (!refimage0.data) {
-        printf("Failed to open y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[4], -1);
     if (!refimage0.data) {
-        printf("Failed to open vu reference image\n");
+        fprintf(stderr, "Failed to open VU reference image\n ");
         return (1);
     }
     absdiff(refimage1, outputimg1, error_img1);
@@ -1279,12 +1279,12 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[3], 0);
     if (!refimage0.data) {
-        printf("Failed to open y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[4], -1);
     if (!refimage0.data) {
-        printf("Failed to open vu reference image\n");
+        fprintf(stderr, "Failed to open VU reference image\n ");
         return (1);
     }
     absdiff(refimage1, outputimg1, error_img1);
@@ -1655,17 +1655,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[3], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[4], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[5], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -1777,17 +1777,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[3], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[4], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[5], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -2063,17 +2063,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[3], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[4], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[5], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -2169,17 +2169,17 @@ int main(int argc, char** argv) {
     /////////////////////////////////////// end of CL /////////////////////
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[3], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[4], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -2278,17 +2278,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[3], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[4], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -2386,13 +2386,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -2482,13 +2482,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -2584,17 +2584,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[3], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[4], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -2693,13 +2693,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -2791,13 +2791,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -2886,13 +2886,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -2979,13 +2979,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -3082,17 +3082,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[3], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[4], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -3171,7 +3171,7 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], -1);
     if (!refimage0.data) {
-        printf("Failed to open YUYV reference image\n");
+        fprintf(stderr, "Failed to open YUYV reference image\n ");
         return (1);
     }
 
@@ -3244,7 +3244,7 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], -1);
     if (!refimage0.data) {
-        printf("Failed to open YUYV reference image\n");
+        fprintf(stderr, "Failed to open YUYV reference image\n ");
         return (1);
     }
 
@@ -3319,7 +3319,7 @@ int main(int argc, char** argv) {
     cv::imwrite("out_YUYV.png", outputimg0);
     refimage0 = cv::imread(argv[2], -1);
     if (!refimage0.data) {
-        printf("Failed to open YUYV reference image\n");
+        fprintf(stderr, "Failed to open YUYV reference image\n ");
         return (1);
     }
 
@@ -3390,7 +3390,7 @@ int main(int argc, char** argv) {
     cv::imwrite("out_YUYV.png", outputimg0);
     refimage0 = cv::imread(argv[2], -1);
     if (!refimage0.data) {
-        printf("Failed to open YUYV reference image\n");
+        fprintf(stderr, "Failed to open YUYV reference image\n ");
         return (1);
     }
 
@@ -3485,17 +3485,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[3], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[4], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -3590,13 +3590,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -3686,13 +3686,13 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -3767,7 +3767,7 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], -1);
     if (!refimage0.data) {
-        std::cout << "Can't open YUYV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open YUYV ref image !!\n ");
         return -1;
     }
 
@@ -3839,7 +3839,7 @@ int main(int argc, char** argv) {
     cvtColor(outputimg0, outputimg0, CV_RGBA2BGR);
     refimage = cv::imread(argv[2], 1);
     if (!refimage.data) {
-        printf("\nFailed to open reference image\n");
+        fprintf(stderr, "Failed to open reference image\n ");
         return -1;
     }
     absdiff(outputimg0, refimage, error_img0);
@@ -3912,7 +3912,7 @@ int main(int argc, char** argv) {
 
     refimage = cv::imread(argv[2], 1);
     if (!refimage.data) {
-        printf("\nFailed to open reference image\n");
+        fprintf(stderr, "Failed to open reference image\n ");
         return -1;
     }
     absdiff(outputimg0, refimage, error_img0);
@@ -3943,7 +3943,8 @@ int main(int argc, char** argv) {
     img_width = inputimg.cols;
     img_height = inputimg.rows;
 
-    /////////////////////////////////////// CL /////////////////////////////////////////
+    /////////////////////////////////////// CL
+    ////////////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -4006,17 +4007,17 @@ int main(int argc, char** argv) {
 
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        printf("Failed to open Y reference image\n");
+        fprintf(stderr, "Failed to open Y reference image\n ");
         return (1);
     }
     refimage1 = cv::imread(argv[3], 0);
     if (!refimage1.data) {
-        printf("Failed to open U reference image\n");
+        fprintf(stderr, "Failed to open U reference image\n ");
         return (1);
     }
     refimage2 = cv::imread(argv[4], 0);
     if (!refimage2.data) {
-        printf("Failed to open V reference image\n");
+        fprintf(stderr, "Failed to open V reference image\n ");
         return (1);
     }
 
@@ -4112,13 +4113,13 @@ int main(int argc, char** argv) {
     printf("\n Written output images\n");
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -4214,13 +4215,13 @@ int main(int argc, char** argv) {
     printf("\n Written output images\n");
     refimage0 = cv::imread(argv[2], 0);
     if (!refimage0.data) {
-        std::cout << "Can't open Y ref image !!" << std::endl;
+        fprintf(stderr, "Can't open Y ref image !!\n ");
         return -1;
     }
 
     refimage1 = cv::imread(argv[3], -1);
     if (!refimage1.data) {
-        std::cout << "Can't open UV ref image !!" << std::endl;
+        fprintf(stderr, "Can't open UV ref image !!\n ");
         return -1;
     }
 
@@ -4296,7 +4297,7 @@ int main(int argc, char** argv) {
 
     refimage = cv::imread(argv[2], 1);
     if (!refimage.data) {
-        printf("\nFailed to read reference image\n");
+        fprintf(stderr, "Failed to read reference image\n ");
         return -1;
     }
     absdiff(outputimg0, refimage, error_img0);
@@ -4364,7 +4365,7 @@ int main(int argc, char** argv) {
     imwrite("out.png", outputimg0);
     refimage = cv::imread(argv[2], -1);
     if (!refimage.data) {
-        printf("\nFailed to read reference image\n");
+        fprintf(stderr, "Failed to read reference image\n ");
         return -1;
     }
     absdiff(outputimg0, refimage, error_img0);
@@ -4436,7 +4437,7 @@ int main(int argc, char** argv) {
 
     refimage = cv::imread(argv[2], 1);
     if (!refimage.data) {
-        printf("\nFailed to read reference image\n");
+        fprintf(stderr, "Failed to read reference image\n ");
         return -1;
     }
     absdiff(outputimg0, refimage, error_img0);
@@ -4517,7 +4518,8 @@ int main(int argc, char** argv) {
     }
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC1);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC1);
-    /////////////////////////////////////// CL //////////////////////////////////////////////
+    /////////////////////////////////////// CL
+    /////////////////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -4565,7 +4567,8 @@ int main(int argc, char** argv) {
                                              (ap_uint<OUTPUT_PTR_WIDTH>*)outputimg.data));
     q.finish();
     printf("write output buffer\n");
-    /////////////////////////////////////// end of CL /////////////////////////////////////////
+    /////////////////////////////////////// end of CL
+    ////////////////////////////////////////////
 
     // OpenCV reference
     cv::cvtColor(inputimg, ocv_outputimg, CV_BGR2GRAY, 1);
@@ -4713,7 +4716,8 @@ int main(int argc, char** argv) {
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
-    ////////////////////////////////////////// CL ///////////////////////////////////
+    ////////////////////////////////////////// CL
+    //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -4777,7 +4781,8 @@ int main(int argc, char** argv) {
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
-    ////////////////////////////////////////// CL ///////////////////////////////////
+    ////////////////////////////////////////// CL
+    //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -4844,7 +4849,8 @@ int main(int argc, char** argv) {
 
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
-    ////////////////////////////////////////// CL ///////////////////////////////////
+    ////////////////////////////////////////// CL
+    //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -4910,7 +4916,8 @@ int main(int argc, char** argv) {
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
 
-    /////////////////////////////////////// CL /////////////////////////////////////////
+    /////////////////////////////////////// CL
+    ////////////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -5650,7 +5657,8 @@ int main(int argc, char** argv) {
     static xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, XF_NPPC1> imgInput(inputimg.rows, inputimg.cols);
     static xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, XF_NPPC1> imgOutput(outputimg.rows, outputimg.cols);
 
-    //////////////////////////////////////////// CL ///////////////////////////////////
+    //////////////////////////////////////////// CL
+    //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -5715,7 +5723,8 @@ int main(int argc, char** argv) {
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
 
-    //////////////////////////////////////////// CL ///////////////////////////////////
+    //////////////////////////////////////////// CL
+    //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -5781,7 +5790,8 @@ int main(int argc, char** argv) {
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
 
-    //////////////////////////////////////////// CL ///////////////////////////////////
+    //////////////////////////////////////////// CL
+    //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -5846,7 +5856,8 @@ int main(int argc, char** argv) {
     outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
     ocv_outputimg.create(inputimg.rows, inputimg.cols, CV_8UC3);
 
-    //////////////////////////////////////////// CL ///////////////////////////////////
+    //////////////////////////////////////////// CL
+    //////////////////////////////////////
     int height = inputimg.rows;
     int width = inputimg.cols;
 
@@ -5918,14 +5929,12 @@ int main(int argc, char** argv) {
         }
     }
     err_per = 100.0 * (float)cnt / (error_img0.rows * error_img0.cols);
-    fprintf(stderr,
-            "Minimum error in intensity = %f\n\
-									Maximum error in intensity = %f\n\
-									Percentage of pixels above error threshold = %f\n",
-            minval, maxval, err_per);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 3.0f) {
-        printf("\n1st Image Test Failed\n");
+        fprintf(stderr, "\n1st Image Test Failed\n ");
         return 1;
     }
 
@@ -5945,13 +5954,11 @@ int main(int argc, char** argv) {
         }
     }
     err_per = 100.0 * (float)cnt / (error_img1.rows * error_img1.cols);
-    fprintf(stderr,
-            "Minimum error in intensity = %f\n\
-							Maximum error in intensity = %f\n\
-							Percentage of pixels above error threshold = %f\n",
-            minval, maxval, err_per);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
     if (err_per > 3.0f) {
-        printf("\n2nd Image Test Failed\n");
+        fprintf(stderr, "\n2nd Image Test Failed\n ");
         return 1;
     }
 
@@ -5971,13 +5978,11 @@ int main(int argc, char** argv) {
         }
     }
     err_per = 100.0 * (float)cnt / (error_img2.rows * error_img2.cols);
-    fprintf(stderr,
-            "Minimum error in intensity = %f\n\
-							Maximum error in intensity = %f\n\
-							Percentage of pixels above error threshold = %f\n",
-            minval, maxval, err_per);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
     if (err_per > 3.0f) {
-        printf("\n3rd Image Test Failed\n");
+        fprintf(stderr, "\n3rd Image Test Failed\n ");
         return 1;
     }
 #endif

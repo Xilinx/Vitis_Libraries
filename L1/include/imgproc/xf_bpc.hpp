@@ -18,8 +18,8 @@
 #define _XF_BPC_HPP_
 
 #include "ap_int.h"
-#include "common/xf_video_mem.hpp"
 #include "common/xf_utility.hpp"
+#include "common/xf_video_mem.hpp"
 //#include "xf_extra_utility.h"
 
 // int glpbal=0;
@@ -54,15 +54,15 @@ namespace cv {
 #define COL_IDX_T uint16_t // Support upto 65,535
 #define ROW_IDX_T uint16_t // Support upto 65,535
 #define SIZE_IDX_T uint32_t
-#define _DST_T XF_8UC1
 
 // Some internal constants
-#define _NPPC (XF_NPIXPERCYCLE(NPPC))       // Number of pixel per clock to be processed
-#define _NPPC_SHIFT_VAL (XF_BITSHIFT(NPPC)) // Gives log base 2 on NPPC; Used for shifting purpose in case of division
+#define _NPPC (XF_NPIXPERCYCLE(NPPC))                   // Number of pixel per clock to be processed
+#define _NPPC_SHIFT_VAL (XF_BITSHIFT(NPPC))             // Gives log base 2 on NPPC; Used for shifting purpose in
+                                                        // case of division
 #define _ECPR ((((K_COLS >> 1) + (_NPPC - 1)) / _NPPC)) // Extra clocks required for processing a row
 #define _NP_IN_PREV \
     (_NPPC - ((K_COLS >> 1) - (((K_COLS >> 1) / _NPPC) * _NPPC))) // No.of valid destination pixels in previous clock
-#define _DST_PIX_WIDTH (XF_PIXELDEPTH(XF_DEPTH(_DST_T, NPPC)))    // destination pixel width
+#define _DST_PIX_WIDTH (XF_PIXELDEPTH(XF_DEPTH(SRC_T, NPPC)))     // destination pixel width
 
 _GENERIC_BPC_TPLT_DEC class GenericBPC {
    public:
@@ -81,7 +81,8 @@ _GENERIC_BPC_TPLT_DEC class GenericBPC {
     COL_IDX_T num_clks_per_row; // No.of clocks required for processing one row
     SIZE_IDX_T rd_ptr;          // Read pointer
     SIZE_IDX_T wr_ptr;          // Write pointer
-    // uint8_t          threshold;        // Threshold value used to classify as similar (0) / brighter(1) / darker(2)
+    // uint8_t          threshold;        // Threshold value used to classify as
+    // similar (0) / brighter(1) / darker(2)
 
     // Default Constructor
     GenericBPC() {
@@ -99,18 +100,18 @@ _GENERIC_BPC_TPLT_DEC class GenericBPC {
     void update_row_idx();
     void process_row(ROW_IDX_T r,
                      xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                     xf::cv::Mat<_DST_T, ROWS, COLS, NPPC>& _dst);
-    void process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src, xf::cv::Mat<_DST_T, ROWS, COLS, NPPC>& _dst);
+                     xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _dst);
+    void process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _dst);
 };
 
 // -----------------------------------------------------------------------------------
 // Function to initialize internal regsiters and buffers
 // -----------------------------------------------------------------------------------
 _GENERIC_BPC_TPLT void _GENERIC_BPC::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src) {
-// clang-format off
 #pragma HLS INLINE
-    // clang-format on
-    // Computing no.of clocks required for processing a row of given image dimensions
+
+    // Computing no.of clocks required for processing a row of given image
+    // dimensions
     num_clks_per_row = (_src.cols + _NPPC - 1) >> _NPPC_SHIFT_VAL;
 
     // Read/Write pointer set to start location of input image
@@ -119,9 +120,7 @@ _GENERIC_BPC_TPLT void _GENERIC_BPC::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, N
 
     // Initialize row-index values
     for (K_ROW_IDX_T kr = 0; kr < K_ROWS; kr++) {
-// clang-format off
 #pragma HLS UNROLL
-        // clang-format on
         row_idx.val[kr] = kr;
     }
 
@@ -133,10 +132,9 @@ _GENERIC_BPC_TPLT void _GENERIC_BPC::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, N
 // -----------------------------------------------------------------------------------
 _GENERIC_BPC_TPLT void _GENERIC_BPC::process_row(ROW_IDX_T r,
                                                  xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                                                 xf::cv::Mat<_DST_T, ROWS, COLS, NPPC>& _dst) {
-// clang-format off
+                                                 xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _dst) {
 #pragma HLS INLINE OFF
-    // clang-format on
+
     // --------------------------------------
     // Constants
     // --------------------------------------
@@ -158,13 +156,10 @@ _GENERIC_BPC_TPLT void _GENERIC_BPC::process_row(ROW_IDX_T r,
 // --------------------------------------
 SRC_INIT_LOOP:
     for (K_ROW_IDX_T kr = 0; kr < K_ROWS; kr++) {
-// clang-format off
 #pragma HLS UNROLL
-        // clang-format on
+
         for (K_COL_IDX_T kc = 0; kc < (_NPPC + K_COLS - 1); kc++) {
-// clang-format off
 #pragma HLS UNROLL
-            // clang-format on
             src_blk.val[kr][kc] = 0;
         }
     }
@@ -174,11 +169,9 @@ SRC_INIT_LOOP:
 // --------------------------------------
 COL_LOOP:
     for (COL_IDX_T c = 0; c < col_loop_cnt; c++) {
-// clang-format off
 #pragma HLS PIPELINE II = 1
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = _TC
-#pragma HLS dependence variable = src_blk inter false
-        // clang-format on
+        //#pragma HLS LOOP_FLATTEN OFF
 
         // Fetch next row of source image and store in internal RAMs
         // .........................................................
@@ -190,42 +183,41 @@ COL_LOOP:
     // .........................................................
     BUFF_RD_LOOP:
         for (K_ROW_IDX_T kr = 0; kr < K_ROWS; kr++) {
-// clang-format off
 #pragma HLS UNROLL
-            // clang-format on
             XF_TNAME(SRC_T, NPPC) tmp_rd_buff;
 
             // Read packed data
-            tmp_rd_buff = buff.val[row_idx.val[kr]][c];
+            tmp_rd_buff = buff.val[row_idx.val[kr]][c]; // tmp_rd_buff = (c < num_clks_per_row)
+                                                        // ? buff.val[row_idx.val[kr]][c] :
+                                                        // (XF_TNAME(SRC_T, NPPC))0;
 
             // Extract pixels from packed data and store in 'src_blk'
             xfExtractPixels<NPPC, XF_WORDWIDTH(SRC_T, NPPC), XF_DEPTH(SRC_T, NPPC)>(src_blk.val[kr], tmp_rd_buff,
                                                                                     (K_COLS - 1));
         }
+    // if (c >= _ECPR) {
+    //   xFSetBorder<K_ROWS, (_NPPC + K_COLS-1), XF_DTUNAME(SRC_T, NPPC),
+    //   BORDER_T>(src_blk, r, (c<<_NPPC_SHIFT_VAL),
+    //   _src.rows, _src.cols);
+    //}
 
     // Process the kernel block
     // ........................
     PROCESS_BLK_LOOP:
         for (int pix_idx = 0; pix_idx < _NPPC; pix_idx++) {
-// clang-format off
 #pragma HLS UNROLL
-            // clang-format on
             XF_DTUNAME(SRC_T, NPPC) NxM_src_blk[K_ROWS][K_COLS];
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable = NxM_src_blk complete
             // clang-format on
-            XF_DTUNAME(_DST_T, NPPC) out_pix;
+            XF_DTUNAME(SRC_T, NPPC) out_pix;
 
         // Extract _NPPC, NxM-blocks from 'src_blk'
         REARRANGE_LOOP:
             for (K_ROW_IDX_T kr = 0; kr < K_ROWS; kr++) {
-// clang-format off
 #pragma HLS UNROLL
-                // clang-format on
                 for (K_COL_IDX_T kc = 0; kc < K_COLS; kc++) {
-// clang-format off
 #pragma HLS UNROLL
-                    // clang-format on
                     NxM_src_blk[kr][kc] = src_blk.val[kr][pix_idx + kc];
                 }
             }
@@ -246,7 +238,8 @@ COL_LOOP:
             if (_NP_IN_PREV == _NPPC) { // Case of (K_COLS / 2) is divisible by NPPC
                 _dst.write(wr_ptr++, out_pixels);
             } else {
-                // Taking '_NP_IN_PREV' pixels from 'prev_out_pixels' (MSB side) and (_NPPC - _NP_IN_PREV) from
+                // Taking '_NP_IN_PREV' pixels from 'prev_out_pixels' (MSB side) and
+                // (_NPPC - _NP_IN_PREV) from
                 // 'out_pixels' (LSB)
                 prev_out_pixels.range((_NP_IN_PREV * _DST_PIX_WIDTH) - 1, 0) =
                     prev_out_pixels.range((_NPPC * _DST_PIX_WIDTH) - 1, ((_NPPC - _NP_IN_PREV) * _DST_PIX_WIDTH));
@@ -258,17 +251,14 @@ COL_LOOP:
         }
         prev_out_pixels = out_pixels;
 
-    // Now get ready for next cycle of coputation. So copy the last K_COLS-1 data to start location of 'src_blk'
+    // Now get ready for next cycle of coputation. So copy the last K_COLS-1 data
+    // to start location of 'src_blk'
     // ...........................................
     SHIFT_LOOP:
         for (K_ROW_IDX_T kr = 0; kr < K_ROWS; kr++) {
-// clang-format off
 #pragma HLS UNROLL
-            // clang-format on
             for (K_COL_IDX_T kc = 0; kc < K_COLS - 1; kc++) {
-// clang-format off
 #pragma HLS UNROLL
-                // clang-format on
                 src_blk.val[kr][kc] = src_blk.val[kr][_NPPC + kc];
             }
         }
@@ -281,15 +271,12 @@ COL_LOOP:
 // Function to update row index (Cyclic shift)
 // -----------------------------------------------------------------------------------
 _GENERIC_BPC_TPLT void _GENERIC_BPC::update_row_idx() {
-// clang-format off
 #pragma HLS INLINE OFF
-    // clang-format on
+
     K_ROW_IDX_T tmp_idx = row_idx.val[0];
 
     for (K_ROW_IDX_T kr = 0; kr < K_ROWS - 1; kr++) {
-// clang-format off
 #pragma HLS UNROLL
-        // clang-format on
         row_idx.val[kr] = row_idx.val[kr + 1];
     }
     row_idx.val[K_ROWS - 1] = tmp_idx;
@@ -301,10 +288,8 @@ _GENERIC_BPC_TPLT void _GENERIC_BPC::update_row_idx() {
 // Main function that runs the filter over the image
 // -----------------------------------------------------------------------------------
 _GENERIC_BPC_TPLT void _GENERIC_BPC::process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                                                   xf::cv::Mat<_DST_T, ROWS, COLS, NPPC>& _dst) {
-// clang-format off
+                                                   xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _dst) {
 #pragma HLS INLINE OFF
-    // clang-format on
     // Constant declaration
     const uint32_t _TC =
         ((COLS >> _NPPC_SHIFT_VAL) + (K_COLS >> 1)) / NPPC; // MAX Trip Count per row considering N-Pixel parallelsim
@@ -318,17 +303,14 @@ _GENERIC_BPC_TPLT void _GENERIC_BPC::process_image(xf::cv::Mat<SRC_T, ROWS, COLS
 // Initialize Line Buffer
 // ----------------------------------
 // Part1: Initialize the buffer with 1st (kernel height)/2 rows of image
-//        Start filling rows from (kernel height)/2 and rest depending on border type
+//        Start filling rows from (kernel height)/2 and rest depending on border
+//        type
 READ_LINES_INIT:
     for (K_ROW_IDX_T r = (K_ROWS >> 1); r < (K_ROWS - 1); r++) { // Note: Ignoring last row
-                                                                 // clang-format off
 #pragma HLS UNROLL
-                                                                 // clang-format on
         for (COL_IDX_T c = 0; c < num_clks_per_row; c++) {
-// clang-format off
 #pragma HLS PIPELINE
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = _TC
-            // clang-format on
             buff.val[r][c] = _src.read(rd_ptr++); // Reading the rows of image
         }
     }
@@ -336,14 +318,10 @@ READ_LINES_INIT:
 //        In border replicate mode, fill with 1st row of the image.
 BORDER_INIT:
     for (K_ROW_IDX_T r = 0; r < (K_ROWS >> 1); r++) {
-// clang-format off
 #pragma HLS UNROLL
-        // clang-format on
         for (COL_IDX_T c = 0; c < num_clks_per_row; c++) {
-// clang-format off
 #pragma HLS PIPELINE
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = _TC
-            // clang-format on
             buff.val[r][c] = (BORDER_T == XF_BORDER_REPLICATE) ? buff.val[K_ROWS >> 1][c] : (XF_TNAME(SRC_T, NPPC))0;
         }
     }
@@ -353,9 +331,8 @@ BORDER_INIT:
 // ----------------------------------
 ROW_LOOP:
     for (ROW_IDX_T r = (K_ROWS >> 1); r < _src.rows + (K_ROWS >> 1); r++) {
-// clang-format off
+//#pragma HLS PIPELINE
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = ROWS
-        // clang-format on
         process_row(r, _src, _dst);
         update_row_idx();
     }
@@ -378,51 +355,44 @@ class BPC {
     // Inputs: patch of NxN size
     // Ouputs: out_pix
     // -------------------------------------------------------------------------
-    void apply(XF_DTUNAME(SRC_T, NPPC) patch[_BPC_P_SIZE][_BPC_P_SIZE], XF_DTUNAME(_DST_T, NPPC) * out_pix) {
-// clang-format off
+    void apply(XF_DTUNAME(SRC_T, NPPC) patch[_BPC_P_SIZE][_BPC_P_SIZE], XF_DTUNAME(SRC_T, NPPC) * out_pix) {
 #pragma HLS INLINE
-        // clang-format on
-        XF_DTUNAME(_DST_T, NPPC) out_val;
+
+        XF_DTUNAME(SRC_T, NPPC) out_val;
         XF_DTUNAME(SRC_T, NPPC) array[9];
         XF_DTUNAME(SRC_T, NPPC) array_channel[8];
-// clang-format off
 #pragma HLS ARRAY_PARTITION variable = array complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = array_channel complete dim = 1
-        // clang-format on
+
         int array_ptr = 0;
     Compute_Grad_Loop:
         for (int copy_arr = 0; copy_arr < _BPC_P_SIZE; copy_arr = copy_arr + 2) {
-// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = 5
 #pragma HLS UNROLL
-            // clang-format on
             for (int copy_in = 0; copy_in < _BPC_P_SIZE; copy_in = copy_in + 2) {
-// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = 5
 #pragma HLS UNROLL
-                // clang-format on
                 array[array_ptr] = patch[copy_arr][copy_in];
                 array_ptr++;
             }
         }
+        // for(int channel=0,k=0;channel<PLANES;channel++,k+=8)
+        //	{
+        //#pragma HLS LOOP_TRIPCOUNT min=1 max=PLANES
+        //#pragma HLS UNROLL
 
         for (int p = 0; p < 4; p++) {
-// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = 9
 #pragma HLS UNROLL
-            // clang-format on
             array_channel[p] = array[p];
         }
         for (int l = 4; l < 8; l++) {
             array_channel[l] = array[l + 1];
         }
-        XF_DTUNAME(_DST_T, NPPC) min = array_channel[0];
-        XF_DTUNAME(_DST_T, NPPC) max = array_channel[0];
+        XF_DTUNAME(SRC_T, NPPC) min = array_channel[0];
+        XF_DTUNAME(SRC_T, NPPC) max = array_channel[0];
     xFApplyMaskLoop:
         for (int16_t j = 1; j < 8; j++) {
-// clang-format off
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = 9
-            // clang-format on
             //#pragma HLS LOOP_FLATTEN off
 
             if (array_channel[j] > max) {
@@ -432,7 +402,7 @@ class BPC {
                 min = array_channel[j];
             }
         }
-        XF_DTUNAME(_DST_T, NPPC) finalout = 0;
+        XF_DTUNAME(SRC_T, NPPC) finalout = 0;
 
         if (array[4] < min)
             finalout = min;
@@ -461,7 +431,8 @@ class BPC {
 //         COLS : Image width
 //         NPPC : No.of pixels per clock
 //     BORDER_T : Type of boder to be used for edge pixel(s) computation
-//                (XF_BORDER_REPLICATE, XF_BORDER_CONSTANT, XF_BORDER_REFLECT_101, XF_BORDER_REFLECT)
+//                (XF_BORDER_REPLICATE, XF_BORDER_CONSTANT,
+//                XF_BORDER_REFLECT_101, XF_BORDER_REFLECT)
 // ......................................................................................
 #define _BPC_ BPC<TYPE, NPPC>
 
@@ -470,6 +441,9 @@ class BPC {
 // --------------------------------------------------------------------------------------
 template <int TYPE, int ROWS, int COLS, int NPPC = 1, int BORDER_T = XF_BORDER_CONSTANT, int USE_URAM = 0>
 void badpixelcorrection(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
     GenericBPC<_BPC_, TYPE, ROWS, COLS, _BPC_P_SIZE, _BPC_P_SIZE, NPPC, BORDER_T, USE_URAM> bpc;
 
     bpc.process_image(_src, _dst);
@@ -487,8 +461,6 @@ void badpixelcorrection(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src, xf::cv::Mat<T
 #undef _GENERIC_BPC_TPLT_DEC
 #undef _GENERIC_BPC_TPLT
 #undef _GENERIC_BPC
-
-#undef _DST_T
 
 #undef CH_IDX_T
 #undef K_ROW_IDX_T

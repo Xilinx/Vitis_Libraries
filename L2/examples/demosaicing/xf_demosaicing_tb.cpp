@@ -15,9 +15,9 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_demosaicing_ref.hpp"
 #include "xcl2.hpp"
 #include "xf_demosaicing_config.h"
+#include "xf_demosaicing_ref.hpp"
 
 void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
     // FILE *fp = fopen("output.txt","w");
@@ -112,7 +112,7 @@ void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int c
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
     cv::Mat img = cv::imread(argv[1], 1);
 
     if (img.empty()) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -194,12 +194,13 @@ int main(int argc, char** argv) {
     // Initialize the buffers:
     cl::Event event;
 
-    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage,                  // buffer on the FPGA
-                                            CL_TRUE,                         // blocking call
-                                            0,                               // buffer offset in bytes
-                                            image_in_size_bytes,             // Size in bytes
-                                            cfa_bayer_output_converted.data, // Pointer to the data to copy
-                                            nullptr, &event));
+    OCL_CHECK(err,
+              queue.enqueueWriteBuffer(buffer_inImage,                  // buffer on the FPGA
+                                       CL_TRUE,                         // blocking call
+                                       0,                               // buffer offset in bytes
+                                       image_in_size_bytes,             // Size in bytes
+                                       cfa_bayer_output_converted.data, // Pointer to the data to copy
+                                       nullptr, &event));
 
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel));
@@ -234,11 +235,10 @@ int main(int argc, char** argv) {
             err_b = abs(err_b);
 
             if ((err_b > ERROR_THRESHOLD) || (err_g > ERROR_THRESHOLD) || (err_r > ERROR_THRESHOLD)) {
-                std::cout << "ERROR: Results verification failed:" << std::endl;
-                std::cout << "\tRef: " << (int)ref_out[0] << "\t" << (int)ref_out[1] << "\t" << (int)ref_out[2]
-                          << std::endl;
-                std::cout << "\tHLS: " << (int)out[0] << "\t" << (int)out[1] << "\t" << (int)out[2] << std::endl;
-                std::cout << "\tError location: row = " << i << "\tcol = " << j << std::endl;
+                fprintf(stderr, "ERROR: Results verification failed:\n ");
+                fprintf(stderr, "\tRef: %d\t %d\t %d\n ", (int)ref_out[0], (int)ref_out[1], (int)ref_out[2]);
+                fprintf(stderr, "\tHLS: %d\t %d\t %d\n ", (int)out[0], (int)out[1], (int)out[2]);
+                fprintf(stderr, "\tError location: row = %d \tcol = %d\n ", i, j);
                 return EXIT_FAILURE;
             }
         }

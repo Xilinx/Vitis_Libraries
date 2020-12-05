@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
     cv::Mat diff;
 
     if (argc != 2) {
-        printf("Usage : <executable> <input image> \n");
+        fprintf(stderr, "Usage: <executable> <input image>\n");
         return -1;
     }
 
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
 
     in_img = cv::imread(argv[1], 1); // reading in the color image
     if (!in_img.data) {
-        printf("Failed to load the image ... %s\n!", argv[1]);
+        fprintf(stderr, "Failed to load the image ... %s\n ", argv[1]);
         return -1;
     }
 
@@ -302,13 +302,12 @@ int main(int argc, char** argv) {
     }
 
     float err_per = 100.0 * (float)cnt / (diff.rows * diff.cols);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
+    std::cout << "\tNo of Pixels with Error = " << cnt << std::endl;
 
-    fprintf(stderr,
-            "Minimum error in intensity = %f\n Maximum error in intensity = %f\n Percentage of pixels above error "
-            "threshold = %f\nNo of Pixels with Error = %d\n",
-            minval, maxval, err_per, cnt);
-
-    fprintf(stderr, "kernel done");
+    std::cout << "\tkernel done" << std::endl;
     if (err_per > 2.5f) return 1;
     /*			Destructors			*/
     in_img.~Mat();

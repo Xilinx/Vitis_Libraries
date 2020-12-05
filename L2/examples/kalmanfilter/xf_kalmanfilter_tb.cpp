@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "common/xf_headers.hpp"
 #include "./xf_kalmanfilter_config.h"
+#include "common/xf_headers.hpp"
 #include "xcl2.hpp"
 
 void error_check(
@@ -47,7 +47,8 @@ void error_check(
 
             if (error > tu_max_error_P || error_int == nan_xf) {
                 tu_max_error_P = error;
-                // std::cout << "ERROR: Difference in results for Pout at (" << i << "," << j << "): " << error <<
+                // std::cout << "ERROR: Difference in results for Pout at (" << i << ","
+                // << j << "): " << error <<
                 // std::endl;
                 cnt++;
             }
@@ -71,12 +72,14 @@ void error_check(
 
         if (error > tu_max_error_X || error_int == nan_xf) {
             tu_max_error_X = error;
-            // std::cout << "ERROR: Difference in results for Xout at " << i << ": " << error << std::endl;
+            // std::cout << "ERROR: Difference in results for Xout at " << i << ": "
+            // << error << std::endl;
             cnt++;
         }
     }
 
-    //  std::cout << "INFO: Percentage of errors = " << (float)cnt * 100 / ((KF_N * KF_N) + KF_N) << "%" << std::endl;
+    //  std::cout << "INFO: Percentage of errors = " << (float)cnt * 100 / ((KF_N
+    //  * KF_N) + KF_N) << "%" << std::endl;
 
     if (tu_max_error_X > tu_max_error_P)
         *error_out = tu_max_error_X;
@@ -443,7 +446,7 @@ int main(int argc, char* argv[]) {
         std::cout << "INFO: Test Pass" << std::endl;
         return 0;
     } else {
-        std::cout << "ERROR: Test Fail" << std::endl;
+        fprintf(stderr, "ERROR: Test Fail.\n ");
         return -1;
     }
 }

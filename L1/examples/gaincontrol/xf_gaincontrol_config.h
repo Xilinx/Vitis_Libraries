@@ -17,12 +17,12 @@
 #ifndef _XF_GC_CONFIG_H_
 #define _XF_GC_CONFIG_H_
 
-#include "hls_stream.h"
-#include <ap_int.h>
-#include "xf_config_params.h"
 #include "common/xf_common.hpp"
-#include "imgproc/xf_gaincontrol.hpp"
+#include "hls_stream.h"
 #include "imgproc/xf_duplicateimage.hpp"
+#include "imgproc/xf_gaincontrol.hpp"
+#include "xf_config_params.h"
+#include <ap_int.h>
 
 // Set the image height and width
 #define HEIGHT 128 // 2160
@@ -30,17 +30,19 @@
 
 #define WB_TYPE 1
 
-#if NO
-#define NPC1 XF_NPPC1
-#endif
-#if RO
-#define NPC1 XF_NPPC2
-#endif
+#define NPC1 NPPC
 
 #define BFORMAT XF_BAYER_RG
 
+// Resolve input and output pixel type:
+#if T_8U
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
+#endif
+#if T_16U
+#define IN_TYPE XF_16UC1
+#define OUT_TYPE XF_16UC1
+#endif
 
 void gaincontrol_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols);
 #endif //_XF_GC_CONFIG_H_

@@ -21,9 +21,9 @@
 #error C++ is needed to include this header.
 #endif
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
 #include <algorithm>
 
 #define XF_RESIZE_INTER_TAB_SIZE 32
@@ -153,17 +153,20 @@ void xFRemapLI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& mapy,
                uint16_t rows,
                uint16_t cols) {
-    // Add one to always get zero for boundary interpolation. Maybe need initialization here?
+    // Add one to always get zero for boundary interpolation. Maybe need
+    // initialization here?
     XF_TNAME(DST_T, NPC)
-    buf[WIN_ROW / 2 + 1][2][COLS / 2 + 1]
-       [2]; // AK,ZoTech: static added for initialization, otherwise X are generated in co-sim.
-            // clang-format off
+    buf[WIN_ROW / 2 + 1][2][COLS / 2 + 1][2]; // AK,ZoTech: static added for
+                                              // initialization, otherwise X are
+                                              // generated in co-sim.
+                                              // clang-format off
     #pragma HLS array_partition complete variable=buf dim=2
     #pragma HLS array_partition complete variable=buf dim=4
-            // clang-format on
+                                              // clang-format on
     XF_TNAME(SRC_T, NPC) s;
 
-    // URAM storage garnularity is 3x3-pel block in 2x2-pixel picture grid, it fits to one URAM word
+    // URAM storage garnularity is 3x3-pel block in 2x2-pixel picture grid, it
+    // fits to one URAM word
     ap_uint<72> bufUram[PLANES][(WIN_ROW + 1) / 2][(COLS + 1) / 2];
 // clang-format off
     #pragma HLS resource variable=bufUram core=RAM_T2P_URAM latency=2
@@ -292,10 +295,12 @@ loop_height:
                 float x_fl = mapx.read_float(read_pointer_map);
                 float y_fl = mapy.read_float(read_pointer_map++);
 
-                int x_fix = (int)((float)x_fl *
-                                  (float)XF_RESIZE_INTER_TAB_SIZE); // mapx data in A16.XF_RESIZE_INTER_TAB_SIZE format
-                int y_fix = (int)((float)y_fl *
-                                  (float)XF_RESIZE_INTER_TAB_SIZE); // mapy data in A16.XF_RESIZE_INTER_TAB_SIZE format
+                int x_fix = (int)((float)x_fl * (float)XF_RESIZE_INTER_TAB_SIZE); // mapx data in
+                                                                                  // A16.XF_RESIZE_INTER_TAB_SIZE
+                                                                                  // format
+                int y_fix = (int)((float)y_fl * (float)XF_RESIZE_INTER_TAB_SIZE); // mapy data in
+                                                                                  // A16.XF_RESIZE_INTER_TAB_SIZE
+                                                                                  // format
 
                 int x = x_fix >> XF_RESIZE_INTER_BITS;
                 int y = y_fix >> XF_RESIZE_INTER_BITS;
@@ -307,7 +312,8 @@ loop_height:
                 iu(XF_RESIZE_INTER_BITS - 1, 0) = x_frac;
                 iv(XF_RESIZE_INTER_BITS - 1, 0) = y_frac;
 
-                // Note that the range here is larger than expected by 1 horizontal and 1 vertical pixel, to allow
+                // Note that the range here is larger than expected by 1 horizontal and
+                // 1 vertical pixel, to allow
                 // Interpolating at the edge of the image
                 bool in_range = (y >= 0 && y_fl <= (rows - 1) && r1[y % WIN_ROW] == y && r2[ynext % WIN_ROW] == ynext &&
                                  x >= 0 && x_fl <= (cols - 1));
@@ -321,7 +327,8 @@ loop_height:
 //                     ya0 = (ynext%WIN_ROW)/2;
 //                     ya1 = (y%WIN_ROW)/2;
 //                 } else {
-//                     // The simpler case, where y hits in bank 0 and ynext hits in bank 1
+//                     // The simpler case, where y hits in bank 0 and ynext
+//                     hits in bank 1
 //                     ya0 = (y%WIN_ROW)/2;
 //                     ya1 = (ynext%WIN_ROW)/2;
 //                 }
@@ -339,54 +346,56 @@ loop_height:
                 for (int ch = 0; ch < PLANES; ch++) {
                     XF_CTUNAME(DST_T, NPC) d00, d01, d10, d11;
 
-                    if (USE_URAM) {
-                        XF_TNAME(DST_T, NPC) d3x3[9];
+                    if (in_range) {
+                        if (USE_URAM) {
+                            XF_TNAME(DST_T, NPC) d3x3[9];
 // clang-format off
-                        #pragma HLS ARRAY_PARTITION variable=d3x3 complete
-                        // clang-format on
+                           #pragma HLS ARRAY_PARTITION variable=d3x3 complete
+                            // clang-format on
 
-                        tempbuf[ch] = bufUram[ch][ya1][xa1];
+                            tempbuf[ch] = bufUram[ch][ya1][xa1];
 
-                        for (int k = 0; k < 9; k++) {
-                            d3x3[k] = tempbuf[ch].range(k * 8 + 7, k * 8);
+                            for (int k = 0; k < 9; k++) {
+                                d3x3[k] = tempbuf[ch].range(k * 8 + 7, k * 8);
+                            }
+
+                            d00 = d3x3[(y % 2) * 3 + x % 2];
+                            d01 = d3x3[(y % 2) * 3 + x % 2 + 1];
+                            d10 = d3x3[(y % 2 + 1) * 3 + x % 2];
+                            d11 = d3x3[(y % 2 + 1) * 3 + x % 2 + 1];
+                        } else {
+                            d00 = buf[ya0][0][xa0][0].range((ch + 1) * 8 - 1, ch * 8);
+                            d01 = buf[ya0][0][xa1][1].range((ch + 1) * 8 - 1, ch * 8);
+                            d10 = buf[ya1][1][xa0][0].range((ch + 1) * 8 - 1, ch * 8);
+                            d11 = buf[ya1][1][xa1][1].range((ch + 1) * 8 - 1, ch * 8);
+
+                            if (x % 2) {
+                                // std::swap(d00,d01);
+                                int t = d00;
+                                d00 = d01;
+                                d01 = t;
+
+                                int t2 = d10;
+                                d10 = d11;
+                                d11 = d10;
+                                // std::swap(d10,d11);
+                            }
+                            if (y % 2) {
+                                int t = d00;
+                                d00 = d10;
+                                d10 = t;
+
+                                int t2 = d01;
+                                d01 = d11;
+                                d11 = d01;
+                                // std::swap(d00,d10);
+                                // std::swap(d01,d11);
+                            }
+                            // if(x == (cols-1))
+                            //{
+                            //	d01=0;d11=0;
+                            //}
                         }
-
-                        d00 = d3x3[(y % 2) * 3 + x % 2];
-                        d01 = d3x3[(y % 2) * 3 + x % 2 + 1];
-                        d10 = d3x3[(y % 2 + 1) * 3 + x % 2];
-                        d11 = d3x3[(y % 2 + 1) * 3 + x % 2 + 1];
-                    } else {
-                        d00 = buf[ya0][0][xa0][0].range((ch + 1) * 8 - 1, ch * 8);
-                        d01 = buf[ya0][0][xa1][1].range((ch + 1) * 8 - 1, ch * 8);
-                        d10 = buf[ya1][1][xa0][0].range((ch + 1) * 8 - 1, ch * 8);
-                        d11 = buf[ya1][1][xa1][1].range((ch + 1) * 8 - 1, ch * 8);
-
-                        if (x % 2) {
-                            // std::swap(d00,d01);
-                            int t = d00;
-                            d00 = d01;
-                            d01 = t;
-
-                            int t2 = d10;
-                            d10 = d11;
-                            d11 = d10;
-                            // std::swap(d10,d11);
-                        }
-                        if (y % 2) {
-                            int t = d00;
-                            d00 = d10;
-                            d10 = t;
-
-                            int t2 = d01;
-                            d01 = d11;
-                            d11 = d01;
-                            // std::swap(d00,d10);
-                            // std::swap(d01,d11);
-                        }
-                        // if(x == (cols-1))
-                        //{
-                        //	d01=0;d11=0;
-                        //}
                     }
                     ap_ufixed<2 * XF_RESIZE_INTER_BITS + 1, 1> k01 = (1 - iv) * (iu); // iu-iu*iv
                     ap_ufixed<2 * XF_RESIZE_INTER_BITS + 1, 1> k10 = (iv) * (1 - iu); // iv-iu*iv
@@ -450,7 +459,8 @@ void remap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     } else {
 #ifndef __SYNTHESIS__
         assert(((INTERPOLATION_TYPE == XF_INTERPOLATION_NN) || (INTERPOLATION_TYPE == XF_INTERPOLATION_BILINEAR)) &&
-               "The INTERPOLATION_TYPE must be either XF_INTERPOLATION_NN or XF_INTERPOLATION_BILINEAR");
+               "The INTERPOLATION_TYPE must be either XF_INTERPOLATION_NN or "
+               "XF_INTERPOLATION_BILINEAR");
 #endif
     }
 }

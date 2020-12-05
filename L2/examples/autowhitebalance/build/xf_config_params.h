@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-#define NO 1 // Normal Operation
-#define RO 0 // Resource Optimized
+#define NPPC XF_NPPC1
 
-#define INPUT_PTR_WIDTH 256
-#define OUTPUT_PTR_WIDTH 256
 #define WB_TYPE XF_WB_GRAY
+
+#define T_8U 1
+#define T_16U 0
+#define T_12U 0
+#define T_10U 0

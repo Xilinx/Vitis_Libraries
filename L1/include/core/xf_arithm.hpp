@@ -860,7 +860,7 @@ void add(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3)) &&
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3) || (SRC_T == XF_16SC3)) &&
            "TYPE must be XF_8UC1,XF_8UC3,XF_16SC1 or XF_16SC3");
     assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");

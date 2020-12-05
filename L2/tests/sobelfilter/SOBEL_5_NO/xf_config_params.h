@@ -25,6 +25,7 @@
 
 #define GRAY 1
 #define RGBA 0
+
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
 

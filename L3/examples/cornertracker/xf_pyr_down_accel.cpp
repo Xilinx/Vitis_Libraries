@@ -53,28 +53,21 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* inImgPyr1,
     const int pCOLS = WIDTH;
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr1_in_mat;
-// clang-format off
-    #pragma HLS stream variable=pyr1_in_mat.data depth=pCOLS/XF_NPPC1
-    // clang-format on
+
     pyr1_in_mat.rows = pyr_h;
     pyr1_in_mat.cols = pyr_w;
+
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr1_out_mat;
-// clang-format off
-    #pragma HLS stream variable=pyr1_out_mat.data depth=pCOLS/XF_NPPC1
-    // clang-format on
+
     pyr1_out_mat.rows = pyr_out_h;
     pyr1_out_mat.cols = pyr_out_w;
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr2_in_mat;
-// clang-format off
-    #pragma HLS stream variable=pyr2_in_mat.data depth=pCOLS/XF_NPPC1
-    // clang-format on
+
     pyr2_in_mat.rows = pyr_h;
     pyr2_in_mat.cols = pyr_w;
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr2_out_mat;
-// clang-format off
-    #pragma HLS stream variable=pyr2_out_mat.data depth=pCOLS/XF_NPPC1
-    // clang-format on
+
     pyr2_out_mat.rows = pyr_out_h;
     pyr2_out_mat.cols = pyr_out_w;
 

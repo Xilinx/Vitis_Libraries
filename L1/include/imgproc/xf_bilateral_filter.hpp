@@ -476,9 +476,9 @@ static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat
                                     float sigma_space) {
 // clang-format off
     #pragma HLS INLINE OFF
-    #pragma HLS ALLOCATION instances=xf::cv::xFBilateralFloatMul limit=1 function
-    #pragma HLS ALLOCATION instances=xf::cv::xFBilateralFloatInv limit=1 function
-    #pragma HLS ALLOCATION instances=xf::cv::xFBilateralExpf limit=1 function
+    #pragma HLS ALLOCATION function instances=xf::cv::xFBilateralFloatMul limit=1 
+    #pragma HLS ALLOCATION function instances=xf::cv::xFBilateralFloatInv limit=1 
+    #pragma HLS ALLOCATION function instances=xf::cv::xFBilateralExpf limit=1
     // clang-format on
     // assert(_border_type == XF_BORDER_REPLICATE && "Only XF_BORDER_REPLICATE is supported");
 

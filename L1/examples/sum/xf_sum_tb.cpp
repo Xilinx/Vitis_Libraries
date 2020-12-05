@@ -15,13 +15,13 @@
  */
 
 #include "common/xf_headers.hpp"
-#include <stdlib.h>
-#include <ap_int.h>
 #include "xf_sum_config.h"
+#include <ap_int.h>
+#include <stdlib.h>
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage:  <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: <INPUT IMAGE PATH 1>\n");
         return EXIT_FAILURE;
     }
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     in_gray = cv::imread(argv[1], 0);
 
     if (in_gray.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -61,8 +61,7 @@ int main(int argc, char** argv) {
     }
 
     if (cnt > 0) {
-        std::cout << "INFO: Error percentage = " << 100.0 * float(cnt) / float(channels) << "%. Test Failed."
-                  << std::endl;
+        fprintf(stderr, "INFO: Error percentage = %d%. Test Failed.\n ", 100.0 * float(cnt) / float(channels));
         return EXIT_FAILURE;
     } else
         std::cout << "Test Passed." << std::endl;

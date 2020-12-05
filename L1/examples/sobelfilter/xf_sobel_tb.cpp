@@ -152,10 +152,10 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(diff_grad_y, 0, err_per1);
 
     if (err_per > 0.0f) {
-        printf("Test failed .... !!!\n");
+        fprintf(stderr, "Test failed .... !!!\n ");
         ret = 1;
     } else {
-        printf("Test Passed .... !!!\n");
+        std::cout << "Test Passed .... !!!" << std::endl;
         ret = 0;
     }
 

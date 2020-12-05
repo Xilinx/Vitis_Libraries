@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     // Read input image
     in_img = cv::imread(argv[1], 0);
     if (in_img.data == NULL) {
-        // cout << "Can't open image !!" << endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return -1;
     }
 
@@ -81,10 +81,9 @@ int main(int argc, char** argv) {
     }
 
     err_per = 100.0 * (float)cnt / (in_img.rows * in_img.cols);
-    fprintf(stderr,
-            "Minimum error in intensity = %f\nMaximum error in intensity = %f\nPercentage of pixels above error "
-            "threshold = %f\n",
-            minval, maxval, err_per);
+    std::cout << "Minimum error in intensity =" << minval << "\t"
+              << "Maximum error in intensity = " << maxval << "\t"
+              << "Percentage of pixels above error" << err_per << std::endl;
 
     if (err_per > 0.0f) {
         return 1;

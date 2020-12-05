@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     // Read input image
     in_img = cv::imread(argv[1], 0);
     if (in_img.data == NULL) {
-        // cout << "Can't open image !!" << endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return -1;
     }
 
@@ -89,12 +89,13 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = krnl.setArg(2, height));
     OCL_CHECK(err, err = krnl.setArg(3, width));
 
-    OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage,   // buffer on the FPGA
-                                        CL_TRUE,          // blocking call
-                                        0,                // buffer offset in bytes
-                                        (height * width), // Size in bytes
-                                        in_img.data,      // Pointer to the data to copy
-                                        nullptr, &event));
+    OCL_CHECK(err,
+              q.enqueueWriteBuffer(buffer_inImage,   // buffer on the FPGA
+                                   CL_TRUE,          // blocking call
+                                   0,                // buffer offset in bytes
+                                   (height * width), // Size in bytes
+                                   in_img.data,      // Pointer to the data to copy
+                                   nullptr, &event));
 
     // Profiling Objects
     cl_ulong start = 0;
@@ -143,10 +144,9 @@ int main(int argc, char** argv) {
     }
 
     err_per = 100.0 * (float)cnt / (in_img.rows * in_img.cols);
-    fprintf(stderr,
-            "Minimum error in intensity = %f\nMaximum error in intensity = %f\nPercentage of pixels above error "
-            "threshold = %f\n",
-            minval, maxval, err_per);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
         return 1;

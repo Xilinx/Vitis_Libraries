@@ -41,18 +41,23 @@ void resize(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC>& _src, xf::cv::Mat<TYPE, 
     assert(((INTERPOLATION_TYPE == XF_INTERPOLATION_NN) || (INTERPOLATION_TYPE == XF_INTERPOLATION_BILINEAR) ||
             (INTERPOLATION_TYPE == XF_INTERPOLATION_AREA)) &&
            "Incorrect parameters interpolation type");
+    assert(((_src.rows <= SRC_ROWS) && (_src.cols <= SRC_COLS)) &&
+           "SRC_ROWS and SRC_COLS should be greater than input image");
+    assert(((_dst.rows <= DST_ROWS) && (_dst.cols <= DST_COLS)) &&
+           "DST_ROWS and DST_COLS should be greater than output image");
 
     if (INTERPOLATION_TYPE == XF_INTERPOLATION_AREA) {
-        assert(((_src.rows <= SRC_ROWS) && (_src.cols <= SRC_COLS)) &&
-               "SRC_ROWS and SRC_COLS should be greater than input image");
-        assert(((_dst.rows <= DST_ROWS) && (_dst.cols <= DST_COLS)) &&
-               "DST_ROWS and DST_COLS should be greater than output image");
+        assert((((_src.rows < _dst.rows) && (_src.cols < _dst.cols)) ||
+                ((_src.rows >= _dst.rows) && (_src.cols >= _dst.cols))) &&
+               " For Area mode, Image can be upscaled or downscaled simultaneously across height & width. But it can't "
+               "be upscaled across height & downscaled across width and vice versa.  For example: input image-128x128 "
+               "& output image-150x80 is not supported");
 
-        if ((SRC_ROWS < DST_ROWS) || (SRC_COLS < DST_COLS)) {
+        if ((_src.rows < _dst.rows) && (_src.cols < _dst.cols)) {
             xFResizeAreaUpScale<SRC_ROWS, SRC_COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XF_WORDWIDTH(TYPE, NPC),
                                 DST_ROWS, DST_COLS, (SRC_COLS >> XF_BITSHIFT(NPC)), (DST_COLS >> XF_BITSHIFT(NPC))>(
                 _src, _dst);
-        } else if ((SRC_ROWS >= DST_ROWS) || (SRC_COLS >= DST_COLS)) {
+        } else if ((_src.rows >= _dst.rows) && (_src.cols >= _dst.cols)) {
             xFResizeAreaDownScale<SRC_ROWS, SRC_COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XF_WORDWIDTH(TYPE, NPC),
                                   DST_ROWS, DST_COLS, (SRC_COLS >> XF_BITSHIFT(NPC)), (DST_COLS >> XF_BITSHIFT(NPC))>(
                 _src, _dst);

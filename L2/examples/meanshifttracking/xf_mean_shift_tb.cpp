@@ -23,9 +23,9 @@
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        printf(
-            "Missed input arguments. Usage: <executable> <path to input video file or image path> <Number of objects "
-            "to be tracked> \n");
+        fprintf(stderr,
+                "Missed input arguments. Usage: <executable> <path to input video file or image path> <Number of "
+                "objects to be tracked> \n");
         return -1;
     }
 
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     cv::VideoCapture cap(path);
     if (!cap.isOpened()) // check if we succeeded
     {
-        std::cout << "ERROR: Cannot open the video file" << std::endl;
+        fprintf(stderr, "ERROR: Cannot open the video file\n ");
         return -1;
     }
 #endif
@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (frame.empty()) {
-            printf("no image!\n");
+            fprintf(stderr, "no image!\n");
             break;
         }
         frame.copyTo(image);

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#define RO 0
 #define NO 1
 
 #define TWO_INPUT 0

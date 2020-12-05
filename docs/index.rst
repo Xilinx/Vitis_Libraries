@@ -12,7 +12,7 @@ Vitis Vision Library
 ##############################
 
 The Vitis Vision library is a FPGA device optimized Vitis vision library intended for application
-developers using Zynq®-7000 SoC and Zynq® UltraScale+™ MPSoC and PCIE based Alveo® U200 devices. 
+developers using Zynq®-7000 SoC and Zynq® UltraScale+™ MPSoC and PCIE based Alveo® U200, U50 devices. 
 Vitis vision library provides a software interface for computer vision functions accelerated on an FPGA device. 
 
 .. note:: 

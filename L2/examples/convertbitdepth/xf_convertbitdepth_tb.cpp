@@ -20,7 +20,7 @@
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << "<INPUT IMAGE PATH >" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH >\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     in_img = cv::imread(argv[1], 0);
 
     if (in_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

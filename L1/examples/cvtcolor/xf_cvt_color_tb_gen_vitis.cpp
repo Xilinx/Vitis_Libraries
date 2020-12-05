@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 #if RGBA2IYUV
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGBA);
@@ -35,21 +35,21 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[4], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 #if RGBA2NV12
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGBA);
@@ -93,14 +93,14 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
 #if RGBA2NV21
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGBA);
@@ -137,14 +137,14 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
 #if RGBA2YUV4
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGBA);
@@ -181,21 +181,21 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[4], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
 #if RGB2IYUV
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
@@ -239,21 +239,21 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[4], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
@@ -289,7 +289,7 @@ int main(int argc, char** argv) {
 #if RGB2NV12
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
@@ -297,14 +297,14 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -333,7 +333,7 @@ int main(int argc, char** argv) {
 #if RGB2NV21
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
@@ -341,14 +341,14 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -377,7 +377,7 @@ int main(int argc, char** argv) {
 #if RGB2YUV4
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
@@ -385,21 +385,21 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[4], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
@@ -435,7 +435,7 @@ int main(int argc, char** argv) {
 #if RGB2UYVY
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
@@ -443,7 +443,7 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -465,7 +465,7 @@ int main(int argc, char** argv) {
 #if RGB2YUYV
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
@@ -473,7 +473,7 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -495,7 +495,7 @@ int main(int argc, char** argv) {
 #if RGB2BGR
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
@@ -503,7 +503,7 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -525,14 +525,14 @@ int main(int argc, char** argv) {
 #if BGR2UYVY
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -554,14 +554,14 @@ int main(int argc, char** argv) {
 #if BGR2YUYV
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -583,14 +583,14 @@ int main(int argc, char** argv) {
 #if BGR2RGB
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -613,21 +613,21 @@ int main(int argc, char** argv) {
 #if BGR2NV12
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -656,21 +656,21 @@ int main(int argc, char** argv) {
 #if BGR2NV21
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -699,35 +699,35 @@ int main(int argc, char** argv) {
 #if IYUV2NV12
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], 0);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput1 = (ap_uint<8 * NPC1>*)imgInput1.data;
 
     imgInput2 = cv::imread(argv[3], 0);
     if (!imgInput2.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput2 = (ap_uint<8 * NPC1>*)imgInput2.data;
 
     refOutput0 = cv::imread(argv[4], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[5], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[5] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[5]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -756,28 +756,28 @@ int main(int argc, char** argv) {
 #if IYUV2RGBA
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], 0);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput1 = (ap_uint<8 * NPC1>*)imgInput1.data;
 
     imgInput2 = cv::imread(argv[3], 0);
     if (!imgInput2.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput2 = (ap_uint<8 * NPC1>*)imgInput2.data;
 
     refOutput0 = cv::imread(argv[4], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -800,28 +800,28 @@ int main(int argc, char** argv) {
 #if IYUV2RGB
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], 0);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput1 = (ap_uint<8 * NPC1>*)imgInput1.data;
 
     imgInput2 = cv::imread(argv[3], 0);
     if (!imgInput2.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput2 = (ap_uint<8 * NPC1>*)imgInput2.data;
 
     refOutput0 = cv::imread(argv[4], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -844,42 +844,42 @@ int main(int argc, char** argv) {
 #if IYUV2YUV4
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], 0);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput1 = (ap_uint<8 * NPC1>*)imgInput1.data;
 
     imgInput2 = cv::imread(argv[3], 0);
     if (!imgInput2.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput2 = (ap_uint<8 * NPC1>*)imgInput2.data;
 
     refOutput0 = cv::imread(argv[4], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[5], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[5] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[5]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[6], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[6] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[6]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
@@ -915,35 +915,35 @@ int main(int argc, char** argv) {
 #if NV122IYUV
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[4], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[5], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[5] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[5]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
@@ -979,21 +979,21 @@ int main(int argc, char** argv) {
 #if NV122RGBA
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1016,35 +1016,35 @@ int main(int argc, char** argv) {
 #if NV122YUV4
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[4], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[5], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[5] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[5]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
@@ -1080,21 +1080,21 @@ int main(int argc, char** argv) {
 #if NV122RGB
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1117,21 +1117,21 @@ int main(int argc, char** argv) {
 #if NV122BGR
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1153,21 +1153,21 @@ int main(int argc, char** argv) {
 #if NV122UYVY
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -1189,21 +1189,21 @@ int main(int argc, char** argv) {
 #if NV122YUYV
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -1225,28 +1225,28 @@ int main(int argc, char** argv) {
 #if NV122NV21
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[4], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -1275,35 +1275,35 @@ int main(int argc, char** argv) {
 #if NV212IYUV
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[4], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[5], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[5] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[5]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
@@ -1339,21 +1339,21 @@ int main(int argc, char** argv) {
 #if NV212RGBA
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1376,21 +1376,21 @@ int main(int argc, char** argv) {
 #if NV212RGB
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1413,21 +1413,21 @@ int main(int argc, char** argv) {
 #if NV212BGR
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1449,35 +1449,35 @@ int main(int argc, char** argv) {
 #if NV212YUV4
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[4], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[5], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[5] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[5]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
@@ -1513,21 +1513,21 @@ int main(int argc, char** argv) {
 #if NV212UYVY
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -1549,21 +1549,21 @@ int main(int argc, char** argv) {
 #if NV212YUYV
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -1585,28 +1585,28 @@ int main(int argc, char** argv) {
 #if NV212NV12
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     imgInput1 = cv::imread(argv[2], -1);
     if (!imgInput1.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgInput1 = (ap_uint<16 * NPC2>*)imgInput1.data;
 
     refOutput0 = cv::imread(argv[3], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[4], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -1635,28 +1635,28 @@ int main(int argc, char** argv) {
 #if UYVY2IYUV
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[4], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
@@ -1692,21 +1692,21 @@ int main(int argc, char** argv) {
 #if UYVY2NV12
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -1735,21 +1735,21 @@ int main(int argc, char** argv) {
 #if UYVY2NV21
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -1778,14 +1778,14 @@ int main(int argc, char** argv) {
 #if UYVY2RGBA
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1808,14 +1808,14 @@ int main(int argc, char** argv) {
 #if UYVY2RGB
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1838,14 +1838,14 @@ int main(int argc, char** argv) {
 #if UYVY2BGR
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -1867,14 +1867,14 @@ int main(int argc, char** argv) {
 #if UYVY2YUYV
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -1896,28 +1896,28 @@ int main(int argc, char** argv) {
 #if YUYV2IYUV
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], 0);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput1 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
 
     refOutput2 = cv::imread(argv[4], 0);
     if (!refOutput2.data) {
-        std::cout << "Can't open image " << argv[4] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[4]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput2 = (ap_uint<8 * NPC1>*)malloc((HEIGHT / 4) * WIDTH * 8);
@@ -1953,21 +1953,21 @@ int main(int argc, char** argv) {
 #if YUYV2NV12
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -1996,21 +1996,21 @@ int main(int argc, char** argv) {
 #if YUYV2NV21
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
 
     refOutput1 = cv::imread(argv[3], -1);
     if (!refOutput1.data) {
-        std::cout << "Can't open image " << argv[3] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[3]);
         return -1;
     }
     ap_uint<16 * NPC2>* _imgOutput1 = (ap_uint<16 * NPC2>*)malloc((HEIGHT / 2) * (WIDTH / 2) * 16);
@@ -2039,14 +2039,14 @@ int main(int argc, char** argv) {
 #if YUYV2RGBA
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2069,14 +2069,14 @@ int main(int argc, char** argv) {
 #if YUYV2RGB
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2099,14 +2099,14 @@ int main(int argc, char** argv) {
 #if YUYV2BGR
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2128,14 +2128,14 @@ int main(int argc, char** argv) {
 #if YUYV2UYVY
     imgInput0 = cv::imread(argv[1], -1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgInput0 = (ap_uint<16 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], -1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
@@ -2157,7 +2157,7 @@ int main(int argc, char** argv) {
 #if RGB2GRAY
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     cvtColor(imgInput0, imgInput0, CV_BGR2RGB);
@@ -2165,7 +2165,7 @@ int main(int argc, char** argv) {
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
@@ -2187,14 +2187,14 @@ int main(int argc, char** argv) {
 #if BGR2GRAY
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 0);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgOutput0 = (ap_uint<8 * NPC1>*)malloc(HEIGHT * WIDTH * 8);
@@ -2216,14 +2216,14 @@ int main(int argc, char** argv) {
 #if GRAY2RGB
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2246,14 +2246,14 @@ int main(int argc, char** argv) {
 #if GRAY2BGR
     imgInput0 = cv::imread(argv[1], 0);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<8 * NPC1>* _imgInput0 = (ap_uint<8 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2275,14 +2275,14 @@ int main(int argc, char** argv) {
 #if RGB2XYZ
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2304,14 +2304,14 @@ int main(int argc, char** argv) {
 #if BGR2XYZ
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2333,14 +2333,14 @@ int main(int argc, char** argv) {
 #if XYZ2RGB
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2363,14 +2363,14 @@ int main(int argc, char** argv) {
 #if XYZ2BGR
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2392,14 +2392,14 @@ int main(int argc, char** argv) {
 #if RGB2YCrCb
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2421,14 +2421,14 @@ int main(int argc, char** argv) {
 #if BGR2YCrCb
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2450,14 +2450,14 @@ int main(int argc, char** argv) {
 #if YCrCb2RGB
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2480,14 +2480,14 @@ int main(int argc, char** argv) {
 #if YCrCb2BGR
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2509,14 +2509,14 @@ int main(int argc, char** argv) {
 #if RGB2HLS
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2538,14 +2538,14 @@ int main(int argc, char** argv) {
 #if BGR2HLS
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2567,14 +2567,14 @@ int main(int argc, char** argv) {
 #if HLS2RGB
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2597,14 +2597,14 @@ int main(int argc, char** argv) {
 #if HLS2BGR
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2626,14 +2626,14 @@ int main(int argc, char** argv) {
 #if RGB2HSV
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2655,14 +2655,14 @@ int main(int argc, char** argv) {
 #if BGR2HSV
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2684,14 +2684,14 @@ int main(int argc, char** argv) {
 #if HSV2RGB
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2714,14 +2714,14 @@ int main(int argc, char** argv) {
 #if HSV2BGR
     imgInput0 = cv::imread(argv[1], 1);
     if (!imgInput0.data) {
-        std::cout << "Can't open image " << argv[1] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
     refOutput0 = cv::imread(argv[2], 1);
     if (!refOutput0.data) {
-        std::cout << "Can't open image " << argv[2] << " !!." << std::endl;
+        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
         return -1;
     }
     ap_uint<32 * NPC1>* _imgOutput0 = (ap_uint<32 * NPC1>*)malloc(HEIGHT * WIDTH * 32);
@@ -2745,13 +2745,13 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(errImg0, ERROR_THRESHOLD, err_per);
 
     if (err_per > 3.0f) {
-        printf("\n1st Image Test Failed\n");
+        fprintf(stderr, "\n1st Image Test Failed\n");
     }
 #if (IYUV2NV12 || RGBA2NV12 || RGBA2NV21 || UYVY2NV12 || YUYV2NV12 || NV122IYUV || NV212IYUV || IYUV2YUV4 || \
      NV122YUV4 || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV || YUYV2IYUV || NV122NV21 || NV212NV12)
     xf::cv::analyzeDiff(errImg1, ERROR_THRESHOLD, err_per);
     if (err_per > 3.0f) {
-        printf("\n2nd Image Test Failed\n");
+        fprintf(stderr, "\n2nd Image Test Failed\n");
         return 1;
     }
 
@@ -2759,7 +2759,7 @@ int main(int argc, char** argv) {
 #if (IYUV2YUV4 || NV122IYUV || NV122YUV4 || NV212IYUV || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV || YUYV2IYUV)
     xf::cv::analyzeDiff(errImg2, ERROR_THRESHOLD, err_per);
     if (err_per > 3.0f) {
-        printf("\n3rd Image Test Failed\n");
+        fprintf(stderr, "\n3rd Image Test Failed\n");
         return 1;
     }
 #endif

@@ -15,12 +15,12 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_fast_config.h"
 #include "xcl2.hpp"
+#include "xf_fast_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     in_gray = cv::imread(argv[1], 0);
 
     if (!in_gray.data) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -215,9 +215,10 @@ int main(int argc, char** argv) {
     std::cout << "\tGain = " << pergain << std::endl;
 
     if (persuccess < 80) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
+    std::cout << "Test Passed" << std::endl;
 
     return 0;
 }

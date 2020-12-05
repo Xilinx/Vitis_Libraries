@@ -23,9 +23,9 @@
 
 typedef unsigned short uint16_t;
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
 
 namespace xf {
 namespace cv {
@@ -187,35 +187,36 @@ void xFScharr3x3(XF_PTNAME(DEPTH_DST) GradientvaluesX[XF_NPIXPERCYCLE(NPC)],
 // clang-format off
     #pragma HLS INLINE off
     // clang-format on
-    int STEP;
+    int STEP, STEP_OUT;
     if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
-        STEP = 16;
+        STEP_OUT = 16;
+        STEP = 8;
     } else {
+        STEP_OUT = 8;
         STEP = 8;
     }
 
 Compute_Grad_Loop:
     for (ap_uint<5> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
-// clang-format off
-        #pragma HLS PIPELINE
-        // clang-format on
         int p = 0;
-        for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += 8) {
 // clang-format off
-            #pragma HLS UNROLL
-            // clang-format on
+#pragma HLS UNROLL
+        // clang-format on
+        for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += STEP) {
+            GradientvaluesX[j].range(p + (STEP_OUT - 1), p) = xFGradientX<DEPTH_SRC, DEPTH_DST>(
+                src_buf1[j].range(k + STEP - 1, k), src_buf1[j + 1].range(k + STEP - 1, k),
+                src_buf1[j + 2].range(k + STEP - 1, k), src_buf2[j].range(k + STEP - 1, k),
+                src_buf2[j + 1].range(k + STEP - 1, k), src_buf2[j + 2].range(k + STEP - 1, k),
+                src_buf3[j].range(k + STEP - 1, k), src_buf3[j + 1].range(k + STEP - 1, k),
+                src_buf3[j + 2].range(k + STEP - 1, k));
 
-            GradientvaluesX[j].range(p + (STEP - 1), p) = xFGradientX<DEPTH_SRC, DEPTH_DST>(
-                src_buf1[j].range(k + 7, k), src_buf1[j + 1].range(k + 7, k), src_buf1[j + 2].range(k + 7, k),
-                src_buf2[j].range(k + 7, k), src_buf2[j + 1].range(k + 7, k), src_buf2[j + 2].range(k + 7, k),
-                src_buf3[j].range(k + 7, k), src_buf3[j + 1].range(k + 7, k), src_buf3[j + 2].range(k + 7, k));
-
-            GradientvaluesY[j].range(p + (STEP - 1), p) = xFGradientY<DEPTH_SRC, DEPTH_DST>(
-                src_buf1[j].range(k + 7, k), src_buf1[j + 1].range(k + 7, k), src_buf1[j + 2].range(k + 7, k),
-                src_buf2[j].range(k + 7, k), src_buf2[j + 1].range(k + 7, k), src_buf2[j + 2].range(k + 7, k),
-                src_buf3[j].range(k + 7, k), src_buf3[j + 1].range(k + 7, k), src_buf3[j + 2].range(k + 7, k));
-
-            p += STEP;
+            GradientvaluesY[j].range(p + (STEP_OUT - 1), p) = xFGradientY<DEPTH_SRC, DEPTH_DST>(
+                src_buf1[j].range(k + STEP - 1, k), src_buf1[j + 1].range(k + STEP - 1, k),
+                src_buf1[j + 2].range(k + STEP - 1, k), src_buf2[j].range(k + STEP - 1, k),
+                src_buf2[j + 1].range(k + STEP - 1, k), src_buf2[j + 2].range(k + STEP - 1, k),
+                src_buf3[j].range(k + STEP - 1, k), src_buf3[j + 1].range(k + STEP - 1, k),
+                src_buf3[j + 2].range(k + STEP - 1, k));
+            p += STEP_OUT;
         }
     }
 }
@@ -347,12 +348,14 @@ void xFScharrFilterKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     ap_uint<13> row, col;
     int read_index = 0, write_index = 0;
 
-    XF_PTNAME(DEPTH_DST) GradientValuesX[XF_NPIXPERCYCLE(NPC) * PLANES]; // X-Gradient result buffer
-    XF_PTNAME(DEPTH_DST) GradientValuesY[XF_NPIXPERCYCLE(NPC) * PLANES]; // Y-Gradient result buffer
-                                                                         // clang-format off
+    XF_PTNAME(DEPTH_DST)
+    GradientValuesX[XF_NPIXPERCYCLE(NPC) * PLANES]; // X-Gradient result buffer
+    XF_PTNAME(DEPTH_DST)
+    GradientValuesY[XF_NPIXPERCYCLE(NPC) * PLANES]; // Y-Gradient result buffer
+                                                    // clang-format off
     #pragma HLS ARRAY_PARTITION variable=GradientValuesX complete dim=1
     #pragma HLS ARRAY_PARTITION variable=GradientValuesY complete dim=1
-                                                                         // clang-format on
+                                                    // clang-format on
 
     XF_PTNAME(DEPTH_SRC)
     src_buf1[XF_NPIXPERCYCLE(NPC) + 2],
@@ -411,45 +414,59 @@ Row_Loop: // Process complete image
         src_buf2[0] = src_buf2[1] = 0;
         src_buf3[0] = src_buf3[1] = 0;
 
-        /***********		Process complete row			**********/
+        /***********		Process complete row
+         * **********/
         P0 = P1 = 0;
         ProcessScharr3x3<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
             _src_mat, _gradx_mat, _grady_mat, buf, src_buf1, src_buf2, src_buf3, GradientValuesX, GradientValuesY, P0,
             P1, img_width, img_height, row_ind, shift_x, shift_y, tp, mid, bottom, row, read_index, write_index);
 
-        /*			Last column border care	for 8-pixel Case			*/
+        /*			Last column border care	for 8-pixel Case
+         */
         if ((NPC == XF_NPPC8)) {
             //	Compute gradient at last column
-            GradientValuesX[0] = xFGradientX<DEPTH_SRC, DEPTH_DST>(src_buf1[buf_size - 2], src_buf1[buf_size - 1], 0,
-                                                                   src_buf2[buf_size - 2], src_buf2[buf_size - 1], 0,
-                                                                   src_buf3[buf_size - 2], src_buf3[buf_size - 1], 0);
-
-            GradientValuesY[0] = xFGradientY<DEPTH_SRC, DEPTH_DST>(src_buf1[buf_size - 2], src_buf1[buf_size - 1], 0,
-                                                                   src_buf2[buf_size - 2], src_buf2[buf_size - 1], 0,
-                                                                   src_buf3[buf_size - 2], src_buf3[buf_size - 1], 0);
-        } else /*			Last column border care	for NO Case			*/
-        {
-            int STEP, q = 0;
+            int STEP, STEP_OUT, p = 0;
             if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
-                STEP = 16;
+                STEP_OUT = 16;
+                STEP = 8;
             } else {
+                STEP_OUT = 8;
                 STEP = 8;
             }
+            for (ap_uint<5> c = 0, k = 0; c < PLANES; c++, k += STEP) {
+                GradientValuesX[0].range(p + (STEP_OUT - 1), p) = xFGradientX<DEPTH_SRC, DEPTH_DST>(
+                    src_buf1[buf_size - 2].range(k + STEP - 1, k), src_buf1[buf_size - 1].range(k + STEP - 1, k), 0,
+                    src_buf2[buf_size - 2].range(k + STEP - 1, k), src_buf2[buf_size - 1].range(k + STEP - 1, k), 0,
+                    src_buf3[buf_size - 2].range(k + STEP - 1, k), src_buf3[buf_size - 1].range(k + STEP - 1, k), 0);
 
-            for (ap_uint<5> i = 0, k = 0; i < PLANES; i++, k += 8) {
-// clang-format off
-                #pragma HLS UNROLL
-                // clang-format on
-                GradientValuesX[0].range(q + (STEP - 1), q) = xFGradientX<DEPTH_SRC, DEPTH_DST>(
-                    src_buf1[buf_size - 3].range(k + 7, k), src_buf1[buf_size - 2].range(k + 7, k), 0,
-                    src_buf2[buf_size - 3].range(k + 7, k), src_buf2[buf_size - 2].range(k + 7, k), 0,
-                    src_buf3[buf_size - 3].range(k + 7, k), src_buf3[buf_size - 2].range(k + 7, k), 0);
+                GradientValuesY[0].range(p + (STEP_OUT - 1), p) = xFGradientY<DEPTH_SRC, DEPTH_DST>(
+                    src_buf1[buf_size - 2].range(k + STEP - 1, k), src_buf1[buf_size - 1].range(k + STEP - 1, k), 0,
+                    src_buf2[buf_size - 2].range(k + STEP - 1, k), src_buf2[buf_size - 1].range(k + STEP - 1, k), 0,
+                    src_buf3[buf_size - 2].range(k + STEP - 1, k), src_buf3[buf_size - 1].range(k + STEP - 1, k), 0);
+                p += STEP_OUT;
+            }
+        } else /*			Last column border care	for NO Case
+                  */
+        {
+            int STEP, STEP_OUT, q = 0;
+            if ((DEPTH_DST == XF_48SP) || (DEPTH_DST == XF_16SP)) {
+                STEP_OUT = 16;
+                STEP = 8;
+            } else {
+                STEP_OUT = 8;
+                STEP = 8;
+            }
+            for (ap_uint<7> i = 0, k = 0; i < PLANES; i++, k += STEP) {
+                GradientValuesX[0].range(q + (STEP_OUT - 1), q) = xFGradientX<DEPTH_SRC, DEPTH_DST>(
+                    src_buf1[buf_size - 3].range(k + STEP - 1, k), src_buf1[buf_size - 2].range(k + STEP - 1, k), 0,
+                    src_buf2[buf_size - 3].range(k + STEP - 1, k), src_buf2[buf_size - 2].range(k + STEP - 1, k), 0,
+                    src_buf3[buf_size - 3].range(k + STEP - 1, k), src_buf3[buf_size - 2].range(k + STEP - 1, k), 0);
 
-                GradientValuesY[0].range(q + (STEP - 1), q) = xFGradientY<DEPTH_SRC, DEPTH_DST>(
-                    src_buf1[buf_size - 3].range(k + 7, k), src_buf1[buf_size - 2].range(k + 7, k), 0,
-                    src_buf2[buf_size - 3].range(k + 7, k), src_buf2[buf_size - 2].range(k + 7, k), 0,
-                    src_buf3[buf_size - 3].range(k + 7, k), src_buf3[buf_size - 2].range(k + 7, k), 0);
-                q += STEP;
+                GradientValuesY[0].range(q + (STEP_OUT - 1), q) = xFGradientY<DEPTH_SRC, DEPTH_DST>(
+                    src_buf1[buf_size - 3].range(k + STEP - 1, k), src_buf1[buf_size - 2].range(k + STEP - 1, k), 0,
+                    src_buf2[buf_size - 3].range(k + STEP - 1, k), src_buf2[buf_size - 2].range(k + STEP - 1, k), 0,
+                    src_buf3[buf_size - 3].range(k + STEP - 1, k), src_buf3[buf_size - 2].range(k + STEP - 1, k), 0);
+                q += STEP_OUT;
             }
         }
 

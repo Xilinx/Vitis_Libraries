@@ -18,6 +18,7 @@
 
 static constexpr int __XF_DEPTH =
     (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(XF_8UC4, XF_NPPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_MAX_OBJECTS = XF_MAX_OBJECTS;
 
 void mean_shift_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                       uint16_t* tlx,
@@ -34,13 +35,13 @@ void mean_shift_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                       int cols) {
 // clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  depth=__XF_DEPTH offset=slave bundle=gmem1
-    #pragma HLS INTERFACE m_axi     port=tlx  offset=slave bundle=gmem2
-    #pragma HLS INTERFACE m_axi     port=tly  offset=slave bundle=gmem2
-    #pragma HLS INTERFACE m_axi     port=obj_height  offset=slave bundle=gmem4
-    #pragma HLS INTERFACE m_axi     port=obj_width  offset=slave bundle=gmem4
-    #pragma HLS INTERFACE m_axi     port=dx  offset=slave bundle=gmem3
-    #pragma HLS INTERFACE m_axi     port=dy  offset=slave bundle=gmem3
-    #pragma HLS INTERFACE m_axi     port=track  offset=slave bundle=gmem5
+    #pragma HLS INTERFACE m_axi     port=tlx  offset=slave bundle=gmem2 depth=__XF_MAX_OBJECTS
+    #pragma HLS INTERFACE m_axi     port=tly  offset=slave bundle=gmem2 depth=__XF_MAX_OBJECTS
+    #pragma HLS INTERFACE m_axi     port=obj_height  offset=slave bundle=gmem4 depth=__XF_MAX_OBJECTS
+    #pragma HLS INTERFACE m_axi     port=obj_width  offset=slave bundle=gmem4 depth=__XF_MAX_OBJECTS
+    #pragma HLS INTERFACE m_axi     port=dx  offset=slave bundle=gmem3 depth=__XF_MAX_OBJECTS
+    #pragma HLS INTERFACE m_axi     port=dy  offset=slave bundle=gmem3 depth=__XF_MAX_OBJECTS
+    #pragma HLS INTERFACE m_axi     port=track  offset=slave bundle=gmem5 depth=__XF_MAX_OBJECTS
     #pragma HLS INTERFACE s_axilite port=frame_status     
     #pragma HLS INTERFACE s_axilite port=no_objects     
     #pragma HLS INTERFACE s_axilite port=no_of_iterations     

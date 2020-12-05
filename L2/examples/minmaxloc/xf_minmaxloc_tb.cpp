@@ -19,7 +19,7 @@
 #include "xf_min_max_loc_config.h"
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     in_img = cv::imread(argv[1], 0);
 
     if (in_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -153,7 +153,8 @@ int main(int argc, char** argv) {
     std::cout << "\tHLS-Max Location.x = " << _max_locx << "  HLS-Max Location.y = " << _max_locy << std::endl
               << std::endl;
 
-    // Difference in min and max, values and locations of both OpenCV and Kernel function:
+    // Difference in min and max, values and locations of both OpenCV and Kernel
+    // function:
     std::cout << "\tDifference in Minimum value: " << (cv_minval - min_value) << std::endl;
     std::cout << "\tDifference in Maximum value: " << (cv_maxval - max_value) << std::endl;
     std::cout << "\tDifference in Minimum value location: (" << (cv_minloc.y - _min_locy) << ","
@@ -162,7 +163,7 @@ int main(int argc, char** argv) {
               << (cv_maxloc.x - _max_locx) << ")" << std::endl;
 
     if (((cv_minloc.y - _min_locy) > 1) || ((cv_minloc.x - _min_locx) > 1)) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 
