@@ -182,10 +182,15 @@ int main(int argc, const char* argv[]) {
     configs = aligned_alloc<ap_uint<512> >(30);
     ap_uint<512>* tree;
     tree = aligned_alloc<ap_uint<512> >(treesize);
-
+#ifdef USE_DDR
     cl_mem_ext_ptr_t mext_data = {XCL_BANK0, data, 0};
     cl_mem_ext_ptr_t mext_configs = {XCL_BANK0, configs, 0};
     cl_mem_ext_ptr_t mext_tree = {XCL_BANK0, tree, 0};
+#else
+    cl_mem_ext_ptr_t mext_data = {(unsigned int)(0), data, 0};
+    cl_mem_ext_ptr_t mext_configs = {(unsigned int)(0), configs, 0};
+    cl_mem_ext_ptr_t mext_tree = {(unsigned int)(0), tree, 0};
+#endif
     // preprocess, now in host
     DataPreocess<DataType, 64>(datasets, numCategories, paras, in_dir, samples_num, features_num, numClass, configs,
                                data);
@@ -235,11 +240,20 @@ int main(int argc, const char* argv[]) {
     q.finish();
     GetTreeFromBits<DataType, 64>(nodes, tree, nodes_num);
     // check nodes_num
-    if (nodes_num != 227) return 1;
+    if (nodes_num != 227) {
+        std::cout << "check failed" << std::endl;
+        return 1;
+    }
     printTree(nodes, nodes_num);
     // test
     bool unorderedFeatures[9] = {0};
     // check tree by computing precision and recall
     int check = precisonAndRecall(testsets, test_num, features_num, nodes, unorderedFeatures, numClass);
+
+    if (check != 0) {
+        std::cout << "check failed" << std::endl;
+    } else {
+        std::cout << "check passed" << std::endl;
+    }
     return check;
 }

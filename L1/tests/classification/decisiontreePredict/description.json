@@ -21,7 +21,7 @@
     "testbench": {
         "source": [
             "test.cpp", 
-            "tree.data",
+            "tree.data", 
             "test_ss.csv"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include", 
@@ -37,7 +37,13 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 16384, 
-                "max_time_min": 420
+                "max_time_min": {
+                    "hls_vivado_syn": 420, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 420, 
+                    "hls_vivado_impl": 420, 
+                    "hls_csynth": 60
+                }
             }
         ], 
         "targets": [

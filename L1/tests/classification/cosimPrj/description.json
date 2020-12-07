@@ -20,9 +20,9 @@
     }, 
     "testbench": {
         "source": [
-            "test.cpp" 
+            "test.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/L2/include  -I./ -I${XF_PROJ_ROOT}/../utils/L1/include",
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/L2/include  -I./ -I${XF_PROJ_ROOT}/../utils/L1/include", 
         "ldflags": "", 
         "argv": {}
     }, 
@@ -35,7 +35,13 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 16384, 
-                "max_time_min": 470
+                "max_time_min": {
+                    "hls_vivado_syn": 470, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 470, 
+                    "hls_vivado_impl": 470, 
+                    "hls_csynth": 60
+                }
             }
         ], 
         "targets": [

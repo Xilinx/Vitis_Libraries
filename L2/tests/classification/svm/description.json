@@ -1,12 +1,47 @@
 {
-    "gui": true,
+    "gui": true, 
     "name": "Xilinx SVM Training", 
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u250"
+        "u250",
+        "u50"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [],
+    "platform_properties": {
+        "u250": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u250.ini"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_HBM"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
+                    ]
+                }
+            }
+        }
+    },
     "launch": [
         {
             "cmd_args": "-xclbin BUILD/svm.xclbin -in PROJECT/ml_datasets/1000.csv -trn 999 -ten 100 -fn 28 -itrn 1 -bn 10", 
@@ -24,7 +59,7 @@
                 "LIB_DIR/L1/include", 
                 "LIB_DIR/L2/include", 
                 "host", 
-                "LIB_DIR/ext/xcl2",
+                "LIB_DIR/ext/xcl2", 
                 "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 "
@@ -34,8 +69,8 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include",
-                "LIB_DIR/../utils/L1/include" 
+                "LIB_DIR/L2/include", 
+                "LIB_DIR/../utils/L1/include"
             ]
         }
     }, 
@@ -45,19 +80,19 @@
                 {
                     "location": "LIB_DIR/L2/src/classification/svm.cpp", 
                     "frequency": 250.0, 
-                    "name": "SVM",
-                    "num_compute_units": 1,
-                    "compute_units" : [
+                    "name": "SVM", 
+                    "num_compute_units": 1, 
+                    "compute_units": [
                         {
-                            "name": "DecisionTree",
-                            "slr": "SLR0",
+                            "name": "SVM", 
+                            "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "ddr",
+                                    "name": "ddr", 
                                     "memory": "DDR[0]"
-                                },
+                                }, 
                                 {
-                                    "name": "weight",
+                                    "name": "weight", 
                                     "memory": "DDR[0]"
                                 }
                             ]
@@ -78,13 +113,19 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 32768, 
-                "max_time_min": 520
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 470, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

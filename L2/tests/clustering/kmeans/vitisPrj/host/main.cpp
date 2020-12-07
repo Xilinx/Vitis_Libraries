@@ -239,12 +239,19 @@ int main(int argc, char* argv[]) {
 
     cl::Kernel kernel0(program, "kmeansKernel");
 
+#ifdef USE_DDR
     cl_mem_ext_ptr_t mext_in;
     mext_in = {XCL_MEM_DDR_BANK0, inputData, 0};
 
     cl_mem_ext_ptr_t mext_out;
     mext_out = {XCL_MEM_DDR_BANK0, centers, 0};
+#else
+    cl_mem_ext_ptr_t mext_in;
+    mext_in = {(unsigned int)(0), inputData, 0};
 
+    cl_mem_ext_ptr_t mext_out;
+    mext_out = {(unsigned int)(0), centers, 0};
+#endif
     cl::Buffer in_buff;
     cl::Buffer out_buff;
 
