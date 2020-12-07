@@ -170,12 +170,12 @@ int main(int argc, const char* argv[]) {
     trees[0] = aligned_alloc<ap_uint<512> >(treesize);
     trees[1] = aligned_alloc<ap_uint<512> >(treesize);
 
-    cl_mem_ext_ptr_t mext_data = {XCL_BANK0, data, 0};
-    cl_mem_ext_ptr_t mext_configs = {XCL_BANK0, configs, 0};
-    cl_mem_ext_ptr_t mext_data_out_0 = {XCL_BANK1, data_out_0, 0};
-    cl_mem_ext_ptr_t mext_data_out_1 = {XCL_BANK1, data_out_1, 0};
-    cl_mem_ext_ptr_t mext_tree_0 = {XCL_BANK1, trees[0], 0};
-    cl_mem_ext_ptr_t mext_tree_1 = {XCL_BANK1, trees[1], 0};
+    cl_mem_ext_ptr_t mext_data = {1, data, kernel_sp_0[0]()};
+    cl_mem_ext_ptr_t mext_configs = {2, configs, kernel_sp_0[0]()};
+    cl_mem_ext_ptr_t mext_data_out_0 = {3, data_out_0, kernel_sp_0[0]()};
+    cl_mem_ext_ptr_t mext_data_out_1 = {3, data_out_1, kernel_sp_0[1]()};
+    cl_mem_ext_ptr_t mext_tree_0 = {1, trees[0], kernel_tree_0[0]()};
+    cl_mem_ext_ptr_t mext_tree_1 = {1, trees[1], kernel_tree_0[1]()};
 
     load_dat<ap_uint<512> >(data + 1, "train", in_dir, datasize - 1, sizeof(ap_uint<512>));
 

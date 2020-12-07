@@ -193,10 +193,15 @@ int main(int argc, const char* argv[]) {
     cl::Kernel kernel;
     kernel = cl::Kernel(program, "DecisionTree");
 
+#ifdef USE_DDR
     cl_mem_ext_ptr_t mext_data = {XCL_BANK0, data, 0};
     cl_mem_ext_ptr_t mext_configs = {XCL_BANK0, configs, 0};
     cl_mem_ext_ptr_t mext_tree = {XCL_BANK0, tree, 0};
-
+#else
+    cl_mem_ext_ptr_t mext_data = {(unsigned int)(0), data, 0};
+    cl_mem_ext_ptr_t mext_configs = {(unsigned int)(0), configs, 0};
+    cl_mem_ext_ptr_t mext_tree = {(unsigned int)(0), tree, 0};
+#endif
     // Map buffers
     int err;
     cl::Buffer buf_data(context, CL_MEM_EXT_PTR_XILINX | CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,

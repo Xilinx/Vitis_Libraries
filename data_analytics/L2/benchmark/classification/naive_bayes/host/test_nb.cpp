@@ -234,9 +234,9 @@ int main(int argc, const char* argv[]) {
     std::cout << "kernel has been created" << std::endl;
 
     cl_mem_ext_ptr_t mext_o[3];
-    mext_o[0] = {XCL_MEM_DDR_BANK0, buf_in, 0};
-    mext_o[1] = {XCL_MEM_DDR_BANK1, buf_out0, 0};
-    mext_o[2] = {XCL_MEM_DDR_BANK1, buf_out1, 0};
+    mext_o[0] = {2, buf_in, kernel()};
+    mext_o[1] = {3, buf_out0, kernel()};
+    mext_o[2] = {4, buf_out1, kernel()};
 
     // create device buffer and map dev buf to host buf
     cl::Buffer buffer_in =
