@@ -132,8 +132,18 @@ endif
 
 EXE_NAME := test.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/reEngineKernel.xclbin -in $(XFLIB_DIR)/L2/tests/text/reEngine/log_data/access_5k.log -out $(CUR_DIR)/check.log
 LIBRARY_PATH =$(CUR_DIR)/re_compile/lib/lib:$(LD_LIBRARY_PATH)
+endif
+ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/reEngineKernel.xclbin -in $(XFLIB_DIR)/L2/tests/text/reEngine/log_data/access_5k.log -lnm 10 -out $(CUR_DIR)/check.log
+LIBRARY_PATH =$(CUR_DIR)/re_compile/lib/lib:$(LD_LIBRARY_PATH)
+endif
+ifeq ($(TARGET),$(filter $(TARGET),hw))
+HOST_ARGS :=  -xclbin $(BUILD_DIR)/reEngineKernel.xclbin -in $(XFLIB_DIR)/L2/tests/text/reEngine/log_data/access_5k.log -out $(CUR_DIR)/check.log
+LIBRARY_PATH =$(CUR_DIR)/re_compile/lib/lib:$(LD_LIBRARY_PATH)
+endif
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
