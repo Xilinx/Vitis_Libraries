@@ -19,7 +19,7 @@
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
         fprintf(fp, "%u\n", histogram[cnt]);
         uint32_t val = (uint32_t)hist_ocv.at<float>(cnt);
         if (val != histogram[cnt]) {
-            printf("\nTest Failed\n");
+            fprintf(stderr, "Test Failed.\n ");
             return 1;
         }
         fprintf(fp1, "%u\n", val);
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
         uint32_t g_val = (uint32_t)g_hist.at<float>(cnt);
         uint32_t r_val = (uint32_t)r_hist.at<float>(cnt);
         if ((b_val != histogram[cnt]) && (g_val != histogram[256 + cnt]) && (r_val != histogram[512 + cnt])) {
-            printf("\nTest Failed\n");
+            fprintf(stderr, "ERROR: Test Failed.\n ");
             return 1;
         }
         fprintf(fp1, "%u	%u	%u\n", b_val, g_val, r_val);

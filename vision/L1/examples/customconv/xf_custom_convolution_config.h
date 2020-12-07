@@ -74,7 +74,7 @@
 #define OUTPUT_PTR_WIDTH 32
 #else
 #define INPUT_PTR_WIDTH 256
-#define OUTPUT_PTR_WIDTH 246
+#define OUTPUT_PTR_WIDTH 256
 #endif
 #endif
 

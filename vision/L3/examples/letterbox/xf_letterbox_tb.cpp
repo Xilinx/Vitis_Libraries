@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
         return -1;
 
     } else {
-        fprintf(stderr, "\n Test Passed\n");
+        std::cout << "Test Passed " << std::endl;
         return 0;
     }
 }

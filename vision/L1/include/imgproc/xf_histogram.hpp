@@ -21,8 +21,8 @@
 #error C++ is needed to include this header
 #endif
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
+#include "hls_stream.h"
 namespace xf {
 namespace cv {
 
@@ -35,8 +35,8 @@ void xFHistogramKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     uint32_t tmp_hist[(PLANES << XF_BITSHIFT(NPC))][256];
     uint32_t tmp_hist1[(PLANES << XF_BITSHIFT(NPC))][256];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=tmp_hist1 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+#pragma HLS ARRAY_PARTITION variable=tmp_hist1 complete dim=1
     // clang-format on
     XF_SNAME(WORDWIDTH) in_buf, in_buf1, temp_buf;
 
@@ -46,11 +46,11 @@ HIST_INITIALIZE_LOOP:
     for (ap_uint<10> i = 0; i < 256; i++) //
     {
 // clang-format off
-        #pragma HLS PIPELINE
+#pragma HLS PIPELINE
         // clang-format on
         for (ap_uint<5> j = 0; j < (1 << XF_BITSHIFT(NPC) * PLANES); j++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=256 max=256
+#pragma HLS LOOP_TRIPCOUNT min=256 max=256
             // clang-format on
             tmp_hist[j][i] = 0;
             tmp_hist1[j][i] = 0;
@@ -60,14 +60,14 @@ HIST_INITIALIZE_LOOP:
 HISTOGRAM_ROW_LOOP:
     for (ap_uint<13> row = 0; row < imgheight; row++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     HISTOGRAM_COL_LOOP:
         for (ap_uint<13> col = 0; col < (imgwidth); col = col + 2) {
 // clang-format off
-            #pragma HLS PIPELINE II=2
-            #pragma HLS LOOP_FLATTEN OFF
-            #pragma HLS LOOP_TRIPCOUNT min=SRC_TC max=SRC_TC
+#pragma HLS PIPELINE II=2
+#pragma HLS LOOP_FLATTEN OFF
+#pragma HLS LOOP_TRIPCOUNT min=SRC_TC max=SRC_TC
             // clang-format on
             in_buf = _src_mat.read(row * (imgwidth) + col); //.data[row*(imgwidth) + col];
 
@@ -79,9 +79,9 @@ HISTOGRAM_ROW_LOOP:
         EXTRACT_UPDATE:
             for (ap_uint<9> i = 0, j = 0; i < ((8 << XF_BITSHIFT(NPC)) * PLANES); j++, i += 8) {
 // clang-format off
-                #pragma HLS DEPENDENCE variable=tmp_hist array intra false
-                #pragma HLS DEPENDENCE variable=tmp_hist1 array intra false
-                #pragma HLS UNROLL
+#pragma HLS DEPENDENCE variable=tmp_hist array intra false
+#pragma HLS DEPENDENCE variable=tmp_hist1 array intra false
+#pragma HLS UNROLL
                 // clang-format on
 
                 ap_uint<8> val = 0, val1 = 0;
@@ -95,35 +95,32 @@ HISTOGRAM_ROW_LOOP:
             }
         }
     }
-    uint32_t cnt, p = 0;
-    uint32_t plane[PLANES];
-COPY_LOOP:
-    for (ap_uint<10> i = 0; i < 256; i++) {
+
+    const int num_ch = XF_CHANNELS(SRC_T, NPC);
+
+MERGE_HIST_LOOP:
+    for (ap_uint<32> i = 0; i < 256; i++) {
 // clang-format off
-        #pragma HLS pipeline
-        // clang-format on
-        cnt = 0;
-        p = 0;
-        for (ap_uint<5> j = 0, k = 0; j < ((1 << XF_BITSHIFT(NPC)) * PLANES); j++, k++) {
+#pragma HLS pipeline
+    // clang-format on
+
+    MERGE_HIST_CH_UNROLL:
+        for (ap_uint<5> ch = 0; ch < num_ch; ch++) {
 // clang-format off
-            #pragma HLS UNROLL
+#pragma HLS UNROLL
             // clang-format on
 
-            uint32_t value = tmp_hist[j][i] + tmp_hist1[j][i];
-            cnt = cnt + value;
-            if (PLANES != 1) {
-                plane[p] = cnt;
-                p++;
-                cnt = 0;
-                value = 0;
+            uint32_t value = 0;
+
+        MERGE_HIST_NPPC_UNROLL:
+            for (ap_uint<5> p = 0; p < XF_NPIXPERCYCLE(NPC); p++) {
+// clang-format off
+#pragma HLS UNROLL
+                // clang-format on
+                value += tmp_hist[p * num_ch + ch][i] + tmp_hist1[p * num_ch + ch][i];
             }
-        }
-        if (PLANES == 1) {
-            hist_array[0][i] = cnt;
-        } else {
-            hist_array[0][i] = plane[0];
-            hist_array[1][i] = plane[1];
-            hist_array[2][i] = plane[2];
+
+            hist_array[ch][i] = value;
         }
     }
 }
@@ -135,7 +132,7 @@ void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, uint32_t* histogram) {
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
     // clang-format on
 
     uint32_t hist_array[XF_CHANNELS(SRC_T, NPC)][256] = {0};
@@ -148,9 +145,9 @@ void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, uint32_t* histogram) {
     for (int i = 0; i < (XF_CHANNELS(SRC_T, NPC)); i++) {
         for (int j = 0; j < 256; j++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=256
-            #pragma HLS PIPELINE
-            #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=1 max=256
+#pragma HLS PIPELINE
+#pragma HLS LOOP_FLATTEN off
             // clang-format on
             histogram[(i * 256) + j] = hist_array[i][j];
         }

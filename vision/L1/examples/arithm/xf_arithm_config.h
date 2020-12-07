@@ -17,11 +17,11 @@
 #ifndef _XF_ARITHM_CONFIG_H_
 #define _XF_ARITHM_CONFIG_H_
 
-#include "hls_stream.h"
-#include <ap_int.h>
-#include "xf_config_params.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
+#include "xf_config_params.h"
+#include <ap_int.h>
 
 #include "core/xf_arithm.hpp"
 
@@ -107,7 +107,7 @@
 #else
 #define TYPE XF_8UC3
 #if NO
-#define PTR_WIDTH 24
+#define PTR_WIDTH 32
 #else
 #define PTR_WIDTH 256
 #endif
@@ -116,7 +116,8 @@
 
 #if ARRAY
 #if defined(FUNCT_BITWISENOT) || defined(FUNCT_ZERO)
-void arithm_accel(ap_uint<PTR_WIDTH>* img_in1, ap_uint<PTR_WIDTH>* img_in2, ap_uint<PTR_WIDTH>* img_out);
+void arithm_accel(
+    ap_uint<PTR_WIDTH>* img_in1, ap_uint<PTR_WIDTH>* img_in2, ap_uint<PTR_WIDTH>* img_out, int height, int width);
 #else
 void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
                   ap_uint<PTR_WIDTH>* img_in2,

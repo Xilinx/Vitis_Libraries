@@ -21,7 +21,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        printf("Usage: <executable> <input image path> \n");
+        fprintf(stderr, "Usage: <executable> <input image path>\n");
         return -1;
     }
 
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     in_img = cv::imread(argv[1], 1); // reading in the color image
 #endif
     if (!in_img.data) {
-        printf("Failed to load the image ... !!!");
+        fprintf(stderr, "Failed to load the image ... !!!\n ");
         return -1;
     }
 // extractChannel(in_img, in_img, 1);

@@ -9,25 +9,12 @@ Getting Started with HLS
 #########################
 
 The Vitis vision library can be used to build applications in Vivado® HLS as well as Vitis HLS.
-This section provides details on how the Vitis vision library components can
-be integrated into a design in Vivado HLS or Vitis HLS 2020.1. This section of the
-document provides steps on how to run a single library component through
-the Vivado HLS or Vitis HLS 2020.1 flow which includes, C-simulation,
+This section of the document provides steps on how to run a single library component through
+the Vivado HLS or Vitis HLS 2020.2 flow which includes, C-simulation,
 C-synthesis, C/RTL co-simulation, and exporting the RTL as an IP.
 
-You are required to do the following changes to facilitate proper
-functioning of the use model in Vivado HLS 2020.1. This is not applicable when using 
-Vitis HLS.:
-
-#. Use of appropriate compile-time options - When using the Vitis vision
-   functions in Vivado HLS, the ``-std=c++0x`` option
-   need to be provided as a compilation flag. 
-
-
-HLS Standalone Mode
-===================
-
-The HLS standalone mode can be operated using the following two modes:
+All the functions under L1 folder of the Vitis Vision library can be built through Vitis HLS flow
+in the following two modes:
 
 #. Tcl Script Mode
 #. GUI Mode
@@ -36,40 +23,34 @@ The HLS standalone mode can be operated using the following two modes:
 Tcl Script Mode
 ----------------
 
-Use the following steps to operate the HLS Standalone Mode using Tcl
-Script. The first 2 steps are applicable to Vivado HLS only:
+Each configuration of all functions in L1 are provided with TCL script which can be run through the
+available Makefile.
 
-#. In the Vivado® HLS tcl script file, update the cflags in all the
-   add_files sections.
-#. Add the ``-std=c++0x`` compiler flags.
-#. Append the path to the vision/L1/include directory, as it contains all
-   the header files required by the library.
-
-Note: When using Vivado HLS in the Windows operating system, provide the
-``-std=c++0x`` flag only for C-Sim and Co-Sim. Do not include the flag
-when performing synthesis.
-
-For example:
-
-Setting flags for source files:
+Open a terminal and run the following commands to set the environment and build :
 
 .. code:: c
 
-   add_files xf_dilation_accel.cpp -cflags "-I<path-to-include-directory> -std=c++0x" 
+   source < path-to-Vitis-installation-directory >/settings64.sh
 
-Setting flags for testbench files:
+   source < part-to-XRT-installation-directory >/setup.sh
 
-.. code:: c
+   export DEVICE=< path-to-platform-directory >/< platform >.xpfm
 
-   add_files -tb xf_dilation_tb.cpp -cflags "-I<path-to-include-directory> -std=c++0x"
+   export OPENCV_INCLUDE=< path-to-opencv-include-folder >
 
+   export OPENCV_LIB=< path-to-opencv-lib-folder >
+
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+
+   make run CSIM=1 CSYNTH=1 COSIM=1 VIVADO_IMPL=1
 
 GUI Mode
 --------
 
 Use the following steps to operate the HLS Standalone Mode using GUI:
 
-#. Open Vivado® HLS or Vitis HLS in GUI mode and create a new project
+#. Open a terminal and update the LD_LIBRARY_PATH to point to OpenCV lib folder.
+#. From the same terminal, open Vivado® HLS or Vitis HLS in GUI mode and create a new project
 #. Specify the name of the project. For example - Dilation.
 #. Click Browse to enter a workspace folder used to store your projects.
 #. Click Next.
@@ -87,13 +68,16 @@ Use the following steps to operate the HLS Standalone Mode using GUI:
 #. Files added under the Test Bench section will be displayed. Select a
    file and click Edit CFLAGS.
 #. Enter
-   ``-I<path-to-include-directory> -std=c++0x``.
+   ``-I<path-to-L1-include-directory> -std=c++0x
+   -I<path-to-opencv-include-folder>``.
    
    Note: When using Vivado HLS in the Windows operating system, make
    sure to provide the ``-std=c++0x`` flag only for C-Sim and Co-Sim. Do
    not include the flag when performing synthesis.
+#. In the Linker Flags section, enter the opencv libs and path to the opencv libs
+   ``-L<path-to-opencv-lib-folder> -lopencv_core -lopencv_imgcodecs -lopencv_imgproc``
 #. Select Synthesis and repeat the above step for all the displayed
-   files.
+   files. Do not add opencv include path here.
 #. Click OK.
 #. Run the C Simulation, select Clean Build and specify the required
    input arguments.
@@ -130,6 +114,9 @@ Video Streaming interface and vice-versa. ``xf::cv::AXIvideo2xfMat()`` and
 Vitis vision functions in the Vivado® IP integrator.
 ``cvMat2AXIvideoxf<NPC>`` and ``AXIvideo2cvMatxf<NPC>``
 are used on the host side.
+
+An example function, 'axiconv', depicting the usage of these functions
+is provided in the L1/examples directory.
 
 .. table:: Table. AXI Video Interface Functions
 

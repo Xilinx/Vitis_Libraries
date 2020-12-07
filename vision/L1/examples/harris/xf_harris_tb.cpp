@@ -24,13 +24,13 @@ int main(int argc, char** argv) {
     cv::Mat ocvpnts, hlspnts;
 
     if (argc != 2) {
-        printf("Usage : <executable> <input image> \n");
+        fprintf(stderr, "Usage: <executable> <input image> \n");
         return -1;
     }
     in_img = cv::imread(argv[1], 0); // reading in the color image
 
     if (!in_img.data) {
-        printf("Failed to load the image ... %s\n!", argv[1]);
+        fprintf(stderr, "Failed to load the image ... %s\n ", argv[1]);
         return -1;
     }
 

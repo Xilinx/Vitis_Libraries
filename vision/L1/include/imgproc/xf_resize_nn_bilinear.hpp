@@ -78,7 +78,7 @@ void computeOutputPixel(XF_TNAME(DEPTH, NPPC) A0[NUMBEROFINPUTWORDS],
     const int PIXELDEPTH = XF_DTPIXELDEPTH(DEPTH, NPPC);
     /*if(indexx[XF_NPIXPERCYCLE(NPPC)-1] > (initIndex+NUMBEROFINPUTWORDS*XF_NPIXPERCYCLE(NPPC)-1))
             {
-                    std::cout << "Insufficient number of words to resize in X" << std::endl;
+                    fprintf(stderr, "Insufficient number of words to resize in X\n");
                     return;
             }*/
     assert((indexx[XF_NPIXPERCYCLE(NPPC) - 1] < (initIndex + NUMBEROFINPUTWORDS * XF_NPIXPERCYCLE(NPPC) - 1)) &&
@@ -275,10 +275,6 @@ template <int SRC_TYPE,
           int MAX_DOWN_SCALE>
 void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
                       xf::cv::Mat<SRC_TYPE, OUTHEIGHT, OUTWIDTH, NPPC>& imgOutput) {
-// clang-format off
-    #pragma HLS ALLOCATION instances=scaleCompute limit=1 function
-    #pragma HLS ALLOCATION instances=xfUDivResize limit=1 function
-    // clang-format on
     const int INDEX_INT = 17;
     const int WEIGHT_WIDTH = 48;
     const int WEIGHT_INT = 16;
@@ -304,6 +300,11 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
     Xscale64 = xfUDivResize(xnew, (imgOutput.cols));
     Yscale64 = xfUDivResize(ynew, (imgOutput.rows));
     ap_ufixed<64, 32> temp_scale_conv;
+
+// clang-format off
+    #pragma HLS ALLOCATION function instances=scaleCompute<INDEX_INT, COMP_INDEX_WIDTH, COMP_INDEX_INT, SCALE_WIDTH, SCALE_INT, INTERPOLATION_TYPE> limit=1
+    #pragma HLS ALLOCATION function instances=xfUDivResize limit=1
+    // clang-format on
 
     temp_scale_conv = *(ap_ufixed<64, 32>*)&Xscale64;
     scalex = temp_scale_conv;

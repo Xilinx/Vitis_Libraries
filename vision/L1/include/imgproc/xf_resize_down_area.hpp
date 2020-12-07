@@ -447,9 +447,9 @@ static void update_output_buffer(bool DDR_write_en,
             #pragma HLS unroll
             // clang-format on
 
-            ap_uint<AREADOWN_PARTIAL_RESULT_BITS> data_mux_out;         //
-            ap_uint<AREADOWN_PARTIAL_RESULT_BITS> data_mux_out_overlap; //
-            ap_uint<NUM_PB + 1> data_mux_out_status;
+            ap_uint<AREADOWN_PARTIAL_RESULT_BITS> data_mux_out = 0;         //
+            ap_uint<AREADOWN_PARTIAL_RESULT_BITS> data_mux_out_overlap = 0; //
+            ap_uint<NUM_PB + 1> data_mux_out_status = 0;
             for (ap_uint<16> out_idx = 0; out_idx < (NUM_PB + 1); out_idx++) {
 // clang-format off
                 #pragma HLS unroll

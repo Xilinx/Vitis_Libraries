@@ -18,7 +18,8 @@
 #include "xcl2.hpp"
 #include "xf_warp_transform_config.h"
 
-// Changing transformation matrix dimensions with transform Affine 2x3, Perspecitve 3x3
+// Changing transformation matrix dimensions with transform Affine 2x3,
+// Perspecitve 3x3
 #if TRANSFORM_TYPE == 1
 #define TRMAT_DIM2 3
 #define TRMAT_DIM1 3
@@ -36,7 +37,7 @@ typedef float image_oper;
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        std::cout << "Usage:  <EXE File> <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: <INPUT IMAGE PATH 1>\n");
         return EXIT_FAILURE;
     }
 
@@ -106,7 +107,7 @@ int main(int argc, char* argv[]) {
     image_input = cv::imread(argv[1], 1);
 #endif
     if (!image_input.data) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -174,12 +175,13 @@ int main(int argc, char* argv[]) {
                                             image_input.data,    // Pointer to the data to copy
                                             nullptr, &event));
 
-    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA
-                                            CL_TRUE,           // blocking call
-                                            0,                 // buffer offset in bytes
-                                            vec_in_size_bytes, // Size in bytes
-                                            R.data(),          // Pointer to the data to copy
-                                            nullptr, &event));
+    OCL_CHECK(err,
+              queue.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA
+                                       CL_TRUE,           // blocking call
+                                       0,                 // buffer offset in bytes
+                                       vec_in_size_bytes, // Size in bytes
+                                       R.data(),          // Pointer to the data to copy
+                                       nullptr, &event));
 
     std::cout << "INFO: Data transferred from host to device" << std::endl;
 

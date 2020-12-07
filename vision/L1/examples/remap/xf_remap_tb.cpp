@@ -22,12 +22,12 @@
 int main(int argc, char** argv) {
 #if READ_MAPS_FROM_FILE
     if (argc != 4) {
-        std::cout << "Usage: <executable> <input image path> <mapx file> <mapy file>" << std::endl;
+        fprintf(stderr, "Usage: <executable> <input image path> <mapx file> <mapy file>\n");
         return -1;
     }
 #else
     if (argc != 2) {
-        std::cout << "Usage: <executable> <input image path>" << std::endl;
+        fprintf(stderr, "Usage: <executable> <input image path>\n");
         return -1;
     }
 #endif
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 #endif
 
     if (!src.data) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -57,7 +57,8 @@ int main(int argc, char** argv) {
 
 // Initialize the float maps:
 #if READ_MAPS_FROM_FILE
-    // read the float map data from the file (code could be alternated for reading from image)
+    // read the float map data from the file (code could be alternated for reading
+    // from image)
     FILE *fp_mx, *fp_my;
     fp_mx = fopen(argv[2], "r");
     fp_my = fopen(argv[3], "r");
@@ -65,10 +66,10 @@ int main(int argc, char** argv) {
         for (int j = 0; j < src.cols; j++) {
             float valx, valy;
             if (fscanf(fp_mx, "%f", &valx) != 1) {
-                printf("Not enough data in the provided map_x file ... !!!\n");
+                fprintf(stderr, "Not enough data in the provided map_x file ... !!!\n ");
             }
             if (fscanf(fp_my, "%f", &valy) != 1) {
-                printf("Not enough data in the provided map_y file ... !!!\n");
+                fprintf(stderr, "Not enough data in the provided map_y file ... !!!\n ");
             }
             map_x.at<float>(i, j) = valx;
             map_y.at<float>(i, j) = valy;
@@ -108,7 +109,7 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(diff, 0, err_per);
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

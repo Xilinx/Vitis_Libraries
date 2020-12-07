@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
 
     clock_gettime(CLOCK_MONOTONIC, &end_time);
     float diff_latency = (end_time.tv_nsec - start_time.tv_nsec) / 1e9 + end_time.tv_sec - start_time.tv_sec;
-    printf("\latency: %f ", diff_latency);
+    printf("latency: %f ", diff_latency);
 
     cv::imwrite("ocv_ref.jpg", in_img1); // reference image
 
@@ -257,10 +257,9 @@ int main(int argc, char** argv) {
         }
     }
     float err_per = 100.0 * (float)cnt / (in_img1.rows * in_img1.cols);
-    fprintf(stderr,
-            "Minimum error in intensity = %f\nMaximum error in intensity = %f\nPercentage of pixels above error "
-            "threshold = %f\n",
-            minval, maxval1, err_per);
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval1 << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
         return 1;

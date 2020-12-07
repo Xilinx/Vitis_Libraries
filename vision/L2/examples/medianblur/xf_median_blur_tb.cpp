@@ -15,12 +15,12 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_median_blur_config.h"
 #include "xcl2.hpp"
+#include "xf_median_blur_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 #endif
 
     if (in_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -97,12 +97,13 @@ int main(int argc, char** argv) {
     // Initialize the buffers:
     cl::Event event;
 
-    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
-                                            CL_TRUE,             // blocking call
-                                            0,                   // buffer offset in bytes
-                                            image_in_size_bytes, // Size in bytes
-                                            in_img.data,         // Pointer to the data to copy
-                                            nullptr, &event));
+    OCL_CHECK(err,
+              queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
+                                       CL_TRUE,             // blocking call
+                                       0,                   // buffer offset in bytes
+                                       image_in_size_bytes, // Size in bytes
+                                       in_img.data,         // Pointer to the data to copy
+                                       nullptr, &event));
 
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel));

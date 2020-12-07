@@ -162,22 +162,6 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC, TC2> phase_mat(img_height, img_width);
         xf::cv::Mat<XF_2UC1, ROWS, COLS, NPC> nms_mat(img_height, img_width);
 
-// clang-format off
-        #pragma HLS STREAM variable=gaussian_mat.data depth=2
-        #pragma HLS STREAM variable=gradx_mat.data depth=2
-        #pragma HLS STREAM variable=gradx1_mat.data depth=2
-        #pragma HLS STREAM variable=gradx2_mat.data depth=2
-        #pragma HLS STREAM variable=grady_mat.data depth=2
-        #pragma HLS STREAM variable=grady1_mat.data depth=2
-        #pragma HLS STREAM variable=grady2_mat.data depth=2
-        #pragma HLS STREAM variable=nms_mat.data depth=2
-// clang-format on
-
-// clang-format off
-            #pragma HLS STREAM variable=phase_mat.data depth=TC1
-            #pragma HLS STREAM variable=magnitude_mat.data depth=TC2
-        // clang-format on
-
         xFAverageGaussianMask3x3<SRC_T, SRC_T, ROWS, COLS, DEPTH_IN, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC))>(
             _src_mat, gaussian_mat, img_height, img_width);
         xFSobel<SRC_T, XF_16SC1, ROWS, COLS, DEPTH_IN, XF_16SP, NPC, WORDWIDTH_SRC, XF_128UW, FILTER_TYPE, USE_URAM>(
@@ -205,22 +189,6 @@ void xFCannyKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
         xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, TC1> magnitude_mat(img_height, img_width);
         xf::cv::Mat<XF_8UC1, ROWS, COLS, NPC, TC2> phase_mat(img_height, img_width);
         xf::cv::Mat<XF_2UC1, ROWS, COLS, NPC> nms_mat(img_height, img_width);
-
-// clang-format off
-            #pragma HLS STREAM variable=phase_mat.data depth=TC1
-            #pragma HLS STREAM variable=magnitude_mat.data depth=TC2
-// clang-format on
-
-// clang-format off
-        #pragma HLS STREAM variable=gaussian_mat.data depth=2
-        #pragma HLS STREAM variable=gradx_mat.data depth=2
-        #pragma HLS STREAM variable=gradx1_mat.data depth=2
-        #pragma HLS STREAM variable=gradx2_mat.data depth=2
-        #pragma HLS STREAM variable=grady_mat.data depth=2
-        #pragma HLS STREAM variable=grady1_mat.data depth=2
-        #pragma HLS STREAM variable=grady2_mat.data depth=2
-        #pragma HLS STREAM variable=nms_mat.data depth=2
-        // clang-format on
 
         xFAverageGaussianMask3x3<SRC_T, SRC_T, ROWS, COLS, DEPTH_IN, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC))>(
             _src_mat, gaussian_mat, img_height, img_width);
@@ -290,8 +258,8 @@ void Canny(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     if (NORM_TYPE == 1) {
         xFCannyKernel<SRC_T, DST_T, NORM_TYPE, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC1), NPC, NPC1,
-                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC1), (COLS >> XF_BITSHIFT(NPC)),
-                      ((COLS >> XF_BITSHIFT(NPC)) * 3), 2, FILTER_TYPE, USE_URAM>(
+                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC1), (COLS >> XF_BITSHIFT(NPC)), 2,
+                      ((COLS >> XF_BITSHIFT(NPC)) * 3), FILTER_TYPE, USE_URAM>(
             _src_mat, _dst_mat, _lowthreshold, _highthreshold, _src_mat.rows, _src_mat.cols);
     } else {
         xFCannyKernel<SRC_T, DST_T, NORM_TYPE, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC1), NPC, NPC1,

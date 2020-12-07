@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     cv::setUseOptimized(false);
 
     if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -39,12 +39,12 @@ int main(int argc, char** argv) {
     right_img = cv::imread(argv[2], 0);
 
     if (left_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
     if (right_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[2]);
         return EXIT_FAILURE;
     }
 
@@ -95,7 +95,8 @@ int main(int argc, char** argv) {
     cv::imwrite("hls_out.jpg", hls_disp8);
 
     ////////  FUNCTIONAL VALIDATION  ////////
-    // changing the invalid value from negative to zero for validating the difference
+    // changing the invalid value from negative to zero for validating the
+    // difference
     cv::Mat disp_u(rows, cols, CV_16UC1);
     for (int i = 0; i < disp.rows; i++) {
         for (int j = 0; j < disp.cols; j++) {

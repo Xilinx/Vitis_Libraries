@@ -22,8 +22,10 @@ void colordetect(cv::Mat& _src, cv::Mat& _dst, unsigned char* nLowThresh, unsign
     // Temporary matrices for processing
     cv::Mat mask1, mask2, mask3, _imgrange, _imghsv;
 
-    // Convert the input to the HSV colorspace. Using BGR here since it is the default of OpenCV.
-    // Using RGB yields different results, requiring a change of the threshold ranges
+    // Convert the input to the HSV colorspace. Using BGR here since it is the
+    // default of OpenCV.
+    // Using RGB yields different results, requiring a change of the threshold
+    // ranges
     cv::cvtColor(_src, _imghsv, cv::COLOR_BGR2HSV);
 
     // Get the color of Yellow from the HSV image and store it as a mask
@@ -53,7 +55,7 @@ void colordetect(cv::Mat& _src, cv::Mat& _dst, unsigned char* nLowThresh, unsign
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -62,7 +64,7 @@ int main(int argc, char** argv) {
     // Open input image:
     in_img = cv::imread(argv[1], 1);
     if (!in_img.data) {
-        std::cout << "ERROR: Could not open the input image." << std::endl;
+        fprintf(stderr, "ERROR: Could not open the input image.\n ");
         return -1;
     }
 
@@ -179,12 +181,13 @@ int main(int argc, char** argv) {
     // Intialize the buffers:
     cl::Event event;
 
-    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage, // buffer on the FPGA
-                                            CL_TRUE,        // blocking call
-                                            0,              // buffer offset in bytes
-                                            image_in_size,  // Size in bytes
-                                            in_img.data     // Pointer to the data to copy
-                                            ));
+    OCL_CHECK(err,
+              queue.enqueueWriteBuffer(buffer_inImage, // buffer on the FPGA
+                                       CL_TRUE,        // blocking call
+                                       0,              // buffer offset in bytes
+                                       image_in_size,  // Size in bytes
+                                       in_img.data     // Pointer to the data to copy
+                                       ));
 
     // Copy input data to device global memory
     OCL_CHECK(err, err = queue.enqueueMigrateMemObjects({buffer_lThres, buffer_hThres, buffer_shapeKrnl}, 0));
@@ -225,7 +228,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << "%" << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

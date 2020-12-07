@@ -19,7 +19,7 @@
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     in_gray = cv::imread(argv[1], 0);
 
     if (!in_gray.data) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 

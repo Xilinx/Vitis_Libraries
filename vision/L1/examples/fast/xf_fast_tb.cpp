@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     in_img = cv::imread(argv[1], 1); // reading in the color image
 
     if (!in_img.data) {
-        printf("Failed to load the image ... %s\n!", argv[1]);
+        fprintf(stderr, "Failed to load the image ... %s\n ", argv[1]);
         return -1;
     }
 
@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
     std::cout << "\tGain = " << pergain << std::endl;
 
     if (persuccess < 80) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

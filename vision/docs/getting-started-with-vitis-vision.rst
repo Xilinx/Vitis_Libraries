@@ -19,21 +19,22 @@ hardware.
 Prerequisites
 =============
 
-#. Valid installation of Vitis™ 2020.1 or later version and the
+#. Valid installation of Vitis™ 2020.2 or later version and the
    corresponding licenses.
 #. Install the Vitis Vision libraries, if you intend to use libraries
    compiled differently than what is provided in Vitis.
-#. Install the card for which the platform is supported in Vitis 2020.1 or
+#. Install the card for which the platform is supported in Vitis 2020.2 or
    later versions.
 #. If targeting an embedded platform, set up the evaluation board.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software
    interface to Xilinx FPGAs.
 #. Install/compile OpenCV libraries(with compatible libjpeg.so). 
    Appropriate version (X86/aarch32/aarch64) of compiler must be used based 
-   on the available processor on the target board.
+   on the available processor for the target board.
 #. libOpenCL.so must be installed if not present along with the
    platform.
 
+.. note:: All Vitis Vision functions were tested against OpenCV version - 3.4
 
 Vitis Design Methodology
 =========================
@@ -151,12 +152,19 @@ This function converts the input array to xf::cv::Mat. The Vitis Vision kernel
 would require the input to be of type, xf::cv::Mat. This function would read
 from the array pointer and write into xf::cv::Mat based on the particular
 configuration (bit-depth, channels, pixel-parallelism) the xf::cv::Mat was
-created.
+created. Array2xfMat supports line stride. Line stride is the number of pixels
+which needs to be added to the address in the first pixel of a row in order to access the 
+first pixel of the next row.
 
 .. code:: c
 
+   //Without Line stride support
    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
    void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& dstMat)
+   
+   //With Line stride support
+   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
+   void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& dstMat, int stride)
 
 .. table:: Table. Array2xfMat Parmater Description
 
@@ -183,6 +191,9 @@ created.
    +-----------------------------------+-----------------------------------+
    | dstMat                            | Output image of type xf::cv::Mat  |
    +-----------------------------------+-----------------------------------+
+   | stride                            | Line stride.                      |
+   |                                   | Default value is dstMat.cols      |
+   +-----------------------------------+-----------------------------------+
 
 
 xfMat2Array
@@ -190,13 +201,20 @@ xfMat2Array
 
 This function converts the input xf::cv::Mat to output array. The output of
 the xf::kernel function will be xf::cv::Mat, and it will require to convert
-that to output pointer.
+that to output pointer. xfMat2Array supports line stride. Line stride is the number of pixels
+which needs to be added to the address in the first pixel of a row in order to access the 
+first pixel of the next row.
 
 .. code:: c
 
-   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
+   //Without Line stride support
+   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int FILLZERO = 1>
    void xfMat2Array(xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& srcMat, ap_uint< PTR_WIDTH > *dstPtr)
-
+   
+   //With Line stride support
+   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int FILLZERO = 1>
+   void xfMat2Array(xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& srcMat, ap_uint< PTR_WIDTH > *dstPtr, int stride)
+   
 .. table:: Table . xfMat2Array Parameter Description
 
    +-----------------------------------+-----------------------------------+
@@ -217,12 +235,18 @@ that to output pointer.
    |                                   | parallel. Example XF_NPPC1,       |
    |                                   | XF_NPPC8                          |
    +-----------------------------------+-----------------------------------+
+   | FILLZERO                          | Line padding Flag. Use when line  |
+   |                                   | stride support is needed.         |
+   |                                   | Default value is 1                |   
+   +-----------------------------------+-----------------------------------+
    | dstPtr                            | Output pointer. Type of the       |
    |                                   | pointer based on the PTR_WIDTH.   |
    +-----------------------------------+-----------------------------------+
    | srcMat                            | Input image of type xf::cv::Mat   |
    +-----------------------------------+-----------------------------------+
-
+   | stride                            | Line stride.                      |
+   |                                   | Default value is srcMat.cols      |
+   +-----------------------------------+-----------------------------------+
 
 Interface pointer widths
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -527,8 +551,8 @@ Evaluating the Functionality
 
 You can build the kernels and test the functionality through software
 emulation, hardware emulation, and running directly on a supported
-hardware with the FPGA. For PCIe based platforms, use the following
-commands to setup the environment:
+hardware with the FPGA. Use the following
+commands to setup the basic environment:
 
 .. code:: c
 
@@ -537,7 +561,32 @@ commands to setup the environment:
    $ source <path to Xilinx_xrt>/setup.sh
    $ export DEVICE=<path-to-platform-directory>/<platform>.xpfm
 
+For PCIe devices, set the following:
 
+.. code:: c
+
+   $ export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+   
+   $ export OPENCV_LIB=< path-to-opencv-lib-folder >
+   
+   $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+
+For embedded devices, set the following:
+
+.. code:: c
+
+   Download the platform, and common-image from Xilinx Download Center. Run the sdk.sh script from the common-image directory to install sysroot using the command : 
+   $ ./sdk.sh -y -d ./ -p
+
+   Unzip the rootfs file : 
+   $ gunzip ./rootfs.ext4.gz
+
+   $ export SYSROOT=< path-to-platform-sysroot >
+   
+   $ export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
+   
+   $ export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
+   
 Software Emulation
 ------------------
 
@@ -558,11 +607,9 @@ the steps to build and run for the software emulation:
 
 .. code:: c
 
-   $ export SYSROOT=< path-to-platform-sysroot >
-   
-   $ make host xclbin TARGET=sw_emu BOARD=Zynq ARCH=< aarch64 | aarch32 >
-   
-   $ make run TARGET=sw_emu BOARD=Zynq ARCH=< aarch64 | aarch32 >
+   $ make host xclbin TARGET=sw_emu HOST_ARCH=< aarch32 | aarch64 >
+
+   $ make run TARGET=sw_emu HOST_ARCH=< aarch32 | aarch64 >
 
 
 Hardware Emulation
@@ -586,11 +633,10 @@ to build and run for the hardware emulation:
 
 .. code:: c
 
-   $ export SYSROOT=< path-to-platform-sysroot >
    
-   $ make host xclbin TARGET=hw_emu BOARD=Zynq ARCH=< aarch64 | aarch32 >
+   $ make host xclbin TARGET=hw_emu HOST_ARCH=< aarch32 | aarch64 >
    
-   $ make run TARGET=hw_emu BOARD=Zynq ARCH=< aarch64 | aarch32 >
+   $ make run TARGET=hw_emu HOST_ARCH=< aarch32 | aarch64 >
 
 
 Testing on the Hardware
@@ -615,11 +661,9 @@ the steps to build the kernel and run on a hardware:
 
 .. code:: c
 
-   $ export SYSROOT=< path-to-platform-sysroot >
+   $ make host xclbin TARGET=hw HOST_ARCH=< aarch32 | aarch64 >
    
-   $ make host xclbin TARGET=hw BOARD=Zynq ARCH=< aarch64 | aarch32 >
-   
-   $ make run TARGET=hw BOARD=Zynq ARCH=< aarch64 | aarch32 >
+   $ make run TARGET=hw HOST_ARCH=< aarch32 | aarch64 >
 
 *Note1*. For non-DFX platforms, BOOT.BIN has to be manually copied from < build-directory >/< xclbin-folder >/sd\_card / to the top level sd_card folder.
 
@@ -627,6 +671,8 @@ the steps to build the kernel and run on a hardware:
 
 .. code:: c
 
+   source /opt/xilinx/xrt/setup.sh
+   
    cd /mnt
    
    export XCL_BINDIR=< xclbin-folder-present-in-the-sd_card > #For example, "export XCL_BINDIR=xclbin_zcu102_base_hw"

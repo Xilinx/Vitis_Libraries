@@ -25,13 +25,13 @@ int main(int argc, char** argv) {
     cv::Mat ocvpnts, hlspnts;
 
     if (argc != 2) {
-        printf("Usage : <executable> <input image> \n");
+        fprintf(stderr, "Usage: <executable> <input image>\n");
         return -1;
     }
     in_img = cv::imread(argv[1], 0); // reading in the color image
 
     if (!in_img.data) {
-        printf("Failed to load the image ... %s\n!", argv[1]);
+        fprintf(stderr, "Failed to load the image ... %s\n ", argv[1]);
         return -1;
     }
 
@@ -95,12 +95,13 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
 
-    OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice,       // buffer on the FPGA
-                                        CL_TRUE,             // blocking call
-                                        0,                   // buffer offset in bytes
-                                        image_in_size_bytes, // Size in bytes
-                                        in_img.data,         // Pointer to the data to copy
-                                        nullptr, &event));
+    OCL_CHECK(err,
+              q.enqueueWriteBuffer(imageToDevice,       // buffer on the FPGA
+                                   CL_TRUE,             // blocking call
+                                   0,                   // buffer offset in bytes
+                                   image_in_size_bytes, // Size in bytes
+                                   in_img.data,         // Pointer to the data to copy
+                                   nullptr, &event));
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);
@@ -149,7 +150,8 @@ int main(int argc, char** argv) {
     std::vector<cv::Point> hls_points;
     std::vector<cv::Point> ocv_points;
     std::vector<cv::Point> common_pts;
-    /*						Mark HLS points on the image 				*/
+    /*						Mark HLS points on the image
+     */
 
     for (int j = 0; j < in_img.rows; j++) {
         int l = 0;
@@ -170,8 +172,10 @@ int main(int argc, char** argv) {
         }
     }
 
-    /*						End of marking HLS points on the image 				*/
-    /*						Write HLS and Opencv corners into a file			*/
+    /*						End of marking HLS points on the image
+     */
+    /*						Write HLS and Opencv corners into a file
+     */
 
     ocvpnts = in_img.clone();
 
@@ -192,7 +196,8 @@ int main(int argc, char** argv) {
 
     /*									End
      */
-    /*							Find common points in among opencv and HLS
+    /*							Find common points in among opencv and
+     * HLS
      */
     int ocv_x, ocv_y, hls_x, hls_y;
     for (int j = 0; j < nocv; j++) {
@@ -211,7 +216,8 @@ int main(int argc, char** argv) {
     /*							End */
     imwrite("output_hls.png", out_img); // HLS Image
     imwrite("output_ocv.png", ocvpnts); // Opencv Image
-    /*						Success, Loss and Gain Percentages */
+    /*						Success, Loss and Gain Percentages
+     */
     float persuccess, perloss, pergain;
 
     int totalocv = ocv_points.size();
@@ -223,7 +229,10 @@ int main(int argc, char** argv) {
 
     printf("Commmon = %d\t Success = %f\t Loss = %f\t Gain = %f\n", ncommon, persuccess, perloss, pergain);
 
-    if (persuccess < 60 || totalhls == 0) return 1;
-
+    if (persuccess < 60 || totalhls == 0) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
+    }
+    std::cout << "Test Passed " << std::endl;
     return 0;
 }

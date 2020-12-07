@@ -27,9 +27,9 @@
 #define SCALAR 1
 // macros for accel
 #define FUNCT_NUM 11
-//#define EXTRA_ARG  0.05
+//#define EXTRA_ARG 0.05
 //#define EXTRA_PARM XF_CONVERT_POLICY_SATURATE
 
 // OpenCV reference macros
 #define CV_FUNCT_NAME min
-//#define CV_EXTRA_ARG  0.05
+//#define CV_EXTRA_ARG 0.05

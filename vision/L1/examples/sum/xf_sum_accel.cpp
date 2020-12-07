@@ -20,7 +20,7 @@ static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) 
 
 void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out) {
 // clang-format off
-    #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth =16384
+    #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth =__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=sum_out       offset=slave  bundle=gmem1 depth =3
     #pragma HLS INTERFACE s_axilite  port=return 		      bundle=control
     // clang-format on

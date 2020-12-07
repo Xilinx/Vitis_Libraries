@@ -15,13 +15,13 @@
  */
 
 #include "common/xf_headers.hpp"
-#include <stdlib.h>
-#include <ap_int.h>
 #include "xf_reduce_config.h"
+#include <ap_int.h>
+#include <stdlib.h>
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage:  <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: <INPUT IMAGE PATH 1>\n");
         return EXIT_FAILURE;
     }
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     in_img = cv::imread(argv[1], 0);
 
     if (in_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
     fclose(fp1);
 
     if (err_cnt > 0) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

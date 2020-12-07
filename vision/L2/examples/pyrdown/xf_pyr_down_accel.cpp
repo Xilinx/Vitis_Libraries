@@ -33,14 +33,7 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     // clang-format on
 
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> in_mat(in_rows, in_cols);
-// clang-format off
-    #pragma HLS stream variable=in_mat.data depth=2
-    // clang-format on
-
     xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> out_mat(out_rows, out_cols);
-// clang-format off
-    #pragma HLS stream variable=out_mat.data depth=2
-// clang-format on
 
 // clang-format off
     #pragma HLS DATAFLOW

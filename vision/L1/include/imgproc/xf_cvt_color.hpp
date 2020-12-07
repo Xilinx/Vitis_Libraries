@@ -17,8 +17,8 @@
 #ifndef _XF_CVT_COLOR_HPP_
 #define _XF_CVT_COLOR_HPP_
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
+#include "hls_stream.h"
 #include "xf_cvt_color_1.hpp"
 #include "xf_cvt_color_utils.hpp"
 #include <assert.h>
@@ -34,12 +34,12 @@ void write_y_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     unsigned long long int idx = 0;
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
         // clang-format on
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             tmp = src_y.read(i * (width >> XF_BITSHIFT(NPC)) + j);
             out_y.write(idx++, tmp);
@@ -68,10 +68,10 @@ void KernRgba2Yuv4_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     XF_PTNAME(XF_8UP) Y0[16], U[16], V[16];
     uint8_t RGB[64];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y0 complete
-    #pragma HLS ARRAY_PARTITION variable=U complete
-    #pragma HLS ARRAY_PARTITION variable=V complete
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Y0 complete
+#pragma HLS ARRAY_PARTITION variable=U complete
+#pragma HLS ARRAY_PARTITION variable=V complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
     unsigned long long int y_idx = 0, u_idx = 0, v_idx = 0;
     XF_SNAME(WORDWIDTH_SRC) PackedPixels;
@@ -81,14 +81,14 @@ void KernRgba2Yuv4_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS PIPELINE
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             PackedPixels = src.read(i * width + j);
             ExtractRGBAPixels<WORDWIDTH_SRC>(PackedPixels, RGB);
@@ -98,7 +98,7 @@ rowloop:
             //		V =  (0.439 * R) - (0.368 * G) - (0.071 * B) + 128
             for (int l = 0; l<(1 << XF_BITSHIFT(NPC))>> 1; l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
                 // clang-format on
                 //#pragma HLS unroll
                 if (PLANES == 4) {
@@ -156,10 +156,10 @@ void KernRgba2Iyuv_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
     ap_uint8_t Y0[16], U[16], V[16];
     uint8_t RGB[64];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y0  complete
-    #pragma HLS ARRAY_PARTITION variable=U   complete
-    #pragma HLS ARRAY_PARTITION variable=V   complete
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Y0  complete
+#pragma HLS ARRAY_PARTITION variable=U   complete
+#pragma HLS ARRAY_PARTITION variable=V   complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
     unsigned long long int y_idx = 0, out_idx = 0, out_idx1 = 0;
     XF_SNAME(WORDWIDTH_SRC) PackedPixels;
@@ -175,21 +175,21 @@ void KernRgba2Iyuv_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
 rowloop:
     for (i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             PackedPixels = rgba.read(i * width + j);
             ExtractRGBAPixels<WORDWIDTH_SRC>(PackedPixels, RGB);
             for (l = 0; l<(1 << XF_BITSHIFT(NPC))>> 1; l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 if (PLANES == 4) {
                     offset = l << 3;
@@ -200,9 +200,11 @@ rowloop:
                     Y0[(l << 1)] = CalculateY(RGB[offset + 0], RGB[offset + 1], RGB[offset + 2]);
                     Y0[(l << 1) + 1] = CalculateY(RGB[offset + 3], RGB[offset + 4], RGB[offset + 5]);
                 }
-                if (evenRow) // As Sampling rate is 2, Calculating U and V components only for even rows
+                if (evenRow) // As Sampling rate is 2, Calculating U and V components
+                             // only for even rows
                 {
-                    /* 128 is added to U and V values to make them always positive and in studio range 16-240 */
+                    /* 128 is added to U and V values to make them always positive and in
+                     * studio range 16-240 */
                     if (evenBlock) {
                         U[l] = CalculateU(RGB[offset + 0], RGB[offset + 1], RGB[offset + 2]);
                         V[l] = CalculateV(RGB[offset + 0], RGB[offset + 1], RGB[offset + 2]);
@@ -225,7 +227,9 @@ rowloop:
         evenRow = evenRow ? false : true;
     }
     //	if(((ROWS+1)>>1) & 0x1)
-    //	{	// Filling the empty region with zeros, when the height is multiple of 2 but not a multiple of 4
+    //	{	// Filling the empty region with zeros, when the height is
+    // multiple
+    // of 2 but not a multiple of 4
     //		for( i = 0; i < width; i++)
     //		{
     //#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
@@ -258,9 +262,9 @@ void KernRgba2Nv12_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
     XF_PTNAME(XF_8UP) Y0[16], UV[16];
     uint8_t RGB[64];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y0  complete
-    #pragma HLS ARRAY_PARTITION variable=UV  complete
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Y0  complete
+#pragma HLS ARRAY_PARTITION variable=UV  complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) PackedPixels;
     XF_SNAME(WORDWIDTH_Y) YPacked, UVPacked;
@@ -270,21 +274,21 @@ void KernRgba2Nv12_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             PackedPixels = rgba.read(i * width + j);
             ExtractRGBAPixels<WORDWIDTH_SRC>(PackedPixels, RGB);
             for (int l = 0; l<(1 << XF_BITSHIFT(NPC))>> 1; l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 if (PLANES == 4) {
                     offset = l << 3;
@@ -333,9 +337,9 @@ void Kernbgr2Nv12_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
     XF_PTNAME(XF_8UP) Y0[16], UV[16];
     uint8_t RGB[64];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y0  complete
-    #pragma HLS ARRAY_PARTITION variable=UV  complete
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Y0  complete
+#pragma HLS ARRAY_PARTITION variable=UV  complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) PackedPixels;
     XF_SNAME(WORDWIDTH_Y) YPacked, UVPacked;
@@ -345,26 +349,28 @@ void Kernbgr2Nv12_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             PackedPixels = rgba.read(i * width + j);
             ExtractRGBAPixels<WORDWIDTH_SRC>(PackedPixels, RGB);
             for (int l = 0; l<(1 << XF_BITSHIFT(NPC))>> 1; l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 if (PLANES == 4) {
                     //				offset = l << 3;
-                    //				Y0[(l<<1)]   = CalculateY(RGB[offset+0], RGB[offset+1], RGB[offset+2]);
-                    //				Y0[(l<<1)+1] = CalculateY(RGB[offset+4], RGB[offset+5], RGB[offset+6]);
+                    //				Y0[(l<<1)]   = CalculateY(RGB[offset+0],
+                    // RGB[offset+1], RGB[offset+2]);
+                    //				Y0[(l<<1)+1] = CalculateY(RGB[offset+4],
+                    // RGB[offset+5], RGB[offset+6]);
                 } else {
                     offset = l * 6;
                     Y0[(l << 1)] = CalculateY(RGB[offset + 2], RGB[offset + 1], RGB[offset + 0]);
@@ -410,9 +416,9 @@ void KernRgba2Nv21_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
     ap_uint8_t Y0[16], VU[16];
     uint8_t RGB[64];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y0 complete
-    #pragma HLS ARRAY_PARTITION variable=VU complete
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Y0 complete
+#pragma HLS ARRAY_PARTITION variable=VU complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) PackedPixels;
     XF_SNAME(WORDWIDTH_Y) YPacked, VUPacked;
@@ -422,21 +428,21 @@ void KernRgba2Nv21_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             PackedPixels = (XF_SNAME(WORDWIDTH_SRC))rgba.read(i * width + j);
             ExtractRGBAPixels<WORDWIDTH_SRC>(PackedPixels, RGB);
             for (int l = 0; l<(1 << XF_BITSHIFT(NPC))>> 1; l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 if (PLANES == 4) {
                     offset = l << 3;
@@ -486,9 +492,9 @@ void Kernbgr2Nv21_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
     ap_uint8_t Y0[16], VU[16];
     uint8_t RGB[64];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y0 complete
-    #pragma HLS ARRAY_PARTITION variable=VU complete
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Y0 complete
+#pragma HLS ARRAY_PARTITION variable=VU complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) PackedPixels;
     XF_SNAME(WORDWIDTH_Y) YPacked, VUPacked;
@@ -498,26 +504,28 @@ void Kernbgr2Nv21_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& rgba,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             PackedPixels = (XF_SNAME(WORDWIDTH_SRC))rgba.read(i * width + j);
             ExtractRGBAPixels<WORDWIDTH_SRC>(PackedPixels, RGB);
             for (int l = 0; l<(1 << XF_BITSHIFT(NPC))>> 1; l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 if (PLANES == 4) {
                     //				offset = l << 3;
-                    //				Y0[(l<<1)]   = CalculateY(RGB[offset+0], RGB[offset+1], RGB[offset+2]);
-                    //				Y0[(l<<1)+1] = CalculateY(RGB[offset+4], RGB[offset+5], RGB[offset+6]);
+                    //				Y0[(l<<1)]   = CalculateY(RGB[offset+0],
+                    // RGB[offset+1], RGB[offset+2]);
+                    //				Y0[(l<<1)+1] = CalculateY(RGB[offset+4],
+                    // RGB[offset+5], RGB[offset+6]);
                 } else {
                     offset = l * 6;
                     Y0[(l << 1)] = CalculateY(RGB[offset + 2], RGB[offset + 1], RGB[offset + 0]);
@@ -552,16 +560,16 @@ void KernIyuv2Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
     //	uchar_t k;
     XF_PTNAME(XF_8UP) RGB[64], Ybuf[16], Ubuf[16], Vbuf[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=Ubuf complete
-    #pragma HLS ARRAY_PARTITION variable=Vbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=Ubuf complete
+#pragma HLS ARRAY_PARTITION variable=Vbuf complete
     // clang-format on
 
     hls::stream<XF_SNAME(WORDWIDTH_SRC)> UStream, VStream;
 // clang-format off
-    #pragma HLS STREAM variable=&UStream  depth=COLS
-    #pragma HLS STREAM variable=&VStream  depth=COLS
+#pragma HLS STREAM variable=&UStream  depth=COLS
+#pragma HLS STREAM variable=&VStream  depth=COLS
     // clang-format on
 
     XF_SNAME(WORDWIDTH_SRC) YPacked, UPacked, VPacked;
@@ -576,14 +584,14 @@ void KernIyuv2Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YPacked = in_y.read(i * width + j);
 
@@ -595,7 +603,8 @@ rowloop:
                     VPacked = in_v.read(idx++);
                     VStream.write(VPacked);
                 } else {
-                    /* Copy of the U and V values are pushed into stream to be used for next row */
+                    /* Copy of the U and V values are pushed into stream to be used for
+                     * next row */
                     UPacked = UStream.read();
                     VPacked = VStream.read();
                 }
@@ -606,10 +615,10 @@ rowloop:
                 offset = (1 << XF_BITSHIFT(NPC)) >> 1;
             }
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) { // Y00 and Y01 have a U and V values in common
-                                                                  // clang-format off
-                                                                  #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                                                                  #pragma HLS unroll
-                                                                  // clang-format on
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
+                // clang-format on
                 // Y00 = (Ybuf[k<<1] > 16) ? (Ybuf[k<<1]-16) : 0;
                 // Y01 = (Ybuf[(k<<1) + 1] > 16) ? (Ybuf[(k<<1)+1]-16) : 0;
 
@@ -673,26 +682,27 @@ void KernIyuv2Nv12_ro(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _u,
     ap_uint<13> i, j;
     XF_PTNAME(XF_8UP) U[16], V[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=U complete
-    #pragma HLS ARRAY_PARTITION variable=V complete
+#pragma HLS ARRAY_PARTITION variable=U complete
+#pragma HLS ARRAY_PARTITION variable=V complete
     // clang-format on
     unsigned long long int idx = 0, idx1 = 0;
     XF_SNAME(WORDWIDTH_SRC) UVPacked0, UVPacked1, UPacked, VPacked;
 rowloop:
     for (i = 0; i<height>> 1; i++) {
 /*
- * Reading the plane interleaved U and V data from streams and packing them in pixel interleaved
+ * Reading the plane interleaved U and V data from streams and packing them in
+ * pixel interleaved
  * and writing out to UV stream
  */
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=rTC max=rTC
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=rTC max=rTC
     // clang-format on
     columnloop:
         for (j = 0; j < (width >> (1 + XF_BITSHIFT(NPC))); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=cTC max=cTC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=cTC max=cTC
             // clang-format on
             UPacked = _u.read(idx);
             VPacked = _v.read(idx++);
@@ -706,8 +716,8 @@ rowloop:
             int l;
             for (k = 0, l = 0; k < ((1 << XF_BITSHIFT(NPC)) >> 1); k++, l += AU_CVT_STEP) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS UNROLL
                 // clang-format on
                 UVPacked0.range(l + AU_CVT_STEP - 1, l) = (U[k]) | ((ap_uint<16>)V[k] << (8));
                 UVPacked1.range(l + AU_CVT_STEP - 1, l) = (U[k + off]) | ((ap_uint<16>)V[k + off] << (8));
@@ -731,28 +741,29 @@ void KernIyuv2Yuv4_ro(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _in_u,
 
     hls::stream<XF_TNAME(SRC_T, NPC)> inter_u, inter_v;
 // clang-format off
-    #pragma HLS stream variable=&inter_u depth=COLS/2
-    #pragma HLS stream variable=&inter_v depth=COLS/2
+#pragma HLS stream variable=&inter_u depth=COLS/2
+#pragma HLS stream variable=&inter_v depth=COLS/2
     // clang-format on
     unsigned long long int idx = 0, idx1 = 0;
     XF_PTNAME(XF_8UP) U[16], V[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=U complete
-    #pragma HLS ARRAY_PARTITION variable=V complete
+#pragma HLS ARRAY_PARTITION variable=U complete
+#pragma HLS ARRAY_PARTITION variable=V complete
     // clang-format on
 
-    XF_SNAME(WORDWIDTH) IUPacked, IVPacked, UPacked0, VPacked0, UPacked1, VPacked1;
+    XF_SNAME(WORDWIDTH)
+    IUPacked, IVPacked, UPacked0, VPacked0, UPacked1, VPacked1;
 rowloop:
     for (int i = 0; i < ((height >> 2) << 1); i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=rTC max=rTC
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=rTC max=rTC
     // clang-format on
     columnloop:
         for (int j = 0, k = 0; j < ((width >> XF_BITSHIFT(NPC)) >> 1); j++, k += 2) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=cTC max=cTC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=cTC max=cTC
             // clang-format on
             IUPacked = _in_u.read(idx);
             IVPacked = _in_v.read(idx++);
@@ -763,8 +774,8 @@ rowloop:
             int off = 1 << (2); // (1 << NPC) >> 1;
             for (int k = 0, l = 0; k < (1 << (2)); k++, l += AU_CVT_STEP) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS UNROLL
                 // clang-format on
                 UPacked0.range(l + AU_CVT_STEP - 1, l) = (U[k]) | ((ap_uint<16>)U[k] << (8));
                 VPacked0.range(l + AU_CVT_STEP - 1, l) = (V[k]) | ((ap_uint<16>)V[k] << (8));
@@ -783,7 +794,7 @@ rowloop:
         }
         for (int j = 0; j < (_u_image.cols >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
+#pragma HLS pipeline
             // clang-format on
             _u_image.write((((i * 2) + 1) * (_u_image.cols >> XF_BITSHIFT(NPC))) + j, inter_u.read());
             _v_image.write((((i * 2) + 1) * (_u_image.cols >> XF_BITSHIFT(NPC))) + j, inter_v.read());
@@ -809,8 +820,8 @@ void KernNv122Iyuv_ro(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
                       uint16_t width) {
     XF_PTNAME(XF_8UP) UV0[16], UV1[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=UV0 complete
-    #pragma HLS ARRAY_PARTITION variable=UV1 complete
+#pragma HLS ARRAY_PARTITION variable=UV0 complete
+#pragma HLS ARRAY_PARTITION variable=UV1 complete
     // clang-format on
     unsigned long long int idx = 0, idx1 = 0;
     XF_SNAME(WORDWIDTH_DST) UPacked, VPacked;
@@ -819,14 +830,14 @@ void KernNv122Iyuv_ro(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
 rowloop:
     for (i = 0; i < (height >> 1); i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (j = 0; j < ((width >> XF_BITSHIFT(NPC)) >> 1); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             UVPacked0 = _uv.read(idx++);
             UVPacked1 = _uv.read(idx++);
@@ -840,8 +851,8 @@ rowloop:
             ap_uint<9> k;
             for (int k = 0, l = 0; k < (1 << (XF_BITSHIFT(NPC))); k += 4, l += AU_CVT_STEP) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS UNROLL
                 // clang-format on
                 VPacked.range(l + AU_CVT_STEP - 1, l) = (UV0[k + 1]) | ((ap_uint<16>)UV0[k + 3] << (8));
                 UPacked.range(l + AU_CVT_STEP - 1, l) = (UV0[k]) | ((ap_uint<16>)UV0[k + 2] << (8));
@@ -877,14 +888,14 @@ void KernNv122Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
     // width=width>>NPC;
     XF_PTNAME(XF_8UP) RGB[64], Ybuf[16], UVbuf[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=UVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=UVbuf complete
     // clang-format on
 
     hls::stream<XF_SNAME(WORDWIDTH_UV)> UVStream;
 // clang-format off
-    #pragma HLS STREAM variable=&UVStream  depth=COLS
+#pragma HLS STREAM variable=&UVStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) YPacked;
     XF_SNAME(WORDWIDTH_UV) UVPacked;
@@ -897,15 +908,15 @@ void KernNv122Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
 
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
 
             YPacked = in_y.read(i * width + j);
@@ -919,9 +930,9 @@ rowloop:
             xfExtractPixels<NPC, WORDWIDTH_UV, XF_8UP>(UVbuf, UVPacked, 0);
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_FLATTEN off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 // Y00 = (Ybuf[k<<1] > 16) ? (Ybuf[k<<1]-16) : 0;
                 // Y01 = (Ybuf[(k<<1)+1] > 16) ? (Ybuf[(k<<1)+1] - 16) : 0;
@@ -1003,14 +1014,14 @@ void KernNv122bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
     // width=width>>NPC;
     XF_PTNAME(XF_8UP) RGB[64], Ybuf[16], UVbuf[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=UVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=UVbuf complete
     // clang-format on
 
     hls::stream<XF_SNAME(WORDWIDTH_UV)> UVStream;
 // clang-format off
-    #pragma HLS STREAM variable=&UVStream  depth=COLS
+#pragma HLS STREAM variable=&UVStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) YPacked;
     XF_SNAME(WORDWIDTH_UV) UVPacked;
@@ -1023,15 +1034,15 @@ void KernNv122bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
 
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
 
             YPacked = in_y.read(i * width + j);
@@ -1045,9 +1056,9 @@ rowloop:
             xfExtractPixels<NPC, WORDWIDTH_UV, XF_8UP>(UVbuf, UVPacked, 0);
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_FLATTEN off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 // Y00 = (Ybuf[k<<1] > 16) ? (Ybuf[k<<1]-16) : 0;
                 // Y01 = (Ybuf[(k<<1)+1] > 16) ? (Ybuf[(k<<1)+1] - 16) : 0;
@@ -1126,33 +1137,34 @@ void KernNv122Yuv4_ro(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
                       uint16_t width) {
     XF_PTNAME(XF_8UP) UV[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=UV complete
+#pragma HLS ARRAY_PARTITION variable=UV complete
     // clang-format on
     ap_uint<13> i, j;
     XF_SNAME(WORDWIDTH_UV) UPacked;
     XF_SNAME(WORDWIDTH_DST) VPacked, UVPacked;
-    XF_SNAME(WORDWIDTH_DST) arr_UPacked[COLS >> (XF_BITSHIFT(NPC))], arr_VPacked[COLS >> (XF_BITSHIFT(NPC))];
+    XF_SNAME(WORDWIDTH_DST)
+    arr_UPacked[COLS >> (XF_BITSHIFT(NPC))], arr_VPacked[COLS >> (XF_BITSHIFT(NPC))];
 
     unsigned long long int idx = 0, idx1 = 0;
 rowloop:
     for (i = 0; i < (height >> 1); i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             UVPacked = _uv.read(idx1++);
             xfExtractPixels<NPC, WORDWIDTH_DST, XF_8UP>(UV, UVPacked, 0);
 #define AU_CVT_STEP 16
             for (int k = 0, l = 0; k < (1 << (XF_BITSHIFT(NPC))); k += 2, l += AU_CVT_STEP) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS UNROLL
                 // clang-format on
                 VPacked.range(l + AU_CVT_STEP - 1, l) = (UV[k + 1]) | ((ap_uint<16>)UV[k + 1] << (8));
                 UPacked.range(l + AU_CVT_STEP - 1, l) = (UV[k]) | ((ap_uint<16>)UV[k] << (8));
@@ -1187,8 +1199,8 @@ void KernNv212Iyuv_ro(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& in_uv,
                       uint16_t width) {
     XF_PTNAME(XF_8UP) VU0[16], VU1[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=VU0 complete
-    #pragma HLS ARRAY_PARTITION variable=VU1 complete
+#pragma HLS ARRAY_PARTITION variable=VU0 complete
+#pragma HLS ARRAY_PARTITION variable=VU1 complete
     // clang-format on
     ap_uint<13> i, j;
     XF_SNAME(WORDWIDTH_DST) UPacked, VPacked;
@@ -1199,16 +1211,17 @@ void KernNv212Iyuv_ro(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& in_uv,
 rowloop:
     for (i = 0; i < (height >> 1); i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (j = 0; j < ((width >> XF_BITSHIFT(NPC)) >> 1);
-             j++) { // reading UV pixel interleaved data and writing them into UStream and VStream
+             j++) { // reading UV pixel interleaved data and writing them into
+                    // UStream and VStream
                     // clang-format off
-                    #pragma HLS pipeline
-                    #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-                    // clang-format on
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+            // clang-format on
             VUPacked0 = in_uv.read(idx++);
             VUPacked1 = in_uv.read(idx++);
 
@@ -1219,8 +1232,8 @@ rowloop:
             int sft = 1 << (XF_BITSHIFT(NPC) + 2);
             for (k = 0, l = 0; k < (1 << (XF_BITSHIFT(NPC))); k += 4, l += AU_CVT_STEP) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS UNROLL
                 // clang-format on
                 UPacked.range(l + AU_CVT_STEP - 1, l) = (VU0[k + 1]) | ((ap_uint<16>)VU0[k + 3] << (8));
                 VPacked.range(l + AU_CVT_STEP - 1, l) = (VU0[k]) | ((ap_uint<16>)VU0[k + 2] << (8));
@@ -1234,21 +1247,24 @@ rowloop:
         }
     }
     /*	if((height>>1)& 0x1)
-            {
-                    // Writing 0's to fill the stream if the UV plane width is odd
-                    for(int i = 0; i < ((width>>XF_BITSHIFT(NPC))>>1); i++)
-                    {
-// clang-format off
-    #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-// clang-format on
-                            u_out.write(idx1,0);
-                            v_out.write(idx1++,0);
-                    }
-            }*/
+        {
+                // Writing 0's to fill the stream if the UV plane width is odd
+                for(int i = 0; i < ((width>>XF_BITSHIFT(NPC))>>1); i++)
+                {
+  // clang-format off
+  #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+  // clang-format on
+                        u_out.write(idx1,0);
+                        v_out.write(idx1++,0);
+                }
+        }*/
 }
-// template<int SRC_T,int UV_T,int DST_T,int ROWS, int COLS, int NPC, int NPC_UV,int PLANES,int WORDWIDTH_Y, int
-// WORDWIDTH_UV, int WORDWIDTH_DST, int TC, int iTC> void KernNv212bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &
-// in_y,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & in_uv,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & rgba,uint16_t
+// template<int SRC_T,int UV_T,int DST_T,int ROWS, int COLS, int NPC, int
+// NPC_UV,int PLANES,int WORDWIDTH_Y, int
+// WORDWIDTH_UV, int WORDWIDTH_DST, int TC, int iTC> void
+// KernNv212bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &
+// in_y,xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC_UV> & in_uv,xf::cv::Mat<DST_T,
+// ROWS, COLS, NPC> & rgba,uint16_t
 // height,uint16_t width)
 //{
 //	XF_PTNAME(XF_8UP) RGB[64],Ybuf[16],UVbuf[16];
@@ -1277,24 +1293,31 @@ rowloop:
 //#pragma HLS pipeline
 //#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
 //			YPacked = in_y.read(i*width+j);
-//			xfExtractPixels<NPC, WORDWIDTH_Y, XF_8UP>(Ybuf, YPacked, 0);
+//			xfExtractPixels<NPC, WORDWIDTH_Y, XF_8UP>(Ybuf, YPacked,
+// 0);
 //			if(evenRow)
 //			{
 //				UVPacked = in_uv.read(in_idx++);
 //				UVStream.write(UVPacked);
 //			}
-//			else // Keep a copy of UV row data in stream to use for oddrow
+//			else // Keep a copy of UV row data in stream to use for
+// oddrow
 //			{
 //				UVPacked = UVStream.read();
 //			}
 //
-//			xfExtractPixels<NPC, WORDWIDTH_UV, XF_8UP>(UVbuf, UVPacked, 0);
+//			xfExtractPixels<NPC, WORDWIDTH_UV, XF_8UP>(UVbuf,
+// UVPacked,
+// 0);
 //			for( k = 0; k < (1<<XF_BITSHIFT(NPC))>>1; k++)
 //			{
 //#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
 //#pragma HLS unroll
 //				//Y00 = (Ybuf[k<<1] > 16) ? (Ybuf[k<<1]-16) : 0;
-//				//Y01 = (Ybuf[(k<<1)+1] > 16) ? (Ybuf[(k<<1)+1]-16) : 0;
+//				//Y01 = (Ybuf[(k<<1)+1] > 16) ?
+//(Ybuf[(k<<1)+1]-16)
+//:
+// 0;
 //
 //				if((Ybuf[k<<1] > 16))
 //				{
@@ -1322,16 +1345,30 @@ rowloop:
 //				V2Gtemp = (short int)V2G * V;
 //				U2Btemp = U * (short int)U2B;
 //
-//				// R = 1.164*Y + 1.596*V = Y + 0.164*Y + V + 0.596*V
-//				// G = 1.164*Y - 0.813*V - 0.391*U = Y + 0.164*Y - 0.813*V - 0.391*U
-//				// B = 1.164*Y + 2.018*U = Y + 0.164 + 2*U + 0.018*U
+//				// R = 1.164*Y + 1.596*V = Y + 0.164*Y + V +
+// 0.596*V
+//				// G = 1.164*Y - 0.813*V - 0.391*U = Y + 0.164*Y
+//-
+// 0.813*V - 0.391*U
+//				// B = 1.164*Y + 2.018*U = Y + 0.164 + 2*U +
+// 0.018*U
 //
-//					RGB[(k*6) + 0] = CalculateB(Y00,U2Btemp,U);		 	//B0
-//					RGB[(k*6) + 1] = CalculateG(Y00,U2Gtemp,V2Gtemp);	//G0
-//					RGB[(k*6) + 2] =  CalculateR(Y00,V2Rtemp,V);		//R0
-//					RGB[(k*6) + 3] = CalculateB(Y01,U2Btemp,U);		    //B1
-//					RGB[(k*6) + 4] = CalculateG(Y01,U2Gtemp,V2Gtemp);	//G1
-//					RGB[(k*6) + 5] = CalculateR(Y01,V2Rtemp,V);		    //R1
+//					RGB[(k*6) + 0] =
+// CalculateB(Y00,U2Btemp,U);
+////B0
+//					RGB[(k*6) + 1] =
+// CalculateG(Y00,U2Gtemp,V2Gtemp);	//G0
+//					RGB[(k*6) + 2] =
+// CalculateR(Y00,V2Rtemp,V);
+////R0
+//					RGB[(k*6) + 3] =
+// CalculateB(Y01,U2Btemp,U);
+////B1
+//					RGB[(k*6) + 4] =
+// CalculateG(Y01,U2Gtemp,V2Gtemp);	//G1
+//					RGB[(k*6) + 5] =
+// CalculateR(Y01,V2Rtemp,V);
+////R1
 //
 //			}
 //
@@ -1370,16 +1407,16 @@ void KernNv212Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
                       uint16_t width) {
     XF_PTNAME(XF_8UP) RGB[64], Ybuf[16], UVbuf[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=UVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=UVbuf complete
     // clang-format on
     ap_uint<13> i, j;
     unsigned long long int in_idx = 0, out_idx = 0;
     int k;
     hls::stream<XF_SNAME(WORDWIDTH_UV)> UVStream;
 // clang-format off
-    #pragma HLS STREAM variable=&UVStream  depth=COLS
+#pragma HLS STREAM variable=&UVStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) YPacked;
     XF_SNAME(WORDWIDTH_UV) UVPacked;
@@ -1391,14 +1428,14 @@ void KernNv212Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
 rowloop:
     for (i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YPacked = in_y.read(i * width + j);
             xfExtractPixels<NPC, WORDWIDTH_Y, XF_8UP>(Ybuf, YPacked, 0);
@@ -1411,8 +1448,8 @@ rowloop:
             xfExtractPixels<NPC, WORDWIDTH_UV, XF_8UP>(UVbuf, UVPacked, 0);
             for (k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 // Y00 = (Ybuf[k<<1] > 16) ? (Ybuf[k<<1]-16) : 0;
                 // Y01 = (Ybuf[(k<<1)+1] > 16) ? (Ybuf[(k<<1)+1]-16) : 0;
@@ -1495,16 +1532,16 @@ void KernNv212bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
                      uint16_t width) {
     XF_PTNAME(XF_8UP) RGB[64], Ybuf[16], UVbuf[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=UVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=UVbuf complete
     // clang-format on
     ap_uint<13> i, j;
     unsigned long long int in_idx = 0, out_idx = 0;
     int k;
     hls::stream<XF_SNAME(WORDWIDTH_UV)> UVStream;
 // clang-format off
-    #pragma HLS STREAM variable=&UVStream  depth=COLS
+#pragma HLS STREAM variable=&UVStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) YPacked;
     XF_SNAME(WORDWIDTH_UV) UVPacked;
@@ -1516,14 +1553,14 @@ void KernNv212bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& in_y,
 rowloop:
     for (i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YPacked = in_y.read(i * width + j);
             xfExtractPixels<NPC, WORDWIDTH_Y, XF_8UP>(Ybuf, YPacked, 0);
@@ -1536,8 +1573,8 @@ rowloop:
             xfExtractPixels<NPC, WORDWIDTH_UV, XF_8UP>(UVbuf, UVPacked, 0);
             for (k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 // Y00 = (Ybuf[k<<1] > 16) ? (Ybuf[k<<1]-16) : 0;
                 // Y01 = (Ybuf[(k<<1)+1] > 16) ? (Ybuf[(k<<1)+1]-16) : 0;
@@ -1567,14 +1604,26 @@ rowloop:
                 // B = 1.164*Y + 2.018*U = Y + 0.164 + 2*U + 0.018*U
                 //				if(PLANES==4)
                 //				{
-                //				RGB[(k<<3) + 0] = CalculateR(Y00,V2Rtemp,V);		//R0
-                //				RGB[(k<<3) + 1] = CalculateG(Y00,U2Gtemp,V2Gtemp);	//G0
-                //				RGB[(k<<3) + 2] = CalculateB(Y00,U2Btemp,U);		//B0
-                //				RGB[(k<<3) + 3] = 255;					//A
-                //				RGB[(k<<3) + 4] = CalculateR(Y01,V2Rtemp,V);		//R1
-                //				RGB[(k<<3) + 5] = CalculateG(Y01,U2Gtemp,V2Gtemp);	//G1
-                //				RGB[(k<<3) + 6] = CalculateB(Y01,U2Btemp,U);		//B0
-                //				RGB[(k<<3) + 7] = 255;					//A
+                //				RGB[(k<<3) + 0] =
+                // CalculateR(Y00,V2Rtemp,V);
+                ////R0
+                //				RGB[(k<<3) + 1] =
+                // CalculateG(Y00,U2Gtemp,V2Gtemp);	//G0
+                //				RGB[(k<<3) + 2] =
+                // CalculateB(Y00,U2Btemp,U);
+                ////B0
+                //				RGB[(k<<3) + 3] = 255;
+                ////A
+                //				RGB[(k<<3) + 4] =
+                // CalculateR(Y01,V2Rtemp,V);
+                ////R1
+                //				RGB[(k<<3) + 5] =
+                // CalculateG(Y01,U2Gtemp,V2Gtemp);	//G1
+                //				RGB[(k<<3) + 6] =
+                // CalculateB(Y01,U2Btemp,U);
+                ////B0
+                //				RGB[(k<<3) + 7] = 255;
+                ////A
                 //				}
                 //				else
                 //				{
@@ -1620,11 +1669,12 @@ void KernNv212Yuv4_ro(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _vu,
                       uint16_t width) {
     XF_PTNAME(XF_8UP) VUbuf[16];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=VUbuf complete
+#pragma HLS ARRAY_PARTITION variable=VUbuf complete
     // clang-format on
     XF_SNAME(WORDWIDTH_DST) UPacked, VPacked;
     XF_SNAME(WORDWIDTH_VU) VUPacked;
-    XF_SNAME(WORDWIDTH_DST) arr_UPacked[COLS >> (XF_BITSHIFT(NPC))], arr_VPacked[COLS >> (XF_BITSHIFT(NPC))];
+    XF_SNAME(WORDWIDTH_DST)
+    arr_UPacked[COLS >> (XF_BITSHIFT(NPC))], arr_VPacked[COLS >> (XF_BITSHIFT(NPC))];
     ap_uint<13> i, j;
     ap_uint<4> k;
     unsigned long long int idx = 0, idx1 = 0;
@@ -1632,22 +1682,22 @@ void KernNv212Yuv4_ro(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _vu,
 rowloop:
     for (i = 0; i < (height >> 1); i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             VUPacked = _vu.read(idx1++);
             xfExtractPixels<NPC, WORDWIDTH_VU, XF_8UP>(VUbuf, VUPacked, 0);
 #define AU_CVT_STEP 16
             for (k = 0, l = 0; k < (1 << (XF_BITSHIFT(NPC))); k += 2, l += AU_CVT_STEP) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS UNROLL
                 // clang-format on
                 UPacked.range(l + AU_CVT_STEP - 1, l) = (VUbuf[k + 1]) | ((ap_uint<16>)VUbuf[k + 1] << (8));
                 VPacked.range(l + AU_CVT_STEP - 1, l) = (VUbuf[k]) | ((ap_uint<16>)VUbuf[k] << (8));
@@ -1684,8 +1734,8 @@ void KernYuyv2Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& yuyv,
     ap_uint8_t RGB[64];
     XF_PTNAME(XF_8UP) YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
 
     XF_SNAME(WORDWIDTH_DST) PackedPixels;
@@ -1697,20 +1747,20 @@ void KernYuyv2Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& yuyv,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YUVPacked = yuyv.read(i * width + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             for (int k = 0; k < (XF_NPIXPERCYCLE(NPC) >> 1); k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
                 // clang-format on
                 // Y00 = (YUVbuf[(k<<2)] > 16) ? (YUVbuf[(k<<2)]-16) : 0;
                 if (YUVbuf[(k << 2)] > 16) {
@@ -1774,8 +1824,8 @@ void KernYuyv2bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& yuyv,
     ap_uint8_t RGB[64];
     XF_PTNAME(XF_8UP) YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
 
     XF_SNAME(WORDWIDTH_DST) PackedPixels;
@@ -1787,20 +1837,20 @@ void KernYuyv2bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& yuyv,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YUVPacked = yuyv.read(i * width + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             for (int k = 0; k < (XF_NPIXPERCYCLE(NPC) >> 1); k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
                 // clang-format on
                 // Y00 = (YUVbuf[(k<<2)] > 16) ? (YUVbuf[(k<<2)]-16) : 0;
                 if (YUVbuf[(k << 2)] > 16) {
@@ -1857,9 +1907,9 @@ void KernYuyv2Nv12_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
                       uint16_t width) {
     XF_PTNAME(XF_8UP) Ybuf[16], UVbuf[16], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=UVbuf complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=UVbuf complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) YUVPacked;
     XF_SNAME(WORDWIDTH_Y) YPacked, UVPacked;
@@ -1868,14 +1918,14 @@ void KernYuyv2Nv12_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YUVPacked = _yuyv.read(i * width + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
@@ -1883,9 +1933,9 @@ rowloop:
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1;
                  k++) { // filling the Ybuf and UVbuf in the format required for NV12
                         // clang-format off
-                        #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                        #pragma HLS unroll
-                        // clang-format on
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
+                // clang-format on
                 Ybuf[(k << 1)] = YUVbuf[(k << 2)];
                 Ybuf[(k << 1) + 1] = YUVbuf[(k << 2) + 2];
                 if (evenRow) {
@@ -1923,9 +1973,9 @@ void KernYuyv2Nv21_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
                       uint16_t width) {
     XF_PTNAME(XF_8UP) Ybuf[16], UVbuf[16], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=UVbuf complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=UVbuf complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) YUVPacked;
     XF_SNAME(WORDWIDTH_Y) YPacked, UVPacked;
@@ -1934,14 +1984,14 @@ void KernYuyv2Nv21_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YUVPacked = _yuyv.read(i * width + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
@@ -1949,9 +1999,9 @@ rowloop:
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1;
                  k++) { // filling the Ybuf and UVbuf in the format required for NV12
                         // clang-format off
-                        #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                        #pragma HLS unroll
-                        // clang-format on
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
+                // clang-format on
                 Ybuf[(k << 1)] = YUVbuf[(k << 2)];
                 Ybuf[(k << 1) + 1] = YUVbuf[(k << 2) + 2];
                 if (evenRow) {
@@ -1980,10 +2030,10 @@ void KernYuyv2Iyuv_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
     uint16_t i, j, k, l;
     ap_uint8_t Ybuf[16], Ubuf[16], Vbuf[16], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Ybuf   complete
-    #pragma HLS ARRAY_PARTITION variable=Ubuf   complete
-    #pragma HLS ARRAY_PARTITION variable=Vbuf   complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf   complete
+#pragma HLS ARRAY_PARTITION variable=Ubuf   complete
+#pragma HLS ARRAY_PARTITION variable=Vbuf   complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
     unsigned long long int idx = 0, idx1 = 0;
     XF_SNAME(WORDWIDTH_SRC) YUVPacked;
@@ -1994,21 +2044,21 @@ void KernYuyv2Iyuv_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YUVPacked = _yuyv.read(i * width + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 Ybuf[(k << 1)] = YUVbuf[(k << 2)];
                 Ybuf[(k << 1) + 1] = YUVbuf[(k << 2) + 2];
@@ -2046,10 +2096,10 @@ void KernUyvy2Iyuv_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
                       uint16_t width) {
     ap_uint8_t Ybuf[16], Ubuf[16], Vbuf[16], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=Ubuf complete
-    #pragma HLS ARRAY_PARTITION variable=Vbuf complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=Ubuf complete
+#pragma HLS ARRAY_PARTITION variable=Vbuf complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
 
     XF_SNAME(WORDWIDTH_SRC) YUVPacked;
@@ -2062,22 +2112,22 @@ void KernUyvy2Iyuv_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YUVPacked = _uyvy.read(i * width + j);
 
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 Ybuf[(k << 1)] = YUVbuf[(k << 2) + 1];
                 Ybuf[(k << 1) + 1] = YUVbuf[(k << 2) + 3];
@@ -2125,9 +2175,9 @@ void KernUyvy2Nv12_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
                       uint16_t width) {
     ap_uint8_t Ybuf[16], UVbuf[16], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=UVbuf complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=UVbuf complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) YUVPacked;
     XF_SNAME(WORDWIDTH_Y) YPacked, UVPacked;
@@ -2136,22 +2186,22 @@ void KernUyvy2Nv12_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YUVPacked = _uyvy.read(i * width + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             // filling the Ybuf and UVbuf in the format required for NV12
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 Ybuf[(k << 1)] = YUVbuf[(k << 2) + 1];
                 Ybuf[(k << 1) + 1] = YUVbuf[(k << 2) + 3];
@@ -2190,9 +2240,9 @@ void KernUyvy2Nv21_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
                       uint16_t width) {
     ap_uint8_t Ybuf[16], UVbuf[16], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Ybuf complete
-    #pragma HLS ARRAY_PARTITION variable=UVbuf complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=Ybuf complete
+#pragma HLS ARRAY_PARTITION variable=UVbuf complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
     XF_SNAME(WORDWIDTH_SRC) YUVPacked;
     XF_SNAME(WORDWIDTH_Y) YPacked, UVPacked;
@@ -2201,22 +2251,22 @@ void KernUyvy2Nv21_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             YUVPacked = _uyvy.read(i * width + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             // filling the Ybuf and UVbuf in the format required for NV12
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 Ybuf[(k << 1)] = YUVbuf[(k << 2) + 1];
                 Ybuf[(k << 1) + 1] = YUVbuf[(k << 2) + 3];
@@ -2244,8 +2294,8 @@ void KernUyvy2Rgb_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
     uint16_t i, j, k;
     XF_PTNAME(XF_8UP) RGB[64], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
 
     XF_SNAME(WORDWIDTH_DST) PackedPixels;
@@ -2257,21 +2307,21 @@ void KernUyvy2Rgb_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
 rowloop:
     for (i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
     // clang-format on
     columnloop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-            #pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
             // clang-format on
             YUVPacked = uyvy.read(idx++);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             for (k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 U = YUVbuf[(k << 2)] - 128;
                 // Y00 = (YUVbuf[(k<<2) + 1] > 16) ? (YUVbuf[(k<<2) + 1] - 16):0;
@@ -2314,8 +2364,8 @@ void KernUyvy2bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
     uint16_t i, j, k;
     XF_PTNAME(XF_8UP) RGB[64], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
 
     XF_SNAME(WORDWIDTH_DST) PackedPixels;
@@ -2327,21 +2377,21 @@ void KernUyvy2bgr_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
 rowloop:
     for (i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
     // clang-format on
     columnloop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-            #pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
             // clang-format on
             YUVPacked = uyvy.read(idx++);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             for (k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 U = YUVbuf[(k << 2)] - 128;
                 // Y00 = (YUVbuf[(k<<2) + 1] > 16) ? (YUVbuf[(k<<2) + 1] - 16):0;
@@ -2384,8 +2434,8 @@ void KernUyvy2Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
     uint16_t i, j, k;
     XF_PTNAME(XF_8UP) RGB[64], YUVbuf[32];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=YUVbuf complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=YUVbuf complete
     // clang-format on
 
     XF_SNAME(WORDWIDTH_DST) PackedPixels;
@@ -2397,21 +2447,21 @@ void KernUyvy2Rgba_ro(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
 rowloop:
     for (i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
     // clang-format on
     columnloop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-            #pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
             // clang-format on
             YUVPacked = uyvy.read(idx++);
             ExtractUYVYPixels<WORDWIDTH_SRC>(YUVPacked, YUVbuf);
             for (k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 U = YUVbuf[(k << 2)] - 128;
                 // Y00 = (YUVbuf[(k<<2) + 1] > 16) ? (YUVbuf[(k<<2) + 1] - 16):0;
@@ -2477,7 +2527,7 @@ void rgba2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _u_image,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC4) && " RGBA image Type must be XF_8UC4");
@@ -2516,14 +2566,14 @@ void KernRgb2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             rgba = _rgba.read(i * width + j);
             uint8_t r = rgba.range(7, 0);
@@ -2580,7 +2630,7 @@ void rgb2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _u_image,
               xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -2634,7 +2684,7 @@ void rgba2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _u_image,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC4) && " RGBA image Type must be XF_8UC3");
@@ -2687,7 +2737,7 @@ void rgba2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC4) && " RGBA image Type must be XF_8UC3");
@@ -2699,7 +2749,9 @@ void rgba2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and VU planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the VU plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the VU "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
@@ -2738,7 +2790,7 @@ void rgba2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC4) && " RGBA image Type must be XF_8UC3");
@@ -2750,7 +2802,9 @@ void rgba2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
@@ -2784,7 +2838,7 @@ void iyuv2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& src_v,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y, U, V images Type must be XF_8UC1");
@@ -2813,7 +2867,7 @@ void xFIyuv2Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                  uint16_t width) {
     if (NPC == XF_NPPC8) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernIyuv2Yuv4_ro<SRC_T, ROWS, COLS, NPC, WORDWIDTH, (ROWS << 1), ((COLS >> XF_BITSHIFT(NPC)) >> 1),
                          ((1 << XF_BITSHIFT(NPC)) >> 1)>(src_u, src_v, _u_image, _v_image, height, width);
@@ -2821,7 +2875,7 @@ void xFIyuv2Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                                                                                          width);
     } else if (NPC == XF_NPPC1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernIyuv2Yuv4<SRC_T, ROWS, COLS, NPC, WORDWIDTH, (ROWS >> 1), ((COLS >> XF_BITSHIFT(NPC)) >> 1)>(
             src_u, src_v, _u_image, _v_image, height, width);
@@ -2838,7 +2892,7 @@ void iyuv2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _u_image,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y, U, V images Type must be XF_8UC1");
@@ -2866,7 +2920,7 @@ void xFIyuv2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                  uint16_t width) {
     if (NPC == XF_NPPC8) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernIyuv2Nv12_ro<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_SRC, WORDWIDTH_UV, (ROWS >> 1),
                          ((COLS >> XF_BITSHIFT(NPC)) >> 1), ((1 << XF_BITSHIFT(NPC)) >> 1)>(src_u, src_v, _uv_image,
@@ -2875,7 +2929,7 @@ void xFIyuv2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                                                                                              width);
     } else {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernIyuv2Nv12<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_SRC, WORDWIDTH_UV, (ROWS >> 1),
                       ((COLS >> XF_BITSHIFT(NPC)) >> 1)>(src_u, src_v, _uv_image, height, width);
@@ -2892,7 +2946,7 @@ void iyuv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y_image,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y, U, V images Type must be XF_8UC1");
@@ -2906,7 +2960,9 @@ void iyuv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "input and ouput Y planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
@@ -2928,7 +2984,7 @@ void xFNv122Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                  uint16_t width) {
     if (NPC == XF_NPPC8) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernNv122Iyuv_ro<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_SRC, WORDWIDTH_DST,
                          ((COLS >> XF_BITSHIFT(NPC)) >> 1), ((1 << XF_BITSHIFT(NPC)) >> 2)>(src_uv, _u_image, _v_image,
@@ -2938,7 +2994,7 @@ void xFNv122Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
 
     } else {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernNv122Iyuv<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_SRC, WORDWIDTH_DST,
                       ((COLS >> XF_BITSHIFT(NPC)) >> 1)>(src_uv, _u_image, _v_image, height, width);
@@ -2955,7 +3011,7 @@ void nv122iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _u_image,
                xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y,U,V image Type must be XF_8UC1");
@@ -2970,7 +3026,9 @@ void nv122iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     assert(((src_y.cols == _v_image.cols) && (src_y.rows == (_v_image.rows << 2))) &&
            "V, Y planes dimensions mismatch");
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
@@ -3010,7 +3068,7 @@ void nv122rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& src_uv,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -3022,7 +3080,9 @@ void nv122rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "Y and UV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
                " 1,2,4,8 pixel parallelism is supported  ");
     } else {
@@ -3040,13 +3100,15 @@ void xFNv122Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v_image,
                  uint16_t height,
                  uint16_t width) {
-    //	assert(( (in_uv.cols == (u_out.cols)) && (in_uv.rows == (u_out.rows>>1)))
+    //	assert(( (in_uv.cols == (u_out.cols)) && (in_uv.rows ==
+    //(u_out.rows>>1)))
     //			&& "UV plane and U plane dimensions mismatch");
-    //	assert(( (in_uv.cols == (v_out.cols)) && (in_uv.rows == (v_out.rows>>1)))
+    //	assert(( (in_uv.cols == (v_out.cols)) && (in_uv.rows ==
+    //(v_out.rows>>1)))
     //			&& "UV plane and V plane dimensions mismatch");
     if (NPC == XF_NPPC8) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernNv122Yuv4_ro<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_UV, WORDWIDTH_DST, (COLS >> XF_BITSHIFT(NPC)),
                          ((1 << (XF_BITSHIFT(NPC))) >> 1)>(src_uv, _u_image, _v_image, height, width);
@@ -3054,7 +3116,7 @@ void xFNv122Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                                                                                              width);
     } else {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernNv122Yuv4<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_UV, WORDWIDTH_DST, (COLS >> XF_BITSHIFT(NPC))>(
             src_uv, _u_image, _v_image, height, width);
@@ -3071,7 +3133,7 @@ void nv122yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _u_image,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
     // clang-format on
     xFNv122Yuv4<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(UV_T, NPC_UV), XF_WORDWIDTH(SRC_T, NPC)>(
         src_y, src_uv, _y_image, _u_image, _v_image, src_y.rows, src_y.cols);
@@ -3086,7 +3148,7 @@ void xFNv212Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                  uint16_t width) {
     if (NPC == XF_NPPC8) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernNv212Iyuv_ro<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_SRC, WORDWIDTH_DST,
                          ((COLS >> XF_BITSHIFT(NPC)) >> 1), ((1 << XF_BITSHIFT(NPC)) >> 2)>(src_uv, _u_image, _v_image,
@@ -3096,7 +3158,7 @@ void xFNv212Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
 
     } else {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernNv212Iyuv<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_SRC, WORDWIDTH_DST,
                       ((COLS >> XF_BITSHIFT(NPC)) >> 1)>(src_uv, _u_image, _v_image, height, width);
@@ -3114,7 +3176,7 @@ void nv212iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _u_image,
                xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y,U,V image Type must be XF_8UC1");
@@ -3130,7 +3192,9 @@ void nv212iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "V, Y planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the VU plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the VU "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
@@ -3172,7 +3236,7 @@ void nv212rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& src_uv,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -3184,7 +3248,9 @@ void nv212rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "Y and VU planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the VU plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the VU "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
@@ -3204,7 +3270,7 @@ void xFNv212Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                  uint16_t width) {
     if (NPC == XF_NPPC8) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernNv212Yuv4_ro<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_UV, WORDWIDTH_DST, (COLS >> XF_BITSHIFT(NPC)),
                          ((1 << XF_BITSHIFT(NPC)) >> 1)>(src_uv, _u_image, _v_image, height, width);
@@ -3213,7 +3279,7 @@ void xFNv212Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
 
     } else {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernNv212Yuv4<SRC_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_UV, WORDWIDTH_DST, (COLS >> XF_BITSHIFT(NPC))>(
             src_uv, _u_image, _v_image, height, width);
@@ -3230,7 +3296,7 @@ void nv212yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _u_image,
                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && "Y plane Type must be XF_8UC1");
@@ -3242,7 +3308,9 @@ void nv212yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
     assert((((src_uv.cols << 1) == src_y.cols) && ((src_uv.rows << 1) == src_y.rows)) &&
            "Y and V planes dimensions mismatch");
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC, NPC_UV values must be same  ");
@@ -3274,7 +3342,7 @@ void uyvy2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _u_image,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
@@ -3306,16 +3374,18 @@ void xFUyvy2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
                  xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& uv_plane,
                  uint16_t height,
                  uint16_t width) {
-    /*	assert(( (uyvy.cols == (y_plane.cols<<1)) && (uyvy.rows == y_plane.rows))
-                            && "UYVY and Y plane dimensions mismatch");
-            assert(( (uyvy.cols == (uv_plane.cols<<1)) && (uyvy.rows == (uv_plane.rows<<1)))
-                            && "UYVY and UV plane dimensions mismatch");*/
+    /*	assert(( (uyvy.cols == (y_plane.cols<<1)) && (uyvy.rows ==
+       y_plane.rows))
+                        && "UYVY and Y plane dimensions mismatch");
+        assert(( (uyvy.cols == (uv_plane.cols<<1)) && (uyvy.rows ==
+       (uv_plane.rows<<1)))
+                        && "UYVY and UV plane dimensions mismatch");*/
 
     width = width >> XF_BITSHIFT(NPC);
 
     if (NPC == XF_NPPC1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernUyvy2Nv12<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_SRC, WORDWIDTH_Y, WORDWIDTH_UV,
                       ((COLS >> 1) >> XF_BITSHIFT(NPC))>(uyvy, y_plane, uv_plane, height, width);
@@ -3330,7 +3400,7 @@ void uyvy2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y_image,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
@@ -3344,7 +3414,9 @@ void uyvy2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y_image.cols == _src.cols) && (_y_image.rows == _src.rows)) && "Y and UYVY planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
                " 1,2,4,8 pixel parallelism is supported  ");
 
@@ -3376,7 +3448,7 @@ void xFUyvy2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void uyvy2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
@@ -3413,7 +3485,7 @@ void yuyv2iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _u_image,
                xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
@@ -3460,7 +3532,7 @@ void yuyv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y_image,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
@@ -3474,7 +3546,9 @@ void yuyv2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y_image.cols == _src.cols) && (_y_image.rows == _src.rows)) && "Y and YUYV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC, NPC_UV values must be same  ");
     }
@@ -3502,7 +3576,7 @@ void xFYuyv2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void yuyv2rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
@@ -3548,7 +3622,7 @@ void rgb2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
     // clang-format on
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
     assert((Y_T == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -3559,7 +3633,9 @@ void rgb2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
@@ -3569,8 +3645,10 @@ void rgb2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 /////////////////////////////////////////////////////////end of
 /// RGB2NV12/////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////RGB2NV21//////////////////////////////////////////////////////////////////////
-// template<int SRC_T, int Y_T, int UV_T,int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_Y, int
-// WORDWIDTH_VU> void KernRgb2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _rgba, xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y,
+// template<int SRC_T, int Y_T, int UV_T,int ROWS, int COLS, int NPC, int
+// WORDWIDTH_SRC, int WORDWIDTH_Y, int
+// WORDWIDTH_VU> void KernRgb2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _rgba,
+// xf::cv::Mat<Y_T, ROWS, COLS, NPC> & _y,
 // xf::cv::Mat<UV_T, ROWS/2, COLS/2, NPC> & _vu,uint16_t height,uint16_t width)
 //{
 //	width=width>>XF_BITSHIFT(NPC);
@@ -3604,7 +3682,8 @@ void rgb2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 //			if(evenRow)
 //			{
 //				if((j & 0x01)==0)
-//					_vu.write(idx1++,v | ((uint16_t)u << 8));
+//					_vu.write(idx1++,v | ((uint16_t)u <<
+// 8));
 //			}
 //		}
 //		evenRow = evenRow ? false : true;
@@ -3640,7 +3719,7 @@ void rgb2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -3652,7 +3731,9 @@ void rgb2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
@@ -3677,14 +3758,14 @@ void KernRgb2Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
 RowLoop:
     for (int i = 0; i < height; ++i) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN OFF
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN OFF
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; ++j) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS PIPELINE
             // clang-format on
             rgba = _rgba.read(i * width + j);
 
@@ -3728,7 +3809,7 @@ void rgb2yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _u_image,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _v_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -3766,14 +3847,14 @@ void KernUyvy2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-            #pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
             // clang-format on
 
             // uyvy = _uyvy.read();
@@ -3784,18 +3865,18 @@ RowLoop:
             u = (uint8_t)uy.range(7, 0) - 128;
 
             /*			if(uyvy.range(15,8) > 16)
-                                            y1 = (uint8_t)uyvy.range(15,8) - 16;
-                                    else
-                                            y1 = 0;*/
+                                y1 = (uint8_t)uyvy.range(15,8) - 16;
+                        else
+                                y1 = 0;*/
 
             y1 = (uy.range(15, 8) > 16) ? ((uint8_t)uy.range(15, 8) - 16) : 0;
 
             v = (uint8_t)vy.range(7, 0) - 128;
 
             /*			if(uyvy.range(31,24) > 16)
-                                            y2 = ((uint8_t)uyvy.range(31,24) - 16);
-                                    else
-                                            y2 = 0;*/
+                                y2 = ((uint8_t)uyvy.range(31,24) - 16);
+                        else
+                                y2 = 0;*/
             y2 = (vy.range(15, 8) > 16) ? ((uint8_t)vy.range(15, 8) - 16) : 0;
 
             V2Rtemp = v * (short int)V2R;
@@ -3827,7 +3908,7 @@ void xFUyvy2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                 uint16_t height,
                 uint16_t width) {
     /*	assert(( (uyvy.cols == (rgba.cols<<1)) && (uyvy.rows == rgba.rows))
-                            && "UYVY and RGBA plane dimensions mismatch");*/
+                        && "UYVY and RGBA plane dimensions mismatch");*/
     width = width >> XF_BITSHIFT(NPC);
 
     if (NPC == 1) {
@@ -3842,7 +3923,7 @@ void xFUyvy2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void uyvy2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
@@ -3874,14 +3955,14 @@ void KernYuyv2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-            #pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
             // clang-format on
 
             yu = _yuyv.read(i * width + j);
@@ -3934,7 +4015,7 @@ void xFYuyv2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void yuyv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
@@ -3962,8 +4043,8 @@ void KernIyuv2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
     ap_uint<13> i, j;
     hls::stream<XF_SNAME(WORDWIDTH_SRC)> uStream, vStream;
 // clang-format off
-    #pragma HLS STREAM variable=&uStream  depth=TC
-    #pragma HLS STREAM variable=&vStream  depth=TC
+#pragma HLS STREAM variable=&uStream  depth=TC
+#pragma HLS STREAM variable=&vStream  depth=TC
     // clang-format on
 
     XF_SNAME(WORDWIDTH_SRC) yPacked, uPacked, vPacked;
@@ -3977,14 +4058,14 @@ void KernIyuv2Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             yPacked = _y.read(i * width + j);
             // dummy1 =  dst1.read();
@@ -3998,7 +4079,8 @@ RowLoop:
                     vPacked = _v.read(idx++);
                     vStream.write(vPacked);
                 } else {
-                    /* Copy of the U and V values are pushed into stream to be used for next row */
+                    /* Copy of the U and V values are pushed into stream to be used for
+                     * next row */
                     uPacked = uStream.read();
                     vPacked = vStream.read();
                 }
@@ -4011,7 +4093,7 @@ RowLoop:
             bool evenPixel = true;
             for (k = 0; k < NPC; k++) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
 
                 y1 = (uint8_t)yPacked.range((8 * k + 7), 8 * k) > 16 ? (uint8_t)yPacked.range((8 * k + 7), 8 * k) - 16
@@ -4062,7 +4144,7 @@ void iyuv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& src_v,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y,U,V planes Type must be XF_8UC1");
@@ -4099,7 +4181,7 @@ void KernNv122bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
     unsigned long long int idx = 0, idx1 = 0;
     hls::stream<XF_SNAME(WORDWIDTH_UV)> uvStream;
 // clang-format off
-    #pragma HLS STREAM variable=&uvStream  depth=COLS
+#pragma HLS STREAM variable=&uvStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
     XF_SNAME(WORDWIDTH_UV) uvPacked;
@@ -4111,14 +4193,14 @@ void KernNv122bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             yPacked = _y.read(i * width + j);
@@ -4132,7 +4214,8 @@ RowLoop:
                     uvPacked = uvStream.read();
                 }
             }
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(UVbuf, UVPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(UVbuf, UVPacked, 0);
             uint8_t t = yPacked.range(7, 0);
             y1 = t > 16 ? t - 16 : 0;
             v = (uint8_t)uvPacked.range(15, 8) - 128;
@@ -4150,7 +4233,8 @@ RowLoop:
             rgba.range(15, 8) = CalculateG(y1, U2Gtemp, V2Gtemp); // G
             rgba.range(7, 0) = CalculateB(y1, U2Btemp, u);        // B
 
-            //			PackedPixels = PackRGBAPixels<WORDWIDTH_DST>(RGB);
+            //			PackedPixels =
+            // PackRGBAPixels<WORDWIDTH_DST>(RGB);
             _rgba.write(idx1++, rgba);
             evenBlock = evenBlock ? false : true;
         }
@@ -4159,7 +4243,7 @@ RowLoop:
     if (height & 1) {
         for (int i = 0; i < width; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             uvStream.read();
         }
@@ -4196,7 +4280,7 @@ void nv122bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& src_uv,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -4208,7 +4292,9 @@ void nv122bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "Y and VU planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the VU plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the VU "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
@@ -4238,7 +4324,7 @@ void KernNv122Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
     unsigned long long int idx = 0, idx1 = 0;
     hls::stream<XF_SNAME(WORDWIDTH_UV)> uvStream;
 // clang-format off
-    #pragma HLS STREAM variable=&uvStream  depth=COLS
+#pragma HLS STREAM variable=&uvStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
     XF_SNAME(WORDWIDTH_UV) uvPacked;
@@ -4250,14 +4336,14 @@ void KernNv122Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             yPacked = _y.read(i * width + j);
@@ -4271,7 +4357,8 @@ RowLoop:
                     uvPacked = uvStream.read();
                 }
             }
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(UVbuf, UVPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(UVbuf, UVPacked, 0);
             uint8_t t = yPacked.range(7, 0);
             y1 = t > 16 ? t - 16 : 0;
             v = (uint8_t)uvPacked.range(15, 8) - 128;
@@ -4289,7 +4376,8 @@ RowLoop:
             rgba.range(15, 8) = CalculateG(y1, U2Gtemp, V2Gtemp); // G
             rgba.range(23, 16) = CalculateB(y1, U2Btemp, u);      // B
 
-            //			PackedPixels = PackRGBAPixels<WORDWIDTH_DST>(RGB);
+            //			PackedPixels =
+            // PackRGBAPixels<WORDWIDTH_DST>(RGB);
             _rgba.write(idx1++, rgba);
             evenBlock = evenBlock ? false : true;
         }
@@ -4298,7 +4386,7 @@ RowLoop:
     if (height & 1) {
         for (int i = 0; i < width; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             uvStream.read();
         }
@@ -4335,7 +4423,7 @@ void nv122rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& src_uv,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -4347,7 +4435,9 @@ void nv122rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "Y and UV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
@@ -4375,7 +4465,7 @@ void KernNv212Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
                   uint16_t width) {
     hls::stream<XF_SNAME(WORDWIDTH_VU)> vuStream;
 // clang-format off
-    #pragma HLS STREAM variable=&vuStream  depth=COLS
+#pragma HLS STREAM variable=&vuStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
     XF_SNAME(WORDWIDTH_VU) vuPacked;
@@ -4389,18 +4479,19 @@ void KernNv212Rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (i = 0; i < (height); i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             yPacked = _y.read(i * width + j);
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(Ybuf, YPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(Ybuf, YPacked, 0);
             if (evenRow) {
                 if (evenBlock) {
                     vuPacked = _vu.read(idx++);
@@ -4411,7 +4502,8 @@ RowLoop:
                     vuPacked = vuStream.read();
                 }
             }
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(UVbuf, UVPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(UVbuf, UVPacked, 0);
             uint8_t t = yPacked.range(7, 0);
             y1 = t > 16 ? t - 16 : 0;
             u = (uint8_t)vuPacked.range(15, 8) - 128;
@@ -4429,7 +4521,8 @@ RowLoop:
             rgba.range(15, 8) = CalculateG(y1, U2Gtemp, V2Gtemp); // G
             rgba.range(23, 16) = CalculateB(y1, U2Btemp, u);      // B
 
-            //			PackedPixels = PackRGBAPixels<WORDWIDTH_DST>(RGB);
+            //			PackedPixels =
+            // PackRGBAPixels<WORDWIDTH_DST>(RGB);
             _rgba.write(idx1++, rgba);
             evenBlock = evenBlock ? false : true;
         }
@@ -4438,7 +4531,7 @@ RowLoop:
     if (height & 1) {
         for (i = 0; i < width; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             vuStream.read();
         }
@@ -4474,7 +4567,7 @@ void nv212rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& src_uv,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -4486,7 +4579,9 @@ void nv212rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "Y and VU planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
@@ -4515,7 +4610,7 @@ void KernNv212bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
                   uint16_t width) {
     hls::stream<XF_SNAME(WORDWIDTH_VU)> vuStream;
 // clang-format off
-    #pragma HLS STREAM variable=&vuStream  depth=COLS
+#pragma HLS STREAM variable=&vuStream  depth=COLS
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
     XF_SNAME(WORDWIDTH_VU) vuPacked;
@@ -4529,18 +4624,19 @@ void KernNv212bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (i = 0; i < (height); i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             yPacked = _y.read(i * width + j);
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(Ybuf, YPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(Ybuf, YPacked, 0);
             if (evenRow) {
                 if (evenBlock) {
                     vuPacked = _vu.read(idx++);
@@ -4551,7 +4647,8 @@ RowLoop:
                     vuPacked = vuStream.read();
                 }
             }
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(UVbuf, UVPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(UVbuf, UVPacked, 0);
             uint8_t t = yPacked.range(7, 0);
             y1 = t > 16 ? t - 16 : 0;
             u = (uint8_t)vuPacked.range(15, 8) - 128;
@@ -4569,7 +4666,8 @@ RowLoop:
             rgba.range(15, 8) = CalculateG(y1, U2Gtemp, V2Gtemp); // G
             rgba.range(7, 0) = CalculateB(y1, U2Btemp, u);        // B
 
-            //			PackedPixels = PackRGBAPixels<WORDWIDTH_DST>(RGB);
+            //			PackedPixels =
+            // PackRGBAPixels<WORDWIDTH_DST>(RGB);
             _rgba.write(idx1++, rgba);
             evenBlock = evenBlock ? false : true;
         }
@@ -4578,7 +4676,7 @@ RowLoop:
     if (height & 1) {
         for (i = 0; i < width; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             vuStream.read();
         }
@@ -4615,7 +4713,7 @@ void nv212bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& src_uv,
               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst0) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -4627,7 +4725,9 @@ void nv212bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
            "Y and VU planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the VU plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the VU "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
@@ -4638,7 +4738,8 @@ void nv212bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
 ///////////////////////////////////////////////////////end of
 /// NV122RGB////////////////////////////////////////////////////////////////
 
-/////////////////////////////////	RGB2GRAY	/////////////////////////////////////
+/////////////////////////////////	RGB2GRAY
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfrgb2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -4647,7 +4748,7 @@ void xfrgb2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) RGB[XF_CHANNELS(SRC_T, NPC) * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) RGB_packed;                   //=0;
@@ -4656,21 +4757,21 @@ void xfrgb2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             RGB_packed = src.read(i * (width >> XF_BITSHIFT(NPC)) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(RGB_packed, RGB);
             for (ap_uint<13> k = 0, offset = 0; k < XF_NPIXPERCYCLE(NPC); k++, offset += 3) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
                 GRAY[k] = CalculateGRAY(RGB[offset], RGB[offset + 1], RGB[offset + 2]);
                 Gray_packed.range((k * XF_DTPIXELDEPTH(DST_T, NPC) + (XF_DTPIXELDEPTH(DST_T, NPC) - 1)),
@@ -4684,7 +4785,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -4697,7 +4798,8 @@ void rgb2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
 
-/////////////////////////////////	BGR2GRAY	/////////////////////////////////////
+/////////////////////////////////	BGR2GRAY
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfbgr2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -4706,7 +4808,7 @@ void xfbgr2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                 unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) RGB[XF_CHANNELS(SRC_T, NPC) * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) RGB_packed;                   //=0;
@@ -4715,21 +4817,21 @@ void xfbgr2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             RGB_packed = src.read(i * (width >> XF_BITSHIFT(NPC)) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(RGB_packed, RGB);
             for (ap_uint<13> k = 0, offset = 0; k < XF_NPIXPERCYCLE(NPC); k++, offset += 3) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
                 GRAY[k] = CalculateGRAY(RGB[offset + 2], RGB[offset + 1], RGB[offset]);
                 Gray_packed.range((k * XF_DTPIXELDEPTH(DST_T, NPC) + (XF_DTPIXELDEPTH(DST_T, NPC) - 1)),
@@ -4743,7 +4845,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -4756,7 +4858,8 @@ void bgr2gray(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
 
-//////////////////////////////////////	GRAY2RGB	////////////////////////////////////
+//////////////////////////////////////	GRAY2RGB
+///////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfgray2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -4770,22 +4873,22 @@ void xfgray2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
 
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             GRAY_packed = src.read(i * (width >> XF_BITSHIFT(NPC)) + j);
 
             for (int k = 0; k < XF_NPIXPERCYCLE(NPC); k++) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
                 GRAY[k] = GRAY_packed.range(k * (XF_PIXELWIDTH(SRC_T, NPC)) + XF_PIXELWIDTH(SRC_T, NPC) - 1,
                                             k * XF_PIXELWIDTH(SRC_T, NPC));
@@ -4804,7 +4907,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void gray2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " GRAY image Type must be XF_8UC1");
@@ -4816,7 +4919,8 @@ void gray2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
     xfgray2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-//////////////////////////////////////	GRAY2BGR	////////////////////////////////////
+//////////////////////////////////////	GRAY2BGR
+///////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfgray2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -4830,22 +4934,22 @@ void xfgray2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
 
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             GRAY_packed = src.read(i * (width >> XF_BITSHIFT(NPC)) + j);
 
             for (int k = 0; k < XF_NPIXPERCYCLE(NPC); k++) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
                 GRAY[k] = GRAY_packed.range(k * (XF_PIXELWIDTH(SRC_T, NPC)) + XF_PIXELWIDTH(SRC_T, NPC) - 1,
                                             k * XF_PIXELWIDTH(SRC_T, NPC));
@@ -4864,7 +4968,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void gray2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC1) && " GRAY image Type must be XF_8UC1");
@@ -4876,7 +4980,8 @@ void gray2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS
     xfgray2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	RGB2XYZ	/////////////////////////////////////
+/////////////////////////////////	RGB2XYZ
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfrgb2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -4885,7 +4990,7 @@ void xfrgb2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     ap_uint<8> RGB[3];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) RGB_packed = 0;
@@ -4897,14 +5002,14 @@ void xfrgb2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j<width>> XF_BITSHIFT(NPC); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             RGB_packed = src.read((i * (width >> XF_BITSHIFT(NPC))) + j);
@@ -4912,7 +5017,7 @@ rowloop:
 
             for (int k = 0, offset = 0; k < XF_NPIXPERCYCLE(NPC); k++, offset += 3) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
                 X = Calculate_X(RGB[offset], RGB[offset + 1], RGB[offset + 2]);
                 Y = Calculate_Y(RGB[offset], RGB[offset + 1], RGB[offset + 2]);
@@ -4933,7 +5038,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -4945,7 +5050,8 @@ void rgb2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
     xfrgb2xyz<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	BGR2XYZ	/////////////////////////////////////
+/////////////////////////////////	BGR2XYZ
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfbgr2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -4954,7 +5060,7 @@ void xfbgr2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     ap_uint<8> RGB[3];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) RGB_packed = 0;
@@ -4966,14 +5072,14 @@ void xfbgr2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j<width>> XF_BITSHIFT(NPC); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             RGB_packed = src.read((i * (width >> XF_BITSHIFT(NPC))) + j);
@@ -4981,7 +5087,7 @@ rowloop:
 
             for (int k = 0, offset = 0; k < XF_NPIXPERCYCLE(NPC); k++, offset += 3) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
                 X = Calculate_X(RGB[offset + 2], RGB[offset + 1], RGB[offset]);
                 Y = Calculate_Y(RGB[offset + 2], RGB[offset + 1], RGB[offset]);
@@ -5002,7 +5108,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -5014,7 +5120,8 @@ void bgr2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
     xfbgr2xyz<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	XYZ2RGB		/////////////////////////////////////
+/////////////////////////////////	XYZ2RGB
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfxyz2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5023,7 +5130,7 @@ void xfxyz2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) XYZ[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=XYZ complete
+#pragma HLS ARRAY_PARTITION variable=XYZ complete
     // clang-format on
 
     XF_TNAME(DST_T, NPC) RGB[XF_NPIXPERCYCLE(NPC)];
@@ -5032,21 +5139,21 @@ void xfxyz2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             XYZ_packed = src.read((i * (width >> XF_BITSHIFT(NPC))) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(XYZ_packed, XYZ);
 
             for (int k = 0, offset = 0; k < XF_NPIXPERCYCLE(NPC); k++, offset += 3) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
                 R = Calculate_R(XYZ[offset], XYZ[offset + 1], XYZ[offset + 2]);
                 G = Calculate_G(XYZ[offset], XYZ[offset + 1], XYZ[offset + 2]);
@@ -5066,7 +5173,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void xyz2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " XYZ image Type must be XF_8UC3");
@@ -5078,7 +5185,8 @@ void xyz2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
     xfxyz2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	XYZ2BGR		/////////////////////////////////////
+/////////////////////////////////	XYZ2BGR
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfxyz2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5087,7 +5195,7 @@ void xfxyz2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) XYZ[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=XYZ complete
+#pragma HLS ARRAY_PARTITION variable=XYZ complete
     // clang-format on
 
     XF_TNAME(DST_T, NPC) RGB[XF_NPIXPERCYCLE(NPC)];
@@ -5096,21 +5204,21 @@ void xfxyz2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             XYZ_packed = src.read((i * (width >> XF_BITSHIFT(NPC))) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(XYZ_packed, XYZ);
 
             for (int k = 0, offset = 0; k < XF_NPIXPERCYCLE(NPC); k++, offset += 3) {
 // clang-format off
-                #pragma HLS UNROLL
+#pragma HLS UNROLL
                 // clang-format on
                 R = Calculate_R(XYZ[offset], XYZ[offset + 1], XYZ[offset + 2]);
                 G = Calculate_G(XYZ[offset], XYZ[offset + 1], XYZ[offset + 2]);
@@ -5130,7 +5238,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void xyz2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " XYZ image Type must be XF_8UC3");
@@ -5143,7 +5251,8 @@ void xyz2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
 
-/////////////////////////////////	RGB2YCRCB	/////////////////////////////////////
+/////////////////////////////////	RGB2YCRCB
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfrgb2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5152,7 +5261,7 @@ void xfrgb2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                  unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) RGB[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
     XF_DTUNAME(DST_T, NPC) YCRCB[XF_NPIXPERCYCLE(NPC)];
     XF_TNAME(SRC_T, NPC) RGB_packed = 0;
@@ -5163,14 +5272,14 @@ void xfrgb2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j<width>> XF_BITSHIFT(NPC); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             RGB_packed = src.read((i * width >> XF_BITSHIFT(NPC)) + j);
@@ -5195,7 +5304,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -5207,7 +5316,8 @@ void rgb2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROW
     xfrgb2ycrcb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	BGR2YCRCB	/////////////////////////////////////
+/////////////////////////////////	BGR2YCRCB
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfbgr2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5216,7 +5326,7 @@ void xfbgr2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                  unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) RGB[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
     XF_DTUNAME(DST_T, NPC) YCRCB[XF_NPIXPERCYCLE(NPC)];
     XF_TNAME(SRC_T, NPC) RGB_packed = 0;
@@ -5227,14 +5337,14 @@ void xfbgr2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             RGB_packed = src.read((i * (width >> XF_BITSHIFT(NPC))) + j);
@@ -5259,7 +5369,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -5271,7 +5381,8 @@ void bgr2ycrcb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROW
     xfbgr2ycrcb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	YCRCB2RGB	/////////////////////////////////////
+/////////////////////////////////	YCRCB2RGB
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfycrcb2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5280,7 +5391,7 @@ void xfycrcb2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                  unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) YCRCB[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=YCRCB complete
+#pragma HLS ARRAY_PARTITION variable=YCRCB complete
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) YCRCB_packed = 0;
@@ -5291,14 +5402,14 @@ void xfycrcb2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             YCRCB_packed = src.read((i * (width >> XF_BITSHIFT(NPC))) + j);
@@ -5322,7 +5433,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void ycrcb2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " YCrCb image Type must be XF_8UC3");
@@ -5334,7 +5445,8 @@ void ycrcb2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROW
     xfycrcb2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	YCRCB2BGRs	/////////////////////////////////////
+/////////////////////////////////	YCRCB2BGRs
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfycrcb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5343,7 +5455,7 @@ void xfycrcb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                  unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) YCRCB[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=YCRCB complete
+#pragma HLS ARRAY_PARTITION variable=YCRCB complete
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) YCRCB_packed = 0;
@@ -5354,14 +5466,14 @@ void xfycrcb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             YCRCB_packed = src.read((i * (width >> XF_BITSHIFT(NPC))) + j);
@@ -5385,7 +5497,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void ycrcb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " YCrCb image Type must be XF_8UC3");
@@ -5398,7 +5510,8 @@ void ycrcb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROW
                 (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
 
-/////////////////////////////////	RGB2HLS	/////////////////////////////////////
+/////////////////////////////////	RGB2HLS
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfrgb2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5407,7 +5520,7 @@ void xfrgb2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) RGB[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) RGB_packed = 0;
@@ -5428,14 +5541,14 @@ void xfrgb2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             RGB_packed = src.read((i * width >> XF_BITSHIFT(NPC)) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(RGB_packed, RGB);
@@ -5502,7 +5615,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -5514,7 +5627,8 @@ void rgb2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
     xfrgb2hls<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	BGR2HLS	/////////////////////////////////////
+/////////////////////////////////	BGR2HLS
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfbgr2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5523,7 +5637,7 @@ void xfbgr2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) RGB[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) RGB_packed = 0;
@@ -5544,14 +5658,14 @@ void xfbgr2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             RGB_packed = src.read((i * width >> XF_BITSHIFT(NPC)) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(RGB_packed, RGB);
@@ -5618,7 +5732,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -5630,7 +5744,8 @@ void bgr2hls(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
     xfbgr2hls<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	HLS2RGB	/////////////////////////////////////
+/////////////////////////////////	HLS2RGB
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfhls2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5639,7 +5754,7 @@ void xfhls2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) HLS[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=HLS complete
+#pragma HLS ARRAY_PARTITION variable=HLS complete
     // clang-format on
     XF_DTUNAME(SRC_T, NPC) RGB[XF_NPIXPERCYCLE(NPC)];
     XF_TNAME(SRC_T, NPC) HLS_packed = 0;
@@ -5656,14 +5771,14 @@ void xfhls2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             HLS_packed = src.read((i * width >> XF_BITSHIFT(NPC)) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(HLS_packed, HLS);
@@ -5715,7 +5830,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void hls2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " HLS image Type must be XF_8UC3");
@@ -5727,7 +5842,8 @@ void hls2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
     xfhls2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	HLS2BGR	/////////////////////////////////////
+/////////////////////////////////	HLS2BGR
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfhls2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5736,7 +5852,7 @@ void xfhls2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) HLS[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=HLS complete
+#pragma HLS ARRAY_PARTITION variable=HLS complete
     // clang-format on
     XF_DTUNAME(SRC_T, NPC) RGB[XF_NPIXPERCYCLE(NPC)];
     XF_TNAME(SRC_T, NPC) HLS_packed = 0;
@@ -5753,14 +5869,14 @@ void xfhls2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             HLS_packed = src.read((i * width >> XF_BITSHIFT(NPC)) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(HLS_packed, HLS);
@@ -5812,7 +5928,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void hls2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " HLS image Type must be XF_8UC3");
@@ -5824,7 +5940,8 @@ void hls2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
     xfhls2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	HSV2RGB	/////////////////////////////////////
+/////////////////////////////////	HSV2RGB
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfhsv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5833,7 +5950,7 @@ void xfhsv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) HSV[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=HSV complete
+#pragma HLS ARRAY_PARTITION variable=HSV complete
     // clang-format on
     XF_DTUNAME(DST_T, NPC) RGB[XF_NPIXPERCYCLE(NPC)];
     XF_TNAME(SRC_T, NPC) HSV_packed = 0;
@@ -5849,14 +5966,14 @@ void xfhsv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j<width>> XF_BITSHIFT(NPC); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             HSV_packed = src.read((i * width >> XF_BITSHIFT(NPC)) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(HSV_packed, HSV);
@@ -5897,7 +6014,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void hsv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " HSV image Type must be XF_8UC3");
@@ -5909,7 +6026,8 @@ void hsv2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS,
     xfhsv2rgb<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
 }
-/////////////////////////////////	HSV2BGR	/////////////////////////////////////
+/////////////////////////////////	HSV2BGR
+////////////////////////////////////////
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
 void xfhsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
@@ -5918,9 +6036,12 @@ void xfhsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) HSV[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=HSV complete
+#pragma HLS ARRAY_PARTITION variable=HSV complete
     // clang-format on
     XF_DTUNAME(DST_T, NPC) RGB[XF_NPIXPERCYCLE(NPC)];
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+    // clang-format on
     XF_TNAME(SRC_T, NPC) HSV_packed = 0;
     XF_TNAME(DST_T, NPC) RGB_packed = 0;
     XF_CTUNAME(SRC_T, NPC) H, S, V;
@@ -5928,20 +6049,23 @@ void xfhsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     unsigned long int g = 0;
     unsigned long int b = 0;
     ap_fixed<28, 9> tab[4];
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable=tab complete
+    // clang-format on
     ap_fixed<28, 9> p1, p2;
     ap_ufixed<20, 1, AP_RND> hscale = 0.0333333333333333333;
     ap_ufixed<20, 1, AP_RND> s_scale = 0.0039215686274509803921568627451;
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (ap_uint<13> j = 0; j<width>> XF_BITSHIFT(NPC); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             HSV_packed = src.read((i * width >> XF_BITSHIFT(NPC)) + j);
             ExtractUYVYPixels<WORDWIDTH_SRC>(HSV_packed, HSV);
@@ -5982,14 +6106,15 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void hsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " HSV image Type must be XF_8UC3");
     assert((DST_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " HSV image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and HSV plane dimensions mismatch");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism is supported  ");
+//    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && " 1,8 pixel parallelism
+//    is supported  ");
 #endif
     xfhsv2bgr<SRC_T, DST_T, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
               (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
@@ -6009,15 +6134,16 @@ void xfrgb2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     ap_uint<24> RGB1[XF_NPIXPERCYCLE(NPC)];
 
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y  complete
-    #pragma HLS ARRAY_PARTITION variable=U  complete
-    #pragma HLS ARRAY_PARTITION variable=V complete
-    #pragma HLS ARRAY_PARTITION variable=RGB1 complete
+#pragma HLS ARRAY_PARTITION variable=Y  complete
+#pragma HLS ARRAY_PARTITION variable=U  complete
+#pragma HLS ARRAY_PARTITION variable=V complete
+#pragma HLS ARRAY_PARTITION variable=RGB1 complete
     // clang-format on
 
     unsigned long long int idx = 0, idx1 = 0;
     XF_SNAME(WORDWIDTH_SRC) Packed_rgb1;
-    XF_PTNAME(XF_DEPTH(DST_T, NPC)) UYPacked, VYPacked, packed_uyvy[XF_NPIXPERCYCLE(NPC)];
+    XF_PTNAME(XF_DEPTH(DST_T, NPC))
+    UYPacked, VYPacked, packed_uyvy[XF_NPIXPERCYCLE(NPC)];
     XF_SNAME(WORDWIDTH_DST) val_dst = 0;
     uint8_t offset = 0;
     uint16_t shift = 0;
@@ -6026,16 +6152,16 @@ void xfrgb2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         evencol = true;
 
     columnloop:
         for (int j = 0; j < (width >> (XF_BITSHIFT(NPC))); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             val_dst = 0;
             //			evencol=true;
@@ -6044,11 +6170,12 @@ rowloop:
             shift = 0;
             for (int l = 0; l < (XF_NPIXPERCYCLE(NPC)); l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
 
-                //				Y0[l]   = CalculateY(RGB1[offset+0].range(7,0),
+                //				Y0[l]   =
+                // CalculateY(RGB1[offset+0].range(7,0),
                 // RGB1[offset+0].range(15,8),
                 // RGB1[offset+0].range(23,16));
                 Y[l] = CalculateY(RGB1[l].range(7, 0), RGB1[l].range(15, 8), RGB1[l].range(23, 16));
@@ -6056,8 +6183,10 @@ rowloop:
                     U[l / 2] = CalculateU(RGB1[l].range(7, 0), RGB1[l].range(15, 8), RGB1[l].range(23, 16));
                     V[l / 2] = CalculateV(RGB1[l].range(7, 0), RGB1[l].range(15, 8), RGB1[l].range(23, 16));
 
-                    //	U[l]    = CalculateU(RGB1[offset+0].range(7,0), RGB1[offset+0].range(15,8),
-                    // RGB1[offset+0].range(23,16)); 					V[l]    =
+                    //	U[l]    = CalculateU(RGB1[offset+0].range(7,0),
+                    // RGB1[offset+0].range(15,8),
+                    // RGB1[offset+0].range(23,16)); V[l]
+                    // =
                     // CalculateV(RGB1[offset+0].range(7,0),
                     // RGB1[offset+0].range(15,8), RGB1[offset+0].range(23,16));
 
@@ -6083,7 +6212,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -6114,15 +6243,16 @@ void xfrgb2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     ap_uint<24> RGB1[XF_NPIXPERCYCLE(NPC)];
 
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y  complete
-    #pragma HLS ARRAY_PARTITION variable=U  complete
-    #pragma HLS ARRAY_PARTITION variable=V complete
-    #pragma HLS ARRAY_PARTITION variable=RGB1 complete
+#pragma HLS ARRAY_PARTITION variable=Y  complete
+#pragma HLS ARRAY_PARTITION variable=U  complete
+#pragma HLS ARRAY_PARTITION variable=V complete
+#pragma HLS ARRAY_PARTITION variable=RGB1 complete
     // clang-format on
 
     unsigned long long int idx = 0, idx1 = 0;
     XF_SNAME(WORDWIDTH_SRC) Packed_rgb1;
-    XF_PTNAME(XF_DEPTH(DST_T, NPC)) YUPacked, YVPacked, packed_yuyv[XF_NPIXPERCYCLE(NPC)];
+    XF_PTNAME(XF_DEPTH(DST_T, NPC))
+    YUPacked, YVPacked, packed_yuyv[XF_NPIXPERCYCLE(NPC)];
     XF_SNAME(WORDWIDTH_DST) val_dst = 0;
     uint8_t offset = 0;
     uint16_t shift = 0;
@@ -6131,16 +6261,16 @@ void xfrgb2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         evencol = true;
 
     columnloop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             val_dst = 0;
             Packed_rgb1 = src.read(idx++);
@@ -6148,8 +6278,8 @@ rowloop:
             shift = 0;
             for (int l = 0; l < (XF_NPIXPERCYCLE(NPC)); l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
 
                 Y[l] = CalculateY(RGB1[l].range(7, 0), RGB1[l].range(15, 8), RGB1[l].range(23, 16));
@@ -6177,7 +6307,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -6202,8 +6332,8 @@ void xfrgb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     ap_uint<24> RGB[XF_NPIXPERCYCLE(NPC)], BGR[XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=BGR complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=BGR complete
     // clang-format on
 
     unsigned long long int idx = 0, idx1 = 0;
@@ -6215,21 +6345,21 @@ void xfrgb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             val_dst = 0;
             Packed_rgb1 = src.read(idx++);
             for (int l = 0; l < (XF_NPIXPERCYCLE(NPC)); l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 RGB[l] = Packed_rgb1(l * 24 + 23, l * 24);
                 BGR[l].range(23, 16) = RGB[l].range(7, 0);
@@ -6245,7 +6375,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void rgb2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
@@ -6282,7 +6412,7 @@ void xfnv122uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     // assert();
     hls::stream<XF_SNAME(WORDWIDTH_UV)> uvStream;
 // clang-format off
-    #pragma HLS STREAM variable=&uvStream  depth=COLS/2
+#pragma HLS STREAM variable=&uvStream  depth=COLS/2
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
     XF_SNAME(WORDWIDTH_UV) uvPacked;
@@ -6295,14 +6425,14 @@ void xfnv122uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             yPacked = _y.read(y_idx++);
             uyvyPacked = 0;
@@ -6337,7 +6467,7 @@ RowLoop:
     if (height & 1) {
         for (int i = 0; i < width; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             uvStream.read();
         }
@@ -6349,7 +6479,7 @@ void nv122uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<SRC_UV, ROWS / 2, COLS / 2, NPC_UV>& _uv,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_Y == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -6359,7 +6489,9 @@ void nv122uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     assert(((_y.cols == _dst.cols) && (_y.rows == _dst.rows)) && "Y and UYVY plane dimensions mismatch");
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
@@ -6390,7 +6522,7 @@ void xfnv212uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     // assert();
     hls::stream<XF_SNAME(WORDWIDTH_UV)> uvStream;
 // clang-format off
-    #pragma HLS STREAM variable=&uvStream  depth=COLS/2
+#pragma HLS STREAM variable=&uvStream  depth=COLS/2
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
     XF_SNAME(WORDWIDTH_UV) uvPacked;
@@ -6403,14 +6535,14 @@ void xfnv212uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             yPacked = _y.read(y_idx++);
             uyvyPacked = 0;
@@ -6445,7 +6577,7 @@ RowLoop:
     if (height & 1) {
         for (int i = 0; i < width; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             uvStream.read();
         }
@@ -6457,7 +6589,7 @@ void nv212uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<SRC_UV, ROWS / 2, COLS / 2, NPC_UV>& _uv,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_Y == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -6467,7 +6599,9 @@ void nv212uyvy(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     assert(((_y.cols == _dst.cols) && (_y.rows == _dst.rows)) && "Y and UYVY plane dimensions mismatch");
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
@@ -6497,7 +6631,7 @@ void xfnv122yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     // assert();
     hls::stream<XF_SNAME(WORDWIDTH_UV)> uvStream;
 // clang-format off
-    #pragma HLS STREAM variable=&uvStream  depth=COLS/2
+#pragma HLS STREAM variable=&uvStream  depth=COLS/2
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
     XF_SNAME(WORDWIDTH_UV) uvPacked;
@@ -6510,14 +6644,14 @@ void xfnv122yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             yPacked = _y.read(y_idx++);
             uyvyPacked = 0;
@@ -6552,7 +6686,7 @@ RowLoop:
     if (height & 1) {
         for (int i = 0; i < width; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             uvStream.read();
         }
@@ -6564,7 +6698,7 @@ void nv122yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<SRC_UV, ROWS / 2, COLS / 2, NPC_UV>& _uv,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_Y == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -6574,7 +6708,9 @@ void nv122yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     assert(((_y.cols == _dst.cols) && (_y.rows == _dst.rows)) && "Y and Yuyv plane dimensions mismatch");
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC,NPC_UV values must be same  ");
     }
@@ -6604,7 +6740,7 @@ void xfnv212yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     // assert();
     hls::stream<XF_SNAME(WORDWIDTH_UV)> uvStream;
 // clang-format off
-    #pragma HLS STREAM variable=&uvStream  depth=COLS/2
+#pragma HLS STREAM variable=&uvStream  depth=COLS/2
     // clang-format on
     XF_SNAME(WORDWIDTH_Y) yPacked;
     XF_SNAME(WORDWIDTH_UV) uvPacked;
@@ -6617,14 +6753,14 @@ void xfnv212yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             yPacked = _y.read(y_idx++);
             uyvyPacked = 0;
@@ -6659,7 +6795,7 @@ RowLoop:
     if (height & 1) {
         for (int i = 0; i < width; i++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             uvStream.read();
         }
@@ -6671,7 +6807,7 @@ void nv212yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<SRC_UV, ROWS / 2, COLS / 2, NPC_UV>& _uv,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_Y == XF_8UC1) && " Y image Type must be XF_8UC1");
@@ -6681,7 +6817,9 @@ void nv212yuyv(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     assert(((_y.cols == _dst.cols) && (_y.rows == _dst.rows)) && "Y and Yuyv plane dimensions mismatch");
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and VU planes dimensions mismatch");
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the VU plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the VU "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
@@ -6706,15 +6844,16 @@ void xfbgr2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     ap_uint<24> RGB1[XF_NPIXPERCYCLE(NPC)];
 
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y  complete
-    #pragma HLS ARRAY_PARTITION variable=U  complete
-    #pragma HLS ARRAY_PARTITION variable=V complete
-    #pragma HLS ARRAY_PARTITION variable=RGB1 complete
+#pragma HLS ARRAY_PARTITION variable=Y  complete
+#pragma HLS ARRAY_PARTITION variable=U  complete
+#pragma HLS ARRAY_PARTITION variable=V complete
+#pragma HLS ARRAY_PARTITION variable=RGB1 complete
     // clang-format on
 
     unsigned long long int idx = 0, idx1 = 0;
     XF_SNAME(WORDWIDTH_SRC) Packed_rgb1;
-    XF_PTNAME(XF_DEPTH(DST_T, NPC)) UYPacked, VYPacked, packed_uyvy[XF_NPIXPERCYCLE(NPC)];
+    XF_PTNAME(XF_DEPTH(DST_T, NPC))
+    UYPacked, VYPacked, packed_uyvy[XF_NPIXPERCYCLE(NPC)];
     XF_SNAME(WORDWIDTH_DST) val_dst = 0;
     uint8_t offset = 0;
     uint16_t shift = 0;
@@ -6723,16 +6862,16 @@ void xfbgr2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         evencol = true;
 
     columnloop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             val_dst = 0;
             //			evencol=true;
@@ -6741,11 +6880,12 @@ rowloop:
             shift = 0;
             for (int l = 0; l < (XF_NPIXPERCYCLE(NPC)); l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
 
-                //				Y0[l]   = CalculateY(RGB1[offset+0].range(7,0),
+                //				Y0[l]   =
+                // CalculateY(RGB1[offset+0].range(7,0),
                 // RGB1[offset+0].range(15,8),
                 // RGB1[offset+0].range(23,16));
                 Y[l] = CalculateY(RGB1[l].range(23, 16), RGB1[l].range(15, 8), RGB1[l].range(7, 0));
@@ -6753,9 +6893,11 @@ rowloop:
                     U[l / 2] = CalculateU(RGB1[l].range(23, 16), RGB1[l].range(15, 8), RGB1[l].range(7, 0));
                     V[l / 2] = CalculateV(RGB1[l].range(23, 16), RGB1[l].range(15, 8), RGB1[l].range(7, 0));
 
-                    //					U[l]    = CalculateU(RGB1[offset+0].range(7,0),
+                    //					U[l]    =
+                    // CalculateU(RGB1[offset+0].range(7,0),
                     // RGB1[offset+0].range(15,8),
-                    // RGB1[offset+0].range(23,16)); 					V[l]    =
+                    // RGB1[offset+0].range(23,16)); V[l]
+                    // =
                     // CalculateV(RGB1[offset+0].range(7,0),
                     // RGB1[offset+0].range(15,8), RGB1[offset+0].range(23,16));
 
@@ -6781,7 +6923,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -6812,15 +6954,16 @@ void xfbgr2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     ap_uint<24> RGB1[XF_NPIXPERCYCLE(NPC)];
 
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=Y  complete
-    #pragma HLS ARRAY_PARTITION variable=U  complete
-    #pragma HLS ARRAY_PARTITION variable=V complete
-    #pragma HLS ARRAY_PARTITION variable=RGB1 complete
+#pragma HLS ARRAY_PARTITION variable=Y  complete
+#pragma HLS ARRAY_PARTITION variable=U  complete
+#pragma HLS ARRAY_PARTITION variable=V complete
+#pragma HLS ARRAY_PARTITION variable=RGB1 complete
     // clang-format on
 
     unsigned long long int idx = 0, idx1 = 0;
     XF_SNAME(WORDWIDTH_SRC) Packed_rgb1;
-    XF_PTNAME(XF_DEPTH(DST_T, NPC)) YUPacked, YVPacked, packed_yuyv[XF_NPIXPERCYCLE(NPC)];
+    XF_PTNAME(XF_DEPTH(DST_T, NPC))
+    YUPacked, YVPacked, packed_yuyv[XF_NPIXPERCYCLE(NPC)];
     XF_SNAME(WORDWIDTH_DST) val_dst = 0;
     uint8_t offset = 0;
     uint16_t shift = 0;
@@ -6829,16 +6972,16 @@ void xfbgr2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
         evencol = true;
 
     columnloop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             val_dst = 0;
             Packed_rgb1 = src.read(idx++);
@@ -6846,8 +6989,8 @@ rowloop:
             shift = 0;
             for (int l = 0; l < (XF_NPIXPERCYCLE(NPC)); l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
 
                 Y[l] = CalculateY(RGB1[l].range(23, 16), RGB1[l].range(15, 8), RGB1[l].range(7, 0));
@@ -6875,7 +7018,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -6899,8 +7042,8 @@ void xfbgr2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
                unsigned short int width) {
     ap_uint<24> RGB[XF_NPIXPERCYCLE(NPC)], BGR[XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=RGB complete
-    #pragma HLS ARRAY_PARTITION variable=BGR complete
+#pragma HLS ARRAY_PARTITION variable=RGB complete
+#pragma HLS ARRAY_PARTITION variable=BGR complete
     // clang-format on
 
     unsigned long long int idx = 0, idx1 = 0;
@@ -6912,21 +7055,21 @@ void xfbgr2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 rowloop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     columnloop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
             // clang-format on
             val_dst = 0;
             Packed_rgb1 = src.read(idx++);
             for (int l = 0; l < (XF_NPIXPERCYCLE(NPC)); l++) {
 // clang-format off
-                #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-                #pragma HLS unroll
+#pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
+#pragma HLS unroll
                 // clang-format on
                 xfExtractPixels<NPC, XF_WORDWIDTH(SRC_T, NPC), XF_DEPTH(SRC_T, NPC)>(BGR, Packed_rgb1, 0);
 
@@ -6944,7 +7087,7 @@ rowloop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void bgr2rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -6986,14 +7129,14 @@ void Kernbgr2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             rgba = _rgba.read(i * width + j);
             uint8_t b = rgba.range(7, 0);
@@ -7051,7 +7194,7 @@ void bgr2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -7063,7 +7206,9 @@ void bgr2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
@@ -7071,7 +7216,7 @@ void bgr2nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     xFbgr2Nv12<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(Y_T, NPC),
                XF_WORDWIDTH(UV_T, NPC_UV)>(_src, _y, _uv, _src.rows, _src.cols);
 } /////////////////////////////////////////////////////////end of
-  /// RGB2NV12/////////////////////////////////////////////////////////////////////
+/// RGB2NV12/////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////RGB2NV21//////////////////////////////////////////////////////////////////////
 template <int SRC_T,
@@ -7098,14 +7243,14 @@ void Kernbgr2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
             rgba = _rgba.read(i * width + j);
             uint8_t b = rgba.range(7, 0);
@@ -7155,7 +7300,7 @@ void bgr2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
               xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
               xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_8UC3) && " BGR image Type must be XF_8UC3");
@@ -7167,7 +7312,9 @@ void bgr2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
     } else {
         assert((NPC == NPC_UV == XF_NPPC1) && " Both NPC values must be same  ");
     }
@@ -7192,14 +7339,14 @@ void KernYuyv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-            #pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
             // clang-format on
 
             yu = _yuyv.read(i * width + j);
@@ -7252,7 +7399,7 @@ void xFYuyv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void yuyv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
@@ -7288,14 +7435,14 @@ void KernUyvy2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
     // clang-format on
     ColLoop:
         for (int j = 0; j < width; j += 2) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-            #pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+#pragma HLS pipeline
             // clang-format on
 
             // uyvy = _uyvy.read();
@@ -7306,18 +7453,18 @@ RowLoop:
             u = (uint8_t)uy.range(7, 0) - 128;
 
             /*			if(uyvy.range(15,8) > 16)
-                                            y1 = (uint8_t)uyvy.range(15,8) - 16;
-                                    else
-                                            y1 = 0;*/
+                                y1 = (uint8_t)uyvy.range(15,8) - 16;
+                        else
+                                y1 = 0;*/
 
             y1 = (uy.range(15, 8) > 16) ? ((uint8_t)uy.range(15, 8) - 16) : 0;
 
             v = (uint8_t)vy.range(7, 0) - 128;
 
             /*			if(uyvy.range(31,24) > 16)
-                                            y2 = ((uint8_t)uyvy.range(31,24) - 16);
-                                    else
-                                            y2 = 0;*/
+                                y2 = ((uint8_t)uyvy.range(31,24) - 16);
+                        else
+                                y2 = 0;*/
             y2 = (vy.range(15, 8) > 16) ? ((uint8_t)vy.range(15, 8) - 16) : 0;
 
             V2Rtemp = v * (short int)V2R;
@@ -7362,7 +7509,7 @@ void xFUyvy2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void uyvy2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
@@ -7411,7 +7558,7 @@ void yuyv2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y_image,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " YUYV plane Type must be XF_16UC1");
@@ -7425,7 +7572,9 @@ void yuyv2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y_image.cols == _src.cols) && (_y_image.rows == _src.rows)) && "Y and YUYV planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
                " 1,2,4,8 pixel parallelism is supported  ");
     } else {
@@ -7456,7 +7605,7 @@ void xFUyvy2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
 
     if (NPC == XF_NPPC1) {
 // clang-format off
-        #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
         // clang-format on
         KernUyvy2Nv21<SRC_T, Y_T, UV_T, ROWS, COLS, NPC, NPC_UV, WORDWIDTH_SRC, WORDWIDTH_Y, WORDWIDTH_UV,
                       ((COLS >> 1) >> XF_BITSHIFT(NPC))>(uyvy, y_plane, uv_plane, height, width);
@@ -7471,7 +7620,7 @@ void uyvy2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
                xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y_image,
                xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv_image) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " UYVY plane Type must be XF_16UC1");
@@ -7485,7 +7634,9 @@ void uyvy2nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     assert(((_y_image.cols == _src.cols) && (_y_image.rows == _src.rows)) && "Y and UYVY planes dimensions mismatch");
 
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
                " 1,2,4,8 pixel parallelism is supported  ");
 
@@ -7512,15 +7663,15 @@ void xfnv122nv21(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
 
     ColLoop:
         for (int j = 0; j<width>> XF_BITSHIFT(NPC); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             yPacked = _y.read(i * (width >> XF_BITSHIFT(NPC)) + j);
@@ -7532,7 +7683,7 @@ RowLoop:
 
             for (int l = 0; l < (XF_NPIXPERCYCLE(NPC_UV)); l++) {
 // clang-format off
-                #pragma HLS unroll
+#pragma HLS unroll
                 // clang-format on
 
                 uvPacked[l] = packed_Data(l * 16 + 15, l * 16);
@@ -7553,7 +7704,7 @@ void nv122nv21(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& out_y,
                xf::cv::Mat<SRC_UV, ROWS / 2, COLS / 2, NPC_UV>& out_uv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_Y == XF_8UC1) && " Y plane Type must be XF_8UC1");
@@ -7562,7 +7713,9 @@ void nv122nv21(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     assert(((_y.rows <= ROWS) && (_y.cols <= COLS)) && " Y image rows and cols should be less than ROWS, COLS");
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and UV planes dimensions mismatch");
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
                " 1,2,4,8 pixel parallelism is supported  ");
     } else {
@@ -7582,7 +7735,7 @@ void nv212nv12(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
                xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& out_y,
                xf::cv::Mat<SRC_UV, ROWS / 2, COLS / 2, NPC_UV>& out_uv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_Y == XF_8UC1) && " Y plane Type must be XF_8UC1");
@@ -7591,7 +7744,9 @@ void nv212nv12(xf::cv::Mat<SRC_Y, ROWS, COLS, NPC>& _y,
     assert(((_y.rows <= ROWS) && (_y.cols <= COLS)) && " Y image rows and cols should be less than ROWS, COLS");
     assert(((_y.cols == (_uv.cols << 1)) && (_y.rows == (_uv.rows << 1))) && "Y and VU planes dimensions mismatch");
     if (NPC != XF_NPPC1) {
-        assert((NPC == (NPC_UV * 2)) && " NPC of Y plane must be double the UV plane for multipixel parallelism  ");
+        assert((NPC == (NPC_UV * 2)) &&
+               " NPC of Y plane must be double the UV "
+               "plane for multipixel parallelism  ");
         assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
                " 1,2,4,8 pixel parallelism is supported  ");
     } else {
@@ -7618,22 +7773,22 @@ void xfuyvy2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
 RowLoop:
     for (int i = 0; i < height; i++) {
 // clang-format off
-        #pragma HLS LOOP_FLATTEN off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
     // clang-format on
 
     ColLoop:
         for (int j = 0; j < (width >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS pipeline
-            #pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
             // clang-format on
 
             uy = uyvy.read(i * (width >> XF_BITSHIFT(NPC)) + j);
 
             for (int l = 0; l < (XF_NPIXPERCYCLE(NPC)); l++) {
 // clang-format off
-                #pragma HLS unroll
+#pragma HLS unroll
                 // clang-format on
 
                 uyPacked[l] = uy(l * 16 + 15, l * 16);
@@ -7649,7 +7804,7 @@ RowLoop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void uyvy2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& yuyv) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " UYVY image Type must be XF_16UC1");
@@ -7668,7 +7823,7 @@ void uyvy2yuyv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy, xf::cv::Mat<DST_T, ROW
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
 void yuyv2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& yuyv, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& uyvy) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
     assert((SRC_T == XF_16UC1) && " YUYV image Type must be XF_16UC1");

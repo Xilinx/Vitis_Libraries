@@ -15,12 +15,12 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_accumulate_squared_config.h"
 #include "xcl2.hpp"
+#include "xf_accumulate_squared_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -35,12 +35,12 @@ int main(int argc, char** argv) {
 
 #endif
     if (in_gray.data == NULL) {
-        std::cout << "Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
     if (in_gray1.data == NULL) {
-        std::cout << "Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[2]);
         return EXIT_FAILURE;
     }
 
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

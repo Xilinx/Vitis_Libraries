@@ -24,7 +24,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        printf("Usage: <executable> <input image path> \n");
+        fprintf(stderr, "Usage: <executable> <input image path>\n");
         return -1;
     }
 
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     in_img = cv::imread(argv[1], 1); // reading in the color image
 #endif
     if (!in_img.data) {
-        printf("Failed to load the image ... !!!");
+        fprintf(stderr, "Failed to load the image ... !!!\n ");
         return -1;
     }
 // extractChannel(in_img, in_img, 1);
@@ -157,10 +157,10 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(diff, 0, err_per);
 
     if (err_per > 1) {
-        printf("\nTest failed\n");
+        fprintf(stderr, "\nTest Failed.\n ");
         return -1;
     } else {
-        printf("\nTest Pass\n");
+        std::cout << "Test Passed " << std::endl;
         return 0;
     }
 }

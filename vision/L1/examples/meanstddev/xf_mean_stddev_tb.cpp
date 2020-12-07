@@ -109,11 +109,15 @@ int main(int argc, char** argv) {
         stddev_hls[c] = (float)stddev[c] / 256;
         diff_mean[c] = mean_c[c] - mean_hls[c];
         diff_stddev[c] = stddev_c[c] - stddev_hls[c];
-        fprintf(stderr, "Ref. Mean     = %f\t Result = %f\tERROR = %f \n", mean_c[c], mean_hls[c], diff_mean[c]);
-        fprintf(stderr, "Ref. Std.Dev. = %f\t Result = %f\tERROR = %f \n", stddev_c[c], stddev_hls[c], diff_stddev[c]);
+        std::cout << "Ref. Mean =" << mean_c[c] << "\t"
+                  << "Result =" << mean_hls[c] << "\t"
+                  << "ERROR =" << diff_mean[c] << std::endl;
+        std::cout << "Ref. Std.Dev. =" << stddev_c[c] << "\t"
+                  << "Result =" << stddev_hls[c] << "\t"
+                  << "ERROR =" << diff_stddev[c] << std::endl;
 
         if (abs(diff_mean[c]) > 1 | abs(diff_stddev[c]) > 1) {
-            printf("\nTest Failed\n");
+            fprintf(stderr, "ERROR: Test Failed.\n ");
             return -1;
         }
     }

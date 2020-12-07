@@ -145,7 +145,8 @@ RowLoop:
                     uvPacked = uvStream.read();
                 }
             }
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(UVbuf, UVPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(UVbuf, UVPacked, 0);
             uint8_t t = yPacked.range(7, 0);
             y1 = t > 16 ? t - 16 : 0;
             v = (uint8_t)uvPacked.range(15, 8) - 128;
@@ -164,7 +165,8 @@ RowLoop:
             rgba.range(23, 16) = CalculateB(y1, U2Btemp, u);      // B
             rgba.range(31, 24) = 255;                             // A
 
-            //			PackedPixels = PackRGBAPixels<WORDWIDTH_DST>(RGB);
+            //			PackedPixels =
+            // PackRGBAPixels<WORDWIDTH_DST>(RGB);
             _rgba.write(idx1++, rgba);
             evenBlock = evenBlock ? false : true;
         }
@@ -300,7 +302,8 @@ RowLoop:
             // clang-format on
 
             yPacked = _y.read(i * width + j);
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(Ybuf, YPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(Ybuf, YPacked, 0);
             if (evenRow) {
                 if (evenBlock) {
                     vuPacked = _vu.read(idx++);
@@ -311,7 +314,8 @@ RowLoop:
                     vuPacked = vuStream.read();
                 }
             }
-            //			auExtractPixels<NPC, WORDWIDTH_SRC, XF_8UP>(UVbuf, UVPacked, 0);
+            //			auExtractPixels<NPC, WORDWIDTH_SRC,
+            // XF_8UP>(UVbuf, UVPacked, 0);
             uint8_t t = yPacked.range(7, 0);
             y1 = t > 16 ? t - 16 : 0;
             u = (uint8_t)vuPacked.range(15, 8) - 128;
@@ -330,7 +334,8 @@ RowLoop:
             rgba.range(23, 16) = CalculateB(y1, U2Btemp, u);      // B
             rgba.range(31, 24) = 255;                             // A
 
-            //			PackedPixels = PackRGBAPixels<WORDWIDTH_DST>(RGB);
+            //			PackedPixels =
+            // PackRGBAPixels<WORDWIDTH_DST>(RGB);
             _rgba.write(idx1++, rgba);
             evenBlock = evenBlock ? false : true;
         }
@@ -420,7 +425,8 @@ RowLoop:
                     vPacked = _v.read(idx++);
                     vStream.write(vPacked);
                 } else {
-                    /* Copy of the U and V values are pushed into stream to be used for next row */
+                    /* Copy of the U and V values are pushed into stream to be used for
+                     * next row */
                     uPacked = uStream.read();
                     vPacked = vStream.read();
                 }

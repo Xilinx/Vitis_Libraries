@@ -19,16 +19,13 @@
 #include <opencv2/core/types_c.h>
 #include <opencv2/core/core_c.h>
 /* From/To AXI video stream */
-#include "xf_axi_sdata.hpp"
+#include "ap_axi_sdata.h"
 #include "utils/x_hls_utils.h"
 
 #include <assert.h>
 
 namespace xf {
 namespace cv {
-
-template <int W, int NPC>
-void cvMat2AXIvideoxf(cv::Mat& cv_mat, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm);
 
 template <int W, int NPC>
 void xfAXISetBitFields(ap_uint<W>& pix, IplImage* img, int row, int col) {
@@ -121,11 +118,9 @@ void IplImage2AXIvideoxf(IplImage* img, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_v
         }
     }
 }
-template <int W>
-void AXIvideo2cvMatxf(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, cv::Mat& cv_mat);
 
 template <int NPC, int W>
-void cvMat2AXIvideoxf(cv::Mat& cv_mat, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
+void cvMat2AXIvideoxf(::cv::Mat& cv_mat, hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
     IplImage img = cv_mat;
     IplImage2AXIvideoxf<W, NPC>(&img, AXI_video_strm);
 }
@@ -222,7 +217,7 @@ void AXIvideo2IplImagexf(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, IplI
 }
 
 template <int NPC, int W>
-void AXIvideo2cvMatxf(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, cv::Mat& cv_mat) {
+void AXIvideo2cvMatxf(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, ::cv::Mat& cv_mat) {
     IplImage img = cv_mat;
     AXIvideo2IplImagexf<W, NPC>(AXI_video_strm, &img);
 }

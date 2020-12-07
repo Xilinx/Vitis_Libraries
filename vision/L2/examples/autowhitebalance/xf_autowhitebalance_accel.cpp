@@ -15,12 +15,12 @@
  */
 #include "xf_autowhitebalance_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_8UC3, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 static bool flag;
 
-static uint32_t hist0[3][256];
-static uint32_t hist1[3][256];
+static uint32_t hist0[3][HIST_SIZE];
+static uint32_t hist1[3][HIST_SIZE];
 static int igain_0[3];
 static int igain_1[3];
 
@@ -28,8 +28,8 @@ void AWBKernel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                int height,
                int width,
-               uint32_t hist0[3][256],
-               uint32_t hist1[3][256],
+               uint32_t hist0[3][HIST_SIZE],
+               uint32_t hist1[3][HIST_SIZE],
                int gain0[3],
                int gain1[3],
                float thresh,
@@ -39,9 +39,9 @@ void AWBKernel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                float outputMax) {
 #pragma HLS INLINE OFF
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> in_mat(height, width);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> out_mat(height, width);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> impop(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> in_mat(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> out_mat(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> impop(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
@@ -51,18 +51,18 @@ void AWBKernel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 #pragma HLS stream variable=impop.data dim=1 depth=2
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
 
     if (WB_TYPE == 1) {
-        xf::cv::AWBhistogram<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, 1>(in_mat, impop, hist0, thresh, inputMin, inputMax,
+        xf::cv::AWBhistogram<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, 1>(in_mat, impop, hist0, thresh, inputMin, inputMax,
                                                                        outputMin, outputMax);
-        xf::cv::AWBNormalization<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, 1>(impop, out_mat, hist1, thresh, inputMin,
+        xf::cv::AWBNormalization<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, 1>(impop, out_mat, hist1, thresh, inputMin,
                                                                            inputMax, outputMin, outputMax);
     } else {
-        xf::cv::AWBChannelGain<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, 0>(in_mat, impop, thresh, gain0);
-        xf::cv::AWBGainUpdate<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, 0>(impop, out_mat, thresh, gain1);
+        xf::cv::AWBChannelGain<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, 0>(in_mat, impop, thresh, gain0);
+        xf::cv::AWBGainUpdate<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, 0>(impop, out_mat, thresh, gain1);
     }
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
 }
 extern "C" {
 void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,

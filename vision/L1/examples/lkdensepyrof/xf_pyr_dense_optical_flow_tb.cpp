@@ -189,7 +189,7 @@ void pyrof_hw(cv::Mat im0,
 
 int main(int argc, char** argv) {
     if (argc != 3) {
-        std::cout << "Usage incorrect! Correct usage: ./exe <current image> <next image> \n";
+        fprintf(stderr, "Usage incorrect! Correct usage: ./exe <current image> <next image>\n");
         return -1;
     }
     // allocating memory spaces for all the hardware operations
@@ -218,10 +218,10 @@ int main(int argc, char** argv) {
     im0 = cv::imread(argv[1], 0);
     im1 = cv::imread(argv[2], 0);
     if (im0.empty()) {
-        std::cout << "Loading image 1 failed, exiting!!\n";
+        fprintf(stderr, "Loading image 1 failed, exiting!!\n");
         return -1;
     } else if (im1.empty()) {
-        std::cout << "Loading image 2 failed, exiting!!\n";
+        fprintf(stderr, "Loading image 2 failed, exiting!!\n");
         return -1;
     }
 

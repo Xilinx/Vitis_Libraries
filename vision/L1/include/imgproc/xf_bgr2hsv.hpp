@@ -17,9 +17,9 @@
 #ifndef _XF_BGR2HSV_HPP_
 #define _XF_BGR2HSV_HPP_
 
-#include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
 
 typedef unsigned short uint16_t;
 
@@ -72,7 +72,7 @@ extern const unsigned char icvSaturate8u_cv[];
 template <int SRC_T, int ROWS, int COLS, int NPC>
 void bgr2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
 // clang-format off
-    #pragma HLS INLINE OFF
+#pragma HLS INLINE OFF
     // clang-format on
 
     int hdiv[256] = {
@@ -113,54 +113,60 @@ void bgr2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, R
         4389,  4370,    4352,   4334,   4316,   4298,   4281,   4263,   4246,   4229,   4212,   4195,  4178,  4161,
         4145,  4128,    4112,   4096};
 
-    XF_PTNAME(XF_DEPTH(SRC_T, NPC)) in_pix, out_pix;
+    XF_SNAME(XF_WORDWIDTH(SRC_T, NPC)) in_pix;
+    XF_SNAME(XF_WORDWIDTH(SRC_T, NPC)) out_pix;
     ap_uint<8> r, g, b;
+
+    int rows = _src_mat.rows;
+    int cols = (_src_mat.cols >> XF_BITSHIFT(NPC));
     int h;
     int s, v;
     ap_uint<8> vmin;
     ap_uint<8> diff;
     int vr, vg;
-
-    for (uint16_t row = 0; row < _src_mat.rows; row++) {
+    const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
+    for (uint16_t row = 0; row < rows; row++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT max=ROWS
+#pragma HLS LOOP_TRIPCOUNT max=ROWS
         // clang-format on
-        for (uint16_t col = 0; col < _src_mat.cols; col++) {
+        for (uint16_t col = 0; col < cols; col++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT max=COLS
-            #pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT max=COLS
+#pragma HLS PIPELINE
             // clang-format on
-            in_pix = _src_mat.read(row * _src_mat.cols + col);
-            b = in_pix.range(7, 0);
-            g = in_pix.range(15, 8);
-            r = in_pix.range(23, 16);
+            in_pix = _src_mat.read(row * cols + col);
 
-            v = b;
-            vmin = b;
+            for (int p = 0; p < (XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)); p = p + XF_CHANNELS(SRC_T, NPC)) {
+                b = in_pix.range(p * STEP + STEP - 1, p * STEP);
+                g = in_pix.range(p * STEP + (2 * STEP) - 1, p * STEP + STEP);
+                r = in_pix.range(p * STEP + (3 * STEP) - 1, p * STEP + 2 * STEP);
 
-            CV_CALC_MAX_8U(v, g);
-            CV_CALC_MAX_8U(v, r);
-            CV_CALC_MIN_8U(vmin, g);
-            CV_CALC_MIN_8U(vmin, r);
+                v = b;
+                vmin = b;
 
-            diff = v - vmin;
-            vr = v == r ? -1 : 0;
-            vg = v == g ? -1 : 0;
+                CV_CALC_MAX_8U(v, g);
+                CV_CALC_MAX_8U(v, r);
+                CV_CALC_MIN_8U(vmin, g);
+                CV_CALC_MIN_8U(vmin, r);
 
-            s = (diff * sdiv[v] + (1 << (11))) >> 12;
-            h = (vr & (g - b)) + (~vr & ((vg & (b - r + 2 * diff)) + ((~vg) & (r - g + 4 * diff))));
-            h = (h * hdiv[diff] + (1 << (11))) >> 12;
-            h += h < 0 ? 180 : 0;
+                diff = v - vmin;
+                vr = v == r ? -1 : 0;
+                vg = v == g ? -1 : 0;
 
-            out_pix.range(7, 0) = (unsigned char)h;
-            out_pix.range(15, 8) = (unsigned char)s;
-            out_pix.range(23, 16) = (unsigned char)v;
+                s = (diff * sdiv[v] + (1 << (11))) >> 12;
+                h = (vr & (g - b)) + (~vr & ((vg & (b - r + 2 * diff)) + ((~vg) & (r - g + 4 * diff))));
+                h = (h * hdiv[diff] + (1 << (11))) >> 12;
+                h += h < 0 ? 180 : 0;
 
-            _dst_mat.write(row * _src_mat.cols + col, (out_pix));
+                out_pix.range(p * STEP + STEP - 1, p * STEP) = (unsigned char)(h);
+                out_pix.range(p * STEP + (2 * STEP) - 1, p * STEP + STEP) = (unsigned char)(s);
+                out_pix.range(p * STEP + (3 * STEP) - 1, p * STEP + 2 * STEP) = (unsigned char)(v);
+            }
+
+            _dst_mat.write(row * cols + col, (out_pix));
         }
     }
 }
-
 } // namespace cv
 } // namespace xf
 #endif

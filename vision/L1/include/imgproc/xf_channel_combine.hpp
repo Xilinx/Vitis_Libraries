@@ -17,10 +17,10 @@
 #ifndef _XF_CHANNEL_COMBINE_HPP_
 #define _XF_CHANNEL_COMBINE_HPP_
 
-#include "hls_stream.h"
 #include "ap_int.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "hls_stream.h"
 
 namespace xf {
 namespace cv {
@@ -194,8 +194,9 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_src2.rows <= ROWS) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC2) &&
-           "Source image should be of 1 channel and destination image of 2 channels");
-    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+           "Source image should be of 1 channel and destination image of 2 "
+           "channels");
+//    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
 
 // clang-format off
@@ -223,8 +224,9 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_src3.rows <= ROWS) && (_src3.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC3) &&
-           "Source image should be of 1 channel and destination image of 3 channels");
-    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+           "Source image should be of 1 channel and destination image of 3 "
+           "channels");
+//    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
 
 // clang-format off
@@ -254,8 +256,9 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_src4.rows <= ROWS) && (_src4.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_dst.rows <= ROWS) && (_dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert((SRC_T == XF_8UC1) && (DST_T == XF_8UC4) &&
-           "Source image should be of 1 channel and destination image of 4 channels");
-    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+           "Source image should be of 1 channel and destination image of 4 "
+           "channels");
+//    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
 #endif
 
 // clang-format off

@@ -37,5 +37,5 @@
 #define HEIGHT 2160 // Maximum Input image height
 
 /* Output image Dimensions */
-#define NEWWIDTH 960   // Maximum output image width
-#define NEWHEIGHT 1620 // Maximum output image height
+#define NEWWIDTH 1920  // Maximum output image width
+#define NEWHEIGHT 1080 // Maximum output image height

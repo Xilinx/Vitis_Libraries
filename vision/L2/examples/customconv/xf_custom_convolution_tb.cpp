@@ -15,12 +15,12 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_custom_convolution_config.h"
 #include "xcl2.hpp"
+#include "xf_custom_convolution_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
 #endif
 
     if (in_img.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
 
@@ -153,12 +153,13 @@ int main(int argc, char** argv) {
     // Initialize the buffers:
     cl::Event event;
 
-    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
-                                            CL_TRUE,             // blocking call
-                                            0,                   // buffer offset in bytes
-                                            image_in_size_bytes, // Size in bytes
-                                            in_img.data,         // Pointer to the data to copy
-                                            nullptr, &event));
+    OCL_CHECK(err,
+              queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
+                                       CL_TRUE,             // blocking call
+                                       0,                   // buffer offset in bytes
+                                       image_in_size_bytes, // Size in bytes
+                                       in_img.data,         // Pointer to the data to copy
+                                       nullptr, &event));
 
     OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_inFilter,   // buffer on the FPGA
                                             CL_TRUE,           // blocking call
@@ -211,7 +212,7 @@ int main(int argc, char** argv) {
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
-        std::cout << "ERROR: Test Failed." << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     }
 

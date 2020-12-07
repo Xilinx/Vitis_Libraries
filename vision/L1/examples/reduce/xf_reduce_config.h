@@ -38,9 +38,6 @@
 #endif
 
 // Set the optimization type:
-#if RO
-#define NPC1 XF_NPPC8
-#endif
 #if NO
 #define NPC1 XF_NPPC1
 #endif

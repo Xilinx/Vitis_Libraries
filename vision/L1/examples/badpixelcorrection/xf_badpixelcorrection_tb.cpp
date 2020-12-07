@@ -25,7 +25,11 @@ int main(int argc, char** argv) {
     }
 
     cv::Mat in_gray, in_gray1, ocv_ref, out_gray, diff, ocv_ref_in1, ocv_ref_in2, inout_gray1, ocv_ref_gw;
+#if T_8U
     in_gray = cv::imread(argv[1], 0); // read image
+#else
+    in_gray = cv::imread(argv[1], -1); // read image
+#endif
     if (in_gray.data == NULL) {
         fprintf(stderr, "Cannot open image %s\n", argv[1]);
         return -1;

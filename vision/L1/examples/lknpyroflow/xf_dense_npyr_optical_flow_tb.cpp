@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "xf_dense_npyr_optical_flow_config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include "ap_int.h"
 #include "hls_stream.h"
+#include "xf_dense_npyr_optical_flow_config.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
 //#include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>
 //#include <iostream>
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     cv::Mat frame_out;
 
     if (argc != 3) {
-        std::cout << "Usage incorrect. Correct usage: ./exe <current frame> <next frame>" << std::endl;
+        fprintf(stderr, "Usage incorrect. Correct usage: ./exe <current frame> <next frame>\n");
         return -1;
     }
 
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     frame1 = cv::imread(argv[2], 0);
 
     if (frame0.empty() || frame1.empty()) {
-        std::cout << "input files not found!" << std::endl;
+        fprintf(stderr, "input files not found!\n");
         return -1;
     }
 

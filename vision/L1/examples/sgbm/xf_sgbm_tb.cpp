@@ -100,7 +100,8 @@ int find_min(int a, int b, int c, int d) {
 } // end find_min()
 
 void cost_computation(int* Lr, int* accumulatedCost, int rows, int cols, int numDir, int ndisparity) {
-    // Computing cost along 5 directions only. (i,j-1) (i-1,j-1) (i-1,j) (i-1,j+1) (i,j+1)
+    // Computing cost along 5 directions only. (i,j-1) (i-1,j-1) (i-1,j) (i-1,j+1)
+    // (i,j+1)
     int iDisp, jDisp;
     for (int r = 0; r < numDir; r++) {
         if (r == 0) {
@@ -120,7 +121,8 @@ void cost_computation(int* Lr, int* accumulatedCost, int rows, int cols, int num
             jDisp = 1;
         }
 
-        // Changed the indices of the loop below to accommodate for number of directions = 5. Need to make it more
+        // Changed the indices of the loop below to accommodate for number of
+        // directions = 5. Need to make it more
         // flexible.
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -197,16 +199,19 @@ void compute_disparity(float* disparity, int* aggregatedCost, int rows, int cols
             //			if(mind > 0)
             //				p = costPtr[mind-1];
             //			else
-            //				p = costPtr[mind+1]; // if there is no previous disparity match with the next
+            //				p = costPtr[mind+1]; // if there is no
+            // previous disparity match with the next
             // disparity
             //
             //			if(mind < ndisparity-1)
             //				n = costPtr[mind+1];
             //			else
-            //				n = costPtr[mind-1]; // if there is no next disparity match with the previous
+            //				n = costPtr[mind-1]; // if there is no
+            // next disparity match with the previous
             // disparity
             //
-            //			float k = p + n - 2*minCost + __ABS((int)p - (int)n);
+            //			float k = p + n - 2*minCost + __ABS((int)p -
+            //(int)n);
             //			int num = p - n;
             //			float delta = 0;
             //			if (k != 0) delta = (float)num/k;
@@ -341,7 +346,7 @@ void saveDisparityMap(float* disparity, int rows, int cols, int ndisparity, std:
 
 int main(int argc, char** argv) {
     if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>" << std::endl;
+        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -352,11 +357,11 @@ int main(int argc, char** argv) {
     in_imgR = cv::imread(argv[2], 0);
 
     if (in_imgL.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[1] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
     if (in_imgR.data == NULL) {
-        std::cout << "ERROR: Cannot open image " << argv[2] << std::endl;
+        fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[2]);
         return EXIT_FAILURE;
     }
 
@@ -413,7 +418,7 @@ int main(int argc, char** argv) {
     std::cout << "INFO: Number of pixels with errors = " << cnt << std::endl;
 
     if (cnt > 0) {
-        std::cout << "ERROR: Test Failed" << std::endl;
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     } else {
         std::cout << "INFO: Test Pass" << std::endl;

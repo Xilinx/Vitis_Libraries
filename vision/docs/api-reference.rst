@@ -270,7 +270,31 @@ class:
    | Option      | Number of bits  | Unsigned/ Signed/  | Number of       |
    |             | per Pixel       | Float Type         | Channels        |
    +=============+=================+====================+=================+
+   | XF_2UC1     | 2               | Unsigned           | 1               |
+   +-------------+-----------------+--------------------+-----------------+
    | XF_8UC1     | 8               | Unsigned           | 1               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_8UC2     | 8               | Unsigned           | 2               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_8UC3     | 8               | Unsigned           | 3               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_8UC4     | 8               | Unsigned           | 4               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_10UC1    | 8               | Unsigned           | 1               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_10UC2    | 8               | Unsigned           | 2               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_10UC3    | 8               | Unsigned           | 3               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_10UC4    | 8               | Unsigned           | 4               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_12UC1    | 8               | Unsigned           | 1               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_12UC2    | 8               | Unsigned           | 2               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_12UC3    | 8               | Unsigned           | 3               |
+   +-------------+-----------------+--------------------+-----------------+
+   | XF_12UC4    | 8               | Unsigned           | 4               |
    +-------------+-----------------+--------------------+-----------------+
    | XF_16UC1    | 16              | Unsigned           | 1               |
    +-------------+-----------------+--------------------+-----------------+
@@ -280,16 +304,11 @@ class:
    +-------------+-----------------+--------------------+-----------------+
    | XF_32FC1    | 32              | Float              | 1               |
    +-------------+-----------------+--------------------+-----------------+
+   | XF_32FC3    | 32              | Float              | 3               |
+   +-------------+-----------------+--------------------+-----------------+
    | XF_32SC1    | 32              | Signed             | 1               |
    +-------------+-----------------+--------------------+-----------------+
-   | XF_8UC2     | 8               | Unsigned           | 2               |
-   +-------------+-----------------+--------------------+-----------------+
-   | XF_8UC4     | 8               | Unsigned           | 4               |
-   +-------------+-----------------+--------------------+-----------------+
-   | XF_8UC3     | 8               | Unsigned           | 3               |
-   +-------------+-----------------+--------------------+-----------------+
-   | XF_2UC1     | 2               | Unsigned           | 1               |
-   +-------------+-----------------+--------------------+-----------------+
+
 
 Manipulating Data Type
 -----------------------
@@ -529,11 +548,10 @@ Vitis Vision Library Functions
 ###############################
 
 The Vitis Vision library is a set of select OpenCV functions optimized for
-Zynq-7000, Zynq UltraScale+ MPSoC and Alveo U200 devices. The maximum resolution supported for all the functions is 4K, except
+Zynq-7000, Zynq UltraScale+ MPSoC, Alveo U200 and U50 devices. The maximum resolution supported for all the functions is 4K, except
 Houghlines and HOG (RB mode).
 
-.. note:: `Resolution Conversion (Resize) <#resolution-conversion>`_ in 8 pixel per cycle mode, `Dense Pyramidal LK Optical Flow <#dense-pyramidal-lk-optical>`_, and `Dense Non-Pyramidal LK Optical Flow <#dense-non-pyramidal-lk-optical>`_ functions are not 
-supported on the Zynq-7000 SoC ZC702 devices, due to the higher resource utilization.
+.. note:: `Resolution Conversion (Resize) <#resolution-conversion>`_ in 8 pixel per cycle mode, `Dense Pyramidal LK Optical Flow <#dense-pyramidal-lk-optical>`_, and `Dense Non-Pyramidal LK Optical Flow <#dense-non-pyramidal-lk-optical>`_ functions are not supported on the Zynq-7000 SoC ZC702 devices, due to the higher resource utilization.
 
 .. note:: Number of pixel per clock depends on the maximum bus width a device can support. For example: Zynq-7000 SoC has 64-bit interface and so for a pixel type 16UC1, maximum of four pixel per clock (XF_NPPC4) is possible.
 
@@ -1251,6 +1269,92 @@ image.
 +-----------------------------+------------------+
 
 
+.. _autoexposurecorrection:
+
+Autoexposurecorrection
+======================
+
+Auto exposure correction improves contrast and brightness of the image and also corrects the exposure of the input frame. The algorithm uses luminence histogram equalization to improve overall exposure and contrast of the image.
+Luminence (V) is extracted after converting input image to HSV color space. Once the algorthm is applied the image is converted back to RGB color space.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+   template <int SRC_T, int DST_T, int SIN_CHANNEL_TYPE, int ROWS, int COLS, int NPC = 1>
+   void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+                               unsigned int hist_array1[1][256],
+                               unsigned int hist_array2[1][256])
+
+.. rubric:: Parameter Descriptions
+
+The following table describes template parameters and arguments of the function.
+
+.. table:: Table AEC Parameter Description
+
+   +------------------+------------------------------------------------------+
+   | Parameter        | Description                                          |
+   +==================+======================================================+
+   | SRC_T            | Input pixel type. 8-bit unsigned 3 channel is        |
+   |                  | supported (XF_8UC3).                                 |
+   +------------------+------------------------------------------------------+
+   | DST_T            | Output pixel type. 8-bit unsigned 3 channel is       |
+   |                  | supported (XF_8UC3).                                 |
+   +------------------+------------------------------------------------------+
+   | ROWS             | Maximum height of input and output image             |
+   +------------------+------------------------------------------------------+
+   | COLS             | Maximum width of input and output image. In case of  |
+   |                  | N-pixel parallelism, width should be multiple of N.  |
+   +------------------+------------------------------------------------------+
+   | SIN_CHANNEL_TYPE | Single channel type. should be XF_8UC1               |
+   +------------------+------------------------------------------------------+
+   | NPC              | Number of pixels to be processed per cycle; possible |
+   |                  | options is XF_NPPC1, XF_NPPC2 AND so on              |
+   +------------------+------------------------------------------------------+
+   | src              | Input image                                          |
+   +------------------+------------------------------------------------------+
+   | dst              | Output image                                         |
+   +------------------+------------------------------------------------------+
+   | hist_array1      | Histogram array                                      |
+   +------------------+------------------------------------------------------+
+   | hist_array2      | Histogram array                                      |
+   +------------------+------------------------------------------------------+
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of kernel in different configurations, generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table AEC Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | 1 pixel            | 300                     | 4                        | 18           | 6713   | 2996    | 1103    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    | 2 pixel            | 300                     | 4                        | 27           | 7618   | 3705    | 1257    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in
+different configurations, as generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table AEC Function Performance Estimate Summary
+
++--------------------+-------------------------+---------------------------------------------+
+|   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+|                    |   (MHz)                 | **Max (ms)**                                |
++====================+=========================+=============================================+
+| 1 pixel            | 300                     | 7                                           |
++--------------------+-------------------------+---------------------------------------------+
+| 2 pixel            | 300                     | 3.7                                         |
++--------------------+-------------------------+---------------------------------------------+
+
+
 .. _autowhitebalance:
 Autowhitebalance
 =================
@@ -1268,19 +1372,50 @@ A threshold of 1 means that all pixels are used to white-balance, while a thresh
 
 A simple white balance algorithm that works by independently stretching each of the input image channels to the specified range(maximum and minimum). Computes channel wise intensity histogram and ignores p% maximum and minimum values and finally normalize each channel with min and max. For increased robustness it ignores the top and bottom :math:`p\%\ \ (4\%\ is\ fixed)` \ of pixel values.
 
-.. rubric:: API Syntax
+.. rubric:: API Syntax for Simple white balance
 
 
 .. code:: c
+	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE>
+	void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
+                  uint32_t histogram[3][HIST_SIZE],
+                  float thresh,
+                  float inputMin,
+                  float inputMax,
+                  float outputMin,
+                  float outputMax)
+	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE, int S_DEPTH = 2>
+	void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& dst,
+                      uint32_t histogram[3][HIST_SIZE],
+                      float thresh,
+                      float inputMin,
+                      float inputMax,
+                      float outputMin,
+                      float outputMax) 	
 
-   template< int SRC_T,int DST_T, int ROWS, int COLS, int NPC = 1,bool WB_TYPE>void balanceWhite(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src1,xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src2, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & dst,float thresh,float inputMin,float inputMax,float outputMin,float outputMax)
+.. rubric:: API Syntax for Grayworld white balance	
 
+.. code:: c	
+
+	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE>
+	void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+                    float thresh,
+                    int i_gain[3])
+					
+	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int S_DEPTH = 2>
+	void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& src2,
+                   float thresh,
+                   int i_gain[3])
 .. rubric:: Parameter Descriptions
 
 
 The following table describes the template and the function parameters.
 
-.. table:: Table balanceWhite Parameter Description
+.. table:: Table Autowhitebalance Parameter Description
 
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   Parameter   |   Description                                                                                                                |
@@ -1297,9 +1432,15 @@ The following table describes the template and the function parameters.
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   WB_TYPE     | White balance type. Supported types are Gray world and simple.                                                               |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
+	|   HIST_SIZE   | Histogram size.                                                                                                              |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   Src1        | Input image.                                                                                                                 |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   Src2        | Input image.                                                                                                                 |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+	|   histogram   | Histogram array for the Simple AWB.                                                                                          |
+    +---------------+------------------------------------------------------------------------------------------------------------------------------+
+    |   i_gain      | Gain values for gray-world AWB.                                                                                              |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
     |   dst         | Output image.                                                                                                                |
     +---------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -1316,9 +1457,9 @@ The following table describes the template and the function parameters.
 
 .. rubric:: Resource Utilization
 
-The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis HLS 2020.1 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
 
-.. table:: Table balanceWhite Resource Utilization Summary
+.. table:: Table Autowhitebalance Resource Utilization Summary
 
     +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
     |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
@@ -1336,9 +1477,9 @@ The following table summarizes the resource utilization  of the kernel in differ
 .. rubric:: Performance Estimate
 
 The following table summarizes a performance estimate of the kernel in
-different configurations, as generated using Vivado HLS 2019.2 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
+different configurations, as generated using Vitis HLS 2020.1 tool for the Xilinx xc7vx485t-ffg1157-1 FPGA, to process a 4K image.
 
-.. table:: Table balanceWhite Function Performance Estimate Summary
+.. table:: Table Autowhitebalance Function Performance Estimate Summary
 
 +--------------------+-------------------------+---------------------------------------------+
 |   Operating Mode   |   Operating Frequency   |   Latency Estimate                          |
@@ -1431,6 +1572,97 @@ The following table summarizes a performance estimate of the kernel in different
     +----------------+---------------------+------------------+
 
 
+.. _bruteforce-feature-matcher:
+
+Brute-force (Bf) Feature Matcher
+================================
+
+Bf matcher takes the descriptor of one feature in first set and is matched 
+with all other features in second set and the closest one is returned.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+   template <int PU = 1, int MAX_KEYPOINTS = 10000>
+   void bfMatcher(ap_uint<256> desc_list_q[MAX_KEYPOINTS],
+                  ap_uint<256> desc_list_t[MAX_KEYPOINTS],
+                  ap_int<16> match_list[MAX_KEYPOINTS],
+                  ap_uint<32> num_keypoints_q,
+                  ap_uint<32> num_keypoints_t,
+                  float ratio_thresh)
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes template paramters and arguments of the function.
+
+.. table:: Table brute-force matcher Parameter Description
+
+   +-----------------+------------------------------------------------------+
+   | Parameter       | Description                                          |
+   +=================+======================================================+
+   | PU              | Parallel units / compute units. Number of parallel   |
+   |                 | matches computed. Default is '1'. Increasing this    |
+   |                 | parameter results in lesser compute time, but also   |
+   |                 | consumes more hardware resources.                    |
+   +-----------------+------------------------------------------------------+
+   | MAX_KEYPOINTS   | Maximum keypoints in the query and training feature  |
+   |                 | sets.                                                |
+   +-----------------+------------------------------------------------------+
+   | desc_list_q     | Feature descriptor query list of 256-bit type.       |
+   +-----------------+------------------------------------------------------+
+   | desc_list_t     | Feature descriptor training list of 256-bit type.    |
+   +-----------------+------------------------------------------------------+
+   | match_list      | Index of corresponding matches for query list in     |
+   |                 | training set.                                        |
+   +-----------------+------------------------------------------------------+
+   | num_keypoints_q | Total number keypoints in the query set. This must   |
+   |                 | not exceed MAX_KEYPOINTS.                            |
+   +-----------------+------------------------------------------------------+
+   | num_keypoints_t | Total number keypoints in the training set. This     |
+   |                 | must not exceed MAX_KEYPOINTS.                       |
+   +-----------------+------------------------------------------------------+
+   | ratio_thresh    | Ratio threshold for lowe's test, for strong matches. |
+   +-----------------+------------------------------------------------------+
+   
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis 2020.2 tool, for MAX_KEYPOINTS of 10000.
+
+.. table:: Table brute-force matcher Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                     |
+    +                    +   (MHz)                 +--------------------------+--------------+--------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |
+    +====================+=========================+==========================+==============+========+=========+
+    | PU = 1             | 300                     | 162                      | 0            | 5152   | 8453    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+
+    | PU = 2             | 300                     | 176                      | 0            | 9471   | 16320   |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+
+    | PU = 10            | 300                     | 176                      | 0            | 17708  | 48839   |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in
+different configurations, as generated using Vitis 2020.2 tool, for MAX_KEYPOINTS of 10000.
+
+.. table:: Table brute-force matcher Function Performance Estimate Summary
+
+   +--------------------+-------------------------+---------------------------------------------+
+   |   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+   |                    |   (MHz)                 | **Max (ms)**                                |
+   +====================+=========================+=============================================+
+   | PU = 1             | 300                     |  333.4                                      |
+   +--------------------+-------------------------+---------------------------------------------+
+   | PU = 2             | 300                     |  168.6                                      |
+   +--------------------+-------------------------+---------------------------------------------+
+   | PU = 10            | 300                     |  34.285                                     |
+   +--------------------+-------------------------+---------------------------------------------+
 
 
 .. _bilateral-filter:
@@ -2188,6 +2420,99 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image:
 | 8 pixel operation (150 MHz) | 1.7              |
 +-----------------------------+------------------+
 
+
+
+.. _blacklevelcorrection:
+
+Blacklevelcorrection
+====================
+
+Black level leads to the whitening of image in dark region and perceived loss of overall
+contrast. The Blacklevelcorrection algorithm corrects the black and white levels of the overall image.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+     template <int SRC_T,int MAX_ROWS,int MAX_COLS,int NPPC = XF_NPPC1,int MUL_VALUE_WIDTH = 16,int FL_POS = 15,int USE_DSP = 1>
+     void blackLevelCorrection(xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _Src,
+                               xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _Dst,
+                               XF_CTUNAME(SRC_T, NPPC) black_level,
+                               float mul_value)
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table blacklevelcorrection correction Parameter Description
+
+   +-----------------+-----------------------------------------------------------+
+   | Parameter       | Description                                               |
+   +=================+===========================================================+
+   | MUL_VALUE_WIDTH | Width of multiplication factor.                           |
+   +-----------------+-----------------------------------------------------------+
+   | FL_POS          | Number of fractional bits in multiplication factor.       |
+   +-----------------+-----------------------------------------------------------+
+   | USE_DSP         | Enables usage of DSP for multiplication.                  |
+   +-----------------+-----------------------------------------------------------+
+   | SRC_T           | Input pixel type. 8/10/12/16-bit unsigned 1 channel       |
+   |                 | are supported (XF_8UC1, XF_10UC1, XF_12UC1, XF_16UC1).    |
+   +-----------------+-----------------------------------------------------------+
+   | DST_T           | Output pixel type. 8/10/12/16-bit unsigned 1 channel are  |
+   |                 | supported (XF_8UC1, XF_10UC1, XF_12UC1, XF_16UC1).        |
+   +-----------------+-----------------------------------------------------------+
+   | MAX_ROWS        | Maximum height of input and output image.                 |
+   +-----------------+-----------------------------------------------------------+
+   | MAX_COLS        | Maximum width of input and output image. In case of       |
+   |                 | N-pixel parallelism, width should be multiple of N.       |
+   +-----------------+-----------------------------------------------------------+
+   | NPC             | Number of pixels to be processed per cycle; possible      |
+   |                 | options are XF_NPPC1, XF_NPPC2 AND so on                  |
+   +-----------------+-----------------------------------------------------------+
+   | \_Src           | Input image                                               |
+   +-----------------+-----------------------------------------------------------+
+   | \_Dst           | Output image                                              |
+   +-----------------+-----------------------------------------------------------+
+   | \black_level    | Black level value                                         |
+   +-----------------+-----------------------------------------------------------+
+   | \mul_value      | Multiplication factor for blacklevel correction;          |      
+   |                 | which is computed as maxlevel/(maxlevel-blacklevel)       |
+   +-----------------+-----------------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, 
+generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table blacklevelcorrection Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | 1 pixel-8U         | 300                     | 0                        | 0            | 279    | 271     | 70      |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+
+.. table:: Table blacklevelcorrection Function Performance Estimate Summary
+
+    +--------------------+-------------------------+---------------------------------------------+
+    |   Operating Mode   |   Operating Frequency   |  Latency Estimate                           |
+    +                    +                         +                                             +
+    |                    |   (MHz)                 |  **Max (ms)**                               |
+    +====================+=========================+=============================================+
+    | 1 pixel            | 300                     | 7                                           |
+    +--------------------+-------------------------+---------------------------------------------+
+    | 2 pixel            | 300                     | 3.6                                         |
+    +--------------------+-------------------------+---------------------------------------------+
+	
 
 .. _box-filter:
 
@@ -6840,6 +7165,83 @@ version tool for the Xczu9eg-ffvb1156-1-i-es1, to process a HD
 +-----------------------------+------------------+
 
 
+.. _colorcorrectionmatrix:
+
+Color correction matrix
+========================
+
+Color correction matrix algorithm converts the input image color format to output image color format using the colorcorrection matrix provided by the user (CCM_TYPE).
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+    template <int CCM_TYPE, int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
+    void colorcorrectionmatrix(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+                               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat)
+
+.. rubric:: Parameter Descriptions
+
+The following table describes template parameters and arguments of the function.
+
+.. table:: Table colorcorrectionmatrix correction Parameter Description
+
+   +-----------------+-----------------------------------------------------------+
+   | Parameter       | Description                                               |
+   +=================+===========================================================+
+   | CCM_TYPE        | colorcorrection matrix.                                   |
+   +-----------------+-----------------------------------------------------------+
+   | SRC_T           | Input pixel type. 8/10/12/16-bit unsigned, 3 channel are  |
+   |                 | supported (XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3).        |
+   +-----------------+-----------------------------------------------------------+
+   | DST_T           | Output pixel type. 8/10/12/16-bit unsigned, 3 channel are |
+   |                 | supported (XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3).        |
+   +-----------------+-----------------------------------------------------------+
+   | ROWS            | Maximum height of input and output image                  |
+   +-----------------+-----------------------------------------------------------+
+   | COLS            | Maximum width of input and output image. In case of       |
+   |                 | N-pixel parallelism, width should be multiple of N.       |
+   +-----------------+-----------------------------------------------------------+
+   | NPC             | Number of pixels to be processed per cycle; possible      |
+   |                 | options is XF_NPPC1, XF_NPPC2 AND so on                   |
+   +-----------------+-----------------------------------------------------------+
+   | _src_mat        | Input image                                               |
+   +-----------------+-----------------------------------------------------------+
+   | _dst_mat        | Output image                                              |
+   +-----------------+-----------------------------------------------------------+
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table colorcorrectionmatrix correction Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    |                    |   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | 1 pixel-8U         | 300                     | 0                        | 9            | 283    | 254     | 73      |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    | 1 pixel-16U        | 300                     | 0                        | 9            | 353    | 239     | 75      |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table colorcorrectionmatrix correction Function Performance Estimate Summary
+
+    +--------------------+-------------------------+---------------------------------------------+
+    |   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+    |                    |   (MHz)                 | **Max (ms)**                                |
+    +====================+=========================+=============================================+
+    | 1 pixel            | 300                     | 7                                           |
+    +--------------------+-------------------------+---------------------------------------------+
+    | 2 pixel            | 300                     | 3.6                                         |
+    +--------------------+-------------------------+---------------------------------------------+
+	
+
 .. _color-tresholding:
 
 Color Thresholding
@@ -7113,6 +7515,113 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA to process a grayscale HD (1080x1920)
 image.
 
 .. table:: Table CompareS Function Performance Estimate Summary
+
++-----------------------------+------------------+
+| Operating Mode              | Latency Estimate |
++                             +------------------+
+|                             | Max Latency (ms) |
++=============================+==================+
+| 1 pixel operation (300 MHz) | 6.9              |
++-----------------------------+------------------+
+| 8 pixel operation (150 MHz) | 1.7              |
++-----------------------------+------------------+
+
+
+.. _convertscaleabs:
+
+convertScaleAbs
+===============
+
+The ``convertScaleAbs`` function converts an input image src with
+optional linear transformation, save the result as image dst.
+
+dst(x,y)= src1(x,y)*scale+shift
+
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template< int SRC_T,int DST_T, int ROWS, int COLS, int NPC = 1>
+   void convertScaleAbs(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src1, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & dst,float scale, float shift)
+
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table . convertScaleAbs Parameter Description
+
+   +---------------+------------------------------------------------------+
+   | Parameter     | Description                                          |
+   +===============+======================================================+
+   | SRC_T         | Input pixel type. Only 8-bit, unsigned, 1 channel is |
+   |               | supported (XF_8UC1).                                 |
+   +---------------+------------------------------------------------------+
+   | DST_T         | Output pixel type. Only 8-bit, unsigned, 1 channel   |
+   |               | is supported (XF_8UC1).                              |
+   +---------------+------------------------------------------------------+
+   | ROWS          | Maximum height of input and output image.            |
+   +---------------+------------------------------------------------------+
+   | COLS          | Maximum width of input and output image. In case of  |
+   |               | N-pixel parallelism, width should be multiple of N.  |
+   +---------------+------------------------------------------------------+
+   | NPC           | Number of pixels to be processed per cycle; possible |
+   |               | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8  |
+   |               | pixel operations respectively.                       |
+   +---------------+------------------------------------------------------+
+   | src1          | Input image                                          |
+   +---------------+------------------------------------------------------+
+   | scale         | Scale factor                                         |
+   +---------------+------------------------------------------------------+
+   | shift         | Delta/shift added to scaled value.                   |
+   +---------------+------------------------------------------------------+
+   | dst           | Output image                                         |
+   +---------------+------------------------------------------------------+
+
+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of the
+convertScaleAbs function in Resource optimized (8 pixel) mode and normal
+mode as generated using Vivado HLS 2019.1 version tool for the
+Xczu9eg-ffvb1156-1-i-es1 FPGA.
+
+.. table:: Table . convertScaleAbs Function Resource Utilization Summary
+
++-----------------------------+-----------------------------+-----------------------------+
+| Name                        | Resource Utilization                                      |
++                             +-----------------------------+-----------------------------+
+|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
++                             +-----------------------------+-----------------------------+
+|                             | 300 MHz                     | 150 MHz                     |
++=============================+=============================+=============================+
+| BRAM_18K                    | 0                           | 0                           |
++-----------------------------+-----------------------------+-----------------------------+
+| DSP48E                      | 10                          | 38                          |
++-----------------------------+-----------------------------+-----------------------------+
+| FF                          | 949                         | 1971                        |
++-----------------------------+-----------------------------+-----------------------------+
+| LUT                         | 1052                        | 1522                        |
++-----------------------------+-----------------------------+-----------------------------+
+| CLB                         | 218                         | 382                         |
++-----------------------------+-----------------------------+-----------------------------+
+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes a performance estimate of the kernel in
+different configurations, generated using Vivado HLS 2019.1 tool for
+Xczu9eg-ffvb1156-1-i-es1 FPGA to process a grayscale HD (1080x1920)
+image...
+
+.. table:: Table . convertScaleAbs Function Performance Estimate Summary
 
 +-----------------------------+------------------+
 | Operating Mode              | Latency Estimate |
@@ -7714,6 +8223,104 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 +-----------------------------+------------------+------------------+
 | 8 pixel operation (150 MHz) | 1.87             | 1.87             |
 +-----------------------------+------------------+------------------+
+
+
+.. _distance-transform:
+
+Distance Transform Feature Matcher
+==================================
+The distance transform is an operator normally only applied to binary 
+images, where in this case the image must be coded as zero and non-zero 
+pixels as a grayscale image. The result of the transform is a graylevel 
+image that looks similar to the input image, except that the graylevel 
+intensities of points inside foreground regions are changed to show the 
+distance to the closest boundary from each point.
+
+This Xilinx implementation applies 3x3 mask, of distance type DIST_L2 
+(Euclidean distance), with horizontal/vertical shift cost, a = 0.955, and 
+diagonal shift cost b = 1.3693.
+
+Computing the distance takes two passes, forward and backward. During the 
+forward pass, forward mask is applied, and while the backward pass the 
+backward mask is applied over the forward pass data.
+In this implementation, it is required to pass a cache memory for the 
+kernel to interact (write while forward pass, read while backward pass).
+The cache memory must be of image dimensions and of type ap_uint<32>.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+   template <int IN_PTR, int FW_PTR, int ROWS, int COLS, int USE_URAM>
+   void distanceTransform(ap_uint<IN_PTR>* _src,
+                          float* _dst, ap_uint<FW_PTR>* _fw_pass, 
+                          int rows, int cols)
+ 
+.. rubric:: Parameter Descriptions
+
+The following table describes template paramters and arguments of the function.
+
+.. table:: Table distance-transform Parameter Description
+
+   +-----------------+------------------------------------------------------+
+   | Parameter       | Description                                          |
+   +=================+======================================================+
+   | IN_PTR          | Input pointer width must be '8'.                     |
+   +-----------------+------------------------------------------------------+
+   | FW_PTR          | Forward pass data pointer width must be '32'.        |
+   +-----------------+------------------------------------------------------+
+   | ROWS            | Maximum number of rows of the input image that the   |
+   |                 | hardware kernel must be built for.                   |
+   +-----------------+------------------------------------------------------+
+   | COLS            | Maximum number of columns of the input image that    |
+   |                 | the hardware kernel must be built for.               |
+   +-----------------+------------------------------------------------------+
+   | USE_URAM        | Default is '0'. Can be set to '1', if the device has |
+   |                 | URAM support.                                        |
+   +-----------------+------------------------------------------------------+
+   | _src            | Grayscale input image pointer, of ap_uint<8>* type.  |
+   +-----------------+------------------------------------------------------+
+   | _dst            | The distance image pointer,of type float*.           |
+   +-----------------+------------------------------------------------------+
+   | _fw_pass        | Forward pass pointer, of type ap_uint<32>. This is   |
+   |                 | used as an intermediary cache, between forward and   |
+   |                 | backward passes.                                     |
+   +-----------------+------------------------------------------------------+
+   | rows            | Number of rows in the input image, must be less than |
+   |                 | ROWS.                                                |
+   +-----------------+------------------------------------------------------+   
+   | cols            | Number of cols in the input image, must be less than |
+   |                 | COLS.                                                |
+   +-----------------+------------------------------------------------------+
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization of the kernel in different configurations, generated using Vitis 2020.2 tool, to process a 4K image.
+
+.. table:: Table distance-transform Resource Utilization Summary
+
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+    |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+    +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+    |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+    +====================+=========================+==========================+==============+========+=========+=========+
+    | default            | 300                     | 22                       | 0            | 5129   | 7444    | 1757    |
+    +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis 2020.2 tool, to process a 4K image.
+
+.. table:: Table distance-transform Function Performance Estimate Summary
+
+   +--------------------+-------------------------+---------------------------------------------+
+   |   Operating Mode   |   Operating Frequency   | Latency Estimate                            |
+   |                    |   (MHz)                 | **Max (ms)**                                |
+   +====================+=========================+=============================================+
+   | default            | 200                     |  86.249                                     |
+   +--------------------+-------------------------+---------------------------------------------+
+   
+
 
 .. _duplicate:
 
@@ -11662,6 +12269,479 @@ Example for Extended Kalman Filter
            }
    }
 
+
+.. _laplacian:
+Laplacian Operator
+======================
+
+This function calculates the Laplacian of the input image. This function internally uses the filter2D kernel to compute the Laplacian.
+The filter coefficients are calculated using cv::getDerivKernels OpenCV function on the host side. 
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template<int BORDER_TYPE,int FILTER_WIDTH,int FILTER_HEIGHT, int SRC_T,int DST_T, int ROWS, int COLS,int NPC=1>
+   void filter2D(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src_mat,xf::cv::Mat<DST_T, ROWS, COLS, NPC> & _dst_mat,short int filter[FILTER_HEIGHT*FILTER_WIDTH],unsigned char _shift)
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table filter2D Parameter Description
+
+   +------------------+---------------------------------------------------+
+   | Parameter        | Description                                       |
+   +==================+===================================================+
+   | BORDER_TYPE      | Border Type supported is XF_BORDER_CONSTANT       |
+   +------------------+---------------------------------------------------+
+   | FILTER_HEIGHT    | Number of rows in the input filter                |
+   +------------------+---------------------------------------------------+
+   | FILTER_WIDTH     | Number of columns in the input filter             |
+   +------------------+---------------------------------------------------+
+   | SRC_T            | Input pixel type. Only 8-bit, unsigned, 1 and 3   |
+   |                  | channels are supported (XF_8UC1 and XF_8UC3)      |
+   +------------------+---------------------------------------------------+
+   | DST_T            | Output pixel type. 8-bit unsigned single and 3    |
+   |                  | channels (XF_8UC1, XF_8UC3) and 16-bit signed     |
+   |                  | single and 3 channels (XF_16SC1, XF_16SC3)        |
+   |                  | supported.                                        |
+   +------------------+---------------------------------------------------+
+   | ROWS             | Maximum height of input and output image          |
+   +------------------+---------------------------------------------------+
+   | COLS             | Maximum width of input and output image. Must be  |
+   |                  | multiple of 8, for 8 pixel mode.                  |
+   +------------------+---------------------------------------------------+
+   | NPC              | Number of pixels to be processed per cycle;       |
+   |                  | possible options are XF_NPPC1 and XF_NPPC8 for 1  |
+   |                  | pixel and 8 pixel operations respectively.        |
+   +------------------+---------------------------------------------------+
+   | \_src_mat        | Input image                                       |
+   +------------------+---------------------------------------------------+
+   | \_dst_mat        | Output image                                      |
+   +------------------+---------------------------------------------------+
+   | filter           | The input filter of any size, provided the        |
+   |                  | dimensions should be an odd number. The filter    |
+   |                  | co-efficients either a 16-bit value or a 16-bit   |
+   |                  | fixed point equivalent value.                     |
+   +------------------+---------------------------------------------------+
+   | \_shift          | The filter must be of type XF_16SP. If the        |
+   |                  | co-efficients are floating point, it must be      |
+   |                  | converted into the Qm.n and provided as the input |
+   |                  | as well as the shift parameter has to be set with |
+   |                  | the ‘n’ value. Else, if the input is not of       |
+   |                  | floating point, the filter is provided directly   |
+   |                  | and the shift parameter is set to zero.           |
+   +------------------+---------------------------------------------------+
+   
+   
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of the kernel in
+different configurations, generated using Vivado HLS 2019.1 tool for the
+Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD (1080x1920)
+image.
+
+.. table:: Table filter2D Function Resource Utilization Summary
+
++----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+| Operating Mode | Filter Size    | Operating Frequency (MHz) |           Utilization Estimate                          |
++                +                +                           +------------------+-----------+-------+-------+----------+
+|                |                |                           | BRAM_18K         | DSP_48Es  | FF    | LUT   |    CLB   |
++================+================+===========================+==================+===========+=======+=======+==========+
+| 1 Pixel        | 3x3            | 300                       | 3                | 9         | 1701  | 1161  |   269    |
++                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+|                | 5x5            | 300                       | 5                | 25        | 3115  | 2144  |   524    |
++----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+| 8 Pixel        | 3x3            | 150                       | 6                | 72        | 2783  | 2768  |   638    |
++                +----------------+---------------------------+------------------+-----------+-------+-------+----------+
+|                | 5x5            | 150                       | 10               | 216       | 3020  | 4443  |   1007   |
++----------------+----------------+---------------------------+------------------+-----------+-------+-------+----------+
+
+
+The following table summarizes the resource utilization of the kernel in
+different configurations, generated using Vivado HLS 2019.1 tool for the
+Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a 4K 3 Channel image.
+
+.. table:: Table filter2D Function Resource Utilization Summary
+
++----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+| Operating Mode | Filter Size   | Operating Frequency (MHz) |               Utilization Estimate          |
++                +               +                           +----------------------+-----------+----+-----+
+|                |               |                           | BRAM_18K             | DSP_48Es  | FF | LUT |
++================+===============+===========================+======================+===========+====+=====+
+| 1 Pixel        |  3x3          | 300                       | 18                   | 27        |886 | 801 |
++----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+| 8 Pixel        |  5x5          | 300                       | 30                   | 75        |1793|1445 |
++----------------+---------------+---------------------------+----------------------+-----------+----+-----+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes the performance of the kernel in
+different configurations, as generated using Vivado HLS 2019.1 tool for
+the Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920)
+image.
+
+.. table:: Table filter2D Function Performance Estimate Summary
+
++-----------------------------+------------------+------------------+------------------+
+| Operating Mode              |  Operating       |Filter Size       | Latency Estimate |
++                             +  Frequency       +                  +------------------+
+|                             |  (MHz)           |                  | Max (ms)         |
++=============================+==================+==================+==================+
+| 1 pixel                     | 300              | 3x3              | 7                |
++                             +------------------+------------------+------------------+
+|                             | 300              | 5x5              | 7.1              |
++-----------------------------+------------------+------------------+------------------+
+| 8 pixel                     | 150              | 3x3              | 1.86             |
++                             +------------------+------------------+------------------+
+|                             | 150              | 5x5              | 1.86             |
++-----------------------------+------------------+------------------+------------------+
+
+
+.. _lensshadingcorrection:
+
+Lens shading correction
+========================
+
+Vignetting/Lensshading refers to the fall-off pixel intensity from the centre towards the edges of the image.
+In this algorithm, vignette is corrected by considering the distance between the centre pixel and actual image pixel position. This distance is used to calculate intensity gain per pixel per channel which is used for the correction.
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+  template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
+  void Lscdistancebased(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst) {
+ 
+.. rubric:: Parameter Descriptions
+
+
+The following table describes template parameters and arguments to the function.
+
+.. table:: Table Lensshading correction Parameter Description
+
+  +-----------------+-----------------------------------------------------------+
+  | Parameter       | Description                                               |
+  +=================+===========================================================+
+  | SRC_T           | Input pixel type. 8/10/12/16-bit, unsigned, 3 channel is  |
+  |                 | supported (XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3).        |
+  +-----------------+-----------------------------------------------------------+
+  | DST_T           | Output pixel type. 8/10/12/16-bit, unsigned, 3 channel is |
+  |                 | supported (XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3).        |
+  +-----------------+-----------------------------------------------------------+
+  | ROWS            | Maximum height of input and output image                  |
+  +-----------------+-----------------------------------------------------------+
+  | COLS            | Maximum width of input and output image. In case of       |
+  |                 | N-pixel parallelism, width should be multiple of N.       |
+  +-----------------+-----------------------------------------------------------+
+  | NPC             | Number of pixels to be processed per cycle; possible      |
+  |                 | options are XF_NPPC1, XF_NPPC2 AND so on                  |
+  +-----------------+-----------------------------------------------------------+
+  | src             | Input image                                               |
+  +-----------------+-----------------------------------------------------------+
+  | dst             | Output image                                              |
+  +-----------------+-----------------------------------------------------------+
+  
+   
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table Lensshading correction Resource Utilization Summary
+
+  +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+  |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
+  +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+  |                    |                         |   BRAM_18K               |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+  +====================+=========================+==========================+==============+========+=========+=========+
+  | 1 pixel-8U         | 300                     | 0                        | 26           | 4198   | 3628    | 889     |
+  +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+  | 1 pixel-16U        | 300                     | 0                        | 26           | 4253   | 3602    | 770     |
+  +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+
+.. table:: Table Lensshading correction Function Performance Estimate Summary
+
+  +--------------------+-------------------------+---------------------------------------------+
+  |   Operating Mode   |   Operating Frequency   |  Latency Estimate                           |
+  |                    |   (MHz)                 |  **Max (ms)**                               |
+  +====================+=========================+=============================================+
+  | 1 pixel            | 300                     | 7                                           |
+  +--------------------+-------------------------+---------------------------------------------+
+  | 2 pixel            | 300                     | 3.6                                         |
+  +--------------------+-------------------------+---------------------------------------------+
+  
+  
+.. _local-tone-mapping:
+
+Local Tone Mapping
+===================================
+
+Most of the display devices have limited dynamic range. Hence images with wide dynamic range cannot be seen natively on such devices. To see wide dynamic range images on devices with low dynamic range, we need to compress the wide dynamic range of image to a low dynamic range. This process is called as tone-mapping.
+
+Local tone mapping takes pixel neighbor statistics into account, and produces images with more contrast and brightness.
+
+This implementaion is based on the algorithm proposed by J. Yang, A. Hore and O. Yadid-Pecht.
+
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   LTM Class API:
+   
+   template <int IN_TYPE, int OUT_TYPE, int BLOCK_HEIGHT, int BLOCK_WIDTH, int ROWS, int COLS, int NPC>
+   class LTM {}
+   
+   Processing member function:
+   
+   xf::cv::LTM<IN_TYPE, OUT_TYPE, BLOCK_HEIGHT, BLOCK_WIDTH, ROWS, COLS, NPC>::process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in,
+                        int block_rows,
+                        int block_cols,
+                        XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& out)
+	
+   Overlaoded processing member function:
+   
+   xf::cv::LTM<IN_TYPE, OUT_TYPE, BLOCK_HEIGHT, BLOCK_WIDTH, ROWS, COLS, NPC>::process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in,
+                        XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& out)
+
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table . LocalToneMapping Function Parameter
+Descriptions
+
+   +--------------+-------------------------------------------------------+
+   | Parameter    | Description                                           |
+   +==============+=======================================================+
+   | IN_TYPE      | Input pixel type. The current supported pixel value is|
+   |              | XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3, XF_32FC3       |
+   +--------------+-------------------------------------------------------+
+   | OUT_TYPE     | Input pixel type. The current supported pixel value is|
+   |              | XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3                 |
+   +--------------+-------------------------------------------------------+
+   | BLOCK_WIDTH  | Max block width the image is divided into.            |
+   |              | This can be any positive integer greater than or      |
+   |              | equal to 32 and less than input image width.          |
+   +--------------+-------------------------------------------------------+
+   | BLOCK_HEIGHT | Max block height the image is divided into.           |
+   |              | This can be any positive integer greater than or      |
+   |              | equal to 32 and less than input image height.         |
+   +--------------+-------------------------------------------------------+
+   | ROWS         | Maximum number of rows of the input image that the    |
+   |              | hardware kernel must be built for.                    |
+   +--------------+-------------------------------------------------------+
+   | COLS         | Maximum number of columns of the input image that the |
+   |              | hardware kernel must be built for.                    |
+   +--------------+-------------------------------------------------------+
+   | NPC          | Number of pixels to process per cycle. Supported      |
+   |              | values are XF_NPPC1, XF_NPPC2, XF_NPPC4, XF_NPPC8.    |
+   +--------------+-------------------------------------------------------+
+   | in           | Input HDR image                                       |
+   +--------------+-------------------------------------------------------+
+   | block_rows   | Actual block height                                   |
+   +--------------+-------------------------------------------------------+
+   | block_cols   | Actual block width                                    |
+   +--------------+-------------------------------------------------------+
+   | omin_r       | Array of min values to be read by the next frame.     |
+   +--------------+-------------------------------------------------------+
+   | omax_r       | Array of max values to be read by the next frame.     |
+   +--------------+-------------------------------------------------------+
+   | omin_w       | Array of min values computed in the current frame.    |
+   +--------------+-------------------------------------------------------+
+   | omax_w       | Array of max values computed in the current frame.    |
+   +--------------+-------------------------------------------------------+
+   | out          | Output HDR image                                      |
+   +--------------+-------------------------------------------------------+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of
+LocalToneMapping for a 4K image, as generated in the Vitis HLS
+2020.2 version tool for the Xilinx xcu200-fsgd2104-2-e FPGA at 300MHz.
+
+
+.. table:: Table . LocalToneMapping Function Resource Utilization Summary
+
++----------------+---------------------+----------------------+----------+-------+-------+
+| Operating Mode | Operating Frequency | Utilization Estimate                            |
+|                |                     |                                                 |
+|                | (MHz)               |                                                 |
++                +                     +----------------------+----------+-------+-------+
+|                |                     | BRAM_18K             | DSP_48Es | FF    | LUTs  |
++================+=====================+======================+==========+=======+=======+
+| 1 pixel        | 300                 |           0          |  123     | 35216 | 20246 |
++----------------+---------------------+----------------------+----------+-------+-------+
+| 4 pixel        | 300                 |           0          |  330     | 67457 | 40391 |
++----------------+---------------------+----------------------+----------+-------+-------+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes performance estimates of the
+LocalToneMapping function for a 4K image, generated using Vitis
+HLS 2020.2 version tool for the Xilinx xcu200-fsgd2104-2-e FPGA.
+
+.. table:: Table . LocalToneMapping Function Performance Estimate Summary
+
++----------------+---------------------+------------------+
+| Operating Mode | Operating Frequency | Latency Estimate |
+|                |                     |                  |
+|                | (MHz)               |                  |
++                +                     +------------------+
+|                |                     | Max (ms)         |
++================+=====================+==================+
+| 1 pixel        | 300                 |     7.2          |
++----------------+---------------------+------------------+
+| 4 pixel        | 300                 |     1.9          |
++----------------+---------------------+------------------+
+  
+
+.. _look-up-table:
+
+Look Up Table
+=============
+
+The ``LUT`` function performs the table lookup operation. Transforms the
+source image into the destination image using the given look-up table.
+The input image must be of depth XF_8UP and the output image of same
+type as input image.
+
+I\ :sub:`out`\ (x, y) = LUT [I:sub:`in1`\ (x, y)]
+
+Where:
+
+-  I\ :sub:`out`\ (x, y) is the intensity of output image at (x, y)
+   position
+-  I\ :sub:`in`\ (x, y) is the intensity of first input image at (x, y)
+   position
+-  LUT is the lookup table of size 256 and type unsigned char.
+
+
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template <int SRC_T, int ROWS, int COLS,int NPC=1>
+   void LUT(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst,unsigned char* _lut)
+
+
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table . LUT Parameter Description
+
+   +-----------+----------------------------------------------------------+
+   | Parameter | Description                                              |
+   +===========+==========================================================+
+   | SRC_T     | Input and Output pixel type. Only 8-bit, unsigned, 1 and |
+   |           | 3 channels are supported (XF_8UC1 and XF_8UC3)           |
+   +-----------+----------------------------------------------------------+
+   | ROWS      | Number of rows in the image being processed.             |
+   +-----------+----------------------------------------------------------+
+   | COLS      | Number of columns in the image being processed. Must be  |
+   |           | a multiple of 8, for 8-pixel operation.                  |
+   +-----------+----------------------------------------------------------+
+   | NPC       | Number of pixels to be processed in parallel. Possible   |
+   |           | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8      |
+   |           | pixel operations respectively.                           |
+   +-----------+----------------------------------------------------------+
+   | \_src     | Input image of size (ROWS, COLS) and type 8U.            |
+   +-----------+----------------------------------------------------------+
+   | \_dst     | Output image of size (ROWS, COLS) and same type as       |
+   |           | input.                                                   |
+   +-----------+----------------------------------------------------------+
+   | \_lut     | Input lookup Table of size 256 and type unsigned char.   |
+   +-----------+----------------------------------------------------------+
+
+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of the LUT
+function, generated using Vivado HLS 2019.1 tool for the Xilinx
+Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD (1080x1920)
+image.
+
+.. table:: Table . LUT Function Resource Utilization Summary
+
++----------------+---------------------------+----------------------+----------+------+-----+-----+
+| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
++                +                           +----------------------+----------+------+-----+-----+
+|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
++================+===========================+======================+==========+======+=====+=====+
+| 1 pixel        | 300                       | 1                    | 0        | 937  | 565 | 137 |
++----------------+---------------------------+----------------------+----------+------+-----+-----+
+| 8 pixel        | 150                       | 9                    | 0        | 1109 | 679 | 162 |
++----------------+---------------------------+----------------------+----------+------+-----+-----+
+
+
+The following table summarizes the resource utilization of the LUT
+function, generated using Vivado HLS 2019.1 tool for the Xilinx
+Xczu9eg-ffvb1156-1-i-es1 FPGA, to process 4K 3Channel image.
+
+.. table:: Table . LUT Function Resource Utilization Summary
+
++----------------+---------------------------+----------------------+----------+------+-----+-----+
+| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
++                +                           +----------------------+----------+------+-----+-----+
+|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
++================+===========================+======================+==========+======+=====+=====+
+| 1 pixel        | 300                       | 4                    | 0        | 1160 | 648 | 175 |
++----------------+---------------------------+----------------------+----------+------+-----+-----+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes the performance in different
+configurations, as generated using Vivado HLS 2019.1 tool for the Xilinx
+Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
+
+.. table:: Table . LUT Function Performance Estimate Summary
+
++-----------------------------+------------------+
+| Operating Mode              | Latency Estimate |
++                             +------------------+
+|                             | Max Latency (ms) |
++=============================+==================+
+| 1 pixel operation (300 MHz) | 6.92             |
++-----------------------------+------------------+
+| 8 pixel operation (150 MHz) | 1.66             |
++-----------------------------+------------------+
+
+
 .. _ariaid-title95:
 
 Mean and Standard Deviation
@@ -12525,6 +13605,95 @@ Performance Estimate Summary
 
 The maximum number of objects that can be tracked is 10.
 
+
+.. _mode-filter:
+
+Mode filter 
+===========
+
+Mode filter is a non-linear digital filter which improves noise reduction. This implements filter operation with given size of N by computing **mode** for all the pixels in an NxN window.
+
+.. rubric:: API Syntax
+
+.. code:: c
+
+	template <int FILTER_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC = 1>
+	void modefilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst)
+
+.. rubric:: Parameter Descriptions
+
+The following table describes the template and the function parameters.
+
+.. table:: Table Mode filter Parameter Description
+
+   +--------------+-------------------------------------------------------+
+   | Parameter    | Description                                           |
+   +==============+=======================================================+
+   | FILTER_SIZE  | Window size of the hardware filter for which the      |
+   |              | hardware kernel will be built. This can be any odd    |
+   |              | positive integer greater than 1.                      |
+   +--------------+-------------------------------------------------------+
+   | BORDER_TYPE  | The way in which borders will be processed in the     |
+   |              | hardware kernel. Currently, only XF_BORDER_REPLICATE  |
+   |              | is supported.                                         |
+   +--------------+-------------------------------------------------------+
+   | TYPE         | Input and Output pixel type. Only 8-bit, unsigned, 1  |
+   |              | or 3 channels are supported (XF_8UC1 and XF_8UC3)     |
+   +--------------+-------------------------------------------------------+
+   | ROWS         | Number of rows in the image being processed.          |
+   +--------------+-------------------------------------------------------+
+   | COLS         | Number of columns in the image being processed. Must  |
+   |              | be a multiple of 8, for 8-pixel operation.            |
+   +--------------+-------------------------------------------------------+
+   | NPC          | Number of pixels to be processed in parallel. Options |
+   |              | are XF_NPPC1 (for 1 pixel processing per clock),      |
+   |              | XF_NPPC8 (for 8 pixel processing per clock            |
+   +--------------+-------------------------------------------------------+
+   | _src         | Input image.                                          |
+   +--------------+-------------------------------------------------------+
+   | _dst         | Output image.                                         |
+   +--------------+-------------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization of the
+Mode filter function for XF_NPPC1 configurations, generated
+using Vitis HLS 2020.2 version tool.
+
+.. table:: Table Mode filter Function Resource Utilization Summary
+
+   +----------------+-------------+---------------------+----------------------+-------+------+-------+
+   | Operating Mode | FILTER_SIZE | Operating Frequency | Utilization Estimate                        |
+   +                +             + (MHz)               +----------------------+-------+------+-------+
+   |                |             |                     | LUTs                 | FFs   | DSPs | BRAMs |
+   +================+=============+=====================+======================+=======+======+=======+
+   | 1 pixel        | 3           | 300                 | 628                  | 900   | 0    | 3     |
+   +----------------+-------------+---------------------+----------------------+-------+------+-------+
+   | 1 pixel        | 5           | 300                 | 2579                 | 4070  | 0    | 5     |
+   +----------------+-------------+---------------------+----------------------+-------+------+-------+
+   | 1 pixel        | 7           | 300                 | 7852                 | 14065 | 0    | 7     |
+   +----------------+-------------+---------------------+----------------------+-------+------+-------+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes performance estimates of Mode filter
+function on Vitis HLS 2020.2 version tool.
+
+.. table:: Table Mode filter Function Performance Estimate Summary
+
+   +----------------+-------------+---------------------+------------------+------------------+
+   | Operating Mode | FILTER_SIZE | Operating Frequency | Input Image Size | Latency Estimate |
+   |                |             | (MHz)               |                  | Max (ms)         |
+   +================+=============+=====================+==================+==================+
+   | 1 pixel        | 3           | 300                 | 1920x1080        | 6.99             |
+   +----------------+-------------+---------------------+------------------+------------------+
+   | 1 pixel        | 5           | 300                 | 1920x1080        | 7.00             |
+   +----------------+-------------+---------------------+------------------+------------------+
+   | 1 pixel        | 7           | 300                 | 1920x1080        | 7.15             |
+   +----------------+-------------+---------------------+------------------+------------------+
+   
+
 .. _otsu-threshold:
 
 Otsu Threshold
@@ -13132,6 +14301,95 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
 | 8 pixel operation (150 MHz) | 1.7              |
 +-----------------------------+------------------+
 
+
+
+.. _quantizationdithering:
+
+Quantization & Dithering
+========================
+
+This algorithm dithers input image using Floyd-Steinberg dithering method. It is commonly used by image manipulation software, for example when an image is converted into GIF format each pixel intensity value is quantized to 8 bit i.e. 256 colors. 
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template <int IN_TYPE, int OUT_TYPE, int ROWS, int COLS, int SCALE_FACTOR, int MAX_REPRESENTED_VALUE, int NPC>
+   void xf_QuatizationDithering(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& stream_in,
+                                xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& stream_out)
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table Quantization & Dithering Parameter Description
+
+   +-----------------------+------------------------------------------------------+
+   | Parameter             | Description                                          |
+   +=======================+======================================================+
+   | IN_TYPE               | Input pixel type. It should be XF_8UC1, XF_8UC3,     |
+   |                       | XF_10UC1, XF_10UC3, XF_12UC1,  XF_12UC3,  XF_16UC1,  |
+   |                       | or XF_16UC3. Note XF_<PIXEL_BITWIDTH>UC<NUM_CHANNELS>|
+   +-----------------------+------------------------------------------------------+
+   | OUT_TYPE              | Output pixel type. It should be XF_8UC1, XF_8UC3,    |
+   |                       | XF_10UC1, XF_10UC3, XF_12UC1,  XF_12UC3,  XF_16UC1,  |
+   |                       | or XF_16UC3. Output PIXEL_WIDTH should less than or  |
+   |                       | equal to input PIXEL_BITWIDTH                        |   
+   +-----------------------+------------------------------------------------------+
+   | ROWS                  | Maximum height of input and output image             |
+   +-----------------------+------------------------------------------------------+
+   | COLS                  | Maximum width of input and output image. In case of  |
+   |                       | N-pixel parallelism, width should be multiple of N.  |
+   +-----------------------+------------------------------------------------------+
+   | SCALE_FACTOR          | The SCALE_FACTOR must be power of 2 & less than or   |
+   |                       | equal to 2^(output PIXEL_BITWIDTH)                   |
+   +-----------------------+------------------------------------------------------+
+   | MAX_REPRESENTED_VALUE | The MAX_REPRESENTED_VALUE must be equal to           |
+   |                       | equal to 2^(input PIXEL_BITWIDTH)                    |   
+   +-----------------------+------------------------------------------------------+
+   | NPC                   | Number of pixels to be processed per cycle; possible |
+   |                       | options is XF_NPPC1 or XF_NPPC2                      |
+   +-----------------------+------------------------------------------------------+
+   | stream_in             | Input image                                          |
+   +-----------------------+------------------------------------------------------+
+   | stream_out            | Output image                                         |
+   +-----------------------+------------------------------------------------------+   
+
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis HLS 2020.2 tool for the Xilinx xcu200-fsgd2104-2-e FPGA, to process a RGB image with a resolution of 1024x676 & pixel width 16 bit and quantized it to 8 bit pixel width.
+
+.. table:: Table Quantization & Dithering Resource Utilization Summary
+
+   +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+   |   Operating Mode   |   Operating Frequency   |  Utilization Estimate                                                |
+   +                    +   (MHz)                 +--------------------------+--------------+--------+---------+---------+
+   |                    |                         |  BRAM_18K                |   DSP_48Es   |   FF   |   LUT   |   CLB   |
+   +====================+=========================+==========================+==============+========+=========+=========+
+   | 1 pixel            | 300                     | 11                       | 10           | 7592   | 5765    | 1582    |
+   +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+   | 2 pixel            | 300                     | 14                       | 12           | 8150   | 6945    | 1749    |
+   +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
+
+
+.. rubric:: Performance Estimate
+
+The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool for the Xilinx xcu200-fsgd2104-2-e FPGA,  to process a RGB image with a resolution of 1024x676 & pixel width 16 bit and quantized it to 8 bit pixel width.
+
+.. table:: Table Quantization & Dithering Function Performance Estimate Summary
+
+   +----------------+---------------------+------------------+
+   | Operating Mode | Operating Frequency | Latency Estimate |
+   |                |                     |                  |
+   |                | (MHz)               | **Max (ms)**     |
+   +================+=====================+==================+
+   | 1 pixel        | 300                 | 2.8              |
+   +----------------+---------------------+------------------+
+   | 2 pixel        | 300                 | 1.58             |
+   +----------------+---------------------+------------------+
+   
+
 .. _reduce:
 
 Reduce
@@ -13601,111 +14859,6 @@ The table below describes the template and the function parameters.
 | \_dst_mat    | Output image                                          |
 +--------------+-------------------------------------------------------+
 
-.. _convertscaleabs:
-
-convertScaleAbs
-===============
-
-The ``convertScaleAbs`` function converts an input image src with
-optional linear transformation, save the result as image dst.
-
-dst(x,y)= src1(x,y)*scale+shift
-
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template< int SRC_T,int DST_T, int ROWS, int COLS, int NPC = 1>
-   void convertScaleAbs(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & src1, xf::cv::Mat<DST_T, ROWS, COLS, NPC> & dst,float scale, float shift)
-
-
-.. rubric:: Parameter Descriptions
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table . convertScaleAbs Parameter Description
-
-   +---------------+------------------------------------------------------+
-   | Parameter     | Description                                          |
-   +===============+======================================================+
-   | SRC_T         | Input pixel type. Only 8-bit, unsigned, 1 channel is |
-   |               | supported (XF_8UC1).                                 |
-   +---------------+------------------------------------------------------+
-   | DST_T         | Output pixel type. Only 8-bit, unsigned, 1 channel   |
-   |               | is supported (XF_8UC1).                              |
-   +---------------+------------------------------------------------------+
-   | ROWS          | Maximum height of input and output image.            |
-   +---------------+------------------------------------------------------+
-   | COLS          | Maximum width of input and output image. In case of  |
-   |               | N-pixel parallelism, width should be multiple of N.  |
-   +---------------+------------------------------------------------------+
-   | NPC           | Number of pixels to be processed per cycle; possible |
-   |               | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8  |
-   |               | pixel operations respectively.                       |
-   +---------------+------------------------------------------------------+
-   | src1          | Input image                                          |
-   +---------------+------------------------------------------------------+
-   | scale         | Scale factor                                         |
-   +---------------+------------------------------------------------------+
-   | shift         | Delta/shift added to scaled value.                   |
-   +---------------+------------------------------------------------------+
-   | dst           | Output image                                         |
-   +---------------+------------------------------------------------------+
-
-
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of the
-convertScaleAbs function in Resource optimized (8 pixel) mode and normal
-mode as generated using Vivado HLS 2019.1 version tool for the
-Xczu9eg-ffvb1156-1-i-es1 FPGA.
-
-.. table:: Table . convertScaleAbs Function Resource Utilization Summary
-
-+-----------------------------+-----------------------------+-----------------------------+
-| Name                        | Resource Utilization                                      |
-+                             +-----------------------------+-----------------------------+
-|                             | 1 pixel per clock operation | 8 pixel per clock operation |  
-+                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
-+=============================+=============================+=============================+
-| BRAM_18K                    | 0                           | 0                           |
-+-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 38                          |
-+-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 949                         | 1971                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 1052                        | 1522                        |
-+-----------------------------+-----------------------------+-----------------------------+
-| CLB                         | 218                         | 382                         |
-+-----------------------------+-----------------------------+-----------------------------+
-
-
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes a performance estimate of the kernel in
-different configurations, generated using Vivado HLS 2019.1 tool for
-Xczu9eg-ffvb1156-1-i-es1 FPGA to process a grayscale HD (1080x1920)
-image...
-
-.. table:: Table . convertScaleAbs Function Performance Estimate Summary
-
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.9              |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.7              |
-+-----------------------------+------------------+
 
 .. _scharr-filter:
 
@@ -15120,124 +16273,6 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 | 300                 | 1                | 15           |
 +---------------------+------------------+--------------+
 
-.. _look-up-table:
-
-Look Up Table
-=============
-
-The ``LUT`` function performs the table lookup operation. Transforms the
-source image into the destination image using the given look-up table.
-The input image must be of depth XF_8UP and the output image of same
-type as input image.
-
-I\ :sub:`out`\ (x, y) = LUT [I:sub:`in1`\ (x, y)]
-
-Where:
-
--  I\ :sub:`out`\ (x, y) is the intensity of output image at (x, y)
-   position
--  I\ :sub:`in`\ (x, y) is the intensity of first input image at (x, y)
-   position
--  LUT is the lookup table of size 256 and type unsigned char.
-
-
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template <int SRC_T, int ROWS, int COLS,int NPC=1>
-   void LUT(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst,unsigned char* _lut)
-
-
-
-.. rubric:: Parameter Descriptions
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table . LUT Parameter Description
-
-   +-----------+----------------------------------------------------------+
-   | Parameter | Description                                              |
-   +===========+==========================================================+
-   | SRC_T     | Input and Output pixel type. Only 8-bit, unsigned, 1 and |
-   |           | 3 channels are supported (XF_8UC1 and XF_8UC3)           |
-   +-----------+----------------------------------------------------------+
-   | ROWS      | Number of rows in the image being processed.             |
-   +-----------+----------------------------------------------------------+
-   | COLS      | Number of columns in the image being processed. Must be  |
-   |           | a multiple of 8, for 8-pixel operation.                  |
-   +-----------+----------------------------------------------------------+
-   | NPC       | Number of pixels to be processed in parallel. Possible   |
-   |           | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8      |
-   |           | pixel operations respectively.                           |
-   +-----------+----------------------------------------------------------+
-   | \_src     | Input image of size (ROWS, COLS) and type 8U.            |
-   +-----------+----------------------------------------------------------+
-   | \_dst     | Output image of size (ROWS, COLS) and same type as       |
-   |           | input.                                                   |
-   +-----------+----------------------------------------------------------+
-   | \_lut     | Input lookup Table of size 256 and type unsigned char.   |
-   +-----------+----------------------------------------------------------+
-
-
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of the LUT
-function, generated using Vivado HLS 2019.1 tool for the Xilinx
-Xczu9eg-ffvb1156-1-i-es1 FPGA, to process a grayscale HD (1080x1920)
-image.
-
-.. table:: Table . LUT Function Resource Utilization Summary
-
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
-+                +                           +----------------------+----------+------+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
-+================+===========================+======================+==========+======+=====+=====+
-| 1 pixel        | 300                       | 1                    | 0        | 937  | 565 | 137 |
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-| 8 pixel        | 150                       | 9                    | 0        | 1109 | 679 | 162 |
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-
-
-The following table summarizes the resource utilization of the LUT
-function, generated using Vivado HLS 2019.1 tool for the Xilinx
-Xczu9eg-ffvb1156-1-i-es1 FPGA, to process 4K 3Channel image.
-
-.. table:: Table . LUT Function Resource Utilization Summary
-
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-| Operating Mode | Operating Frequency (MHz) | Utilization Estimate                               |
-+                +                           +----------------------+----------+------+-----+-----+
-|                |                           | BRAM_18K             | DSP_48Es | FF   | LUT | CLB |
-+================+===========================+======================+==========+======+=====+=====+
-| 1 pixel        | 300                       | 4                    | 0        | 1160 | 648 | 175 |
-+----------------+---------------------------+----------------------+----------+------+-----+-----+
-
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes the performance in different
-configurations, as generated using Vivado HLS 2019.1 tool for the Xilinx
-Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
-
-.. table:: Table . LUT Function Performance Estimate Summary
-
-+-----------------------------+------------------+
-| Operating Mode              | Latency Estimate |
-+                             +------------------+
-|                             | Max Latency (ms) |
-+=============================+==================+
-| 1 pixel operation (300 MHz) | 6.92             |
-+-----------------------------+------------------+
-| 8 pixel operation (150 MHz) | 1.66             |
-+-----------------------------+------------------+
 
 .. _square-root:
 
