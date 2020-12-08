@@ -118,8 +118,13 @@ int main(int argc, const char* argv[]) {
     cl::Kernel kernel;
     kernel = cl::Kernel(program, "LASSORegressionTrain");
 
+#ifdef USE_DDR
     cl_mem_ext_ptr_t mext_table = {XCL_BANK0, table, 0};
     cl_mem_ext_ptr_t mext_res = {XCL_BANK0, res, 0};
+#else
+    cl_mem_ext_ptr_t mext_table = {(unsigned int)(0), table, 0};
+    cl_mem_ext_ptr_t mext_res = {(unsigned int)(0), res, 0};
+#endif
 
     // Map buffers
     int err;

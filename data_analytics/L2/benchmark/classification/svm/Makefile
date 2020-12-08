@@ -316,9 +316,6 @@ BIN_DIR_SUFFIX ?= _$(XDEVICE)
 OBJ_DIR = $(CUR_DIR)/$(OBJ_DIR_BASE)$(BIN_DIR_SUFFIX)
 BIN_DIR = $(CUR_DIR)/$(BIN_DIR_BASE)$(BIN_DIR_SUFFIX)
 
-CXX := xcpp
-CC := gcc
-
 CXXFLAGS += -std=c++14 -fPIC \
     -I$(SRC_DIR) -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include \
     -Wall -Wno-unknown-pragmas -Wno-unused-label -pthread

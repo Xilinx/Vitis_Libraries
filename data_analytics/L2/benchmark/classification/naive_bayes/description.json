@@ -1,15 +1,50 @@
 {
-    "gui": true,
+    "gui": true, 
     "name": "Xilinx Naive Bayes Training", 
     "description": "", 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u200"
+        "u200",
+        "u50"
     ], 
-    "platform_blacklist": [], 
+    "platform_blacklist": [],
+    "platform_properties": {
+        "u200": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_DDR"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u200_u250.ini"
+                    ]
+                }
+            }
+        },
+        "u50": {
+            "host": {
+                "compiler": {
+                    "symbols": [
+                        "USE_HBM"
+                    ]
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "cflags": [
+                        "--config PROJECT/conn_u50.ini"
+                    ]
+                }
+            }
+        }
+    },
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/naiveBayesTrain_kernel.xclbin -in PROJECT/dat/test.dat -g PROJECT/dat/test_g.dat -c 10 -t 13107",
+            "cmd_args": " -xclbin BUILD/naiveBayesTrain_kernel.xclbin -in PROJECT/dat/test.dat -g PROJECT/dat/test_g.dat -c 10 -t 13107", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -17,13 +52,13 @@
         "host_exe": "test_nb.exe", 
         "compiler": {
             "sources": [
-                "host/test_nb.cpp",
+                "host/test_nb.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L1/include",
-                "host",
-                "kernel",
+                "LIB_DIR/L1/include", 
+                "host", 
+                "kernel", 
                 "LIB_DIR/ext/xcl2"
             ], 
             "options": "-O3 "
@@ -32,7 +67,7 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include",
+                "LIB_DIR/L1/include", 
                 "kernel"
             ]
         }
@@ -41,7 +76,7 @@
         {
             "accelerators": [
                 {
-                    "location": "kernel/naiveBayesTrain_kernel.cpp",
+                    "location": "kernel/naiveBayesTrain_kernel.cpp", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=naiveBayesTrain_kernel", 
                     "name": "naiveBayesTrain_kernel"
@@ -60,13 +95,19 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 32768, 
-                "max_time_min": 300
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
             }
         ], 
         "targets": [
             "vitis_sw_emu", 
             "vitis_hw_emu", 
-            "vitis_hw"
+            "vitis_hw_build", 
+            "vitis_hw_run"
         ], 
         "category": "canary"
     }

@@ -20,7 +20,7 @@
     }, 
     "testbench": {
         "source": [
-            "test.cpp" 
+            "test.cpp"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include -I./", 
         "ldflags": "", 
@@ -35,7 +35,13 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": 16384, 
-                "max_time_min": 460
+                "max_time_min": {
+                    "hls_vivado_syn": 460, 
+                    "hls_csim": 60, 
+                    "hls_cosim": 460, 
+                    "hls_vivado_impl": 460, 
+                    "hls_csynth": 60
+                }
             }
         ], 
         "targets": [
