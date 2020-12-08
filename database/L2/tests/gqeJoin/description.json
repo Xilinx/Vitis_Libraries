@@ -5,8 +5,7 @@
     "gui": true,
     "platform_type": "pcie",
     "platform_whitelist": [
-        "u280",
-        "u50"
+        "u280"
     ],
     "platform_blacklist": [
         "other"
@@ -88,7 +87,7 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/src/gqe_join.cpp",
-                    "frequency": 180,
+                    "frequency": 300,
                     "name": "gqeJoin"
                 }
             ],

@@ -12,8 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# makefile-generator v1.0.3
 #
-############################## Help Section ##############################
+
+# ####################################### Help Section #####################################
 .PHONY: help
 
 help::
@@ -28,8 +30,7 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make sd_card TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to prepare sd_card files."
+	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
@@ -47,33 +48,29 @@ help::
 	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
 	$(ECHO) ""
 
-############################## Setting up Project Variables ##############################
+# ##################### Setting up default value of TARGET ##########################
+TARGET ?= sw_emu
 
+# ################### Setting up default value of DEVICE ##############################
+DEVICE ?= xilinx_u280_xdma_201920_3
+
+# ###################### Setting up default value of HOST_ARCH ####################### 
+HOST_ARCH ?= x86
+
+# #################### Checking if DEVICE in blacklist #############################
+
+# #################### Checking if DEVICE in whitelist ############################
+ifneq ($(findstring u280, $(DEVICE)), u280)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+
+# ######################## Setting up Project Variables #################################
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-ifneq ($(wildcard $(XILINX_VITIS)/aietools/.*),)
-XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/aietools
-LDXRT := -ladf_api_xrt
-else
-XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/cardano
-LDXRT := -lcardano_api_xrt
-endif
-
-SYSROOT := $(SYSROOT)
-TARGET ?= sw_emu
-DEVICE ?= xilinx_u280_xdma_201920_1
-HOST_ARCH ?= x86
-
-
-ifneq ($(findstring u280, $(DEVICE)), u280)
-ifneq ($(findstring u50, $(DEVICE)), u50)
-$(error [ERROR]: This project is not supported for $(DEVICE).)
-endif
-endif
-
+# ######################### Include environment variables in utils.mk ####################
 include ./utils.mk
 XDEVICE := $(call device2xsa, $(DEVICE))
 TEMP_DIR := _x_temp.$(TARGET).$(XDEVICE)
@@ -81,20 +78,13 @@ TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(XDEVICE)
 BUILD_DIR := build_dir.$(TARGET).$(XDEVICE)
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
-
-PERL ?= perl
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
 
-# Setting tools
-VPP := v++
-
-
-############################## Setting up Host Variables ##############################
+# ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/host/test_q1.cpp
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
-
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
 CXXFLAGS += -I$(CUR_DIR)/host
@@ -103,7 +93,6 @@ CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include/sw
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
 
-
 ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
 endif
@@ -111,46 +100,39 @@ endif
 ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
 endif
-# Host compiler global settings
+
+# ######################### Host compiler global settings ############################
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 -O3 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
-
 ifeq ($(HOST_ARCH), x86)
 LDFLAGS += -L$(XILINX_VIVADO)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
 endif
-PKG_OUT_DIR := package_$(TARGET)
-ifneq (,$(findstring zc706, $(XDEVICE)))
-K_IMAGE := $(SYSROOT)/../../uImage
-else
-K_IMAGE := $(SYSROOT)/../../Image
-endif
+
+# ################### Setting package and image directory #######################
 
 EXE_NAME := test_gqeAggr.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/gqe_aggr.xclbin -scale 10000
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/gqe_aggr.xclbin -scale 10000
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/gqe_aggr.xclbin
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 
-
-############################## Setting up Kernel Variables ##############################
-# Kernel compiler global settings
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
-VPP_LDFLAGS += --optimize 2 --jobs 16 
+# ##################### Kernel compiler global settings ##########################
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
+VPP_FLAGS += --jobs 8
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
 VPP_FLAGS += --config $(CUR_DIR)/conn_u280.ini
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+endif
+
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_FLAGS += --config $(CUR_DIR)/conn_u50.ini
 endif
 
@@ -161,56 +143,42 @@ VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
-# Use tempalte hook
-define MAKE_GEN_INI
-[vivado]
-prop=run.impl_1.STEPS.OPT_DESIGN.TCL.POST=$(CUR_DIR)/post_opt.tcl
-endef
+gqeAggr_VPP_FLAGS += --hls.clock 250000000:gqeAggr
+VPP_LDFLAGS_gqe_aggr += --kernel_frequency 180
 
-VPP_FLAGS += --config opts.ini
 
-HLS_FREQUENCY_FLAG := --hls.clock 250000000:gqeAggr
-
-VPP_FREQUENCY ?= 180
-VPP_FLAGS += $(HLS_FREQUENCY_FLAG) --kernel_frequency $(VPP_FREQUENCY) --report_level 2
-
-############################## Declaring Binary Containers ##############################
-
+# ############################ Declaring Binary Containers ##########################
 
 BINARY_CONTAINERS += $(BUILD_DIR)/gqe_aggr.xclbin
-
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/gqe_aggr.xclbin
 BINARY_CONTAINER_gqe_aggr_OBJS += $(TEMP_DIR)/gqeAggr.xo
 
-############################## Setting Targets ##############################
-CP = cp -rf
+# ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: write_ini check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: host
 host: check_xrt check_sysroot $(EXE_FILE)
 
 .PHONY: xclbin
-xclbin: write_ini check_vpp check_sysroot $(BINARY_CONTAINERS)
+xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
 
 .PHONY: build
 build: xclbin
 
-############################## Setting Rules for Binary Containers (Building Kernels) ##############################
-
-
+# ################ Setting Rules for Binary Containers (Building Kernels) ################
 $(TEMP_DIR)/gqeAggr.xo: $(XFLIB_DIR)/L2/src/gqe_aggr.cpp
 	$(ECHO) "Compiling Kernel: gqeAggr"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) $(gqeAggr_VPP_FLAGS) $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -c -k gqeAggr -I'$(<D)' -o'$@' '$<'
+	$(VPP) -c $(gqeAggr_VPP_FLAGS) $(VPP_FLAGS) -k gqeAggr -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
 
 
 $(BUILD_DIR)/gqe_aggr.xclbin: $(BINARY_CONTAINER_gqe_aggr_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/gqe_aggr -l $(VPP_LDFLAGS) $(VPP_LDFLAGS_gqe_aggr) -o'$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/gqe_aggr $(VPP_LDFLAGS) $(VPP_LDFLAGS_gqe_aggr) -o '$@' $(+)
 
-############################## Setting Rules for Host (Building Host Executable) ##############################
+
+# ################# Setting Rules for Host (Building Host Executable) ################
 $(EXE_FILE): $(HOST_SRCS) | check_xrt
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
@@ -219,31 +187,17 @@ emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(XPLATFORM) --od $(EMCONFIG_DIR)
 
-############################## Setting Essential Checks and Building Rules ##############################
-.PHONY: build
-build: $(BUILD_OBJS)
 
-MAKE_GEN_INI_FILE ?= $(CUR_DIR)/make_gen_$(XDEVICE).ini
-.PHONY: write_ini
-ifneq (,$(MAKE_GEN_INI))
-write_ini: export MAKE_GEN_INI := $(MAKE_GEN_INI)
-write_ini:
-	@echo "----Generating $(notdir $(MAKE_GEN_INI_FILE)) ..."
-	@echo "$${MAKE_GEN_INI}" > $(MAKE_GEN_INI_FILE)
-VPP_FLAGS += --config $(MAKE_GEN_INI_FILE)
-endif
-
-############################## Setting Essential Checks and Running Rules ##############################
-RESULT_VAL ?= 
-RUN_LEVEL ?= 7
+# ###############Setting Essential Checks And Running Rules For Vitis Flow #############
 run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 else
-	LD_LIBRARY_PATH=$(LIBRARY_PATH) $(EXE_FILE) $(HOST_ARGS)
+	$(EXE_FILE) $(HOST_ARGS)
 endif
-############################## Cleaning Rules ##############################
+
+# ################################# Cleaning Rules ##################################
 cleanh:
 	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj* bin* *.csv *.jpg *.jpeg *.png
@@ -257,6 +211,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh
