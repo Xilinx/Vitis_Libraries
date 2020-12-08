@@ -227,7 +227,7 @@ int main(int argc, const char* argv[]) {
     // load data from disk to in-memory buffer
     std::ifstream log_file(log_path);
     std::ofstream out_file(out_path);
-    uint32_t lnm;
+    uint32_t lnm = 0;
     if (!log_file.is_open()) {
         std::cerr << "ERROR: " << log_path << " cannot be opened for read.\n";
         return -1;
@@ -236,7 +236,7 @@ int main(int argc, const char* argv[]) {
         std::cerr << "ERROR: " << out_path << " cannot be opened for write.\n";
         return -1;
     }
-    while (!log_file.eof()) {
+    while (!log_file.eof() && (limit_ln == -1 || lnm < limit_ln)) {
         // load data
         if (load_dat(log_file, msg_buff, offt_buff, len_buff, lnm, limit_ln) == -1) {
             return -1;
