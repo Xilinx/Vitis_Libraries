@@ -157,7 +157,7 @@ endif
 EXE_NAME := pyrup
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/HD.jpg 
+HOST_ARGS := $(XFLIB_DIR)/data/128x128.png 
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 LIBRARY_PATH =$(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib

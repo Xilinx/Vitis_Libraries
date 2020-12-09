@@ -158,13 +158,13 @@ endif
 EXE_NAME := accumulatesquared
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/4k_1.jpg $(XFLIB_DIR)/data/4k_2.jpg 
+HOST_ARGS := $(XFLIB_DIR)/data/128x128_1.png $(XFLIB_DIR)/data/128x128_2.png 
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 LIBRARY_PATH =$(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/4k_1.jpg $(XFLIB_DIR)/data/4k_2.jpg 
+HOST_ARGS := $(XFLIB_DIR)/data/128x128_1.png $(XFLIB_DIR)/data/128x128_2.png 
 
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 LIBRARY_PATH =$(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib

@@ -30,8 +30,7 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make sd_card TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to prepare sd_card files."
+	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
@@ -62,18 +61,20 @@ HOST_ARCH ?= x86
 ifeq ($(findstring u280, $(DEVICE)), u280)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
+ifeq ($(findstring zcu102, $(DEVICE)), zcu102)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
+ifeq ($(findstring zcu104, $(DEVICE)), zcu104)
+$(error [ERROR]: This project is not supported for $(DEVICE).)
+endif
 ifeq ($(findstring u250, $(DEVICE)), u250)
 $(error [ERROR]: This project is not supported for $(DEVICE).)
 endif
 
 # #################### Checking if DEVICE in whitelist ############################
 ifneq ($(findstring u200, $(DEVICE)), u200)
-ifneq ($(findstring zcu102, $(DEVICE)), zcu102)
-ifneq ($(findstring zcu104, $(DEVICE)), zcu104)
 ifneq ($(findstring u50, $(DEVICE)), u50)
 $(warning [WARNING]: This project has not been tested for $(DEVICE). It may or may not work.)
-endif
-endif
 endif
 endif
 
@@ -93,12 +94,6 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
-
-# ####################### Setting environment variables for embedded #####################
-SYSROOT := $(SYSROOT)
-PERL ?= perl
-SDCARD := sd_card
-EMU_DIR := $(SDCARD)/data/emulation
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
@@ -148,31 +143,19 @@ LDFLAGS += -L${SYSROOT}/opt/xilinx/xrt/lib
 endif
 
 # ################### Setting package and image directory #######################
-EMBEDDED_PACKAGE_OUT = package_$(TARGET)
-ifneq (,$(findstring zc706, $(XDEVICE)))
-K_IMAGE := $(EDGE_COMMON_SW)/uImage
-else
-K_IMAGE := $(EDGE_COMMON_SW)/Image
-endif
 
 EXE_NAME := bilateralfilter
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
 HOST_ARGS := $(XFLIB_DIR)/data/128x128.png 
-
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 LIBRARY_PATH =$(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 HOST_ARGS := $(XFLIB_DIR)/data/128x128.png  
-
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 LIBRARY_PATH =$(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
 HOST_ARGS := $(XFLIB_DIR)/data/4k.jpg 
-
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 LIBRARY_PATH =$(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 
@@ -190,13 +173,7 @@ VPP_FLAGS +=
 
 # ############################ Declaring Binary Containers ##########################
 
-ifeq ($(HOST_ARCH), x86)
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_bilateralfilter.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/krnl_bilateralfilter.xclbin
-else
-BINARY_CONTAINERS += $(BUILD_DIR)/krnl_bilateralfilter_xo.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/krnl_bilateralfilter.xclbin
-endif
 BINARY_CONTAINER_krnl_bilateralfilter_OBJS += $(TEMP_DIR)/bilateralfilter.xo
 
 # ######################### Setting Targets of Makefile ################################
@@ -204,8 +181,7 @@ DATA_FILE += $(XFLIB_DIR)/data/4k.jpg
 DATA_FILE += $(XFLIB_DIR)/data/128x128.png
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig sd_card
-
+all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: check_env
 check_env:
@@ -232,7 +208,7 @@ $(TEMP_DIR)/bilateralfilter.xo: $(XFLIB_DIR)/L2/examples/bilateralfilter/xf_bila
 	$(VPP) -c $(bilateralfilter_VPP_FLAGS) $(VPP_FLAGS) -k bilateralfilter -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
 
 
-$(BINARY_CONTAINERS): $(BINARY_CONTAINER_krnl_bilateralfilter_OBJS)
+$(BUILD_DIR)/krnl_bilateralfilter.xclbin: $(BINARY_CONTAINER_krnl_bilateralfilter_OBJS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/krnl_bilateralfilter $(VPP_LDFLAGS) $(VPP_LDFLAGS_krnl_bilateralfilter) -o '$@' $(+)
 
@@ -248,57 +224,12 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 
 # ###############Setting Essential Checks And Running Rules For Vitis Flow #############
-# Setting default value for vitis flow
-RESULT_VAL ?= 
-RUN_LEVEL ?= 7
 run: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-ifeq ($(HOST_ARCH), x86)
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	LD_LIBRARY_PATH=$(LIBRARY_PATH) XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 else
-	$(PERL) $(XF_PROJ_ROOT)/ext/make_utility/embedded_run_emulation.pl "./$(EMBEDDED_PACKAGE_OUT)/launch_$(TARGET).sh -no-reboot" "./run_script.sh" "$(RESULT_VAL)" "$(RUN_LEVEL)" | tee embedded_run.log 
-endif
-else
-	LD_LIBRARY_PATH=$(LIBRARY_PATH)
-ifeq ($(HOST_ARCH), x86)
-	$(EXE_FILE) $(HOST_ARGS)
-else
-	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
-endif
-endif
-
-# ######################### Preparing sdcard folder ##############################
-EMBEDDED_EXEC_SCRIPT = run_script.sh
-PACKAGE_FILES += $(EMBEDDED_EXEC_SCRIPT)
-PACKAGE_FILES += $(EXE_FILE)
-PACKAGE_FILES += emconfig.json
-PACKAGE_FILES += $(DATA_FILE)
-SD_FILES_WITH_PREFIX = $(foreach sd_file,$(PACKAGE_FILES),--package.sd_file $(sd_file))
-SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
-sd_card: $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
-ifneq ($(HOST_ARCH), x86)
-	@echo "Generating sd_card folder...."
-	mkdir -p $(EMBEDDED_PACKAGE_OUT)
-	rm -rf run_script.sh
-	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$$LD_LIBRARY_PATH' >> run_script.sh
-ifeq ($(TARGET), $(filter $(TARGET),sw_emu hw_emu))
-	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> run_script.sh
-endif
-	@echo 'export XILINX_VITIS=/mnt' >> run_script.sh
-	@echo 'export XILINX_XRT=/usr' >> run_script.sh
-	@echo 'cp platform_desc.txt /etc/xocl.txt' >> run_script.sh
-	emconfigutil --platform $(DEVICE) --nd 1;
-	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> run_script.sh
-	@echo 'return_code=$$?' >> run_script.sh
-	@echo 'if [ $$return_code -ne 0 ]; then' >> run_script.sh
-	@echo '         echo "ERROR: Embedded host run failed, RC=$$return_code"' >> run_script.sh
-	@echo 'fi' >> run_script.sh
-	@echo 'echo "INFO: Embedded host run completed."' >> run_script.sh
-	@echo 'exit $$return_code' >> run_script.sh
-	chmod a+rx run_script.sh
-	v++ -t $(TARGET) --platform $(DEVICE) -o $(BINARY_CONTAINERS_PKG) -p $(BINARY_CONTAINERS) --package.out_dir $(EMBEDDED_PACKAGE_OUT) --package.rootfs $(EDGE_COMMON_SW)/rootfs.ext4 --package.sd_file $(K_IMAGE) $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
-	@echo "### ***** sd_card generation done! ***** ###"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH) $(EXE_FILE) $(HOST_ARGS)
 endif
 
 # ################################# Cleaning Rules ##################################
@@ -313,7 +244,7 @@ cleank:
 	-$(RMDIR) _x_temp.* 
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR) sd_card* build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
+	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
 
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
