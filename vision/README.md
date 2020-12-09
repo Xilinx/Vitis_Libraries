@@ -28,7 +28,7 @@ Full User Guide for Vitis Vision and using OpenCV on Xilinx devices Check here:
 [Xilinx Vitis Vision User Guide](https://xilinx.github.io/Vitis_Libraries/vision/2020.2/index.html)
 
 ## SUPPORT
-For questions and to get help on this project or your own projects, visit the [Xilinx Forums][] (link yet to be updated).
+For questions and to get help on this project or your own projects, visit the [Xilinx Forums](https://forums.xilinx.com/t5/Vitis-Acceleration-SDAccel-SDSoC/bd-p/tools_v)
 
 ## LICENSE AND CONTRIBUTING TO THE REPOSITORY
 The source for this project is licensed under the [Apache License](http://www.apache.org/licenses/LICENSE-2.0)
@@ -89,4 +89,5 @@ This library is written by developers at
 
 #### Known Issues:
 1. Windows OS has path length limitations, kernel names must be smaller than 25 characters.
-2. Axiconverter function in L1 fails cosim because of a known HLS issue.
+2. 'axiconv' function in L1 fails cosim because of a known HLS issue.
+3. 'bilateralfilter' function RO configuration is not supported.

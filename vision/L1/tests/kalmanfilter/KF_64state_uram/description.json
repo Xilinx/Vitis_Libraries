@@ -4,9 +4,8 @@
     "flow": "hls", 
     "platform_whitelist": [
         "u200", 
-        "zcu102", 
-        "zcu104", 
-        "zc706"
+        "u50",
+        "zcu104"
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
