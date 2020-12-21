@@ -44,12 +44,10 @@ Level 2 contains the host-callable kernels and engines for various Vitis Vision 
 
     make run TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 > #This command will generate only the sd_card folder in case of hardware build. 
 
-**Note**. For hw run on embedded devices, copy the generated sd_card folder content under package_hw, to an SDCARD and run the following commands on the board:
+**Note**. For hw run on embedded devices, copy the generated sd_card folder content under package_hw to an SD Card. More information on preparing the SD Card is available [here](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842385/How+to+format+SD+card+for+SD+boot#HowtoformatSDcardforSDboot-CopingtheImagestotheNewPartitions). After successful booting of the board, run the following commands:
 
     cd /mnt
 	
-	source /opt/xilinx/xrt/setup.sh
-	   
     export XCL_BINDIR=< xclbin-folder-present-in-the-sd_card > #For example, "export XCL_BINDIR=xclbin_zcu102_base_hw"
 	   
-    ./< executable > < arguments >
+    ./run_script.sh
