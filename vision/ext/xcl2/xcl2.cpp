@@ -180,16 +180,16 @@ std::string find_binary_file(const std::string& _device_name, const std::string&
     }
 
     const char* aws_file_patterns[] = {
-        "%1$s/%2$s.%3$s.%4$s.awsxclbin",     // <kernel>.<target>.<device>.awsxclbin
-        "%1$s/%2$s.%3$s.%5$s.awsxclbin",     // <kernel>.<target>.<device_versionless>.awsxclbin
-        "%1$s/binary_container_1.awsxclbin", // default for gui projects
-        "%1$s/%2$s.awsxclbin",               // <kernel>.awsxclbin
+        "%1$s/%2$s.%3$s.%4$s.awsxclbin",       // <kernel>.<target>.<device>.awsxclbin
+        "%1$s/%2$s.%3$s.%4$.0s%5$s.awsxclbin", // <kernel>.<target>.<device_versionless>.awsxclbin
+        "%1$s/binary_container_1.awsxclbin",   // default for gui projects
+        "%1$s/%2$s.awsxclbin",                 // <kernel>.awsxclbin
         NULL};
 
-    const char* file_patterns[] = {"%1$s/%2$s.%3$s.%4$s.xclbin",     // <kernel>.<target>.<device>.xclbin
-                                   "%1$s/%2$s.%3$s.%5$s.xclbin",     // <kernel>.<target>.<device_versionless>.xclbin
-                                   "%1$s/binary_container_1.xclbin", // default for gui projects
-                                   "%1$s/%2$s.xclbin",               // <kernel>.xclbin
+    const char* file_patterns[] = {"%1$s/%2$s.%3$s.%4$s.xclbin",       // <kernel>.<target>.<device>.xclbin
+                                   "%1$s/%2$s.%3$s.%4$.0s%5$s.xclbin", // <kernel>.<target>.<device_versionless>.xclbin
+                                   "%1$s/binary_container_1.xclbin",   // default for gui projects
+                                   "%1$s/%2$s.xclbin",                 // <kernel>.xclbin
                                    NULL};
     char xclbin_file_name[PATH_MAX];
     memset(xclbin_file_name, 0, PATH_MAX);

@@ -19,6 +19,8 @@ The Vitis Vision library is designed to work with Zynq, Zynq Ultrascale+, and Al
 
 Vitis 2020.2 Development Environment is required to work with the library.
 
+OpenCV must be installed. All Vitis Vision functions are tested against OpenCV version 3.4.2.
+
 **Vitis Flow:**
 
 U200 platform, available in the Vitis tool, is required to build and run the library functions on U200 PCIe board. Same applies for U50 and Zynq based platforms.
@@ -89,5 +91,4 @@ This library is written by developers at
 
 #### Known Issues:
 1. Windows OS has path length limitations, kernel names must be smaller than 25 characters.
-2. 'axiconv' function in L1 fails cosim because of a known HLS issue.
-3. 'bilateralfilter' function RO configuration is not supported.
+2. 'bilateralfilter' function RO configuration is not supported.
