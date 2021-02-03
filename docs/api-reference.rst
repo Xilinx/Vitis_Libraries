@@ -2835,10 +2835,10 @@ parameters:
    +-----------------------+----------------------------------------------+
    | DST_T                 | Output pixel type. Only XF_2UC1 is           |
    |                       | supported. The output in case of             |
-   |                       | NPC=XF_NPPC1 is 8-bit and packing four 2-bit |
-   |                       | pixel values into 8-bit. The output in case  |
-   |                       | of NPC=XF_NPPC8 is 16-bit, 8-bit, 2-bit      |
-   |                       | pixel values are packing into 16-bit.        |
+   |                       | NPC=XF_NPPC1 is 8-bit, where four 2-bit pixel|
+   |                       | values are packed into 8-bit. The output in  |
+   |                       | case of NPC=XF_NPPC8 is 16-bit, where 8 2-bit|
+   |                       | pixel values are packed into 16-bit.         |
    +-----------------------+----------------------------------------------+
    | ROWS                  | Maximum height of input and output image     |
    +-----------------------+----------------------------------------------+
@@ -2876,9 +2876,15 @@ parameters:
    +-----------------------+----------------------------------------------+
    | Parameter             | Description                                  |
    +=======================+==============================================+
-   | SRC_T                 | Input pixel type                             |
+   | SRC_T                 | Input pixel type. Only XF_2UC1 is            |
+   |                       | supported. The input in case of NPC=XF_NPPC1 |
+   |                       | is 8-bit, where four 2-bit pixel values      |
+   |                       | are packed into 8-bit. The input in case of  |
+   |                       | of NPC=XF_NPPC8 is 16-bit, where 8 2-bit     |
+   |                       | pixel values are packed into 16-bit.         |
    +-----------------------+----------------------------------------------+
-   | DST_T                 | Output pixel type                            |
+   | DST_T                 | Output pixel type. Only 8-bit, unsigned, 1   |
+   |                       | channel is supported (XF_8UC1)               |
    +-----------------------+----------------------------------------------+
    | ROWS                  | Maximum height of input and output image     |
    +-----------------------+----------------------------------------------+
@@ -7689,7 +7695,7 @@ The following table describes the template and the function parameters.
    +---------------+------------------------------------------------------+
    | \_dst_mat     | Output ROI image                                     |
    +---------------+------------------------------------------------------+
-   | roi           | ROI is a ``xf::cv::Rect`` object that consists of the    |
+   | roi           | ROI is a ``xf::cv::Rect`` object that consists of    |
    |               | top left corner of the rectangle along with the      |
    |               | height and width of the rectangle.                   |
    +---------------+------------------------------------------------------+
@@ -7699,7 +7705,7 @@ The following table describes the template and the function parameters.
 
 
 The following table summarizes the resource utilization of crop function
-in normal mode (NPC=1) for 3 ROIs (480x640, 100x200, 300x300) as
+in normal mode (NPC=1) for 3 ROIs (480x640, 100x200, 300x300) in memory mapped mode as
 generated in the Vivado HLS 2019.1 tool for the Xilinx
 xczu9eg-ffvb1156-2-i-es2 FPGA.
 
@@ -7710,15 +7716,15 @@ xczu9eg-ffvb1156-2-i-es2 FPGA.
 +                             +-----------------------------+-----------------------------+
 |                             | 1 pixel per clock operation | 8 pixel per clock operation |  
 +                             +-----------------------------+-----------------------------+
-|                             | 300 MHz                     | 150 MHz                     |
+|                             | 300 MHz                     | 300 MHz                     |
 +=============================+=============================+=============================+
-| BRAM_18K                    | 6                           | 8                           |
+| BRAM_18K                    | 0                           | 0                           |
 +-----------------------------+-----------------------------+-----------------------------+
-| DSP48E                      | 10                          | 10                          |
+| DSP48E                      | 2                           | 2                           |
 +-----------------------------+-----------------------------+-----------------------------+
-| FF                          | 17482                       | 16995                       |
+| FF                          | 1163                        | 2358                        |
 +-----------------------------+-----------------------------+-----------------------------+
-| LUT                         | 16831                       | 15305                       |
+| LUT                         | 909                         | 3140                        |
 +-----------------------------+-----------------------------+-----------------------------+
 
 

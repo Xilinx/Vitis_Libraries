@@ -34,7 +34,7 @@ Prerequisites
 #. libOpenCL.so must be installed if not present along with the
    platform.
 
-.. note:: All Vitis Vision functions were tested against OpenCV version - 3.4
+.. note:: All Vitis Vision functions were tested against OpenCV version - 3.4.2
 
 Vitis Design Methodology
 =========================
