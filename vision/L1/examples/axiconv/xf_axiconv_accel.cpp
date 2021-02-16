@@ -16,13 +16,10 @@
 
 #include "xf_axiconv_config.h"
 
-void axiconv_accel(hls::stream<ap_axiu<8, 1, 1, 1> >& _src,
-                   hls::stream<ap_axiu<8, 1, 1, 1> >& _dst,
-                   int rows,
-                   int cols) {
+void axiconv_accel(hls::stream<ap_axiu<8, 1, 1, 1> >& src, hls::stream<ap_axiu<8, 1, 1, 1> >& dst, int rows, int cols) {
 // clang-format off
-    #pragma HLS INTERFACE axis port=_src
-    #pragma HLS INTERFACE axis port=_dst
+    #pragma HLS INTERFACE axis port=src
+    #pragma HLS INTERFACE axis port=dst
     #pragma HLS INTERFACE s_axilite port=rows               
     #pragma HLS INTERFACE s_axilite port=cols               
     #pragma HLS INTERFACE s_axilite port=return
@@ -33,8 +30,8 @@ void axiconv_accel(hls::stream<ap_axiu<8, 1, 1, 1> >& _src,
     #pragma HLS dataflow
     // clang-format on
 
-    xf::cv::AXIvideo2xfMat(_src, src_mat);
-    xf::cv::xfMat2AXIvideo(src_mat, _dst);
+    xf::cv::AXIvideo2xfMat(src, src_mat);
+    xf::cv::xfMat2AXIvideo(src_mat, dst);
 
     return;
 }
