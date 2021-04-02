@@ -37,19 +37,18 @@ void canny_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
+    int npcCols = cols;
+    int divNum = (int)(cols / 32);
+    int npcColsNxt = (divNum + 1) * 32;
+    if (cols % 32 != 0) {
+        npcCols = npcColsNxt;
+    }
+    printf("actual number of cols is %d \n", npcCols);
+
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, INTYPE> in_mat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=in_mat.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> dst_mat(rows, npcCols);
 
-    xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> dst_mat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=dst_mat.data depth=2
-// clang-format on
-
-// clang-format off
-    #pragma HLS DATAFLOW
-    // clang-format on
+#pragma HLS DATAFLOW
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, INTYPE>(img_inp, in_mat);
     xf::cv::Canny<FILTER_WIDTH, NORM_TYPE, XF_8UC1, XF_2UC1, HEIGHT, WIDTH, INTYPE, XF_NPPC32, XF_USE_URAM>(
