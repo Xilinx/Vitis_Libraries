@@ -259,11 +259,12 @@ void TopDown(ap_uint<64> iBuff[BRAMS][DEPTH],
 /**
  * xfEdgeTracing : Connects edge
  */
-template <int SRC_T, int DST_T, int NPC_SRC, int NPC_DST, int HEIGHT, int WIDTH, bool USE_URAM>
-static void xfEdgeTracing(xf::cv::Mat<DST_T, HEIGHT, WIDTH, NPC_DST>& _dst,
-                          xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPC_SRC>& _src,
+template <int SRC_T, int DST_T, int NPC_SRC, int NPC_DST, int HEIGHT, int WIDTH, bool USE_URAM, int depthm = -1>
+static void xfEdgeTracing(xf::cv::Mat<DST_T, HEIGHT, WIDTH, NPC_DST, depthm>& _dst,
+                          xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPC_SRC, depthm>& _src,
                           uint16_t height,
-                          uint16_t width) {
+                          uint16_t width,
+                          uint16_t width_8) {
 // clang-format off
 #pragma HLS INLINE
 // clang-format on
@@ -406,6 +407,10 @@ INTER_ITERATION_LOOP:
         }
     }
 
+    // printf("widthby8:%d\n",width / 8);
+
+    // printf("widthby8:%d %d\n",width_8,(width_8 / 8));
+
     ap_uint<64> oBuff[RAM_ROW_DEPTH], oRegF[1];
 //# Write the final output as 8-bit / pixel
 FIN_WR_LOOP:
@@ -443,17 +448,20 @@ FIN_WR_LOOP:
                     oRegF[0].range(l + 7, l) = 0;
             }
             id++;
-            _dst.write((ii * width / 8 + j), oRegF[0]);
+
+            if (j < (width_8 / 8)) _dst.write((ii * (width_8 / 8) + j), oRegF[0]);
         }
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC_SRC, int NPC_DST, bool USE_URAM = false>
-void EdgeTracing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC_SRC>& _src, xf::cv::Mat<DST_T, ROWS, COLS, NPC_DST>& _dst) {
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC_SRC, int NPC_DST, bool USE_URAM = false, int depthm = -1>
+void EdgeTracing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC_SRC, depthm>& _src,
+                 xf::cv::Mat<DST_T, ROWS, COLS, NPC_DST, depthm>& _dst) {
 // clang-format off
     #pragma HLS INLINE
     // clang-format on
-    xfEdgeTracing<SRC_T, DST_T, NPC_SRC, NPC_DST, ROWS, COLS, USE_URAM>(_dst, _src, _dst.rows, _dst.cols);
+    xfEdgeTracing<SRC_T, DST_T, NPC_SRC, NPC_DST, ROWS, COLS, USE_URAM, depthm>(_dst, _src, _src.rows, _src.cols,
+                                                                                _dst.cols);
 }
 
 } // namespace cv
