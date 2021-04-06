@@ -89,8 +89,17 @@ void xFPackNMS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,  // hls::stream< X
                xf::cv::Mat<DST_T, ROWS, COLS, NPC1>& _dst_mat, // hls::stream< XF_SNAME(WORDWIDTH_DST)>& _dst_mat,
                uint16_t imgheight,
                uint16_t imgwidth) {
+    int npcCols = imgwidth;
+    int divNum = (int)(imgwidth / 32);
+    int npcColsNxt = (divNum + 1) * 32;
+    if (imgwidth % 32 != 0) {
+        npcCols = npcColsNxt;
+    }
     const int num_clks_32pix = 32 / NPC;
-    int col_loop_count = (imgwidth / NPC);
+
+    int col_loop_count_ac = (imgwidth / NPC);
+    int col_loop_count = (npcCols / NPC);
+    // printf("col_loop_count:%d %d \n",col_loop_count_ac,col_loop_count);
     ap_uint<64> val;
     int read_ind = 0, write_ind = 0;
 rowLoop:
@@ -111,7 +120,11 @@ rowLoop:
 // clang-format off
                 #pragma HLS UNROLL
                 // clang-format on
-                val.range(k * 2 * NPC + (NPC * 2 - 1), k * 2 * NPC) = _src_mat.read(read_ind++);
+                if ((j + k) >= col_loop_count_ac) {
+                    val.range(k * 2 * NPC + (NPC * 2 - 1), k * 2 * NPC) = 0; //_src_mat.read(read_ind++);
+                } else {
+                    val.range(k * 2 * NPC + (NPC * 2 - 1), k * 2 * NPC) = _src_mat.read(read_ind++);
+                }
             }
             _dst_mat.write(write_ind++, val);
         }
