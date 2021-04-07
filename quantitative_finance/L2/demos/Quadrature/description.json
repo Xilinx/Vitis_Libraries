@@ -5,7 +5,7 @@
     ], 
     "flow": "vitis", 
     "platform_whitelist": [
-        "u250", 
+        "xilinx_u250_xdma_201830_2", 
         "u50", 
         "u200"
     ], 

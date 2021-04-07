@@ -212,20 +212,20 @@ int main(int argc, const char* argv[]) {
                                     // launch kernel and calculate kernel execution time
                                     std::cout << "kernel start------" << std::endl;
                                     gettimeofday(&start_time, 0);
-                                    int j = 0;
-                                    kernel_Engine.setArg(j++, underlying);
-                                    kernel_Engine.setArg(j++, volatility);
-                                    kernel_Engine.setArg(j++, dividendYield);
-                                    kernel_Engine.setArg(j++, riskFreeRate);
-                                    kernel_Engine.setArg(j++, timeLength);
-                                    kernel_Engine.setArg(j++, strike);
-                                    kernel_Engine.setArg(j++, optionType);
-                                    kernel_Engine.setArg(j++, resetDates_buf[kk]);
-                                    kernel_Engine.setArg(j++, seed_buf);
-                                    kernel_Engine.setArg(j++, output_buf);
-                                    kernel_Engine.setArg(j++, requiredTolerance);
-                                    kernel_Engine.setArg(j++, timeSteps);
-                                    kernel_Engine.setArg(j++, requiredSamples);
+                                    int a = 0;
+                                    kernel_Engine.setArg(a++, underlying);
+                                    kernel_Engine.setArg(a++, volatility);
+                                    kernel_Engine.setArg(a++, dividendYield);
+                                    kernel_Engine.setArg(a++, riskFreeRate);
+                                    kernel_Engine.setArg(a++, timeLength);
+                                    kernel_Engine.setArg(a++, strike);
+                                    kernel_Engine.setArg(a++, optionType);
+                                    kernel_Engine.setArg(a++, resetDates_buf[kk]);
+                                    kernel_Engine.setArg(a++, seed_buf);
+                                    kernel_Engine.setArg(a++, output_buf);
+                                    kernel_Engine.setArg(a++, requiredTolerance);
+                                    kernel_Engine.setArg(a++, timeSteps);
+                                    kernel_Engine.setArg(a++, requiredSamples);
 
                                     q.enqueueTask(kernel_Engine, nullptr, nullptr);
 

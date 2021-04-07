@@ -82,7 +82,7 @@ int main(int argc, const char* argv[]) {
     unsigned int requiredSamples = 40000;
     TEST_DT relative_err = 0.01;
     unsigned int maxSamples = 0;
-    unsigned int timeSteps = 1;
+    unsigned int timeSteps[] = {1, 10};
 
     TEST_DT goldens[] = {25.7561,   32.9468, 53.2671, 28.6606,    34.839,  54.3405, 35.447,      39.5876, 56.9929,
                          20.9081,   29.1095, 49.3851, 23.7934,    30.8919, 50.4131, 30.5703,     35.3988, 52.9576,
@@ -172,19 +172,19 @@ int main(int argc, const char* argv[]) {
                                 // launch kernel and calculate kernel execution time
                                 std::cout << "kernel start------" << std::endl;
                                 gettimeofday(&start_time, 0);
-                                int j = 0;
-                                kernel_Engine.setArg(j++, underlying);
-                                kernel_Engine.setArg(j++, volatility);
-                                kernel_Engine.setArg(j++, dividendYield);
-                                kernel_Engine.setArg(j++, riskFreeRate);
-                                kernel_Engine.setArg(j++, timeLength);
-                                kernel_Engine.setArg(j++, strike);
-                                kernel_Engine.setArg(j++, optionType);
-                                kernel_Engine.setArg(j++, seed_buf);
-                                kernel_Engine.setArg(j++, output_buf);
-                                kernel_Engine.setArg(j++, requiredTolerance);
-                                kernel_Engine.setArg(j++, requiredSamples);
-                                kernel_Engine.setArg(j++, timeSteps);
+                                int a = 0;
+                                kernel_Engine.setArg(a++, underlying);
+                                kernel_Engine.setArg(a++, volatility);
+                                kernel_Engine.setArg(a++, dividendYield);
+                                kernel_Engine.setArg(a++, riskFreeRate);
+                                kernel_Engine.setArg(a++, timeLength);
+                                kernel_Engine.setArg(a++, strike);
+                                kernel_Engine.setArg(a++, optionType);
+                                kernel_Engine.setArg(a++, seed_buf);
+                                kernel_Engine.setArg(a++, output_buf);
+                                kernel_Engine.setArg(a++, requiredTolerance);
+                                kernel_Engine.setArg(a++, requiredSamples);
+                                kernel_Engine.setArg(a++, timeSteps[idx % 2]);
 
                                 q.enqueueTask(kernel_Engine, nullptr, nullptr);
 
@@ -210,10 +210,10 @@ int main(int argc, const char* argv[]) {
                                               << "   tolerance:           " << requiredTolerance << "\n"
                                               << "   requaried samples:   " << requiredSamples << "\n"
                                               << "   maximum samples:     " << maxSamples << "\n"
-                                              << "   timesteps:           " << timeSteps << "\n"
+                                              << "   timesteps:           " << timeSteps[idx % 2] << "\n"
                                               << "   golden:              " << goldens[idx] << "\n";
-                                    std::cout << "Acutal value: " << outputs[idx]
-                                              << ", Expected value: " << goldens[idx] << std::endl;
+                                    std::cout << "Acutal value: " << outputs[0] << ", Expected value: " << goldens[idx]
+                                              << std::endl;
                                     std::cout << "error: " << diff << ", tolerance: " << relative_err << std::endl;
                                     return -1;
                                 }
@@ -238,7 +238,7 @@ int main(int argc, const char* argv[]) {
               riskFreeRate, // model parameter
               timeLength, strike,
               optionType, // option parameter
-              seeds, outputs, requiredTolerance, requiredSamples, timeSteps);
+              seeds, outputs, requiredTolerance, requiredSamples, timeSteps[0]);
 
     TEST_DT diff = std::fabs(outputs[0] - goldens[0]) / underlying;
     // comapre with golden result
@@ -257,7 +257,7 @@ int main(int argc, const char* argv[]) {
                   << "   tolerance:           " << requiredTolerance << "\n"
                   << "   requaried samples:   " << requiredSamples << "\n"
                   << "   maximum samples:     " << maxSamples << "\n"
-                  << "   timesteps:           " << timeSteps << "\n"
+                  << "   timesteps:           " << timeSteps[0] << "\n"
                   << "   golden:              " << goldens[0] << "\n";
         std::cout << "Acutal value: " << outputs[0] << ", Expected value: " << goldens[idx] << std::endl;
         std::cout << "error: " << diff << ", tolerance: " << relative_err << std::endl;
