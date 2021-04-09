@@ -1,4 +1,4 @@
 @Library('pipeline-library')_
 
-VitisLibPipeline (branch: 'next', libname: 'xf_fft', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu:vitis_hw_build',
-                  email: 'lingl@xilinx.com', devtest: 'RunDeploy.sh', TOOLVERSION: '2020.2_stable_latest')
+VitisLibPipeline (branch: 'master', libname: 'xf_dsp', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu:vitis_hw_build',
+                  email: 'lingl@xilinx.com', devtest: 'RunDeploy.sh', TOOLVERSION: '2020.2_released')
