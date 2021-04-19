@@ -220,7 +220,7 @@ void convertSuperStreamToArrayNScale(hls::stream<SuperSampleContainer<t_R, T_dty
     //#pragma HLS ARRAY_PARTITION variable = p_outDataArray complete dim = 1
 
     for (int i = 0; i < t_L / t_R; i++) {
-#pragma HLS PIPELINE II = 1 rewind
+#pragma HLS PIPELINE II = 1
 
         p_in.read(temp);
 
