@@ -589,6 +589,102 @@ void crc32(hls::stream<ap_uint<32> >& crcInitStrm,
     }
     endOutStrm.write(true);
 }
+
+/**
+ * @brief crc32 computes the CRC32 check value of an input data.
+ * @tparam W byte number of input data, the value of W includes 1, 2, 4, 8, 16.
+ * @param crcInitStrm initialize crc32 value
+ * @param inStrm input messages to be checked
+ * @param inPackLenStrm effetive lengths of input message pack, 1~W. 0 means end of message
+ * @param endInPackLenStrm end flag of inPackLenStrm, 1 "false" for 1 message, 1 "true" means no message anymore.
+ * @param outStrm crc32 result to output
+ * @param endOutStrm end flag of outStrm
+ */
+template <int W>
+void crc32(hls::stream<ap_uint<32> >& crcInitStrm,
+           hls::stream<ap_uint<8 * W> >& inStrm,
+           hls::stream<ap_uint<5> >& inPackLenStrm,
+           hls::stream<bool>& endInPackLenStrm,
+           hls::stream<ap_uint<32> >& outStrm,
+           hls::stream<bool>& endOutStrm) {
+#pragma HLS array_partition variable = internal::table dim = 1 block factor = W
+    bool e = endInPackLenStrm.read();
+    while (!e) {
+        ap_uint<5> inPackLen = inPackLenStrm.read();
+
+        ap_uint<32> crc = crcInitStrm.read();
+        ap_uint<8 * W> in_data;
+        if (W == 1) {
+            while (inPackLen == W) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS loop_tripcount max = 100 min = 100
+                in_data = inStrm.read();
+                inPackLen = inPackLenStrm.read();
+                crc = (crc >> 8) ^ internal::table[0][crc(7, 0) ^ in_data];
+            }
+        } else if (W == 2) {
+            while (inPackLen == W) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS loop_tripcount max = 100 min = 100
+                in_data = inStrm.read();
+                inPackLen = inPackLenStrm.read();
+                ap_uint<16> inTmp = in_data ^ crc(15, 0);
+                crc = crc(31, 16) ^ internal::table[0][inTmp(15, 8)];
+                crc ^= internal::table[1][inTmp(7, 0)];
+            }
+            if (inPackLen != 0) {
+                in_data = inStrm.read();
+                crc = (crc >> 8) ^ internal::table[0][crc(7, 0) ^ in_data.range(7, 0)];
+                inPackLen = inPackLenStrm.read();
+            }
+        } else {
+            while (inPackLen == W) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS loop_tripcount max = 100 min = 100
+                in_data = inStrm.read();
+                inPackLen = inPackLenStrm.read();
+                const int NUM = W / 4;
+                ap_uint<32> inTmp[NUM];
+                for (int j = 0; j < NUM; j++) {
+                    if (j == 0)
+                        inTmp[j] = in_data(31 + 32 * j, 32 * j) ^ crc;
+                    else
+                        inTmp[j] = in_data(31 + 32 * j, 32 * j);
+                }
+                crc = internal::table[0][inTmp[W / 4 - 1](31, 24)];
+                for (int j = 1; j < W; j++) {
+                    int index = j / 4;
+                    int offset = j % 4;
+                    crc ^= internal::table[j][inTmp[W / 4 - 1 - index](31 - offset * 8, 24 - offset * 8)];
+                }
+
+                // crc = internal::table[15][inTmp[0](7, 0)] ^ internal::table[14][inTmp[0](15, 8)] ^
+                //      internal::table[13][inTmp[0](23, 16)] ^ internal::table[12][inTmp[0](31, 24)] ^
+                //      internal::table[11][inTmp[1](7, 0)] ^ internal::table[10][inTmp[1](15, 8)] ^
+                //      internal::table[9][inTmp[1](23, 16)] ^ internal::table[8][inTmp[1](31, 24)] ^
+                //      internal::table[7][inTmp[2](7, 0)] ^ internal::table[6][inTmp[2](15, 8)] ^
+                //      internal::table[5][inTmp[2](23, 16)] ^ internal::table[4][inTmp[2](31, 24)] ^
+                //      internal::table[3][inTmp[3](7, 0)] ^ internal::table[2][inTmp[3](15, 8)] ^
+                //      internal::table[1][inTmp[3](23, 16)] ^ internal::table[0][inTmp[3](31, 24)];
+            }
+
+            if (inPackLen != 0) {
+                for (ap_uint<5> i = 0; i < inPackLen; i++) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS loop_tripcount max = W min = W
+                    if (i == 0) in_data = inStrm.read();
+                    crc = (crc >> 8) ^ internal::table[0][crc(7, 0) ^ in_data.range(7 + 8 * i, 8 * i)];
+                }
+                inPackLen = inPackLenStrm.read();
+            }
+        }
+        outStrm.write(~crc);
+        endOutStrm.write(false);
+        e = endInPackLenStrm.read();
+    }
+    endOutStrm.write(true);
+}
+
 } // end of namespace security
 } // end of namespace xf
 #endif // _XF_SECURITY_CRC32_HPP_

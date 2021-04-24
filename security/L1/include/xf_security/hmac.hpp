@@ -90,7 +90,7 @@ void kpadHash(hls::stream<ap_uint<dataW> >& keyStrm,
 #pragma HLS stream variable = eKeyStrm depth = 4
 #pragma HLS resource variable = eKeyStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<lW> > keyLenStrm;
-#pragma HLS stream variable = KeyLenStrm depth = 4
+#pragma HLS stream variable = keyLenStrm depth = 4
 #pragma HLS resource variable = KeyLenStrm core = FIFO_LUTRAM
     hls::stream<ap_uint<hshW> > keyHashStrm;
 #pragma HLS stream variable = KeyHashStrm depth = 4
