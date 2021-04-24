@@ -145,6 +145,93 @@ void adler32(hls::stream<ap_uint<32> >& adlerStrm,
     endOutStrm.write(true);
 }
 
+/**
+ * @brief adler32 computes the Adler-32 checksum of an input data.
+ * @tparam W byte number of input data, the value of W includes 1, 2, 4, 8, 16.
+ * @param adlerStrm initialize adler32 value
+ * @param inStrm messages to be checked
+ * @param inPackLenStrm effective length of each pack from inStrm, 1~W. 0 means end of message
+ * @param endInPackLenStrm end flag of inPackLenStrm, 1 "false" for 1 message, 1 "true" means no message anymore.
+ * @param outStrm checksum result
+ * @param end flag of outStrm
+ */
+template <int W>
+void adler32(hls::stream<ap_uint<32> >& adlerStrm,
+             hls::stream<ap_uint<W * 8> >& inStrm,
+             hls::stream<ap_uint<5> >& inPackLenStrm,
+             hls::stream<bool>& endInPackLenStrm,
+             hls::stream<ap_uint<32> >& outStrm,
+             hls::stream<bool>& endOutStrm) {
+    bool e = endInPackLenStrm.read();
+    while (!e) {
+        ap_uint<32> adler = adlerStrm.read();
+        ap_uint<5> inPackLen = inPackLenStrm.read();
+
+        ap_uint<32> s1 = adler & 0xffff;
+        ap_uint<32> s2 = ((adler >> 16) & 0xffff);
+        ap_uint<W * 8> inData;
+
+        while (inPackLen == W) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS loop_tripcount max = 100 min = 100
+            inPackLen = inPackLenStrm.read();
+            inData = inStrm.read();
+            ap_uint<12> sTmp[W];
+#pragma HLS array_partition variable = sTmp dim = 1
+            for (int i = 0; i < W; i++) {
+#pragma HLS unroll
+                sTmp[i] = 0;
+                for (int j = 0; j <= i; j++) {
+                    sTmp[i] += inData(j * 8 + 7, j * 8);
+                }
+            }
+
+            s2 += s1 * W;
+
+            if (W == 16) {
+                s2 += internal::treeAdd<12, 4>::f(sTmp);
+            } else if (W == 8) {
+                s2 += internal::treeAdd<12, 3>::f(sTmp);
+            } else if (W == 4) {
+                s2 += internal::treeAdd<12, 2>::f(sTmp);
+            } else if (W == 2) {
+                s2 += internal::treeAdd<12, 1>::f(sTmp);
+            } else if (W == 1) {
+                s2 += internal::treeAdd<12, 0>::f(sTmp);
+            }
+
+            for (int j = 0; j <= W; j++) {
+                if (s2 >= internal::BASE[W - j]) {
+                    s2 -= internal::BASE[W - j];
+                    break;
+                }
+            }
+
+            s1 += sTmp[W - 1];
+            if (s1 >= internal::BASE[0]) s1 -= internal::BASE[0];
+        }
+
+        if (inPackLen != 0) {
+            for (int j = 0; j < inPackLen; j++) {
+#pragma HLS PIPELINE II = 1
+#pragma HLS loop_tripcount max = W min = W
+                if (j == 0) inData = inStrm.read();
+                s1 += inData(j * 8 + 7, j * 8);
+                if (s1 >= internal::BASE[0]) s1 -= internal::BASE[0];
+                s2 += s1;
+                if (s2 >= internal::BASE[0]) s2 -= internal::BASE[0];
+            }
+            inPackLen = inPackLenStrm.read();
+        }
+
+        ap_uint<32> res = (s2 << 16) + s1;
+        outStrm.write(res);
+        endOutStrm.write(false);
+        e = endInPackLenStrm.read();
+    }
+    endOutStrm.write(true);
+}
+
 } // end of namespace security
 } // end of namespace xf
 #endif // _XF_SECURITY_ADLER32_HPP_

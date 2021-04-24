@@ -516,23 +516,23 @@ void aesGcmEncrypt(
 
     hls::stream<ap_uint<128> > H_strm("H_strm");
 #pragma HLS RESOURCE variable = H_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = H_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = H_strm depth = 32
 
     hls::stream<ap_uint<128> > E_K_Y0_strm("E_K_Y0_strm");
 #pragma HLS RESOURCE variable = E_K_Y0_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = E_K_Y0_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = E_K_Y0_strm depth = 32
 
     hls::stream<bool> end_length_strm("end_length_strm");
 #pragma HLS RESOURCE variable = end_length_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = end_length_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = end_length_strm depth = 32
 
     hls::stream<ap_uint<128> > ciphertext_strm("ciphertext_strm");
 #pragma HLS RESOURCE variable = ciphertext_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = ciphertext_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = ciphertext_strm depth = 32
 
     hls::stream<ap_uint<64> > ciphertext_length_strm("ciphertext_length_strm");
 #pragma HLS RESOURCE variable = ciphertext_length_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = ciphertext_length_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = ciphertext_length_strm depth = 32
 
     aesGctrEncrypt<_keyWidth>(plaintext, plaintext_length, end_length, cipherkey, IV, H_strm, E_K_Y0_strm,
                               end_length_strm, ciphertext_strm, ciphertext_length_strm, ciphertext, ciphertext_length);
@@ -584,23 +584,23 @@ void aesGcmDecrypt(
 
     hls::stream<ap_uint<128> > H_strm("H_strm");
 #pragma HLS RESOURCE variable = H_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = H_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = H_strm depth = 32
 
     hls::stream<ap_uint<128> > E_K_Y0_strm("E_K_Y0_strm");
 #pragma HLS RESOURCE variable = E_K_Y0_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = E_K_Y0_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = E_K_Y0_strm depth = 32
 
     hls::stream<bool> end_length_strm("end_length_strm");
 #pragma HLS RESOURCE variable = end_length_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = end_length_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = end_length_strm depth = 32
 
     hls::stream<ap_uint<128> > ciphertext_strm("ciphertext_strm");
 #pragma HLS RESOURCE variable = ciphertext_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = ciphertext_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = ciphertext_strm depth = 32
 
     hls::stream<ap_uint<64> > ciphertext_length_strm("ciphertext_length_strm");
 #pragma HLS RESOURCE variable = ciphertext_length_strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = ciphertext_length_strm depth = 32 dim = 1
+#pragma HLS STREAM variable = ciphertext_length_strm depth = 32
 
     aesGctrDecrypt<_keyWidth>(ciphertext, ciphertext_length, end_length, cipherkey, IV, H_strm, E_K_Y0_strm,
                               end_length_strm, ciphertext_strm, ciphertext_length_strm, plaintext, plaintext_length);
