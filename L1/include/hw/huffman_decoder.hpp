@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,29 @@ enum eHuffmanType { FIXED = 0, DYNAMIC, FULL };
 typedef ap_uint<48> bitBufferType;
 
 namespace details {
+
+enum blockStatus { PENDING = 0, FINISH = 1 };
+void loadBitStream(bitBufferType& bitbuffer,
+                   ap_uint<6>& bits_cntr,
+                   hls::stream<ap_uint<16> >& inStream,
+                   hls::stream<bool>& inEos,
+                   bool& done) {
+#pragma HLS INLINE off
+    while (bits_cntr < 32 && (done == false)) {
+    loadBitStream:
+        uint16_t tmp_dt = (uint16_t)inStream.read();
+        bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
+        done = inEos.read();
+        bits_cntr += 16;
+    }
+}
+
+void discardBitStream(bitBufferType& bitbuffer, ap_uint<6>& bits_cntr, ap_uint<6> n_bits) {
+#pragma HLS INLINE off
+    bitbuffer >>= n_bits;
+    bits_cntr -= n_bits;
+}
+
 template <typename T>
 T reg(T d) {
 #pragma HLS PIPELINE II = 1
@@ -39,18 +62,16 @@ T reg(T d) {
     return d;
 }
 
-template <int ByteGenLoopII = 1>
 inline uint8_t huffmanBytegenStatic(bitBufferType& _bitbuffer,
                                     ap_uint<6>& bits_cntr,
-                                    hls::stream<ap_uint<32> >& outStream,
-                                    hls::stream<bool>& endOfStream,
-                                    int32_t& curInSize,
+                                    hls::stream<ap_uint<17> >& outStream,
+                                    hls::stream<bool>& inEos,
                                     hls::stream<ap_uint<16> >& inStream,
                                     const uint8_t* array_codes_op,
                                     const uint8_t* array_codes_bits,
-                                    const uint16_t* array_codes_val) {
+                                    const uint16_t* array_codes_val,
+                                    bool& done) {
 #pragma HLS INLINE
-    const int c_byteGenLoopII = ByteGenLoopII;
     uint16_t used = 512;
     uint16_t lit_mask = 511;
     uint16_t dist_mask = 31;
@@ -60,13 +81,13 @@ inline uint8_t huffmanBytegenStatic(bitBufferType& _bitbuffer,
     uint8_t current_bits = details::reg<uint8_t>(array_codes_bits[lidx]);
     uint16_t current_val = details::reg<uint16_t>(array_codes_val[lidx]);
     bool is_length = true;
-    ap_uint<32> tmpVal;
+    ap_uint<17> tmpVal;
     uint8_t ret = 0;
 
-    bool done = false;
+    bool huffDone = false;
 ByteGenStatic:
-    for (; !done;) {
-#pragma HLS PIPELINE II = c_byteGenLoopII
+    for (; !huffDone;) {
+#pragma HLS PIPELINE II = 1
         ap_uint<4> len1 = current_bits;
         ap_uint<4> len2 = 0;
         ap_uint<4> ml_op = current_op;
@@ -76,10 +97,10 @@ ByteGenStatic:
         bits_cntr -= current_bits;
 
         if (current_op == 0) {
-            tmpVal.range(7, 0) = (uint8_t)(current_val);
-            tmpVal.range(31, 8) = 0;
+            tmpVal.range(8, 1) = (uint8_t)(current_val);
+            tmpVal.range(16, 9) = 0XFF;
+            tmpVal.range(0, 0) = 0;
             outStream << tmpVal;
-            endOfStream << 0;
             lidx = bitbuffer3;
             is_length = true;
         } else if (current_op & 16) {
@@ -87,28 +108,29 @@ ByteGenStatic:
             len += (uint16_t)bitbuffer1 & ((1 << ml_op) - 1);
             len2 = ml_op;
             bits_cntr -= ml_op;
-            if (is_length) {
-                tmpVal.range(31, 16) = len;
-            } else {
-                tmpVal.range(15, 0) = len;
-                outStream << tmpVal;
-                endOfStream << 0;
-            }
+            tmpVal.range(16, 1) = len;
+            tmpVal.range(0, 0) = 0;
+            outStream << tmpVal;
             uint16_t array_offset = (is_length) ? used : 0;
             ap_uint<9> mask = (is_length) ? dist_mask : lit_mask;
             lidx = array_offset + (bitbuffer2 & mask);
             is_length = !(is_length);
         } else if (current_op & 32) {
             if (is_length) {
-                ret = 2;
+                ret = blockStatus::PENDING;
             } else {
-                ret = 77;
+                ret = blockStatus::FINISH;
             }
-            done = true;
+            huffDone = true;
         }
-        if (bits_cntr < 32) {
+
+        if ((done == true) && (bits_cntr < 32)) {
+            ret = blockStatus::FINISH;
+            huffDone = true;
+        }
+        if ((bits_cntr < 32) && (done == false)) {
             uint16_t inValue = inStream.read();
-            curInSize -= 2;
+            done = inEos.read();
             bitbuffer = (bitbuffer >> (len1 + len2)) | (bitBufferType)(inValue) << bits_cntr;
             bits_cntr += (uint8_t)16;
         } else {
@@ -122,21 +144,19 @@ ByteGenStatic:
     return ret;
 }
 
-template <int ByteGenLoopII = 1>
 uint8_t huffmanBytegen(bitBufferType& _bitbuffer,
                        ap_uint<6>& bits_cntr,
-                       hls::stream<ap_uint<32> >& outStream,
-                       hls::stream<bool>& endOfStream,
-                       int32_t& curInSize,
+                       hls::stream<ap_uint<17> >& outStream,
+                       hls::stream<bool>& inEos,
                        hls::stream<ap_uint<16> >& inStream,
                        const uint32_t* array_codes,
                        const uint32_t* array_codes_extra,
                        const uint32_t* array_codes_dist,
-                       const uint32_t* array_codes_dist_extra) {
+                       const uint32_t* array_codes_dist_extra,
+                       bool& done) {
 #pragma HLS INLINE
     uint16_t lit_mask = 511; // Adjusted according to 8 bit
     uint16_t dist_mask = 511;
-    const int c_byteGenLoopII = ByteGenLoopII;
     bitBufferType bitbuffer = details::reg<bitBufferType>(_bitbuffer);
     //    bitBufferType bitbuffer = _bitbuffer;
     ap_uint<9> lidx = bitbuffer;
@@ -151,10 +171,10 @@ uint8_t huffmanBytegen(bitBufferType& _bitbuffer,
     bool dist_extra = false;
     bool len_extra = false;
 
-    bool done = false;
+    bool huffDone = false;
 ByteGen:
-    for (; !done;) {
-#pragma HLS PIPELINE II = c_byteGenLoopII
+    for (; !huffDone;) {
+#pragma HLS PIPELINE II = 1
         ap_uint<4> len1 = current_bits;
         ap_uint<4> len2 = 0;
         ap_uint<4> ml_op = current_op;
@@ -168,10 +188,10 @@ ByteGen:
         len_extra = false;
 
         if (current_op == 0) {
-            tmpVal.range(7, 0) = (uint8_t)(current_val);
-            tmpVal.range(31, 8) = 0;
+            tmpVal.range(8, 1) = (uint8_t)(current_val);
+            tmpVal.range(16, 9) = 0xFF;
+            tmpVal.range(0, 0) = 0;
             outStream << tmpVal;
-            endOfStream << 0;
             lidx = bitbuffer3;
             is_length = true;
         } else if (current_op & 16) {
@@ -179,13 +199,9 @@ ByteGen:
             len += (uint16_t)bitbuffer1 & ((1 << ml_op) - 1);
             len2 = ml_op;
             bits_cntr -= ml_op;
-            if (is_length) {
-                tmpVal.range(31, 16) = len;
-            } else {
-                tmpVal.range(15, 0) = len;
-                outStream << tmpVal;
-                endOfStream << 0;
-            }
+            tmpVal.range(0, 0) = 0;
+            tmpVal.range(16, 1) = len;
+            outStream << tmpVal;
             lidx = bitbuffer2;
             is_length = !(is_length);
         } else if ((current_op & 64) == 0) {
@@ -196,15 +212,19 @@ ByteGen:
             }
         } else if (current_op & 32) {
             if (is_length) {
-                ret = 2;
+                ret = blockStatus::PENDING;
             } else {
-                ret = 77;
+                ret = blockStatus::FINISH;
             }
-            done = true;
+            huffDone = true;
         }
-        if (bits_cntr < 32) {
+        if ((done == true) && (bits_cntr < 32)) {
+            huffDone = true;
+            ret = blockStatus::FINISH;
+        }
+        if (bits_cntr < 32 && (done == false)) {
             uint16_t inValue = inStream.read();
-            curInSize -= 2;
+            done = inEos.read();
             bitbuffer = (bitbuffer >> (len1 + len2)) | (bitBufferType)(inValue) << bits_cntr;
             bits_cntr += (uint8_t)16;
         } else {
@@ -288,7 +308,6 @@ void code_generator_array_dyn(
 #pragma HLS ARRAY_PARTITION variable = offs
 
     uint16_t codeBuffer[512];
-#pragma HLS DEPENDENCE false inter variable = codeBuffer
 #pragma HLS DEPENDENCE false inter variable = codeBuffer
 
     const uint16_t lbase[32] = {3,  4,  5,  6,  7,  8,  9,  10,  11,  13,  15,  17,  19,  23, 27, 31,
@@ -459,19 +478,18 @@ code_gen:
  * @param inStream input bit packed data
  * @param outStream output lz77 compressed output in the form of 32bit packets
  * (Literals, Match Length, Distances)
- * @param endOfStream output completion of execution
  * @param input_size input data size
  */
-template <eHuffmanType DECODER = FULL, int ByteGenLoopII = 1>
+template <eHuffmanType DECODER = FULL>
 void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
-                    hls::stream<ap_uint<32> >& outStream,
-                    hls::stream<bool>& endOfStream,
-                    uint32_t input_size) {
-    int32_t curInSize = input_size;
+                    hls::stream<bool>& inEos,
+                    hls::stream<ap_uint<17> >& outStream) {
     bitBufferType bitbuffer = 0;
     ap_uint<6> bits_cntr = 0;
     bool isMultipleFiles = false;
-    while (curInSize > 0) {
+    bool done = false;
+    details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
+    while (done == false) {
         uint8_t current_op = 0;
         uint8_t current_bits = 0;
         uint16_t current_val = 0;
@@ -504,89 +522,58 @@ void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
         const bool include_fixed_block = (DECODER == FIXED || DECODER == FULL);
         const bool include_dynamic_block = (DECODER == DYNAMIC || DECODER == FULL);
         bool skip_fname = false;
-        if (bits_cntr < 16) {
-            uint16_t tmp_dt = (uint16_t)inStream.read();
-            bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-            curInSize -= 2;
-            bits_cntr += 16;
-        }
+        details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
         uint16_t magic_number = bitbuffer & 0xFFFF;
-        bitbuffer >>= 16;
-        bits_cntr -= 16;
+        details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)16);
         if (magic_number == 0x8b1f) {
             // GZIP Header Processing
             // Deflate mode & file name flag
             isGzip = true;
             isMultipleFiles = false;
-            if (bits_cntr < 16) {
-                uint16_t tmp_dt = (uint16_t)inStream.read();
-                bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                curInSize -= 2;
-                bits_cntr += 16;
-            }
+            details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
             uint16_t lcl_tmp = bitbuffer & 0xFFFF;
-            bitbuffer >>= 16;
-            bits_cntr -= 16;
+            details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)16);
 
             // Check for fnam content
             skip_fname = (lcl_tmp >> 8) ? true : false;
-
-            while (bits_cntr < 32) {
-                uint16_t tmp_dt = (uint16_t)inStream.read();
-                bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                curInSize -= 2;
-                bits_cntr += 16;
-            }
+            details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
 
             // MTIME - must
             // XFL (2 for high compress, 4 fast)
             // OS code (3Unix, 0Fat)
-            bitbuffer >>= 32;
-            bits_cntr -= 32;
-
-            if (bits_cntr < 16) {
-                uint16_t tmp_dt = (uint16_t)inStream.read();
-                bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                curInSize -= 2;
-                bits_cntr += 16;
-            }
+            details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)32);
+            details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
 
             // MTIME - must
             // XFL (2 for high compress, 4 fast)
             // OS code (3Unix, 0Fat)
-            bitbuffer >>= 16;
-            bits_cntr -= 16;
-
+            details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)16);
             // If FLG is set to zero by using -n
             if (skip_fname) {
             // Read file name
             read_fname:
                 do {
-                    if (bits_cntr < 16) {
-                        uint16_t tmp_dt = (uint16_t)inStream.read();
-                        bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                        curInSize -= 2;
+#pragma HLS PIPELINE II = 1
+                    if (bits_cntr < 16 && (done == false)) {
+                        uint16_t tmp_data = inStream.read();
+                        bitbuffer += (bitBufferType)(tmp_data << bits_cntr);
+                        done = inEos.read();
                         bits_cntr += 16;
                     }
                     lcl_tmp = bitbuffer & 0xFF;
-                    bitbuffer >>= 8;
-                    bits_cntr -= 8;
+                    details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)8);
                 } while (lcl_tmp != 0);
             }
+        } else if ((magic_number & 0x00FF) != 0x0078) {
+            blocks_processed = true;
         }
 
         if (isMultipleFiles) blocks_processed = true;
-        while (!blocks_processed) {
+        while (!blocks_processed && (done == false)) {
             // one block per iteration
             // check if the following block is stored block or compressed block
             isMultipleFiles = true;
-            if (bits_cntr < 16) {
-                // if first block
-                uint16_t temp = inStream.read();
-                bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                curInSize -= 2;
-                bits_cntr += 16;
-            }
+            details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
             // read the last bit in bitbuffer to check if this is last block
             dynamic_last = bitbuffer & 1;
             bitbuffer >>= 1; // dump the bit read
@@ -598,91 +585,69 @@ void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
                 bitbuffer >>= bits_cntr & 7;
                 bits_cntr -= bits_cntr & 7;
 
-                while (bits_cntr < 32) {
-                    uint16_t tmp_dt = (uint16_t)inStream.read();
-                    bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                    curInSize -= 2;
-                    bits_cntr += 16;
-                }
+                details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
                 uint16_t store_length = bitbuffer & 0xffff;
-
-                bitbuffer >>= 32;
-                bits_cntr -= 32;
+                details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)32);
 
                 if (DECODER == FULL) {
-                    ap_uint<32> tmpVal = 0;
+                    ap_uint<17> tmpVal = 0;
                 strd_blk_cpy:
                     for (uint16_t i = 0; i < store_length; i++) {
 #pragma HLS PIPELINE II = 1
-                        if (bits_cntr < 8) {
+                        if (bits_cntr < 8 && (done == false)) {
                             uint16_t tmp_dt = (uint16_t)inStream.read();
                             bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                            curInSize -= 2;
+                            done = inEos.read();
                             bits_cntr += 16;
                         }
-                        tmpVal.range(7, 0) = bitbuffer;
-                        tmpVal.range(31, 8) = 0;
+                        tmpVal.range(8, 1) = bitbuffer;
+                        tmpVal.range(16, 9) = 0xFF;
+                        tmpVal.range(0, 0) = 0;
                         outStream << tmpVal;
-                        endOfStream << 0;
-                        bitbuffer >>= 8;
-                        bits_cntr -= 8;
+                        details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)8);
                     }
                 }
 
             } else if (cb_type == 2) {       // dynamic huffman compressed block
                 if (include_dynamic_block) { // compile if decoder should be dynamic/full
-                    // Read 14 bits HLIT(5-bits), HDIST(5-bits) and HCLEN(4-bits)
-                    if (bits_cntr < 16) {
-                        uint16_t tmp_data = inStream.read();
-                        bitbuffer += (bitBufferType)tmp_data << bits_cntr;
-                        curInSize -= 2;  // read 2 bytes above
-                        bits_cntr += 16; // read 16 bits
-                    }
+                                             // Read 14 bits HLIT(5-bits), HDIST(5-bits) and HCLEN(4-bits)
+                    details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
                     dynamic_nlen = (bitbuffer & ((1 << 5) - 1)) + 257; // Max 288
-                    bitbuffer >>= 5;
+                    details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)5);
 
                     dynamic_ndist = (bitbuffer & ((1 << 5) - 1)) + 1; // Max 30
-                    bitbuffer >>= 5;
+                    details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)5);
 
                     dynamic_ncode = (bitbuffer & ((1 << 4) - 1)) + 4; // Max 19
-                    bitbuffer >>= 4;
-                    bits_cntr -= 14;
+                    details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)4);
 
                     dynamic_curInSize = 0;
 
                 dyn_len_bits:
                     while (dynamic_curInSize < dynamic_ncode) {
 #pragma HLS PIPELINE II = 1
-                        if (bits_cntr < 16) {
+                        if ((bits_cntr < 16) && (done == false)) {
                             uint16_t tmp_data = inStream.read();
                             bitbuffer += (bitBufferType)(tmp_data << bits_cntr);
-                            curInSize -= 2;
+                            done = inEos.read();
                             bits_cntr += 16;
                         }
                         dynamic_lens[order[dynamic_curInSize++]] = (uint16_t)(bitbuffer & ((1 << 3) - 1));
-                        bitbuffer >>= 3;
-                        bits_cntr -= 3;
+                        details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)3);
                     }
 
                     while (dynamic_curInSize < 19) dynamic_lens[order[dynamic_curInSize++]] = 0;
-
                     details::code_generator_array_dyn(1, dynamic_lens, 19, array_codes, array_codes_extra, 7);
 
                     dynamic_curInSize = 0;
                     uint32_t dlenb_mask = ((1 << 7) - 1);
 
-                    while (bits_cntr < 32) {
-                        // read 2-bytes
-                        uint16_t tmp_data = inStream.read();
-                        bitbuffer += (bitBufferType)(tmp_data) << bits_cntr;
-                        curInSize -= 2;
-                        bits_cntr += 16;
-                    }
+                    details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
                     current_table_val = array_codes[(bitbuffer & dlenb_mask)];
                 // Figure out codes for LIT/ML and DIST
                 bitlen_gen:
                     while (dynamic_curInSize < dynamic_nlen + dynamic_ndist || (copy != 0)) {
-#pragma HLS PIPELINE II = 2
+#pragma HLS PIPELINE II = 1
                         //#pragma HLS dependence variable = dynamic_lens inter false
 
                         current_bits = current_table_val.range(23, 16);
@@ -720,10 +685,10 @@ void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
                         dynamic_lens[dynamic_curInSize++] = (uint16_t)len;
                         copy -= 1;
                         current_table_val = details::reg<ap_uint<32> >(array_codes[(bitbuffer & dlenb_mask)]);
-                        if (bits_cntr < 32) {
+                        if ((bits_cntr < 32) && (done == false)) {
                             uint16_t tmp_data = inStream.read();
                             bitbuffer += (bitBufferType)(tmp_data) << bits_cntr;
-                            curInSize -= 2;
+                            done = inEos.read();
                             bits_cntr += 16;
                         }
                     } // End of while
@@ -732,32 +697,23 @@ void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
                     details::code_generator_array_dyn(3, dynamic_lens + dynamic_nlen, dynamic_ndist, array_codes_dist,
                                                       array_codes_dist_extra, 9);
                     // BYTEGEN dynamic state
-                    if (curInSize >= 6) {
-                        // ********************************
-                        //  Create Packets Below
-                        //  [LIT|ML|DIST|DIST] --> 32 Bit
-                        //  Read data from inStream - 8bits
-                        //  at a time. Decode the literals,
-                        //  ML, Distances based on tables
-                        // ********************************
+                    // ********************************
+                    //  Create Packets Below
+                    //  [LIT|ML|DIST|DIST] --> 32 Bit
+                    //  Read data from inStream - 8bits
+                    //  at a time. Decode the literals,
+                    //  ML, Distances based on tables
+                    // ********************************
 
-                        // Read from inStream
-                        while (bits_cntr < 32) {
-                            uint16_t temp = inStream.read();
-                            bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                            bits_cntr += 16;
-                            curInSize -= 2;
-                        }
+                    // Read from inStream
+                    details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
 
-                        uint8_t ret = details::huffmanBytegen<ByteGenLoopII>(
-                            bitbuffer, bits_cntr, outStream, endOfStream, curInSize, inStream, array_codes,
-                            array_codes_extra, array_codes_dist, array_codes_dist_extra);
+                    uint8_t ret =
+                        details::huffmanBytegen(bitbuffer, bits_cntr, outStream, inEos, inStream, array_codes,
+                                                array_codes_extra, array_codes_dist, array_codes_dist_extra, done);
 
-                        if (ret == 77) blocks_processed = true;
+                    if (ret == details::blockStatus::FINISH) blocks_processed = true;
 
-                    } else {
-                        blocks_processed = true;
-                    }
                 } else {
                     blocks_processed = true;
                 }
@@ -772,19 +728,14 @@ void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
                     //  ML, Distances based on tables
                     // ********************************
                     // Read from inStream
-                    while (bits_cntr < 32) {
-                        uint16_t temp = inStream.read();
-                        bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                        bits_cntr += 16;
-                        curInSize -= 2;
-                    }
+                    details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
 
                     // ByteGeneration module
-                    uint8_t ret = details::huffmanBytegenStatic<ByteGenLoopII>(
-                        bitbuffer, bits_cntr, outStream, endOfStream, curInSize, inStream, fixed_litml_op,
-                        fixed_litml_bits, fixed_litml_val);
+                    uint8_t ret =
+                        details::huffmanBytegenStatic(bitbuffer, bits_cntr, outStream, inEos, inStream, fixed_litml_op,
+                                                      fixed_litml_bits, fixed_litml_val, done);
 
-                    if (ret == 77) blocks_processed = true;
+                    if (ret == details::blockStatus::FINISH) blocks_processed = true;
 
                 } else {
                     blocks_processed = true;
@@ -796,406 +747,22 @@ void huffmanDecoder(hls::stream<ap_uint<16> >& inStream,
         } // While end
         // Checksum 4Bytes
         if (isGzip) {
-            while (bits_cntr < 32) {
-                uint16_t temp = inStream.read();
-                bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                bits_cntr += 16;
-                curInSize -= 2;
-            }
+            details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
             ap_uint<6> leftOverBits = 32;
-            bitbuffer >>= leftOverBits;
-            bits_cntr -= leftOverBits;
+            details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)leftOverBits);
 
-            while (bits_cntr < 32) {
-                uint16_t temp = inStream.read();
-                bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                bits_cntr += 16;
-                curInSize -= 2;
-            }
+            details::loadBitStream(bitbuffer, bits_cntr, inStream, inEos, done);
             leftOverBits = 32 + (bits_cntr % 8);
-            bitbuffer >>= leftOverBits;
-            bits_cntr -= leftOverBits;
+            details::discardBitStream(bitbuffer, bits_cntr, (ap_uint<6>)leftOverBits);
         } else {
         consumeLeftOverData:
-            while (curInSize > 0) {
+            while (done == false) {
                 inStream.read();
-                curInSize -= 2;
+                done = inEos.read();
             }
         }
     }
-    outStream << 0; // Adding Dummy Data for last end of stream case
-    endOfStream << 1;
-}
-
-template <eHuffmanType DECODER = FULL, int ByteGenLoopII = 2>
-void huffmanDecoderStream(hls::stream<ap_uint<16> >& inStream,
-                          hls::stream<ap_uint<32> >& outStream,
-                          hls::stream<bool>& endOfStream,
-                          hls::stream<uint32_t>& inSize,
-                          hls::stream<uint32_t>& outSize) {
-    for (uint32_t input_size = inSize.read(); input_size != 0; input_size = inSize.read()) {
-        outSize << input_size;
-        int32_t curInSize = input_size;
-        bitBufferType bitbuffer = 0;
-        ap_uint<6> bits_cntr = 0;
-        bool isMultipleFiles = false;
-        while (curInSize > 0) {
-            uint8_t current_op = 0;
-            uint8_t current_bits = 0;
-            uint16_t current_val = 0;
-            ap_uint<32> current_table_val;
-
-            uint8_t len = 0;
-
-            const ap_uint<5> order[19] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
-
-            bool dynamic_last = 0;
-            ap_uint<9> dynamic_nlen = 0;
-            ap_uint<9> dynamic_ndist = 0;
-            ap_uint<5> dynamic_ncode = 0;
-            ap_uint<9> dynamic_curInSize = 0;
-            uint16_t dynamic_lens[512];
-
-            uint8_t copy = 0;
-
-            bool blocks_processed = false;
-
-            const uint16_t c_tcodesize = 2048;
-
-            uint32_t array_codes[512];
-            uint32_t array_codes_extra[512];
-            uint32_t array_codes_dist[512];
-            uint32_t array_codes_dist_extra[512];
-
-            bool isGzip = false;
-
-            const bool include_fixed_block = (DECODER == FIXED || DECODER == FULL);
-            const bool include_dynamic_block = (DECODER == DYNAMIC || DECODER == FULL);
-            bool skip_fname = false;
-            if (bits_cntr < 16) {
-                uint16_t tmp_dt = (uint16_t)inStream.read();
-                bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                curInSize -= 2;
-                bits_cntr += 16;
-            }
-            uint16_t magic_number = bitbuffer & 0xFFFF;
-            bitbuffer >>= 16;
-            bits_cntr -= 16;
-            if (magic_number == 0x8b1f) {
-                // GZIP Header Processing
-                // Deflate mode & file name flag
-                isGzip = true;
-                isMultipleFiles = false;
-                if (bits_cntr < 16) {
-                    uint16_t tmp_dt = (uint16_t)inStream.read();
-                    bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                    curInSize -= 2;
-                    bits_cntr += 16;
-                }
-                uint16_t lcl_tmp = bitbuffer & 0xFFFF;
-                bitbuffer >>= 16;
-                bits_cntr -= 16;
-
-                // Check for fnam content
-                skip_fname = (lcl_tmp >> 8) ? true : false;
-
-                while (bits_cntr < 32) {
-                    uint16_t tmp_dt = (uint16_t)inStream.read();
-                    bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                    curInSize -= 2;
-                    bits_cntr += 16;
-                }
-
-                // MTIME - must
-                // XFL (2 for high compress, 4 fast)
-                // OS code (3Unix, 0Fat)
-                bitbuffer >>= 32;
-                bits_cntr -= 32;
-
-                if (bits_cntr < 16) {
-                    uint16_t tmp_dt = (uint16_t)inStream.read();
-                    bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                    curInSize -= 2;
-                    bits_cntr += 16;
-                }
-
-                // MTIME - must
-                // XFL (2 for high compress, 4 fast)
-                // OS code (3Unix, 0Fat)
-                bitbuffer >>= 16;
-                bits_cntr -= 16;
-
-                // If FLG is set to zero by using -n
-                if (skip_fname) {
-                // Read file name
-                read_fname:
-                    do {
-                        if (bits_cntr < 16) {
-                            uint16_t tmp_dt = (uint16_t)inStream.read();
-                            bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                            curInSize -= 2;
-                            bits_cntr += 16;
-                        }
-                        lcl_tmp = bitbuffer & 0xFF;
-                        bitbuffer >>= 8;
-                        bits_cntr -= 8;
-                    } while (lcl_tmp != 0);
-                }
-            }
-
-            if (isMultipleFiles) blocks_processed = true;
-            while (!blocks_processed) {
-                // one block per iteration
-                // check if the following block is stored block or compressed block
-                isMultipleFiles = true;
-                if (bits_cntr < 16) {
-                    // if first block
-                    uint16_t temp = inStream.read();
-                    bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                    curInSize -= 2;
-                    bits_cntr += 16;
-                }
-                // read the last bit in bitbuffer to check if this is last block
-                dynamic_last = bitbuffer & 1;
-                bitbuffer >>= 1; // dump the bit read
-                ap_uint<2> cb_type = (uint8_t)(bitbuffer)&3;
-                bitbuffer >>= 2;
-                bits_cntr -= 3; // previously dumped 1 bit + current dumped 2 bits
-
-                if (cb_type == 0) { // stored block
-                    bitbuffer >>= bits_cntr & 7;
-                    bits_cntr -= bits_cntr & 7;
-
-                    while (bits_cntr < 32) {
-                        uint16_t tmp_dt = (uint16_t)inStream.read();
-                        bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                        curInSize -= 2;
-                        bits_cntr += 16;
-                    }
-                    uint16_t store_length = bitbuffer & 0xffff;
-
-                    bitbuffer >>= 32;
-                    bits_cntr -= 32;
-
-                    if (DECODER == FULL) {
-                        ap_uint<32> tmpVal = 0;
-                    strd_blk_cpy:
-                        for (uint16_t i = 0; i < store_length; i++) {
-#pragma HLS PIPELINE II = 1
-                            if (bits_cntr < 8) {
-                                uint16_t tmp_dt = (uint16_t)inStream.read();
-                                bitbuffer += (bitBufferType)(tmp_dt) << bits_cntr;
-                                curInSize -= 2;
-                                bits_cntr += 16;
-                            }
-                            tmpVal.range(7, 0) = bitbuffer;
-                            tmpVal.range(31, 8) = 0;
-                            outStream << tmpVal;
-                            endOfStream << 0;
-                            bitbuffer >>= 8;
-                            bits_cntr -= 8;
-                        }
-                    }
-
-                } else if (cb_type == 2) {       // dynamic huffman compressed block
-                    if (include_dynamic_block) { // compile if decoder should be dynamic/full
-                        // Read 14 bits HLIT(5-bits), HDIST(5-bits) and HCLEN(4-bits)
-                        if (bits_cntr < 16) {
-                            uint16_t tmp_data = inStream.read();
-                            bitbuffer += (bitBufferType)tmp_data << bits_cntr;
-                            curInSize -= 2;  // read 2 bytes above
-                            bits_cntr += 16; // read 16 bits
-                        }
-                        dynamic_nlen = (bitbuffer & ((1 << 5) - 1)) + 257; // Max 288
-                        bitbuffer >>= 5;
-
-                        dynamic_ndist = (bitbuffer & ((1 << 5) - 1)) + 1; // Max 30
-                        bitbuffer >>= 5;
-
-                        dynamic_ncode = (bitbuffer & ((1 << 4) - 1)) + 4; // Max 19
-                        bitbuffer >>= 4;
-                        bits_cntr -= 14;
-
-                        dynamic_curInSize = 0;
-
-                    dyn_len_bits:
-                        while (dynamic_curInSize < dynamic_ncode) {
-#pragma HLS PIPELINE II = 1
-                            if (bits_cntr < 16) {
-                                uint16_t tmp_data = inStream.read();
-                                bitbuffer += (bitBufferType)(tmp_data << bits_cntr);
-                                curInSize -= 2;
-                                bits_cntr += 16;
-                            }
-                            dynamic_lens[order[dynamic_curInSize++]] = (uint16_t)(bitbuffer & ((1 << 3) - 1));
-                            bitbuffer >>= 3;
-                            bits_cntr -= 3;
-                        }
-
-                        while (dynamic_curInSize < 19) dynamic_lens[order[dynamic_curInSize++]] = 0;
-
-                        details::code_generator_array_dyn(1, dynamic_lens, 19, array_codes, array_codes_extra, 7);
-
-                        dynamic_curInSize = 0;
-                        uint32_t dlenb_mask = ((1 << 7) - 1);
-
-                        while (bits_cntr < 32) {
-                            // read 2-bytes
-                            uint16_t tmp_data = inStream.read();
-                            bitbuffer += (bitBufferType)(tmp_data) << bits_cntr;
-                            curInSize -= 2;
-                            bits_cntr += 16;
-                        }
-                        current_table_val = array_codes[(bitbuffer & dlenb_mask)];
-                    // Figure out codes for LIT/ML and DIST
-                    bitlen_gen:
-                        while (dynamic_curInSize < dynamic_nlen + dynamic_ndist || (copy != 0)) {
-#pragma HLS PIPELINE II = 2
-                            //#pragma HLS dependence variable = dynamic_lens inter false
-
-                            current_bits = current_table_val.range(23, 16);
-                            current_op = current_table_val.range(24, 31);
-                            current_val = current_table_val.range(15, 0);
-
-                            if (current_val < 16 && (copy == 0)) {
-                                bitbuffer >>= current_bits;
-                                bits_cntr -= current_bits;
-                                len = current_val;
-                                copy = 1;
-                            } else if (current_val == 16 && (copy == 0)) {
-                                bitbuffer >>= current_bits;
-
-                                if (dynamic_curInSize == 0) blocks_processed = true;
-
-                                // len = dynamic_lens[dynamic_curInSize - 1];
-                                copy = 3 + (bitbuffer & 3);      // use 2 bits
-                                bitbuffer >>= 2;                 // dump 2 bits
-                                bits_cntr -= (current_bits + 2); // update bits_cntr
-                            } else if (current_val == 17 && (copy == 0)) {
-                                bitbuffer >>= current_bits;
-                                len = 0;
-                                copy = 3 + (bitbuffer & 7); // use 3 bits
-                                bitbuffer >>= 3;
-                                bits_cntr -= (current_bits + 3);
-                            } else if (copy == 0) {
-                                bitbuffer >>= current_bits;
-                                len = 0;
-                                copy = 11 + (bitbuffer & ((1 << 7) - 1)); // use 7 bits
-                                bitbuffer >>= 7;
-                                bits_cntr -= (current_bits + 7);
-                            }
-
-                            dynamic_lens[dynamic_curInSize++] = (uint16_t)len;
-                            copy -= 1;
-                            current_table_val = details::reg<ap_uint<32> >(array_codes[(bitbuffer & dlenb_mask)]);
-                            if (bits_cntr < 32) {
-                                uint16_t tmp_data = inStream.read();
-                                bitbuffer += (bitBufferType)(tmp_data) << bits_cntr;
-                                curInSize -= 2;
-                                bits_cntr += 16;
-                            }
-                        } // End of while
-                        details::code_generator_array_dyn(2, dynamic_lens, dynamic_nlen, array_codes, array_codes_extra,
-                                                          9);
-
-                        details::code_generator_array_dyn(3, dynamic_lens + dynamic_nlen, dynamic_ndist,
-                                                          array_codes_dist, array_codes_dist_extra, 9);
-                        // BYTEGEN dynamic state
-                        if (curInSize >= 6) {
-                            // ********************************
-                            //  Create Packets Below
-                            //  [LIT|ML|DIST|DIST] --> 32 Bit
-                            //  Read data from inStream - 8bits
-                            //  at a time. Decode the literals,
-                            //  ML, Distances based on tables
-                            // ********************************
-
-                            // Read from inStream
-                            while (bits_cntr < 32) {
-                                uint16_t temp = inStream.read();
-                                bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                                bits_cntr += 16;
-                                curInSize -= 2;
-                            }
-
-                            uint8_t ret = details::huffmanBytegen<ByteGenLoopII>(
-                                bitbuffer, bits_cntr, outStream, endOfStream, curInSize, inStream, array_codes,
-                                array_codes_extra, array_codes_dist, array_codes_dist_extra);
-
-                            if (ret == 77) blocks_processed = true;
-
-                        } else {
-                            blocks_processed = true;
-                        }
-                    } else {
-                        blocks_processed = true;
-                    }
-                } else if (cb_type == 1) {     // fixed huffman compressed block
-                    if (include_fixed_block) { // compile if decoder should be fixed/full
-#include "fixed_codes.hpp"
-                        // ********************************
-                        //  Create Packets Below
-                        //  [LIT|ML|DIST|DIST] --> 32 Bit
-                        //  Read data from inStream - 8bits
-                        //  at a time. Decode the literals,
-                        //  ML, Distances based on tables
-                        // ********************************
-                        // Read from inStream
-                        while (bits_cntr < 32) {
-                            uint16_t temp = inStream.read();
-                            bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                            bits_cntr += 16;
-                            curInSize -= 2;
-                        }
-
-                        // ByteGeneration module
-                        uint8_t ret = details::huffmanBytegenStatic<ByteGenLoopII>(
-                            bitbuffer, bits_cntr, outStream, endOfStream, curInSize, inStream, fixed_litml_op,
-                            fixed_litml_bits, fixed_litml_val);
-
-                        if (ret == 77) blocks_processed = true;
-
-                    } else {
-                        blocks_processed = true;
-                    }
-                } else {
-                    blocks_processed = true;
-                }
-                if (dynamic_last) blocks_processed = true;
-            } // While end
-            // Checksum 4Bytes
-            if (isGzip) {
-                while (bits_cntr < 32) {
-                    uint16_t temp = inStream.read();
-                    bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                    bits_cntr += 16;
-                    curInSize -= 2;
-                }
-                ap_uint<6> leftOverBits = 32;
-                bitbuffer >>= leftOverBits;
-                bits_cntr -= leftOverBits;
-
-                while (bits_cntr < 32) {
-                    uint16_t temp = inStream.read();
-                    bitbuffer += (bitBufferType)(temp) << bits_cntr;
-                    bits_cntr += 16;
-                    curInSize -= 2;
-                }
-                leftOverBits = 32 + (bits_cntr % 8);
-                bitbuffer >>= leftOverBits;
-                bits_cntr -= leftOverBits;
-            } else {
-            consumeLeftOverData:
-                while (curInSize > 0) {
-                    inStream.read();
-                    curInSize -= 2;
-                }
-            }
-        }
-        outStream << 0; // Adding Dummy Data for last end of stream case
-        endOfStream << 1;
-    }
-    outSize << 0;
+    outStream << 1; // Adding Dummy Data for last end of stream case
 }
 
 } // Compression

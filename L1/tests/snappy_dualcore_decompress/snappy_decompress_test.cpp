@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2019-2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,14 +35,14 @@
 #define HISTORY_SIZE MAX_OFFSET
 
 typedef ap_uint<MULTIPLE_BYTES * 8> uintS_t;
+typedef ap_uint<(MULTIPLE_BYTES * 8) + 8> uintV_t;
 
 void snappyMultiCoreDec(hls::stream<uintS_t>& inStream,
                         hls::stream<uint32_t>& inSizeStream,
-                        hls::stream<uintS_t>& outStream,
-                        hls::stream<bool>& outStreamEoS,
+                        hls::stream<uintV_t>& outStream,
                         hls::stream<uint32_t>& outSizeStream) {
     xf::compression::snappyMultiCoreDecompress<NUM_BLOCKS, MULTIPLE_BYTES, HISTORY_SIZE, BLOCK_SIZE>(
-        inStream, inSizeStream, outStream, outStreamEoS, outSizeStream);
+        inStream, inSizeStream, outStream, outSizeStream);
 }
 
 void processFile(std::string& compFile_name,
@@ -52,8 +52,7 @@ void processFile(std::string& compFile_name,
     hls::stream<uintS_t> inStream("inStream");
     hls::stream<uint32_t> inStreamSize("compLength");
     hls::stream<bool> inStreamEos("inStreamEos");
-    hls::stream<uintS_t> outStream("decompressOut");
-    hls::stream<bool> outStreamEoS("decompressOutEos");
+    hls::stream<uintV_t> outStream("decompressOut");
     hls::stream<uint32_t> outStreamSize("decompressOutSize");
 
     uint32_t comp_length = inSizeStream.read();
@@ -75,7 +74,7 @@ void processFile(std::string& compFile_name,
     }
 
     // DECOMPRESSION CALL
-    snappyMultiCoreDec(inStream, inStreamSize, outStream, outStreamEoS, outStreamSize);
+    snappyMultiCoreDec(inStream, inStreamSize, outStream, outStreamSize);
 
     std::ofstream origFile;
     origFile.open(origFile_name, std::fstream::binary | std::fstream::out);
@@ -90,11 +89,10 @@ void processFile(std::string& compFile_name,
     uint32_t outSize = outStreamSize.read();
 
     uint32_t outCnt = 0;
-    uintS_t g;
-    for (bool outEoS = outStreamEoS.read(); outEoS == 0; outEoS = outStreamEoS.read()) {
-        // reading value from output stream
-        uintS_t o = outStream.read();
-
+    uintV_t g;
+    uintV_t o = outStream.read();
+    bool eosFlag = o.range((MULTIPLE_BYTES + 1) * 8 - 1, MULTIPLE_BYTES * 8);
+    while (!eosFlag) {
         // writing output file
         if (outCnt + MULTIPLE_BYTES < outSize) {
             origFile.write((char*)&o, MULTIPLE_BYTES);
@@ -121,9 +119,10 @@ void processFile(std::string& compFile_name,
                 }
             }
         }
+        // reading value from output stream
+        o = outStream.read();
+        eosFlag = o.range((MULTIPLE_BYTES + 1) * 8 - 1, MULTIPLE_BYTES * 8);
     }
-
-    uintS_t o = outStream.read();
 
     origFile.close();
     if (pass) {

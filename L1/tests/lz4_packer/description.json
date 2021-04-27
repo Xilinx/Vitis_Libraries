@@ -7,7 +7,14 @@
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
-    "part_blacklist": [], 
+    "part_blacklist": [],
+    "QoR_golden": {
+        "VV_LUT": "19558",
+        "VV_FF": "23002",
+        "VV_BRAM": "43",
+        "VV_URAM": "6",
+        "VV_AchievedClockPeriod": "3.266"
+    }, 
     "project": "lz4_packer_test", 
     "solution": "sol1", 
     "clock": "3.3", 

@@ -7,7 +7,14 @@
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
-    "part_blacklist": [], 
+    "part_blacklist": [],
+    "QoR_golden": {
+        "VV_LUT": "3842",
+        "VV_FF": "6389",
+        "VV_BRAM": "24",
+        "VV_URAM": "0",
+        "VV_AchievedClockPeriod": "2.927"
+    }, 
     "project": "checksum32MM", 
     "solution": "sol1", 
     "clock": "3.3", 

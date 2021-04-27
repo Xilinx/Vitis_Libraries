@@ -1,5 +1,5 @@
 .. 
-   Copyright 2020 Xilinx, Inc.
+   Copyright 2019-2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ License
 
 Licensed using the `Apache 2.0 license <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
-    Copyright 2020 Xilinx, Inc.
+    Copyright 2019-2021 Xilinx, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

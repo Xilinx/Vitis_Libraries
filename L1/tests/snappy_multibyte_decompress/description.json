@@ -11,6 +11,13 @@
             "snappy_decompress_test.cpp"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8"
+    },
+    "QoR_golden": {
+        "VV_LUT": "6818",
+        "VV_FF": "5450",
+        "VV_BRAM": "0",
+        "VV_URAM": "4",
+        "VV_AchievedClockPeriod": "3.255"
     }, 
     "testbench": {
         "source": [

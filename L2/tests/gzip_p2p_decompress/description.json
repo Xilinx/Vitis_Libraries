@@ -21,7 +21,14 @@
             "cmd_args": "-dx BUILD/decompress_stream.xclbin -d PROJECT/sample.txt.gz", 
             "name": "generic launch for all flows"
         }
-    ], 
+    ],
+     "post_launch": [
+        {
+            "launch_cmd": [
+                  "./run.sh HOST_EXE LIB_DIR BUILD/decompress_stream.xclbin"
+             ]
+        }
+    ],  
     "host": {
         "host_exe": "xil_gzip", 
         "compiler": {
@@ -46,41 +53,39 @@
         }
     }, 
     "v++": {
-        "build_datafiles": [
-            "PROJECT/advanced.cfg"
-        ], 
         "compiler": {
             "symbols": [
                 "PARALLEL_BLOCK=1", 
                 "MULTIPLE_BYTES=8", 
                 "GZIP_MODE=1"
-            ], 
-            "clflags": [
-                "--config PROJECT/advanced.cfg"
-            ]
+            ] 
         }
     }, 
     "containers": [
         {
             "name": "decompress_stream", 
-            "ldclflags": "--config PROJECT/opts.cfg", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
-                    "name": "xilZlibDmReader", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp"
+                    "name": "xilGzipS2MM", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_s2mm.cpp"
                 }, 
                 {
-                    "name": "xilZlibDmWriter", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp"
+                    "name": "xilGzipMM2S", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_mm2s.cpp"
                 }, 
                 {
-                    "name": "xilDecompressFull", 
-                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_full.cpp"
+                    "name": "xilDecompress", 
+                    "location": "LIB_DIR/L2/src/zlib_decompress.cpp"
                 }
             ]
         }
-    ], 
-    "output_files": "sample.txt.gz.*", 
+    ],
+    "output_files": [
+            "sample.txt.gz.*",
+            "sample_run.*",
+            "test.list"
+    ],          
     "testinfo": {
         "disable": false, 
         "jobs": [

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,8 @@ void __xf_decomp_datamover(xf::compression::uintMemWidth_t* in,
     xf::compression::details::streamDownsizer<uint32_t, kGMemDWidth, c_parallelBit>(instream512, outdownstream,
                                                                                     input_size);
 
-    xf::compression::details::streamDm2k<c_parallelBit>(outdownstream, input_size, instream_orig, instream_size);
+    xf::compression::details::streamDm2k<c_parallelBit, uint32_t, 32>(outdownstream, input_size, instream_orig,
+                                                                      instream_size);
     xf::compression::details::streamDataK2dmMultiByteSize<MULTIPLE_BYTES>(
         decompoutstream, decompressedStreamEoS, decompressSizeStream, outstream_dest, outstream_size);
 

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@
 #include <sys/wait.h>
 #include <typeinfo>
 #include <iomanip>
+#include <iostream>
+#include <fstream>
 
 // Input file preliminary checks
 void compressApp::inputFilePreCheck(std::ifstream& file) {
@@ -32,7 +34,7 @@ void compressApp::inputFilePreCheck(std::ifstream& file) {
     }
 
     file.seekg(0, file.end);
-    uint64_t file_size = file.tellg();
+    size_t file_size = file.tellg();
     if (file_size == 0) {
         cerr << "File is empty!" << std::endl;
         exit(1);
@@ -53,14 +55,18 @@ static std::string getFileSizeUnit(double& input_size) {
     return res;
 }
 
-std::string compressApp::getXclbin(void) {
+std::string compressApp::getXclbin(void) const {
     return m_xclbin;
 }
-uint8_t compressApp::getDeviceId(void) {
+uint8_t compressApp::getDeviceId(void) const {
     return std::stoi(m_device_id);
 }
 
-uint8_t compressApp::getMCR(void) {
+std::string& compressApp::getInFileName(void) {
+    return m_uncompressed_file;
+}
+
+uint8_t compressApp::getMCR(void) const {
     return std::stoi(m_mcr);
 }
 
@@ -94,6 +100,7 @@ void compressApp::parser(int argc, char** argv) {
     m_filelist = m_parser.value("test_list");
     m_xclbin = m_parser.value("xclbin");
     m_device_id = m_parser.value("device_id");
+    m_mcr = m_parser.value("max_cr");
 }
 
 // compressApp Constructor: parse CLI opions and set the driver class memebr variables
@@ -105,6 +112,7 @@ compressApp::compressApp(int argc, char** argv, bool enable_profile) {
     m_parser.addSwitch("--compress_list", "-cfl", "Compress List of Input Files", "");
     m_parser.addSwitch("--decompress_list", "-dfl", "Decompress List of compressed Input Files", "");
     m_parser.addSwitch("--test_list", "-l", "Xilinx Compress & Decompress on Input Files", "");
+    m_parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "10");
     m_parser.addSwitch("--xclbin", "-xbin", "XCLBIN", "");
     m_parser.addSwitch("--device_id", "-id", "Device ID", "0");
 }
@@ -135,6 +143,7 @@ void compressApp::run(compressBase* b) {
         std::vector<std::string> filename_vec;
         getListFilenames(m_uncompressed_filelist, filename_vec);
         for (auto file_itr : filename_vec) {
+            m_uncompressed_file = file_itr;
             runCompress(b, file_itr);
         }
     }
@@ -174,7 +183,7 @@ void compressApp::run(compressBase* b) {
                 if (ret == 0) {
                     std::cout << (ret ? "FAILED\t" : "PASSED\t") << "\t" << file_name << std::endl;
                 } else {
-                    std::cout << "Validation Failed" << file_name << std::endl;
+                    std::cout << "Validation Failed: " << file_name << std::endl;
                 }
             }
         }
@@ -186,9 +195,10 @@ void compressApp::runCompress(compressBase* b, const std::string m_uncompressed_
     std::ifstream inFile(m_uncompressed_file, std::ifstream::binary);
     inputFilePreCheck(inFile);
     double input_size = m_inputsize;
+    double output_size = m_inputsize + ((m_inputsize - 1) / m_stdBSize + 1) * 100;
 
-    std::vector<uint8_t> in(m_inputsize);
-    std::vector<uint8_t> out(m_inputsize);
+    std::vector<uint8_t> in(input_size);
+    std::vector<uint8_t> out(output_size);
 
     inFile.read(reinterpret_cast<char*>(in.data()), m_inputsize);
     inFile.close();
@@ -246,7 +256,8 @@ void compressApp::runDecompress(compressBase* b, const std::string m_compressed_
     double input_size = m_inputsize;
     std::vector<uint8_t> in(m_inputsize);
     std::vector<uint8_t> out;
-    out.reserve(5 * m_inputsize);
+    uint8_t mcr = std::stoi(m_mcr);
+    out.reserve(mcr * m_inputsize);
 
     inFile.read((char*)in.data(), m_inputsize);
     inFile.close();
@@ -288,7 +299,7 @@ void compressApp::runDecompress(compressBase* b, const std::string m_compressed_
         if (ret == 0) {
             std::cout << (ret ? "FAILED\t" : "PASSED\t") << "\t" << m_golden_file << std::endl;
         } else {
-            std::cout << "Validation Failed" << m_golden_file << std::endl;
+            std::cout << "Validation Failed: " << m_golden_file << std::endl;
         }
     }
 }

@@ -16,14 +16,14 @@
     ], 
     "launch": [
         {
-            "cmd_args": "-cx BUILD/compress.xclbin -dx BUILD/decompress.xclbin -v PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress_decompress.xclbin -t PROJECT/sample.txt", 
             "name": "generic launch for all flows"
         }
     ], 
     "post_launch": [
         {
             "launch_cmd": [
-                  "./run.sh HOST_EXE LIB_DIR BUILD/compress.xclbin BUILD/decompress.xclbin"
+                  "./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
              ]
         }
     ], 
@@ -32,16 +32,19 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/L3/src/lz4.cpp", 
+                "LIB_DIR/common/libs/compress/lz4OCLHost.cpp",
+                "LIB_DIR/common/libs/compress/lz4Base.cpp",
+                "LIB_DIR/common/libs/compress/lz4App.cpp",
+                "LIB_DIR/common/libs/compress/compressApp.cpp",
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp", 
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/include", 
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/common/thirdParty/xxhash"
+                "LIB_DIR/common/thirdParty/xxhash",
+                "LIB_DIR/common/libs/compress/"
             ], 
             "symbols": [
                 "PARALLEL_BLOCK=8", 
@@ -53,115 +56,29 @@
     }, 
     "containers": [
         {
-            "name": "compress", 
+            "name": "compress_decompress", 
             "ldclflags": "--profile_kernel data:all:all:all", 
             "accelerators": [
                 {
                     "name": "xilLz4Compress", 
                     "location": "LIB_DIR/L2/src/lz4_compress_mm.cpp", 
-                    "clflags": "-DPARALLEL_BLOCK=8", 
-                    "num_compute_units": "2", 
-                    "compute_units": [
-                        {
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "in_block_size", 
-                                    "memory": "DDR[0]"
-                                }
-                            ]
-                        }, 
-                        {
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "in_block_size", 
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }, 
-        {
-            "name": "decompress", 
-            "ldclflags": "--profile_kernel data:all:all:all", 
-            "accelerators": [
+                    "clflags": "-DPARALLEL_BLOCK=8",
+                    "num_compute_units": "2" 
+                },
                 {
                     "name": "xilLz4Decompress", 
-                    "clflags": "-DPARALLEL_BLOCK=1 -DPARALLEL_BYTE=8 -DHOST_BUFFER_SIZE_IN_MB=128", 
-                    "location": "LIB_DIR/L2/src/lz4_multibyte_decompress_mm.cpp", 
-                    "num_compute_units": "2", 
-                    "compute_units": [
-                        {
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "in_compress_size", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "in_block_size", 
-                                    "memory": "DDR[0]"
-                                }
-                            ]
-                        }, 
-                        {
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "in_compress_size", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "in_block_size", 
-                                    "memory": "DDR[1]"
-                                }
-                            ]
-                        }
-                    ]
+                    "clflags": "-DPARALLEL_BLOCK=1 -DHOST_BUFFER_SIZE_IN_MB=2", 
+                    "location": "LIB_DIR/L2/src/lz4_multibyte_decompress_mm.cpp",
+                    "num_compute_units": "2"
                 }
             ]
         }
     ], 
-    "output_files": "sample.txt.* sample_run.* test.list", 
+    "output_files": [
+           "sample.txt.*",
+           "sample_run.*",
+           "test.list"
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [

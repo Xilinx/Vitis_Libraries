@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2020 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# makefile-generator v1.0.2
+# makefile-generator v1.0.4
 #
 
 # ####################################### Help Section #####################################
@@ -20,9 +20,8 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -30,22 +29,14 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "      Command to run application in emulation or on board."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<aarch32/aarch64/x86>"
+	$(ECHO) "  make host HOST_ARCH=<x86>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For SoC shells, ENV variable SYSROOT needs to be set."
 	$(ECHO) ""
 
 # ##################### Setting up default value of TARGET ##########################
@@ -84,16 +75,20 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(XDEVICE)
 EMCONFIG_DIR := $(BUILD_DIR)
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
+include ./config.mk
 
 # ######################### Setting up Host Variables #########################
 #Include Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/src/host.cpp
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/src/zstd.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/compress/zstdOCLHost.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/compress/zstdApp.cpp
+HOST_SRCS += $(XFLIB_DIR)/common/libs/compress/compressApp.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/xcl2/xcl2.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/cmdparser/cmdlineparser.cpp
 HOST_SRCS += $(XFLIB_DIR)/common/libs/logger/logger.cpp
 
 CXXFLAGS += -DMULTIPLE_BYTES=4 -DZSTD_BLOCK_SIZE_KB=128
+CXXFLAGS += -I$(XFLIB_DIR)/common/libs/compress/
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += -I$(XFLIB_DIR)/L2/tests/src
@@ -110,45 +105,46 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 # ######################### Host compiler global settings ############################
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++11 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE
 CXXFLAGS += -fmessage-length=0 
 CXXFLAGS += -I$(CUR_DIR)/src/ 
 
 # ################### Setting package and image directory #######################
-PKG_OUT_DIR := package_$(TARGET)
 
 EXE_NAME := xil_zstd
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-HOST_ARGS := -dx $(BUILD_DIR)/xilZstdDecompressStream.xclbin -d $(CUR_DIR)/sample.txt.zst
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
+HOST_ARGS := -xbin $(BUILD_DIR)/xilZstdDecompressStream.xclbin -d $(CUR_DIR)/sample.txt.zst
 
 # ##################### Kernel compiler global settings ##########################
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps --optimize 2
-VPP_FLAGS += --jobs 8
+VPP_FLAGS += --hls.jobs 8
+VPP_LDFLAGS += --vivado.synth.jobs 8 --vivado.impl.jobs 8
 VPP_FLAGS += -I$(XFLIB_DIR)/L1/include/hw
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/include
 VPP_FLAGS += -I$(XFLIB_DIR)/L2/src
 
+VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
 VPP_FLAGS += -DINZSTD=1 -DMULTIPLE_BYTES=4 -DZSTD_BLOCK_SIZE_KB=128 
 
 # Kernel linker flags
-VPP_LDFLAGS_xilZstdDecompressStream_temp := --config $(CUR_DIR)/opts.cfg
+VPP_LDFLAGS_xilZstdDecompressStream_temp := --config $(CUR_DIR)/connectivity.cfg
 VPP_LDFLAGS_xilZstdDecompressStream += $(VPP_LDFLAGS_xilZstdDecompressStream_temp)
+
+# Kernel args
 
 # ############################ Declaring Binary Containers ##########################
 
 BINARY_CONTAINERS += $(BUILD_DIR)/xilZstdDecompressStream.xclbin
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/xilZstdDecompressStream.xclbin
-BINARY_CONTAINER_xilZstdDecompressStream_OBJS += $(TEMP_DIR)/xilZlibDmReader.xo
-BINARY_CONTAINER_xilZstdDecompressStream_OBJS += $(TEMP_DIR)/xilZlibDmWriter.xo
+BINARY_CONTAINER_xilZstdDecompressStream_OBJS += $(TEMP_DIR)/xilGzipS2MM.xo
+BINARY_CONTAINER_xilZstdDecompressStream_OBJS += $(TEMP_DIR)/xilGzipMM2S.xo
 BINARY_CONTAINER_xilZstdDecompressStream_OBJS += $(TEMP_DIR)/xilZstdDecompressStream.xo
 
 # ######################### Setting Targets of Makefile ################################
 
 .PHONY: all clean cleanall docs emconfig
-all: check_vpp check_platform  $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
+all: check_vpp check_platform check_sysroot $(EXE_FILE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: host
 host: check_xrt check_sysroot $(EXE_FILE)
@@ -160,22 +156,22 @@ xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
 build: xclbin
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/xilZlibDmReader.xo: $(XFLIB_DIR)/L2/tests/src/zlib_dm_multibyte_rd.cpp
-	$(ECHO) "Compiling Kernel: xilZlibDmReader"
+$(TEMP_DIR)/xilGzipS2MM.xo: $(XFLIB_DIR)/L2/tests/src/gzip_dm_s2mm.cpp
+	$(ECHO) "Compiling Kernel: xilGzipS2MM"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(xilZlibDmReader_VPP_FLAGS) $(VPP_FLAGS) -k xilZlibDmReader -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
-$(TEMP_DIR)/xilZlibDmWriter.xo: $(XFLIB_DIR)/L2/tests/src/zlib_dm_multibyte_wr.cpp
-	$(ECHO) "Compiling Kernel: xilZlibDmWriter"
+	$(VPP) -c $(xilGzipS2MM_VPP_FLAGS) $(VPP_FLAGS) -k xilGzipS2MM -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
+$(TEMP_DIR)/xilGzipMM2S.xo: $(XFLIB_DIR)/L2/tests/src/gzip_dm_mm2s.cpp
+	$(ECHO) "Compiling Kernel: xilGzipMM2S"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(xilZlibDmWriter_VPP_FLAGS) $(VPP_FLAGS) -k xilZlibDmWriter -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(xilGzipMM2S_VPP_FLAGS) $(VPP_FLAGS) -k xilGzipMM2S -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
 $(TEMP_DIR)/xilZstdDecompressStream.xo: $(XFLIB_DIR)/L2/src/zstd_decompress_stream.cpp
 	$(ECHO) "Compiling Kernel: xilZstdDecompressStream"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(xilZstdDecompressStream_VPP_FLAGS) $(VPP_FLAGS) -k xilZstdDecompressStream -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$<'
+	$(VPP) -c $(xilZstdDecompressStream_VPP_FLAGS) $(VPP_FLAGS) -k xilZstdDecompressStream -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' $^
 
 $(BUILD_DIR)/xilZstdDecompressStream.xclbin: $(BINARY_CONTAINER_xilZstdDecompressStream_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(BUILD_DIR) --report_dir $(BUILD_REPORT_DIR)/xilZstdDecompressStream $(VPP_LDFLAGS) $(VPP_LDFLAGS_xilZstdDecompressStream) -o '$@' $(+)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/xilZstdDecompressStream $(VPP_LDFLAGS) $(VPP_LDFLAGS_xilZstdDecompressStream) -o '$@' $(+)
 
 
 # ################# Setting Rules for Host (Building Host Executable) ################
@@ -213,7 +209,7 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary $(CUR_DIR)/*.raw package_* run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
-	-$(RMDIR) ./sample.txt.zst.* 
+	-$(RMDIR) $(CUR_DIR)/sample.txt.zst.* 
 	-$(RMDIR) $(AIE_CONTAINERS) $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS
 
 clean: cleanh

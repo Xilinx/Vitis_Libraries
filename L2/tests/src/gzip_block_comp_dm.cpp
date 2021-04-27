@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,7 @@ void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
                          uint32_t* outputSize,
                          hls::stream<ap_axiu<GMEM_IN_DWIDTH, 0, 0, 0> >& instream_orig,
                          hls::stream<ap_axiu<32, 0, 0, 0> >& instream_size,
-                         hls::stream<ap_axiu<GMEM_OUT_DWIDTH, 0, 0, 0> >& outstream_dest,
-                         hls::stream<ap_axiu<32, 0, 0, 0> >& outstream_size) {
+                         hls::stream<ap_axiu<GMEM_OUT_DWIDTH, 0, 0, 0> >& outstream_dest) {
     hls::stream<xf::compression::uintMemWidth_t> instream512("inputStream");
     hls::stream<ap_uint<GMEM_IN_DWIDTH> > outdownstream("outDownStream");
     hls::stream<ap_uint<GMEM_OUT_DWIDTH> > decompoutstream("decompoutstream");
@@ -93,8 +92,8 @@ void __xf_comp_datamover(xf::compression::uintMemWidth_t* in,
                                                                                       input_size);
 
     streamDataDm2kSize<GMEM_IN_DWIDTH>(outdownstream, instream_orig, instream_size, input_size);
-    xf::compression::details::streamDataK2dmMultiByteSize<c_gmemParallelBytes>(
-        decompoutstream, decompressedStreamEoS, decompressSizeStream, outstream_dest, outstream_size);
+    xf::compression::details::streamDataK2dmMultiByte<c_gmemParallelBytes>(decompoutstream, decompressedStreamEoS,
+                                                                           decompressSizeStream, outstream_dest);
 
     xf::compression::details::upsizerEos<GMEM_OUT_DWIDTH, c_gMemDWidth>(decompoutstream, decompressedStreamEoS,
                                                                         outstream512, outStreamEoS);
@@ -109,15 +108,13 @@ void xilCompDatamover(xf::compression::uintMemWidth_t* in,
                       uint32_t* outputSize,
                       hls::stream<ap_axiu<GMEM_IN_DWIDTH, 0, 0, 0> >& instream_orig,
                       hls::stream<ap_axiu<32, 0, 0, 0> >& instream_size,
-                      hls::stream<ap_axiu<GMEM_OUT_DWIDTH, 0, 0, 0> >& outstream_dest,
-                      hls::stream<ap_axiu<32, 0, 0, 0> >& outstream_size) {
+                      hls::stream<ap_axiu<GMEM_OUT_DWIDTH, 0, 0, 0> >& outstream_dest) {
 #pragma HLS INTERFACE m_axi port = in offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = out offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = outputSize offset = slave bundle = gmem
 #pragma HLS interface axis port = instream_orig
 #pragma HLS interface axis port = instream_size
 #pragma HLS interface axis port = outstream_dest
-#pragma HLS interface axis port = outstream_size
 #pragma HLS INTERFACE s_axilite port = in bundle = control
 #pragma HLS INTERFACE s_axilite port = out bundle = control
 #pragma HLS INTERFACE s_axilite port = input_size bundle = control
@@ -125,6 +122,6 @@ void xilCompDatamover(xf::compression::uintMemWidth_t* in,
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     // Transfer Data to and from compression kernels
-    __xf_comp_datamover(in, out, inputSize, outputSize, instream_orig, instream_size, outstream_dest, outstream_size);
+    __xf_comp_datamover(in, out, inputSize, outputSize, instream_orig, instream_size, outstream_dest);
 }
 }

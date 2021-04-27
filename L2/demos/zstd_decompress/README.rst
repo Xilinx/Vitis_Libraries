@@ -16,38 +16,26 @@ Results
 Overall Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx Zstd decompress kernel (excluding data movers) supporting Window Size of 32KB. The final Fmax achieved is 232MHz.
+Table below presents resource utilization of Xilinx Zstd decompress kernel supporting Window Size of 32KB. The final Fmax achieved is 232MHz.
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM  
 ========== ===== ====== ===== ===== ===== 
-DeCompress 18.8K 153    17.2K 52    4     
+DeCompress 22.3K 153    8.1K  52    4    
+---------- ----- ------ ----- ----- -----
+DM Reader  3.2K  717    3.8K  10    0  
+---------- ----- ------ ----- ----- -----
+DM Writer  2.6K  281    1.8K  15    0
 ========== ===== ====== ===== ===== ===== 
-
-
-Decompress Kernel Resource Utilization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-=========== ===== ======= ===== ===== =====
-Kernel      LUT   LUTMem  REG   BRAM  URAM
-=========== ===== ======= ===== ===== =====
-Decompress  22.3K 153     8.1K  52    4
------------ ----- ------- ----- ----- -----
-DmReader    3.2K  717     3.8K  10    0
------------ ----- ------- ----- ----- -----
-DmWriter    2.6K  281     1.8K  15    0
-=========== ===== ======= ===== ===== =====
 
 
 Performance Data
 ~~~~~~~~~~~~~~~~
 
 +----------------------------+------------------------+
-| Topic                      | Best Kernel Throughput |
+| Topic                      | Kernel Throughput      |
 +============================+========================+
-| Decompression              | 783 MB/s               |
-+----------------------------+------------------------+
-| Average Compression Ratio  | 2.78 (Silesia Corpus)  |
+| Decompression              | 463 MB/s               |
 +----------------------------+------------------------+
 
 .. [*] Decompression uses feasibile options (Bitwidth: 32bit, Window Size: 32KB) 

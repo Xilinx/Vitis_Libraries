@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@
 #include <ap_int.h>
 
 #include "lz_decompress.hpp"
-#include "lz_optional.hpp"
 #include "mm2s.hpp"
 #include "s2mm.hpp"
 #include "stream_downsizer.hpp"
@@ -38,8 +37,8 @@
 
 #include "snappy_decompress_details.hpp"
 
-#define GMEM_DWIDTH 512
-#define GMEM_BURST_SIZE 16
+#define GMEM_DWIDTH 64
+#define GMEM_BURST_SIZE 512
 
 #ifndef PARALLEL_BYTE
 #define PARALLEL_BYTE 8
@@ -60,8 +59,8 @@ extern "C" {
  * @param block_size_in_kb block size in bytes
  * @param no_blocks number of blocks
  */
-void xilSnappyDecompress(const xf::compression::uintMemWidth_t* in,
-                         xf::compression::uintMemWidth_t* out,
+void xilSnappyDecompress(const ap_uint<PARALLEL_BYTE * 8>* in,
+                         ap_uint<PARALLEL_BYTE * 8>* out,
                          uint32_t* in_block_size,
                          uint32_t* in_compress_size,
                          uint32_t block_size_in_kb,

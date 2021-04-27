@@ -78,7 +78,7 @@
     "containers": [
         {
             "name": "decompress_streaming", 
-            "ldclflags": "--config PROJECT/decompress.ini", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
                     "name": "xilLz4DecompressStream", 
@@ -90,8 +90,12 @@
                 }
             ]
         }
-    ], 
-    "output_files": "*.orig", 
+    ],
+    "output_files": [
+            "sample.txt.lz4.*",
+            "sample_run.*",
+            "test.list"
+    ],        
     "testinfo": {
         "disable": false, 
         "jobs": [

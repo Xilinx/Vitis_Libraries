@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@
  * Maximum host buffer used to operate per kernel invocation
  */
 #ifndef HOST_BUFFER_SIZE
-#define HOST_BUFFER_SIZE (1 * 1024 * 1024)
+#define HOST_BUFFER_SIZE (100 * 1024 * 1024)
 #endif
 
 /**
@@ -110,6 +110,15 @@ class xfZlib {
     uint64_t compressFile(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
 
     /**
+     * @brief Compress the input file.
+     *
+     * @param inFile_name input file name
+     * @param outFile_name output file name
+     * @param actual_size input size
+     */
+    uint64_t compressFileFull(std::string& inFile_name, std::string& outFile_name, uint64_t actual_size);
+
+    /**
      * @brief Initialize host/device and OpenCL Setup
      *
      */
@@ -130,6 +139,7 @@ class xfZlib {
     cl::Context* m_context;
     cl::CommandQueue* m_q;
     cl::Kernel* compress_kernel_zlib;
+    cl::Kernel* datamover_kernel;
 
     // Compression related
     std::vector<uint8_t, aligned_allocator<uint8_t> > h_buf_in;
@@ -140,9 +150,11 @@ class xfZlib {
     cl::Buffer* buffer_input;
     cl::Buffer* buffer_output;
     cl::Buffer* buffer_compressed_size;
+    cl::Buffer* buffer_checksum_data;
 
     // Kernel names
-    std::vector<std::string> compress_kernel_names = {"xilZlibCompressFull", "xilGzipMultiCoreCompressFull"};
+    std::vector<std::string> compress_kernel_names = {"xilZlibCompressFull", "xilGzipComp", "xilGzipCompBlock"};
+    std::string datamover_kernel_name = "xilDataMover";
 };
 
 #endif // _XFCOMPRESSION_ZLIB_COMPRESS_HPP_

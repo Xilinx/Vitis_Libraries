@@ -5,17 +5,14 @@
     ], 
     "flow": "vitis", 
     "platform_blacklist": [
-        "vck", 
-        "u50", 
-        "u280"
+        "other" 
     ], 
     "platform_whitelist": [
-        "u250", 
-        "u200"
+        "u250" 
     ], 
     "launch": [
         {
-            "cmd_args": "-sx BUILD/compress_decompress.xclbin -v PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress_decompress.xclbin -t PROJECT/sample.txt", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -33,7 +30,10 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/L3/src/zlib_old.cpp", 
+                "LIB_DIR/common/libs/compress/gzipOCLHost.cpp", 
+                "LIB_DIR/common/libs/compress/gzipBase.cpp", 
+                "LIB_DIR/common/libs/compress/gzipApp.cpp", 
+                "LIB_DIR/common/libs/compress/compressApp.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp",
@@ -43,16 +43,14 @@
             "includepaths": [
                 "LIB_DIR/L3/include", 
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/common/thirdParty/zlib-1.2.7"
+                "LIB_DIR/common/thirdParty/zlib-1.2.7",
+                "LIB_DIR/common/libs/compress/"
             ], 
             "options": "-O3 ", 
             "symbols": [
                 "C_COMPUTE_UNIT=2", 
-                "H_COMPUTE_UNIT=2", 
                 "D_COMPUTE_UNIT=8", 
-                "PARALLEL_BLOCK=8", 
-                "GZIP_MODE", 
-                "OVERLAP_HOST_DEVICE"
+                "PARALLEL_BLOCK=4"
             ]
         }
     }, 
@@ -63,12 +61,11 @@
         ], 
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/tests/src/"
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/../security/L1/include"
             ], 
             "symbols": [
-                "PARALLEL_BLOCK=8", 
-                "MULTIPLE_BYTES=8", 
-                "GZIP_MODE"
+                "MULTIPLE_BYTES=8" 
             ], 
             "clflags": [
                 "--config PROJECT/advanced.cfg"
@@ -78,11 +75,11 @@
     "containers": [
         {
             "name": "compress_decompress", 
-            "ldclflags": "--kernel_frequency 250 --config PROJECT/opts.cfg", 
+            "ldclflags": "--kernel_frequency 250 --config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
-                    "name": "xilLz77Compress", 
-                    "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp", 
+                    "name": "xilGzipCompBlock", 
+                    "location": "LIB_DIR/L2/src/gzip_compress_multicore_mm.cpp", 
                     "num_compute_units": "2", 
                     "compute_units": [
                         {
@@ -101,17 +98,9 @@
                                     "memory": "DDR[0]"
                                 }, 
                                 {
-                                    "name": "in_block_size", 
+                                    "name": "checksumData", 
                                     "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "dyn_ltree_freq", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "dyn_dtree_freq", 
-                                    "memory": "DDR[0]"
-                                }
+                                } 
                             ]
                         }, 
                         {
@@ -130,89 +119,16 @@
                                     "memory": "DDR[3]"
                                 }, 
                                 {
-                                    "name": "in_block_size", 
+                                    "name": "checksumData", 
                                     "memory": "DDR[3]"
-                                }, 
-                                {
-                                    "name": "dyn_ltree_freq", 
-                                    "memory": "DDR[3]"
-                                }, 
-                                {
-                                    "name": "dyn_dtree_freq", 
-                                    "memory": "DDR[3]"
-                                }
+                                } 
                             ]
                         }
                     ]
                 }, 
                 {
-                    "name": "xilHuffmanKernel", 
-                    "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp", 
-                    "num_compute_units": "2", 
-                    "compute_units": [
-                        {
-                            "slr": "SLR0", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "in_block_size", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "dyn_ltree_freq", 
-                                    "memory": "DDR[0]"
-                                }, 
-                                {
-                                    "name": "dyn_dtree_freq", 
-                                    "memory": "DDR[0]"
-                                }
-                            ]
-                        }, 
-                        {
-                            "slr": "SLR2", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "DDR[3]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "DDR[3]"
-                                }, 
-                                {
-                                    "name": "in_block_size", 
-                                    "memory": "DDR[3]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "DDR[3]"
-                                }, 
-                                {
-                                    "name": "dyn_ltree_freq", 
-                                    "memory": "DDR[3]"
-                                }, 
-                                {
-                                    "name": "dyn_dtree_freq", 
-                                    "memory": "DDR[3]"
-                                }
-                            ]
-                        }
-                    ]
-                }, 
-                {
-                    "name": "xilZlibDmReader", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp", 
+                    "name": "xilGzipS2MM", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_s2mm.cpp", 
                     "num_compute_units": "8", 
                     "compute_units": [
                         {
@@ -354,8 +270,8 @@
                     ]
                 }, 
                 {
-                    "name": "xilZlibDmWriter", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp", 
+                    "name": "xilGzipMM2S", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_mm2s.cpp", 
                     "num_compute_units": "8", 
                     "compute_units": [
                         {
@@ -433,8 +349,8 @@
                     ]
                 }, 
                 {
-                    "name": "xilDecompressFull", 
-                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_full.cpp", 
+                    "name": "xilDecompress", 
+                    "location": "LIB_DIR/L2/src/zlib_decompress.cpp", 
                     "num_compute_units": "8", 
                     "compute_units": [
                         {
@@ -466,7 +382,9 @@
             ]
         }
     ], 
-    "output_files": "sample.txt.*", 
+    "output_files": [
+           "sample.txt.*"
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [
