@@ -26,22 +26,22 @@ kernels. The final Fmax achieved is 262MHz
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
 ========== ===== ====== ===== ===== ===== 
-Compress   56.5K 18.1K  50.9K 48    48    
+Compress   47.6K 10.7K  50.7K 56    48    
 ---------- ----- ------ ----- ----- ----- 
-DeCompress 8.8K  692    6.7K  2     4     
+DeCompress 7.3K  1.1K   7K    2     4     
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents best kernel throughput achieved for a single compute
+Table below presents kernel throughput achieved for a single compute
 unit. 
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Best Compression Throughput   2.1 GB/s
-Best Decompression Throughput 1.1 GB/s
+Compression Throughput        1.7 GB/s
+Decompression Throughput      443 MB/s
 Average Compression Ratio     2.13x (Silesia Benchmark)
 ============================= =========================
 
@@ -56,36 +56,33 @@ Software & Hardware
      Software: Xilinx Vitis 2020.2
      Hardware: xilinx_u200_xdma_201830_2 (Xilinx Alveo U200)
 
-Usage
------
-
-Execution Steps
-~~~~~~~~~~~~~~~
-
-
-::
-
-     Input Arguments: 
-       
-           1. To execute single file for compression :  ./build/xil_lz4 -sx <compress_decompress xclbin> -c <file_name>
-           2. To execute single file for decompression: ./build/xil_lz4 -sx <compress_decompress xclbin> -d <file_name.lz4>
-           3. To validate various files together:       ./build/xil_lz4 -sx <compress_decompress xclbin> -l <files.list>
-               3.a. <files.list>: Contains various file names with current path  
-           4. To execute single file for compression and decompression : ./build/xil_lz4 -sx <compress_decompress xclbin> -v <file_name>  
+Executable Usage
+----------------
+ 
+1. To execute single file for compression             : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -c <file_name>``
+2. To execute single file for decompression           : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -d <file_name.lz4>``
+3. To validate single file (compress & decompress)    : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -t <file_name>``
+4. To execute multiple files for compression     : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -cfl <files.list>``
+5. To execute multiple files for decompression     : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress xclbin> -dfl <compressed files.list>``
+6. To validate multiple files (compress and decompress) : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress xclbin> -l <files.list>``  
            
-      Note: Default arguments are set in Makefile
+      - ``<files.list>``: Contains various file names with current path
 
-     Help:
+      - Note: Default arguments are set in Makefile
 
-           ===============================================================================================
-           Usage: application.exe -[-h-c-l-d-sx-v-B-x]
+The usage of the generated executable is as follows:
 
-                   --help                  -h      Print Help Options   Default: [false]
-                   --compress              -c      Compress
-                   --file_list             -l      List of Input Files
-                   --decompress            -d      Decompress
-                   --compress_decompress   -sx     Compress_Decompress binary
-                   --validate              -v      Single file validate for Compress and Decompress  
-                   --block_size            -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
-                   --flow                  -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd]   Default:[1]
-           ===============================================================================================
+.. code-block:: bash
+
+   Usage: application.exe -[-h-c-d-t-cfl-dfl-l-xbin-B-id]
+          --help,                -h        Print Help Options
+          --compress,            -c        Compress
+          --decompress,          -d        Decompress
+          --test,                -t        Xilinx compress & Decompress
+          --compress_list,       -cfl      Compress List of Input Files
+          --decompress_list,     -dfl      Decompress List of compressed Input Files
+          --test_list,           -l        Xilinx Compress & Decompress on Input Files
+          --max_cr,              -mcr      Maximum CR                                            Default: [10]
+          --xclbin,              -xbin     XCLBIN
+          --device_id,           -id       Device ID                                             Default: [0]
+          --block_size,          -B        Compress Block Size [0-64: 1-256: 2-1024: 3-4096]     Default: [0]

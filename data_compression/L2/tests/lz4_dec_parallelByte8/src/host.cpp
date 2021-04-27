@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
  */
 #include "lz4App.hpp"
 #include "lz4OCLHost.hpp"
+#include <memory>
 
 int main(int argc, char* argv[]) {
     bool enable_profile = false;
@@ -25,8 +26,9 @@ int main(int argc, char* argv[]) {
 
     // Design class object creating and constructor invocation
     std::unique_ptr<lz4OCLHost> lz4(
-        new lz4OCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), enable_profile));
+        new lz4OCLHost(flow, d.getXclbin(), d.getDeviceId(), d.getBlockSize(), d.getMCR(), enable_profile));
 
     // Run API to launch the compress or decompress engine
     d.run(lz4.get());
+    return 0;
 }

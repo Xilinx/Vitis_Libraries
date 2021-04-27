@@ -39,8 +39,8 @@ The host executable generated is named as "**xil_zlibc**" and it is generated in
 
 Following is the usage of the executable:
 
-1. To execute single file for compression 	          : ``./<build_directory>/xil_zlibc -cx ./<build_directory>/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <input file_name>``
-4. To validate multiple files (compress)              : ``./<build_directory>/xil_zlibc -cx ./<build_directory>/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -l <files.list>``
+1. To execute single file for compression 	          : ``./<build_directory>/xil_zlibc -xbin ./<build_directory>/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -c <input file_name>``
+2. To validate multiple files for compression              : ``./<build_directory>/xil_zlibc -xbin ./<build_directory>/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin -cfl <files.list>``
 
 	- ``<files.list>``: Contains various file names with current path
 
@@ -48,13 +48,13 @@ The usage of the generated executable is as follows:
 
 .. code-block:: bash
  
-   Usage: application.exe -[-h-c-cx-l-k-id-mcr]
-        --help,                 -h      Print Help Options   Default: [false]
-        --compress,             -c      Compress
-        --compress_xclbin,      -cx     Compress XCLBIN      
-        --file_list,            -l      List of Input Files
-        --cu,                   -k      CU                   Default: [0]
-        --id,                   -id     Device ID            Default: [0]
-        --max_cr,               -mcr    Maximum CR           Default: [10]
+   Usage: application.exe -[-h-c-xbin-l-k-id-mcr]
+          --help,                -h        Print Help Options
+          --compress,            -c        Compress
+          --compress_list,       -cfl      Compress List of Input Files
+          --max_cr,              -mcr      Maximum CR                                      Default: [10]
+          --xclbin,              -xbin     XCLBIN
+          --device_id,           -id       Device ID                                       Default: [0]
+          --zlib,                -zlib     [0:GZip, 1:Zlib]                                Default: [0]
 ===========================================================
 

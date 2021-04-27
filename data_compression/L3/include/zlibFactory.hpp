@@ -1,18 +1,8 @@
 #include "zlib.hpp"
 #include "deflate.h"
 #include "zlibDriver.hpp"
-#ifdef ENABLE_XRM
-#include <xrm.h>
-#endif
 using namespace xf::compression;
 
-#ifdef ENABLE_XRM
-typedef struct {
-    xrmCuProperty cuProp;
-    xrmCuResource cuRes;
-} xrmStruct;
-
-#endif
 class zlibFactory {
    public:
     // Use getInstance of zlibFactory class
@@ -27,15 +17,20 @@ class zlibFactory {
     bool getXmode();
 
     // Driver Instance
-    zlibDriver* getDriverInstance(z_streamp strm, int flow);
+    zlibDriver* getDriverInstance(z_streamp strm, int flow, bool init = true);
 
     // Release Driver Instance
     void releaseDriverObj(z_streamp strm);
 
+    // Release Driver Instance
+    void releaseZlibObj(z_streamp strm);
+
    private:
     // XCLBIN name
     std::string m_u50_xclbin;
-
+    std::vector<cl::Device> m_deviceCount;
+    std::vector<cl::Context*> m_deviceContext;
+    std::vector<cl::Program*> m_deviceProgram;
     // Common platform / device
     // exists throughout the process
     cl_context_properties m_platform;
@@ -50,27 +45,14 @@ class zlibFactory {
     // PreCheck flag --> FPGA/CPU
     bool m_xMode = true;
 
-#ifdef ENABLE_XRM
-
-    // XRM CU Instance
-    xrmStruct* getXrmCuInstance(z_streamp strm, const std::string& kernel_name);
-
-    // XRM Context
-    static xrmContext* m_ctx;
-
-    // Map data structure to hold
-    // zstream struture pointer and xrmObject
-    std::map<z_streamp, xrmStruct*> m_xrmMapObj;
-#endif
+    std::mutex m_mutex;
+    void lock() { m_mutex.lock(); }
+    void unlock() { m_mutex.unlock(); }
 
     // std::map container to hold
     // zstream structure pointers and zlibDriver Class Object
     // Mapping (Driver Class)
     std::map<z_streamp, zlibDriver*> m_driverMapObj;
-
-    std::mutex m_mutex;
-    void lock() { m_mutex.lock(); }
-    void unlock() { m_mutex.unlock(); }
 
     // Precheck status
     bool m_PreCheckStatus = true;

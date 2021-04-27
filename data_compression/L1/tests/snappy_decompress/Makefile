@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ help::
 
 # MK_INC_BEGIN vivado.mk
 
-TOOL_VERSION ?= 2019.2
+TOOL_VERSION ?= 2020.2
 
 ifeq (,$(XILINX_VIVADO))
 XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
@@ -76,7 +76,7 @@ DEVICE ?= u200
 ifeq (,$(XPART))
 # MK_INC_BEGIN vitis.mk
 
-TOOL_VERSION ?= 2019.2
+TOOL_VERSION ?= 2020.2
 
 ifeq (,$(XILINX_VITIS))
 XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)

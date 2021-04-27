@@ -17,11 +17,12 @@ This application is present in ``L3/demos/lz4_app`` directory. Follow build inst
 
 The binary host file generated is named as "**xil_lz4**" and it is present in ``./build`` directory.
 
-1. To execute single file for compression 	: ``./build/xil_lz4 -cx <compress xclbin> -c <file_name>``
-
-2. To execute single file for decompression	: ``./build/xil_lz4 -dx <decompress xclbin> -d <file_name.lz4>``
-
-3. To validate various files together		: ``./build/xil_lz4 -cx <compress xclbin> -dx <decompress xclbin> -l <files.list>``
+1. To execute single file for compression 	: ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -c <file_name>``
+2. To execute single file for decompression	: ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -d <file_name.lz4>``
+3. To validate single file (compress & decompress) : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -t <input file_name>``
+4. To execute multiple files for compression        : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -cfl <files.list>``
+5. To execute multiple files for decompression        : ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/compress_decompress.xclbin -dfl <compressed files.list>``   
+6. To validate multiple files files (compress & decompress)		: ``./build/xil_lz4 -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -l <files.list>``
 	
 	- ``<files.list>``: Contains various file names with current path
 
@@ -29,98 +30,15 @@ The usage of the generated executable is as follows:
 
 .. code-block:: bash
    
-   Usage: application.exe -[-h-c-l-d-B-x]
-        --help,             -h      Print Help Options   Default: [false]
-    	--compress_xclbin   -cx     Compress binary
-        --compress,         -c      Compress
-        --file_list,        -l      List of Input Files
-        --decompress_xclbin -dx     Decompress binary
-        --decompress,       -d      Decompress
-        --block_size,       -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
-        --flow,             -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd] Default: [1]
-
-LZ4 Compress
-~~~~~~~~~~~~~
-
-Code Snippet below explains the general usage of LZ4 compress library.
-
-.. code-block:: cpp
-    
-    // Input: Raw File
-    // Output: Compress File (.lz4)
-
-    #include "lz4.hpp" 
-    using namespace xf::compression;
-    
-    // Create LZ4 class object
-    // a. Initiate OpenCL device setup
-    // b. Load XCLBIN file to FPGA
-    // c. Allocate host and device buffers
-    xfLz4 xlz;
-    
-    // This variable sets the flows
-    // LZ4 Compress or Decompress
-    // 1 -> Compress
-    xlz.m_BinFlow = 1;   
-
-    // XCLBIN file
-    // OpenCL setup
-    xlz.init(binaryFileName);
-        
-    // Set the block size
-    xlz.m_BlockSizeInKb = block_size     
-    
-    // 0 means Xilinx Flow
-    xlz.m_SwitchFlow = 0;
-    
-    // File I/O operations
-    // Internally invokes FPGA Accelerated LZ4 Compress 
-    // xf::compression::compress() 
-    uint64_t enc_bytes = xlz.compressFile(inFile, outFile, input_size, file_list_flag);
-
-    // Release OpenCL objects
-    // Release device buffers
-    xlz.release();
-
-LZ4 Decompress
-~~~~~~~~~~~~~
-
-Code Snippet below explains the general usage of LZ4 compress library.
-
-.. code-block:: cpp
-    
-    // Input: Compressed File (.lz4)
-    // Output: Raw File
-
-    #include "lz4.hpp" 
-    using namespace xf::compression;
-    
-    // Create LZ4 class object
-    // a. Initiate OpenCL device setup
-    // b. Load XCLBIN file to FPGA
-    // c. Allocate host and device buffers
-    xfLz4 xlz;
-    
-    // This variable sets the flows
-    // LZ4 Compress or Decompress
-    // 1 -> Compress
-    xlz.m_BinFlow = 1;   
-
-    // XCLBIN file
-    // OpenCL setup
-    xlz.init(binaryFileName);
-        
-    // Set the block size
-    xlz.m_BlockSizeInKb = block_size     
-    
-    // 0 means Xilinx Flow
-    xlz.m_SwitchFlow = 0;
-    
-    // File I/O operations
-    // Internally invokes FPGA Accelerated LZ4 Compress 
-    // xf::compression::compress() 
-    uint64_t enc_bytes = xlz.compressFile(inFile, outFile, input_size, file_list_flag);
-
-    // Release OpenCL objects
-    // Release device buffers
-    xlz.release();
+   Usage: application.exe -[-h-c-l-d-B-x]         
+          --help,                -h        Print Help Options
+          --compress,            -c        Compress
+          --decompress,          -d        Decompress
+          --test,                -t        Xilinx compress & Decompress
+          --compress_list,       -cfl      Compress List of Input Files
+          --decompress_list,     -dfl      Decompress List of compressed Input Files
+          --test_list,           -l        Xilinx Compress & Decompress on Input Files
+          --max_cr,              -mcr      Maximum CR                                            Default: [10]
+          --xclbin,              -xbin     XCLBIN
+          --device_id,           -id       Device ID                                             Default: [0]
+          --block_size,          -B        Compress Block Size [0-64: 1-256: 2-1024: 3-4096]     Default: [0]

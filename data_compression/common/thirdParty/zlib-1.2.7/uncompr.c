@@ -40,39 +40,8 @@ int ZEXPORT uncompress(Bytef* dest, uLongf* destLen, const Bytef* source, uLong 
     err = inflateInit(&stream);
     if (err != Z_OK) return err;
 
-#ifdef XILINX_CODE
-    // Create factory class
-    auto sObj = zlibFactory::getInstance();
-    auto cflow = true;
-    sObj->xilinxPreChecks();
-    if (!(sObj->getXmode())) {
-        cflow = false;
-    }
-    char* noaccel = getenv("XILINX_NO_ACCEL");
-    if (noaccel && (std::stoi(noaccel) == 0)){ 
-        cflow = false;
-    }    
-
-    if (cflow) {
-        // Driver class
-        zlibDriver* driver = sObj->getDriverInstance(&stream, XILINX_INFLATE);
-        if (driver == NULL) {
-            cflow = false;
-        }
-
-        uint64_t debytes = driver->xilinxHwUncompress(&stream, 0);
-        *destLen = debytes;
-        sObj->releaseDriverObj(&stream);
-        err = inflateEnd(&stream);
-        if (debytes == 0) {
-            return Z_BUF_ERROR;
-        } else {
-            return Z_OK;
-        }
-    }
-#endif
-
     err = inflate(&stream, Z_FINISH);
+
     if (err != Z_STREAM_END) {
         inflateEnd(&stream);
         if (err == Z_NEED_DICT || (err == Z_BUF_ERROR && stream.avail_in == 0)) return Z_DATA_ERROR;

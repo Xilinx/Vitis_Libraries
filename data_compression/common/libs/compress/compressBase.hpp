@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,22 @@
  */
 #ifndef _XFCOMPRESSION_COMPRESS_BASE_HPP_
 #define _XFCOMPRESSION_COMPRESS_BASE_HPP_
-#include "xcl2.hpp"
+#include <stdint.h>
+#include <stddef.h>
+#include <boost/assert.hpp>
 
 class compressBase {
    public:
     enum State { COMPRESS, DECOMPRESS, BOTH };
+    enum Level { OLAP = 0, SEQ };
 
     // Xilinx compression
-    virtual uint64_t xilCompress(uint8_t* in, uint8_t* out, uint64_t input_size) = 0;
+    virtual uint64_t xilCompress(uint8_t* in, uint8_t* out, size_t input_size) = 0;
 
     // Xilinx decompression
-    virtual uint64_t xilDecompress(uint8_t* in, uint8_t* out, uint64_t input_size) = 0;
+    virtual uint64_t xilDecompress(uint8_t* in, uint8_t* out, size_t input_size) = 0;
+
+    virtual ~compressBase(){};
 };
 
 #endif // _XFCOMPRESSION_COMPRESS_BASE_HPP_

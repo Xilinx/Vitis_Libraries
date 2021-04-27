@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -757,12 +757,13 @@ void parseFramesAndBlocks(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
                           hls::stream<uint32_t>& blockMetaStream,
                           hls::stream<ap_uint<8 * PARALLEL_BYTE> >& zstdBlockStream) {
     // decompress all zstd frames
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
-    const uint16_t c_accRegWidth = c_streamWidth * 3;
+    const uint8_t c_parallelBit = 8 * PARALLEL_BYTE;
 
+    // 14 because of magic number + frame header
+    const uint8_t numWidth = 14 / PARALLEL_BYTE + 1;
+    ap_uint<128> inputWindow;
     bool lastInputWord = false;
-    ap_uint<c_accRegWidth> accRegister = 0;
-    uint8_t bytesInAcc = 0;
+    uint8_t inputIdx = 0;
     ap_uint<4> istb;
 // parse all frames and exit when there is no data to read in inStream
 parseFrames_main_loop:
@@ -773,7 +774,25 @@ parseFrames_main_loop:
         uint64_t frameContentSize = 0;
         uint32_t contentCheckSum = 0;
         uint32_t blockMaxSize = 0;
-        uint8_t bitsInAcc = bytesInAcc << 3;
+        uint32_t readBytes = 0;
+        uint32_t processedBytes = 0;
+
+        for (uint8_t i = 0; i < numWidth; i++) {
+#pragma HLS PIPELINE II = 1
+            istb = inStrobe.read();
+            if (istb == 0) { // 0 data here means data ends here and there is no more frames to decode
+                lastInputWord = true;
+                ap_uint<c_parallelBit> dummyVal = inStream.read();
+                break;
+            } else {
+                inputWindow.range((i + 1) * c_parallelBit - 1, i * c_parallelBit) = inStream.read();
+                readBytes += PARALLEL_BYTE;
+            }
+        }
+
+        if (lastInputWord) { // 0 data here means data ends here and there is no more frames to decode
+            break;
+        }
 
         /* Frame format
          * <Magic_Number><Frame_Header><Data_Block(s).....><Content_Checksum>
@@ -781,19 +800,8 @@ parseFrames_main_loop:
          */
         // printf("Bytes in Acc: %d\n", bytesInAcc);
         // Read data to accumulator
-        if (bytesInAcc < PARALLEL_BYTE) {
-            istb = inStrobe.read();
-            accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
-            bitsInAcc += c_streamWidth;
-        }
-        if (istb == 0) { // 0 data here means data ends here and there is no more frames to decode
-            lastInputWord = true;
-            break;
-        }
-        magicNumber = accRegister;
-        accRegister >>= 32;
-        bitsInAcc -= 32;
-        bytesInAcc = bitsInAcc >> 3;
+        magicNumber = inputWindow.range(31, 0);
+        inputIdx += 4;
 
         // verify magic number
         if (magicNumber != c_magicNumber) {
@@ -801,44 +809,31 @@ parseFrames_main_loop:
                 // Error: Invalid Frame, magic number mismatch !!
                 return;
             } else {
-                // skippable frame
-                if (bytesInAcc < 4) {
-                    istb = inStrobe.read();
-                    accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
-                    bitsInAcc += c_streamWidth;
-                }
-                if (istb == 0) { // end of data stream, erroneous
-                    lastInputWord = true;
-                    break;
-                }
-                uint32_t frameSize = accRegister;
-                accRegister >>= 32;
-                bitsInAcc -= 32;
-                bytesInAcc = bitsInAcc >> 3;
+                uint32_t frameSize = inputWindow >> inputIdx * 8;
+                inputIdx += 4;
+                processedBytes += 4;
 
-                if (bytesInAcc > frameSize) {
-                    accRegister >>= (frameSize << 3);
-                    bytesInAcc -= frameSize;
-                    bitsInAcc = (bytesInAcc << 3);
+                if ((readBytes - processedBytes) > frameSize) {
+                    inputIdx += frameSize;
                 } else {
-                    accRegister = 0; // needs to be skipped
-                    uint32_t skfRemBytes = frameSize - bytesInAcc;
+                    uint32_t skfRemBytes = frameSize - (readBytes - processedBytes);
                     uint32_t iterLim = 1 + ((skfRemBytes - 1) / PARALLEL_BYTE);
                     // skip this frame
-                    ap_uint<c_streamWidth> tmp = 0;
+                    ap_uint<c_parallelBit> input;
                 skip_frame_loop:
                     for (uint32_t i = 0; i < iterLim; ++i) {
 #pragma HLS PIPELINE II = 1
                         istb = inStrobe.read();
-                        tmp = inStream.read();
+                        input = inStream.read();
                     }
-                    // put residual in accumulator register
-                    bytesInAcc = (PARALLEL_BYTE * iterLim) - skfRemBytes;
-                    accRegister = (tmp >> (PARALLEL_BYTE - bytesInAcc));
-                    bitsInAcc = (bytesInAcc << 3);
+                    uint32_t remBytes = (PARALLEL_BYTE * iterLim) - skfRemBytes;
+                    uint32_t nextFrameData = (PARALLEL_BYTE - remBytes);
+                    input >>= remBytes * 8;
+                    inputWindow.range(nextFrameData * 8 - 1, 0) = input;
+                    inputIdx = nextFrameData;
                 }
-                continue;
             }
+            continue;
         }
         /* Frame_Header format
          * <Frame_Header_Descriptor><Window_Descriptor><Dictionary_Id><Frame_Content_Size>
@@ -847,18 +842,8 @@ parseFrames_main_loop:
          * bytes
          */
         // Read data to accumulator
-        if (bytesInAcc < PARALLEL_BYTE) {
-            istb = inStrobe.read();
-            accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
-            bitsInAcc += c_streamWidth;
-        }
-        if (istb == 0) { // end of data stream, erroneous
-            lastInputWord = true;
-            break;
-        }
-        uint8_t headerDesc = (uint8_t)accRegister;
-        accRegister >>= 8;
-        bitsInAcc -= 8;
+        ap_uint<8> headerDesc = inputWindow.range(39, 32);
+        inputIdx += 1;
 
         // Parse frame header descriptor
         /*
@@ -866,10 +851,10 @@ parseFrames_main_loop:
          * <Frame_Content_Size_flag><Single_Segment_flag><Not used><Content_Checksum_flag><Dictionary_ID_flag>
          *          bit 7-6                 bit 5         bit 4-3           bit 2               bit 1-0
          */
-        bool checksumFlag = (headerDesc >> 2) & 1;
-        bool singleSegmentFlag = (headerDesc >> 5) & 1;
-        uint8_t didFieldSize = headerDesc & 3;
-        uint8_t fcsFieldSize = headerDesc >> 6;
+        bool checksumFlag = headerDesc.range(2, 2);
+        bool singleSegmentFlag = headerDesc.range(5, 5);
+        uint8_t didFieldSize = headerDesc.range(1, 0);
+        uint8_t fcsFieldSize = headerDesc.range(7, 6);
 
         didFieldSize += (uint8_t)(didFieldSize == 3);
         fcsFieldSize = fcsFieldSize ? ((uint8_t)1 << fcsFieldSize) : (fcsFieldSize | singleSegmentFlag);
@@ -883,44 +868,24 @@ parseFrames_main_loop:
          */
         if (!singleSegmentFlag) {
             // read 1 byte
-            uint8_t winDesc = (uint8_t)accRegister;
-            accRegister >>= 8;
-            bitsInAcc -= 8;
+            uint8_t winDesc = (uint8_t)(inputWindow.range(47, 40));
+            inputIdx += 1;
             // get window size
             uint8_t windowLog = (10 + (winDesc >> 3));
             uint64_t windowBase = (uint64_t)1 << windowLog;
             uint64_t windowAdd = (windowBase >> 3) * (winDesc & 7);
             windowSize = windowBase + windowAdd;
         }
-        bytesInAcc = bitsInAcc >> 3;
+
         // read Dictionary_Id
         // read bytes if needed
-        if (bytesInAcc < didFieldSize) {
-            istb = inStrobe.read();
-            accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
-            bitsInAcc += c_streamWidth;
-            bytesInAcc += PARALLEL_BYTE;
-        }
-        dictionaryId = (didFieldSize > 0) ? accRegister.range((8 * didFieldSize) - 1, 0) : 0;
-        accRegister >>= (didFieldSize * 8);
-        bytesInAcc -= didFieldSize;
-        bitsInAcc = bytesInAcc << 3;
+        dictionaryId = (didFieldSize > 0) ? inputWindow.range((inputIdx + didFieldSize) * 8 - 1, inputIdx * 8) : 0;
+        inputIdx += didFieldSize;
 
-    // read Frame_Content_Size
-    // read bytes if needed
-    read_fss_bytes:
-        while (bytesInAcc < fcsFieldSize) {
-#pragma HLS PIPELINE II = 1
-            istb = inStrobe.read();
-            accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
-            bitsInAcc += c_streamWidth;
-            bytesInAcc += PARALLEL_BYTE;
-        }
-        frameContentSize = (fcsFieldSize > 0) ? accRegister.range((8 * fcsFieldSize) - 1, 0) : 0;
+        // read Frame_Content_Size
+        frameContentSize = (fcsFieldSize > 0) ? inputWindow.range((inputIdx + fcsFieldSize) * 8 - 1, inputIdx * 8) : 0;
         frameContentSize += ((fcsFieldSize == 2) ? 256 : 0);
-        accRegister >>= (fcsFieldSize * 8);
-        bytesInAcc -= fcsFieldSize;
-        bitsInAcc = bytesInAcc << 3;
+        inputIdx += fcsFieldSize;
 
         if (singleSegmentFlag) {
             windowSize = frameContentSize;
@@ -934,34 +899,37 @@ parseFrames_main_loop:
 
         // parse Blocks in this Frame and pass block data to block decompression unit
         bool isLastBlock = false;
-    // int blkcnt = 0;
+
+        inputWindow >>= (inputIdx * 8);
+        uint8_t validBytes = readBytes - inputIdx;
+        processedBytes += inputIdx;
+        inputIdx = 0;
+
     parse_block_in_frame:
         while (!isLastBlock) {
-            if (bytesInAcc < PARALLEL_BYTE) {
+            if (validBytes < 4) {
                 istb = inStrobe.read();
-                accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
-                bitsInAcc += c_streamWidth;
-                bytesInAcc += PARALLEL_BYTE;
+                ap_uint<c_parallelBit> input = inStream.read();
+                inputWindow.range((validBytes + PARALLEL_BYTE) * 8 - 1, validBytes * 8) = input;
+                readBytes += PARALLEL_BYTE;
+                validBytes += PARALLEL_BYTE;
             }
+
             // Parse block header
             /*
              * Block_Header: 3 bytes
              * <Last_Block><Block_Type><Block_Size>
              *    bit 0		 bits 1-2    bits 3-23
              */
-            ap_uint<24> blockHeader = accRegister;
-            accRegister >>= 24;
-            bitsInAcc -= 24;
-            bytesInAcc -= 3;
+            ap_uint<24> blockHeader = inputWindow.range(23, 0);
+            processedBytes += 3;
+
+            inputWindow >>= 24;
+            validBytes -= 3;
 
             isLastBlock = (blockHeader & 1) ? true : false;
             xfBlockType_t blockType = (xfBlockType_t)(((uint8_t)blockHeader >> 1) & 3);
             uint32_t blockSize = (blockHeader >> 3);
-
-            // write data to zstdStream
-            // data transfer register
-            ap_uint<c_accRegWidth> dtRegister = 0;
-            uint8_t bytesUnused = 0;
 
             // enable processing for this block
             blockValidStream << 1;
@@ -971,49 +939,48 @@ parseFrames_main_loop:
             blockMetaStream << metabuf;
             // copy blockSize data
             uint32_t bs2Write = blockSize;
+
             if (blockType == RLE_BLOCK) {
                 bs2Write = 1;
             }
-            /*
-             * Use bytes from accumulator. Number of bytes in accumulator will always be less than PARALLEL_BYTE.
-             * Number of bytes available in accumulator won't change during the iterations, but at last.
-             */
-            ap_uint<c_accRegWidth> wbuf = accRegister;
+
+            uint32_t blockLen = bs2Write;
+            int readCheck = bs2Write - validBytes;
+            uint8_t updBInAcc = validBytes;
             uint8_t bytesWritten = 0;
-            uint8_t updBInAcc = bytesInAcc;
-        // write block data
+
         parser_write_block_data:
             for (int i = 0; i < bs2Write; i += PARALLEL_BYTE) {
 #pragma HLS PIPELINE II = 1
-                if (i < (const int)(bs2Write - bytesInAcc)) {
+                if (i < readCheck) {
                     istb = inStrobe.read();
-                    wbuf.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
+                    inputWindow.range((validBytes + PARALLEL_BYTE) * 8 - 1, validBytes * 8) = inStream.read();
                     updBInAcc += PARALLEL_BYTE;
                 }
-                ap_uint<c_streamWidth> tmpV = wbuf;
-                zstdBlockStream << tmpV;
+
+                ap_uint<c_parallelBit> outValue = inputWindow;
+                zstdBlockStream << outValue;
 
                 if (i > (const int)(bs2Write - PARALLEL_BYTE)) {
                     bytesWritten = bs2Write - i;
                     break;
                 }
-                wbuf >>= c_streamWidth;
+
+                inputWindow >>= c_parallelBit;
                 updBInAcc -= PARALLEL_BYTE;
             }
-            bytesInAcc = updBInAcc - bytesWritten;
-            accRegister = wbuf >> (bytesWritten * 8);
-            bitsInAcc = bytesInAcc * 8;
+            validBytes = updBInAcc - bytesWritten;
+            inputWindow >>= bytesWritten * 8;
         }
+
         // check for checksum flag
         if (checksumFlag) {
-            if (bytesInAcc < 4) {
+            if (validBytes < 4) {
                 istb = inStrobe.read();
-                accRegister.range((bitsInAcc + c_streamWidth - 1), bitsInAcc) = inStream.read();
-                bytesInAcc += PARALLEL_BYTE;
+                ap_uint<c_parallelBit> input = inStream.read();
             }
-            bytesInAcc -= 4;
-            accRegister >>= 32;
         }
+        inputIdx = 0;
     }
     blockValidStream << 0;
 }
@@ -1055,8 +1022,8 @@ void decompressMultiFrames(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
 #pragma HLS STREAM variable = seqDecodeInStream depth = c_inStreamDepth
 
 #pragma HLS STREAM variable = blockMetaStream depth = c_minStreamDepth
-#pragma HLS STREAM variable = litMetaStream depth = c_metaStreamDepth
-#pragma HLS STREAM variable = seqMetaStream depth = c_metaStreamDepth
+#pragma HLS STREAM variable = litMetaStream depth = 32
+#pragma HLS STREAM variable = seqMetaStream depth = 32
 
 #pragma HLS STREAM variable = fseTableLitStream depth = c_metaStreamDepth
 #pragma HLS STREAM variable = fseTableSeqStream depth = c_seqMetaStreamDepth
@@ -1088,63 +1055,45 @@ void decompressMultiFrames(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
 template <int PARALLEL_BYTE>
 void kStreamReadZstdDecomp(hls::stream<ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> >& inKStream,
                            hls::stream<ap_uint<8 * PARALLEL_BYTE> >& zstdCoreInStream,
-                           hls::stream<ap_uint<4> >& inStrobe,
-                           uint64_t inputSize) {
+                           hls::stream<ap_uint<4> >& inStrobe) {
     // write input data to core module from kernel axi stream
-    const uint16_t c_streamWidth = 8 * PARALLEL_BYTE;
-    uint8_t lbWidth = inputSize % PARALLEL_BYTE;
-    ap_uint<4> strb = PARALLEL_BYTE;
-    ap_axiu<c_streamWidth, 0, 0, 0> tmp;
-ksReadZstIn:
-    for (int i = 0; i < inputSize; i += PARALLEL_BYTE) {
+    bool last = true;
+    do {
 #pragma HLS PIPELINE II = 1
-        tmp = inKStream.read();
+        ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> tmp = inKStream.read();
         zstdCoreInStream << tmp.data;
-        if (inputSize < i + PARALLEL_BYTE) strb = lbWidth;
-        inStrobe << strb;
-    }
-    // last strobe
-    inStrobe << 0;
+        last = tmp.last;
+        inStrobe << tmp.strb;
+    } while (last == false);
     zstdCoreInStream << 0;
+    inStrobe << 0; // Terminate condition
 }
 
 template <int STREAM_WIDTH>
 void kStreamWriteZstdDecomp(hls::stream<ap_axiu<STREAM_WIDTH, 0, 0, 0> >& outKStream,
-                            hls::stream<ap_axiu<64, 0, 0, 0> >& outSizeStream,
-                            hls::stream<ap_uint<STREAM_WIDTH> >& outDataStream,
-                            hls::stream<bool>& byteEos,
-                            hls::stream<uint64_t>& dataSize) {
+                            hls::stream<ap_uint<STREAM_WIDTH + (STREAM_WIDTH / 8)> >& outDataStream) {
     // write output data from core module to kernel axi stream
-    bool lastByte = false;
-    ap_uint<STREAM_WIDTH> tmp;
+    ap_uint<STREAM_WIDTH / 8> strb = 0;
+    ap_uint<STREAM_WIDTH + (STREAM_WIDTH / 8)> tmp;
     ap_axiu<STREAM_WIDTH, 0, 0, 0> t1;
 
-    ap_axiu<64, 0, 0, 0> pcksize;
-
-    bool flag = false;
-ksWriteOut:
-    for (lastByte = byteEos.read(); !lastByte; lastByte = byteEos.read()) {
+    tmp = outDataStream.read();
+    strb = tmp.range((STREAM_WIDTH / 8) - 1, 0);
+    t1.data = tmp.range(STREAM_WIDTH + (STREAM_WIDTH / 8) - 1, STREAM_WIDTH / 8);
+    t1.strb = strb;
+    t1.last = 0;
+    while (strb != 0) {
 #pragma HLS PIPELINE II = 1
-        if (flag) {
-            outKStream << t1;
-        } else {
-            flag = true;
-        }
         tmp = outDataStream.read();
-        t1.data = tmp;
+        strb = tmp.range((STREAM_WIDTH / 8) - 1, 0);
+        if (strb == 0) {
+            t1.last = 1;
+        }
+        outKStream << t1;
+        t1.data = tmp.range(STREAM_WIDTH + (STREAM_WIDTH / 8) - 1, STREAM_WIDTH / 8);
+        t1.strb = strb;
         t1.last = 0;
     }
-    // read extra packet
-    outDataStream.read();
-    // send the previously read packet
-    t1.data = tmp;
-    t1.last = 1;
-    outKStream << t1;
-    // write the total size of decompressed output
-    pcksize.data = dataSize.read();
-    // write total output size
-    pcksize.last = 1;
-    outSizeStream << pcksize;
 }
 
 } // details
@@ -1162,21 +1111,17 @@ ksWriteOut:
  * @param inStream input stream
  * @param inStrobe valid input strobe stream
  * @param outStream output stream
- * @param endOfStream end of output stream flag stream
- * @param sizeOutStream output data size
  */
 template <int PARALLEL_BYTE, int BLOCK_SIZE_KB, int LZ_MAX_OFFSET, int LMO_WIDTH>
 void zstdDecompressStream(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
                           hls::stream<ap_uint<4> >& inStrobe,
-                          hls::stream<ap_uint<8 * PARALLEL_BYTE> >& outStream,
-                          hls::stream<bool>& endOfStream,
-                          hls::stream<uint64_t>& sizeOutStream) {
+                          hls::stream<ap_uint<(8 * PARALLEL_BYTE) + PARALLEL_BYTE> >& outStream) {
     // take zstd compressed bitstream as input and generate a zstd decompressed output stream
     // const values
     const uint32_t c_intlLiteralStreamDepth = (BLOCK_SIZE_KB * 1024) / PARALLEL_BYTE;
     const uint32_t c_literalStreamDepth = (36 * 1024) / (8 * PARALLEL_BYTE);
     const uint16_t c_lmoStreamDepth = 1024;
-    const uint16_t c_litlenStreamDepth = 8 * 1024;
+    const uint16_t c_litlenStreamDepth = 1024;
     const uint8_t c_minStreamDepth = 4;
     // internal streams
     hls::stream<ap_uint<8 * PARALLEL_BYTE> > intlLiteralStream("intlLiteralStream");
@@ -1209,7 +1154,7 @@ void zstdDecompressStream(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
 
     // lz decompress for the aligned (to PARALLEL_BYTE bytes) stream of input
     lzMultiByteDecompress<PARALLEL_BYTE, LZ_MAX_OFFSET, ap_uint<LMO_WIDTH>, ap_uint<LMO_WIDTH> >(
-        litLenStream, literalStream, offsetStream, matLenStream, outStream, endOfStream, sizeOutStream);
+        litLenStream, literalStream, offsetStream, matLenStream, outStream);
 }
 
 /**
@@ -1228,35 +1173,28 @@ void zstdDecompressStream(hls::stream<ap_uint<8 * PARALLEL_BYTE> >& inStream,
  */
 template <int PARALLEL_BYTE, int BLOCK_SIZE_KB, int LZ_MAX_OFFSET, int LMO_WIDTH = 15>
 void zstdDecompressCore(hls::stream<ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> >& inStream,
-                        hls::stream<ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> >& outStream,
-                        hls::stream<ap_axiu<64, 0, 0, 0> >& outSizeStream,
-                        uint64_t inputSize) {
+                        hls::stream<ap_axiu<8 * PARALLEL_BYTE, 0, 0, 0> >& outStream) {
     // Core function to use zstdDecompressStream module with zlib data movers
     // const values
     const uint16_t c_inStreamDepth = 128 / PARALLEL_BYTE; // 32 for PARALLEL_BYTE=4 and 16 for PARALLEL_BYTE=8
     const uint8_t c_minStreamDepth = 4;
     // internal streams
     hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > zstdCoreInStream("zstdCoreInStream");
-    hls::stream<ap_uint<(8 * PARALLEL_BYTE)> > outputStream("outputStream");
+    hls::stream<ap_uint<(8 * PARALLEL_BYTE) + PARALLEL_BYTE> > outputStream("outputStream");
     hls::stream<ap_uint<4> > inStrobe("inStrobe");
-    hls::stream<bool> endOfStream("endOfStream");
-    hls::stream<uint64_t> sizeOutStream("sizeOutStream");
 
 #pragma HLS STREAM variable = zstdCoreInStream depth = c_inStreamDepth
 #pragma HLS STREAM variable = outputStream depth = c_inStreamDepth
 #pragma HLS STREAM variable = inStrobe depth = c_inStreamDepth
-#pragma HLS STREAM variable = sizeOutStream depth = c_minStreamDepth
-#pragma HLS STREAM variable = endOfStream depth = c_inStreamDepth
 
 #pragma HLS dataflow
 
-    details::kStreamReadZstdDecomp<PARALLEL_BYTE>(inStream, zstdCoreInStream, inStrobe, inputSize);
+    details::kStreamReadZstdDecomp<PARALLEL_BYTE>(inStream, zstdCoreInStream, inStrobe);
 
-    zstdDecompressStream<PARALLEL_BYTE, BLOCK_SIZE_KB, LZ_MAX_OFFSET, LMO_WIDTH>(
-        zstdCoreInStream, inStrobe, outputStream, endOfStream, sizeOutStream);
+    zstdDecompressStream<PARALLEL_BYTE, BLOCK_SIZE_KB, LZ_MAX_OFFSET, LMO_WIDTH>(zstdCoreInStream, inStrobe,
+                                                                                 outputStream);
 
-    details::kStreamWriteZstdDecomp<8 * PARALLEL_BYTE>(outStream, outSizeStream, outputStream, endOfStream,
-                                                       sizeOutStream);
+    details::kStreamWriteZstdDecomp<8 * PARALLEL_BYTE>(outStream, outputStream);
 }
 
 } // compression

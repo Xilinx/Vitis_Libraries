@@ -1,4 +1,4 @@
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -185,38 +185,34 @@ VPP_FLAGS += -I$(XFLIB_DIR)/../security/L1/include
 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_FLAGS += --config $(CUR_DIR)/advanced.cfg \
-			 -DPARALLEL_BLOCK=$(PARALLEL_BLOCK) \
 			 -DMULTIPLE_BYTES=$(MULTIPLE_BYTES)
 
 VPP_DIRS = --temp_dir $(TEMP_DIR)/_x.$(TARGET) \
 		--report_dir $(CUR_DIR)/reports/_x.$(TARGET)
 
 # Linking flags
-VPP_LINK_FLAGS = --kernel_frequency 250 --optimize 2 --config $(CUR_DIR)/opts.cfg
+VPP_LINK_FLAGS = --kernel_frequency 250 --optimize 2 --config $(CUR_DIR)/connectivity.cfg
 
 VPP_LINK_DIRS = --temp_dir $(TEMP_DIR)/_build.$(TARGET)\
 				--report_dir $(CUR_DIR)/reports/_build.$(TARGET)/
 
 XCLBIN_FILE = $(BUILD_DIR)/xclbin_$(XDEVICE)_$(TARGET)/compress_decompress.xclbin
 
-XO_FILES_C = $(TEMP_DIR)/xilZlibCompressFull.xo \
-			 $(TEMP_DIR)/xilChecksum32.xo
+XO_FILES_C = $(TEMP_DIR)/xilGzipCompBlock.xo \
 		  	 
-XO_FILES_D = $(TEMP_DIR)/xilZlibDmReader.xo \
-		     $(TEMP_DIR)/xilZlibDmWriter.xo \
-		     $(TEMP_DIR)/xilDecompressFull.xo
+XO_FILES_D = $(TEMP_DIR)/xilGzipS2MM.xo \
+		     $(TEMP_DIR)/xilGzipMM2S.xo \
+		     $(TEMP_DIR)/xilDecompress.xo
 
-COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_compress_multi_engine_mm.cpp
-CHECKSUM_KERNEL_SRCS = $(KSRC_DIR)/checksum_mm.cpp
-DATAREADER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_rd.cpp
-DATAWRITER_KERNEL_SRCS = $(TB_DIR)/zlib_dm_multibyte_wr.cpp
-DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_parallelbyte_decompress_full.cpp
+COMPRESS_KERNEL_SRCS = $(KSRC_DIR)/gzip_compress_multicore_mm.cpp
+DATAREADER_KERNEL_SRCS = $(TB_DIR)/gzip_dm_s2mm.cpp
+DATAWRITER_KERNEL_SRCS = $(TB_DIR)/gzip_dm_mm2s.cpp
+DECOMPRESS_KERNEL_SRCS = $(KSRC_DIR)/zlib_decompress.cpp
 
-COMPRESS_KERNEL_NAME = xilZlibCompressFull
-CHECKSUM_KERNEL_NAME = xilChecksum32
-DATAREADER_KERNEL_NAME = xilZlibDmReader
-DATAWRITER_KERNEL_NAME = xilZlibDmWriter
-DECOMPRESS_KERNEL_NAME = xilDecompressFull
+COMPRESS_KERNEL_NAME = xilGzipCompBlock
+DATAREADER_KERNEL_NAME = xilGzipS2MM
+DATAWRITER_KERNEL_NAME = xilGzipMM2S
+DECOMPRESS_KERNEL_NAME = xilDecompress
 
 KERNELS += $(COMPRESS_KERNEL_NAME) $(CHECKSUM_KERNEL_NAME)
 KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERNEL_NAME)
@@ -226,31 +222,25 @@ KERNELS += $(DATAREADER_KERNEL_NAME) $(DATAWRITER_KERNEL_NAME) $(DECOMPRESS_KERN
 #                      kernel rules
 
 # Building kernel
-$(TEMP_DIR)/xilZlibCompressFull.xo: $(COMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilGzipCompBlock.xo: $(COMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling compression kernel..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(COMPRESS_KERNEL_NAME) \
 		-I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xilChecksum32.xo: $(CHECKSUM_KERNEL_SRCS) $(HLS_SRC_DIR)
-	@echo -e "----\nCompiling huffman kernel $*..."
-	mkdir -p $(TEMP_DIR)
-	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(CHECKSUM_KERNEL_NAME) \
-		-I'$(<D)' -o'$@' '$<'
-
-$(TEMP_DIR)/xilZlibDmReader.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilGzipS2MM.xo: $(DATAREADER_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling data reader kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAREADER_KERNEL_NAME) \
 	    -I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xilZlibDmWriter.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilGzipMM2S.xo: $(DATAWRITER_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling data writer kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DATAWRITER_KERNEL_NAME) \
 	    -I'$(<D)' -o'$@' '$<'
 
-$(TEMP_DIR)/xilDecompressFull.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
+$(TEMP_DIR)/xilDecompress.xo: $(DECOMPRESS_KERNEL_SRCS) $(HLS_SRC_DIR)
 	@echo -e "----\nCompiling decompression kernel $*..."
 	mkdir -p $(TEMP_DIR)
 	$(VPP) $(VPP_FLAGS) $(VPP_DIRS) -c -k $(DECOMPRESS_KERNEL_NAME) \

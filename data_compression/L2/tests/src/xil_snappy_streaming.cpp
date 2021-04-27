@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,6 @@
 #include "xil_snappy_streaming.hpp"
 #include <fcntl.h>  /* For O_RDWR */
 #include <unistd.h> /* For open(), creat() */
-#define BLOCK_SIZE 64
-#define KB 1024
-#define MAGIC_HEADER_SIZE 4
-#define MAGIC_BYTE_1 4
-#define MAGIC_BYTE_2 34
-#define MAGIC_BYTE_3 77
-#define MAGIC_BYTE_4 24
-#define FLG_BYTE 104
 
 int fd_p2p_c_in = 0;
 const int RESIDUE_4K = 4096;
@@ -503,7 +495,6 @@ uint32_t xfSnappyStreaming::decompressFull(uint8_t* in, uint8_t* out, uint32_t i
 #endif
     cl_mem_ext_ptr_t p2pInExt;
     char* p2pPtr = NULL;
-
     uint32_t inputSize4KMultiple = 0;
     if (enable_p2p) {
         // roundoff inputSize to 4K

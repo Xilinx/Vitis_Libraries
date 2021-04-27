@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,8 @@
 #
 
 VERBOSE := no
-ENABLE_SW_CHECKSUM := yes
 
 # Generate Verbose content
 ifeq ($(VERBOSE),yes)
 CXXFLAGS += -DVERBOSE
-endif
-
-# Enable Checksum
-ifeq ($(ENABLE_SW_CHECKSUM),yes)
-CXXFLAGS += -DENABLE_SW_CHECKSUM
 endif

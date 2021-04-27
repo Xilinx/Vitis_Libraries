@@ -42,7 +42,9 @@ Following is the usage of the executable:
 1. To execute single file for compression 	      : ``./build/xgzip.exe -sx ./build/xclbin_<xsa_name>_<TARGET mode>/xgzip.xclbin -c <input file_name>``
 2. To execute single file for decompression           : ``./build/xgzip.exe -sx ./build/xclbin_<xsa_name>_<TARGET mode>/xgzip.xclbin -d <compressed file_name>``
 3. To validate single file (compress & decompress)    : ``./build/xgzip.exe -sx ./build/xclbin_<xsa_name>_<TARGET mode>/xgzip.xclbin -t <input file_name>``
-4. To validate multiple files (compress & decompress) : ``./build/xgzip.exe -sx ./build/xclbin_<xsa_name>_<TARGET mode>/xgzip.xclbin -l <files.list>``
+4. To execute multiple files for compression          : ``./build/xgzip.exe -sx ./build/xclbin_<xsa_name>_<TARGET mode>/xgzip.xclbin -cfl <files.list>``
+5. To execute multiple files for decompression        : ``./build/xgzip.exe -sx ./build/xclbin_<xsa_name>_<TARGET mode>/xgzip.xclbin -dfl <files.list>``
+6. To validate multiple files (compress & decompress) : ``./build/xgzip.exe -sx ./build/xclbin_<xsa_name>_<TARGET mode>/xgzip.xclbin -l <files.list>``
 
 	- ``<files.list>``: Contains various file names with current path
 

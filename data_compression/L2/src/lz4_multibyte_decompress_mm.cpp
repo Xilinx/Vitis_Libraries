@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,12 @@
 #include "lz4_multibyte_decompress_mm.hpp"
 
 const int c_gmemBurstSize = 32;
-const int c_sizeStreamDepth = 8;
 const int historySize = MAX_OFFSET;
-const int buffDepth = (64 / PARALLEL_BYTE) / 2;
-const int buffSize = buffDepth * 1024;
 
 // namespace hw_decompress {
 
 void lz4CoreDec(hls::stream<ap_uint<PARALLEL_BYTE * 8> >& inStream,
-                hls::stream<ap_uint<PARALLEL_BYTE * 8> >& outStream,
-                hls::stream<bool>& endOfStream,
+                hls::stream<ap_uint<(PARALLEL_BYTE * 8) + 8> >& outStream,
                 const uint32_t _input_size) {
     uint32_t input_size = _input_size;
     hls::stream<uint32_t> decStreamSize;
@@ -43,8 +39,8 @@ void lz4CoreDec(hls::stream<ap_uint<PARALLEL_BYTE * 8> >& inStream,
     blockCompSize << input_size;
     blockCompSize << 0;
 #pragma HLS DATAFLOW
-    xf::compression::lz4CoreDecompressEngine<PARALLEL_BYTE, historySize>(inStream, outStream, endOfStream,
-                                                                         decStreamSize, blockCompSize);
+    xf::compression::lz4CoreDecompressEngine<PARALLEL_BYTE, historySize>(inStream, outStream, decStreamSize,
+                                                                         blockCompSize);
     {
         uint32_t outsize = decStreamSize.read(); // Dummy module to empty SizeStream
     }
@@ -61,25 +57,21 @@ void lz4Dec(const ap_uint<PARALLEL_BYTE * 8>* in,
     uint32_t rIdx = input_idx / c_wordSize;
 
     hls::stream<ap_uint<PARALLEL_BYTE * 8> > inStream;
-    hls::stream<ap_uint<PARALLEL_BYTE * 8> > outStream;
-    hls::stream<bool> endOfStream;
+    hls::stream<ap_uint<(PARALLEL_BYTE * 8) + 8> > outStream;
 #pragma HLS STREAM variable = inStream depth = c_gmemBurstSize
 #pragma HLS STREAM variable = outStream depth = c_gmemBurstSize
-#pragma HLS STREAM variable = endOfStream depth = c_gmemBurstSize
 #pragma HLS BIND_STORAGE variable = inStream type = FIFO impl = SRL
 #pragma HLS BIND_STORAGE variable = outStream type = FIFO impl = SRL
-#pragma HLS BIND_STORAGE variable = endOfStream type = FIFO impl = SRL
 
 #pragma HLS dataflow
     // Transfer data from global memory to kernel
     xf::compression::details::mm2sSimple<PARALLEL_BYTE * 8, GMEM_BURST_SIZE>(&(in[rIdx]), inStream, input_size);
 
     // LZ4 Single Instance
-    lz4CoreDec(inStream, outStream, endOfStream, input_size1);
+    lz4CoreDec(inStream, outStream, input_size1);
 
     // Transfer data from kernel to global memory
-    xf::compression::details::s2mmEosStreamSimple<PARALLEL_BYTE * 8, GMEM_BURST_SIZE>(&(out[rIdx]), outStream,
-                                                                                      endOfStream);
+    xf::compression::details::s2mmEosStreamSimple<PARALLEL_BYTE * 8, GMEM_BURST_SIZE>(&(out[rIdx]), outStream);
 }
 //} // namespace end
 

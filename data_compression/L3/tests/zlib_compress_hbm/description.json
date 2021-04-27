@@ -15,7 +15,7 @@
     ], 
     "launch": [
         {
-            "cmd_args": "-cx BUILD/compress.xclbin -c PROJECT/sample.txt", 
+            "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt", 
             "name": "generic launch for all flows"
         }
     ], 
@@ -25,7 +25,10 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/L3/src/zlib.cpp", 
+                "LIB_DIR/common/libs/compress/gzipOCLHost.cpp", 
+                "LIB_DIR/common/libs/compress/gzipBase.cpp", 
+                "LIB_DIR/common/libs/compress/gzipApp.cpp", 
+                "LIB_DIR/common/libs/compress/compressApp.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp", 
@@ -35,15 +38,13 @@
             "includepaths": [
                 "LIB_DIR/L3/include", 
                 "LIB_DIR/L1/include/hw",
-                "LIB_DIR/common/thirdParty/zlib-1.2.7"
+                "LIB_DIR/common/thirdParty/zlib-1.2.7",
+                "LIB_DIR/common/libs/compress/"
             ], 
             "options": "-O3 ", 
             "symbols": [
 
-                "C_COMPUTE_UNIT=12", 
-                "PARALLEL_BLOCK=4",
-                "USE_SINGLE_KERNEL_ZLIBC",
-                "ENABLE_HW_CHECKSUM" 
+                "C_COMPUTE_UNIT=6" 
             ]
         }
     }, 
@@ -57,9 +58,6 @@
                 "LIB_DIR/L2/tests/src/", 
                 "LIB_DIR/../security/L1/include"
             ], 
-            "symbols": [
-                "PARALLEL_BLOCK=4"
-            ], 
             "clflags": [
                 "--config PROJECT/advanced.cfg"
             ]
@@ -71,9 +69,9 @@
             "ldclflags": "--kernel_frequency 250", 
             "accelerators": [
                 {
-                    "name": "xilZlibCompressFull", 
-                    "location": "LIB_DIR/L2/src/zlib_compress_multi_engine_mm.cpp", 
-                    "num_compute_units": "12", 
+                    "name": "xilGzipCompBlock", 
+                    "location": "LIB_DIR/L2/src/gzip_compress_multicore_mm.cpp", 
+                    "num_compute_units": "6", 
                     "compute_units": [
                         {
                             "slr": "SLR0", 
@@ -89,7 +87,11 @@
                                 {
                                     "name": "compressd_size", 
                                     "memory": "HBM[0:31]"
-                                }
+                                },
+                                {
+                                    "name": "checksumData", 
+                                    "memory": "HBM[0:31]"
+                                } 
                             ]
                         }, 
                         {
@@ -106,7 +108,11 @@
                                 {
                                     "name": "compressd_size", 
                                     "memory": "HBM[0:31]"
-                                }
+                                },
+                                {
+                                    "name": "checksumData", 
+                                    "memory": "HBM[0:31]"
+                                } 
                             ]
                         }, 
                         {
@@ -123,58 +129,11 @@
                                 {
                                     "name": "compressd_size", 
                                     "memory": "HBM[0:31]"
-                                }
-                            ]
-                        }, 
-                        {
-                            "slr": "SLR0", 
-                            "arguments": [
+                                },
                                 {
-                                    "name": "in", 
+                                    "name": "checksumData", 
                                     "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "HBM[0:31]"
-                                }
-                            ]
-                        }, 
-                        {
-                            "slr": "SLR0", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "HBM[0:31]"
-                                }
-                            ]
-                        }, 
-                        {
-                            "slr": "SLR0", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "HBM[0:31]"
-                                }
+                                } 
                             ]
                         }, 
                         {
@@ -191,7 +150,11 @@
                                 {
                                     "name": "compressd_size", 
                                     "memory": "HBM[0:31]"
-                                }
+                                },
+                                {
+                                    "name": "checksumData", 
+                                    "memory": "HBM[0:31]"
+                                } 
                             ]
                         }, 
                         {
@@ -208,7 +171,11 @@
                                 {
                                     "name": "compressd_size", 
                                     "memory": "HBM[0:31]"
-                                }
+                                },
+                                {
+                                    "name": "checksumData", 
+                                    "memory": "HBM[0:31]"
+                                } 
                             ]
                         }, 
                         {
@@ -225,99 +192,21 @@
                                 {
                                     "name": "compressd_size", 
                                     "memory": "HBM[0:31]"
-                                }
+                                },
+                                {
+                                    "name": "checksumData", 
+                                    "memory": "HBM[0:31]"
+                                } 
                             ]
-                        }, 
-                        {
-                            "slr": "SLR1", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "HBM[0:31]"
-                                }
-                            ]
-                        },
-                        {
-                            "slr": "SLR1", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "HBM[0:31]"
-                                }
-                            ]
-                        },
-                        {
-                            "slr": "SLR1", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "HBM[0:31]"
-                                }
-                            ]
-                        }
+                        } 
                     ]
-                }, 
-                {
-                    "name": "xilChecksum32", 
-                    "location": "LIB_DIR/L2/src/checksum_mm.cpp", 
-                    "num_compute_units": "2", 
-                    "compute_units": [
-                        {
-                            "slr": "SLR0", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "initData", 
-                                    "memory": "HBM[0:31]"
-                                }
-                            ]
-                        }, 
-                        {
-                            "slr": "SLR0", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[0:31]"
-                                }, 
-                                {
-                                    "name": "initData", 
-                                    "memory": "HBM[0:31]"
-                                }
-                            ]
-                        }
-                    ]
-                }
+                } 
             ]
         }
     ], 
-    "output_files": "sample.txt.*", 
+    "output_files": [
+          "sample.txt.*"
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [

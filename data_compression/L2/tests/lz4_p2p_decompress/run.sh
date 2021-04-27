@@ -11,9 +11,9 @@ then
     cmd1=$(diff sample.txt sample.txt.lz4.*)
     if [ $? -eq 0 ]
      then
-        echo "files are the same"
+        echo "PASS: files are the same"
     else
-        echo "files are different"
+        echo "ERROR: files are different"
         echo "$cmd1"
    fi     
 fi

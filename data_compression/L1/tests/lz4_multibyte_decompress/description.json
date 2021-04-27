@@ -8,6 +8,13 @@
     "platform_blacklist": [], 
     "part_whitelist": [], 
     "part_blacklist": [], 
+    "QoR_golden": {
+        "VV_LUT": "5370",
+        "VV_FF": "4159",
+        "VV_BRAM": "0",
+        "VV_URAM": "4",
+        "VV_AchievedClockPeriod": "3.357"
+    },
     "project": "lz4_decompress_test", 
     "solution": "sol1", 
     "clock": "3.3", 

@@ -61,7 +61,7 @@
     "containers": [
         {
             "name": "dualcore_decompress_streaming", 
-            "ldclflags": "--config PROJECT/decompress.ini", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
                     "name": "xilSnappyDecompressStream", 

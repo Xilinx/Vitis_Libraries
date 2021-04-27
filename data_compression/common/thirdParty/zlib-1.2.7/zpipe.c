@@ -38,7 +38,7 @@
    level is supplied, Z_VERSION_ERROR if the version of zlib.h and the
    version of the library linked do not match, or Z_ERRNO if there is
    an error reading or writing the files. */
-int def(uint8_t *inVec, uint8_t *outVec, size_t input_size, uint64_t *csize, uint16_t num_iter, int level) {
+int def(uint8_t* inVec, uint8_t* outVec, size_t input_size, uint64_t* csize, uint16_t num_iter, int level) {
     int ret, flush;
     unsigned have;
     z_stream strm;
@@ -54,7 +54,7 @@ int def(uint8_t *inVec, uint8_t *outVec, size_t input_size, uint64_t *csize, uin
     strm.opaque = Z_NULL;
     ret = deflateInit(&strm, level);
     if (ret != Z_OK) return ret;
-    
+
     for (int i = 0; i < num_iter; i++) {
         inIdx = 0;
         outIdx = 0;
@@ -91,7 +91,7 @@ int def(uint8_t *inVec, uint8_t *outVec, size_t input_size, uint64_t *csize, uin
 
     /* close the stream pointer */
     (void)deflateEnd(&strm);
-    
+
     // Final output size
     *csize = outIdx;
 
@@ -104,12 +104,15 @@ int def(uint8_t *inVec, uint8_t *outVec, size_t input_size, uint64_t *csize, uin
    invalid or incomplete, Z_VERSION_ERROR if the version of zlib.h and
    the version of the library linked do not match, or Z_ERRNO if there
    is an error reading or writing the files. */
-int inf(FILE* source, FILE* dest) {
+int inf(uint8_t* inVec, uint8_t* outVec, size_t input_size, uint64_t* csize, uint16_t numiter) {
     int ret;
     unsigned have;
     z_stream strm;
     unsigned char in[CHUNK];
     unsigned char out[CHUNK];
+
+    uint64_t inIdx = 0;
+    uint64_t outIdx = 0;
 
     /* allocate inflate state */
     strm.zalloc = Z_NULL;
@@ -120,39 +123,40 @@ int inf(FILE* source, FILE* dest) {
     ret = inflateInit(&strm);
     if (ret != Z_OK) return ret;
 
-    /* decompress until deflate stream ends or end of file */
-    do {
-        strm.avail_in = fread(in, 1, CHUNK, source);
-        if (ferror(source)) {
-            (void)inflateEnd(&strm);
-            return Z_ERRNO;
-        }
-        if (strm.avail_in == 0) break;
-        strm.next_in = in;
-
-        /* run inflate() on input until output buffer not full */
+    for (int i = 0; i < numiter; i++) {
+        inIdx = 0;
+        outIdx = 0;
         do {
-            strm.avail_out = CHUNK;
-            strm.next_out = out;
-            ret = inflate(&strm, Z_NO_FLUSH);
-            assert(ret != Z_STREAM_ERROR); /* state not clobbered */
-            switch (ret) {
-                case Z_NEED_DICT:
-                    ret = Z_DATA_ERROR; /* and fall through */
-                case Z_DATA_ERROR:
-                case Z_MEM_ERROR:
-                    (void)inflateEnd(&strm);
-                    return ret;
-            }
-            have = CHUNK - strm.avail_out;
-            if (fwrite(out, 1, have, dest) != have || ferror(dest)) {
-                (void)inflateEnd(&strm);
-                return Z_ERRNO;
-            }
-        } while (strm.avail_out == 0);
+            uint64_t chunk = ((inIdx + CHUNK) >= input_size) ? (input_size - inIdx) : CHUNK;
+            memcpy(&in, &inVec[inIdx], chunk);
+            inIdx += chunk;
+            strm.avail_in = chunk;
 
-        /* done when inflate() says it's done */
-    } while (ret != Z_STREAM_END);
+            if (strm.avail_in == 0) break;
+            strm.next_in = in;
+
+            do {
+                strm.avail_out = CHUNK;
+                strm.next_out = out;
+                ret = inflate(&strm, Z_NO_FLUSH);
+                assert(ret != Z_STREAM_ERROR);
+
+                switch (ret) {
+                    case Z_NEED_DICT:
+                        ret = Z_DATA_ERROR;
+                    case Z_DATA_ERROR:
+                    case Z_MEM_ERROR:
+                        (void)inflateEnd(&strm);
+                        return ret;
+                }
+                have = CHUNK - strm.avail_out;
+                memcpy(&outVec[outIdx], &out, have);
+                outIdx += have;
+            } while (strm.avail_out == 0);
+        } while (ret != Z_STREAM_END);
+    }
+
+    *csize = outIdx;
 
     /* clean up and return */
     (void)inflateEnd(&strm);

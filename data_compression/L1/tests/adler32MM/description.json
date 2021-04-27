@@ -7,7 +7,14 @@
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
-    "part_blacklist": [], 
+    "part_blacklist": [],
+    "QoR_golden": {
+        "VV_LUT": "3140",
+        "VV_FF": "5326",
+        "VV_BRAM": "8",
+        "VV_URAM": "0",
+        "VV_AchievedClockPeriod": "3.002"
+    }, 
     "project": "adler32MM", 
     "solution": "sol1", 
     "clock": "3.3", 

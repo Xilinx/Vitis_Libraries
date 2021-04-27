@@ -25,7 +25,7 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/L3/src/zlib_old.cpp", 
+                "LIB_DIR/L3/src/zlib.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
                 "LIB_DIR/common/libs/logger/logger.cpp",
@@ -39,12 +39,9 @@
             ], 
             "options": "-O3 ", 
             "symbols": [
-                "PARALLEL_BLOCK=8", 
+                "PARALLEL_BLOCK=4", 
                 "C_COMPUTE_UNIT=2", 
-                "H_COMPUTE_UNIT=2", 
-                "D_COMPUTE_UNIT=9", 
-                "DOVERLAP_HOST_DEVICE", 
-                "GZIP_MODE"
+                "D_COMPUTE_UNIT=9" 
             ]
         }
     }, 
@@ -55,12 +52,11 @@
         ], 
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/tests/src/"
+                "LIB_DIR/L2/tests/src/",
+                "LIB_DIR/../security/L1/include"
             ], 
             "symbols": [
-                "PARALLEL_BLOCK=8", 
-                "MULTIPLE_BYTES=8", 
-                "GZIP_MODE"
+                "MULTIPLE_BYTES=8" 
             ], 
             "clflags": [
                 "--config PROJECT/advanced.cfg"
@@ -70,11 +66,11 @@
     "containers": [
         {
             "name": "compress_decompress", 
-            "ldclflags": "--config PROJECT/opts.cfg", 
+            "ldclflags": "--config PROJECT/connectivity.cfg", 
             "accelerators": [
                 {
-                    "name": "xilLz77Compress", 
-                    "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp", 
+                    "name": "xilGzipCompBlock", 
+                    "location": "LIB_DIR/L2/src/gzip_compress_multicore_mm.cpp", 
                     "num_compute_units": "2", 
                     "compute_units": [
                         {
@@ -82,28 +78,20 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[0]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[0]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[0]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
-                                    "name": "in_block_size", 
-                                    "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "dyn_ltree_freq", 
-                                    "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "dyn_dtree_freq", 
-                                    "memory": "HBM[0]"
-                                }
+                                    "name": "checksumData", 
+                                    "memory": "HBM[0:31]"
+                                } 
                             ]
                         }, 
                         {
@@ -111,100 +99,28 @@
                             "arguments": [
                                 {
                                     "name": "in", 
-                                    "memory": "HBM[1]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "out", 
-                                    "memory": "HBM[1]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
                                     "name": "compressd_size", 
-                                    "memory": "HBM[1]"
+                                    "memory": "HBM[0:31]"
                                 }, 
                                 {
-                                    "name": "in_block_size", 
-                                    "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "dyn_ltree_freq", 
-                                    "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "dyn_dtree_freq", 
-                                    "memory": "HBM[1]"
-                                }
+                                    "name": "checksumData", 
+                                    "memory": "HBM[0:31]"
+                                } 
+                                
                             ]
                         }
                     ]
                 }, 
                 {
-                    "name": "xilHuffmanKernel", 
-                    "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp", 
-                    "num_compute_units": "2", 
-                    "compute_units": [
-                        {
-                            "slr": "SLR0", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "in_block_size", 
-                                    "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "dyn_ltree_freq", 
-                                    "memory": "HBM[0]"
-                                }, 
-                                {
-                                    "name": "dyn_dtree_freq", 
-                                    "memory": "HBM[0]"
-                                }
-                            ]
-                        }, 
-                        {
-                            "slr": "SLR1", 
-                            "arguments": [
-                                {
-                                    "name": "in", 
-                                    "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "out", 
-                                    "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "in_block_size", 
-                                    "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "compressd_size", 
-                                    "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "dyn_ltree_freq", 
-                                    "memory": "HBM[1]"
-                                }, 
-                                {
-                                    "name": "dyn_dtree_freq", 
-                                    "memory": "HBM[1]"
-                                }
-                            ]
-                        }
-                    ]
-                }, 
-                {
-                    "name": "xilZlibDmReader", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_rd.cpp", 
+                    "name": "xilGzipS2MM", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_s2mm.cpp", 
                     "num_compute_units": "9", 
                     "compute_units": [
                         {
@@ -363,8 +279,8 @@
                     ]
                 }, 
                 {
-                    "name": "xilZlibDmWriter", 
-                    "location": "LIB_DIR/L2/tests/src/zlib_dm_multibyte_wr.cpp", 
+                    "name": "xilGzipMM2S", 
+                    "location": "LIB_DIR/L2/tests/src/gzip_dm_mm2s.cpp", 
                     "num_compute_units": "9", 
                     "compute_units": [
                         {
@@ -451,8 +367,8 @@
                     ]
                 }, 
                 {
-                    "name": "xilDecompressFull", 
-                    "location": "LIB_DIR/L2/src/zlib_parallelbyte_decompress_full.cpp", 
+                    "name": "xilDecompress", 
+                    "location": "LIB_DIR/L2/src/zlib_decompress.cpp", 
                     "num_compute_units": "9", 
                     "compute_units": [
                         {
@@ -487,7 +403,9 @@
             ]
         }
     ], 
-    "output_files": "sample.txt.*", 
+    "output_files": [
+           "sample.txt.*"
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [
