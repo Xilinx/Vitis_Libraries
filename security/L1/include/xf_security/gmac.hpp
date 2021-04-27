@@ -453,12 +453,12 @@ void gmacTop(hls::stream<ap_uint<128> >& dataStrm,
     // the hash subkey
     hls::stream<ap_uint<128> > HStrm("HStrm");
 #pragma HLS RESOURCE variable = HStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = HStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = HStrm depth = 32
 
     // the E(K,Y0)
     hls::stream<ap_uint<128> > EKY0Strm("EKY0Strm");
 #pragma HLS RESOURCE variable = EKY0Strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = EKY0Strm depth = 32 dim = 1
+#pragma HLS STREAM variable = EKY0Strm depth = 32
 
     preGMAC<_keyWidth>(cipherkeyStrm, IVStrm, HStrm, EKY0Strm);
 

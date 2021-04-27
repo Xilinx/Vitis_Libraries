@@ -118,12 +118,12 @@ ap_uint<N> productMod(ap_uint<N> opA, ap_uint<N> opB, ap_uint<N> opM) {
     ap_uint<N + 1> tmp = 0;
     for (int i = N - 1; i >= 0; i--) {
         tmp <<= 1;
-        if (tmp > opM) {
+        if (tmp >= opM) {
             tmp -= opM;
         }
         if (opB[i] == 1) {
             tmp += opA;
-            if (tmp > opM) {
+            if (tmp >= opM) {
                 tmp -= opM;
             }
         }

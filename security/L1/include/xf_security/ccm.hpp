@@ -881,45 +881,45 @@ void aesCcmEncrypt(
     hls::stream<ap_uint<64> > lenPldStrm2("lenPldStrm2");
     hls::stream<ap_uint<64> > lenPldStrm3("lenPldStrm3");
 #pragma HLS RESOURCE variable = lenPldStrm1 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = lenPldStrm1 depth = 32 dim = 1
+#pragma HLS STREAM variable = lenPldStrm1 depth = 32
 #pragma HLS RESOURCE variable = lenPldStrm2 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = lenPldStrm2 depth = 32 dim = 1
+#pragma HLS STREAM variable = lenPldStrm2 depth = 32
 #pragma HLS RESOURCE variable = lenPldStrm3 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = lenPldStrm3 depth = 32 dim = 1
+#pragma HLS STREAM variable = lenPldStrm3 depth = 32
 
     hls::stream<bool> endLenStrm1("endLenStrm1");
     hls::stream<bool> endLenStrm2("endLenStrm2");
     hls::stream<bool> endLenStrm3("endLenStrm3");
 #pragma HLS RESOURCE variable = endLenStrm1 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = endLenStrm1 depth = 32 dim = 1
+#pragma HLS STREAM variable = endLenStrm1 depth = 32
 #pragma HLS RESOURCE variable = endLenStrm2 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = endLenStrm2 depth = 32 dim = 1
+#pragma HLS STREAM variable = endLenStrm2 depth = 32
 #pragma HLS RESOURCE variable = endLenStrm3 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = endLenStrm3 depth = 32 dim = 1
+#pragma HLS STREAM variable = endLenStrm3 depth = 32
 
     hls::stream<ap_uint<128> > blockStrm("blockStrm");
 #pragma HLS RESOURCE variable = blockStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = blockStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = blockStrm depth = 32
 
     hls::stream<ap_uint<64> > outLenADStrm("outLenADStrm");
 #pragma HLS RESOURCE variable = outLenADStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = outLenADStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = outLenADStrm depth = 32
 
     hls::stream<ap_uint<8 * (15 - _q)> > outNonceStrm("outNonceStrm");
 #pragma HLS RESOURCE variable = outNonceStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = outNonceStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = outNonceStrm depth = 32
 
     hls::stream<ap_uint<128> > outPayloadStrm("outPayloadStrm");
 #pragma HLS RESOURCE variable = outPayloadStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = outPayloadStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = outPayloadStrm depth = 32
 
     hls::stream<ap_uint<_keyWidth> > outCipherkeyStrm("outCipherkeyStrm");
 #pragma HLS RESOURCE variable = outCipherkeyStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = outCipherkeyStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = outCipherkeyStrm depth = 32
 
     hls::stream<ap_uint<128> > S0Strm("S0Strm");
 #pragma HLS RESOURCE variable = S0Strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = S0Strm depth = 32 dim = 1
+#pragma HLS STREAM variable = S0Strm depth = 32
 
     dupStrm<64>(lenPldStrm, endLenStrm, lenPldStrm1, endLenStrm1, lenPldStrm2, endLenStrm2, lenPldStrm3, endLenStrm3);
 
@@ -981,45 +981,45 @@ void aesCcmDecrypt(
     hls::stream<ap_uint<64> > lenPldStrm2("lenPldStrm2");
     hls::stream<ap_uint<64> > lenPldStrm3("lenPldStrm3");
 #pragma HLS RESOURCE variable = lenPldStrm1 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = lenPldStrm1 depth = 32 dim = 1
+#pragma HLS STREAM variable = lenPldStrm1 depth = 32
 #pragma HLS RESOURCE variable = lenPldStrm2 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = lenPldStrm2 depth = 32 dim = 1
+#pragma HLS STREAM variable = lenPldStrm2 depth = 32
 #pragma HLS RESOURCE variable = lenPldStrm3 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = lenPldStrm3 depth = 32 dim = 1
+#pragma HLS STREAM variable = lenPldStrm3 depth = 32
 
     hls::stream<bool> endLenStrm1("endLenStrm1");
     hls::stream<bool> endLenStrm2("endLenStrm2");
     hls::stream<bool> endLenStrm3("endLenStrm3");
 #pragma HLS RESOURCE variable = endLenStrm1 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = endLenStrm1 depth = 32 dim = 1
+#pragma HLS STREAM variable = endLenStrm1 depth = 32
 #pragma HLS RESOURCE variable = endLenStrm2 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = endLenStrm2 depth = 32 dim = 1
+#pragma HLS STREAM variable = endLenStrm2 depth = 32
 #pragma HLS RESOURCE variable = endLenStrm3 core = FIFO_LUTRAM
-#pragma HLS STREAM variable = endLenStrm3 depth = 32 dim = 1
+#pragma HLS STREAM variable = endLenStrm3 depth = 32
 
     hls::stream<ap_uint<128> > blockStrm("blockStrm");
 #pragma HLS RESOURCE variable = blockStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = blockStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = blockStrm depth = 32
 
     hls::stream<ap_uint<64> > outLenADStrm("outLenADStrm");
 #pragma HLS RESOURCE variable = outLenADStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = outLenADStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = outLenADStrm depth = 32
 
     hls::stream<ap_uint<8 * (15 - _q)> > outNonceStrm("outNonceStrm");
 #pragma HLS RESOURCE variable = outNonceStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = outNonceStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = outNonceStrm depth = 32
 
     hls::stream<ap_uint<128> > outPayloadStrm("outPayloadStrm");
 #pragma HLS RESOURCE variable = outPayloadStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = outPayloadStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = outPayloadStrm depth = 32
 
     hls::stream<ap_uint<_keyWidth> > outCipherkeyStrm("outCipherkeyStrm");
 #pragma HLS RESOURCE variable = outCipherkeyStrm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = outCipherkeyStrm depth = 32 dim = 1
+#pragma HLS STREAM variable = outCipherkeyStrm depth = 32
 
     hls::stream<ap_uint<128> > S0Strm("S0Strm");
 #pragma HLS RESOURCE variable = S0Strm core = FIFO_LUTRAM
-#pragma HLS STREAM variable = S0Strm depth = 32 dim = 1
+#pragma HLS STREAM variable = S0Strm depth = 32
 
     dupStrm<64>(lenPldStrm, endLenStrm, lenPldStrm1, endLenStrm1, lenPldStrm2, endLenStrm2, lenPldStrm3, endLenStrm3);
 
