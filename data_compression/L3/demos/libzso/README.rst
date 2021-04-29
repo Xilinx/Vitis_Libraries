@@ -41,11 +41,9 @@ Deployment
 
 **#2**  ``./scripts/xrmxclbin.sh <number of devices>`` --> XRM loads XCLBIN to devices as per user input
  
-**#3** Build libz.so (Shared Object file) - ``make lib ENABLE_XRM=yes`` --> Current directory contains libz.so.1.2.7
+**#3** Build libz.so (Shared Object file) - ``make lib ENABLE_INFLATE_XRM=yes`` --> Current directory contains libz.so.1.2.7
 
-**#4.a** Build xzlib (Host Executable for Hadoop (Compress-FPGA, Decompress-CPU) - ``make host ENABLE_XRM=yes HADOOP=yes`` --> ./build directory contains ``xzlib`` executable
-
-**#4.b** Build xzlib (Host Executable (Compress/Decompress - FPGA)) - ``make host ENABLE_XRM=yes`` --> ./build directory contains ``xzlib`` executable
+**#4** Build xzlib (Host Executable ) - ``make host `` --> ./build directory contains ``xzlib`` executable
 
 Note: By default host executable is built for both compress/decompress on FPGA.
 

@@ -1,55 +1,219 @@
 #include "zlibDriver.hpp"
+#include <time.h>
+
+#ifdef ENABLE_INFLATE_XRM
+
+// Provide XRM CU Instance
+xrmStruct* zlibDriver::getXrmCuInstance(z_streamp strm, const std::string& kernel_name) {
+    xrmStruct* ret;
+    auto iterator = this->m_xrmMapObj.find(strm);
+    if (iterator != this->m_xrmMapObj.end()) {
+        // Return if it exists
+        ret = iterator->second;
+    } else {
+        // Create new xrmData structure for
+        // current stream pointer
+        xrmStruct* xrmData = new xrmStruct;
+        if (xrmData == nullptr) {
+            ret = nullptr;
+        } else {
+            // Insert the stream,xrmdataobj key/value pairs in map
+            this->m_xrmMapObj.insert(std::pair<z_streamp, xrmStruct*>(strm, xrmData));
+
+            //// Query XRM
+            memset(&(xrmData->cuProp), 0, sizeof(xrmCuProperty));
+            memset(&(xrmData->cuRes), 0, sizeof(xrmCuResource));
+
+            // Assign kernel name to look for CU allocation
+            strncpy(xrmData->cuProp.kernelName, kernel_name.c_str(), kernel_name.size() + 1);
+            strcpy(xrmData->cuProp.kernelAlias, "");
+
+            // Open device in exclusive mode
+            xrmData->cuProp.devExcl = false;
+            // % of load
+            xrmData->cuProp.requestLoad = 100;
+            xrmData->cuProp.poolId = 0;
+
+            // Block until get exclusive access to the CU
+            int err = xrmCuBlockingAlloc(this->m_ctx, &(xrmData->cuProp), 2, &(xrmData->cuRes));
+            if (err != 0) {
+                std::cout << "xrmCuAlloc: Failed to allocate CU \n" << std::endl;
+#if (VERBOSE_LEVEL >= 1)
+                std::cout << "xrmCuAlloc: Failed to allocate CU \n" << std::endl;
+#endif
+                ret = nullptr;
+            } else {
+                ret = xrmData;
+            }
+        }
+    }
+    return ret;
+}
+#endif
+
+void zlibDriver::releaseZlibCU(z_streamp strm) {
+    if (this->m_xlz) {
+        delete this->m_xlz;
+        this->m_xlz = nullptr;
+    }
+
+#ifdef ENABLE_INFLATE_XRM
+    // XRM iterator
+    auto xrmIter = this->m_xrmMapObj.find(strm);
+    if (xrmIter != this->m_xrmMapObj.end()) {
+        if (this->m_ctx != nullptr) {
+            xrmCuRelease(this->m_ctx, &(xrmIter->second->cuRes));
+        }
+        delete xrmIter->second;
+        // Remove <key,value> pair from map
+        this->m_xrmMapObj.erase(xrmIter);
+    }
+#endif
+}
+
+bool zlibDriver::allocateCU(z_streamp strm) {
+    std::string kernel;
+    bool ret = false;
+    bool enable_xrm = false;
+    if (this->m_flow == XILINX_DEFLATE)
+        kernel = compress_kernel_names[1];
+    else
+        kernel = stream_decompress_kernel_name[2];
+
+    if (this->m_flow == XILINX_INFLATE) {
+#ifdef ENABLE_INFLATE_XRM
+        enable_xrm = true;
+#endif
+    }
+
+#ifdef ENABLE_INFLATE_XRM
+    if (enable_xrm) {
+        // Created relavant XRM object
+        xrmStruct* xrmData = getXrmCuInstance(strm, kernel);
+        if (xrmData == nullptr) {
+            ret = true;
+        } else {
+            this->m_kernel_instance = xrmData->cuRes.instanceName;
+            this->m_deviceid = this->m_ndevinfo[xrmData->cuRes.deviceId];
+            this->m_bank = xrmData->cuRes.cuId % C_COMPUTE_UNIT;
+            this->m_context = this->m_contexts[xrmData->cuRes.deviceId];
+            this->m_program = this->m_programs[xrmData->cuRes.deviceId];
+            //        this->m_cuid = (this->m_kernel_instance[this->m_kernel_instance.size() - 1] - '0') - 1;
+        }
+    } else {
+#endif
+        srand(time(0));
+        std::string nKernel = std::to_string(1 + (rand() % D_COMPUTE_UNIT));
+        if (this->m_flow == XILINX_INFLATE) {
+            this->m_kernel_instance = kernel + "_" + nKernel;
+        } else {
+            this->m_kernel_instance = kernel;
+        }
+        std::random_device randDevice;
+        std::uniform_int_distribution<> range(0, (this->m_ndevinfo.size() - 1));
+        uint8_t devNo = range(randDevice);
+        this->m_context = this->m_contexts[devNo];
+        this->m_program = this->m_programs[devNo];
+        this->m_deviceid = this->m_ndevinfo[devNo];
+#ifdef ENABLE_INFLATE_XRM
+    }
+#endif
+    return ret;
+}
+
 // Constructor
 zlibDriver::zlibDriver(z_streamp strm,
-                       const std::string& instance_name,
-                       const cl::Device& device_id,
                        const cl_context_properties& platform_id,
                        const std::string& u50_xclbin,
                        const int flow,
-                       const int bank // useful only for xrm case, random flow picks bank randomly
-                       ) {
-    m_kernel_instance = instance_name;
-    m_u50_xclbin = u50_xclbin;
-    m_flow = flow;
-    m_cuid = (instance_name[instance_name.size() - 1] - '0') - 1;
-    // Update stream pointer infor
-    struct_update(strm, flow);
-    m_deflateOutput = new unsigned char[2 * m_bufSize];
-    m_deflateInput = new unsigned char[2 * m_bufSize];
+                       std::vector<cl::Device>& devices,
+                       std::vector<cl::Context*>& deviceContext,
+                       std::vector<cl::Program*>& deviceProgram,
+                       bool _init) {
+    this->m_ndevinfo = devices;
+    this->m_platformid = platform_id;
+    this->m_u50_xclbin = u50_xclbin;
+    this->m_flow = flow;
+    this->m_contexts = deviceContext;
+    this->m_programs = deviceProgram;
 
-    bool err;
-    err = this->getZlibInstance(m_kernel_instance, device_id, platform_id, bank);
-    if (err) this->m_status = true;
+    // Update stream pointer
+    struct_update(strm, flow);
+    if (_init) init(strm, flow);
+}
+
+void zlibDriver::init(z_streamp strm, const int flow) {
+    if (initialized) return;
+    initialized = true;
+    if (flow == XILINX_DEFLATE) {
+        // Deflate output / input size
+        this->m_deflateOutput = new unsigned char[2 * this->m_bufSize];
+        this->m_deflateInput = new unsigned char[2 * this->m_bufSize];
+    } else {
+        this->m_inflateOutput = new unsigned char[2 * m_bufSize];
+        this->m_inflateInput = new unsigned char[2 * m_bufSize];
+    }
+
+#ifdef ENABLE_INFLATE_XRM
+    // XRM Context Creation
+    this->m_ctx = (xrmContext*)xrmCreateContext(XRM_API_VERSION_1);
+    if (this->m_ctx == nullptr) {
+#if (VERBOSE_LEVEL >= 1)
+        std::cout << "Failed to create XRM Context " << std::endl;
+#endif
+        this->m_status = true;
+    } else {
+#endif
+
+        bool err;
+        err = this->allocateCU(strm);
+        if (err) this->m_status = true;
+        err = this->getZlibInstance();
+        if (err) this->m_status = true;
+
+#ifdef ENABLE_INFLATE_XRM
+    }
+#endif
 }
 
 // Destructor
 zlibDriver::~zlibDriver() {
-    if (m_deflateOutput) {
+    if (this->m_deflateOutput != nullptr) {
         delete m_deflateOutput;
     }
 
-    if (m_deflateInput) {
+    if (this->m_deflateInput != nullptr) {
         delete m_deflateInput;
     }
 
-    if (m_xlz) {
-        delete m_xlz;
+    if (this->m_inflateOutput != nullptr) {
+        delete m_inflateOutput;
     }
+
+    if (this->m_inflateInput != nullptr) {
+        delete m_inflateInput;
+    }
+#ifdef ENABLE_INFLATE_XRM
+    if (this->m_ctx != nullptr) {
+        delete m_ctx;
+        this->m_ctx = nullptr;
+    }
+#endif
 }
 
 // Structure update
 void zlibDriver::struct_update(z_streamp strm, int flow) {
-    m_info.in_buf = strm->next_in;
-    m_info.out_buf = strm->next_out;
-    m_info.input_size = strm->avail_in;
-    m_info.output_size = strm->avail_out;
-    m_info.adler32 = strm->adler;
+    this->m_info.in_buf = strm->next_in;
+    this->m_info.out_buf = strm->next_out;
+    this->m_info.input_size = strm->avail_in;
+    this->m_info.output_size = strm->avail_out;
+    this->m_info.adler32 = strm->adler;
     if (flow == XILINX_DEFLATE) {
-        m_info.level = strm->state->level;
-        m_info.strategy = strm->state->strategy;
-        m_info.window_bits = strm->state->w_bits;
+        this->m_info.level = strm->state->level;
+        this->m_info.strategy = strm->state->strategy;
+        this->m_info.window_bits = strm->state->w_bits;
     }
-    m_flow = flow;
+    this->m_flow = flow;
 }
 
 // Get method for status
@@ -58,86 +222,198 @@ bool zlibDriver::getStatus(void) {
 }
 
 // Proivde xfZlib object
-bool zlibDriver::getZlibInstance(const std::string& instance_name,
-                                 const cl::Device& device_id,
-                                 const cl_context_properties& platform_id,
-                                 const int bank) {
-    if (m_flow == XILINX_DEFLATE) {
-        // If not create it
-        m_xlz = new xfZlib(m_u50_xclbin.c_str(), COMP_ONLY, device_id, platform_id, XILINX_ZLIB, bank);
-        if (m_xlz->error_code()) {
-            return 1;
+bool zlibDriver::getZlibInstance(void) {
+    bool ret = false;
+    if (this->m_flow == XILINX_DEFLATE) {
+        if (this->m_xlz == nullptr) {
+#ifdef ENABLE_DEFLATE_XRM
+            this->m_xlz = new xfZlib(this->m_u50_xclbin.c_str(), false, COMP_ONLY, this->m_context, this->m_program,
+                                     this->m_deviceid, XILINX_ZLIB, this->m_bank);
+#else
+            this->m_xlz = new xfZlib(this->m_u50_xclbin.c_str(), false, COMP_ONLY, this->m_context, this->m_program,
+                                     this->m_deviceid, XILINX_ZLIB, this->m_bank);
+#endif
+            if (this->m_xlz->error_code()) {
+                ret = true;
+            }
         }
-    } else if (m_flow == XILINX_INFLATE) {
+    } else if (this->m_flow == XILINX_INFLATE) {
         // If not create it
-        m_xlz = new xfZlib(m_u50_xclbin.c_str(), DECOMP_ONLY, device_id, platform_id, XILINX_ZLIB);
-        if (m_xlz->error_code()) {
-            return 1;
+        this->m_xlz = new xfZlib(this->m_u50_xclbin.c_str(), false, DECOMP_ONLY, this->m_context, this->m_program,
+                                 this->m_deviceid, XILINX_ZLIB);
+        if (this->m_xlz->error_code()) {
+            ret = true;
         }
     }
+    return ret;
 }
 
 // Call to HW Deflate
 bool zlibDriver::xilinxHwDeflate(z_streamp strm, int flush) {
+    lock();
+    if (this->m_xlz == nullptr) {
+        bool err;
+        err = this->allocateCU(strm);
+        if (err) this->m_status = true;
+        err = this->getZlibInstance();
+        if (err) this->m_status = true;
+    }
     uint32_t adler32 = 0;
     size_t enbytes = 0;
 
     bool last_data = false;
 
-    while ((m_info.input_size != 0 || flush) && (strm->avail_out != 0)) {
+    while ((this->m_info.input_size != 0 || flush) && (strm->avail_out != 0)) {
         bool last_buffer = false;
-        if (m_info.input_size + m_inputSize >= m_bufSize) {
-            std::memcpy(m_deflateInput + m_inputSize, m_info.in_buf, m_bufSize - m_inputSize);
-            m_info.in_buf += (m_bufSize - m_inputSize);
-            m_info.input_size -= (m_bufSize - m_inputSize);
-            m_inputSize += (m_bufSize - m_inputSize);
-        } else if (m_info.input_size != 0) {
-            std::memcpy(m_deflateInput + m_inputSize, m_info.in_buf, m_info.input_size);
-            m_inputSize += m_info.input_size;
-            m_info.input_size = 0;
+        if (this->m_info.input_size + this->m_inputSize >= this->m_bufSize) {
+            std::memcpy(this->m_deflateInput + this->m_inputSize, this->m_info.in_buf,
+                        this->m_bufSize - this->m_inputSize);
+            this->m_info.in_buf += (this->m_bufSize - this->m_inputSize);
+            this->m_info.input_size -= (this->m_bufSize - this->m_inputSize);
+            this->m_inputSize += (this->m_bufSize - this->m_inputSize);
+        } else if (this->m_info.input_size != 0) {
+            std::memcpy(this->m_deflateInput + this->m_inputSize, this->m_info.in_buf, this->m_info.input_size);
+            this->m_inputSize += this->m_info.input_size;
+            this->m_info.input_size = 0;
         }
-        if (flush != Z_NO_FLUSH && m_info.input_size == 0) last_buffer = true;
+        if (flush != Z_NO_FLUSH && this->m_info.input_size == 0) last_buffer = true;
         // Set adler value
-        m_xlz->set_checksum(strm->adler);
-        size_t inputSize = m_inputSize;
+        this->m_xlz->set_checksum(strm->adler);
+        size_t inputSize = this->m_inputSize;
         // Call compression_buffer API
-        if (last_buffer && (m_outputSize < m_bufSize)) {
-            enbytes = m_xlz->deflate_buffer(m_deflateInput, m_deflateOutput + m_outputSize, inputSize, last_data,
-                                            last_buffer, m_kernel_instance);
-            m_outputSize += enbytes;
-            m_inputSize = inputSize;
-        } else if ((inputSize >= m_bufSize)) {
+        if (last_buffer && (this->m_outputSize < this->m_bufSize)) {
+            enbytes = this->m_xlz->deflate_buffer(this->m_deflateInput, this->m_deflateOutput + this->m_outputSize,
+                                                  inputSize, last_data, last_buffer, this->m_kernel_instance);
+            this->m_outputSize += enbytes;
+            this->m_inputSize = inputSize;
+        } else if ((inputSize >= this->m_bufSize)) {
             while (inputSize != 0) {
-                enbytes = m_xlz->deflate_buffer(m_deflateInput, m_deflateOutput + m_outputSize, inputSize, last_data,
-                                                last_buffer, m_kernel_instance);
-                m_outputSize += enbytes;
+                enbytes = this->m_xlz->deflate_buffer(this->m_deflateInput, this->m_deflateOutput + this->m_outputSize,
+                                                      inputSize, last_data, last_buffer, this->m_kernel_instance);
+                this->m_outputSize += enbytes;
             }
-            m_inputSize = 0;
+            this->m_inputSize = 0;
         }
-        adler32 = m_xlz->get_checksum();
+        adler32 = this->m_xlz->get_checksum();
 
-        if (m_outputSize > 0) {
+        if (this->m_outputSize > 0) {
             if (flush == Z_FINISH && last_data && enbytes > 0) {
                 long int last_block = 0xffff000001;
                 // zlib special block based on Z_SYNC_FLUSH
-                std::memcpy(&(m_deflateOutput[m_outputSize]), &last_block, 5);
-                m_outputSize += 5;
+                std::memcpy(&(this->m_deflateOutput[this->m_outputSize]), &last_block, 5);
+                this->m_outputSize += 5;
 
-                m_deflateOutput[m_outputSize] = adler32 >> 24;
-                m_deflateOutput[m_outputSize + 1] = adler32 >> 16;
-                m_deflateOutput[m_outputSize + 2] = adler32 >> 8;
-                m_deflateOutput[m_outputSize + 3] = adler32;
-                m_outputSize += 4;
+                this->m_deflateOutput[this->m_outputSize] = adler32 >> 24;
+                this->m_deflateOutput[this->m_outputSize + 1] = adler32 >> 16;
+                this->m_deflateOutput[this->m_outputSize + 2] = adler32 >> 8;
+                this->m_deflateOutput[this->m_outputSize + 3] = adler32;
+                this->m_outputSize += 4;
             }
-            if (m_outputSize > strm->avail_out) {
-                std::memcpy(strm->next_out, m_deflateOutput, strm->avail_out);
-                m_outputSize -= strm->avail_out;
-                std::memmove(m_deflateOutput, m_deflateOutput + strm->avail_out, m_outputSize);
+            if (this->m_outputSize > strm->avail_out) {
+                std::memcpy(strm->next_out, this->m_deflateOutput, strm->avail_out);
+                this->m_outputSize -= strm->avail_out;
+                std::memmove(this->m_deflateOutput, this->m_deflateOutput + strm->avail_out, this->m_outputSize);
                 strm->total_out += strm->avail_out;
                 strm->next_out += strm->avail_out;
                 strm->avail_out = 0;
             } else {
-                std::memcpy(strm->next_out, m_deflateOutput, m_outputSize);
+                std::memcpy(strm->next_out, this->m_deflateOutput, this->m_outputSize);
+                strm->avail_out = strm->avail_out - this->m_outputSize;
+                strm->total_out += this->m_outputSize;
+                strm->next_out += this->m_outputSize;
+                this->m_outputSize = 0;
+                if (last_data) break;
+            }
+        }
+        if (this->m_outputSize == 0) {
+            if (last_data) break;
+        }
+    }
+
+    strm->avail_in = this->m_info.input_size;
+
+    strm->adler = adler32;
+    unlock();
+    if (last_data && strm->avail_out != 0) {
+        return true;
+    } else
+        return false;
+}
+
+// Call to HW Compress
+uint64_t zlibDriver::xilinxHwCompress(z_streamp strm, int val) {
+    return this->xilinxHwDeflate(strm, val);
+}
+
+// Call to HW decompress
+uint64_t zlibDriver::xilinxHwUncompress(z_streamp strm, int cu) {
+#ifdef ENABLE_INFLATE_XRM
+    // Call decompress API
+    this->m_info.output_size = this->m_xlz->decompress(this->m_info.in_buf, this->m_info.out_buf,
+                                                       this->m_info.input_size, this->m_info.output_size, this->m_cuid);
+    if (this->m_info.output_size == 0) {
+#if (VERBOSE_LEVEL >= 1)
+        std::cout << "Decompression Failed " << std::endl;
+#endif
+    }
+#endif
+    return this->m_info.output_size;
+}
+
+// Call to HW Inflate
+bool zlibDriver::xilinxHwInflate(z_streamp strm, int flush) {
+    size_t enbytes = 0;
+
+    bool last_data = false;
+
+    if (m_info.input_size >= 9) {
+        long int lastblock = 0;
+        std::memcpy((unsigned char*)(&lastblock), m_info.in_buf + (m_info.input_size - 9), 5);
+        if (lastblock == 0xffff000001) last_block = true;
+    } else {
+        //        last_block = true;
+    }
+
+    while ((m_info.input_size != 0 || last_block) && (strm->avail_out != 0)) {
+        bool last_buffer = false;
+        if (m_info.input_size + m_inputSize >= m_bufSize) {
+            std::memcpy(m_inflateInput + m_inputSize, m_info.in_buf, m_bufSize - m_inputSize);
+            m_info.in_buf += (m_bufSize - m_inputSize);
+            m_info.input_size -= (m_bufSize - m_inputSize);
+            m_inputSize += (m_bufSize - m_inputSize);
+        } else if (m_info.input_size != 0) {
+            std::memcpy(m_inflateInput + m_inputSize, m_info.in_buf, m_info.input_size);
+            m_inputSize += m_info.input_size;
+            m_info.input_size = 0;
+        }
+        if (last_block && m_info.input_size == 0) last_buffer = true;
+        size_t inputSize = m_inputSize;
+        size_t outputSize = m_bufSize;
+        // Call compression_buffer API
+        if (last_buffer && (m_outputSize < m_bufSize)) {
+            enbytes = m_xlz->inflate_buffer(m_inflateInput, m_inflateOutput + m_outputSize, inputSize, outputSize,
+                                            last_data, last_buffer, m_kernel_instance);
+            m_outputSize += enbytes;
+            m_inputSize = inputSize;
+        } else if ((inputSize >= m_bufSize)) {
+            while ((inputSize != 0) && (m_outputSize < m_bufSize)) {
+                enbytes = m_xlz->inflate_buffer(m_inflateInput, m_inflateOutput + m_outputSize, inputSize, outputSize,
+                                                last_data, last_buffer, m_kernel_instance);
+                m_outputSize += enbytes;
+            }
+            m_inputSize = inputSize;
+        }
+
+        if (m_outputSize > 0) {
+            if (m_outputSize > strm->avail_out) {
+                std::memcpy(strm->next_out, m_inflateOutput, strm->avail_out);
+                m_outputSize -= strm->avail_out;
+                std::memmove(m_inflateOutput, m_inflateOutput + strm->avail_out, m_outputSize);
+                strm->total_out += strm->avail_out;
+                strm->next_out += strm->avail_out;
+                strm->avail_out = 0;
+            } else {
+                std::memcpy(strm->next_out, m_inflateOutput, m_outputSize);
                 strm->avail_out = strm->avail_out - m_outputSize;
                 strm->total_out += m_outputSize;
                 strm->next_out += m_outputSize;
@@ -152,30 +428,18 @@ bool zlibDriver::xilinxHwDeflate(z_streamp strm, int flush) {
 
     strm->avail_in = m_info.input_size;
 
-    strm->adler = adler32;
-
     if (last_data && strm->avail_out != 0) {
         return true;
     } else
         return false;
 }
 
-// Call to HW Compress
-uint64_t zlibDriver::xilinxHwCompress(z_streamp strm, int val) {
-    return this->xilinxHwDeflate(strm, val);
-}
-
-// Call to HW decompress
-uint64_t zlibDriver::xilinxHwUncompress(z_streamp strm, int cu) {
-#ifdef ENABLE_XRM
-    // Call decompress API
-    m_info.output_size =
-        m_xlz->decompress(m_info.in_buf, m_info.out_buf, m_info.input_size, m_info.output_size, m_cuid);
-    if (m_info.output_size == 0) {
-#if (VERBOSE_LEVEL >= 1)
-        std::cout << "Decompression Failed " << std::endl;
-#endif
+void zlibDriver::copyData(z_streamp strm) {
+    if (m_copydecompressData == false) {
+        return;
     }
-#endif
-    return m_info.output_size;
+    struct_update(strm, XILINX_INFLATE);
+    assert((m_info.input_size + m_inputSize) <= (2 * 1024 * 1024));
+    std::memcpy(m_inflateInput + m_inputSize, m_info.in_buf, m_info.input_size);
+    m_inputSize += m_info.input_size;
 }

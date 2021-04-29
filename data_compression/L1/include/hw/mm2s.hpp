@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
  *
  * This file is part of Vitis Data Compression Library.
  */
+#include "compress_utils.hpp"
 #include "hls_stream.h"
 
 #include <ap_int.h>
@@ -54,149 +55,6 @@ const int c_bLTreeSize = 64;
 const int c_maxCodeSize = 16;
 
 namespace details {
-
-template <int NUM_BLOCKS, int BLOCK_SIZE, int DATAWIDTH, int BURST_SIZE>
-void mm2multStreamMM1(const ap_uint<DATAWIDTH>* in,
-                      hls::stream<ap_uint<DATAWIDTH> > outStream[NUM_BLOCKS],
-                      hls::stream<uint16_t> outSizeStream[NUM_BLOCKS],
-                      hls::stream<uint32_t> outLz77SizeStream[NUM_BLOCKS],
-                      const uint32_t input_idx[NUM_BLOCKS],
-                      const uint32_t _input_size[NUM_BLOCKS]) {
-    const int c_byteSize = 8;
-    const int c_wordSize = DATAWIDTH / c_byteSize;
-
-    ap_uint<NUM_BLOCKS> is_pending;
-    uint32_t read_idx[NUM_BLOCKS];
-    uint32_t read_size[NUM_BLOCKS];
-    uint32_t input_size[NUM_BLOCKS];
-#pragma HLS ARRAY_PARTITION variable = read_idx dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = read_size dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = input_size dim = 0 complete
-
-    for (uint8_t vid = 0; vid < NUM_BLOCKS; vid++) {
-#pragma HLS UNROLL
-        read_idx[vid] = input_idx[vid];
-        input_size[vid] = _input_size[vid];
-        read_size[vid] = 0;
-        is_pending.range(vid, vid) = 1;
-    }
-
-    while (is_pending) {
-    parallel_ops:
-        for (uint32_t vid = 0; vid < NUM_BLOCKS; vid++) {
-            bool isFull = (outSizeStream[vid]).full();
-            uint32_t pendingBytes = 0, sizeWrite = 0;
-            uint32_t blkMod = read_size[vid] % BLOCK_SIZE;
-            if (!isFull) {
-                pendingBytes = (input_size[vid] > read_size[vid]) ? (input_size[vid] - read_size[vid]) : 0;
-                is_pending.range(vid, vid) = (pendingBytes > 0) ? 1 : 0;
-            }
-            if (pendingBytes && blkMod == 0) {
-                uint32_t sendingBytes = BLOCK_SIZE;
-                if (pendingBytes < sendingBytes) sendingBytes = pendingBytes;
-                outLz77SizeStream[vid] << sendingBytes;
-            }
-            if (pendingBytes && !isFull) {
-                uint32_t pendingWords = (pendingBytes - 1) / c_wordSize + 1;
-                uint32_t burstSize = (pendingWords > BURST_SIZE) ? BURST_SIZE : pendingWords;
-                sizeWrite = burstSize * c_wordSize;
-                if (read_size[vid] + sizeWrite <= input_size[vid]) {
-                    read_size[vid] += sizeWrite;
-                } else {
-                    sizeWrite = input_size[vid] - read_size[vid];
-                    read_size[vid] = input_size[vid];
-                }
-
-                outSizeStream[vid] << sizeWrite;
-                uint32_t rIdx = read_idx[vid];
-            gmem_read:
-                for (uint32_t midx = 0; midx < burstSize; midx++) {
-#pragma HLS PIPELINE II = 1
-                    outStream[vid] << in[rIdx + midx];
-                }
-                read_idx[vid] += burstSize;
-            }
-        }
-    }
-
-size_init:
-    for (uint8_t vid = 0; vid < NUM_BLOCKS; vid++) {
-#pragma HLS UNROLL
-        outLz77SizeStream[vid] << 0;
-        outSizeStream[vid] << 0;
-    }
-}
-
-template <int OUT_DATAWIDTH = 8,
-          int NUM_BLOCKS = 8,
-          int BLOCK_SIZE = 32768,
-          int IN_DATAWIDTH = 512,
-          int BURST_SIZE = 16>
-void mm2multStream1(const ap_uint<IN_DATAWIDTH>* in,
-                    const uint32_t input_idx[NUM_BLOCKS],
-                    hls::stream<ap_uint<OUT_DATAWIDTH> > outStream[NUM_BLOCKS],
-                    hls::stream<uint32_t> outSizeStream[NUM_BLOCKS],
-                    const uint32_t _input_size[NUM_BLOCKS]) {
-    const uint32_t c_depthOutStreamV = 2 * BURST_SIZE;
-    // Array of Streams used as internal buffer.
-    hls::stream<ap_uint<IN_DATAWIDTH> > outStreamV[NUM_BLOCKS];
-    hls::stream<uint16_t> outStreamVSize[NUM_BLOCKS];
-#pragma HLS STREAM variable = outStreamV depth = c_depthOutStreamV
-#pragma HLS STREAM variable = outStreamVSize depth = 1
-
-#pragma HLS DATAFLOW
-    xf::compression::details::mm2multStreamMM1<NUM_BLOCKS, BLOCK_SIZE, IN_DATAWIDTH, BURST_SIZE>(
-        in, outStreamV, outStreamVSize, outSizeStream, input_idx, _input_size);
-downsizer:
-    for (uint8_t vid = 0; vid < NUM_BLOCKS; vid++) {
-#pragma HLS UNROLL
-        xf::compression::details::simpleStreamDownSizer<IN_DATAWIDTH, OUT_DATAWIDTH>(
-            outStreamV[vid], outStreamVSize[vid], outStream[vid]);
-    }
-}
-
-template <int OUT_DATAWIDTH = 8,
-          int NUM_BLOCKS = 4,
-          int BLOCK_SIZE = 32768,
-          int IN_DATAWIDTH = 512,
-          int BURST_SIZE = 16>
-void mm2multStreamBlockGenerator(const ap_uint<IN_DATAWIDTH>* in,
-                                 hls::stream<ap_uint<OUT_DATAWIDTH> > outStream[NUM_BLOCKS],
-                                 hls::stream<uint32_t> outSizeStream[NUM_BLOCKS],
-                                 hls::stream<uint32_t> outBaseIdx[NUM_BLOCKS],
-                                 uint32_t input_size) {
-#pragma HLS dataflow
-    constexpr int c_byteWidth = 8;
-    constexpr int c_wordSize = IN_DATAWIDTH / c_byteWidth;
-
-    uint32_t block_idx = 0;
-    uint32_t no_blks = (input_size - 1) / BLOCK_SIZE + 1;
-    uint32_t engine_no_blks = no_blks / NUM_BLOCKS;
-    uint32_t engine_no_blks_rem = no_blks % NUM_BLOCKS;
-    uint32_t max_block_length = engine_no_blks * BLOCK_SIZE;
-
-    uint32_t readBlockSize = 0;
-
-    uint32_t input_block_size[NUM_BLOCKS];
-    uint32_t input_idx[NUM_BLOCKS];
-#pragma HLS ARRAY_PARTITION variable = input_block_size dim = 0 complete
-#pragma HLS ARRAY_PARTITION variable = input_idx dim = 0 complete
-
-    // Figure out total blocks & block sizes
-    for (uint8_t j = 0; j < NUM_BLOCKS; j++) {
-        uint32_t inBlockSize = max_block_length;
-        if (j < engine_no_blks_rem) inBlockSize = max_block_length + BLOCK_SIZE;
-        if (readBlockSize + inBlockSize > input_size) inBlockSize = input_size - readBlockSize;
-        input_block_size[j] = inBlockSize;
-        input_idx[j] = readBlockSize / c_wordSize;
-        outBaseIdx[j] << input_idx[j];
-        readBlockSize += inBlockSize;
-    }
-
-    // Call for parallel mm2s
-    xf::compression::details::mm2multStream1<OUT_DATAWIDTH, NUM_BLOCKS, BLOCK_SIZE, IN_DATAWIDTH, BURST_SIZE>(
-        in, input_idx, outStream, outSizeStream, input_block_size);
-}
 
 template <int DATAWIDTH, int BURST_SIZE, int NUM_BLOCKS>
 void mm2sNb(const ap_uint<DATAWIDTH>* in,
@@ -293,55 +151,6 @@ void mm2sNb(const ap_uint<DATAWIDTH>* in,
     }
 }
 
-template <int NUM_BLOCKS, int IN_DATAWIDTH, int OUT_DATAWIDTH, int BURST_SIZE>
-void mm2multStream(const ap_uint<IN_DATAWIDTH>* in,
-                   const uint32_t input_idx[NUM_BLOCKS],
-                   hls::stream<ap_uint<OUT_DATAWIDTH> > outStream[NUM_BLOCKS],
-                   const uint32_t _input_size[NUM_BLOCKS]) {
-    /**
-     * @brief This module reads 512-bit data from memory interface and
-     * writes to the output stream in 8-bit chunks. Writing to the multiple data streams is
-     * non-blocking call which is done using is_full() API
-     *
-     * @tparam DATAWIDTH input width of data bus
-     * @tparam BURST_SIZE burst size of the data transfers
-     * @tparam NUM_BLOCKS number of parallel blocks
-     * @tparam OUT_DATAWIDTH output width of the data bus
-     *
-     * @param in input memory address
-     * @param input_idx input index
-     * @param outStream output stream
-     * @param _input_size input stream size
-     */
-
-    // Array of Streams used as internal buffer.
-    hls::stream<ap_uint<IN_DATAWIDTH> > outStreamBuffer[NUM_BLOCKS];
-#pragma HLS STREAM variable = outStreamBuffer depth = 16
-#pragma HLS BIND_STORAGE variable = outStreamBuffer type = FIFO impl = SRL
-
-    // Local buffer to store the input_size for all PARALLEL BLOCKS
-    // for multiple reads
-    uint32_t input_size[NUM_BLOCKS];
-#pragma HLS ARRAY_PARTITION variable = input_size complete dim = 1
-
-    for (uint32_t bIdx = 0; bIdx < NUM_BLOCKS; bIdx++) {
-#pragma HLS UNROLL
-        input_size[bIdx] = _input_size[bIdx];
-    }
-
-#pragma HLS DATAFLOW
-    // Calling the mm2sNb module
-    xf::compression::details::mm2sNb<IN_DATAWIDTH, BURST_SIZE, NUM_BLOCKS>(in, input_idx, outStreamBuffer, input_size);
-
-// Calling the Downsizer parallelly for entire array of outStreams
-parallel_downsizer:
-    for (uint32_t i = 0; i < NUM_BLOCKS; i++) {
-#pragma HLS UNROLL
-        xf::compression::details::streamDownsizer<uint32_t, IN_DATAWIDTH, OUT_DATAWIDTH>(outStreamBuffer[i],
-                                                                                         outStream[i], input_size[i]);
-    }
-}
-
 template <int NUM_BLOCKS, int DATAWIDTH, int BURST_SIZE>
 void mm2multStreamSimple(const ap_uint<DATAWIDTH>* in,
                          hls::stream<ap_uint<DATAWIDTH> > outStream[NUM_BLOCKS],
@@ -385,6 +194,7 @@ void mm2multStreamSimple(const ap_uint<DATAWIDTH>* in,
     while (is_pending) {
     parallel_ops:
         for (uint32_t vid = 0; vid < NUM_BLOCKS; vid++) {
+#pragma HLS PIPELINE off
             bool isFull = (outSizeStream[vid]).full();
             uint32_t pendingBytes = (input_size[vid] > read_size[vid]) ? (input_size[vid] - read_size[vid]) : 0;
             is_pending.range(vid, vid) = (pendingBytes > 0) ? 1 : 0;
@@ -741,6 +551,43 @@ mm2s_simple:
 }
 
 template <int DATAWIDTH, int BURST_SIZE>
+void mm2sSimple(const ap_uint<DATAWIDTH>* in,
+                hls::stream<ap_uint<DATAWIDTH> >& outstream,
+                uint32_t inputSize,
+                uint32_t numItr) {
+    /**
+     * @brief Read data from DATAWIDTH wide axi memory interface and
+     *        write to stream.
+     *
+     * @tparam DATAWIDTH    width of data bus
+     *
+     * @param in            pointer to input memory
+     * @param outstream     output stream
+     * @param inputSize     size of the data
+     *
+     */
+    const int c_byte_size = 8;
+    const int c_word_size = DATAWIDTH / c_byte_size;
+    const int inSize_gmemwidth = (inputSize - 1) / c_word_size + 1;
+
+    int allignedwidth = inSize_gmemwidth / BURST_SIZE;
+    allignedwidth = ((inSize_gmemwidth - allignedwidth) > 0) ? allignedwidth + 1 : allignedwidth;
+
+    for (auto z = 0; z < numItr; z++) {
+        int i = 0;
+        ap_uint<DATAWIDTH> temp;
+    mm2s_simple:
+        for (; i < allignedwidth * BURST_SIZE; i += BURST_SIZE) {
+            for (uint32_t j = 0; j < BURST_SIZE; j++) {
+#pragma HLS PIPELINE II = 1
+                temp = in[i + j];
+                if ((i + j) < inSize_gmemwidth) outstream << temp;
+            }
+        }
+    }
+}
+
+template <int DATAWIDTH, int BURST_SIZE>
 void mm2sSimple(const ap_uint<DATAWIDTH>* in, hls::stream<ap_uint<DATAWIDTH> >& outstream, uint32_t inputSize) {
     /**
      * @brief Read data from DATAWIDTH wide axi memory interface and
@@ -773,10 +620,14 @@ mm2s_simple:
 }
 
 template <int DATAWIDTH, int BURST_SIZE>
-void mm2sSimple(const ap_uint<DATAWIDTH>* in,
-                hls::stream<ap_uint<DATAWIDTH> >& outstream,
-                uint64_t inputSize,
-                hls::stream<uint64_t>& outSizeStream) {
+void mm2Stream(const ap_uint<DATAWIDTH>* in,
+               hls::stream<ap_uint<DATAWIDTH> >& outstream,
+               hls::stream<ap_uint<32> >& checksumStream,
+               uint32_t* checksumData,
+               uint32_t inputSize,
+               hls::stream<uint32_t>& outSizeStream,
+               bool checksumType,
+               hls::stream<ap_uint<2> >& checksumTypeStream) {
     /**
      * @brief Read data from DATAWIDTH wide axi memory interface and
      *        write to stream.
@@ -793,106 +644,26 @@ void mm2sSimple(const ap_uint<DATAWIDTH>* in,
     const int c_word_size = DATAWIDTH / c_byte_size;
     const int inSize_gmemwidth = (inputSize - 1) / c_word_size + 1;
 
-    outSizeStream << inputSize;
+    checksumTypeStream << checksumType;
+    // exit condition for checksum kernel
+    checksumTypeStream << 3;
 
-    uint64_t allignedwidth = inSize_gmemwidth / BURST_SIZE;
+    outSizeStream << inputSize;
+    checksumStream << checksumData[0];
+
+    uint32_t allignedwidth = inSize_gmemwidth / BURST_SIZE;
     allignedwidth = ((inSize_gmemwidth - allignedwidth) > 0) ? allignedwidth + 1 : allignedwidth;
 
-    uint64_t i = 0;
+    uint32_t i = 0;
     ap_uint<DATAWIDTH> temp;
-mm2s_simple:
+mm2s:
     for (; i < allignedwidth * BURST_SIZE; i += BURST_SIZE) {
-        for (uint32_t j = 0; j < BURST_SIZE; j++) {
+        for (uint16_t j = 0; j < BURST_SIZE; j++) {
 #pragma HLS PIPELINE II = 1
             temp = in[i + j];
             if ((i + j) < inSize_gmemwidth) outstream << temp;
         }
     }
-}
-
-template <int DATAWIDTH, int BURST_SIZE>
-void mm2s(const uintMemWidth_t* in,
-          uintMemWidth_t* head_prev_blk,
-          uintMemWidth_t* orig_input_data,
-          hls::stream<ap_uint<DATAWIDTH> >& outStream,
-          hls::stream<uint32_t>& outStreamSize,
-          uint32_t* compressd_size,
-          uint32_t* in_block_size,
-          uint32_t no_blocks,
-          uint32_t block_size_in_kb,
-          uint32_t head_res_size,
-          uint32_t offset) {
-    const int c_byte_size = 8;
-    const int c_word_size = DATAWIDTH / c_byte_size;
-    ap_uint<DATAWIDTH> buffer[BURST_SIZE];
-#pragma HLS BIND_STORAGE variable = buffer type = RAM_2P impl = LUTRAM
-
-    uint32_t offset_gmem = offset ? offset / 64 : 0;
-
-    // Handle header or residue here
-    uint32_t block_stride = block_size_in_kb * 1024 / 64;
-
-    uint32_t blkCompSize = 0;
-    uint32_t origSize = 0;
-    uint32_t sizeInWord = 0;
-    uint32_t byteSize = 0;
-    // Run over number of blocks
-    for (int bIdx = 0; bIdx < no_blocks + 1; bIdx++) {
-        if (bIdx == 0) {
-            sizeInWord = head_res_size ? ((head_res_size - 1) / c_word_size + 1) : 0;
-            byteSize = head_res_size;
-        } else {
-            blkCompSize = compressd_size[bIdx - 1];
-            origSize = in_block_size[bIdx - 1];
-            // Put compress block & input block
-            // into streams for next block
-            sizeInWord = (blkCompSize - 1) / c_word_size + 1;
-            byteSize = blkCompSize;
-        }
-
-        // Send size in bytes
-        outStreamSize << byteSize;
-
-        // printf("[ %s ]blkCompSize %d origSize %d sizeInWord_512 %d offset %d head_res_size %d\n",
-        // __FUNCTION__,
-        // blkCompSize, origSize, sizeInWord, offset, head_res_size);
-
-        // Copy data from global memory to local
-        // Put it into stream
-        for (uint32_t i = 0; i < sizeInWord; i += BURST_SIZE) {
-            uint32_t chunk_size = BURST_SIZE;
-
-            if (i + BURST_SIZE > sizeInWord) chunk_size = sizeInWord - i;
-
-            if (bIdx == 0) {
-            memrd1:
-                for (uint32_t j = 0; j < chunk_size; j++) {
-#pragma HLS PIPELINE II = 1
-                    buffer[j] = head_prev_blk[(offset_gmem + i) + j];
-                }
-            } else if (blkCompSize == origSize) {
-            memrd2:
-                for (uint32_t j = 0; j < chunk_size; j++) {
-#pragma HLS PIPELINE II = 1
-                    buffer[j] = orig_input_data[(block_stride * (bIdx - 1) + i) + j];
-                }
-            } else {
-            memrd3:
-                for (uint32_t j = 0; j < chunk_size; j++) {
-#pragma HLS PIPELINE II = 1
-                    buffer[j] = in[(block_stride * (bIdx - 1) + i) + j];
-                }
-            }
-
-        memrd4:
-            for (uint32_t j = 0; j < chunk_size; j++) {
-#pragma HLS PIPELINE II = 1
-                outStream << buffer[j];
-            }
-        }
-    }
-    // printf("%s Done \n", __FUNCTION__);
-    outStreamSize << 0;
 }
 
 } // namespace details

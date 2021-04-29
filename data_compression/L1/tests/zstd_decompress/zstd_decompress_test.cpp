@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2019-2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 
 #define ZSTD
 
-#define PARALLEL_BYTES_READ 4
+#define PARALLEL_BYTES_READ 8
 #define ZSTD_BLOCK_SIZE_KB 32
 #define WINDOW_SIZE (32 * 1024)
 
@@ -50,12 +50,10 @@ uint64_t getFileSize(std::ifstream& file) {
 
 void decompressFrame(hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ)> >& inStream,
                      hls::stream<ap_uint<4> >& inStrobe,
-                     hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ)> >& outStream,
-                     hls::stream<bool>& endOfStream,
-                     hls::stream<uint64_t>& outSizeStream) {
+                     hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ) + PARALLEL_BYTES_READ> >& outStream) {
     const int c_lmoDWidth = 1 + getDataPortWidth(WINDOW_SIZE);
     xf::compression::zstdDecompressStream<PARALLEL_BYTES_READ, ZSTD_BLOCK_SIZE_KB, WINDOW_SIZE, c_lmoDWidth>(
-        inStream, inStrobe, outStream, endOfStream, outSizeStream);
+        inStream, inStrobe, outStream);
 }
 
 void validateFile(std::string& fileName, std::string& cmpFileName, uint8_t max_cr) {
@@ -82,9 +80,7 @@ void validateFile(std::string& fileName, std::string& cmpFileName, uint8_t max_c
 
     hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ)> > inputStream("inputStream");
     hls::stream<ap_uint<4> > inStrobe("inStrobe");
-    hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ)> > outputStream("outputStream");
-    hls::stream<uint64_t> outSizeStream("outSizeStream");
-    hls::stream<bool> endOfStream("endOfStream");
+    hls::stream<ap_uint<(8 * PARALLEL_BYTES_READ) + PARALLEL_BYTES_READ> > outputStream("outputStream");
 
     uint8_t lbWidth = inputSize % PARALLEL_BYTES_READ;
     ap_uint<4> strb = PARALLEL_BYTES_READ;
@@ -99,29 +95,44 @@ void validateFile(std::string& fileName, std::string& cmpFileName, uint8_t max_c
     inStrobe << 0;
     inputStream << 0;
     inCmpFile.close();
-    decompressFrame(inputStream, inStrobe, outputStream, endOfStream, outSizeStream);
+    decompressFrame(inputStream, inStrobe, outputStream);
 
     uint64_t k = 0;
     bool pass = true;
-    for (bool last = endOfStream.read(); !last; last = endOfStream.read()) {
-        ap_uint<(8 * PARALLEL_BYTES_READ)> tbuf = outputStream.read();
-        for (uint8_t i = 0; i < PARALLEL_BYTES_READ && k < originalSize; ++i) {
-            uint8_t od = tbuf.range(((i + 1) * 8) - 1, i * 8);
-            uint8_t ov;
-            origFile.read((char*)&ov, 1);
-            if (od != ov) {
-                std::cout << "Error at char index: " << k << " !!" << std::endl;
-                pass = false;
+    uint64_t outCnt = 0;
+
+    for (ap_uint<(8 * PARALLEL_BYTES_READ) + PARALLEL_BYTES_READ> val = outputStream.read(); val != 0;
+         val = outputStream.read()) {
+        // reading value from output stream
+        ap_uint<(8 * PARALLEL_BYTES_READ)> o =
+            val.range((8 * PARALLEL_BYTES_READ) + PARALLEL_BYTES_READ - 1, PARALLEL_BYTES_READ);
+        ap_uint<PARALLEL_BYTES_READ> strb = val.range(PARALLEL_BYTES_READ - 1, 0);
+        size_t size = __builtin_popcount(strb.to_uint());
+        // writing output file
+        // outFile.write((char*)&o, size);
+        outCnt += size;
+
+        // Comparing with input file
+        ap_uint<(8 * PARALLEL_BYTES_READ)> g = 0;
+        origFile.read((char*)&g, PARALLEL_BYTES_READ);
+        if (o != g) {
+            for (uint8_t v = 0; v < size; v++) {
+                uint8_t e = g.range((v + 1) * 8 - 1, v * 8);
+                uint8_t r = o.range((v + 1) * 8 - 1, v * 8);
+                if (e != r) {
+                    pass = false;
+                    std::cout << "Expected=" << std::hex << e << " got=" << r << std::endl;
+                    std::cout << "-----TEST FAILED: The input file and the file after "
+                              << "decompression are not similar!-----" << std::endl;
+                }
+                if (!pass) break;
             }
-            k++;
         }
-        if (!pass) break;
     }
+
     origFile.close();
 
-    outputStream.read();
-    outputSize = outSizeStream.read();
-    printf("\nOriginal Size: %lld, OutputSize: %lld\n", originalSize, outputSize);
+    printf("\nOriginal Size: %lld, OutputSize: %lld\n", originalSize, outCnt);
 
     if (pass)
         std::cout << "Test PASSED" << std::endl;

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@
 #include <fcntl.h>  /* For O_RDWR */
 #include <unistd.h> /* For open(), creat() */
 
-#define BLOCK_SIZE 64
-#define KB 1024
 #define MAGIC_HEADER_SIZE 4
 #define MAGIC_BYTE_1 4
 #define MAGIC_BYTE_2 34

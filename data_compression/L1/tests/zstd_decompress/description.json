@@ -8,6 +8,13 @@
     "platform_blacklist": [], 
     "part_whitelist": [], 
     "part_blacklist": [], 
+    "QoR_golden": {
+        "VV_LUT": "21211",
+        "VV_FF": "15892",
+        "VV_BRAM": "103",
+        "VV_URAM": "4",
+        "VV_AchievedClockPeriod": "4.539"
+    },
     "project": "zstd_decompress", 
     "solution": "sol1", 
     "clock": "3.3", 

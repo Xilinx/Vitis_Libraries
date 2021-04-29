@@ -20,52 +20,52 @@ compress/decompress kernels (excluding data movers). It achieves Fmax of 300MHz.
 ========== ===== ====== ==== ===== ===== 
 Flow       LUT   LUTMem REG  BRAM  URAM  
 ========== ===== ====== ==== ===== ===== 
-Compress   4.1K  1.1K   3.4K 4     6     
+Compress   3K    99     3.4K 5     6     
 ---------- ----- ------ ---- ----- ----- 
-DeCompress 802   32     1K   16    0     
+DeCompress 6K    370    5K   0     4     
 ========== ===== ====== ==== ===== ===== 
 
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents best kernel throughput achieved for a single compute
+Table below presents kernel throughput achieved for a single compute
 unit (Single Engine). 
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Best Compression Throughput   287 MB/s
-Best Decompression Throughput 293 MB/s
-Average Compression Ratio     2.13x (Silesia Benchmark)
+Compression Throughput        287 MB/s
+Decompression Throughput      368 MB/s
+Average Compression Ratio     2.23x (Silesia Benchmark)
 ============================= =========================
 
 Note: Overall throughput can still be increased with multiple compute units.
 
-
-Usage
------
-
-Execution Steps
+Executable Usage
 ~~~~~~~~~~~~~~~
 
-1. To execute single file for compression 	: ``./build/xil_lz4_streaming -cx <compress xclbin> -c <file_name>``
-
-2. To execute single file for decompression	: ``./build/xil_lz4_streaming -dx <decompress xclbin> -d <file_name.lz4>``
-
-3. To validate various files together		: ``./build/xil_lz4_streaming -cx <compress xclbin> -dx <decompress xclbin> -l <files.list>``
+1. To execute single file for compression 	: ``./build/xil_lz4_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin> -c <file_name>``
+2. To execute single file for decompression	: ``./build/xil_lz4_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin> -d <file_name.lz4>``
+3. To validate single file (compress & decompress) : ``./build/xil_lz4_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin> -t <file_name>``
+4. To execute multiple files for compression           : ``./build/xil_lz4_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin -cfl <files.list>``
+5. To execute multiple files for decompression          : ``./build/xil_lz4_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin -dfl <compressed files.list>``   
+6. To validate multiple files (compress & decompress)      : ``./build/xil_lz4_streaming -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress_streaming.xclbin -l <files.list>``  
 	
-	- ``<files.list>``: Contains various file names with current path
+      - ``<files.list>``: Contains various file names with current path
 
 The usage of the generated executable is as follows:
 
 .. code-block:: bash
    
-   Usage: application.exe -[-h-c-l-d-B-x]
-        --help,             -h      Print Help Options   Default: [false]
-        --compress,         -c      Compress
-    	--compress_xclbin   -cx     Compress binary
-        --file_list,        -l      List of Input Files
-    	--decompress_xclbin -dx     Decompress binary
-        --decompress,       -d      Decompress
-        --block_size,       -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
-        --flow,             -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd] Default: [1]
+   Usage: application.exe -[-h-c-d-t-cfl-dfl-l-B-id]
+          --help,                -h        Print Help Options
+          --compress,            -c        Compress
+          --decompress,          -d        Decompress
+          --test,                -t        Xilinx compress & Decompress
+          --compress_list,       -cfl      Compress List of Input Files
+          --decompress_list,     -dfl      Decompress List of compressed Input Files
+          --test_list,           -l        Xilinx Compress & Decompress on Input Files
+          --max_cr,              -mcr      Maximum CR                                            Default: [10]
+          --xclbin,              -xbin     XCLBIN
+          --device_id,           -id       Device ID                                             Default: [0]
+          --block_size,          -B        Compress Block Size [0-64: 1-256: 2-1024: 3-4096]     Default: [0]

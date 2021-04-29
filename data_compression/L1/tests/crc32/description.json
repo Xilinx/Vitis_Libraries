@@ -7,7 +7,14 @@
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
-    "part_blacklist": [], 
+    "part_blacklist": [],
+    "QoR_golden": {
+        "VV_LUT": "93",
+        "VV_FF": "117",
+        "VV_BRAM": "1",
+        "VV_URAM": "0",
+        "VV_AchievedClockPeriod": "2.027"
+    }, 
     "project": "crc32", 
     "solution": "sol1", 
     "clock": "3.3", 

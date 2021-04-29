@@ -12,8 +12,9 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <zlib.h>
+#include <thread>
 extern int def(uint8_t* in, uint8_t* out, size_t input_size, uint64_t* csize, uint16_t num_iter, int level);
-extern int inf(FILE* src, FILE* dest);
+extern int inf(uint8_t* in, uint8_t* out, size_t input_size, uint64_t* csize, uint16_t num_iter);
 extern void zerr(int ret);
 
 // Data Size definitions
@@ -28,6 +29,7 @@ uint16_t max_cr_val = MAX_CR;
 std::uint8_t verbosity = 0;
 uint16_t num_iter = NUM_ITER;
 bool chunk_mode = false;
+bool mprocess = true;
 int compressLevel = Z_DEFAULT_COMPRESSION;
 #define ERRCHCK(call)                                        \
     try {                                                    \
@@ -73,7 +75,7 @@ bool get_list_filenames(std::string& filelist, std::vector<std::string>& fname_v
     return EXIT_SUCCESS;
 }
 
-void zlib_compress(std::string& inFile_name) {
+void zlib_compress(const std::string& inFile_name) {
     std::string outFile_name = inFile_name;
     outFile_name = outFile_name + ".zlib";
 
@@ -132,12 +134,6 @@ void zlib_compress(std::string& inFile_name) {
     float throughput_in_mbps_1 = (float)input_size * 1000 / compress_API_time_ns_1.count();
 
     if (verbosity >= 1) {
-        if (chunk_mode) {
-            std::ifstream outFile(outFile_name.c_str(), std::ifstream::binary);
-            if (!outFile) throw std::runtime_error("Unable to Open Output File: " + outFile_name);
-            compress_len = get_file_size(outFile);
-            outFile.close();
-        }
         std::cout << "#Iterations " << num_iter;
         std::cout << ", Input File: " << inFile_name;
         std::cout << ", Output File: " << outFile_name << std::endl;
@@ -151,12 +147,10 @@ void zlib_compress(std::string& inFile_name) {
                   << std::endl;
         std::cout << "\n";
     }
-    if (!chunk_mode) {
-        std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
-        if (!outFile) throw std::runtime_error("Unable to Open Output File: " + outFile_name);
-        outFile.write((char*)compress_out.data(), compress_len);
-        outFile.close();
-    }
+    std::ofstream outFile(outFile_name.c_str(), std::ofstream::binary);
+    if (!outFile) throw std::runtime_error("Unable to Open Output File: " + outFile_name);
+    outFile.write((char*)compress_out.data(), compress_len);
+    outFile.close();
 }
 
 void zlib_uncompress(std::string& inFile_name) {
@@ -185,24 +179,25 @@ void zlib_uncompress(std::string& inFile_name) {
     // Close file
     inFile.close();
 
-#ifdef COMPONLY_FLOW
-    setenv("XILINX_NO_ACCEL", "0", 1);
-#endif
-
     int ret = 0;
     std::chrono::duration<double, std::milli> compress_API_time_ms_1(0);
     std::chrono::duration<double, std::nano> compress_API_time_ns_1(0);
     auto compress_API_start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < num_iter; i++) {
-        // Call to libz (uncompress API) located in
-        // thirdParty/zlib-1.2.7/uncompress.c
-        ret = uncompress(out.data(), &uncompress_len, in.data(), input_size);
-        if (ret != Z_OK) {
-            if (ret == Z_BUF_ERROR)
-                throw std::runtime_error(
-                    "Output Buffer Size Exceeds limits ... use -mcr option (Increase/Reduce Buffer Size) ");
-            zerr(ret);
+        if (chunk_mode) {
+            ret = inf(in.data(), out.data(), input_size, &uncompress_len, num_iter);
+            i = num_iter;
+        } else {
+            // Call to libz (uncompress API) located in
+            // thirdParty/zlib-1.2.7/uncompress.c
+            ret = uncompress(out.data(), &uncompress_len, in.data(), input_size);
+            if (ret != Z_OK) {
+                if (ret == Z_BUF_ERROR)
+                    throw std::runtime_error(
+                        "Output Buffer Size Exceeds limits ... use -mcr option (Increase/Reduce Buffer Size) ");
+                zerr(ret);
+            }
         }
     }
 
@@ -292,6 +287,7 @@ int main(int argc, char* argv[]) {
     parser.addSwitch("--file_list", "-l", "File List (Compress, Decompress and Validation)", "");
     parser.addSwitch("--num_iter", "-nitr", "Number of Iterations", "1");
     parser.addSwitch("--max_cr", "-mcr", "Maximum CR", "20");
+    parser.addSwitch("--mprocess", "-mp", "Multi Process [1] or Multi thread [0]", "1");
 #endif
     if (argc == 1) {
         parser.printHelp();
@@ -316,6 +312,7 @@ int main(int argc, char* argv[]) {
     std::string filelist = parser.value("file_list");
     std::string numitr = parser.value("num_iter");
     std::string mcr = parser.value("max_cr");
+    std::string mp = parser.value("mprocess");
 
     // Maximum CR value
     if (!(mcr.empty())) {
@@ -325,6 +322,7 @@ int main(int argc, char* argv[]) {
     if (!chunkmode.empty()) ERRCHCK(chunk_mode = boost::lexical_cast<bool>(chunkmode));
     if (!compLevel.empty()) ERRCHCK(compressLevel = boost::lexical_cast<int>(compLevel));
     if (!numitr.empty()) num_iter = boost::lexical_cast<uint16_t>(numitr);
+    if (!mp.empty()) mprocess = boost::lexical_cast<bool>(mp);
 #endif
     if (!compress_mod.empty()) {
         // Compression with no option for it
@@ -343,21 +341,53 @@ int main(int argc, char* argv[]) {
         ERRCHCK(verify(verify_mod));
 #ifdef XILINX_DEBUG
     } else if (!cfilelist.empty() || !dfilelist.empty()) {
-        // By default verbosity enabled
-        verbosity = 1;
+        std::vector<std::string> fname_vec;
+        ERRCHCK(get_list_filenames(cfilelist, fname_vec));
+        std::ifstream ifile(fname_vec[0].c_str(), std::ifstream::binary);
+        size_t input_size = get_file_size(ifile);
+
+        std::chrono::duration<double, std::milli> compress_API_time_ms_1(0);
+        std::chrono::duration<double, std::nano> compress_API_time_ns_1(0);
+        auto compress_API_start = std::chrono::high_resolution_clock::now();
         // Compression
         if (!cfilelist.empty()) {
-            std::vector<std::string> fname_vec;
-            ERRCHCK(get_list_filenames(cfilelist, fname_vec));
+            std::vector<std::thread> vecOfThreads;
             for (auto fr : fname_vec) {
-                if (fork() == 0) {
-                    ERRCHCK(zlib_compress(fr));
-                    exit(0);
+                if (mprocess) {
+                    if (fork() == 0) {
+                        ERRCHCK(zlib_compress(fr));
+                        exit(0);
+                    }
+                } else {
+                    vecOfThreads.push_back(std::thread(zlib_compress, fr));
                 }
             }
-            for (auto fr : fname_vec) wait(NULL);
-        }
 
+            if (mprocess) {
+                for (auto fr : fname_vec) wait(NULL);
+            } else {
+                for (std::thread& th : vecOfThreads) {
+                    if (th.joinable()) {
+                        th.join();
+                    }
+                }
+            }
+        }
+        auto compress_API_end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration<double, std::nano>(compress_API_end - compress_API_start);
+        auto duration_ms = std::chrono::duration<double, std::milli>(compress_API_end - compress_API_start);
+        compress_API_time_ns_1 = duration;
+        float throughput_in_mbps_1 =
+            (float)input_size * num_iter * fname_vec.size() * 1000 / compress_API_time_ns_1.count();
+        std::cout << "\n";
+        std::cout << "Throughput: " << throughput_in_mbps_1 << "MB/s"
+                  << " NIter: " << num_iter;
+        if (mprocess)
+            std::cout << " #Processes: " << fname_vec.size();
+        else
+            std::cout << " #Threads: " << fname_vec.size();
+        std::cout << "\n";
+        std::cout << "\n";
         if (!dfilelist.empty()) {
             std::vector<std::string> fname_vec;
             ERRCHCK(get_list_filenames(dfilelist, fname_vec));
@@ -373,9 +403,6 @@ int main(int argc, char* argv[]) {
             for (auto fr : fname_vec) wait(NULL);
         }
     } else if (!filelist.empty()) {
-        // By default verbosity enabled
-        verbosity = 1;
-
         std::vector<std::string> fname_vec;
         ERRCHCK(get_list_filenames(filelist, fname_vec));
         std::cout << "======================================" << std::endl;

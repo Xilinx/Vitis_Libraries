@@ -31,9 +31,9 @@
         "compiler": {
             "sources": [
                 "./src/host.cpp", 
-                "LIB_DIR/common/libs/lz4/lz4OCLHost.cpp", 
-                "LIB_DIR/common/libs/lz4/lz4Base.cpp", 
-                "LIB_DIR/common/libs/lz4/lz4App.cpp", 
+                "LIB_DIR/common/libs/compress/lz4OCLHost.cpp", 
+                "LIB_DIR/common/libs/compress/lz4Base.cpp", 
+                "LIB_DIR/common/libs/compress/lz4App.cpp", 
                 "LIB_DIR/common/libs/compress/compressApp.cpp", 
                 "LIB_DIR/common/libs/xcl2/xcl2.cpp", 
                 "LIB_DIR/common/libs/cmdparser/cmdlineparser.cpp", 
@@ -41,10 +41,8 @@
                 "LIB_DIR/common/thirdParty/xxhash/xxhash.c"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/tests/src/",
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/common/thirdParty/xxhash",
-                "LIB_DIR/common/libs/lz4/",
                 "LIB_DIR/common/libs/compress/"
             ], 
             "symbols": [
@@ -63,13 +61,17 @@
                 }, 
                 {
                     "name": "xilLz4Decompress", 
-                    "clflags": "-DPARALLEL_BLOCK=1 -DPARALLEL_BYTE=8", 
+                    "clflags": "-DPARALLEL_BLOCK=1", 
                     "location": "LIB_DIR/L2/src/lz4_multibyte_decompress_mm.cpp"
                 }
             ]
         }
-    ], 
-    "output_files": "sample.txt.* sample_run.* test.list", 
+    ],
+    "output_files": [
+            "sample.txt.*",
+            "sample_run.*",
+            "test.list"
+    ],         
     "testinfo": {
         "disable": false, 
         "jobs": [

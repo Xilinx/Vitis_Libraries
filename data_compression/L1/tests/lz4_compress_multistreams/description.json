@@ -8,6 +8,13 @@
     "platform_blacklist": [], 
     "part_whitelist": [], 
     "part_blacklist": [], 
+    "QoR_golden": {
+        "VV_LUT": "8282",
+        "VV_FF": "13490",
+        "VV_BRAM": "42",
+        "VV_URAM": "6",
+        "VV_AchievedClockPeriod": "3.015"
+    },
     "project": "lz4_compress_test", 
     "solution": "sol1", 
     "clock": "3.3", 

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,7 @@ class xil_zlib {
     int init(const std::string& binaryFile, uint8_t flow, uint8_t d_type);
     int release();
     uint32_t compress(uint8_t* in, uint8_t* out, uint64_t actual_size, uint32_t host_buffer_size);
+    uint32_t compressFull(uint8_t* in, uint8_t* out, uint64_t actual_size);
     uint32_t decompress(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run = 0, bool enable_p2p = 0);
     uint32_t decompressSeq(uint8_t* in, uint8_t* out, uint32_t actual_size, int cu_run);
     uint32_t compress_file(std::string& inFile_name, std::string& outFile_name, uint64_t input_size);
@@ -111,7 +112,9 @@ class xil_zlib {
     cl::Program* m_program;
     cl::Context* m_context;
     cl::CommandQueue* m_q[C_COMPUTE_UNIT * OVERLAP_BUF_COUNT];
+#ifndef FREE_RUNNING_KERNEL
     cl::CommandQueue* m_q_dec;
+#endif
     cl::CommandQueue* m_q_rd;
     cl::CommandQueue* m_q_rdd;
     cl::CommandQueue* m_q_wr;
@@ -167,6 +170,7 @@ class xil_zlib {
 
     // Device buffers
     cl::Buffer* buffer_input[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
+    cl::Buffer* buffer_output[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
     cl::Buffer* buffer_lz77_output[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
     cl::Buffer* buffer_zlib_output[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
     cl::Buffer* buffer_compress_size[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
@@ -186,18 +190,19 @@ class xil_zlib {
 
     cl::Buffer* buffer_max_codes[MAX_CCOMP_UNITS][OVERLAP_BUF_COUNT];
 
+    cl::Buffer* buffer_checksum_data;
+
     // Decompress Device Buffers
     cl::Buffer* buffer_dec_input[MAX_DDCOMP_UNITS];
     cl::Buffer* buffer_dec_zlib_output[MAX_DDCOMP_UNITS];
     cl::Buffer* buffer_dec_compress_size[MAX_DDCOMP_UNITS];
 
     // Kernel names
-    std::vector<std::string> compress_kernel_names = {"xilLz77Compress"};
+    std::vector<std::string> compress_kernel_names = {"xilLz77Compress", "xilGzipCompBlock"};
     std::vector<std::string> huffman_kernel_names = {"xilHuffmanKernel"};
     std::vector<std::string> treegen_kernel_names = {"xilTreegenKernel"};
-    std::vector<std::string> decompress_kernel_names = {"xilDecompressStream", "xilDecompressFixed",
-                                                        "xilDecompressFull"};
-    std::vector<std::string> data_writer_kernel_names = {"xilZlibDmWriter"};
-    std::vector<std::string> data_reader_kernel_names = {"xilZlibDmReader"};
+    std::vector<std::string> decompress_kernel_names = {"xilDecompressDynamic", "xilDecompressFixed", "xilDecompress"};
+    std::vector<std::string> data_writer_kernel_names = {"xilGzipMM2S"};
+    std::vector<std::string> data_reader_kernel_names = {"xilGzipS2MM"};
 };
 #endif // _XFCOMPRESSION_ZLIB_HPP_

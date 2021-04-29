@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Xilinx, Inc. All rights reserved.
+ * (c) Copyright 2019-2021 Xilinx, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-#include "zlib_old.hpp"
+#include "zlib.hpp"
 #include <fstream>
 #include <vector>
 #include "cmdlineparser.h"
@@ -35,7 +35,7 @@ void xil_compress_decompress_list(std::string& file_list,
                                   uint8_t device_id = 0,
                                   design_flow dflow = XILINX_GZIP) {
     // Create xfZlib object
-    xfZlib xlz(single_bin, max_cr, BOTH, device_id, 0, FULL, dflow);
+    xfZlib xlz(single_bin, false, max_cr, BOTH, device_id, 0, FULL, dflow, ccu, dcu);
     ERROR_STATUS(xlz.error_code());
 
     if (mode != ONLY_DECOMPRESS) {
@@ -164,9 +164,10 @@ void xil_decompress_top(std::string& decompress_mod,
                         std::string& single_bin,
                         uint8_t device_id,
                         uint8_t max_cr,
-                        bool list_flow = false) {
+                        bool list_flow = false,
+                        design_flow dflow = XILINX_GZIP) {
     // Xilinx ZLIB object
-    xfZlib xlz(single_bin, max_cr, DECOMP_ONLY, device_id, 0, FULL);
+    xfZlib xlz(single_bin, false, max_cr, DECOMP_ONLY, device_id, 0, FULL, dflow, 0, cu);
     ERROR_STATUS(xlz.error_code());
     if (!list_flow) std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
@@ -202,7 +203,7 @@ void xil_compress_top(std::string& compress_mod,
                       design_flow dflow = XILINX_GZIP,
                       bool list_flow = false) {
     // Xilinx ZLIB object
-    xfZlib xlz(single_bin, max_cr, COMP_ONLY, device_id, 0, FULL, dflow);
+    xfZlib xlz(single_bin, false, max_cr, COMP_ONLY, device_id, 0, FULL, dflow, cu_id);
     ERROR_STATUS(xlz.error_code());
     if (!list_flow) std::cout << std::fixed << std::setprecision(2) << "E2E(MBps)\t\t:";
 
@@ -266,7 +267,7 @@ void xilCompressDecompressTop(std::string& compress_decompress_mod,
                               uint8_t max_cr_val,
                               design_flow dflow) {
     // Create xfZlib object
-    xfZlib xlz(single_bin, max_cr_val, BOTH, device_id, 0, FULL, dflow);
+    xfZlib xlz(single_bin, false, max_cr_val, BOTH, device_id, 0, FULL, dflow);
     ERROR_STATUS(xlz.error_code());
 
     std::cout << "--------------------------------------------------------------" << std::endl;
@@ -504,5 +505,5 @@ int main(int argc, char* argv[]) {
         xil_compress_top(compress_mod, single_bin, device_id, max_cr_val, ccu_id, dflow);
     } else if (!decompress_mod.empty())
         // "-d" - DeCompress Mode
-        xil_decompress_top(decompress_mod, dcu_id, single_bin, device_id, max_cr_val);
+        xil_decompress_top(decompress_mod, dcu_id, single_bin, device_id, max_cr_val, dflow);
 }

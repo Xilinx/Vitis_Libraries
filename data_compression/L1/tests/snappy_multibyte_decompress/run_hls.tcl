@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2021 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -O -argv "${XF_PROJ_ROOT}/L1/tests/snappy_decompress/sample.txt.snappy ${XF_PROJ_ROOT}/L1/tests/snappy_multibyte_decompress/sample.txt.snappy.out ${XF_PROJ_ROOT}/L1/tests/snappy_multibyte_decompress/sample.txt" 
+  cosim_design -disable_dependency_check -O -argv "${XF_PROJ_ROOT}/L1/tests/snappy_decompress/sample.txt.snappy ${XF_PROJ_ROOT}/L1/tests/snappy_multibyte_decompress/sample.txt.snappy.out ${XF_PROJ_ROOT}/L1/tests/snappy_multibyte_decompress/sample.txt" 
 }
 
 if {$VIVADO_SYN == 1} {

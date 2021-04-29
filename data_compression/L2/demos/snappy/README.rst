@@ -27,23 +27,23 @@ The final Fmax achieved for this design is 299MHz
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM  
 ========== ===== ====== ===== ===== ===== 
-Compress   47K   10.1K  49.6K 48    48    
+Compress   48K   10.8K  50.6K 48    48    
 ---------- ----- ------ ----- ----- ----- 
-DeCompress 33.7K 14K    43.8K 146   0    
+DeCompress 12.4K 2.9K   16.5K 16    4    
 ========== ===== ====== ===== ===== ===== 
 
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents the best kernel throughput achieved with single
+Table below presents the kernel throughput achieved with single
 compute unit during execution of this application.
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Best Compression Throughput   2.1 GB/s
-Best Decompression Throughput 1.8 GB/s
-Average Compression Ratio     2.15x (Silesia Benchmark)
+Compression Throughput        1.8 GB/s
+Decompression Throughput      1 GB/s
+Average Compression Ratio     2.14x (Silesia Benchmark)
 ============================= =========================
 
 Note: Overall throughput can still be increased with multiple compute
@@ -83,32 +83,32 @@ Hardware
      Note: This command compiles for hardware execution. It generates kernel binary ".xclbin" file. 
            This file is placed in ./build/xclbin*/ directory under Snappy folder.
 
-Execution Steps
-~~~~~~~~~~~~~~~
+Executable Usage
+----------------
+ 
+1. To execute single file for compression             : ``./build/xil_snappy -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -c <file_name>``
+2. To execute single file for decompression           : ``./build/xil_snappy -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -d <file_name.snappy>``
+3. To validate single file (compress & decompress)    : ``./build/xil_snappy -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -t <file_name>``
+4. To execute multiple files for compression     : ``./build/xil_snappy -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -cfl <files.list>``
+5. To execute multiple files for decompression     : ``./build/xil_snappy -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -dfl <compressed files.list>``
+6. To validate multiple files (compress and decompress) : ``./build/xil_snappy -xbin ./build/xclbin_<xsa_name>_<TARGET mode>/<compress_decompress.xclbin> -l <files.list>``  
+               
+      - ``<files.list>``: Contains various file names with current path
 
-::
+      - Note: Default arguments are set in Makefile
 
-     Input Arguments: 
-       
-           1. To execute single file for compression :  ./build/xil_snappy -sx <compress_decompress xclbin> -c <file_name>
-           2. To execute single file for decompression: ./build/xil_snappy -sx <compress_decompress xclbin> -d <file_name.snappy>
-           3. To validate various files together:       ./build/xil_snappy -sx <compress_decompress xclbin> -l <files.list>
-               3.a. <files.list>: Contains various file names with current path
-           4. To execute single file for compression and decompression : ./build/xil_snappy -sx <compress_decompress xclbin> -v <file_name>    
-           
-      Note: Default arguments are set in Makefile
+The usage of the generated executable is as follows:
 
-     Help:
+.. code-block:: bash
 
-           ===============================================================================================
-           Usage: application.exe -[-h-c-l-d-sx-v-B-x]
-
-                   --help                  -h      Print Help Options   Default: [false]
-                   --compress              -c      Compress
-                   --file_list             -l      List of Input Files
-                   --decompresss           -d      Decompress
-                   --compress_decompress   -sx     Compress_Decompress binary
-                   --validate              -v      Single file validate for Compress and Decompress 
-                   --block_size            -B      Compress Block Size [0-64: 1-256: 2-1024: 3-4096] Default: [0]
-                   --flow                  -x      Validation [0-All: 1-XcXd: 2-XcSd: 3-ScXd]   Default:[1]
-           ===============================================================================================
+          --help,                -h        Print Help Options
+          --compress,            -c        Compress
+          --decompress,          -d        Decompress
+          --test,                -t        Xilinx compress & Decompress
+          --compress_list,       -cfl      Compress List of Input Files
+          --decompress_list,     -dfl      Decompress List of compressed Input Files
+          --test_list,           -l        Xilinx Compress & Decompress on Input Files
+          --max_cr,              -mcr      Maximum CR                                            Default: [10]
+          --xclbin,              -xbin     XCLBIN
+          --device_id,           -id       Device ID                                             Default: [0]
+          --block_size,          -B        Compress Block Size [0-64: 1-256: 2-1024: 3-4096]     Default: [0]

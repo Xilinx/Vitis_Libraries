@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2019-2021 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,16 +108,16 @@ int main(int argc, char* argv[]) {
     if (input_size > 0) no_blocks = (input_size - 1) / block_length + 1;
     uint32_t oIdx = 0, offset = 0;
 
-    uint8_t temp_buff[10] = {xf::compression::FLG_BYTE,
-                             BLOCK_SIZE,
-                             input_size,
-                             input_size >> 8,
-                             input_size >> 16,
-                             input_size >> 24,
-                             0,
-                             0,
-                             0,
-                             0};
+    uint32_t temp_buff[10] = {xf::compression::FLG_BYTE,
+                              BLOCK_SIZE,
+                              input_size,
+                              input_size >> 8,
+                              input_size >> 16,
+                              input_size >> 24,
+                              0,
+                              0,
+                              0,
+                              0};
 
     // xxhash is used to calculate hash value
     uint32_t xxh = XXH32(temp_buff, 10, 0);

@@ -7,7 +7,14 @@
     ], 
     "platform_blacklist": [], 
     "part_whitelist": [], 
-    "part_blacklist": [], 
+    "part_blacklist": [],
+    "QoR_golden": {
+        "VV_LUT": "5889",
+        "VV_FF": "3887",
+        "VV_BRAM": "4",
+        "VV_URAM": "6",
+        "VV_AchievedClockPeriod": "2.968"
+    }, 
     "project": "snappy_compress_test", 
     "solution": "sol1", 
     "clock": "3.3", 
