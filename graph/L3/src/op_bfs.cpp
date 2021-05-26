@@ -20,6 +20,7 @@
 #define _XF_GRAPH_L3_OP_BFS_CPP_
 
 #include "op_bfs.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 namespace xf {
 namespace graph {
@@ -27,17 +28,23 @@ namespace L3 {
 
 void createHandleBFS(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
     // Platform related operations
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int err;
+
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
-    handle.context = cl::Context(handle.device);
+    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
     handle.q = cl::CommandQueue(handle.context, handle.device,
-                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
     handle.xclBins = xcl::import_binary_file(pXclbin);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    handle.program = cl::Program(handle.context, devices2, handle.xclBins);
+    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &err);
+    logger.logCreateProgram(err);
 }
 
 uint32_t opBFS::cuPerBoardBFS;
@@ -129,7 +136,10 @@ void opBFS::bufferInit(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    kernel0 = cl::Kernel(program, instanceName);
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int err;
+    kernel0 = cl::Kernel(program, instanceName, &err);
+    logger.logCreateKernel(err);
     std::cout << "INFO: Kernel has been created" << std::endl;
 
     std::vector<cl_mem_ext_ptr_t> mext_in = std::vector<cl_mem_ext_ptr_t>(7);

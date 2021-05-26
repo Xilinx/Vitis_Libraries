@@ -403,12 +403,12 @@ class sharedHandlesCosSimDense {
     }
 };
 
-extern "C" void bfs_fpga(uint32_t numVertices,
-                         uint32_t numEdges,
-                         uint32_t sourceID,
-                         xf::graph::Graph<uint32_t, uint32_t> g,
-                         uint32_t* predecent,
-                         uint32_t* distance) {
+extern "C" int bfs_fpga(uint32_t numVertices,
+                        uint32_t numEdges,
+                        uint32_t sourceID,
+                        xf::graph::Graph<uint32_t, uint32_t> g,
+                        uint32_t* predecent,
+                        uint32_t* distance) {
     //----------------- Text Parser --------------------------
     std::string opName;
     std::string kernelName;
@@ -419,8 +419,8 @@ extern "C" void bfs_fpga(uint32_t numVertices,
     std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config.json";
     std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
-        std::cout << "Error : config file doesn't exist !" << std::endl;
-        exit(1);
+        std::cout << "Error : config file " << jsonFilePath << " doesn't exist !" << std::endl;
+        return 2;
     }
     char line[1024] = {0};
     char* token;
@@ -472,9 +472,10 @@ extern "C" void bfs_fpga(uint32_t numVertices,
     (handle0->opbfs)->join();
     handle0->free();
     g.freeBuffers();
+    return 0;
 }
 
-extern "C" void load_xgraph_fpga(uint32_t numVertices, uint32_t numEdges, xf::graph::Graph<uint32_t, float> g) {
+extern "C" int load_xgraph_fpga(uint32_t numVertices, uint32_t numEdges, xf::graph::Graph<uint32_t, float> g) {
     //----------------- Text Parser --------------------------
     std::string opName;
     std::string kernelName;
@@ -486,8 +487,8 @@ extern "C" void load_xgraph_fpga(uint32_t numVertices, uint32_t numEdges, xf::gr
     std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config_shortest_path.json";
     std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
-        std::cout << "Error : config file doesn't exist !" << std::endl;
-        exit(1);
+        std::cout << "Error : config file " << jsonFilePath << " doesn't exist !" << std::endl;
+        return 2;
     }
     char line[1024] = {0};
     char* token;
@@ -537,6 +538,7 @@ extern "C" void load_xgraph_fpga(uint32_t numVertices, uint32_t numEdges, xf::gr
 
     //--------------- Free and delete -----------------------------------
     g.freeBuffers();
+    return 0;
 }
 
 extern "C" void shortest_ss_pos_wt_fpga(uint32_t numVertices,
@@ -556,9 +558,9 @@ extern "C" void shortest_ss_pos_wt_fpga(uint32_t numVertices,
     // g.freeBuffers();
 }
 
-extern "C" void load_xgraph_pageRank_wt_fpga(uint32_t numVertices,
-                                             uint32_t numEdges,
-                                             xf::graph::Graph<uint32_t, float> g) {
+extern "C" int load_xgraph_pageRank_wt_fpga(uint32_t numVertices,
+                                            uint32_t numEdges,
+                                            xf::graph::Graph<uint32_t, float> g) {
     //----------------- Text Parser --------------------------
     std::string opName;
     std::string kernelName;
@@ -570,8 +572,8 @@ extern "C" void load_xgraph_pageRank_wt_fpga(uint32_t numVertices,
     std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config_pagerank.json";
     std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
-        std::cout << "Error : config file doesn't exist !" << std::endl;
-        exit(1);
+        std::cout << "Error : config file " << jsonFilePath << " doesn't exist !" << std::endl;
+        return 2;
     }
     char line[1024] = {0};
     char* token;
@@ -621,6 +623,8 @@ extern "C" void load_xgraph_pageRank_wt_fpga(uint32_t numVertices,
 
     //--------------- Free and delete -----------------------------------
     g.freeBuffers();
+
+    return 0;
 }
 
 extern "C" void pageRank_wt_fpga(
@@ -637,9 +641,9 @@ extern "C" void pageRank_wt_fpga(
     // g.freeBuffers();
 }
 
-extern "C" void load_xgraph_cosine_nbor_ss_fpga(uint32_t numVertices,
-                                                uint32_t numEdges,
-                                                xf::graph::Graph<uint32_t, float> g) {
+extern "C" int load_xgraph_cosine_nbor_ss_fpga(uint32_t numVertices,
+                                               uint32_t numEdges,
+                                               xf::graph::Graph<uint32_t, float> g) {
     //----------------- Text Parser --------------------------
     std::string opName;
     std::string kernelName;
@@ -651,8 +655,8 @@ extern "C" void load_xgraph_cosine_nbor_ss_fpga(uint32_t numVertices,
     std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config_cosine_nbor_ss.json";
     std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
-        std::cout << "Error : config file doesn't exist !" << std::endl;
-        exit(1);
+        std::cout << "Error : config file " << jsonFilePath << " doesn't exist !" << std::endl;
+        return 2;
     }
     char line[1024] = {0};
     char* token;
@@ -702,6 +706,7 @@ extern "C" void load_xgraph_cosine_nbor_ss_fpga(uint32_t numVertices,
 
     //--------------- Free and delete -----------------------------------
     g.freeBuffers();
+    return 0;
 }
 
 extern "C" void cosine_nbor_ss_fpga(uint32_t topK,
@@ -723,9 +728,9 @@ extern "C" void cosine_nbor_ss_fpga(uint32_t topK,
     // g.freeBuffers();
 }
 
-extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
-                                                  uint32_t cuNm,
-                                                  xf::graph::Graph<int32_t, int32_t>** g) {
+extern "C" int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
+                                                 uint32_t cuNm,
+                                                 xf::graph::Graph<int32_t, int32_t>** g) {
     //----------------- Text Parser --------------------------
     std::string opName;
     std::string kernelName;
@@ -737,8 +742,8 @@ extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
     std::string jsonFilePath = basePath + "/dev/gdk/gsql/src/QueryUdf/config_cosinesim_ss_dense_fpga.json";
     std::fstream userInput(jsonFilePath, std::ios::in);
     if (!userInput) {
-        std::cout << "Error : config file doesn't exist !" << std::endl;
-        exit(1);
+        std::cout << "Error : config file " << jsonFilePath << " doesn't exist !" << std::endl;
+        return -2;
     }
     char line[1024] = {0};
     char* token;
@@ -757,11 +762,11 @@ extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
             } else if (!std::strcmp(token, "xclbinPath")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 std::string tmpStr = token;
-                xclbinPath = basePath + tmpStr;
+                xclbinPath = tmpStr;
             } else if (!std::strcmp(token, "xclbinPath2")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 std::string tmpStr2 = token;
-                xclbinPath2 = basePath + tmpStr2;
+                xclbinPath2 = tmpStr2;
             } else if (!std::strcmp(token, "deviceNeeded")) {
                 token = strtok(NULL, "\"\t ,}:{\n");
                 //             deviceNeeded = std::atoi(token);
@@ -781,12 +786,24 @@ extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
     op0.deviceNeeded = deviceNeeded;
     op0.cuPerBoard = cuNm;
 
+    std::fstream xclbinFS(xclbinPath, std::ios::in);
+    if (!xclbinFS) {
+        std::cout << "Error : xclbinFile doesn't exist: " << xclbinPath << std::endl;
+        return -3;
+    }
+
+    std::fstream xclbinFS2(xclbinPath2, std::ios::in);
+    if (!xclbinFS2) {
+        std::cout << "Error : xclbinFile2 doesn't exist: " << xclbinPath2 << std::endl;
+        return -4;
+    }
     std::shared_ptr<xf::graph::L3::Handle> handleInstance(new xf::graph::L3::Handle);
     sharedHandlesCosSimDense::instance().handlesMap[0] = handleInstance;
     std::shared_ptr<xf::graph::L3::Handle> handle0 = sharedHandlesCosSimDense::instance().handlesMap[0];
 
     handle0->addOp(op0);
-    handle0->setUp();
+    int status = handle0->setUp();
+    if (status < 0) return status;
 
     //---------------- Run Load Graph -----------------------------------
     for (int i = 0; i < deviceNeeded * cuNm; ++i) {
@@ -801,6 +818,8 @@ extern "C" void loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded,
         delete[] g[i]->numVerticesPU;
     }
     delete[] g;
+
+    return 0;
 }
 
 extern "C" void cosinesim_ss_dense_fpga(uint32_t deviceNeeded,

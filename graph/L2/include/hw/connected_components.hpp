@@ -784,7 +784,6 @@ void connectedComponentImpl(const int vertexNum,
  * @param offsetCSCTmp1 temp row offset for CSR2CSC convert
  * @param offsetCSCTmp2 temp row offset of CSR2CSC convert
  * @param queue32 intermediate queue32 used during the internal BFS
- * @param queue512 intermediate queue512 used during the internal BFS
  * @param component512 Same as component32 but in 512bit, which shoude be shared the same buffer with component32 in
  * host
  * @param component32 return result buffer with the vertex label containing the lowest vertex id in the connnected

@@ -32,6 +32,7 @@
 #include <xrm.h>
 
 #include <thread>
+#include <future>
 #include <unistd.h>
 namespace xf {
 namespace graph {
@@ -161,6 +162,10 @@ class openXRM {
     std::thread unloadXclbinNonBlock(unsigned int deviceId) { return std::thread(xrmUnloadOneDevice, ctx, deviceId); }
     std::thread loadXclbinNonBlock(unsigned int deviceId, char* xclbinName) {
         return std::thread(xrmLoadOneDevice, ctx, deviceId, xclbinName);
+    }
+    std::future<int> loadXclbinAsync(unsigned int deviceId, char* xclbinName) {
+        std::future<int> ret = std::async(&xrmLoadOneDevice, ctx, deviceId, xclbinName);
+        return ret;
     }
 
     void allocCU(xrmCuResource* resR, const char* kernelName, const char* kernelAlias, int requestLoad) {
@@ -515,9 +520,12 @@ inline void worker(queue& q,
             resR[i] = (xrmCuResource*)malloc(sizeof(xrmCuResource));
             memset(resR[i], 0, sizeof(xrmCuResource));
         }
+
+        bool toStop = false;
         for (int i = 0; i < requestNm; ++i) {
-            if (!t[i].valid()) exit(1);
+            if (!t[i].valid()) toStop = true;
         }
+        if (toStop) break;
 #ifdef __DEBUG__
         std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_compute_time =
             std::chrono::high_resolution_clock::now();
@@ -599,9 +607,11 @@ inline void worker2(queue& q,
         for (int i = 0; i < requestNm; ++i) {
             t[i] = q.getWork();
         }
+        bool toStop = false;
         for (int i = 0; i < requestNm; ++i) {
-            if (!t[i].valid()) exit(1);
+            if (!t[i].valid()) toStop = true;
         }
+        if (toStop) break;
 #ifdef __DEBUG__
         std::chrono::time_point<std::chrono::high_resolution_clock> l_tp_compute_time =
             std::chrono::high_resolution_clock::now();

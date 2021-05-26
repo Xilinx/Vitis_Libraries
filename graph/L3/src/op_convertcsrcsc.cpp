@@ -20,24 +20,30 @@
 #define _XF_GRAPH_L3_OP_CONVERTCSRCSC_CPP_
 
 #include "op_convertcsrcsc.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 namespace xf {
 namespace graph {
 namespace L3 {
 
 void createHandleConvertCsrCsc(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int err;
     // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
-    handle.context = cl::Context(handle.device);
+    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &err);
+    logger.logCreateContext(err);
     handle.q = cl::CommandQueue(handle.context, handle.device,
-                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    logger.logCreateCommandQueue(err);
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
     handle.xclBins = xcl::import_binary_file(pXclbin);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    handle.program = cl::Program(handle.context, devices2, handle.xclBins);
+    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &err);
+    logger.logCreateProgram(err);
 }
 
 uint32_t opConvertCsrCsc::cuPerBoardConvertCsrCsc;
@@ -118,6 +124,8 @@ void opConvertCsrCsc::bufferInit(clHandle* hds,
                                  cl::Kernel& kernel0,
                                  std::vector<cl::Memory>& ob_in,
                                  std::vector<cl::Memory>& ob_out) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int err;
     cl::Device device = hds[0].device;
     const char* instanceName = instanceName0.c_str();
     // Creating Context and Command Queue for selected Device
@@ -128,7 +136,8 @@ void opConvertCsrCsc::bufferInit(clHandle* hds,
     std::vector<cl::Device> devices;
     devices.push_back(hds[0].device);
     cl::Program program = hds[0].program;
-    kernel0 = cl::Kernel(program, instanceName);
+    kernel0 = cl::Kernel(program, instanceName, &err);
+    logger.logCreateKernel(err);
     std::cout << "INFO: Kernel has been created" << std::endl;
 
     std::vector<cl_mem_ext_ptr_t> mext_in = std::vector<cl_mem_ext_ptr_t>(6);

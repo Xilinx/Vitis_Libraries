@@ -35,6 +35,8 @@
 #endif
 #endif
 
+#include "xf_utils_sw/logger.hpp"
+
 //#define BANCKMARK
 
 // typedef double DT;
@@ -292,20 +294,29 @@ int main(int argc, const char* argv[]) {
     }
     free(pagerank1);
 #else
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    // Get CL devices.
+    cl_int fail;
+
     // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+
+    cl::Context context(device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbin_path);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
-    cl::Kernel kernel_pagerank(program, "kernel_pagerank_0");
+    cl::Program program(context, devices, xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
+    cl::Kernel kernel_pagerank(program, "kernel_pagerank_0", &fail);
+    logger.logCreateKernel(fail);
     std::cout << "INFO: Kernel has been created" << std::endl;
 
 #ifndef USE_HBM
@@ -561,9 +572,11 @@ int main(int argc, const char* argv[]) {
 
     if (err < nrows * tolerance) {
         std::cout << "INFO: Result is correct" << std::endl;
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
         return 0;
     } else {
         std::cout << "INFO: Result is wrong" << std::endl;
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
         return 1;
     }
 }

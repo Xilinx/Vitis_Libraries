@@ -16,6 +16,7 @@
 
 #include "utils.hpp"
 #include "xf_graph_L3.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 #define DT float
 
@@ -195,11 +196,11 @@ int main(int argc, const char* argv[]) {
     delete[] similarity;
     delete[] resultID;
 
-    if (err == 0) {
-        std::cout << "INFO: Results are correct" << std::endl;
-        return 0;
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    if (err) {
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
     } else {
-        std::cout << "Error: Results are false" << std::endl;
-        return 1;
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
     }
+    return err;
 }

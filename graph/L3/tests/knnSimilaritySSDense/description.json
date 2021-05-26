@@ -33,7 +33,8 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/include"
+                "LIB_DIR/L3/include",
+                "LIB_DIR/../utils/L1/include"
             ], 
             "options": "-O3 -I$(XILINX_XRM)/include"
         }, 
@@ -49,13 +50,6 @@
     }, 
     "v++": {
         "compiler": {
-            "includepaths": [
-                "LIB_DIR/L1/include/hw", 
-                "LIB_DIR/L2/include/hw", 
-                "LIB_DIR/L2/tests/dense_similarity/kernel"
-            ]
-        }, 
-        "linker": {
             "includepaths": [
                 "LIB_DIR/L1/include/hw", 
                 "LIB_DIR/L2/include/hw", 

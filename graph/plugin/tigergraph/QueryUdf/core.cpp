@@ -384,7 +384,10 @@ std::vector<CosineVecValue> makeCosineVector(SnomedConcept concept,
 }
 }
 
-int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, uint32_t cuNm, xf::graph::Graph<int32_t, int32_t>** g) {
+int loadgraph_cosinesim_ss_dense_fpga_wrapper(uint32_t deviceNeeded,
+                                              uint32_t cuNm,
+                                              xf::graph::Graph<int32_t, int32_t>** g) {
+    int status = 0;
     std::cout << "INFO: Running Load Graph for Single Source Cosine Similarity Dense API\n\n";
 
     // open the library
@@ -395,12 +398,12 @@ int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, uint32_t cuNm, xf::
 
     if (!handle) {
         std::cerr << "ERROR: Cannot open library: " << dlerror() << '\n';
-        return 1;
+        return -5;
     }
 
     // load the symbol
     std::cout << "INFO: Loading symbol loadgraph_cosinesim_ss_dense_fpga...\n";
-    typedef void (*load_t)(uint32_t, uint32_t, xf::graph::Graph<int32_t, int32_t>**);
+    typedef int (*load_t)(uint32_t, uint32_t, xf::graph::Graph<int32_t, int32_t>**);
 
     // reset errors
     dlerror();
@@ -410,17 +413,17 @@ int loadgraph_cosinesim_ss_dense_fpga(uint32_t deviceNeeded, uint32_t cuNm, xf::
     if (dlsym_error2) {
         std::cerr << "ERROR: Cannot load symbol 'loadgraph_cosinesim_ss_dense_fpga': " << dlsym_error2 << '\n';
         dlclose(handle);
-        return 1;
+        return -6;
     }
 
     // use it to do the calculation
     std::cout << "INFO: Calling 'loadgraph_cosinesim_ss_dense_fpga'...\n";
-    runT(deviceNeeded, cuNm, g);
+    status = runT(deviceNeeded, cuNm, g);
 
     // close the library
-    std::cout << "INFO: Closing library...\n";
+    std::cout << "INFO: Closing library... status=" << status << std::endl;
     dlclose(handle);
-    return 0;
+    return status;
 }
 
 int cosinesim_ss_dense_fpga(uint32_t deviceNeeded,

@@ -57,7 +57,7 @@ extern "C" void kernel_pagerank_0(int nrows,
     32 max_read_burst_length = 2 num_write_outstanding = 2 max_write_burst_length = 32 depth = 2
 
 #pragma HLS INTERFACE m_axi offset = slave bundle = gmem7 port = orderUnroll latency = 125 num_read_outstanding = \
-    32 max_read_burst_length = 32 num_write_outstanding = 32 max_write_burst_length = 32 depth = depOffset
+    32 max_read_burst_length = 32 num_write_outstanding = 32 max_write_burst_length = 32 depth = depthOffset
 
 #pragma HLS INTERFACE s_axilite port = offsetCSC bundle = control
 #pragma HLS INTERFACE s_axilite port = indiceCSC bundle = control

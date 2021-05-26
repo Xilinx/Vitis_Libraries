@@ -19,6 +19,7 @@
 #include "utils.hpp"
 #include "xf_graph_L3.hpp"
 #include <cmath>
+#include "xf_utils_sw/logger.hpp"
 
 typedef float DT;
 
@@ -218,9 +219,11 @@ int main(int argc, const char* argv[]) {
 
     if (err < numVertices * tolerance) {
         std::cout << "INFO: Result is correct" << std::endl;
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
         return 0;
     } else {
         std::cout << "INFO: Result is wrong" << std::endl;
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
         return 1;
     }
 }

@@ -9,22 +9,26 @@ The algorithms implemented by Vitis Graph Library include:
 - Similarity analysis: Cosine Similarity, Jaccard Similarity, k-nearest neighbor.
 - Centrality analysis: PageRank.
 - Pathfinding: Single Source Shortest Path (SSSP), Multi-Sources Shortest Path (MSSP).
-- Connectivity analysis: Weekly Connected Components and Strongly Connected Components.
+- Connectivity analysis: Weakly Connected Components and Strongly Connected Components.
 - Community Detection: Louvain Modularity, Label Propagation and Triangle Count.
 - Search: Breadth First Search.
 - Graph Format: Calculate Degree and Format Convert between CSR and CSC.
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these Kernels are built into xclbins and compared with Spark. For details on running these cases, please refer to the README file in that folder. The benchmark results can be found in [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2020.2/index.html).
+In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/results.html).
+
+## Software level API
+
+`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/guide_L3/L3_internal/getting_started.html).
 
 ## Xilinx TigerGraph Integration
 
-Xilinx TigerGraph Integration is offered in `plugin`. For details on running these cases, please refer to [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2020.2/index.html).
+Xilinx TigerGraph Integration is offered in `plugin`. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/plugin/tigergraph_integration.html).
 
 ## Documentations
 
-For more details of the Graph library, please refer to [xf_graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2020.2/index.html).
+For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2021.1/index.html).
 
 ## License
 
@@ -45,7 +49,5 @@ Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-
     limitations under the License.
     Copyright 2019 Xilinx, Inc.
 
-## Contribution/Feedback
 
-Welcome! Guidelines to be published soon.
 

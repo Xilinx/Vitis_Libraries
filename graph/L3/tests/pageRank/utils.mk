@@ -25,18 +25,18 @@ DEBUG := no
 #'estimate' for estimate report generation
 #'system' for system report generation
 ifneq ($(REPORT), no)
-LDCLFLAGS += --report estimate
-LDCLFLAGS += --report system
+VPP_LDFLAGS += --report estimate
+VPP_LDFLAGS += --report system
 endif
 
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
-LDCLFLAGS += --profile_kernel data:all:all:all
+VPP_LDFLAGS += --profile_kernel data:all:all:all
 endif
 
 #Generates debug summary report
 ifeq ($(DEBUG), yes)
-LDCLFLAGS += --dk protocol:all:all:all
+VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
 #Check environment setup
@@ -75,18 +75,21 @@ endif
 CXX := g++
 ifeq ($(HOST_ARCH), x86)
 ifneq ($(shell expr $(shell g++ -dumpversion) \>= 5), 1)
-#ifndef XILINX_VIVADO
-#$(error [ERROR]: g++ version older. Please use 5.0 or above)
-#else
-#CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
-#$(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
-#endif
+ifndef XILINX_VIVADO
+$(error [ERROR]: g++ version older. Please use 5.0 or above)
+else
+CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin/g++
+$(warning [WARNING]: g++ version older. Using g++ provided by the tool : $(CXX))
+endif
 endif
 else ifeq ($(HOST_ARCH), aarch64)
 CXX := $(XILINX_VITIS)/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++
 else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
 endif
+
+#Setting VPP
+VPP := v++
 
 #Cheks for aiecompiler
 
@@ -192,4 +195,5 @@ RM = rm -f
 RMDIR = rm -rf
 
 MV = mv -f
+CP = cp -rf
 ECHO:= @echo

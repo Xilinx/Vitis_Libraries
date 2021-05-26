@@ -20,24 +20,32 @@
 #define _XF_GRAPH_L3_OP_SP_CPP_
 
 #include "op_sp.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 namespace xf {
 namespace graph {
 namespace L3 {
 
 void createHandleSP(clHandle& handle, const char* kernelName, const char* pXclbin, int32_t IDDevice) {
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int fail;
+
     // Platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     handle.device = devices[IDDevice];
-    handle.context = cl::Context(handle.device);
+    handle.context = cl::Context(handle.device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
     handle.q = cl::CommandQueue(handle.context, handle.device,
-                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                                CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
+
     std::string devName = handle.device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
     handle.xclBins = xcl::import_binary_file(pXclbin);
     std::vector<cl::Device> devices2;
     devices2.push_back(handle.device);
-    handle.program = cl::Program(handle.context, devices2, handle.xclBins);
+    handle.program = cl::Program(handle.context, devices2, handle.xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
 }
 
 uint32_t opSP::cuPerBoardSP;

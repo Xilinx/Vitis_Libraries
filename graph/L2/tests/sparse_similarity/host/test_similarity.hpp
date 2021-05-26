@@ -22,6 +22,7 @@
 #endif
 
 #include "utils.hpp"
+#include "xf_utils_sw/logger.hpp"
 
 template <int PUNUM>
 void generateSourceParams(unsigned int numVerticesPU[PUNUM],
@@ -160,24 +161,31 @@ int computeSimilarity(std::string xclbinPath,
 ///////////////////////////////////////////////////////////////////////
 
 #ifndef HLS_TEST
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int fail;
+
     // platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbinPath);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
 
     // create kernels
     std::vector<cl::Kernel> similarity_kernel(repInt);
     for (int i = 0; i < repInt; i++) {
-        similarity_kernel[i] = cl::Kernel(program, "sparseSimilarityKernel");
+        similarity_kernel[i] = cl::Kernel(program, "sparseSimilarityKernel", &fail);
+        logger.logCreateKernel(fail);
     }
     std::cout << "INFO: kernel has been created" << std::endl;
 
@@ -354,7 +362,11 @@ int computeSimilarity(std::string xclbinPath,
     // need to write a compare function in order to compare golden values with results and put it here
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     int err = checkData<PU_NUMBER>(goldenFile, result_id[0], similarity[0]);
-
+    if (err) {
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
+    } else {
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    }
     return err;
 }
 
@@ -406,24 +418,31 @@ int computeSimilarity(std::string xclbinPath,
 ///////////////////////////////////////////////////////////////////////
 
 #ifndef HLS_TEST
+    xf::common::utils_sw::Logger logger(std::cout, std::cerr);
+    cl_int fail;
+
     // platform related operations
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     // Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::Context context(device, NULL, NULL, NULL, &fail);
+    logger.logCreateContext(fail);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &fail);
+    logger.logCreateCommandQueue(fail);
     std::string devName = device.getInfo<CL_DEVICE_NAME>();
     printf("INFO: Found Device=%s\n", devName.c_str());
 
     cl::Program::Binaries xclBins = xcl::import_binary_file(xclbinPath);
     devices.resize(1);
-    cl::Program program(context, devices, xclBins);
+    cl::Program program(context, devices, xclBins, NULL, &fail);
+    logger.logCreateProgram(fail);
 
     // create kernels
     std::vector<cl::Kernel> similarity_kernel(repInt);
     for (int i = 0; i < repInt; i++) {
-        similarity_kernel[i] = cl::Kernel(program, "denseSimilarityKernel");
+        similarity_kernel[i] = cl::Kernel(program, "denseSimilarityKernel", &fail);
+        logger.logCreateKernel(fail);
     }
     std::cout << "INFO: kernel has been created" << std::endl;
 
@@ -556,12 +575,12 @@ int computeSimilarity(std::string xclbinPath,
     events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
     events_write[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
     exec_time0 = (timeEnd - timeStart) / 1000.0;
-    std::cout << "INFO: Data transfer from host to device: " << exec_time0 << " us\n";
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_H2D_MS, exec_time0);
     std::cout << "-------------------------------------------------------" << std::endl;
     events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_START, &timeStart);
     events_read[0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
     exec_time0 = (timeEnd - timeStart) / 1000.0;
-    std::cout << "INFO: Data transfer from device to host: " << exec_time0 << " us\n";
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_D2H_MS, exec_time0);
     std::cout << "-------------------------------------------------------" << std::endl;
     exec_time0 = 0;
     for (int i = 0; i < repInt; ++i) {
@@ -569,7 +588,7 @@ int computeSimilarity(std::string xclbinPath,
         events_kernel[i][0].getProfilingInfo(CL_PROFILING_COMMAND_END, &timeEnd);
         exec_time0 += (timeEnd - timeStart) / 1000.0;
     }
-    std::cout << "INFO: Average kernel execution per run: " << exec_time0 / repInt << " us\n";
+    logger.info(xf::common::utils_sw::Logger::Message::TIME_KERNEL_MS, exec_time0 / repInt);
     std::cout << "-------------------------------------------------------" << std::endl;
     unsigned long exec_timeE2E = diff(&end_time, &start_time);
     std::cout << "INFO: FPGA execution time of " << repInt << " runs:" << exec_timeE2E << " us\n"
@@ -586,7 +605,11 @@ int computeSimilarity(std::string xclbinPath,
     // need to write a compare function in order to compare golden values with results and put it here
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     int err = checkData<PU_NUMBER>(goldenFile, result_id[0], similarity[0]);
-
+    if (err) {
+        logger.error(xf::common::utils_sw::Logger::Message::TEST_FAIL);
+    } else {
+        logger.info(xf::common::utils_sw::Logger::Message::TEST_PASS);
+    }
     return err;
 }
 
