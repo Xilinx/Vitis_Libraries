@@ -167,9 +167,9 @@ template <typename T, int N, int NCU>
 void inverse(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataX[N][N]) {
     T dataD[NCU][(N + NCU - 1) / NCU];
 #pragma HLS resource variable = dataD core = XPM_MEMORY uram
-#pragma HLS array_partition variable = dataD cyclic factor = NCU dim = 1
+#pragma HLS array_partition variable = dataD cyclic factor = NCU
     T buf[N], buf_i[NCU][(N + NCU - 1) / NCU], buf_o[N];
-#pragma HLS array_partition variable = buf_i cyclic factor = NCU dim = 1
+#pragma HLS array_partition variable = buf_i cyclic factor = NCU
     for (int c = 0; c < n; c++) {
         for (int i = 0; i < (n + NCU - 1) / NCU; i++) {
             for (int k = 0; k < NCU; k++) {
@@ -205,7 +205,7 @@ void inverse(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataX[N][N]) {
 template <typename T, int N, int NCU>
 void inverse_core(int n, T dataA[NCU][(N + NCU - 1) / NCU][N], T dataX[N][N]) {
     T tmp1, dataj[NCU][N];
-#pragma HLS array_partition variable = dataj cyclic factor = NCU dim = 1
+#pragma HLS array_partition variable = dataj cyclic factor = NCU
 
 Loop_col:
     for (int j = 0; j < n; ++j) {
@@ -250,7 +250,7 @@ void pomatrixinverse(int m, T* A, int lda, int& info) {
         A[0] = 1.0 / A[0];
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
-#pragma HLS array_partition variable = matA cyclic factor = NCU dim = 1
+#pragma HLS array_partition variable = matA cyclic factor = NCU
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
 
     Loop_read:

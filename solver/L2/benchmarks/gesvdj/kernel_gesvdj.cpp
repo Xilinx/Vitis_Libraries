@@ -16,6 +16,7 @@
 
 #include "xf_solver_L2.hpp"
 #define MA 16 // Symmetric Matrix Row size
+//#define MA 512// Symmetric Matrix Row size
 #define NA MA // Symmetric Matrix Col size
 
 extern "C" void kernel_gesvdj_0(
@@ -39,4 +40,5 @@ extern "C" void kernel_gesvdj_0(
     //  // Calling for svd core function
     int info;
     xf::solver::gesvdj<double, NA, 4>(matrixSize, dataA, matrixSize, sigma, dataU, matrixSize, dataV, matrixSize, info);
+    //xf::solver::gesvdj<double, NA, 8>(matrixSize, dataA, matrixSize, sigma, dataU, matrixSize, dataV, matrixSize, info);
 }

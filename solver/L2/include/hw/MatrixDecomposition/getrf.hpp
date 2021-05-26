@@ -61,8 +61,8 @@ LoopSweeps:
     for (int s = 0; s < (m - 1); s++) {
         T rows[NCU][NCMAX];
         T cols[NCU][NCMAX];
-#pragma HLS array_partition variable = rows dim = 1
-#pragma HLS array_partition variable = cols dim = 1
+#pragma HLS array_partition variable = rows
+#pragma HLS array_partition variable = cols
 #pragma HLS resource variable = rows core = RAM_2P_BRAM
 #pragma HLS resource variable = cols core = RAM_2P_BRAM
 
@@ -156,7 +156,7 @@ void getrf(int n, T* A, int lda, int* ipiv, int& info) {
     const int NRCU = int((NMAX + NCU - 1) / NCU);
 
     T matA[NCU][NRCU][NMAX];
-#pragma HLS array_partition variable = matA dim = 1 complete
+#pragma HLS array_partition variable = matA complete
 #pragma HLS resource variable = matA core = XPM_MEMORY uram
 
 LoopRead:
